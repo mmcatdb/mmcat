@@ -18,6 +18,7 @@ public class InferenceEditSerializer {
         boolean isActive,
         String type,
         Key primaryKey,
+        Key primaryKeyIdentified,
         Key referenceKey,
         Key referredKey,
         List<Key> clusterKeys,
@@ -29,6 +30,7 @@ public class InferenceEditSerializer {
     public static SerializedInferenceEdit serialize(InferenceEdit inferenceEdit) {
         String type = null;
         Key primaryKey = null;
+        Key primaryKeyIdentified = null;
         Key referenceKey = null;
         Key referredKey = null;
         List<Key> clusterKeys = null;
@@ -39,6 +41,7 @@ public class InferenceEditSerializer {
         if (inferenceEdit instanceof PrimaryKeyMerge.Data primaryKeyData) {
             type = "PrimaryKey";
             primaryKey = primaryKeyData.getPrimaryKey();
+            primaryKeyIdentified = primaryKeyData.getPrimaryKeyIdentified();
             primaryKeyCandidate = primaryKeyData.getCandidate();
         } else if (inferenceEdit instanceof ReferenceMerge.Data referenceData) {
             type = "Reference";
@@ -58,6 +61,7 @@ public class InferenceEditSerializer {
             inferenceEdit.isActive(),
             type,
             primaryKey,
+            primaryKeyIdentified,
             referenceKey,
             referredKey,
             clusterKeys,
@@ -76,6 +80,7 @@ public class InferenceEditSerializer {
                 serializedInferenceEdit.id(),
                 serializedInferenceEdit.isActive(),
                 serializedInferenceEdit.primaryKey(),
+                serializedInferenceEdit.primaryKeyIdentified(),
                 serializedInferenceEdit.primaryKeyCandidate()
             );
         } else if ("Reference".equals(type)) {
@@ -102,6 +107,5 @@ public class InferenceEditSerializer {
 
         return inferenceEdit;
     }
-
 
 }

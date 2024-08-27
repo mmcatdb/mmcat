@@ -70,8 +70,9 @@ function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
         edit = new PrimaryKeyMergeInferenceEdit(payload, true);
     } else {
         const primaryKey = payload[0].schemaObject.key;
+        const primaryKeyIdentified = payload[1].schemaObject.key;
 
-        edit = new PrimaryKeyMergeInferenceEdit(primaryKey, true);
+        edit = new PrimaryKeyMergeInferenceEdit(primaryKey, primaryKeyIdentified, true);
     }
     confirmOrRevert(edit);
 }

@@ -16,7 +16,6 @@ import cz.matfyz.inference.edit.algorithms.RecursionMerge;
 import cz.matfyz.inference.edit.algorithms.ReferenceMerge;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -195,7 +194,7 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
         final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, appIdA.key(), null)).createAlgorithm();
+        final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, appIdA.key(), reviews.key(), null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
@@ -257,6 +256,64 @@ class SchemaCategoryInferenceEditorTests {
         List<Key> clusterKeys = new ArrayList<>();
         clusterKeys.add(country1.key());
         clusterKeys.add(country2.key());
+
+        final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
+
+        final List<Mapping> editMappings = edit.applyMappingEdit(List.of(mapping));
+
+        System.out.println("Mapping after edit:");
+        System.out.println(editMappings.get(0).accessPath());
+    }
+
+    @Test
+    void testClusterEdit2() {
+        final var builder = new SchemaBuilder();
+
+        final var user =            builder.object("user", 0);
+        final var name =            builder.object("name", 1);
+        final var compliment1 =     builder.object("compliment_cute", 2);
+        final var rating1 =         builder.object("rating", 3);
+        final var comments1 =       builder.object("comments", 4);
+        final var compliment2 =     builder.object("compliment_funny", 5);
+        final var rating2 =         builder.object("rating", 6);
+        final var comments2 =       builder.object("comments", 7);
+
+        final var userToName =              builder.morphism(user, name, 1);
+        final var userToCompliment1 =       builder.morphism(user, compliment1, 2);
+        final var compliment1ToRating =     builder.morphism(compliment1, rating1, 3);
+        final var compliment1ToComments =   builder.morphism(compliment1, comments1, 4);
+        final var userToCompliment2 =       builder.morphism(user, compliment2, 5);
+        final var compliment2ToRating =     builder.morphism(compliment2, rating2, 6);
+        final var compliment2ToComments =   builder.morphism(compliment2, comments2, 7);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
+
+        final MappingBuilder mb = new MappingBuilder();
+        final Mapping mapping = new Mapping(
+            schema,
+            user.key(),
+            "kindName",
+            mb.root(
+                mb.simple("name", userToName),
+                mb.complex("compliment_cute", userToCompliment1,
+                    mb.simple("rating", compliment1ToRating),
+                    mb.simple("comments", compliment1ToComments)),
+                mb.complex("compliment_funny", userToCompliment2,
+                    mb.simple("rating", compliment2ToRating),
+                    mb.simple("comments", compliment2ToComments))
+            ),
+            null
+        );
+
+        System.out.println("Mapping before edit:");
+        System.out.println(mapping.accessPath());
+
+
+        List<Key> clusterKeys = new ArrayList<>();
+        clusterKeys.add(compliment1.key());
+        clusterKeys.add(compliment2.key());
 
         final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
@@ -364,84 +421,6 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
         List<PatternSegment> pattern = new ArrayList<>();
-        pattern.add(new PatternSegment("A", "->"));
-        pattern.add(new PatternSegment("B", "->"));
-        pattern.add(new PatternSegment("A", ""));
-
-        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
-        testAlgorithm(schema, metadata, edit);
-    }
-
-    /**
-     * With complex pattern A<-A->B->A and notebook example short version
-     */
-    @Test
-    void testRecursionEdit3() {
-        final var builder = new SchemaBuilder();
-
-        final var id =  builder.object("_id", 0);
-        final var o1 =  builder.object("A", 1);
-        final var o3 =  builder.object("B", 3);
-        final var o4 =  builder.object("A", 4);
-        final var o6 =  builder.object("A", 6);
-        final var o8 =  builder.object("B", 8);
-
-        builder.morphism(id, o1, 1);
-        builder.morphism(o1, o3, 3);
-        builder.morphism(o1, o4, 4);
-        builder.morphism(o3, o6, 6);
-        builder.morphism(o6, o8, 8);
-
-        final SchemaCategory schema = builder.build();
-        final MetadataCategory metadata = builder.buildMetadata(schema);
-
-        List<PatternSegment> pattern = new ArrayList<>();
-        pattern.add(new PatternSegment("A", "<-"));
-        pattern.add(new PatternSegment("A", "->"));
-        pattern.add(new PatternSegment("B", "->"));
-        pattern.add(new PatternSegment("A", ""));
-
-        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
-        testAlgorithm(schema, metadata, edit);
-    }
-
-    /**
-     * With complex pattern A<-A->B->A and notebook example long version
-     */
-    @Test
-    void testRecursionEdit4() {
-        final var builder = new SchemaBuilder();
-
-        final var id =  builder.object("_id", 0);
-        final var o1 =  builder.object("A", 1);
-        final var o2 =  builder.object("B", 2);
-        final var o3 =  builder.object("B", 3);
-        final var o4 =  builder.object("A", 4);
-        final var o5 =  builder.object("A", 5);
-        final var o6 =  builder.object("A", 6);
-        final var o7 =  builder.object("B", 7);
-        final var o8 =  builder.object("B", 8);
-        final var o9 =  builder.object("A", 9);
-        final var o10 = builder.object("B", 10);
-        final var o11 = builder.object("A", 11);
-
-        builder.morphism(id, o1, 1);
-        builder.morphism(id, o2, 2);
-        builder.morphism(o1, o3, 3);
-        builder.morphism(o1, o4, 4);
-        builder.morphism(o2, o5, 5);
-        builder.morphism(o3, o6, 6);
-        builder.morphism(o4, o7, 7);
-        builder.morphism(o6, o8, 8);
-        builder.morphism(o7, o9, 9);
-        builder.morphism(o9, o10, 10);
-        builder.morphism(o10, o11, 11);
-
-        final SchemaCategory schema = builder.build();
-        final MetadataCategory metadata = builder.buildMetadata(schema);
-
-        List<PatternSegment> pattern = new ArrayList<>();
-        pattern.add(new PatternSegment("A", "<-"));
         pattern.add(new PatternSegment("A", "->"));
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));

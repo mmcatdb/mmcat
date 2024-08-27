@@ -23,8 +23,8 @@ const nodes = shallowRef<(Node)[]>([]);
 const confirmClicked = ref(false);
 const clickedCandidates = ref<PrimaryKeyCandidate[]>([]);
 
-const nodeSelected = computed(() => !!nodes.value[0]);
-const noNodeSelected = computed(() => !nodes.value[0]);
+const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
+const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
 function confirmCandidate(candidate: PrimaryKeyCandidate) {
     if (!clickedCandidates.value.includes(candidate)) 
@@ -44,7 +44,7 @@ function save() { // do not do anything, just go back t editor
 }
 
 function cancel() {
-    if (noNodeSelected.value) { // go back to editor
+    if (noNodesSelected.value && !confirmClicked.value) { // go back to editor
         emit('cancel');
     }
     
@@ -85,10 +85,13 @@ function splitName(name: string) {
             <ValueRow label="Primary Key object:"> 
                 {{ nodes[0]?.schemaObject.label }}
             </ValueRow>
+            <ValueRow label="Primary Key identified object:"> 
+                {{ nodes[1]?.schemaObject.label }}
+            </ValueRow>
             <NodeInput
                 v-model="nodes"
                 :graph="props.graph"
-                :count="1"
+                :count="2"
                 :type="SelectionType.Selected"
             />
         </ValueContainer>
@@ -120,7 +123,7 @@ function splitName(name: string) {
         <div class="button-row">
             <button
                 v-if="inputType === 'manual'"
-                :disabled="!nodeSelected || confirmClicked"
+                :disabled="!nodesSelected || confirmClicked"
                 @click="confirmNodes"
             >
                 Confirm

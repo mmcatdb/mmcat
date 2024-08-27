@@ -14,7 +14,7 @@ import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -32,6 +32,9 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         @JsonProperty("primaryKey")
         private Key primaryKey;
 
+        @JsonProperty("primaryKeyIdentified")
+        private Key primaryKeyIdentified;
+
         @JsonProperty("candidate")
         private PrimaryKeyCandidate candidate;
 
@@ -40,10 +43,12 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
                 @JsonProperty("id") Integer id,
                 @JsonProperty("isActive") boolean isActive,
                 @JsonProperty("primaryKey") Key primaryKey,
+                @JsonProperty("primaryKeyIdentified") Key primaryKeyIdentified,
                 @JsonProperty("candidate") PrimaryKeyCandidate candidate) {
             setId(id);
             setActive(isActive);
             this.primaryKey = primaryKey;
+            this.primaryKeyIdentified = primaryKeyIdentified;
             this.candidate = candidate;
         }
 
@@ -51,11 +56,16 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             setId(null);
             setActive(false);
             this.primaryKey = null;
+            this.primaryKeyIdentified = null;
             this.candidate = null;
         }
 
         public Key getPrimaryKey() {
             return primaryKey;
+        }
+
+        public Key getPrimaryKeyIdentified() {
+            return primaryKeyIdentified;
         }
 
         public PrimaryKeyCandidate getCandidate() {
@@ -73,7 +83,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     private final Data data;
 
     private Key primaryKeyRoot;
-    private List<Key> keysIdentifiedByPrimary;
     private Map<Key, Signature> newSignatureMap;
     private Map<Key, Signature> oldSignatureMap = new HashMap<>();
 
@@ -81,28 +90,35 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         this.data = data;
     }
 
-    /*
-     * Assumption: the primary key has a unique name. All the objects w/ this
-     * name are the same primary keys. The primary key is a single object
-     */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Primary Key Merge Edit on Schema Category...");
 
         if (data.candidate != null) {
             data.primaryKey = InferenceEditorUtils.findKeyFromName(newSchema, newMetadata, data.candidate.hierarchicalName());
+            data.primaryKeyIdentified = findPrimaryKeyIdentifiedFromCandidate(newSchema);
         }
 
-        System.out.println("pk: " + data.primaryKey);
-        System.out.println("isActive: " + data.isActive());
-        System.out.println("id: " + data.getId());
         this.primaryKeyRoot = findPrimaryKeyRoot(newSchema);
-        SchemaObject dom = newSchema.getObject(primaryKeyRoot);
 
-        final String primaryKeyLabel = newMetadata.getObject(data.primaryKey).label;
-        this.keysIdentifiedByPrimary = findKeysIdentifiedByPrimaryKeyLabel(primaryKeyLabel);
+        if (!primaryKeyRoot.equals(data.primaryKeyIdentified)) { // TODO: if not, set the identification?, similarly in mapping
+            SchemaObject cod = newSchema.getObject(primaryKeyRoot);
 
-        this.newSignatureMap = createNewMorphisms(dom);
-        InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
+            final String primaryKeyLabel = newMetadata.getObject(data.primaryKey).label;
+
+            this.newSignatureMap = createNewMorphism(cod);
+
+            findObjectsAndMorphismsToDelete(primaryKeyLabel);
+            InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
+        }
+    }
+
+    private Key findPrimaryKeyIdentifiedFromCandidate(SchemaCategory schema) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
+            if (morphism.cod().key().equals(data.primaryKey)) {
+                return morphism.dom().key();
+            }
+        }
+        throw new NotFoundException("Primary Key Identified has not been found.");
     }
 
     private Key findPrimaryKeyRoot(SchemaCategory schema) {
@@ -115,59 +131,51 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Primary Key Root has not been found");
     }
 
-    private List<Key> findKeysIdentifiedByPrimaryKeyLabel(String primaryKeyLabel) {
-        final List<Key> keys = new ArrayList<>();
-        for (final SchemaMorphism morphism : newSchema.allMorphisms()) {
-            if (newMetadata.getObject(morphism.cod()).label.equals(primaryKeyLabel) && !morphism.dom().key().equals(primaryKeyRoot)) {
-                keys.add(morphism.dom().key());
-
-                signaturesToDelete.add(morphism.signature());
-                keysToDelete.add(morphism.cod().key());
-                oldSignatureMap.put(morphism.dom().key(), morphism.signature());
-            }
-        }
-        return keys;
-    }
-
-    private Map<Key, Signature> createNewMorphisms(SchemaObject dom) {
+    private Map<Key, Signature> createNewMorphism(SchemaObject cod) {
         Map<Key, Signature> signatureMap = new HashMap<>();
-        for (Key key : keysIdentifiedByPrimary) {
-            Signature newSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, newSchema.getObject(key));
-            signatureMap.put(key, newSignature);
-        }
+        Signature newSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(data.primaryKeyIdentified), cod);
+        signatureMap.put(data.primaryKeyIdentified, newSignature);
         return signatureMap;
     }
 
-    @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
-        /*
-         * Assumption: When we find object which is identified by the primary key,
-         * we assume that the object is a root in its "part" of the schema
-         */
-        LOGGER.info("Applying Primary Key Merge Edit on Mapping...");
+    private void findObjectsAndMorphismsToDelete(String primaryKeyLabel) {
+        for (SchemaMorphism morphism : newSchema.allMorphisms()) {
+            if (morphism.dom().key().equals(data.primaryKeyIdentified) &&
+                newMetadata.getObject(morphism.cod().key()).label.equals(primaryKeyLabel)) {
 
-        List<Mapping> primaryKeyMappings = findMappingsWithPrimaryKey(mappings);
-
-        List<Mapping> cleanedPrimaryKeyMappings = cleanPrimaryKeyMappings(primaryKeyMappings);
-
-        return InferenceEditorUtils.updateMappings(mappings, primaryKeyMappings, cleanedPrimaryKeyMappings);
-    }
-
-    private List<Mapping> findMappingsWithPrimaryKey(List<Mapping> mappings) {
-        List<Mapping> primaryKeyMappings = new ArrayList<>();
-        for (Mapping mapping : mappings) {
-            if (keysIdentifiedByPrimary.contains(mapping.rootObject().key())) {
-                primaryKeyMappings.add(mapping);
+                keysToDelete.add(morphism.cod().key());
+                signaturesToDelete.add(morphism.signature());
+                oldSignatureMap.put(morphism.dom().key(), morphism.signature());
             }
         }
-        return primaryKeyMappings;
     }
 
-    private List<Mapping> cleanPrimaryKeyMappings(List<Mapping> primaryKeyMappings) {
-        List<Mapping> cleanedPrimaryKeyMappings = new ArrayList<>();
-        for (Mapping mapping : primaryKeyMappings) {
-            cleanedPrimaryKeyMappings.add(createCleanedMapping(mapping));
+    // TODO: maybe I actually keep the PKs in the mapping --> but would it correspond w/ the schema?
+    @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
+        /*
+        * Assumption: the primary key has a unique name. All the objects w/ this
+        * name are the same primary keys. The primary key is a single object
+        */
+        LOGGER.info("Applying Primary Key Merge Edit on Mapping...");
+
+        if (!primaryKeyRoot.equals(data.primaryKeyIdentified)) {
+            Mapping primaryKeyIdentifiedMapping = findPrimaryKeyIdentifiedMapping(mappings);
+
+            Mapping cleanedPrimaryKeyIdentifiedMapping = createCleanedMapping(primaryKeyIdentifiedMapping);
+
+            return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(primaryKeyIdentifiedMapping), Arrays.asList(cleanedPrimaryKeyIdentifiedMapping));
         }
-        return cleanedPrimaryKeyMappings;
+
+        return mappings;
+    }
+
+    private Mapping findPrimaryKeyIdentifiedMapping(List<Mapping> mappings) {
+        for (Mapping mapping : mappings) {
+            if (mapping.rootObject().key().equals(data.primaryKeyIdentified)) {
+                return mapping;
+            }
+        }
+        throw new NotFoundException("Mapping for object identified with PK has not been found.");
     }
 
     private Mapping createCleanedMapping(Mapping mapping) {

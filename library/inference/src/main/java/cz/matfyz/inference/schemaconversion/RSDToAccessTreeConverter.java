@@ -41,7 +41,7 @@ public class RSDToAccessTreeConverter {
             }
 
             for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
-               // if (!rsdChild.getName().equals("_")) { //here we are excluding the "_" objects of arrays
+               // if (!rsdChild.getName().equals("_")) { // excluding the "_" objects of arrays
                     boolean isArray = isTypeArray(rsdChild);
                     AccessTreeNode.State state = isArray ? AccessTreeNode.State.COMPLEX : AccessTreeNode.State.SIMPLE;
                     BaseSignature signature = Signature.createBase(signatureGenerator.next());

@@ -7,6 +7,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.metadata.MetadataCategory;
@@ -319,6 +320,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private ComplexProperty getNewComplexProperty(AccessPath firstClusterAccessPath, ComplexProperty clusterComplexProperty) {
         List<AccessPath> newSubpaths = new ArrayList<>();
         boolean complexChanged = false;
+        boolean complexIsCluster = false;
 
         for (AccessPath subpath : clusterComplexProperty.subpaths()) {
             if (!(subpath instanceof ComplexProperty complexProperty)) {
@@ -326,25 +328,41 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                 continue;
             }
 
-            if (!complexChanged) {
+            if (!complexChanged || complexIsCluster) {
                 for (Signature oldSignature : mapOldClusterNameSignature.values()) {
-                    AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
-                    if (currentSubpath != null) {
-                        complexProperty = complexProperty.minusSubpath(currentSubpath);
+                    if (complexProperty.signature().equals(oldSignature)) {
+                        complexProperty = null;
                         complexChanged = true;
+                        complexIsCluster = true;
+                        break;
+                    } else if (complexProperty != null) {
+                        AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
+                        if (currentSubpath != null) {
+                            complexProperty = complexProperty.minusSubpath(currentSubpath);
+                            complexChanged = true;
+                        }
                     }
                 }
             }
 
             if (complexChanged) {
-                List<AccessPath> currentAccessPaths = complexProperty.subpaths();
-                currentAccessPaths.add(createNewComplexProperty((ComplexProperty) firstClusterAccessPath));
-                newSubpaths.add(new ComplexProperty(complexProperty.name(), complexProperty.signature(), currentAccessPaths));
-            } else {
+                List<AccessPath> updatedSubpaths = complexProperty != null ? complexProperty.subpaths() : new ArrayList<>();
+                ComplexProperty newComplexProperty = createNewComplexProperty((ComplexProperty) firstClusterAccessPath);
+                updatedSubpaths.add(newComplexProperty);
+
+                ComplexProperty resultProperty = complexProperty != null
+                    ? new ComplexProperty(complexProperty.name(), complexProperty.signature(), updatedSubpaths)
+                    : newComplexProperty;
+
+                newSubpaths.add(resultProperty);
+
+            } else if (complexProperty != null) {
                 newSubpaths.add(complexProperty);
             }
         }
-        return new ComplexProperty(clusterComplexProperty.name(), newClusterSignature, newSubpaths);
+        //TODO: use the mapping builder everywhere
+        MappingBuilder mappingBuilder = new MappingBuilder();
+        return mappingBuilder.root(newSubpaths.toArray(new AccessPath[0]));
     }
 
     public ComplexProperty createNewComplexProperty(ComplexProperty original) {

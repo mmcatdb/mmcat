@@ -30,6 +30,7 @@ export type SerializedInferenceEdit = {
     isActive: boolean;
     type: 'PrimaryKey' | 'Reference' | 'Cluster' | 'Recursion';
     primaryKey?: KeyFromServer;
+    primaryKeyIdentified?: KeyFromServer;
     candidate?: SerializedPrimaryKeyCandidate | SerializedReferenceCandidate;
     referenceKey?: KeyFromServer;
     referredKey?: KeyFromServer;
@@ -40,27 +41,34 @@ export type SerializedInferenceEdit = {
 export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
     readonly type: string = 'PrimaryKey';
     readonly primaryKey?: Key;
+    readonly primaryKeyIdentified?: Key;
     readonly candidate?: PrimaryKeyCandidate;
     public isActive: boolean;
     public id: number | null;
 
-    constructor(primaryKey: Key, isActive: boolean, id?: number | null);
+    constructor(primaryKey: Key, primaryKeyIdentified: Key, isActive: boolean, id?: number | null);
     constructor(candidate: PrimaryKeyCandidate, isActive: boolean, id?: number | null);
 
-    constructor(primaryKeyOrCandidate: Key | PrimaryKeyCandidate, isActive: boolean, id: number | null = null) {
-        if (primaryKeyOrCandidate instanceof Key) 
+    constructor(primaryKeyOrCandidate: Key | PrimaryKeyCandidate, primaryKeyIdentifiedOrIsActive: Key | boolean, isActiveOrId?: boolean | number | null, id: number | null = null) {
+        if (primaryKeyOrCandidate instanceof Key && primaryKeyIdentifiedOrIsActive instanceof Key) {
             this.primaryKey = primaryKeyOrCandidate;
-        else 
+            this.primaryKeyIdentified = primaryKeyIdentifiedOrIsActive;
+            this.isActive = isActiveOrId as boolean;
+            this.id = id ?? null;
+        } else if (primaryKeyOrCandidate instanceof PrimaryKeyCandidate) {
             this.candidate = primaryKeyOrCandidate;
-        
-        this.isActive = isActive;
-        this.id = id;
+            this.isActive = primaryKeyIdentifiedOrIsActive as boolean;
+            this.id = isActiveOrId as number ?? null;
+        } else {
+            throw new Error('Invalid constructor arguments for PrimaryKeyMergeInferenceEdit.');
+        }
     }
 
     static fromServer(data: SerializedInferenceEdit): PrimaryKeyMergeInferenceEdit {
-        if (data.primaryKey != null) {
+        if (data.primaryKey != null && data.primaryKeyIdentified != null) {
             return new PrimaryKeyMergeInferenceEdit(
                 Key.fromServer(data.primaryKey),
+                Key.fromServer(data.primaryKeyIdentified),
                 data.isActive,
                 data.id,
             );
