@@ -69,9 +69,9 @@ const navbarItems: NavbarItem[] = [
         route: '/about',
     },
     {
-        label: 'Databases',
-        route: '/databases',
-    }
+        label: 'Datasources',
+        route: '/datasources',
+    },
 ];
 
 type ThemeToggleProps = Readonly<{
