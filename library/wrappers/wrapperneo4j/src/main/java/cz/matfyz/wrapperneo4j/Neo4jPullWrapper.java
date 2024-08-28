@@ -3,6 +3,7 @@ package cz.matfyz.wrapperneo4j;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
@@ -15,9 +16,15 @@ import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.neo4j.driver.Query;
+import org.neo4j.driver.Result;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.exceptions.Neo4jException;
 
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
@@ -243,6 +250,188 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     @Override public QueryResult executeQuery(QueryStatement statement) {
         // TODO
         throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
+    }
+
+    private JSONObject nodeToJson(Value node) {
+        try {
+            JSONObject json = new JSONObject();
+
+            // Add the element ID
+            json.put("id", node.asNode().elementId().split(":")[2]);
+            
+            // Add labels
+            JSONArray labelsArray = new JSONArray();
+            for (final var label : node.asNode().labels()) {
+                labelsArray.put(label);
+            }
+            json.put("labels", labelsArray);
+    
+            // Add properties
+            JSONObject properties = new JSONObject();
+            node.asNode().asMap().forEach((key, value) -> {
+                try {
+                    properties.put(key, value);
+                } catch (JSONException e) {
+                    throw QueryException.message("Error when getting properties.");
+                }
+            });
+            json.put("properties", properties);
+    
+            return json;
+        }
+        catch (JSONException e){
+            throw QueryException.message("Error when getting node data.");
+        }
+    }
+
+    private JSONObject relationshipToJson(Value relationship) {
+        try {
+            JSONObject json = new JSONObject();
+
+            // Add the element ID
+            json.put("id", relationship.asRelationship().elementId().split(":")[2]);
+            
+            // Add type
+            json.put("type", relationship.asRelationship().type());
+            
+            // Add start and end node IDs
+            json.put("startNodeId", relationship.asRelationship().startNodeElementId().split(":")[2]);
+            json.put("endNodeId", relationship.asRelationship().endNodeElementId().split(":")[2]);
+            
+            // Add properties
+            JSONObject properties = new JSONObject();
+            relationship.asRelationship().asMap().forEach((key, value) -> {
+                try {
+                    properties.put(key, value);
+                } catch (JSONException e) {
+                    throw QueryException.message("Error when getting properties.");
+                }
+            });
+            json.put("properties", properties);
+
+            return json; 
+        }
+        catch (JSONException e){
+            throw QueryException.message("Error when getting relation data.");
+        }
+        
+    }
+
+    public JSONArray getNodes(String limit) throws Neo4jException{
+        JSONArray result = new JSONArray();
+        
+        try{
+            var allNodes = provider.getSession().executeRead(tx -> {
+                var query = new Query("MATCH (a) RETURN a LIMIT " + limit + ";");
+
+                return tx.run(query).stream().map(node -> {
+                    return nodeToJson(node.get("a"));
+                }).toList();
+            });
+            allNodes.forEach(result::put);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        
+        return result;  
+    }
+
+    public JSONArray getNode(String id, String limit) throws Neo4jException{
+        JSONArray result = new JSONArray();
+
+        try{
+            var allNodes = provider.getSession().executeRead(tx -> {
+                var query = new Query("MATCH (a) WHERE id(a)="+ id +" RETURN a LIMIT " + limit + ";");
+
+                return tx.run(query).stream().map(node -> {
+                    return nodeToJson(node.get("a"));
+                }).toList();
+            });
+            allNodes.forEach(result::put);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return result; 
+    }
+
+    public JSONArray getRelationships(String limit) throws Neo4jException{
+        JSONArray result = new JSONArray();
+        
+        try{
+            var allNodes = provider.getSession().executeRead(tx -> {
+                var query = new Query("MATCH ()-[r]->() RETURN r LIMIT " + limit + ";");
+
+                return tx.run(query).stream().map(node -> {
+                    return relationshipToJson(node.get("r"));
+                }).toList();
+            });
+            allNodes.forEach(result::put);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        
+        return result;  
+    }
+
+    public JSONArray getRelationship(String id, String limit) throws Neo4jException{
+        JSONArray result = new JSONArray();
+        
+        try{
+            var allNodes = provider.getSession().executeRead(tx -> {
+                var query = new Query("MATCH ()-[r]->() WHERE id(r)=" + id + " RETURN r LIMIT " + limit + ";");
+
+                return tx.run(query).stream().map(node -> {
+                    return relationshipToJson(node.get("r"));
+                }).toList();
+            });
+            allNodes.forEach(result::put);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        
+        return result;  
+    }
+
+    public JSONArray getByLabel(String labelName, String limit) throws Neo4jException{
+        JSONArray result = new JSONArray();
+
+        try{
+            var allNodes = provider.getSession().executeRead(tx -> {
+                var query = new Query("MATCH (a:" + labelName + ") RETURN a LIMIT " + limit + ";");
+
+                return tx.run(query).stream().map(node -> {
+                    return nodeToJson(node.get("a"));
+                }).toList();
+            });
+            allNodes.forEach(result::put);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public JSONArray getLabels(String limit) throws Neo4jException{
+        JSONArray result = new JSONArray();
+        
+        try{
+            Result queryResult = provider.getSession().run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label LIMIT " + limit + ";");
+            while (queryResult.hasNext()) {
+                Record queryRecord = queryResult.next();
+                result.put(queryRecord.get("label").asString());
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        
+        return result;  
     }
 
 }

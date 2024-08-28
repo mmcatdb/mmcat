@@ -3,6 +3,7 @@ package cz.matfyz.wrapperpostgresql;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
@@ -18,10 +19,13 @@ import cz.matfyz.core.record.RootRecord;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,4 +141,34 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    public JSONArray getQuery(String query) {
+        Connection connection = provider.getConnection();
+
+        try(Statement stmt = connection.createStatement();){
+
+            ResultSet resultSet = stmt.executeQuery(query);
+            JSONArray result = new JSONArray();
+
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while (resultSet.next()) {
+                JSONObject jsonObject = new JSONObject();
+
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnName(i);
+                    Object columnValue = resultSet.getObject(i);
+
+                    jsonObject.put(columnName, columnValue);
+                }
+
+                result.put(jsonObject);
+            }
+
+            return result;
+        }
+        catch (Exception e) {
+			throw QueryException.message("Error when executing a query.");
+		}
+    }
 }

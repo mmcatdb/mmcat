@@ -3,6 +3,7 @@ package cz.matfyz.wrappermongodb;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.mapping.AccessPath;
@@ -29,9 +30,18 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoIterable;
+import com.mongodb.client.model.Filters;
+
 import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MongoDBPullWrapper implements AbstractPullWrapper {
 
@@ -259,6 +269,98 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
                 return getResultFromDocument(childDocument, child);
             }
+        }
+    }
+
+    public JSONArray getTablesNames(String limit) throws MongoException{
+        MongoIterable<String> tableNames = provider.getDatabase().listCollectionNames();
+        JSONArray result = new JSONArray();
+
+        int lim = Integer.parseInt(limit);
+        int count = 0;
+        for (String tableName : tableNames) {
+            result.put(tableName);
+
+            count++;
+            if (count >= lim) {
+                break;
+            }
+        }
+        return result;  
+    }
+
+    public JSONArray getTable(String tableName, String limit) throws MongoException{
+        try {
+            JSONArray result = new JSONArray();
+            MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
+            FindIterable<Document> documents = collection.find();
+    
+            int lim = Integer.parseInt(limit);
+            int count = 0;
+            for (Document document : documents) {
+                JSONObject jsonObject = new JSONObject(document.toJson());
+                JSONObject dataWithoutQuotationMarks = new JSONObject();
+                Iterator<String> keys = jsonObject.keys();
+                
+                while(keys.hasNext()) {
+                    String key = keys.next();
+                    Object value = jsonObject.get(key);
+                    if (value instanceof String) {
+                        dataWithoutQuotationMarks.put(key, ((String) value).replace("\"", ""));
+                    } else {
+                        dataWithoutQuotationMarks.put(key, value);
+                    }
+                }
+                result.put(dataWithoutQuotationMarks);
+    
+                count++;
+                if (count >= lim) {
+                    break;
+                }
+            }
+    
+            return result;
+        }
+        catch (JSONException e){
+            throw QueryException.message("Error when getting data.");
+        }
+    }
+
+    public JSONArray getRow(String tableName, String id, String limit) throws MongoException{
+        try {
+            JSONArray result = new JSONArray();
+            MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
+            Bson filter = Filters.eq("_id", new org.bson.types.ObjectId(id));
+            FindIterable<Document> documents = collection.find(filter);
+    
+            int lim = Integer.parseInt(limit);
+            int count = 0;
+            for (Document document : documents) {
+                JSONObject jsonObject = new JSONObject(document.toJson());
+                JSONObject dataWithoutQuotationMarks = new JSONObject();
+                Iterator<String> keys = jsonObject.keys();
+                
+                while(keys.hasNext()) {
+                    String key = keys.next();
+                    Object value = jsonObject.get(key);
+                    if (value instanceof String) {
+                        dataWithoutQuotationMarks.put(key, ((String) value).replace("\"", ""));
+                    } else {
+                        dataWithoutQuotationMarks.put(key, value);
+                    }
+                }
+                result.put(dataWithoutQuotationMarks);
+    
+                count++;
+                if (count >= lim) {
+                    break;
+                }
+            }
+    
+            return result;
+        }
+        catch (JSONException e){
+            throw QueryException.message("Error when getting data.");
         }
     }
 
