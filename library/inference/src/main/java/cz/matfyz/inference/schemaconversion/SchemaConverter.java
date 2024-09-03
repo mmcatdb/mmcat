@@ -13,27 +13,48 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 /**
- * Class for conversion from RSD to Schema Category
+ * Class for converting a {@link RecordSchemaDescription} (RSD) to a Schema Category and its associated mappings.
+ * This conversion process includes creating an access tree from the RSD, converting the access tree into a schema category,
+ * and generating the corresponding mapping.
  */
 public class SchemaConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaConverter.class);
 
     private RecordSchemaDescription rsd;
-    public String kindName; // TODO: I need this to name the root of my SK and my mapping (probably the same as kind name). Getting it as user inpu rn, but in case of MongoDB, it has to match a collection name! (otherwise cant pull from it)
+
+    /** The kind name used to label the root of the Schema Category and the mapping. */
+    public String kindName; // TODO: This needs to match the collection name in the case of MongoDB for pulling data.
+
     private final UniqueNumberGenerator keyGenerator;
     private final UniqueNumberGenerator signatureGenerator;
 
+    /**
+     * Constructs a new {@code SchemaConverter} with initialized key and signature generators.
+     */
     public SchemaConverter() {
         this.keyGenerator = new UniqueNumberGenerator(0);
         this.signatureGenerator = new UniqueNumberGenerator(0);
     }
 
+    /**
+     * Sets a new {@link RecordSchemaDescription} (RSD) and kind name for the converter.
+     *
+     * @param rsd The new {@link RecordSchemaDescription} to set.
+     * @param kindName The kind name to use for the root of the Schema Category and mapping.
+     */
     public void setNewRSD(RecordSchemaDescription rsd, String kindName) {
         this.rsd = rsd;
         this.kindName = kindName;
     }
 
+    /**
+     * Converts the current {@link RecordSchemaDescription} to a schema category and mapping.
+     * This involves creating an access tree from the RSD, converting the tree to a schema category,
+     * and generating the mapping for the schema category.
+     *
+     * @return A {@link CategoryMappingPair} containing the schema and its associated metadata and mappings.
+     */
     public CategoryMappingPair convertToSchemaCategoryAndMapping() {
         LOGGER.info("Converting RSD to SchemaCategory...");
 
@@ -49,21 +70,16 @@ public class SchemaConverter {
         final var schema = schemaWithMetadata.schema();
         final var metadata = schemaWithMetadata.metadata();
 
-
-        // System.out.println("Morphisms in the final SK: ");
-        // for (SchemaMorphism m : schemaCategory.allMorphisms()) {
-        //     System.out.println(m.dom() == null ? "Domain is null" : "Domain: " + m.dom().label());
-        //     System.out.println(m.cod() == null ? "Codomain is null" : "Codomain: " + m.cod().label());
-        //     System.out.println();
-        // }
-
         LOGGER.info("Creating the mapping for the schema category...");
         final MappingCreator mappingCreator = new MappingCreator(root.getKey(), root);
-        final Mapping mapping = mappingCreator.createMapping(schema, this.kindName); //What will this label be?
+        final Mapping mapping = mappingCreator.createMapping(schema, this.kindName);
 
         return new CategoryMappingPair(schema, metadata, List.of(mapping));
     }
 
+    /**
+     * Enum representing the possible labels for schema objects.
+     */
     public enum Label {
         IDENTIFIER, RELATIONAL;
     }

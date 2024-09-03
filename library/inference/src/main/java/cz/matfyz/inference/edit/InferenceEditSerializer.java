@@ -11,8 +11,16 @@ import cz.matfyz.inference.edit.algorithms.ReferenceMerge;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * The {@code InferenceEditSerializer} class provides methods for serializing
+ * and deserializing {@link InferenceEdit} objects. This is useful for converting
+ * between different representations of edits for storage or transmission.
+ */
 public class InferenceEditSerializer {
 
+    /**
+     * A record class representing the serialized form of an {@link InferenceEdit}.
+     */
     public record SerializedInferenceEdit(
         Integer id,
         boolean isActive,
@@ -27,6 +35,12 @@ public class InferenceEditSerializer {
         ReferenceCandidate referenceCandidate
     ) implements Serializable {}
 
+    /**
+     * Serializes an {@link InferenceEdit} into a {@link SerializedInferenceEdit} record.
+     *
+     * @param inferenceEdit The {@link InferenceEdit} to serialize.
+     * @return A {@link SerializedInferenceEdit} representing the serialized form of the input edit.
+     */
     public static SerializedInferenceEdit serialize(InferenceEdit inferenceEdit) {
         String type = null;
         Key primaryKey = null;
@@ -71,6 +85,12 @@ public class InferenceEditSerializer {
         );
     }
 
+    /**
+     * Deserializes a {@link SerializedInferenceEdit} back into an {@link InferenceEdit} object.
+     *
+     * @param serializedInferenceEdit The {@link SerializedInferenceEdit} to deserialize.
+     * @return The deserialized {@link InferenceEdit} object.
+     */
     public static InferenceEdit deserialize(SerializedInferenceEdit serializedInferenceEdit) {
         String type = serializedInferenceEdit.type();
         InferenceEdit inferenceEdit = null;

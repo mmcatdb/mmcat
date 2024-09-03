@@ -1,9 +1,18 @@
 package cz.matfyz.inference.schemaconversion.utils;
 
-// these are layout types from the JUNG library
+/**
+ * Enum representing different types of graph layouts from the JUNG library.
+ */
 public enum LayoutType {
-    FR,     // Force-directed
-    CIRCLE, // Circular
-    KK,     // Kamada-Kawai
-    ISOM,   // Self-Organizing Map
+    /** Force-directed layout. */
+    FR,
+
+    /** Circular layout. */
+    CIRCLE,
+
+    /** Kamada-Kawai layout. */
+    KK,
+
+    /** Self-Organizing Map layout. */
+    ISOM,
 }

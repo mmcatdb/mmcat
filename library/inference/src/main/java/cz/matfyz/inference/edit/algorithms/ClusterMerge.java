@@ -10,14 +10,12 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -40,13 +38,29 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
+/**
+ * The {@code ClusterMerge} class implements an algorithm to merge clusters within a schema.
+ * It extends the {@link InferenceEditAlgorithm} and operates on schema categories to modify
+ * the structure and metadata according to the specified cluster merging rules.
+ */
 public class ClusterMerge extends InferenceEditAlgorithm {
 
+    /**
+     * Represents the data model used by the ClusterMerge algorithm, including cluster keys
+     * and activity status.
+     */
     public static class Data extends InferenceEdit {
 
         @JsonProperty("clusterKeys")
         List<Key> clusterKeys;
 
+        /**
+         * Constructor for deserialization with JSON properties.
+         *
+         * @param id The ID of the edit.
+         * @param isActive The active status of the edit.
+         * @param clusterKeys The list of keys representing clusters to merge.
+         */
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
@@ -57,16 +71,29 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             this.clusterKeys = clusterKeys;
         }
 
+        /**
+         * Default constructor initializing the data with default values.
+         */
         public Data() {
             setId(null);
             setActive(false);
             this.clusterKeys = null;
         }
 
+        /**
+         * Gets the list of cluster keys.
+         *
+         * @return The list of keys representing clusters.
+         */
         public List<Key> getClusterKeys() {
             return clusterKeys;
         }
 
+        /**
+         * Creates an instance of the {@code ClusterMerge} algorithm.
+         *
+         * @return A new instance of {@code ClusterMerge}.
+         */
         @Override public ClusterMerge createAlgorithm() {
             return new ClusterMerge(this);
         }
@@ -77,10 +104,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private static final int RND_CLUSTER_IDX = 0;
 
     private final Data data;
-
-    public ClusterMerge(Data data) {
-        this.data = data;
-    }
 
     private Key newClusterKey;
     private Signature newClusterSignature;
@@ -93,9 +116,19 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private SchemaCategory newSchemaPart;
     private MetadataCategory newMetadataPart;
 
-    /*
-     * Assumption: The startKey can have ingoing and outgoing edges,
-     * however we assume that one ingoing edge is from the root cluster
+    /**
+     * Constructs a {@code ClusterMerge} instance with the specified data.
+     *
+     * @param data The data model containing cluster information and merge settings.
+     */
+    public ClusterMerge(Data data) {
+        this.data = data;
+    }
+
+    /**
+     * Applies the cluster merging algorithm to the schema category.
+     * Assumes that the startKey can have ingoing and outgoing edges,
+     * with one ingoing edge from the root cluster.
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Cluster Edit on Schema Category...");
@@ -113,20 +146,30 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
     }
 
-    // The cluster root is the object, which has an outgoing morphisms to all of the clusterKeys
-    // we assume there is only one such object
+    /**
+     * Finds the root key of the cluster within the schema. The cluster root is the object,
+     * which has an outgoing morphism to all the cluster keys.
+     *
+     * @param schema The schema category in which to find the cluster root.
+     * @return The key of the cluster root.
+     */
     private Key findClusterRootKey(SchemaCategory schema) {
         final Multiset<Key> rootCandidates = HashMultiset.create();
         for (final SchemaMorphism morphism : schema.allMorphisms())
             if (data.clusterKeys.contains(morphism.cod().key()))
                 rootCandidates.add(morphism.dom().key());
 
-        return rootCandidates.stream()
+             return rootCandidates.stream()
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
             .entrySet().stream().max((o1, o2) -> o1.getValue().compareTo(o2.getValue()))
             .map(Map.Entry::getKey).orElse(null);
-}
+    }
 
+    /**
+     * Retrieves the names of the old clusters based on the keys provided in the data.
+     *
+     * @return A list of old cluster names.
+     */
     private List<String> getOldClusterNames() {
         final List<String> oldClusterNames = new ArrayList<>();
         for (final Key key : data.clusterKeys)
@@ -135,6 +178,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return oldClusterNames;
     }
 
+    /**
+     * Finds the repeating pattern among a list of strings.
+     *
+     * @param strings The list of strings to analyze.
+     * @return The longest common substring found in the list.
+     */
     private String findRepeatingPattern(List<String> strings) {
         if (strings == null || strings.isEmpty())
             return "";
@@ -146,10 +195,22 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return findLongestCommonSubstring(normalizedStrings);
     }
 
+    /**
+     * Normalizes a string by removing specific special characters.
+     *
+     * @param str The string to normalize.
+     * @return The normalized string.
+     */
     private String normalizeString(String str) {
         return str.replaceAll("[._:,-]", "");
     }
 
+    /**
+     * Finds the longest common substring among a list of strings.
+     *
+     * @param strings The list of strings to analyze.
+     * @return The longest common substring.
+     */
     private String findLongestCommonSubstring(List<String> strings) {
         if (strings.size() == 1) {
             return strings.get(0);
@@ -174,7 +235,15 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return longestCommonSubstring;
     }
 
-    // Note: Consumers (+ other functional interfaces) are pretty cool
+    /**
+     * Traverses the schema objects and morphisms starting from a given key
+     * and applies the specified consumers to each schema object and morphism.
+     *
+     * @param startKey The key to start traversal.
+     * @param clusterRootKey The key of the cluster root.
+     * @param objectConsumer A consumer to apply to each schema object.
+     * @param morphismConsumer A consumer to apply to each schema morphism.
+     */
     private void traverseAndPerform(Key startKey, Key clusterRootKey, Consumer<SchemaObject> objectConsumer, Consumer<SchemaMorphism> morphismConsumer) {
         Set<Key> visited = new HashSet<>();
         Queue<SchemaObject> queue = new LinkedList<>();
@@ -209,6 +278,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         }
     }
 
+    /**
+     * Traverses the schema starting from a given key and builds a new schema part.
+     *
+     * @param startKey The key to start traversal.
+     * @param clusterRootKey The key of the cluster root.
+     */
     private void traverseAndBuild(Key startKey, Key clusterRootKey) {
         newSchemaPart = new SchemaCategory();
         newMetadataPart = MetadataCategory.createEmpty(newSchemaPart);
@@ -225,6 +300,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         );
     }
 
+    /**
+     * Traverses the schema and identifies objects and morphisms to delete.
+     *
+     * @param startKey The key to start traversal.
+     * @param clusterRootKey The key of the cluster root.
+     */
     private void traverseAndFind(Key startKey, Key clusterRootKey) {
         traverseAndPerform(startKey, clusterRootKey,
             object -> keysToDelete.add(object.key()),
@@ -232,12 +313,24 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         );
     }
 
+    /**
+     * Adds a new schema part to the current schema, mapping old and new keys and morphisms.
+     *
+     * @param oldClusterNames A list of old cluster names.
+     * @param clusterRootKey The key of the cluster root.
+     */
     private void addSchemaPart(List<String> oldClusterNames, Key clusterRootKey) {
         final Map<Key, Key> mapOldNewKey = addObjects(oldClusterNames);
         addMorphisms(mapOldNewKey, clusterRootKey);
         //addTypeObjectAndMorphism();
     }
 
+    /**
+     * Adds objects to the schema based on old cluster names.
+     *
+     * @param oldClusterNames A list of old cluster names.
+     * @return A map of old keys to new keys.
+     */
     private Map<Key, Key> addObjects(List<String> oldClusterNames) {
         final Map<Key, Key> mapOldNewKey = new HashMap<>();
         for (final SchemaObject object : newSchemaPart.allObjects()) {
@@ -256,6 +349,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return mapOldNewKey;
     }
 
+    /**
+     * Adds morphisms to the schema based on the mapping of old and new keys.
+     *
+     * @param mapOldNewKey A map of old keys to new keys.
+     * @param clusterRootKey The key of the cluster root.
+     */
     private void addMorphisms(Map<Key, Key> mapOldNewKey, Key clusterRootKey) {
         for (final SchemaMorphism morphism : newSchemaPart.allMorphisms()) {
             final SchemaObject dom = newSchema.getObject(mapOldNewKey.get(morphism.dom().key()));
@@ -265,11 +364,19 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(clusterRootKey), newSchema.getObject(newClusterKey));
     }
 
+    /**
+     * Adds a new type object and morphism to the schema.
+     */
     private void addTypeObjectAndMorphism() {
         final Key typeKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), TYPE_LABEL);
         newTypeSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey));
     }
 
+    /**
+     * Finds morphisms and objects to delete based on the provided cluster root key.
+     *
+     * @param clusterRootKey The key of the cluster root.
+     */
     private void findMorphismsAndObjectsToDelete(Key clusterRootKey) {
         for (final Key key : data.clusterKeys)
             traverseAndFind(key, clusterRootKey);
@@ -283,6 +390,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         }
     }
 
+    /**
+     * Applies the mapping edit to a list of mappings.
+     *
+     * @param mappings The list of mappings to edit.
+     * @return The updated list of mappings.
+     */
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Cluster Edit on Mapping...");
 
@@ -294,6 +407,13 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return mappings;
     }
 
+    /**
+     * Finds the cluster mapping from the provided list of mappings.
+     *
+     * @param mappings The list of mappings to search.
+     * @return The mapping corresponding to the cluster.
+     * @throws NotFoundException if the cluster mapping is not found.
+     */
     private Mapping findClusterMapping(List<Mapping> mappings) {
         for (final Mapping mapping : mappings) {
             // just try if any of the old signatures is in the mapping, then all of them should be there
@@ -306,11 +426,23 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Cluster Mapping has not been found");
     }
 
+    /**
+     * Creates a new merged mapping based on the cluster mapping provided.
+     *
+     * @param clusterMapping The cluster mapping to merge.
+     * @return The new merged mapping.
+     */
     private Mapping createMergedMapping(Mapping clusterMapping) {
         ComplexProperty changedComplexProperty = changeComplexProperties(clusterMapping.accessPath());
         return new Mapping(newSchema, clusterMapping.rootObject().key(), clusterMapping.kindName(), changedComplexProperty, clusterMapping.primaryKey());
     }
 
+    /**
+     * Changes complex properties within a cluster complex property.
+     *
+     * @param clusterComplexProperty The complex property of the cluster to change.
+     * @return The updated complex property.
+     */
     private ComplexProperty changeComplexProperties(ComplexProperty clusterComplexProperty) {
         final var randomClusterObject = oldMetadata.getObject(data.clusterKeys.get(RND_CLUSTER_IDX));
         final var signature = mapOldClusterNameSignature.get(randomClusterObject.label);
@@ -319,6 +451,13 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return getNewComplexProperty(firstClusterAccessPath, clusterComplexProperty);
     }
 
+    /**
+     * Gets a new complex property based on the provided access path and complex property.
+     *
+     * @param firstClusterAccessPath The first cluster access path.
+     * @param clusterComplexProperty The cluster complex property.
+     * @return The new complex property.
+     */
     private ComplexProperty getNewComplexProperty(AccessPath firstClusterAccessPath, ComplexProperty clusterComplexProperty) {
         List<AccessPath> newSubpaths = new ArrayList<>();
         boolean complexChanged = false;
@@ -367,6 +506,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return mappingBuilder.root(newSubpaths.toArray(new AccessPath[0]));
     }
 
+    /**
+     * Creates a new complex property based on the original complex property.
+     *
+     * @param original The original complex property.
+     * @return The new complex property.
+     */
     public ComplexProperty createNewComplexProperty(ComplexProperty original) {
         List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
         Name name;
@@ -374,14 +519,10 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
         if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
             complexPropertySignature = newClusterSignature;
-            //name = newClusterName;
             name = new DynamicName(complexPropertySignature);
-
-            // add the _type object
-            //newSubpaths.add(new SimpleProperty(new DynamicName(newTypeSignature), newTypeSignature));
         } else {
             complexPropertySignature = mapOldNewSignature.get(original.signature());
-            if (complexPropertySignature == null) { //meaning the original was an array object and so the signature was dual
+            if (complexPropertySignature == null) { // meaning the original was an array object and so the signature was dual
                 complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
             }
             name = original.name();
@@ -389,12 +530,24 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return new ComplexProperty(name, complexPropertySignature, newSubpaths);
     }
 
+    /**
+     * Transforms the subpaths of a complex property into new subpaths.
+     *
+     * @param originalSubpaths The original subpaths to transform.
+     * @return A list of transformed subpaths.
+     */
     private List<AccessPath> transformSubpaths(List<AccessPath> originalSubpaths) {
         return originalSubpaths.stream()
                 .map(this::transformSubpath)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Transforms a single access path into a new access path.
+     *
+     * @param original The original access path to transform.
+     * @return The transformed access path.
+     */
     private AccessPath transformSubpath(AccessPath original) {
         if (original instanceof SimpleProperty) {
             return createNewSimpleProperty((SimpleProperty) original);
@@ -405,8 +558,13 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         }
     }
 
+    /**
+     * Creates a new simple property based on the original simple property.
+     *
+     * @param original The original simple property.
+     * @return The new simple property.
+     */
     private SimpleProperty createNewSimpleProperty(SimpleProperty original) {
         return new SimpleProperty(original.name(), mapOldNewSignature.get(original.signature()));
     }
-
 }

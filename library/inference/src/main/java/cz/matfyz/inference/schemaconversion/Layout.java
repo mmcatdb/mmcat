@@ -20,6 +20,11 @@ import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The {@code Layout} class provides functionality for applying various graph layout algorithms
+ * from the JUNG library to a schema category. This includes methods for calculating positions
+ * of schema objects within a graph based on the chosen layout type.
+ */
 public class Layout {
 
     // Constants for layout configuration
@@ -29,6 +34,13 @@ public class Layout {
 
     private Layout() {}
 
+    /**
+     * Applies a layout to the metadata of the given schema category based on the specified layout type.
+     *
+     * @param schema The {@link SchemaCategory} to which the layout is applied.
+     * @param metadata The {@link MetadataCategory} associated with the schema.
+     * @param layoutType The type of layout to apply, specified by {@link LayoutType}.
+     */
     public static void applyToMetadata(SchemaCategory schema, MetadataCategory metadata, LayoutType layoutType) {
         final var positions = computeObjectsLayout(schema, layoutType);
 
@@ -40,7 +52,12 @@ public class Layout {
     }
 
     /**
-     * Layout algorithm using JUNG library.
+     * Computes the layout for the objects in the given schema category using a specified layout type.
+     * This method utilizes the JUNG library for layout computation.
+     *
+     * @param schema The {@link SchemaCategory} for which to compute the layout.
+     * @param layoutType The {@link LayoutType} specifying which layout algorithm to use.
+     * @return A {@link Map} of {@link Key} to {@link Position} representing the computed positions for each schema object.
      */
     private static Map<Key, Position> computeObjectsLayout(SchemaCategory schema, LayoutType layoutType) {
         final var graph = createGraphFromSchemaCategory(schema);
@@ -50,6 +67,7 @@ public class Layout {
 
         AbstractLayout<SchemaObject, SchemaMorphism> layout;
 
+        // Select the appropriate layout algorithm based on the layout type
         switch (layoutType) {
             case CIRCLE:
                 layout = new CircleLayout<>(graph);
@@ -68,6 +86,7 @@ public class Layout {
 
         layout.setSize(new Dimension(layoutSize, layoutSize));
 
+        // Perform initial steps for the FRLayout to improve layout quality
         if (layout instanceof FRLayout) {
             for (int i = 0; i < INITIAL_STEPS; i++) {
                 ((FRLayout<SchemaObject, SchemaMorphism>) layout).step();
@@ -83,6 +102,12 @@ public class Layout {
         return positions;
     }
 
+    /**
+     * Creates a directed sparse graph from the given schema category.
+     *
+     * @param schema The {@link SchemaCategory} from which to create the graph.
+     * @return A {@link DirectedSparseGraph} representing the schema objects and morphisms.
+     */
     private static DirectedSparseGraph<SchemaObject, SchemaMorphism> createGraphFromSchemaCategory(SchemaCategory schema) {
         final var graph = new DirectedSparseGraph<SchemaObject, SchemaMorphism>();
 

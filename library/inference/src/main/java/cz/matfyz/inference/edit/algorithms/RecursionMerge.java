@@ -17,13 +17,29 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 // TODO: this class is a one big WIP + needs refactoring
+
+/**
+ * The {@code RecursionMerge} class implements an algorithm for merging recursive patterns
+ * within a schema. It extends the {@link InferenceEditAlgorithm} and provides functionality
+ * to detect and merge recursive structures.
+ */
 public class RecursionMerge extends InferenceEditAlgorithm {
 
+    /**
+     * Data class representing the pattern and state needed for recursion merging.
+     */
     public static class Data extends InferenceEdit {
 
         @JsonProperty("pattern")
         List<PatternSegment> pattern;
 
+        /**
+         * Constructs a {@code Data} instance with specified parameters.
+         *
+         * @param id The ID of the edit.
+         * @param isActive The active status of the edit.
+         * @param pattern The pattern segments to be used for recursion detection and merging.
+         */
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
@@ -34,16 +50,29 @@ public class RecursionMerge extends InferenceEditAlgorithm {
             this.pattern = pattern;
         }
 
+        /**
+         * Default constructor initializing data with default values.
+         */
         public Data() {
             setId(null);
             setActive(false);
             this.pattern = null;
         }
 
+        /**
+         * Gets the pattern segments used for recursion detection and merging.
+         *
+         * @return The list of pattern segments.
+         */
         public List<PatternSegment> getPattern() {
             return pattern;
         }
 
+        /**
+         * Creates an instance of the {@code RecursionMerge} algorithm.
+         *
+         * @return A new instance of {@code RecursionMerge}.
+         */
         @Override public RecursionMerge createAlgorithm() {
             return new RecursionMerge(this);
         }
@@ -61,14 +90,20 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     private List<PatternSegment> adjustedPattern;
     private Map<PatternSegment, Set<SchemaObject>> mapPatternObjects = new HashMap<>();
 
+    /**
+     * Constructs a {@code RecursionMerge} instance with the specified data.
+     *
+     * @param data The data model containing pattern information and merge settings.
+     */
     public RecursionMerge(Data data) {
         this.data = data;
     }
 
     /*
-     * Assumptions: Morphisms in the pattern are only among the elemenets of the pattern
-     * Pattern always starts and ends in the same object (however the occurence does not have to end in this object)
-     * For now we assume that the pattern needs to occur at least one in its full length to count it as a full match
+     * Applies the primary key merging algorithm to the schema category.
+     * Assumptions: Morphisms in the pattern are only among the elements of the pattern.
+     * Pattern always starts and ends in the same object (however the occurrence does not have to end in this object).
+     * For now, we assume that the pattern needs to occur at least once in its full length to count as a full match.
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Recursion Edit on Schema Category...");
@@ -85,6 +120,9 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         createRecursiveMorphisms(occurences);
     }
 
+    /**
+     * Adjusts the pattern to account for recursive segments.
+     */
     private void adjustPattern() {
         List<PatternSegment> newPattern = new ArrayList<>();
         int i = 0;
@@ -110,6 +148,11 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         adjustedPattern = newPattern;
     }
 
+    /**
+     * Finds occurrences of the adjusted pattern in the schema.
+     *
+     * @return A list of lists, where each inner list represents a sequence of schema objects matching the pattern.
+     */
     private List<List<SchemaObject>> findAdjustedPatternOccurences() {
         List<List<SchemaObject>> result = new ArrayList<>();
         for (SchemaObject node : newSchema.allObjects())
@@ -118,6 +161,17 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return cleanOccurences(result);
     }
 
+    /**
+     * Performs a depth-first search to find matches of the adjusted pattern.
+     *
+     * @param currentNode The current node being explored.
+     * @param patternIndex The current index in the pattern being matched.
+     * @param currentPath The current path of schema objects being explored.
+     * @param result The list of all matching paths found.
+     * @param fullMatch Flag indicating if a full match has been found.
+     * @param processing Flag indicating if the current path is still being processed.
+     * @param recursiveNodes Set of schema objects that are part of recursive segments.
+     */
     private void dfsFind(
         SchemaObject currentNode,
         int patternIndex,
@@ -213,6 +267,13 @@ public class RecursionMerge extends InferenceEditAlgorithm {
             currentPath.remove(currentPath.size() - 1);
     }
 
+    /**
+     * Checks if a recursive node already exists in the set.
+     *
+     * @param recursiveNodes The set of recursive nodes.
+     * @param currentNodeLabel The label of the current node to check.
+     * @return {@code true} if the recursive node already exists; {@code false} otherwise.
+     */
     public boolean containsRecursiveAlready(Set<SchemaObject> recursiveNodes, String currentNodeLabel) {
         for (final SchemaObject object : recursiveNodes)
             if (newMetadata.getObject(object).label.equals(currentNodeLabel))
@@ -221,6 +282,12 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
+    /**
+     * Cleans the list of occurrences by removing duplicates and merging subsequences.
+     *
+     * @param listOfLists The list of occurrences to clean.
+     * @return A cleaned list of occurrences.
+     */
     public static List<List<SchemaObject>> cleanOccurences(List<List<SchemaObject>> listOfLists) {
         List<List<SchemaObject>> result = new ArrayList<>();
 
@@ -254,10 +321,24 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return result;
     }
 
+    /**
+     * Checks if one list is a sublist of another list.
+     *
+     * @param list The main list to check against.
+     * @param sublist The potential sublist.
+     * @return {@code true} if the sublist is found in the list; {@code false} otherwise.
+     */
     private static boolean isSublist(List<SchemaObject> list, List<SchemaObject> sublist) {
         return Collections.indexOfSubList(list, sublist) != -1;
     }
 
+    /**
+     * Checks if two lists can be merged based on overlapping elements.
+     *
+     * @param list1 The first list to check.
+     * @param list2 The second list to check.
+     * @return {@code true} if the lists can be merged; {@code false} otherwise.
+     */
     private static boolean canMerge(List<SchemaObject> list1, List<SchemaObject> list2) {
         int overlapSize = Math.min(list1.size(), list2.size());
 
@@ -269,6 +350,13 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
+    /**
+     * Merges two lists based on overlapping elements.
+     *
+     * @param list1 The first list.
+     * @param list2 The second list.
+     * @return The merged list.
+     */
     private static List<SchemaObject> mergeLists(List<SchemaObject> list1, List<SchemaObject> list2) {
         int overlapSize = 0;
 
@@ -284,10 +372,22 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return mergedList;
     }
 
+    /**
+     * Checks if the current path represents a full match of the adjusted pattern.
+     *
+     * @param currentPath The current path of schema objects being checked.
+     * @return {@code true} if a full match is found; {@code false} otherwise.
+     */
     private boolean foundFullMatch(List<SchemaObject> currentPath) {
         return currentPath.size() >= adjustedPattern.size() && containsPatternSequence(currentPath);
     }
 
+    /**
+     * Checks if the given list contains the adjusted pattern sequence.
+     *
+     * @param list The list to check.
+     * @return {@code true} if the pattern sequence is found; {@code false} otherwise.
+     */
     private boolean containsPatternSequence(List<SchemaObject> list) {
         if (adjustedPattern.size() > list.size())
             return false;
@@ -309,6 +409,13 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
+    /**
+     * Checks if a given occurrence has already been found.
+     *
+     * @param result The list of all found occurrences.
+     * @param currentPath The current path to check.
+     * @return {@code true} if the occurrence has already been found; {@code false} otherwise.
+     */
     private boolean occurenceAlreadyFound(List<List<SchemaObject>> result, List<SchemaObject> currentPath) {
         if (result.isEmpty()) {
             return false;
@@ -331,6 +438,14 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
+    /**
+     * Finds the next node to traverse to based on the current segment direction.
+     *
+     * @param schema The schema category containing the nodes and morphisms.
+     * @param currentNode The current node being explored.
+     * @param currentSegment The current pattern segment.
+     * @return The next schema object to traverse to, or {@code null} if none is found.
+     */
     private SchemaObject findNextNode(SchemaCategory schema, SchemaObject currentNode, PatternSegment currentSegment) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (currentSegment.direction().equals(FORWARD) && morphism.dom().equals(currentNode)) {
@@ -346,6 +461,11 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return null;
     }
 
+    /**
+     * Bridges the occurrences by creating new morphisms between pattern start and end nodes.
+     *
+     * @param occurences The list of pattern occurrences to bridge.
+     */
     private void bridgeOccurences(List<List<SchemaObject>> occurences) {
         for (List<SchemaObject> occurence : occurences) {
             SchemaObject firstInPattern = occurence.get(0);
@@ -357,6 +477,13 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         }
     }
 
+    /**
+     * Finds morphisms connected to a specific node that are not part of a given path.
+     *
+     * @param node The node to find morphisms for.
+     * @param previous The previous node in the path to exclude from the search.
+     * @return A list of morphisms that connect to the node but are not part of the specified path.
+     */
     private List<SchemaMorphism> findOtherMorphisms(SchemaObject node, SchemaObject previous) {
         List<SchemaMorphism> morphisms = new ArrayList<>();
         for (SchemaMorphism morphism : newSchema.allMorphisms()) {
@@ -368,6 +495,13 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return morphisms;
     }
 
+    /**
+     * Creates new morphisms connecting the last occurrence to the first in the pattern.
+     *
+     * @param lastOccurence The last occurrence in the pattern.
+     * @param firstInPattern The first occurrence in the pattern.
+     * @param otherMorphisms The list of other morphisms to create new connections for.
+     */
     private void createNewOtherMorphisms(SchemaObject lastOccurence, SchemaObject firstInPattern, List<SchemaMorphism> otherMorphisms) {
         if (otherMorphisms == null)
             return;
@@ -383,6 +517,11 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         }
     }
 
+    /**
+     * Finds morphisms and objects to delete based on pattern occurrences.
+     *
+     * @param occurences The list of pattern occurrences to analyze.
+     */
     private void findMorphismsAndObjectsToDelete(List<List<SchemaObject>> occurences) {
         for (List<SchemaObject> occurence : occurences) {
             for (int i = adjustedPattern.size() - 1; i < occurence.size(); i++) {
@@ -393,6 +532,12 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         }
     }
 
+    /**
+     * Finds all signatures associated with a schema object.
+     *
+     * @param schemaObject The schema object to find signatures for.
+     * @return A list of signatures associated with the schema object.
+     */
     private List<Signature> findSignaturesForObject(SchemaObject schemaObject) {
         List<Signature> signatures = new ArrayList<>();
         for (SchemaMorphism morphism : newSchema.allMorphisms()) {
@@ -403,6 +548,11 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return signatures;
     }
 
+    /**
+     * Creates recursive morphisms for pattern occurrences.
+     *
+     * @param occurences The list of pattern occurrences to create recursive morphisms for.
+     */
     private void createRecursiveMorphisms(List<List<SchemaObject>> occurences) {
         for (List<SchemaObject> occurence : occurences) {
             SchemaObject firstInPattern = occurence.get(0);
@@ -413,6 +563,11 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         createRepetitiveMorphisms(occurences);
     }
 
+    /**
+     * Creates repetitive morphisms for segments marked as recursive.
+     *
+     * @param occurences The list of pattern occurrences to analyze.
+     */
     private void createRepetitiveMorphisms(List<List<SchemaObject>> occurences) {
         for (PatternSegment segment : adjustedPattern) {
             if (isRepetitive(segment)) {
@@ -425,10 +580,23 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         }
     }
 
+    /**
+     * Checks if a pattern segment is marked as recursive.
+     *
+     * @param segment The pattern segment to check.
+     * @return {@code true} if the segment is recursive; {@code false} otherwise.
+     */
     private boolean isRepetitive(PatternSegment segment) {
         return segment.direction().contains(RECURSIVE_MARKER);
     }
 
+    /**
+     * Checks if a schema object is part of any pattern occurrence.
+     *
+     * @param occurences The list of pattern occurrences.
+     * @param schemaObjectToFind The schema object to search for.
+     * @return {@code true} if the schema object is part of any occurrence; {@code false} otherwise.
+     */
     private boolean inAnyOccurence(List<List<SchemaObject>> occurences, SchemaObject schemaObjectToFind) {
         for (List<SchemaObject> occurence : occurences) {
             for (SchemaObject schemaObject : occurence) {
@@ -440,6 +608,12 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
+    /**
+     * Applies the mapping edit to a list of mappings.
+     *
+     * @param mappings The list of mappings to edit.
+     * @return The updated list of mappings.
+     */
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         // TODO: adjust the mapping
         return mappings;

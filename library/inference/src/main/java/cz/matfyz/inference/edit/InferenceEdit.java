@@ -11,6 +11,16 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The {@code InferenceEdit} class is an abstract base class that represents
+ * an edit operation in the inference process. Subclasses of this class
+ * provide specific implementations of different types of inference edits,
+ * such as merging primary keys, references, clusters, or handling recursion.
+ *
+ * <p>This class uses Jackson annotations for JSON serialization and deserialization.
+ * The {@code JsonTypeInfo} and {@code JsonSubTypes} annotations are used to handle
+ * polymorphic type handling for the subclasses.
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = PrimaryKeyMerge.Data.class, name = "PrimaryKey"),
@@ -42,7 +52,12 @@ public abstract class InferenceEdit implements Serializable {
         this.isActive = isActive;
     }
 
-   public abstract InferenceEditAlgorithm createAlgorithm();
+    /**
+     * Creates an instance of the specific {@code InferenceEditAlgorithm} that
+     * corresponds to the type of edit represented by this class.
+     *
+     * @return An instance of the {@code InferenceEditAlgorithm}.
+     */
+    public abstract InferenceEditAlgorithm createAlgorithm();
 
 }
-

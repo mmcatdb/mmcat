@@ -10,7 +10,12 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
 
 /**
- * Record to hold the final result of SchemaConversion - SchemaCategory and Mapping
+ * A record to hold the final result of schema conversion, consisting of a schema category,
+ * associated metadata, and a list of mappings.
+ *
+ * @param schema The {@link SchemaCategory} representing the schema.
+ * @param metadata The {@link MetadataCategory} associated with the schema.
+ * @param mappings The list of {@link Mapping} objects associated with the schema.
  */
 public record CategoryMappingPair(
     SchemaCategory schema,
@@ -18,6 +23,13 @@ public record CategoryMappingPair(
     List<Mapping> mappings
 ) {
 
+    /**
+     * Merges multiple {@code CategoryMappingPair} instances into a single instance.
+     * The merged instance contains a combined schema, metadata, and mappings from all provided pairs.
+     *
+     * @param pairs The list of {@code CategoryMappingPair} instances to merge.
+     * @return A new {@code CategoryMappingPair} instance containing the merged schema, metadata, and mappings.
+     */
     public static CategoryMappingPair merge(List<CategoryMappingPair> pairs) {
         final SchemaCategory mergedSchema = new SchemaCategory();
         final MetadataCategory mergedMetadata = MetadataCategory.createEmpty(mergedSchema);

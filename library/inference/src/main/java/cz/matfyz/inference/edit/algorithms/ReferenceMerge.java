@@ -4,7 +4,6 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
-import cz.matfyz.core.rsd.PrimaryKeyCandidate;
 import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -22,8 +21,16 @@ import org.apache.hadoop.yarn.webapp.NotFoundException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The {@code ReferenceMerge} class implements an algorithm for merging references
+ * within a schema. It extends the {@link InferenceEditAlgorithm} and provides functionality
+ * to modify schema objects and mappings based on reference merging rules.
+ */
 public class ReferenceMerge extends InferenceEditAlgorithm {
 
+    /**
+     * Data class representing the parameters and state needed for the reference merge.
+     */
     public static class Data extends InferenceEdit {
 
         @JsonProperty("referenceKey")
@@ -35,7 +42,15 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         @JsonProperty("candidate")
         private final ReferenceCandidate candidate;
 
-
+        /**
+         * Constructs a {@code Data} instance with specified parameters.
+         *
+         * @param id The ID of the edit.
+         * @param isActive The active status of the edit.
+         * @param referenceKey The key representing the reference to merge.
+         * @param referredKey The key representing the referred object.
+         * @param candidate The candidate reference information.
+         */
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
@@ -50,6 +65,9 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             this.candidate = candidate;
         }
 
+        /**
+         * Default constructor initializing data with default values.
+         */
         public Data() {
             setId(null);
             setActive(false);
@@ -58,18 +76,38 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             this.candidate = null;
         }
 
+        /**
+         * Gets the key representing the reference.
+         *
+         * @return The reference key.
+         */
         public Key getReferenceKey() {
             return referenceKey;
         }
 
+        /**
+         * Gets the key representing the referred object.
+         *
+         * @return The referred key.
+         */
         public Key getReferredKey() {
             return referredKey;
         }
 
+        /**
+         * Gets the candidate reference information.
+         *
+         * @return The reference candidate.
+         */
         public ReferenceCandidate getCandidate() {
             return candidate;
         }
 
+        /**
+         * Creates an instance of the {@code ReferenceMerge} algorithm.
+         *
+         * @return A new instance of {@code ReferenceMerge}.
+         */
         @Override public ReferenceMerge createAlgorithm() {
             return new ReferenceMerge(this);
         }
@@ -87,14 +125,20 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     private Signature oldIndexSignature;
     private Signature newIndexSignature;
 
+    /**
+     * Constructs a {@code ReferenceMerge} instance with the specified data.
+     *
+     * @param data The data model containing reference information and merge settings.
+     */
     public ReferenceMerge(Data data) {
         this.data = data;
     }
 
     /*
-     * Assumption: when there is a reference and it is an array object
-     * it has 2 outgoing morphism, one for _index and one for the original parent node
-     * If it is not array, it has only one ingoing morphism from the root
+     * Applies the primary key merging algorithm to the schema category.
+     * Assumption: when there is a reference and it is an array object,
+     * it has 2 outgoing morphisms: one for _index and one for the original parent node.
+     * If it is not an array, it has only one incoming morphism from the root.
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Reference Merge Edit on Schema Category...");
@@ -131,6 +175,13 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
     }
 
+    /**
+     * Determines if the reference is an array based on its morphisms.
+     *
+     * @param schema The schema category to check.
+     * @param metadata The metadata category associated with the schema.
+     * @return {@code true} if the reference is an array; {@code false} otherwise.
+     */
     private boolean isReferenceArray(SchemaCategory schema, MetadataCategory metadata) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.dom().key().equals(data.referenceKey) && metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL)) {
@@ -140,7 +191,15 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         return false;
     }
 
-    // based on the assumptions
+    /**
+     * Finds the parent key of the reference object in the schema based on whether it is an array.
+     *
+     * @param schema The schema category to search within.
+     * @param metadata The metadata category associated with the schema.
+     * @param isReferenceArray Flag indicating if the reference is an array.
+     * @return The parent key of the reference object.
+     * @throws NotFoundException if the parent key is not found.
+     */
     private Key getReferenceParentKey(SchemaCategory schema, MetadataCategory metadata, boolean isReferenceArray) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (isReferenceArray) {
@@ -156,6 +215,15 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Parent key has not been found");
     }
 
+    /**
+     * Finds the index key associated with a given reference key in the schema.
+     *
+     * @param schema The schema category to search within.
+     * @param metadata The metadata category associated with the schema.
+     * @param key The reference key to find the index for.
+     * @return The index key associated with the reference key.
+     * @throws NotFoundException if the index key is not found.
+     */
     private Key getIndexKey(SchemaCategory schema, MetadataCategory metadata, Key key) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.dom().key().equals(key) && metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL)) {
@@ -165,6 +233,12 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Index key has not been found");
     }
 
+    /**
+     * Identifies morphisms and objects to delete based on the reference and index keys.
+     *
+     * @param schema The schema category containing the morphisms and objects.
+     * @param indexKey The index key to check for deletion.
+     */
     private void findMorphismsAndObjectToDelete(SchemaCategory schema, Key indexKey) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (indexKey != null && morphism.dom().key().equals(data.referenceKey)) {
@@ -185,6 +259,12 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         keysToDelete.add(data.referenceKey);
     }
 
+    /**
+     * Applies the mapping edit to a list of mappings.
+     *
+     * @param mappings The list of mappings to edit.
+     * @return The updated list of mappings.
+     */
     @Override
     public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         /*
@@ -204,6 +284,13 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         return mappings;
     }
 
+    /**
+     * Finds the mapping corresponding to the reference based on the old reference signature.
+     *
+     * @param mappings The list of mappings to search.
+     * @return The mapping corresponding to the reference.
+     * @throws NotFoundException if the reference mapping is not found.
+     */
     private Mapping findReferenceMapping(List<Mapping> mappings) {
         for (Mapping mapping : mappings) {
             if (mapping.accessPath().getSubpathBySignature(oldReferenceSignature) != null) {
@@ -213,6 +300,14 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Mapping for reference has not been found.");
     }
 
+    /**
+     * Finds the mapping corresponding to the referred object based on the schema.
+     *
+     * @param mappings The list of mappings to search.
+     * @param schema The schema category containing the objects and morphisms.
+     * @return The mapping corresponding to the referred object.
+     * @throws NotFoundException if the referred mapping is not found.
+     */
     private Mapping findReferredMapping(List<Mapping> mappings, SchemaCategory schema) {
         // 1) in the schema find the signature where key is dom or cod
         // 2) check in which mapping this signature appears, it should appear in exactly one
@@ -225,6 +320,13 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Mapping for referred with signature " + referredSignature + " has not been found.");
     }
 
+    /**
+     * Finds the signature associated with the referred object in the schema.
+     *
+     * @param schema The schema category to search within.
+     * @return The signature associated with the referred object.
+     * @throws NotFoundException if the signature is not found.
+     */
     private Signature findReferredSignature(SchemaCategory schema) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if ((morphism.dom().key().equals(data.referredKey) || morphism.cod().key().equals(data.referredKey)) && !morphism.signature().equals(newIndexSignature)) {
