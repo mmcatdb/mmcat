@@ -234,7 +234,7 @@ public class JobExecutorService {
             control.execute(result.statements());
             LOGGER.info("... models executed."); */
         }
-
+        System.out.println(output.toString());
         job.data = new ModelJobData(output.toString());
     }
 

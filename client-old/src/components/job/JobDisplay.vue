@@ -200,7 +200,7 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
             />
             <TextArea
                 v-else-if="job.payload.type !== ActionType.RSDToCategory && job.data"
-                v-model="(job.data as ModelJobData).model"
+                v-model="(job.data as ModelJobData).value"
                 class="w-100 mt-2"
                 readonly
                 :min-rows="1"

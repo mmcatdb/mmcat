@@ -8,6 +8,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.metadata.MetadataCategory;
@@ -234,7 +235,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private void addSchemaPart(List<String> oldClusterNames, Key clusterRootKey) {
         final Map<Key, Key> mapOldNewKey = addObjects(oldClusterNames);
         addMorphisms(mapOldNewKey, clusterRootKey);
-        addTypeObjectAndMorphism();
+        //addTypeObjectAndMorphism();
     }
 
     private Map<Key, Key> addObjects(List<String> oldClusterNames) {
@@ -289,7 +290,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
         Mapping mergedMapping = createMergedMapping(clusterMapping);
 
-        return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(clusterMapping), mergedMapping);
+        //return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(clusterMapping), mergedMapping);
+        return mappings;
     }
 
     private Mapping findClusterMapping(List<Mapping> mappings) {
@@ -367,22 +369,24 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     public ComplexProperty createNewComplexProperty(ComplexProperty original) {
         List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
-        String name;
+        Name name;
         Signature complexPropertySignature;
 
         if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
             complexPropertySignature = newClusterSignature;
-            name = newClusterName;
+            //name = newClusterName;
+            name = new DynamicName(complexPropertySignature);
+
             // add the _type object
-            newSubpaths.add(new SimpleProperty(new DynamicName(newTypeSignature), newTypeSignature));
+            //newSubpaths.add(new SimpleProperty(new DynamicName(newTypeSignature), newTypeSignature));
         } else {
             complexPropertySignature = mapOldNewSignature.get(original.signature());
             if (complexPropertySignature == null) { //meaning the original was an array object and so the signature was dual
                 complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
             }
-            name = original.name().toString();
+            name = original.name();
         }
-        return new ComplexProperty(new StaticName(name), complexPropertySignature, newSubpaths);
+        return new ComplexProperty(name, complexPropertySignature, newSubpaths);
     }
 
     private List<AccessPath> transformSubpaths(List<AccessPath> originalSubpaths) {
