@@ -8,6 +8,10 @@ import cz.matfyz.core.exception.OtherException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Data Manipulation Language (DML) wrapper for JSON that implements the {@link AbstractDMLWrapper} interface.
+ * This class provides methods to build and manipulate DML statements for JSON data.
+ */
 public class JsonDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;
@@ -19,12 +23,25 @@ public class JsonDMLWrapper implements AbstractDMLWrapper {
         kindName = name;
     }
 
+    /**
+     * Appends a new field to the DML statement with the given name and value.
+     * If the value is null, it is stored as a null string.
+     *
+     * @param name the name of the field.
+     * @param value the value of the field; converted to a string.
+     */
     @Override
     public void append(String name, Object value) {
         String stringValue = value == null ? null : value.toString();
         propertyValues.add(new PropertyValue(name, stringValue));
     }
 
+    /**
+     * Creates a DML statement by constructing a JSON representation of the appended fields.
+     *
+     * @return a {@link JsonCommandStatement} containing the generated JSON content.
+     * @throws OtherException if an error occurs while creating the DML statement.
+     */
     @Override
     public JsonCommandStatement createDMLStatement() {
         try {
@@ -38,10 +55,13 @@ public class JsonDMLWrapper implements AbstractDMLWrapper {
         }
     }
 
+    /**
+     * Clears the current state of the DML wrapper, resetting the kind name, property values, and JSON constructor.
+     */
     @Override
     public void clear() {
         kindName = null;
         propertyValues = new ArrayList<>();
-        constructor = new JsonDMLConstructor(); // reset
+        constructor = new JsonDMLConstructor();
     }
 }

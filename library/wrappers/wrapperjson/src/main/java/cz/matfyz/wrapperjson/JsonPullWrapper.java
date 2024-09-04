@@ -26,18 +26,33 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * A pull wrapper implementation for JSON files that implements the {@link AbstractPullWrapper} interface.
+ * This class provides methods for pulling data from JSON files and converting it into a {@link ForestOfRecords}.
+ */
 public class JsonPullWrapper implements AbstractPullWrapper {
 
     private final JsonProvider provider;
 
+    /**
+     * Constructs a new {@code JsonPullWrapper} with the specified JSON provider.
+     *
+     * @param provider the JSON provider used to access JSON files.
+     */
     public JsonPullWrapper(JsonProvider provider) {
         this.provider = provider;
     }
 
+    /**
+     * Pulls a forest of records from a JSON file based on a complex property path and query content.
+     *
+     * @param path the complex property path specifying the structure of the records.
+     * @param query the query content used to filter or modify the records pulled.
+     * @return a {@link ForestOfRecords} containing the pulled records.
+     * @throws PullForestException if an error occurs while pulling the forest of records.
+     */
     @Override
     public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
-        System.out.println("json pullwrapper");
-        System.out.println("query: " + query);
         final var forest = new ForestOfRecords();
 
         try (InputStream inputStream = provider.getInputStream(path.name().toString())) {
@@ -49,6 +64,14 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         return forest;
     }
 
+    /**
+     * Processes a JSON input stream and populates a {@link ForestOfRecords} with data parsed from the stream.
+     *
+     * @param inputStream the input stream of the JSON file.
+     * @param forest the forest of records to populate.
+     * @param path the complex property path specifying the structure of the records.
+     * @throws IOException if an error occurs while processing the input stream.
+     */
     private void processJsonStream(InputStream inputStream, ForestOfRecords forest, ComplexProperty path) throws IOException {
         JsonFactory factory = new JsonFactory();
         JsonParser parser = factory.createParser(inputStream);
@@ -56,7 +79,6 @@ public class JsonPullWrapper implements AbstractPullWrapper {
 
         while (parser.nextToken() != null) {
             if (parser.currentToken() == JsonToken.START_OBJECT) {
-                System.out.println("current token in processJsonStream: " + parser.currentToken());
                 JsonNode jsonNode = objectMapper.readTree(parser);
                 RootRecord rootRecord = new RootRecord();
                 getDataFromJsonNode(rootRecord, jsonNode, path);
@@ -65,6 +87,13 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Recursively extracts data from a {@link JsonNode} and populates a {@link ComplexRecord}.
+     *
+     * @param parentRecord the parent record to populate with data.
+     * @param jsonNode the JSON node to extract data from.
+     * @param path the complex property path specifying the structure of the records.
+     */
     public void getDataFromJsonNode(ComplexRecord parentRecord, JsonNode jsonNode, ComplexProperty path) {
         for (AccessPath subpath : path.subpaths()) {
             Name name = subpath.name();
@@ -89,6 +118,14 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Handles JSON arrays and populates a {@link ComplexRecord} with array elements.
+     *
+     * @param parentRecord the parent record to populate.
+     * @param arrayNode the JSON array node.
+     * @param complexSubpath the complex property subpath describing the array structure.
+     * @param fieldName the field name associated with the array.
+     */
     private void handleJsonArray(ComplexRecord parentRecord, JsonNode arrayNode, ComplexProperty complexSubpath, String fieldName) {
         for (JsonNode itemNode : arrayNode) {
             if (itemNode.isObject()) {
@@ -98,6 +135,14 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Handles simple properties in the JSON data and populates a {@link ComplexRecord} with the property values.
+     *
+     * @param parentRecord the parent record to populate.
+     * @param valueNode the JSON node representing the property value.
+     * @param simpleSubpath the simple property subpath describing the property.
+     * @param fieldName the field name associated with the property.
+     */
     private void handleSimpleProperty(ComplexRecord parentRecord, JsonNode valueNode, SimpleProperty simpleSubpath, String fieldName) {
         if (valueNode.isArray()) {
             ArrayList<String> values = new ArrayList<>();
@@ -110,6 +155,13 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Converts a {@link Name} object to a {@link RecordName} based on its type (static or dynamic).
+     *
+     * @param name the name object to convert.
+     * @param valueIfDynamic the value to use if the name is dynamic.
+     * @return the converted {@link RecordName}.
+     */
     private RecordName toRecordName(Name name, String valueIfDynamic) {
         if (name instanceof DynamicName dynamicName)
             return dynamicName.toRecordName(valueIfDynamic);
@@ -118,6 +170,13 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         return staticName.toRecordName();
     }
 
+    /**
+     * Executes a query statement. This method is currently not implemented.
+     *
+     * @param statement the query statement to execute.
+     * @return nothing, as this method always throws an exception.
+     * @throws UnsupportedOperationException always thrown as this method is not implemented.
+     */
     @Override
     public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");

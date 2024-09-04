@@ -10,10 +10,21 @@ import java.util.List;
 
 import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
 
+/**
+ * A provider class for accessing JSON files based on given settings.
+ * This class provides methods to retrieve input streams and JSON file names
+ * from both local and remote sources.
+ */
 public class JsonProvider {
 
+    /** The settings used by this provider for accessing JSON files. */
     public final JsonSettings settings;
 
+    /**
+     * Constructs a new {@code JsonProvider} with the specified settings.
+     *
+     * @param settings the settings used to configure this provider.
+     */
     public JsonProvider(JsonSettings settings) {
         this.settings = settings;
     }
@@ -22,6 +33,15 @@ public class JsonProvider {
         return settings.url;
     }
 
+    /**
+     * Retrieves an input stream for the specified JSON file.
+     * If the URL points directly to a JSON file, that file is used.
+     * Otherwise, a JSON file corresponding to the kind name is accessed.
+     *
+     * @param kindName the name of the JSON kind or type.
+     * @return an input stream for the JSON file.
+     * @throws IOException if an I/O error occurs while retrieving the input stream.
+     */
     public InputStream getInputStream(String kindName) throws IOException {
         if (settings.url.endsWith(".json")) {
             return new UrlInputStreamProvider(settings.url).getInputStream();
@@ -30,9 +50,17 @@ public class JsonProvider {
         }
     }
 
-    /**
+    /*
      * There is not a straightforward way to access filenames in remote folder.
      * Therefore, right now it is possible to access local folders or files and remote just files.
+     */
+    /**
+     * Retrieves a list of JSON file names from the specified URL.
+     * Supports both local directories and remote file access.
+     *
+     * @return a list of JSON file names (without the ".json" extension).
+     * @throws URISyntaxException if the URL is not formatted correctly.
+     * @throws IOException if an I/O error occurs while accessing local or remote files.
      */
     public List<String> getJsonFileNames() throws URISyntaxException, IOException {
         URI uri = new URI(settings.url);
@@ -45,6 +73,13 @@ public class JsonProvider {
         }
     }
 
+    /**
+     * Retrieves a list of JSON file names from a remote location.
+     * Currently only supports URLs pointing directly to a JSON file.
+     *
+     * @param uri the URI pointing to the remote location.
+     * @return a list of JSON file names (without the ".json" extension).
+     */
     private List<String> getRemoteJsonFileNames(URI uri) {
         List<String> jsonFileNames = new ArrayList<>();
         if (settings.url.endsWith(".json")) {
@@ -55,6 +90,12 @@ public class JsonProvider {
         return jsonFileNames;
     }
 
+    /**
+     * Retrieves a list of JSON file names from a local directory or file.
+     *
+     * @param uri the URI pointing to the local directory or file.
+     * @return a list of JSON file names (without the ".json" extension).
+     */
     private List<String> getLocalJsonFileNames(URI uri) {
         List<String> jsonFileNames = new ArrayList<>();
         File file = new File(uri);
@@ -77,6 +118,9 @@ public class JsonProvider {
         return jsonFileNames;
     }
 
+    /**
+     * A record representing JSON settings, including the URL, writability, and queryability of the JSON source.
+     */
     public record JsonSettings(
         String url,
         boolean isWritable,

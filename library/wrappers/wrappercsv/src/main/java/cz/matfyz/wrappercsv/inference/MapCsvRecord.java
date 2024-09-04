@@ -7,12 +7,26 @@ import org.slf4j.LoggerFactory;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.*;
 
+/**
+ * Abstract class responsible for processing a CSV record and converting it into a
+ * {@link RecordSchemaDescription} structure.
+ */
 public abstract class MapCsvRecord {
 
     private MapCsvRecord() {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapCsvRecord.class);
 
+    /**
+     * Processes a single key-value pair from a CSV record and produces a {@link RecordSchemaDescription}
+     * that represents the schema of the record.
+     *
+     * @param key the key representing the field name in the CSV record.
+     * @param value the value associated with the key, which can be of various data types.
+     * @param processChildren a boolean indicating whether to process child elements if the value is a complex type (e.g., Map or List).
+     * @param firstOccurrence a boolean indicating whether this is the first occurrence of the value.
+     * @return a {@link RecordSchemaDescription} representing the structure and schema inferred from the input key-value pair.
+     */
     public static RecordSchemaDescription process(String key, Object value, boolean processChildren, boolean firstOccurrence) {
         RecordSchemaDescription result = new RecordSchemaDescription();
         result.setName(key);
@@ -49,6 +63,13 @@ public abstract class MapCsvRecord {
         return result;
     }
 
+    /**
+     * Converts a set of map entries into a list of {@link RecordSchemaDescription} objects representing
+     * the children of a complex type.
+     *
+     * @param t1 a set of map entries representing the children of a complex type.
+     * @return an {@link ObjectArrayList} of {@link RecordSchemaDescription} objects.
+     */
     private static ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
         for (Map.Entry<String, Object> value : t1) {
@@ -58,6 +79,13 @@ public abstract class MapCsvRecord {
         return children;
     }
 
+    /**
+     * Converts a list of objects into a list of {@link RecordSchemaDescription} objects representing
+     * the children of an array type.
+     *
+     * @param t1 a list of objects representing the elements of an array type.
+     * @return an {@link ObjectArrayList} of {@link RecordSchemaDescription} objects.
+     */
     private static ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
         Set<Object> visited = new HashSet<>();

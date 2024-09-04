@@ -18,19 +18,36 @@ import org.slf4j.LoggerFactory;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import scala.Tuple2;
 
+/**
+ * A function that maps a BSON {@link Document} to a list of Tuples, where each Tuple contains a string key
+ * and a {@link PropertyHeuristics} object. This class is used to perform heuristic analysis on the properties
+ * of JSON documents.
+ */
 public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, String, PropertyHeuristics> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecordToHeuristicsMap.class);
 
     private final String collectionName;
 
+    /**
+     * Constructs a new {@code RecordToHeuristicsMap} with the specified collection name.
+     *
+     * @param collectionName the name of the collection being processed, used as a prefix for the keys.
+     */
     public RecordToHeuristicsMap(String collectionName) {
         this.collectionName = collectionName;
     }
 
+    /**
+     * Applies this function to the given BSON {@link Document} and returns an iterator over the
+     * generated tuples.
+     *
+     * @param document a BSON {@link Document} representing a JSON document.
+     * @return an iterator over tuples containing keys and their corresponding {@link PropertyHeuristics}.
+     */
     @Override
     public Iterator<Tuple2<String, PropertyHeuristics>> call(Document document) {
-        ObjectArrayList<Tuple2<String, PropertyHeuristics>> result = new ObjectArrayList<Tuple2<String, PropertyHeuristics>>();
+        ObjectArrayList<Tuple2<String, PropertyHeuristics>> result = new ObjectArrayList<>();
 
         appendHeuristics(collectionName, new Document(), 1, result, true);
 
@@ -41,12 +58,21 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, Stri
         return result.iterator();
     }
 
+    /**
+     * Appends heuristics for a given key-value pair to the result list.
+     *
+     * @param key the hierarchical key for the current property.
+     * @param value the value of the property to analyze.
+     * @param firstShare the initial share value for the property.
+     * @param result the list to append the heuristics result to.
+     * @param appendThisProperty whether to append the current property to the result.
+     */
     private void appendHeuristics(String key, Object value, int firstShare, ObjectArrayList<Tuple2<String, PropertyHeuristics>> result, boolean appendThisProperty) {
         if (value == null)
             return;
         if (appendThisProperty) {
             PropertyHeuristics heuristics = buildHeuristics(key, value, firstShare, 1);
-            result.add(new Tuple2<String, PropertyHeuristics>(key + "::" + value.toString(), heuristics));
+            result.add(new Tuple2<>(key + "::" + value.toString(), heuristics));
         }
 
         if (value instanceof Map) {
@@ -57,6 +83,16 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, Stri
         }
     }
 
+    /**
+     * Builds a {@link PropertyHeuristics} object for a given key-value pair.
+     * This method is responsible for setting various properties based on the value type.
+     *
+     * @param key the hierarchical name to be used for the property.
+     * @param value the value to be analyzed and stored in the heuristics.
+     * @param first the first occurrence count.
+     * @param total the total occurrence count.
+     * @return a new instance of {@link PropertyHeuristics} with computed properties.
+     */
     private PropertyHeuristics buildHeuristics(String key, Object value, int first, int total) {
         return new PropertyHeuristics() {
             {
@@ -89,6 +125,13 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, Stri
         };
     }
 
+    /**
+     * Appends heuristics for properties within a map to the result list.
+     *
+     * @param parentName the parent hierarchical name.
+     * @param nestedProperties the set of entries representing nested properties.
+     * @param result the list to append the heuristics result to.
+     */
     private void appendMapHeuristics(String parentName, Set<Map.Entry<String, Object>> nestedProperties,  ObjectArrayList<Tuple2<String, PropertyHeuristics>> result) {
         parentName += "/";
 
@@ -98,6 +141,13 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, Stri
         }
     }
 
+    /**
+     * Appends heuristics for elements within a list to the result list.
+     *
+     * @param parentName the parent hierarchical name.
+     * @param elements the list of elements to process.
+     * @param result the list to append the heuristics result to.
+     */
     private void appendListHeuristics(String parentName, List<Object> elements,  ObjectArrayList<Tuple2<String, PropertyHeuristics>> result) {
         Set<Object> visited = new HashSet<>();
         String hierarchicalName = parentName + "/_";
