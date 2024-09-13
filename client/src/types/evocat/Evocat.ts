@@ -3,7 +3,7 @@ import { type SchemaCategory, type ObjectDefinition, SchemaObject, type Morphism
 import type { LogicalModel } from '../logicalModel';
 import type { Result } from '../api/result';
 import { type Version, VersionContext, computeLatestVersions } from './Version';
-import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, EditMorphism, EditObject } from '../schema/operation';
+import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, UpdateMorphism, UpdateObject } from '../schema/operation';
 import type { MetadataUpdate, SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
 import { VersionedSMO } from '../schema/VersionedSMO';
 
@@ -183,9 +183,9 @@ export class Evocat {
         this.commitOperation(operation);
     }
 
-    editObject(update: ObjectDefinition, oldObject: SchemaObject): SchemaObject {
+    updateObject(update: ObjectDefinition, oldObject: SchemaObject): SchemaObject {
         const newObject = oldObject.createCopy(update);
-        const operation = EditObject.create(newObject, oldObject);
+        const operation = UpdateObject.create(newObject, oldObject);
         this.commitOperation(operation);
 
         return newObject;
@@ -206,9 +206,9 @@ export class Evocat {
         this.commitOperation(operation);
     }
 
-    editMorphism(update: MorphismDefinition, oldMorphism: SchemaMorphism): SchemaMorphism {
+    updateMorphism(update: MorphismDefinition, oldMorphism: SchemaMorphism): SchemaMorphism {
         const newMorphism = oldMorphism.createCopy(update);
-        const operation = EditMorphism.create(newMorphism, oldMorphism);
+        const operation = UpdateMorphism.create(newMorphism, oldMorphism);
         this.commitOperation(operation);
 
         return newMorphism;

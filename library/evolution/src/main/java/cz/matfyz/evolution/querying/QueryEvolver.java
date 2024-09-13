@@ -11,8 +11,8 @@ import cz.matfyz.evolution.schema.CreateMorphism;
 import cz.matfyz.evolution.schema.CreateObject;
 import cz.matfyz.evolution.schema.DeleteMorphism;
 import cz.matfyz.evolution.schema.DeleteObject;
-import cz.matfyz.evolution.schema.EditMorphism;
-import cz.matfyz.evolution.schema.EditObject;
+import cz.matfyz.evolution.schema.UpdateMorphism;
+import cz.matfyz.evolution.schema.UpdateObject;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.evolution.schema.SchemaEvolutionVisitor;
 import cz.matfyz.querying.parsing.Filter.ConditionFilter;
@@ -212,12 +212,12 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
     }
 
-    @Override public Void visit(EditMorphism operation) {
+    @Override public Void visit(UpdateMorphism operation) {
         errors.add(new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }
 
-    @Override public Void visit(EditObject operation) {
+    @Override public Void visit(UpdateObject operation) {
         errors.add(new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }

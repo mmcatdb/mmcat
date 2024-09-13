@@ -56,7 +56,7 @@ function save() {
             label: '#role',
         });
 
-        evocat.editObject({
+        evocat.updateObject({
             ...setObject.toDefinition(),
             ids: ObjectIds.createCrossProduct([
                 { signature: setToNode1.signature, ids: node1.schemaObject.ids },

@@ -12,11 +12,11 @@ import { ObjectIds, idsAreEqual } from '@/types/identifiers/ObjectIds';
 
 const { evocat } = $(useEvocat());
 
-type EditObjectProps = {
+type UpdateObjectProps = {
     node: Node;
 };
 
-const props = defineProps<EditObjectProps>();
+const props = defineProps<UpdateObjectProps>();
 
 const emit = defineEmits([ 'save', 'cancel', 'update' ]);
 
@@ -32,7 +32,7 @@ function save() {
         label: label.value.trim(),
         ids: objectIds.value,
     };
-    evocat.editObject(update, props.node.schemaObject);
+    evocat.updateObject(update, props.node.schemaObject);
     emit('save');
 }
 

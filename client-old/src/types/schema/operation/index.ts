@@ -1,10 +1,10 @@
 import { SMOType, type SMOFromServer, type SMO } from './schemaModificationOperation';
 import { CreateObject, type CreateObjectFromServer } from './createObject';
 import { DeleteObject, type DeleteObjectFromServer } from './deleteObject';
-import { EditObject, type EditObjectFromServer } from './editObject';
+import { UpdateObject, type UpdateObjectFromServer } from './updateObject';
 import { CreateMorphism, type CreateMorphismFromServer } from './createMorphism';
 import { DeleteMorphism, type DeleteMorphismFromServer } from './deleteMorphism';
-import { EditMorphism, type EditMorphismFromServer } from './editMorphism';
+import { UpdateMorphism, type UpdateMorphismFromServer } from './updateMorphism';
 import { Composite, type CompositeFromServer } from './composite';
 
 export function fromServer(input: SMOFromServer): SMO {
@@ -13,14 +13,14 @@ export function fromServer(input: SMOFromServer): SMO {
         return CreateObject.fromServer(input as CreateObjectFromServer);
     case SMOType.DeleteObject:
         return DeleteObject.fromServer(input as DeleteObjectFromServer);
-    case SMOType.EditObject:
-        return EditObject.fromServer(input as EditObjectFromServer);
+    case SMOType.UpdateObject:
+        return UpdateObject.fromServer(input as UpdateObjectFromServer);
     case SMOType.CreateMorphism:
         return CreateMorphism.fromServer(input as CreateMorphismFromServer);
     case SMOType.DeleteMorphism:
         return DeleteMorphism.fromServer(input as DeleteMorphismFromServer);
-    case SMOType.EditMorphism:
-        return EditMorphism.fromServer(input as EditMorphismFromServer);
+    case SMOType.UpdateMorphism:
+        return UpdateMorphism.fromServer(input as UpdateMorphismFromServer);
     case SMOType.Composite:
         return Composite.fromServer(input as CompositeFromServer);
     }
@@ -31,9 +31,9 @@ export {
     type SMOFromServer,
     CreateObject,
     DeleteObject,
-    EditObject,
+    UpdateObject,
     CreateMorphism,
     DeleteMorphism,
-    EditMorphism,
+    UpdateMorphism,
     Composite,
 };

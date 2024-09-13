@@ -19,8 +19,8 @@ import cz.matfyz.evolution.metadata.ObjectMetadata;
 import cz.matfyz.evolution.schema.Composite;
 import cz.matfyz.evolution.schema.CreateMorphism;
 import cz.matfyz.evolution.schema.CreateObject;
-import cz.matfyz.evolution.schema.EditMorphism;
-import cz.matfyz.evolution.schema.EditObject;
+import cz.matfyz.evolution.schema.UpdateMorphism;
+import cz.matfyz.evolution.schema.UpdateObject;
 import cz.matfyz.evolution.schema.SchemaModificationOperation;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.evolution.VersionedSMO;
@@ -113,7 +113,7 @@ public abstract class SchemaBase {
         final var newObject = new SerializedObject(key, object.ids(), object.superId());
         final var oldObject = getOldObject(key);
 
-        addSchemaOperation(new EditObject(newObject, oldObject));
+        addSchemaOperation(new UpdateObject(newObject, oldObject));
     }
 
     protected void editIds(BuilderObject builderObject, ObjectIds ids) {
@@ -121,7 +121,7 @@ public abstract class SchemaBase {
         final var newObject = new SerializedObject(key, ids, ids.generateDefaultSuperId());
         final var oldObject = getOldObject(key);
 
-        addSchemaOperation(new EditObject(newObject, oldObject));
+        addSchemaOperation(new UpdateObject(newObject, oldObject));
     }
 
     protected void addMorphism(BuilderMorphism builderMorphism) {
@@ -133,7 +133,7 @@ public abstract class SchemaBase {
         addMetadataOperation(new MorphismMetadata(mm, null));
     }
 
-    protected void editMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
+    protected void updateMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
         final var oldMorphism = SerializedMorphism.serialize(originalSchema.getMorphism(signature));
         final var newMorphism = new SerializedMorphism(
             oldMorphism.signature(),
@@ -143,11 +143,11 @@ public abstract class SchemaBase {
             oldMorphism.tags()
         );
 
-        addSchemaOperation(new EditMorphism(newMorphism, oldMorphism));
+        addSchemaOperation(new UpdateMorphism(newMorphism, oldMorphism));
     }
 
-    protected void editMorphism(BuilderMorphism morphism, @Nullable BuilderObject newDom, @Nullable BuilderObject newCod) {
-        editMorphism(morphism.signature(), newDom != null ? newDom.key() : null, newCod != null ? newCod.key() : null);
+    protected void updateMorphism(BuilderMorphism morphism, @Nullable BuilderObject newDom, @Nullable BuilderObject newCod) {
+        updateMorphism(morphism.signature(), newDom != null ? newDom.key() : null, newCod != null ? newCod.key() : null);
     }
 
     protected void moveObject(BuilderObject object, double x, double y) {

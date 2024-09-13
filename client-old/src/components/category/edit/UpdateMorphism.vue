@@ -9,11 +9,11 @@ import { useEvocat } from '@/utils/injects';
 
 const { evocat, graph } = $(useEvocat());
 
-type EditMorphismProps = {
+type UpdateMorphismProps = {
     edge: Edge;
 };
 
-const props = defineProps<EditMorphismProps>();
+const props = defineProps<UpdateMorphismProps>();
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -68,7 +68,7 @@ function save() {
         label: label.value.trim(),
         tags: old.tags,
     };
-    evocat.editMorphism(update, old);
+    evocat.updateMorphism(update, old);
 
     temporayEdge.value?.delete();
 

@@ -4,7 +4,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
 
-public record EditObject(
+public record UpdateObject(
     SerializedObject newObject,
     SerializedObject oldObject
 ) implements SchemaModificationOperation {

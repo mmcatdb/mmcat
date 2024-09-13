@@ -68,7 +68,7 @@ function save() {
             min: Cardinality.One,
         });
 
-        evocat.editObject({
+        evocat.updateObject({
             ...mapObject.toDefinition(),
             ids: ObjectIds.createCrossProduct([
                 { signature: mapToKey.signature, ids: keyObjectIds },
