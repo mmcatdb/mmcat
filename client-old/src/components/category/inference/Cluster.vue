@@ -25,7 +25,7 @@ const noNodesSelected = computed(() => nodes.value.every(node => !node));
 const selectedNodeLabels = computed(() => {
     return nodes.value
         .filter(node => node !== undefined)
-        .map(node => node?.schemaObject.label)
+        .map(node => node?.metadata.label)
         .join(', ');
 });
 
@@ -44,7 +44,7 @@ function cancel() {
     }
     
 
-    nodes.value = [undefined, undefined];  //unselect selected nodes
+    nodes.value = [ undefined, undefined ];  //unselect selected nodes
 
     if (confirmClicked.value) {
         emit('cancel-edit');

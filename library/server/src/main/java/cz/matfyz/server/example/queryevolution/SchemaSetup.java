@@ -10,13 +10,13 @@ class SchemaSetup extends SchemaBase {
 
     private final int version;
 
-    private SchemaSetup(SchemaCategoryWrapper wrapper, String lastUpdateVersion, int version) {
-        super(wrapper, lastUpdateVersion, Schema.newSchema(version));
+    private SchemaSetup(SchemaCategoryWrapper wrapper, int version) {
+        super(wrapper, Schema.newSchema(version));
         this.version = version;
     }
 
-    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, String lastUpdateVersion, int version) {
-        return new SchemaSetup(wrapper, lastUpdateVersion, version).innerCreateNewUpdate();
+    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, int version) {
+        return new SchemaSetup(wrapper, version).innerCreateNewUpdate();
     }
 
     @Override protected void createOperations() {

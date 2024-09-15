@@ -1,4 +1,4 @@
-import { SMOType, type SMOFromServer, type SMO } from './schemaModificationOperation';
+import { SMOType, type SMOFromServer, type SMO } from './smo';
 import { CreateObject, type CreateObjectFromServer } from './createObject';
 import { DeleteObject, type DeleteObjectFromServer } from './deleteObject';
 import { UpdateObject, type UpdateObjectFromServer } from './updateObject';
@@ -7,7 +7,7 @@ import { DeleteMorphism, type DeleteMorphismFromServer } from './deleteMorphism'
 import { UpdateMorphism, type UpdateMorphismFromServer } from './updateMorphism';
 import { Composite, type CompositeFromServer } from './composite';
 
-export function fromServer(input: SMOFromServer): SMO {
+export function smoFromServer(input: SMOFromServer): SMO {
     switch (input.type) {
     case SMOType.CreateObject:
         return CreateObject.fromServer(input as CreateObjectFromServer);

@@ -1,7 +1,9 @@
 package cz.matfyz.server.entity.evolution;
 
 import cz.matfyz.evolution.Version;
+import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.matfyz.evolution.schema.SMO;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.utils.Utils;
@@ -17,43 +19,45 @@ public class SchemaUpdate extends Entity {
     public final Id categoryId;
     public final Version prevVersion;
     public final Version nextVersion;
-    public final List<VersionedSMO> operations;
+    public final List<SMO> schema;
+    public final List<MMO> metadata;
 
-    private SchemaUpdate(Id id, Id categoryId, Version prevVersion, Version nextVersion, List<VersionedSMO> operations) {
+    private SchemaUpdate(Id id, Id categoryId, Version prevVersion, Version nextVersion, List<SMO> schema, List<MMO> metadata) {
         super(id);
         this.categoryId = categoryId;
         this.prevVersion = prevVersion;
         this.nextVersion = nextVersion;
-        this.operations = operations;
+        this.schema = schema;
+        this.metadata = metadata;
     }
 
     public static SchemaUpdate fromInit(SchemaUpdateInit init, Id categoryId, Version systemVersion) {
-        final String newSchemaVersion = init.operations().getLast().version();
-
         return new SchemaUpdate(
             null,
             categoryId,
             init.prevVersion(),
-            systemVersion.generateNext(newSchemaVersion),
-            init.operations()
+            systemVersion.generateNext(null),
+            init.schema(),
+            init.metadata()
         );
     }
 
     public SchemaCategoryUpdate toEvolution() {
         return new SchemaCategoryUpdate(
             prevVersion,
-            operations.stream().map(VersionedSMO::smo).toList()
+            schema
         );
     }
 
     public String toJsonValue() throws JsonProcessingException {
-        return Utils.toJson(new JsonValue(prevVersion, nextVersion, operations));
+        return Utils.toJson(new JsonValue(prevVersion, nextVersion, schema, metadata));
     }
 
     private record JsonValue(
         Version prevVersion,
         Version nextVersion,
-        List<VersionedSMO> operations
+        List<SMO> schema,
+        List<MMO> metadata
     ) {}
 
     private static final ObjectReader reader = new ObjectMapper().readerFor(JsonValue.class);
@@ -66,7 +70,8 @@ public class SchemaUpdate extends Entity {
             categoryId,
             parsedValue.prevVersion,
             parsedValue.nextVersion,
-            parsedValue.operations
+            parsedValue.schema,
+            parsedValue.metadata
         );
     }
 

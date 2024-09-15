@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
 
 import { useEvocat } from '@/utils/injects';
 
-import type { Version } from '@/types/evocat/Version';
+// import type { Version } from '@/types/evocat/Version';
 import VersionsDisplay from './VersionsDisplay.vue';
 import IconArrowLeftBold from '@/components/icons/IconArrowLeftBold.vue';
 import IconArrowRightBold from '@/components/icons/IconArrowRightBold.vue';
@@ -14,24 +14,6 @@ const { evocat } = $(useEvocat());
 
 const allVersions = shallowRef<Version[]>(evocat.versionContext.allVersions);
 const currentVersion = shallowRef<Version>(evocat.versionContext.currentVersion);
-
-function allListener(versions: Version[]) {
-    allVersions.value = versions;
-}
-
-function currentListener(version: Version) {
-    currentVersion.value = version;
-}
-
-onMounted(() => {
-    evocat.versionContext.addAllListener(allListener);
-    evocat.versionContext.addCurrentListener(currentListener);
-});
-
-onUnmounted(() => {
-    evocat.versionContext.removeAllListener(allListener);
-    evocat.versionContext.removeCurrentListener(currentListener);
-});
 
 const compositeParent = computed(() => {
     let nextVersion = currentVersion.value.lastChild;

@@ -1,6 +1,6 @@
 import type { SchemaCategory } from '../SchemaCategory';
 import { SchemaMorphism, type SchemaMorphismFromServer } from '../SchemaMorphism';
-import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
+import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type UpdateMorphismFromServer = SMOFromServer<SMOType.UpdateMorphism> & {
     newMorphism: SchemaMorphismFromServer;

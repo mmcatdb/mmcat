@@ -7,12 +7,12 @@ import cz.matfyz.tests.example.basic.Schema;
 
 class SchemaSetup extends SchemaBase {
 
-    private SchemaSetup(SchemaCategoryWrapper wrapper, String lastUpdateVersion) {
-        super(wrapper, lastUpdateVersion, Schema.newSchema());
+    private SchemaSetup(SchemaCategoryWrapper wrapper) {
+        super(wrapper, Schema.newSchema());
     }
 
-    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, String lastUpdateVersion) {
-        return new SchemaSetup(wrapper, lastUpdateVersion).innerCreateNewUpdate();
+    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper) {
+        return new SchemaSetup(wrapper).innerCreateNewUpdate();
     }
 
     @Override protected void createOperations() {

@@ -3,7 +3,7 @@ import { computed, watch } from 'vue';
 
 import { useEvocat } from '@/utils/injects';
 
-import { computeLatestVersions, type Version } from '@/types/evocat/Version';
+// import { computeLatestVersions, type Version } from '@/types/evocat/Version';
 
 type VersionsDisplayProps = {
     allVersions: Version[];

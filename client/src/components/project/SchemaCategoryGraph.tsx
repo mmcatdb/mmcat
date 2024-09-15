@@ -8,15 +8,15 @@ type SchemaCategoryGraphProps = Readonly<{
 export function SchemaCategoryGraph({ category }: SchemaCategoryGraphProps) {
     const initialNodes = category.getObjects().map(object => ({
         id: '' + object.key.value,
-        data: { label: object.current?.label },
-        position: object._position,
+        data: { label: object.metadata.label },
+        position: object.metadata.position,
     }));
 
     const initialEdges = category.getMorphisms().map(morphism => ({
         id: '' + morphism.signature.baseValue,
         source: '' + morphism.current?.domKey.value,
         target: '' + morphism.current?.codKey.value,
-        data: { label: morphism.current?.label },
+        data: { label: morphism.metadata.label },
     }));
 
     console.log({ initialNodes, initialEdges });

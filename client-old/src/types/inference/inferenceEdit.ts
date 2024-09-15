@@ -1,7 +1,7 @@
 import { Key } from '../identifiers';
 import type { KeyFromServer } from '../identifiers';
 import { PrimaryKeyCandidate, ReferenceCandidate } from './candidates';
-import { LayoutType } from '@/types/inference/layoutType';
+import type { LayoutType } from '@/types/inference/layoutType';
 import type { SerializedPrimaryKeyCandidate, SerializedReferenceCandidate } from './candidates';
 
 export interface InferenceEdit {
@@ -55,11 +55,13 @@ export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
             this.primaryKeyIdentified = primaryKeyIdentifiedOrIsActive;
             this.isActive = isActiveOrId as boolean;
             this.id = id ?? null;
-        } else if (primaryKeyOrCandidate instanceof PrimaryKeyCandidate) {
+        }
+        else if (primaryKeyOrCandidate instanceof PrimaryKeyCandidate) {
             this.candidate = primaryKeyOrCandidate;
             this.isActive = primaryKeyIdentifiedOrIsActive as boolean;
             this.id = isActiveOrId as number ?? null;
-        } else {
+        }
+        else {
             throw new Error('Invalid constructor arguments for PrimaryKeyMergeInferenceEdit.');
         }
     }
@@ -72,7 +74,8 @@ export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
                 data.isActive,
                 data.id,
             );
-        } else if (data.candidate != null) {
+        }
+        else if (data.candidate != null) {
             return new PrimaryKeyMergeInferenceEdit(
                 PrimaryKeyCandidate.fromServer(data.candidate as SerializedPrimaryKeyCandidate),
                 data.isActive,
@@ -100,11 +103,13 @@ export class ReferenceMergeInferenceEdit implements InferenceEdit {
             this.referredKey = referredKeyOrIsActive;
             this.isActive = isActiveOrId as boolean;
             this.id = id ?? null;
-        } else if (referenceOrCandidate instanceof ReferenceCandidate) {
+        }
+        else if (referenceOrCandidate instanceof ReferenceCandidate) {
             this.candidate = referenceOrCandidate;
             this.isActive = referredKeyOrIsActive as boolean;
             this.id =  isActiveOrId as number ?? null;
-        } else {
+        }
+        else {
             throw new Error('Invalid constructor arguments for ReferenceMergeInferenceEdit.');
         }
     }
@@ -118,7 +123,8 @@ export class ReferenceMergeInferenceEdit implements InferenceEdit {
                 data.isActive,
                 data.id,
             );
-        } else if (data.candidate != null) {
+        }
+        else if (data.candidate != null) {
             return new ReferenceMergeInferenceEdit(
                 ReferenceCandidate.fromServer(data.candidate as SerializedReferenceCandidate),
                 data.isActive,

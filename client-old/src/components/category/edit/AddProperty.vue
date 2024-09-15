@@ -29,8 +29,8 @@ function save() {
         });
 
         evocat.createMorphism({
-            dom: node.value.schemaObject,
-            cod: object,
+            domKey: node.value.schemaObject.key,
+            codKey: object.key,
             min: min.value,
         });
     });

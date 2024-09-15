@@ -1,14 +1,13 @@
-import type { Position } from 'cytoscape';
 import type { Entity, Id, VersionId } from '../id';
-import type { KeyFromServer } from '../identifiers';
-import { VersionedSMO, type VersionedSMOFromServer } from './VersionedSMO';
+import { type SMO, smoFromServer, type SMOFromServer } from './operation';
+import type { MMOFromServer } from '../evocat/metadata/mmo';
 
 export type SchemaUpdateFromServer = {
     id: Id;
     categoryId: Id;
     prevVersion: VersionId;
     nextVersion: VersionId;
-    operations: VersionedSMOFromServer[];
+    schema: SMOFromServer[];
 };
 
 export class SchemaUpdate implements Entity {
@@ -17,7 +16,7 @@ export class SchemaUpdate implements Entity {
         readonly categoryId: Id,
         readonly prevVersion: VersionId,
         readonly nextVersion: VersionId,
-        readonly operations: VersionedSMO[],
+        readonly schema: SMO[],
     ) {}
 
     static fromServer(input: SchemaUpdateFromServer): SchemaUpdate {
@@ -26,18 +25,13 @@ export class SchemaUpdate implements Entity {
             input.categoryId,
             input.prevVersion,
             input.nextVersion,
-            input.operations.map(VersionedSMO.fromServer),
+            input.schema.map(smoFromServer),
         );
     }
 }
 
-export type MetadataUpdate = {
-    key: KeyFromServer;
-    position: Position;
-};
-
 export type SchemaUpdateInit = {
     readonly prevVersion: VersionId;
-    readonly operations: VersionedSMOFromServer[];
-    readonly metadata: MetadataUpdate[];
+    readonly schema: SMOFromServer[];
+    readonly metadata: MMOFromServer[];
 };

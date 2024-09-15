@@ -1,9 +1,9 @@
 import type { JobDataType } from '../job';
 import { SchemaCategory, type SchemaCategoryInfo, type SerializedSchema, type SerializedMetadata } from '../schema';
 import { Candidates, type SerializedCandidates } from './candidates';
-import { type InferenceEdit, type SerializedInferenceEdit } from './inferenceEdit';
+import type { InferenceEdit, SerializedInferenceEdit } from './inferenceEdit';
 import { createInferenceEditFromServer } from './inferenceEdit';
-import { LayoutType } from './layoutType';
+import type { LayoutType } from './layoutType';
 
 export type InferenceJobDataFromServer = {
     type: JobDataType.Inference;

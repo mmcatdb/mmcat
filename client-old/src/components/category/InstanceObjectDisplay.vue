@@ -14,9 +14,11 @@ const props = defineProps<{
 const emit = defineEmits([ 'object:click' ]);
 
 function defineColumn(signature: Signature, node: Node): Column {
+    const neighbor = node.getNeighborNode(signature);
     return {
         signature,
-        schemaObject: node.getNeighborNode(signature)?.schemaObject,
+        schemaObject: neighbor?.schemaObject,
+        metadata: neighbor?.metadata,
         isClickable: !signature.equals(Signature.empty),
     };
 }

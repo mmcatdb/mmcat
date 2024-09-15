@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = UpdateMorphism.class, name = "updateMorphism"),
     @JsonSubTypes.Type(value = Composite.class, name = "composite"),
 })
-public interface SchemaModificationOperation {
+public interface SMO {
 
     void up(SchemaCategory schema) throws EvolutionException;
 

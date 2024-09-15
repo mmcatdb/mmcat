@@ -43,26 +43,25 @@ function save() {
         });
 
         const setToNode1 = evocat.createMorphism({
-            dom: setObject,
-            cod: node1.schemaObject,
+            domKey: setObject.key,
+            codKey: node1.schemaObject.key,
             min: Cardinality.One,
             label: '#role',
         });
 
         const setToNode2 = evocat.createMorphism({
-            dom: setObject,
-            cod: node2.schemaObject,
+            domKey: setObject.key,
+            codKey: node2.schemaObject.key,
             min: Cardinality.One,
             label: '#role',
         });
 
-        evocat.updateObject({
-            ...setObject.toDefinition(),
+        evocat.updateObject(setObject, {
             ids: ObjectIds.createCrossProduct([
                 { signature: setToNode1.signature, ids: node1.schemaObject.ids },
                 { signature: setToNode2.signature, ids: node2.schemaObject.ids },
             ]),
-        }, setObject);
+        });
     });
 
     graph.layout();
@@ -82,10 +81,10 @@ function cancel() {
                 <input v-model="setLabel" />
             </ValueRow>
             <ValueRow label="Domain object:">
-                {{ nodes[0]?.schemaObject.label }}
+                {{ nodes[0]?.metadata.label }}
             </ValueRow>
             <ValueRow label="Codomain object:">
-                {{ nodes[1]?.schemaObject.label }}
+                {{ nodes[1]?.metadata.label }}
             </ValueRow>
         </ValueContainer>
         <NodeInput

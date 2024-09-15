@@ -7,7 +7,7 @@ import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
 public record UpdateObject(
     SerializedObject newObject,
     SerializedObject oldObject
-) implements SchemaModificationOperation {
+) implements SMO {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
         return visitor.visit(this);

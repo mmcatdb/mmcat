@@ -50,31 +50,30 @@ function save() {
         });
 
         const mapToKey = evocat.createMorphism({
-            dom: mapObject,
-            cod: keyObject,
+            domKey: mapObject.key,
+            codKey: keyObject.key,
             min: Cardinality.One,
             label: '#key',
         });
 
         const mapToNode1 = evocat.createMorphism({
-            dom: mapObject,
-            cod: node1.schemaObject,
+            domKey: mapObject.key,
+            codKey: node1.schemaObject.key,
             min: Cardinality.One,
         });
 
         evocat.createMorphism({
-            dom: mapObject,
-            cod: node2.schemaObject,
+            domKey: mapObject.key,
+            codKey: node2.schemaObject.key,
             min: Cardinality.One,
         });
 
-        evocat.updateObject({
-            ...mapObject.toDefinition(),
+        evocat.updateObject(mapObject, {
             ids: ObjectIds.createCrossProduct([
                 { signature: mapToKey.signature, ids: keyObjectIds },
                 { signature: mapToNode1.signature, ids: node1.schemaObject.ids },
             ]),
-        }, mapObject);
+        });
     });
 
     graph.layout();
@@ -97,10 +96,10 @@ function cancel() {
                 <input v-model="keyLabel" />
             </ValueRow>
             <ValueRow label="Domain object:">
-                {{ nodes[0]?.schemaObject.label }}
+                {{ nodes[0]?.metadata.label }}
             </ValueRow>
             <ValueRow label="Codomain object:">
-                {{ nodes[1]?.schemaObject.label }}
+                {{ nodes[1]?.metadata.label }}
             </ValueRow>
         </ValueContainer>
         <NodeInput

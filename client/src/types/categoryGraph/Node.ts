@@ -1,11 +1,11 @@
 import { ComparableMap } from '@/types/utils/ComparableMap';
-// import type { Core, ElementDefinition, NodeSingular } from 'cytoscape';
+// import type { Core, ElementDefinition, NodeSingular, Position } from 'cytoscape';
 // import { groupHighlightColorToClass } from '@/components/category/defaultGraphStyle';
 import type { Key, Signature } from '../identifiers';
-import type { ComparablePosition, SchemaObject } from '../schema';
+import type { MetadataObject, SchemaObject, VersionedSchemaObject } from '../schema';
 import { DirectedEdge, type Edge } from './Edge';
 import { PathMarker, type MorphismData, type Filter } from './PathMarker';
-import type { Group } from './Graph';
+import type { Group, Position } from './Graph';
 
 export enum NodeTag {
     Root = 'tag-root'
@@ -75,15 +75,19 @@ export class Node {
     private _neighbors = new ComparableMap<Signature, string, Neighbor>(signature => signature.value);
 
     private constructor(
+        readonly object: VersionedSchemaObject,
         public schemaObject: SchemaObject,
         readonly highlights: NodeHighlights,
     ) {}
 
-    static create(cytoscape: Core, object: SchemaObject, position: ComparablePosition, groups: Group[]): Node {
-        const highlights = new NodeHighlights(cytoscape, groups, object.key, position);
-        const node = new Node(object, highlights);
-        const classes = (object.isNew ? 'new' : '') + ' ' + (!object.ids ? 'no-ids' : '');
-        const nodeDefinition = createNodeDefinition(object, position, node, classes);
+    static create(cytoscape: Core, object: VersionedSchemaObject, schemaObject: SchemaObject, position: Position, groups: Group[]): Node {
+        // This object is shared between all placeholder nodes. And its mutated when dragged ... yes, cytoscape is a bit weird.
+        const positionObject = { ...position };
+
+        const highlights = new NodeHighlights(cytoscape, groups, schemaObject.key, positionObject);
+        const node = new Node(object, schemaObject, highlights);
+        const classes = (schemaObject.isNew ? 'new' : '') + ' ' + (!schemaObject.ids ? 'no-ids' : '');
+        const nodeDefinition = createNodeDefinition(schemaObject, positionObject, node, classes);
         const cytoscapeNode = cytoscape.add(nodeDefinition);
         node.setCytoscapeNode(cytoscapeNode);
 
@@ -105,9 +109,7 @@ export class Node {
         this.node.data('label', this.label);
         this.node.toggleClass('no-ids', !this.schemaObject.ids);
 
-        // TODO position should be tracked elsewhere?
-        //this.node.position('x', schemaObject.position.x);
-        //this.node.position('y', schemaObject.position.y);
+        this.node.position({ ...this.metadata.position });
 
         if (!this.node.inside()) {
             this.node.restore();
@@ -115,10 +117,14 @@ export class Node {
         }
     }
 
+    get metadata(): MetadataObject {
+        return this.object.metadata;
+    }
+
     get cytoscapeIdAndPosition() {
         return {
             nodeId: this.node.id(),
-            position: this.node.position(),
+            position: { ...this.node.position() },
         };
     }
 
@@ -129,7 +135,7 @@ export class Node {
     addNeighbor(edge: Edge, direction: boolean): void {
         const thisNode = direction ? edge.domainNode : edge.codomainNode;
         if (!thisNode.equals(this))
-            throw new Error(`Cannot add edge with signature: ${edge.schemaMorphism.signature} and direction: ${direction} to node with key: ${this.schemaObject.key}`);
+            throw new Error(`Cannot add edge with signature: ${edge.schemaMorphism.signature} and direction: ${direction} to node with key: ${this.object.key}`);
 
         const node = direction ? edge.codomainNode : edge.domainNode;
 
@@ -180,7 +186,7 @@ export class Node {
     }
 
     get label(): string {
-        return this.schemaObject.label + (
+        return this.metadata.label + (
             this._selectionStatus.type === SelectionType.Selected
                 ? ` (${this._selectionStatus.level + 1})`
                 : ''
@@ -238,14 +244,14 @@ export class Node {
     }
 }
 
-function createNodeDefinition(object: SchemaObject, position: ComparablePosition, node: Node, classes?: string): ElementDefinition {
+function createNodeDefinition(object: SchemaObject, position: Position, node: Node, classes?: string): ElementDefinition {
     return {
         data: {
             id: '' + object.key.value,
             label: node.label,
             schemaData: node,
         },
-        position: position,
+        position,
         ...classes ? { classes } : {},
     };
 }
@@ -263,7 +269,7 @@ class NodeHighlights {
         private readonly cytoscape: Core,
         groups: Group[],
         key: Key,
-        position: ComparablePosition,
+        position: Position,
     ) {
         groups.forEach(group => {
             this.placeholders.set(group.id, {
@@ -314,13 +320,17 @@ class NodeHighlights {
     }
 }
 
-function createGroupPlaceholderDefinition(key: Key, position: ComparablePosition, groupId: string): ElementDefinition {
+function createGroupPlaceholderDefinition(key: Key, position: Position, groupId: string): ElementDefinition {
     return {
         data: {
             id: groupId + '_' + key.value,
             parent: 'group_' + groupId,
         },
-        position: position,
+        position,
         classes: 'group-placeholder group-placeholder-hidden',
     };
+}
+
+export function isPositionEqual(a: Position, b: Position): boolean {
+    return a.x === b.x && a.y === b.y;
 }

@@ -10,7 +10,7 @@ import GraphDisplay from './GraphDisplay.vue';
 import { Evocat } from '@/types/evocat/Evocat';
 import { LogicalModel } from '@/types/logicalModel';
 import { DataResultSuccess } from '@/types/api/result';
-import { SchemaUpdate, type MetadataUpdate, type SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
+import { SchemaUpdate, type SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
 
 const props = defineProps<{
     schemaCategory?: SchemaCategory;
@@ -41,7 +41,6 @@ onMounted(async () => {
     const schemaCategory = SchemaCategory.fromServer(schemaCategoryResult.data, logicalModels);
     const newEvocat = Evocat.create(schemaCategory, schemaUpdates, logicalModels, {
         update: updateFunction,
-        updateMetadata: updateMetadataFunction,
     });
     evocat.value = newEvocat;
 
@@ -69,15 +68,6 @@ async function updateFunction(update: SchemaUpdateInit, models: LogicalModel[]) 
     return DataResultSuccess(schemaCategory);
 }
 
-async function updateMetadataFunction(metadata: MetadataUpdate[]) {
-    fetching.value = true;
-    const result = await API.schemas.updateCategoryMetadata({ id: categoryId }, metadata);
-    fetching.value = false;
-
-    if (!result.status)
-        console.log('Update metadata failed');
-}
-
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
     if (evocat.value)
@@ -89,17 +79,12 @@ function contextCompleted(evocat: Evocat, graph: Graph) {
     evocat.graph = graph;
     emit('evocatCreated', { evocat, graph });
 }
-
-async function updatePositions() {
-    await evocat.value?.updateMetadata();
-}
 </script>
 
 <template>
     <GraphDisplay
         v-if="!!evocat || fetching"
         @graph-created="graphCreated"
-        @update-positions="updatePositions"
     />
     <ResourceNotFound v-else />
 </template>

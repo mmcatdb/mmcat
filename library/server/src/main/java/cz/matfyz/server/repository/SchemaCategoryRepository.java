@@ -127,19 +127,6 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public void updateMetadata(SchemaCategoryWrapper wrapper) {
-        db.run(connection -> {
-            final var statement = connection.prepareStatement("""
-                UPDATE schema_category
-                SET json_value = ?::jsonb
-                WHERE id = ?;
-                """);
-            statement.setString(1, wrapper.toJsonValue());
-            setId(statement, 2, wrapper.id());
-            executeChecked(statement);
-        });
-    }
-
     public List<SchemaUpdate> findAllUpdates(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""

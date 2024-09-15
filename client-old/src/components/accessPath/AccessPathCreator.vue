@@ -50,7 +50,7 @@ function confirmDatasourceAndRootNode() {
 
     selectingRootNode.value.unselect();
     selectingRootNode.value.becomeRoot();
-    const label = selectingRootNode.value.schemaObject.label.toLowerCase();
+    const label = selectingRootNode.value.metadata.label.toLowerCase();
     accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
 }
 

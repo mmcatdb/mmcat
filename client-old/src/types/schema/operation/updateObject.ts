@@ -1,6 +1,6 @@
 import type { SchemaCategory } from '../SchemaCategory';
 import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
-import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
+import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type UpdateObjectFromServer = SMOFromServer<SMOType.UpdateObject> & {
     newObject: SchemaObjectFromServer;
