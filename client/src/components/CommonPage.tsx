@@ -72,6 +72,11 @@ const navbarItems: NavbarItem[] = [
         label: 'Datasources',
         route: '/datasources',
     },
+
+    {
+        label: 'Adminer',
+        route: '/adminer',
+    },
 ];
 
 type ThemeToggleProps = Readonly<{

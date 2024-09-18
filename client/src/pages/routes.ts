@@ -33,4 +33,5 @@ export const routes = {
         // databases: projectIndex.child('/databases', 'databases'),
     },
     datasources: 'datasources',
+    adminer: 'adminer',
 } as const;

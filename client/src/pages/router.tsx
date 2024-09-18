@@ -6,6 +6,7 @@ import { routes } from '@/pages/routes';
 import { ErrorPage } from '@/pages/errorPages';
 import { ProjectIndex, projectIndexLoader } from '@/pages/ProjectIndex';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
+import { AdminerPage } from '@/pages/AdminerPage';
 
 export const router = createBrowserRouter([
     {
@@ -35,5 +36,9 @@ export const router = createBrowserRouter([
     {
         path: 'datasources',
         Component: DatasourcesPage,
+    },
+    {
+        path: 'adminer',
+        Component: AdminerPage,
     },
 ]);
