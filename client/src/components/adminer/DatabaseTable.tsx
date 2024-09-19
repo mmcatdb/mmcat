@@ -26,7 +26,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({ apiUrl }) => {
 
     return (
         <div>
-            <Table aria-label='Database'>
+            <Table aria-label='Table'>
                 <TableHeader>
                     {columns.map((column) => (
                         <TableColumn key={column}>{column}</TableColumn>
@@ -44,7 +44,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({ apiUrl }) => {
                             : <TableCell>{JSON.stringify(item, null, 2)}</TableCell>}
                     </TableRow>
                 ))}
-            </TableBody>
+                </TableBody>
             </Table>
         </div>
     );
