@@ -9,3 +9,6 @@ weight: 5
 - [Unified Interface for Accessing Multi-Model Data](mm-accessor.md)
 
 ### Master
+
+- [Propagation of changes to multi-model data](mm-evocat-impl.md)
+- [Querying over multi-model data](mm-evoque-impl.md)
