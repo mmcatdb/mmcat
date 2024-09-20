@@ -1,5 +1,5 @@
 import { useFetchData } from '@/components/adminer/useFetchData';
-import { renderList } from '@/components/adminer/renderList';
+import { ListComponent } from '@/components/adminer/ListComponent';
 import { Spinner } from '@nextui-org/react';
 
 type DatabaseListProps = {
@@ -24,7 +24,7 @@ export const DatabaseList: React.FC<DatabaseListProps> = ({ apiUrl }) => {
     return (
         <div>
             {data.length > 0 ? (
-                renderList(data)
+                <ListComponent value={data} />
             ) : (
                 <span>No rows to display.</span>
             )}
