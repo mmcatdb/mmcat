@@ -38,10 +38,16 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({ apiUrl }) => {
                         {typeof item === 'object' && !Array.isArray(item)
                             ? columns.map((column) => (
                                 <TableCell key={column}>
-                                    {JSON.stringify(item[column as keyof typeof item], null, 2)}
+                                    {typeof item[column as keyof typeof item] === 'string'
+                                        ? item[column as keyof typeof item] // Render string without quotes
+                                        : JSON.stringify(item[column as keyof typeof item], null, 2)}
                                 </TableCell>
                               ))
-                            : <TableCell>{JSON.stringify(item, null, 2)}</TableCell>}
+                            : <TableCell>
+                                {typeof item === 'string'
+                                    ? item // Render string without quotes
+                                    : JSON.stringify(item, null, 2)}
+                            </TableCell>}
                     </TableRow>
                 ))}
                 </TableBody>
