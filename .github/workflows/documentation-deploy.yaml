@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: hugo --cleanDestinationDir
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build
           path: ./documentation/public
@@ -32,18 +32,23 @@ jobs:
   deploy:
     needs: [build]
     runs-on: ubuntu-latest
-    container: byteflair/ssh-rsync
     environment: prod
     defaults:
       run:
         working-directory: ./documentation
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: build
           path: ./documentation/public
-      - run: sshpass -e rsync -e 'ssh -p 42222 -o StrictHostKeyChecking=no' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
-        env:
-          SSHPASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_HOST: ${{ vars.FTP_HOST }}
+
+      - uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -r --delete
+          path: ./documentation/public/.
+          remote_path: /var/www/html/mmcat-docs
+          remote_host: ${{ vars.FTP_HOST }}
+          remote_port: 42222
+          remote_user: ${{ secrets.FTP_USERNAME }}
+          remote_key: ${{ secrets.FTP_SSH_KEY }}
+
