@@ -1,6 +1,6 @@
 import { CommonPage } from '@/components/CommonPage';
 import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
-import AddDatasourceForm from '@/components/datasources/AddDatasourceForm';
+import AddDatasourceForm from '@/components/datasources/DatasourceForm';
 
 export function DatasourcesPage() {
     return (

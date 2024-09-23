@@ -4,7 +4,7 @@ import { usePreferences } from '@/components/PreferencesProvider';
 import { Link, portals } from '@/components/common';
 import { ThemeToggle } from '@/components/CommonPage';
 import clsx from 'clsx';
-import { routes } from './routes';
+import { routes } from '../routes/routes';
 import { CollapseContextToggle } from '@/components/project/context';
 import { api, type Resolved } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
@@ -113,12 +113,11 @@ function createMenuItems(projectId: string): MenuItem[] {
             id: routes.project.index.id,
             path: routes.project.index.resolve({ projectId }),
         },
-        // TODO: once not using global databases, use this
-        // {
-        //     label: 'Databases',
-        //     icon: 'databases',
-        //     id: routes.project.databases.id,
-        //     path: routes.project.databases.resolve({ projectId }),
-        // },
+        {
+            label: 'Databases',
+            icon: 'databases',
+            id: routes.project.databases.id,
+            path: routes.project.databases.resolve({ projectId }),
+        },
     ];
 }

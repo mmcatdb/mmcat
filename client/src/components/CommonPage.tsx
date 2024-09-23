@@ -3,8 +3,9 @@ import { Button, Navbar, NavbarContent, NavbarItem } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
 import { Link, Tooltip } from './common';
-import { routes } from '@/pages/routes';
+import { routes } from '@/routes/routes';
 import { useLocation } from 'react-router-dom';
+import Sidebar from './sidebar/Sidebar';
 
 type CommonPageProps = Readonly<{
     children: React.ReactNode;
@@ -15,6 +16,7 @@ export function CommonPage({ children }: CommonPageProps) {
 
     return (
         <div className={clsx('h-screen overflow-hidden text-foreground bg-background', theme)}>
+            <Sidebar />
             <div className='main-scroller'>
                 <CommonNavbar />
                 <main className='w-full max-w-[1024px] mx-auto p-6'>
@@ -72,7 +74,6 @@ const navbarItems: NavbarItem[] = [
         label: 'Datasources',
         route: '/datasources',
     },
-
     {
         label: 'Adminer',
         route: '/adminer',

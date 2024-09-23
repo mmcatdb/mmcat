@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CommonPage } from '@/components/CommonPage';
 import { Link } from '@/components/common';
-import { routes } from './routes';
+import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { Button } from '@nextui-org/react';

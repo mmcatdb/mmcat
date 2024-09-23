@@ -18,6 +18,24 @@ export default function App() {
             datasourceSettings,
             datasourceConfig,
         });
+
+        // Clear input fields
+        setDatasourceType('');
+        setDatasourceLabel('');
+        setDatasourceSettings('');
+        setDatasourceConfig('');
+
+        // Close the modal
+        onOpenChange();
+    };
+
+    const handleClose = () => {
+        // Clear input fields and close the modal
+        setDatasourceType('');
+        setDatasourceLabel('');
+        setDatasourceSettings('');
+        setDatasourceConfig('');
+        onOpenChange();
     };
 
     return (
@@ -26,7 +44,7 @@ export default function App() {
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} isKeyboardDismissDisabled={true}>
                 {/* TODO: Dark mode not working */}
                 <ModalContent>
-                    {(onClose) => (
+                    {() => (
                         <>
                             <ModalHeader className='flex flex-col gap-1'>Add Datasource</ModalHeader>
                             <ModalBody>
@@ -42,7 +60,6 @@ export default function App() {
 
                                 <Input
                                     label='Datasource Label'
-                                    placeholder='Enter datasource label'
                                     value={datasourceName}
                                     onChange={(e) => setDatasourceLabel(e.target.value)}
                                     fullWidth
@@ -51,7 +68,6 @@ export default function App() {
 
                                 <Input
                                     label='Settings'
-                                    placeholder='Enter datasource settings'
                                     value={datasourceSettings}
                                     onChange={(e) => setDatasourceSettings(e.target.value)}
                                     fullWidth
@@ -68,7 +84,7 @@ export default function App() {
                                 />
                             </ModalBody>
                             <ModalFooter>
-                                <Button color='danger' variant='light' onPress={onClose}>
+                                <Button color='danger' variant='light' onPress={handleClose}>
                                     Close
                                 </Button>
                                 <Button color='primary' onPress={handleSubmit}>
