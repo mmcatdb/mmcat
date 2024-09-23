@@ -2,9 +2,7 @@ import clsx from 'clsx';
 import { Button, Navbar, NavbarContent, NavbarItem } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
-import { Link, Tooltip } from './common';
-import { routes } from '@/routes/routes';
-import { useLocation } from 'react-router-dom';
+import { Tooltip } from './common';
 import Sidebar from './sidebar/Sidebar';
 
 type CommonPageProps = Readonly<{
@@ -16,35 +14,22 @@ export function CommonPage({ children }: CommonPageProps) {
 
     return (
         <div className={clsx('h-screen overflow-hidden text-foreground bg-background', theme)}>
-            <Sidebar />
-            <div className='main-scroller'>
-                <CommonNavbar />
-                <main className='w-full max-w-[1024px] mx-auto p-6'>
-                    {children}
-                </main>
+            <div className='flex h-full'>
+                <Sidebar />
+                <div className='flex flex-col flex-grow overflow-hidden'>
+                    <CommonNavbar />
+                    <main className='flex-grow overflow-auto w-full max-w-[1024px] mx-auto p-6'>
+                        {children}
+                    </main>
+                </div>
             </div>
         </div>
     );
 }
 
 function CommonNavbar() {
-    const location = useLocation();
-
     return (
         <Navbar>
-            <NavbarContent justify='center'>
-                {navbarItems.map(item => {
-                    const isActive = item.route === location.pathname;
-
-                    return (
-                        <NavbarItem key={item.route} isActive={isActive}>
-                            <Link to={item.route} isDisabled={isActive} color={isActive ? undefined : 'foreground'} className='data-[disabled=true]:opacity-100'>
-                                {item.label}
-                            </Link>
-                        </NavbarItem>
-                    );
-                })}
-            </NavbarContent>
             <NavbarContent justify='end'>
                 <NavbarItem>
                     <ThemeToggle className='min-w-8 w-8 h-8' />
@@ -58,27 +43,6 @@ type NavbarItem = {
     label: string;
     route: string;
 };
-
-const navbarItems: NavbarItem[] = [
-    {
-        label: 'Home',
-        route: routes.home.path,
-    },
-    {
-        label: 'About',
-        // TODO: figure out why it does not work via routes (adding strings to the path, not changing them)
-        // route: routes.about
-        route: '/about',
-    },
-    {
-        label: 'Datasources',
-        route: '/datasources',
-    },
-    {
-        label: 'Adminer',
-        route: '/adminer',
-    },
-];
 
 type ThemeToggleProps = Readonly<{
     className?: string;

@@ -1,24 +1,51 @@
-import { Link } from 'react-router-dom';
-import { Navbar } from '@nextui-org/react';
+import { Link, useLocation } from 'react-router-dom';
 
-const Sidebar: React.FC = () => {
+const sidebarItems = [
+    {
+        label: 'Home',
+        route: '/',
+    },
+    {
+        label: 'About',
+        route: '/about',
+    },
+    {
+        label: 'Datasources',
+        route: '/datasources',
+    },
+    {
+        label: 'Adminer',
+        route: '/adminer',
+    },
+];
+
+function Sidebar() {
+    const location = useLocation();
+
     return (
-        <div className='w-64 h-screen bg-gray-800 text-white p-6 flex flex-col'>
+        <div className='w-64 h-screen p-6 flex flex-col border-r border-grey-300'>
             <h1 className='text-2xl font-semibold mb-10'>New Sidebar</h1>
 
-            <Navbar className='flex flex-col space-y-6'>
-                <Link to='/' className='hover:text-gray-400 transition duration-200'>
-                    Home
-                </Link>
-                <Link to='/about' className='hover:text-gray-400 transition duration-200'>
-                    About
-                </Link>
-                <Link to='/data-sources' className='hover:text-gray-400 transition duration-200'>
-                    Data Sources
-                </Link>
-            </Navbar>
+            {/* Container for the list of sidebar links */}
+            <div className='flex flex-col'>
+                {sidebarItems.map((item) => {
+                    const isActive = item.route === location.pathname;
+
+                    return (
+                        <Link
+                            key={item.route}
+                            to={item.route}
+                            className={`block px-4 py-2 rounded hover:bg-gray-100 transition duration-200 ${
+                                isActive ? 'text-blue-600 font-semibold' : ''
+                            }`}
+                        >
+                            {item.label}
+                        </Link>
+                    );
+                })}
+            </div>
         </div>
     );
-};
+}
 
 export default Sidebar;
