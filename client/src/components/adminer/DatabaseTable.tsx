@@ -26,7 +26,7 @@ export const DatabaseTable: React.FC<DatabaseTableProps> = ({ apiUrl }) => {
 
     return (
         <div>
-            <Table aria-label='Table'>
+            <Table isStriped isCompact aria-label='Table'>
                 <TableHeader>
                     {columns.map((column) => (
                         <TableColumn key={column}>{column}</TableColumn>

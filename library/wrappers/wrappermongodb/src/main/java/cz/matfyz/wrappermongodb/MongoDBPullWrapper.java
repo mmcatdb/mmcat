@@ -272,24 +272,30 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    public JSONArray getTablesNames(String limit) throws MongoException{
-        MongoIterable<String> tableNames = provider.getDatabase().listCollectionNames();
-        JSONArray result = new JSONArray();
+    @Override public JSONArray getTableNames(String limit) {
+        try {
+            MongoIterable<String> tableNames = provider.getDatabase().listCollectionNames();
+            JSONArray result = new JSONArray();
 
-        int lim = Integer.parseInt(limit);
-        int count = 0;
-        for (String tableName : tableNames) {
-            result.put(tableName);
+            int lim = Integer.parseInt(limit);
+            int count = 0;
+            for (String tableName : tableNames) {
+                result.put(tableName);
 
-            count++;
-            if (count >= lim) {
-                break;
+                count++;
+                if (count >= lim) {
+                    break;
+                }
             }
+
+            return result;
         }
-        return result;  
+        catch (Exception e) {
+			throw QueryException.message("Error when executing a MongoDB query.");
+		}
     }
 
-    public JSONArray getTable(String tableName, String limit) throws MongoException{
+    @Override public JSONArray getTable(String tableName, String limit){
         try {
             JSONArray result = new JSONArray();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
@@ -321,12 +327,12 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     
             return result;
         }
-        catch (JSONException e){
-            throw QueryException.message("Error when getting data.");
+        catch (Exception e){
+            throw QueryException.message("Error when executing a MongoDB query.");
         }
     }
 
-    public JSONArray getRow(String tableName, String id, String limit) throws MongoException{
+    @Override public JSONArray getRow(String tableName, String id, String limit){
         try {
             JSONArray result = new JSONArray();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
@@ -359,8 +365,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     
             return result;
         }
-        catch (JSONException e){
-            throw QueryException.message("Error when getting data.");
+        catch (Exception e){
+            throw QueryException.message("Error when executing a MongoDB query.");
         }
     }
 

@@ -150,4 +150,17 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         // TODO
         throw new UnsupportedOperationException("DummyPullWrapper.executeQuery not implemented.");
     }
+
+    @Override public JSONArray getTableNames(String limit) {
+        throw new UnsupportedOperationException("DummyPullWrapper.getTableNames not implemented.");
+    }
+
+    @Override public JSONArray getTable(String tableName, String limit) {
+        throw new UnsupportedOperationException("DummyPullWrapper.gatTable not implemented.");
+    }
+
+    @Override public JSONArray getRow(String tableName, String id, String limit) {
+        throw new UnsupportedOperationException("DummyPullWrapper.getRow not implemented.");
+    }
+    
 }
