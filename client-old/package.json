@@ -10,6 +10,8 @@
     },
     "dependencies": {
         "@types/qs": "^6.9.7",
+        "@vuedoc/md": "^4.0.0-beta8",
+        "@vuedoc/parser": "^4.0.0-beta14",
         "axios": "^1.7.2",
         "bootstrap": "^5.3.3",
         "cytoscape": "^3.21.0",

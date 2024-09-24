@@ -9,6 +9,9 @@ const props = defineProps<{
     graph: Graph;
 }>();
 
+/**
+ * This is how I define emits here
+ */
 const emit = defineEmits<{
     (e: 'save'): void;
     (e: 'cancel'): void;

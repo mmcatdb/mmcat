@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import AccessPathCreator from '@/components/accessPath/AccessPathCreator.vue';
+import AccessPathCreator2 from '@/components/accessPath/AccessPathCreator2.vue';
 </script>
 
 <template>
     <h1>Create Mapping</h1>
-    <AccessPathCreator />
+    <AccessPathCreator2 />
 </template>

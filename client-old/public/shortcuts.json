@@ -1,0 +1,27 @@
+{
+    "createNewKind": {
+      "keyboard": "k", 
+      "description": "Press 'K' to create a new kind with the selected objects"
+    },
+    "deleteSingleObject": {
+        "keyboard": "delete",
+        "description": "Press 'Delete' to remove the selected object"
+    },
+    "deleteGroupOfObjects": {
+      "keyboard": "delete",
+      "description": "Press 'Delete' to remove the selected group of objects"
+    },
+    "insertBetween": {
+        "keyboard": "+",
+        "description": "Press '+' to insert object between two selected objects"
+    },
+    "insert": {
+        "keyboard": "+",
+        "description":"Press '+' to insert object as a child of the selected object"
+    },
+    "changeRoot": {
+        "keyboard": "r",
+        "description": "Press 'R' to change root to the selected one"
+    }
+  }
+  
