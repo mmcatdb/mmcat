@@ -26,6 +26,8 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.json.JSONArray;
+
 public class JsonPullWrapper implements AbstractPullWrapper {
 
     private final JsonProvider provider;
@@ -125,6 +127,18 @@ public class JsonPullWrapper implements AbstractPullWrapper {
     public QueryResult executeQuery(QueryStatement statement) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
+    }
+
+    @Override public JSONArray getTableNames(String limit) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getTableNames not implemented.");
+    }
+
+    @Override public JSONArray getTable(String tableName, String limit) {
+        throw new UnsupportedOperationException("JsonPullWrapper.gatTable not implemented.");
+    }
+
+    @Override public JSONArray getRow(String tableName, String id, String limit) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
     }
 
 }

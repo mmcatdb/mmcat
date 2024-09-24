@@ -141,11 +141,40 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    public JSONArray getQuery(String query) {
-        Connection connection = provider.getConnection();
+    @Override public JSONArray getTableNames(String limit) {
+        try(
+            Connection connection = provider.getConnection();
+            Statement stmt = connection.createStatement();
+        ){
+            final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' LIMIT " + limit + ";";
+            ResultSet resultSet = stmt.executeQuery(query);
+            JSONArray result = new JSONArray();
 
-        try(Statement stmt = connection.createStatement();){
+            while (resultSet.next()) {
+                String tableName = resultSet.getString(1);
+                result.put(tableName);
+            }
 
+            return result;
+        }
+        catch (Exception e) {
+			throw QueryException.message("Error when executing a PostgreSQL query.");
+		}
+    }
+
+    @Override public JSONArray getTable(String tableName, String limit) {
+        return getQuery("SELECT * FROM " + tableName + " LIMIT " + limit + ";");
+    }
+
+    @Override public JSONArray getRow(String tableName, String id, String limit) {
+        return getQuery("SELECT * FROM " + tableName +  " WHERE id = '" + id +"'" + " LIMIT " + limit + ";");
+    }
+
+    private JSONArray getQuery(String query) {
+        try(
+            Connection connection = provider.getConnection();
+            Statement stmt = connection.createStatement();
+        ){
             ResultSet resultSet = stmt.executeQuery(query);
             JSONArray result = new JSONArray();
 
@@ -168,7 +197,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             return result;
         }
         catch (Exception e) {
-			throw QueryException.message("Error when executing a query.");
+			throw QueryException.message("Error when executing a PostgreSQL query.");
 		}
     }
 }
