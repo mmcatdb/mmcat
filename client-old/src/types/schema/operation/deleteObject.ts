@@ -1,6 +1,6 @@
 import type { SchemaCategory } from '../SchemaCategory';
 import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
-import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
+import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type DeleteObjectFromServer = SMOFromServer<SMOType.DeleteObject> & {
     object: SchemaObjectFromServer;
@@ -10,7 +10,7 @@ export class DeleteObject implements SMO<SMOType.DeleteObject> {
     readonly type = SMOType.DeleteObject;
 
     private constructor(
-        private readonly object: SchemaObject,
+        readonly object: SchemaObject,
     ) {}
 
     static fromServer(input: DeleteObjectFromServer): DeleteObject {

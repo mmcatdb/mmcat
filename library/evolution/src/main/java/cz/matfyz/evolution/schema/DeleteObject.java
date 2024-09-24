@@ -5,7 +5,7 @@ import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
 
 public record DeleteObject(
     SerializedObject object
-) implements SchemaModificationOperation {
+) implements SMO {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
         return visitor.visit(this);

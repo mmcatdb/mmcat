@@ -1,6 +1,6 @@
 import type { SchemaCategory } from '../SchemaCategory';
 import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
-import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
+import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CreateObjectFromServer = SMOFromServer<SMOType.CreateObject> & {
     object: SchemaObjectFromServer;
@@ -10,7 +10,7 @@ export class CreateObject implements SMO<SMOType.CreateObject> {
     readonly type = SMOType.CreateObject;
 
     private constructor(
-        private readonly object: SchemaObject,
+        readonly object: SchemaObject,
     ) {}
 
     static fromServer(input: CreateObjectFromServer): CreateObject {

@@ -20,9 +20,11 @@ const columns = computed<Columns>(() => ({
 type Columns = { dom: Column[], cod: Column[] };
 
 function defineColumn(signature: Signature, node: Node): Column {
+    const neighbor = node.getNeighborNode(signature);
     return {
         signature,
-        schemaObject: node.getNeighborNode(signature)?.schemaObject,
+        schemaObject: neighbor?.schemaObject,
+        metadata: neighbor?.metadata,
         isClickable: !signature.equals(Signature.empty),
     };
 }

@@ -9,7 +9,7 @@ import { style, groupColors } from './defaultGraphStyle';
 cytoscape.use(fcose);
 cytoscape.use(layoutUtilities);
 
-const emit = defineEmits([ 'graphCreated', 'updatePositions' ]);
+const emit = defineEmits([ 'graphCreated' ]);
 
 const graph = shallowRef<Graph>();
 
@@ -82,13 +82,6 @@ function toggleGroup(groupId: string) {
         />
         <template v-if="graph">
             <div class="category-command-panel p-2 d-flex align-items-start gap-2">
-                <button
-                    :disabled="fetching"
-                    class="text-nowrap"
-                    @click="() => emit('updatePositions')"
-                >
-                    Save positions
-                </button>
                 <button
                     class="text-nowrap"
                     @click="graph?.center"

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = ObjectMetadata.class, name = "objectMetadata"),
     @JsonSubTypes.Type(value = MorphismMetadata.class, name = "morphismMetadata"),
 })
-public interface MetadataModificationOperation {
+public interface MMO {
 
     void up(MetadataCategory metadata) throws EvolutionException;
 

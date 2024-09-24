@@ -6,7 +6,7 @@ import GraphDisplay from '../../category/GraphDisplay.vue';
 import type { SchemaCategory } from '@/types/schema';
 import EditorForInferenceSchemaCategory from './EditorForInferenceSchemaCategory.vue';
 import LayoutSelector from './LayoutSelector.vue';
-import { LayoutType } from '@/types/inference/layoutType';
+import type { LayoutType } from '@/types/inference/layoutType';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
 import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates'; 
 
@@ -54,7 +54,8 @@ function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
 
     if (payload instanceof ReferenceCandidate) {
         edit = new ReferenceMergeInferenceEdit(payload, true);
-    } else {
+    }
+    else {
         const referenceKey = payload[0].schemaObject.key;
         const referredKey = payload[1].schemaObject.key;
 
@@ -68,7 +69,8 @@ function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
 
     if (payload instanceof PrimaryKeyCandidate) {
         edit = new PrimaryKeyMergeInferenceEdit(payload, true);
-    } else {
+    }
+    else {
         const primaryKey = payload[0].schemaObject.key;
         const primaryKeyIdentified = payload[1].schemaObject.key;
 
@@ -91,7 +93,7 @@ function createRecursionEdit(payload: { nodes: Node[], edges: Edge[] }) {
 
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
-        const nodeName = node.schemaObject.label;
+        const nodeName = node.metadata.label;
         let direction: '->' | '<-' | '' = '';
 
         if (i < edges.length) {

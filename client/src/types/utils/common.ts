@@ -26,3 +26,8 @@ export type SpecialType<T, S extends string> = T & { [secretType]: S };
  * An instance of T is NOT assignable to UniqueType<T>.
  */
 export type UniqueType<T, S extends string> = Omit<T, typeof secretType> & { [secretType]: S };
+
+export function isArrayEqual<TType>(a: TType[], b: TType[], isEqual?: (a: TType, b: TType) => boolean): boolean {
+    const comparator = isEqual ?? ((a, b) => a === b);
+    return a.length === b.length && a.every((value, index) => comparator(value, b[index]));
+}

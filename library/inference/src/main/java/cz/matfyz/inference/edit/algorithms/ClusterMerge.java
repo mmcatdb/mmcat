@@ -16,6 +16,7 @@ import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -487,7 +488,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             }
 
             if (complexChanged) {
-                List<AccessPath> updatedSubpaths = complexProperty != null ? complexProperty.subpaths() : new ArrayList<>();
+                List<AccessPath> updatedSubpaths = complexProperty != null ? new ArrayList<>(complexProperty.subpaths()) : new ArrayList<>();
                 ComplexProperty newComplexProperty = createNewComplexProperty((ComplexProperty) firstClusterAccessPath);
                 updatedSubpaths.add(newComplexProperty);
 
@@ -513,7 +514,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
      * @return The new complex property.
      */
     public ComplexProperty createNewComplexProperty(ComplexProperty original) {
-        List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
+        final List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
         Name name;
         Signature complexPropertySignature;
 
@@ -536,10 +537,10 @@ public class ClusterMerge extends InferenceEditAlgorithm {
      * @param originalSubpaths The original subpaths to transform.
      * @return A list of transformed subpaths.
      */
-    private List<AccessPath> transformSubpaths(List<AccessPath> originalSubpaths) {
+    private List<AccessPath> transformSubpaths(Collection<AccessPath> originalSubpaths) {
         return originalSubpaths.stream()
-                .map(this::transformSubpath)
-                .collect(Collectors.toList());
+            .map(this::transformSubpath)
+            .collect(Collectors.toList());
     }
 
     /**

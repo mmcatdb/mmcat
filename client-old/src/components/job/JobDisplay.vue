@@ -10,7 +10,7 @@ import TextArea from '../input/TextArea.vue';
 import InferenceJobDisplay from '@/components/category/inference/InferenceJobDisplay.vue';
 import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/inferenceEdit';
 import type { InferenceJobData } from '@/types/inference/InferenceJobData';
-import { LayoutType } from '@/types/inference/layoutType';
+import type { LayoutType } from '@/types/inference/layoutType';
 import { useSchemaCategoryInfo } from '@/utils/injects';
 
 type JobDisplayProps = {

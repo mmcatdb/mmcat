@@ -23,13 +23,12 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
         <EvocatDisplay
             @evocat-created="evocatCreated"
         />
-        <div
-            v-if="evocat"
-        >
+        <div v-if="evocat">
             <EditorForSchemaCategory />
         </div>
     </div>
     <div v-if="evocat">
-        <VersionsControl />
+        <!-- TODO display of previous versions -->
+        <!-- <VersionsControl /> -->
     </div>
 </template>

@@ -12,27 +12,25 @@ import { ObjectIds, idsAreEqual } from '@/types/identifiers/ObjectIds';
 
 const { evocat } = $(useEvocat());
 
-type EditObjectProps = {
+type UpdateObjectProps = {
     node: Node;
 };
 
-const props = defineProps<EditObjectProps>();
+const props = defineProps<UpdateObjectProps>();
 
 const emit = defineEmits([ 'save', 'cancel', 'update' ]);
 
-const label = shallowRef(props.node.schemaObject.label);
-const changed = computed(() => label.value !== props.node.schemaObject.label || !idsAreEqual(objectIds.value, props.node.schemaObject.ids) || addingId.value);
+const label = shallowRef(props.node.metadata.label);
+const changed = computed(() => label.value !== props.node.metadata.label || !idsAreEqual(objectIds.value, props.node.schemaObject.ids) || addingId.value);
 const isNew = computed(() => props.node.schemaObject.isNew);
 
 defineExpose({ changed });
 
 function save() {
-    const update = {
-        ...props.node.schemaObject.toDefinition(),
+    evocat.updateObject(props.node.schemaObject, {
         label: label.value.trim(),
-        ids: objectIds.value,
-    };
-    evocat.editObject(update, props.node.schemaObject);
+        ids: objectIds.value ?? null,
+    });
     emit('save');
 }
 
@@ -94,7 +92,7 @@ function deleteNonSignatureId() {
                 <ObjectIdsDisplay
                     v-if="objectIds"
                     :ids="objectIds"
-                    :disabled="!isNew || addingId"
+                    :disabled="addingId"
                     class="object-ids-display"
                     @delete-signature="deleteSignatureId"
                     @delete-non-signature="deleteNonSignatureId"

@@ -1,7 +1,10 @@
-import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
+import { smoFromServer } from '.';
+import type { SchemaCategory } from '../SchemaCategory';
+import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CompositeFromServer = SMOFromServer<SMOType.Composite> & {
     name: string;
+    children: SMOFromServer[];
 };
 
 export class Composite implements SMO<SMOType.Composite> {
@@ -9,17 +12,20 @@ export class Composite implements SMO<SMOType.Composite> {
 
     private constructor(
         readonly name: string,
+        readonly children: SMO[],
     ) {}
 
     static fromServer(input: CompositeFromServer): Composite {
         return new Composite(
             input.name,
+            input.children.map(smoFromServer),
         );
     }
 
-    static create(name: string): Composite {
+    static create(name: string, children: SMO[]): Composite {
         return new Composite(
             name,
+            children,
         );
     }
 
@@ -27,14 +33,15 @@ export class Composite implements SMO<SMOType.Composite> {
         return {
             type: SMOType.Composite,
             name: this.name,
+            children: this.children.map(smo => smo.toServer()),
         };
     }
 
-    up(): void {
-        /* This function is intentionally empty. */
+    up(category: SchemaCategory): void {
+        this.children.forEach(child => child.up(category));
     }
 
-    down(): void {
-        /* This function is intentionally empty. */
+    down(category: SchemaCategory): void {
+        [ ...this.children ].reverse().forEach(child => child.down(category));
     }
 }

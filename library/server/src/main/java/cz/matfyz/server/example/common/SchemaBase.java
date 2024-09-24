@@ -13,17 +13,16 @@ import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
-import cz.matfyz.evolution.metadata.MetadataModificationOperation;
+import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MorphismMetadata;
 import cz.matfyz.evolution.metadata.ObjectMetadata;
 import cz.matfyz.evolution.schema.Composite;
 import cz.matfyz.evolution.schema.CreateMorphism;
 import cz.matfyz.evolution.schema.CreateObject;
-import cz.matfyz.evolution.schema.EditMorphism;
-import cz.matfyz.evolution.schema.EditObject;
-import cz.matfyz.evolution.schema.SchemaModificationOperation;
+import cz.matfyz.evolution.schema.UpdateMorphism;
+import cz.matfyz.evolution.schema.UpdateObject;
+import cz.matfyz.evolution.schema.SMO;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.evolution.VersionedSMO;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 
 import java.util.ArrayList;
@@ -49,14 +48,11 @@ public abstract class SchemaBase {
     private final SchemaCategory newSchema;
     private final MetadataCategory newMetadata;
 
-    private final VersionCounter counter;
-
-    protected SchemaBase(SchemaCategoryWrapper wrapper, String lastUpdateVersion, SchemaCategory schema) {
+    protected SchemaBase(SchemaCategoryWrapper wrapper, SchemaCategory schema) {
         this.wrapper = wrapper;
         this.originalSchema = schema;
         this.newSchema = new SchemaCategory();
         this.newMetadata = MetadataCategory.createEmpty(newSchema);
-        this.counter = VersionCounter.fromString(lastUpdateVersion);
     }
 
     private SerializedObject getOldObject(Key key) {
@@ -72,17 +68,16 @@ public abstract class SchemaBase {
 
     protected abstract void createOperations();
 
-    private List<VersionedSMO> schemaOperations = new ArrayList<>();
+    private List<SMO> schemaOperations = new ArrayList<>();
 
-    private void addSchemaOperation(SchemaModificationOperation smo) {
-        final var operation = new VersionedSMO(counter.next(), smo);
-        schemaOperations.add(operation);
+    private void addSchemaOperation(SMO smo) {
+        schemaOperations.add(smo);
         smo.up(newSchema);
     }
 
-    private List<MetadataModificationOperation> metadataOperations = new ArrayList<>();
+    private List<MMO> metadataOperations = new ArrayList<>();
 
-    protected void addMetadataOperation(MetadataModificationOperation mmo) {
+    protected void addMetadataOperation(MMO mmo) {
         metadataOperations.add(mmo);
         mmo.up(newMetadata);
     }
@@ -113,7 +108,7 @@ public abstract class SchemaBase {
         final var newObject = new SerializedObject(key, object.ids(), object.superId());
         final var oldObject = getOldObject(key);
 
-        addSchemaOperation(new EditObject(newObject, oldObject));
+        addSchemaOperation(new UpdateObject(newObject, oldObject));
     }
 
     protected void editIds(BuilderObject builderObject, ObjectIds ids) {
@@ -121,7 +116,7 @@ public abstract class SchemaBase {
         final var newObject = new SerializedObject(key, ids, ids.generateDefaultSuperId());
         final var oldObject = getOldObject(key);
 
-        addSchemaOperation(new EditObject(newObject, oldObject));
+        addSchemaOperation(new UpdateObject(newObject, oldObject));
     }
 
     protected void addMorphism(BuilderMorphism builderMorphism) {
@@ -133,7 +128,7 @@ public abstract class SchemaBase {
         addMetadataOperation(new MorphismMetadata(mm, null));
     }
 
-    protected void editMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
+    protected void updateMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
         final var oldMorphism = SerializedMorphism.serialize(originalSchema.getMorphism(signature));
         final var newMorphism = new SerializedMorphism(
             oldMorphism.signature(),
@@ -143,11 +138,11 @@ public abstract class SchemaBase {
             oldMorphism.tags()
         );
 
-        addSchemaOperation(new EditMorphism(newMorphism, oldMorphism));
+        addSchemaOperation(new UpdateMorphism(newMorphism, oldMorphism));
     }
 
-    protected void editMorphism(BuilderMorphism morphism, @Nullable BuilderObject newDom, @Nullable BuilderObject newCod) {
-        editMorphism(morphism.signature(), newDom != null ? newDom.key() : null, newCod != null ? newCod.key() : null);
+    protected void updateMorphism(BuilderMorphism morphism, @Nullable BuilderObject newDom, @Nullable BuilderObject newCod) {
+        updateMorphism(morphism.signature(), newDom != null ? newDom.key() : null, newCod != null ? newCod.key() : null);
     }
 
     protected void moveObject(BuilderObject object, double x, double y) {
@@ -160,10 +155,12 @@ public abstract class SchemaBase {
     }
 
     protected void addComposite(String name, Runnable content) {
-        counter.nextLevel();
+        final var innerContext = new ArrayList<SMO>();
+        final var currentContext = schemaOperations;
+        schemaOperations = innerContext;
         content.run();
-        counter.prevLevel();
-        addSchemaOperation(new Composite(name));
+        schemaOperations = currentContext;
+        addSchemaOperation(new Composite(name, innerContext));
     }
 
     protected static final String ADD_PROPERTY = "addProperty";

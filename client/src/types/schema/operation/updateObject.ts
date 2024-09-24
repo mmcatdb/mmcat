@@ -1,40 +1,40 @@
 import type { SchemaCategory } from '../SchemaCategory';
 import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
-import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
+import { type SMO, type SMOFromServer, SMOType } from './smo';
 
-export type EditObjectFromServer = SMOFromServer<SMOType.EditObject> & {
+export type UpdateObjectFromServer = SMOFromServer<SMOType.UpdateObject> & {
     newObject: SchemaObjectFromServer;
     oldObject: SchemaObjectFromServer;
 };
 
-export class EditObject implements SMO<SMOType.EditObject> {
-    readonly type = SMOType.EditObject;
+export class UpdateObject implements SMO<SMOType.UpdateObject> {
+    readonly type = SMOType.UpdateObject;
 
     private constructor(
         readonly newObject: SchemaObject,
         readonly oldObject: SchemaObject,
     ) {}
 
-    static fromServer(input: EditObjectFromServer): EditObject {
-        return new EditObject(
+    static fromServer(input: UpdateObjectFromServer): UpdateObject {
+        return new UpdateObject(
             SchemaObject.fromServer(input.newObject),
             SchemaObject.fromServer(input.oldObject),
         );
     }
 
-    static create(newObject: SchemaObject, oldObject: SchemaObject): EditObject {
+    static create(newObject: SchemaObject, oldObject: SchemaObject): UpdateObject {
         if (!newObject.key.equals(oldObject.key))
             throw new Error('Cannot edit object\'s key.');
 
-        return new EditObject(
+        return new UpdateObject(
             newObject,
             oldObject,
         );
     }
 
-    toServer(): EditObjectFromServer {
+    toServer(): UpdateObjectFromServer {
         return {
-            type: SMOType.EditObject,
+            type: SMOType.UpdateObject,
             newObject: this.newObject.toServer(),
             oldObject: this.oldObject.toServer(),
         };

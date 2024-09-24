@@ -1,8 +1,7 @@
 import type { Position } from 'cytoscape';
-import { Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer } from '../identifiers';
-import { ComparablePosition } from './Position';
+import { idsAreEqual, Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer } from '../identifiers';
 import { SchemaCategoryInvalidError } from './Error';
-import type { Graph } from '../categoryGraph';
+import { isPositionEqual, type Graph } from '../categoryGraph';
 
 export type SchemaObjectFromServer = {
     key: KeyFromServer;
@@ -16,23 +15,17 @@ export type MetadataObjectFromServer = {
     position: Position;
 };
 
-// TODO
-const TEMP_METADATA_OBJECT: MetadataObjectFromServer = { key: 0, label: '', position: { x: 0, y: 0 } };
-
 export class SchemaObject {
     private constructor(
         readonly key: Key,
-        readonly label: string,
         readonly ids: ObjectIds | undefined,
         readonly superId: SignatureId,
         private _isNew: boolean,
     ) {}
 
-    static fromServer(schema: SchemaObjectFromServer, metadata: MetadataObjectFromServer = TEMP_METADATA_OBJECT): SchemaObject {
+    static fromServer(schema: SchemaObjectFromServer): SchemaObject {
         const object = new SchemaObject(
             Key.fromServer(schema.key),
-            // schema.label,
-            metadata.label,
             schema.ids ? ObjectIds.fromServer(schema.ids) : undefined,
             SignatureId.fromServer(schema.superId),
             false,
@@ -41,10 +34,9 @@ export class SchemaObject {
         return object;
     }
 
-    static createNew(key: Key, def: ObjectDefinition): SchemaObject {
+    static createNew(key: Key, def: Omit<ObjectDefinition, 'label'>): SchemaObject {
         const object = new SchemaObject(
             key,
-            def.label,
             def.ids,
             def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             true,
@@ -53,15 +45,15 @@ export class SchemaObject {
         return object;
     }
 
-    toDefinition(): ObjectDefinition {
-        return {
-            label: this.label,
-            ids: this.ids,
-        };
-    }
+    /** If there is nothing to update, undefined will be returned. */
+    update({ ids }: { ids?: ObjectIds | null }): SchemaObject | undefined {
+        if (ids === null && this.ids)
+            return SchemaObject.createNew(this.key, {});
 
-    createCopy(def: ObjectDefinition): SchemaObject {
-        return SchemaObject.createNew(this.key, def);
+        if (ids && !idsAreEqual(ids, this.ids))
+            return SchemaObject.createNew(this.key, { ids });
+
+        return undefined;
     }
 
     get isNew(): boolean {
@@ -93,21 +85,61 @@ export type ObjectDefinition = {
     ids?: ObjectIds;
 };
 
+export class MetadataObject {
+    private constructor(
+        readonly label: string,
+        readonly position: Position,
+    ) {}
+
+    static fromServer(input: MetadataObjectFromServer): MetadataObject {
+        return new MetadataObject(
+            input.label,
+            input.position,
+        );
+    }
+
+    static createDefault(): MetadataObject {
+        return new MetadataObject(
+            '',
+            { x: 0, y: 0 },
+        );
+    }
+
+    static create(label: string, position: Position): MetadataObject {
+        return new MetadataObject(
+            label,
+            position,
+        );
+    }
+
+    toServer(key: Key): MetadataObjectFromServer {
+        return {
+            key: key.toServer(),
+            label: this.label,
+            position: this.position,
+        };
+    }
+}
+
 // TODO rename for consistency
 
 export class VersionedSchemaObject {
+    public readonly originalMetadata: MetadataObject;
+
     private constructor(
         readonly key: Key,
-        private _position: ComparablePosition,
+        private _metadata: MetadataObject,
         private _graph?: Graph,
-    ) {}
+    ) {
+        this.originalMetadata = _metadata;
+    }
 
     static fromServer(input: SchemaObjectFromServer, metadata: MetadataObjectFromServer): VersionedSchemaObject {
         const output = new VersionedSchemaObject(
             Key.fromServer(input.key),
-            ComparablePosition.fromPosition(metadata.position),
+            MetadataObject.fromServer(metadata),
         );
-        output.current = SchemaObject.fromServer(input, metadata);
+        output.current = SchemaObject.fromServer(input);
 
         return output;
     }
@@ -115,7 +147,7 @@ export class VersionedSchemaObject {
     static create(key: Key, graph: Graph | undefined): VersionedSchemaObject {
         return new VersionedSchemaObject(
             key,
-            ComparablePosition.createDefault(),
+            MetadataObject.createDefault(),
             graph,
         );
     }
@@ -140,10 +172,18 @@ export class VersionedSchemaObject {
             this.updateGraph(this._graph);
     }
 
-    get position(): ComparablePosition {
-        const currentPosition = this._graph?.getNode(this.key)?.cytoscapeIdAndPosition.position;
-        // The fallback option this._position represents the original position the object has if it isn't in any graph.
-        return currentPosition ? ComparablePosition.fromPosition(currentPosition) : this._position;
+    get metadata(): MetadataObject {
+        return this._metadata;
+    }
+
+    // TODO position and label sync with cytoscape ...
+
+    set metadata(value: MetadataObject) {
+        const isUpdateNeeded = this._metadata.label !== value.label || !isPositionEqual(this._metadata.position, value.position);
+        this._metadata = value;
+
+        if (isUpdateNeeded && this._current)
+            this._graph?.getNode(this.key)?.update(this._current);
     }
 
     private updateGraph(graph: Graph) {
@@ -151,7 +191,7 @@ export class VersionedSchemaObject {
         const currentNode = graph.getNode(this.key);
         if (!currentNode) {
             if (this._current)
-                graph.createNode(this._current, this._position, [ ...this.groupIds.values() ]);
+                graph.createNode(this, this._current, this.metadata.position, [ ...this.groupIds.values() ]);
 
             return;
         }
@@ -162,7 +202,7 @@ export class VersionedSchemaObject {
             currentNode.update(this._current);
     }
 
-    private readonly groupIds: Set<string> = new Set();
+    private readonly groupIds = new Set<string>();
 
     addGroup(id: string) {
         this.groupIds.add(id);

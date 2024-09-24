@@ -1,5 +1,5 @@
-import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from 'cytoscape';
-import type { ComparablePosition, GroupData, SchemaMorphism, SchemaObject } from '../schema';
+import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular, Position } from 'cytoscape';
+import type { GroupData, SchemaMorphism, SchemaObject, VersionedSchemaMorphism, VersionedSchemaObject } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
@@ -44,10 +44,10 @@ export class Graph {
         this.nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
-    createNode(object: SchemaObject, position: ComparablePosition, groupIds: string[]): Node {
+    createNode(object: VersionedSchemaObject, schemaObject: SchemaObject, position: Position, groupIds: string[]): Node {
         const nodeGroups = groupIds.map(groupId => this.highlights.getOrCreateGroup(groupId));
-        const node = Node.create(this.cytoscape, object, position, nodeGroups);
-        this.nodes.set(object.key, node);
+        const node = Node.create(this.cytoscape, object, schemaObject, position, nodeGroups);
+        this.nodes.set(schemaObject.key, node);
 
         return node;
     }
@@ -64,12 +64,12 @@ export class Graph {
         // TODO might not be true anymore.
     }
 
-    createEdge(morphism: SchemaMorphism): Edge {
-        const dom = this.nodes.get(morphism.domKey) as Node;
-        const cod = this.nodes.get(morphism.codKey) as Node;
+    createEdge(morphism: VersionedSchemaMorphism, schemaMorphism: SchemaMorphism): Edge {
+        const dom = this.nodes.get(schemaMorphism.domKey) as Node;
+        const cod = this.nodes.get(schemaMorphism.codKey) as Node;
 
-        const edge = Edge.create(this.cytoscape, morphism, dom, cod);
-        this.edges.set(morphism.signature, edge);
+        const edge = Edge.create(this.cytoscape, morphism, schemaMorphism, dom, cod);
+        this.edges.set(schemaMorphism.signature, edge);
 
         return edge;
     }
@@ -151,7 +151,7 @@ export class Graph {
 
     public toggleEdgeLabels(show: boolean): void {
         const labelStyle = show ? { 'text-opacity': 1 } : { 'text-opacity': 0 };
-    
+
         this.cytoscape.edges().forEach(edge => {
             const currentLabel = edge.data('label');
             edge.style({
@@ -179,7 +179,7 @@ class GraphEventListener {
         return session;
     }
 
-    onSessionClose(sessionId: number) {
+    closeSession(sessionId: number) {
         this.openSessions.delete(sessionId);
     }
 
@@ -197,7 +197,7 @@ type EventHandlerObject = {
     handler: EventHandler;
 };
 
-class ListenerSession {
+export class ListenerSession {
     private lastHandlerId = -1;
 
     constructor(
@@ -210,7 +210,7 @@ class ListenerSession {
 
     close() {
         [ ...this.eventHandlers.keys() ].forEach(handler => this.removeEventHandler(handler));
-        this.eventListener.onSessionClose(this.id);
+        this.eventListener.closeSession(this.id);
     }
 
     private createEventHandler(event: string, handler: EventHandler, selector?: string): number {

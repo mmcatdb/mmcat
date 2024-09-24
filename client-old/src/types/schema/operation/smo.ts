@@ -3,10 +3,10 @@ import type { SchemaCategory } from '../SchemaCategory';
 export enum SMOType {
     CreateObject = 'createObject',
     DeleteObject = 'deleteObject',
-    EditObject = 'editObject',
+    UpdateObject = 'updateObject',
     CreateMorphism = 'createMorphism',
     DeleteMorphism = 'deleteMorphism',
-    EditMorphism = 'editMorphism',
+    UpdateMorphism = 'updateMorphism',
     Composite = 'composite',
 }
 

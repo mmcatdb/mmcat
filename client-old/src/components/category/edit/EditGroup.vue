@@ -22,7 +22,7 @@ function cancel() {
                 :key="node.schemaObject.key.value"
                 label="-"
             >
-                {{ node.schemaObject.label }}
+                {{ node.metadata.label }}
             </ValueRow>
         </ValueContainer>
         <div class="button-row">

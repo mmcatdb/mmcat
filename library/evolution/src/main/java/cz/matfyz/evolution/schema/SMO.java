@@ -10,13 +10,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = CreateObject.class, name = "createObject"),
     @JsonSubTypes.Type(value = DeleteObject.class, name = "deleteObject"),
-    @JsonSubTypes.Type(value = EditObject.class, name = "editObject"),
+    @JsonSubTypes.Type(value = UpdateObject.class, name = "updateObject"),
     @JsonSubTypes.Type(value = CreateMorphism.class, name = "createMorphism"),
     @JsonSubTypes.Type(value = DeleteMorphism.class, name = "deleteMorphism"),
-    @JsonSubTypes.Type(value = EditMorphism.class, name = "editMorphism"),
+    @JsonSubTypes.Type(value = UpdateMorphism.class, name = "updateMorphism"),
     @JsonSubTypes.Type(value = Composite.class, name = "composite"),
 })
-public interface SchemaModificationOperation {
+public interface SMO {
 
     void up(SchemaCategory schema) throws EvolutionException;
 

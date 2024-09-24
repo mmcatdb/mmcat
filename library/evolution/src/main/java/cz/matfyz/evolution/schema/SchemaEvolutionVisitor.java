@@ -7,7 +7,7 @@ public interface SchemaEvolutionVisitor<T> {
     T visit(CreateObject operation);
     T visit(DeleteMorphism operation);
     T visit(DeleteObject operation);
-    T visit(EditMorphism operation);
-    T visit(EditObject operation);
+    T visit(UpdateMorphism operation);
+    T visit(UpdateObject operation);
 
 }

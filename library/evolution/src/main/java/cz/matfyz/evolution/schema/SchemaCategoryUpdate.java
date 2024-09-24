@@ -14,9 +14,9 @@ public class SchemaCategoryUpdate {
         return prevVersion;
     }
 
-    public final List<SchemaModificationOperation> operations;
+    public final List<SMO> operations;
 
-    public SchemaCategoryUpdate(Version prevVersion, List<SchemaModificationOperation> operations) {
+    public SchemaCategoryUpdate(Version prevVersion, List<SMO> operations) {
         this.prevVersion = prevVersion;
         this.operations = operations;
     }

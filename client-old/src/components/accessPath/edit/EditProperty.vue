@@ -38,7 +38,7 @@ const typeIsDetermined = ref(false);
 const typeChanged = computed(() => type.value !== propertyToType(props.property));
 const nameChanged = computed(() => !props.property.name.equals(name.value));
 const signatureChanged = computed(() => !props.property.signature.equals(signature.value) || ('isAuxiliary' in props.property && props.property.isAuxiliary !== isAuxiliary.value));
-const schemaObject = computed(() => signature.value.sequence.lastNode.schemaObject);
+const lastNode = computed(() => signature.value.sequence.lastNode);
 
 function propertyToType(property: GraphChildProperty): PropertyType {
     return property instanceof GraphSimpleProperty ? PropertyType.Simple : PropertyType.Complex;
@@ -59,7 +59,7 @@ function cancel() {
     emit('cancel');
 }
 
-const isSelfIdentifier = computed(() => signature.value.isEmpty && !signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
+const isSelfIdentifier = computed(() => signature.value.isEmpty && !lastNode.value.schemaObject.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
@@ -68,7 +68,7 @@ const isSignatureValid = computed(() => {
     if (signature.value.isEmpty)
         return false;
 
-    if (!props.datasource.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
+    if (!props.datasource.configuration.isComplexPropertyAllowed && lastNode.value.determinedPropertyType === PropertyType.Complex)
         return false;
 
     return true;
@@ -77,7 +77,7 @@ const isSignatureValid = computed(() => {
 const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value || name.value.isAnonymous);
 
 function confirmSignature() {
-    const node = signature.value.sequence.lastNode;
+    const node = lastNode.value;
     const newType = determinePropertyType(node);
 
     if (newType !== null) {
@@ -145,12 +145,12 @@ function isAuxiliaryClicked() {
         <h2>Edit property</h2>
         <ValueContainer>
             <ValueRow label="Object:">
-                {{ schemaObject.label }}
+                {{ lastNode.metadata.label }}
             </ValueRow>
             <ValueRow label="Ids:">
                 <ObjectIdsDisplay
-                    v-if="schemaObject.ids"
-                    :ids="schemaObject.ids"
+                    v-if="lastNode.schemaObject.ids"
+                    :ids="lastNode.schemaObject.ids"
                     disabled
                     class="object-ids-display"
                 />

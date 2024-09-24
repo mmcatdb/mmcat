@@ -9,26 +9,26 @@ import { useEvocat } from '@/utils/injects';
 
 const { evocat, graph } = $(useEvocat());
 
-type EditMorphismProps = {
+type UpdateMorphismProps = {
     edge: Edge;
 };
 
-const props = defineProps<EditMorphismProps>();
+const props = defineProps<UpdateMorphismProps>();
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
 const nodes = shallowRef<(Node | undefined)[]>([ props.edge.domainNode, props.edge.codomainNode ]);
 const temporayEdge = ref<TemporaryEdge>();
 
-const label = ref(props.edge.schemaMorphism.label);
+const label = ref(props.edge.metadata.label);
 const min = ref(props.edge.schemaMorphism.min);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
 const changed = computed(() =>
     !props.edge.domainNode.equals(nodes.value[0])
-            || !props.edge.codomainNode.equals(nodes.value[1])
-            || props.edge.schemaMorphism.label !== label.value.trim()
-            || props.edge.schemaMorphism.min !== min.value,
+        || !props.edge.codomainNode.equals(nodes.value[1])
+        || props.edge.metadata.label !== label.value.trim()
+        || props.edge.schemaMorphism.min !== min.value,
 );
 const isNew = computed(() => props.edge.schemaMorphism.isNew);
 
@@ -68,7 +68,7 @@ function save() {
         label: label.value.trim(),
         tags: old.tags,
     };
-    evocat.editMorphism(update, old);
+    evocat.updateMorphism(old, update);
 
     temporayEdge.value?.delete();
 
@@ -96,10 +96,10 @@ function switchNodes() {
         <h2>Edit Schema Morphism</h2>
         <ValueContainer>
             <ValueRow label="Domain obje">
-                {{ nodes[0]?.schemaObject.label }}
+                {{ nodes[0]?.metadata.label }}
             </ValueRow>
             <ValueRow label="Codomain ob">
-                {{ nodes[1]?.schemaObject.label }}
+                {{ nodes[1]?.metadata.label }}
             </ValueRow>
             <ValueRow label="Label?:">
                 <input v-model="label" />

@@ -83,10 +83,10 @@ function splitName(name: string) {
         </div>
         <ValueContainer v-if="inputType === 'manual'">
             <ValueRow label="Primary Key object:"> 
-                {{ nodes[0]?.schemaObject.label }}
+                {{ nodes[0]?.metadata.label }}
             </ValueRow>
             <ValueRow label="Primary Key identified object:"> 
-                {{ nodes[1]?.schemaObject.label }}
+                {{ nodes[1]?.metadata.label }}
             </ValueRow>
             <NodeInput
                 v-model="nodes"

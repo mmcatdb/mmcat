@@ -3,7 +3,7 @@ package cz.matfyz.server.service;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.Version;
-import cz.matfyz.evolution.metadata.MetadataModificationOperation;
+import cz.matfyz.evolution.exception.VersionException;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
@@ -16,7 +16,6 @@ import cz.matfyz.server.repository.SchemaCategoryRepository;
 
 import java.util.List;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,12 +55,12 @@ public class SchemaCategoryService {
         return repository.find(id);
     }
 
-    public @Nullable SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
+    public SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);
         final var update = SchemaUpdate.fromInit(updateInit, id, wrapper.systemVersion);
 
         if (!update.prevVersion.equals(wrapper.version))
-            return null;
+            throw VersionException.mismatch(update.prevVersion, wrapper.version);
 
         final SchemaCategoryUpdate evolutionUpdate = update.toEvolution();
         final SchemaCategory schema = wrapper.toSchemaCategory();
@@ -85,19 +84,6 @@ public class SchemaCategoryService {
         );
 
         return newWrapper;
-    }
-
-    public void updateMetadata(Id id, List<MetadataModificationOperation> metadataUpdates) {
-        final var wrapper = repository.find(id);
-
-        final var schema = wrapper.toSchemaCategory();
-        final var metadata = wrapper.toMetadataCategory(schema);
-
-        metadataUpdates.forEach(update -> update.up(metadata));
-
-        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(wrapper.id(), wrapper.label, wrapper.version, wrapper.systemVersion, schema, metadata);
-
-        repository.updateMetadata(newWrapper);
     }
 
     public List<SchemaUpdate> findAllUpdates(Id id) {

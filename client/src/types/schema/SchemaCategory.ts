@@ -3,7 +3,7 @@ import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import type { Entity, Id, VersionId } from '../id';
 import { DynamicName, Key, type KeyFromServer, Signature, type SignatureFromServer } from '../identifiers';
 import type { LogicalModel } from '../logicalModel';
-import { type MetadataMorphismFromServer, SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
+import { type MetadataMorphismFromServer, type SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
 import { type MetadataObjectFromServer, type SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
 import { ComparableMap } from '@/types/utils/ComparableMap';
@@ -37,7 +37,7 @@ export class SchemaCategory implements Entity {
         readonly label: string,
         readonly versionId: VersionId,
         objects: VersionedSchemaObject[],
-        morphisms: SchemaMorphism[],
+        morphisms: VersionedSchemaMorphism[],
         logicalModels: LogicalModel[],
     ) {
         objects.forEach(object => {
@@ -49,8 +49,11 @@ export class SchemaCategory implements Entity {
         });
 
         morphisms.forEach(morphism => {
-            const versionedMorphism = this.getMorphism(morphism.signature);
-            versionedMorphism.current = morphism;
+            if (!morphism.current)
+                return;
+
+            this.morphisms.set(morphism.signature, morphism);
+            this.signatureProvider.add(morphism.signature);
         });
 
         this.groups = createGroups(logicalModels, objects, morphisms);
@@ -73,7 +76,7 @@ export class SchemaCategory implements Entity {
         const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
             input.metadata.morphisms.map(m => [ m.signature, m ]),
         );
-        const morphisms = input.schema.morphisms.map(m => SchemaMorphism.fromServer(m, morphismMetadata.get(m.signature)));
+        const morphisms = input.schema.morphisms.map(m => VersionedSchemaMorphism.fromServer(m, morphismMetadata.get(m.signature)!));
 
         return new SchemaCategory(
             input.id,
@@ -205,7 +208,7 @@ type Context = {
     morphisms: ComparableMap<Signature, string, SchemaMorphism>;
 };
 
-function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObject[], morphisms: SchemaMorphism[]): GroupData[] {
+function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObject[], morphisms: VersionedSchemaMorphism[]): GroupData[] {
     const context: Context = {
         objects: new ComparableMap(key => key.value),
         morphisms: new ComparableMap(signature => signature.value),
@@ -216,7 +219,10 @@ function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObj
         .filter((o): o is SchemaObject => !!o)
         .forEach(object => context.objects.set(object.key, object));
 
-    morphisms.forEach(morphism => context.morphisms.set(morphism.signature, morphism));
+    morphisms
+        .map(morphism => morphism.current)
+        .filter((m): m is SchemaMorphism => !!m)
+        .forEach(morphism => context.morphisms.set(morphism.signature, morphism));
 
     const typeIndices = new Map<DatasourceType, number>();
 

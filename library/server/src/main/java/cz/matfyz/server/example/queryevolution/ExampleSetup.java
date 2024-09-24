@@ -6,7 +6,6 @@ import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.service.LogicalModelService;
@@ -58,17 +57,15 @@ public class ExampleSetup {
         final SchemaCategoryInit schemaInit = new SchemaCategoryInit(Schema.schemaLabel);
         final SchemaCategoryWrapper schemaWrapper = schemaService.create(schemaInit);
 
-        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(schemaWrapper, "0", 1);
+        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(schemaWrapper, 1);
 
         return schemaService.update(schemaWrapper.id(), schemaUpdate);
     }
 
     private SchemaCategoryWrapper updateSchemaCategory(SchemaCategoryWrapper wrapper) {
         final var updates = schemaService.findAllUpdates(wrapper.id());
-        final var operations = updates.get(updates.size() - 1).operations;
-        final String lastUpdateVersion = operations.get(operations.size() - 1).version();
 
-        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(wrapper, lastUpdateVersion, 2);
+        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(wrapper, 2);
         return schemaService.update(wrapper.id(), schemaUpdate);
     }
 

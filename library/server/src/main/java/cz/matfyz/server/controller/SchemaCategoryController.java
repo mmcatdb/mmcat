@@ -1,6 +1,5 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.evolution.metadata.MetadataModificationOperation;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
@@ -16,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -65,12 +63,7 @@ public class SchemaCategoryController {
 
     @PostMapping("/schema-categories/{id}/updates")
     public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaUpdateInit update) {
-        SchemaCategoryWrapper updatedWrapper = service.update(id, update);
-
-        if (updatedWrapper == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-
-        return updatedWrapper;
+        return service.update(id, update);
     }
 
     @GetMapping("/schema-categories/{id}/updates")
@@ -81,11 +74,6 @@ public class SchemaCategoryController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
         return updates;
-    }
-
-    @PutMapping("/schema-categories/{id}/metadata")
-    public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataModificationOperation> metadataUpdates) {
-        service.updateMetadata(id, metadataUpdates);
     }
 
 }

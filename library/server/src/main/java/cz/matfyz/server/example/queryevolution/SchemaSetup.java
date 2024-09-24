@@ -10,13 +10,13 @@ class SchemaSetup extends SchemaBase {
 
     private final int version;
 
-    private SchemaSetup(SchemaCategoryWrapper wrapper, String lastUpdateVersion, int version) {
-        super(wrapper, lastUpdateVersion, Schema.newSchema(version));
+    private SchemaSetup(SchemaCategoryWrapper wrapper, int version) {
+        super(wrapper, Schema.newSchema(version));
         this.version = version;
     }
 
-    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, String lastUpdateVersion, int version) {
-        return new SchemaSetup(wrapper, lastUpdateVersion, version).innerCreateNewUpdate();
+    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, int version) {
+        return new SchemaSetup(wrapper, version).innerCreateNewUpdate();
     }
 
     @Override protected void createOperations() {
@@ -110,10 +110,10 @@ class SchemaSetup extends SchemaBase {
             editIds(Schema.order, new ObjectIds(Schema.orderToOrderId.signature()));
             addObject(Schema.item, 0, 0);
             addMorphism(Schema.itemToOrder);
-            editMorphism(Schema.orderToProduct, Schema.item, null);
+            updateMorphism(Schema.orderToProduct, Schema.item, null);
             addIds(Schema.item);
-            editMorphism(Schema.orderToOrderPrice, Schema.item, null);
-            editMorphism(Schema.orderToQuantity, Schema.item, null);
+            updateMorphism(Schema.orderToOrderPrice, Schema.item, null);
+            updateMorphism(Schema.orderToQuantity, Schema.item, null);
         });
 
         moveObject(Schema.order, 0, -1);
@@ -125,7 +125,7 @@ class SchemaSetup extends SchemaBase {
         addComposite("group", () -> {
             addObject(Schema.ordered, -2, -1);
             addMorphism(Schema.orderedToOrder);
-            editMorphism(Schema.orderToCustomer, Schema.ordered, null);
+            updateMorphism(Schema.orderToCustomer, Schema.ordered, null);
             addIds(Schema.ordered);
         });
     }

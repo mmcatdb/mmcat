@@ -3,10 +3,10 @@ package cz.matfyz.evolution.schema;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
 
-public record EditMorphism(
+public record UpdateMorphism(
     SerializedMorphism newMorphism,
     SerializedMorphism oldMorphism
-) implements SchemaModificationOperation {
+) implements SMO {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
         return visitor.visit(this);

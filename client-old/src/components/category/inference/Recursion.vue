@@ -30,7 +30,7 @@ const isNodeTurn = computed(() => nodes.value.length === edges.value.length);
 const selectedNodeLabels = computed(() => {
     const labels: string[] = [];
     for (let i = 0; i < nodes.value.length; i++) {
-        labels.push(nodes.value[i].schemaObject.label);
+        labels.push(nodes.value[i].metadata.label);
         if (i < edges.value.length) {
             const edge = edges.value[i];
             const direction = edge.domainNode.equals(nodes.value[i]) ? '->' : '<-';
