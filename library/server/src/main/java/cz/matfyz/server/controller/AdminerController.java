@@ -5,8 +5,8 @@ import cz.matfyz.server.service.DatasourceService;
 import cz.matfyz.server.service.WrapperService;
 
 import org.json.JSONArray;
-import org.springframework.http.ResponseEntity;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -72,4 +72,5 @@ public class AdminerController {
 
         return getJsonResponse(json);
     }
+    
 }
