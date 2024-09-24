@@ -29,7 +29,7 @@ export function CommonPage({ children }: CommonPageProps) {
 
 function CommonNavbar() {
     return (
-        <Navbar>
+        <Navbar className='z-20'>
             <NavbarContent justify='end'>
                 <NavbarItem>
                     <ThemeToggle className='min-w-8 w-8 h-8' />
