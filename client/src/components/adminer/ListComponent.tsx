@@ -3,9 +3,10 @@ import { Button } from '@nextui-org/react';
 
 type ListComponentProps = Readonly<{
     value: unknown;
+    depth: number;
 }>;
 
-export function ListComponent({ value }: ListComponentProps) {
+export function ListComponent({ value, depth }: ListComponentProps) {
     const [ isOpen, setIsOpen ] = useState(true);
 
     if (!isOpen) {
@@ -19,13 +20,13 @@ export function ListComponent({ value }: ListComponentProps) {
         const len = Object.entries(value).length;
         return (
             <ul className='ps-8' onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}>
-                {len > 1 && '{'}
+                {len > 1 && depth > 0 && '{'}
                 {Object.entries(value).map(([ key, val ]) => (
                     <li key={key}>
-                        <strong>{key}:</strong> <ListComponent value={val} />
+                        <strong>{key}:</strong> <ListComponent value={val} depth={depth + 1} />
                     </li>
                 ))}
-                {len > 1 && '}'}
+                {len > 1 && depth > 0 && '}'}
             </ul>
         );
     }
@@ -35,11 +36,11 @@ export function ListComponent({ value }: ListComponentProps) {
         const len = value.length;
         return (
             <ul className="ps8" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}>
-                {len > 1 && '{'}
+                {len > 1 && depth > 0 && '{'}
                 {value.map((item, idx) => (
-                    <li key={idx}><ListComponent value={item} /></li>
+                    <li key={idx}><ListComponent value={item} depth={depth + 1} /></li>
                 ))}
-                {len > 1 && '}'}
+                {len > 1 && depth > 0 && '}'}
             </ul>
         );
     }

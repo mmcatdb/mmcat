@@ -18,13 +18,13 @@ export const DatabaseList: React.FC<DatabaseListProps> = ({ apiUrl }) => {
     }
 
     if (error) {
-        return <p>{error}</p>;
+        return <p style={{ fontSize: '14px' }}>{error}</p>;
     }
 
     return (
-        <div>
+        <div style={{ fontSize: '14px' }}>
             {data.length > 0 ? (
-                <ListComponent value={data} />
+                <ListComponent value={data} depth={0}/>
             ) : (
                 <span>No rows to display.</span>
             )}
