@@ -53,7 +53,7 @@ function Sidebar() {
                     <XMarkIcon className='w-6 h-6 text-zinc-500' />
                 </button>
                 
-                <h1 className='text-2xl font-semibold mb-10'>New Sidebar</h1>
+                <h1 className='text-2xl font-semibold mb-10'>MM-cat</h1>
 
                 <div className='flex flex-col'>
                     {sidebarItems.map((item) => {

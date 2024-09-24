@@ -18,7 +18,7 @@ export function CommonPage({ children }: CommonPageProps) {
                 <Sidebar />
                 <div className='flex flex-col flex-grow overflow-hidden'>
                     <CommonNavbar />
-                    <main className='flex-grow overflow-auto w-full max-w-[1024px] mx-auto p-6'>
+                    <main className='flex-grow overflow-auto w-full max-w-screen-xl mx-auto p-6'>
                         {children}
                     </main>
                 </div>
@@ -29,7 +29,7 @@ export function CommonPage({ children }: CommonPageProps) {
 
 function CommonNavbar() {
     return (
-        <Navbar className='z-20'>
+        <Navbar className='z-20 max-w-7xl mx-auto' isBlurred={false} maxWidth='full'>
             <NavbarContent justify='end'>
                 <NavbarItem>
                     <ThemeToggle className='min-w-8 w-8 h-8' />
