@@ -30,7 +30,7 @@ export const routes = {
     about: 'about',
     project: {
         index: projectIndex,
-        // databases: projectIndex.child('/databases', 'databases'),
+        databases: projectIndex.child('/databases', 'databases'),
     },
     datasources: 'datasources',
     adminer: 'adminer',
