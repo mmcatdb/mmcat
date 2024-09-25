@@ -1,6 +1,7 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.exception.DatasourceException;
@@ -36,9 +37,21 @@ public class WrapperService {
     public AbstractControlWrapper getControlWrapper(DatasourceWrapper datasource) {
         try {
             return switch (datasource.type) {
-                case mongodb -> getMongoDBControlWrapper(datasource);
-                case postgresql -> getPostgreSQLControlWrapper(datasource);
-                case neo4j -> getNeo4jControlWrapper(datasource);
+                case mongodb -> new MongoDBControlWrapper(getProvider(
+                    datasource,
+                    MongoDBSettings.class,
+                    MongoDBProvider::new
+                ));
+                case postgresql -> new PostgreSQLControlWrapper(getProvider(
+                    datasource,
+                    PostgreSQLSettings.class,
+                    PostgreSQLProvider::new
+                ));
+                case neo4j -> new Neo4jControlWrapper(getProvider(
+                    datasource,
+                    Neo4jSettings.class,
+                    Neo4jProvider::new
+                ));
                 case jsonld -> getJsonLdControlWrapper(datasource);
                 case json -> getJsonControlWrapper(datasource);
                 case csv -> getCsvControlWrapper(datasource);
@@ -50,60 +63,40 @@ public class WrapperService {
         }
     }
 
-    // MongoDB
-
-    private Map<Id, MongoDBProvider> mongoDBCache = new TreeMap<>();
-
-    private MongoDBControlWrapper getMongoDBControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        if (!mongoDBCache.containsKey(datasource.id))
-            mongoDBCache.put(datasource.id, createMongoDBProvider(datasource));
-
-        final var provider = mongoDBCache.get(datasource.id);
-        return new MongoDBControlWrapper(provider);
-    }
-
+    private Map<Id, AbstractDatasourceProvider> cachedProviders = new TreeMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static MongoDBProvider createMongoDBProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var settings = mapper.treeToValue(datasource.settings, MongoDBSettings.class);
-
-        return new MongoDBProvider(settings);
+    private interface CreateProviderFunction<TProvider extends AbstractDatasourceProvider, TSettings> {
+        TProvider apply(TSettings settings) throws JsonProcessingException;
     }
 
-    // PostgreSQL
+    @SuppressWarnings("unchecked")
+    private <TProvider extends AbstractDatasourceProvider, TSettings> TProvider getProvider(
+        DatasourceWrapper datasource,
+        Class<TSettings> clazz,
+        CreateProviderFunction<TProvider, TSettings> create
+    ) throws JsonProcessingException {
+        final TSettings settings = mapper.treeToValue(datasource.settings, clazz);
 
-    private Map<Id, PostgreSQLProvider> postgreSQLCache = new TreeMap<>();
+        // First, we try to get the provider from the cache. If it's there and still valid, we return it.
+        final TProvider cached = (TProvider) cachedProviders.get(datasource.id);
+        if (cached != null && cached.isStillValid(settings))
+            return cached;
 
-    private PostgreSQLControlWrapper getPostgreSQLControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        if (!postgreSQLCache.containsKey(datasource.id))
-            postgreSQLCache.put(datasource.id, createPostgreSQLProvider(datasource));
+        // If the provider is invalid, we should close it.
+        if (cached != null) {
+            System.out.println("Reseting the provider for \"" + datasource.label + "\"");
+            cached.close();
+        }
+        else {
+            System.out.println("Creating new provider for \"" + datasource.label + "\"");
+        }
 
-        final var provider = postgreSQLCache.get(datasource.id);
-        return new PostgreSQLControlWrapper(provider);
-    }
+        // If the provider is not in the cache or is not valid anymore, we create a new one and put it into the cache.
+        final TProvider provider = create.apply(settings);
+        cachedProviders.put(datasource.id, provider);
 
-    private static PostgreSQLProvider createPostgreSQLProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var settings = mapper.treeToValue(datasource.settings, PostgreSQLSettings.class);
-
-        return new PostgreSQLProvider(settings);
-    }
-
-    // Neo4j
-
-    private Map<Id, Neo4jProvider> neo4jCache = new TreeMap<>();
-
-    private Neo4jControlWrapper getNeo4jControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        if (!neo4jCache.containsKey(datasource.id))
-            neo4jCache.put(datasource.id, createNeo4jProvider(datasource));
-
-        final var provider = neo4jCache.get(datasource.id);
-        return new Neo4jControlWrapper(provider);
-    }
-
-    private static Neo4jProvider createNeo4jProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var settings = mapper.treeToValue(datasource.settings, Neo4jSettings.class);
-
-        return new Neo4jProvider(settings);
+        return provider;
     }
 
     // JsonLd

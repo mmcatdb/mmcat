@@ -19,7 +19,8 @@ public record DatasourceDetail(
             datasource.id,
             datasource.type,
             datasource.label,
-            datasource.settings,
+            // Don't forget to sanitize the settings.
+            datasource.getSanitizedSettings(),
             configuration
         );
     }

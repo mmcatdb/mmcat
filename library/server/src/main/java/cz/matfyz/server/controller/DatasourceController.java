@@ -35,7 +35,6 @@ public class DatasourceController {
     @GetMapping("/datasources")
     public List<DatasourceDetail> getAllDatasources(@RequestParam Optional<Id> categoryId) {
         final var datasources = categoryId.isPresent() ? service.findAllInCategory(categoryId.get()) : service.findAll();
-        datasources.forEach(DatasourceWrapper::hidePassword);
         return datasources.stream().map(this::datasourceToDetail).toList();
     }
 
@@ -45,7 +44,6 @@ public class DatasourceController {
         if (datasource == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        datasource.hidePassword();
         return datasourceToDetail(datasource);
     }
 
@@ -54,8 +52,6 @@ public class DatasourceController {
         final DatasourceWrapper datasource = service.createNew(data);
         if (datasource == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-
-        datasource.hidePassword();
 
         return datasourceToDetail(datasource);
     }
@@ -69,8 +65,6 @@ public class DatasourceController {
         final DatasourceWrapper datasource = service.update(id, update);
         if (datasource == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-
-        datasource.hidePassword();
 
         return datasourceToDetail(datasource);
     }

@@ -1,12 +1,13 @@
 package cz.matfyz.wrapperpostgresql;
 
+import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 import cz.matfyz.core.exception.OtherException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class PostgreSQLProvider {
+public class PostgreSQLProvider implements AbstractDatasourceProvider {
 
     public final PostgreSQLSettings settings;
 
@@ -24,6 +25,15 @@ public class PostgreSQLProvider {
         catch (SQLException e) {
             throw new OtherException(e);
         }
+    }
+
+    public boolean isStillValid(Object settings) {
+        // We always create a new connection so we don't need to cache anything.
+        return false;
+    }
+
+    public void close() {
+        // We don't need to close anything because we don't cache anything.
     }
 
     public record PostgreSQLSettings(

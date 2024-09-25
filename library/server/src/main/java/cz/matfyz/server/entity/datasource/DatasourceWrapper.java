@@ -34,8 +34,14 @@ public class DatasourceWrapper extends Entity {
         );
     }
 
-    public void hidePassword() {
-        this.settings.remove(PASSWORD_FIELD_NAME);
+    /**
+     * Returns a sanitized version of the settings, where all sensitive fields (e.g., password) are removed.
+     */
+    public ObjectNode getSanitizedSettings() {
+        final ObjectNode sanitized = settings.deepCopy();
+        sanitized.remove(PASSWORD_FIELD_NAME);
+
+        return sanitized;
     }
 
     public void updateFrom(DatasourceUpdate data) {
