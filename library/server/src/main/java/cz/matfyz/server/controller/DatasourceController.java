@@ -72,9 +72,7 @@ public class DatasourceController {
     }
 
     public DatasourceDetail datasourceToDetail(DatasourceWrapper datasource) {
-        datasource.hidePassword();
         return DatasourceDetail.create(datasource, wrapperService.getControlWrapper(datasource));
     }
 
 }
-
