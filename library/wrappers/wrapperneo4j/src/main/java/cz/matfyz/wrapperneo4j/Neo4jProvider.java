@@ -1,5 +1,7 @@
 package cz.matfyz.wrapperneo4j;
 
+import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
+
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
@@ -7,7 +9,7 @@ import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
 
-public class Neo4jProvider {
+public class Neo4jProvider implements AbstractDatasourceProvider {
 
     public final Neo4jSettings settings;
 
@@ -24,6 +26,22 @@ public class Neo4jProvider {
             driver = GraphDatabase.driver(settings.createConnectionString(), settings.createAuthToken());
 
         return driver.session(SessionConfig.forDatabase(settings.database));
+    }
+
+    public boolean isStillValid(Object settings) {
+        if (!(settings instanceof Neo4jSettings neo4jSettings))
+            return false;
+
+        return this.settings.host.equals(neo4jSettings.host)
+            && this.settings.port.equals(neo4jSettings.port)
+            && this.settings.database.equals(neo4jSettings.database)
+            && this.settings.isWritable == neo4jSettings.isWritable
+            && this.settings.isQueryable == neo4jSettings.isQueryable;
+    }
+
+    public void close() {
+        if (driver != null)
+            driver.close();
     }
 
     public record Neo4jSettings(
