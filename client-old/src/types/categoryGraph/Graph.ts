@@ -6,6 +6,7 @@ import type { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Id } from '../id';
 import { shallowRef } from 'vue';
+import { SequenceSignature } from '../accessPath/graph';
 
 export type TemporaryEdge = {
     delete: () => void;
@@ -23,6 +24,35 @@ export class Graph {
         this.eventListener = new GraphEventListener(cytoscape);
         this.highlights = new GraphHighlights({ nodes: this.nodes, edges: this.edges, cytoscape });
     }
+
+    /// functions for Mapping editor
+    public getChildrenForNode(node: Node): Node[] {
+        const outgoingEdges = Array.from(this.edges.values()).filter(edge => edge.domainNode.equals(node));
+
+        return outgoingEdges.map(edge => edge.codomainNode);
+    }
+
+    public getSignature(node: Node, parentNode: Node): SequenceSignature {
+        const edge = Array.from(this.edges.values())
+            .find(edge => edge.domainNode.equals(parentNode) && edge.codomainNode.equals(node));
+    
+        if (!edge) {
+            console.warn(`No edge found between parent ${parentNode.schemaObject.key.value} and node ${node.schemaObject.key.value}`);
+            return SequenceSignature.empty(node); // Return empty sequence as fallback
+        }
+    
+        return SequenceSignature.fromSignature(edge.schemaMorphism.signature, node);
+    }  
+
+    public getParentNode(node: Node): Node | undefined {
+        const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));
+        
+        if (incomingEdges.length === 0) 
+            return undefined;       
+
+        return incomingEdges[0].domainNode;
+    }
+    ///
 
     public resetElements(groupsData: GroupData[]): void {
         this.cytoscape.elements().remove();

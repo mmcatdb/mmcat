@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, provide, ref, shallowRef } from 'vue';
-import { GraphRootProperty } from '@/types/accessPath/graph';
+import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
+import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SignatureId, StaticName } from '@/types/identifiers';
 import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor2 from './edit/AccessPathEditor2.vue';
-import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
@@ -12,8 +12,10 @@ import { useRoute, useRouter } from 'vue-router';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
+import NodeInput from '@/components/input/NodeInput.vue';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '../category/EvocatDisplay.vue';
+import { isKeyPressed, Key } from '@/utils/keyboardInput';
 
 const route = useRoute();
 const router = useRouter();
@@ -25,14 +27,18 @@ provide(evocatKey, { evocat, graph } as EvocatContext);
 function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     evocat.value = context.evocat;
     graph.value = context.graph;
+
+    graph.value.listen().onNode('tap', onNodeTapHandler);
 }
 
 const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
 const logicalModels = shallowRef<LogicalModel[]>([]);
 const selectedLogicalModel = shallowRef<LogicalModel>();
+const selectedNodes = ref<Node[]>([]);
+const rootConfirmed = ref(false);
 
-const datasourceAndRootNodeValid = computed(() => !!selectedLogicalModel.value && !!selectingRootNode.value);
+const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
 const categoryId = useSchemaCategoryId();
 const category = useSchemaCategoryInfo();
@@ -42,7 +48,7 @@ onMounted(async () => {
     if (result.status) {
         logicalModels.value = result.data.map(LogicalModel.fromServer);
         selectedLogicalModel.value = logicalModels.value.find(model => model.id.toString() === route.query.logicalModelId);
-    }
+    }    
 });
 
 function confirmDatasourceAndRootNode() {
@@ -51,8 +57,91 @@ function confirmDatasourceAndRootNode() {
 
     selectingRootNode.value.unselect();
     selectingRootNode.value.becomeRoot();
-    const label = selectingRootNode.value.schemaObject.label.toLowerCase();
+    rootConfirmed.value = true;
+}
+
+function confirmSelectedNodes() {
+    if (!selectedLogicalModel.value || !selectingRootNode.value || selectedNodes.value.length === 0) return;
+
+    const label = selectingRootNode.value.metadata.label.toLowerCase();
     accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
+
+    selectedNodes.value.forEach(node => {
+        const subpath = createSubpathForNode(node);
+        if (subpath) 
+            accessPath.value?.updateOrAddSubpath(subpath);        
+    });
+}
+
+let previousParentProperty: GraphParentProperty;
+
+function createSubpathForNode(node: Node): GraphChildProperty | undefined {
+    if (!graph.value) {
+        console.error("Graph instance is not available.");
+        return;
+    }
+
+    const childrenAll = graph.value.getChildrenForNode(node);
+    const children = childrenAll.filter(child => 
+        selectedNodes.value.some(selectedNode => selectedNode.equals(child)),
+    );
+    const parentNode = graph.value.getParentNode(node);
+    const signature = graph.value.getSignature(node, parentNode);
+    const label = node.metadata.label.toLowerCase();
+    console.log("current label: ", label);
+
+    let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : previousParentProperty;  
+    console.log('current previous parent prop: ', previousParentProperty);
+    console.log('current parentProperty: ' + parentProperty);
+    if (!parentProperty) return;
+
+    if (children.length === 0) {
+        console.log('no children');
+        const simpleProperty = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
+        //previousParentProperty = simpleProperty;
+        return simpleProperty;
+    } else {
+        console.log('children');
+        const childSubpaths = children.map(child => createSubpathForNode(child));
+        const complexProperty = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, childSubpaths);
+        previousParentProperty = complexProperty;
+        return complexProperty;
+    }
+}
+
+function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty | undefined {
+    return accessPath.value ? searchSubpathsForNode(accessPath.value, parentNode) : undefined;
+}
+
+function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
+    if (property.node.equals(node)) 
+        return property;
+
+    if (property instanceof GraphComplexProperty) {
+        for (const subpath of property.subpaths) {
+            const result = searchSubpathsForNode(subpath, node);
+            if (result) return result;            
+        }
+    }
+}
+
+function onNodeTapHandler(node: Node) {
+    if (!rootConfirmed.value) return;
+
+    if (isKeyPressed(Key.Shift)) {
+        const currentLength = selectedNodes.value.length;
+        selectedNodes.value = selectedNodes.value.filter(n => !n.equals(node));
+        if (selectedNodes.value.length < currentLength) {
+            node.unselect();
+        } else {
+            selectedNodes.value.push(node);
+            node.select({ type: SelectionType.Selected, level: 0 });
+        }
+    } else {
+        selectedNodes.value.forEach(n => n.unselect());
+        selectedNodes.value = [ node ];
+        node.select({ type: SelectionType.Selected, level: 0 });
+    }
 }
 
 async function createMapping(primaryKey: SignatureId) {
@@ -81,20 +170,37 @@ async function createMapping(primaryKey: SignatureId) {
                     v-if="!accessPath || !selectedLogicalModel"
                     class="editor"
                 >
-                    <ValueContainer>
+                    <ValueContainer v-if="!rootConfirmed">
                         <ValueRow label="Root object:">
                             <SingleNodeInput
-                                v-model="selectingRootNode"
+                                v-model="selectingRootNode"                                
                                 :type="SelectionType.Root"
                             />
                         </ValueRow>
                     </ValueContainer>
-                    <div class="button-row">
+                    <div v-if="!rootConfirmed" class="button-row">
                         <button
-                            :disabled="!selectedLogicalModel || !selectingRootNode"
+                            :disabled="!selectedLogicalModel || !selectingRootNode || rootConfirmed"
                             @click="confirmDatasourceAndRootNode"
                         >
-                            Confirm
+                            Confirm Root Node
+                        </button>
+                    </div>
+                    <ValueContainer v-if="rootConfirmed">
+                        <ValueRow label="AccessPath objects:">
+                            {{ selectedNodeLabels }}
+                            <NodeInput
+                                :model-value="selectedNodes"
+                                :type="SelectionType.Selected"
+                            />
+                        </ValueRow>
+                    </ValueContainer>
+                    <div v-if="rootConfirmed" class="button-row">
+                        <button
+                            :disabled="selectedNodes.length === 0"
+                            @click="confirmSelectedNodes"
+                        >
+                            Confirm Selected Nodes
                         </button>
                     </div>
                 </div>

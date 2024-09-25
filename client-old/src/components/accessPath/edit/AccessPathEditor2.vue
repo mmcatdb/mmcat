@@ -68,6 +68,7 @@ function finishMapping() {
     emit('finish', primaryKey.value);
 }
 
+// this never gets entered, but somehow when I dont have it here the nodes dont get unselected when I click again
 function onNodeClick(node: Node) {
     console.log("Am I here?");
     const index = selectedNodes.value.indexOf(node);
