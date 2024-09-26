@@ -6,7 +6,8 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
-import org.json.JSONArray;
+
+import org.json.JSONObject;
 
 public interface AbstractPullWrapper {
 
@@ -14,10 +15,10 @@ public interface AbstractPullWrapper {
 
     QueryResult executeQuery(QueryStatement statement);
 
-    JSONArray getTableNames(String limit, String offset);
+    JSONObject getTableNames(String limit, String offset);
 
-    JSONArray getTable(String tableName, String limit, String offset);
+    JSONObject getTable(String tableName, String limit, String offset);
 
-    JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset);
+    JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset);
 
 }

@@ -4,8 +4,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.service.DatasourceService;
 import cz.matfyz.server.service.WrapperService;
 
-import org.json.JSONArray;
-
+import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,7 @@ public class AdminerController {
     @Autowired
     private WrapperService wrapperService;
 
-    private ResponseEntity<String> getJsonResponse(JSONArray json){
+    private ResponseEntity<String> getJsonResponse(JSONObject json){
         String jsonResponse = json.toString();
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(jsonResponse);
     }
@@ -39,7 +38,7 @@ public class AdminerController {
         }
 
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONArray json = myWrapper.getTableNames(limit, offset);
+        JSONObject json = myWrapper.getTableNames(limit, offset);
 
         return getJsonResponse(json);
     }
@@ -53,7 +52,7 @@ public class AdminerController {
         }
 
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONArray json = myWrapper.getTable(table, limit, offset);
+        JSONObject json = myWrapper.getTable(table, limit, offset);
 
         return getJsonResponse(json);
     }
@@ -67,7 +66,7 @@ public class AdminerController {
         }
 
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONArray json = myWrapper.getRows(table, columnName, columnValue, operator, limit, offset);
+        JSONObject json = myWrapper.getRows(table, columnName, columnValue, operator, limit, offset);
 
         return getJsonResponse(json);
     }

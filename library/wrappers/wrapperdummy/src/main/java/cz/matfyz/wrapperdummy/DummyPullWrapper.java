@@ -151,15 +151,15 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("DummyPullWrapper.executeQuery not implemented.");
     }
 
-    @Override public JSONArray getTableNames(String limit, String offset) {
+    @Override public JSONObject getTableNames(String limit, String offset) {
         throw new UnsupportedOperationException("DummyPullWrapper.getTableNames not implemented.");
     }
 
-    @Override public JSONArray getTable(String tableName, String limit, String offset) {
+    @Override public JSONObject getTable(String tableName, String limit, String offset) {
         throw new UnsupportedOperationException("DummyPullWrapper.gatTable not implemented.");
     }
 
-    @Override public JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
+    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
         throw new UnsupportedOperationException("DummyPullWrapper.getRow not implemented.");
     }
 

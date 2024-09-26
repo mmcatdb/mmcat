@@ -27,7 +27,7 @@ import java.util.Map;
 
 import java.util.Arrays;
 
-import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 public class CsvPullWrapper implements AbstractPullWrapper {
@@ -111,15 +111,15 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 
-    @Override public JSONArray getTableNames(String limit, String offset) {
+    @Override public JSONObject getTableNames(String limit, String offset) {
         throw new UnsupportedOperationException("CsvPullWrapper.getTableNames not implemented.");
     }
 
-    @Override public JSONArray getTable(String tableName, String limit, String offset) {
+    @Override public JSONObject getTable(String tableName, String limit, String offset) {
         throw new UnsupportedOperationException("CsvPullWrapper.gatTable not implemented.");
     }
 
-    @Override public JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
+    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
         throw new UnsupportedOperationException("CsvPullWrapper.getRow not implemented.");
     }
 

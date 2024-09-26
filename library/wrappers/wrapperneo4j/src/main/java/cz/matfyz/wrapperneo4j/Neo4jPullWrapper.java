@@ -24,7 +24,6 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
-import org.neo4j.driver.exceptions.Neo4jException;
 
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
@@ -317,83 +316,105 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     }
 
-    @Override public JSONArray getTableNames(String limit, String offset) {
-        try {
-            JSONArray result = new JSONArray();
-            Result queryResult = provider.getSession().run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label SKIP " + offset + " LIMIT " + limit + ";");
+    private JSONObject getResultObject(Result countQueryResult, JSONArray resultData) throws JSONException {
+        int recordNumber = countQueryResult.next().get("recordCount").asInt();
+
+        JSONObject metadata = new JSONObject();
+        metadata.put("rowCount", recordNumber);
+
+        JSONObject result = new JSONObject();
+        result.put("metadata", metadata);
+        result.put("data", resultData);
+
+        return result;
+    }
+
+    @Override public JSONObject getTableNames(String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            JSONArray resultData = new JSONArray();
+
+            Result queryResult = session.run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label SKIP " + offset + " LIMIT " + limit + ";");
             while (queryResult.hasNext()) {
                 Record queryRecord = queryResult.next();
-                result.put(queryRecord.get("label").asString());
+                resultData.put(queryRecord.get("label").asString());
             }
 
-            return result;
+            Result countQueryResult = session.run("MATCH (n) UNWIND labels(n) AS label RETURN COUNT(DISTINCT label) AS recordCount;");
+
+            return getResultObject(countQueryResult, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getNodes(String limit, String offset) {
-        try {
-            JSONArray result = new JSONArray();
+    private JSONObject getNodes(String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            JSONArray resultData = new JSONArray();
 
-            var allNodes = provider.getSession().executeRead(tx -> {
+            var allNodes = session.executeRead(tx -> {
                 var query = new Query("MATCH (a) RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
                 }).toList();
             });
-            allNodes.forEach(result::put);
+            allNodes.forEach(resultData::put);
 
-            return result;
+            Result countQueryResult = session.run("MATCH (a) RETURN COUNT(a) AS recordCount;");
+
+            return getResultObject(countQueryResult, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getRelationships(String limit, String offset) {
-        try {
-            JSONArray result = new JSONArray();
+    private JSONObject getRelationships(String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            JSONArray resultData = new JSONArray();
 
-            var allNodes = provider.getSession().executeRead(tx -> {
+            var allNodes = session.executeRead(tx -> {
                 var query = new Query("MATCH ()-[r]->() RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return relationshipToJson(node.get("r"));
                 }).toList();
             });
-            allNodes.forEach(result::put);
+            allNodes.forEach(resultData::put);
 
-            return result;
+            Result countQueryResult = session.run("MATCH ()-[r]->() RETURN COUNT(r) AS recordCount;");
+
+            return getResultObject(countQueryResult, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getByLabel(String label, String limit, String offset) {
-        try {
-            JSONArray result = new JSONArray();
+    private JSONObject getByLabel(String label, String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            JSONArray resultData = new JSONArray();
 
-            var allNodes = provider.getSession().executeRead(tx -> {
+            var allNodes = session.executeRead(tx -> {
                 var query = new Query("MATCH (a:" + label + ") RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
                 }).toList();
             });
-            allNodes.forEach(result::put);
+            allNodes.forEach(resultData::put);
 
-            return result;
+            Result countQueryResult = session.run("MATCH (a:" + label + ") RETURN COUNT(a) AS recordCount;");
+
+            return getResultObject(countQueryResult, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    @Override public JSONArray getTable(String tableName, String limit, String offset) {
+    @Override public JSONObject getTable(String tableName, String limit, String offset) {
         if (tableName.equals("nodes")) {
             return getNodes(limit, offset);
         }
@@ -405,67 +426,73 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return getByLabel(tableName, limit, offset);
     }
 
-    private JSONArray getNode(String propertyName, String propertyValue, String operator, String limit, String offset) {
-        try {
-            JSONArray result = new JSONArray();
+    private JSONObject getNode(String propertyName, String propertyValue, String operator, String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            JSONArray resultData = new JSONArray();
 
-            var allNodes = provider.getSession().executeRead(tx -> {
+            var allNodes = session.executeRead(tx -> {
                 var query = new Query("MATCH (a) WHERE a." + propertyName + "" + operator + "'" + propertyValue + "' RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
                 }).toList();
             });
-            allNodes.forEach(result::put);
+            allNodes.forEach(resultData::put);
 
-            return result;
+            Result countQueryResult = session.run("MATCH (a) WHERE a." + propertyName + "" + operator + "'" + propertyValue + "' RETURN COUNT(a) AS recordCount;");
+
+            return getResultObject(countQueryResult, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getRelationship(String propertyName, String propertyValue, String operator, String limit, String offset) {
-        try {
-            JSONArray result = new JSONArray();
+    private JSONObject getRelationship(String propertyName, String propertyValue, String operator, String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            JSONArray resultData = new JSONArray();
 
-            var allNodes = provider.getSession().executeRead(tx -> {
+            var allNodes = session.executeRead(tx -> {
                 var query = new Query("MATCH ()-[r]->() WHERE r." + propertyName + "" + operator + "'" + propertyValue + "' RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return relationshipToJson(node.get("r"));
                 }).toList();
             });
-            allNodes.forEach(result::put);
+            allNodes.forEach(resultData::put);
 
-            return result;
+            Result countQueryResult = session.run("MATCH ()-[r]->() WHERE r." + propertyName + "" + operator + "'" + propertyValue + "' RETURN COUNT(r) AS recordCount;");
+
+            return getResultObject(countQueryResult, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getByLabelAndId(String label, String propertyName, String propertyValue, String operator, String limit, String offset) {
-        try {
-            JSONArray result = new JSONArray();
+    private JSONObject getByLabelAndId(String label, String propertyName, String propertyValue, String operator, String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            JSONArray resultData = new JSONArray();
 
-            var allNodes = provider.getSession().executeRead(tx -> {
+            var allNodes = session.executeRead(tx -> {
                 var query = new Query("MATCH (a:" + label + ") WHERE a." + propertyName + "" + operator + "'"+ propertyValue +"' RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
                 }).toList();
             });
-            allNodes.forEach(result::put);
+            allNodes.forEach(resultData::put);
 
-            return result;
+            Result countQueryResult = session.run("MATCH (a:" + label + ") WHERE a." + propertyName + "" + operator + "'"+ propertyValue +"' RETURN COUNT(a) AS recordCount;");
+
+            return getResultObject(countQueryResult, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    @Override public JSONArray getRows(String tableName, String propertyName, String propertyValue, String operator, String limit, String offset) {
+    @Override public JSONObject getRows(String tableName, String propertyName, String propertyValue, String operator, String limit, String offset) {
         if (tableName.equals("nodes")) {
             return getNode(propertyName, propertyValue, operator, limit, offset);
         }

@@ -3,7 +3,6 @@ package cz.matfyz.wrappermongodb;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
-import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.mapping.AccessPath;
@@ -30,7 +29,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -273,10 +271,21 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override public JSONArray getTableNames(String limit, String offsetString) {
+    private JSONObject getResultObject(int rowCount, JSONArray resultData) throws JSONException {
+        JSONObject metadata = new JSONObject();
+        metadata.put("rowCount", rowCount);
+
+        JSONObject result = new JSONObject();
+        result.put("metadata", metadata);
+        result.put("data", resultData);
+
+        return result;
+    }
+
+    @Override public JSONObject getTableNames(String limit, String offsetString) {
         try {
             MongoIterable<String> tableNames = provider.getDatabase().listCollectionNames();
-            JSONArray result = new JSONArray();
+            JSONArray resultData = new JSONArray();
 
             int lim = Integer.parseInt(limit);
             int offset = Integer.parseInt(offsetString);
@@ -285,28 +294,24 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             int count = 0;
 
             for (String tableName : tableNames) {
-                if (index >= offset) {
-                    result.put(tableName);
+                if (index >= offset && count < lim) {
+                    resultData.put(tableName);
                     count++;
-
-                    if (count >= lim) {
-                        break;
-                    }
                 }
 
                 index++;
             }
 
-            return result;
+            return getResultObject(index, resultData);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);
 		}
     }
 
-    @Override public JSONArray getTable(String tableName, String limit, String offsetString){
+    @Override public JSONObject getTable(String tableName, String limit, String offsetString){
         try {
-            JSONArray result = new JSONArray();
+            JSONArray resultData = new JSONArray();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
             FindIterable<Document> documents = collection.find();
 
@@ -317,7 +322,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             int count = 0;
 
             for (Document document : documents) {
-                if (index >= offset) {
+                if (index >= offset && count < lim) {
                     JSONObject jsonObject = new JSONObject(document.toJson());
                     JSONObject dataWithoutQuotationMarks = new JSONObject();
                     Iterator<String> keys = jsonObject.keys();
@@ -332,18 +337,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                         }
                     }
 
-                    result.put(dataWithoutQuotationMarks);
+                    resultData.put(dataWithoutQuotationMarks);
                     count++;
-
-                    if (count >= lim) {
-                        break;
-                    }
                 }
 
                 index++;
             }
 
-            return result;
+            return getResultObject(index, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
@@ -371,9 +372,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override public JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offsetString){
+    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offsetString){
         try {
-            JSONArray result = new JSONArray();
+            JSONArray resultData = new JSONArray();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
             Bson filter = createFilter(columnName, operator, columnValue);
             FindIterable<Document> documents = collection.find(filter);
@@ -385,7 +386,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             int count = 0;
 
             for (Document document : documents) {
-                if (index >= offset) {
+                if (index >= offset && count < lim) {
                     JSONObject jsonObject = new JSONObject(document.toJson());
                     JSONObject dataWithoutQuotationMarks = new JSONObject();
                     Iterator<String> keys = jsonObject.keys();
@@ -400,18 +401,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                         }
                     }
 
-                    result.put(dataWithoutQuotationMarks);
+                    resultData.put(dataWithoutQuotationMarks);
                     count++;
-
-                    if (count >= lim) {
-                        break;
-                    }
                 }
 
                 index++;
             }
 
-            return result;
+            return getResultObject(index, resultData);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);

@@ -3,7 +3,6 @@ package cz.matfyz.wrapperpostgresql;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
-import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
@@ -25,6 +24,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,42 +141,63 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override public JSONArray getTableNames(String limit, String offset) {
+    private JSONObject getResultObject(ResultSet countResultSet, JSONArray resultData) throws JSONException, SQLException {
+        int rowCount = 0;
+
+        if (countResultSet.next()) {
+            rowCount = countResultSet.getInt(1);
+        }
+
+        JSONObject metadata = new JSONObject();
+        metadata.put("rowCount", rowCount);
+
+        JSONObject result = new JSONObject();
+        result.put("metadata", metadata);
+        result.put("data", resultData);
+
+        return result;
+    }
+
+    @Override public JSONObject getTableNames(String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
             final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(query);
-            JSONArray result = new JSONArray();
+            JSONArray resultData = new JSONArray();
 
             while (resultSet.next()) {
                 String tableName = resultSet.getString(1);
-                result.put(tableName);
+                resultData.put(tableName);
             }
 
-            return result;
+            String countQuery = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public';";
+            ResultSet countResultSet = stmt.executeQuery(countQuery);
+
+            return getResultObject(countResultSet, resultData);
         }
         catch (Exception e) {
-			throw QueryException.message("Error when executing a PostgreSQL query.");
+			throw PullForestException.innerException(e);
 		}
     }
 
-    @Override public JSONArray getTable(String tableName, String limit, String offset) {
-        return getQuery("SELECT * FROM " + tableName + " LIMIT " + limit + " OFFSET " + offset + ";");
+    @Override public JSONObject getTable(String tableName, String limit, String offset) {
+        return getQuery("FROM " + tableName, limit, offset);
     }
 
-    @Override public JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
-        return getQuery("SELECT * FROM " + tableName +  " WHERE " + columnName + " " + operator + " '" + columnValue +"'" + " LIMIT " + limit + " OFFSET " + offset + ";");
+    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
+        return getQuery("FROM " + tableName +  " WHERE " + columnName + " " + operator + " '" + columnValue + "'", limit, offset);
     }
 
-    private JSONArray getQuery(String query) {
+    private JSONObject getQuery(String queryBase, String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            ResultSet resultSet = stmt.executeQuery(query);
-            JSONArray result = new JSONArray();
+            String selectQuery = "SELECT * " + queryBase + " LIMIT " + limit + " OFFSET " + offset + ";";
+            ResultSet resultSet = stmt.executeQuery(selectQuery);
+            JSONArray resultData = new JSONArray();
 
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
@@ -191,10 +212,13 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                     jsonObject.put(columnName, columnValue);
                 }
 
-                result.put(jsonObject);
+                resultData.put(jsonObject);
             }
 
-            return result;
+            String countQuery = "SELECT COUNT(*) " + queryBase + ";";
+            ResultSet countResultSet = stmt.executeQuery(countQuery);
+
+            return getResultObject(countResultSet, resultData);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);
