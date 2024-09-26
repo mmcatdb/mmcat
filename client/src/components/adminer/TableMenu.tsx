@@ -25,9 +25,23 @@ export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
     return (
         <div>
             {fetchedData !== null && fetchedData.data.length > 0 ? (
-                <ButtonGroup>
+                <ButtonGroup
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                    }}
+                >
                     {fetchedData.data.map((name, index) => (
-                        <Button key={index} onPress={() => setTableName(name)} color={tableName === name ? 'primary' : 'default'}>
+                        <Button
+                            key={index}
+                            onPress={() => setTableName(name)}
+                            color={tableName === name ? 'primary' : 'default'}
+                            style={{
+                                flex: 1,
+                                minWidth: '50px',
+                            }}
+                        >
                             {name}
                         </Button>
                     ))}
