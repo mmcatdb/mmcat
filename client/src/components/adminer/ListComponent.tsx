@@ -19,26 +19,30 @@ export function ListComponent({ value, depth }: ListComponentProps) {
         // If value is an object, create another unordered list for its key-value pairs
         const len = Object.entries(value).length;
         return (
-            <ul className='ps-8' onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}>
+            <ul className='ps-8' onClick={(e) => {
+                e.stopPropagation(); setIsOpen(false);
+            }}>
                 {len > 1 && depth > 0 && '{'}
                 {Object.entries(value).map(([ key, val ]) => (
                     <li key={key}>
-                        <strong>{key}:</strong> <ListComponent value={val} depth={depth + 1} />
+                        <strong>{key}:</strong> <ListComponent value={val as unknown} depth={depth + 1} />
                     </li>
                 ))}
                 {len > 1 && depth > 0 && '}'}
             </ul>
         );
     }
-    
+
     if (Array.isArray(value)) {
         // If value is an array, create a list for each item
         const len = value.length;
         return (
-            <ul className="ps8" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}>
+            <ul className='ps8' onClick={(e) => {
+                e.stopPropagation(); setIsOpen(false);
+            }}>
                 {len > 1 && depth > 0 && '{'}
-                {value.map((item, idx) => (
-                    <li key={idx}><ListComponent value={item} depth={depth + 1} /></li>
+                {value.map((item, index) => (
+                    <li key={index}><ListComponent value={item as unknown} depth={depth + 1} /></li>
                 ))}
                 {len > 1 && depth > 0 && '}'}
             </ul>
@@ -47,4 +51,4 @@ export function ListComponent({ value, depth }: ListComponentProps) {
 
     // For primitive values (string, number, etc.), return them as a string
     return <span>{String(value)}</span>;
-};
+}

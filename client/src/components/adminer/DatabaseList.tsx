@@ -1,13 +1,13 @@
-import { useFetchData } from '@/components/adminer/useFetchData';
+import { useFetchObjectData } from '@/components/adminer/useFetchObjectData';
 import { ListComponent } from '@/components/adminer/ListComponent';
 import { Spinner } from '@nextui-org/react';
 
-type DatabaseListProps = {
+type DatabaseListProps = Readonly<{
     apiUrl: string;
-};
+}>;
 
-export const DatabaseList: React.FC<DatabaseListProps> = ({ apiUrl }) => {
-    const { data, loading, error } = useFetchData(apiUrl);
+export function DatabaseList({ apiUrl }: DatabaseListProps) {
+    const { fetchedData, loading, error } = useFetchObjectData(apiUrl);
 
     if (loading) {
         return (
@@ -17,17 +17,17 @@ export const DatabaseList: React.FC<DatabaseListProps> = ({ apiUrl }) => {
         );
     }
 
-    if (error) {
-        return <p style={{ fontSize: '14px' }}>{error}</p>;
-    }
+    if (error)
+        return <p>{error}</p>;
+
 
     return (
-        <div style={{ fontSize: '14px' }}>
-            {data.length > 0 ? (
-                <ListComponent value={data} depth={0}/>
+        <div>
+            {fetchedData !== null && fetchedData.data.length > 0 ? (
+                <ListComponent value={fetchedData.data} depth={0}/>
             ) : (
                 <span>No rows to display.</span>
             )}
         </div>
     );
-};
+}
