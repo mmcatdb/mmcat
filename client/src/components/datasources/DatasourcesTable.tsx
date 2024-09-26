@@ -1,38 +1,14 @@
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
-import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 
-export const DatasourcesTable = () => {
-    const [ datasources, setDatasources ] = useState<Datasource[]>([]);
-    const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | null>(null);
+type DatasourcesTableProps = {
+    datasources: Datasource[];
+    loading: boolean;
+    error: string | null;
+};
 
-    useEffect(() => {
-        const fetchDatasources = async () => {
-            try {
-                setLoading(true);
-
-                const response = await api.datasources.getAllDatasources(
-                    {}, // empty for urlParams + no categoryId
-                );
-    
-                if (response.status && response.data)
-                    setDatasources(response.data);
-                else
-                    setError('Failed to load data');
-            }
-            catch (err) {
-                setError('Failed to load data');
-            } 
-            finally {
-                setLoading(false);
-            }
-        };
-    
-        fetchDatasources();
-    }, []);
-    
+export const DatasourcesTable = ({ datasources, loading, error }: DatasourcesTableProps) => {
     if (loading) {
         return (
             <div>
@@ -41,7 +17,8 @@ export const DatasourcesTable = () => {
         );
     }
 
-    if (error)
+    // TODO: error page
+    if (error) 
         return <p>{error}</p>;
 
     return (
@@ -59,7 +36,7 @@ function DatasourceTable(props: DatasourceTableProps) {
     const { datasources } = props;
 
     return (
-        <Table aria-label='Example static collection table'>
+        <Table aria-label='Datasource Table'>
             <TableHeader>
                 <TableColumn>ID</TableColumn>
                 <TableColumn>Type</TableColumn>

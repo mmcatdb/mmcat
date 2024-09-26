@@ -8,9 +8,14 @@ import {
     type Settings,
     validateSettings,
     type DatasourceInit,
+    type Datasource,
 } from '@/types/datasource';
 
-export const DatasourceModal = () => {
+type DatasourceModalProps = {
+    onDatasourceCreated: (newDatasource: Datasource) => void;
+};
+
+export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [ datasourceType, setDatasourceType ] = useState<DatasourceType | ''>('');
     const [ datasourceName, setDatasourceLabel ] = useState('');
@@ -28,31 +33,38 @@ export const DatasourceModal = () => {
             alert('Please fill out all required fields based on the datasource type.');
             return;
         }
-
+    
         try {
             const newDatasource: DatasourceInit = {
                 type: datasourceType,
                 label: datasourceName,
                 settings: settings,
             };
-
+    
             // Call the API to create the datasource
             const createdDatasource = await api.datasources.createDatasource({}, newDatasource);
 
-            console.log('Datasource created successfully:', createdDatasource);
-
-            // Clear input fields
-            setDatasourceType('');
-            setDatasourceLabel('');
-            setSettings({});
-
-            // Close the modal
-            onOpenChange();
+            if (createdDatasource.status && createdDatasource.data) {
+                // Notify parent
+                onDatasourceCreated(createdDatasource.data);
+    
+                setDatasourceType('');
+                setDatasourceLabel('');
+                setSettings({});
+    
+                onOpenChange();
+            }
+            else {
+                console.error('Failed to create datasource:');
+                alert('Failed to create datasource. Please try again.');
+            }
         }
         catch (error) {
-            console.error('Failed to create datasource:', error);
+            console.error('An unexpected error occurred:', error);
+            alert('An unexpected error occurred. Please try again.');
         }
     };
+    
 
     const handleClose = () => {
         setDatasourceType('');
