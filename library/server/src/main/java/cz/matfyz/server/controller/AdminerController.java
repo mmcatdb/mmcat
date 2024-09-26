@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,21 +31,7 @@ public class AdminerController {
     }
 
     @GetMapping(value = "/adminer/{db}")
-    public ResponseEntity<String> getTableNames(@PathVariable Id db, @RequestParam(required = false, defaultValue = "50") String limit) {
-        final var datasource = datasourceService.find(db);
-
-        if (datasource == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        
-        final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONArray json = myWrapper.getTableNames(limit);
-
-        return getJsonResponse(json);
-    }
-
-    @GetMapping(value = "/adminer/{db}/table", params = {"name"})
-    public ResponseEntity<String> getTable(@PathVariable Id db, @RequestParam String name, @RequestParam(required = false, defaultValue = "50") String limit) {
+    public ResponseEntity<String> getTableNames(@PathVariable Id db, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceService.find(db);
 
         if (datasource == null) {
@@ -54,23 +39,37 @@ public class AdminerController {
         }
 
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONArray json = myWrapper.getTable(name, limit);
+        JSONArray json = myWrapper.getTableNames(limit, offset);
 
         return getJsonResponse(json);
     }
 
-    @GetMapping(value = "/adminer/{db}/row", params = {"table", "id"})
-    public ResponseEntity<String> getRow(@PathVariable Id db, @RequestParam String table, @RequestParam String id, @RequestParam(required = false, defaultValue = "50") String limit) {
+    @GetMapping(value = "/adminer/{db}/{table}")
+    public ResponseEntity<String> getTable(@PathVariable Id db, @PathVariable String table, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceService.find(db);
 
         if (datasource == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        
+
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONArray json = myWrapper.getRow(table, id, limit);
+        JSONArray json = myWrapper.getTable(table, limit, offset);
 
         return getJsonResponse(json);
     }
-    
+
+    @GetMapping(value = "/adminer/{db}/{table}", params = {"columnName", "columnValue", "operator"})
+    public ResponseEntity<String> getRows(@PathVariable Id db, @PathVariable String table, @RequestParam String columnName, @RequestParam String columnValue, @RequestParam String operator, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
+        final var datasource = datasourceService.find(db);
+
+        if (datasource == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        JSONArray json = myWrapper.getRows(table, columnName, columnValue, operator, limit, offset);
+
+        return getJsonResponse(json);
+    }
+
 }

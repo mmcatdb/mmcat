@@ -141,12 +141,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override public JSONArray getTableNames(String limit) {
+    @Override public JSONArray getTableNames(String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' LIMIT " + limit + ";";
+            final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(query);
             JSONArray result = new JSONArray();
 
@@ -162,12 +162,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 		}
     }
 
-    @Override public JSONArray getTable(String tableName, String limit) {
-        return getQuery("SELECT * FROM " + tableName + " LIMIT " + limit + ";");
+    @Override public JSONArray getTable(String tableName, String limit, String offset) {
+        return getQuery("SELECT * FROM " + tableName + " LIMIT " + limit + " OFFSET " + offset + ";");
     }
 
-    @Override public JSONArray getRow(String tableName, String id, String limit) {
-        return getQuery("SELECT * FROM " + tableName +  " WHERE id = '" + id +"'" + " LIMIT " + limit + ";");
+    @Override public JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
+        return getQuery("SELECT * FROM " + tableName +  " WHERE " + columnName + " " + operator + " '" + columnValue +"'" + " LIMIT " + limit + " OFFSET " + offset + ";");
     }
 
     private JSONArray getQuery(String query) {
@@ -197,7 +197,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             return result;
         }
         catch (Exception e) {
-			throw QueryException.message("Error when executing a PostgreSQL query.");
+			throw PullForestException.innerException(e);
 		}
     }
 }

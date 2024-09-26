@@ -129,15 +129,15 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 
-    @Override public JSONArray getTableNames(String limit) {
+    @Override public JSONArray getTableNames(String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getTableNames not implemented.");
     }
 
-    @Override public JSONArray getTable(String tableName, String limit) {
+    @Override public JSONArray getTable(String tableName, String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.gatTable not implemented.");
     }
 
-    @Override public JSONArray getRow(String tableName, String id, String limit) {
+    @Override public JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
     }
 

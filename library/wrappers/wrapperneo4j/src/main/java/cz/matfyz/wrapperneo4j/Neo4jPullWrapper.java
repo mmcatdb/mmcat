@@ -258,14 +258,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             // Add the element ID
             json.put("id", node.asNode().elementId().split(":")[2]);
-            
+
             // Add labels
             JSONArray labelsArray = new JSONArray();
             for (final var label : node.asNode().labels()) {
                 labelsArray.put(label);
             }
             json.put("labels", labelsArray);
-    
+
             // Add properties
             JSONObject properties = new JSONObject();
             node.asNode().asMap().forEach((key, value) -> {
@@ -276,7 +276,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 }
             });
             json.put("properties", properties);
-    
+
             return json;
         }
         catch (JSONException e){
@@ -290,14 +290,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             // Add the element ID
             json.put("id", relationship.asRelationship().elementId().split(":")[2]);
-            
+
             // Add type
             json.put("type", relationship.asRelationship().type());
-            
+
             // Add start and end node IDs
             json.put("startNodeId", relationship.asRelationship().startNodeElementId().split(":")[2]);
             json.put("endNodeId", relationship.asRelationship().endNodeElementId().split(":")[2]);
-            
+
             // Add properties
             JSONObject properties = new JSONObject();
             relationship.asRelationship().asMap().forEach((key, value) -> {
@@ -309,36 +309,36 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             });
             json.put("properties", properties);
 
-            return json; 
+            return json;
         }
         catch (JSONException e){
             throw QueryException.message("Error when getting relation data.");
         }
-        
+
     }
 
-    @Override public JSONArray getTableNames(String limit) {
+    @Override public JSONArray getTableNames(String limit, String offset) {
         try {
             JSONArray result = new JSONArray();
-            Result queryResult = provider.getSession().run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label LIMIT " + limit + ";");
+            Result queryResult = provider.getSession().run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label SKIP " + offset + " LIMIT " + limit + ";");
             while (queryResult.hasNext()) {
                 Record queryRecord = queryResult.next();
                 result.put(queryRecord.get("label").asString());
             }
 
-            return result; 
+            return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a Neo4j query.");
+            throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getNodes(String limit) {
+    private JSONArray getNodes(String limit, String offset) {
         try {
             JSONArray result = new JSONArray();
 
             var allNodes = provider.getSession().executeRead(tx -> {
-                var query = new Query("MATCH (a) RETURN a LIMIT " + limit + ";");
+                var query = new Query("MATCH (a) RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
@@ -349,16 +349,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a Neo4j query.");
-        } 
+            throw PullForestException.innerException(e);
+        }
     }
 
-    private JSONArray getRelationships(String limit) {
+    private JSONArray getRelationships(String limit, String offset) {
         try {
             JSONArray result = new JSONArray();
 
             var allNodes = provider.getSession().executeRead(tx -> {
-                var query = new Query("MATCH ()-[r]->() RETURN r LIMIT " + limit + ";");
+                var query = new Query("MATCH ()-[r]->() RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return relationshipToJson(node.get("r"));
@@ -366,19 +366,19 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             });
             allNodes.forEach(result::put);
 
-            return result;  
+            return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a Neo4j query.");
+            throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getByLabel(String label, String limit) {
+    private JSONArray getByLabel(String label, String limit, String offset) {
         try {
             JSONArray result = new JSONArray();
 
             var allNodes = provider.getSession().executeRead(tx -> {
-                var query = new Query("MATCH (a:" + label + ") RETURN a LIMIT " + limit + ";");
+                var query = new Query("MATCH (a:" + label + ") RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
@@ -389,28 +389,28 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a Neo4j query.");
+            throw PullForestException.innerException(e);
         }
     }
 
-    @Override public JSONArray getTable(String tableName, String limit) {
+    @Override public JSONArray getTable(String tableName, String limit, String offset) {
         if (tableName.equals("nodes")) {
-            return getNodes(limit);
-        }
-        
-        if (tableName.equals("relationships")) {
-            return getRelationships(limit);
+            return getNodes(limit, offset);
         }
 
-        return getByLabel(tableName, limit);
+        if (tableName.equals("relationships")) {
+            return getRelationships(limit, offset);
+        }
+
+        return getByLabel(tableName, limit, offset);
     }
 
-    private JSONArray getNode(String id, String limit) {
+    private JSONArray getNode(String propertyName, String propertyValue, String operator, String limit, String offset) {
         try {
             JSONArray result = new JSONArray();
 
             var allNodes = provider.getSession().executeRead(tx -> {
-                var query = new Query("MATCH (a) WHERE id(a)="+ id +" RETURN a LIMIT " + limit + ";");
+                var query = new Query("MATCH (a) WHERE a." + propertyName + "" + operator + "'" + propertyValue + "' RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
@@ -418,19 +418,19 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             });
             allNodes.forEach(result::put);
 
-            return result; 
+            return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a Neo4j query.");
+            throw PullForestException.innerException(e);
         }
     }
 
-    private JSONArray getRelationship(String id, String limit) {
+    private JSONArray getRelationship(String propertyName, String propertyValue, String operator, String limit, String offset) {
         try {
             JSONArray result = new JSONArray();
 
             var allNodes = provider.getSession().executeRead(tx -> {
-                var query = new Query("MATCH ()-[r]->() WHERE id(r)=" + id + " RETURN r LIMIT " + limit + ";");
+                var query = new Query("MATCH ()-[r]->() WHERE r." + propertyName + "" + operator + "'" + propertyValue + "' RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return relationshipToJson(node.get("r"));
@@ -438,19 +438,19 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             });
             allNodes.forEach(result::put);
 
-            return result; 
+            return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a Neo4j query.");
-        } 
+            throw PullForestException.innerException(e);
+        }
     }
 
-    private JSONArray getByLabelAndId(String label, String id, String limit) {
+    private JSONArray getByLabelAndId(String label, String propertyName, String propertyValue, String operator, String limit, String offset) {
         try {
             JSONArray result = new JSONArray();
 
             var allNodes = provider.getSession().executeRead(tx -> {
-                var query = new Query("MATCH (a:" + label + ") WHERE id(a)="+ id +" RETURN a LIMIT " + limit + ";");
+                var query = new Query("MATCH (a:" + label + ") WHERE a." + propertyName + "" + operator + "'"+ propertyValue +"' RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToJson(node.get("a"));
@@ -461,20 +461,20 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a Neo4j query.");
+            throw PullForestException.innerException(e);
         }
     }
 
-    @Override public JSONArray getRow(String tableName, String id, String limit) {
+    @Override public JSONArray getRows(String tableName, String propertyName, String propertyValue, String operator, String limit, String offset) {
         if (tableName.equals("nodes")) {
-            return getNode(id, limit);
-        }
-        
-        if (tableName.equals("relationships")) {
-            return getRelationship(id, limit);
+            return getNode(propertyName, propertyValue, operator, limit, offset);
         }
 
-        return getByLabelAndId(tableName, id, limit);
+        if (tableName.equals("relationships")) {
+            return getRelationship(propertyName,propertyValue, operator, limit, offset);
+        }
+
+        return getByLabelAndId(tableName, propertyName, propertyValue, operator, limit, offset);
     }
 
 }

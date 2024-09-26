@@ -39,6 +39,7 @@ import com.mongodb.client.model.Filters;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -272,101 +273,148 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override public JSONArray getTableNames(String limit) {
+    @Override public JSONArray getTableNames(String limit, String offsetString) {
         try {
             MongoIterable<String> tableNames = provider.getDatabase().listCollectionNames();
             JSONArray result = new JSONArray();
 
             int lim = Integer.parseInt(limit);
-            int count = 0;
-            for (String tableName : tableNames) {
-                result.put(tableName);
+            int offset = Integer.parseInt(offsetString);
 
-                count++;
-                if (count >= lim) {
-                    break;
+            int index = 0;
+            int count = 0;
+
+            for (String tableName : tableNames) {
+                if (index >= offset) {
+                    result.put(tableName);
+                    count++;
+
+                    if (count >= lim) {
+                        break;
+                    }
                 }
+
+                index++;
             }
 
             return result;
         }
         catch (Exception e) {
-			throw QueryException.message("Error when executing a MongoDB query.");
+			throw PullForestException.innerException(e);
 		}
     }
 
-    @Override public JSONArray getTable(String tableName, String limit){
+    @Override public JSONArray getTable(String tableName, String limit, String offsetString){
         try {
             JSONArray result = new JSONArray();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
             FindIterable<Document> documents = collection.find();
-    
+
             int lim = Integer.parseInt(limit);
+            int offset = Integer.parseInt(offsetString);
+
+            int index = 0;
             int count = 0;
+
             for (Document document : documents) {
-                JSONObject jsonObject = new JSONObject(document.toJson());
-                JSONObject dataWithoutQuotationMarks = new JSONObject();
-                Iterator<String> keys = jsonObject.keys();
-                
-                while(keys.hasNext()) {
-                    String key = keys.next();
-                    Object value = jsonObject.get(key);
-                    if (value instanceof String) {
-                        dataWithoutQuotationMarks.put(key, ((String) value).replace("\"", ""));
-                    } else {
-                        dataWithoutQuotationMarks.put(key, value);
+                if (index >= offset) {
+                    JSONObject jsonObject = new JSONObject(document.toJson());
+                    JSONObject dataWithoutQuotationMarks = new JSONObject();
+                    Iterator<String> keys = jsonObject.keys();
+
+                    while(keys.hasNext()) {
+                        String key = keys.next();
+                        Object value = jsonObject.get(key);
+                        if (value instanceof String) {
+                            dataWithoutQuotationMarks.put(key, ((String) value).replace("\"", ""));
+                        } else {
+                            dataWithoutQuotationMarks.put(key, value);
+                        }
+                    }
+
+                    result.put(dataWithoutQuotationMarks);
+                    count++;
+
+                    if (count >= lim) {
+                        break;
                     }
                 }
-                result.put(dataWithoutQuotationMarks);
-    
-                count++;
-                if (count >= lim) {
-                    break;
-                }
+
+                index++;
             }
-    
+
             return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a MongoDB query.");
+            throw PullForestException.innerException(e);
         }
     }
 
-    @Override public JSONArray getRow(String tableName, String id, String limit){
+    private Bson createFilter(String columnName, String operator, String columnValue) {
+        var value = "_id".equals(columnName) ? new ObjectId(columnValue) : columnValue;
+
+        switch (operator) {
+            case "=":
+                return Filters.eq(columnName, value);
+            case "<>":
+                return Filters.ne(columnName, value);
+            case "<":
+                return Filters.lt(columnName, value);
+            case ">":
+                return Filters.gt(columnName, value);
+            case "<=":
+                return Filters.lte(columnName, value);
+            case ">=":
+                return Filters.gte(columnName, value);
+            default:
+                throw new UnsupportedOperationException("Unsupported operator: " + operator);
+        }
+    }
+
+    @Override public JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offsetString){
         try {
             JSONArray result = new JSONArray();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
-            Bson filter = Filters.eq("_id", new org.bson.types.ObjectId(id));
+            Bson filter = createFilter(columnName, operator, columnValue);
             FindIterable<Document> documents = collection.find(filter);
-    
+
             int lim = Integer.parseInt(limit);
+            int offset = Integer.parseInt(offsetString);
+
+            int index = 0;
             int count = 0;
+
             for (Document document : documents) {
-                JSONObject jsonObject = new JSONObject(document.toJson());
-                JSONObject dataWithoutQuotationMarks = new JSONObject();
-                Iterator<String> keys = jsonObject.keys();
-                
-                while(keys.hasNext()) {
-                    String key = keys.next();
-                    Object value = jsonObject.get(key);
-                    if (value instanceof String) {
-                        dataWithoutQuotationMarks.put(key, ((String) value).replace("\"", ""));
-                    } else {
-                        dataWithoutQuotationMarks.put(key, value);
+                if (index >= offset) {
+                    JSONObject jsonObject = new JSONObject(document.toJson());
+                    JSONObject dataWithoutQuotationMarks = new JSONObject();
+                    Iterator<String> keys = jsonObject.keys();
+
+                    while(keys.hasNext()) {
+                        String key = keys.next();
+                        Object value = jsonObject.get(key);
+                        if (value instanceof String) {
+                            dataWithoutQuotationMarks.put(key, ((String) value).replace("\"", ""));
+                        } else {
+                            dataWithoutQuotationMarks.put(key, value);
+                        }
+                    }
+
+                    result.put(dataWithoutQuotationMarks);
+                    count++;
+
+                    if (count >= lim) {
+                        break;
                     }
                 }
-                result.put(dataWithoutQuotationMarks);
-    
-                count++;
-                if (count >= lim) {
-                    break;
-                }
+
+                index++;
             }
-    
+
             return result;
         }
         catch (Exception e){
-            throw QueryException.message("Error when executing a MongoDB query.");
+            throw PullForestException.innerException(e);
         }
     }
 

@@ -14,10 +14,10 @@ public interface AbstractPullWrapper {
 
     QueryResult executeQuery(QueryStatement statement);
 
-    JSONArray getTableNames(String limit);
+    JSONArray getTableNames(String limit, String offset);
 
-    JSONArray getTable(String tableName, String limit);
+    JSONArray getTable(String tableName, String limit, String offset);
 
-    JSONArray getRow(String tableName, String id, String limit);
+    JSONArray getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset);
 
 }
