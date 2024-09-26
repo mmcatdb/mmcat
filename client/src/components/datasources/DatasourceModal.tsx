@@ -10,6 +10,7 @@ import {
     type DatasourceInit,
     type Datasource,
 } from '@/types/datasource';
+import toast from 'react-hot-toast';
 
 type DatasourceModalProps = {
     onDatasourceCreated: (newDatasource: Datasource) => void;
@@ -30,7 +31,7 @@ export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) =
 
     const handleSubmit = async () => {
         if (!datasourceType || !validateSettings(settings, datasourceType)) {
-            alert('Please fill out all required fields based on the datasource type.');
+            toast.error('Please fill out all fields.');
             return;
         }
     
@@ -53,19 +54,20 @@ export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) =
                 setSettings({});
     
                 onOpenChange();
+
+                toast.success('Datasource created.');
             }
             else {
                 console.error('Failed to create datasource:');
-                alert('Failed to create datasource. Please try again.');
+                toast.error('Failed to create datasource. Please try again.');
             }
         }
         catch (error) {
             console.error('An unexpected error occurred:', error);
-            alert('An unexpected error occurred. Please try again.');
+            toast.error('An unexpected error occurred. Please try again.');
         }
     };
     
-
     const handleClose = () => {
         setDatasourceType('');
         setDatasourceLabel('');

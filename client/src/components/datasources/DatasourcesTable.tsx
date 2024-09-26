@@ -1,4 +1,3 @@
-// import { useEffect, useState } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import type { Datasource } from '@/types/datasource';
 
