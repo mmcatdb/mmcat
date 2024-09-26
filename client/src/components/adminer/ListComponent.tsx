@@ -24,7 +24,7 @@ export function ListComponent({ value, depth }: ListComponentProps) {
             }}>
                 {len > 1 && depth > 0 && '{'}
                 {Object.entries(value).map(([ key, val ]) => (
-                    <li key={key}>
+                    <li className='ps-8' key={key}>
                         <strong>{key}:</strong> <ListComponent value={val as unknown} depth={depth + 1} />
                     </li>
                 ))}
@@ -42,7 +42,7 @@ export function ListComponent({ value, depth }: ListComponentProps) {
             }}>
                 {len > 1 && depth > 0 && '{'}
                 {value.map((item, index) => (
-                    <li key={index}><ListComponent value={item as unknown} depth={depth + 1} /></li>
+                    <li className='ps-8' key={index}><ListComponent value={item as unknown} depth={depth + 1} /></li>
                 ))}
                 {len > 1 && depth > 0 && '}'}
             </ul>
