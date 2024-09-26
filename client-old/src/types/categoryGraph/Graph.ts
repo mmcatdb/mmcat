@@ -28,7 +28,6 @@ export class Graph {
     /// functions for Mapping editor
     public getChildrenForNode(node: Node): Node[] {
         const outgoingEdges = Array.from(this.edges.values()).filter(edge => edge.domainNode.equals(node));
-
         return outgoingEdges.map(edge => edge.codomainNode);
     }
 
@@ -44,12 +43,8 @@ export class Graph {
         return SequenceSignature.fromSignature(edge.schemaMorphism.signature, node);
     }  
 
-    public getParentNode(node: Node): Node | undefined {
-        const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));
-        
-        if (incomingEdges.length === 0) 
-            return undefined;       
-
+    public getParentNode(node: Node): Node {
+        const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));    
         return incomingEdges[0].domainNode;
     }
     ///

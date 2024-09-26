@@ -242,6 +242,11 @@ export class Node {
         const pathMarker = new PathMarker(this, filter);
         pathMarker.markPathsFromRootNode();
     }
+
+    // functions to highlight nodes in Mapping Editor
+    highlight(): void {
+        this.node.addClass('highlighted');
+    }
 }
 
 function createNodeDefinition(object: SchemaObject, position: Position, node: Node, classes?: string): ElementDefinition {

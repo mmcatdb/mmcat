@@ -39,6 +39,18 @@ const emit = defineEmits([ 'finish' ]);
 const state = shallowRef<StateValue>({ type: State.Default });
 const selectedNodes = ref<Node[]>([]);
 
+function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
+    if (!ids)
+        return SignatureIdFactory.createEmpty();
+
+    if (ids.isSignatures && ids.signatureIds.length > 0)
+        return ids.signatureIds[0];
+
+    return SignatureIdFactory.createEmpty();
+}
+
+const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
+
 function setStateToDefault() {
     state.value = { type: State.Default };
 }

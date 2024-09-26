@@ -3,6 +3,7 @@ import type { StaticName } from '@/types/identifiers';
 import type { RootPropertyFromServer } from '../serverTypes';
 import type { GraphChildProperty } from './compositeTypes';
 import { SequenceSignature } from './SequenceSignature';
+import { GraphComplexProperty } from './GraphComplexProperty';
 
 export class GraphRootProperty {
     name: StaticName;
@@ -13,6 +14,19 @@ export class GraphRootProperty {
         this.name = name;
         this._subpaths = [ ...subpaths ];
         this._signature = SequenceSignature.empty(rootNode);
+    }
+
+    highlightPath() {
+        this.node.highlight();
+        this.highlightSubpaths(this._subpaths);
+    }
+
+    private highlightSubpaths(subpaths: GraphChildProperty[]) {
+        subpaths.forEach(subpath => {
+            subpath.node.highlight();
+            if (subpath instanceof GraphComplexProperty) 
+                this.highlightSubpaths(subpath.subpaths);
+        });
     }
 
     update(newName: StaticName): void {

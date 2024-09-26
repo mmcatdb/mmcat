@@ -38,6 +38,9 @@ const selectedLogicalModel = shallowRef<LogicalModel>();
 const selectedNodes = ref<Node[]>([]);
 const rootConfirmed = ref(false);
 
+let previousParentProperty: GraphParentProperty;
+let processedNodes = new Set<number>();
+
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
 const categoryId = useSchemaCategoryId();
@@ -57,6 +60,7 @@ function confirmDatasourceAndRootNode() {
 
     selectingRootNode.value.unselect();
     selectingRootNode.value.becomeRoot();
+    selectingRootNode.value.highlight();
     rootConfirmed.value = true;
 }
 
@@ -66,47 +70,64 @@ function confirmSelectedNodes() {
     const label = selectingRootNode.value.metadata.label.toLowerCase();
     accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
 
-    selectedNodes.value.forEach(node => {
-        const subpath = createSubpathForNode(node);
-        if (subpath) 
-            accessPath.value?.updateOrAddSubpath(subpath);        
-    });
+    selectedNodes.value.forEach(node => processNode(node));
+    processedNodes.clear();
+
+    accessPath.value?.highlightPath();
 }
 
-let previousParentProperty: GraphParentProperty;
+function processNode(node: Node) {
+    if (!processedNodes.has(node.schemaObject.key.value)) {
+        const subpath = createSubpathForNode(node);
+        if (subpath) {
+            accessPath.value?.updateOrAddSubpath(subpath);        
+            processedNodes.add(node.schemaObject.key.value);
+        }
+    }
+}
 
 function createSubpathForNode(node: Node): GraphChildProperty | undefined {
     if (!graph.value) {
-        console.error("Graph instance is not available.");
+        console.error('Graph instance is not available.');
         return;
     }
 
-    const childrenAll = graph.value.getChildrenForNode(node);
-    const children = childrenAll.filter(child => 
-        selectedNodes.value.some(selectedNode => selectedNode.equals(child)),
-    );
+    const children = filterChildren(node);
     const parentNode = graph.value.getParentNode(node);
     const signature = graph.value.getSignature(node, parentNode);
-    const label = node.metadata.label.toLowerCase();
-    console.log("current label: ", label);
+    const label = node.metadata.label.toLowerCase(); // why to lower case though?
+    let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) ?? previousParentProperty : previousParentProperty;
 
-    let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : previousParentProperty;  
-    console.log('current previous parent prop: ', previousParentProperty);
-    console.log('current parentProperty: ' + parentProperty);
     if (!parentProperty) return;
 
-    if (children.length === 0) {
-        console.log('no children');
-        const simpleProperty = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
-        //previousParentProperty = simpleProperty;
-        return simpleProperty;
-    } else {
-        console.log('children');
+    let subpath: GraphChildProperty;
+    if (children.length === 0) 
+        subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
+    else 
+        subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
+
+    if (subpath instanceof GraphComplexProperty) {
+        previousParentProperty = subpath;
         const childSubpaths = children.map(child => createSubpathForNode(child));
-        const complexProperty = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, childSubpaths);
-        previousParentProperty = complexProperty;
-        return complexProperty;
+        childSubpaths.forEach(childSubpath => {
+            if (childSubpath) 
+                subpath.updateOrAddSubpath(childSubpath);            
+        });
     }
+
+    processedNodes.add(node.schemaObject.key.value);
+    return subpath;
+}
+
+function filterChildren(node: Node): Node[] {
+    if (graph.value) {
+        const allChildren = graph.value.getChildrenForNode(node);
+        return allChildren.filter(child => 
+            selectedNodes.value.some(selectedNode => selectedNode.equals(child)) &&
+            !processedNodes.has(child.schemaObject.key.value)
+        );
+    }
+    return [];
 }
 
 function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty | undefined {
@@ -114,8 +135,7 @@ function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty 
 }
 
 function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
-    if (property.node.equals(node)) 
-        return property;
+    if (property.node.equals(node)) return property;
 
     if (property instanceof GraphComplexProperty) {
         for (const subpath of property.subpaths) {
