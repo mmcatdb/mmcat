@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
+import { GraphComplexProperty, GraphSimpleProperty, GraphRootProperty } from '@/types/accessPath/graph';
+import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SelectionType, type Node } from '@/types/categoryGraph';
-import { shallowRef, ref, watch } from 'vue';
+import { shallowRef, ref, watch, computed } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { Datasource } from '@/types/datasource';
 import StaticNameInput from '../input/StaticNameInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import PrimaryKeyInput from '../input/PrimaryKeyInput.vue';
-import { ObjectIds, SignatureId, SignatureIdFactory } from '@/types/identifiers';
+import { ObjectIds, SignatureId, SignatureIdFactory, StaticName } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
+import { useEvocat } from '@/utils/injects';
 
 enum State {
     Default, // user should select some nodes to create a kind
@@ -26,18 +28,20 @@ type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.TwoNodes, { nodes: Node[] }> |
     GenericStateValue<State.MultipleNodes, { nodes: Node[] }>;
     
-
 type AccessPathEditorProps = {
     datasource: Datasource;
     rootProperty: GraphRootProperty;
 };
 
+const { graph } = $(useEvocat());
+
 const props = defineProps<AccessPathEditorProps>();
 
-const emit = defineEmits([ 'finish' ]);
+const emit = defineEmits([ 'finish', 'update:rootProperty' ]);
 
 const state = shallowRef<StateValue>({ type: State.Default });
 const selectedNodes = ref<Node[]>([]);
+const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
 function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     if (!ids)
@@ -55,20 +59,87 @@ function setStateToDefault() {
     state.value = { type: State.Default };
 }
 
-function insertClicked() {
-    console.log('Inserting node:', state.value);
+function insertClicked(node: Node) {
+    insert(node);
+    node.highlight();
+    selectedNodes.value = [];
 }
 
-function deleteClicked() {
-    console.log('Deleting nodes:', selectedNodes.value);
-    selectedNodes.value = []; // Clear the selection after deletion
+function insert(node: Node): boolean {
+    const children = graph.getChildrenForNode(node);
+    const parentNode = graph.getParentNode(node);
+    const label = node.metadata.label.toLowerCase();
+    let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : undefined;
+
+    if (!parentProperty) return false;
+
+    const signature = graph.getSignature(node, parentNode);
+
+    let subpath: GraphChildProperty;
+    if (children.length === 0)
+        subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
+    else 
+        subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
+
+    parentProperty.updateOrAddSubpath(subpath);
+    return true;
 }
 
-function setRootClicked() {
-    if (state.value.type === State.OneNode) {
-        console.log('Setting root to node:', state.value.node);
+function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty | undefined {
+    return props.rootProperty ? searchSubpathsForNode(props.rootProperty, parentNode) : undefined;
+}
+
+function findSubpathForNode(node: Node): GraphChildProperty | undefined {
+    return searchSubpathsForNode(props.rootProperty, node) as GraphChildProperty | undefined;
+}
+
+function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
+    if (property.node.equals(node)) return property;
+
+    if (property instanceof GraphComplexProperty || property instanceof GraphRootProperty) {
+        for (const subpath of property.subpaths) {
+            const result = searchSubpathsForNode(subpath, node);
+            if (result) return result;            
+        }
     }
 }
+
+function insertBetweenClicked() {
+    console.log('Inserting betweenxx');
+}
+
+function deleteClicked(nodes: Node[]) {
+    nodes.forEach(node => {
+        if (isNodeInAccessPath(node)) {
+            node.unhighlight();
+            props.rootProperty.removeSubpathForNode(node);   
+        }
+    });
+    selectedNodes.value = [];
+}
+
+function setRootClicked(node: Node) {
+    const label = node.metadata.label.toLowerCase();
+    const newRoot = new GraphRootProperty(StaticName.fromString(label), node);
+
+    //be aware if I want to add a root, (like user) I dont have a parent prop
+    if (!isNodeInAccessPath(node)) {
+        if (!insert(node)) {
+            node.unselect();
+            selectedNodes.value = [];
+            emit('update:rootProperty', newRoot);
+            return;
+        }   
+    }
+    const newSubpaths = findSubpathForNode(node);
+    if (newSubpaths) 
+        newRoot.updateOrAddSubpath(newSubpaths);    
+    
+    node.unselect();
+    selectedNodes.value = [];
+    emit('update:rootProperty', newRoot);
+}
+
 
 function renameClicked() {
     if (state.value.type === State.OneNode) {
@@ -80,38 +151,21 @@ function finishMapping() {
     emit('finish', primaryKey.value);
 }
 
-// this never gets entered, but somehow when I dont have it here the nodes dont get unselected when I click again
-function onNodeClick(node: Node) {
-    console.log("Am I here?");
-    const index = selectedNodes.value.indexOf(node);
-
-    if (index !== -1) {
-        // If the node is already selected, unselect it and remove it from the selected nodes
-        node.unselect();
-        selectedNodes.value.splice(index, 1);
-    } else {
-        // If the node is not selected, add it to the selection
-        selectedNodes.value.push(node);
-        node.select({ type: SelectionType.Root, level: selectedNodes.value.length - 1 });
-    }
-
-    // Reassign selectedNodes.value to trigger reactivity
-    console.log(selectedNodes);
-    console.log("changing the nodes");
-    selectedNodes.value = [...selectedNodes.value];  // This ensures Vue detects the changes
-}
-
-
 watch(selectedNodes, (nodes) => {
-    if (nodes.length === 0) 
+    const validNodes = nodes.filter((node): node is Node => node !== undefined);
+    if (validNodes.length === 0) 
         state.value = { type: State.Default };
-    else if (nodes.length === 1) 
-        state.value = { type: State.OneNode, node: nodes[0] as Node };
-    else if (nodes.length === 2) 
-        state.value = { type: State.TwoNodes, nodes: nodes as Node[] };
+    else if (validNodes.length === 1) 
+        state.value = { type: State.OneNode, node: validNodes[0] as Node };
+    else if (validNodes.length === 2) 
+        state.value = { type: State.TwoNodes, nodes: validNodes as Node[] };
     else 
-        state.value = { type: State.MultipleNodes, nodes: nodes as Node[] };    
+        state.value = { type: State.MultipleNodes, nodes: validNodes as Node[] };    
 });
+
+function isNodeInAccessPath(node: Node): boolean {
+    return props.rootProperty.containsNode(node) ?? false;
+}
 
 </script>
 
@@ -119,8 +173,13 @@ watch(selectedNodes, (nodes) => {
     <div class="divide">
         <div>
             <div class="editor">
+                <template v-if="state.type !== State.Default">
+                    <ValueRow label="Selected Nodes:">
+                        {{ selectedNodeLabels }}
+                    </ValueRow>
+                </template>
                 <template v-if="state.type === State.Default">
-                    <h2 class="custom-text">Select Nodes to edit</h2>
+                    <h2 class="custom-text">Select valid nodes to edit</h2>
                     <div class="button-row">
                         <button
                             @click="finishMapping"
@@ -129,35 +188,44 @@ watch(selectedNodes, (nodes) => {
                         </button>
                     </div>
                 </template>
-                <template v-else-if="state.type === State.OneNode">
+                <template v-if="state.type === State.OneNode">
                     <div class="options">
-                        <button @click="insertClicked">
+                        <button 
+                            v-if="!isNodeInAccessPath(state.node)"
+                            @click="insertClicked(state.node)"
+                        >
                             Insert
                         </button>
-                        <button @click="deleteClicked">
+                        <button
+                            v-if="isNodeInAccessPath(state.node)"
+                            @click="deleteClicked([state.node])"
+                        >
                             Delete
                         </button>
-                        <button @click="setRootClicked">
+                        <button @click="setRootClicked(state.node)">
                             Set Root
                         </button>
-                        <button @click="renameClicked">
+                        <button 
+                            v-if="isNodeInAccessPath(state.node)"
+                            @click="renameClicked"
+                        >
                             Rename
                         </button>
                     </div>
                 </template>
-                <template v-else-if="state.type === State.TwoNodes">
+                <template v-if="state.type === State.TwoNodes">
                     <div class="options">
-                        <button @click="insertClicked">
+                        <button @click="insertBetweenClicked">
                             Insert Between
                         </button>
-                        <button @click="deleteClicked">
+                        <button @click="deleteClicked(state.nodes)">
                             Delete
                         </button>
                     </div>
                 </template>
-                <template v-else-if="state.type === State.MultipleNodes">
+                <template v-if="state.type === State.MultipleNodes">
                     <div class="options">
-                        <button @click="deleteClicked">
+                        <button @click="deleteClicked(state.nodes)">
                             Delete
                         </button>
                     </div>
@@ -166,8 +234,7 @@ watch(selectedNodes, (nodes) => {
         </div>
         <NodeInput
             :model-value="selectedNodes"
-            :type="SelectionType.Selected"
-            @node-click="onNodeClick" 
+            :type="SelectionType.Selected" 
             @update:modelValue="selectedNodes = $event"
         />
         <ParentPropertyDisplay

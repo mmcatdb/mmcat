@@ -43,10 +43,17 @@ export class Graph {
         return SequenceSignature.fromSignature(edge.schemaMorphism.signature, node);
     }  
 
-    public getParentNode(node: Node): Node {
-        const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));    
+    public getParentNode(node: Node): Node | undefined {
+        const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));
+    
+        if (incomingEdges.length === 0) {
+            console.warn('No incoming edges found for node:', node);
+            return undefined;
+        }
+    
         return incomingEdges[0].domainNode;
     }
+    
     ///
 
     public resetElements(groupsData: GroupData[]): void {

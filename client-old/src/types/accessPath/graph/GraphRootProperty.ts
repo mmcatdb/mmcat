@@ -1,7 +1,7 @@
 import type { Node } from '@/types/categoryGraph';
 import type { StaticName } from '@/types/identifiers';
 import type { RootPropertyFromServer } from '../serverTypes';
-import type { GraphChildProperty } from './compositeTypes';
+import type { GraphChildProperty, GraphParentProperty } from './compositeTypes';
 import { SequenceSignature } from './SequenceSignature';
 import { GraphComplexProperty } from './GraphComplexProperty';
 
@@ -16,6 +16,21 @@ export class GraphRootProperty {
         this._signature = SequenceSignature.empty(rootNode);
     }
 
+    containsNode(node: Node): boolean {
+        if (this.node.equals(node)) return true;      
+
+        return this._subpaths.some(subpath => this.searchSubpathsForNode(subpath, node));
+    }
+
+    searchSubpathsForNode(property: GraphParentProperty, node: Node): boolean {
+        if (property.node.equals(node)) return true;        
+
+        if (property instanceof GraphComplexProperty) 
+            return property.subpaths.some(subpath => this.searchSubpathsForNode(subpath, node));
+        
+        return false;
+    }
+
     highlightPath() {
         this.node.highlight();
         this.highlightSubpaths(this._subpaths);
@@ -26,6 +41,19 @@ export class GraphRootProperty {
             subpath.node.highlight();
             if (subpath instanceof GraphComplexProperty) 
                 this.highlightSubpaths(subpath.subpaths);
+        });
+    }
+
+    unhighlightPath() {
+        this.node.unhighlight();
+        this.unhighlightSubpaths(this._subpaths);
+    }
+
+    private unhighlightSubpaths(subpaths: GraphChildProperty[]) {
+        subpaths.forEach(subpath => {
+            subpath.node.unhighlight();
+            if (subpath instanceof GraphComplexProperty) 
+                this.unhighlightSubpaths(subpath.subpaths);
         });
     }
 
@@ -46,6 +74,25 @@ export class GraphRootProperty {
     removeSubpath(oldSubpath: GraphChildProperty): void {
         this._subpaths = this._subpaths.filter(subpath => !subpath.signature.equals(oldSubpath.signature));
     }
+
+    removeSubpathForNode(node: Node): void {
+        if (this.node.equals(node)) {
+            console.warn('Cannot remove the root node.');
+            return;
+        }
+    
+        const subpathToRemove = this._subpaths.find(subpath => subpath.node.equals(node));
+        if (subpathToRemove) {
+            this.removeSubpath(subpathToRemove);
+            return;
+        }
+    
+        for (const subpath of this._subpaths) {
+            if (subpath instanceof GraphComplexProperty) 
+                subpath.removeSubpathForNode(node);            
+        }
+    }
+    
 
     get isAuxiliary(): boolean {
         return true;

@@ -164,6 +164,15 @@ function onNodeTapHandler(node: Node) {
     }
 }
 
+function updateRootProperty(newRootProperty: GraphRootProperty) {
+    accessPath.value?.node.removeRoot();
+    accessPath.value?.unhighlightPath();
+
+    newRootProperty.node.becomeRoot();
+    accessPath.value = newRootProperty;
+    accessPath.value.highlightPath();
+}
+
 async function createMapping(primaryKey: SignatureId) {
     if (! selectedLogicalModel.value || !graph.value || !accessPath.value)
         return;
@@ -229,6 +238,7 @@ async function createMapping(primaryKey: SignatureId) {
                     :datasource="selectedLogicalModel.datasource"
                     :root-property="accessPath"
                     @finish="createMapping"
+                    @update:rootProperty="updateRootProperty"
                 />
             </div>
         </div>

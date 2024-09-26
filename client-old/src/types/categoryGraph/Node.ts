@@ -234,6 +234,13 @@ export class Node {
         this.node.addClass(NodeTag.Root);
     }
 
+    removeRoot(): void {
+        if (this.tags.has(NodeTag.Root)) {
+            this.tags.delete(NodeTag.Root);
+            this.node.removeClass(NodeTag.Root);
+        }
+    }
+
     equals(other: Node | null | undefined): boolean {
         return !!other && this.schemaObject.equals(other.schemaObject);
     }
@@ -243,10 +250,15 @@ export class Node {
         pathMarker.markPathsFromRootNode();
     }
 
-    // functions to highlight nodes in Mapping Editor
+    /// To highlight nodes in Mapping Editor
     highlight(): void {
         this.node.addClass('highlighted');
     }
+
+    unhighlight(): void {
+        this.node.removeClass('highlighted');
+    }
+    ///
 }
 
 function createNodeDefinition(object: SchemaObject, position: Position, node: Node, classes?: string): ElementDefinition {
