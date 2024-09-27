@@ -18,6 +18,7 @@ export function AdminerPage() {
 
     useEffect(() => {
         setTableName(undefined);
+        setFilters(undefined);
     }, [ datasource ]);
 
     return (
