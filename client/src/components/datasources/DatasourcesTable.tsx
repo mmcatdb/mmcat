@@ -1,13 +1,15 @@
-import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
+import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
 import type { Datasource } from '@/types/datasource';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
     loading: boolean;
     error: string | null;
+    onDeleteDatasource: (id: string) => void;
 };
 
-export const DatasourcesTable = ({ datasources, loading, error }: DatasourcesTableProps) => {
+export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasource }: DatasourcesTableProps) => {
     if (loading) {
         return (
             <div>
@@ -22,18 +24,17 @@ export const DatasourcesTable = ({ datasources, loading, error }: DatasourcesTab
 
     return (
         <div>
-            <DatasourceTable datasources={datasources} />
+            <DatasourceTable datasources={datasources} onDeleteDatasource={onDeleteDatasource} />
         </div>
     );
 };
 
 type DatasourceTableProps = {
     datasources: Datasource[];
+    onDeleteDatasource: (id: string) => void;
 }
 
-function DatasourceTable(props: DatasourceTableProps) {
-    const { datasources } = props;
-
+function DatasourceTable({ datasources, onDeleteDatasource }: DatasourceTableProps) {
     return (
         <Table aria-label='Datasource Table'>
             <TableHeader>
@@ -42,6 +43,7 @@ function DatasourceTable(props: DatasourceTableProps) {
                 <TableColumn>Label</TableColumn>
                 <TableColumn>Settings</TableColumn>
                 <TableColumn>Configuration</TableColumn>
+                <TableColumn>Actions</TableColumn>
             </TableHeader>
             <TableBody emptyContent={'No rows to display.'}>
                 {datasources.map((datasource) => (
@@ -54,6 +56,17 @@ function DatasourceTable(props: DatasourceTableProps) {
                         </TableCell>
                         <TableCell>
                             {JSON.stringify(datasource.configuration, null, 2)}
+                        </TableCell>
+                        <TableCell>
+                            <Button
+                                isIconOnly
+                                aria-label='Delete'
+                                color='danger'
+                                variant='light'
+                                onPress={() => onDeleteDatasource(datasource.id)}
+                            >
+                                <TrashIcon className='w-5 h-5' />
+                            </Button>
                         </TableCell>
                     </TableRow>
                 ))}

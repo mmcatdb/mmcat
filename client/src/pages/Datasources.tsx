@@ -4,6 +4,7 @@ import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
 import { DatasourceModal } from '@/components/datasources/DatasourceModal';
 import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
+import { toast } from 'react-toastify';
 
 export function DatasourcesPage() {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
@@ -38,6 +39,25 @@ export function DatasourcesPage() {
         setDatasources((prevDatasources) => [ ...prevDatasources, newDatasource ]);
     };
 
+    // callback to delete a datasource
+    const handleDeleteDatasource = async (id: string) => {
+        try {
+            const response = await api.datasources.deleteDatasource({ id });
+            
+            if (response.status) {
+                setDatasources((prevDatasources) =>
+                    prevDatasources.filter((datasource) => datasource.id !== id),
+                );
+            } else {
+                toast.error('Failed to delete datasource. Please try again.');
+            }
+        }
+        catch (error) {
+            console.error('Error deleting datasource:', error);
+            toast.error('An error occurred while deleting the datasource.');
+        }
+    };
+
     return (
         <CommonPage>
             <div className='flex items-center justify-between'>
@@ -46,7 +66,12 @@ export function DatasourcesPage() {
             </div>
 
             <div className='mt-5'>
-                <DatasourcesTable datasources={datasources} loading={loading} error={error} />
+                <DatasourcesTable 
+                    datasources={datasources} 
+                    loading={loading} 
+                    error={error} 
+                    onDeleteDatasource={handleDeleteDatasource}
+                />
             </div>
         </CommonPage>
     );
