@@ -87,8 +87,6 @@ public class AdminerController {
             }
         }
 
-        System.out.println(filterList);
-
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
         JSONObject json = myWrapper.getRows(table, filterList, limit, offset);
 
