@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 
 type ColumnFormProps = Readonly<{
-    setFilter: (filter: ColumnFilter) => void;
+    filters: ColumnFilter[] | undefined;
+    setFilters: (newFilters: ColumnFilter[]) => void;
 }>;
 
-export function ColumnForm({ setFilter }: ColumnFormProps) {
+export function ColumnForm({ filters, setFilters }: ColumnFormProps) {
     const [ columnName, setColumnName ] = useState<string>('');
     const [ columnValue, setColumnValue ] = useState<string>('');
     const [ operator, setOperator ] = useState<Operator>(Operator.eq);
@@ -19,7 +20,7 @@ export function ColumnForm({ setFilter }: ColumnFormProps) {
             operator,
         };
 
-        setFilter(filter);
+        setFilters(filters ? [ ...filters, filter ] : [ filter ]);
     };
 
     return (

@@ -13,7 +13,7 @@ const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 export function AdminerPage() {
     const [ datasource, setDatasource ] = useState<Datasource>();
     const [ tableName, setTableName ] = useState<string>();
-    const [ filter, setFilter ] = useState<ColumnFilter>();
+    const [ filters, setFilters ] = useState<ColumnFilter[]>();
     const [ limit, setLimit ] = useState<number>(50);
 
     useEffect(() => {
@@ -38,15 +38,22 @@ export function AdminerPage() {
                             <div className='mt-5' style={{ fontSize: '14px' }}>
                                 <LimitForm limit={limit} setLimit={setLimit}/>
                             </div>
+
                             <div className='mt-5' style={{ fontSize: '14px' }}>
-                                <ColumnForm setFilter={setFilter}/>
+                                <ColumnForm filters={filters} setFilters={setFilters} />
                             </div>
+
+                            {filters?.map((filter, index) => (
+                                <div key={index} className='mt-5' style={{ fontSize: '14px' }}>
+                                    <ColumnForm filters={filters} setFilters={setFilters} />
+                                </div>
+                            ))}
                         </>
                     )}
 
                     <div className='mt-5' style={{ fontSize: '14px' }}>
                         {typeof tableName === 'string' && (
-                            <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}?`} datasourceType={datasource.type} limit={limit}/>
+                            <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}`} filters={filters} datasourceType={datasource.type} limit={limit}/>
                         )}
                     </div>
                 </>
