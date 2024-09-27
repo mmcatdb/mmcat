@@ -10,6 +10,8 @@ export function DatasourcesPage() {
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
 
+    // console.log("On render", datasources);
+
     useEffect(() => {
         const fetchDatasources = async () => {
             try {

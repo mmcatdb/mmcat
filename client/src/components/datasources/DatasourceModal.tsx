@@ -1,6 +1,6 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, useDisclosure, Select, SelectItem } from '@nextui-org/react';
 import { useState } from 'react';
-import { AddIcon } from '../icons/AddIcon';
+import { AddIcon } from '@/components/icons/AddIcon';
 import { api } from '@/api';
 import {
     DATASOURCE_TYPES,
@@ -10,7 +10,7 @@ import {
     type DatasourceInit,
     type Datasource,
 } from '@/types/datasource';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 type DatasourceModalProps = {
     onDatasourceCreated: (newDatasource: Datasource) => void;

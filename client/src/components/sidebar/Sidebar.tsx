@@ -1,27 +1,44 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, LightBulbIcon, CircleStackIcon, CodeBracketSquareIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+    HomeIcon as HomeIconOutline,
+    LightBulbIcon as LightBulbIconOutline,
+    CircleStackIcon as CircleStackIconOutline,
+    CodeBracketSquareIcon as CodeBracketSquareIconOutline,
+    Bars3Icon,
+    XMarkIcon,
+} from '@heroicons/react/24/outline';
+import {
+    HomeIcon as HomeIconSolid,
+    LightBulbIcon as LightBulbIconSolid,
+    CircleStackIcon as CircleStackIconSolid,
+    CodeBracketSquareIcon as CodeBracketSquareIconSolid,
+} from '@heroicons/react/24/solid';
 
 const sidebarItems = [
     {
         label: 'Home',
         route: '/',
-        icon: <HomeIcon className='mr-2 w-5 h-5' />,
+        outlineIcon: <HomeIconOutline className='mr-2 w-5 h-5' />,
+        solidIcon: <HomeIconSolid className='mr-2 w-5 h-5' />,
     },
     {
         label: 'About',
         route: '/about',
-        icon: <LightBulbIcon className='mr-2 w-5 h-5' />,
+        outlineIcon: <LightBulbIconOutline className='mr-2 w-5 h-5' />,
+        solidIcon: <LightBulbIconSolid className='mr-2 w-5 h-5' />,
     },
     {
         label: 'Datasources',
         route: '/datasources',
-        icon: <CircleStackIcon className='mr-2 w-5 h-5' />,
+        outlineIcon: <CircleStackIconOutline className='mr-2 w-5 h-5' />,
+        solidIcon: <CircleStackIconSolid className='mr-2 w-5 h-5' />,
     },
     {
         label: 'Adminer',
         route: '/adminer',
-        icon: <CodeBracketSquareIcon className='mr-2 w-5 h-5' />,
+        outlineIcon: <CodeBracketSquareIconOutline className='mr-2 w-5 h-5' />,
+        solidIcon: <CodeBracketSquareIconSolid className='mr-2 w-5 h-5' />,
     },
 ];
 
@@ -52,7 +69,7 @@ function Sidebar() {
                 >
                     <XMarkIcon className='w-6 h-6 text-zinc-500' />
                 </button>
-                
+
                 <h1 className='text-2xl font-semibold mb-10'>MM-cat</h1>
 
                 <div className='flex flex-col'>
@@ -68,7 +85,7 @@ function Sidebar() {
                                     isActive ? 'text-blue-600 font-semibold' : ''
                                 }`}
                             >
-                                {item.icon && item.icon}
+                                {isActive ? item.solidIcon : item.outlineIcon}
                                 {item.label}
                             </Link>
                         );
