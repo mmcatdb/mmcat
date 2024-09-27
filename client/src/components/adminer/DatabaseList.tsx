@@ -1,13 +1,19 @@
+import { useEffect } from 'react';
 import { useFetchObjectData } from '@/components/adminer/useFetchObjectData';
 import { ListComponent } from '@/components/adminer/ListComponent';
 import { Spinner } from '@nextui-org/react';
 
 type DatabaseListProps = Readonly<{
     apiUrl: string;
+    setRowCount: (rowCount: number | undefined) => void;
 }>;
 
-export function DatabaseList({ apiUrl }: DatabaseListProps) {
+export function DatabaseList({ apiUrl, setRowCount }: DatabaseListProps) {
     const { fetchedData, loading, error } = useFetchObjectData(apiUrl);
+
+    useEffect(() => {
+        setRowCount(fetchedData?.metadata.rowCount);
+    }, [ fetchedData, setRowCount ]);
 
     if (loading) {
         return (

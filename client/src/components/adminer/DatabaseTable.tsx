@@ -1,12 +1,18 @@
+import { useEffect } from 'react';
 import { useFetchArrayData } from '@/components/adminer/useFetchArrayData';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 
 type DatabaseTableProps = Readonly<{
     apiUrl: string;
+    setRowCount: (rowCount: number | undefined) => void;
 }>;
 
-export function DatabaseTable({ apiUrl }: DatabaseTableProps ) {
+export function DatabaseTable({ apiUrl, setRowCount }: DatabaseTableProps ) {
     const { fetchedData, loading, error } = useFetchArrayData(apiUrl);
+
+    useEffect(() => {
+        setRowCount(fetchedData?.metadata.rowCount);
+    }, [ fetchedData, setRowCount ]);
 
     if (loading) {
         return (
@@ -21,7 +27,6 @@ export function DatabaseTable({ apiUrl }: DatabaseTableProps ) {
 
     if (fetchedData === null)
         return <p>No data to display.</p>;
-
 
     const keys: string[] = typeof fetchedData.data[0] === 'object' ? Object.keys(fetchedData.data[0]) : [ 'Value' ];
     const columns: string[] = fetchedData.data.length > 0 ? keys : [];

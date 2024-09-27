@@ -23,7 +23,7 @@ export function ColumnForm({ setFilter }: ColumnFormProps) {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             <Input
                 label='Column Name'
                 placeholder='Enter column name'

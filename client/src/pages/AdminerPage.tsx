@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CommonPage } from '@/components/CommonPage';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { TableMenu } from '@/components/adminer/TableMenu';
+import { LimitForm } from '@/components/adminer/LimitForm';
 import { ColumnForm } from '@/components/adminer/ColumnForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import type { Datasource } from '@/types/datasource';
@@ -13,6 +14,7 @@ export function AdminerPage() {
     const [ datasource, setDatasource ] = useState<Datasource>();
     const [ tableName, setTableName ] = useState<string>();
     const [ filter, setFilter ] = useState<ColumnFilter>();
+    const [ limit, setLimit ] = useState<number>(50);
 
     useEffect(() => {
         setTableName(undefined);
@@ -32,17 +34,19 @@ export function AdminerPage() {
                     </div>
 
                     {tableName && (
-                        <div className='mt-5' style={{ fontSize: '14px' }}>
-                            <ColumnForm setFilter={setFilter}/>
-                        </div>
+                        <>
+                            <div className='mt-5' style={{ fontSize: '14px' }}>
+                                <LimitForm limit={limit} setLimit={setLimit}/>
+                            </div>
+                            <div className='mt-5' style={{ fontSize: '14px' }}>
+                                <ColumnForm setFilter={setFilter}/>
+                            </div>
+                        </>
                     )}
 
                     <div className='mt-5' style={{ fontSize: '14px' }}>
-                        {typeof tableName !== 'string' ? (
-                            <span>No table selected.</span>
-
-                        ) : (
-                            <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}`} datasourceType={datasource.type} />
+                        {typeof tableName === 'string' && (
+                            <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}?`} datasourceType={datasource.type} limit={limit}/>
                         )}
                     </div>
                 </>
