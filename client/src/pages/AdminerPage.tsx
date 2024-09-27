@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { CommonPage } from '@/components/CommonPage';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { TableMenu } from '@/components/adminer/TableMenu';
-import { DatabaseTable } from '@/components/adminer/DatabaseTable';
-import { DatabaseList } from '@/components/adminer/DatabaseList';
-import { DatasourceType } from '@/types/datasource';
+import { ColumnForm } from '@/components/adminer/ColumnForm';
+import { DatabaseView } from '@/components/adminer/DatabaseView';
 import type { Datasource } from '@/types/datasource';
+import type { ColumnFilter } from '@/types/adminer/ColumnFilter';
 
 const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 export function AdminerPage() {
     const [ datasource, setDatasource ] = useState<Datasource>();
     const [ tableName, setTableName ] = useState<string>();
+    const [ filter, setFilter ] = useState<ColumnFilter>();
 
     useEffect(() => {
         setTableName(undefined);
@@ -30,23 +31,20 @@ export function AdminerPage() {
                         <TableMenu apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}`} tableName={tableName} setTableName={setTableName}/>
                     </div>
 
-                    {datasource.type === DatasourceType.postgresql ? (
+                    {tableName && (
                         <div className='mt-5' style={{ fontSize: '14px' }}>
-                            {typeof tableName === 'string' ? (
-                                <DatabaseTable apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}`} />
-                            ) : (
-                                <span>No table selected.</span>
-                            )}
-                        </div>
-                    ) : (
-                        <div className='mt-5' style={{ fontSize: '14px' }}>
-                            {typeof tableName === 'string' ? (
-                                <DatabaseList apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}`} />
-                            ) : (
-                                <span>No table selected.</span>
-                            )}
+                            <ColumnForm setFilter={setFilter}/>
                         </div>
                     )}
+
+                    <div className='mt-5' style={{ fontSize: '14px' }}>
+                        {typeof tableName !== 'string' ? (
+                            <span>No table selected.</span>
+
+                        ) : (
+                            <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}`} datasourceType={datasource.type} />
+                        )}
+                    </div>
                 </>
             )}
         </CommonPage>
