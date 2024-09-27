@@ -15,6 +15,7 @@ import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.record.ComplexRecord;
+import cz.matfyz.core.record.AdminerFilter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -119,7 +120,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("CsvPullWrapper.gatTable not implemented.");
     }
 
-    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
+    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("CsvPullWrapper.getRow not implemented.");
     }
 

@@ -17,6 +17,7 @@ import cz.matfyz.core.querying.queryresult.ResultLeaf;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.querying.queryresult.ResultMap;
 import cz.matfyz.core.querying.queryresult.ResultNode;
+import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
@@ -351,32 +352,47 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    private Bson createFilter(String columnName, String operator, String columnValue) {
+    private Bson createFilter(List<AdminerFilter> filters) {
+    List<Bson> filterList = new ArrayList<>();
+
+    for (AdminerFilter filter : filters) {
+        var columnName = filter.columnName();
+        var operator = filter.operator();
+        var columnValue = filter.columnValue();
         var value = "_id".equals(columnName) ? new ObjectId(columnValue) : columnValue;
 
         switch (operator) {
             case "=":
-                return Filters.eq(columnName, value);
+                filterList.add(Filters.eq(columnName, value));
+                break;
             case "<>":
-                return Filters.ne(columnName, value);
+                filterList.add(Filters.ne(columnName, value));
+                break;
             case "<":
-                return Filters.lt(columnName, value);
+                filterList.add(Filters.lt(columnName, value));
+                break;
             case ">":
-                return Filters.gt(columnName, value);
+                filterList.add(Filters.gt(columnName, value));
+                break;
             case "<=":
-                return Filters.lte(columnName, value);
+                filterList.add(Filters.lte(columnName, value));
+                break;
             case ">=":
-                return Filters.gte(columnName, value);
+                filterList.add(Filters.gte(columnName, value));
+                break;
             default:
                 throw new UnsupportedOperationException("Unsupported operator: " + operator);
         }
     }
 
-    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offsetString){
+    return Filters.and(filterList);
+}
+
+    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filters, String limit, String offsetString){
         try {
             JSONArray resultData = new JSONArray();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
-            Bson filter = createFilter(columnName, operator, columnValue);
+            Bson filter = createFilter(filters);
             FindIterable<Document> documents = collection.find(filter);
 
             int lim = Integer.parseInt(limit);

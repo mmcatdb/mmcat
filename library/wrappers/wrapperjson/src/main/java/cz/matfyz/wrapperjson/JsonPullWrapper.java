@@ -14,10 +14,12 @@ import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -137,7 +139,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("JsonPullWrapper.gatTable not implemented.");
     }
 
-    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
+    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
     }
 

@@ -12,9 +12,12 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -426,82 +429,102 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return getByLabel(tableName, limit, offset);
     }
 
-    private JSONObject getNode(String propertyName, String propertyValue, String operator, String limit, String offset) {
-        try (Session session = provider.getSession()) {
-            JSONArray resultData = new JSONArray();
-
-            var allNodes = session.executeRead(tx -> {
-                var query = new Query("MATCH (a) WHERE a." + propertyName + "" + operator + "'" + propertyValue + "' RETURN a SKIP " + offset + " LIMIT " + limit + ";");
-
-                return tx.run(query).stream().map(node -> {
-                    return nodeToJson(node.get("a"));
-                }).toList();
-            });
-            allNodes.forEach(resultData::put);
-
-            Result countQueryResult = session.run("MATCH (a) WHERE a." + propertyName + "" + operator + "'" + propertyValue + "' RETURN COUNT(a) AS recordCount;");
-
-            return getResultObject(countQueryResult, resultData);
+    private String createWhereClause(List<AdminerFilter> filters, String name) {
+        if (filters.isEmpty()) {
+            throw new IllegalArgumentException("Filters cannot be empty");
         }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
+
+        StringBuilder whereClause = new StringBuilder();
+
+        for (int i = 0; i < filters.size(); i++) {
+            AdminerFilter filter = filters.get(i);
+            if (i == 0) {
+                whereClause.append(name).append(".").append(filter.columnName()).append(" ").append(filter.operator()).append(" '").append(filter.columnValue()).append("'");
+            } else {
+                whereClause.append(" AND ").append(name).append(".").append(filter.columnName()).append(" ").append(filter.operator()).append(" '").append(filter.columnValue()).append("'");
+            }
         }
+
+        return whereClause.toString();
     }
 
-    private JSONObject getRelationship(String propertyName, String propertyValue, String operator, String limit, String offset) {
-        try (Session session = provider.getSession()) {
-            JSONArray resultData = new JSONArray();
+    private JSONObject getNode(List<AdminerFilter> filters, String limit, String offset) {
+    try (Session session = provider.getSession()) {
+        JSONArray resultData = new JSONArray();
 
-            var allNodes = session.executeRead(tx -> {
-                var query = new Query("MATCH ()-[r]->() WHERE r." + propertyName + "" + operator + "'" + propertyValue + "' RETURN r SKIP " + offset + " LIMIT " + limit + ";");
+        String whereClause = createWhereClause(filters, "a");
+        var allNodes = session.executeRead(tx -> {
+            var query = new Query("MATCH (a) WHERE " + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
-                return tx.run(query).stream().map(node -> {
-                    return relationshipToJson(node.get("r"));
-                }).toList();
-            });
-            allNodes.forEach(resultData::put);
+            return tx.run(query).stream().map(node -> {
+                return nodeToJson(node.get("a"));
+            }).toList();
+        });
+        allNodes.forEach(resultData::put);
 
-            Result countQueryResult = session.run("MATCH ()-[r]->() WHERE r." + propertyName + "" + operator + "'" + propertyValue + "' RETURN COUNT(r) AS recordCount;");
+        Result countQueryResult = session.run("MATCH (a) WHERE " + whereClause + " RETURN COUNT(a) AS recordCount;");
 
-            return getResultObject(countQueryResult, resultData);
-        }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
-        }
+        return getResultObject(countQueryResult, resultData);
+    } catch (Exception e) {
+        throw PullForestException.innerException(e);
     }
+}
 
-    private JSONObject getByLabelAndId(String label, String propertyName, String propertyValue, String operator, String limit, String offset) {
-        try (Session session = provider.getSession()) {
-            JSONArray resultData = new JSONArray();
+private JSONObject getRelationship(List<AdminerFilter> filters, String limit, String offset) {
+    try (Session session = provider.getSession()) {
+        JSONArray resultData = new JSONArray();
 
-            var allNodes = session.executeRead(tx -> {
-                var query = new Query("MATCH (a:" + label + ") WHERE a." + propertyName + "" + operator + "'"+ propertyValue +"' RETURN a SKIP " + offset + " LIMIT " + limit + ";");
+        String whereClause = createWhereClause(filters, "r");
+        var allNodes = session.executeRead(tx -> {
+            var query = new Query("MATCH ()-[r]->() WHERE " + whereClause + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
-                return tx.run(query).stream().map(node -> {
-                    return nodeToJson(node.get("a"));
-                }).toList();
-            });
-            allNodes.forEach(resultData::put);
+            return tx.run(query).stream().map(node -> {
+                return relationshipToJson(node.get("r"));
+            }).toList();
+        });
+        allNodes.forEach(resultData::put);
 
-            Result countQueryResult = session.run("MATCH (a:" + label + ") WHERE a." + propertyName + "" + operator + "'"+ propertyValue +"' RETURN COUNT(a) AS recordCount;");
+        Result countQueryResult = session.run("MATCH ()-[r]->() WHERE " + whereClause + " RETURN COUNT(r) AS recordCount;");
 
-            return getResultObject(countQueryResult, resultData);
-        }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
-        }
+        return getResultObject(countQueryResult, resultData);
+    } catch (Exception e) {
+        throw PullForestException.innerException(e);
     }
+}
 
-    @Override public JSONObject getRows(String tableName, String propertyName, String propertyValue, String operator, String limit, String offset) {
+private JSONObject getByLabelAndId(String label, List<AdminerFilter> filters, String limit, String offset) {
+    try (Session session = provider.getSession()) {
+        JSONArray resultData = new JSONArray();
+
+        String whereClause = createWhereClause(filters, "a");
+        var allNodes = session.executeRead(tx -> {
+            var query = new Query("MATCH (a:" + label + ") WHERE " + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
+
+            return tx.run(query).stream().map(node -> {
+                return nodeToJson(node.get("a"));
+            }).toList();
+        });
+        allNodes.forEach(resultData::put);
+
+        Result countQueryResult = session.run("MATCH (a:" + label + ") WHERE " + whereClause + " RETURN COUNT(a) AS recordCount;");
+
+        return getResultObject(countQueryResult, resultData);
+    } catch (Exception e) {
+        throw PullForestException.innerException(e);
+    }
+}
+
+
+    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filters, String limit, String offset) {
         if (tableName.equals("nodes")) {
-            return getNode(propertyName, propertyValue, operator, limit, offset);
+            return getNode(filters, limit, offset);
         }
 
         if (tableName.equals("relationships")) {
-            return getRelationship(propertyName,propertyValue, operator, limit, offset);
+            return getRelationship(filters, limit, offset);
         }
 
-        return getByLabelAndId(tableName, propertyName, propertyValue, operator, limit, offset);
+        return getByLabelAndId(tableName, filters, limit, offset);
     }
 
 }

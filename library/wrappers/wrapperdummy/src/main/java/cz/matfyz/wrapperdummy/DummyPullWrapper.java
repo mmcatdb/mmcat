@@ -12,6 +12,7 @@ import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
@@ -19,6 +20,7 @@ import cz.matfyz.core.record.RootRecord;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -159,7 +161,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("DummyPullWrapper.gatTable not implemented.");
     }
 
-    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
+    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("DummyPullWrapper.getRow not implemented.");
     }
 

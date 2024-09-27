@@ -3,8 +3,8 @@ package cz.matfyz.server.controller;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.service.DatasourceService;
 import cz.matfyz.server.service.WrapperService;
+import cz.matfyz.core.record.AdminerFilter;
 
-import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class AdminerController {
@@ -57,16 +63,34 @@ public class AdminerController {
         return getJsonResponse(json);
     }
 
-    @GetMapping(value = "/adminer/{db}/{table}", params = {"columnName", "columnValue", "operator"})
-    public ResponseEntity<String> getRows(@PathVariable Id db, @PathVariable String table, @RequestParam String columnName, @RequestParam String columnValue, @RequestParam String operator, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
+    @GetMapping(value = "/adminer/{db}/{table}", params = {"filters"})
+    public ResponseEntity<String> getRows(@PathVariable Id db, @PathVariable String table, @RequestParam String filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceService.find(db);
 
         if (datasource == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
+        List<AdminerFilter> filterList = new ArrayList<>();
+
+
+        for (int indexOpen = filters.indexOf('(');
+            indexOpen >= 0;
+            indexOpen = filters.indexOf('(', indexOpen + 1)) {
+            int indexClose = filters.indexOf(')', indexOpen + 1);
+
+            String filter = filters.substring(indexOpen + 1, indexClose);
+            String[] filterParams = filter.split(",");
+
+            if (filterParams.length == 3) {
+                filterList.add(new AdminerFilter(filterParams[0], filterParams[1], filterParams[2]));
+            }
+        }
+
+        System.out.println(filterList);
+
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONObject json = myWrapper.getRows(table, columnName, columnValue, operator, limit, offset);
+        JSONObject json = myWrapper.getRows(table, filterList, limit, offset);
 
         return getJsonResponse(json);
     }

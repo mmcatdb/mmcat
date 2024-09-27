@@ -12,6 +12,7 @@ import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
@@ -22,6 +23,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -186,8 +188,34 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return getQuery("FROM " + tableName, limit, offset);
     }
 
-    @Override public JSONObject getRows(String tableName, String columnName, String columnValue, String operator, String limit, String offset) {
-        return getQuery("FROM " + tableName +  " WHERE " + columnName + " " + operator + " '" + columnValue + "'", limit, offset);
+    private String createWhereClause(List<AdminerFilter> filters) {
+        StringBuilder whereClause = new StringBuilder();
+
+        if (filters != null && !filters.isEmpty()) {
+            for (int i = 0; i < filters.size(); i++) {
+                AdminerFilter filter = filters.get(i);
+
+                if (i == 0) {
+                    whereClause.append("WHERE ");
+                } else {
+                    whereClause.append("AND ");
+                }
+
+                whereClause.append(filter.columnName())
+                           .append(" ")
+                           .append(filter.operator())
+                           .append(" '")
+                           .append(filter.columnValue())
+                           .append("' ");
+            }
+        }
+
+        return whereClause.toString();
+    }
+
+    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
+        String whereClause = createWhereClause(filter);
+        return getQuery("FROM " + tableName +  " " + whereClause, limit, offset);
     }
 
     private JSONObject getQuery(String queryBase, String limit, String offset) {
