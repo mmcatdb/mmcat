@@ -3,14 +3,15 @@ import { useState } from 'react';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 
 type ColumnFormProps = Readonly<{
+    actualFilter: ColumnFilter;
     filters: ColumnFilter[] | undefined;
     setFilters: (newFilters: ColumnFilter[]) => void;
 }>;
 
-export function ColumnForm({ filters, setFilters }: ColumnFormProps) {
-    const [ columnName, setColumnName ] = useState<string>('');
-    const [ columnValue, setColumnValue ] = useState<string>('');
-    const [ operator, setOperator ] = useState<Operator>(Operator.eq);
+export function ColumnForm({ actualFilter, filters, setFilters }: ColumnFormProps) {
+    const [ columnName, setColumnName ] = useState<string>(actualFilter.columnName);
+    const [ columnValue, setColumnValue ] = useState<string>(actualFilter.columnValue);
+    const [ operator, setOperator ] = useState<Operator>(actualFilter.operator);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,6 +22,10 @@ export function ColumnForm({ filters, setFilters }: ColumnFormProps) {
         };
 
         setFilters(filters ? [ ...filters, filter ] : [ filter ]);
+
+        setColumnName(actualFilter.columnName);
+        setColumnValue(actualFilter.columnValue);
+        setOperator(actualFilter.operator);
     };
 
     return (

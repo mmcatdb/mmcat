@@ -6,7 +6,7 @@ import { LimitForm } from '@/components/adminer/LimitForm';
 import { ColumnForm } from '@/components/adminer/ColumnForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import type { Datasource } from '@/types/datasource';
-import type { ColumnFilter } from '@/types/adminer/ColumnFilter';
+import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 
 const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
@@ -40,12 +40,12 @@ export function AdminerPage() {
                             </div>
 
                             <div className='mt-5' style={{ fontSize: '14px' }}>
-                                <ColumnForm filters={filters} setFilters={setFilters} />
+                                <ColumnForm actualFilter={{ columnName:'', columnValue:'', operator:Operator.eq }} filters={filters} setFilters={setFilters} />
                             </div>
 
                             {filters?.map((filter, index) => (
                                 <div key={index} className='mt-5' style={{ fontSize: '14px' }}>
-                                    <ColumnForm filters={filters} setFilters={setFilters} />
+                                    <ColumnForm actualFilter={filter} filters={filters} setFilters={setFilters} />
                                 </div>
                             ))}
                         </>
