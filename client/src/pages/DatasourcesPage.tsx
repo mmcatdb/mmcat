@@ -11,8 +11,6 @@ export function DatasourcesPage() {
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
 
-    // console.log("On render", datasources);
-
     useEffect(() => {
         const fetchDatasources = async () => {
             try {
@@ -67,9 +65,9 @@ export function DatasourcesPage() {
 
             <div className='mt-5'>
                 <DatasourcesTable 
-                    datasources={datasources} 
-                    loading={loading} 
-                    error={error} 
+                    datasources={datasources}
+                    loading={loading}
+                    error={error}
                     onDeleteDatasource={handleDeleteDatasource}
                 />
             </div>

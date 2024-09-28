@@ -5,7 +5,8 @@ import { About } from '@/pages/About';
 import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
 import { ProjectIndex, projectIndexLoader } from '@/pages/ProjectIndex';
-import { DatasourcesPage } from '@/pages/Datasources';
+import { DatasourcesPage } from '@/pages/DatasourcesPage';
+import { DatasourceDetailPage } from '@/pages/DatasourceDetailPage';
 import { AdminerPage } from '@/pages/AdminerPage';
 
 export const router = createBrowserRouter([
@@ -16,7 +17,7 @@ export const router = createBrowserRouter([
         ErrorBoundary: ErrorPage,
     },
     {
-        path: 'about', // TODO: same problem as in the routes.ts
+        path: 'about',
         Component: About,
     },
     {
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
     {
         path: 'datasources',
         Component: DatasourcesPage,
+    },
+    {
+        path: 'datasources/:id',
+        Component: DatasourceDetailPage,
     },
     {
         path: 'adminer',

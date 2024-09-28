@@ -1,6 +1,7 @@
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
 import type { Datasource } from '@/types/datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
@@ -35,28 +36,40 @@ type DatasourceTableProps = {
 }
 
 function DatasourceTable({ datasources, onDeleteDatasource }: DatasourceTableProps) {
+    const navigate = useNavigate();
+
+    // navigate to the detail page
+    const handleRowAction = (key: React.Key) => {
+        navigate(`/datasources/${key}`);
+    };
+
     return (
-        <Table aria-label='Datasource Table'>
+        <Table 
+            aria-label='Datasource Table'
+            onRowAction={handleRowAction}
+            removeWrapper
+            isCompact
+        >
             <TableHeader>
                 <TableColumn>ID</TableColumn>
                 <TableColumn>Type</TableColumn>
                 <TableColumn>Label</TableColumn>
                 <TableColumn>Settings</TableColumn>
-                <TableColumn>Configuration</TableColumn>
+                {/* <TableColumn>Configuration</TableColumn> */}
                 <TableColumn>Actions</TableColumn>
             </TableHeader>
             <TableBody emptyContent={'No rows to display.'}>
                 {datasources.map((datasource) => (
-                    <TableRow key={datasource.id}>
+                    <TableRow key={datasource.id} className='hover:bg-zinc-100 focus:bg-zinc-200 dark:hover:bg-zinc-800 dark:focus:bg-zinc-700 cursor-pointer'>
                         <TableCell>{datasource.id}</TableCell>
                         <TableCell>{datasource.type}</TableCell>
                         <TableCell>{datasource.label}</TableCell>
                         <TableCell>
                             {JSON.stringify(datasource.settings, null, 2)}
                         </TableCell>
-                        <TableCell>
+                        {/* <TableCell>
                             {JSON.stringify(datasource.configuration, null, 2)}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                             <Button
                                 isIconOnly

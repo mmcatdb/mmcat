@@ -74,7 +74,12 @@ function Sidebar() {
 
                 <div className='flex flex-col'>
                     {sidebarItems.map((item) => {
-                        const isActive = item.route === location.pathname;
+                        // item stays active, including subpaths of the item (had to exclude / for Home)
+                        const isActive =
+                        item.route === '/'
+                            ? location.pathname === item.route
+                            : location.pathname.startsWith(item.route);
+                        // const isActive = item.route === location.pathname;
 
                         return (
                             <Link
