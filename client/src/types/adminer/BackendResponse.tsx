@@ -1,4 +1,4 @@
-export type BackendArrayResponse = {
+export type BackendTableResponse = {
     metadata: {
         rowCount: number;
         [key: string]: unknown;
@@ -6,10 +6,21 @@ export type BackendArrayResponse = {
     data: string[];
 };
 
-export type BackendObjectResponse = {
+export type BackendDocumentResponse = {
     metadata: {
         rowCount: number;
         [key: string]: unknown;
     };
     data: Record<string, unknown>[];
+};
+
+export type BackendGraphResponse = {
+    metadata: {
+        rowCount: number;
+        [key: string]: unknown;
+    };
+    data: {
+        properties: Record<string, unknown>;
+        [key: string]: unknown;
+    }[];
 };

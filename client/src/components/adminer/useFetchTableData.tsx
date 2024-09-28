@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import type { BackendObjectResponse } from '@/types/adminer/BackendResponse';
+import type { BackendTableResponse } from '@/types/adminer/BackendResponse';
 
-export function useFetchObjectData(url: string) {
-    const [ fetchedData, setFetchedData ] = useState<BackendObjectResponse | null>(null);
+export function useFetchTableData(url: string) {
+    const [ fetchedData, setFetchedData ] = useState<BackendTableResponse | null>(null);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
 
@@ -18,7 +18,7 @@ export function useFetchObjectData(url: string) {
                     throw new Error(`Failed to fetch data from ${url}`);
 
 
-                const data = await response.json() as BackendObjectResponse;
+                const data = await response.json() as BackendTableResponse;
                 setFetchedData(data);
             }
             catch (err) {

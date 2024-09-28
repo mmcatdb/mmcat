@@ -1,5 +1,5 @@
-import { useFetchArrayData } from '@/components/adminer/useFetchArrayData';
-import { Spinner, ButtonGroup, Button } from '@nextui-org/react';
+import { useFetchTableData } from '@/components/adminer/useFetchTableData';
+import { Spinner, Button } from '@nextui-org/react';
 
 type TableMenuProps = Readonly<{
     apiUrl: string;
@@ -8,7 +8,7 @@ type TableMenuProps = Readonly<{
 }>;
 
 export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
-    const { fetchedData, loading, error } = useFetchArrayData(apiUrl);
+    const { fetchedData, loading, error } = useFetchTableData(apiUrl);
 
     if (loading) {
         return (
@@ -23,29 +23,19 @@ export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
 
 
     return (
-        <div>
+        <div className='flex flex-wrap gap-3 items-center'>
             {fetchedData !== null && fetchedData.data.length > 0 ? (
-                <ButtonGroup
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        width: '100%',
-                    }}
-                >
-                    {fetchedData.data.map((name, index) => (
-                        <Button
-                            key={index}
-                            onPress={() => setTableName(name)}
-                            color={tableName === name ? 'primary' : 'default'}
-                            style={{
-                                flex: 1,
-                                minWidth: '50px',
-                            }}
-                        >
-                            {name}
-                        </Button>
-                    ))}
-                </ButtonGroup>
+                fetchedData.data.map((name, index) => (
+                    <Button
+                        key={index}
+                        onPress={() => setTableName(name)}
+                        color={tableName === name ? 'primary' : 'default'}
+                        variant={tableName === name ? 'solid' : 'ghost'}
+                        className='flex-1 min-w-[50px]'
+                    >
+                        <span className='truncate'>{name}</span>
+                    </Button>
+                ))
             ) : (
                 <span>No tables to display.</span>
             )}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/api';
-import { Spinner, ButtonGroup, Button } from '@nextui-org/react';
+import { Spinner, Button } from '@nextui-org/react';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
 type DatasourceMenuProps = Readonly<{
@@ -47,30 +47,23 @@ export function DatasourceMenu({ datasource, setDatasource }: DatasourceMenuProp
         return <p>{error}</p>;
 
     return (
-        <div>
-            <ButtonGroup
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                }}
-            >
-                {datasources
-                    .filter((item) => item.type === DatasourceType.postgresql || item.type === DatasourceType.mongodb || item.type === DatasourceType.neo4j)
-                    .map((item) => (
-                        <Button
-                            key={item.id}
-                            onPress={() => setDatasource(item)}
-                            color={datasource === item ? 'primary' : 'default'}
-                            style={{
-                                flex: 1,
-                                minWidth: '50px',
-                            }}
-                        >
-                            {item.label}
-                        </Button>
-                    ))}
-            </ButtonGroup>
+        <div className='flex flex-wrap gap-3 items-center'>
+            {datasources
+                .filter((item) =>
+                    item.type === DatasourceType.postgresql ||
+                    item.type === DatasourceType.mongodb ||
+                    item.type === DatasourceType.neo4j,
+                )
+                .map((item) => (
+                    <Button
+                        key={item.id}
+                        onPress={() => setDatasource(item)}
+                        color={datasource === item ? 'primary' : 'default'}
+                        className='flex-1 min-w-[150px] max-w-[200px]'
+                    >
+                        <span className='truncate'>{item.label}</span>
+                    </Button>
+                ))}
         </div>
     );
 }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import type { BackendArrayResponse } from '@/types/adminer/BackendResponse';
+import type { BackendGraphResponse, BackendTableResponse } from '@/types/adminer/BackendResponse';
 
-export function useFetchArrayData(url: string) {
-    const [ fetchedData, setFetchedData ] = useState<BackendArrayResponse | null>(null);
+export function useFetchGraphData(url: string) {
+    const [ fetchedData, setFetchedData ] = useState<BackendTableResponse | null>(null);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
 
@@ -18,8 +18,14 @@ export function useFetchArrayData(url: string) {
                     throw new Error(`Failed to fetch data from ${url}`);
 
 
-                const data = await response.json() as BackendArrayResponse;
-                setFetchedData(data);
+                const data = await response.json() as BackendGraphResponse;
+
+                const modifiedData = { metadata: data.metadata, data: [] } as BackendTableResponse;
+
+                for (const element of data.data)
+                    modifiedData.data.push(element.properties);
+
+                setFetchedData(modifiedData);
             }
             catch (err) {
                 if (err instanceof Error)

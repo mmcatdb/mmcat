@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@nextui-org/react';
 
-type ListComponentProps = Readonly<{
+type DocumentComponentProps = Readonly<{
     value: unknown;
     depth: number;
 }>;
 
-export function ListComponent({ value, depth }: ListComponentProps) {
+export function DocumentComponent({ value, depth }: DocumentComponentProps) {
     const [ isOpen, setIsOpen ] = useState(true);
 
     if (!isOpen) {
@@ -25,7 +25,7 @@ export function ListComponent({ value, depth }: ListComponentProps) {
                 {len > 1 && depth > 0 && '{'}
                 {Object.entries(value).map(([ key, val ]) => (
                     <li className='ps-8' key={key}>
-                        <strong>{key}:</strong> <ListComponent value={val as unknown} depth={depth + 1} />
+                        <strong>{key}:</strong> <DocumentComponent value={val as unknown} depth={depth + 1} />
                     </li>
                 ))}
                 {len > 1 && depth > 0 && '}'}
@@ -42,7 +42,7 @@ export function ListComponent({ value, depth }: ListComponentProps) {
             }}>
                 {len > 1 && depth > 0 && '{'}
                 {value.map((item, index) => (
-                    <li className='ps-8' key={index}><ListComponent value={item as unknown} depth={depth + 1} /></li>
+                    <li className='ps-8' key={index}><DocumentComponent value={item as unknown} depth={depth + 1} /></li>
                 ))}
                 {len > 1 && depth > 0 && '}'}
             </ul>
