@@ -1,50 +1,28 @@
-import { Input, Select, SelectItem, Button, Spacer } from '@nextui-org/react';
-import { useState } from 'react';
+import { Input, Select, SelectItem } from '@nextui-org/react';
+import type { Action } from '@/types/adminer/Reducer';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 
 type ColumnFormProps = Readonly<{
-    actualFilter: ColumnFilter;
-    filters: ColumnFilter[] | undefined;
-    setFilters: (newFilters: ColumnFilter[]) => void;
+    filter: ColumnFilter;
+    dispatch: React.Dispatch<Action>;
 }>;
 
-export function ColumnForm({ actualFilter, filters, setFilters }: ColumnFormProps) {
-    const [ columnName, setColumnName ] = useState<string>(actualFilter.columnName);
-    const [ columnValue, setColumnValue ] = useState<string>(actualFilter.columnValue);
-    const [ operator, setOperator ] = useState<Operator>(actualFilter.operator);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const filter: ColumnFilter = {
-            columnName,
-            columnValue,
-            operator,
-        };
-
-        setFilters(filters ? [ ...filters, filter ] : [ filter ]);
-
-        setColumnName(actualFilter.columnName);
-        setColumnValue(actualFilter.columnValue);
-        setOperator(actualFilter.operator);
-    };
-
+export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
     return (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div className='mt-5 flex gap-3 items-center'>
             <Input
                 label='Column Name'
                 placeholder='Enter column name'
-                value={columnName}
-                onChange={(e) => setColumnName(e.target.value)}
+                value={filter.columnName}
+                onChange={(e) => dispatch({ type: 'change_column_name', filterId: filter.id, newName: e.target.value })}
                 required
             />
-
-            <Spacer y={1} />
 
             <Select
                 label='Operator'
                 placeholder='Select an operator'
-                value={operator}
-                onChange={(e) => setOperator(e.target.value as Operator)}
+                value={filter.operator}
+                onChange={(e) => dispatch({ type: 'change_operator', filterId: filter.id, newOperator: e.target.value as Operator })}
                 required
             >
                 {Object.entries(Operator).map(([ key, value ]) => (
@@ -54,21 +32,13 @@ export function ColumnForm({ actualFilter, filters, setFilters }: ColumnFormProp
                 ))}
             </Select>
 
-            <Spacer y={1} />
-
             <Input
                 label='Column Value'
                 placeholder='Enter column value'
-                value={columnValue}
-                onChange={(e) => setColumnValue(e.target.value)}
+                value={filter.columnValue}
+                onChange={(e) => dispatch({ type: 'change_column_value', filterId: filter.id, newValue: e.target.value })}
                 required
             />
-
-            <Spacer y={1.5} />
-
-            <Button type='submit' color='primary'>
-                Submit
-            </Button>
-        </form>
+        </div>
     );
 }

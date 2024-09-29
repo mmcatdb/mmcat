@@ -11,18 +11,22 @@ import { View } from '@/types/adminer/View';
 
 type DatabaseViewProps = Readonly<{
     apiUrl: string;
-    filters: ColumnFilter[] | undefined;
     datasourceType: DatasourceType;
+    filters: ColumnFilter[] | undefined;
     limit: number;
     view: View;
 }>;
 
 function generateUrl(apiUrl: string, filters: ColumnFilter[] | undefined, limit: number, offset: number) {
-    if (filters) {
+    const filterExist = filters?.some((filter) => {
+        return filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0;
+    });
+
+    if (filters && filterExist) {
         return `${apiUrl}?filters=${filters
             .map(
                 (filter) =>
-                    `(${filter.columnName},${Operator[filter.operator as keyof typeof Operator]},${filter.columnValue})`,
+                    filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0 ? `(${filter.columnName},${Operator[filter.operator as keyof typeof Operator]},${filter.columnValue})` : '',
             )
             .join('')}&limit=${limit}&offset=${offset}`;
     }
@@ -43,7 +47,7 @@ function getFetchFunction(datasourceType: DatasourceType) {
     }
 }
 
-export function DatabaseView({ apiUrl, filters, datasourceType, limit, view }: DatabaseViewProps) {
+export function DatabaseView({ apiUrl, datasourceType, filters,  limit, view }: DatabaseViewProps) {
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ offset, setOffset ] = useState<number>(0);
     const [ rowCount, setRowCount ] = useState<number | undefined>();
