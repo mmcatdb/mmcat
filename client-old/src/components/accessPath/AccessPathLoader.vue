@@ -13,7 +13,7 @@ import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import API from '@/utils/api';
-import { Mapping, MappingFromServer, MappingInfoFromServer, MappingInit } from '@/types/mapping';
+import { Mapping } from '@/types/mapping';
 
 const { graph } = $(useEvocat());
 
@@ -25,10 +25,11 @@ const accessPath = ref<GraphRootProperty>();
 const originalMapping = ref<Mapping>();
 const mappingConfirmed = ref(false);
 
-const emit = defineEmits([ 'finish' ]);
+const emit = defineEmits([ 'finish', 'cancel' ]);
 
 onMounted(async () => {
-    const result = await API.mappings.getAllMappingsInLogicalModel({ selectedLogicalModel });
+    const logicalModelId = props.selectedLogicalModel.id;
+    const result = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId });
     if (result.status) {
         originalMapping.value = Mapping.fromServer(result.data[0]);
         // highlight it in the editor
@@ -54,6 +55,10 @@ function createMapping(primaryKey: SignatureId) {
     emit('finish', primaryKey, accessPath);
 }
 
+function cancel() {
+    emit('cancel');
+}
+
 </script>
 
 <template>
@@ -68,6 +73,11 @@ function createMapping(primaryKey: SignatureId) {
                         @click="confirmMapping"
                     >
                         Confirm Initial Mapping
+                    </button>
+                    <button
+                        @click="cancel"
+                    >
+                        Cancel
                     </button>
                 </div>
             </div>

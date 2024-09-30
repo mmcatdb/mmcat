@@ -33,7 +33,7 @@ const selectedLogicalModel = shallowRef<LogicalModel>();
 const categoryId = useSchemaCategoryId();
 const category = useSchemaCategoryInfo();
 
-const initializeType = ref<'create' | 'load'>();
+const initializeType = ref<'create' | 'load' | 'default'>('default');
 
 onMounted(async () => {
     const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
@@ -62,36 +62,48 @@ async function createMapping(primaryKey: SignatureId, accessPath: GraphRootPrope
 function setInitializeType(type: 'create' | 'load') {
     initializeType.value = type;
 }
+
+function setToDefault() {
+    initializeType.value = 'default';
+}
+
 </script>
 
 <template>
     <div class="divide">
         <EvocatDisplay @evocat-created="evocatCreated" />
         <div v-if="evocat">
-            <div 
-                v-if="!initializeType"
-                class="button-row"
+            <div
+                v-if="initializeType === 'default'" 
+                class="editor"
             >
-                <button
-                    @click="setInitializeType('load')"
+                <h5>Select Mapping initialization:</h5>
+                <div 
+                    class="button-row"
                 >
-                    Load Initial Mapping
-                </button>
-                <button
-                    @click="setInitializeType('create')"
-                >
-                    Create New Mapping
-                </button>
+                    <button
+                        @click="setInitializeType('load')"
+                    >
+                        Load Initial
+                    </button>
+                    <button
+                        @click="setInitializeType('create')"
+                    >
+                        Create New
+                    </button>
+                </div>
             </div>
             <AccessPathLoader
                 v-if="initializeType === 'load'"
                 :selected-logical-model="selectedLogicalModel"
                 @finish="createMapping"
+                @cancel="setToDefault"
             />
             <AccessPathCreator2
                 v-if="initializeType === 'create'"
                 :selected-logical-model="selectedLogicalModel"
                 @finish="createMapping"
+                @cancel="setToDefault"
             />
         </div>
     </div>
@@ -102,5 +114,10 @@ function setInitializeType(type: 'create' | 'load') {
     display: flex;
     gap: 10px;
     justify-content: center;
+}
+
+.editor {
+    display: flex;
+    flex-direction: column;
 }
 </style>

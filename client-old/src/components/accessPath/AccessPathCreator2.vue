@@ -29,7 +29,7 @@ let processedNodes = new Set<number>();
 
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
-const emit = defineEmits([ 'finish' ]);
+const emit = defineEmits([ 'finish', 'cancel' ]);
 
 function confirmDatasourceAndRootNode() {
     if (!props.selectedLogicalModel || !selectingRootNode.value)
@@ -143,17 +143,29 @@ function onNodeTapHandler(node: Node) {
 }
 
 function updateRootProperty(newRootProperty: GraphRootProperty) {
-    accessPath.value?.node.removeRoot();
-    accessPath.value?.unhighlightPath();
+    undoAccessPath();
 
     newRootProperty.node.becomeRoot();
     accessPath.value = newRootProperty;
     accessPath.value.highlightPath();
 }
 
+function undoAccessPath() {
+    rootConfirmed.value = false;
+    accessPath.value?.node.removeRoot();
+    accessPath.value?.unhighlightPath();
+    selectingRootNode.value?.unhighlight();
+}
+
 function createMapping(primaryKey: SignatureId) {
     emit('finish', primaryKey, accessPath);
 }
+
+function cancel() {
+    undoAccessPath();
+    emit('cancel');
+}
+ 
 </script>
 
 <template>
@@ -197,6 +209,11 @@ function createMapping(primaryKey: SignatureId) {
                         Confirm Selected Nodes
                     </button>
                 </div>
+                <button
+                    @click="cancel"
+                >
+                    Cancel
+                </button>
             </div>
             <AccessPathEditor2
                 v-else
@@ -204,6 +221,7 @@ function createMapping(primaryKey: SignatureId) {
                 :root-property="accessPath"
                 @finish="createMapping"
                 @update:rootProperty="updateRootProperty"
+                @cancel="cancel"
             />
         </div>
     </div>

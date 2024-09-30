@@ -37,7 +37,7 @@ const { graph } = $(useEvocat());
 
 const props = defineProps<AccessPathEditorProps>();
 
-const emit = defineEmits([ 'finish', 'update:rootProperty' ]);
+const emit = defineEmits([ 'finish', 'update:rootProperty', 'cancel' ]);
 
 const state = shallowRef<StateValue>({ type: State.Default });
 const selectedNodes = ref<Node[]>([]);
@@ -122,7 +122,6 @@ function setRootClicked(node: Node) {
     const label = node.metadata.label.toLowerCase();
     const newRoot = new GraphRootProperty(StaticName.fromString(label), node);
 
-    //be aware if I want to add a root, (like user) I dont have a parent prop
     if (!isNodeInAccessPath(node)) {
         if (!insert(node)) {
             node.unselect();
@@ -142,9 +141,8 @@ function setRootClicked(node: Node) {
 
 
 function renameClicked() {
-    if (state.value.type === State.OneNode) {
-        console.log('Renaming node:', state.value.node);
-    }
+    if (state.value.type === State.OneNode) 
+        console.log('Renaming node:', state.value.node);    
 }
 
 function finishMapping() {
@@ -167,6 +165,10 @@ function isNodeInAccessPath(node: Node): boolean {
     return props.rootProperty.containsNode(node) ?? false;
 }
 
+function cancel() {
+    emit('cancel');
+}
+
 </script>
 
 <template>
@@ -187,6 +189,11 @@ function isNodeInAccessPath(node: Node): boolean {
                             Finish mapping
                         </button>
                     </div>
+                    <button
+                        @click="cancel"
+                    >
+                        Cancel
+                    </button>
                 </template>
                 <template v-if="state.type === State.OneNode">
                     <div class="options">
