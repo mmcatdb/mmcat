@@ -1,45 +1,66 @@
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, shallowRef } from 'vue';
-import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
-import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
-import { SignatureId, StaticName } from '@/types/identifiers';
-import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
+import { onMounted, ref, watch } from 'vue';
+import { GraphRootProperty } from '@/types/accessPath/graph';
+import { SignatureId } from '@/types/identifiers';
 import AccessPathEditor2 from './edit/AccessPathEditor2.vue';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey, type EvocatContext, useEvocat } from '@/utils/injects';
-import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import { useEvocat } from '@/utils/injects';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
-import NodeInput from '@/components/input/NodeInput.vue';
-import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
 
 const { graph } = $(useEvocat());
 
 const props = defineProps<{
-    selectedLogicalModel: LogicalModel;
+    logicalModels: LogicalModel[];
 }>();
 
 const accessPath = ref<GraphRootProperty>();
 const originalMapping = ref<Mapping>();
-const mappingConfirmed = ref(false);
+const originalGraphProperty = ref<GraphRootProperty>();
+const selectedLogicalModel = ref<LogicalModel>();
+const selectedMapping = ref<Mapping>();
+const mappings = ref<Mapping[]>([]);
 
 const emit = defineEmits([ 'finish', 'cancel' ]);
 
 onMounted(async () => {
-    const logicalModelId = props.selectedLogicalModel.id;
-    const result = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId });
-    if (result.status) {
-        originalMapping.value = Mapping.fromServer(result.data[0]);
-        // highlight it in the editor
-    }
+    await loadMappingsForSelectedLogicalModel();
 });
 
+watch(selectedLogicalModel, async (newModel) => {
+    if (newModel) 
+        await loadMappingsForSelectedLogicalModel();
+});
+
+watch(selectedMapping, (newMapping) => {
+    if (newMapping) 
+        loadSelectedMapping(newMapping); 
+});
+
+async function loadMappingsForSelectedLogicalModel() {
+    if (!selectedLogicalModel.value) return;
+
+    const logicalModelId = selectedLogicalModel.value.id;
+    const result = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId });
+    if (result.status) 
+        mappings.value = result.data.map(Mapping.fromServer);
+}
+
+async function loadSelectedMapping(mapping: Mapping) {
+    originalMapping.value = mapping;
+    const node = graph.getNode(mapping.rootObjectKey) || null;
+
+    originalGraphProperty.value = GraphRootProperty.fromRootProperty(
+        mapping.accessPath, 
+        node,
+    );
+    originalGraphProperty.value?.highlightPath();
+}
+
 function confirmMapping() {
-    mappingConfirmed.value = true;
     if (originalMapping.value)
-        accessPath.value = originalMapping.value?.accessPath
+        accessPath.value = originalGraphProperty.value;
 }
 
 function updateRootProperty(newRootProperty: GraphRootProperty) {
@@ -51,11 +72,18 @@ function updateRootProperty(newRootProperty: GraphRootProperty) {
     accessPath.value.highlightPath();
 }
 
+function undoAccessPath() {
+    originalGraphProperty.value?.unhighlightPath();
+    accessPath.value?.node.removeRoot();
+    accessPath.value?.unhighlightPath();
+}
+
 function createMapping(primaryKey: SignatureId) {
     emit('finish', primaryKey, accessPath);
 }
 
 function cancel() {
+    undoAccessPath();
     emit('cancel');
 }
 
@@ -64,11 +92,37 @@ function cancel() {
 <template>
     <div class="divide">
         <div>
+            <div v-if="props.logicalModels.length">
+                <ValueRow label="Logical model:">
+                    <select v-model="selectedLogicalModel">
+                        <option 
+                            v-for="logicalModel in logicalModels" 
+                            :key="logicalModel.id" 
+                            :value="logicalModel"
+                        >
+                            {{ logicalModel.label }}
+                        </option>
+                    </select>
+                </ValueRow>
+            </div>
+            <div v-if="props.logicalModels.length">
+                <ValueRow label="Kind:">
+                    <select v-model="selectedMapping">
+                        <option 
+                            v-for="mapping in mappings" 
+                            :key="mapping.id" 
+                            :value="mapping"
+                        >
+                            {{ mapping.kindName }}
+                        </option>
+                    </select>
+                </ValueRow>
+            </div>
             <div
-                v-if="!accessPath || !selectedLogicalModel"
+                v-if="!accessPath"
                 class="loader"
             >
-                <div v-if="!mappingConfirmed" class="button-row">
+                <div class="button-row">
                     <button
                         @click="confirmMapping"
                     >
@@ -82,7 +136,7 @@ function cancel() {
                 </div>
             </div>
             <AccessPathEditor2
-                v-else
+                v-else-if="selectedLogicalModel"
                 :datasource="selectedLogicalModel.datasource"
                 :root-property="accessPath"
                 @finish="createMapping"

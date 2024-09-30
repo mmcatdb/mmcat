@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, shallowRef } from 'vue';
+import { onMounted, provide, ref, shallowRef } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
-import { SignatureId, StaticName } from '@/types/identifiers';
-import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
+import { SignatureId } from '@/types/identifiers';
+import { type Graph } from '@/types/categoryGraph';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
-import ValueContainer from '@/components/layout/page/ValueContainer.vue';
-import ValueRow from '@/components/layout/page/ValueRow.vue';
-import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '../category/EvocatDisplay.vue';
 import AccessPathLoader from './AccessPathLoader.vue';
@@ -95,12 +92,12 @@ function setToDefault() {
             </div>
             <AccessPathLoader
                 v-if="initializeType === 'load'"
-                :selected-logical-model="selectedLogicalModel"
+                :logical-models="logicalModels"
                 @finish="createMapping"
                 @cancel="setToDefault"
             />
             <AccessPathCreator2
-                v-if="initializeType === 'create'"
+                v-if="initializeType === 'create' && selectedLogicalModel"
                 :selected-logical-model="selectedLogicalModel"
                 @finish="createMapping"
                 @cancel="setToDefault"

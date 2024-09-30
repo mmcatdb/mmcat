@@ -5,13 +5,9 @@ import { SelectionType, type Node } from '@/types/categoryGraph';
 import { shallowRef, ref, watch, computed } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { Datasource } from '@/types/datasource';
-import StaticNameInput from '../input/StaticNameInput.vue';
-import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import PrimaryKeyInput from '../input/PrimaryKeyInput.vue';
 import { ObjectIds, SignatureId, SignatureIdFactory, StaticName } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
-import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import { useEvocat } from '@/utils/injects';
 
 enum State {
@@ -71,7 +67,7 @@ function insert(node: Node): boolean {
     const label = node.metadata.label.toLowerCase();
     let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : undefined;
 
-    if (!parentProperty) return false;
+    if (!parentProperty || !parentNode) return false;
 
     const signature = graph.getSignature(node, parentNode);
 
@@ -181,7 +177,9 @@ function cancel() {
                     </ValueRow>
                 </template>
                 <template v-if="state.type === State.Default">
-                    <h2 class="custom-text">Select valid nodes to edit</h2>
+                    <h2 class="custom-text">
+                        Select valid nodes to edit
+                    </h2>
                     <div class="button-row">
                         <button
                             @click="finishMapping"

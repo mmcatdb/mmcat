@@ -1,9 +1,12 @@
 import type { Node } from '@/types/categoryGraph';
 import type { StaticName } from '@/types/identifiers';
 import type { RootPropertyFromServer } from '../serverTypes';
+import { RootProperty, SimpleProperty, ComplexProperty } from '../basic';
 import type { GraphChildProperty, GraphParentProperty } from './compositeTypes';
 import { SequenceSignature } from './SequenceSignature';
 import { GraphComplexProperty } from './GraphComplexProperty';
+import { GraphSimpleProperty } from './GraphSimpleProperty';
+import { type ChildProperty } from '@/types/accessPath/basic/compositeTypes';
 
 export class GraphRootProperty {
     name: StaticName;
@@ -91,8 +94,7 @@ export class GraphRootProperty {
             if (subpath instanceof GraphComplexProperty) 
                 subpath.removeSubpathForNode(node);            
         }
-    }
-    
+    } 
 
     get isAuxiliary(): boolean {
         return true;
@@ -117,4 +119,39 @@ export class GraphRootProperty {
             subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }
+  
+    static fromRootProperty(rootProperty: RootProperty, rootNode: Node | null): GraphRootProperty | undefined{
+        if (!rootNode) return;
+        const name = rootProperty.name;
+
+        const subpaths = rootProperty.subpaths.map(subpath => {
+            return GraphRootProperty.convertToGraphChildProperty(subpath, null, rootNode);
+        });
+
+        const graphRootProperty = new GraphRootProperty(name, rootNode, subpaths);
+        graphRootProperty._signature = SequenceSignature.fromSignature(rootProperty.signature, rootNode);
+        return graphRootProperty;
+    }
+
+    static convertToGraphChildProperty(childProperty: ChildProperty, parent: GraphParentProperty | null, rootNode: Node): GraphChildProperty {
+        if (childProperty instanceof SimpleProperty) 
+            return GraphRootProperty.convertToGraphSimpleProperty(childProperty, parent, rootNode);
+        else if (childProperty instanceof ComplexProperty) 
+            return GraphRootProperty.convertToGraphComplexProperty(childProperty, parent, rootNode);
+        else 
+            throw new Error('Unsupported ChildProperty type');        
+    }
+
+    static convertToGraphSimpleProperty(simpleProperty: SimpleProperty, parent: GraphParentProperty | null, rootNode: Node): GraphSimpleProperty {
+        return new GraphSimpleProperty(simpleProperty.name, SequenceSignature.fromSignature(simpleProperty.signature, rootNode), parent);
+    }
+
+    static convertToGraphComplexProperty(complexProperty: ComplexProperty, parent: GraphParentProperty | null, rootNode: Node): GraphComplexProperty {
+        const graphSubpaths = complexProperty.subpaths.map(subpath =>
+            GraphRootProperty.convertToGraphChildProperty(subpath, null, rootNode)
+        );
+
+        return new GraphComplexProperty(complexProperty.name, SequenceSignature.fromSignature(complexProperty.signature, rootNode), parent, graphSubpaths);
+    }
+    
 }

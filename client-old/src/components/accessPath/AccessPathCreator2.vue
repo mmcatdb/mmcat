@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, shallowRef } from 'vue';
+import { computed, ref } from 'vue';
 import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SignatureId, StaticName } from '@/types/identifiers';
-import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
+import { type Node, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor2 from './edit/AccessPathEditor2.vue';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey, type EvocatContext, useEvocat } from '@/utils/injects';
+import { useEvocat } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
-import { isKeyPressed, Key } from '@/utils/keyboardInput';
 
 const { graph } = $(useEvocat());
 
@@ -72,6 +71,9 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
 
     const children = filterChildren(node);
     const parentNode = graph.getParentNode(node);
+
+    if (!parentNode) return;
+
     const signature = graph.getSignature(node, parentNode);
     const label = node.metadata.label.toLowerCase(); // why to lower case though?
     let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) ?? previousParentProperty : previousParentProperty;
@@ -123,28 +125,8 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
     }
 }
 
-function onNodeTapHandler(node: Node) {
-    if (!rootConfirmed.value) return;
-
-    if (isKeyPressed(Key.Shift)) {
-        const currentLength = selectedNodes.value.length;
-        selectedNodes.value = selectedNodes.value.filter(n => !n.equals(node));
-        if (selectedNodes.value.length < currentLength) {
-            node.unselect();
-        } else {
-            selectedNodes.value.push(node);
-            node.select({ type: SelectionType.Selected, level: 0 });
-        }
-    } else {
-        selectedNodes.value.forEach(n => n.unselect());
-        selectedNodes.value = [ node ];
-        node.select({ type: SelectionType.Selected, level: 0 });
-    }
-}
-
 function updateRootProperty(newRootProperty: GraphRootProperty) {
     undoAccessPath();
-
     newRootProperty.node.becomeRoot();
     accessPath.value = newRootProperty;
     accessPath.value.highlightPath();
