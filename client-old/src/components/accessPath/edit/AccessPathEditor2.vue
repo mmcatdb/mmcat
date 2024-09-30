@@ -2,7 +2,7 @@
 import { GraphComplexProperty, GraphSimpleProperty, GraphRootProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SelectionType, type Node } from '@/types/categoryGraph';
-import { shallowRef, ref, watch, computed } from 'vue';
+import { shallowRef, ref, watch, computed, onMounted, onUnmounted} from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { Datasource } from '@/types/datasource';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
@@ -29,6 +29,18 @@ type AccessPathEditorProps = {
     rootProperty: GraphRootProperty;
 };
 
+type ShortcutConfig = {
+    insert?: {
+        keyboard: string;
+    };
+    delete?: {
+        keyboard: string;
+    };
+    setRoot?: {
+        keyboard: string;
+    };
+};
+
 const { graph } = $(useEvocat());
 
 const props = defineProps<AccessPathEditorProps>();
@@ -38,6 +50,45 @@ const emit = defineEmits([ 'finish', 'update:rootProperty', 'cancel' ]);
 const state = shallowRef<StateValue>({ type: State.Default });
 const selectedNodes = ref<Node[]>([]);
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
+const shortcutConfig = ref<ShortcutConfig>({});
+
+onMounted(async () => {
+    await loadShortcuts();
+    window.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+});
+
+async function loadShortcuts() {
+    try {
+        const response = await fetch('/shortcuts.json');
+        if (response.ok) 
+            shortcutConfig.value = await response.json();
+        else 
+            console.error('Failed to load shortcut config');        
+    } catch (error) {
+        console.error('Error loading shortcuts:', error);
+    }
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+    const key = event.key.toLowerCase(); // normalize it
+    
+    const insertShortcut = shortcutConfig.value.insert?.keyboard?.toLowerCase();
+    const deleteShortcut = shortcutConfig.value.delete?.keyboard?.toLowerCase();
+    const setRootShortcut = shortcutConfig.value.setRoot?.keyboard?.toLowerCase();
+    
+    if (key === insertShortcut && state.value.type === State.OneNode) 
+        insertRequested(state.value.node);  
+    else if (key === deleteShortcut && state.value.type === State.OneNode)
+        deleteRequested([ state.value.node ]);
+    else if (key === deleteShortcut && (state.value.type === State.TwoNodes || state.value.type === State.MultipleNodes))
+        deleteRequested(state.value.nodes);  
+    else if (key === setRootShortcut && state.value.type === State.OneNode)
+        setRootRequested(state.value.node);      
+}
 
 function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     if (!ids)
@@ -51,11 +102,7 @@ function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
 
 const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
 
-function setStateToDefault() {
-    state.value = { type: State.Default };
-}
-
-function insertClicked(node: Node) {
+function insertRequested(node: Node) {
     insert(node);
     node.highlight();
     selectedNodes.value = [];
@@ -104,7 +151,7 @@ function insertBetweenClicked() {
     console.log('Inserting betweenxx');
 }
 
-function deleteClicked(nodes: Node[]) {
+function deleteRequested(nodes: Node[]) {
     nodes.forEach(node => {
         if (isNodeInAccessPath(node)) {
             node.unhighlight();
@@ -114,7 +161,7 @@ function deleteClicked(nodes: Node[]) {
     selectedNodes.value = [];
 }
 
-function setRootClicked(node: Node) {
+function setRootRequested(node: Node) {
     const label = node.metadata.label.toLowerCase();
     const newRoot = new GraphRootProperty(StaticName.fromString(label), node);
 
@@ -197,17 +244,17 @@ function cancel() {
                     <div class="options">
                         <button 
                             v-if="!isNodeInAccessPath(state.node)"
-                            @click="insertClicked(state.node)"
+                            @click="insertRequested(state.node)"
                         >
                             Insert
                         </button>
                         <button
                             v-if="isNodeInAccessPath(state.node)"
-                            @click="deleteClicked([state.node])"
+                            @click="deleteRequested([state.node])"
                         >
                             Delete
                         </button>
-                        <button @click="setRootClicked(state.node)">
+                        <button @click="setRootRequested(state.node)">
                             Set Root
                         </button>
                         <button 
@@ -223,14 +270,14 @@ function cancel() {
                         <button @click="insertBetweenClicked">
                             Insert Between
                         </button>
-                        <button @click="deleteClicked(state.nodes)">
+                        <button @click="deleteRequested(state.nodes)">
                             Delete
                         </button>
                     </div>
                 </template>
                 <template v-if="state.type === State.MultipleNodes">
                     <div class="options">
-                        <button @click="deleteClicked(state.nodes)">
+                        <button @click="deleteRequested(state.nodes)">
                             Delete
                         </button>
                     </div>

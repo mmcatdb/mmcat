@@ -75,7 +75,7 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
     if (!parentNode) return;
 
     const signature = graph.getSignature(node, parentNode);
-    const label = node.metadata.label.toLowerCase(); // why to lower case though?
+    const label = node.metadata.label.toLowerCase(); // for normalization?
     let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) ?? previousParentProperty : previousParentProperty;
 
     if (!parentProperty) return;
