@@ -31,8 +31,6 @@ const selectingRootNode = ref<Node>();
 const logicalModels = shallowRef<LogicalModel[]>([]);
 const selectedLogicalModel = shallowRef<LogicalModel>();
 
-const datasourceAndRootNodeValid = computed(() => !!selectedLogicalModel.value && !!selectingRootNode.value);
-
 const categoryId = useSchemaCategoryId();
 const category = useSchemaCategoryInfo();
 

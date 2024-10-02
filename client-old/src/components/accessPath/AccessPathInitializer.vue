@@ -43,6 +43,7 @@ onMounted(async () => {
 async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty) {
     if (!selectedLogicalModel.value || !graph.value || !accessPath)
         return;
+    accessPath.node.schemaObject;
 
     const result = await API.mappings.createNewMapping({}, {
         logicalModelId: selectedLogicalModel.value.id,

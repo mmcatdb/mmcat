@@ -47,6 +47,7 @@ const props = defineProps<AccessPathEditorProps>();
 
 const emit = defineEmits([ 'finish', 'update:rootProperty', 'cancel' ]);
 
+const localRootProperty = shallowRef<GraphRootProperty>(props.rootProperty);
 const state = shallowRef<StateValue>({ type: State.Default });
 const selectedNodes = ref<Node[]>([]);
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
@@ -103,9 +104,10 @@ function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
 const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
 
 function insertRequested(node: Node) {
-    insert(node);
-    node.highlight();
+    if (insert(node))
+        node.highlight();
     selectedNodes.value = [];
+    emit('update:rootProperty', localRootProperty.value);
 }
 
 function insert(node: Node): boolean {
@@ -125,6 +127,7 @@ function insert(node: Node): boolean {
         subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
 
     parentProperty.updateOrAddSubpath(subpath);
+    localRootProperty.value = parentProperty as GraphRootProperty;
     return true;
 }
 
@@ -159,6 +162,7 @@ function deleteRequested(nodes: Node[]) {
         }
     });
     selectedNodes.value = [];
+    emit('update:rootProperty', localRootProperty.value);
 }
 
 function setRootRequested(node: Node) {
@@ -180,6 +184,7 @@ function setRootRequested(node: Node) {
     node.unselect();
     selectedNodes.value = [];
     emit('update:rootProperty', newRoot);
+    localRootProperty.value = newRoot;
 }
 
 
@@ -189,7 +194,7 @@ function renameClicked() {
 }
 
 function finishMapping() {
-    emit('finish', primaryKey.value);
+    emit('finish', primaryKey.value, props.rootProperty);
 }
 
 watch(selectedNodes, (nodes) => {
@@ -205,7 +210,7 @@ watch(selectedNodes, (nodes) => {
 });
 
 function isNodeInAccessPath(node: Node): boolean {
-    return props.rootProperty.containsNode(node) ?? false;
+    return localRootProperty.value.containsNode(node) ?? false;
 }
 
 function cancel() {
@@ -290,7 +295,7 @@ function cancel() {
             @update:modelValue="selectedNodes = $event"
         />
         <ParentPropertyDisplay
-            :property="rootProperty"
+            :property="localRootProperty"
         />
     </div>
 </template>

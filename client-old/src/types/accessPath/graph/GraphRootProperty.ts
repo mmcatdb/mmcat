@@ -124,34 +124,44 @@ export class GraphRootProperty {
         if (!rootNode) return;
         const name = rootProperty.name;
 
-        const subpaths = rootProperty.subpaths.map(subpath => {
-            return GraphRootProperty.convertToGraphChildProperty(subpath, null, rootNode);
+        const graphRootProperty = new GraphRootProperty(name, rootNode);
+
+        rootProperty.subpaths.map(subpath => {
+            const graphChildProperty = GraphRootProperty.convertToGraphChildProperty(subpath, graphRootProperty, rootNode); 
+            graphRootProperty.updateOrAddSubpath(graphChildProperty);
+            return graphChildProperty;
         });
 
-        const graphRootProperty = new GraphRootProperty(name, rootNode, subpaths);
-        graphRootProperty._signature = SequenceSignature.fromSignature(rootProperty.signature, rootNode);
         return graphRootProperty;
     }
 
-    static convertToGraphChildProperty(childProperty: ChildProperty, parent: GraphParentProperty | null, rootNode: Node): GraphChildProperty {
+    static convertToGraphChildProperty(childProperty: ChildProperty, parent: GraphParentProperty, parentNode: Node): GraphChildProperty {
         if (childProperty instanceof SimpleProperty) 
-            return GraphRootProperty.convertToGraphSimpleProperty(childProperty, parent, rootNode);
+            return GraphRootProperty.convertToGraphSimpleProperty(childProperty, parent, parentNode);
         else if (childProperty instanceof ComplexProperty) 
-            return GraphRootProperty.convertToGraphComplexProperty(childProperty, parent, rootNode);
+            return GraphRootProperty.convertToGraphComplexProperty(childProperty, parent, parentNode);
         else 
             throw new Error('Unsupported ChildProperty type');        
     }
 
-    static convertToGraphSimpleProperty(simpleProperty: SimpleProperty, parent: GraphParentProperty | null, rootNode: Node): GraphSimpleProperty {
-        return new GraphSimpleProperty(simpleProperty.name, SequenceSignature.fromSignature(simpleProperty.signature, rootNode), parent);
+    static convertToGraphSimpleProperty(simpleProperty: SimpleProperty, parent: GraphParentProperty, parentNode: Node): GraphSimpleProperty {
+        const graphSimpleProperty =  new GraphSimpleProperty(simpleProperty.name, SequenceSignature.fromSignature(simpleProperty.signature, parentNode), parent);
+        // workaround line - prevents from selecting node in the current GraphRootProperty - delete later
+        graphSimpleProperty.signature.sequence.unselectAll();
+        return graphSimpleProperty;
     }
 
-    static convertToGraphComplexProperty(complexProperty: ComplexProperty, parent: GraphParentProperty | null, rootNode: Node): GraphComplexProperty {
-        const graphSubpaths = complexProperty.subpaths.map(subpath =>
-            GraphRootProperty.convertToGraphChildProperty(subpath, null, rootNode)
-        );
+    static convertToGraphComplexProperty(complexProperty: ComplexProperty, parent: GraphParentProperty, parentNode: Node): GraphComplexProperty {
+        const graphComplexProperty = new GraphComplexProperty(complexProperty.name, SequenceSignature.fromSignature(complexProperty.signature, parentNode), parent);
 
-        return new GraphComplexProperty(complexProperty.name, SequenceSignature.fromSignature(complexProperty.signature, rootNode), parent, graphSubpaths);
+        complexProperty.subpaths.map(subpath => {
+            const graphChildProperty = GraphRootProperty.convertToGraphChildProperty(subpath, graphComplexProperty, graphComplexProperty.node);
+            graphComplexProperty.updateOrAddSubpath(graphChildProperty);
+        });
+
+        // workaround line - prevents from selecting node in the current GraphRootProperty - delete later
+        graphComplexProperty.signature.sequence.unselectAll();
+        return graphComplexProperty;
     }
     
 }

@@ -38,9 +38,8 @@ export class Graph {
         if (!edge) {
             console.warn(`No edge found between parent ${parentNode.schemaObject.key.value} and node ${node.schemaObject.key.value}`);
             return SequenceSignature.empty(node); // Return empty sequence as fallback
-        }
-    
-        return SequenceSignature.fromSignature(edge.schemaMorphism.signature, node);
+        }   
+        return SequenceSignature.fromSignature(edge.schemaMorphism.signature, parentNode);
     }  
 
     public getParentNode(node: Node): Node | undefined {
@@ -52,8 +51,7 @@ export class Graph {
         }
     
         return incomingEdges[0].domainNode;
-    }
-    
+    }    
     ///
 
     public resetElements(groupsData: GroupData[]): void {

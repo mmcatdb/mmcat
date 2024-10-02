@@ -140,7 +140,7 @@ function undoAccessPath() {
 }
 
 function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath);
+    emit('finish', primaryKey, accessPath.value);
 }
 
 function cancel() {

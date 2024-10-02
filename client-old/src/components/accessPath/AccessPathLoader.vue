@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId } from '@/types/identifiers';
 import AccessPathEditor2 from './edit/AccessPathEditor2.vue';
@@ -21,6 +21,8 @@ const originalGraphProperty = ref<GraphRootProperty>();
 const selectedLogicalModel = ref<LogicalModel>();
 const selectedMapping = ref<Mapping>();
 const mappings = ref<Mapping[]>([]);
+const mappingConfirmed = ref(false);
+const isConfirmDisabled = computed(() => !selectedMapping.value);
 
 const emit = defineEmits([ 'finish', 'cancel' ]);
 
@@ -48,6 +50,8 @@ async function loadMappingsForSelectedLogicalModel() {
 }
 
 async function loadSelectedMapping(mapping: Mapping) {
+    originalGraphProperty.value?.unhighlightPath();
+    originalGraphProperty.value?.node.removeRoot();
     originalMapping.value = mapping;
     const node = graph.getNode(mapping.rootObjectKey) || null;
 
@@ -55,12 +59,16 @@ async function loadSelectedMapping(mapping: Mapping) {
         mapping.accessPath, 
         node,
     );
+    originalGraphProperty.value?.node.becomeRoot();
     originalGraphProperty.value?.highlightPath();
 }
 
 function confirmMapping() {
-    if (originalMapping.value)
+    if (originalMapping.value) {
         accessPath.value = originalGraphProperty.value;
+        console.log('accesspath root ', accessPath.value?.node.schemaObject);
+        mappingConfirmed.value = true;
+    }
 }
 
 function updateRootProperty(newRootProperty: GraphRootProperty) {
@@ -74,16 +82,18 @@ function updateRootProperty(newRootProperty: GraphRootProperty) {
 
 function undoAccessPath() {
     originalGraphProperty.value?.unhighlightPath();
+    originalGraphProperty.value?.node.removeRoot();
     accessPath.value?.node.removeRoot();
     accessPath.value?.unhighlightPath();
 }
 
 function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath);
+    emit('finish', primaryKey, accessPath.value);
 }
 
 function cancel() {
     undoAccessPath();
+    mappingConfirmed.value = false;
     emit('cancel');
 }
 
@@ -92,9 +102,12 @@ function cancel() {
 <template>
     <div class="divide">
         <div>
-            <div v-if="props.logicalModels.length">
+            <div v-if="props.logicalModels.length && !mappingConfirmed">
                 <ValueRow label="Logical model:">
-                    <select v-model="selectedLogicalModel">
+                    <select 
+                        v-model="selectedLogicalModel"
+                        :disabled="mappingConfirmed"
+                    >
                         <option 
                             v-for="logicalModel in logicalModels" 
                             :key="logicalModel.id" 
@@ -104,10 +117,11 @@ function cancel() {
                         </option>
                     </select>
                 </ValueRow>
-            </div>
-            <div v-if="props.logicalModels.length">
                 <ValueRow label="Kind:">
-                    <select v-model="selectedMapping">
+                    <select 
+                        v-model="selectedMapping"
+                        :disabled="mappingConfirmed"
+                    >
                         <option 
                             v-for="mapping in mappings" 
                             :key="mapping.id" 
@@ -124,9 +138,10 @@ function cancel() {
             >
                 <div class="button-row">
                     <button
+                        :disabled="isConfirmDisabled"
                         @click="confirmMapping"
                     >
-                        Confirm Initial Mapping
+                        Confirm
                     </button>
                     <button
                         @click="cancel"
@@ -141,6 +156,7 @@ function cancel() {
                 :root-property="accessPath"
                 @finish="createMapping"
                 @update:rootProperty="updateRootProperty"
+                @cancel="cancel"
             />
         </div>
     </div>
