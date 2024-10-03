@@ -26,7 +26,7 @@ public class Session extends Entity {
 
     public static Session createNew(Id categoryId) {
         return new Session(
-            Id.createNewUUID(),
+            Id.createNew(),
             categoryId,
             new Date()
         );

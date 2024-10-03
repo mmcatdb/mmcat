@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,26 +29,11 @@ public abstract class Utils {
         return idString == null ? null : new Id(idString);
     }
 
-    public static void setId(PreparedStatement statement, int position, @Nullable Id id, boolean isUuid) throws SQLException {
+    public static void setId(PreparedStatement statement, int position, @Nullable Id id) throws SQLException {
         if (id == null)
-            statement.setNull(position, isUuid ? Types.OTHER : Types.INTEGER);
+            statement.setNull(position, Types.OTHER);
         else
-            setId(statement, position, id);
-    }
-
-    public static void setId(PreparedStatement statement, int position, Id id) throws SQLException {
-        if (id.isUuid()) {
-            statement.setObject(position, UUID.fromString(id.toString()));
-            return;
-        }
-
-        try {
-            //statement.setString(position, id.value);
-            statement.setInt(position, Integer.parseInt(id.toString()));
-        }
-        catch (NumberFormatException e) {
-            statement.setInt(position, 0);
-        }
+            statement.setObject(position, id.toUUID());
     }
 
     public static void executeChecked(PreparedStatement statement) throws SQLException {

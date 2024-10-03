@@ -1,36 +1,21 @@
 package cz.matfyz.server.entity;
 
 import cz.matfyz.core.identifiers.Identified;
-import cz.matfyz.server.exception.EntityException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class Entity implements Identified<Entity, Id> {
 
-    private @Nullable Id id;
+    private Id id;
 
-    public Entity(@Nullable Id id) {
+    public Entity(Id id) {
         this.id = id;
     }
 
     @JsonProperty("id")
     public Id id() {
-        if (id == null)
-            throw EntityException.readNullId();
-
         return id;
-    }
-
-    public void assignId(Id id) {
-        if (this.id != null)
-            throw EntityException.reassignId(this.id);
-
-        // This shouldn't be necessary because it should be covered by the @Nullable check. However, the checker isn't propertly implemented yet, so ...
-        if (id == null)
-            throw EntityException.writeNullId();
-
-        this.id = id;
     }
 
     @Override public Id identifier() {

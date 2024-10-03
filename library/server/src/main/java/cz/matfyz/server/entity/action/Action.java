@@ -23,7 +23,7 @@ public class Action extends Entity {
 
     public static Action createNew(Id categoryId, String label, ActionPayload payload) {
         return new Action(
-            Id.createNewUUID(),
+            Id.createNew(),
             categoryId,
             label,
             payload

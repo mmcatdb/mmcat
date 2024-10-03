@@ -30,7 +30,7 @@ public class QueryVersion extends Entity {
 
     public static QueryVersion createNew(Id queryId, Version version, String content, List<QueryUpdateError> errors) {
         return new QueryVersion(
-            Id.createNewUUID(),
+            Id.createNew(),
             queryId,
             version,
             content,

@@ -36,8 +36,8 @@ public class SchemaCategoryService {
         final var schema = new SchemaCategory();
         final var metadata = MetadataCategory.createEmpty(schema);
         final var version = Version.generateInitial("0");
-        final var wrapper = SchemaCategoryWrapper.fromSchemaCategory(null, init.label(), version, version, schema, metadata);
-        repository.add(wrapper);
+        final var wrapper = SchemaCategoryWrapper.createNew(init.label(), version, version, schema, metadata);
+        repository.save(wrapper);
         jobService.createSession(wrapper.id());
 
         return wrapper;
@@ -57,7 +57,7 @@ public class SchemaCategoryService {
 
     public SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);
-        final var update = SchemaUpdate.fromInit(updateInit, id, wrapper.systemVersion);
+        final var update = SchemaUpdate.createFromInit(updateInit, id, wrapper.systemVersion);
 
         if (!update.prevVersion.equals(wrapper.version))
             throw VersionException.mismatch(update.prevVersion, wrapper.version);

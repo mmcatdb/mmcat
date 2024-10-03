@@ -133,8 +133,8 @@ public class JobRepository {
                 """);
             setId(statement, 1, run.id());
             setId(statement, 2, run.categoryId);
-            setId(statement, 3, run.actionId, true);
-            setId(statement, 4, run.sessionId, true);
+            setId(statement, 3, run.actionId);
+            setId(statement, 4, run.sessionId);
             executeChecked(statement);
         });
     }

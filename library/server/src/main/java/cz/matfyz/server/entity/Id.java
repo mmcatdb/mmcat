@@ -2,7 +2,6 @@ package cz.matfyz.server.entity;
 
 import java.io.IOException;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -26,8 +25,12 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
         this.value = value;
     }
 
-    public static Id createNewUUID() {
+    public static Id createNew() {
         return new Id(UUID.randomUUID().toString());
+    }
+
+    public UUID toUUID() {
+        return UUID.fromString(value);
     }
 
     @Override public String toString() {
@@ -48,12 +51,6 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
 
     @Override public boolean isEmpty() {
         return value.isEmpty();
-    }
-
-    private static final Pattern UUID_REGEX = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
-
-    public boolean isUuid() {
-        return UUID_REGEX.matcher(value).matches();
     }
 
     public int compareTo(Id another) {

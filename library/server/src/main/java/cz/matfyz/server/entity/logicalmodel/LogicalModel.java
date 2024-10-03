@@ -10,15 +10,26 @@ import com.fasterxml.jackson.databind.ObjectReader;
 
 public class LogicalModel extends Entity {
 
+    /** Immutable. */
     public final Id categoryId;
+    /** Immutable. */
     public final Id datasourceId;
     public final String label;
 
-    public LogicalModel(Id id, Id categoryId, Id datasourceId, String label) {
+    private LogicalModel(Id id, Id categoryId, Id datasourceId, String label) {
         super(id);
         this.categoryId = categoryId;
         this.datasourceId = datasourceId;
         this.label = label;
+    }
+
+    public static LogicalModel createNew(Id categoryId, Id datasourceId, String label) {
+        return new LogicalModel(
+            Id.createNew(),
+            categoryId,
+            datasourceId,
+            label
+        );
     }
 
     public String toJsonValue() throws JsonProcessingException {

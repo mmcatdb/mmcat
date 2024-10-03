@@ -21,7 +21,7 @@ public class Query extends Entity {
 
     public static Query createNew(Id categoryId, String label) {
         return new Query(
-            Id.createNewUUID(),
+            Id.createNew(),
             categoryId,
             label
         );

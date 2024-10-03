@@ -9,7 +9,6 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
-import java.sql.Statement;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,32 +79,16 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public void add(SchemaCategoryWrapper wrapper) {
-        db.run(connection -> {
-            final var statement = connection.prepareStatement("""
-                INSERT INTO schema_category (json_value)
-                VALUES (?::jsonb);
-                """,
-                Statement.RETURN_GENERATED_KEYS
-            );
-            statement.setString(1, wrapper.toJsonValue());
-            executeChecked(statement);
-
-            final var generatedKeys = statement.getGeneratedKeys();
-            generatedKeys.next();
-            wrapper.assignId(getId(generatedKeys, "id"));
-        });
-    }
-
     public void save(SchemaCategoryWrapper wrapper) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                UPDATE schema_category
-                SET json_value = ?::jsonb
-                WHERE id = ?;
+                INSERT INTO schema_category (id, json_value)
+                VALUES (?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    json_value = EXCLUDED.json_value;
                 """);
-            statement.setString(1, wrapper.toJsonValue());
-            setId(statement, 2, wrapper.id());
+            setId(statement, 1, wrapper.id());
+            statement.setString(2, wrapper.toJsonValue());
             executeChecked(statement);
         });
     }
@@ -116,13 +99,14 @@ public class SchemaCategoryRepository {
                 UPDATE schema_category
                 SET json_value = ?::jsonb
                 WHERE id = ?;
-                INSERT INTO schema_category_update (schema_category_id, json_value)
-                VALUES (?, ?::jsonb);
+                INSERT INTO schema_category_update (id, schema_category_id, json_value)
+                VALUES (?, ?, ?::jsonb);
                 """);
             statement.setString(1, wrapper.toJsonValue());
             setId(statement, 2, wrapper.id());
-            setId(statement, 3, wrapper.id());
-            statement.setString(4, update.toJsonValue());
+            setId(statement, 3, update.id());
+            setId(statement, 4, update.categoryId);
+            statement.setString(5, update.toJsonValue());
             executeChecked(statement);
         });
     }

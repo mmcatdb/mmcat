@@ -27,7 +27,7 @@ public class DatasourceWrapper extends Entity {
 
     public static DatasourceWrapper createNew(DatasourceInit init) {
         return new DatasourceWrapper(
-            Id.createNewUUID(),
+            Id.createNew(),
             init.label(),
             init.type(),
             init.settings()

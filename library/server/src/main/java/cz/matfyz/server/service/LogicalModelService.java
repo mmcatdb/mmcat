@@ -57,13 +57,12 @@ public class LogicalModelService {
 
     public LogicalModelWithDatasource createNew(LogicalModelInit init) {
         final var datasource = datasourceService.find(init.datasourceId());
-        final var logicalModel = new LogicalModel(
-            null,
+        final var logicalModel = LogicalModel.createNew(
             init.categoryId(),
             init.datasourceId(),
             init.label()
         );
-        repository.add(logicalModel);
+        repository.save(logicalModel);
 
         return new LogicalModelWithDatasource(logicalModel, datasource);
     }

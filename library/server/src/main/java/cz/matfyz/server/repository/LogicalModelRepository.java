@@ -11,7 +11,6 @@ import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,22 +84,19 @@ public class LogicalModelRepository {
         "Logical model", id);
     }
 
-    public void add(LogicalModel model) {
+    public void save(LogicalModel model) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO logical_model (schema_category_id, datasource_id, json_value)
-                VALUES (?, ?, ?::jsonb);
-                """,
-                Statement.RETURN_GENERATED_KEYS
-            );
-            setId(statement, 1, model.categoryId);
-            setId(statement, 2, model.datasourceId);
-            statement.setString(3, model.toJsonValue());
+                INSERT INTO logical_model (id, schema_category_id, datasource_id, json_value)
+                VALUES (?, ?, ?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    json_value = EXCLUDED.json_value;
+                """);
+            setId(statement, 1, model.id());
+            setId(statement, 2, model.categoryId);
+            setId(statement, 3, model.datasourceId);
+            statement.setString(4, model.toJsonValue());
             executeChecked(statement);
-
-            final var generatedKeys = statement.getGeneratedKeys();
-            generatedKeys.next();
-            model.assignId(getId(generatedKeys, "id"));
         });
     }
 

@@ -28,6 +28,17 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         this.metadata = metadata;
     }
 
+    public static SchemaCategoryWrapper createNew(String label, Version version, Version systemVersion, SchemaCategory category, MetadataCategory metadata) {
+        return new SchemaCategoryWrapper(
+            Id.createNew(),
+            label,
+            version,
+            systemVersion,
+            SchemaSerializer.serialize(category),
+            MetadataSerializer.serialize(metadata)
+        );
+    }
+
     public static SchemaCategoryWrapper fromSchemaCategory(@Nullable Id id, String label, Version version, Version systemVersion, SchemaCategory category, MetadataCategory metadata) {
         return new SchemaCategoryWrapper(
             id,

@@ -17,13 +17,13 @@ DROP TABLE IF EXISTS schema_category;
 -- TODO name to label
 
 CREATE TABLE schema_category (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     json_value JSONB NOT NULL
 );
 
 CREATE TABLE schema_category_update (
-    id SERIAL PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    id UUID PRIMARY KEY,
+    schema_category_id UUID NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
 );
 
@@ -45,15 +45,15 @@ VALUES
     }');
 
 CREATE TABLE logical_model (
-    id SERIAL PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    id UUID PRIMARY KEY,
+    schema_category_id UUID NOT NULL REFERENCES schema_category,
     datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
 );
 
 CREATE TABLE mapping (
-    id SERIAL PRIMARY KEY,
-    logical_model_id INTEGER NOT NULL REFERENCES logical_model,
+    id UUID PRIMARY KEY,
+    logical_model_id UUID NOT NULL REFERENCES logical_model,
     json_value JSONB NOT NULL
 );
 
@@ -67,20 +67,20 @@ CREATE TABLE mapping (
 
 CREATE TABLE action (
     id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    schema_category_id UUID NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
 );
 
 CREATE TABLE session (
     id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    schema_category_id UUID NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL,
     instance_data JSONB DEFAULT NULL
 );
 
 CREATE TABLE run (
     id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    schema_category_id UUID NOT NULL REFERENCES schema_category,
     action_id UUID REFERENCES action,
     session_id UUID REFERENCES session
 );
@@ -93,7 +93,7 @@ CREATE TABLE job (
 
 CREATE TABLE query (
     id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    schema_category_id UUID NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
 );
 
