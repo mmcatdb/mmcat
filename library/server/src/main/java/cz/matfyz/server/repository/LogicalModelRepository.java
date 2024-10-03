@@ -48,7 +48,7 @@ public class LogicalModelRepository {
                     datasource.json_value as "datasource.json_value"
                 FROM logical_model
                 JOIN datasource ON datasource.id = logical_model.datasource_id
-                WHERE logical_model.schema_category_id = ?
+                WHERE logical_model.category_id = ?
                 ORDER BY logical_model.id;
                 """);
             setId(statement, 1, categoryId);
@@ -65,7 +65,7 @@ public class LogicalModelRepository {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
-                    logical_model.schema_category_id as "logical_model.schema_category_id",
+                    logical_model.category_id as "logical_model.category_id",
                     logical_model.json_value as "logical_model.json_value",
                     datasource.id as "datasource.id",
                     datasource.json_value as "datasource.json_value"
@@ -77,7 +77,7 @@ public class LogicalModelRepository {
             final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                final Id categoryId = getId(resultSet, "logical_model.schema_category_id");
+                final Id categoryId = getId(resultSet, "logical_model.category_id");
                 output.set(modelFromResultSet(resultSet, id, categoryId));
             }
         },
@@ -87,7 +87,7 @@ public class LogicalModelRepository {
     public void save(LogicalModel model) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO logical_model (id, schema_category_id, datasource_id, json_value)
+                INSERT INTO logical_model (id, category_id, datasource_id, json_value)
                 VALUES (?, ?, ?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
                     json_value = EXCLUDED.json_value;

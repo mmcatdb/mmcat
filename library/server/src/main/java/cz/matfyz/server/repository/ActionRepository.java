@@ -22,7 +22,7 @@ public class ActionRepository {
             final var statement = connection.prepareStatement("""
                 SELECT *
                 FROM action
-                WHERE schema_category_id = ?
+                WHERE category_id = ?
                 ORDER BY action.id;
                 """);
             setId(statement, 1, categoryId);
@@ -47,7 +47,7 @@ public class ActionRepository {
             final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                final Id categoryId = getId(resultSet, "schema_category_id");
+                final Id categoryId = getId(resultSet, "category_id");
                 final String jsonValue = resultSet.getString("json_value");
                 output.set(Action.fromJsonValue(id, categoryId, jsonValue));
             }
@@ -57,10 +57,10 @@ public class ActionRepository {
     public void save(Action action) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO action (id, schema_category_id, json_value)
+                INSERT INTO action (id, category_id, json_value)
                 VALUES (?, ?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
-                    schema_category_id = EXCLUDED.schema_category_id,
+                    category_id = EXCLUDED.category_id,
                     json_value = EXCLUDED.json_value;
                 """);
             setId(statement, 1, action.id());

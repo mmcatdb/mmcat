@@ -55,8 +55,8 @@ public class ExampleSetup {
     @Autowired
     private LogicalModelService logicalModelService;
 
-    private List<LogicalModel> createLogicalModels(List<DatasourceWrapper> datasources, Id schemaId) {
-        return datasources.stream().map(datasource -> logicalModelService.createNew(new LogicalModelInit(datasource.id(), schemaId, datasource.label)).logicalModel()).toList();
+    private List<LogicalModel> createLogicalModels(List<DatasourceWrapper> datasources, Id categoryId) {
+        return datasources.stream().map(datasource -> logicalModelService.createNew(new LogicalModelInit(datasource.id(), categoryId, datasource.label)).logicalModel()).toList();
     }
 
 }

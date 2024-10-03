@@ -13,6 +13,7 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
+import cz.matfyz.server.repository.EvolutionRepository;
 
 import java.util.List;
 
@@ -24,6 +25,9 @@ public class SchemaCategoryService {
 
     @Autowired
     private SchemaCategoryRepository repository;
+
+    @Autowired
+    private EvolutionRepository evolutionRepository;
 
     @Autowired
     private JobService jobService;
@@ -75,7 +79,8 @@ public class SchemaCategoryService {
 
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(wrapper.id(), wrapper.label, update.nextVersion, update.nextVersion, schema, metadata);
 
-        repository.update(newWrapper, update);
+        repository.save(newWrapper);
+        evolutionRepository.save(update);
 
         jobService.createSystemRun(
             id,
@@ -84,10 +89,6 @@ public class SchemaCategoryService {
         );
 
         return newWrapper;
-    }
-
-    public List<SchemaUpdate> findAllUpdates(Id id) {
-        return repository.findAllUpdates(id);
     }
 
 }

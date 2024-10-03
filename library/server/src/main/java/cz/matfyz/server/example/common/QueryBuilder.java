@@ -11,14 +11,14 @@ import java.util.function.Function;
 public class QueryBuilder {
 
     private final List<QueryInit> inits = new ArrayList<>();
-    private final Id schemaId;
+    private final Id categoryId;
 
-    public QueryBuilder(Id schemaId) {
-        this.schemaId = schemaId;
+    public QueryBuilder(Id categoryId) {
+        this.categoryId = categoryId;
     }
 
     public QueryBuilder add(String label, String content) {
-        inits.add(new QueryInit(schemaId, label, content));
+        inits.add(new QueryInit(categoryId, label, content));
 
         return this;
     }

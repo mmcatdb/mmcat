@@ -42,7 +42,7 @@ public class MappingRepository {
                 SELECT
                     mapping.json_value,
                     mapping.logical_model_id,
-                    logical_model.schema_category_id
+                    logical_model.category_id
                 FROM mapping
                 JOIN logical_model ON logical_model.id = mapping.logical_model_id
                 WHERE mapping.id = ?;
@@ -65,7 +65,7 @@ public class MappingRepository {
                 SELECT
                     mapping.id,
                     mapping.json_value,
-                    logical_model.schema_category_id
+                    logical_model.category_id
                 FROM mapping
                 JOIN logical_model ON logical_model.id = mapping.logical_model_id
                 WHERE logical_model.id = ?

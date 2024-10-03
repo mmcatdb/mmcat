@@ -1,7 +1,6 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
@@ -64,16 +63,6 @@ public class SchemaCategoryController {
     @PostMapping("/schema-categories/{id}/updates")
     public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaUpdateInit update) {
         return service.update(id, update);
-    }
-
-    @GetMapping("/schema-categories/{id}/updates")
-    public List<SchemaUpdate> getCategoryUpdates(@PathVariable Id id) {
-        final var updates = service.findAllUpdates(id);
-
-        if (updates == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        return updates;
     }
 
 }
