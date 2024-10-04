@@ -9,7 +9,7 @@ export function ErrorPage() {
 
     return (
         <CommonPage>
-            <h1>404</h1>
+            <h1 className='heading-main'>404</h1>
             <p>
                 The page you are looking for does not exist.
             </p>

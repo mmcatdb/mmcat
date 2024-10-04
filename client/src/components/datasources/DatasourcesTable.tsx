@@ -13,7 +13,7 @@ type DatasourcesTableProps = {
 export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasource }: DatasourcesTableProps) => {
     if (loading) {
         return (
-            <div>
+            <div className='flex items-center justify-center h-screen'>
                 <Spinner />
             </div>
         );

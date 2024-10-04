@@ -1,4 +1,5 @@
 @import '_layout.css';
+@import 'styles.css';
 @import 'reactflow/dist/style.css';
 
 @tailwind base;

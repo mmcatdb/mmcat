@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
-import { ErrorPage } from '@/pages/errorPages';
-import { LoadingComponent } from '@/pages/errorPages';
+import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 import { CommonPage } from '@/components/CommonPage';
 import { Breadcrumbs, BreadcrumbItem } from '@nextui-org/react';
 
@@ -43,7 +42,7 @@ export const DatasourceDetailPage = () => {
     }, [ id ]);
 
     if (loading) 
-        return <LoadingComponent className='w-screen h-screen text-foreground bg-background' />;
+        return <LoadingPage />;
     if (error || !datasource) 
         return <ErrorPage />;
 
@@ -53,14 +52,17 @@ export const DatasourceDetailPage = () => {
                 <BreadcrumbItem>
                     <Link
                         to='/datasources'
-                        className='text-blue-600 hover:text-blue-700 font-bold'
+                        className='breadcrumb-item-link'
                     >
                         Datasources
-                    </Link></BreadcrumbItem>
-                <BreadcrumbItem>Detail</BreadcrumbItem>
+                    </Link>
+                </BreadcrumbItem>
+                <BreadcrumbItem>
+                    Detail
+                </BreadcrumbItem>
             </Breadcrumbs>
             <div>
-                <h1 className='text-2xl font-bold my-5'>{datasource.label}</h1>
+                <h1 className='heading-main my-5'>{datasource.label}</h1>
                 <p className='mb-5'>Type: {datasource.type}</p>
                 <pre>{JSON.stringify(datasource.settings, null, 2)}</pre>
                 <pre>{JSON.stringify(datasource.configuration, null, 2)}</pre>

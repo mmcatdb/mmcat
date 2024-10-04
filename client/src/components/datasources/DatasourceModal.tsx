@@ -22,6 +22,12 @@ export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) =
     const [ datasourceName, setDatasourceLabel ] = useState('');
     const [ settings, setSettings ] = useState<Settings>({});
 
+    const resetForm = () => {
+        setDatasourceType('');
+        setDatasourceLabel('');
+        setSettings({});
+    };
+
     const handleSettingsChange = (field: keyof Settings, value: unknown) => {
         setSettings((prevSettings) => ({
             ...prevSettings,
@@ -48,17 +54,11 @@ export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) =
             if (createdDatasource.status && createdDatasource.data) {
                 // Notify parent
                 onDatasourceCreated(createdDatasource.data);
-    
-                setDatasourceType('');
-                setDatasourceLabel('');
-                setSettings({});
-    
+                resetForm();
                 onOpenChange();
-
                 toast.success('Datasource created.');
             }
             else {
-                console.error('Failed to create datasource:');
                 toast.error('Failed to create datasource. Please try again.');
             }
         }
@@ -92,22 +92,10 @@ export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) =
                         <>
                             <ModalHeader className='flex flex-col gap-1'>Add Datasource</ModalHeader>
                             <ModalBody>
-                                <Select
-                                    items={DATASOURCE_TYPES}
-                                    label='Type'
-                                    placeholder='Select a Type'
-                                    selectedKeys={datasourceType ? new Set([datasourceType]) : new Set()}
-                                    onSelectionChange={(e) => {
-                                        const selectedType = Array.from(e as Set<DatasourceType>)[0];
-                                        setDatasourceType(selectedType);
-                                    }}
-                                >
-                                    {(item) => (
-                                        <SelectItem key={item.type}>
-                                            {item.label}
-                                        </SelectItem>
-                                    )}
-                                </Select>
+                                <SelectDatasourceType 
+                                    datasourceType={datasourceType}
+                                    setDatasourceType={setDatasourceType}
+                                />
 
                                 <Input
                                     label='Datasource Label'
@@ -197,5 +185,29 @@ export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) =
         </>
     );
 };
+
+type SelectDatasourceTypeProps = {
+    datasourceType: DatasourceType | '';
+    setDatasourceType: (type: DatasourceType) => void;
+};
+
+const SelectDatasourceType = ({ datasourceType, setDatasourceType }: SelectDatasourceTypeProps) => (
+    <Select
+        items={DATASOURCE_TYPES}
+        label='Type'
+        placeholder='Select a Type'
+        selectedKeys={datasourceType ? new Set([datasourceType]) : new Set()}
+        onSelectionChange={(e) => {
+            const selectedType = Array.from(e as Set<DatasourceType>)[0];
+            setDatasourceType(selectedType);
+        }}
+    >
+        {(item) => (
+            <SelectItem key={item.type}>
+                {item.label}
+            </SelectItem>
+        )}
+    </Select>
+);
 
 export default DatasourceModal;

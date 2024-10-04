@@ -59,7 +59,7 @@ export function DatasourcesPage() {
     return (
         <CommonPage>
             <div className='flex items-center justify-between'>
-                <h1 className='text-3xl font-bold leading-tight'>Datasources</h1>
+                <h1 className='heading-large'>Datasources</h1>
                 <DatasourceModal onDatasourceCreated={handleAddDatasource} />
             </div>
 

@@ -43,7 +43,7 @@ export function Home() {
 
     return (
         <CommonPage>
-            <h1>MM-cat</h1>
+            <h1 className='heading-main'>MM-cat</h1>
             <p>
                 A multi-model data modeling framework based on category theory.
             </p>
