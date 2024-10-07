@@ -40,8 +40,8 @@ public class MappingService {
             .getVersionByLogicalModel(init.logicalModelId())
             .generateNext();
 
-        final var wrapper = new MappingWrapper(null, init.logicalModelId(), init.rootObjectKey(), init.primaryKey(), init.kindName(), init.accessPath(), systemVersion);
-        repository.add(wrapper);
+        final var wrapper = MappingWrapper.createNew(init.logicalModelId(), init.rootObjectKey(), init.primaryKey(), init.kindName(), init.accessPath(), systemVersion);
+        repository.save(wrapper);
 
         return MappingInfo.fromWrapper(wrapper);
     }

@@ -50,7 +50,7 @@ public class QueryRepository {
                     query_version.json_value AS version_json_value
                 FROM query
                 JOIN query_version ON query_version.query_id = query.id
-                WHERE query.schema_category_id = ?
+                WHERE query.category_id = ?
                 ORDER BY query.id, query_version.json_value::json->>'version' DESC
                 """);
             setId(statement, 1, categoryId);
@@ -74,7 +74,7 @@ public class QueryRepository {
                 FROM query
                 JOIN query_version ON query_version.query_id = query.id
                 WHERE
-                    query.schema_category_id = ? AND
+                    query.category_id = ? AND
                     query_version.json_value->>'version' = ?
                 ORDER BY query.id DESC
                 """);
@@ -93,7 +93,7 @@ public class QueryRepository {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT DISTINCT ON (query.id)
-                    query.schema_category_id AS schema_category_id,
+                    query.category_id AS category_id,
                     query.json_value AS query_json_value,
                     query_version.id AS version_id,
                     query_version.json_value AS version_json_value
@@ -106,7 +106,7 @@ public class QueryRepository {
             final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                final var categoryId = getId(resultSet, "schema_category_id");
+                final var categoryId = getId(resultSet, "category_id");
                 output.set(queryWithVersionFromResultSet(resultSet, id, categoryId));
             }
         });
@@ -155,10 +155,10 @@ public class QueryRepository {
     public void save(Query query) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO query (id, schema_category_id, json_value)
+                INSERT INTO query (id, category_id, json_value)
                 VALUES (?, ?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
-                    schema_category_id = EXCLUDED.schema_category_id,
+                    category_id = EXCLUDED.category_id,
                     json_value = EXCLUDED.json_value;
                 """);
             setId(statement, 1, query.id());

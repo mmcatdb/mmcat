@@ -17,8 +17,8 @@ class QuerySetup {
     @Autowired
     private QueryService queryService;
 
-    List<QueryWithVersion> createQueries(Id schemaId) {
-        return new QueryBuilder(schemaId)
+    List<QueryWithVersion> createQueries(Id categoryId) {
+        return new QueryBuilder(categoryId)
             .add("Find friends", Queries.findFriends)
             .add("Most expensive order", Queries.mostExpensiveOrder)
             .build(queryService::createQuery);

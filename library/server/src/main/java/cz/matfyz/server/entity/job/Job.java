@@ -52,7 +52,7 @@ public class Job extends Entity {
 
     public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually) {
         return new Job(
-            Id.createNewUUID(),
+            Id.createNew(),
             runId,
             label,
             new Date(),

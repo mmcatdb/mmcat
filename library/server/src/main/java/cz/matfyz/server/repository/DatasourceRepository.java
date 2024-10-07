@@ -52,7 +52,7 @@ public class DatasourceRepository {
                     datasource.json_value as json_value
                 FROM datasource
                 JOIN logical_model on logical_model.datasource_id = datasource.id
-                WHERE logical_model.schema_category_id = ?
+                WHERE logical_model.category_id = ?
                 ORDER BY datasource.id;
                 """);
             setId(statement, 1, categoryId);

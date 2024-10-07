@@ -4,12 +4,10 @@ import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
-import java.sql.Statement;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,71 +78,17 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public void add(SchemaCategoryWrapper wrapper) {
-        db.run(connection -> {
-            final var statement = connection.prepareStatement("""
-                INSERT INTO schema_category (json_value)
-                VALUES (?::jsonb);
-                """,
-                Statement.RETURN_GENERATED_KEYS
-            );
-            statement.setString(1, wrapper.toJsonValue());
-            executeChecked(statement);
-
-            final var generatedKeys = statement.getGeneratedKeys();
-            generatedKeys.next();
-            wrapper.assignId(getId(generatedKeys, "id"));
-        });
-    }
-
     public void save(SchemaCategoryWrapper wrapper) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                UPDATE schema_category
-                SET json_value = ?::jsonb
-                WHERE id = ?;
+                INSERT INTO schema_category (id, json_value)
+                VALUES (?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    json_value = EXCLUDED.json_value;
                 """);
-            statement.setString(1, wrapper.toJsonValue());
-            setId(statement, 2, wrapper.id());
+            setId(statement, 1, wrapper.id());
+            statement.setString(2, wrapper.toJsonValue());
             executeChecked(statement);
-        });
-    }
-
-    public void update(SchemaCategoryWrapper wrapper, SchemaUpdate update) {
-        db.run(connection -> {
-            final var statement = connection.prepareStatement("""
-                UPDATE schema_category
-                SET json_value = ?::jsonb
-                WHERE id = ?;
-                INSERT INTO schema_category_update (schema_category_id, json_value)
-                VALUES (?, ?::jsonb);
-                """);
-            statement.setString(1, wrapper.toJsonValue());
-            setId(statement, 2, wrapper.id());
-            setId(statement, 3, wrapper.id());
-            statement.setString(4, update.toJsonValue());
-            executeChecked(statement);
-        });
-    }
-
-    public List<SchemaUpdate> findAllUpdates(Id categoryId) {
-        return db.getMultiple((connection, output) -> {
-            final var statement = connection.prepareStatement("""
-                SELECT
-                    id,
-                    json_value
-                FROM schema_category_update
-                WHERE schema_category_id = ?
-                ORDER BY id;
-                """);
-            setId(statement, 1, categoryId);
-            final var resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                final var id = getId(resultSet, "id");
-                final var jsonValue = resultSet.getString("json_value");
-                output.add(SchemaUpdate.fromJsonValue(id, categoryId, jsonValue));
-            }
         });
     }
 

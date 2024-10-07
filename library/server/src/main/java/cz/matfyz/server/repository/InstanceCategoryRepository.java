@@ -21,7 +21,7 @@ public class InstanceCategoryRepository {
             final var statement = connection.prepareStatement("""
                 SELECT
                     instance_data,
-                    schema_category_id
+                    category_id
                 FROM session
                 WHERE id = ?;
                 """);
@@ -35,7 +35,7 @@ public class InstanceCategoryRepository {
                     return;
                 }
 
-                final var schemaCategoryId = getId(resultSet, "schema_category_id");
+                final var schemaCategoryId = getId(resultSet, "category_id");
                 output.set(InstanceCategoryWrapper.fromJsonValue(schemaCategoryId, sessionId, instanceData));
             }
         });

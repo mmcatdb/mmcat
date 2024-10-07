@@ -36,7 +36,7 @@ public class ProjectRepository {
             final var statement = connection.prepareStatement("""
                 SELECT schema_category.json_value::json->>'systemVersion' as systemVersion
                 FROM schema_category
-                JOIN logical_model ON schema_category.id = logical_model.schema_category_id
+                JOIN logical_model ON schema_category.id = logical_model.category_id
                 WHERE logical_model.id = ?;
                 """);
             setId(statement, 1, modelId);

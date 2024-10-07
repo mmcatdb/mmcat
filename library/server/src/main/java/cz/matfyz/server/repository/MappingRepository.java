@@ -11,7 +11,6 @@ import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
-import java.sql.Statement;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +42,7 @@ public class MappingRepository {
                 SELECT
                     mapping.json_value,
                     mapping.logical_model_id,
-                    logical_model.schema_category_id
+                    logical_model.category_id
                 FROM mapping
                 JOIN logical_model ON logical_model.id = mapping.logical_model_id
                 WHERE mapping.id = ?;
@@ -66,7 +65,7 @@ public class MappingRepository {
                 SELECT
                     mapping.id,
                     mapping.json_value,
-                    logical_model.schema_category_id
+                    logical_model.category_id
                 FROM mapping
                 JOIN logical_model ON logical_model.id = mapping.logical_model_id
                 WHERE logical_model.id = ?
@@ -109,21 +108,18 @@ public class MappingRepository {
         });
     }
 
-    public void add(MappingWrapper wrapper) {
+    public void save(MappingWrapper wrapper) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO mapping (logical_model_id, json_value)
-                VALUES (?, ?::jsonb);
-                """,
-                Statement.RETURN_GENERATED_KEYS
-            );
-            setId(statement, 1, wrapper.logicalModelId);
-            statement.setString(2, jsonValueWriter.writeValueAsString(wrapper.toJsonValue()));
+                INSERT INTO mapping (id, logical_model_id, json_value)
+                VALUES (?, ?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    json_value = EXCLUDED.json_value;
+                """);
+            setId(statement, 1, wrapper.id());
+            setId(statement, 2, wrapper.logicalModelId);
+            statement.setString(3, jsonValueWriter.writeValueAsString(wrapper.toJsonValue()));
             executeChecked(statement);
-
-            final var generatedKeys = statement.getGeneratedKeys();
-            generatedKeys.next();
-            wrapper.assignId(getId(generatedKeys, "id"));
         });
     }
 

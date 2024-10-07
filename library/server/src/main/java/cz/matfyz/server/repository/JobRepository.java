@@ -49,7 +49,7 @@ public class JobRepository {
                     run.session_id as "run.session_id"
                 FROM job
                 JOIN run ON run.id = job.run_id
-                WHERE run.schema_category_id = ?
+                WHERE run.category_id = ?
                     AND (run.session_id = ? OR run.session_id IS NULL)
                 ORDER BY job.id;
                 """);
@@ -88,7 +88,7 @@ public class JobRepository {
                 SELECT
                     job.json_value as "job.json_value",
                     run.id as "run.id",
-                    run.schema_category_id as "run.schema_category_id",
+                    run.category_id as "run.category_id",
                     run.action_id as "run.action_id",
                     run.session_id as "run.session_id"
                 FROM job
@@ -99,7 +99,7 @@ public class JobRepository {
             final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                final Id categoryId = getId(resultSet, "run.schema_category_id");
+                final Id categoryId = getId(resultSet, "run.category_id");
                 output.set(jobWithRunFromResultSet(resultSet, jobId, categoryId));
             }
         });
@@ -124,17 +124,17 @@ public class JobRepository {
     public void save(Run run) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO run (id, schema_category_id, action_id, session_id)
+                INSERT INTO run (id, category_id, action_id, session_id)
                 VALUES (?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
-                    schema_category_id = EXCLUDED.schema_category_id,
+                    category_id = EXCLUDED.category_id,
                     action_id = EXCLUDED.action_id,
                     session_id = EXCLUDED.session_id;
                 """);
             setId(statement, 1, run.id());
             setId(statement, 2, run.categoryId);
-            setId(statement, 3, run.actionId, true);
-            setId(statement, 4, run.sessionId, true);
+            setId(statement, 3, run.actionId);
+            setId(statement, 4, run.sessionId);
             executeChecked(statement);
         });
     }
@@ -143,9 +143,9 @@ public class JobRepository {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
-                    id, schema_category_id, json_value
+                    id, category_id, json_value
                 FROM session
-                WHERE schema_category_id = ?
+                WHERE category_id = ?
                 ORDER BY session.id;
                 """);
             setId(statement, 1, categoryId);
@@ -162,10 +162,10 @@ public class JobRepository {
     public void save(Session session) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO session (id, schema_category_id, json_value)
+                INSERT INTO session (id, category_id, json_value)
                 VALUES (?, ?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
-                    schema_category_id = EXCLUDED.schema_category_id,
+                    category_id = EXCLUDED.category_id,
                     json_value = EXCLUDED.json_value;
                 """);
             setId(statement, 1, session.id());

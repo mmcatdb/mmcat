@@ -31,9 +31,9 @@ public class SchemaUpdate extends Entity {
         this.metadata = metadata;
     }
 
-    public static SchemaUpdate fromInit(SchemaUpdateInit init, Id categoryId, Version systemVersion) {
+    public static SchemaUpdate createFromInit(SchemaUpdateInit init, Id categoryId, Version systemVersion) {
         return new SchemaUpdate(
-            null,
+            Id.createNew(),
             categoryId,
             init.prevVersion(),
             systemVersion.generateNext(null),

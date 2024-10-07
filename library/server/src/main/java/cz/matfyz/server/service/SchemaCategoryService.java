@@ -13,6 +13,7 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
+import cz.matfyz.server.repository.EvolutionRepository;
 
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class SchemaCategoryService {
     private SchemaCategoryRepository repository;
 
     @Autowired
+    private EvolutionRepository evolutionRepository;
+
+    @Autowired
     private JobService jobService;
 
     public List<SchemaCategoryInfo> findAllInfos() {
@@ -36,8 +40,8 @@ public class SchemaCategoryService {
         final var schema = new SchemaCategory();
         final var metadata = MetadataCategory.createEmpty(schema);
         final var version = Version.generateInitial("0");
-        final var wrapper = SchemaCategoryWrapper.fromSchemaCategory(null, init.label(), version, version, schema, metadata);
-        repository.add(wrapper);
+        final var wrapper = SchemaCategoryWrapper.createNew(init.label(), version, version, schema, metadata);
+        repository.save(wrapper);
         jobService.createSession(wrapper.id());
 
         return wrapper;
@@ -57,7 +61,7 @@ public class SchemaCategoryService {
 
     public SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);
-        final var update = SchemaUpdate.fromInit(updateInit, id, wrapper.systemVersion);
+        final var update = SchemaUpdate.createFromInit(updateInit, id, wrapper.systemVersion);
 
         if (!update.prevVersion.equals(wrapper.version))
             throw VersionException.mismatch(update.prevVersion, wrapper.version);
@@ -75,7 +79,8 @@ public class SchemaCategoryService {
 
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(wrapper.id(), wrapper.label, update.nextVersion, update.nextVersion, schema, metadata);
 
-        repository.update(newWrapper, update);
+        repository.save(newWrapper);
+        evolutionRepository.save(update);
 
         jobService.createSystemRun(
             id,
@@ -84,10 +89,6 @@ public class SchemaCategoryService {
         );
 
         return newWrapper;
-    }
-
-    public List<SchemaUpdate> findAllUpdates(Id id) {
-        return repository.findAllUpdates(id);
     }
 
 }

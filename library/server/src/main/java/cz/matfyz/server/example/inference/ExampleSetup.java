@@ -66,16 +66,16 @@ public class ExampleSetup {
         return schemaService.create(schemaInit);
     }
 
-    private Action createAndSaveAction(ActionPayload payload, Id schemaId, String label) {
-        final Action action = Action.createNew(schemaId, label, payload);
+    private Action createAndSaveAction(ActionPayload payload, Id categoryId, String label) {
+        final Action action = Action.createNew(categoryId, label, payload);
         actionRepository.save(action);
 
         return action;
     }
 
     // if more jobs per run, change the logic
-    private void createAndSaveJob(ActionPayload payload, Id schemaId, Id actionId, String label) {
-        Run run = Run.createUser(schemaId, actionId, null);
+    private void createAndSaveJob(ActionPayload payload, Id categoryId, Id actionId, String label) {
+        Run run = Run.createUser(categoryId, actionId, null);
         jobRepository.save(run);
 
         Job job = Job.createNew(run.id(), label, payload, false);

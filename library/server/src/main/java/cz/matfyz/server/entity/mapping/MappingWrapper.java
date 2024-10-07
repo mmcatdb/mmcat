@@ -21,7 +21,7 @@ public class MappingWrapper extends Entity {
     public final ComplexProperty accessPath;
     public final Version version;
 
-    public MappingWrapper(
+    private MappingWrapper(
         Id id,
         Id logicalModelId,
         Key rootObjectKey,
@@ -38,6 +38,18 @@ public class MappingWrapper extends Entity {
         this.kindName = kindName;
         this.accessPath = accessPath;
         this.version = version;
+    }
+
+    public static MappingWrapper createNew(Id logicalModelId, Key rootObjectKey, List<Signature> primaryKey, String kindName, ComplexProperty accessPath, Version version) {
+        return new MappingWrapper(
+            Id.createNew(),
+            logicalModelId,
+            rootObjectKey,
+            primaryKey,
+            kindName,
+            accessPath,
+            version
+        );
     }
 
     public static MappingWrapper fromJsonValue(Id id, Id logicalModelId, MappingJsonValue jsonValue) {
