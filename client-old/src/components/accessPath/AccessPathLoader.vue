@@ -2,7 +2,7 @@
 import { onMounted, ref, watch, computed } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId } from '@/types/identifiers';
-import AccessPathEditor2 from './edit/AccessPathEditor2.vue';
+import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
 import { useEvocat } from '@/utils/injects';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
@@ -66,7 +66,6 @@ async function loadSelectedMapping(mapping: Mapping) {
 function confirmMapping() {
     if (originalMapping.value) {
         accessPath.value = originalGraphProperty.value;
-        console.log('accesspath root ', accessPath.value?.node.schemaObject);
         mappingConfirmed.value = true;
     }
 }
@@ -88,7 +87,7 @@ function undoAccessPath() {
 }
 
 function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath.value);
+    emit('finish', primaryKey, accessPath.value, selectedMapping.value?.kindName);
 }
 
 function cancel() {
@@ -102,7 +101,10 @@ function cancel() {
 <template>
     <div class="divide">
         <div>
-            <div v-if="props.logicalModels.length && !mappingConfirmed">
+            <div 
+                v-if="props.logicalModels.length && !mappingConfirmed"
+                class="editor"
+            >
                 <ValueRow label="Logical model:">
                     <select 
                         v-model="selectedLogicalModel"
@@ -130,12 +132,7 @@ function cancel() {
                             {{ mapping.kindName }}
                         </option>
                     </select>
-                </ValueRow>
-            </div>
-            <div
-                v-if="!accessPath"
-                class="loader"
-            >
+                </ValueRow>         
                 <div class="button-row">
                     <button
                         :disabled="isConfirmDisabled"
@@ -150,7 +147,7 @@ function cancel() {
                     </button>
                 </div>
             </div>
-            <AccessPathEditor2
+            <AccessPathEditor
                 v-else-if="selectedLogicalModel"
                 :datasource="selectedLogicalModel.datasource"
                 :root-property="accessPath"
@@ -169,11 +166,6 @@ function cancel() {
     width: 600px;
     height: 600px;
     font-size: 15px;
-}
-
-.loader {
-    display: flex;
-    flex-direction: column;
 }
 
 .display {

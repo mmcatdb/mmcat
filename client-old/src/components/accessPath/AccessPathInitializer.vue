@@ -10,7 +10,7 @@ import { useRoute, useRouter } from 'vue-router';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '../category/EvocatDisplay.vue';
 import AccessPathLoader from './AccessPathLoader.vue';
-import AccessPathCreator2 from '@/components/accessPath/AccessPathCreator2.vue';
+import AccessPathCreator from '@/components/accessPath/AccessPathCreator.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -40,16 +40,18 @@ onMounted(async () => {
     }
 });
 
-async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty) {
+async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty, kindName: string | undefined) {
     if (!selectedLogicalModel.value || !graph.value || !accessPath)
         return;
     accessPath.node.schemaObject;
+
+    const newKindName = kindName !== undefined ? kindName : accessPath.name.toString();
 
     const result = await API.mappings.createNewMapping({}, {
         logicalModelId: selectedLogicalModel.value.id,
         rootObjectKey: accessPath.node.schemaObject.key.toServer(),
         primaryKey: new SignatureId(selectedLogicalModel.value.datasource.configuration.isSchemaless ? [] : primaryKey.signatures).toServer(),
-        kindName: accessPath.name.toString(),
+        kindName: newKindName,
         accessPath: accessPath.toServer(),
         categoryVersionn: category.value.versionId,
     });
@@ -97,7 +99,7 @@ function setToDefault() {
                 @finish="createMapping"
                 @cancel="setToDefault"
             />
-            <AccessPathCreator2
+            <AccessPathCreator
                 v-if="initializeType === 'create' && selectedLogicalModel"
                 :selected-logical-model="selectedLogicalModel"
                 @finish="createMapping"
