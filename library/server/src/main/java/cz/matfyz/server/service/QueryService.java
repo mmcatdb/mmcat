@@ -14,6 +14,8 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
+import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
@@ -32,13 +34,13 @@ public class QueryService {
     private QueryRepository repository;
 
     @Autowired
-    private LogicalModelService logicalModelService;
+    private LogicalModelRepository logicalModelRepository;
 
     @Autowired
     private WrapperService wrapperService;
 
     @Autowired
-    private MappingService mappingService;
+    private MappingRepository mappingRepository;
 
     @Autowired
     private SchemaCategoryRepository categoryRepository;
@@ -78,8 +80,8 @@ public class QueryService {
     private KindsAndDatasources defineKinds(Id categoryId, SchemaCategory category) {
         final Map<Id, DatasourceWrapper> datasources = new TreeMap<>();
 
-        final var kinds = logicalModelService
-            .findAll(categoryId).stream()
+        final var kinds = logicalModelRepository
+            .findAllInCategory(categoryId).stream()
             .flatMap(model -> {
                 final DatasourceWrapper datasourceWrapper = model.datasource();
                 final var control = wrapperService.getControlWrapper(datasourceWrapper);
@@ -89,7 +91,7 @@ public class QueryService {
                 datasources.put(datasourceWrapper.id(), datasourceWrapper);
 
                 final var builder = new Datasource.Builder();
-                mappingService.findAll(model.logicalModel().id()).forEach(mappingWrapper -> {
+                mappingRepository.findAll(model.logicalModel().id()).forEach(mappingWrapper -> {
                     final var mapping = mappingWrapper.toMapping(category);
                     builder.mapping(mapping);
                 });

@@ -5,7 +5,9 @@ import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 
 import java.util.List;
@@ -21,18 +23,10 @@ public class LogicalModelService {
     private LogicalModelRepository repository;
 
     @Autowired
-    private MappingService mappingService;
+    private MappingRepository mappingRepository;
 
     @Autowired
-    private DatasourceService datasourceService;
-
-    public List<LogicalModelWithDatasource> findAll(Id categoryId) {
-        return repository.findAllInCategory(categoryId);
-    }
-
-    public LogicalModelWithDatasource find(Id logicalModelId) {
-        return repository.find(logicalModelId);
-    }
+    private DatasourceRepository datasourceRepository;
 
     public record LogicalModelWithMappings(
         LogicalModel logicalModel,
@@ -41,22 +35,22 @@ public class LogicalModelService {
     ) {}
 
     public LogicalModelWithMappings findFull(Id logicalModelId) {
-        final var model = find(logicalModelId);
-        final var mappings = mappingService.findAll(logicalModelId);
+        final var model = repository.find(logicalModelId);
+        final var mappings = mappingRepository.findAll(logicalModelId);
 
         return new LogicalModelWithMappings(model.logicalModel(), model.datasource(), mappings);
     }
 
     public List<LogicalModelWithMappings> findAllFull(Id categoryId) {
         return repository.findAllInCategory(categoryId).stream().map(model -> {
-            final var mappings = mappingService.findAll(model.logicalModel().id());
+            final var mappings = mappingRepository.findAll(model.logicalModel().id());
 
             return new LogicalModelWithMappings(model.logicalModel(), model.datasource(), mappings);
         }).toList();
     }
 
     public LogicalModelWithDatasource createNew(LogicalModelInit init) {
-        final var datasource = datasourceService.find(init.datasourceId());
+        final var datasource = datasourceRepository.find(init.datasourceId());
         final var logicalModel = LogicalModel.createNew(
             init.categoryId(),
             init.datasourceId(),

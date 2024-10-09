@@ -4,6 +4,7 @@ import cz.matfyz.evolution.Version;
 import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
@@ -34,6 +35,9 @@ public class ActionController {
     private ActionService service;
 
     @Autowired
+    private ActionRepository repository;
+
+    @Autowired
     private LogicalModelRepository logicalModelRepository;
 
     @Autowired
@@ -54,7 +58,7 @@ public class ActionController {
 
     @GetMapping("/actions/{id}")
     public ActionDetail getAction(@PathVariable Id id) {
-        return actionToDetail(service.find(id));
+        return actionToDetail(repository.find(id));
     }
 
     public record ActionInit(
@@ -70,7 +74,7 @@ public class ActionController {
 
     @DeleteMapping("/actions/{id}")
     public void deleteAction(@PathVariable Id id) {
-        service.delete(id);
+        repository.delete(id);
     }
 
     private ActionDetail actionToDetail(Action action) {

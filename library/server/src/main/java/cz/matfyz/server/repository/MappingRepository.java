@@ -7,7 +7,6 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
@@ -80,30 +79,6 @@ public class MappingRepository {
                 final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
 
                 output.add(MappingWrapper.fromJsonValue(foundId, logicalModelId, parsedJsonValue));
-            }
-        });
-    }
-
-    public List<MappingInfo> findAllInfos(Id logicalModelId) {
-        return db.getMultiple((connection, output) -> {
-            final var statement = connection.prepareStatement("""
-                SELECT
-                    mapping.id,
-                    mapping.json_value::json->>'kindName' as kindName,
-                    mapping.json_value::json->>'version' as version
-                FROM mapping
-                WHERE logical_model_id = ?
-                ORDER BY id;
-                """);
-            setId(statement, 1, logicalModelId);
-            final var resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                final Id foundId = getId(resultSet, "id");
-                final String kindName = resultSet.getString("kindName");
-                Version version = Version.fromString(resultSet.getString("version"));
-
-                output.add(new MappingInfo(foundId, kindName, version));
             }
         });
     }
