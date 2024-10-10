@@ -9,12 +9,23 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
 
+/**
+ * Extracts the graph object from Evocat.
+ */
 const { graph } = $(useEvocat());
 
+/**
+ * Props passed to the component.
+ * @typedef {Object} Props
+ * @property {LogicalModel[]} logicalModels - Array of logical models.
+ */
 const props = defineProps<{
     logicalModels: LogicalModel[];
 }>();
 
+/**
+ * Reactive references to track the access path, mappings, and selected values.
+ */
 const accessPath = ref<GraphRootProperty>();
 const originalMapping = ref<Mapping>();
 const originalGraphProperty = ref<GraphRootProperty>();
@@ -22,24 +33,47 @@ const selectedLogicalModel = ref<LogicalModel>();
 const selectedMapping = ref<Mapping>();
 const mappings = ref<Mapping[]>([]);
 const mappingConfirmed = ref(false);
+
+/**
+ * Computed property that determines if the "Confirm" button should be disabled.
+ * @type {import('vue').ComputedRef<boolean>}
+ */
 const isConfirmDisabled = computed(() => !selectedMapping.value);
 
+/**
+ * Emits custom events to the parent component.
+ * @emits finish - Emitted when the mapping process is finished.
+ * @emits cancel - Emitted when the operation is canceled.
+ */
 const emit = defineEmits([ 'finish', 'cancel' ]);
 
+/**
+ * Lifecycle hook to load mappings for the selected logical model on component mount.
+ */
 onMounted(async () => {
     await loadMappingsForSelectedLogicalModel();
 });
 
+/**
+ * Watches the selected logical model and loads the associated mappings when changed.
+ */
 watch(selectedLogicalModel, async (newModel) => {
     if (newModel) 
         await loadMappingsForSelectedLogicalModel();
 });
 
+/**
+ * Watches the selected mapping and loads the selected mapping data when changed.
+ */
 watch(selectedMapping, (newMapping) => {
     if (newMapping) 
         loadSelectedMapping(newMapping); 
 });
 
+/**
+ * Loads mappings for the currently selected logical model.
+ * Fetches the mappings from the server and updates the mappings array.
+ */
 async function loadMappingsForSelectedLogicalModel() {
     if (!selectedLogicalModel.value) return;
 
@@ -49,6 +83,10 @@ async function loadMappingsForSelectedLogicalModel() {
         mappings.value = result.data.map(Mapping.fromServer);
 }
 
+/**
+ * Loads the selected mapping and updates the graph property to reflect the mapping's access path.
+ * @param {Mapping} mapping - The selected mapping to load.
+ */
 async function loadSelectedMapping(mapping: Mapping) {
     originalGraphProperty.value?.unhighlightPath();
     originalGraphProperty.value?.node.removeRoot();
@@ -63,6 +101,9 @@ async function loadSelectedMapping(mapping: Mapping) {
     originalGraphProperty.value?.highlightPath();
 }
 
+/**
+ * Confirms the selected mapping by setting the access path and marking it as confirmed.
+ */
 function confirmMapping() {
     if (originalMapping.value) {
         accessPath.value = originalGraphProperty.value;
@@ -70,6 +111,10 @@ function confirmMapping() {
     }
 }
 
+/**
+ * Updates the root property when modified in the AccessPathEditor.
+ * @param {GraphRootProperty} newRootProperty - The new root property to update.
+ */
 function updateRootProperty(newRootProperty: GraphRootProperty) {
     accessPath.value?.node.removeRoot();
     accessPath.value?.unhighlightPath();
@@ -79,6 +124,9 @@ function updateRootProperty(newRootProperty: GraphRootProperty) {
     accessPath.value.highlightPath();
 }
 
+/**
+ * Resets the access path and removes any highlights or root node markings.
+ */
 function undoAccessPath() {
     originalGraphProperty.value?.unhighlightPath();
     originalGraphProperty.value?.node.removeRoot();
@@ -86,10 +134,17 @@ function undoAccessPath() {
     accessPath.value?.unhighlightPath();
 }
 
+/**
+ * Emits the finish event to create a mapping with the given primary key and selected mapping kind name.
+ * @param {SignatureId} primaryKey - The primary key for the mapping.
+ */
 function createMapping(primaryKey: SignatureId) {
     emit('finish', primaryKey, accessPath.value, selectedMapping.value?.kindName);
 }
 
+/**
+ * Cancels the current mapping process, resets the access path, and emits the cancel event.
+ */
 function cancel() {
     undoAccessPath();
     mappingConfirmed.value = false;

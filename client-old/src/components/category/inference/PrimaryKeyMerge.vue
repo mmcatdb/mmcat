@@ -6,26 +6,64 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 
+/**
+ * Props passed to the component.
+ * @typedef {Object} Props
+ * @property {Graph} graph - The graph object used for selecting nodes.
+ * @property {Candidates} candidates - The candidates available for primary key merging.
+ */
 const props = defineProps<{
     graph: Graph;
     candidates: Candidates;
-}>(); 
+}>();
 
+/**
+ * Emits custom events to the parent component.
+ * @emits confirm - Emitted when the user confirms the primary key merge.
+ * @emits cancel - Emitted when the user cancels the current operation.
+ * @emits cancel-edit - Emitted when the user cancels the current edit.
+ * @param {Node[] | PrimaryKeyCandidate} payload - The selected nodes or primary key candidate.
+ */
 const emit = defineEmits<{
     (e: 'confirm', payload: Node[] | PrimaryKeyCandidate): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
 }>();
 
+/**
+ * Reactive reference for tracking whether the user is inputting nodes manually or selecting a candidate.
+ */
 const inputType = ref<'manual' | 'candidate'>('manual');
 
+/**
+ * Reactive reference for storing selected nodes.
+ */
 const nodes = shallowRef<(Node)[]>([]);
+
+/**
+ * Reactive reference for tracking whether the confirm button has been clicked.
+ */
 const confirmClicked = ref(false);
+
+/**
+ * Reactive reference for tracking which candidates have been clicked.
+ */
 const clickedCandidates = ref<PrimaryKeyCandidate[]>([]);
 
+/**
+ * Computed property to check if two nodes have been selected.
+ */
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
+
+/**
+ * Computed property to check if no nodes are selected.
+ */
 const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
+/**
+ * Confirms the selected primary key candidate and emits the 'confirm' event.
+ * @param {PrimaryKeyCandidate} candidate - The primary key candidate to confirm.
+ */
 function confirmCandidate(candidate: PrimaryKeyCandidate) {
     if (!clickedCandidates.value.includes(candidate)) 
         clickedCandidates.value.push(candidate);
@@ -34,28 +72,44 @@ function confirmCandidate(candidate: PrimaryKeyCandidate) {
     emit('confirm', candidate);
 }
 
+/**
+ * Confirms the selected nodes and emits the 'confirm' event.
+ */
 function confirmNodes() {
     confirmClicked.value = true;
     emit('confirm', nodes.value as Node[]);
 }
 
-function save() { // do not do anything, just go back t editor
+/**
+ * Cancels the current operation and goes back to the editor.
+ * Emits the 'cancel' event.
+ */
+function save() {
     emit('cancel');
 }
 
+/**
+ * Cancels the current selection or edit.
+ * If no nodes are selected and confirm button has not been clicked, it goes back to the editor.
+ * Otherwise, it emits the 'cancel-edit' event.
+ */
 function cancel() {
-    if (noNodesSelected.value && !confirmClicked.value) { // go back to editor
-        emit('cancel');
-    }
+    if (noNodesSelected.value && !confirmClicked.value) 
+        emit('cancel');    
     
-    nodes.value = [];  //unselect selected nodes
+    nodes.value = [];  // Unselect selected nodes.
 
-    if (confirmClicked.value) { // delete the edit (on BE)
+    if (confirmClicked.value) {
         emit('cancel-edit');
         confirmClicked.value = false;
     }
 }
 
+/**
+ * Splits the hierarchical name of a candidate into two parts.
+ * @param {string} name - The hierarchical name to split.
+ * @returns {Object} - The split name, with partA and partB.
+ */
 function splitName(name: string) {
     const [ partA, partB ] = name.split('/');
     return { partA, partB };

@@ -12,26 +12,54 @@ import EvocatDisplay from '../category/EvocatDisplay.vue';
 import AccessPathLoader from './AccessPathLoader.vue';
 import AccessPathCreator from '@/components/accessPath/AccessPathCreator.vue';
 
+/**
+ * Vue router instances for navigating and accessing route parameters.
+ */
 const route = useRoute();
 const router = useRouter();
 
+/**
+ * Stores references for Evocat and graph instances.
+ */
 const evocat = shallowRef<Evocat>();
 const graph = shallowRef<Graph>();
+
+/**
+ * Provides the Evocat context, containing evocat and graph references.
+ */
 provide(evocatKey, { evocat, graph } as EvocatContext);
 
+/**
+ * Handles the creation of Evocat and graph instances when emitted by EvocatDisplay.
+ * @param {Object} context - The Evocat and graph context.
+ * @param {Evocat} context.evocat - The created Evocat instance.
+ * @param {Graph} context.graph - The created Graph instance.
+ */
 function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     evocat.value = context.evocat;
     graph.value = context.graph;
 }
 
+/**
+ * Stores the list of logical models and the selected logical model.
+ */
 const logicalModels = shallowRef<LogicalModel[]>([]);
 const selectedLogicalModel = shallowRef<LogicalModel>();
 
+/**
+ * Retrieves the schema category ID and category information.
+ */
 const categoryId = useSchemaCategoryId();
 const category = useSchemaCategoryInfo();
 
+/**
+ * Tracks the current initialization type ('create', 'load', or 'default').
+ */
 const initializeType = ref<'create' | 'load' | 'default'>('default');
 
+/**
+ * Fetches all logical models in the selected category and sets the selected logical model based on the route query parameter.
+ */
 onMounted(async () => {
     const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
     if (result.status) {
@@ -40,6 +68,12 @@ onMounted(async () => {
     }
 });
 
+/**
+ * Creates a new mapping with the provided primary key, access path, and kind name.
+ * @param {SignatureId} primaryKey - The primary key of the mapping.
+ * @param {GraphRootProperty} accessPath - The root property of the access path.
+ * @param {string | undefined} kindName - The name of the kind being created (optional).
+ */
 async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty, kindName: string | undefined) {
     if (!selectedLogicalModel.value || !graph.value || !accessPath)
         return;
@@ -59,10 +93,17 @@ async function createMapping(primaryKey: SignatureId, accessPath: GraphRootPrope
         router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });
 }
 
+/**
+ * Sets the initialization type to either 'create' or 'load'.
+ * @param {'create' | 'load'} type - The type of initialization to set.
+ */
 function setInitializeType(type: 'create' | 'load') {
     initializeType.value = type;
 }
 
+/**
+ * Resets the initialization type to 'default'.
+ */
 function setToDefault() {
     initializeType.value = 'default';
 }

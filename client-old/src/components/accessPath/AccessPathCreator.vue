@@ -12,24 +12,54 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 
+/**
+ * Extracts the graph object from Evocat.
+ */
 const { graph } = $(useEvocat());
 
+/**
+ * Props passed to the component.
+ * @typedef {Object} Props
+ * @property {LogicalModel} selectedLogicalModel - The selected logical model.
+ */
 const props = defineProps<{
     selectedLogicalModel: LogicalModel;
 }>();
+
 
 const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
 const selectedNodes = ref<Node[]>([]);
 const rootConfirmed = ref(false);
 
+/**
+ * Stores the previous parent property used for path construction.
+ * @type {GraphParentProperty}
+ */
 let previousParentProperty: GraphParentProperty;
+
+/**
+ * A set to track processed node keys.
+ * @type {Set<number>}
+ */
 let processedNodes = new Set<number>();
 
+/**
+ * Computed property that generates a string of the labels for the selected nodes.
+ * @type {import('vue').ComputedRef<string>}
+ */
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
+/**
+ * Emits custom events to the parent component.
+ * @emits finish - Emitted when the mapping process is finished.
+ * @emits cancel - Emitted when the operation is canceled.
+ */
 const emit = defineEmits([ 'finish', 'cancel' ]);
 
+/**
+ * Confirms the selected datasource and root node. It marks the root node as selected and finalizes the root.
+ */
 function confirmDatasourceAndRootNode() {
     if (!props.selectedLogicalModel || !selectingRootNode.value)
         return;
@@ -39,6 +69,9 @@ function confirmDatasourceAndRootNode() {
     rootConfirmed.value = true;
 }
 
+/**
+ * Confirms the selected nodes and constructs the access path from the root node and the selected nodes.
+ */
 function confirmSelectedNodes() {
     if (!props.selectedLogicalModel || !selectingRootNode.value) return;
 
@@ -53,6 +86,10 @@ function confirmSelectedNodes() {
     accessPath.value?.highlightPath();
 }
 
+/**
+ * Processes a single node by creating its subpath and adding it to the access path.
+ * @param {Node} node - The node to be processed.
+ */
 function processNode(node: Node) {
     if (!processedNodes.has(node.schemaObject.key.value)) {
         const subpath = createSubpathForNode(node);
@@ -63,6 +100,11 @@ function processNode(node: Node) {
     }
 }
 
+/**
+ * Creates a subpath for the given node based on its children and parent property.
+ * @param {Node} node - The node for which to create a subpath.
+ * @returns {GraphChildProperty | undefined} - The created subpath, or undefined if creation failed.
+ */
 function createSubpathForNode(node: Node): GraphChildProperty | undefined {
     if (!graph) {
         console.error('Graph instance is not available.');
@@ -99,6 +141,11 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
     return subpath;
 }
 
+/**
+ * Filters the children nodes of the given node to only include those that are selected.
+ * @param {Node} node - The node whose children are to be filtered.
+ * @returns {Node[]} - The filtered list of child nodes.
+ */
 function filterChildren(node: Node): Node[] {
     if (graph) {
         const allChildren = graph.getChildrenForNode(node);
@@ -110,10 +157,21 @@ function filterChildren(node: Node): Node[] {
     return [];
 }
 
+/**
+ * Retrieves the parent property from the access path for the specified parent node.
+ * @param {Node} parentNode - The parent node.
+ * @returns {GraphParentProperty | undefined} - The parent property if found, otherwise undefined.
+ */
 function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty | undefined {
     return accessPath.value ? searchSubpathsForNode(accessPath.value, parentNode) : undefined;
 }
 
+/**
+ * Searches for the node within the subpaths of a given property.
+ * @param {GraphParentProperty} property - The property to search within.
+ * @param {Node} node - The node to find.
+ * @returns {GraphParentProperty | undefined} - The corresponding property if found, otherwise undefined.
+ */
 function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
     if (property.node.equals(node)) return property;
 
@@ -125,6 +183,10 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
     }
 }
 
+/**
+ * Updates the root property with a new root property and highlights the path.
+ * @param {GraphRootProperty} newRootProperty - The new root property to update.
+ */
 function updateRootProperty(newRootProperty: GraphRootProperty) {
     undoAccessPath();
     newRootProperty.node.becomeRoot();
@@ -132,6 +194,9 @@ function updateRootProperty(newRootProperty: GraphRootProperty) {
     accessPath.value.highlightPath();
 }
 
+/**
+ * Resets the access path and clears root node status and highlights.
+ */
 function undoAccessPath() {
     rootConfirmed.value = false;
     accessPath.value?.node.removeRoot();
@@ -140,10 +205,17 @@ function undoAccessPath() {
     selectingRootNode.value?.removeRoot();
 }
 
+/**
+ * Emits the finish event with the primary key and the access path, signaling the end of the mapping process.
+ * @param {SignatureId} primaryKey - The primary key of the mapping.
+ */
 function createMapping(primaryKey: SignatureId) {
     emit('finish', primaryKey, accessPath.value);
 }
 
+/**
+ * Cancels the current operation, resets the access path, and emits the cancel event.
+ */
 function cancel() {
     undoAccessPath();
     emit('cancel');

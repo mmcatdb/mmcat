@@ -6,27 +6,70 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 
+/**
+ * Props passed to the component.
+ * @typedef {Object} Props
+ * @property {Graph} graph - The graph object used for selecting nodes.
+ * @property {Candidates} candidates - The candidates available for reference merging.
+ */
 const props = defineProps<{
     graph: Graph;
     candidates: Candidates;
 }>();
 
+/**
+ * Emits custom events to the parent component.
+ * @emits confirm - Emitted when the user confirms the reference merge.
+ * @emits cancel - Emitted when the user cancels the current operation.
+ * @emits cancel-edit - Emitted when the user cancels the current edit.
+ * @param {Node[] | ReferenceCandidate} payload - The selected nodes or reference candidate.
+ */
 const emit = defineEmits<{
     (e: 'confirm', payload: Node[] | ReferenceCandidate): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
 }>();
 
+/**
+ * Reactive reference for tracking whether the user is inputting nodes manually or selecting a candidate.
+ */
 const inputType = ref<'manual' | 'candidate'>('manual');
 
+/**
+ * Reactive reference for storing selected nodes.
+ */
 const nodes = shallowRef<(Node)[]>([]);
+
+/**
+ * Reactive reference for tracking whether the confirm button has been clicked.
+ */
 const confirmClicked = ref(false);
+
+/**
+ * Reactive reference for tracking clicked reference candidates.
+ */
 const clickedCandidates = ref<ReferenceCandidate[]>([]);
+
+/**
+ * Reactive reference for tracking the index of the clicked candidate.
+ */
 const clickedIndex = ref<number | undefined>(undefined);
 
+/**
+ * Computed property to check if two nodes have been selected.
+ */
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
+
+/**
+ * Computed property to check if no nodes are selected.
+ */
 const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
+/**
+ * Confirms the selected reference candidate and emits the 'confirm' event.
+ * @param {ReferenceCandidate} candidate - The reference candidate to confirm.
+ * @param {number} index - The index of the selected candidate.
+ */
 function confirmCandidate(candidate: ReferenceCandidate, index: number) {
     if (!clickedCandidates.value.includes(candidate)) 
         clickedCandidates.value.push(candidate);
@@ -36,34 +79,50 @@ function confirmCandidate(candidate: ReferenceCandidate, index: number) {
     emit('confirm', candidate);
 }
 
+/**
+ * Confirms the selected nodes and emits the 'confirm' event.
+ */
 function confirmNodes() {
     confirmClicked.value = true;
     emit('confirm', nodes.value as Node[]);
 }
 
-function save() { // do not do anything, just go back t editor
+/**
+ * Cancels the current operation and goes back to the editor without making changes.
+ * Emits the 'cancel' event.
+ */
+function save() {
     emit('cancel');
 }
 
+/**
+ * Cancels the current selection or edit.
+ * If no nodes are selected and the confirm button has not been clicked, it goes back to the editor.
+ * Otherwise, it unselects nodes and resets the edit state, emitting the 'cancel-edit' event.
+ */
 function cancel() {
     if (noNodesSelected.value && !confirmClicked.value) { // go back to editor
         emit('cancel');
     }
     
-    nodes.value = [];  // unselect selected nodes
+    nodes.value = [];  // Unselect selected nodes.
 
-    if (confirmClicked.value) { // delete the edit (on BE)
+    if (confirmClicked.value) {
         emit('cancel-edit');
         confirmClicked.value = false;
-        clickedIndex.value = undefined; //maybe dont reset it here?
+        clickedIndex.value = undefined;  // Optionally reset clicked index.
     }
 }
 
+/**
+ * Splits the hierarchical name of a candidate into two parts.
+ * @param {string} name - The hierarchical name to split.
+ * @returns {Object} - The split name, with partA and partB.
+ */
 function splitName(name: string) {
     const [ partA, partB ] = name.split('/');
     return { partA, partB };
 }
-
 
 </script>
 

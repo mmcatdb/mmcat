@@ -18,16 +18,37 @@ type InferenceJobDisplayProps = {
     candidates: Candidates;
 };
 
+/**
+ * Props passed to the component.
+ * @typedef {Object} InferenceJobDisplayProps
+ * @property {Job} job - The current inference job.
+ * @property {SchemaCategory} schemaCategory - The schema category used in the job.
+ * @property {InferenceEdit[]} inferenceEdits - List of inference edits.
+ * @property {LayoutType} layoutType - The current layout type.
+ * @property {Candidates} candidates - The candidates for merges and edits.
+ */
 const props = defineProps<InferenceJobDisplayProps>();
 
 const graph = shallowRef<Graph>();
 
+/**
+ * Emits custom events to the parent component.
+ * @emits change-layout - Emitted when the layout type is changed.
+ * @emits update-edit - Emitted when an edit is updated.
+ * @emits cancel-edit - Emitted when the current edit is canceled.
+ * @param {LayoutType} newLayoutType - The new layout type.
+ * @param {InferenceEdit} edit - The updated inference edit.
+ */
 const emit = defineEmits<{
     (e: 'change-layout', newLayoutType: LayoutType): void;
     (e: 'update-edit', edit: InferenceEdit): void;
     (e: 'cancel-edit'): void;
 }>();
 
+/**
+ * Watches for changes in the schema category and updates the graph when it changes.
+ * If the graph is available, it assigns the graph to the new schema category.
+ */
 watch(() => props.schemaCategory, (newCategory, oldCategory) => {
     if (newCategory && newCategory !== oldCategory) {
         if (graph.value) 
@@ -36,6 +57,10 @@ watch(() => props.schemaCategory, (newCategory, oldCategory) => {
     }
 }, { immediate: true });
 
+/**
+ * Handles the graph creation event from the GraphDisplay component.
+ * @param {Graph} newGraph - The newly created graph instance.
+ */
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
     if (!props.schemaCategory)
@@ -45,10 +70,20 @@ function graphCreated(newGraph: Graph) {
     props.schemaCategory.graph = newGraph;
 }
 
+/**
+ * Emits the 'change-layout' event when the layout type is changed.
+ * @param {LayoutType} newLayoutType - The new layout type.
+ */
 function changeLayout(newLayoutType: LayoutType) {
     emit('change-layout', newLayoutType);
 }
 
+
+/**
+ * Creates a reference merge edit from the provided payload.
+ * Emits the 'update-edit' event with the new edit.
+ * @param {Node[] | ReferenceCandidate} payload - The nodes or reference candidate for the merge.
+ */
 function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
     let edit;
 
@@ -64,6 +99,11 @@ function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
     confirmOrRevert(edit);
 }
 
+/**
+ * Creates a primary key merge edit from the provided payload.
+ * Emits the 'update-edit' event with the new edit.
+ * @param {Node[] | PrimaryKeyCandidate} payload - The nodes or primary key candidate for the merge.
+ */
 function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
     let edit;
 
@@ -79,6 +119,11 @@ function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
     confirmOrRevert(edit);
 }
 
+/**
+ * Creates a cluster edit from the selected nodes.
+ * Emits the 'update-edit' event with the new cluster edit.
+ * @param {Node[]} nodes - The nodes to include in the cluster.
+ */
 function createClusterEdit(nodes: Node[]) {
     const clusterKeys = nodes.map(node => node.schemaObject.key);
 
@@ -86,6 +131,11 @@ function createClusterEdit(nodes: Node[]) {
     confirmOrRevert(edit);
 }
 
+/**
+ * Creates a recursion edit based on the provided nodes and edges.
+ * Emits the 'update-edit' event with the new recursion edit.
+ * @param {{nodes: Node[], edges: Edge[]}} payload - The nodes and edges involved in the recursion.
+ */
 function createRecursionEdit(payload: { nodes: Node[], edges: Edge[] }) {
     const { nodes, edges } = payload;
 
@@ -115,14 +165,20 @@ function createRecursionEdit(payload: { nodes: Node[], edges: Edge[] }) {
     confirmOrRevert(edit);
 }
 
+/**
+ * Confirms or reverts the provided edit by emitting the 'update-edit' event.
+ * @param {InferenceEdit} edit - The edit to confirm or revert.
+ */
 function confirmOrRevert(edit: InferenceEdit) {
     emit('update-edit', edit);
 }
 
+/**
+ * Cancels the current edit by emitting the 'cancel-edit' event.
+ */
 function cancelEdit() {
     emit('cancel-edit');
 }
-
 
 </script>
 

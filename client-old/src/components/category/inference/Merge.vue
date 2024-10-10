@@ -6,11 +6,26 @@ import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inf
 import ReferenceMerge from '@/components/category/inference/ReferenceMerge.vue';
 import PrimaryKeyMerge from '@/components/category/inference/PrimaryKeyMerge.vue';
 
+/**
+ * Props passed to the component.
+ * @typedef {Object} Props
+ * @property {Graph} graph - The graph object used for merging operations.
+ * @property {Candidates} candidates - Candidates for merging, either by reference or primary key.
+ */
 const props = defineProps<{
     graph: Graph;
     candidates: Candidates;
 }>();
 
+/**
+ * Emits custom events to the parent component.
+ * @emits cancel - Emitted when the cancel button is clicked.
+ * @emits cancel-edit - Emitted when the current edit is canceled.
+ * @emits confirm-reference-merge - Emitted when a reference merge is confirmed.
+ * @emits confirm-primary-key-merge - Emitted when a primary key merge is confirmed.
+ * @param {Node[] | ReferenceCandidate} payload - The payload for the reference merge.
+ * @param {Node[] | PrimaryKeyCandidate} nodes - The payload for the primary key merge.
+ */
 const emit = defineEmits<{
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
@@ -18,24 +33,45 @@ const emit = defineEmits<{
     (e: 'confirm-primary-key-merge', nodes: Node[] | PrimaryKeyCandidate): void;
 }>();
 
+/**
+ * Tracks the current merge type (either 'reference' or 'primaryKey').
+ */
 const mergeType = ref<'reference' | 'primaryKey'>('reference');
 
+/**
+ * Confirms the reference merge and emits the 'confirm-reference-merge' event.
+ * @param {Node[] | ReferenceCandidate} payload - The payload for the reference merge.
+ */
 function confirmReference(payload: Node[] | ReferenceCandidate ) {
     emit('confirm-reference-merge', payload);
 }
 
+/**
+ * Confirms the primary key merge and emits the 'confirm-primary-key-merge' event.
+ * @param {Node[] | PrimaryKeyCandidate} payload - The payload for the primary key merge.
+ */
 function confirmPrimaryKey(payload: Node[] | PrimaryKeyCandidate) {
     emit('confirm-primary-key-merge', payload);
 }
 
+/**
+ * Cancels the current operation by emitting the 'cancel' event.
+ */
 function cancel() {
     emit('cancel');
 }
 
+/**
+ * Cancels the current edit by emitting the 'cancel-edit' event.
+ */
 function cancelEdit() {
     emit('cancel-edit');
 }
 
+/**
+ * Sets the current merge type to either 'reference' or 'primaryKey'.
+ * @param {'reference' | 'primaryKey'} type - The type of merge to set.
+ */
 function setMergeType(type: 'reference' | 'primaryKey') {
     mergeType.value = type;
 }
@@ -79,12 +115,10 @@ function setMergeType(type: 'reference' | 'primaryKey') {
     </div>
 </template>
 
-<style>
-
+<style scoped>
 .button-row {
     display: flex;
     gap: 10px;
     justify-content: center;
 }
-
 </style>
