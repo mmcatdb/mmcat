@@ -40,16 +40,22 @@ import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
 import cz.matfyz.server.entity.job.data.ModelJobData;
-import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.exception.SessionException;
+import cz.matfyz.server.repository.DatasourceRepository;
+import cz.matfyz.server.repository.EvolutionRepository;
+import cz.matfyz.server.repository.InstanceCategoryRepository;
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
+import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
+import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
@@ -73,16 +79,25 @@ public class JobExecutorService {
     private JobRepository repository;
 
     @Autowired
+    private MappingRepository mappingRepository;
+
+    @Autowired
     private MappingService mappingService;
+
+    @Autowired
+    private LogicalModelRepository logicalModelRepository;
 
     @Autowired
     private LogicalModelService logicalModelService;
 
     @Autowired
-    private EvolutionService evolutionService;
+    private EvolutionRepository evolutionRepository;
 
     @Autowired
-    private SchemaCategoryService schemaService;
+    private SchemaCategoryRepository schemaRepository;
+
+    @Autowired
+    private InstanceCategoryRepository instanceRepository;
 
     @Autowired
     private InstanceCategoryService instanceService;
@@ -100,7 +115,7 @@ public class JobExecutorService {
     private QueryRepository queryRepository;
 
     @Autowired
-    private DatasourceService datasourceService;
+    private DatasourceRepository datasourceRepository;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
@@ -165,12 +180,12 @@ public class JobExecutorService {
         if (run.sessionId == null)
             throw SessionException.notFound(run.id());
 
-        final DatasourceWrapper datasource = logicalModelService.find(payload.logicalModelId()).datasource();
+        final DatasourceWrapper datasource = logicalModelRepository.find(payload.logicalModelId()).datasource();
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
+        final List<MappingWrapper> mappingWrappers = mappingRepository.findAll(payload.logicalModelId());
 
-        final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
+        final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
+        @Nullable InstanceCategory instance = instanceRepository.find(run.sessionId).toInstanceCategory(schema);
         //System.out.println("jobexecutor: " + instance.objects());
         //System.out.println("print if non empty");
         System.out.println("instance before");
@@ -195,11 +210,11 @@ public class JobExecutorService {
         if (run.sessionId == null)
             throw SessionException.notFound(job.id());
 
-        final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
+        final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
+        @Nullable InstanceCategory instance = instanceRepository.find(run.sessionId).toInstanceCategory(schema);
 
-        final DatasourceWrapper datasource = logicalModelService.find(payload.logicalModelId()).datasource();
-        final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
+        final DatasourceWrapper datasource = logicalModelRepository.find(payload.logicalModelId()).datasource();
+        final List<Mapping> mappings = mappingRepository.findAll(payload.logicalModelId()).stream()
             .map(wrapper -> wrapper.toMapping(schema))
             .toList();
 
@@ -261,8 +276,8 @@ public class JobExecutorService {
     }
 
     private QueryEvolver createQueryEvolver(Id categoryId, Version prevVersion, Version nextVersion) {
-        final SchemaCategoryWrapper wrapper = schemaService.find(categoryId);
-        final List<SchemaCategoryUpdate> updates = evolutionService
+        final SchemaCategoryWrapper wrapper = schemaRepository.find(categoryId);
+        final List<SchemaCategoryUpdate> updates = evolutionRepository
             .findAllUpdates(categoryId).stream()
             .filter(u -> u.prevVersion.compareTo(prevVersion) >= 0 && u.nextVersion.compareTo(nextVersion) <= 0)
             .map(SchemaUpdate::toEvolution).toList();
@@ -277,7 +292,7 @@ public class JobExecutorService {
 
     private void rsdToCategoryAlgorithm(Run run, Job job, RSDToCategoryPayload payload) {
         // extracting the empty SK wrapper
-        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
+        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
 
         final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
@@ -375,12 +390,12 @@ public class JobExecutorService {
     }
 
     private void finishRSDToCategoryProcessing(JobWithRun job, SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings) {
-        final var wrapper = schemaService.find(job.run().categoryId);
+        final var wrapper = schemaRepository.find(job.run().categoryId);
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(wrapper.id(), wrapper.label, wrapper.version, wrapper.systemVersion, schema, metadata);
-        schemaService.replace(newWrapper);
+        schemaRepository.save(newWrapper);
 
         final RSDToCategoryPayload payload = (RSDToCategoryPayload) job.job().payload;
-        final DatasourceWrapper datasource = datasourceService.find(payload.datasourceId());
+        final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
         final LogicalModelWithDatasource logicalModel = createLogicalModel(datasource.id(), newWrapper.id(), "Initial logical model");
 
         for (Mapping mapping : mappings) {

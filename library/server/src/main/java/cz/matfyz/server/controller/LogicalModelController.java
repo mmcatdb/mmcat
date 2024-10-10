@@ -5,6 +5,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.service.LogicalModelService;
 import cz.matfyz.server.service.LogicalModelService.LogicalModelWithMappings;
@@ -12,16 +13,17 @@ import cz.matfyz.server.service.LogicalModelService.LogicalModelWithMappings;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class LogicalModelController {
+
+    @Autowired
+    private LogicalModelRepository repository;
 
     @Autowired
     private LogicalModelService service;
@@ -47,12 +49,7 @@ public class LogicalModelController {
 
     @GetMapping("/logical-models/{id}")
     public LogicalModelDetail getLogicalModel(@PathVariable Id id) {
-        final var logicalModel = service.findFull(id);
-
-        if (logicalModel == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        return createDetail(logicalModel);
+        return createDetail(service.findFull(id));
     }
 
     @Deprecated
@@ -82,7 +79,7 @@ public class LogicalModelController {
 
     @GetMapping("/schema-categories/{categoryId}/logical-model-infos")
     public List<LogicalModelInfo> getAllLogicalModelInfosInCategory(@PathVariable Id categoryId) {
-        return service.findAll(categoryId).stream().map(this::createInfo).toList();
+        return repository.findAllInCategory(categoryId).stream().map(this::createInfo).toList();
     }
 
 }

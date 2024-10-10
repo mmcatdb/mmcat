@@ -9,13 +9,10 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
-
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,10 +29,6 @@ public class SchemaCategoryService {
     @Autowired
     private JobService jobService;
 
-    public List<SchemaCategoryInfo> findAllInfos() {
-        return repository.findAllInfos();
-    }
-
     public SchemaCategoryWrapper create(SchemaCategoryInit init) {
         final var schema = new SchemaCategory();
         final var metadata = MetadataCategory.createEmpty(schema);
@@ -45,18 +38,6 @@ public class SchemaCategoryService {
         jobService.createSession(wrapper.id());
 
         return wrapper;
-    }
-
-    public void replace(SchemaCategoryWrapper wrapper) {
-        repository.save(wrapper);
-    }
-
-    public SchemaCategoryInfo findInfo(Id id) {
-        return repository.findInfo(new Id("" + id));
-    }
-
-    public SchemaCategoryWrapper find(Id id) {
-        return repository.find(id);
     }
 
     public SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {

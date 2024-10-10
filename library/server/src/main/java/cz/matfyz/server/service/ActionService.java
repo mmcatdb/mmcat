@@ -20,19 +20,11 @@ public class ActionService {
         return repository.findAllInCategory(categoryId);
     }
 
-    public Action find(Id id) {
-        return repository.find(id);
-    }
-
     public Action create(ActionInit init) {
         final var action = Action.createNew(init.categoryId(), init.label(), init.payload());
         repository.save(action);
 
         return action;
-    }
-
-    public void delete(Id id) {
-        repository.delete(id);
     }
 
 }

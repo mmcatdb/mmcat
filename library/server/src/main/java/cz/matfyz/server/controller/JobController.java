@@ -148,7 +148,7 @@ public class JobController {
 
     @GetMapping("/schema-categories/{categoryId}/sessions")
     public List<Session> getAllSessions(@PathVariable Id categoryId) {
-        return service.findAllSessions(categoryId);
+        return repository.findAllSessionsInCategory(categoryId);
     }
 
     @PostMapping("/schema-categories/{categoryId}/sessions")

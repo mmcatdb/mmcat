@@ -14,10 +14,10 @@ import cz.matfyz.core.utils.UniqueIdProvider;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.service.DatasourceService;
-import cz.matfyz.server.service.LogicalModelService;
-import cz.matfyz.server.service.MappingService;
-import cz.matfyz.server.service.SchemaCategoryService;
+import cz.matfyz.server.repository.DatasourceRepository;
+import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.MappingRepository;
+import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.service.WrapperService;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
@@ -36,16 +36,16 @@ class ServerApplicationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);
 
     @Autowired
-    private MappingService mappingService;
+    private MappingRepository mappingRepository;
 
     @Autowired
-    private LogicalModelService logicalModelService;
+    private LogicalModelRepository logicalModelRepository;
 
     @Autowired
-    private DatasourceService datasourceService;
+    private DatasourceRepository datasourceRepository;
 
     @Autowired
-    private SchemaCategoryService categoryService;
+    private SchemaCategoryRepository categoryRepository;
 
     @Autowired
     private WrapperService wrapperService;
@@ -106,13 +106,13 @@ class ServerApplicationTests {
     }
 
     private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id datasourceId, int records) throws Exception {
-        var mappingWrapper = mappingService.find(mappingId);
-        var mapping = createMapping(mappingWrapper);
+        final var mappingWrapper = mappingRepository.find(mappingId);
+        final var mapping = createMapping(mappingWrapper);
 
-        DatasourceWrapper datasource = datasourceService.find(datasourceId);
-        AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final DatasourceWrapper datasource = datasourceRepository.find(datasourceId);
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        var newInstance = new DatabaseToInstance()
+        final var newInstance = new DatabaseToInstance()
             .input(mapping, instance, pullWrapper, new KindNameQuery(mapping.kindName(), records, null))
             .run();
 
@@ -127,16 +127,16 @@ class ServerApplicationTests {
     }
 
     private void exportMapping(InstanceCategory instance, Id mappingId, Id datasourceId) throws Exception {
-        var mappingWrapper = mappingService.find(mappingId);
-        var mapping = createMapping(mappingWrapper);
+        final var mappingWrapper = mappingRepository.find(mappingId);
+        final var mapping = createMapping(mappingWrapper);
 
-        DatasourceWrapper datasource = datasourceService.find(datasourceId);
+        final DatasourceWrapper datasource = datasourceRepository.find(datasourceId);
         final var control = wrapperService.getControlWrapper(datasource);
-        AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
-        AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
-        AbstractICWrapper icWrapper = control.getICWrapper();
+        final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
+        final AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
+        final AbstractICWrapper icWrapper = control.getICWrapper();
 
-        var process = new InstanceToDatabase();
+        final var process = new InstanceToDatabase();
         process.input(mapping, List.of(mapping), instance, ddlWrapper, dmlWrapper, icWrapper);
         process.run();
 
@@ -149,8 +149,8 @@ class ServerApplicationTests {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper) {
-        final var model = logicalModelService.find(mappingWrapper.logicalModelId);
-        final var categoryWrapper = categoryService.find(model.logicalModel().categoryId);
+        final var model = logicalModelRepository.find(mappingWrapper.logicalModelId);
+        final var categoryWrapper = categoryRepository.find(model.logicalModel().categoryId);
         final var category = categoryWrapper.toSchemaCategory();
 
         return mappingWrapper.toMapping(category);

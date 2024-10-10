@@ -5,6 +5,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.service.MappingService;
 
 import java.util.List;
@@ -20,16 +21,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class MappingController {
 
     @Autowired
+    private MappingRepository repository;
+
+    @Autowired
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
     public MappingWrapper getMapping(@PathVariable Id id) {
-        return service.find(id);
+        return repository.find(id);
     }
 
     @GetMapping("/logical-models/{logicalModelId}/mappings")
     public List<MappingWrapper> getAllMappingsInLogicalModel(@PathVariable Id logicalModelId) {
-        return service.findAll(logicalModelId);
+        return repository.findAll(logicalModelId);
     }
 
     @PostMapping("/mappings")
