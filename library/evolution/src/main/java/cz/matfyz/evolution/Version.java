@@ -34,7 +34,7 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
     private static String stringFormat = "%d";
     private static String stringFormatWithLocal = "%d:%s";
 
-    private static final Pattern pattern = Pattern.compile("^([\\d])+(:[^:]+)?$");
+    private static final Pattern pattern = Pattern.compile("^([\\d]+)(:[^:]+)?$");
 
     private Version(int integerValue, @Nullable String localValue) {
         this.value = localValue == null
@@ -46,11 +46,6 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
     }
 
     public static Version fromString(String value) {
-        // This null check has been added just so I can run it w/o errors
-        if (value == null) {
-            return Version.generateInitial(null);
-        }
-
         final Matcher matcher = pattern.matcher(value);
         if (!matcher.matches())
             throw VersionException.parse(value);
@@ -77,8 +72,16 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         return new Version(integerValue + 1, localValue);
     }
 
+    public static Version generateInitial() {
+        return generateInitial(null);
+    }
+
     public static Version generateInitial(@Nullable String localValue) {
         return new Version(0, localValue);
+    }
+
+    public boolean isAfterOrEqual(Version another) {
+        return integerValue >= another.integerValue;
     }
 
     @Override public String toString() {
@@ -97,8 +100,9 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         return value.subSequence(beginIndex, endIndex);
     }
 
-    public int compareTo(Version another) {
-        return value.compareTo(another.value);
+    // The integer part has to be unique so we can use it for comparison.
+    public int compareTo(Version other) {
+        return integerValue - other.integerValue;
     }
 
     @Override public boolean equals(Object object) {

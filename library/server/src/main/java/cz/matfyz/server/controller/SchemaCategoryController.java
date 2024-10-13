@@ -1,12 +1,12 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.evolution.Version;
+import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.service.SchemaCategoryService;
+import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.List;
 
@@ -26,17 +26,33 @@ public class SchemaCategoryController {
     @Autowired
     private SchemaCategoryService service;
 
+    public record SchemaCategoryInfo(
+        Id id,
+        Version version,
+        Version lastValid,
+        String label,
+        /** The current version of the whole project. */
+        Version systemVersion
+    ) implements IEntity {
+
+        public static SchemaCategoryInfo fromWrapper(SchemaCategoryWrapper wrapper) {
+            return new SchemaCategoryInfo(wrapper.id(), wrapper.version(), wrapper.lastValid(), wrapper.label, wrapper.systemVersion());
+        }
+
+    }
+
     @GetMapping("/schema-categories")
     public List<SchemaCategoryInfo> getAllCategoryInfos() {
         return repository.findAllInfos();
     }
 
+    public record SchemaCategoryInit(
+        String label
+    ) {}
+
     @PostMapping("/schema-categories")
     public SchemaCategoryInfo createNewCategory(@RequestBody SchemaCategoryInit init) {
-        if (init.label() == null)
-            return null;
-
-        return SchemaCategoryInfo.fromWrapper(service.create(init));
+        return SchemaCategoryInfo.fromWrapper(service.create(init.label));
     }
 
     @GetMapping("/schema-categories/{id}/info")
@@ -45,12 +61,12 @@ public class SchemaCategoryController {
     }
 
     @GetMapping("/schema-categories/{id}")
-    public SchemaCategoryWrapper getCategoryWrapper(@PathVariable Id id) {
+    public SchemaCategoryWrapper getCategory(@PathVariable Id id) {
         return repository.find(id);
     }
 
     @PostMapping("/schema-categories/{id}/updates")
-    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaUpdateInit update) {
+    public SchemaCategoryWrapper updateCategory(@PathVariable Id id, @RequestBody SchemaEvolutionInit update) {
         return service.update(id, update);
     }
 

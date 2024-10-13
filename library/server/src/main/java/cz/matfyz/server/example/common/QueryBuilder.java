@@ -2,7 +2,7 @@ package cz.matfyz.server.example.common;
 
 import cz.matfyz.server.controller.QueryController.QueryInit;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
+import cz.matfyz.server.entity.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class QueryBuilder {
         return this;
     }
 
-    public List<QueryWithVersion> build(Function<QueryInit, QueryWithVersion> creator) {
+    public List<Query> build(Function<QueryInit, Query> creator) {
         return inits.stream().map(creator).toList();
     }
 

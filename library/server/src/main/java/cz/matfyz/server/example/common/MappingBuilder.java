@@ -1,9 +1,9 @@
 package cz.matfyz.server.example.common;
 
-import cz.matfyz.server.entity.logicalmodel.LogicalModel;
-import cz.matfyz.server.entity.mapping.MappingInfo;
+import cz.matfyz.server.entity.LogicalModel;
 import cz.matfyz.server.entity.mapping.MappingInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -29,13 +29,13 @@ public class MappingBuilder {
 
     public MappingBuilder add(LogicalModel model, Function<SchemaCategory, TestMapping> initCreator) {
         final Mapping mapping = initCreator.apply(schema).mapping();
-        final var init = MappingInit.fromMapping(mapping, model.id());
+        final var init = MappingInit.fromMapping(mapping, model.categoryId, model.datasourceId);
         inits.add(init);
 
         return this;
     }
 
-    public List<MappingInfo> build(Function<MappingInit, MappingInfo> mappingCreator) {
+    public List<MappingWrapper> build(Function<MappingInit, MappingWrapper> mappingCreator) {
         return inits.stream().map(mappingCreator).toList();
     }
 

@@ -3,7 +3,6 @@ package cz.matfyz.server.controller;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
@@ -64,7 +63,7 @@ public class LogicalModelController {
         DatasourceDetail datasource
     ) implements IEntity {}
 
-    LogicalModelInfo createInfo(LogicalModelWithDatasource model) {
+    LogicalModelInfo toInfo(LogicalModelWithDatasource model) {
         return new LogicalModelInfo(
             model.logicalModel().id(),
             model.logicalModel().label,
@@ -72,14 +71,20 @@ public class LogicalModelController {
         );
     }
 
+    public record LogicalModelInit(
+        Id categoryId,
+        Id datasourceId,
+        String label
+    ) {}
+
     @PostMapping("/logical-models")
     public LogicalModelInfo createNewLogicalModel(@RequestBody LogicalModelInit init) {
-        return createInfo(service.createNew(init));
+        return toInfo(service.create(init.categoryId(), init.datasourceId(), init.label));
     }
 
     @GetMapping("/schema-categories/{categoryId}/logical-model-infos")
     public List<LogicalModelInfo> getAllLogicalModelInfosInCategory(@PathVariable Id categoryId) {
-        return repository.findAllInCategory(categoryId).stream().map(this::createInfo).toList();
+        return repository.findAllInCategory(categoryId).stream().map(this::toInfo).toList();
     }
 
 }

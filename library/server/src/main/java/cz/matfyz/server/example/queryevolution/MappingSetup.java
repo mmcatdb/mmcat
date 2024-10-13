@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.logicalmodel.LogicalModel;
-import cz.matfyz.server.entity.mapping.MappingInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.LogicalModel;
+import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.service.MappingService;
 import cz.matfyz.tests.example.queryevolution.MongoDB;
 import cz.matfyz.tests.example.queryevolution.PostgreSQL;
@@ -19,13 +19,13 @@ class MappingSetup {
     @Autowired
     private MappingService mappingService;
 
-    List<MappingInfo> createMappings(List<LogicalModel> models, SchemaCategoryWrapper schemaWrapper, int version) {
+    List<MappingWrapper> createMappings(List<LogicalModel> models, SchemaCategoryWrapper schemaWrapper, int version) {
         final var builder = new MappingBuilder(models, schemaWrapper);
 
         if (version == 3) {
             return builder
                 .add(1, MongoDB::orders)
-                .build(mappingService::createNew);
+                .build(mappingService::create);
         }
 
         builder
@@ -46,7 +46,7 @@ class MappingSetup {
             builder.add(1, MongoDB::order);
         }
 
-        return builder.build(mappingService::createNew);
+        return builder.build(mappingService::create);
     }
 
 }

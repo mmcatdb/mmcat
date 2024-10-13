@@ -1,10 +1,9 @@
-package cz.matfyz.server.entity.instance;
+package cz.matfyz.server.entity;
 
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceSerializer;
 import cz.matfyz.core.instance.InstanceSerializer.SerializedInstance;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.server.entity.Id;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

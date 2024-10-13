@@ -3,7 +3,7 @@ package cz.matfyz.server.repository;
 import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.instance.InstanceCategoryWrapper;
+import cz.matfyz.server.entity.InstanceCategoryWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import org.checkerframework.checker.nullness.qual.Nullable;

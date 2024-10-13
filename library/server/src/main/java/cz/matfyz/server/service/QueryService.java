@@ -4,20 +4,21 @@ import cz.matfyz.abstractwrappers.datasource.Datasource;
 import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.server.controller.QueryController.QueryPartDescription;
 import cz.matfyz.server.controller.DatasourceController;
 import cz.matfyz.server.controller.QueryController.QueryDescription;
 import cz.matfyz.server.controller.QueryController.QueryInit;
-import cz.matfyz.server.controller.QueryController.QueryVersionUpdate;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.Query;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
-import cz.matfyz.server.entity.query.Query;
-import cz.matfyz.server.entity.query.QueryVersion;
+import cz.matfyz.server.entity.evolution.QueryEvolution;
+import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.QueryRepository;
-import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 
 import java.util.List;
@@ -32,6 +33,9 @@ public class QueryService {
 
     @Autowired
     private QueryRepository repository;
+
+    @Autowired
+    private EvolutionRepository evolutionRepository;
 
     @Autowired
     private LogicalModelRepository logicalModelRepository;
@@ -102,43 +106,67 @@ public class QueryService {
         return new KindsAndDatasources(kinds, datasources);
     }
 
-    public QueryWithVersion createQuery(QueryInit init) {
-        final var categoryInfo = categoryRepository.findInfo(init.categoryId());
+    public Query create(QueryInit init) {
+        final var category = categoryRepository.find(init.categoryId());
 
-        final var query = Query.createNew(init.categoryId(), init.label());
-        final var version = QueryVersion.createNew(query.id(), categoryInfo.version, init.content(), List.of());
+        final var newVersion = category.systemVersion().generateNext();
+        final var query = Query.createNew(newVersion, init.categoryId(), init.label(), init.content());
+        final var evolution = QueryEvolution.createNew(category.id(), newVersion, query.id(), init.content(), "", List.of());
 
         repository.save(query);
-        repository.save(version);
+        evolutionRepository.create(evolution);
 
-        return new QueryWithVersion(query, version);
+        propagateEvolution(category, evolution);
+
+        return query;
     }
 
-    public QueryVersion createQueryVersion(Id queryId, QueryVersionUpdate update) {
-        final var version = QueryVersion.createNew(queryId, update.version(), update.content(), update.errors());
-        version.version = update.version();
-        version.content = update.content();
-        version.errors = update.errors();
+    public void update(Query query, String content, List<QueryEvolutionError> errors) {
+        final var category = categoryRepository.find(query.categoryId);
 
-        repository.save(version);
+        final var newVersion = category.systemVersion().generateNext();
+        final var evolution = QueryEvolution.createNew(category.id(), newVersion, query.id(), content, query.content, errors);
 
-        return version;
+        query.updateVersion(newVersion, category.systemVersion());
+        query.content = content;
+        query.errors = errors;
+
+        repository.save(query);
+        evolutionRepository.create(evolution);
+
+        propagateEvolution(category, evolution);
     }
 
-    public QueryVersion updateQueryVersion(Id versionId, QueryVersionUpdate update) {
-        final var version = repository.findVersion(versionId);
-        version.version = update.version();
-        version.content = update.content();
-        version.errors = update.errors();
+    private void propagateEvolution(SchemaCategoryWrapper category, QueryEvolution evolution) {
+        final var oldVersion = category.systemVersion;
 
-        repository.save(version);
+        category.systemVersion = evolution.version;
+        category.updateLastValid(evolution.version);
+        categoryRepository.save(category);
 
-        return version;
+        // All other queries are independed on this query so we can propagate the evolution.
+        // TODO make more efficient with orm.
+        repository.findAllInCategory(category.id(), null).stream()
+            .filter(query -> query.lastValid().equals(oldVersion))
+            .forEach(query -> {
+                query.updateLastValid(evolution.version);
+                repository.save(query);
+            });
+
+        // The same holds true for mappings.
+        mappingRepository.findAll().stream()
+            .filter(mapping -> mapping.lastValid().equals(oldVersion))
+            .forEach(mapping -> {
+                mapping.updateLastValid(evolution.version);
+                mappingRepository.save(mapping);
+            });
+
     }
 
-    public void deleteQueryWithVersions(Id id) {
-        repository.deleteQueryVersionsByQuery(id);
-        repository.deleteQuery(id);
+    // TODO Allow only soft-delete because of the evolution.
+    public void delete(Id id) {
+        evolutionRepository.deleteQueryEvolutions(id);
+        repository.delete(id);
     }
 
 }

@@ -25,12 +25,12 @@ async function fetchModel() {
 
 const router = useRouter();
 
-function createNewMapping() {
+function createMapping() {
     router.push({ name: 'accessPathEditor', query: { logicalModelId: route.params.id } });
 }
 
 const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(logicalModel.value.datasource.type));
-console.log("isForFile: ", isForFile.value);
+console.log('isForFile: ', isForFile.value);
 
 
 </script>
@@ -48,7 +48,7 @@ console.log("isForFile: ", isForFile.value);
             <div class="button-row">
                 <button
                     :disabled="(isForFile && logicalModel.mappings.length > 0)"
-                    @click="createNewMapping"
+                    @click="createMapping"
                 >
                     Create new
                 </button>

@@ -1,9 +1,8 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.LogicalModel;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
-import cz.matfyz.server.entity.logicalmodel.LogicalModel;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
@@ -49,13 +48,13 @@ public class LogicalModelService {
         }).toList();
     }
 
-    public LogicalModelWithDatasource createNew(LogicalModelInit init) {
-        final var datasource = datasourceRepository.find(init.datasourceId());
-        final var logicalModel = LogicalModel.createNew(
-            init.categoryId(),
-            init.datasourceId(),
-            init.label()
-        );
+    public LogicalModelWithDatasource create(
+        Id categoryId,
+        Id datasourceId,
+        String label
+    ) {
+        final var datasource = datasourceRepository.find(datasourceId);
+        final var logicalModel = LogicalModel.createNew(categoryId, datasourceId, label);
         repository.save(logicalModel);
 
         return new LogicalModelWithDatasource(logicalModel, datasource);

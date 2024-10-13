@@ -86,12 +86,12 @@ public class ActionController {
     ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
         if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
             final var model = logicalModelRepository.find(modelToCategoryPayload.logicalModelId());
-            final var info = logicalModelController.createInfo(model);
+            final var info = logicalModelController.toInfo(model);
             return new ModelToCategoryPayloadDetail(info);
         }
         if (payload instanceof CategoryToModelPayload categoryToModelPayload) {
             final var model = logicalModelRepository.find(categoryToModelPayload.logicalModelId());
-            final var info = logicalModelController.createInfo(model);
+            final var info = logicalModelController.toInfo(model);
             return new CategoryToModelPayloadDetail(info);
         }
         if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {

@@ -17,8 +17,8 @@ import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
-import cz.matfyz.evolution.querying.QueryUpdateResult;
-import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.matfyz.evolution.querying.QueryEvolutionResult;
+import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditSerializer;
@@ -29,34 +29,32 @@ import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
+import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.Query;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
-import cz.matfyz.server.entity.evolution.SchemaUpdate;
+import cz.matfyz.server.entity.evolution.QueryEvolution;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
 import cz.matfyz.server.entity.job.data.ModelJobData;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.entity.query.QueryVersion;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.InstanceCategoryRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
-import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
-import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
@@ -257,35 +255,45 @@ public class JobExecutorService {
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {
-        final List<QueryWithVersion> prevQueries = queryRepository.findAllInCategoryWithVersion(run.categoryId, payload.prevVersion());
-        final List<QueryWithVersion> nextQueries = queryRepository.findAllInCategoryWithVersion(run.categoryId, payload.nextVersion());
-        final List<QueryWithVersion> filteredPrevQueries = ArrayUtils.filterSorted(prevQueries, nextQueries);
+        // FIXME filter correctly by versions.
+        final List<Query> prevQueries = queryRepository.findAllInCategory(run.categoryId, payload.prevVersion());
+        final List<Query> nextQueries = queryRepository.findAllInCategory(run.categoryId, payload.nextVersion());
+
+        // Some high order magic right here because Java generics suck ass!
+        @SuppressWarnings("unchecked")
+        final List<Query> filteredPrevQueries = (List<Query>) (Object) ArrayUtils.filterSorted((List<Entity>) (Object) prevQueries, (List<Entity>) (Object) nextQueries);
 
         final QueryEvolver evolver = createQueryEvolver(run.categoryId, payload.prevVersion(), payload.nextVersion());
 
-        for (final var query : filteredPrevQueries) {
-            final QueryUpdateResult updateResult = evolver.run(query.version().content);
-            final var newVersion = QueryVersion.createNew(
-                query.query().id(),
-                payload.nextVersion(),
-                updateResult.nextContent,
-                updateResult.errors
-            );
-            queryRepository.save(newVersion);
-        }
+        // FIXME doesn't do anything now.
+        // for (final var query : filteredPrevQueries) {
+        //     final QueryEvolutionResult updateResult = evolver.run(query.content);
+        //     final var newVersion = QueryEvolution.createNew(
+        //         run.categoryId,
+        //         // FIXME get system version
+        //         payload.nextVersion(),
+        //         query.id(),
+        //         updateResult.nextContent,
+        //         updateResult.errors
+        //     );
+        //     evolutionRepository.create(newVersion);
+        // }
     }
 
     private QueryEvolver createQueryEvolver(Id categoryId, Version prevVersion, Version nextVersion) {
         final SchemaCategoryWrapper wrapper = schemaRepository.find(categoryId);
-        final List<SchemaCategoryUpdate> updates = evolutionRepository
-            .findAllUpdates(categoryId).stream()
-            .filter(u -> u.prevVersion.compareTo(prevVersion) >= 0 && u.nextVersion.compareTo(nextVersion) <= 0)
-            .map(SchemaUpdate::toEvolution).toList();
+        final List<SchemaEvolutionAlgorithm> updates = evolutionRepository
+            .findAllSchemaEvolutions(categoryId).stream()
+            // TODO Check if the version comparison is correct (with respect to the previous algorithm)
+            .filter(u -> u.version.compareTo(prevVersion) > 0 && u.version.compareTo(nextVersion) <= 0)
+            // .filter(u -> u.prevVersion.compareTo(prevVersion) >= 0 && u.nextVersion.compareTo(nextVersion) <= 0)
+            .map(u -> u.toSchemaAlgorithm(prevVersion)).toList();
+            // .map(SchemaUpdate::toEvolution).toList();
 
         final SchemaCategory prevCategory = wrapper.toSchemaCategory();
         final SchemaCategory nextCategory = wrapper.toSchemaCategory();
-        SchemaCategoryUpdate.setToVersion(prevCategory, updates, wrapper.version, prevVersion);
-        SchemaCategoryUpdate.setToVersion(nextCategory, updates, wrapper.version, nextVersion);
+        SchemaEvolutionAlgorithm.setToVersion(prevCategory, updates, wrapper.version(), prevVersion);
+        SchemaEvolutionAlgorithm.setToVersion(nextCategory, updates, wrapper.version(), nextVersion);
 
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
@@ -391,21 +399,19 @@ public class JobExecutorService {
 
     private void finishRSDToCategoryProcessing(JobWithRun job, SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings) {
         final var wrapper = schemaRepository.find(job.run().categoryId);
-        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(wrapper.id(), wrapper.label, wrapper.version, wrapper.systemVersion, schema, metadata);
-        schemaRepository.save(newWrapper);
+
+        final var version = wrapper.systemVersion().generateNext();
+        wrapper.update(version, schema, metadata);
+        schemaRepository.save(wrapper);
 
         final RSDToCategoryPayload payload = (RSDToCategoryPayload) job.job().payload;
         final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
-        final LogicalModelWithDatasource logicalModel = createLogicalModel(datasource.id(), newWrapper.id(), "Initial logical model");
+        logicalModelService.create(wrapper.id(), datasource.id(), "Initial logical model");
 
-        for (Mapping mapping : mappings) {
-            final MappingInit init = MappingInit.fromMapping(mapping, logicalModel.logicalModel().id());
-            mappingService.createNew(init);
+        for (final Mapping mapping : mappings) {
+            final MappingInit init = MappingInit.fromMapping(mapping, wrapper.id(), datasource.id());
+            mappingService.create(init);
         }
     }
 
-    private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id categoryId, String initialLogicalModelLabel) {
-        final LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceId, categoryId, initialLogicalModelLabel);
-        return logicalModelService.createNew(logicalModelInit);
-    }
 }

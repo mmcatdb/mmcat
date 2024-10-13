@@ -22,8 +22,8 @@ import cz.matfyz.evolution.schema.CreateObject;
 import cz.matfyz.evolution.schema.UpdateMorphism;
 import cz.matfyz.evolution.schema.UpdateObject;
 import cz.matfyz.evolution.schema.SMO;
-import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,10 +60,10 @@ public abstract class SchemaBase {
         return new SerializedObject(key, object.ids(), object.superId());
     }
 
-    protected SchemaUpdateInit innerCreateNewUpdate() {
+    protected SchemaEvolutionInit innerCreateNewUpdate() {
         createOperations();
 
-        return new SchemaUpdateInit(wrapper.version, schemaOperations, metadataOperations);
+        return new SchemaEvolutionInit(wrapper.version(), schemaOperations, metadataOperations);
     }
 
     protected abstract void createOperations();

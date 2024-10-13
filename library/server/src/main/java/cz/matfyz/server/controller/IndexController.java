@@ -1,7 +1,7 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.controller.SchemaCategoryController.SchemaCategoryInfo;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

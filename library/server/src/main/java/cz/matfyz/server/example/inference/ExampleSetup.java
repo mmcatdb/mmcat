@@ -7,8 +7,7 @@ import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
-import cz.matfyz.server.entity.schema.SchemaCategoryInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.service.SchemaCategoryService;
@@ -61,9 +60,7 @@ public class ExampleSetup {
     private SchemaCategoryService schemaService;
 
     private SchemaCategoryWrapper createEmptySchemaCategory() {
-        final SchemaCategoryInit schemaInit = new SchemaCategoryInit("Inference Example Schema");
-
-        return schemaService.create(schemaInit);
+        return schemaService.create("Inference Example Schema");
     }
 
     private Action createAndSaveAction(ActionPayload payload, Id categoryId, String label) {

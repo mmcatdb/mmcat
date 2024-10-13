@@ -1,7 +1,7 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.evolution.SchemaUpdate;
+import cz.matfyz.server.entity.evolution.SchemaEvolution;
 import cz.matfyz.server.repository.EvolutionRepository;
 
 import java.util.List;
@@ -18,8 +18,8 @@ public class EvolutionController {
     private EvolutionRepository repository;
 
     @GetMapping("/schema-categories/{id}/updates")
-    public List<SchemaUpdate> getCategoryUpdates(@PathVariable Id id) {
-        return repository.findAllUpdates(id);
+    public List<SchemaEvolution> getCategoryUpdates(@PathVariable Id id) {
+        return repository.findAllSchemaEvolutions(id);
     }
 
 }

@@ -6,7 +6,7 @@ import cz.matfyz.evolution.Version;
 
 import java.util.List;
 
-public class SchemaCategoryUpdate {
+public class SchemaEvolutionAlgorithm {
 
     private final Version prevVersion;
 
@@ -16,29 +16,29 @@ public class SchemaCategoryUpdate {
 
     public final List<SMO> operations;
 
-    public SchemaCategoryUpdate(Version prevVersion, List<SMO> operations) {
+    public SchemaEvolutionAlgorithm(Version prevVersion, List<SMO> operations) {
         this.prevVersion = prevVersion;
         this.operations = operations;
     }
 
-    public SchemaCategory up(SchemaCategory category) {
+    public SchemaCategory up(SchemaCategory schema) {
         for (final var operation : operations)
-            operation.up(category);
+            operation.up(schema);
 
-        return category;
+        return schema;
     }
 
-    public SchemaCategory down(SchemaCategory category) {
+    public SchemaCategory down(SchemaCategory schema) {
         for (final var operation : operations.reversed())
-            operation.down(category);
+            operation.down(schema);
 
-        return category;
+        return schema;
     }
 
     /**
      * The provided updates are expected to be sorted from the oldest version to the newest.
      */
-    public static void setToVersion(SchemaCategory category, List<SchemaCategoryUpdate> allUpdates, Version currentVersion, Version newVersion) {
+    public static void setToVersion(SchemaCategory schema, List<SchemaEvolutionAlgorithm> allUpdates, Version currentVersion, Version newVersion) {
         final int comparison = currentVersion.compareTo(newVersion);
 
         if (comparison < 0) {
@@ -51,7 +51,7 @@ public class SchemaCategoryUpdate {
 
             for (int i = firstIndex; i < lastIndex; i++) {
                 final var update = allUpdates.get(i);
-                update.up(category);
+                update.up(schema);
             }
         }
         else if (comparison > 0) {
@@ -62,7 +62,7 @@ public class SchemaCategoryUpdate {
 
             for (int i = firstIndex; i > lastIndex; i--) {
                 final var update = allUpdates.get(i);
-                update.down(category);
+                update.down(schema);
             }
         }
     }

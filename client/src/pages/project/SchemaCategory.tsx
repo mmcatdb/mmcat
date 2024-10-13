@@ -45,7 +45,7 @@ export function schemaCategoryLoader({ params: { projectId } }: { params: Params
         throw new Error('Project ID is required');
 
     const data = Promise.all([
-        api.schemas.getCategoryWrapper({ id: projectId }),
+        api.schemas.getCategory({ id: projectId }),
         api.schemas.getCategoryUpdates({ id: projectId }),
         api.logicalModels.getAllLogicalModelsInCategory({ categoryId: projectId }),
     ])

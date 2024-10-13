@@ -73,18 +73,18 @@ public class Job extends Entity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static Job fromJsonValue(Id id, Id runId, String jsonValueString) throws JsonProcessingException {
-        final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
+    public static Job fromJsonValue(Id id, Id runId, String jsonValue) throws JsonProcessingException {
+        final JsonValue json = jsonValueReader.readValue(jsonValue);
         final var job = new Job(
             id,
             runId,
-            jsonValue.label,
-            jsonValue.createdAt,
-            jsonValue.payload,
-            jsonValue.state
+            json.label,
+            json.createdAt,
+            json.payload,
+            json.state
         );
-        job.data = jsonValue.data;
-        job.error = jsonValue.error;
+        job.data = json.data;
+        job.error = json.error;
 
         return job;
     }

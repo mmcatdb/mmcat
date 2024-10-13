@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.basic;
 
-import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.example.common.SchemaBase;
+import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.basic.Schema;
 
 class SchemaSetup extends SchemaBase {
@@ -11,7 +11,7 @@ class SchemaSetup extends SchemaBase {
         super(wrapper, Schema.newSchema());
     }
 
-    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper) {
+    static SchemaEvolutionInit createNewUpdate(SchemaCategoryWrapper wrapper) {
         return new SchemaSetup(wrapper).innerCreateNewUpdate();
     }
 

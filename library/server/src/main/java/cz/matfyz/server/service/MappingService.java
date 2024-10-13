@@ -1,11 +1,14 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.evolution.Version;
-import cz.matfyz.server.entity.mapping.MappingInfo;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.evolution.MappingEvolution;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.repository.EvolutionRepository;
+import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.MappingRepository;
-import cz.matfyz.server.repository.ProjectRepository;
+import cz.matfyz.server.repository.QueryRepository;
+import cz.matfyz.server.repository.SchemaCategoryRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,17 +21,75 @@ public class MappingService {
     private MappingRepository repository;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    private SchemaCategoryRepository categoryRepository;
 
-    public MappingInfo createNew(MappingInit init) {
-        final Version systemVersion = projectRepository
-            .getVersionByLogicalModel(init.logicalModelId())
-            .generateNext();
+    @Autowired
+    private LogicalModelRepository logicalModelRepository;
 
-        final var wrapper = MappingWrapper.createNew(init.logicalModelId(), init.rootObjectKey(), init.primaryKey(), init.kindName(), init.accessPath(), systemVersion);
-        repository.save(wrapper);
+    @Autowired
+    private EvolutionRepository evolutionRepository;
 
-        return MappingInfo.fromWrapper(wrapper);
+    @Autowired
+    private QueryRepository queryRepository;
+
+    public MappingWrapper create(MappingInit init) {
+        final var category = categoryRepository.find(init.categoryId());
+        final var logicalModel = logicalModelRepository.find(init.categoryId(), init.datasourceId());
+
+        final var newVersion = category.systemVersion().generateNext();
+        final var mapping = MappingWrapper.createNew(newVersion, logicalModel.logicalModel().id(), init.rootObjectKey(), init.primaryKey(), init.kindName(), init.accessPath());
+        // FIXME Add some data to the evolution.
+        final var evolution = MappingEvolution.createNew(category.id(), newVersion, mapping.id(), null);
+
+        repository.save(mapping);
+        evolutionRepository.create(evolution);
+
+        propagateEvolution(category, evolution);
+
+        return mapping;
+    }
+
+    // FIXME Define mapping edit ...
+    public void update(MappingWrapper mapping, Object edit) {
+        final var logicalModel = logicalModelRepository.find(mapping.logicalModelId);
+        final var category = categoryRepository.find(logicalModel.logicalModel().categoryId);
+
+        final var newVersion = category.systemVersion().generateNext();
+        final var evolution = MappingEvolution.createNew(category.id(), newVersion, mapping.id(), edit);
+
+        mapping.updateVersion(newVersion, category.systemVersion());
+        // FIXME Update the mapping.
+
+        repository.save(mapping);
+        evolutionRepository.create(evolution);
+
+        propagateEvolution(category, evolution);
+    }
+
+    // TODO Probably should be moved to dedicated service once we have orm.
+    private void propagateEvolution(SchemaCategoryWrapper category, MappingEvolution evolution) {
+        final var oldVersion = category.systemVersion;
+
+        category.systemVersion = evolution.version;
+        category.updateLastValid(evolution.version);
+        categoryRepository.save(category);
+
+        // All other mappings are independed on this mapping so we can propagate the evolution.
+        // TODO make more efficient with orm.
+        repository.findAll().stream()
+            .filter(mapping -> mapping.lastValid().equals(oldVersion))
+            .forEach(mapping -> {
+                mapping.updateLastValid(evolution.version);
+                repository.save(mapping);
+            });
+
+        // The same holds true for queries.
+        queryRepository.findAllInCategory(category.id(), null).stream()
+            .filter(query -> query.lastValid().equals(oldVersion))
+            .forEach(query -> {
+                query.updateLastValid(evolution.version);
+                queryRepository.save(query);
+            });
     }
 
 }

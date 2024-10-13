@@ -9,7 +9,7 @@ const mappings = {
     getAllMappingsInLogicalModel: GET<{ logicalModelId: StringLike }, MappingFromServer[]>(
         u => `/logical-models/${u.logicalModelId}/mappings`,
     ),
-    createNewMapping: POST<Empty, MappingInfoFromServer, MappingInit>(
+    createMapping: POST<Empty, MappingInfoFromServer, MappingInit>(
         () => `/mappings`,
     ),
 };

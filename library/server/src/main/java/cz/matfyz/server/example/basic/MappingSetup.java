@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.basic;
 
-import cz.matfyz.server.entity.logicalmodel.LogicalModel;
-import cz.matfyz.server.entity.mapping.MappingInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.LogicalModel;
+import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.service.MappingService;
 import cz.matfyz.tests.example.basic.MongoDB;
 import cz.matfyz.tests.example.basic.Neo4j;
@@ -20,7 +20,7 @@ class MappingSetup {
     @Autowired
     private MappingService mappingService;
 
-    List<MappingInfo> createMappings(List<LogicalModel> models, SchemaCategoryWrapper schemaWrapper) {
+    List<MappingWrapper> createMappings(List<LogicalModel> models, SchemaCategoryWrapper schemaWrapper) {
         return new MappingBuilder(models, schemaWrapper)
             .add(0, PostgreSQL::order)
             .add(0, PostgreSQL::product)
@@ -31,7 +31,7 @@ class MappingSetup {
             .add(1, MongoDB::customer)
             .add(1, MongoDB::note)
             .add(2, Neo4j::item)
-            .build(mappingService::createNew);
+            .build(mappingService::create);
     }
 
 }

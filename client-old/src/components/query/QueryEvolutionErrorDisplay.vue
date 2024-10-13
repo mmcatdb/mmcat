@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ErrorType, type QueryUpdateError } from '@/types/query';
+import { ErrorType, type QueryEvolutionError } from '@/types/query';
 import IconXSquare from '../icons/IconXSquare.vue';
 
-type QueryUpdateErrorDisplayProps = {
-    error: QueryUpdateError;
+type QueryEvolutionErrorDisplayProps = {
+    error: QueryEvolutionError;
 };
 
-defineProps<QueryUpdateErrorDisplayProps>();
+defineProps<QueryEvolutionErrorDisplayProps>();
 
 const emit = defineEmits([ 'deleteError' ]);
 

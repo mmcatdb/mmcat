@@ -39,7 +39,7 @@ onMounted(async () => {
             <h2>{{ schemaCategoryInfo.label }}</h2>
             <div class="ms-3">
                 <span class="fw-semibold">v.</span>
-                <VersionDisplay :version-id="schemaCategoryInfo.versionId" />
+                <VersionDisplay :version-id="schemaCategoryInfo.systemVersionId" />
             </div>
             <div class="ms-3">
                 <SessionSelect

@@ -4,7 +4,7 @@ import { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId } from '@/types/identifiers';
 import { type Graph } from '@/types/categoryGraph';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
+import { useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
 import type { Evocat } from '@/types/evocat/Evocat';
@@ -50,7 +50,6 @@ const selectedLogicalModel = shallowRef<LogicalModel>();
  * Retrieves the schema category ID and category information.
  */
 const categoryId = useSchemaCategoryId();
-const category = useSchemaCategoryInfo();
 
 /**
  * Tracks the current initialization type ('create', 'load', or 'default').
@@ -77,17 +76,17 @@ onMounted(async () => {
 async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty, kindName: string | undefined) {
     if (!selectedLogicalModel.value || !graph.value || !accessPath)
         return;
-    accessPath.node.schemaObject;
 
     const newKindName = kindName !== undefined ? kindName : accessPath.name.toString();
 
-    const result = await API.mappings.createNewMapping({}, {
+    const result = await API.mappings.createMapping({}, {
+        categoryId,
+        datasourceId: selectedLogicalModel.value.datasource.id,
         logicalModelId: selectedLogicalModel.value.id,
         rootObjectKey: accessPath.node.schemaObject.key.toServer(),
         primaryKey: new SignatureId(selectedLogicalModel.value.datasource.configuration.isSchemaless ? [] : primaryKey.signatures).toServer(),
         kindName: newKindName,
         accessPath: accessPath.toServer(),
-        categoryVersionn: category.value.versionId,
     });
     if (result.status)
         router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });

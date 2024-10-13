@@ -16,10 +16,10 @@ const schemas = {
     getCategoryInfo: GET<{ id: StringLike }, SchemaCategoryInfoFromServer>(
         u => `/schema-categories/${u.id}/info`,
     ),
-    getCategoryWrapper: GET<{ id: StringLike }, SchemaCategoryFromServer>(
+    getCategory: GET<{ id: StringLike }, SchemaCategoryFromServer>(
         u => `/schema-categories/${u.id}`,
     ),
-    updateCategoryWrapper: POST<{ id: StringLike }, SchemaCategoryFromServer, SchemaUpdateInit>(
+    updateCategory: POST<{ id: StringLike }, SchemaCategoryFromServer, SchemaUpdateInit>(
         u => `/schema-categories/${u.id}/updates`,
     ),
     getCategoryUpdates: GET<{ id: StringLike }, SchemaUpdateFromServer[]>(

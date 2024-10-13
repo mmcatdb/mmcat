@@ -9,16 +9,18 @@ import cz.matfyz.server.entity.Id;
 import java.util.List;
 
 public record MappingInit(
-    Id logicalModelId,
+    Id categoryId,
+    Id datasourceId,
     Key rootObjectKey,
     List<Signature> primaryKey,
     String kindName,
     ComplexProperty accessPath
 ) {
 
-    public static MappingInit fromMapping(Mapping mapping, Id logicalModelId) {
+    public static MappingInit fromMapping(Mapping mapping, Id categoryId, Id datasourceId) {
         return new MappingInit(
-            logicalModelId,
+            categoryId,
+            datasourceId,
             mapping.rootObject().key(),
             mapping.primaryKey().stream().toList(),
             mapping.kindName(),

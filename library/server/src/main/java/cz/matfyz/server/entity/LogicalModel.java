@@ -1,7 +1,5 @@
-package cz.matfyz.server.entity.logicalmodel;
+package cz.matfyz.server.entity;
 
-import cz.matfyz.server.entity.Entity;
-import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.utils.Utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

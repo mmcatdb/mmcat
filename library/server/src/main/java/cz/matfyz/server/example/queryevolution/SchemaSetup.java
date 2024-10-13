@@ -1,9 +1,9 @@
 package cz.matfyz.server.example.queryevolution;
 
 import cz.matfyz.core.identifiers.ObjectIds;
-import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.example.common.SchemaBase;
+import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.queryevolution.Schema;
 
 class SchemaSetup extends SchemaBase {
@@ -15,7 +15,7 @@ class SchemaSetup extends SchemaBase {
         this.version = version;
     }
 
-    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, int version) {
+    static SchemaEvolutionInit createNewUpdate(SchemaCategoryWrapper wrapper, int version) {
         return new SchemaSetup(wrapper, version).innerCreateNewUpdate();
     }
 

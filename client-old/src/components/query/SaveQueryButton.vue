@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue';
 import API from '@/utils/api';
 import { useSchemaCategoryInfo } from '@/utils/injects';
-import { queryWithVersionFromServer, type QueryWithVersion } from '@/types/query';
+import { Query } from '@/types/query';
 
 type SaveQueryButtonProps = {
     content: string;
@@ -12,7 +12,7 @@ const props = defineProps<SaveQueryButtonProps>();
 const categoryInfo = useSchemaCategoryInfo();
 
 const emit = defineEmits<{
-    (e: 'saveQuery', query: QueryWithVersion): void;
+    (e: 'saveQuery', query: Query): void;
 }>();
 
 enum State { Default, Label, Fetching }
@@ -28,13 +28,12 @@ async function finishSaving() {
     state.value = State.Fetching;
     const result = await API.queries.createQuery({}, {
         categoryId: categoryInfo.value.id,
-        version: categoryInfo.value.versionId,
         label: label.value,
         content: props.content,
     });
     state.value = State.Default;
     if (result.status) {
-        const query = queryWithVersionFromServer(result.data);
+        const query = Query.fromServer(result.data);
         emit('saveQuery', query);
     }
 }

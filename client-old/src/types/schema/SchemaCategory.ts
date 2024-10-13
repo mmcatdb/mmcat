@@ -89,7 +89,7 @@ export class SchemaCategory implements Entity {
     }
 
     static fromServerWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): SchemaCategory {
-        return this.fromServer({ ...info, version: info.versionId, schema, metadata }, []);
+        return this.fromServer({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata }, []);
     }
 
     private objects = new ComparableMap<Key, number, VersionedSchemaObject>(key => key.value);
@@ -168,6 +168,7 @@ export type SchemaCategoryInfoFromServer = {
     id: Id;
     label: string;
     version: VersionId;
+    systemVersion: VersionId;
 };
 
 export class SchemaCategoryInfo implements Entity {
@@ -175,6 +176,7 @@ export class SchemaCategoryInfo implements Entity {
         public readonly id: Id,
         public readonly label: string,
         public readonly versionId: VersionId,
+        public readonly systemVersionId: VersionId,
     ) {}
 
     static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
@@ -182,6 +184,7 @@ export class SchemaCategoryInfo implements Entity {
             input.id,
             input.label,
             input.version,
+            input.systemVersion,
         );
     }
 }

@@ -1,9 +1,9 @@
 package cz.matfyz.server.controller.publicapi;
 
 import cz.matfyz.server.controller.SchemaCategoryController;
+import cz.matfyz.server.controller.SchemaCategoryController.SchemaCategoryInfo;
+import cz.matfyz.server.controller.SchemaCategoryController.SchemaCategoryInit;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 
 import java.util.List;
 

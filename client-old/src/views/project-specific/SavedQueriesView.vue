@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 import { useSchemaCategoryId } from '@/utils/injects';
-import { queryWithVersionFromServer, type QueryWithVersion, QueryVersion } from '@/types/query';
+import { Query } from '@/types/query';
 import API from '@/utils/api';
 import QueryDisplay from '@/components/query/QueryDisplay.vue';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
@@ -11,27 +11,27 @@ import EvocatDisplay from '@/components/category/EvocatDisplay.vue';
 
 const categoryId = useSchemaCategoryId();
 
-const queries = shallowRef<QueryWithVersion[]>();
+const queries = shallowRef<Query[]>();
 
 async function fetchQueries() {
     const result = await API.queries.getQueriesInCategory({ categoryId });
     if (!result.status)
         return false;
 
-    queries.value = result.data.map(queryWithVersionFromServer);
+    queries.value = result.data.map(Query.fromServer);
     return true;
 }
 
-function updateQuery(newVersion: QueryVersion) {
+function updateQuery(newQuery: Query) {
     if (!queries.value)
         return;
 
     const newQueries = [ ...queries.value ];
-    const index = newQueries.findIndex(q => q.query.id === newVersion.query.id);
+    const index = newQueries.findIndex(q => q.id === newQuery.id);
     if (index === -1)
         return;
 
-    newQueries[index] = { query: newVersion.query, version: newVersion };
+    newQueries[index] = newQuery;
     queries.value = newQueries;
 }
 
@@ -54,10 +54,10 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
                 <template v-if="queries">
                     <QueryDisplay
                         v-for="query in queries"
-                        :key="query.query.id"
-                        :version="query.version"
-                        @create-query-version="updateQuery"
-                        @delete-query="() => queries = queries?.filter(q => q.query.id !== query.query.id)"
+                        :key="query.id"
+                        :query="query"
+                        @update-query="updateQuery"
+                        @delete-query="() => queries = queries?.filter(q => q.id !== query.id)"
                     />
                     <div v-if="queries.length === 0">
                         You have no saved queries yet. Go to <RouterLink :to="{ name: 'query' }">

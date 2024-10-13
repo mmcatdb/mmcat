@@ -4,8 +4,8 @@ import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.evolution.querying.QueryUpdateResult.ErrorType;
-import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
+import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
+import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.evolution.schema.Composite;
 import cz.matfyz.evolution.schema.CreateMorphism;
 import cz.matfyz.evolution.schema.CreateObject;
@@ -13,7 +13,7 @@ import cz.matfyz.evolution.schema.DeleteMorphism;
 import cz.matfyz.evolution.schema.DeleteObject;
 import cz.matfyz.evolution.schema.UpdateMorphism;
 import cz.matfyz.evolution.schema.UpdateObject;
-import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.evolution.schema.SchemaEvolutionVisitor;
 import cz.matfyz.querying.parsing.Filter.ConditionFilter;
 import cz.matfyz.querying.core.QueryContext;
@@ -41,15 +41,15 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
     private SchemaCategory prevCategory;
     private SchemaCategory nextCategory;
-    private List<SchemaCategoryUpdate> updates;
+    private List<SchemaEvolutionAlgorithm> updates;
 
-    public QueryEvolver(SchemaCategory prevCategory, SchemaCategory nextCategory, List<SchemaCategoryUpdate> updates) {
+    public QueryEvolver(SchemaCategory prevCategory, SchemaCategory nextCategory, List<SchemaEvolutionAlgorithm> updates) {
         this.prevCategory = prevCategory;
         this.nextCategory = nextCategory;
         this.updates = updates;
     }
 
-    public QueryUpdateResult run(String prevContent) {
+    public QueryEvolutionResult run(String prevContent) {
         try {
             return innerRun(prevContent);
         }
@@ -67,9 +67,9 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
     private List<ConditionFilter> conditionFilters;
     private List<ValueFilter> valueFilters;
 
-    private List<QueryUpdateError> errors = new ArrayList<>();
+    private List<QueryEvolutionError> errors = new ArrayList<>();
 
-    private QueryUpdateResult innerRun(String prevContent) throws Exception {
+    private QueryEvolutionResult innerRun(String prevContent) throws Exception {
         query = QueryParser.parse(prevContent);
         selectTermTrees = new ArrayList<>(query.select.originalTermTrees);
         whereTermTrees = new ArrayList<>(query.where.originalTermTrees);
@@ -99,7 +99,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
         final String newContent = QueryParser.write(updatedQuery);
 
-        return new QueryUpdateResult(newContent, errors);
+        return new QueryEvolutionResult(newContent, errors);
     }
 
     @Override public Void visit(Composite operation) {
@@ -136,7 +136,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
             .filter(Objects::nonNull)
             .toList();
 
-        errors.add(new QueryUpdateError(ErrorType.UpdateWarning, "Query was changed because of delete morphism " + operation.morphism().signature(), null));
+        errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete morphism " + operation.morphism().signature(), null));
 
         return null;
     }
@@ -160,7 +160,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
         final boolean isSomethingChanged = !whereDeletor.deleted.isEmpty() || !selectDeletor.deleted.isEmpty();
         if (isSomethingChanged)
-            errors.add(new QueryUpdateError(ErrorType.UpdateWarning, "Query was changed because of delete object " + operation.object().key(), null));
+            errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete object " + operation.object().key(), null));
 
         return null;
     }
@@ -213,12 +213,12 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
     }
 
     @Override public Void visit(UpdateMorphism operation) {
-        errors.add(new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null));
+        errors.add(new QueryEvolutionError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }
 
     @Override public Void visit(UpdateObject operation) {
-        errors.add(new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null));
+        errors.add(new QueryEvolutionError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }
 

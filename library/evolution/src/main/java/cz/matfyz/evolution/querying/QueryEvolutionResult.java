@@ -5,17 +5,17 @@ import java.util.List;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class QueryUpdateResult {
+public class QueryEvolutionResult {
 
     public final String nextContent;
-    public final List<QueryUpdateError> errors;
+    public final List<QueryEvolutionError> errors;
 
-    public QueryUpdateResult(String nextContent, List<QueryUpdateError> errors) {
+    public QueryEvolutionResult(String nextContent, List<QueryEvolutionError> errors) {
         this.nextContent = nextContent;
         this.errors = errors;
     }
 
-    public record QueryUpdateError(
+    public record QueryEvolutionError(
         ErrorType type,
         String message,
         @Nullable Serializable data

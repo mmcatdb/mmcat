@@ -1,8 +1,9 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.mapping.MappingUpdate;
+import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.MappingRepository;
@@ -36,13 +37,25 @@ public class MappingController {
         return repository.findAll(logicalModelId);
     }
 
+    public record MappingInfo(
+        Id id,
+        String kindName,
+        Version version
+    ) implements IEntity {
+
+        public static MappingInfo fromWrapper(MappingWrapper wrapper) {
+            return new MappingInfo(wrapper.id(), wrapper.kindName, wrapper.version());
+        }
+
+    }
+
     @PostMapping("/mappings")
-    public MappingInfo createNewMapping(@RequestBody MappingInit newMapping) {
-        return service.createNew(newMapping);
+    public MappingInfo createMapping(@RequestBody MappingInit newMapping) {
+        return MappingInfo.fromWrapper(service.create(newMapping));
     }
 
     @PostMapping("/mappings/{id}/update")
-    public MappingWrapper updateCategoryWrapper(@RequestBody MappingUpdate update) {
+    public MappingWrapper updateMapping(@RequestBody MappingUpdate update) {
         // TOOD
         throw new UnsupportedOperationException();
     }

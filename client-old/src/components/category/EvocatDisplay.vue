@@ -25,7 +25,7 @@ const fetching = ref(true);
 const emit = defineEmits([ 'evocatCreated' ]);
 
 onMounted(async () => {
-    const schemaCategoryResult = await API.schemas.getCategoryWrapper({ id: categoryId });
+    const schemaCategoryResult = await API.schemas.getCategory({ id: categoryId });
     const schemaUpdatesResult = await API.schemas.getCategoryUpdates({ id: categoryId });
     const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
     fetching.value = false;
@@ -53,7 +53,7 @@ const info = useSchemaCategoryInfo();
 
 async function updateFunction(update: SchemaUpdateInit, models: LogicalModel[]) {
     fetching.value = true;
-    const result = await API.schemas.updateCategoryWrapper({ id: categoryId }, update);
+    const result = await API.schemas.updateCategory({ id: categoryId }, update);
     fetching.value = false;
 
     if (!result.status) {

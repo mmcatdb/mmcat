@@ -55,13 +55,13 @@ public class DatasourceWrapper extends Entity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static DatasourceWrapper fromJsonValue(Id id, String jsonValueString) throws JsonProcessingException {
-        final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
+    public static DatasourceWrapper fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
+        final JsonValue json = jsonValueReader.readValue(jsonValue);
         return new DatasourceWrapper(
             id,
-            jsonValue.label(),
-            jsonValue.type(),
-            jsonValue.settings()
+            json.label(),
+            json.type(),
+            json.settings()
         );
     }
 
