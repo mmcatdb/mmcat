@@ -13,7 +13,7 @@ A key component of this integration is the creation of a new **Schema Conversion
 
 Furthermore, the integration was enhanced by **Inference Editor** which enables real live editing of the inferred Schema Category.
 
-And finally, the addition of the inference functionality showed the need for an improved version of the Mapping Editor.
+And finally, the addition of the inference functionality showed the need for an improved version of the **Mapping Editor**.
 
 Through this integration, users are now able to infer and adjust a Schema Category from any input data stored in a single-model format. 
 
@@ -55,13 +55,13 @@ The wrapper class for inferred Schema Category editing. Created with a list of i
 
 The current version enables the user to work with multiple nodes at once. Furthermore, it offers context menu as well as keyboard shortcuts for smooth and quick work flow.
 
+![Mapping Editor](/img/mapping-editor.png)
+
 
 Notes:
-- maybe also describe the AccessTreeNode class
 - this can happen as many times as user requests (the inference editing, also we have undo/redo)
 - seq diagram could be more complex (for example if I were to add the layout logic as well)
 - in seq diagrams I dont show mapping (mapping creation, mapping editing in inference editor, mapping editor)
-- add some pics of the mapping editor
 
 [^article]: Koupil, P., Hricko, S., & Holubová, I. Mm-infer: A tool for inference of multi-model
 schemas. (2022). https://doi.org/10.48786/EDBT.2022.52
