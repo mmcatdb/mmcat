@@ -1,7 +1,9 @@
 import { useRouteError } from 'react-router-dom';
 import { CommonPage } from '@/components/CommonPage';
 import { usePreferences } from '@/components/PreferencesProvider';
+import { Spinner } from '@nextui-org/react';
 import clsx from 'clsx';
+import { useEffect } from 'react';
 
 export function ErrorPage() {
     const error = useRouteError();
@@ -19,7 +21,11 @@ export function ErrorPage() {
 
 export function LoadingPage() {
     return (
-        <LoadingComponent className='w-screen h-screen text-foreground bg-background' />
+        <CommonPage>
+            <div>
+                <Spinner />
+            </div>
+        </CommonPage>
     );
 }
 

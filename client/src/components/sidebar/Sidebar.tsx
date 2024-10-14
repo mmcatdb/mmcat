@@ -70,7 +70,7 @@ function Sidebar() {
                     <XMarkIcon className='w-6 h-6 text-zinc-500' />
                 </button>
 
-                <h1 className='text-2xl font-semibold mb-10'>MM-cat</h1>
+                <h1 className='text-xl font-semibold mb-10'>MM-cat</h1>
 
                 <div className='flex flex-col'>
                     {sidebarItems.map((item) => {
@@ -86,7 +86,7 @@ function Sidebar() {
                                 key={item.route}
                                 to={item.route}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className={`flex items-center px-4 py-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-900 transition duration-200 ${
+                                className={`flex items-center px-2 py-1.5 rounded hover:bg-zinc-100 dark:hover:bg-zinc-900 transition duration-200 ${
                                     isActive ? 'text-blue-600 font-semibold' : ''
                                 }`}
                             >

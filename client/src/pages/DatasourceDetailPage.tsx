@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
-import { ErrorPage, LoadingPage } from '@/pages/errorPages';
+import { ErrorPage } from '@/pages/errorPages';
 import { CommonPage } from '@/components/CommonPage';
-import { Breadcrumbs, BreadcrumbItem } from '@nextui-org/react';
+import { Breadcrumbs, BreadcrumbItem, Spinner } from '@nextui-org/react';
 
 export const DatasourceDetailPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -41,9 +41,7 @@ export const DatasourceDetailPage = () => {
         fetchDatasource();
     }, [ id ]);
 
-    if (loading) 
-        return <LoadingPage />;
-    if (error || !datasource) 
+    if (error ?? (!datasource && !loading)) 
         return <ErrorPage />;
 
     return (
@@ -61,11 +59,19 @@ export const DatasourceDetailPage = () => {
                     Detail
                 </BreadcrumbItem>
             </Breadcrumbs>
-            <div>
-                <h1 className='heading-main my-5'>{datasource.label}</h1>
-                <p className='mb-5'>Type: {datasource.type}</p>
-                <pre>{JSON.stringify(datasource.settings, null, 2)}</pre>
-                <pre>{JSON.stringify(datasource.configuration, null, 2)}</pre>
+            <div className='mt-5'>
+                {loading ? (
+                    <div>
+                        <Spinner />
+                    </div>
+                ) : (
+                    <div>
+                        <h1 className='heading-main my-5'>{datasource?.label}</h1>
+                        <p className='mb-5'>Type: {datasource?.type}</p>
+                        <pre>{JSON.stringify(datasource?.settings, null, 2)}</pre>
+                        <pre className='text-zinc-400'>{JSON.stringify(datasource?.configuration, null, 2)}</pre>
+                    </div>
+                )}
             </div>
         </CommonPage>
     );

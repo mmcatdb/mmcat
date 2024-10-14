@@ -85,6 +85,7 @@ export const DatasourceModal = ({ onDatasourceCreated }: DatasourceModalProps) =
                 onOpenChange={onOpenChange}
                 isDismissable={false}
                 isKeyboardDismissDisabled={true}
+                hideCloseButton
             >
                 {/* TODO: Dark mode not working */}
                 <ModalContent>
