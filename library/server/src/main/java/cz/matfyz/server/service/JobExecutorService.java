@@ -7,6 +7,7 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataSerializer;
@@ -31,6 +32,7 @@ import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.InstanceCategoryWrapper;
 import cz.matfyz.server.entity.Query;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
@@ -183,7 +185,12 @@ public class JobExecutorService {
         final List<MappingWrapper> mappingWrappers = mappingRepository.findAll(payload.logicalModelId());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceRepository.find(run.sessionId).toInstanceCategory(schema);
+        final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
+
+        InstanceCategory instance = instanceWrapper != null
+            ? instanceWrapper.toInstanceCategory(schema)
+            : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+
         //System.out.println("jobexecutor: " + instance.objects());
         //System.out.println("print if non empty");
         System.out.println("instance before");
@@ -209,7 +216,11 @@ public class JobExecutorService {
             throw SessionException.notFound(job.id());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceRepository.find(run.sessionId).toInstanceCategory(schema);
+        final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
+
+        final InstanceCategory instance = instanceWrapper != null
+            ? instanceWrapper.toInstanceCategory(schema)
+            : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
         final DatasourceWrapper datasource = logicalModelRepository.find(payload.logicalModelId()).datasource();
         final List<Mapping> mappings = mappingRepository.findAll(payload.logicalModelId()).stream()
