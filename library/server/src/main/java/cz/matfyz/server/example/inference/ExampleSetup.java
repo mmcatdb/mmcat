@@ -32,27 +32,14 @@ public class ExampleSetup {
     public SchemaCategoryWrapper setup() {
         final DatasourceWrapper datasource = datasourceSetup.createDatasource();
 
-        // create empty SK
         final SchemaCategoryWrapper schemaCategory = createEmptySchemaCategory();
 
         RSDToCategoryPayload inferencePayload = new RSDToCategoryPayload(datasource.id());
 
         Action inferenceAction = createAndSaveAction(inferencePayload, schemaCategory.id(), "inference");
 
-        // create (and run) the inference job
         createAndSaveJob(inferencePayload, schemaCategory.id(), inferenceAction.id(), "inference job");
 
-        // TODO: for the other parts of data generation (mct and ctm) create actions, and let the user run them themselves
-        /*
-        List<DatasourceWrapper> datasources = datasourceSetup.createDatasourceForMapping();
-
-        ModelToCategoryPayload mtcPayload = new ModelToCategoryPayload(null); // insert logical model Id
-        Action mtcAction = createAndSaveAction(mtcPayload, schemaCategory.id(), "create instance category");
-
-        CategoryToModelPayload ctmPayload = new CategoryToModelPayload(null); // insert logical model Id
-        Action ctmAction = createAndSaveAction(ctmPayload, schemaCategory.id(), "generate mm data");
-        */
-        // this has been added after, because the compiler was complaining in IndexController, that all cases need to return SchemaCategoryWrapper
         return schemaCategory;
     }
 

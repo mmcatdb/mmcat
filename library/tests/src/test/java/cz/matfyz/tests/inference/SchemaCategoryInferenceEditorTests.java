@@ -356,20 +356,6 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
-        /*
-        MappingBuilder builder = new MappingBuilder();
-
-        List<AccessPath> subpaths = new ArrayList<>();
-        subpaths.add(builder.simple("c", Signature.createBase(6)));
-        subpaths.add(builder.simple("b", Signature.createBase(5)));
-
-        ComplexProperty complexProperty = builder.complex("app", Signature.createBase(0), subpaths.toArray(new AccessPath[0]));
-
-        Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
-        System.out.println(mapping.accessPath());
-*/
-        //List<Mapping> mappings = new ArrayList<>();
-        //mappings.add(mapping);
         List<PatternSegment> pattern = new ArrayList<>();
         pattern.add(new PatternSegment("A", "->"));
         pattern.add(new PatternSegment("B", "->"));
@@ -377,12 +363,6 @@ class SchemaCategoryInferenceEditorTests {
 
         final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
-
-        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
-/*
-        System.out.println();
-        System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());*/
     }
 
     /**

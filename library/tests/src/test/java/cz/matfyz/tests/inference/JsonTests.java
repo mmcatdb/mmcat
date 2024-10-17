@@ -44,8 +44,6 @@ class JsonTests {
         }
     }
 
-    //TODO: Add tests for local url - testing both a single file and a whole folder
-
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
         URL url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
@@ -89,7 +87,7 @@ class JsonTests {
         assertEquals(1, documents.count(), "There should be one document");
     }
 
-    @Test // TODO: handle malformed files better
+    @Test
     void testLoadDocumentsWithMalformedJson() throws Exception {
         String malformedJson = "{\"key\":\"value\"}\n{\"malformedJson\"";
         JsonSettings settings = new JsonSettings("", false, false);

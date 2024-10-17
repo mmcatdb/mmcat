@@ -30,7 +30,6 @@ function createMapping() {
 }
 
 const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(logicalModel.value.datasource.type));
-console.log('isForFile: ', isForFile.value);
 
 
 </script>
