@@ -81,7 +81,7 @@ public class ActionController {
         return new ActionDetail(action, actionPayloadToDetail(action.payload));
     }
 
-    // TODO extremely unefficient - load all models and data sources at once.
+    // TODO extremely unefficient - load all models and datasources at once.
     // TODO switch to pattern matching when available.
     ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
         if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {

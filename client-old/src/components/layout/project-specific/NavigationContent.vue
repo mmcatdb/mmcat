@@ -20,7 +20,7 @@ function defineLink(pathName: string, label: string): Link {
 const links = [
     defineLink('schemaCategory', 'Schema Category'),
     defineLink('logicalModels', 'Logical Models'),
-    defineLink('datasourcesInCategory', 'Data sources'),
+    defineLink('datasourcesInCategory', 'Datasources'),
     defineLink('actions', 'Actions'),
     defineLink('jobs', 'Jobs'),
     defineLink('instanceCategory', 'Instance Category'),

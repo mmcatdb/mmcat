@@ -42,7 +42,7 @@ function edit(id: Id) {
 
 <template>
     <div>
-        <h1>Data Sources in category</h1>
+        <h1>Datasources in category</h1>
         <div class="d-flex flex-wrap mt-3">
             <div
                 v-for="datasource in datasourcesInCategory"
@@ -64,7 +64,7 @@ function edit(id: Id) {
                 </button>
             </div>
         </template>
-        <h1>Other data sources</h1>
+        <h1>Other datasources</h1>
         <div class="d-flex flex-wrap mt-3">
             <div
                 v-for="datasource in datasourcesOther"

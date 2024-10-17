@@ -2,7 +2,9 @@ import type { Graph } from '@/types/categoryGraph';
 import type { Evocat } from '@/types/evocat/Evocat';
 import type { Id } from '@/types/id';
 import type { SchemaCategoryInfo } from '@/types/schema';
+import type { Workflow } from '@/types/workflow';
 import { inject, type InjectionKey, type Ref, type ShallowRef } from 'vue';
+import { useRoute } from 'vue-router';
 
 export const categoryIdKey: InjectionKey<Ref<Id>> = Symbol('categoryId');
 
@@ -37,4 +39,19 @@ export function useEvocat(): EvocatContext {
         throw new Error('Evocat not injected.');
 
     return evocatContext;
+}
+
+export const workflowKey: InjectionKey<Ref<Workflow | undefined>> = Symbol('workflow');
+
+export function useWorkflow(): Ref<Workflow | undefined> {
+    const workflow = inject(workflowKey);
+    if (workflow === undefined)
+        throw new Error('Workflow not injected.');
+
+    return workflow;
+}
+
+export function useWorkflowId(): Id | undefined{
+    const route = useRoute();
+    return (route.query.workflowId ?? undefined) as Id | undefined;
 }

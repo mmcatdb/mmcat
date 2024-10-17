@@ -4,10 +4,12 @@ import VersionDisplay from '@/components/VersionDisplay.vue';
 import type { Id } from '@/types/id';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
-import { categoryIdKey, categoryInfoKey } from '@/utils/injects';
+import { categoryIdKey, categoryInfoKey, useWorkflowId, workflowKey } from '@/utils/injects';
 import { onMounted, provide, ref, shallowRef, type Ref } from 'vue';
-import { RouterView, useRouter } from 'vue-router';
+import { type RouteLocationRaw, RouterView, useRouter } from 'vue-router';
 import SessionSelect from '@/components/SessionSelect.vue';
+import type { Workflow } from '@/types/workflow';
+import WorkflowNavigationContent from '@/components/layout/project-specific/WorkflowNavigationContent.vue';
 
 const props = defineProps<{
     categoryId: Id;
@@ -16,10 +18,32 @@ const props = defineProps<{
 provide(categoryIdKey, ref(props.categoryId));
 
 const schemaCategoryInfo = shallowRef<SchemaCategoryInfo>();
-
 provide(categoryInfoKey, schemaCategoryInfo as Ref<SchemaCategoryInfo>);
 
+const workflow = shallowRef<Workflow>();
+provide(workflowKey, workflow);
+
 const router = useRouter();
+
+const workflowId = useWorkflowId();
+
+function getInitialWorkflowRoute(workflow: Workflow): RouteLocationRaw {
+    switch (workflow.data.type) {
+    case 'inference':
+        if (workflow.data.jobId) {
+            return {
+                name: 'job',
+                params: { id: workflow.data.jobId },
+                query: { workflowId: workflow.id },
+            };
+        }
+
+        return {
+            name: 'logicalModels',
+            query: { workflowId: workflow.id },
+        };
+    }
+}
 
 onMounted(async () => {
     const result = await API.schemas.getCategoryInfo({ id: props.categoryId });
@@ -28,6 +52,17 @@ onMounted(async () => {
         return;
     }
 
+    if (workflowId) {
+        const workflowResult = await API.workflows.getWorkflow({ id: workflowId });
+        if (!workflowResult.status) {
+            router.push({ name: 'notFound' });
+            return;
+        }
+
+        workflow.value = workflowResult.data;
+        router.push(getInitialWorkflowRoute(workflowResult.data));
+    }
+    
     schemaCategoryInfo.value = SchemaCategoryInfo.fromServer(result.data);
 });
 </script>
@@ -48,7 +83,13 @@ onMounted(async () => {
             </div>
         </Teleport>
         <Teleport to="#app-left-bar-content">
-            <NavigationContent />
+            <template v-if="workflow">
+                <WorkflowNavigationContent />
+                <button class="mt-4">
+                    Continue
+                </button>
+            </template>
+            <NavigationContent v-else />
         </Teleport>
     </template>
 </template>

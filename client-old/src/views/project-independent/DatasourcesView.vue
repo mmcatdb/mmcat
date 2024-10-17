@@ -26,7 +26,7 @@ function createNew() {
 
 <template>
     <div>
-        <h1>Data Sources</h1>
+        <h1>Datasources</h1>
         <div class="d-flex flex-wrap mt-3">
             <div
                 v-for="datasource in datasources"

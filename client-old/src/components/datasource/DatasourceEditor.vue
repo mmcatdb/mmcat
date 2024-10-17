@@ -108,7 +108,7 @@ async function deleteMethod() {
 
 <template>
     <div class="editor">
-        <h2>{{ isNew ? 'Add' : 'Edit' }} Data Source</h2>
+        <h2>{{ isNew ? 'Add' : 'Edit' }} Datasource</h2>
         <ValueContainer>
             <ValueRow label="Type:">
                 <select

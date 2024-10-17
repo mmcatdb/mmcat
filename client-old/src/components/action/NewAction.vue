@@ -95,7 +95,7 @@ async function createAction() {
             </ValueRow>
             <ValueRow
                 v-if="actionType === ActionType.RSDToCategory"
-                label="Data source:"
+                label="Datasource:"
             >
                 <select v-model="datasourceId">
                     <option

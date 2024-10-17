@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS workflow;
+
 DROP TABLE IF EXISTS job;
 DROP TABLE IF EXISTS run;
 DROP TABLE IF EXISTS session;
@@ -121,3 +123,12 @@ CREATE TABLE job (
     json_value JSONB NOT NULL
 );
 
+-- Workflow
+
+CREATE TABLE workflow (
+    id UUID PRIMARY KEY,
+    category_id UUID NOT NULL REFERENCES schema_category,
+    label VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    json_value JSONB NOT NULL
+);

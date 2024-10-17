@@ -55,7 +55,7 @@ async function deleteAction() {
             </ValueRow>
             <ValueRow
                 v-if="action.payload.type === ActionType.RSDToCategory "
-                label="Data source:"
+                label="Datasource:"
             >
                 <RouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id }, query: { categoryId: action.categoryId } }">
                     {{ action.payload.datasource.label }}

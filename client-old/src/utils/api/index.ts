@@ -7,6 +7,7 @@ import mappings from './routes/mappings';
 import models from './routes/models';
 import queries from './routes/queries';
 import schemas from './routes/schemas';
+import workflows from './routes/workflows';
 
 const API = {
     actions,
@@ -18,6 +19,7 @@ const API = {
     models,
     queries,
     schemas,
+    workflows,
 };
 
 export default API;

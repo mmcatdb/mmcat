@@ -3,13 +3,13 @@ package cz.matfyz.abstractwrappers.datasource;
 import cz.matfyz.core.mapping.Mapping;
 
 /**
- * This class represents a kind in a data source. It's identified by the datasourceId and mapping (more precisely, by the name of the collection, i.e., kindName).
+ * This class represents a kind in a datasource. It's identified by the datasourceId and mapping (more precisely, by the name of the collection, i.e., kindName).
  */
 public class Kind implements Comparable<Kind> {
 
     public final Datasource datasource;
     /**
-     * There has to be at most one mapping for each kind name in a given data source.
+     * There has to be at most one mapping for each kind name in a given datasource.
      * If not, many algorithms will broke.
      *
      * E.g., there is an algorithm for determining which kinds to join for a query. If we allowed multiple mappings for a single kind, we would have to use some other identifier (e.g., ID) to distinguish between them. However, the algorithm might then decide to join different mappings (i.e., with different IDs) for the same kind (one kindName). In that case, the joining would be much more complicated, because we can't join a kind with itself. We would need to merge the mappings of the kind together.

@@ -175,34 +175,4 @@ public class JobRepository {
         });
     }
 
-    public String findInstanceCategoryJson(Id sessionId) {
-        return db.get((connection, output) -> {
-            final var statement = connection.prepareStatement("""
-                SELECT
-                    instance_data
-                FROM session
-                WHERE id = ?;
-                """);
-            setId(statement, 1, sessionId);
-            final var resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                output.set(resultSet.getString("instance_data"));
-            }
-        });
-    }
-
-    public void saveInstanceCategoryJson(Id sessionId, String json) {
-        db.run(connection -> {
-            final var statement = connection.prepareStatement("""
-                UPDATE session
-                SET instance_data = ?
-                WHERE id = ?;
-                """);
-            statement.setString(1, json);
-            setId(statement, 2, sessionId);
-            executeChecked(statement);
-        });
-    }
-
 }

@@ -60,7 +60,7 @@ function cancel() {
 <template>
     <div>
         <template v-if="isNew">
-            <h1>Create new data source</h1>
+            <h1>Create new datasource</h1>
             <div class="d-flex mt-3">
                 <DatasourceEditor
                     @save="save"
@@ -69,7 +69,7 @@ function cancel() {
             </div>
         </template>
         <template v-else>
-            <h1>Data Source</h1>
+            <h1>Datasource</h1>
             <div
                 v-if="datasource"
                 class="d-flex mt-3"

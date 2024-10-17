@@ -5,8 +5,8 @@ import API from '@/utils/api';
 
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
-import { useRouter } from 'vue-router';
-import { useSchemaCategoryId } from '@/utils/injects';
+import { RouterLink, useRouter } from 'vue-router';
+import { useSchemaCategoryId, useWorkflowId } from '@/utils/injects';
 
 const infos = ref<LogicalModelInfo[]>();
 
@@ -23,8 +23,10 @@ async function fetchModels() {
 }
 
 const router = useRouter();
+const workflowId = useWorkflowId();
+
 function createNew() {
-    router.push({ name: 'newLogicalModel' });
+    router.push({ name: 'newLogicalModel', query: { workflowId } });
 }
 </script>
 
