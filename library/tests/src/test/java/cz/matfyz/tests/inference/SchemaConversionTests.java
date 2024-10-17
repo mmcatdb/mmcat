@@ -173,32 +173,4 @@ public class SchemaConversionTests {
         return count;
     }
 
-    // TODO: try a different folder, this one has no candidates
-    @Test
-    void testMultipleRSDToSchemaCategoryAndMapping() throws Exception {
-        @SuppressWarnings("deprecation")
-        final var url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
-        final var csvProvider = new CsvProvider(settings);
-
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
-
-        final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper)
-            .run();
-
-        final List<CategoryMappingPair> pairs = inferenceResult.pairs();
-
-        final var pair = CategoryMappingPair.merge(pairs);
-        final SchemaCategory schema = pair.schema();
-        final Mapping mapping = pair.mappings().get(0);
-
-        System.out.println(schema.allObjects());
-
-        //assertEquals(22, schema.allObjects().size(), "There should be 10 Schema Objects.");
-        //assertEquals(21, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
-
-        //assertEquals(3, countComplexProperties(mapping), "There should be 3 complex properties");
-    }
-
 }

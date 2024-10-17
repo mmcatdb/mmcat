@@ -33,14 +33,28 @@ export class Graph {
 
     public getSignature(node: Node, parentNode: Node): SequenceSignature {
         const edge = Array.from(this.edges.values())
-            .find(edge => edge.domainNode.equals(parentNode) && edge.codomainNode.equals(node));
+            .find(edge => 
+                ((edge.domainNode.equals(parentNode) && edge.codomainNode.equals(node)) ||
+                (edge.domainNode.equals(node) && edge.codomainNode.equals(parentNode))),
+            );
     
         if (!edge) {
             console.warn(`No edge found between parent ${parentNode.schemaObject.key.value} and node ${node.schemaObject.key.value}`);
-            return SequenceSignature.empty(node); // Return empty sequence as fallback
+            return SequenceSignature.empty(node);
         }   
-        return SequenceSignature.fromSignature(edge.schemaMorphism.signature, parentNode);
-    }  
+
+        if (edge.domainNode.equals(node))
+            return SequenceSignature.fromSignature(edge.schemaMorphism.signature.dual(), parentNode);
+        else
+            return SequenceSignature.fromSignature(edge.schemaMorphism.signature, parentNode);
+    }      
+
+    public getEdges(node: Node): Edge[] {
+        return Array.from(this.edges.values())
+            .filter(edge => 
+                edge.domainNode.equals(node) || edge.codomainNode.equals(node)
+            );
+    }    
 
     public getParentNode(node: Node): Node | undefined {
         const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));

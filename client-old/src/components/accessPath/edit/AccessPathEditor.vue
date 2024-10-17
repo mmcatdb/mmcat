@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { GraphComplexProperty, GraphSimpleProperty, GraphRootProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
-import { SelectionType, type Node } from '@/types/categoryGraph';
+import { SelectionType, type Node, type Edge } from '@/types/categoryGraph';
 import { shallowRef, ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { Datasource } from '@/types/datasource';
@@ -182,13 +182,16 @@ function insertRequested(node: Node) {
  */
 function insert(node: Node): boolean {
     const children = graph.getChildrenForNode(node);
-    const parentNode = graph.getParentNode(node);
     const label = node.metadata.label.toLowerCase();
-    let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : undefined;
+    //let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : undefined;
+    // assume we the new property is connected to the root (parentProperty)
+    const edges = graph.getEdges(node);
+    const parentProperty = findMatchingProperty(edges, localRootProperty.value);
 
-    if (!parentProperty || !parentNode) return false;
+    //if (!parentProperty || !parentNode) return false;
+    if (!parentProperty) return false;
 
-    const signature = graph.getSignature(node, parentNode);
+    const signature = graph.getSignature(node, parentProperty.node);
 
     let subpath: GraphChildProperty;
     if (children.length === 0)
@@ -197,8 +200,50 @@ function insert(node: Node): boolean {
         subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
 
     parentProperty.updateOrAddSubpath(subpath);
-    localRootProperty.value = parentProperty as GraphRootProperty;
+    //localRootProperty.value = parentProperty as GraphRootProperty;
     return true;
+}
+
+function findMatchingProperty(edges: Edge[], property: GraphRootProperty): GraphParentProperty | undefined {
+    for (const edge of edges) {
+        if (property.containsNode(edge.domainNode)) 
+            return findPropertyForNode(property, edge.domainNode);        
+
+        if (property.containsNode(edge.codomainNode)) 
+            return findPropertyForNode(property, edge.codomainNode);        
+    }
+
+    return undefined;
+}
+
+function findPropertyForNode(property: GraphRootProperty, node: Node): GraphParentProperty | undefined {
+    if (property.node.equals(node)) 
+        return property;
+    
+    for (const subpath of property.subpaths) {
+        if (subpath instanceof GraphComplexProperty || subpath instanceof GraphRootProperty) {
+            const result = findPropertyInSubpaths(subpath, node);
+            if (result) return result;
+        }
+    }
+
+    return undefined;
+}
+
+function findPropertyInSubpaths(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
+    if (property.node.equals(node)) 
+        return property;    
+
+    if (property instanceof GraphComplexProperty) {
+        for (const subpath of property.subpaths) {
+            if (subpath instanceof GraphComplexProperty || subpath instanceof GraphRootProperty) {
+                const result = findPropertyInSubpaths(subpath, node);
+                if (result) return result;
+            }
+        }
+    }
+
+    return undefined;
 }
 
 /**
@@ -237,7 +282,7 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
 }
 
 function insertBetweenClicked() {
-    console.log('Inserting betweenxx');
+    console.log('Inserting between');
 }
 
 /**

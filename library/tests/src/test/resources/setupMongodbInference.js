@@ -8,13 +8,12 @@ db.business.insertMany([
         city: "Affton",
         state: "MO",
         postal_code: "63123",
-        latitude: 38.551126,
-        longitude: -90.335695,
         stars: 3.0,
         review_count: 15,
         is_open: 1,
         attributes: {
             BusinessAcceptsCreditCards: "True",
+            HasTV: "False",
         },
         categories: "Shipping Centers, Local Services, Notaries, Mailbox Centers, Printing Services",
         hours: {
@@ -33,13 +32,12 @@ db.business.insertMany([
         city: "Philadelphia",
         state: "PA",
         postal_code: "19107",
-        latitude: 39.9555052,
-        longitude: -75.1555641,
         stars: 4.0,
         review_count: 80,
         is_open: 1,
         attributes: {
             BusinessAcceptsCreditCards: "False",
+            HasTV: "True",
         },
         categories: "Restaurants, Food, Bubble Tea, Coffee & Tea, Bakeries",
         hours: {
