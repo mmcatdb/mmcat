@@ -26,7 +26,6 @@ import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

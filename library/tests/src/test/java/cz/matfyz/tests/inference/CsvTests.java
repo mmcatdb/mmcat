@@ -44,8 +44,6 @@ class CsvTests {
         }
     }
 
-    //TODO: Add tests for local url - testing both a single file and a whole folder
-
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
         URL url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv"); // the file includes comma as a delimiter

@@ -188,7 +188,6 @@ function insert(node: Node): boolean {
     const edges = graph.getEdges(node);
     const parentProperty = findMatchingProperty(edges, localRootProperty.value);
 
-    //if (!parentProperty || !parentNode) return false;
     if (!parentProperty) return false;
 
     const signature = graph.getSignature(node, parentProperty.node);
@@ -200,7 +199,6 @@ function insert(node: Node): boolean {
         subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
 
     parentProperty.updateOrAddSubpath(subpath);
-    //localRootProperty.value = parentProperty as GraphRootProperty;
     return true;
 }
 

@@ -191,8 +191,6 @@ public class JobExecutorService {
             ? instanceWrapper.toInstanceCategory(schema)
             : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
-        //System.out.println("jobexecutor: " + instance.objects());
-        //System.out.println("print if non empty");
         System.out.println("instance before");
         System.out.println(instance);
 

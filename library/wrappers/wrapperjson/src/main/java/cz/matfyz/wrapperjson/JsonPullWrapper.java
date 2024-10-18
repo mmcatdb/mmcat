@@ -18,7 +18,9 @@ import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -53,11 +55,19 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      */
     @Override
     public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+        System.out.println("change propagated");
         final var forest = new ForestOfRecords();
 
-        try (InputStream inputStream = provider.getInputStream(path.name().toString())) {
-            processJsonStream(inputStream, forest, path);
-        } catch (IOException e) {
+        try {
+            List<String> fileNames = provider.getJsonFileNames();
+            for (String fileName : fileNames) {
+                try (InputStream inputStream = provider.getInputStream(fileName)) {
+                    processJsonStream(inputStream, forest, path);
+                } catch (IOException e) {
+                    System.err.println("Error processing file: " + fileName + " - " + e.getMessage());
+                }
+            }
+        } catch (IOException | URISyntaxException e) {
             throw PullForestException.innerException(e);
         }
 
