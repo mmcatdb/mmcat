@@ -4,26 +4,34 @@ export type Workflow = {
     id: Id;
     categoryId: Id;
     label: string;
-    state: WorkflowState;
+    jobId?: Id;
     data: WorkflowData;
 };
 
-export enum WorkflowState {
-    Running = 'Running',
-    Finished = 'Finished',
-    Canceled = 'Canceled',
-    Failed = 'Failed',
-}
-
 export type WorkflowType = 'inference';
-
-export type WorkflowData = {
-    type: 'inference';
-    datasourceIds?: Id[];
-    jobId?: Id;
-};
 
 export type WorkflowInit = {
     label: string;
     type: WorkflowType;
 };
+
+export type WorkflowData = {
+    type: 'inference';
+    step: InferenceWorkflowStep;
+    inputDatasource?: Id;
+    allDatasources?: Id[];
+    inferenceJob?: Id;
+    datasourceIds?: Id[];
+    // Mappings are already accessible via the category.
+    mtcJobs?: Id[];
+};
+
+export type InferenceWorkflowStep = typeof inferenceWorkflowSteps[number];
+export const inferenceWorkflowSteps = [
+    'addDatasources',
+    'editCategory',
+    'addMappings',
+    'setOutput',
+    'finish',
+];
+

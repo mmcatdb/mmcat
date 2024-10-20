@@ -129,6 +129,6 @@ CREATE TABLE workflow (
     id UUID PRIMARY KEY,
     category_id UUID NOT NULL REFERENCES schema_category,
     label VARCHAR(255) NOT NULL,
-    state VARCHAR(255) NOT NULL,
+    job_id UUID REFERENCES job,
     json_value JSONB NOT NULL
 );

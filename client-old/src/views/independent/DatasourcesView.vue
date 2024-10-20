@@ -4,7 +4,7 @@ import API from '@/utils/api';
 import { Datasource } from '@/types/datasource';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
-import { useRouter } from 'vue-router';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 const datasources = ref<Datasource[]>();
 
@@ -17,7 +17,7 @@ async function fetchDatasources() {
     return true;
 }
 
-const router = useRouter();
+const router = useFixedRouter();
 
 function createNew() {
     router.push({ name: 'datasource', params: { id: 'new' } });

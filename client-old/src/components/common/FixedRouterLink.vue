@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Id } from '@/types/id';
+import { fixRouterName, type ViewType } from '@/router/specificRoutes';
 import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router';
 
 function compareRoutes(to: RouteLocationRaw, route: RouteLocationNormalizedLoaded): boolean {
@@ -12,33 +12,23 @@ function compareRoutes(to: RouteLocationRaw, route: RouteLocationNormalizedLoade
     else return false;
 }
 
-function addWorkflowId(to: RouteLocationRaw, route: RouteLocationNormalizedLoaded): RouteLocationRaw {
-    if (workflowId === undefined || typeof to === 'string')
-        return to;
-
-    return {
-        ...to,
-        query: {
-            ...to.query,
-            workflowId,
-        },
-    };
-}
 /**
  * This component looks like a normal link except for the situation when we are on the exact page the link directs to. Then only a plain content without any link is rendered.
  */
-const props = defineProps<{ to: RouteLocationRaw }>();
+const props = defineProps<{
+    to: RouteLocationRaw;
+    view?: ViewType;
+    alwaysLink?: boolean;
+}>();
 
 const route = useRoute();
-
-
-const workflowId = (route.query.workflowId ?? undefined) as Id | undefined;
+const fixedTo = fixRouterName(props.to, route, props.view);
 </script>
 
 <template>
     <RouterLink
-        v-if="!compareRoutes(props.to, route)"
-        :to="addWorkflowId(props.to, route)"
+        v-if="alwaysLink || !compareRoutes(fixedTo, $route)"
+        :to="fixedTo"
     >
         <slot />
     </RouterLink>

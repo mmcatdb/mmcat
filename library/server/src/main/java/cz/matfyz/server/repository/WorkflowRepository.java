@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.workflow.Workflow;
-import cz.matfyz.server.entity.workflow.Workflow.WorkflowState;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
@@ -27,10 +26,10 @@ public class WorkflowRepository {
         final var id = getId(resultSet, "id");
         final var categoryId = getId(resultSet, "category_id");
         final var label = resultSet.getString("label");
-        final var state = WorkflowState.valueOf(resultSet.getString("state"));
+        final var jobId = getId(resultSet, "job_id");
         final var jsonValue = resultSet.getString("json_value");
 
-        return Workflow.fromJsonValue(id, categoryId, label, state, jsonValue);
+        return Workflow.fromJsonValue(id, categoryId, label, jobId, jsonValue);
     }
 
     public @Nullable Workflow find(Id id) {
@@ -40,7 +39,7 @@ public class WorkflowRepository {
                     id,
                     category_id,
                     label,
-                    state,
+                    job_id,
                     json_value
                 FROM workflow
                 WHERE id = ?;
@@ -60,7 +59,7 @@ public class WorkflowRepository {
                     id,
                     category_id,
                     label,
-                    state,
+                    job_id,
                     json_value
                 FROM workflow
                 ORDER BY id;
@@ -75,18 +74,18 @@ public class WorkflowRepository {
     public void save(Workflow workflow) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO workflow (id, category_id, label, state, json_value)
+                INSERT INTO workflow (id, category_id, label, job_id, json_value)
                 VALUES (?, ?, ?, ?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
                     category_id = EXCLUDED.category_id,
                     label = EXCLUDED.label,
-                    state = EXCLUDED.state,
+                    job_id = EXCLUDED.job_id,
                     json_value = EXCLUDED.json_value;
                 """);
             setId(statement, 1, workflow.id());
             setId(statement, 2, workflow.categoryId);
             statement.setString(3, workflow.label);
-            statement.setString(4, workflow.state.name());
+            setId(statement, 4, workflow.jobId);
             statement.setString(5, workflow.toJsonValue());
             executeChecked(statement);
         });

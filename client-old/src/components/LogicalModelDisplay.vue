@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import {  } from 'vue';
 import type { LogicalModelInfo } from '@/types/logicalModel';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useRoute } from 'vue-router';
@@ -17,9 +16,9 @@ const route = useRoute();
 
 <template>
     <div class="logical-model-display">
-        <CleverRouterLink :to="{ name: 'logicalModel', params: { id: logicalModel.id } }">
+        <FixedRouterLink :to="{ name: 'logicalModel', params: { id: logicalModel.id } }">
             <h2>{{ logicalModel.label }}</h2>
-        </CleverRouterLink>
+        </FixedRouterLink>
         <ValueContainer>
             <ValueRow label="Id:">
                 {{ logicalModel.id }}
@@ -27,9 +26,9 @@ const route = useRoute();
             <ValueRow
                 label="Datasource:"
             >
-                <RouterLink :to="{ name: 'datasource', params: { id: logicalModel.datasource.id }, query: { categoryId: route.params.categoryId } }">
+                <FixedRouterLink :to="{ name: 'datasource', params: { id: logicalModel.datasource.id }, query: { categoryId: route.params.categoryId } }">
                     {{ logicalModel.datasource.label }}
-                </RouterLink>
+                </FixedRouterLink>
             </ValueRow>
         </ValueContainer>
     </div>

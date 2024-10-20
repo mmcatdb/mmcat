@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from 'vue-router';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
+import { useRoute } from 'vue-router';
 
 type Link = {
     pathName: string;
@@ -20,7 +21,7 @@ function defineLink(pathName: string, label: string): Link {
 const links = [
     defineLink('schemaCategory', 'Schema Category'),
     defineLink('logicalModels', 'Logical Models'),
-    defineLink('datasourcesInCategory', 'Datasources'),
+    defineLink('datasources', 'Datasources'),
 ];
 
 const steps = [
@@ -50,13 +51,6 @@ const currentStepIndex = 0;
             />
         </div>
     </div>
-    <!-- <RouterLink
-        v-for="link in links"
-        :key="link.pathName"
-        :to="{ name: link.pathName }"
-    >
-        {{ link.label }}
-    </RouterLink> -->
 </template>
 
 <style scoped>

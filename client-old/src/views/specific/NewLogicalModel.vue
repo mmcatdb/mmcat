@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import API from '@/utils/api';
-import { useRouter } from 'vue-router';
 import { useSchemaCategoryId } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { Datasource } from '@/types/datasource';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 const datasources = ref<Datasource[]>();
 const selectedDatasource = ref<Datasource>();
@@ -18,7 +18,7 @@ onMounted(async () => {
         datasources.value = result.data.map(Datasource.fromServer);
 });
 
-const router = useRouter();
+const router = useFixedRouter();
 
 const categoryId = useSchemaCategoryId();
 

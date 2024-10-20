@@ -6,17 +6,18 @@ import { type Graph } from '@/types/categoryGraph';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '../category/EvocatDisplay.vue';
 import AccessPathLoader from './AccessPathLoader.vue';
 import AccessPathCreator from '@/components/accessPath/AccessPathCreator.vue';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 /**
  * Vue router instances for navigating and accessing route parameters.
  */
 const route = useRoute();
-const router = useRouter();
+const router = useFixedRouter();
 
 /**
  * Stores references for Evocat and graph instances.

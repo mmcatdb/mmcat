@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import API from '@/utils/api';
 import { Action, ActionType } from '@/types/action';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
@@ -43,9 +43,9 @@ async function deleteAction() {
 
 <template>
     <div class="action-display">
-        <CleverRouterLink :to="{ name: 'action', params: { id: action.id } }">
+        <FixedRouterLink :to="{ name: 'action', params: { id: action.id } }">
             <h2>{{ action.label }}</h2>
-        </CleverRouterLink>
+        </FixedRouterLink>
         <ValueContainer>
             <ValueRow label="Id:">
                 {{ action.id }}
@@ -57,17 +57,17 @@ async function deleteAction() {
                 v-if="action.payload.type === ActionType.RSDToCategory "
                 label="Datasource:"
             >
-                <RouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id }, query: { categoryId: action.categoryId } }">
+                <FixedRouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id }, query: { categoryId: action.categoryId } }">
                     {{ action.payload.datasource.label }}
-                </RouterLink>
+                </FixedRouterLink>
             </ValueRow>
             <ValueRow
                 v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
                 label="Logical model:"
             >
-                <RouterLink :to="{ name: 'logicalModel', params: { id: action.payload.logicalModel.id } }">
+                <FixedRouterLink :to="{ name: 'logicalModel', params: { id: action.payload.logicalModel.id } }">
                     {{ action.payload.logicalModel.label }}
-                </RouterLink>
+                </FixedRouterLink>
             </ValueRow>
             <ValueRow
                 v-else-if="action.payload.type === ActionType.UpdateSchema"

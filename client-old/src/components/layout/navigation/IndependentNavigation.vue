@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 
 type Link = {
     pathName: string;
@@ -18,11 +18,12 @@ const links = [
 </script>
 
 <template>
-    <RouterLink
+    <FixedRouterLink
         v-for="link in links"
         :key="link.pathName"
         :to="{ name: link.pathName }"
+        always-link
     >
         {{ link.label }}
-    </RouterLink>
+    </FixedRouterLink>
 </template>

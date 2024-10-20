@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
@@ -107,11 +107,12 @@ async function confirmNewWorkflow() {
                     :key="category.id"
                     class="schema-category-display"
                 >
-                    <CleverRouterLink
+                    <FixedRouterLink
                         :to="{ name: 'schemaCategory', params: { categoryId: category.id } }"
+                        view="category"
                     >
                         <h3>{{ category.label }}</h3>
-                    </CleverRouterLink>
+                    </FixedRouterLink>
                 </div>
             </div>
             <ResourceLoader :loading-function="fetchCategories" />
@@ -163,11 +164,12 @@ async function confirmNewWorkflow() {
                     :key="workflow.id"
                     class="schema-category-display"
                 >
-                    <CleverRouterLink
-                        :to="{ name: 'schemaCategory', params: { categoryId: workflow.categoryId }, query: { workflowId: workflow.id } }"
+                    <FixedRouterLink
+                        :to="{ name: 'schemaCategory', params: { workflowId: workflow.id } }"
+                        view="workflow"
                     >
                         <h3>{{ workflow.label }}</h3>
-                    </CleverRouterLink>
+                    </FixedRouterLink>
                 </div>
             </div>
             <ResourceLoader :loading-function="fetchWorkflows" />

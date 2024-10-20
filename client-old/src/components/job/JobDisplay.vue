@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import API from '@/utils/api';
 import { Job, JobState, type ModelJobData } from '@/types/job';
 import { ActionType } from '@/types/action';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
@@ -98,11 +98,11 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
             </div>
             <div class="col-4 d-flex align-items-center gap-3">
                 <div>
-                    <CleverRouterLink :to="{name: 'job', params: { id: job.id } }">
+                    <FixedRouterLink :to="{name: 'job', params: { id: job.id } }">
                         <div class="fs-6 fw-bold">
                             {{ job.label }}
                         </div>
-                    </CleverRouterLink>
+                    </FixedRouterLink>
                     <div class="text-secondary small">
                         {{ job.id }}
                     </div>
@@ -113,14 +113,14 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
             </div>
             <div class="col-3">
                 <template v-if="job.payload.type === ActionType.RSDToCategory">
-                    <RouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id }, query: { categoryId: job.categoryId } }">
+                    <FixedRouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id }, query: { categoryId: job.categoryId } }">
                         {{ job.payload.datasource.label }}
-                    </RouterLink>
+                    </FixedRouterLink>
                 </template>
                 <template v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
-                    <RouterLink :to="{ name: 'logicalModel', params: { id: job.payload.logicalModel.id } }">
+                    <FixedRouterLink :to="{ name: 'logicalModel', params: { id: job.payload.logicalModel.id } }">
                         {{ job.payload.logicalModel.label }}
-                    </RouterLink>
+                    </FixedRouterLink>
                 </template>
                 <template v-else>
                     <VersionDisplay :version-id="job.payload.prevVersion" /> -> <VersionDisplay :version-id="job.payload.nextVersion" />

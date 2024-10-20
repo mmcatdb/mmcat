@@ -4,9 +4,9 @@ import API from '@/utils/api';
 import { Datasource } from '@/types/datasource';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
-import { useRouter } from 'vue-router';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 const datasourcesInCategory = ref<Datasource[]>();
 const datasourcesOther = ref<Datasource[]>();
@@ -29,7 +29,7 @@ async function fetchDatasources() {
     return true;
 }
 
-const router = useRouter();
+const router = useFixedRouter();
 
 function createNew() {
     router.push({ name: 'datasource', params: { id: 'new' }, query: { categoryId } });

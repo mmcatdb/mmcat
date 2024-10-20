@@ -2,7 +2,6 @@
 import { onMounted, ref, shallowRef } from 'vue';
 import API from '@/utils/api';
 import { SchemaCategory } from '@/types/schema';
-
 import ResourceNotFound from '@/components/common/ResourceNotFound.vue';
 import type { Graph } from '@/types/categoryGraph';
 import { useSchemaCategoryId, useSchemaCategoryInfo } from '@/utils/injects';

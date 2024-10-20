@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Datasource } from '@/types/datasource';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import type { Id } from '@/types/id';
@@ -16,9 +16,9 @@ const emit = defineEmits([ 'edit' ]);
 
 <template>
     <div class="datasource-display">
-        <CleverRouterLink :to="{ name: 'datasource', params: { id: datasource.id }, query: { categoryId } }">
+        <FixedRouterLink :to="{ name: 'datasource', params: { id: datasource.id }, query: { categoryId } }">
             <h2>{{ datasource.label }}</h2>
-        </CleverRouterLink>
+        </FixedRouterLink>
         <ValueContainer>
             <ValueRow label="Id:">
                 {{ datasource.id }}

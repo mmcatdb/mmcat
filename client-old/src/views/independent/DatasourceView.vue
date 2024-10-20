@@ -5,21 +5,17 @@ import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
 import DatasourceEditor from '@/components/datasource/DatasourceEditor.vue';
 import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { toQueryScalar } from '@/utils/router';
+import { useRoute } from 'vue-router';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 const route = useRoute();
-const router = useRouter();
+const router = useFixedRouter();
 
 const rawId = route.params.id as string;
 const isNew = rawId === 'new';
 const id = isNew ? undefined : rawId;
 
 const isEditing = ref(isNew || route.query.state === 'editing');
-const categoryId = toQueryScalar(route.query.categoryId);
-const returnPath = categoryId
-    ? { name: 'datasourcesInCategory', params: { categoryId } }
-    : { name: 'datasources' };
 
 const datasource = ref<Datasource>();
 
@@ -39,7 +35,7 @@ async function fetchDatasource() {
 
 function save(newValue: Datasource) {
     if (shouldReturnToAllDatasourcesAfterEditing) {
-        router.push(returnPath);
+        router.push({ name: 'datasources' });
         return;
     }
 
@@ -49,7 +45,7 @@ function save(newValue: Datasource) {
 
 function cancel() {
     if (shouldReturnToAllDatasourcesAfterEditing) {
-        router.push(returnPath);
+        router.push({ name: 'datasources' });
         return;
     }
 
@@ -79,7 +75,7 @@ function cancel() {
                     :datasource="datasource"
                     @save="save"
                     @cancel="cancel"
-                    @delete="router.push(returnPath)"
+                    @delete="router.push({ name: 'datasources' })"
                 />
                 <DatasourceDisplay
                     v-else
@@ -91,7 +87,7 @@ function cancel() {
             <div class="button-row">
                 <button
                     v-if="!isEditing"
-                    @click="router.push(returnPath)"
+                    @click="router.push({ name: 'datasources' })"
                 >
                     Back
                 </button>

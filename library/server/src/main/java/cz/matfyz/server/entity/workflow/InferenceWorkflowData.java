@@ -8,11 +8,31 @@ import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record InferenceWorkflowData(
+    InferenceWorkflowStep step,
+    @Nullable Id inputDatasource,
+    @Nullable List<Id> allDatasources,
+    @Nullable Id inferenceJob,
     @Nullable List<Id> datasourceIds,
-    @Nullable Id jobId
+    @Nullable List<Id> mtcJobs
 ) implements WorkflowData {
 
     public static InferenceWorkflowData createNew() {
-        return new InferenceWorkflowData(null, null);
+        return new InferenceWorkflowData(
+            InferenceWorkflowStep.addDatasources,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
     }
+
+    public enum InferenceWorkflowStep {
+        addDatasources,
+        editCategory,
+        addMappings,
+        setOutput,
+        finish,
+    }
+
 }

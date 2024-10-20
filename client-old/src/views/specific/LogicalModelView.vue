@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { LogicalModel } from '@/types/logicalModel';
-
 import { isFile } from '@/types/datasource';
-
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import API from '@/utils/api';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 const logicalModel = ref<LogicalModel>();
 
@@ -23,15 +22,13 @@ async function fetchModel() {
     return true;
 }
 
-const router = useRouter();
+const router = useFixedRouter();
 
 function createMapping() {
     router.push({ name: 'accessPathEditor', query: { logicalModelId: route.params.id } });
 }
 
 const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(logicalModel.value.datasource.type));
-
-
 </script>
 
 <template>

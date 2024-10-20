@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ModelView } from '@/types/model';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
@@ -9,9 +9,9 @@ defineProps<{ model: ModelView }>();
 
 <template>
     <div class="model-display">
-        <CleverRouterLink :to="{ name: 'model', params: { jobId: model.jobId } }">
+        <FixedRouterLink :to="{ name: 'model', params: { jobId: model.jobId } }">
             <h2>{{ model.jobLabel }}</h2>
-        </CleverRouterLink>
+        </FixedRouterLink>
         <ValueContainer>
             <ValueRow label="Job id:">
                 {{ model.jobId }}

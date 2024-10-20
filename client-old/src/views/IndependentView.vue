@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NavigationContent from '@/components/layout/project-independent/NavigationContent.vue';
+import IndependentNavigation from '@/components/layout/navigation/IndependentNavigation.vue';
 import { RouterView } from 'vue-router';
 
 </script>
@@ -7,6 +7,6 @@ import { RouterView } from 'vue-router';
 <template>
     <RouterView />
     <Teleport to="#app-left-bar-content">
-        <NavigationContent />
+        <IndependentNavigation />
     </Teleport>
 </template>

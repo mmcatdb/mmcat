@@ -2,7 +2,7 @@
 import type { Mapping } from '@/types/mapping';
 import ParentPropertyDisplay from './display/ParentPropertyDisplay.vue';
 import Divider from '@/components/layout/Divider.vue';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureIdDisplay from '../category/SignatureIdDisplay.vue';
@@ -20,9 +20,9 @@ const category = useSchemaCategoryInfo();
 
 <template>
     <div class="mapping-display">
-        <CleverRouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
+        <FixedRouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
             <h2>{{ mapping.kindName }}</h2>
-        </CleverRouterLink>
+        </FixedRouterLink>
         <ValueContainer>
             <ValueRow label="Id:">
                 {{ mapping.id }}

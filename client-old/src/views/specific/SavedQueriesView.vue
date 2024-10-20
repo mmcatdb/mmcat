@@ -8,6 +8,7 @@ import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import type { Evocat } from '@/types/evocat/Evocat';
 import type { Graph } from '@/types/categoryGraph';
 import EvocatDisplay from '@/components/category/EvocatDisplay.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 
 const categoryId = useSchemaCategoryId();
 
@@ -60,9 +61,9 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
                         @delete-query="() => queries = queries?.filter(q => q.id !== query.id)"
                     />
                     <div v-if="queries.length === 0">
-                        You have no saved queries yet. Go to <RouterLink :to="{ name: 'query' }">
+                        You have no saved queries yet. Go to <FixedRouterLink :to="{ name: 'query' }">
                             Querying
-                        </RouterLink> to add some!
+                        </FixedRouterLink> to add some!
                     </div>
                 </template>
                 <ResourceLoader :loading-function="fetchQueries" />

@@ -2,11 +2,10 @@
 import { ref } from 'vue';
 import { LogicalModelInfo } from '@/types/logicalModel';
 import API from '@/utils/api';
-
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
-import { RouterLink, useRouter } from 'vue-router';
-import { useSchemaCategoryId, useWorkflowId } from '@/utils/injects';
+import { useSchemaCategoryId } from '@/utils/injects';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 const infos = ref<LogicalModelInfo[]>();
 
@@ -22,11 +21,10 @@ async function fetchModels() {
     return true;
 }
 
-const router = useRouter();
-const workflowId = useWorkflowId();
+const router = useFixedRouter();
 
 function createNew() {
-    router.push({ name: 'newLogicalModel', query: { workflowId } });
+    router.push({ name: 'newLogicalModel' });
 }
 </script>
 
