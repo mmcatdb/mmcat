@@ -20,6 +20,10 @@ export function useSchemaCategoryId(): Id {
     return useSchemaCategoryInfo().value.id;
 }
 
+export function tryUseSchemaCategoryId(): Id | undefined {
+    return inject(categoryInfoKey)?.value.id;
+}
+
 export type EvocatContext = {
     evocat: ShallowRef<Evocat>;
     graph: ShallowRef<Graph>;
@@ -35,9 +39,9 @@ export function useEvocat(): EvocatContext {
     return evocatContext;
 }
 
-export const workflowKey: InjectionKey<Ref<Workflow | undefined>> = Symbol('workflow');
+export const workflowKey: InjectionKey<Ref<Workflow>> = Symbol('workflow');
 
-export function useWorkflow(): Ref<Workflow | undefined> {
+export function useWorkflow(): Ref<Workflow> {
     const workflow = inject(workflowKey);
     if (workflow === undefined)
         throw new Error('Workflow not injected.');
@@ -45,7 +49,6 @@ export function useWorkflow(): Ref<Workflow | undefined> {
     return workflow;
 }
 
-// export function useWorkflowId(): Id | undefined{
-//     const route = useRoute();
-//     return (route.query.workflowId ?? undefined) as Id | undefined;
-// }
+export function tryUseWorkflow(): Ref<Workflow> | undefined {
+    return inject(workflowKey);
+}

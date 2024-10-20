@@ -29,8 +29,8 @@ public class JobRepository {
     private static JobWithRun jobWithRunFromResultSet(ResultSet resultSet, Id jobId, Id categoryId) throws SQLException, JsonProcessingException {
         final Id runId = getId(resultSet, "run.id");
         final String jsonValue = resultSet.getString("job.json_value");
-        final @Nullable Id actionId = getIdOrNull(resultSet, "run.action_id");
-        final @Nullable Id sessionId = getIdOrNull(resultSet, "run.session_id");
+        final @Nullable Id actionId = getId(resultSet, "run.action_id");
+        final @Nullable Id sessionId = getId(resultSet, "run.session_id");
 
         return new JobWithRun(
             Job.fromJsonValue(jobId, runId, jsonValue),

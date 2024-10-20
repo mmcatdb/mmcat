@@ -3,20 +3,19 @@ import type { Datasource } from '@/types/datasource';
 import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import type { Id } from '@/types/id';
 import IriDisplay from '../common/IriDisplay.vue';
 
 defineProps<{
     datasource: Datasource;
-    categoryId?: Id;
+    button?: string;
 }>();
 
-const emit = defineEmits([ 'edit' ]);
+const emit = defineEmits([ 'edit', 'onClick' ]);
 </script>
 
 <template>
     <div class="datasource-display">
-        <FixedRouterLink :to="{ name: 'datasource', params: { id: datasource.id }, query: { categoryId } }">
+        <FixedRouterLink :to="{ name: 'datasource', params: { id: datasource.id } }">
             <h2>{{ datasource.label }}</h2>
         </FixedRouterLink>
         <ValueContainer>
@@ -42,6 +41,12 @@ const emit = defineEmits([ 'edit' ]);
                 @click="emit('edit')"
             >
                 Edit
+            </button>
+            <button
+                v-if="button"
+                @click="emit('onClick')"
+            >
+                {{ button }}
             </button>
         </div>
     </div>

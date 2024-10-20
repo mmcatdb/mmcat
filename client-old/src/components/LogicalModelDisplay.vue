@@ -26,7 +26,7 @@ const route = useRoute();
             <ValueRow
                 label="Datasource:"
             >
-                <FixedRouterLink :to="{ name: 'datasource', params: { id: logicalModel.datasource.id }, query: { categoryId: route.params.categoryId } }">
+                <FixedRouterLink :to="{ name: 'datasource', params: { id: logicalModel.datasource.id } }">
                     {{ logicalModel.datasource.label }}
                 </FixedRouterLink>
             </ValueRow>

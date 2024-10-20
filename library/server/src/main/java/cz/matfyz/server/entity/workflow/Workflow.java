@@ -15,8 +15,8 @@ public class Workflow extends Entity {
 
     // The general idea is that a workflow is a sequence of steps. Each step might require user input, job, or both.
     // If a step requires a job, it waits for the job to finish. Only after that can the user continue.
-    // In theory, there might be multiple jobs or inputs in a single step. It's not recommended since it might be confusing. However, the logic behind steps is entirely up the specific workflow.
-    // In that case, this class holds only the current job it's waiting for.
+    // There might be only one waiting job for a step, because it's run by trying to continue to the next step.
+    // This class holds only the current job the workflow is waiting for, not the previous ones.
 
     public final Id categoryId;
     public final String label;
@@ -42,11 +42,21 @@ public class Workflow extends Entity {
         );
     }
 
+    public enum WorkflowType {
+        inference,
+    }
+
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
     @JsonSubTypes({
         @JsonSubTypes.Type(value = InferenceWorkflowData.class, name = "inference"),
     })
     public interface WorkflowData {
+
+        public static WorkflowData createNew(WorkflowType type) {
+            return switch (type) {
+                case inference -> InferenceWorkflowData.createNew();
+            };
+        }
 
     }
 

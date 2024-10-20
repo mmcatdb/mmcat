@@ -9,14 +9,13 @@ import cz.matfyz.server.repository.DatasourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class DatasourceService {
 
     @Autowired
     private DatasourceRepository repository;
 
-    public DatasourceWrapper createNew(DatasourceInit data) {
+    public DatasourceWrapper create(DatasourceInit data) {
         final var datasource = DatasourceWrapper.createNew(data);
         repository.save(datasource);
 

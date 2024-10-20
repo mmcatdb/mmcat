@@ -1,35 +1,18 @@
 <script setup lang="ts">
-import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
-import { useRoute } from 'vue-router';
+import { type InferenceWorkflowStep, inferenceWorkflowSteps } from '@/types/workflow';
+import { useWorkflow } from '@/utils/injects';
 
-type Link = {
-    pathName: string;
-    label: string;
-    params: {
-        categoryId: string | string[];
-    };
+const workflow = useWorkflow();
+
+const stepLabels: Record<InferenceWorkflowStep, string> = {
+    addDatasources: 'Add Datasources',
+    editCategory: 'Edit Schema',
+    addMappings: 'Add Mappings',
+    setOutput: 'Set Output',
+    finish: 'Gather Data',
 };
 
-const route = useRoute();
-
-function defineLink(pathName: string, label: string): Link {
-    return { pathName, label, params: {
-        categoryId: route.params.categoryId,
-    } };
-}
-
-const links = [
-    defineLink('schemaCategory', 'Schema Category'),
-    defineLink('logicalModels', 'Logical Models'),
-    defineLink('datasources', 'Datasources'),
-];
-
-const steps = [
-    'Add something',
-    'Change something else',
-];
-
-const currentStepIndex = 0;
+const steps = inferenceWorkflowSteps;
 </script>
 
 <template>
@@ -39,11 +22,11 @@ const currentStepIndex = 0;
             :key="step"
             class="d-flex flex-column align-items-center"
         >
-            <div :class="[ 'step-icon rounded-circle d-flex align-items-center justify-content-center border border-2', { 'border-primary text-primary': currentStepIndex === index } ]">
+            <div :class="[ 'step-icon rounded-circle d-flex align-items-center justify-content-center border border-2', { 'border-primary text-primary': step === workflow?.data.step } ]">
                 {{ index + 1 }}
             </div>
             <div class="text-center">
-                {{ step }}
+                {{ stepLabels[step] }}
             </div>
             <div
                 v-if="index < steps.length - 1"

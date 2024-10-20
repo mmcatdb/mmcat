@@ -2,10 +2,16 @@ package cz.matfyz.server.repository;
 
 import static cz.matfyz.server.repository.utils.Utils.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.LogicalModel;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +23,21 @@ public class DatasourceRepository {
     @Autowired
     private DatabaseWrapper db;
 
+    private static DatasourceWrapper fromResultSet(ResultSet resultSet) throws SQLException, JsonProcessingException {
+        final Id id = getId(resultSet, "id");
+        final String jsonValue = resultSet.getString("json_value");
+
+        return DatasourceWrapper.fromJsonValue(id, jsonValue);
+    }
+
     public DatasourceWrapper find(Id id) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("SELECT * FROM datasource WHERE id = ?;");
             setId(statement, 1, id);
             final var resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
-                final String jsonValue = resultSet.getString("json_value");
-                output.set(DatasourceWrapper.fromJsonValue(id, jsonValue));
-            }
+            if (resultSet.next())
+                output.set(fromResultSet(resultSet));
         },
         "Datasource", id);
     }
@@ -36,11 +47,24 @@ public class DatasourceRepository {
             final var statement = connection.prepareStatement("SELECT * FROM datasource ORDER BY id;");
             final var resultSet = statement.executeQuery();
 
-            while (resultSet.next()) {
-                final Id id = getId(resultSet, "id");
-                final String jsonValue = resultSet.getString("json_value");
-                output.add(DatasourceWrapper.fromJsonValue(id, jsonValue));
-            }
+            while (resultSet.next())
+                output.add(fromResultSet(resultSet));
+        });
+    }
+
+    public List<DatasourceWrapper> findAllByIds(List<Id> ids) {
+        return db.getMultiple((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT *
+                FROM datasource
+                WHERE id = ANY(?)
+                ORDER BY id;
+                """);
+            setIds(statement, 1, ids);
+            final var resultSet = statement.executeQuery();
+
+            while (resultSet.next())
+                output.add(fromResultSet(resultSet));
         });
     }
 
@@ -58,11 +82,8 @@ public class DatasourceRepository {
             setId(statement, 1, categoryId);
             final var resultSet = statement.executeQuery();
 
-            while (resultSet.next()) {
-                final Id id = getId(resultSet, "id");
-                final String jsonValue = resultSet.getString("json_value");
-                output.add(DatasourceWrapper.fromJsonValue(id, jsonValue));
-            }
+            while (resultSet.next())
+                output.add(fromResultSet(resultSet));
         });
     }
 

@@ -1,41 +1,24 @@
 <script setup lang="ts">
 import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
-import { RouterLink, useRoute } from 'vue-router';
-
-type Link = {
-    pathName: string;
-    label: string;
-    params: {
-        categoryId: string | string[];
-    };
-};
-
-const route = useRoute();
-
-function defineLink(pathName: string, label: string): Link {
-    return { pathName, label, params: {
-        categoryId: route.params.categoryId,
-    } };
-}
 
 const links = [
-    defineLink('schemaCategory', 'Schema Category'),
-    defineLink('logicalModels', 'Logical Models'),
-    defineLink('datasources', 'Datasources'),
-    defineLink('actions', 'Actions'),
-    defineLink('jobs', 'Jobs'),
-    defineLink('instanceCategory', 'Instance Category'),
-    defineLink('models', 'Models'),
-    defineLink('query', 'Querying'),
-    defineLink('savedQueries', 'Saved Queries'),
+    { name: 'schemaCategory', label: 'Schema Category' },
+    { name: 'logicalModels', label: 'Logical Models' },
+    { name: 'datasources', label: 'Datasources' },
+    { name: 'actions', label: 'Actions' },
+    { name: 'jobs', label: 'Jobs' },
+    { name: 'instanceCategory', label: 'Instance Category' },
+    { name: 'models', label: 'Models' },
+    { name: 'query', label: 'Querying' },
+    { name: 'savedQueries', label: 'Saved Queries' },
 ];
 </script>
 
 <template>
     <FixedRouterLink
         v-for="link in links"
-        :key="link.pathName"
-        :to="{ name: link.pathName }"
+        :key="link.name"
+        :to="{ name: link.name }"
         always-link
     >
         {{ link.label }}

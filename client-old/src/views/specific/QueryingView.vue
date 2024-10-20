@@ -26,9 +26,7 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
 
 <template>
     <div>
-        <h1 class="mb-3">
-            Querying
-        </h1>
+        <h1>Querying</h1>
         <div class="row">
             <div class="col-6 d-flex flex-column gap-4">
                 <NewQueryDisplay @execute-query="queryExecuted" />

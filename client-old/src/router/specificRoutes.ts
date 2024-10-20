@@ -55,7 +55,7 @@ const specificRoutes: RouteRecordRaw[] = [ {
 }, {
     path: 'datasources',
     name: 'datasources',
-    component: () => import('@/views/specific/DatasourcesInCategoryView.vue'),
+    component: () => import('@/views/specific/DatasourcesView.vue'),
 }, {
     path: 'datasources/:id',
     name: 'datasource',

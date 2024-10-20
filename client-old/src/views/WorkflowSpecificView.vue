@@ -19,27 +19,28 @@ const schemaCategoryInfo = shallowRef<SchemaCategoryInfo>();
 provide(categoryInfoKey, schemaCategoryInfo as Ref<SchemaCategoryInfo>);
 
 const workflow = shallowRef<Workflow>();
-provide(workflowKey, workflow);
+provide(workflowKey, workflow as Ref<Workflow>);
 
 const router = useFixedRouter();
 
 function getInitialWorkflowRoute(workflow: Workflow): RouteLocationRaw {
-    switch (workflow.data.type) {
-    case 'inference':
-        // TODO
-        // if (workflow.data.jobId) {
-        //     return {
-        //         name: 'job',
-        //         params: { id: workflow.data.jobId },
-        //         query: { workflowId: workflow.id },
-        //     };
-        // }
-
+    switch (workflow.data.step) {
+    case 'addDatasources':
+        return { name: 'datasources' };
+    case 'editCategory':
         return {
-            name: 'logicalModels',
-            query: { workflowId: workflow.id },
+            name: 'job',
+            params: { id: workflow.data.inferenceJobId! },
         };
+    case 'addMappings':
+        return { name: 'logicalModels' };
+    case 'setOutput':
+        return { name: 'output' };
+    case 'finish':
+        return { name: 'gather' };
     }
+
+    throw new Error('Unknown workflow step');
 }
 
 onMounted(async () => {
@@ -49,18 +50,26 @@ onMounted(async () => {
         return;
     }
 
-    workflow.value = workflowResult.data;
-
-    const categoryResult = await API.schemas.getCategoryInfo({ id: workflow.value.categoryId });
+    const categoryResult = await API.schemas.getCategoryInfo({ id: workflowResult.data.categoryId });
     if (!categoryResult.status) {
         router.push({ name: 'notFound' });
         return;
     }
-
+    
+    workflow.value = workflowResult.data;
     schemaCategoryInfo.value = SchemaCategoryInfo.fromServer(categoryResult.data);
 
-    router.push(getInitialWorkflowRoute(workflowResult.data));
+    router.push(getInitialWorkflowRoute(workflow.value));
 });
+
+async function continueWorkflow() {
+    const result = await API.workflows.continueWorkflow({ id: props.workflowId });
+    if (!result.status) 
+        return;
+
+    workflow.value = result.data;
+    router.push(getInitialWorkflowRoute(workflow.value));
+}
 </script>
 
 <template>
@@ -78,7 +87,10 @@ onMounted(async () => {
         </Teleport>
         <Teleport to="#app-left-bar-content">
             <WorkflowSpecificNavigation />
-            <button class="mt-4">
+            <button
+                class="mt-4"
+                @click="continueWorkflow"
+            >
                 Continue
             </button>
         </Teleport>

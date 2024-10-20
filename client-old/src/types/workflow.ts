@@ -18,12 +18,11 @@ export type WorkflowInit = {
 export type WorkflowData = {
     type: 'inference';
     step: InferenceWorkflowStep;
-    inputDatasource?: Id;
-    allDatasources?: Id[];
-    inferenceJob?: Id;
-    datasourceIds?: Id[];
+    inputDatasourceId?: Id;
+    allDatasourceIds: Id[];
+    inferenceJobId?: Id;
     // Mappings are already accessible via the category.
-    mtcJobs?: Id[];
+    mtcActionIds: Id[];
 };
 
 export type InferenceWorkflowStep = typeof inferenceWorkflowSteps[number];

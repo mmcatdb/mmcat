@@ -35,27 +35,27 @@ public class DatasourceController {
     private WrapperService wrapperService;
 
     @GetMapping("/datasources")
-    public List<DatasourceDetail> getAllDatasources(@RequestParam Optional<Id> categoryId) {
-        final var datasources = categoryId.isPresent() ? repository.findAllInCategory(categoryId.get()) : repository.findAll();
-        datasources.forEach(DatasourceWrapper::hidePassword);
+    public List<DatasourceDetail> getAllDatasources(@RequestParam Optional<Id> categoryId, @RequestParam Optional<List<Id>> ids) {
+        List<DatasourceWrapper> datasources;
+        if (ids.isPresent())
+            datasources = repository.findAllByIds(ids.get());
+        else if (categoryId.isPresent())
+            datasources = repository.findAllInCategory(categoryId.get());
+        else
+            datasources = repository.findAll();
+
         return datasources.stream().map(this::datasourceToDetail).toList();
     }
 
     @GetMapping("/datasources/{id}")
     public DatasourceDetail getDatasource(@PathVariable Id id) {
         final DatasourceWrapper datasource = repository.find(id);
-
-        datasource.hidePassword();
-
         return datasourceToDetail(datasource);
     }
 
     @PostMapping("/datasources")
     public DatasourceDetail createDatasource(@RequestBody DatasourceInit data) {
-        final DatasourceWrapper datasource = service.createNew(data);
-
-        datasource.hidePassword();
-
+        final DatasourceWrapper datasource = service.create(data);
         return datasourceToDetail(datasource);
     }
 
@@ -67,8 +67,6 @@ public class DatasourceController {
         }
         final DatasourceWrapper datasource = service.update(id, update);
 
-        datasource.hidePassword();
-
         return datasourceToDetail(datasource);
     }
 
@@ -78,6 +76,7 @@ public class DatasourceController {
     }
 
     public DatasourceDetail datasourceToDetail(DatasourceWrapper datasource) {
+        datasource.hidePassword();
         return DatasourceDetail.create(datasource, wrapperService.getControlWrapper(datasource));
     }
 

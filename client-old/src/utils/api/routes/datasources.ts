@@ -4,7 +4,7 @@ import type { DatasourceInit, DatasourceUpdate, DatasourceFromServer } from '@/t
 import type { Id } from '@/types/id';
 
 const datasources = {
-    getAllDatasources: GET<Empty, DatasourceFromServer[], { categoryId: Id }>(
+    getAllDatasources: GET<Empty, DatasourceFromServer[], GetDatasourcesQuery>(
         () => `/datasources`,
     ),
     getDatasource: GET<{ id: StringLike }, DatasourceFromServer>(
@@ -22,3 +22,8 @@ const datasources = {
 };
 
 export default datasources;
+
+type GetDatasourcesQuery = {
+    categoryId?: Id;
+    ids?: Id[];
+};

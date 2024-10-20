@@ -113,7 +113,7 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
             </div>
             <div class="col-3">
                 <template v-if="job.payload.type === ActionType.RSDToCategory">
-                    <FixedRouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id }, query: { categoryId: job.categoryId } }">
+                    <FixedRouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id } }">
                         {{ job.payload.datasource.label }}
                     </FixedRouterLink>
                 </template>

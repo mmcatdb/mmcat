@@ -11,7 +11,7 @@ export const independentRoutes: RouteRecordRaw[] = [ {
 }, {
     path: 'datasources',
     name: 'datasources',
-    component: () => import('@/views/independent/DatasourcesView.vue'),
+    component: () => import('@/views/specific/DatasourcesView.vue'),
 }, {
     path: 'datasources/:id',
     name: 'datasource',

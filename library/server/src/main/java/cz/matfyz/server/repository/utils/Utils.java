@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,11 +22,7 @@ public abstract class Utils {
         return input == 0 ? null : input;
     }
 
-    public static Id getId(ResultSet resultSet, String columnName) throws SQLException {
-        return new Id(resultSet.getString(columnName));
-    }
-
-    public static @Nullable Id getIdOrNull(ResultSet resultSet, String columnName) throws SQLException {
+    public static @Nullable Id getId(ResultSet resultSet, String columnName) throws SQLException {
         final var idString = resultSet.getString(columnName);
         return idString == null ? null : new Id(idString);
     }
@@ -34,6 +32,11 @@ public abstract class Utils {
             statement.setNull(position, Types.OTHER);
         else
             statement.setObject(position, id.toUUID());
+    }
+
+    public static void setIds(PreparedStatement statement, int position, List<Id> ids) throws SQLException {
+        final var uuids = ids.stream().map(Id::toUUID).toArray(UUID[]::new);
+        statement.setArray(position, statement.getConnection().createArrayOf("UUID", uuids));
     }
 
     public static void executeChecked(PreparedStatement statement) throws SQLException {

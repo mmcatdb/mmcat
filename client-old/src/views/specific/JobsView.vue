@@ -35,9 +35,7 @@ async function fetchJobs() {
 
 <template>
     <div>
-        <h1 class="mb-3">
-            Jobs
-        </h1>
+        <h1>Jobs</h1>
         <div
             v-if="jobs"
             class="d-flex flex-column gap-3"

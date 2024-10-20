@@ -68,8 +68,9 @@ public class ActionController {
     ) {}
 
     @PostMapping("/actions")
-    public ActionDetail createAction(@RequestBody ActionInit actionInit) {
-        return actionToDetail(service.create(actionInit));
+    public ActionDetail createAction(@RequestBody ActionInit init) {
+        final var action = service.create(init.categoryId(), init.label(), init.payload());
+        return actionToDetail(action);
     }
 
     @DeleteMapping("/actions/{id}")

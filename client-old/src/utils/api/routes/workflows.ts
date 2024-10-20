@@ -1,6 +1,6 @@
 import type { Empty, StringLike } from '@/types/api/routes';
-import { GET, POST } from '../routeFunctions';
-import type { Workflow, WorkflowInit } from '@/types/workflow';
+import { GET, POST, PUT } from '../routeFunctions';
+import type { Workflow, WorkflowData, WorkflowInit } from '@/types/workflow';
 
 const jobs = {
     getAllWorkflows: GET<Empty, Workflow[]>(
@@ -11,6 +11,12 @@ const jobs = {
     ),
     createWorkflow: POST<Empty, Workflow, WorkflowInit>(
         () => `/workflows`,
+    ),
+    updateWorkflowData: PUT<{ id: StringLike }, Workflow, WorkflowData>(
+        u => `/workflows/${u.id}/data`,
+    ),
+    continueWorkflow: POST<{ id: StringLike }, Workflow>(
+        u => `/workflows/${u.id}/continue`,
     ),
 };
 

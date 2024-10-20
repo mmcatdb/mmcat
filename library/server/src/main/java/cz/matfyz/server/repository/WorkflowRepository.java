@@ -26,7 +26,7 @@ public class WorkflowRepository {
         final var id = getId(resultSet, "id");
         final var categoryId = getId(resultSet, "category_id");
         final var label = resultSet.getString("label");
-        final var jobId = getId(resultSet, "job_id");
+        final @Nullable Id jobId = getId(resultSet, "job_id");
         final var jsonValue = resultSet.getString("json_value");
 
         return Workflow.fromJsonValue(id, categoryId, label, jobId, jsonValue);
