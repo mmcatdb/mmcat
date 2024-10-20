@@ -93,4 +93,10 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         return signature.hashCode();
     }
 
+    // Identification
+
+    @Override public String toString() {
+        return "M: " + dom.key() + " -[" + signature + "]-> " + cod.key();
+    }
+
 }

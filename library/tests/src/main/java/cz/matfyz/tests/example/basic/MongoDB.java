@@ -12,6 +12,8 @@ public abstract class MongoDB {
 
     public static final String orderKind = "order";
     public static final String addressKind = "address";
+    public static final String addressMissingSimpleKind = "addressMissingSimple";
+    public static final String addressMissingComplexKind = "addressMissingComplex";
     public static final String tagKind = "tag";
     public static final String itemKind = "orderItem";
     public static final String itemEmptyKind = "orderItemEmpty";
@@ -23,10 +25,10 @@ public abstract class MongoDB {
         return PostgreSQL.order(schema);
     }
 
-    public static TestMapping address(SchemaCategory schema) {
+    private static TestMapping addressInner(SchemaCategory schema, String kindName) {
         return new TestMapping(schema,
             Schema.order,
-            addressKind,
+            kindName,
             b -> b.root(
                 b.simple("number", Schema.orderToNumber),
                 b.complex("address", Schema.orderToAddress,
@@ -36,6 +38,18 @@ public abstract class MongoDB {
                 )
             )
         );
+    }
+
+    public static TestMapping address(SchemaCategory schema) {
+        return addressInner(schema, addressKind);
+    }
+
+    public static TestMapping addressMissingSimple(SchemaCategory schema) {
+        return addressInner(schema, addressMissingSimpleKind);
+    }
+
+    public static TestMapping addressMissingComplex(SchemaCategory schema) {
+        return addressInner(schema, addressMissingComplexKind);
     }
 
     public static void addAddress(InstanceBuilder builder, int orderIndex, String uniqueId, @Nullable String streetValue, @Nullable String cityValue, @Nullable String zipValue) {

@@ -28,7 +28,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 
-public class DataGenerationTests {
+class DataGenerationTests {
 
     private final SparkProvider sparkProvider = new SparkProvider();
 
@@ -54,15 +54,15 @@ public class DataGenerationTests {
         System.out.println("Mapping:" + mappings.get(0).accessPath());
 
         final AbstractPullWrapper pullWrapper = jsonControlWrapper.getPullWrapper();
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
-        instance = new DatabaseToInstance().input(mappings.getFirst(), instance, pullWrapper).run();
+        final InstanceCategory emptyInstance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+        final InstanceCategory instance = new DatabaseToInstance().input(mappings.getFirst(), emptyInstance, pullWrapper).run();
 
         System.out.println("Instance: " + instance);
     }
 
     @Test
     void testMergeKinds() throws Exception {
-        Path relativePath = Paths.get("src/test/resources/yelpTwoKinds");
+        final Path relativePath = Paths.get("src/test/resources/yelpTwoKinds");
         final var url = relativePath.toUri().toURL();
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
@@ -81,27 +81,30 @@ public class DataGenerationTests {
         final MetadataCategory metadata = pair.metadata();
         final List<Mapping> mappings = pair.mappings();
 
-        System.out.println("Mapping A : " + mappings.get(0).accessPath());
-        System.out.println("Mapping B : " + mappings.get(1).accessPath());
+        System.out.println("Mapping A:\n" + mappings.get(0).accessPath());
+        System.out.println("Mapping B:\n" + mappings.get(1).accessPath());
 
         final var pkKey = getKeyFromNames(schema, metadata, "business_id", "business");
         final var pkIdentifiedKey = getKeyFromNames(schema, metadata, "checkin", null);
 
         final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, pkKey, pkIdentifiedKey, null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
-        final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
+        final List<Mapping> editedMappings = edit.applyMappingEdit(mappings);
+        final Mapping finalMapping = editedMappings.get(0);
+
+        System.out.println("Mapping C:\n" + finalMapping.accessPath());
 
         final AbstractPullWrapper pullWrapper = jsonControlWrapper.getPullWrapper();
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
-        instance = new DatabaseToInstance().input(editMappings.getFirst(), instance, pullWrapper).run();
+        final InstanceCategory emptyInstance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+        final InstanceCategory instance = new DatabaseToInstance().input(finalMapping, emptyInstance, pullWrapper).run();
 
         System.out.println("Instance: " + instance);
     }
 
     private Key getKeyFromNames(SchemaCategory schema, MetadataCategory metadata, String name, String domainNameToFind) throws Exception {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
-            String domainName = metadata.getObject(morphism.dom().key()).label;
-            String codomainName = metadata.getObject(morphism.cod().key()).label;
+        for (final SchemaMorphism morphism : schema.allMorphisms()) {
+            final String domainName = metadata.getObject(morphism.dom().key()).label;
+            final String codomainName = metadata.getObject(morphism.cod().key()).label;
 
             if (domainNameToFind != null) {
                 if (domainName.equals(domainNameToFind) && codomainName.equals(name))
@@ -133,12 +136,13 @@ public class DataGenerationTests {
         System.out.println("Objects: ");
         for (SchemaObject o : schema.allObjects()) {
             final var mo = metadata.getObject(o);
-            System.out.println("Object: " + o + " label: " + mo.label);
+            System.out.println("    " + o + " (" + mo.label + ")");
         }
 
+        System.out.println("Morphisms: ");
         for (SchemaMorphism m : schema.allMorphisms()) {
             final var mm = metadata.getMorphism(m);
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature() + " label: " + mm.label);
+            System.out.println("    " + m + " (" + mm.label + ")");
         }
     }
 }

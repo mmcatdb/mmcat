@@ -238,7 +238,7 @@ class MTCAlgorithmTests {
             .mappingWithRecords(MongoDB.address(schema), """
                 [{
                     "number": "o_100",
-                    "nested": null
+                    "address": null
                 }, {
                     "number": "o_200"
                 }]

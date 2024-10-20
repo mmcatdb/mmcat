@@ -49,7 +49,7 @@ public class SchemaObject implements Identified<SchemaObject, Key> {
     // Identification
 
     @Override public String toString() {
-        return "SO: " + key;
+        return "O: " + key;
     }
 
 }
