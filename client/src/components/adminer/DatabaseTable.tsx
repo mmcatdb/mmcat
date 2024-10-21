@@ -1,19 +1,15 @@
 import { useEffect } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
-import type { BackendTableResponse, BackendDocumentResponse, BackendGraphResponse } from '@/types/adminer/BackendResponse';
+import type { BackendTableResponse } from '@/types/adminer/BackendResponse';
+import { useFetchData } from './useFetchData';
 
 type DatabaseTableProps = Readonly<{
     apiUrl: string;
-    fetchData: (url: string) => {
-        fetchedData: BackendTableResponse | BackendDocumentResponse | BackendGraphResponse | null;
-        loading: boolean;
-        error: string | null;
-    };
     setRowCount: (rowCount: number | undefined) => void;
 }>;
 
-export function DatabaseTable({ apiUrl, fetchData, setRowCount }: DatabaseTableProps ) {
-    const { fetchedData, loading, error } = fetchData(apiUrl);
+export function DatabaseTable({ apiUrl, setRowCount }: DatabaseTableProps ) {
+    let { fetchedData, loading, error } = useFetchData(apiUrl);
 
     useEffect(() => {
         setRowCount(fetchedData?.metadata.rowCount);
@@ -32,6 +28,16 @@ export function DatabaseTable({ apiUrl, fetchData, setRowCount }: DatabaseTableP
 
     if (fetchedData === null)
         return <p>No data to display.</p>;
+
+    // If the data are for graph database, we want to display just properties in the table view
+    if (fetchedData.data.every((item: any) => 'properties' in item)){
+        const modifiedData = { metadata: fetchedData.metadata, data: [] } as BackendTableResponse;
+
+        for (const element of fetchedData.data)
+            modifiedData.data.push(element.properties);
+
+        fetchedData = modifiedData;
+    }
 
     const keys: string[] = typeof fetchedData.data[0] === 'object' ? Object.keys(fetchedData.data[0]) : [ 'Value' ];
     const columns: string[] = fetchedData.data.length > 0 ? keys : [];

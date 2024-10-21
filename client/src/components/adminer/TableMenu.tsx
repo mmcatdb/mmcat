@@ -1,4 +1,4 @@
-import { useFetchTableData } from '@/components/adminer/useFetchTableData';
+import { useFetchData } from '@/components/adminer/useFetchData';
 import { Spinner, Button } from '@nextui-org/react';
 
 type TableMenuProps = Readonly<{
@@ -8,7 +8,7 @@ type TableMenuProps = Readonly<{
 }>;
 
 export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
-    const { fetchedData, loading, error } = useFetchTableData(apiUrl);
+    const { fetchedData, loading, error } = useFetchData(apiUrl);
 
     if (loading) {
         return (

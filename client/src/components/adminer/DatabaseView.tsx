@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Pagination } from '@nextui-org/react';
-import { useFetchTableData } from './useFetchTableData';
-import { useFetchDocumentData } from './useFetchDocumentData';
-import { useFetchGraphData } from './useFetchGraphData';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
-import { DatasourceType } from '@/types/datasource';
+import { type DatasourceType } from '@/types/datasource';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 import { type AdminerFilterState } from '@/types/adminer/Reducer';
 import { View } from '@/types/adminer/View';
@@ -36,27 +33,12 @@ function generateUrl(apiUrl: string, datasourceId: string, tableName: string, fi
     return `${apiUrl}/${datasourceId}/${tableName}?limit=${limit}&offset=${offset}`;
 }
 
-function getFetchFunction(datasourceType: DatasourceType) {
-    switch (datasourceType) {
-    case DatasourceType.postgresql:
-        return useFetchTableData;
-    case DatasourceType.mongodb:
-        return useFetchDocumentData;
-    case DatasourceType.neo4j:
-        return useFetchGraphData;
-    default:
-        throw new Error('Invalid datasource type');
-    }
-}
-
 export function DatabaseView({ apiUrl, datasourceId, tableName, datasourceType, state, view }: DatabaseViewProps) {
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ offset, setOffset ] = useState<number>(0);
     const [ rowCount, setRowCount ] = useState<number | undefined>();
     const [ totalPages, setTotalPages ] = useState<number>(1);
     const [ url, setUrl ] = useState<string>(generateUrl(apiUrl, datasourceId, tableName, state.submitted.filters, state.submitted.limit, offset));
-
-    const fetchData = getFetchFunction(datasourceType);
 
     useEffect(() => {
         if (rowCount)
@@ -82,9 +64,9 @@ export function DatabaseView({ apiUrl, datasourceId, tableName, datasourceType, 
     return (
         <div className='mt-5'>
             {view === View.table ? (
-                <DatabaseTable apiUrl={url} fetchData={fetchData} setRowCount={setRowCount}/>
+                <DatabaseTable apiUrl={url} setRowCount={setRowCount}/>
             ) : (
-                <DatabaseDocument apiUrl={url} fetchData={fetchData} setRowCount={setRowCount}/>
+                <DatabaseDocument apiUrl={url} setRowCount={setRowCount}/>
             )}
 
             <div className='mt-5 inline-flex gap-3 items-center'>
