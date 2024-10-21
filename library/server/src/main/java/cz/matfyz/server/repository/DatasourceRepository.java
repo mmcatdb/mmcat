@@ -52,22 +52,6 @@ public class DatasourceRepository {
         });
     }
 
-    public List<DatasourceWrapper> findAllByIds(List<Id> ids) {
-        return db.getMultiple((connection, output) -> {
-            final var statement = connection.prepareStatement("""
-                SELECT *
-                FROM datasource
-                WHERE id = ANY(?)
-                ORDER BY id;
-                """);
-            setIds(statement, 1, ids);
-            final var resultSet = statement.executeQuery();
-
-            while (resultSet.next())
-                output.add(fromResultSet(resultSet));
-        });
-    }
-
     public List<DatasourceWrapper> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""

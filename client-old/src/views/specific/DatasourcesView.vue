@@ -7,6 +7,7 @@ import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
 import { tryUseSchemaCategoryId, tryUseWorkflow } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { useFixedRouter } from '@/router/specificRoutes';
+import { type WorkflowData } from '@/types/workflow';
 
 const categoryId = tryUseSchemaCategoryId();
 const workflow = tryUseWorkflow();
@@ -17,27 +18,26 @@ const datasources = shallowRef<{
     inCategory: Datasource[];
     other: Datasource[];
 } | {
-    inWorkflow: Datasource[];
+    all: Datasource[];
+    selected?: Datasource;
     other: Datasource[];
 }>();
 
 async function fetchDatasources() {
     if (workflow) {
-        const results = await Promise.all([
-            API.datasources.getAllDatasources({}),
-            API.datasources.getAllDatasources({}, { ids: workflow.value.data.allDatasourceIds }),
-        ]);
-        if (!results[0].status || !results[1].status)
+        const result = await API.datasources.getAllDatasources({});
+        if (!result.status)
             return false;
 
-        const inWorkflow = workflow.value.data.allDatasourceIds.length > 0
-            ? results[1].data.map(Datasource.fromServer)
-            : [];
-        const other = results[0].data
-            .filter(datasource => !inWorkflow.find(d => d.id === datasource.id))
-            .map(Datasource.fromServer);
+        const all = result.data.map(Datasource.fromServer);
+        const selected = workflow.value.data.inputDatasourceId
+            ? all.find(datasource => datasource.id === workflow.value.data.inputDatasourceId)
+            : undefined;
+        const other = workflow.value.data.inputDatasourceId
+            ? all.filter(datasource => datasource.id !== workflow.value.data.inputDatasourceId)
+            : all;
 
-        datasources.value = { inWorkflow, other };
+        datasources.value = { all, selected, other };
         return true;
     }
 
@@ -79,51 +79,28 @@ function edit(id: Id) {
     router.push({ name: 'datasource', params: { id }, query: { state: 'editing' } });
 }
 
-async function addToWorkflow(id: Id) {
+async function selectAsInput(id: Id) {
     if (!workflow)
         throw new Error('No workflow');
 
-    const newData = { ...workflow.value.data, allDatasourceIds: [ ...workflow.value.data.allDatasourceIds, id ] };
+    const newData: WorkflowData = { ...workflow.value.data, inputDatasourceId: id };
     const result = await API.workflows.updateWorkflowData({ id: workflow.value.id }, newData);
     if (!result.status)
         return;
 
-    if (!datasources.value || !('inWorkflow' in datasources.value))
+    if (!datasources.value || !('selected' in datasources.value))
         throw new Error('No workflow');
 
     workflow.value = result.data;
 
-    const datasource = datasources.value.other.find(datasource => datasource.id === id);
-    if (!datasource)
+    const selected = datasources.value.all.find(datasource => datasource.id === id);
+    if (!selected)
         return;
 
     datasources.value = {
-        inWorkflow: [ ...datasources.value.inWorkflow, datasource ],
-        other: datasources.value.other.filter(datasource => datasource.id !== id),
-    };
-}
-
-async function removeFromWorkflow(id: Id) {
-    if (!workflow)
-        throw new Error('No workflow');
-
-    const newData = { ...workflow.value.data, allDatasourceIds: workflow.value.data.allDatasourceIds.filter(dId => dId !== id) };
-    const result = await API.workflows.updateWorkflowData({ id: workflow.value.id }, newData);
-    if (!result.status)
-        return;
-
-    if (!datasources.value || !('inWorkflow' in datasources.value))
-        throw new Error('No workflow');
-
-    workflow.value = result.data;
-
-    const datasource = datasources.value.inWorkflow.find(datasource => datasource.id === id);
-    if (!datasource)
-        return;
-
-    datasources.value = {
-        inWorkflow: datasources.value.inWorkflow.filter(datasource => datasource.id !== id),
-        other: [ ...datasources.value.other, datasource ],
+        all: datasources.value.all,
+        selected,
+        other: datasources.value.all.filter(datasource => datasource.id !== id),
     };
 }
 </script>
@@ -133,17 +110,14 @@ async function removeFromWorkflow(id: Id) {
         <!-- Only in a specific workflow. -->
         <template v-if="workflow">
             <h1>Datasources in workflow</h1>
-            <template v-if="datasources && 'inWorkflow' in datasources">
+            <template v-if="datasources && 'selected' in datasources">
                 <div class="d-flex flex-wrap mt-3">
                     <div
-                        v-for="datasource in datasources.inWorkflow"
-                        :key="datasource.id"
+                        v-if="datasources.selected"
                     >
                         <DatasourceDisplay
-                            :datasource="datasource"
-                            button="Remove from workflow"
-                            @edit="edit(datasource.id)"
-                            @on-click="removeFromWorkflow(datasource.id)"
+                            :datasource="datasources.selected"
+                            @edit="edit(datasources.selected.id)"
                         />
                     </div>
                 </div>
@@ -160,9 +134,9 @@ async function removeFromWorkflow(id: Id) {
                     >
                         <DatasourceDisplay
                             :datasource="datasource"
-                            button="Add to workflow"
+                            button="Select as input"
                             @edit="edit(datasource.id)"
-                            @on-click="addToWorkflow(datasource.id)"
+                            @on-click="selectAsInput(datasource.id)"
                         />
                     </div>
                 </div>

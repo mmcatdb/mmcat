@@ -25,5 +25,4 @@ export default datasources;
 
 type GetDatasourcesQuery = {
     categoryId?: Id;
-    ids?: Id[];
 };

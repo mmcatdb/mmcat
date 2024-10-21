@@ -5,10 +5,10 @@ import { useWorkflow } from '@/utils/injects';
 const workflow = useWorkflow();
 
 const stepLabels: Record<InferenceWorkflowStep, string> = {
-    addDatasources: 'Add Datasources',
+    selectInput: 'Select Input',
     editCategory: 'Edit Schema',
     addMappings: 'Add Mappings',
-    setOutput: 'Set Output',
+    selectOutputs: 'Select Outputs',
     finish: 'Gather Data',
 };
 

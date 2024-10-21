@@ -25,7 +25,7 @@ const router = useFixedRouter();
 
 function getInitialWorkflowRoute(workflow: Workflow): RouteLocationRaw {
     switch (workflow.data.step) {
-    case 'addDatasources':
+    case 'selectInput':
         return { name: 'datasources' };
     case 'editCategory':
         return {
@@ -34,13 +34,27 @@ function getInitialWorkflowRoute(workflow: Workflow): RouteLocationRaw {
         };
     case 'addMappings':
         return { name: 'logicalModels' };
-    case 'setOutput':
+    case 'selectOutputs':
         return { name: 'output' };
     case 'finish':
         return { name: 'gather' };
     }
+}
 
-    throw new Error('Unknown workflow step');
+function isContinueEnabled(workflow: Workflow): boolean {
+    switch (workflow.data.step) {
+    case 'selectInput':
+        return !!workflow.data.inputDatasourceId;
+    case 'editCategory':
+        // TODO
+        return true;
+    case 'addMappings':
+        return true;
+    case 'selectOutputs':
+        return true;
+    case 'finish':
+        return true;
+    }
 }
 
 onMounted(async () => {
@@ -88,6 +102,7 @@ async function continueWorkflow() {
         <Teleport to="#app-left-bar-content">
             <WorkflowSpecificNavigation />
             <button
+                v-if="isContinueEnabled(workflow)"
                 class="mt-4"
                 @click="continueWorkflow"
             >

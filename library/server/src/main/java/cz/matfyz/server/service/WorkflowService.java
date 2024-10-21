@@ -44,7 +44,7 @@ public class WorkflowService {
 
     private Workflow continueInference(Workflow workflow, InferenceWorkflowData data, @Nullable Job currentJob) {
         switch (data.step()) {
-            case addDatasources -> {
+            case selectInput -> {
                 if (currentJob != null) {
                     // The inference job is finished - we can continue.
                     workflow.data = data.updateStep(InferenceWorkflowStep.editCategory);
@@ -61,9 +61,8 @@ public class WorkflowService {
                 final var inferenceJob = jobService.createSystemRun(workflow.categoryId, "Schema inference", payload).job();
 
                 final var newData = new InferenceWorkflowData(
-                    InferenceWorkflowStep.addDatasources,
+                    InferenceWorkflowStep.selectInput,
                     data.inputDatasourceId(),
-                    data.allDatasourceIds(),
                     inferenceJob.id(),
                     data.mtcActionIds()
                 );
@@ -81,11 +80,11 @@ public class WorkflowService {
             }
             case addMappings -> {
                 // There should be at least one mapping for the MTC job ... but it's not checked here.
-                workflow.data = data.updateStep(InferenceWorkflowStep.setOutput);
+                workflow.data = data.updateStep(InferenceWorkflowStep.selectOutputs);
                 repository.save(workflow);
                 return workflow;
             }
-            case setOutput -> {
+            case selectOutputs -> {
                 // TODO This is not clear yet. The problem is that there migh be multiple jobs, however we can only wait for one. The options are:
                 //  - Allow for only one job. When it's finished, the user might go back and create another one.
                 //  - Create a special type of job that contains multiple jobs and waits for all of them to finish.

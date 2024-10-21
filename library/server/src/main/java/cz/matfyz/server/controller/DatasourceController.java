@@ -35,14 +35,10 @@ public class DatasourceController {
     private WrapperService wrapperService;
 
     @GetMapping("/datasources")
-    public List<DatasourceDetail> getAllDatasources(@RequestParam Optional<Id> categoryId, @RequestParam Optional<List<Id>> ids) {
-        List<DatasourceWrapper> datasources;
-        if (ids.isPresent())
-            datasources = repository.findAllByIds(ids.get());
-        else if (categoryId.isPresent())
-            datasources = repository.findAllInCategory(categoryId.get());
-        else
-            datasources = repository.findAll();
+    public List<DatasourceDetail> getAllDatasources(@RequestParam Optional<Id> categoryId) {
+        final List<DatasourceWrapper> datasources = categoryId.isPresent()
+            ? repository.findAllInCategory(categoryId.get())
+            : repository.findAll();
 
         return datasources.stream().map(this::datasourceToDetail).toList();
     }
