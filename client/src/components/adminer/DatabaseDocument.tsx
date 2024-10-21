@@ -29,7 +29,7 @@ export function DatabaseDocument({ apiUrl, setRowCount }: DatabaseDocumentProps)
 
     return (
         <div>
-            {fetchedData !== null && fetchedData.data.length > 0 ? (
+            {fetchedData && fetchedData.data.length > 0 ? (
                 <DocumentComponent value={fetchedData.data} depth={0}/>
             ) : (
                 <span>No rows to display.</span>

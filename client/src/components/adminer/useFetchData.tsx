@@ -4,15 +4,15 @@ import { useState, useEffect } from 'react';
 type BackendResponse = BackendTableResponse | BackendDocumentResponse | BackendGraphResponse;
 
 export function useFetchData<T extends BackendResponse>(url: string) {
-    const [ fetchedData, setFetchedData ] = useState<T | null>(null);
+    const [ fetchedData, setFetchedData ] = useState<T | undefined>();
     const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | null>(null);
+    const [ error, setError ] = useState<string | undefined>();
 
     useEffect(() => {
         (async () => {
             try {
                 setLoading(true);
-                setError(null);
+                setError(undefined);
 
                 const response = await fetch(url);
 

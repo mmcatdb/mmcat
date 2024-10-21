@@ -26,7 +26,7 @@ export function DatabaseTable({ apiUrl, setRowCount }: DatabaseTableProps ) {
     if (error)
         return <p>{error}</p>;
 
-    if (fetchedData === null)
+    if (fetchedData === undefined)
         return <p>No data to display.</p>;
 
     // If the data are for graph database, we want to display just properties in the table view

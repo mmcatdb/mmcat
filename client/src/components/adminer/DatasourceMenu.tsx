@@ -11,7 +11,7 @@ type DatasourceMenuProps = Readonly<{
 export function DatasourceMenu({ datasource, setDatasource }: DatasourceMenuProps) {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | null>(null);
+    const [ error, setError ] = useState<string | undefined>();
 
     useEffect(() => {
         (async () => {

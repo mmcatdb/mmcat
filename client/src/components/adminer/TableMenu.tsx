@@ -24,7 +24,7 @@ export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
 
     return (
         <div className='flex flex-wrap gap-3 items-center'>
-            {fetchedData !== null && fetchedData.data.length > 0 ? (
+            {fetchedData && fetchedData.data.length > 0 ? (
                 fetchedData.data.map((name, index) => (
                     <Button
                         key={index}
