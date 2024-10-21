@@ -8,7 +8,6 @@ import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { reducer } from '@/components/adminer/reducer';
 import type { Datasource } from '@/types/datasource';
 import { View } from '@/types/adminer/View';
-import { type State } from '@/types/adminer/Reducer';
 
 const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
@@ -16,14 +15,16 @@ export function AdminerPage() {
     const [ datasource, setDatasource ] = useState<Datasource>();
     const [ tableName, setTableName ] = useState<string>();
     const [ view, setView ] = useState<View>(View.table);
-    const [ state, dispatch ] = useReducer(reducer, { limit: 50, filters: [] });
-    const [ shownState, setShownState ] = useState<State>({ limit: 50, filters: [] });
+    const [ state, dispatch ] = useReducer(reducer, { submitted: { limit: 50, filters: [] }, new: { limit: 50, filters: [] } });
 
     useEffect(() => {
         setTableName(undefined);
         dispatch({ type:'delete_filters' });
-        setShownState(state);
     }, [ datasource ]);
+
+    useEffect(() => {
+        dispatch({ type:'delete_filters' });
+    }, [ tableName ]);
 
     return (
         <CommonPage>
@@ -43,13 +44,13 @@ export function AdminerPage() {
 
                         {tableName && (
                             <div className='mt-5'>
-                                <FilterForm state={state} dispatch={dispatch} setNewState={setShownState}/>
+                                <FilterForm state={state} dispatch={dispatch}/>
                             </div>
                         )}
 
                         <div className='mt-5'>
                             {typeof tableName === 'string' && (
-                                <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}/${tableName}`} datasourceType={datasource.type} filters={shownState.filters} limit={shownState.limit} view={view}/>
+                                <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer`} datasourceId={datasource.id} tableName={tableName} datasourceType={datasource.type} state={state} view={view}/>
                             )}
                         </div>
                     </>
