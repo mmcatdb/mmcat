@@ -5,7 +5,9 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategoryBuilder;
+import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -89,16 +91,30 @@ class DataGenerationTests {
 
         final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, pkKey, pkIdentifiedKey, null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
-        final List<Mapping> editedMappings = edit.applyMappingEdit(mappings);
-        final Mapping finalMapping = editedMappings.get(0);
 
+        final List<Mapping> editedMappings = edit.applyMappingEdit(mappings);
+        Mapping mappingBusiness = null;
+        Mapping mappingCheckin = null;
+
+        for (Mapping mapping : editedMappings) {
+            if (mapping.kindName().equals("business"))
+                mappingBusiness = mapping;
+            else
+                mappingCheckin = mapping;
+        }
+
+        final MappingBuilder mappingBuilder = new MappingBuilder();
+
+        final ComplexProperty newComplexProperty = mappingBuilder.complex(mappingBusiness.kindName(), mappingBusiness.accessPath().signature(), mappingBusiness.accessPath(), mappingCheckin.accessPath());
+
+        final Mapping finalMapping = Mapping.create(schema, mappingBusiness.rootObject().key(), mappingBusiness.kindName(), newComplexProperty);
         System.out.println("Mapping C:\n" + finalMapping.accessPath());
 
         final AbstractPullWrapper pullWrapper = jsonControlWrapper.getPullWrapper();
         final InstanceCategory emptyInstance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
-        final InstanceCategory instance = new DatabaseToInstance().input(finalMapping, emptyInstance, pullWrapper).run();
+        //final InstanceCategory instance = new DatabaseToInstance().input(finalMapping, emptyInstance, pullWrapper).run();
 
-        System.out.println("Instance: " + instance);
+        //System.out.println("Instance: " + instance);
     }
 
     private Key getKeyFromNames(SchemaCategory schema, MetadataCategory metadata, String name, String domainNameToFind) throws Exception {

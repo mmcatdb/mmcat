@@ -400,9 +400,9 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Cluster Edit on Mapping...");
 
-        Mapping clusterMapping = findClusterMapping(mappings);
+        //Mapping clusterMapping = findClusterMapping(mappings);
 
-        Mapping mergedMapping = createMergedMapping(clusterMapping);
+        //Mapping mergedMapping = createMergedMapping(clusterMapping);
 
         //return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(clusterMapping), mergedMapping);
         return mappings;
