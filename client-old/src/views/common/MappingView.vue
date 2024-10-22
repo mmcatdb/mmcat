@@ -23,19 +23,11 @@ async function fetchMapping() {
 
 <template>
     <h1>Mapping</h1>
-    <div
-        v-if="mapping"
-        class="mapping"
-    >
+    <div class="d-flex">
         <MappingDisplay
+            v-if="mapping"
             :mapping="mapping"
         />
     </div>
     <ResourceLoader :loading-function="fetchMapping" />
 </template>
-
-<style scoped>
-.mapping {
-    display: flex;
-}
-</style>

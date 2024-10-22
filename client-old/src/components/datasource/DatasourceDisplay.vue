@@ -7,14 +7,14 @@ import IriDisplay from '../common/IriDisplay.vue';
 
 defineProps<{
     datasource: Datasource;
-    button?: string;
+    scondaryButton?: string;
 }>();
 
-const emit = defineEmits([ 'edit', 'onClick' ]);
+const emit = defineEmits([ 'edit', 'onSecondaryClick' ]);
 </script>
 
 <template>
-    <div class="datasource-display">
+    <div class="datasource-display d-flex flex-column">
         <FixedRouterLink :to="{ name: 'datasource', params: { id: datasource.id } }">
             <h2>{{ datasource.label }}</h2>
         </FixedRouterLink>
@@ -36,6 +36,7 @@ const emit = defineEmits([ 'edit', 'onClick' ]);
                 />
             </ValueRow>
         </ValueContainer>
+        <div class="flex-grow-1" />
         <div class="button-row">
             <button
                 @click="emit('edit')"
@@ -43,10 +44,10 @@ const emit = defineEmits([ 'edit', 'onClick' ]);
                 Edit
             </button>
             <button
-                v-if="button"
-                @click="emit('onClick')"
+                v-if="scondaryButton"
+                @click="emit('onSecondaryClick')"
             >
-                {{ button }}
+                {{ scondaryButton }}
             </button>
         </div>
     </div>
@@ -56,8 +57,6 @@ const emit = defineEmits([ 'edit', 'onClick' ]);
 .datasource-display {
     padding: 12px;
     border: 1px solid var(--color-primary);
-    margin-right: 16px;
-    margin-bottom: 16px;
     min-width: 204px;
 }
 </style>

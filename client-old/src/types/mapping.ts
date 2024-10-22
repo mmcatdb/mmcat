@@ -11,7 +11,6 @@ export type MappingFromServer = {
     kindName: string;
     accessPath: RootPropertyFromServer;
     version: VersionId;
-    categoryVersion: VersionId;
 };
 
 export class Mapping implements Entity {
@@ -24,7 +23,6 @@ export class Mapping implements Entity {
         public readonly primaryKey: SignatureId,
         public readonly accessPath: RootProperty,
         public readonly version: VersionId,
-        public readonly categoryVersionId: VersionId,
     ) {}
 
     static fromServer(input: MappingFromServer): Mapping {
@@ -36,7 +34,6 @@ export class Mapping implements Entity {
             SignatureId.fromServer(input.primaryKey),
             RootProperty.fromServer(input.accessPath),
             input.version,
-            input.categoryVersion,
         );
     }
 }
@@ -44,7 +41,6 @@ export class Mapping implements Entity {
 export type MappingInit = {
     categoryId: Id;
     datasourceId: Id;
-    logicalModelId: Id;
     rootObjectKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
@@ -55,7 +51,6 @@ export type MappingInfoFromServer = {
     id: Id;
     kindName: string;
     version: VersionId;
-    categoryVersion: VersionId;
 };
 
 export class MappingInfo implements Entity {
@@ -63,7 +58,6 @@ export class MappingInfo implements Entity {
         public readonly id: Id,
         public readonly kindName: string,
         public readonly version: VersionId,
-        public readonly categoryVersion: VersionId,
     ) {}
 
     static fromServer(input: MappingInfoFromServer): MappingInfo {
@@ -71,7 +65,6 @@ export class MappingInfo implements Entity {
             input.id,
             input.kindName,
             input.version,
-            input.categoryVersion,
         );
     }
 }

@@ -1,81 +1,102 @@
 import { type NavigationFailure, useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw, type RouteRecordRaw, useRouter } from 'vue-router';
 
-const specificRoutes: RouteRecordRaw[] = [ {
+const commonRoutes: Record<string, RouteRecordRaw> = {
+    datasource: {
+        path: 'datasources/:id',
+        name: 'datasource',
+        component: () => import('@/views/common/DatasourceView.vue'),
+    },
+    mapping: {
+        path: 'mappings/:id',
+        name: 'mapping',
+        component: () => import('@/views/common/MappingView.vue'),
+    },
+    accessPathEditor: {
+        path: 'mappings/new',
+        name: 'accessPathEditor',
+        component: () => import('@/views/common/AccessPathEditorView.vue'),
+    },
+};
+
+const categoryRoutes: RouteRecordRaw[] = [ {
     path: 'actions',
     name: 'actions',
-    component: () => import('@/views/specific/ActionsView.vue'),
+    component: () => import('@/views/category/ActionsView.vue'),
 }, {
     path: 'actions/:id',
     name: 'action',
-    component: () => import('@/views/specific/ActionView.vue'),
+    component: () => import('@/views/category/ActionView.vue'),
 }, {
     path: 'jobs',
     name: 'jobs',
-    component: () => import('@/views/specific/JobsView.vue'),
+    component: () => import('@/views/category/JobsView.vue'),
 }, {
     path: 'jobs/:id',
     name: 'job',
-    component: () => import('@/views/specific/JobView.vue'),
+    component: () => import('@/views/category/JobView.vue'),
 }, {
     path: 'logical-models',
     name: 'logicalModels',
-    component: () => import('@/views/specific/LogicalModelsView.vue'),
+    component: () => import('@/views/category/LogicalModelsView.vue'),
 }, {
     path: 'logical-models/:id',
     name: 'logicalModel',
-    component: () => import('@/views/specific/LogicalModelView.vue'),
+    component: () => import('@/views/common/LogicalModelView.vue'),
 }, {
     path: 'logical-models/new',
     name: 'newLogicalModel',
-    component: () => import('@/views/specific/NewLogicalModel.vue'),
-}, {
-    path: 'mappings/:id',
-    name: 'mapping',
-    component: () => import('@/views/specific/MappingView.vue'),
-}, {
-    path: 'mappings/new',
-    name: 'accessPathEditor',
-    component: () => import('@/views/specific/AccessPathEditorView.vue'),
-}, {
+    component: () => import('@/views/category/NewLogicalModel.vue'),
+},
+commonRoutes.mapping,
+commonRoutes.accessPathEditor,
+{
     path: 'schema-category',
     name: 'schemaCategory',
-    component: () => import('@/views/specific/SchemaCategoryView.vue'),
+    component: () => import('@/views/category/SchemaCategoryView.vue'),
 }, {
     path: 'instance-category',
     name: 'instanceCategory',
-    component: () => import('@/views/specific/InstanceCategoryView.vue'),
+    component: () => import('@/views/category/InstanceCategoryView.vue'),
 }, {
     path: 'models',
     name: 'models',
-    component: () => import('@/views/specific/ModelsView.vue'),
+    component: () => import('@/views/category/ModelsView.vue'),
 }, {
     path: 'models/:jobId',
     name: 'model',
-    component: () => import('@/views/specific/ModelView.vue'),
+    component: () => import('@/views/category/ModelView.vue'),
 }, {
     path: 'datasources',
     name: 'datasources',
-    component: () => import('@/views/specific/DatasourcesView.vue'),
-}, {
-    path: 'datasources/:id',
-    name: 'datasource',
-    component: () => import('@/views/independent/DatasourceView.vue'),
-}, {
+    component: () => import('@/views/category/DatasourcesView.vue'),
+},
+commonRoutes.datasource,
+{
     path: 'query',
     name: 'query',
-    component: () => import('@/views/specific/QueryingView.vue'),
+    component: () => import('@/views/category/QueryingView.vue'),
 }, {
     path: 'saved-queries',
     name: 'savedQueries',
-    component: () => import('@/views/specific/SavedQueriesView.vue'),
+    component: () => import('@/views/category/SavedQueriesView.vue'),
 }, {
     path: '404',
     name: 'specificNotFound',
-    component: () => import('@/views/PageNotFoundView.vue'),
+    component: () => import('@/views/common/PageNotFoundView.vue'),
 }, {
     path: ':catchAll(.*)',
     redirect: { name: 'specificNotFound' },
 } ];
+
+const workflowRoutes: RouteRecordRaw[] = [ {
+    path: '',
+    name: 'index',
+    component: () => import('@/views/workflow/IndexView.vue'),
+},
+commonRoutes.datasource,
+commonRoutes.mapping,
+commonRoutes.accessPathEditor,
+];
 
 // The specific routes can be accessed in two contexts: category and workflow. Therefore, they have to have different names.
 // We take care of this by prepending the view type to the route name.
@@ -89,31 +110,46 @@ const viewTypes = [
 export type ViewType = typeof viewTypes[number];
 
 function getSpecificRouteName(viewType: ViewType, name: string): string {
-    return `${viewType}:${name}`;
+    const prefix = `${viewType}:`;
+    return (name.startsWith(prefix) ? '' : prefix) + name;
 }
 
-function createSpecificRoutes(viewType: ViewType): RouteRecordRaw[] {
-    return specificRoutes.map(route => ({
+function createSpecificRoutes(routes: RouteRecordRaw[], viewType: ViewType): RouteRecordRaw[] {
+    return routes.map(route => ({
         ...route,
-        name: getSpecificRouteName(viewType, route.name as string),
+        name: route.name && getSpecificRouteName(viewType, route.name as string),
     }));
 }
 
-export const categorySpecificRoutes: RouteRecordRaw[] = createSpecificRoutes('category');
+export const specificRoutes: Record<ViewType, RouteRecordRaw[]> = {
+    category: createSpecificRoutes(categoryRoutes, 'category'),
+    workflow: createSpecificRoutes(workflowRoutes, 'workflow'),
+};
 
-export const workflowSpecificRoutes: RouteRecordRaw[] = createSpecificRoutes('workflow');
+/**
+ * Allows the routes from some view to be used in another view.
+ * E.g., the workflow view contains the "datasource" route which can redirect to the "datasources" throught the "back button". However, the workflow view doesn't have the "datasources" route - it renders the datasources directly from index. So, we need to redirect the "datasource" route to the "index" route.
+ */
+const redirects: Record<ViewType, Record<string, string>> = {
+    category: {},
+    workflow: {
+        'datasources': 'index',
+        'job': 'index',
+        'logicalModel': 'index',
+        'logicalModels': 'index',
+    },
+};
 
 // Routing
-
-const specificRouteNames: string[] = specificRoutes.map(route => route.name as string);
 
 function tryGetRouteView(route: RouteLocationNormalizedLoaded): ViewType | undefined {
     if (typeof route.name !== 'string')
         return;
 
-    for (const viewType of viewTypes)
+    for (const viewType of viewTypes) {
         if (route.name.startsWith(viewType + ':'))
             return viewType;
+    }
 }
 
 /**
@@ -129,19 +165,27 @@ export function fixRouterName(to: RouteLocationRaw, route: RouteLocationNormaliz
     if (!view)
         return to;
 
-    // The view prefix might be already applied.
-    if (!specificRouteNames.includes(to.name))
-        return to;
+    let fixedName = getSpecificRouteName(view, to.name);
+
+    // Let's check if the route exists.
+    if (!specificRoutes[view].find(r => r.name === fixedName)) {
+        // Hmm, it doesn't. Let's try to redirect it.
+        const redirect = redirects[view][to.name];
+        if (!redirect)
+            throw new Error(`Route "${fixedName}" does not exist and the original route "${to.name}" can't be redirected.`);
+
+        fixedName = getSpecificRouteName(view, redirect);
+    }
 
     return {
         ...to,
-        name: getSpecificRouteName(view, to.name),
+        name: fixedName,
     };
 }
 
 type FixedRouter = {
     push(to: RouteLocationRaw, newView?: ViewType): Promise<NavigationFailure | void | undefined>;
-}
+};
 
 export function useFixedRouter(): FixedRouter {
     const route = useRoute();
@@ -150,6 +194,6 @@ export function useFixedRouter(): FixedRouter {
     return {
         push(to: RouteLocationRaw, newView?: ViewType): Promise<NavigationFailure | void | undefined> {
             return router.push(fixRouterName(to, route, newView));
-        }
-    }
+        },
+    };
 }

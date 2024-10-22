@@ -4,7 +4,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 const LOADING_WAIT_TIME_IN_MILLISECONDS = 400;
 
 type ResourceLoaderProps = {
-    loadingFunction: () => Promise<boolean>;
+    loadingFunction: () => Promise<boolean | 'no-refetch'>;
     notReloadable?: boolean;
     refreshPeriod?: number;
 };
@@ -48,10 +48,10 @@ const refreshingTimeoutId = ref<number>();
 // The correct solution would be to add an abort controller.
 const continueRefreshing = ref(true);
 
-function onFinishedFetch(result: boolean) {
+function onFinishedFetch(result: boolean | 'no-refetch') {
     state.value = result ? State.Success : State.NotFound;
 
-    if (result && props.refreshPeriod && continueRefreshing.value) {
+    if (result && result !== 'no-refetch' && props.refreshPeriod && continueRefreshing.value) {
         refreshingTimeoutId.value = setTimeout(async () => {
             onFinishedFetch(await props.loadingFunction());
         }, props.refreshPeriod);

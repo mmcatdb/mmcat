@@ -34,11 +34,20 @@ CREATE TABLE datasource (
 
 INSERT INTO datasource (id, json_value)
 VALUES
-    ('119dd3fc-aabd-4195-9d12-94abf4fceeb0', '{
+    ('00000000-aabd-4195-9d12-94abf4fceeb0', '{
         "label": "Czech business registry",
         "type": "jsonld",
         "settings": {
             "url": "https://data.mmcatdb.com/test2.jsonld",
+            "isWritable": false,
+            "isQueryable": false
+        }
+    }'),
+    ('00000001-aabd-4195-ad12-94abf4fceeb0', '{
+        "label": "Yelp business sample",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/yelp_business_sample.json",
             "isWritable": false,
             "isQueryable": false
         }

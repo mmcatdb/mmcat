@@ -70,13 +70,11 @@ async function restartJob() {
         emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
-async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | null, newLayoutType: LayoutType | null) {
+async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | null, layoutType: LayoutType | null) {
     fetching.value = true;
 
-    const payload: SaveJobResultPayload = { isFinal: permanent, edit, newLayoutType };
-    console.log('Sending payload:', JSON.stringify(payload));
-
-    const result = await API.jobs.updateJobResult({ id: props.job.id }, { isFinal: permanent, edit, newLayoutType } as SaveJobResultPayload);
+    const payload: SaveJobResultPayload = { isFinal, edit, layoutType };
+    const result = await API.jobs.updateJobResult({ id: props.job.id }, payload);
     fetching.value = false;
     if (result.status) 
         emit('updateJob', Job.fromServer(result.data, info.value));
@@ -200,7 +198,7 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
             />
             <TextArea
                 v-else-if="job.payload.type !== ActionType.RSDToCategory && job.data"
-                v-model="(job.data as ModelJobData).value"
+                v-model="(job.data as ModelJobData).model"
                 class="w-100 mt-2"
                 readonly
                 :min-rows="1"

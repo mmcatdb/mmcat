@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Job } from '@/types/job';
+import { Job, JobState } from '@/types/job';
 import API from '@/utils/api';
 import { useSchemaCategoryInfo } from '@/utils/injects';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
@@ -18,6 +18,9 @@ async function fetchJob() {
         return false;
 
     job.value = Job.fromServer(result.data, info.value);
+    if (job.value.state === JobState.Failed || job.value.state === JobState.Waiting)
+        return 'no-refetch';
+
     return true;
 }
 </script>
@@ -34,5 +37,8 @@ async function fetchJob() {
             @update-job="newJob => job = newJob"
         />
     </div>
-    <ResourceLoader :loading-function="fetchJob" />
+    <ResourceLoader
+        :loading-function="fetchJob"
+        :refresh-period="2000"
+    />
 </template>

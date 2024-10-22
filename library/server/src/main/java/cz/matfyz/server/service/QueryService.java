@@ -95,7 +95,7 @@ public class QueryService {
                 datasources.put(datasourceWrapper.id(), datasourceWrapper);
 
                 final var builder = new Datasource.Builder();
-                mappingRepository.findAll(model.logicalModel().id()).forEach(mappingWrapper -> {
+                mappingRepository.findAll(model.logicalModel().datasourceId).forEach(mappingWrapper -> {
                     final var mapping = mappingWrapper.toMapping(category);
                     builder.mapping(mapping);
                 });
@@ -154,7 +154,7 @@ public class QueryService {
             });
 
         // The same holds true for mappings.
-        mappingRepository.findAll().stream()
+        mappingRepository.findAllInCategory(category.id()).stream()
             .filter(mapping -> mapping.lastValid().equals(oldVersion))
             .forEach(mapping -> {
                 mapping.updateLastValid(evolution.version);

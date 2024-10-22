@@ -15,7 +15,7 @@ public class Workflow extends Entity {
 
     // The general idea is that a workflow is a sequence of steps. Each step might require user input, job, or both.
     // If a step requires a job, it waits for the job to finish. Only after that can the user continue.
-    // There might be only one waiting job for a step, because it's run by trying to continue to the next step.
+    // There might be only multiple waiting jobs for a step (it's up to the workflow to decide when to continue). However, it isn't recommended since it might be confusing for the users.
     // This class holds only the current job the workflow is waiting for, not the previous ones.
 
     public final Id categoryId;

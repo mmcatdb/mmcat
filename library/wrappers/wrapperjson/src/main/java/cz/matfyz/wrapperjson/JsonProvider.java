@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
 
 /**
@@ -85,7 +87,7 @@ public class JsonProvider {
         if (settings.url.endsWith(".json")) {
             jsonFileNames.add(new File(uri.getPath()).getName().replace(".json", ""));
         } else {
-            throw new IllegalArgumentException("The provided URL does not point to a directory.");
+            throw new IllegalArgumentException("Provided URL doesn't end with .json.");
         }
         return jsonFileNames;
     }
@@ -121,6 +123,7 @@ public class JsonProvider {
     /**
      * A record representing JSON settings, including the URL, writability, and queryability of the JSON source.
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record JsonSettings(
         String url,
         boolean isWritable,

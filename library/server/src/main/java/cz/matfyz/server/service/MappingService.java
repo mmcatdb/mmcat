@@ -1,14 +1,17 @@
 package cz.matfyz.server.service;
 
+import cz.matfyz.server.entity.LogicalModel;
 import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.evolution.MappingEvolution;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,12 @@ public class MappingService {
     private LogicalModelRepository logicalModelRepository;
 
     @Autowired
+    private DatasourceRepository datasourceRepository;
+
+    @Autowired
+    private LogicalModelService logicalModelService;
+
+    @Autowired
     private EvolutionRepository evolutionRepository;
 
     @Autowired
@@ -34,7 +43,15 @@ public class MappingService {
 
     public MappingWrapper create(MappingInit init) {
         final var category = categoryRepository.find(init.categoryId());
-        final var logicalModel = logicalModelRepository.find(init.categoryId(), init.datasourceId());
+        LogicalModelWithDatasource logicalModel;
+        try {
+            logicalModel = logicalModelRepository.find(init.categoryId(), init.datasourceId());
+        }
+        catch (Exception e) {
+            // TODO This is just atrocious. It makes me feel sick. Will be fixed at the exact moment we send the logical models to the Jesus.
+            final var datasource = datasourceRepository.find(init.datasourceId());
+            logicalModel = logicalModelService.create(init.categoryId(), init.datasourceId(), datasource.label);
+        }
 
         final var newVersion = category.systemVersion().generateNext();
         final var mapping = MappingWrapper.createNew(newVersion, logicalModel.logicalModel().id(), init.rootObjectKey(), init.primaryKey(), init.kindName(), init.accessPath());
@@ -76,7 +93,7 @@ public class MappingService {
 
         // All other mappings are independed on this mapping so we can propagate the evolution.
         // TODO make more efficient with orm.
-        repository.findAll().stream()
+        repository.findAllInCategory(category.id()).stream()
             .filter(mapping -> mapping.lastValid().equals(oldVersion))
             .forEach(mapping -> {
                 mapping.updateLastValid(evolution.version);

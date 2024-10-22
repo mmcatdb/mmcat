@@ -51,20 +51,21 @@ public class MappingRepository {
         }, "Mapping", id);
     }
 
-    public List<MappingWrapper> findAll(Id logicalModelId) {
+    public List<MappingWrapper> findAll(Id datasourceId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
-                    id,
-                    version,
-                    last_valid,
-                    logical_model_id,
-                    json_value
+                    mapping.id as id,
+                    mapping.version as version,
+                    mapping.last_valid as last_valid,
+                    mapping.logical_model_id as logical_model_id,
+                    mapping.json_value as json_value
                 FROM mapping
-                WHERE mapping.logical_model_id = ?
+                JOIN logical_model ON mapping.logical_model_id = logical_model.id
+                WHERE logical_model.datasource_id = ?
                 ORDER BY mapping.id;
                 """);
-            setId(statement, 1, logicalModelId);
+            setId(statement, 1, datasourceId);
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next())
@@ -72,18 +73,21 @@ public class MappingRepository {
         });
     }
 
-    public List<MappingWrapper> findAll() {
+    public List<MappingWrapper> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
-                    id,
-                    version,
-                    last_valid,
-                    logical_model_id,
-                    json_value
+                    mapping.id as id,
+                    mapping.version as version,
+                    mapping.last_valid as last_valid,
+                    mapping.logical_model_id as logical_model_id,
+                    mapping.json_value as json_value
                 FROM mapping
+                JOIN logical_model ON mapping.logical_model_id = logical_model.id
+                WHERE logical_model.category_id = ?
                 ORDER BY mapping.id;
                 """);
+            setId(statement, 1, categoryId);
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next())

@@ -102,40 +102,28 @@ public class WrapperService {
     // JsonLd
 
     private JsonLdControlWrapper getJsonLdControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var provider = createJsonLdProvider(datasource);
-        return new JsonLdControlWrapper(provider);
-    }
-
-    private static JsonLdProvider createJsonLdProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, JsonLdSettings.class);
+        final var provider = new JsonLdProvider(settings);
 
-        return new JsonLdProvider(settings);
+        return new JsonLdControlWrapper(provider);
     }
 
     // Json
 
     private JsonControlWrapper getJsonControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var provider = createJsonProvider(datasource);
-        return new JsonControlWrapper(provider);
-    }
-
-    private static JsonProvider createJsonProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, JsonSettings.class);
+        final var provider = new JsonProvider(settings);
 
-        return new JsonProvider(settings);
+        return new JsonControlWrapper(provider);
     }
 
     // Csv
 
     private CsvControlWrapper getCsvControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var provider = createCsvProvider(datasource);
-        return new CsvControlWrapper(provider);
-    }
-
-    private static CsvProvider createCsvProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, CsvSettings.class);
+        final var provider = new CsvProvider(settings);
 
-        return new CsvProvider(settings);
+        return new CsvControlWrapper(provider);
     }
 
 }

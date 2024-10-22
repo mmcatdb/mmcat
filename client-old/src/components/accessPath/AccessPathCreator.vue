@@ -5,12 +5,12 @@ import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath
 import { SignatureId, StaticName } from '@/types/identifiers';
 import { type Node, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
-import { LogicalModel } from '@/types/logicalModel';
 import { useEvocat } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
+import { Datasource } from '@/types/datasource';
 
 /**
  * Extracts the graph object from Evocat.
@@ -20,12 +20,11 @@ const { graph } = $(useEvocat());
 /**
  * Props passed to the component.
  * @typedef {Object} Props
- * @property {LogicalModel} selectedLogicalModel - The selected logical model.
+ * @property {Datasource} selectedDatasource - The selected datasource.
  */
 const props = defineProps<{
-    selectedLogicalModel: LogicalModel;
+    selectedDatasource: Datasource;
 }>();
-
 
 const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
@@ -61,7 +60,7 @@ const emit = defineEmits([ 'finish', 'cancel' ]);
  * Confirms the selected datasource and root node. It marks the root node as selected and finalizes the root.
  */
 function confirmDatasourceAndRootNode() {
-    if (!props.selectedLogicalModel || !selectingRootNode.value)
+    if (!props.selectedDatasource || !selectingRootNode.value)
         return;
 
     selectingRootNode.value.unselect();
@@ -73,7 +72,7 @@ function confirmDatasourceAndRootNode() {
  * Confirms the selected nodes and constructs the access path from the root node and the selected nodes.
  */
 function confirmSelectedNodes() {
-    if (!props.selectedLogicalModel || !selectingRootNode.value) return;
+    if (!props.selectedDatasource || !selectingRootNode.value) return;
 
     const label = selectingRootNode.value.metadata.label.toLowerCase();
     accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
@@ -151,7 +150,7 @@ function filterChildren(node: Node): Node[] {
         const allChildren = graph.getChildrenForNode(node);
         return allChildren.filter(child => 
             selectedNodes.value.some(selectedNode => selectedNode.equals(child)) &&
-            !processedNodes.has(child.schemaObject.key.value)
+            !processedNodes.has(child.schemaObject.key.value),
         );
     }
     return [];
@@ -227,7 +226,7 @@ function cancel() {
     <div class="divide">
         <div>
             <div
-                v-if="!accessPath || !selectedLogicalModel"
+                v-if="!accessPath || !selectedDatasource"
                 class="editor"
             >
                 <ValueContainer v-if="!rootConfirmed">
@@ -238,9 +237,12 @@ function cancel() {
                         />
                     </ValueRow>
                 </ValueContainer>
-                <div v-if="!rootConfirmed" class="button-row">
+                <div
+                    v-if="!rootConfirmed"
+                    class="button-row"
+                >
                     <button
-                        :disabled="!selectedLogicalModel || !selectingRootNode || rootConfirmed"
+                        :disabled="!selectedDatasource || !selectingRootNode || rootConfirmed"
                         @click="confirmDatasourceAndRootNode"
                     >
                         Confirm
@@ -280,7 +282,7 @@ function cancel() {
             </div>
             <AccessPathEditor
                 v-else
-                :datasource="selectedLogicalModel.datasource"
+                :datasource="selectedDatasource"
                 :root-property="accessPath"
                 @finish="createMapping"
                 @update:rootProperty="updateRootProperty"

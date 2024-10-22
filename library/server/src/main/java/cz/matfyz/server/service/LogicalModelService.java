@@ -35,14 +35,14 @@ public class LogicalModelService {
 
     public LogicalModelWithMappings findFull(Id logicalModelId) {
         final var model = repository.find(logicalModelId);
-        final var mappings = mappingRepository.findAll(logicalModelId);
+        final var mappings = mappingRepository.findAll(model.datasource().id());
 
         return new LogicalModelWithMappings(model.logicalModel(), model.datasource(), mappings);
     }
 
     public List<LogicalModelWithMappings> findAllFull(Id categoryId) {
         return repository.findAllInCategory(categoryId).stream().map(model -> {
-            final var mappings = mappingRepository.findAll(model.logicalModel().id());
+            final var mappings = mappingRepository.findAll(model.logicalModel().datasourceId);
 
             return new LogicalModelWithMappings(model.logicalModel(), model.datasource(), mappings);
         }).toList();

@@ -4,6 +4,9 @@ import API from '@/utils/api';
 import { computed, ref, watch } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { useRoute } from 'vue-router';
+import { tryUseWorkflow } from '@/utils/injects';
+import { type WorkflowData } from '@/types/workflow';
 
 const props = defineProps<{
     datasource?: Datasource;
@@ -16,7 +19,6 @@ const emit = defineEmits<{
 }>();
 
 const fetching = ref(false);
-
 
 type InnerValue = {
     type?: DatasourceType;
@@ -64,6 +66,11 @@ async function save() {
     fetching.value = false;
 }
 
+// If we are in the phase of creating and selecting a new datasource as input for the workflow, we need to set it on the workflow.
+const route = useRoute();
+const isSelecting = ref(route.query.state === 'selecting');
+const workflow = tryUseWorkflow();
+
 async function createNew() {
     const init = innerValue.value;
     if (!init.type)
@@ -74,6 +81,16 @@ async function createNew() {
         return;
 
     const newDatasource = Datasource.fromServer(result.data);
+
+    if (workflow && isSelecting.value) {
+        const newData: WorkflowData = { ...workflow.value.data, inputDatasourceId: newDatasource.id };
+        const result = await API.workflows.updateWorkflowData({ id: workflow.value.id }, newData);
+        if (!result.status)
+            return;
+
+        workflow.value = result.data;
+    }
+
     emit('save', newDatasource);
 }
 

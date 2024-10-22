@@ -35,7 +35,7 @@ const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(l
     <div>
         <h1>Logical model</h1>
         <template v-if="logicalModel">
-            <div class="logical-model">
+            <div class="d-flex">
                 <LogicalModelDisplay
                     :logical-model="logicalModel"
                 />
@@ -49,26 +49,14 @@ const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(l
                     Create new
                 </button>
             </div>
-            <div class="mappings">
-                <div
+            <div class="d-flex flex-wrap gap-3">
+                <MappingDisplay
                     v-for="mapping in logicalModel.mappings"
                     :key="mapping.id"
-                >
-                    <MappingDisplay :mapping="mapping" />
-                </div>
+                    :mapping="mapping"
+                />
             </div>
         </template>
         <ResourceLoader :loading-function="fetchModel" />
     </div>
 </template>
-
-<style scoped>
-.logical-model {
-    display: flex;
-}
-
-.mappings {
-    display: flex;
-    flex-wrap: wrap;
-}
-</style>

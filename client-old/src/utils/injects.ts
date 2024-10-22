@@ -4,7 +4,6 @@ import type { Id } from '@/types/id';
 import type { SchemaCategoryInfo } from '@/types/schema';
 import type { Workflow } from '@/types/workflow';
 import { inject, type InjectionKey, type Ref, type ShallowRef } from 'vue';
-import { useRoute } from 'vue-router';
 
 export const categoryInfoKey: InjectionKey<Ref<SchemaCategoryInfo>> = Symbol('category');
 
@@ -21,7 +20,7 @@ export function useSchemaCategoryId(): Id {
 }
 
 export function tryUseSchemaCategoryId(): Id | undefined {
-    return inject(categoryInfoKey)?.value.id;
+    return inject(categoryInfoKey, undefined)?.value.id;
 }
 
 export type EvocatContext = {
@@ -50,5 +49,5 @@ export function useWorkflow(): Ref<Workflow> {
 }
 
 export function tryUseWorkflow(): Ref<Workflow> | undefined {
-    return inject(workflowKey);
+    return inject(workflowKey, undefined);
 }
