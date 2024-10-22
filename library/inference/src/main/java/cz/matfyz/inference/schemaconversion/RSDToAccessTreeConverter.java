@@ -58,6 +58,7 @@ public class RSDToAccessTreeConverter {
      * @param i The current index used for processing.
      * @param currentNode The current {@link AccessTreeNode} being processed.
      */
+    /*
     private void buildAccessTree(RecordSchemaDescription rsdParent, Key keyParent, int i, AccessTreeNode currentNode) {
         if (!rsdParent.getChildren().isEmpty()) {
             if (rsdParent.getName().equals("root")) {
@@ -68,7 +69,7 @@ public class RSDToAccessTreeConverter {
             }
 
             for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
-                if (!rsdChild.getName().equals("_")) { // excluding the "_" objects of arrays - PROBLEMATIC
+                if (!rsdChild.getName().equals("_")) { // excluding the "_" objects of arrays - PROBLEMATIC (some arrays have more children fields in them)
                     boolean isArray = isTypeArray(rsdChild);
                     AccessTreeNode.State state = isArray ? AccessTreeNode.State.COMPLEX : AccessTreeNode.State.SIMPLE;
                     BaseSignature signature = Signature.createBase(signatureGenerator.next());
@@ -89,6 +90,41 @@ public class RSDToAccessTreeConverter {
                         child.addChild(indexChild);
                     }
 
+                    buildAccessTree(rsdChild, keyChild, i++, child);
+                }
+            }
+        }
+    }*/
+
+    private void buildAccessTree(RecordSchemaDescription rsdParent, Key keyParent, int i, AccessTreeNode currentNode) {
+        if (!rsdParent.getChildren().isEmpty()) {
+            if (rsdParent.getName().equals("root")) {
+                currentNode = root;
+            }
+            if (currentNode != null && currentNode.getState() != AccessTreeNode.State.ROOT) {
+                currentNode.setState(AccessTreeNode.State.COMPLEX);
+            }
+            for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
+                boolean isArray = isTypeArray(rsdChild);
+                AccessTreeNode.State state = rsdChild.getChildren().isEmpty() ? AccessTreeNode.State.SIMPLE : AccessTreeNode.State.COMPLEX;
+                BaseSignature signature = Signature.createBase(signatureGenerator.next());
+                Key keyChild = new Key(keyGenerator.next());
+                Min min = findMin(rsdParent, rsdChild);
+
+                if (rsdChild.getName().equals("_")) { // Check for mongo identifier
+                    buildAccessTree(rsdChild, keyParent, i++, currentNode);
+                } else if (!rsdChild.getName().equals("_id")){
+                    String label = "";
+                    AccessTreeNode child = new AccessTreeNode(state, rsdChild.getName(), signature, keyChild, keyParent, label, min, isArray);
+                    currentNode.addChild(child);
+
+                    // Add _index node if parent is array and the _index is not yet present
+                    if (isArray && !hasIndexChild(child)) {
+                        BaseSignature signatureIndex = Signature.createBase(signatureGenerator.next());
+                        Key keyIndex = new Key(keyGenerator.next());
+                        AccessTreeNode indexChild = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "_index", signatureIndex, keyIndex, keyChild, "", Min.ONE, false);
+                        child.addChild(indexChild);
+                    }
                     buildAccessTree(rsdChild, keyChild, i++, child);
                 }
             }

@@ -137,8 +137,8 @@ public class MMInferOneInAll {
      * @throws Exception if an error occurs during the candidate mining process.
      */
     public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
-        BloomFilter.setParams(10000, new BasicHashFunction());
-        StartingEndingFilter.setParams(10000);
+        BloomFilter.setParams(100000, new BasicHashFunction());
+        StartingEndingFilter.setParams(100000);
         CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
         Candidates candidates = candidateMiner.process(wrapper, kinds);
 
