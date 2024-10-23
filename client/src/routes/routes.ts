@@ -31,6 +31,8 @@ export const routes = {
     project: {
         index: projectIndex,
         databases: projectIndex.child('/databases', 'databases'),
+        models: projectIndex.child('/models', 'models'),
+        querying: projectIndex.child('/querying', 'querying'),
     },
     datasources: 'datasources',
     adminer: 'adminer',

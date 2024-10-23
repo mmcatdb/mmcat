@@ -2,7 +2,7 @@ import { Suspense, useMemo } from 'react';
 import { Outlet, type Params, useLoaderData, useMatches, defer, Await } from 'react-router-dom';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { Link, portals } from '@/components/common';
-import { ThemeToggle } from '@/components/CommonPage';
+import { CommonPage, ThemeToggle } from '@/components/CommonPage';
 import clsx from 'clsx';
 import { routes } from '../routes/routes';
 import { CollapseContextToggle } from '@/components/project/context';
@@ -50,18 +50,15 @@ function ProjectIndexInner() {
     const { category } = useCategoryInfo();
 
     return (
-        <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}>
-            <ProjectMenu projectId={category.id} />
-            <div className='mm-context'>
-                <div className='mm-context-header flex items-center px-2'>
+        <CommonPage>
+            {/* <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}> */}
+                {/* TODO: place category.label to navbar (via portal or sth) */}
+                {/* <div className='mm-context-header flex items-center px-2'>
                     {category.label}
-                </div>
-                <div className='mm-context-content main-scroller main-scroller-no-center' id={portals.context} />
-            </div>
-            <div className='mm-content main-scroller main-scroller-no-center p-4'>
-                <Outlet />
-            </div>
-        </div>
+                </div> */}
+            <Outlet />
+            {/* </div> */}
+        </CommonPage>
     );
 }
 

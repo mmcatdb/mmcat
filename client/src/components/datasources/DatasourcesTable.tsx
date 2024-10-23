@@ -92,7 +92,9 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     };
 
     const handleRowAction = (key: React.Key) => {
-        navigate(`/datasources/${key}`);
+        navigate(`/datasources/${key}`, {
+            state: { sortDescriptor },
+        });
     };
 
     return (

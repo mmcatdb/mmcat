@@ -8,6 +8,9 @@ import { ProjectIndex, projectIndexLoader } from '@/pages/ProjectIndex';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
 import { DatasourceDetailPage } from '@/pages/DatasourceDetailPage';
 import { AdminerPage } from '@/pages/AdminerPage';
+import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
+import { ModelsPage } from '@/pages/ModelsPage';
+import { QueryingPage } from '@/pages/GueryingPage';
 
 export const router = createBrowserRouter([
     {
@@ -32,6 +35,14 @@ export const router = createBrowserRouter([
                 loader: schemaCategoryLoader,
                 Component: SchemaCategory,
             },
+            {
+                path: routes.project.models.path,
+                Component: ModelsPage,
+            },
+            {
+                path: routes.project.querying.path,
+                Component: QueryingPage,
+            },
         ],
     },
     {
@@ -45,5 +56,9 @@ export const router = createBrowserRouter([
     {
         path: 'adminer',
         Component: AdminerPage,
+    },
+    {
+        path: 'schema-categories',
+        Component: SchemaCategoriesPage,
     },
 ]);
