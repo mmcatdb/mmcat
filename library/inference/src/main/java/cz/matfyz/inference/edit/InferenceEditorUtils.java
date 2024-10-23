@@ -148,6 +148,16 @@ public class InferenceEditorUtils {
         editor.deleteObjects(keysToDelete);
     }
 
+    public static void updateObjects(SchemaCategory schema, MetadataCategory metadata, SchemaObject objectToDelete, SchemaObject objectToAdd) {
+        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
+        editor.deleteObject(objectToDelete.key());
+
+        MetadataObject metadataToDelete = metadata.getObject(objectToDelete);
+
+        schema.addObject(objectToAdd);
+        metadata.setObject(objectToAdd, new MetadataObject(metadataToDelete.label, metadataToDelete.position));
+    }
+
     /**
      * Creates a new mapping by merging the specified mappings into a new mapping structure.
      *

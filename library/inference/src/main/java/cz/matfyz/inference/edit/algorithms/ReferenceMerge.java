@@ -2,13 +2,18 @@ package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -267,9 +272,6 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
      */
     @Override
     public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
-        /*
-         * No edit required
-         */
         LOGGER.info("Applying Reference Merge Edit on Mapping...");
 
         /*
@@ -278,10 +280,12 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             this.newReferenceSignature = this.newReferenceSignature.dual();
         }*/
 
-        // Mapping referenceMapping = findReferenceMapping(mappings);
+        Mapping referenceMapping = findReferenceMapping(mappings);
         // Mapping referredMapping = findReferredMapping(mappings, newSchemaCategory);
 
-        return mappings;
+        Mapping cleanedReferenceMapping = createCleanedMapping(referenceMapping);
+
+        return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(referenceMapping), Arrays.asList(cleanedReferenceMapping));
     }
 
     /**
@@ -336,6 +340,42 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             }
         }
         throw new NotFoundException("Signature for referred object has not been found");
+    }
+
+        /**
+     * Creates a cleaned mapping by removing unwanted subpaths.
+     *
+     * @param mapping The original mapping to clean.
+     * @return The cleaned mapping.
+     * @throws Exception
+     */
+    private Mapping createCleanedMapping(Mapping mapping) {
+        ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
+        return new Mapping(newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, mapping.primaryKey());
+    }
+
+    /**
+     * Cleans the complex property by removing subpaths associated with old signatures.
+     *
+     * @param mapping The mapping containing the complex property to clean.
+     * @return The cleaned complex property.
+     * @throws Exception
+     */
+    private ComplexProperty cleanComplexProperty(Mapping mapping) {
+        ComplexProperty complexProperty = mapping.accessPath();
+        Signature oldSignature = oldReferenceSignature;
+        AccessPath accessPathToDelete = complexProperty.getSubpathBySignature(oldSignature);
+        ComplexProperty cleanedComplexProperty = complexProperty.minusSubpath(accessPathToDelete);
+
+        return adjustPKComplexProperty(cleanedComplexProperty, accessPathToDelete);
+    }
+
+    private ComplexProperty adjustPKComplexProperty(ComplexProperty complexProperty, AccessPath accessPathToDelete) {
+        SimpleProperty pkProperty = new SimpleProperty(accessPathToDelete.name(), newReferenceSignature);
+
+        List<AccessPath> newAccessPaths = new ArrayList<>(complexProperty.subpaths());
+        newAccessPaths.add(pkProperty);
+        return new ComplexProperty(complexProperty.name(), complexProperty.signature(), newAccessPaths);
     }
 
 }
