@@ -8,6 +8,7 @@ import { useEvocat } from '@/utils/injects';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
+import { Datasource } from '@/types/datasource';
 
 /**
  * Extracts the graph object from Evocat.
@@ -20,7 +21,7 @@ const { graph } = $(useEvocat());
  * @property {LogicalModel[]} logicalModels - Array of logical models.
  */
 const props = defineProps<{
-    logicalModels: LogicalModel[];
+    datasources: Datasource[];
 }>();
 
 /**
@@ -29,7 +30,7 @@ const props = defineProps<{
 const accessPath = ref<GraphRootProperty>();
 const originalMapping = ref<Mapping>();
 const originalGraphProperty = ref<GraphRootProperty>();
-const selectedLogicalModel = ref<LogicalModel>();
+const selectedDatasource = ref<Datasource>();
 const selectedMapping = ref<Mapping>();
 const mappings = ref<Mapping[]>([]);
 const mappingConfirmed = ref(false);
@@ -51,15 +52,15 @@ const emit = defineEmits([ 'finish', 'cancel' ]);
  * Lifecycle hook to load mappings for the selected logical model on component mount.
  */
 onMounted(async () => {
-    await loadMappingsForSelectedLogicalModel();
+    await loadMappingsForSelectedDatasource();
 });
 
 /**
  * Watches the selected logical model and loads the associated mappings when changed.
  */
-watch(selectedLogicalModel, async (newModel) => {
+watch(selectedDatasource, async (newModel) => {
     if (newModel) 
-        await loadMappingsForSelectedLogicalModel();
+        await loadMappingsForSelectedDatasource();
 });
 
 /**
@@ -74,11 +75,11 @@ watch(selectedMapping, (newMapping) => {
  * Loads mappings for the currently selected logical model.
  * Fetches the mappings from the server and updates the mappings array.
  */
-async function loadMappingsForSelectedLogicalModel() {
-    if (!selectedLogicalModel.value) return;
+async function loadMappingsForSelectedDatasource() {
+    if (!selectedDatasource.value) return;
 
-    const logicalModelId = selectedLogicalModel.value.id;
-    const result = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId });
+    const datasourceId = selectedDatasource.value.id;
+    const result = await API.mappings.getAllMappingsInDatasource({ datasourceId });
     if (result.status) 
         mappings.value = result.data.map(Mapping.fromServer);
 }
@@ -157,20 +158,20 @@ function cancel() {
     <div class="divide">
         <div>
             <div 
-                v-if="props.logicalModels.length && !mappingConfirmed"
+                v-if="props.datasources.length && !mappingConfirmed"
                 class="editor"
             >
                 <ValueRow label="Logical model:">
                     <select 
-                        v-model="selectedLogicalModel"
+                        v-model="selectedDatasource"
                         :disabled="mappingConfirmed"
                     >
                         <option 
-                            v-for="logicalModel in logicalModels" 
-                            :key="logicalModel.id" 
-                            :value="logicalModel"
+                            v-for="datasource in datasources" 
+                            :key="datasource.id" 
+                            :value="datasource"
                         >
-                            {{ logicalModel.label }}
+                            {{ datasource.label }}
                         </option>
                     </select>
                 </ValueRow>
@@ -203,8 +204,8 @@ function cancel() {
                 </div>
             </div>
             <AccessPathEditor
-                v-else-if="selectedLogicalModel"
-                :datasource="selectedLogicalModel.datasource"
+                v-else-if="selectedDatasource && accessPath"
+                :datasource="selectedDatasource"
                 :root-property="accessPath"
                 @finish="createMapping"
                 @update:rootProperty="updateRootProperty"

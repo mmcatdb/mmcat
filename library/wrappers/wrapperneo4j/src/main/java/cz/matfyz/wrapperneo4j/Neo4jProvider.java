@@ -2,6 +2,7 @@ package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
@@ -44,6 +45,7 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
             driver.close();
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record Neo4jSettings(
         String host,
         String port,

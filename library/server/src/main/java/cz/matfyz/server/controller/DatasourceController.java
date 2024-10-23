@@ -59,7 +59,7 @@ public class DatasourceController {
     public DatasourceDetail updateDatasource(@PathVariable Id id, @RequestBody DatasourceUpdate update) {
         if (!update.hasPassword()) {
             final var originalDatasource = repository.find(id);
-            update.setPasswordFrom(originalDatasource);
+            update.trySetPasswordFrom(originalDatasource);
         }
         final DatasourceWrapper datasource = service.update(id, update);
 

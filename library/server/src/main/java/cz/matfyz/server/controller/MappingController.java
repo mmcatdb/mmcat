@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,9 +33,14 @@ public class MappingController {
         return repository.find(id);
     }
 
-    @GetMapping("/logical-models/{logicalModelId}/mappings")
-    public List<MappingWrapper> getAllMappingsInLogicalModel(@PathVariable Id logicalModelId) {
-        return repository.findAll(logicalModelId);
+    @GetMapping("/datasources/{datasourceId}/mappings")
+    public List<MappingWrapper> getAllMappingsInDatasource(@PathVariable Id datasourceId) {
+        return repository.findAll(datasourceId);
+    }
+
+    @GetMapping("/mappings")
+    public List<MappingWrapper> getAllMappingsInCategory(@RequestParam Id categoryId) {
+        return repository.findAllInCategory(categoryId);
     }
 
     public record MappingInfo(
@@ -50,8 +56,8 @@ public class MappingController {
     }
 
     @PostMapping("/mappings")
-    public MappingInfo createMapping(@RequestBody MappingInit newMapping) {
-        return MappingInfo.fromWrapper(service.create(newMapping));
+    public MappingWrapper createMapping(@RequestBody MappingInit newMapping) {
+        return service.create(newMapping);
     }
 
     @PostMapping("/mappings/{id}/update")

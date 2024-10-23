@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { categorySpecificRoutes, workflowSpecificRoutes } from './specificRoutes';
+import { specificRoutes } from './specificRoutes';
 import { independentRoutes } from './independentRoutes';
 
 const router = createRouter({
@@ -12,16 +12,16 @@ const router = createRouter({
         path: '/categories/:categoryId',
         component: () => import('@/views/CategorySpecificView.vue'),
         props: route => ({ categoryId: route.params.categoryId }),
-        children: categorySpecificRoutes,
+        children: specificRoutes.category,
     }, {
         path: '/workflows/:workflowId',
         component: () => import('@/views/WorkflowSpecificView.vue'),
         props: route => ({ workflowId: route.params.workflowId }),
-        children: workflowSpecificRoutes,
+        children: specificRoutes.workflow,
     }, {
         path: '/404',
         name: 'notFound',
-        component: () => import('@/views/PageNotFoundView.vue'),
+        component: () => import('@/views/common/PageNotFoundView.vue'),
     }, {
         path: '/:catchAll(.*)',
         redirect: { name: 'notFound' },

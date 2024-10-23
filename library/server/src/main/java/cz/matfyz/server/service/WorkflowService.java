@@ -6,9 +6,9 @@ import cz.matfyz.server.entity.workflow.InferenceWorkflowData;
 import cz.matfyz.server.entity.workflow.Workflow;
 import cz.matfyz.server.entity.workflow.InferenceWorkflowData.InferenceWorkflowStep;
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.WorkflowRepository;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,36 +24,20 @@ public class WorkflowService {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    private MappingRepository mappingRepository;
+
     public Workflow continueWorkflow(Workflow workflow) {
-        // If the workflow is waiting for a job, it has to be finished before we can continue.
-        final @Nullable Job currentJob = workflow.jobId == null ? null : jobRepository.find(workflow.jobId).job();
-        if (currentJob != null) {
-            if (currentJob.state != Job.State.Finished)
-                throw new IllegalStateException("Can't continue until the job is finished.");
-
-            // The job is finished, we remove it from the workflow.
-            workflow.jobId = null;
-        }
-
-        // The job is either finished or it doesn't exist. Now we have to decide based on the workflow data.
         return switch (workflow.data) {
-            case InferenceWorkflowData data -> continueInference(workflow, data, currentJob);
+            case InferenceWorkflowData data -> continueInference(workflow, data);
             default -> throw new IllegalArgumentException("Unknown workflow type.");
         };
     }
 
-    private Workflow continueInference(Workflow workflow, InferenceWorkflowData data, @Nullable Job currentJob) {
+    private Workflow continueInference(Workflow workflow, InferenceWorkflowData data) {
         switch (data.step()) {
             case selectInput -> {
-                if (currentJob != null) {
-                    // The inference job is finished - we can continue.
-                    workflow.data = data.updateStep(InferenceWorkflowStep.editCategory);
-                    repository.save(workflow);
-                    return workflow;
-                }
-
-                // The inference job doesn't exist yet. We have to create it.
-
+                // The user has to select the input datasource. Then we can create the inference job and the user can continue.
                 if (data.inputDatasourceId() == null)
                     throw new IllegalArgumentException("Input datasource is required.");
 
@@ -61,7 +45,7 @@ public class WorkflowService {
                 final var inferenceJob = jobService.createSystemRun(workflow.categoryId, "Schema inference", payload).job();
 
                 final var newData = new InferenceWorkflowData(
-                    InferenceWorkflowStep.selectInput,
+                    InferenceWorkflowStep.editCategory,
                     data.inputDatasourceId(),
                     inferenceJob.id(),
                     data.mtcActionIds()
@@ -73,13 +57,22 @@ public class WorkflowService {
                 return workflow;
             }
             case editCategory -> {
-                // There are no check here - if the user wants to continue, he can. There's no way back tho.
+                // The user has to first wait for the job. Then he can check the result - it probably needs some manual adjustments. After the user marks the job as finished, he can continue.
+                final Job currentJob = jobRepository.find(data.inferenceJobId()).job();
+                if (currentJob.state != Job.State.Finished)
+                    throw new IllegalStateException("Can't continue until the job is finished.");
+
+                workflow.jobId = null;
                 workflow.data = data.updateStep(InferenceWorkflowStep.addMappings);
                 repository.save(workflow);
                 return workflow;
             }
             case addMappings -> {
-                // There should be at least one mapping for the MTC job ... but it's not checked here.
+                // There should be at least one mapping for the MTC job. I.e., two mappings in total.
+                final var mappings = mappingRepository.findAllInCategory(workflow.categoryId);
+                if (mappings.size() < 2)
+                    throw new IllegalArgumentException("At least two mappings are required.");
+
                 workflow.data = data.updateStep(InferenceWorkflowStep.selectOutputs);
                 repository.save(workflow);
                 return workflow;

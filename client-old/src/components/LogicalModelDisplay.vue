@@ -10,8 +10,6 @@ type LogicalModelDisplayProps = {
 };
 
 defineProps<LogicalModelDisplayProps>();
-
-const route = useRoute();
 </script>
 
 <template>

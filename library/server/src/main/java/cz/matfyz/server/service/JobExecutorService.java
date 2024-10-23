@@ -182,6 +182,9 @@ public class JobExecutorService {
 
         final DatasourceWrapper datasource = logicalModelRepository.find(payload.logicalModelId()).datasource();
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        // TODO
+        if (true)
+            throw new UnsupportedOperationException("NOT LOGICAL MODEL ID ...");
         final List<MappingWrapper> mappingWrappers = mappingRepository.findAll(payload.logicalModelId());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
@@ -221,6 +224,9 @@ public class JobExecutorService {
             : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
         final DatasourceWrapper datasource = logicalModelRepository.find(payload.logicalModelId()).datasource();
+        // TODO
+        if (true)
+        throw new UnsupportedOperationException("NOT LOGICAL MODEL ID ...");
         final List<Mapping> mappings = mappingRepository.findAll(payload.logicalModelId()).stream()
             .map(wrapper -> wrapper.toMapping(schema))
             .toList();

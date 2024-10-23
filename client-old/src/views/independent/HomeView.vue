@@ -165,7 +165,7 @@ async function confirmNewWorkflow() {
                     class="schema-category-display"
                 >
                     <FixedRouterLink
-                        :to="{ name: 'schemaCategory', params: { workflowId: workflow.id } }"
+                        :to="{ name: 'index', params: { workflowId: workflow.id } }"
                         view="workflow"
                     >
                         <h3>{{ workflow.label }}</h3>

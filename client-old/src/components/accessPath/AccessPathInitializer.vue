@@ -3,7 +3,6 @@ import { onMounted, provide, ref, shallowRef } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId } from '@/types/identifiers';
 import { type Graph } from '@/types/categoryGraph';
-import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute } from 'vue-router';
@@ -12,6 +11,8 @@ import EvocatDisplay from '../category/EvocatDisplay.vue';
 import AccessPathLoader from './AccessPathLoader.vue';
 import AccessPathCreator from '@/components/accessPath/AccessPathCreator.vue';
 import { useFixedRouter } from '@/router/specificRoutes';
+import { Datasource } from '@/types/datasource';
+import { Mapping } from '@/types/mapping';
 
 /**
  * Vue router instances for navigating and accessing route parameters.
@@ -44,8 +45,8 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
 /**
  * Stores the list of logical models and the selected logical model.
  */
-const logicalModels = shallowRef<LogicalModel[]>([]);
-const selectedLogicalModel = shallowRef<LogicalModel>();
+const datasources = shallowRef<Datasource[]>([]);
+const selectedDatasource = shallowRef<Datasource>();
 
 /**
  * Retrieves the schema category ID and category information.
@@ -61,10 +62,10 @@ const initializeType = ref<'create' | 'load' | 'default'>('default');
  * Fetches all logical models in the selected category and sets the selected logical model based on the route query parameter.
  */
 onMounted(async () => {
-    const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
+    const result = await API.datasources.getAllDatasources({});
     if (result.status) {
-        logicalModels.value = result.data.map(LogicalModel.fromServer);
-        selectedLogicalModel.value = logicalModels.value.find(model => model.id.toString() === route.query.logicalModelId);
+        datasources.value = result.data.map(Datasource.fromServer);
+        selectedDatasource.value = datasources.value.find(model => model.id.toString() === route.query.datasourceId);
     }
 });
 
@@ -75,22 +76,23 @@ onMounted(async () => {
  * @param {string | undefined} kindName - The name of the kind being created (optional).
  */
 async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty, kindName: string | undefined) {
-    if (!selectedLogicalModel.value || !graph.value || !accessPath)
+    if (!selectedDatasource.value || !graph.value || !accessPath)
         return;
 
     const newKindName = kindName !== undefined ? kindName : accessPath.name.toString();
 
     const result = await API.mappings.createMapping({}, {
         categoryId,
-        datasourceId: selectedLogicalModel.value.datasource.id,
-        logicalModelId: selectedLogicalModel.value.id,
+        datasourceId: selectedDatasource.value.id,
         rootObjectKey: accessPath.node.schemaObject.key.toServer(),
-        primaryKey: new SignatureId(selectedLogicalModel.value.datasource.configuration.isSchemaless ? [] : primaryKey.signatures).toServer(),
+        primaryKey: new SignatureId(selectedDatasource.value.configuration.isSchemaless ? [] : primaryKey.signatures).toServer(),
         kindName: newKindName,
         accessPath: accessPath.toServer(),
     });
-    if (result.status)
-        router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });
+    if (result.status) {
+        const mapping = Mapping.fromServer(result.data);
+        router.push({ name: 'logicalModel', params: { id: mapping.logicalModelId } });
+    }
 }
 
 /**
@@ -136,13 +138,13 @@ function setToDefault() {
             </div>
             <AccessPathLoader
                 v-if="initializeType === 'load'"
-                :logical-models="logicalModels"
+                :datasources="datasources"
                 @finish="createMapping"
                 @cancel="setToDefault"
             />
             <AccessPathCreator
-                v-if="initializeType === 'create' && selectedLogicalModel"
-                :selected-logical-model="selectedLogicalModel"
+                v-if="initializeType === 'create' && selectedDatasource"
+                :selected-datasource="selectedDatasource"
                 @finish="createMapping"
                 @cancel="setToDefault"
             />

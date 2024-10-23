@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
 
 /**
@@ -122,6 +124,7 @@ public class CsvProvider {
     /**
      * A record representing CSV settings, including the URL, writability, and queryability of the CSV source.
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record CsvSettings(
         String url,
         boolean isWritable,
