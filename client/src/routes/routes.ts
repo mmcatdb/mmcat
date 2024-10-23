@@ -36,4 +36,5 @@ export const routes = {
     },
     datasources: 'datasources',
     adminer: 'adminer',
+    categories: 'schema-categories',
 } as const;

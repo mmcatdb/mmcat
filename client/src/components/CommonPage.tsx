@@ -30,6 +30,9 @@ export function CommonPage({ children }: CommonPageProps) {
 function CommonNavbar() {
     return (
         <Navbar className='z-20 w-full mx-auto border-b h-12' isBlurred={false} maxWidth='full'>
+            <NavbarContent justify='start'>
+                <div id='breadcrumb-portal'></div>
+            </NavbarContent>
             <NavbarContent justify='end'>
                 <NavbarItem>
                     <ThemeToggle className='min-w-8 w-8 h-8' />
@@ -38,6 +41,7 @@ function CommonNavbar() {
         </Navbar>
     );
 }
+
 
 type NavbarItem = {
     label: string;

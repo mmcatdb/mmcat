@@ -10,7 +10,7 @@ import { DatasourceDetailPage } from '@/pages/DatasourceDetailPage';
 import { AdminerPage } from '@/pages/AdminerPage';
 import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
 import { ModelsPage } from '@/pages/ModelsPage';
-import { QueryingPage } from '@/pages/GueryingPage';
+import { QueryingPage } from '@/pages/QueryingPage';
 
 export const router = createBrowserRouter([
     {

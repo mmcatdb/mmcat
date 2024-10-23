@@ -3,7 +3,6 @@ import { CommonPage } from '@/components/CommonPage';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { Spinner } from '@nextui-org/react';
 import clsx from 'clsx';
-import { useEffect } from 'react';
 
 export function ErrorPage() {
     const error = useRouteError();

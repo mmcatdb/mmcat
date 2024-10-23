@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { CommonPage } from '@/components/CommonPage';
-import { Link } from '@/components/common';
+import { CustomLink, Portal } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
-import { Button } from '@nextui-org/react';
+import { BreadcrumbItem, Breadcrumbs, Button } from '@nextui-org/react';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
@@ -56,9 +57,9 @@ export function Home() {
                 <div className='flex flex-col'>
                     {categories.map(category => (
                         <div key={category.id}>
-                            <Link to={routes.project.index.resolve({ projectId: category.id })}>
+                            <CustomLink to={routes.project.index.resolve({ projectId: category.id })}>
                                 {category.label}
-                            </Link>
+                            </CustomLink>
                         </div>
                     ))}
                 </div>

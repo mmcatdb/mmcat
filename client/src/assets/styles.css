@@ -8,7 +8,20 @@
     @apply text-3xl font-bold leading-tight;
 }
 
-.breadcrumb-item-link {
-    @apply text-blue-600 hover:text-blue-700 font-bold;
-}
+.breadcrumb {
+    a {
+        @apply text-zinc-900 text-sm no-underline;
+    }
 
+    a:hover {
+        @apply text-zinc-800;
+    }
+
+    span:last-child {
+        @apply text-blue-600 font-bold text-sm;
+    }
+
+    span:last-child:hover {
+        @apply text-blue-700;
+    }
+}

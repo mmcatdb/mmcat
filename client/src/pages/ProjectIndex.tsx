@@ -1,7 +1,7 @@
 import { Suspense, useMemo } from 'react';
 import { Outlet, type Params, useLoaderData, useMatches, defer, Await } from 'react-router-dom';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { Link, portals } from '@/components/common';
+import { CustomLink, portals } from '@/components/common';
 import { CommonPage, ThemeToggle } from '@/components/CommonPage';
 import clsx from 'clsx';
 import { routes } from '../routes/routes';
@@ -73,9 +73,9 @@ function ProjectMenu({ projectId }: Readonly<{ projectId: string }>) {
                     const isMatched = matches.find(match => match.id === item.id) !== undefined;
 
                     return (
-                        <Link key={item.id} to={item.path} isDisabled={isMatched} className='mm-menu-element flex items-center justify-center'>
+                        <CustomLink key={item.id} to={item.path} isDisabled={isMatched} className='mm-menu-element flex items-center justify-center'>
                             {item.label}
-                        </Link>
+                        </CustomLink>
                     );
                 })}
             </nav>

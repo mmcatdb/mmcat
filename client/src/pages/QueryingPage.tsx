@@ -1,8 +1,8 @@
 import { Portal } from '@/components/common';
-import { BreadcrumbItem, Breadcrumbs } from '@nextui-org/react';
+import { Breadcrumbs, BreadcrumbItem } from '@nextui-org/react';
 import { Link, useParams } from 'react-router-dom';
 
-export const ModelsPage = () => {
+export const QueryingPage = () => {
     const { projectId } = useParams<'projectId'>();
 
     return (
@@ -20,14 +20,14 @@ export const ModelsPage = () => {
                         </Link>
                     </BreadcrumbItem>
                     <BreadcrumbItem>
-                        <Link to={`/projects/${projectId}/models`}>
-                            <span>Models</span>
+                        <Link to={`/projects/${projectId}/querying`}>
+                            <span>Querying</span>
                         </Link>
                     </BreadcrumbItem>
                 </Breadcrumbs>
             </Portal>
 
-            <h2>Models for Project {projectId}</h2>
+            <h2>Querying for Project {projectId}</h2>
             <p>Template page</p>
         </div>
     );
