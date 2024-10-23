@@ -1,4 +1,4 @@
-import { useFetchTableData } from '@/components/adminer/useFetchTableData';
+import { useFetchData } from '@/components/adminer/useFetchData';
 import { Spinner, Button } from '@nextui-org/react';
 
 type TableMenuProps = Readonly<{
@@ -8,7 +8,7 @@ type TableMenuProps = Readonly<{
 }>;
 
 export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
-    const { fetchedData, loading, error } = useFetchTableData(apiUrl);
+    const { fetchedData, loading, error } = useFetchData(apiUrl);
 
     if (loading) {
         return (
@@ -24,7 +24,7 @@ export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
 
     return (
         <div className='flex flex-wrap gap-3 items-center'>
-            {fetchedData !== null && fetchedData.data.length > 0 ? (
+            {fetchedData && fetchedData.data.length > 0 ? (
                 fetchedData.data.map((name, index) => (
                     <Button
                         key={index}

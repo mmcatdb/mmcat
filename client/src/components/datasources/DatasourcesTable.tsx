@@ -27,9 +27,9 @@ export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasour
             fieldB = fieldB.toLowerCase();
         }
 
-        if (fieldA < fieldB) 
+        if (fieldA < fieldB)
             return sortDescriptor.direction === 'ascending' ? -1 : 1;
-        if (fieldA > fieldB) 
+        if (fieldA > fieldB)
             return sortDescriptor.direction === 'ascending' ? 1 : -1;
         return 0;
     });
@@ -47,7 +47,7 @@ export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasour
     }
 
     // TODO: error page
-    if (error) 
+    if (error)
         return <p>{error}</p>;
 
     return (
@@ -80,9 +80,9 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     };
 
     const confirmDelete = () => {
-        if (selectedDatasourceId) 
+        if (selectedDatasourceId)
             onDeleteDatasource(selectedDatasourceId);
-        
+
         setModalOpen(false);
     };
 
@@ -99,7 +99,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
 
     return (
         <>
-            <Table 
+            <Table
                 aria-label='Datasource Table'
                 onRowAction={handleRowAction}
                 sortDescriptor={sortDescriptor}
@@ -149,8 +149,8 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
             </Table>
 
             {/* Confirmation of datasource delete */}
-            <Modal 
-                isOpen={isModalOpen} 
+            <Modal
+                isOpen={isModalOpen}
                 onClose={closeModal}
             >
                 <ModalContent>

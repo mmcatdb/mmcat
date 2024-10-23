@@ -15,7 +15,7 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
         );
     }
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    if (typeof value === 'object' && value && !Array.isArray(value)) {
         // If value is an object, create another unordered list for its key-value pairs
         const len = Object.entries(value).length;
         return (

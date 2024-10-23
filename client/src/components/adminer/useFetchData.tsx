@@ -1,16 +1,18 @@
+import { type BackendDocumentResponse, type BackendGraphResponse, type BackendTableResponse } from '@/types/adminer/BackendResponse';
 import { useState, useEffect } from 'react';
-import type { BackendGraphResponse, BackendTableResponse } from '@/types/adminer/BackendResponse';
 
-export function useFetchGraphData(url: string) {
-    const [ fetchedData, setFetchedData ] = useState<BackendTableResponse | null>(null);
+type BackendResponse = BackendTableResponse | BackendDocumentResponse | BackendGraphResponse;
+
+export function useFetchData<T extends BackendResponse>(url: string) {
+    const [ fetchedData, setFetchedData ] = useState<T | undefined>();
     const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | null>(null);
+    const [ error, setError ] = useState<string | undefined>();
 
     useEffect(() => {
         (async () => {
             try {
                 setLoading(true);
-                setError(null);
+                setError(undefined);
 
                 const response = await fetch(url);
 
@@ -18,14 +20,9 @@ export function useFetchGraphData(url: string) {
                     throw new Error(`Failed to fetch data from ${url}`);
 
 
-                const data = await response.json() as BackendGraphResponse;
+                const data = await response.json() as T;
 
-                const modifiedData = { metadata: data.metadata, data: [] } as BackendTableResponse;
-
-                for (const element of data.data)
-                    modifiedData.data.push(element.properties);
-
-                setFetchedData(modifiedData);
+                setFetchedData(data);
             }
             catch (err) {
                 if (err instanceof Error)
