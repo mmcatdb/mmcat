@@ -47,7 +47,7 @@ public class QueryRepository {
                     json_value
                 FROM query
                 WHERE query.category_id = ?
-                """ + (version != null ? "AND query.version = ?" : "") + """
+                """ + (version != null ? "AND query.version = ?\n" : "") + """
                 ORDER BY query.id
                 """);
             setId(statement, 1, categoryId);

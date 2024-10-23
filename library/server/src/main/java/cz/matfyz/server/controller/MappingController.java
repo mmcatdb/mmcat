@@ -10,6 +10,7 @@ import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.service.MappingService;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,14 +34,9 @@ public class MappingController {
         return repository.find(id);
     }
 
-    @GetMapping("/datasources/{datasourceId}/mappings")
-    public List<MappingWrapper> getAllMappingsInDatasource(@PathVariable Id datasourceId) {
-        return repository.findAll(datasourceId);
-    }
-
     @GetMapping("/mappings")
-    public List<MappingWrapper> getAllMappingsInCategory(@RequestParam Id categoryId) {
-        return repository.findAllInCategory(categoryId);
+    public List<MappingWrapper> getAllMappingsInCategory(@RequestParam Id categoryId, @RequestParam Optional<Id> datasourceId) {
+        return repository.findAllInCategory(categoryId, datasourceId.orElse(null));
     }
 
     public record MappingInfo(

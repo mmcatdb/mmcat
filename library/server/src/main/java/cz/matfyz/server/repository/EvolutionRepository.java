@@ -122,7 +122,7 @@ public class EvolutionRepository {
                     query_evolution.json_value as json_value
                 FROM query_evolution
                 JOIN evolution ON query_evolution.id = evolution.id
-                """ + (isByQuery ? "WHERE query_evolution.query_id = ?" : "WHERE evolution.category_id = ?") + """
+                """ + (isByQuery ? "WHERE query_evolution.query_id = ?\n" : "WHERE evolution.category_id = ?\n") + """
                 ORDER BY evolution.id;
                 """);
             setId(statement, 1, groupId);
@@ -183,7 +183,7 @@ public class EvolutionRepository {
                     mapping_evolution.json_value as json_value
                 FROM mapping_evolution
                 JOIN evolution ON mapping_evolution.id = evolution.id
-                """ + (isByMapping ? "WHERE mapping_evolution.mapping_id = ?" : "WHERE evolution.category_id = ?") + """
+                """ + (isByMapping ? "WHERE mapping_evolution.mapping_id = ?\n" : "WHERE evolution.category_id = ?\n") + """
                 ORDER BY evolution.id;
                 """);
             setId(statement, 1, groupId);

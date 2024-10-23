@@ -95,7 +95,7 @@ public class QueryService {
                 datasources.put(datasourceWrapper.id(), datasourceWrapper);
 
                 final var builder = new Datasource.Builder();
-                mappingRepository.findAll(model.logicalModel().datasourceId).forEach(mappingWrapper -> {
+                mappingRepository.findAllInCategory(model.logicalModel().categoryId, model.logicalModel().datasourceId).forEach(mappingWrapper -> {
                     final var mapping = mappingWrapper.toMapping(category);
                     builder.mapping(mapping);
                 });

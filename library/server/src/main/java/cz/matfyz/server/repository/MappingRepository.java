@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -51,29 +52,11 @@ public class MappingRepository {
         }, "Mapping", id);
     }
 
-    public List<MappingWrapper> findAll(Id datasourceId) {
-        return db.getMultiple((connection, output) -> {
-            final var statement = connection.prepareStatement("""
-                SELECT
-                    mapping.id as id,
-                    mapping.version as version,
-                    mapping.last_valid as last_valid,
-                    mapping.logical_model_id as logical_model_id,
-                    mapping.json_value as json_value
-                FROM mapping
-                JOIN logical_model ON mapping.logical_model_id = logical_model.id
-                WHERE logical_model.datasource_id = ?
-                ORDER BY mapping.id;
-                """);
-            setId(statement, 1, datasourceId);
-            final var resultSet = statement.executeQuery();
-
-            while (resultSet.next())
-                output.add(fromResultSet(resultSet));
-        });
+    public List<MappingWrapper> findAllInCategory(Id categoryId) {
+        return findAllInCategory(categoryId, null);
     }
 
-    public List<MappingWrapper> findAllInCategory(Id categoryId) {
+    public List<MappingWrapper> findAllInCategory(Id categoryId, @Nullable Id datasourceId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
@@ -85,9 +68,12 @@ public class MappingRepository {
                 FROM mapping
                 JOIN logical_model ON mapping.logical_model_id = logical_model.id
                 WHERE logical_model.category_id = ?
+                """ + (datasourceId != null ? "AND logical_model.datasource_id = ?\n" : "") + """
                 ORDER BY mapping.id;
                 """);
             setId(statement, 1, categoryId);
+            if (datasourceId != null)
+                setId(statement, 2, datasourceId);
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next())

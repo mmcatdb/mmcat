@@ -7,10 +7,7 @@ const mappings = {
     getMapping: GET<{ id: StringLike }, MappingFromServer>(
         u => `/mappings/${u.id}`,
     ),
-    getAllMappingsInDatasource: GET<{ datasourceId: StringLike }, MappingFromServer[]>(
-        u => `/datasources/${u.datasourceId}/mappings`,
-    ),
-    getAllMappingsInCategory: GET<Empty, MappingFromServer[], { categoryId: Id }>(
+    getAllMappingsInCategory: GET<Empty, MappingFromServer[], { categoryId: Id, datasourceId?: Id }>(
         () => `/mappings`,
     ),
     createMapping: POST<Empty, MappingFromServer, MappingInit>(

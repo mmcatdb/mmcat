@@ -185,7 +185,7 @@ public class JobExecutorService {
         // TODO
         if (true)
             throw new UnsupportedOperationException("NOT LOGICAL MODEL ID ...");
-        final List<MappingWrapper> mappingWrappers = mappingRepository.findAll(payload.logicalModelId());
+        final List<MappingWrapper> mappingWrappers = mappingRepository.findAllInCategory(payload.logicalModelId());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
         final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
@@ -227,7 +227,7 @@ public class JobExecutorService {
         // TODO
         if (true)
         throw new UnsupportedOperationException("NOT LOGICAL MODEL ID ...");
-        final List<Mapping> mappings = mappingRepository.findAll(payload.logicalModelId()).stream()
+        final List<Mapping> mappings = mappingRepository.findAllInCategory(payload.logicalModelId()).stream()
             .map(wrapper -> wrapper.toMapping(schema))
             .toList();
 

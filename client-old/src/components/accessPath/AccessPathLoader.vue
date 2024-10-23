@@ -3,12 +3,13 @@ import { onMounted, ref, watch, computed } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId } from '@/types/identifiers';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
-import { LogicalModel } from '@/types/logicalModel';
-import { useEvocat } from '@/utils/injects';
+import { useEvocat, useSchemaCategoryId } from '@/utils/injects';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
 import { Datasource } from '@/types/datasource';
+
+const categoryId = useSchemaCategoryId();
 
 /**
  * Extracts the graph object from Evocat.
@@ -79,7 +80,7 @@ async function loadMappingsForSelectedDatasource() {
     if (!selectedDatasource.value) return;
 
     const datasourceId = selectedDatasource.value.id;
-    const result = await API.mappings.getAllMappingsInDatasource({ datasourceId });
+    const result = await API.mappings.getAllMappingsInCategory({}, { categoryId, datasourceId });
     if (result.status) 
         mappings.value = result.data.map(Mapping.fromServer);
 }
