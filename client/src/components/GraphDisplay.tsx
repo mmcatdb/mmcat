@@ -41,6 +41,8 @@ type GraphProps = Readonly<{
 }>;
 
 export function GraphDisplay({ nodes, edges, width, height }: GraphProps) {
+    const [ localNodes, setLocalNodes ] = useState(nodes);
+
     const [ coordinates, setCoordinates ] = useState<Coordinates>(() => computeInitialCoordinates(nodes, width, height));
     const screenRef = useRef<HTMLDivElement>(null);
 
@@ -115,13 +117,26 @@ export function GraphDisplay({ nodes, edges, width, height }: GraphProps) {
         };
     }, []);
 
+    const setNode = useCallback((node: Node) => {
+        setLocalNodes(oldNodes => oldNodes.map(n => n.id === node.id ? node : n));
+    }, []);
+
+    console.log('render ' + Math.random());
+
     return (
-        <div style={{ width, height }} className={clsx('relative bg-slate-400 overflow-hidden', isDown ? 'cursor-grabbing' : 'cursor-grab')} onWheel={wheel} ref={screenRef} onMouseDown={mouseDown}>
-            {nodes.map(node => (
-                <NodeDisplay key={node.id} node={node} coordinates={coordinates} />
+        <div
+            style={{ width, height }}
+            className={clsx('relative bg-slate-400 overflow-hidden', isDown ? 'cursor-grabbing' : 'cursor-grab')}
+            onWheel={wheel}
+            ref={screenRef}
+            onMouseDown={mouseDown}
+            id='screen'
+        >
+            {localNodes.map(node => (
+                <NodeDisplay key={node.id} node={node} coordinates={coordinates} setNode={setNode} />
             ))}
             {edges.map(edge => (
-                <EdgeDisplay key={edge.id} edge={edge} nodes={nodes} coordinates={coordinates} />
+                <EdgeDisplay key={edge.id} edge={edge} nodes={localNodes} coordinates={coordinates} />
             ))}
         </div>
     );
@@ -180,16 +195,58 @@ function throttle<T extends(...args: Parameters<T>) => void>(callback: T): T {
 type NodeDisplayProps = Readonly<{
     node: Node;
     coordinates: Coordinates;
+    setNode: (node: Node) => void;
 }>;
 
-function NodeDisplay({ node, coordinates }: NodeDisplayProps) {
+function NodeDisplay({ node, coordinates, setNode }: NodeDisplayProps) {
+    const [ isDragging, setIsDragging ] = useState(false);
+
     function click(e: MouseEvent) {
         console.log(e);
     }
 
+    function mouseDown() {
+        setIsDragging(true);
+    }
+
+    function mouseUp(e: MouseEvent<HTMLDivElement>) {
+        if (!isDragging)
+            return;
+
+        const rect = document.getElementById('screen')!.getBoundingClientRect();
+        const mouse: ScreenPosition = {
+            left: e.clientX - rect.left,
+            top: e.clientY - rect.top,
+        };
+
+        setIsDragging(false);
+        setNode({ ...node, position: getPosition(mouse, coordinates) });
+        console.log('SET NODE');
+    }
+
+
+    function mouseMove(e: MouseEvent<HTMLDivElement>) {
+        if (!isDragging)
+            return;
+
+        const rect = document.getElementById('screen')!.getBoundingClientRect();
+        const mouse: ScreenPosition = {
+            left: e.clientX - rect.left,
+            top: e.clientY - rect.top,
+        };
+
+        setNode({ ...node, position: getPosition(mouse, coordinates) });
+    }
+
     return (
         <div className='absolute w-0 h-0 select-none z-10' style={getScreenPosition(node.position, coordinates)}>
-            <div className='absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white hover:bg-green-400 cursor-pointer active:bg-green-500' onClick={click} />
+            <div
+                className='absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white hover:bg-green-400 cursor-pointer active:bg-green-500'
+                onClick={click}
+                onMouseDown={mouseDown}
+                onMouseUp={mouseUp}
+                onMouseMove={mouseMove}
+            />
             <div className='w-fit'>
                 <span className='relative -left-1/2 -top-10'>
                     {node.label}
