@@ -1,5 +1,7 @@
 import { type SchemaCategory } from '@/types/schema';
 import ReactFlow from 'reactflow';
+import { GraphDisplay } from '../GraphDisplay';
+import { useMemo } from 'react';
 
 type SchemaCategoryGraphProps = Readonly<{
     category: SchemaCategory;
@@ -21,9 +23,25 @@ export function SchemaCategoryGraph({ category }: SchemaCategoryGraphProps) {
 
     console.log({ initialNodes, initialEdges });
 
-    return (
-        <div className='w-[1200px] h-[800px] bg-slate-700'>
+    const graphData = useMemo(() => ({
+        nodes: initialNodes.map(node => ({
+            id: node.id,
+            label: node.data.label ?? '',
+            position: { ...node.position },
+        })),
+        edges: initialEdges.map(edge => ({
+            id: edge.id,
+            label: edge.data.label ?? '',
+            from: edge.source,
+            to: edge.target,
+        })),
+    }), []);
+
+    return (<>
+        {/* <div className='w-[1200px] h-[400px] bg-slate-700'>
             <ReactFlow nodes={initialNodes} edges={initialEdges} />
-        </div>
-    );
+        </div> */}
+
+        <GraphDisplay nodes={graphData.nodes} edges={graphData.edges} width={1200} height={800} />
+    </>);
 }

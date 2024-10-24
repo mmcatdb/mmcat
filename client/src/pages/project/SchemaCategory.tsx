@@ -21,9 +21,9 @@ export function SchemaCategory() {
                         <p>
                             Some text.
                         </p>
-                        <p>
+                        {/* <p>
                             updates: {updates.length}
-                        </p>
+                        </p> */}
 
                         <SchemaCategoryGraph category={category} />
                     </div>
