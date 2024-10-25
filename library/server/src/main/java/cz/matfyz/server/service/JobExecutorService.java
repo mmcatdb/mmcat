@@ -197,9 +197,6 @@ public class JobExecutorService {
         System.out.println("instance before");
         System.out.println(instance);
 
-        if (mappingWrappers.isEmpty())
-            System.out.println("mapping wrappers is empty");
-
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
             final Mapping mapping = mappingWrapper.toMapping(schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();

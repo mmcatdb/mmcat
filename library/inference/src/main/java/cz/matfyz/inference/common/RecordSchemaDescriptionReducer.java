@@ -25,9 +25,11 @@ public class RecordSchemaDescriptionReducer {
         return result;
     }
 
-    public static ObjectArrayList<RecordSchemaDescription> mergeOrderedListsRemoveDuplicates(ObjectArrayList<RecordSchemaDescription> list1, ObjectArrayList<RecordSchemaDescription> list2) {
+    public static ObjectArrayList<RecordSchemaDescription> mergeOrderedListsRemoveDuplicates(
+        ObjectArrayList<RecordSchemaDescription> list1, ObjectArrayList<RecordSchemaDescription> list2) {
         ObjectArrayList<RecordSchemaDescription> mergedList = new ObjectArrayList<>();
-        int i = 0, j = 0;
+        int i = 0;
+        int j = 0;
 
         while (i < list1.size() && j < list2.size()) {
             RecordSchemaDescription element1 = list1.get(i);
@@ -37,38 +39,44 @@ public class RecordSchemaDescriptionReducer {
 
             switch (comparison) {
                 case -1:    // element1 < element 2
-                    mergedList.add(element1);
+                    addIfNotDuplicate(mergedList, element1);
                     ++i;
                     break;
-                case 1:    // element1 > element 2
-                    mergedList.add(element2);
+                case 1:     // element1 > element 2
+                    addIfNotDuplicate(mergedList, element2);
                     ++j;
                     break;
-                default:
-                    // Both elements are equal
+                default:    // Both elements are equal
                     RecordSchemaDescription union = process(element1, element2);
-                    mergedList.add(union);
+                    addIfNotDuplicate(mergedList, union);
                     ++i;
                     ++j;
                     break;
             }
         }
 
-        // Add any remaining elements from list1 (if any)
+        // Add any remaining elements from list1, checking for duplicates
         while (i < list1.size()) {
-            RecordSchemaDescription element = list1.get(i);
-            mergedList.add(element);
+            addIfNotDuplicate(mergedList, list1.get(i));
             ++i;
         }
 
-        // Add any remaining elements from list2 (if any)
+        // Add any remaining elements from list2, checking for duplicates
         while (j < list2.size()) {
-            RecordSchemaDescription element = list2.get(j);
-            mergedList.add(element);
+            addIfNotDuplicate(mergedList, list2.get(j));
             ++j;
         }
 
         return mergedList;
     }
 
+    private static void addIfNotDuplicate(ObjectArrayList<RecordSchemaDescription> mergedList,
+                                        RecordSchemaDescription element) {
+        boolean exists = mergedList.stream()
+            .anyMatch(e -> e.getName().equals(element.getName()) && e.getTypes() == element.getTypes());
+
+        if (!exists) {
+            mergedList.add(element);
+        }
+    }
 }

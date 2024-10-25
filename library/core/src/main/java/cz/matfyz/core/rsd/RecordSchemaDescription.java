@@ -135,7 +135,6 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
     }
 
     // Utility methods
-    // TODO: make it prettier; this kinda nasty
     public boolean hasParentWithChildName(String childName) {
         for (RecordSchemaDescription child : this.children) {
             if (child.getName().equals(childName))

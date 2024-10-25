@@ -104,6 +104,7 @@ public class MMInferOneInAll {
      */
     private Map<String, RecordSchemaDescription> getRecordSchemaDescriptions(Map<String, AbstractInferenceWrapper> wrappers) {
         return wrappers.entrySet().stream()
+            .peek(entry -> System.out.println("Processing element: " + entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> executeRBA(entry.getValue(), true)));
     }
 

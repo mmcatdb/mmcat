@@ -18,6 +18,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 
@@ -74,10 +77,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Loads record schema descriptions (RSDs) from the CSV data.
-     * Assumes the first line of the CSV is the header, the CSV is comma-delimited,
-     * and there are no missing data.
-     *
-     * TODO: get rid of assumptions.
      *
      * @return a {@link JavaRDD} of {@link RecordSchemaDescription} objects.
      */
@@ -95,48 +94,64 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      */
     public JavaRDD<Map<String, String>> loadDocuments() {
         List<Map<String, String>> lines = new ArrayList<>();
-        boolean firstLine = false;
         String[] header = null;
 
         try (InputStream inputStream = provider.getInputStream(kindName);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            String firstLine = reader.readLine();
+            if (firstLine == null) {
+                return context.emptyRDD();
+            }
+
+            char delimiter = detectDelimiter(firstLine);
+            header = parseLine(firstLine, delimiter).toArray(new String[0]);
+
             String line;
             while ((line = reader.readLine()) != null) {
-                char delimiter = detectDelimiter(line);
-                String[] elements = line.split(Character.toString(delimiter) + "\\s*");
-                if (!firstLine) {
-                    header = elements;
-                    firstLine = true;
-                } else {
-                    Map<String, String> lineMap = new HashMap<>();
-                    for (int i = 0; i < elements.length; i++) {
-                        lineMap.put(header[i], elements[i]);
-                    }
-                    lines.add(lineMap);
-                }
+                List<String> elements = parseLine(line, delimiter);
+                Map<String, String> lineMap = createLineMap(header, elements);
+                lines.add(lineMap);
             }
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
             return context.emptyRDD();
         }
-        JavaRDD<Map<String, String>> csvDocuments = context.parallelize(lines);
-        return csvDocuments;
+
+        return context.parallelize(lines);
     }
 
-    /**
-     * Detects the delimiter used in the CSV line. The allowed delimiters are ',', '\t', and ';'.
-     *
-     * @param line the line from the CSV file to analyze.
-     * @return the detected delimiter character.
-     */
     private char detectDelimiter(String line) {
-        char[] possibleDelimiters = {',', '\t', ';'};
+        char[] possibleDelimiters = {',', '\t', ';', '.'};
         Map<Character, Integer> delimiterCount = new HashMap<>();
         for (char delimiter : possibleDelimiters) {
-            int count = line.split(Character.toString(delimiter)).length - 1;
+            int count = line.split(Pattern.quote(Character.toString(delimiter))).length - 1;
             delimiterCount.put(delimiter, count);
         }
         return Collections.max(delimiterCount.entrySet(), Map.Entry.comparingByValue()).getKey();
+    }
+
+    private List<String> parseLine(String line, char delimiter) {
+        String escapedDelimiter = Pattern.quote(Character.toString(delimiter));
+        Pattern csvPattern = Pattern.compile("\"([^\"]*)\"|([^" + escapedDelimiter + "]+)");
+        List<String> elements = new ArrayList<>();
+        Matcher matcher = csvPattern.matcher(line);
+
+        while (matcher.find()) {
+            String value = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+            elements.add(value);
+        }
+        return elements;
+    }
+
+    private Map<String, String> createLineMap(String[] header, List<String> elements) {
+        Map<String, String> lineMap = new HashMap<>();
+        for (int i = 0; i < elements.size(); i++) {
+            if (i < header.length) {
+                lineMap.put(header[i], elements.get(i));
+            }
+        }
+        return lineMap;
     }
 
     /**
