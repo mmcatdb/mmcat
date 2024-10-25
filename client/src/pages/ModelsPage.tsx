@@ -3,7 +3,7 @@ import { BreadcrumbItem, Breadcrumbs } from '@nextui-org/react';
 import { Link, useParams } from 'react-router-dom';
 
 export const ModelsPage = () => {
-    const { projectId } = useParams<'projectId'>();
+    const { categoryId } = useParams<'categoryId'>();
 
     return (
         <div>
@@ -15,19 +15,19 @@ export const ModelsPage = () => {
                         </Link>
                     </BreadcrumbItem>
                     <BreadcrumbItem>
-                        <Link to={`/projects/${projectId}`} >
-                            Project {projectId}
+                        <Link to={`/category/${categoryId}`} >
+                            Project {categoryId}
                         </Link>
                     </BreadcrumbItem>
                     <BreadcrumbItem>
-                        <Link to={`/projects/${projectId}/models`}>
+                        <Link to={`/category/${categoryId}/models`}>
                             <span>Models</span>
                         </Link>
                     </BreadcrumbItem>
                 </Breadcrumbs>
             </Portal>
 
-            <h2>Models for Project {projectId}</h2>
+            <h2>Models for Project {categoryId}</h2>
             <p>Template page</p>
         </div>
     );

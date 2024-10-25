@@ -3,7 +3,7 @@ import { Breadcrumbs, BreadcrumbItem } from '@nextui-org/react';
 import { Link, useParams } from 'react-router-dom';
 
 export const QueryingPage = () => {
-    const { projectId } = useParams<'projectId'>();
+    const { categoryId } = useParams<'categoryId'>();
 
     return (
         <div>
@@ -15,19 +15,19 @@ export const QueryingPage = () => {
                         </Link>
                     </BreadcrumbItem>
                     <BreadcrumbItem>
-                        <Link to={`/projects/${projectId}`} >
-                            Project {projectId}
+                        <Link to={`/category/${categoryId}`} >
+                            Project {categoryId}
                         </Link>
                     </BreadcrumbItem>
                     <BreadcrumbItem>
-                        <Link to={`/projects/${projectId}/querying`}>
+                        <Link to={`/category/${categoryId}/querying`}>
                             <span>Querying</span>
                         </Link>
                     </BreadcrumbItem>
                 </Breadcrumbs>
             </Portal>
 
-            <h2>Querying for Project {projectId}</h2>
+            <h2>Querying for Project {categoryId}</h2>
             <p>Template page</p>
         </div>
     );

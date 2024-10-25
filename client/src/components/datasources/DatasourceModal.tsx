@@ -1,6 +1,6 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, useDisclosure, Select, SelectItem } from '@nextui-org/react';
 import { useState } from 'react';
-import { AddIcon } from '@/components/icons/AddIcon';
+import { AddIcon } from '@/components/icons/PlusIcon';
 import { api } from '@/api';
 import {
     DATASOURCE_TYPES,
@@ -210,5 +210,3 @@ const SelectDatasourceType = ({ datasourceType, setDatasourceType }: SelectDatas
         )}
     </Select>
 );
-
-export default DatasourceModal;

@@ -40,14 +40,14 @@ type SchemaCategoryLoaderData = {
     }>;
 };
 
-export function schemaCategoryLoader({ params: { projectId } }: { params: Params<'projectId'> }) {
-    if (!projectId)
-        throw new Error('Project ID is required');
+export function schemaCategoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+    if (!categoryId)
+        throw new Error('Category ID is required');
 
     const data = Promise.all([
-        api.schemas.getCategoryWrapper({ id: projectId }),
-        api.schemas.getCategoryUpdates({ id: projectId }),
-        api.logicalModels.getAllLogicalModelsInCategory({ categoryId: projectId }),
+        api.schemas.getCategoryWrapper({ id: categoryId }),
+        api.schemas.getCategoryUpdates({ id: categoryId }),
+        api.logicalModels.getAllLogicalModelsInCategory({ categoryId: categoryId }),
     ])
         .then(([ categoryResponse, updatesResponse, modelsResponse ]) => {
             if (!categoryResponse.status || !updatesResponse.status || !modelsResponse.status)

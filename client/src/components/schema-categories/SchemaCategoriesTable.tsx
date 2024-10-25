@@ -43,7 +43,7 @@ function DatasourceTable({ categories }: DatasourceTableProps) {
     const navigate = useNavigate();
 
     const handleRowAction = (key: React.Key) => {
-        navigate(`/projects/${key}`, {});
+        navigate(`/category/${key}`, {});
     };
 
     function handleDeleteClick(id: string): void {

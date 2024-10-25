@@ -1,9 +1,8 @@
 import { Suspense, useMemo } from 'react';
 import { Outlet, type Params, useLoaderData, useMatches, defer, Await } from 'react-router-dom';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { CustomLink, portals } from '@/components/common';
+import { CustomLink } from '@/components/common';
 import { CommonPage, ThemeToggle } from '@/components/CommonPage';
-import clsx from 'clsx';
 import { routes } from '../routes/routes';
 import { CollapseContextToggle } from '@/components/project/context';
 import { api, type Resolved } from '@/api';
@@ -31,12 +30,12 @@ type ProjectIndexLoaderData = {
     category: Promise<SchemaCategoryInfo>;
 };
 
-export function projectIndexLoader({ params: { projectId } }: { params: Params<'projectId'> }) {
-    if (!projectId)
+export function projectIndexLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+    if (!categoryId)
         throw new Error('Project ID is required');
 
     return defer({
-        category: api.schemas.getCategoryInfo({ id: projectId }).then(response => {
+        category: api.schemas.getCategoryInfo({ id: categoryId }).then(response => {
             if (!response.status)
                 throw new Error('Failed to load project info');
 
@@ -52,8 +51,8 @@ function ProjectIndexInner() {
     return (
         <CommonPage>
             {/* <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}> */}
-                {/* TODO: place category.label to navbar (via portal or sth) */}
-                {/* <div className='mm-context-header flex items-center px-2'>
+            {/* TODO: place category.label to navbar (via portal or sth) */}
+            {/* <div className='mm-context-header flex items-center px-2'>
                     {category.label}
                 </div> */}
             <Outlet />
@@ -62,8 +61,8 @@ function ProjectIndexInner() {
     );
 }
 
-function ProjectMenu({ projectId }: Readonly<{ projectId: string }>) {
-    const menuItems = useMemo(() => createMenuItems(projectId), [ projectId ]);
+function ProjectMenu({ categoryId }: Readonly<{ categoryId: string }>) {
+    const menuItems = useMemo(() => createMenuItems(categoryId), [ categoryId ]);
     const matches = useMatches();
 
     return (
@@ -96,7 +95,7 @@ type MenuItem = {
     path: string;
 };
 
-function createMenuItems(projectId: string): MenuItem[] {
+function createMenuItems(categoryId: string): MenuItem[] {
     return [
         {
             label: 'Home',
@@ -107,14 +106,14 @@ function createMenuItems(projectId: string): MenuItem[] {
         {
             label: 'Project',
             icon: 'project',
-            id: routes.project.index.id,
-            path: routes.project.index.resolve({ projectId }),
+            id: routes.category.index.id,
+            path: routes.category.index.resolve({ categoryId }),
         },
         {
-            label: 'Databases',
-            icon: 'databases',
-            id: routes.project.databases.id,
-            path: routes.project.databases.resolve({ projectId }),
+            label: 'Datasources',
+            icon: 'datasources',
+            id: routes.category.datasources.id,
+            path: routes.category.datasources.resolve({ categoryId }),
         },
     ];
 }

@@ -81,5 +81,3 @@ export const DatasourceDetailPage = () => {
         </CommonPage>
     );
 };
-
-export default DatasourceDetailPage;

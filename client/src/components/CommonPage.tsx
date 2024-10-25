@@ -3,7 +3,7 @@ import { Button, Navbar, NavbarContent, NavbarItem } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
 import { Tooltip } from './common';
-import Sidebar from './sidebar/Sidebar';
+import { Sidebar } from './sidebar/Sidebar';
 
 type CommonPageProps = Readonly<{
     children: React.ReactNode;

@@ -25,3 +25,7 @@
         @apply text-blue-700;
     }
 }
+
+.sidebar-icon {
+    @apply mr-2 w-5 h-5;
+}

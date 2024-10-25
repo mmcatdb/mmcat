@@ -1,10 +1,10 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { Home } from '@/pages/Home';
-import { SchemaCategory, schemaCategoryLoader } from '@/pages/project/SchemaCategory';
+import { SchemaCategory, schemaCategoryLoader } from '@/pages/category/SchemaCategory';
 import { About } from '@/pages/About';
 import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
-import { ProjectIndex, projectIndexLoader } from '@/pages/ProjectIndex';
+import { ProjectIndex, projectIndexLoader } from '@/pages/CategoryIndex';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
 import { DatasourceDetailPage } from '@/pages/DatasourceDetailPage';
 import { AdminerPage } from '@/pages/AdminerPage';
@@ -24,23 +24,23 @@ export const router = createBrowserRouter([
         Component: About,
     },
     {
-        path: routes.project.index.path,
+        path: routes.category.index.path,
         Component: ProjectIndex,
         loader: projectIndexLoader,
         ErrorBoundary: ErrorPage,
         children: [
             {
                 index: true,
-                id: routes.project.index.id,
+                id: routes.category.index.id,
                 loader: schemaCategoryLoader,
                 Component: SchemaCategory,
             },
             {
-                path: routes.project.models.path,
+                path: routes.category.models.path,
                 Component: ModelsPage,
             },
             {
-                path: routes.project.querying.path,
+                path: routes.category.querying.path,
                 Component: QueryingPage,
             },
         ],

@@ -1,68 +1,42 @@
 import { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import {
-    HomeIcon as HomeIconOutline,
-    HeartIcon as HeartIconOutline,
-    CircleStackIcon as CircleStackIconOutline,
-    CodeBracketSquareIcon as CodeBracketSquareIconOutline,
-    LightBulbIcon as LightBulbIconOutline,
-    Bars3Icon,
-    XMarkIcon,
-    DocumentTextIcon,
-} from '@heroicons/react/24/outline';
-import {
-    HomeIcon as HomeIconSolid,
-    HeartIcon as HeartIconSolid,
-    CircleStackIcon as CircleStackIconSolid,
-    CodeBracketSquareIcon as CodeBracketSquareIconSolid,
-    LightBulbIcon as LightBulbIconSolid,
-} from '@heroicons/react/24/solid';
 import { routes } from '@/routes/routes';
+import { sidebarIconMap } from '@/components/icons/Icons';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 type SidebarItem = {
     label: string;
     route?: string;
-    outlineIcon?: JSX.Element;
-    solidIcon?: JSX.Element;
-    isSeparator?: boolean;   // all other options (except label) may be optional because of this separator
+    iconName?: keyof typeof sidebarIconMap;
+    isSeparator?: boolean;   // because of this separator all other options (except label) may be optional
 };
 
 const generalSidebarItems: SidebarItem[] = [
     {
-        label: 'Home',
-        route: routes.home.path,
-        outlineIcon: <HomeIconOutline className='mr-2 w-5 h-5' />,
-        solidIcon: <HomeIconSolid className='mr-2 w-5 h-5' />,
-    },
-    {
         label: 'Schema categories',
         route: '/schema-categories',
-        outlineIcon: <HeartIconOutline className='mr-2 w-5 h-5' />,
-        solidIcon: <HeartIconSolid className='mr-2 w-5 h-5' />,
+        iconName: 'heart',
     },
     {
         label: 'About',
         route: '/about',
-        outlineIcon: <LightBulbIconOutline className='mr-2 w-5 h-5' />,
-        solidIcon: <LightBulbIconSolid className='mr-2 w-5 h-5' />,
+        iconName: 'lightBulb',
     },
     {
         label: 'Datasources',
         route: '/datasources',
-        outlineIcon: <CircleStackIconOutline className='mr-2 w-5 h-5' />,
-        solidIcon: <CircleStackIconSolid className='mr-2 w-5 h-5' />,
+        iconName: 'circleStack',
     },
     {
         label: 'Adminer',
         route: '/adminer',
-        outlineIcon: <CodeBracketSquareIconOutline className='mr-2 w-5 h-5' />,
-        solidIcon: <CodeBracketSquareIconSolid className='mr-2 w-5 h-5' />,
+        iconName: 'codeBracketSquare',
     },
 ];
 
-function Sidebar() {
+export function Sidebar() {
     const location = useLocation();
-    const { projectId } = useParams<'projectId'>();
+    const { categoryId } = useParams<'categoryId'>();
     const [ isSidebarOpen, setIsSidebarOpen ] = useState(false);
 
     const toggleSidebar = () => {
@@ -72,40 +46,25 @@ function Sidebar() {
     // project is not open, show the general sidebar items
     let dynamicSidebarItems: SidebarItem[] = generalSidebarItems;
 
-    // If projectId exists, replace the items with project-specific ones
-    if (projectId) {
+    // If categoryId exists, replace the items with project-specific ones
+    if (categoryId) {
         dynamicSidebarItems = [
-            {
-                label: 'Home',
-                route: routes.home.path,
-                outlineIcon: <HomeIconOutline className='mr-2 w-5 h-5' />,
-                solidIcon: <HomeIconSolid className='mr-2 w-5 h-5' />,
-            },
-            {
-                label: 'Schema categories',
-                route: '/schema-categories',
-                outlineIcon: <HeartIconOutline className='mr-2 w-5 h-5' />,
-                solidIcon: <HeartIconSolid className='mr-2 w-5 h-5' />,
-            },
             // Static separator 'Project'
             { label: 'Project', isSeparator: true },
             {
                 label: 'Schema category',
-                route: routes.project.index.resolve({ projectId }), // Points to the project schema category
-                outlineIcon: <DocumentTextIcon className='mr-2 w-5 h-5' />,
-                solidIcon: <DocumentTextIcon className='mr-2 w-5 h-5' />,
+                route: routes.category.index.resolve({ categoryId }),
+                iconName: 'documentText',
             },
             {
                 label: 'Models',
-                route: routes.project.models.resolve({ projectId }),
-                outlineIcon: <DocumentTextIcon className='mr-2 w-5 h-5' />,
-                solidIcon: <DocumentTextIcon className='mr-2 w-5 h-5' />,
+                route: routes.category.models.resolve({ categoryId }),
+                iconName: 'documentText',
             },
             {
                 label: 'Querying',
-                route: routes.project.querying.resolve({ projectId }),
-                outlineIcon: <DocumentTextIcon className='mr-2 w-5 h-5' />,
-                solidIcon: <DocumentTextIcon className='mr-2 w-5 h-5' />,
+                route: routes.category.querying.resolve({ categoryId }),
+                iconName: 'documentText',
             },
         ];
     }
@@ -129,7 +88,9 @@ function Sidebar() {
                     <XMarkIcon className='w-6 h-6 text-zinc-500' />
                 </button>
 
-                <h1 className='text-xl font-semibold mb-10'>MM-cat</h1>
+                <Link to={routes.home.path}>
+                    <h1 className='text-xl font-semibold mb-10'>MM-cat</h1>
+                </Link>
 
                 <div className='flex flex-col'>
                     {dynamicSidebarItems.map((item) => {
@@ -146,6 +107,7 @@ function Sidebar() {
 
                         // const isActive = item.route === '/' ? location.pathname === item.route : location.pathname.startsWith(item.route);
                         const isActive = item.route === location.pathname;
+                        const icon = item.iconName ? sidebarIconMap[item.iconName] : null;
 
                         return (
                             <Link
@@ -156,7 +118,7 @@ function Sidebar() {
                                     isActive ? 'text-blue-600 font-semibold' : ''
                                 }`}
                             >
-                                {isActive ? item.solidIcon : item.outlineIcon}
+                                {icon && (isActive ? icon.solid : icon.outline)}
                                 {item.label}
                             </Link>
                         );
@@ -173,5 +135,3 @@ function Sidebar() {
         </div>
     );
 }
-
-export default Sidebar;
