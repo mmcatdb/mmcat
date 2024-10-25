@@ -46,7 +46,7 @@ public class InferenceEditorUtils {
     private static int getNewSignatureValue(SchemaCategory schema) {
         int max = 0;
         for (SchemaMorphism morphism : schema.allMorphisms()) {
-            // TODO: here I am relying on the fact that in inference I create only BaseSignatures
+            // TODO: current assumption: in inference I create only BaseSignatures
             int signatureVal = Integer.parseInt(morphism.signature().toString());
             if (signatureVal > max) {
                 max = signatureVal;
@@ -64,7 +64,7 @@ public class InferenceEditorUtils {
     private static int getNewKeyValue(SchemaCategory schema) {
         int max = 0;
         for (SchemaObject object : schema.allObjects()) {
-            // TODO: here I am relying on the fact that in inference I create only BaseSignatures
+            // TODO: current assumption: in inference I create only BaseSignatures
             int keyVal = object.key().getValue();
             if (keyVal > max) {
                 max = keyVal;
@@ -82,18 +82,24 @@ public class InferenceEditorUtils {
      * @param cod The codomain object of the morphism.
      * @return The signature of the newly created morphism.
      */
-    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod) {
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, Signature signature) {
         final SchemaMorphism existingMorphism = getMorphismIfExists(schema, dom, cod);
         if (existingMorphism != null)
             return existingMorphism.signature();
 
-        final BaseSignature signature = Signature.createBase(getNewSignatureValue(schema));
+        if (signature == null)
+            signature = Signature.createBase(getNewSignatureValue(schema));
+
         final SchemaMorphism newMorphism = new SchemaMorphism(signature, dom, cod, Min.ONE, Set.of());
 
         schema.addMorphism(newMorphism);
         metadata.setMorphism(newMorphism, new MetadataMorphism(""));
 
         return newMorphism.signature();
+    }
+
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod) {
+        return createAndAddMorphism(schema, metadata, dom, cod, null);
     }
 
     /**

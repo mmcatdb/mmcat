@@ -10,12 +10,14 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +147,9 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
         findMorphismsAndObjectsToDelete(clusterRootKey);
         InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
+
+        // finally add the _type object
+        addTypeObjectAndMorphism();
     }
 
     /**
@@ -323,7 +328,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private void addSchemaPart(List<String> oldClusterNames, Key clusterRootKey) {
         final Map<Key, Key> mapOldNewKey = addObjects(oldClusterNames);
         addMorphisms(mapOldNewKey, clusterRootKey);
-        //addTypeObjectAndMorphism();
     }
 
     /**
@@ -366,14 +370,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     /**
-     * Adds a new type object and morphism to the schema.
-     */
-    private void addTypeObjectAndMorphism() {
-        final Key typeKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), TYPE_LABEL);
-        newTypeSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey));
-    }
-
-    /**
      * Finds morphisms and objects to delete based on the provided cluster root key.
      *
      * @param clusterRootKey The key of the cluster root.
@@ -392,6 +388,15 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     /**
+     * Adds a new type object and morphism to the schema.
+     */
+    private void addTypeObjectAndMorphism() {
+        final Key typeKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), TYPE_LABEL);
+        this.newTypeSignature = Signature.concatenate(this.mapOldClusterNameSignature.values());
+        InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey), this.newTypeSignature);
+    }
+
+    /**
      * Applies the mapping edit to a list of mappings.
      *
      * @param mappings The list of mappings to edit.
@@ -400,12 +405,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Cluster Edit on Mapping...");
 
-        //Mapping clusterMapping = findClusterMapping(mappings);
+        Mapping clusterMapping = findClusterMapping(mappings);
 
-        //Mapping mergedMapping = createMergedMapping(clusterMapping);
+        Mapping mergedMapping = createMergedMapping(clusterMapping);
 
-        //return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(clusterMapping), mergedMapping);
-        return mappings;
+        return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(clusterMapping), mergedMapping);
+        //return mappings;
     }
 
     /**
@@ -448,6 +453,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         final var randomClusterObject = oldMetadata.getObject(data.clusterKeys.get(RND_CLUSTER_IDX));
         final var signature = mapOldClusterNameSignature.get(randomClusterObject.label);
         final AccessPath firstClusterAccessPath = clusterComplexProperty.getSubpathBySignature(signature);
+        System.out.println("firstClusterAccess: " + firstClusterAccessPath);
+        if (firstClusterAccessPath instanceof ComplexProperty) {
+            System.out.println("complex");
+        } else if (firstClusterAccessPath instanceof SimpleProperty) {
+            System.out.println("simple");
+        }
 
         return getNewComplexProperty(firstClusterAccessPath, clusterComplexProperty);
     }
@@ -459,15 +470,17 @@ public class ClusterMerge extends InferenceEditAlgorithm {
      * @param clusterComplexProperty The cluster complex property.
      * @return The new complex property.
      */
-    private ComplexProperty getNewComplexProperty(AccessPath firstClusterAccessPath, ComplexProperty clusterComplexProperty) {
+/*    private ComplexProperty getNewComplexProperty(AccessPath firstClusterAccessPath, ComplexProperty clusterComplexProperty) {
         List<AccessPath> newSubpaths = new ArrayList<>();
         boolean complexChanged = false;
         boolean complexIsCluster = false;
 
         for (AccessPath subpath : clusterComplexProperty.subpaths()) {
             if (!(subpath instanceof ComplexProperty complexProperty)) {
-                newSubpaths.add(subpath);
-                continue;
+                if (!(mapOldClusterNameSignature.values().contains(subpath.signature()))) {
+                    newSubpaths.add(subpath);
+                    continue;
+                }
             }
 
             if (!complexChanged || complexIsCluster) {
@@ -477,7 +490,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                         complexChanged = true;
                         complexIsCluster = true;
                         break;
-                    } else if (complexProperty != null) {
+                    } else if (complexProperty != null) { // remove the old cluster members
                         AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
                         if (currentSubpath != null) {
                             complexProperty = complexProperty.minusSubpath(currentSubpath);
@@ -487,7 +500,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                 }
             }
 
-            if (complexChanged) {
+            if (complexChanged) { // add the new cluster representant
                 List<AccessPath> updatedSubpaths = complexProperty != null ? new ArrayList<>(complexProperty.subpaths()) : new ArrayList<>();
                 ComplexProperty newComplexProperty = createNewComplexProperty((ComplexProperty) firstClusterAccessPath);
                 updatedSubpaths.add(newComplexProperty);
@@ -502,7 +515,61 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                 newSubpaths.add(complexProperty);
             }
         }
-        //TODO: use the mapping builder everywhere
+        MappingBuilder mappingBuilder = new MappingBuilder();
+        return mappingBuilder.root(newSubpaths.toArray(new AccessPath[0]));
+    }*/
+    private ComplexProperty getNewComplexProperty(AccessPath firstClusterAccessPath, ComplexProperty clusterComplexProperty) {
+        List<AccessPath> newSubpaths = new ArrayList<>();
+        boolean complexChanged = false;
+        boolean complexIsCluster = false;
+
+        for (AccessPath subpath : clusterComplexProperty.subpaths()) {
+            ComplexProperty complexProperty = null; // Declare complexProperty here
+
+            if (subpath instanceof ComplexProperty tempComplexProperty) {
+                complexProperty = tempComplexProperty;
+            }
+            // Now you can check for the signature and use complexProperty safely
+            if (!(mapOldClusterNameSignature.values().contains(subpath.signature()))) {
+                newSubpaths.add(subpath);
+                continue;
+            } else {
+                complexChanged = true;
+            }
+
+            // At this point, complexProperty will only be non-null if the subpath is a ComplexProperty
+            if (!complexChanged || complexIsCluster) {
+                for (Signature oldSignature : mapOldClusterNameSignature.values()) {
+                    if (complexProperty != null && complexProperty.signature().equals(oldSignature)) {
+                        complexProperty = null;
+                        complexChanged = true;
+                        complexIsCluster = true;
+                        break;
+                    } else if (complexProperty != null) { // remove the old cluster members
+                        AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
+                        if (currentSubpath != null) {
+                            complexProperty = complexProperty.minusSubpath(currentSubpath);
+                            complexChanged = true;
+                        }
+                    }
+                }
+            }
+
+            if (complexChanged) { // add the new cluster representant
+                List<AccessPath> updatedSubpaths = complexProperty != null ? new ArrayList<>(complexProperty.subpaths()) : new ArrayList<>();
+                ComplexProperty newComplexProperty = createNewComplexProperty(firstClusterAccessPath);
+                updatedSubpaths.add(newComplexProperty);
+
+                ComplexProperty resultProperty = complexProperty != null
+                    ? new ComplexProperty(complexProperty.name(), complexProperty.signature(), updatedSubpaths)
+                    : newComplexProperty;
+
+                newSubpaths.add(resultProperty);
+
+            } else if (complexProperty != null) {
+                newSubpaths.add(complexProperty);
+            }
+        }
         MappingBuilder mappingBuilder = new MappingBuilder();
         return mappingBuilder.root(newSubpaths.toArray(new AccessPath[0]));
     }
@@ -513,20 +580,29 @@ public class ClusterMerge extends InferenceEditAlgorithm {
      * @param original The original complex property.
      * @return The new complex property.
      */
-    public ComplexProperty createNewComplexProperty(ComplexProperty original) {
-        final List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
-        Name name;
-        Signature complexPropertySignature;
+    public ComplexProperty createNewComplexProperty(AccessPath original) {
+        System.out.println("original access: " + original);
+        List<AccessPath> newSubpaths = new ArrayList<>();
+        Name name = null;
+        Signature complexPropertySignature = null;
 
-        if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
-            complexPropertySignature = newClusterSignature;
-            name = new DynamicName(complexPropertySignature);
-        } else {
-            complexPropertySignature = mapOldNewSignature.get(original.signature());
-            if (complexPropertySignature == null) { // meaning the original was an array object and so the signature was dual
-                complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
+        if (original instanceof SimpleProperty) { // meaning it is simple
+            System.out.println("it was a simple prop, yeay! :)");
+            name = new StaticName(this.newClusterName);
+            complexPropertySignature = this.newClusterSignature;
+            newSubpaths.add(new SimpleProperty(new DynamicName(this.newTypeSignature), this.newTypeSignature));
+        } else if (original instanceof ComplexProperty tempOriginal) {
+            newSubpaths = transformSubpaths(tempOriginal.subpaths());
+            if (!mapOldNewSignature.containsKey(tempOriginal.signature()) && !mapOldNewSignature.containsKey(tempOriginal.signature().dual())) {
+                complexPropertySignature = newClusterSignature;
+                name = new DynamicName(complexPropertySignature);
+            } else {
+                complexPropertySignature = mapOldNewSignature.get(tempOriginal.signature());
+                if (complexPropertySignature == null) { // meaning the original was an array object and so the signature was dual
+                    complexPropertySignature = mapOldNewSignature.get(tempOriginal.signature().dual()).dual();
+                }
+                name = original.name();
             }
-            name = original.name();
         }
         return new ComplexProperty(name, complexPropertySignature, newSubpaths);
     }

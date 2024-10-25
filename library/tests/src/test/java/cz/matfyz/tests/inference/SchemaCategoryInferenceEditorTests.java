@@ -201,7 +201,7 @@ class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testClusterEdit() {
+    void testClusterComplexEdit() {
         final var builder = new SchemaBuilder();
 
         final var world =       builder.object("world", 0);
@@ -267,7 +267,7 @@ class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testClusterEdit2() {
+    void testClusterIntermediateEdit() {
         final var builder = new SchemaBuilder();
 
         final var user =            builder.object("user", 0);
@@ -303,6 +303,52 @@ class SchemaCategoryInferenceEditorTests {
                 mb.complex("compliment_funny", userToCompliment2,
                     mb.simple("rating", compliment2ToRating),
                     mb.simple("comments", compliment2ToComments))
+            ),
+            null
+        );
+
+        System.out.println("Mapping before edit:");
+        System.out.println(mapping.accessPath());
+
+
+        List<Key> clusterKeys = new ArrayList<>();
+        clusterKeys.add(compliment1.key());
+        clusterKeys.add(compliment2.key());
+
+        final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
+
+        final List<Mapping> editMappings = edit.applyMappingEdit(List.of(mapping));
+
+        System.out.println("Mapping after edit:");
+        System.out.println(editMappings.get(0).accessPath());
+    }
+
+    @Test
+    void testClusterSimpleEdit() {
+        final var builder = new SchemaBuilder();
+
+        final var user =            builder.object("user", 0);
+        final var name =            builder.object("name", 1);
+        final var compliment1 =     builder.object("compliment_cute", 2);
+        final var compliment2 =     builder.object("compliment_funny", 3);
+
+        final var userToName =              builder.morphism(user, name, 1);
+        final var userToCompliment1 =       builder.morphism(user, compliment1, 2);
+        final var userToCompliment2 =       builder.morphism(user, compliment2, 3);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
+
+        final MappingBuilder mb = new MappingBuilder();
+        final Mapping mapping = new Mapping(
+            schema,
+            user.key(),
+            "kindName",
+            mb.root(
+                mb.simple("name", userToName),
+                mb.simple("compliment_cute", userToCompliment1),
+                mb.simple("compliment_funny", userToCompliment2)
             ),
             null
         );
