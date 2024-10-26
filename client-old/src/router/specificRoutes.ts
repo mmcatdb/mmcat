@@ -34,18 +34,6 @@ const categoryRoutes: RouteRecordRaw[] = [ {
     path: 'jobs/:id',
     name: 'job',
     component: () => import('@/views/category/JobView.vue'),
-}, {
-    path: 'logical-models',
-    name: 'logicalModels',
-    component: () => import('@/views/category/LogicalModelsView.vue'),
-}, {
-    path: 'logical-models/:id',
-    name: 'logicalModel',
-    component: () => import('@/views/common/LogicalModelView.vue'),
-}, {
-    path: 'logical-models/new',
-    name: 'newLogicalModel',
-    component: () => import('@/views/category/NewLogicalModel.vue'),
 },
 commonRoutes.mapping,
 commonRoutes.accessPathEditor,
@@ -57,14 +45,6 @@ commonRoutes.accessPathEditor,
     path: 'instance-category',
     name: 'instanceCategory',
     component: () => import('@/views/category/InstanceCategoryView.vue'),
-}, {
-    path: 'models',
-    name: 'models',
-    component: () => import('@/views/category/ModelsView.vue'),
-}, {
-    path: 'models/:jobId',
-    name: 'model',
-    component: () => import('@/views/category/ModelView.vue'),
 }, {
     path: 'datasources',
     name: 'datasources',
@@ -135,8 +115,6 @@ const redirects: Record<ViewType, Record<string, string>> = {
     workflow: {
         'datasources': 'index',
         'job': 'index',
-        'logicalModel': 'index',
-        'logicalModels': 'index',
     },
 };
 

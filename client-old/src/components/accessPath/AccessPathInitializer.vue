@@ -43,7 +43,7 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
 }
 
 /**
- * Stores the list of logical models and the selected logical model.
+ * Stores the list of datasources and the selected datasource.
  */
 const datasources = shallowRef<Datasource[]>([]);
 const selectedDatasource = shallowRef<Datasource>();
@@ -59,7 +59,7 @@ const categoryId = useSchemaCategoryId();
 const initializeType = ref<'create' | 'load' | 'default'>('default');
 
 /**
- * Fetches all logical models in the selected category and sets the selected logical model based on the route query parameter.
+ * Fetches all datasources in the selected category and sets the selected datasource based on the route query parameter.
  */
 onMounted(async () => {
     const result = await API.datasources.getAllDatasources({});
@@ -91,7 +91,7 @@ async function createMapping(primaryKey: SignatureId, accessPath: GraphRootPrope
     });
     if (result.status) {
         const mapping = Mapping.fromServer(result.data);
-        router.push({ name: 'logicalModel', params: { id: mapping.logicalModelId } });
+        router.push({ name: 'datasource', params: { id: mapping.datasourceId } });
     }
 }
 

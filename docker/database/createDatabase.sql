@@ -12,7 +12,6 @@ DROP TABLE IF EXISTS evolution;
 
 DROP TABLE IF EXISTS query;
 DROP TABLE IF EXISTS mapping;
-DROP TABLE IF EXISTS logical_model;
 DROP TABLE IF EXISTS datasource;
 DROP TABLE IF EXISTS schema_category;
 
@@ -53,18 +52,12 @@ VALUES
         }
     }');
 
-CREATE TABLE logical_model (
-    id UUID PRIMARY KEY,
-    category_id UUID NOT NULL REFERENCES schema_category,
-    datasource_id UUID NOT NULL REFERENCES datasource,
-    json_value JSONB NOT NULL
-);
-
 CREATE TABLE mapping (
     id UUID PRIMARY KEY,
     version VARCHAR(255) NOT NULL,
     last_valid VARCHAR(255) NOT NULL,
-    logical_model_id UUID NOT NULL REFERENCES logical_model,
+    category_id UUID NOT NULL REFERENCES schema_category,
+    datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
 );
 

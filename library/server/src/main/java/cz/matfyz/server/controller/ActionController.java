@@ -1,9 +1,7 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.evolution.Version;
-import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.entity.action.Action;
@@ -13,7 +11,6 @@ import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
-
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
@@ -36,12 +33,6 @@ public class ActionController {
 
     @Autowired
     private ActionRepository repository;
-
-    @Autowired
-    private LogicalModelRepository logicalModelRepository;
-
-    @Autowired
-    private LogicalModelController logicalModelController;
 
     @Autowired
     private DatasourceRepository datasourceRepository;
@@ -85,23 +76,23 @@ public class ActionController {
     // TODO extremely unefficient - load all models and datasources at once.
     // TODO switch to pattern matching when available.
     ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
-        if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
-            final var model = logicalModelRepository.find(modelToCategoryPayload.logicalModelId());
-            final var info = logicalModelController.toInfo(model);
-            return new ModelToCategoryPayloadDetail(info);
+        if (payload instanceof ModelToCategoryPayload p) {
+            final var datasource = datasourceRepository.find(p.datasourceId());
+            final var detail = datasourceController.datasourceToDetail(datasource);
+            return new ModelToCategoryPayloadDetail(detail);
         }
-        if (payload instanceof CategoryToModelPayload categoryToModelPayload) {
-            final var model = logicalModelRepository.find(categoryToModelPayload.logicalModelId());
-            final var info = logicalModelController.toInfo(model);
-            return new CategoryToModelPayloadDetail(info);
+        if (payload instanceof CategoryToModelPayload p) {
+            final var datasource = datasourceRepository.find(p.datasourceId());
+            final var detail = datasourceController.datasourceToDetail(datasource);
+            return new CategoryToModelPayloadDetail(detail);
         }
-        if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
-            return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
+        if (payload instanceof UpdateSchemaPayload p) {
+            return new UpdateSchemaPayloadDetail(p.prevVersion(), p.nextVersion());
         }
-        if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
-            final var datasource = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
-            final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
-            return new RSDToCategoryPayloadDetail(datasourceDetail);
+        if (payload instanceof RSDToCategoryPayload p) {
+            final var datasource = datasourceRepository.find(p.datasourceId());
+            final var detail = datasourceController.datasourceToDetail(datasource);
+            return new RSDToCategoryPayloadDetail(detail);
         }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
@@ -128,11 +119,11 @@ public class ActionController {
     interface ActionPayloadDetail {}
 
     record CategoryToModelPayloadDetail(
-        LogicalModelInfo logicalModel
+        DatasourceDetail datasource
     ) implements ActionPayloadDetail {}
 
     record ModelToCategoryPayloadDetail(
-        LogicalModelInfo logicalModel
+        DatasourceDetail datasource
     ) implements ActionPayloadDetail {}
 
     record UpdateSchemaPayloadDetail(

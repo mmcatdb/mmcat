@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import API from '@/utils/api';
-import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { Datasource } from '@/types/datasource';
@@ -13,10 +12,8 @@ const emit = defineEmits<{
     (e: 'newAction', action: Action): void;
 }>();
 
-const logicalModels = ref<LogicalModel[]>();
 const datasources = ref<Datasource[]>();
 const fetched = ref(false);
-const logicalModelId = ref<Id>();
 const datasourceId = ref<Id>();
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
@@ -25,10 +22,6 @@ const fetching = ref(false);
 const categoryId = useSchemaCategoryId();
 
 onMounted(async () => {
-    const logicalModelResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
-    if (logicalModelResult.status)
-        logicalModels.value = logicalModelResult.data.map(LogicalModel.fromServer);
-
     const datasourceResult = await API.datasources.getAllDatasources({});
     if (datasourceResult.status)
         datasources.value = datasourceResult.data.map(Datasource.fromServer);
@@ -40,28 +33,15 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    if (actionType.value === ActionType.RSDToCategory)
-        return !!datasourceId.value;
-    else return !!logicalModelId.value;
-
+    return !!datasourceId.value;
 });
 
 async function createAction() {
     fetching.value = true;
-    let payload;
-
-    if (actionType.value === ActionType.RSDToCategory) {
-        payload = {
-            type: actionType.value,
-            datasourceId: datasourceId.value,
-        };
-    }
-    else {
-        payload = {
-            type: actionType.value,
-            logicalModelId: logicalModelId.value,
-        };
-    }
+    const payload = {
+        type: actionType.value,
+        datasourceId: datasourceId.value,
+    };
 
     const result = await API.actions.createAction({}, {
         categoryId,
@@ -93,10 +73,7 @@ async function createAction() {
             <ValueRow label="Label:">
                 <input v-model="actionName" />
             </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.RSDToCategory"
-                label="Datasource:"
-            >
+            <ValueRow label="Datasource:">
                 <select v-model="datasourceId">
                     <option
                         v-for="datasource in datasources"
@@ -104,20 +81,6 @@ async function createAction() {
                         :value="datasource.id"
                     >
                         {{ datasource.label }}
-                    </option>
-                </select>
-            </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"
-                label="Logical model:"
-            >
-                <select v-model="logicalModelId">
-                    <option
-                        v-for="logicalModel in logicalModels"
-                        :key="logicalModel.id"
-                        :value="logicalModel.id"
-                    >
-                        {{ logicalModel.label }}
                     </option>
                 </select>
             </ValueRow>

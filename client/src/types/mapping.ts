@@ -5,7 +5,8 @@ import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from
 
 export type MappingFromServer = {
     id: Id;
-    logicalModelId: Id;
+    categoryId: Id;
+    datasourceId: Id;
     rootObjectKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
@@ -17,8 +18,8 @@ export class Mapping implements Entity {
     private constructor(
         public readonly id: Id,
         public readonly kindName: string,
-        public readonly logicalModelId: Id,
-        //public readonly rootObject: SchemaObject,
+        public readonly categoryId: Id,
+        public readonly datasourceId: Id,
         public readonly rootObjectKey: Key,
         public readonly primaryKey: SignatureId,
         public readonly accessPath: RootProperty,
@@ -29,7 +30,8 @@ export class Mapping implements Entity {
         return new Mapping(
             input.id,
             input.kindName,
-            input.logicalModelId,
+            input.categoryId,
+            input.datasourceId,
             Key.fromServer(input.rootObjectKey),
             SignatureId.fromServer(input.primaryKey),
             RootProperty.fromServer(input.accessPath),
@@ -41,7 +43,6 @@ export class Mapping implements Entity {
 export type MappingInit = {
     categoryId: Id;
     datasourceId: Id;
-    logicalModelId: Id;
     rootObjectKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;

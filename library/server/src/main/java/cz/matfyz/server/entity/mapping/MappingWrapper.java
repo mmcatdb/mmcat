@@ -19,7 +19,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class MappingWrapper extends VersionedEntity {
 
-    public final Id logicalModelId;
+    public final Id categoryId;
+    public final Id datasourceId;
     public final Key rootObjectKey;
     public final List<Signature> primaryKey;
     public final String kindName;
@@ -29,7 +30,8 @@ public class MappingWrapper extends VersionedEntity {
         Id id,
         Version version,
         Version lastValid,
-        Id logicalModelId,
+        Id categoryId,
+        Id datasourceId,
         Key rootObjectKey,
         List<Signature> primaryKey,
         String kindName,
@@ -37,19 +39,21 @@ public class MappingWrapper extends VersionedEntity {
     ) {
         super(id, version, lastValid);
 
-        this.logicalModelId = logicalModelId;
+        this.categoryId = categoryId;
+        this.datasourceId = datasourceId;
         this.rootObjectKey = rootObjectKey;
         this.primaryKey = primaryKey;
         this.kindName = kindName;
         this.accessPath = accessPath;
     }
 
-    public static MappingWrapper createNew(Version version, Id logicalModelId, Key rootObjectKey, List<Signature> primaryKey, String kindName, ComplexProperty accessPath) {
+    public static MappingWrapper createNew(Version version, Id categoryId, Id datasourceId, Key rootObjectKey, List<Signature> primaryKey, String kindName, ComplexProperty accessPath) {
         return new MappingWrapper(
             Id.createNew(),
             version,
             version,
-            logicalModelId,
+            categoryId,
+            datasourceId,
             rootObjectKey,
             primaryKey,
             kindName,
@@ -77,13 +81,14 @@ public class MappingWrapper extends VersionedEntity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(MappingJsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(MappingJsonValue.class);
 
-    public static MappingWrapper fromJsonValue(Id id, Version version, Version lastValid, Id logicalModelId, String jsonValue) throws JsonProcessingException {
+    public static MappingWrapper fromJsonValue(Id id, Version version, Version lastValid, Id categoryId, Id datasourceId, String jsonValue) throws JsonProcessingException {
         final MappingJsonValue json = jsonValueReader.readValue(jsonValue);
         return new MappingWrapper(
             id,
             version,
             lastValid,
-            logicalModelId,
+            categoryId,
+            datasourceId,
             json.rootObjectKey(),
             json.primaryKey(),
             json.kindName(),

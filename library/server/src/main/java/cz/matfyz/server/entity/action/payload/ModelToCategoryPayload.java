@@ -4,5 +4,5 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.ActionPayload;
 
 public record ModelToCategoryPayload(
-    Id logicalModelId
+    Id datasourceId
 ) implements ActionPayload {}

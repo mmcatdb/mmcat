@@ -7,9 +7,9 @@ import type { Graph } from '@/types/categoryGraph';
 import { useSchemaCategoryId, useSchemaCategoryInfo } from '@/utils/injects';
 import GraphDisplay from './GraphDisplay.vue';
 import { Evocat } from '@/types/evocat/Evocat';
-import { LogicalModel } from '@/types/logicalModel';
 import { DataResultSuccess } from '@/types/api/result';
 import { SchemaUpdate, type SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
+import { type LogicalModel, logicalModelsFromServer } from '@/types/datasource';
 
 const props = defineProps<{
     schemaCategory?: SchemaCategory;
@@ -26,16 +26,17 @@ const emit = defineEmits([ 'evocatCreated' ]);
 onMounted(async () => {
     const schemaCategoryResult = await API.schemas.getCategory({ id: categoryId });
     const schemaUpdatesResult = await API.schemas.getCategoryUpdates({ id: categoryId });
-    const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
+    const datasourcesResult = await API.datasources.getAllDatasources({}, { categoryId });
+    const mappingsResult = await API.mappings.getAllMappingsInCategory({}, { categoryId });
     fetching.value = false;
 
-    if (!schemaCategoryResult.status || !schemaUpdatesResult.status || !logicalModelsResult.status) {
+    if (!schemaCategoryResult.status || !schemaUpdatesResult.status || !datasourcesResult.status || !mappingsResult.status) {
         // TODO handle error
         return;
     }
 
     const schemaUpdates = schemaUpdatesResult.data.map(SchemaUpdate.fromServer);
-    const logicalModels = logicalModelsResult.data.map(LogicalModel.fromServer);
+    const logicalModels = logicalModelsFromServer(datasourcesResult.data, mappingsResult.data);
 
     const schemaCategory = SchemaCategory.fromServer(schemaCategoryResult.data, logicalModels);
     const newEvocat = Evocat.create(schemaCategory, schemaUpdates, logicalModels, {

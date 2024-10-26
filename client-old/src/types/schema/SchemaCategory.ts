@@ -2,14 +2,13 @@ import { UniqueIdProvider } from '@/utils/UniqueIdProvider';
 import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import type { Entity, Id, VersionId } from '../id';
 import { DynamicName, Key, type KeyFromServer, Signature, type SignatureFromServer } from '../identifiers';
-import type { LogicalModel } from '../logicalModel';
 import { type MetadataMorphismFromServer, SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
 import { type MetadataObjectFromServer, SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Mapping } from '../mapping';
 import { ComparableSet } from '@/utils/ComparableSet';
-import type { DatasourceType } from '../datasource';
+import type { DatasourceType, LogicalModel } from '../datasource';
 
 export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
     schema: SerializedSchema;

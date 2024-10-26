@@ -53,9 +53,9 @@ class TempTests {
     private static List<Kind> defineKinds(List<TestDatasource<?>> testDatasources) {
         return testDatasources.stream()
             .flatMap(testDatasource -> {
-                final var builder = new Datasource.Builder();
+                final var builder = new Datasource.Builder(testDatasource.type, testDatasource.wrapper, testDatasource.id);
                 testDatasource.mappings.stream().forEach(builder::mapping);
-                final var datasource = builder.build(testDatasource.type, testDatasource.wrapper, testDatasource.id);
+                final var datasource = builder.build();
 
                 return datasource.kinds.stream();
             })

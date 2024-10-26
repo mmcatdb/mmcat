@@ -1,9 +1,10 @@
 package cz.matfyz.server.example.common;
 
-import cz.matfyz.server.entity.LogicalModel;
+import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -14,22 +15,24 @@ import java.util.function.Function;
 
 public class MappingBuilder {
 
-    private final List<LogicalModel> models;
+    private final List<DatasourceWrapper> datasources;
+    private final Id categoryId;
     private final SchemaCategory schema;
     private List<MappingInit> inits = new ArrayList<>();
 
-    public MappingBuilder(List<LogicalModel> models, SchemaCategoryWrapper wrapper) {
-        this.models = models;
+    public MappingBuilder(List<DatasourceWrapper> datasources, SchemaCategoryWrapper wrapper) {
+        this.datasources = datasources;
+        this.categoryId = wrapper.id();
         schema = wrapper.toSchemaCategory();
     }
 
     public MappingBuilder add(int index, Function<SchemaCategory, TestMapping> initCreator) {
-        return add(models.get(index), initCreator);
+        return add(datasources.get(index), initCreator);
     }
 
-    public MappingBuilder add(LogicalModel model, Function<SchemaCategory, TestMapping> initCreator) {
+    public MappingBuilder add(DatasourceWrapper datasource, Function<SchemaCategory, TestMapping> initCreator) {
         final Mapping mapping = initCreator.apply(schema).mapping();
-        final var init = MappingInit.fromMapping(mapping, model.categoryId, model.datasourceId);
+        final var init = MappingInit.fromMapping(mapping, categoryId, datasource.id());
         inits.add(init);
 
         return this;

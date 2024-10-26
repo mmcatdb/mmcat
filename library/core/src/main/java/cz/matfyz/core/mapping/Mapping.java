@@ -70,7 +70,7 @@ public class Mapping implements Comparable<Mapping> {
     }
 
     @Override public int compareTo(Mapping other) {
-        // This guarantees uniqueness in one logical model, however mappings between different logical models are never compared.
+        // This guarantees uniqueness in one datasource, however mappings between different datasources are never compared.
         return kindName.compareTo(other.kindName);
     }
 

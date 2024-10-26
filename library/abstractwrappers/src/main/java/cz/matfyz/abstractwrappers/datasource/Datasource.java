@@ -47,6 +47,16 @@ public class Datasource implements Comparable<Datasource> {
 
     public static class Builder {
 
+        private DatasourceType type;
+        private AbstractControlWrapper control;
+        private String identifier;
+
+        public Builder(DatasourceType type, AbstractControlWrapper control, String identifier) {
+            this.type = type;
+            this.control = control;
+            this.identifier = identifier;
+        }
+
         private List<Mapping> mappings = new ArrayList<>();
 
         public Builder mapping(Mapping mapping) {
@@ -55,7 +65,7 @@ public class Datasource implements Comparable<Datasource> {
             return this;
         }
 
-        public Datasource build(DatasourceType type, AbstractControlWrapper control, String identifier) {
+        public Datasource build() {
             final var datasource = new Datasource(type, control, identifier, new TreeSet<>());
             mappings.forEach(m -> datasource.kinds.add(new Kind(m, datasource)));
 

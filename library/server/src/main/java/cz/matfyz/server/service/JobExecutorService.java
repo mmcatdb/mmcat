@@ -52,7 +52,6 @@ import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.InstanceCategoryRepository;
 import cz.matfyz.server.repository.JobRepository;
-import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
@@ -83,12 +82,6 @@ public class JobExecutorService {
 
     @Autowired
     private MappingService mappingService;
-
-    @Autowired
-    private LogicalModelRepository logicalModelRepository;
-
-    @Autowired
-    private LogicalModelService logicalModelService;
 
     @Autowired
     private EvolutionRepository evolutionRepository;
@@ -180,12 +173,9 @@ public class JobExecutorService {
         if (run.sessionId == null)
             throw SessionException.notFound(run.id());
 
-        final DatasourceWrapper datasource = logicalModelRepository.find(payload.logicalModelId()).datasource();
+        final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        // TODO
-        if (true)
-            throw new UnsupportedOperationException("NOT LOGICAL MODEL ID ...");
-        final List<MappingWrapper> mappingWrappers = mappingRepository.findAllInCategory(payload.logicalModelId());
+        final List<MappingWrapper> mappingWrappers = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
         final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
@@ -220,11 +210,8 @@ public class JobExecutorService {
             ? instanceWrapper.toInstanceCategory(schema)
             : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
-        final DatasourceWrapper datasource = logicalModelRepository.find(payload.logicalModelId()).datasource();
-        // TODO
-        if (true)
-        throw new UnsupportedOperationException("NOT LOGICAL MODEL ID ...");
-        final List<Mapping> mappings = mappingRepository.findAllInCategory(payload.logicalModelId()).stream()
+        final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
+        final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
             .map(wrapper -> wrapper.toMapping(schema))
             .toList();
 
@@ -418,7 +405,6 @@ public class JobExecutorService {
 
         final RSDToCategoryPayload payload = (RSDToCategoryPayload) job.job().payload;
         final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
-        logicalModelService.create(wrapper.id(), datasource.id(), "Initial logical model");
 
         for (final Mapping mapping : mappings) {
             final MappingInit init = MappingInit.fromMapping(mapping, wrapper.id(), datasource.id());

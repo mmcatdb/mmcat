@@ -54,26 +54,18 @@ async function deleteAction() {
                 {{ action.payload.type }}
             </ValueRow>
             <ValueRow
-                v-if="action.payload.type === ActionType.RSDToCategory "
+                v-if="action.payload.type === ActionType.UpdateSchema"
+                label="Versions:"
+            >
+                <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
+            </ValueRow>
+            <ValueRow
+                v-else
                 label="Datasource:"
             >
                 <FixedRouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id } }">
                     {{ action.payload.datasource.label }}
                 </FixedRouterLink>
-            </ValueRow>
-            <ValueRow
-                v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
-                label="Logical model:"
-            >
-                <FixedRouterLink :to="{ name: 'logicalModel', params: { id: action.payload.logicalModel.id } }">
-                    {{ action.payload.logicalModel.label }}
-                </FixedRouterLink>
-            </ValueRow>
-            <ValueRow
-                v-else-if="action.payload.type === ActionType.UpdateSchema"
-                label="Versions:"
-            >
-                <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
             </ValueRow>
             <!--
                 <ValueRow label="State:">

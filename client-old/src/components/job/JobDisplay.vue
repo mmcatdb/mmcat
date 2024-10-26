@@ -78,9 +78,7 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
     fetching.value = false;
     if (result.status) 
         emit('updateJob', Job.fromServer(result.data, info.value));
-    
 }
-
 </script>
 
 <template>
@@ -110,18 +108,13 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                 {{ job.payload.type }}
             </div>
             <div class="col-3">
-                <template v-if="job.payload.type === ActionType.RSDToCategory">
+                <template v-if="job.payload.type === ActionType.UpdateSchema">
+                    <VersionDisplay :version-id="job.payload.prevVersion" /> -> <VersionDisplay :version-id="job.payload.nextVersion" />
+                </template>
+                <template v-else>
                     <FixedRouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id } }">
                         {{ job.payload.datasource.label }}
                     </FixedRouterLink>
-                </template>
-                <template v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
-                    <FixedRouterLink :to="{ name: 'logicalModel', params: { id: job.payload.logicalModel.id } }">
-                        {{ job.payload.logicalModel.label }}
-                    </FixedRouterLink>
-                </template>
-                <template v-else>
-                    <VersionDisplay :version-id="job.payload.prevVersion" /> -> <VersionDisplay :version-id="job.payload.nextVersion" />
                 </template>
             </div>
             <div class="flex-grow-1">
@@ -198,7 +191,7 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
             />
             <TextArea
                 v-else-if="job.payload.type !== ActionType.RSDToCategory && job.data"
-                v-model="(job.data as ModelJobData).model"
+                v-model="(job.data as ModelJobData).value"
                 class="w-100 mt-2"
                 readonly
                 :min-rows="1"

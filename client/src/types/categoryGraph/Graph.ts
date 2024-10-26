@@ -310,7 +310,7 @@ class GraphHighlights {
             node: this.control.cytoscape.add({
                 data: {
                     id: 'group_' + id,
-                    label: groupData.logicalModel.label,
+                    label: groupData.logicalModel.datasource.label,
                 },
                 classes: 'group ' + 'group-' + id,
             }),

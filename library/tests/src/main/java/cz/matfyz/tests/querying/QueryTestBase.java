@@ -71,9 +71,9 @@ public class QueryTestBase {
 
     private List<Kind> defineKinds() {
         return datasources.stream().flatMap(testDatasource -> {
-            final var builder = new Datasource.Builder();
+            final var builder = new Datasource.Builder(testDatasource.type, testDatasource.wrapper, testDatasource.id);
             testDatasource.mappings.forEach(builder::mapping);
-            final var datasource = builder.build(testDatasource.type, testDatasource.wrapper, testDatasource.id);
+            final var datasource = builder.build();
 
             return datasource.kinds.stream();
         }).toList();

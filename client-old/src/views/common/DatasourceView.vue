@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import API from '@/utils/api';
-import type { Datasource } from '@/types/datasource';
+import { isFile, type Datasource } from '@/types/datasource';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
 import DatasourceEditor from '@/components/datasource/DatasourceEditor.vue';
-import { ref } from 'vue';
+import { computed, shallowRef } from 'vue';
 import { useRoute } from 'vue-router';
 import { useFixedRouter } from '@/router/specificRoutes';
+import { Mapping } from '@/types/mapping';
+import { tryUseSchemaCategoryId } from '@/utils/injects';
+import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 
 const route = useRoute();
 const router = useFixedRouter();
@@ -15,11 +18,14 @@ const rawId = route.params.id as string;
 const isNew = rawId === 'new';
 const id = isNew ? undefined : rawId;
 
-const isEditing = ref(isNew || route.query.state === 'editing');
+const isEditing = shallowRef(isNew || route.query.state === 'editing');
 
-const datasource = ref<Datasource>();
+const datasource = shallowRef<Datasource>();
 
 const shouldReturnToAllDatasourcesAfterEditing = isEditing.value;
+
+const categoryId = tryUseSchemaCategoryId();
+const mappings = shallowRef<Mapping[]>();
 
 async function fetchDatasource() {
     if (isNew || !id)
@@ -30,6 +36,16 @@ async function fetchDatasource() {
         return false;
 
     datasource.value = result.data;
+
+    if (!categoryId)
+        return true;
+
+    const mappingsResult = await API.mappings.getAllMappingsInCategory({}, { categoryId, datasourceId: id });
+    if (!mappingsResult.status)
+        return false;
+
+    mappings.value = mappingsResult.data.map(Mapping.fromServer);
+
     return true;
 }
 
@@ -51,6 +67,12 @@ function cancel() {
 
     isEditing.value = false;
 }
+
+function createMapping() {
+    router.push({ name: 'accessPathEditor', query: { datasourceId: route.params.id } });
+}
+
+const isForFile = computed(() => datasource.value?.type && isFile(datasource.value.type));
 </script>
 
 <template>
@@ -83,15 +105,33 @@ function cancel() {
                     @edit="isEditing = true"
                 />
             </div>
+            <template v-if="mappings">
+                <h2 class="mt-3">
+                    {{ isForFile ? 'Mapping' : 'Mappings' }}
+                </h2>
+                <div class="d-flex align-items-center gap-3">
+                    <button
+                        :disabled="(isForFile && mappings.length > 0)"
+                        @click="createMapping"
+                    >
+                        Create new
+                    </button>
+                    <button
+                        v-if="!isEditing"
+                        @click="router.push({ name: 'datasources' })"
+                    >
+                        Back
+                    </button>
+                </div>
+                <div class="mt-3 d-flex flex-wrap gap-3">
+                    <MappingDisplay
+                        v-for="mapping in mappings"
+                        :key="mapping.id"
+                        :mapping="mapping"
+                    />
+                </div>
+            </template>
             <ResourceLoader :loading-function="fetchDatasource" />
-            <div class="button-row">
-                <button
-                    v-if="!isEditing"
-                    @click="router.push({ name: 'datasources' })"
-                >
-                    Back
-                </button>
-            </div>
         </template>
     </div>
 </template>

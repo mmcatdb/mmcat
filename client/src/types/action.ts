@@ -1,5 +1,4 @@
 import type { Entity, Id, VersionId } from './id';
-import { LogicalModelInfo, type LogicalModelInfoFromServer } from './logicalModel';
 import {  Datasource, type DatasourceFromServer } from './datasource';
 
 export type ActionFromServer = {
@@ -25,7 +24,6 @@ export class Action implements Entity {
             actionPayloadFromServer(input.payload),
         );
     }
-
 }
 
 export type ActionInit = {
@@ -85,46 +83,42 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
 }
 
 export type ActionPayloadInit = {
-    type: ActionType.ModelToCategory | ActionType.CategoryToModel;
-    logicalModelId: Id;
-} | {
-    type: ActionType.RSDToCategory;
+    type: ActionType.ModelToCategory | ActionType.CategoryToModel | ActionType.RSDToCategory;
     datasourceId: Id;
-    kindName: string;
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
-    logicalModel: LogicalModelInfoFromServer;
+    datasource: DatasourceFromServer;
 };
 
 class ModelToCategoryPayload implements ActionPayloadType<ActionType.ModelToCategory> {
     readonly type = ActionType.ModelToCategory;
 
     private constructor(
-        readonly logicalModel: LogicalModelInfo,
+        readonly datasource: Datasource,
     ) {}
 
     static fromServer(input: ModelToCategoryPayloadFromServer): ModelToCategoryPayload {
         return new ModelToCategoryPayload(
-            LogicalModelInfo.fromServer(input.logicalModel),
+            Datasource.fromServer(input.datasource),
         );
     }
 }
 
 type CategoryToModelPayloadFromServer = ActionPayloadFromServer<ActionType.CategoryToModel> & {
-    logicalModel: LogicalModelInfoFromServer;
+    datasource: DatasourceFromServer;
 };
 
 class CategoryToModelPayload implements ActionPayloadType<ActionType.CategoryToModel> {
     readonly type = ActionType.CategoryToModel;
 
     private constructor(
-        readonly logicalModel: LogicalModelInfo,
+        readonly datasource: Datasource,
     ) {}
 
     static fromServer(input: CategoryToModelPayloadFromServer): CategoryToModelPayload {
         return new CategoryToModelPayload(
-            LogicalModelInfo.fromServer(input.logicalModel),
+            Datasource.fromServer(input.datasource),
         );
     }
 }

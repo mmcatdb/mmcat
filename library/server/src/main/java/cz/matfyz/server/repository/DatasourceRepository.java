@@ -5,9 +5,7 @@ import static cz.matfyz.server.repository.utils.Utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.LogicalModel;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
-import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
@@ -59,8 +57,8 @@ public class DatasourceRepository {
                     DISTINCT datasource.id as id,
                     datasource.json_value as json_value
                 FROM datasource
-                JOIN logical_model on logical_model.datasource_id = datasource.id
-                WHERE logical_model.category_id = ?
+                JOIN mapping on mapping.datasource_id = datasource.id
+                WHERE mapping.category_id = ?
                 ORDER BY datasource.id;
                 """);
             setId(statement, 1, categoryId);

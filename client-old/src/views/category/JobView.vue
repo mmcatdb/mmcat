@@ -18,7 +18,7 @@ async function fetchJob() {
         return false;
 
     job.value = Job.fromServer(result.data, info.value);
-    if (job.value.state === JobState.Failed || job.value.state === JobState.Waiting)
+    if (job.value.state === JobState.Failed || job.value.state === JobState.Waiting || job.value.state === JobState.Finished)
         return 'no-refetch';
 
     return true;

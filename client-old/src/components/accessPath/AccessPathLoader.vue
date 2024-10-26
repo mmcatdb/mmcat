@@ -19,7 +19,7 @@ const { graph } = $(useEvocat());
 /**
  * Props passed to the component.
  * @typedef {Object} Props
- * @property {LogicalModel[]} logicalModels - Array of logical models.
+ * @property {Datasource[]} datasources - Array of datasources.
  */
 const props = defineProps<{
     datasources: Datasource[];
@@ -50,14 +50,14 @@ const isConfirmDisabled = computed(() => !selectedMapping.value);
 const emit = defineEmits([ 'finish', 'cancel' ]);
 
 /**
- * Lifecycle hook to load mappings for the selected logical model on component mount.
+ * Lifecycle hook to load mappings for the selected datasource on component mount.
  */
 onMounted(async () => {
     await loadMappingsForSelectedDatasource();
 });
 
 /**
- * Watches the selected logical model and loads the associated mappings when changed.
+ * Watches the selected datasource and loads the associated mappings when changed.
  */
 watch(selectedDatasource, async (newModel) => {
     if (newModel) 
@@ -73,7 +73,7 @@ watch(selectedMapping, (newMapping) => {
 });
 
 /**
- * Loads mappings for the currently selected logical model.
+ * Loads mappings for the currently selected datasource.
  * Fetches the mappings from the server and updates the mappings array.
  */
 async function loadMappingsForSelectedDatasource() {
@@ -162,7 +162,7 @@ function cancel() {
                 v-if="props.datasources.length && !mappingConfirmed"
                 class="editor"
             >
-                <ValueRow label="Logical model:">
+                <ValueRow label="Datasource:">
                     <select 
                         v-model="selectedDatasource"
                         :disabled="mappingConfirmed"

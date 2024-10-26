@@ -1,6 +1,5 @@
 import { isPositionEqual, type Graph, type ListenerSession } from '@/types/categoryGraph';
 import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism, MetadataObject, MetadataMorphism } from '@/types/schema';
-import type { LogicalModel } from '../logicalModel';
 import type { Result } from '../api/result';
 import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, UpdateMorphism, UpdateObject } from '../schema/operation';
 import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
@@ -8,6 +7,7 @@ import type { MMO } from './metadata/mmo';
 import { MorphismMetadata } from './metadata/morphismMetadata';
 import { ObjectMetadata } from './metadata/objectMetadata';
 import type { ObjectIds } from '../identifiers';
+import { type LogicalModel } from '../datasource';
 
 type UpdateFunction = (udpate: SchemaUpdateInit, logicalModels: LogicalModel[]) => Promise<Result<SchemaCategory>>;
 

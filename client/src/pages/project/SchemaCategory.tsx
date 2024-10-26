@@ -1,5 +1,4 @@
 import { api, type Resolved } from '@/api';
-import { LogicalModel } from '@/types/logicalModel';
 import { SchemaCategory as SchemaCategoryType } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { Suspense } from 'react';
@@ -7,6 +6,7 @@ import { type Params, useLoaderData, defer, Await } from 'react-router-dom';
 import { LoadingComponent } from '../errorPages';
 import { Portal, portals } from '@/components/common';
 import { SchemaCategoryGraph } from '@/components/project/SchemaCategoryGraph';
+import { logicalModelsFromServer } from '@/types/datasource';
 
 export function SchemaCategory() {
     const loaderData = useLoaderData() as SchemaCategoryLoaderData;
@@ -47,14 +47,15 @@ export function schemaCategoryLoader({ params: { projectId } }: { params: Params
     const data = Promise.all([
         api.schemas.getCategory({ id: projectId }),
         api.schemas.getCategoryUpdates({ id: projectId }),
-        api.logicalModels.getAllLogicalModelsInCategory({ categoryId: projectId }),
+        api.datasources.getAllDatasources({}, { categoryId: projectId }),
+        api.mappings.getAllMappingsInCategory({}, { categoryId: projectId }),
     ])
-        .then(([ categoryResponse, updatesResponse, modelsResponse ]) => {
-            if (!categoryResponse.status || !updatesResponse.status || !modelsResponse.status)
+        .then(([ categoryResponse, updatesResponse, datasourcesResponse, mappingsResponse ]) => {
+            if (!categoryResponse.status || !updatesResponse.status || !datasourcesResponse.status || !mappingsResponse.status)
                 throw new Error('Failed to load schema category');
 
             const updates = updatesResponse.data.map(SchemaUpdate.fromServer);
-            const logicalModels = modelsResponse.data.map(LogicalModel.fromServer);
+            const logicalModels = logicalModelsFromServer(datasourcesResponse.data, mappingsResponse.data);
             const category = SchemaCategoryType.fromServer(categoryResponse.data, logicalModels);
 
             return { category, updates };

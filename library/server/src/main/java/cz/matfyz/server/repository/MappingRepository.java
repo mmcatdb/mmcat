@@ -26,10 +26,11 @@ public class MappingRepository {
         final Id id = getId(resultSet, "id");
         final Version version = Version.fromString(resultSet.getString("version"));
         final Version lastValid = Version.fromString(resultSet.getString("last_valid"));
-        final Id logicalModelId = getId(resultSet, "logical_model_id");
+        final Id categoryId = getId(resultSet, "category_id");
+        final Id datasourceId = getId(resultSet, "datasource_id");
         final String jsonValue = resultSet.getString("json_value");
 
-        return MappingWrapper.fromJsonValue(id, version, lastValid, logicalModelId, jsonValue);
+        return MappingWrapper.fromJsonValue(id, version, lastValid, categoryId, datasourceId, jsonValue);
     }
 
     public MappingWrapper find(Id id) {
@@ -39,7 +40,8 @@ public class MappingRepository {
                     id,
                     version,
                     last_valid,
-                    logical_model_id,
+                    category_id,
+                    datasource_id,
                     json_value
                 FROM mapping
                 WHERE mapping.id = ?;
@@ -60,15 +62,15 @@ public class MappingRepository {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
-                    mapping.id as id,
-                    mapping.version as version,
-                    mapping.last_valid as last_valid,
-                    mapping.logical_model_id as logical_model_id,
-                    mapping.json_value as json_value
+                    id,
+                    version,
+                    last_valid,
+                    category_id,
+                    datasource_id,
+                    json_value
                 FROM mapping
-                JOIN logical_model ON mapping.logical_model_id = logical_model.id
-                WHERE logical_model.category_id = ?
-                """ + (datasourceId != null ? "AND logical_model.datasource_id = ?\n" : "") + """
+                WHERE category_id = ?
+                """ + (datasourceId != null ? "AND datasource_id = ?\n" : "") + """
                 ORDER BY mapping.id;
                 """);
             setId(statement, 1, categoryId);
@@ -84,8 +86,8 @@ public class MappingRepository {
     public void save(MappingWrapper wrapper) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO mapping (id, version, last_valid, logical_model_id, json_value)
-                VALUES (?, ?, ?, ?, ?::jsonb)
+                INSERT INTO mapping (id, version, last_valid, category_id, datasource_id, json_value)
+                VALUES (?, ?, ?, ?, ?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
                     version = EXCLUDED.version,
                     last_valid = EXCLUDED.last_valid,
@@ -94,8 +96,9 @@ public class MappingRepository {
             setId(statement, 1, wrapper.id());
             statement.setString(2, wrapper.version().toString());
             statement.setString(3, wrapper.lastValid().toString());
-            setId(statement, 4, wrapper.logicalModelId);
-            statement.setString(5, wrapper.toJsonValue());
+            setId(statement, 4, wrapper.categoryId);
+            setId(statement, 5, wrapper.datasourceId);
+            statement.setString(6, wrapper.toJsonValue());
             executeChecked(statement);
         });
     }

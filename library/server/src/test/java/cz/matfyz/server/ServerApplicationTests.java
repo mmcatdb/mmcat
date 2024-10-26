@@ -15,7 +15,6 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.DatasourceRepository;
-import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.service.WrapperService;
@@ -37,9 +36,6 @@ class ServerApplicationTests {
 
     @Autowired
     private MappingRepository mappingRepository;
-
-    @Autowired
-    private LogicalModelRepository logicalModelRepository;
 
     @Autowired
     private DatasourceRepository datasourceRepository;
@@ -148,12 +144,11 @@ class ServerApplicationTests {
         Statistics.reset();
     }
 
-    private Mapping createMapping(MappingWrapper mappingWrapper) {
-        final var model = logicalModelRepository.find(mappingWrapper.logicalModelId);
-        final var categoryWrapper = categoryRepository.find(model.logicalModel().categoryId);
+    private Mapping createMapping(MappingWrapper wrapper) {
+        final var categoryWrapper = categoryRepository.find(wrapper.categoryId);
         final var category = categoryWrapper.toSchemaCategory();
 
-        return mappingWrapper.toMapping(category);
+        return wrapper.toMapping(category);
     }
 
 }
