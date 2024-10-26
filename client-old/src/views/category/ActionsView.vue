@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { shallowRef } from 'vue';
 import API from '@/utils/api';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import NewAction from '@/components/action/NewAction.vue';
@@ -8,7 +8,7 @@ import type { Id } from '@/types/id';
 import ActionDisplay from '@/components/action/ActionDisplay.vue';
 import { Action } from '@/types/action';
 
-const actions = ref<Action[]>();
+const actions = shallowRef<Action[]>();
 
 function addNewAction(action: Action) {
     actions.value?.push(action);
@@ -51,8 +51,6 @@ async function fetchActions() {
                 />
             </div>
         </div>
-        <ResourceLoader
-            :loading-function="fetchActions"
-        />
+        <ResourceLoader :loading-function="fetchActions" />
     </div>
 </template>

@@ -12,7 +12,10 @@ const workflow = useWorkflow();
 const emit = defineEmits([ 'continue' ]);
 
 const datasources = shallowRef<Datasource[]>();
-const mappings = shallowRef<Mapping[]>();
+const mappings = shallowRef<{
+    output: Mapping[];
+    input: Mapping[];
+}>();
 
 async function fetchData() {
     const datasourcesResult = await API.datasources.getAllDatasources({});
@@ -23,8 +26,17 @@ async function fetchData() {
     if (!mappingsResult.status)
         return false;
 
+    const data = workflow.value.data;
+    if (data.step !== 'addMappings')
+        return false;
+    
     datasources.value = datasourcesResult.data.map(Datasource.fromServer);
-    mappings.value = mappingsResult.data.map(Mapping.fromServer);
+
+    const allMappings = mappingsResult.data.map(Mapping.fromServer);
+    mappings.value = {
+        output: allMappings.filter(mapping => !data.inputMappingIds.includes(mapping.id)),
+        input: allMappings.filter(mapping => data.inputMappingIds.includes(mapping.id)),
+    };
 
     return true;
 }
@@ -44,45 +56,56 @@ function createMapping() {
 <template>
     <h1>Add mappings</h1>
     <p>
-        You should have at least one two mappings ...
+        You should have at least one output mapping ...
     </p>
-    <div
-        v-if="datasources && mappings"
-        class="d-flex flex-wrap gap-3"
-    >
-        <MappingDisplay
-            v-for="mapping in mappings"
-            :key="mapping.id"
-            :mapping="mapping"
-            max-height-path
-        />
-        <div class="border border-primary p-4 d-flex flex-column align-items-center justify-content-center">
-            <label>
-                Select datasource:<br />
-                <select v-model="selectedDatasource">
-                    <option
-                        v-for="datasource in datasources"
-                        :key="datasource.id"
-                        :value="datasource"
-                    >
-                        {{ datasource.label }}
-                    </option>
-                </select>
-            </label>
-            <button
-                class="mt-5"
-                :disabled="!selectedDatasource"
-                @click="createMapping"
-            >
-                Create new mapping
-            </button>
+    <template v-if="datasources && mappings">
+        <h2>Outputs</h2>
+        <div class="mt-3 d-flex flex-wrap gap-3">
+            <MappingDisplay
+                v-for="mapping in mappings.output"
+                :key="mapping.id"
+                :mapping="mapping"
+                max-height-path
+            />
+            <div class="border border-primary p-4 d-flex flex-column align-items-center justify-content-center">
+                <label>
+                    Select datasource:<br />
+                    <select v-model="selectedDatasource">
+                        <option
+                            v-for="datasource in datasources"
+                            :key="datasource.id"
+                            :value="datasource"
+                        >
+                            {{ datasource.label }}
+                        </option>
+                    </select>
+                </label>
+                <button
+                    class="mt-5"
+                    :disabled="!selectedDatasource"
+                    @click="createMapping"
+                >
+                    Create new mapping
+                </button>
+            </div>
         </div>
-    </div>
+        <h2 class="mt-3">
+            Inputs
+        </h2>
+        <div class="mt-3 d-flex flex-wrap gap-3">
+            <MappingDisplay
+                v-for="mapping in mappings.input"
+                :key="mapping.id"
+                :mapping="mapping"
+                max-height-path
+            />
+        </div>
+    </template>
     <ResourceLoader :loading-function="fetchData" />
     <Teleport to="#app-left-bar-content">
         <button
             class="mt-4 order-2"
-            :disabled="!mappings?.length || mappings.length < 2"
+            :disabled="!mappings?.output.length"
             @click="emit('continue')"
         >
             Continue

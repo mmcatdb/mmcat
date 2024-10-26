@@ -94,7 +94,7 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
             </div>
             <div class="col-4 d-flex align-items-center gap-3">
                 <div>
-                    <FixedRouterLink :to="{name: 'job', params: { id: job.id } }">
+                    <FixedRouterLink :to="{ name: 'job', params: { id: job.id } }">
                         <div class="fs-6 fw-bold">
                             {{ job.label }}
                         </div>

@@ -8,8 +8,7 @@ const stepLabels: Record<InferenceWorkflowStep, string> = {
     selectInput: 'Select Input',
     editCategory: 'Edit Schema',
     addMappings: 'Add Mappings',
-    selectOutputs: 'Select Outputs',
-    finish: 'Gather Data',
+    finish: 'View Results',
 };
 
 const steps = inferenceWorkflowSteps;

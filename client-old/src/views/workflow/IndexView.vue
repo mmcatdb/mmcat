@@ -4,6 +4,7 @@ import API from '@/utils/api';
 import DatasourcesView from './DatasourcesView.vue';
 import JobView from './JobView.vue';
 import AddMappingsView from './AddMappingsView.vue';
+import ResultsView from './ResultsView.vue';
 
 const workflow = useWorkflow();
 
@@ -29,7 +30,5 @@ async function continueWorkflow() {
         v-else-if="workflow.data.step === 'addMappings'"
         @continue="continueWorkflow"
     />
-    <div v-else>
-        <h1>TODO</h1>
-    </div>
+    <ResultsView v-else />
 </template>

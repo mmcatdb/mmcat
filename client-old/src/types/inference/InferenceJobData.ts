@@ -55,7 +55,6 @@ export class InferenceJobData {
      * @returns {InferenceJobData} - A new instance of `InferenceJobData`.
      */
     static fromServer(input: InferenceJobDataFromServer, info: SchemaCategoryInfo): InferenceJobData {
-        console.log('edits in InferenceJobData', input.edits);
         return new InferenceJobData(
             input.edits.map(createInferenceEditFromServer),
             SchemaCategory.fromServerWithInfo(info, input.inferenceSchema, input.inferenceMetadata),

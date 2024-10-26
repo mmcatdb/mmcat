@@ -12,7 +12,7 @@ public record InferenceWorkflowData(
     InferenceWorkflowStep step,
     @Nullable Id inputDatasourceId,
     @Nullable Id inferenceJobId,
-    List<Id> mtcActionIds
+    List<Id> inputMappingIds
 ) implements WorkflowData {
 
     public static InferenceWorkflowData createNew() {
@@ -29,7 +29,7 @@ public record InferenceWorkflowData(
             step,
             inputDatasourceId,
             inferenceJobId,
-            mtcActionIds
+            inputMappingIds
         );
     }
 
@@ -37,7 +37,6 @@ public record InferenceWorkflowData(
         selectInput,
         editCategory,
         addMappings,
-        selectOutputs,
         finish,
     }
 

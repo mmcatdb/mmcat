@@ -1,7 +1,6 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.workflow.InferenceWorkflowData;
 import cz.matfyz.server.entity.workflow.Workflow;
 import cz.matfyz.server.entity.workflow.Workflow.WorkflowData;
 import cz.matfyz.server.entity.workflow.Workflow.WorkflowType;
@@ -12,6 +11,7 @@ import cz.matfyz.server.service.WorkflowService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,9 +67,9 @@ public class WorkflowController {
     }
 
     @PostMapping("/workflows/{id}/continue")
-    public Workflow continueWorkflow(@PathVariable Id id) {
+    public Workflow continueWorkflow(@PathVariable Id id, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
         final var workflow = repository.find(id);
-        return service.continueWorkflow(workflow);
+        return service.continueWorkflow(workflow, sessionId);
     }
 
 }
