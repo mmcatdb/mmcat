@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState, type WheelEvent, type MouseEvent as ReactMouseEvent } from 'react';
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 
 type Node = {
     id: string;
@@ -29,8 +29,7 @@ export function GraphDisplay({ nodes, edges, width, height }: GraphDisplayProps)
     return (
         <div
             style={{ width, height }}
-            className={clsx('relative bg-slate-400 overflow-hidden', state.drag ? 'cursor-grabbing' : 'cursor-grab')}
-            onWheel={e => engine.wheel(e)}
+            className={clsx('relative bg-slate-400 overflow-hidden', state.drag ? 'cursor-grabbing' : 'cursor-default')}
             ref={engine.canvasRef}
             onMouseDown={e => engine.canvasDown(e)}
         >
@@ -51,17 +50,17 @@ type NodeDisplayProps = Readonly<{
 }>;
 
 function NodeDisplay({ node, state, engine }: NodeDisplayProps) {
+    const isDragging = !!state.drag && 'nodeId' in state.drag && state.drag.nodeId === node.id;
+
     function click(e: ReactMouseEvent<HTMLDivElement>) {
         console.log(e);
     }
-
-    const isDragging = state.drag && 'nodeId' in state.drag && state.drag.nodeId === node.id;
 
     return (
         <div className='absolute w-0 h-0 select-none z-10' style={positionToOffset(node.position, state.coordinates)}>
             <div
                 className={clsx('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white hover:bg-green-400 active:bg-green-500',
-                    isDragging ? 'cursor-grabbing' : 'cursor-pointer',
+                    isDragging ? 'cursor-grabbing pointer-events-none' : 'cursor-pointer',
                 )}
                 onClick={click}
                 onMouseDown={e => engine.nodeDown(e, node.id)}
@@ -161,18 +160,42 @@ class GraphEngine {
         const mousemove = throttle((e: MouseEvent) => this.globalMove(e));
         document.addEventListener('mousemove', mousemove);
 
-        const mouseup = () => this.globalUp();
+        const mouseup = (e: MouseEvent) => this.globalUp(e);
         document.addEventListener('mouseup', mouseup);
+
+        const wheel = (e: WheelEvent) => this.wheel(e);
+        this.canvas.addEventListener('wheel', wheel, { passive: false });
 
         return () => {
             document.removeEventListener('mousemove', mousemove);
             document.removeEventListener('mouseup', mouseup);
+            document.removeEventListener('wheel', wheel);
         };
     }
 
-    public wheel(event: WheelEvent<HTMLDivElement>) {
-        event.stopPropagation();
+    private wheel(event: WheelEvent) {
+        // Prevent default actions like zooming in/out the whole page or scrolling.
+        event.preventDefault();
 
+        if (event.ctrlKey && event.shiftKey)
+            return;
+        if (event.ctrlKey)
+            this.zoom(event);
+        else
+            this.move(event, event.shiftKey ? 'left' : 'top');
+    }
+
+    private move(event: WheelEvent, direction: 'top' | 'left') {
+        this.setState(state => {
+            const coordinates = state.coordinates;
+            const origin = { ...coordinates.origin };
+            origin[direction] -= event.deltaY / 5;
+
+            return { ...state, coordinates: { ...coordinates, origin } };
+        });
+    }
+
+    private zoom(event: WheelEvent) {
         // We want to transform the coordinates in such a way that the mouse point will be on the same canvas position as before.
         // Therefore, it must hold origin.left + scale * mousePosition.x = newOrigin.left + newScale * mousePosition.x and the same for top and y.
         this.setState(state => {
@@ -188,14 +211,19 @@ class GraphEngine {
         });
     }
 
-    private isDragging = false;
+    // We don't want to start dragging the node immediately after the mouse down event. We wait for a small movement.
+    private dragging?: 'node' | 'canvas';
+    private startDragging?: {
+        nodeId: string;
+        mouseOffset: Offset;
+    };
 
     public canvasDown(event: ReactMouseEvent<HTMLDivElement>) {
         // We are only interested in clicking on the actual canvas, not the nodes or edges. Also, we ignore the right click.
-        if (event.target !== this.canvas || event.button === 2)
+        if (event.target !== this.canvas || !draggable.canvas.includes(event.button))
             return;
 
-        this.isDragging = true;
+        this.dragging = 'canvas';
         this.setState(state => {
             const draggedPoint = getMousePosition(event, this.canvas, state.coordinates);
             return { ...state, drag: { draggedPoint } };
@@ -203,15 +231,30 @@ class GraphEngine {
     }
 
     public nodeDown(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
-        if (event.button === 2)
+        if (!draggable.node.includes(event.button))
             return;
 
-        this.isDragging = true;
-        this.setState(state => ({ ...state, drag: { nodeId } }));
+        event.stopPropagation();
+        this.startDragging = {
+            nodeId,
+            mouseOffset: getMouseOffset(event, this.canvas),
+        };
     }
 
     private globalMove(event: MouseEvent) {
-        if (!this.isDragging)
+        if (this.startDragging) {
+            const { nodeId, mouseOffset } = this.startDragging;
+            const currentOffset = getMouseOffset(event, this.canvas);
+            if (Math.abs(mouseOffset.left - currentOffset.left) < 1 && Math.abs(mouseOffset.top - currentOffset.top) < 1)
+                return;
+
+            this.startDragging = undefined;
+            this.dragging = 'node';
+            this.setState(state => ({ ...state, drag: { nodeId } }));
+            return;
+        }
+
+        if (!this.dragging)
             return;
 
         this.setState(state => {
@@ -240,14 +283,25 @@ class GraphEngine {
         });
     }
 
-    private globalUp() {
-        if (!this.isDragging)
+    private globalUp(event: MouseEvent) {
+        this.startDragging = undefined;
+
+        if (!this.dragging || !draggable[this.dragging].includes(event.button))
             return;
 
-        this.isDragging = false;
+        event.stopPropagation();
+        this.dragging = undefined;
         this.setState(state => ({ ...state, drag: undefined }));
     }
 }
+
+const LEFT_BUTTON = 0;
+const MIDDLE_BUTTON = 1;
+
+const draggable = {
+    canvas: [ MIDDLE_BUTTON ],
+    node: [ LEFT_BUTTON ],
+};
 
 // Math
 
