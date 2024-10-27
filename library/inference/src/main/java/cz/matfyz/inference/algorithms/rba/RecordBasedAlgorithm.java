@@ -20,6 +20,7 @@ public class RecordBasedAlgorithm {
             JavaRDD<RecordSchemaDescription> allRSDs = wrapper.loadRSDs();
             // System.out.println("RESULT_TIME_RBA OF MAPPIND AFTER: " + (System.currentTimeMillis() - start) + "ms");
 
+            // FIXME The filter function does literally nothing, it always returns true. Can this step be removed?
             JavaRDD<RecordSchemaDescription> rsds = allRSDs.filter(new FilterInvalidRSDFunction());    // odstrani se prazdne nebo nevalidni RSDs
             // System.out.println("RESULT_TIME_RBA OF FILTERING AFTER: " + (System.currentTimeMillis() - start) + "ms");
 

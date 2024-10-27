@@ -196,6 +196,8 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
 
     @Override
     public int compareTo(RecordSchemaDescription o) {
+        // FIXME Either fix these comments or remove them.
+
         // WARN: TOHLE JE SPATNE, JE TU BUG! TAKHLE SE TO POROVNAVAT NEDA
         // A NAVIC JE TO PRASARNA
         int comparedNames = name.compareTo(o.name);

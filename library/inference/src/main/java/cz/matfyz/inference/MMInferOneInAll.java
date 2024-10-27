@@ -138,6 +138,7 @@ public class MMInferOneInAll {
      * @throws Exception if an error occurs during the candidate mining process.
      */
     public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
+        // FIXME This "100000" literal should be extracted to a constant. Also, why we use this exact value?
         BloomFilter.setParams(100000, new BasicHashFunction());
         StartingEndingFilter.setParams(100000);
         CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();

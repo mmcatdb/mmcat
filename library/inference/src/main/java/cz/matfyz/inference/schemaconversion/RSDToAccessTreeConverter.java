@@ -50,6 +50,7 @@ public class RSDToAccessTreeConverter {
         return root;
     }
 
+    // FIXME All commented out code should be removed. If there is a very specific reason for keeping it, it should be documented in a comment.
     /**
      * Recursively builds the access tree from the given parent schema description and adds nodes to the current node.
      *

@@ -7,7 +7,7 @@ public class DefaultLocalReductionFunction implements AbstractRSDsReductionFunct
 
     @Override
     public RecordSchemaDescription call(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) throws Exception {
-        return RecordSchemaDescriptionReducer.call(rsd1, rsd2);
+        return RecordSchemaDescriptionReducer.process(rsd1, rsd2);
     }
 
 }

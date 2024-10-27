@@ -68,6 +68,7 @@ public class Layout {
         AbstractLayout<SchemaObject, SchemaMorphism> layout;
 
         // Select the appropriate layout algorithm based on the layout type
+        // FIXME This switch should be extracted to a separate method to improve readability. Also, it can directly return the instances without the need for the `break` statements.
         switch (layoutType) {
             case CIRCLE:
                 layout = new CircleLayout<>(graph);

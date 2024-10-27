@@ -8,7 +8,6 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.MappingBuilder;
-import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.metadata.MetadataCategory;
@@ -211,6 +210,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return str.replaceAll("[._:,-]", "");
     }
 
+    // FIXME javadoc is not necessary on private methods. Again, if the @param or @return tags just repeat the description, they should be removed.
+
     /**
      * Finds the longest common substring among a list of strings.
      *
@@ -218,9 +219,10 @@ public class ClusterMerge extends InferenceEditAlgorithm {
      * @return The longest common substring.
      */
     private String findLongestCommonSubstring(List<String> strings) {
-        if (strings.size() == 1) {
+        if (strings.size() == 1)
             return strings.get(0);
-        }
+
+        // FIXME There are 4 cycles in each other (the `contains` method also uses cycle), which is not very efficient. There is a much faster solution https://en.wikipedia.org/wiki/Longest_common_substring.
         String reference = strings.get(0);
         String longestCommonSubstring = "";
         for (int length = reference.length(); length > 0; length--) {
@@ -565,7 +567,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                     : newComplexProperty;
 
                 newSubpaths.add(resultProperty);
-
             } else if (complexProperty != null) {
                 newSubpaths.add(complexProperty);
             }
@@ -582,29 +583,34 @@ public class ClusterMerge extends InferenceEditAlgorithm {
      */
     public ComplexProperty createNewComplexProperty(AccessPath original) {
         System.out.println("original access: " + original);
-        List<AccessPath> newSubpaths = new ArrayList<>();
-        Name name = null;
-        Signature complexPropertySignature = null;
 
-        if (original instanceof SimpleProperty) { // meaning it is simple
+        if (original instanceof SimpleProperty) {
             System.out.println("it was a simple prop, yeay! :)");
-            name = new StaticName(this.newClusterName);
-            complexPropertySignature = this.newClusterSignature;
-            newSubpaths.add(new SimpleProperty(new DynamicName(this.newTypeSignature), this.newTypeSignature));
-        } else if (original instanceof ComplexProperty tempOriginal) {
-            newSubpaths = transformSubpaths(tempOriginal.subpaths());
-            if (!mapOldNewSignature.containsKey(tempOriginal.signature()) && !mapOldNewSignature.containsKey(tempOriginal.signature().dual())) {
-                complexPropertySignature = newClusterSignature;
-                name = new DynamicName(complexPropertySignature);
-            } else {
-                complexPropertySignature = mapOldNewSignature.get(tempOriginal.signature());
-                if (complexPropertySignature == null) { // meaning the original was an array object and so the signature was dual
-                    complexPropertySignature = mapOldNewSignature.get(tempOriginal.signature().dual()).dual();
-                }
-                name = original.name();
-            }
+            final AccessPath subpath = new SimpleProperty(new DynamicName(this.newTypeSignature), this.newTypeSignature);
+            return new ComplexProperty(
+                new StaticName(newClusterName),
+                newClusterSignature,
+                List.of(subpath)
+            );
         }
-        return new ComplexProperty(name, complexPropertySignature, newSubpaths);
+
+        // Now it has to be a complex property.
+        final var newSubpaths = transformSubpaths(((ComplexProperty) original).subpaths());
+
+        if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
+            return new ComplexProperty(
+                new DynamicName(newClusterSignature),
+                newClusterSignature,
+                newSubpaths
+            );
+        }
+
+        Signature complexPropertySignature = mapOldNewSignature.get(original.signature());
+        if (complexPropertySignature == null)
+            // Meaning the original was an array object and so the signature was dual.
+            complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
+
+        return new ComplexProperty(original.name(), complexPropertySignature, newSubpaths);
     }
 
     /**
@@ -626,13 +632,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
      * @return The transformed access path.
      */
     private AccessPath transformSubpath(AccessPath original) {
-        if (original instanceof SimpleProperty) {
+        if (original instanceof SimpleProperty)
             return createNewSimpleProperty((SimpleProperty) original);
-        } else if (original instanceof ComplexProperty) {
+        if (original instanceof ComplexProperty)
             return createNewComplexProperty((ComplexProperty) original);
-        } else {
-            throw new IllegalArgumentException("Unknown AccessPath type");
-        }
+
+        throw new IllegalArgumentException("Unknown AccessPath type");
     }
 
     /**

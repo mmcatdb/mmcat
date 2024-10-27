@@ -86,6 +86,11 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             this.candidate = null;
         }
 
+        // FIXME This is a very good example that less is sometimes more.
+        // First, the primaryKey is private and it isn't changed anywhere in the class, so it could be final. Then there is no need for a getter.
+        // Second, the javadoc adds just zero additional information while taking 5 lines of vertical space.
+        // This comment applies for all following properties, as well as for other "-Merge" classes.
+
         /**
          * Gets the primary key involved in the merge.
          *
@@ -113,6 +118,8 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             return candidate;
         }
 
+        // FIXME This is similar to the javadoc comment above.
+        // For simple methods, it's usually better to not use the @return tag since it contains the same information as the description.
         /**
          * Creates an instance of the {@code PrimaryKeyMerge} algorithm.
          *
@@ -317,7 +324,13 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
      * @return The cleaned complex property.
      * @throws Exception
      */
-    private ComplexProperty cleanComplexProperty(Mapping mapping) {
+
+    // FIXME This is a good example why not to use the @throws tag in the Javadoc.
+    // If the method was able to throw an exception, it would require to put it in the method signature like `private ComplexProperty cleanComplexProperty(Mapping mapping) throws Exception {`.
+    // So the method probably did throw an exception in the past, but it was removed and the Javadoc was not updated.
+    // I would recommend to remove all @throws tags. Like they can be useful when throwing a very specific exception in some cases (like "if the second argument is zero, throws an ArithmeticException" for some mathematical method), but in most cases they are not needed. Especially if they throw only the generic Exception.
+
+    private ComplexProperty cleanComplexProperty(Mapping mapping){
         ComplexProperty complexProperty = mapping.accessPath();
         Signature oldSignature = oldSignatureMap.get(mapping.rootObject().key());
         AccessPath accessPathToDelete = complexProperty.getSubpathBySignature(oldSignature);

@@ -1,6 +1,5 @@
 package cz.matfyz.inference.edit;
 
-import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
@@ -48,9 +47,8 @@ public class InferenceEditorUtils {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             // TODO: current assumption: in inference I create only BaseSignatures
             int signatureVal = Integer.parseInt(morphism.signature().toString());
-            if (signatureVal > max) {
+            if (signatureVal > max)
                 max = signatureVal;
-            }
         }
         return max + 1;
     }
@@ -66,9 +64,8 @@ public class InferenceEditorUtils {
         for (SchemaObject object : schema.allObjects()) {
             // TODO: current assumption: in inference I create only BaseSignatures
             int keyVal = object.key().getValue();
-            if (keyVal > max) {
+            if (keyVal > max)
                 max = keyVal;
-            }
         }
         return max + 1;
     }
@@ -111,11 +108,10 @@ public class InferenceEditorUtils {
      * @return The existing morphism if found; {@code null} otherwise.
      */
     private static SchemaMorphism getMorphismIfExists(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
-            if (morphism.dom().equals(dom) && morphism.cod().equals(cod)) {
+        for (SchemaMorphism morphism : schema.allMorphisms())
+            if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
                 return morphism;
-            }
-        }
+
         return null;
     }
 
@@ -175,14 +171,13 @@ public class InferenceEditorUtils {
      */
     public static Mapping createNewMapping(SchemaCategory schema, Mapping mapping, List<Mapping> mappingsToMerge, ComplexProperty accessPath) {
         Collection<Signature> primaryKey = new HashSet<>();
-        if (mapping.primaryKey() != null) {
+        if (mapping.primaryKey() != null)
             primaryKey.addAll(mapping.primaryKey());
-        }
-        for (Mapping mappingToMerge : mappingsToMerge) {
-            if (mappingToMerge.primaryKey() != null) {
+
+        for (Mapping mappingToMerge : mappingsToMerge)
+            if (mappingToMerge.primaryKey() != null)
                 primaryKey.addAll(mappingToMerge.primaryKey());
-            }
-        }
+
         return new Mapping(schema, mapping.rootObject().key(), mapping.kindName(), accessPath, primaryKey);
     }
 
@@ -208,14 +203,12 @@ public class InferenceEditorUtils {
      */
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, List<Mapping> mappingsToKeep) {
         List<Mapping> updatedMappings = new ArrayList<>();
-        for (Mapping mapping : mappings) {
-            if (!mappingsToDelete.contains(mapping)) {
+        for (Mapping mapping : mappings)
+            if (!mappingsToDelete.contains(mapping))
                 updatedMappings.add(mapping);
-            }
-        }
-        for (Mapping mapping : mappingsToKeep) {
+
+        for (Mapping mapping : mappingsToKeep)
             updatedMappings.add(mapping);
-        }
 
         return updatedMappings;
     }
@@ -279,9 +272,8 @@ public class InferenceEditorUtils {
      */
     public static Key findKeyFromName(SchemaCategory schemaCategory, MetadataCategory metadata, String fullName) {
         String[] nameParts = fullName.split("/");
-        if (nameParts.length != 2) {
+        if (nameParts.length != 2)
             throw new IllegalArgumentException("Invalid full name format: " + fullName);
-        }
 
         String parentName = nameParts[0];
         String childName = nameParts[1];
@@ -293,10 +285,10 @@ public class InferenceEditorUtils {
             MetadataObject metaDom = metadata.getObject(dom);
             MetadataObject metaCod = metadata.getObject(cod);
 
-            if (metaDom.label.equals(parentName) && metaCod.label.equals(childName)) {
+            if (metaDom.label.equals(parentName) && metaCod.label.equals(childName))
                 return cod.key();
-            }
         }
+
         throw new NotFoundException("Key for name " + fullName + " does not exist");
     }
 

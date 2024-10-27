@@ -4,6 +4,7 @@ package cz.matfyz.inference.schemaconversion.utils;
  * A class that generates unique sequential numbers starting from a specified initial value.
  */
 public class UniqueNumberGenerator {
+
     private int nextValue;
 
     /**

@@ -8,6 +8,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
+// FIXME The javadoc doesn't render new lines, so there's no point in breaking the lines like this. They should be breaked to separate logical points, not just to fit the line length.
 /**
  * The {@code AccessTreeNode} class represents a node in a tree structure that
  * holds information about properties in a schema category. This is used to
@@ -15,6 +16,9 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
  */
 public class AccessTreeNode {
 
+    // FIXME Why is it named "state"?. It looks more like "type of the node". State is something that changes over time.
+    // Also, isn't the simple vs. complex type determined by the presence of children? And the root type by the absence of a parent?
+    // If so, it would be better to just have a "getState" method that would compute the state based on the presence of children and parent.
     /**
      * Enum representing the state of the {@code AccessTreeNode}.
      * <ul>
@@ -33,6 +37,7 @@ public class AccessTreeNode {
     private final String name;
     private final BaseSignature signature;
     private final Key key;
+    // FIXME This looks like it might be null. If so, it should be annotated with @Nullable from org.checkerframework.checker.nullness.qual.Nullable. This applies to all fields or function arguments that can be null.
     private Key parentKey;
     private final String label;
     private final Min min;
@@ -67,10 +72,12 @@ public class AccessTreeNode {
         return state;
     }
 
+    // FIXME Similarly to the comments below, it's simpler to just make the value public.
     public void setState(State newState) {
         this.state = newState;
     }
 
+    // FIXME It doesn't make sense to have a getter for something that is final. It's better to make it public and remove the getter.
     public String getName() {
         return name;
     }
@@ -87,6 +94,7 @@ public class AccessTreeNode {
         return parentKey;
     }
 
+    // FIXME Is this method necessary? If it's only intended to be used internally, it shouldn't be there.
     public void setParentKey(Key parentKey) {
         this.parentKey = parentKey;
     }
@@ -125,15 +133,15 @@ public class AccessTreeNode {
      * @throws NoSuchElementException If a node with the specified key is not found.
      */
     public static AccessTreeNode findNodeWithKey(Key targetKey, AccessTreeNode node) throws NoSuchElementException {
-        if (node.key.equals(targetKey)) {
+        if (node.key.equals(targetKey))
             return node;
-        }
-        for (AccessTreeNode child : node.children) {
+
+        for (final AccessTreeNode child : node.children) {
             AccessTreeNode result = findNodeWithKey(targetKey, child);
-            if (result != null) {
+            if (result != null)
                 return result;
-            }
         }
+
         throw new NoSuchElementException("Node with key " + targetKey + " not found.");
     }
 
@@ -145,26 +153,26 @@ public class AccessTreeNode {
      */
     public void transformArrayNodes() {
         if (this.isArrayType && !this.children.isEmpty()) {
-            AccessTreeNode child = this.children.get(0); // getting the first child
-            if (child.getName().equals("_")) {
+            final AccessTreeNode child = this.children.get(0); // getting the first child
+            // FIXME This "_" character looks like some magical constant that is used on multiple places. If so, it should be extracted to a constant.
+            if (child.getName().equals("_"))
                 promoteChildren(child);
-            }
         }
-        for (AccessTreeNode child : this.children) {
+
+        for (final AccessTreeNode child : this.children)
             child.transformArrayNodes();
-        }
     }
 
     /**
-     * Promotes the children of a specified child node to be direct children of the current node.
+     * Promotes the children of a specified child node to be a direct child of the current node.
      *
      * @param child The child node whose children are to be promoted.
      */
     private void promoteChildren(AccessTreeNode child) {
-        List<AccessTreeNode> newChildren = new ArrayList<>(child.getChildren());
-        for (AccessTreeNode newChild : newChildren) {
+        final List<AccessTreeNode> newChildren = new ArrayList<>(child.getChildren());
+        for (final AccessTreeNode newChild : newChildren)
             newChild.setParentKey(this.key);
-        }
+
         this.children = newChildren;
     }
 
@@ -175,8 +183,8 @@ public class AccessTreeNode {
                                     ", Key: " + this.key +
                                     ", Parent Key: " + this.parentKey +
                                     ", isArrayType: " + this.isArrayType);
-        for (AccessTreeNode child : this.children) {
+
+        for (AccessTreeNode child : this.children)
             child.printTree(prefix + "    ");
-        }
     }
 }

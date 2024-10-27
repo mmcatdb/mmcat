@@ -208,13 +208,11 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     private Key getReferenceParentKey(SchemaCategory schema, MetadataCategory metadata, boolean isReferenceArray) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (isReferenceArray) {
-                if (morphism.dom().key().equals(data.referenceKey) && !metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL)) {
+                if (morphism.dom().key().equals(data.referenceKey) && !metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL))
                     return morphism.cod().key();
-                }
             } else {
-                if (morphism.cod().key().equals(data.referenceKey)) {
+                if (morphism.cod().key().equals(data.referenceKey))
                     return morphism.dom().key();
-                }
             }
         }
         throw new NotFoundException("Parent key has not been found");
@@ -230,11 +228,10 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
      * @throws NotFoundException if the index key is not found.
      */
     private Key getIndexKey(SchemaCategory schema, MetadataCategory metadata, Key key) {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
-            if (morphism.dom().key().equals(key) && metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL)) {
+        for (SchemaMorphism morphism : schema.allMorphisms())
+            if (morphism.dom().key().equals(key) && metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL))
                 return morphism.cod().key();
-            }
-        }
+
         throw new NotFoundException("Index key has not been found");
     }
 
@@ -249,11 +246,10 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             if (indexKey != null && morphism.dom().key().equals(data.referenceKey)) {
                 signaturesToDelete.add(morphism.signature());
                 // find the reference and index signatures
-                if (morphism.cod().key().equals(indexKey)) {
+                if (morphism.cod().key().equals(indexKey))
                     oldIndexSignature = morphism.signature();
-                } else {
+                else
                     oldReferenceSignature = morphism.signature();
-                }
             } else {
                 if (morphism.cod().key().equals(data.referenceKey)) {
                     signaturesToDelete.add(morphism.signature());
@@ -296,11 +292,10 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
      * @throws NotFoundException if the reference mapping is not found.
      */
     private Mapping findReferenceMapping(List<Mapping> mappings) {
-        for (Mapping mapping : mappings) {
-            if (mapping.accessPath().getSubpathBySignature(oldReferenceSignature) != null) {
+        for (Mapping mapping : mappings)
+            if (mapping.accessPath().getSubpathBySignature(oldReferenceSignature) != null)
                 return mapping;
-            }
-        }
+
         throw new NotFoundException("Mapping for reference has not been found.");
     }
 
@@ -316,11 +311,10 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         // 1) in the schema find the signature where key is dom or cod
         // 2) check in which mapping this signature appears, it should appear in exactly one
         Signature referredSignature = findReferredSignature(schema);
-        for (Mapping mapping : mappings) {
-            if (mapping.accessPath().getSubpathBySignature(referredSignature) != null) {
+        for (Mapping mapping : mappings)
+            if (mapping.accessPath().getSubpathBySignature(referredSignature) != null)
                 return mapping;
-            }
-        }
+
         throw new NotFoundException("Mapping for referred with signature " + referredSignature + " has not been found.");
     }
 

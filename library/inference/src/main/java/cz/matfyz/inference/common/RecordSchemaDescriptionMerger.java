@@ -10,6 +10,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// FIXME This class isn't used anywhere in the project. Can it be deleted?
 public class RecordSchemaDescriptionMerger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecordSchemaDescriptionMerger.class);

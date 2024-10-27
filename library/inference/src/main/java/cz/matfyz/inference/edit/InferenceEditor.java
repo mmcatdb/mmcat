@@ -60,11 +60,10 @@ public class InferenceEditor {
      */
     private void filterActiveEdits() {
         List<InferenceEdit> filteredEdits = new ArrayList<>();
-        for (InferenceEdit edit : edits) {
-            if (edit.isActive()) {
+        for (InferenceEdit edit : edits)
+            if (edit.isActive())
                 filteredEdits.add(edit);
-            }
-        }
+
         this.activeEdits = filteredEdits;
     }
 
@@ -93,9 +92,8 @@ public class InferenceEditor {
      */
     public void applyEdits() {
         applyCategoryEdits();
-        if (hasMappings()) {
+        if (hasMappings())
             applyMappingEdits();
-        }
     }
 
     /**

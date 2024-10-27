@@ -13,7 +13,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
 import cz.matfyz.core.rsd.SubsetType;
-import cz.matfyz.inference.algorithms.miner.functions.SuitableReferencePropertiesFilterFunction;
 import org.apache.spark.api.java.JavaPairRDD;
 import scala.Tuple2;
 import cz.matfyz.inference.algorithms.miner.functions.ReferenceTupleToPairWithSubsetTypeMapFunction;
@@ -75,13 +74,8 @@ public class CandidateMinerAlgorithm implements Serializable {
             });
 
             // ReferenceCandidates
-            JavaRDD<PropertyHeuristics> suitableProperties = all.filter(
-                new SuitableReferencePropertiesFilterFunction()
-            );
-
-            JavaRDD<PropertyHeuristics> suitablePrimaryKeys = primaryKeyCandidates.filter(
-                new SuitableReferencePropertiesFilterFunction()
-            );
+            JavaRDD<PropertyHeuristics> suitableProperties = all.filter(heuristics -> heuristics.getMin() != null);
+            JavaRDD<PropertyHeuristics> suitablePrimaryKeys = primaryKeyCandidates.filter(heuristics -> heuristics.getMin() != null);
 
             // first heuristics are primaryKey, second the referenced property, SubsetType is reference type
             JavaPairRDD<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> referenceCandidates = suitablePrimaryKeys

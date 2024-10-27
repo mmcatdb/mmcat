@@ -372,9 +372,8 @@ public class JobExecutorService {
     // TODO: move this to an util class - should I?
     private void updateInferenceEdits(List<InferenceEdit> edits, InferenceEdit edit, boolean isFinal) {
         if (edit == null) {
-            if (!isFinal && !edits.isEmpty()) {
+            if (!isFinal && !edits.isEmpty())
                 edits.remove(edits.size() - 1);
-            }
             return;
         }
         Integer editIdx = findEditIdx(edit, edits);
@@ -388,11 +387,10 @@ public class JobExecutorService {
     }
 
     private Integer findEditIdx(InferenceEdit edit, List<InferenceEdit> manual) {
-        for (int i = 0; i < manual.size(); i++) {
-            if (manual.get(i).getId().equals(edit.getId())) {
+        for (int i = 0; i < manual.size(); i++)
+            if (manual.get(i).getId().equals(edit.getId()))
                 return i;
-            }
-        }
+
         return null;
     }
 

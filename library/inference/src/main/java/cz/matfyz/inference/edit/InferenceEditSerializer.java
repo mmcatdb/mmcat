@@ -11,6 +11,9 @@ import cz.matfyz.inference.edit.algorithms.ReferenceMerge;
 import java.io.Serializable;
 import java.util.List;
 
+// FIXME What is the purpose of this class? Isn't the `InferenceEdit` class already serializable? It implements `Serializable` and it uses `JsonSubTypes` to handle inheritance.
+// Also, the `InferenceEdit` class is much more better - this one consists of mostly nullable fields, which are almost guaranteed to cause null pointer exceptions in the future.
+
 /**
  * The {@code InferenceEditSerializer} class provides methods for serializing
  * and deserializing {@link InferenceEdit} objects. This is useful for converting

@@ -226,6 +226,8 @@ public class RecursionMerge extends InferenceEditAlgorithm {
                     processing = true;
                 }
 
+                // FIXME This method is way too long and nested. It should be decomposed into smaller methods. If it needs to track a lot of variables, it might be better to refactor it into a class and use private variables instead of passing them as arguments.
+
                 for (SchemaMorphism m : morphismsToProcess) {
                     if (currentSegment.direction().equals(RECURSIVE_FORWARD) && newMetadata.getObject(m.cod()).label.equals(currentNodeLabel)) {
                         dfsFind(m.cod(), patternIndex, currentPath, result, fullMatch, processing, recursiveNodes);
@@ -342,11 +344,10 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     private static boolean canMerge(List<SchemaObject> list1, List<SchemaObject> list2) {
         int overlapSize = Math.min(list1.size(), list2.size());
 
-        for (int i = 1; i <= overlapSize; i++) {
-            if (list1.subList(list1.size() - i, list1.size()).equals(list2.subList(0, i))) {
+        for (int i = 1; i <= overlapSize; i++)
+            if (list1.subList(list1.size() - i, list1.size()).equals(list2.subList(0, i)))
                 return true;
-            }
-        }
+
         return false;
     }
 
@@ -360,11 +361,9 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     private static List<SchemaObject> mergeLists(List<SchemaObject> list1, List<SchemaObject> list2) {
         int overlapSize = 0;
 
-        for (int i = 1; i <= Math.min(list1.size(), list2.size()); i++) {
-            if (list1.subList(list1.size() - i, list1.size()).equals(list2.subList(0, i))) {
+        for (int i = 1; i <= Math.min(list1.size(), list2.size()); i++)
+            if (list1.subList(list1.size() - i, list1.size()).equals(list2.subList(0, i)))
                 overlapSize = i;
-            }
-        }
 
         List<SchemaObject> mergedList = new ArrayList<>(list1);
         mergedList.addAll(list2.subList(overlapSize, list2.size()));
@@ -417,24 +416,22 @@ public class RecursionMerge extends InferenceEditAlgorithm {
      * @return {@code true} if the occurrence has already been found; {@code false} otherwise.
      */
     private boolean occurenceAlreadyFound(List<List<SchemaObject>> result, List<SchemaObject> currentPath) {
-        if (result.isEmpty()) {
+        if (result.isEmpty())
             return false;
-        }
-        for (List<SchemaObject> r : result) {
+
+        for (final List<SchemaObject> r : result) {
+            if (r.size() != currentPath.size())
+                continue;
+
             boolean diff = false;
-            if (r.size() != currentPath.size()) {
-                diff = true;
-            } else {
-                for (int i = 0; i < r.size(); i++) {
-                    if (!r.get(i).equals(currentPath.get(i))) {
-                        diff = true;
-                    }
-                }
-            }
-            if (!diff) {
+            for (int i = 0; i < r.size(); i++)
+                if (!r.get(i).equals(currentPath.get(i)))
+                    diff = true;
+
+            if (!diff)
                 return true;
-            }
         }
+
         return false;
     }
 
@@ -450,6 +447,8 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (currentSegment.direction().equals(FORWARD) && morphism.dom().equals(currentNode)) {
                 return morphism.cod();
+
+            // FIXME There is no need for `else` if the `if` branch contains a `return` statement - because if it's true, there is no need to check the `else` branch.
             } else if (currentSegment.direction().equals(BACKWARD) && morphism.cod().equals(currentNode)) {
                 return morphism.dom();
             } else if (currentSegment.direction().equals(RECURSIVE_FORWARD) && morphism.dom().equals(currentNode)) {
@@ -540,11 +539,12 @@ public class RecursionMerge extends InferenceEditAlgorithm {
      */
     private List<Signature> findSignaturesForObject(SchemaObject schemaObject) {
         List<Signature> signatures = new ArrayList<>();
-        for (SchemaMorphism morphism : newSchema.allMorphisms()) {
-            if (morphism.dom().equals(schemaObject) || morphism.cod().equals(schemaObject)) {
+        for (SchemaMorphism morphism : newSchema.allMorphisms())
+            if (morphism.dom().equals(schemaObject) || morphism.cod().equals(schemaObject))
                 signatures.add(morphism.signature());
-            }
-        }
+
+        // FIXME This can be done much more clearly by the filter method.
+
         return signatures;
     }
 
@@ -570,13 +570,12 @@ public class RecursionMerge extends InferenceEditAlgorithm {
      */
     private void createRepetitiveMorphisms(List<List<SchemaObject>> occurences) {
         for (PatternSegment segment : adjustedPattern) {
-            if (isRepetitive(segment)) {
-                for (SchemaObject object : mapPatternObjects.get(segment)) {
-                    if (!keysToDelete.contains(object.key()) && inAnyOccurence(occurences, object)) {
-                        InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, object, object);
-                    }
-                }
-            }
+            if (!isRepetitive(segment))
+                continue;
+
+            for (SchemaObject object : mapPatternObjects.get(segment))
+                if (!keysToDelete.contains(object.key()) && inAnyOccurence(occurences, object))
+                    InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, object, object);
         }
     }
 
@@ -598,13 +597,11 @@ public class RecursionMerge extends InferenceEditAlgorithm {
      * @return {@code true} if the schema object is part of any occurrence; {@code false} otherwise.
      */
     private boolean inAnyOccurence(List<List<SchemaObject>> occurences, SchemaObject schemaObjectToFind) {
-        for (List<SchemaObject> occurence : occurences) {
-            for (SchemaObject schemaObject : occurence) {
-                if (schemaObject.equals(schemaObjectToFind)) {
+        for (List<SchemaObject> occurence : occurences)
+            for (SchemaObject schemaObject : occurence)
+                if (schemaObject.equals(schemaObjectToFind))
                     return true;
-                }
-            }
-        }
+
         return false;
     }
 
