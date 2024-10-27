@@ -24,8 +24,6 @@ type GraphDisplayProps = Readonly<{
 export function GraphDisplay({ nodes, edges, width, height }: GraphDisplayProps) {
     const [ state, engine ] = useGraphEngine({ nodes, edges, width, height });
 
-    console.log('render: ' + Math.random());
-
     return (
         <div
             style={{ width, height }}
@@ -39,6 +37,7 @@ export function GraphDisplay({ nodes, edges, width, height }: GraphDisplayProps)
             {edges.map(edge => (
                 <EdgeDisplay key={edge.id} edge={edge} nodes={state.nodes} coordinates={state.coordinates} />
             ))}
+            <SelectionBox state={state} />
         </div>
     );
 }
@@ -51,22 +50,26 @@ type NodeDisplayProps = Readonly<{
 
 function NodeDisplay({ node, state, engine }: NodeDisplayProps) {
     const isDragging = !!state.drag && 'nodeId' in state.drag && state.drag.nodeId === node.id;
-
-    function click(e: ReactMouseEvent<HTMLDivElement>) {
-        console.log(e);
-    }
+    // We want to highlight the node when it's being dragged or hovered, but not when other dragged node is over it.
+    // Also, no selection is allowed when dragging.
+    const isHightlightAllowed = (!state.drag || isDragging) && !state.select;
+    const isInSelecBox = state.select && isPointInBox(node.position, state.select);
+    const isSelected = state.selectedNodes?.includes(node.id);
 
     return (
         <div className='absolute w-0 h-0 select-none z-10' style={positionToOffset(node.position, state.coordinates)}>
             <div
-                className={clsx('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white hover:bg-green-400 active:bg-green-500',
+                className={clsx('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white active:bg-cyan-300',
+                    isHightlightAllowed && 'hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300',
                     isDragging ? 'cursor-grabbing pointer-events-none' : 'cursor-pointer',
+                    isInSelecBox && 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-cyan-300',
+                    isSelected && 'bg-cyan-200',
                 )}
-                onClick={click}
+                onClick={e => engine.nodeClick(e, node.id)}
                 onMouseDown={e => engine.nodeDown(e, node.id)}
             />
             <div className='w-fit'>
-                <span className='relative -left-1/2 -top-10'>
+                <span className='relative -left-1/2 -top-10 font-medium'>
                     {node.label}
                 </span>
             </div>
@@ -99,7 +102,6 @@ function EdgeDisplay({ edge, nodes, coordinates }: EdgeDisplayProps) {
     const x = end.left - start.left;
     const y = end.top - start.top;
     const angle = Math.atan2(y, x);
-
     const width = Math.sqrt(x * x + y * y) - 2 * EDGE_OFFSET;
 
     return (
@@ -108,6 +110,30 @@ function EdgeDisplay({ edge, nodes, coordinates }: EdgeDisplayProps) {
 
             </div>
         </div>
+    );
+}
+
+type SelectionBoxProps = Readonly<{
+    state: GraphState;
+}>;
+
+function SelectionBox({ state }: SelectionBoxProps) {
+    if (!state.select)
+        return null;
+
+    const initial = positionToOffset(state.select.initial, state.coordinates);
+    const current = positionToOffset(state.select.current, state.coordinates);
+
+    const left = Math.min(initial.left, current.left);
+    const top = Math.min(initial.top, current.top);
+    const width = Math.abs(initial.left - current.left);
+    const height = Math.abs(initial.top - current.top);
+
+    return (
+        <div
+            className='absolute border-2 border-slate-700 border-dotted'
+            style={{ left, top, width, height }}
+        />
     );
 }
 
@@ -134,6 +160,11 @@ type GraphState = {
         /** Just the note is being dragged. */
         nodeId: string;
     };
+    select?: {
+        initial: Position;
+        current: Position;
+    };
+    selectedNodes?: string[];
 };
 
 function computeInitialState({ nodes, edges, width, height }: GraphDisplayProps): GraphState {
@@ -218,20 +249,31 @@ class GraphEngine {
         initialMouseOffset: Offset;
     };
 
+    private isSelecting = false;
+
     public canvasDown(event: ReactMouseEvent<HTMLDivElement>) {
         // We are only interested in clicking on the actual canvas, not the nodes or edges. Also, we ignore the right click.
-        if (event.target !== this.canvas || !draggable.canvas.includes(event.button))
+        if (event.target !== this.canvas)
             return;
 
-        this.dragging = 'canvas';
-        this.setState(state => {
-            const draggedPoint = getMousePosition(event, this.canvas, state.coordinates);
-            return { ...state, drag: { draggedPoint } };
-        });
+        if (actions.drag.canvas === event.button) {
+            this.dragging = 'canvas';
+            this.setState(state => {
+                const draggedPoint = getMousePosition(event, this.canvas, state.coordinates);
+                return { ...state, drag: { draggedPoint } };
+            });
+        }
+        else if (actions.select.canvas === event.button) {
+            this.isSelecting = true;
+            this.setState(state => {
+                const initial = getMousePosition(event, this.canvas, state.coordinates);
+                return { ...state, select: { initial, current: initial } };
+            });
+        }
     }
 
     public nodeDown(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
-        if (!draggable.node.includes(event.button))
+        if (actions.drag.node !== event.button)
             return;
 
         event.stopPropagation();
@@ -265,9 +307,13 @@ class GraphEngine {
             return;
         }
 
-        if (!this.dragging)
-            return;
+        if (this.dragging)
+            this.moveDrag(event);
+        else if (this.isSelecting)
+            this.moveSelect(event);
+    }
 
+    private moveDrag(event: MouseEvent) {
         this.setState(state => {
             if (!state.drag)
                 throw new Error('Unexpected state.');
@@ -294,24 +340,66 @@ class GraphEngine {
         });
     }
 
+    private moveSelect(event: MouseEvent) {
+        this.setState(state => {
+            if (!state.select)
+                throw new Error('Unexpected state.');
+
+            const current = getMousePosition(event, this.canvas, state.coordinates);
+            return { ...state, select: { ...state.select, current } };
+        });
+    }
+
     private globalUp(event: MouseEvent) {
         this.startDragging = undefined;
 
-        if (!this.dragging || !draggable[this.dragging].includes(event.button))
-            return;
+        if (this.dragging) {
+            if (actions.drag[this.dragging] !== event.button)
+                return;
 
-        event.stopPropagation();
-        this.dragging = undefined;
-        this.setState(state => ({ ...state, drag: undefined }));
+            event.stopPropagation();
+            this.dragging = undefined;
+            this.setState(state => ({ ...state, drag: undefined }));
+        }
+        else if (this.isSelecting) {
+            if (actions.select.canvas !== event.button)
+                return;
+
+            event.stopPropagation();
+            this.isSelecting = false;
+            this.setState(state => {
+                const selectedNodes = state.nodes.filter(node => isPointInBox(node.position, state.select!)).map(node => node.id);
+                return { ...state, select: undefined, selectedNodes };
+            });
+        }
+    }
+
+    public nodeClick(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
+        this.setState(state => {
+            const originalSelectedNodes = state.selectedNodes ?? [];
+            const withoutNode = originalSelectedNodes.filter(id => id !== nodeId);
+            // If the node was selected, we deselect it.
+            if (withoutNode.length !== originalSelectedNodes.length)
+                return { ...state, selectedNodes: withoutNode };
+
+            // The node wasn't selected. If the shift or ctrl key is pressed, we add the node to the selection. Otherwise, we select only this node.
+            const selectedNodes = (event.shiftKey || event.ctrlKey) ? [ ...originalSelectedNodes, nodeId ] : [ nodeId ];
+            return { ...state, selectedNodes };
+        });
     }
 }
 
 const LEFT_BUTTON = 0;
 const MIDDLE_BUTTON = 1;
 
-const draggable = {
-    canvas: [ MIDDLE_BUTTON ],
-    node: [ LEFT_BUTTON ],
+const actions = {
+    drag: {
+        canvas: MIDDLE_BUTTON,
+        node: LEFT_BUTTON,
+    },
+    select: {
+        canvas: LEFT_BUTTON,
+    },
 };
 
 // Math
@@ -392,6 +480,13 @@ function computeInitialCoordinates(nodes: Node[], width: number, height: number)
     };
 
     return { origin, scale };
+}
+
+function isPointInBox(point: Position, box: { initial: Position, current: Position }): boolean {
+    return Math.min(box.initial.x, box.current.x) < point.x
+        && Math.max(box.initial.x, box.current.x) > point.x
+        && Math.min(box.initial.y, box.current.y) < point.y
+        && Math.max(box.initial.y, box.current.y) > point.y;
 }
 
 const THROTTLE_DURATION_MS = 20;
