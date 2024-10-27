@@ -1,17 +1,5 @@
 import clsx from 'clsx';
-import { type MouseEvent, useCallback, useEffect, useMemo, useRef, useState, type WheelEvent } from 'react';
-
-/** In some relative units. The point { x: 0; y: 0 } is in the top left corner. */
-type Position = {
-    x: number;
-    y: number;
-};
-
-/** In pixels. */
-type ScreenPosition = {
-    left: number;
-    top: number;
-};
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState, type WheelEvent, type MouseEvent as ReactMouseEvent } from 'react';
 
 type Node = {
     id: string;
@@ -26,226 +14,57 @@ type Edge = {
     to: string;
 };
 
-type Coordinates = {
-    /** Where the point { x: 0; y: 0 } is on the screen. */
-    origin: ScreenPosition;
-    /** Distance in pixels = scale * distance in position units. */
-    scale: number;
-}
-
-type GraphProps = Readonly<{
+type GraphDisplayProps = Readonly<{
     nodes: Node[];
     edges: Edge[];
     width: number;
     height: number;
 }>;
 
-export function GraphDisplay({ nodes, edges, width, height }: GraphProps) {
-    const [ localNodes, setLocalNodes ] = useState(nodes);
+export function GraphDisplay({ nodes, edges, width, height }: GraphDisplayProps) {
+    const [ state, engine ] = useGraphEngine({ nodes, edges, width, height });
 
-    const [ coordinates, setCoordinates ] = useState<Coordinates>(() => computeInitialCoordinates(nodes, width, height));
-    const screenRef = useRef<HTMLDivElement>(null);
-
-    const wheel = useCallback((e: WheelEvent<HTMLDivElement>) => {
-        if (!screenRef.current)
-            return;
-
-        e.stopPropagation();
-        const rect = screenRef.current.getBoundingClientRect();
-        const mouse: ScreenPosition = {
-            left: e.clientX - rect.left,
-            top: e.clientY - rect.top,
-        };
-
-        // We want to transform the coordinates in such a way that the mouse point will be on the same screen position as before.
-        // Therefore, it must hold origin.left + scale * mousePosition.x = newOrigin.left + newScale * mousePosition.x and the same for top and y.
-
-        setCoordinates(coordinates => {
-            const mousePosition = getPosition(mouse, coordinates);
-            const scale = coordinates.scale * (1 - e.deltaY / 1000);
-            const origin = {
-                left: coordinates.origin.left + (coordinates.scale - scale) * mousePosition.x,
-                top: coordinates.origin.top + (coordinates.scale - scale) * mousePosition.y,
-            };
-
-            return { origin, scale };
-        });
-    }, [ screenRef ]);
-
-    const lastPosition = useRef<ScreenPosition | undefined>(undefined);
-    const [ isDown, setIsDown ] = useState(false);
-
-    const mouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
-        if (e.target !== screenRef.current)
-            return;
-        // We don't want to interfere with the right click.
-        if (e.button === 2)
-            return;
-
-        setIsDown(true);
-        lastPosition.current = { left: e.clientX, top: e.clientY };
-    }, []);
-
-    useEffect(() => {
-        const mouseup = () => {
-            lastPosition.current = undefined;
-            setIsDown(false);
-        };
-        const mousemove = throttle((e: MouseEvent) => {
-            if (!lastPosition.current)
-                return;
-
-            const diff = { left: e.clientX - lastPosition.current.left, top: e.clientY - lastPosition.current.top };
-            lastPosition.current = { left: e.clientX, top: e.clientY };
-            setCoordinates(c => ({
-                ...c,
-                origin: {
-                    left: c.origin.left + diff.left,
-                    top: c.origin.top + diff.top,
-                },
-            }));
-        });
-
-        document.addEventListener('mouseup', mouseup);
-        // @ts-expect-error - What the actual fuck?
-        document.addEventListener('mousemove', mousemove);
-
-        return () => {
-            document.removeEventListener('mouseup', mouseup);
-            // @ts-expect-error - What the actual fuck?
-            document.removeEventListener('mousemove', mousemove);
-        };
-    }, []);
-
-    const setNode = useCallback((node: Node) => {
-        setLocalNodes(oldNodes => oldNodes.map(n => n.id === node.id ? node : n));
-    }, []);
-
-    console.log('render ' + Math.random());
+    console.log('render: ' + Math.random());
 
     return (
         <div
             style={{ width, height }}
-            className={clsx('relative bg-slate-400 overflow-hidden', isDown ? 'cursor-grabbing' : 'cursor-grab')}
-            onWheel={wheel}
-            ref={screenRef}
-            onMouseDown={mouseDown}
-            id='screen'
+            className={clsx('relative bg-slate-400 overflow-hidden', state.drag ? 'cursor-grabbing' : 'cursor-grab')}
+            onWheel={e => engine.wheel(e)}
+            ref={engine.canvasRef}
+            onMouseDown={e => engine.canvasDown(e)}
         >
-            {localNodes.map(node => (
-                <NodeDisplay key={node.id} node={node} coordinates={coordinates} setNode={setNode} />
+            {state.nodes.map(node => (
+                <NodeDisplay key={node.id} node={node} state={state} engine={engine} />
             ))}
             {edges.map(edge => (
-                <EdgeDisplay key={edge.id} edge={edge} nodes={localNodes} coordinates={coordinates} />
+                <EdgeDisplay key={edge.id} edge={edge} nodes={state.nodes} coordinates={state.coordinates} />
             ))}
         </div>
     );
 }
 
-function computeInitialCoordinates(nodes: Node[], width: number, height: number): Coordinates {
-    const minX = Math.min(...nodes.map(node => node.position.x));
-    const maxX = Math.max(...nodes.map(node => node.position.x));
-    const minY = Math.min(...nodes.map(node => node.position.y));
-    const maxY = Math.max(...nodes.map(node => node.position.y));
-
-    const scale = Math.min(width / (100 + maxX - minX), height / (100 + maxY - minY));
-
-    const centroid = {
-        x: (minX + maxX) / 2,
-        y: (minY + maxY) / 2,
-    };
-
-    const origin = {
-        left: (width / 2) - scale * centroid.x,
-        top: (height / 2) - scale * centroid.y,
-    };
-
-    return { origin, scale };
-}
-
-function getPosition(screenPosition: ScreenPosition, coordinates: Coordinates): Position {
-    return {
-        x: (screenPosition.left - coordinates.origin.left) / coordinates.scale,
-        y: (screenPosition.top - coordinates.origin.top) / coordinates.scale,
-    };
-}
-
-function getScreenPosition(position: Position, coordinates: Coordinates): ScreenPosition {
-    return {
-        left: coordinates.origin.left + coordinates.scale * position.x,
-        top: coordinates.origin.top + coordinates.scale * position.y,
-    };
-}
-
-const THROTTLE_DURATION_MS = 20;
-function throttle<T extends(...args: Parameters<T>) => void>(callback: T): T {
-    let timeout: NodeJS.Timeout | undefined = undefined;
-
-    return ((...args: Parameters<T>) => {
-        if (timeout)
-            return;
-
-        callback(...args);
-        timeout = setTimeout(() => {
-            timeout = undefined;
-        }, THROTTLE_DURATION_MS);
-    }) as T;
-}
-
 type NodeDisplayProps = Readonly<{
     node: Node;
-    coordinates: Coordinates;
-    setNode: (node: Node) => void;
+    state: GraphState;
+    engine: GraphEngine;
 }>;
 
-function NodeDisplay({ node, coordinates, setNode }: NodeDisplayProps) {
-    const [ isDragging, setIsDragging ] = useState(false);
-
-    function click(e: MouseEvent) {
+function NodeDisplay({ node, state, engine }: NodeDisplayProps) {
+    function click(e: ReactMouseEvent<HTMLDivElement>) {
         console.log(e);
     }
 
-    function mouseDown() {
-        setIsDragging(true);
-    }
-
-    function mouseUp(e: MouseEvent<HTMLDivElement>) {
-        if (!isDragging)
-            return;
-
-        const rect = document.getElementById('screen')!.getBoundingClientRect();
-        const mouse: ScreenPosition = {
-            left: e.clientX - rect.left,
-            top: e.clientY - rect.top,
-        };
-
-        setIsDragging(false);
-        setNode({ ...node, position: getPosition(mouse, coordinates) });
-        console.log('SET NODE');
-    }
-
-
-    function mouseMove(e: MouseEvent<HTMLDivElement>) {
-        if (!isDragging)
-            return;
-
-        const rect = document.getElementById('screen')!.getBoundingClientRect();
-        const mouse: ScreenPosition = {
-            left: e.clientX - rect.left,
-            top: e.clientY - rect.top,
-        };
-
-        setNode({ ...node, position: getPosition(mouse, coordinates) });
-    }
+    const isDragging = state.drag && 'nodeId' in state.drag && state.drag.nodeId === node.id;
 
     return (
-        <div className='absolute w-0 h-0 select-none z-10' style={getScreenPosition(node.position, coordinates)}>
+        <div className='absolute w-0 h-0 select-none z-10' style={positionToOffset(node.position, state.coordinates)}>
             <div
-                className='absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white hover:bg-green-400 cursor-pointer active:bg-green-500'
+                className={clsx('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white hover:bg-green-400 active:bg-green-500',
+                    isDragging ? 'cursor-grabbing' : 'cursor-pointer',
+                )}
                 onClick={click}
-                onMouseDown={mouseDown}
-                onMouseUp={mouseUp}
-                onMouseMove={mouseMove}
+                onMouseDown={e => engine.nodeDown(e, node.id)}
             />
             <div className='w-fit'>
                 <span className='relative -left-1/2 -top-10'>
@@ -271,8 +90,8 @@ function EdgeDisplay({ edge, nodes, coordinates }: EdgeDisplayProps) {
         to: nodes.find(node => node.id === edge.to)!,
     }), [ edge, nodes ]);
 
-    const start = getScreenPosition(cache.from.position, coordinates);
-    const end = getScreenPosition(cache.to.position, coordinates);
+    const start = positionToOffset(cache.from.position, coordinates);
+    const end = positionToOffset(cache.to.position, coordinates);
 
     const center = {
         left: (start.left + end.left) / 2,
@@ -291,4 +110,224 @@ function EdgeDisplay({ edge, nodes, coordinates }: EdgeDisplayProps) {
             </div>
         </div>
     );
+}
+
+function useGraphEngine(props: GraphDisplayProps) {
+    const [ state, setState ] = useState(() => computeInitialState(props));
+    const canvasRef = useRef<HTMLDivElement>(null);
+    const engine = useMemo(() => new GraphEngine(setState, canvasRef), []);
+
+    useEffect(() => {
+        return engine.start();
+    }, [ engine ]);
+
+    return [ state, engine ] as const;
+}
+
+type GraphState = {
+    nodes: Node[];
+    edges: Edge[];
+    coordinates: Coordinates;
+    drag?: {
+        /** The whole canvas is being dragged. */
+        draggedPoint: Position;
+    } | {
+        /** Just the note is being dragged. */
+        nodeId: string;
+    };
+};
+
+function computeInitialState({ nodes, edges, width, height }: GraphDisplayProps): GraphState {
+    return {
+        nodes,
+        edges,
+        coordinates: computeInitialCoordinates(nodes, width, height),
+    };
+}
+
+class GraphEngine {
+    constructor(
+        private readonly setState: Dispatch<SetStateAction<GraphState>>,
+        readonly canvasRef: React.RefObject<HTMLDivElement>,
+    ) {}
+
+    get canvas(): HTMLDivElement {
+        return this.canvasRef.current!;
+    }
+
+    /** Returns the abort function */
+    public start(): () => void {
+        // The event is throttled because we don't need to update the state that often.
+        const mousemove = throttle((e: MouseEvent) => this.globalMove(e));
+        document.addEventListener('mousemove', mousemove);
+
+        const mouseup = () => this.globalUp();
+        document.addEventListener('mouseup', mouseup);
+
+        return () => {
+            document.removeEventListener('mousemove', mousemove);
+            document.removeEventListener('mouseup', mouseup);
+        };
+    }
+
+    public wheel(event: WheelEvent<HTMLDivElement>) {
+        event.stopPropagation();
+
+        // We want to transform the coordinates in such a way that the mouse point will be on the same canvas position as before.
+        // Therefore, it must hold origin.left + scale * mousePosition.x = newOrigin.left + newScale * mousePosition.x and the same for top and y.
+        this.setState(state => {
+            const coordinates = state.coordinates;
+            const mousePosition = getMousePosition(event, this.canvas, coordinates);
+            const scale = coordinates.scale * (1 - event.deltaY / 1000);
+            const origin = {
+                left: coordinates.origin.left + (coordinates.scale - scale) * mousePosition.x,
+                top: coordinates.origin.top + (coordinates.scale - scale) * mousePosition.y,
+            };
+
+            return { ...state, coordinates: { origin, scale } };
+        });
+    }
+
+    private isDragging = false;
+
+    public canvasDown(event: ReactMouseEvent<HTMLDivElement>) {
+        // We are only interested in clicking on the actual canvas, not the nodes or edges. Also, we ignore the right click.
+        if (event.target !== this.canvas || event.button === 2)
+            return;
+
+        this.isDragging = true;
+        this.setState(state => {
+            const draggedPoint = getMousePosition(event, this.canvas, state.coordinates);
+            return { ...state, drag: { draggedPoint } };
+        });
+    }
+
+    public nodeDown(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
+        if (event.button === 2)
+            return;
+
+        this.isDragging = true;
+        this.setState(state => ({ ...state, drag: { nodeId } }));
+    }
+
+    private globalMove(event: MouseEvent) {
+        if (!this.isDragging)
+            return;
+
+        this.setState(state => {
+            if (!state.drag)
+                throw new Error('Unexpected state.');
+
+            if ('nodeId' in state.drag) {
+                const nodeId = state.drag.nodeId;
+                const mousePosition = getMousePosition(event, this.canvas, state.coordinates);
+                const nodes = state.nodes.map(node => node.id !== nodeId ? node : { ...node, position: mousePosition });
+
+                return { ...state, nodes };
+            }
+
+            // The whole canvas is being dragged. We have to change the origin so that the dragged point is on the mouse offset.
+            const mouseOffset = getMouseOffset(event, this.canvas);
+            const coordinates = {
+                ...state.coordinates,
+                origin: {
+                    left: mouseOffset.left - state.coordinates.scale * state.drag.draggedPoint.x,
+                    top: mouseOffset.top - state.coordinates.scale * state.drag.draggedPoint.y,
+                },
+            };
+
+            return { ...state, coordinates };
+        });
+    }
+
+    private globalUp() {
+        if (!this.isDragging)
+            return;
+
+        this.isDragging = false;
+        this.setState(state => ({ ...state, drag: undefined }));
+    }
+}
+
+// Math
+
+/** Internal position of the nodes. In some relative units. */
+type Position = {
+    x: number;
+    y: number;
+};
+
+/** Distance from the top-left corner of the canvas. In pixels. */
+type Offset = {
+    left: number;
+    top: number;
+};
+
+type Coordinates = {
+    /** Where the position { x: 0; y: 0 } is on the canvas. */
+    origin: Offset;
+    /** Distance in pixels = scale * distance in relative units. */
+    scale: number;
+}
+
+function offsetToPosition(offset: Offset, coordinates: Coordinates): Position {
+    return {
+        x: (offset.left - coordinates.origin.left) / coordinates.scale,
+        y: (offset.top - coordinates.origin.top) / coordinates.scale,
+    };
+}
+
+function positionToOffset(position: Position, coordinates: Coordinates): Offset {
+    return {
+        left: coordinates.origin.left + coordinates.scale * position.x,
+        top: coordinates.origin.top + coordinates.scale * position.y,
+    };
+}
+
+function getMouseOffset(event: { clientX: number, clientY: number }, canvas: HTMLDivElement): Offset {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        left: event.clientX - rect.left,
+        top: event.clientY - rect.top,
+    };
+}
+
+function getMousePosition(event: { clientX: number, clientY: number }, canvas: HTMLDivElement, coordinates: Coordinates): Position {
+    return offsetToPosition(getMouseOffset(event, canvas), coordinates);
+}
+
+function computeInitialCoordinates(nodes: Node[], width: number, height: number): Coordinates {
+    const minX = Math.min(...nodes.map(node => node.position.x));
+    const maxX = Math.max(...nodes.map(node => node.position.x));
+    const minY = Math.min(...nodes.map(node => node.position.y));
+    const maxY = Math.max(...nodes.map(node => node.position.y));
+
+    const scale = Math.min(width / (100 + maxX - minX), height / (100 + maxY - minY));
+
+    const centroid = {
+        x: (minX + maxX) / 2,
+        y: (minY + maxY) / 2,
+    };
+
+    const origin = {
+        left: (width / 2) - scale * centroid.x,
+        top: (height / 2) - scale * centroid.y,
+    };
+
+    return { origin, scale };
+}
+
+const THROTTLE_DURATION_MS = 20;
+function throttle<T extends(...args: Parameters<T>) => void>(callback: T): T {
+    let timeout: NodeJS.Timeout | undefined = undefined;
+
+    return ((...args: Parameters<T>) => {
+        if (timeout)
+            return;
+
+        callback(...args);
+        timeout = setTimeout(() => {
+            timeout = undefined;
+        }, THROTTLE_DURATION_MS);
+    }) as T;
 }
