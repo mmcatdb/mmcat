@@ -1,5 +1,4 @@
 import { type SchemaCategory } from '@/types/schema';
-import ReactFlow from 'reactflow';
 import { GraphDisplay } from '../GraphDisplay';
 import { useMemo } from 'react';
 
@@ -37,11 +36,7 @@ export function SchemaCategoryGraph({ category }: SchemaCategoryGraphProps) {
         })),
     }), []);
 
-    return (<>
-        {/* <div className='w-[1200px] h-[400px] bg-slate-700'>
-            <ReactFlow nodes={initialNodes} edges={initialEdges} />
-        </div> */}
-
+    return (
         <GraphDisplay nodes={graphData.nodes} edges={graphData.edges} width={1200} height={800} />
-    </>);
+    );
 }
