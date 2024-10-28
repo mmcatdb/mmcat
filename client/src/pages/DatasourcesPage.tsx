@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { CommonPage } from '@/components/CommonPage';
 import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
 import { DatasourceModal } from '@/components/datasources/DatasourceModal';
 import { api } from '@/api';
@@ -57,7 +56,7 @@ export function DatasourcesPage() {
     };
 
     return (
-        <CommonPage>
+        <div>
             <div className='flex items-center justify-between'>
                 <h1 className='heading-large'>Datasources</h1>
                 <DatasourceModal onDatasourceCreated={handleAddDatasource} />
@@ -71,6 +70,6 @@ export function DatasourcesPage() {
                     onDeleteDatasource={handleDeleteDatasource}
                 />
             </div>
-        </CommonPage>
+        </div>
     );
 }

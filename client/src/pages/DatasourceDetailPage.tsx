@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { ErrorPage } from '@/pages/errorPages';
-import { CommonPage } from '@/components/CommonPage';
 import { Breadcrumbs, BreadcrumbItem, Spinner } from '@nextui-org/react';
 import { Portal } from '@/components/common';
 
@@ -46,7 +45,7 @@ export const DatasourceDetailPage = () => {
         return <ErrorPage />;
 
     return (
-        <CommonPage>
+        <div>
             <Portal to='breadcrumb-portal'>
                 <Breadcrumbs className='breadcrumb'>
                     <BreadcrumbItem>
@@ -78,6 +77,6 @@ export const DatasourceDetailPage = () => {
                     </div>
                 )}
             </div>
-        </CommonPage>
+        </div>
     );
 };

@@ -23,18 +23,19 @@ class ParametrizedRoute<TParam extends string = never, TQuery extends string = n
     }
 }
 
-const projectIndex = new ParametrizedRoute<'categoryId'>('/category/:categoryId', 'category');
+const categoryIndex = new ParametrizedRoute<'categoryId'>('/category/:categoryId', 'category');
 
 export const routes = {
     home: new ParametrizedRoute('/', 'home'),
+    categories: 'schema-categories',
     about: 'about',
-    category: {
-        index: projectIndex,
-        datasources: projectIndex.child('/datasources', 'datasources'),
-        models: projectIndex.child('/models', 'models'),
-        querying: projectIndex.child('/querying', 'querying'),
-    },
     datasources: 'datasources',
     adminer: 'adminer',
-    categories: 'schema-categories',
+    category: {
+        index: categoryIndex,
+        editor: categoryIndex.child('/editor', 'editor'),
+        datasources: categoryIndex.child('/datasources', 'datasources'),
+        models: categoryIndex.child('/models', 'models'),
+        querying: categoryIndex.child('/querying', 'querying'),
+    },
 } as const;

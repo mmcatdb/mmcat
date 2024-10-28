@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { CommonPage } from '@/components/CommonPage';
 import { SchemaCategoriesTable } from '@/components/schema-categories/SchemaCategoriesTable';
 // import { SchemaCategoryModal } from '@/components/schemaCategories/SchemaCategoryModal';
 import { api } from '@/api';
@@ -43,7 +42,7 @@ export function SchemaCategoriesPage() {
     }
 
     return (
-        <CommonPage>
+        <div>
             <div className='flex items-center justify-between'>
                 <h1 className='heading-large'>Schema Categories</h1>
                 <Button onClick={handleAddCategory} color='primary'>+ Add Schema Category</Button>
@@ -56,6 +55,6 @@ export function SchemaCategoriesPage() {
                     onDeleteCategory={handleDeleteCategory}
                 />
             </div>
-        </CommonPage>
+        </div>
     );
 }

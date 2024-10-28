@@ -1,5 +1,4 @@
 import { useRouteError } from 'react-router-dom';
-import { CommonPage } from '@/components/CommonPage';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { Spinner } from '@nextui-org/react';
 import clsx from 'clsx';
@@ -9,22 +8,20 @@ export function ErrorPage() {
     console.error(error);
 
     return (
-        <CommonPage>
+        <div>
             <h1 className='heading-main'>404</h1>
             <p>
                 The page you are looking for does not exist.
             </p>
-        </CommonPage>
+        </div>
     );
 }
 
 export function LoadingPage() {
     return (
-        <CommonPage>
-            <div>
-                <Spinner />
-            </div>
-        </CommonPage>
+        <div>
+            <Spinner />
+        </div>
     );
 }
 

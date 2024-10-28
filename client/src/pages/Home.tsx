@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CommonPage } from '@/components/CommonPage';
 import { CustomLink } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
@@ -42,7 +41,7 @@ export function Home() {
     }, []);
 
     return (
-        <CommonPage>
+        <div>
             <h1 className='heading-main'>MM-cat</h1>
             <p>
                 A multi-model data modeling framework based on category theory.
@@ -73,6 +72,6 @@ export function Home() {
             </>) : (
                 <p>Loading...</p>
             )}
-        </CommonPage>
+        </div>
     );
 }

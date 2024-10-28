@@ -57,6 +57,11 @@ export function Sidebar() {
                 iconName: 'documentText',
             },
             {
+                label: 'Editor',
+                route: routes.category.editor.resolve({ categoryId }),
+                iconName: 'documentText',
+            },
+            {
                 label: 'Models',
                 route: routes.category.models.resolve({ categoryId }),
                 iconName: 'documentText',
@@ -88,7 +93,7 @@ export function Sidebar() {
                     <XMarkIcon className='w-6 h-6 text-zinc-500' />
                 </button>
 
-                <Link to={routes.home.path}>
+                <Link to={routes.home.path} onClick={() => setIsSidebarOpen(false)}>
                     <h1 className='text-xl font-semibold mb-10'>MM-cat</h1>
                 </Link>
 

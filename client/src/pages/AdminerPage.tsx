@@ -1,5 +1,4 @@
 import { useState, useEffect, useReducer } from 'react';
-import { CommonPage } from '@/components/CommonPage';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { TableMenu } from '@/components/adminer/TableMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
@@ -27,7 +26,7 @@ export function AdminerPage() {
     }, [ tableName ]);
 
     return (
-        <CommonPage>
+        <div>
             <div className='mt-5 text-sm'>
                 <DatasourceMenu datasource={datasource} setDatasource={setDatasource}/>
 
@@ -56,6 +55,6 @@ export function AdminerPage() {
                     </>
                 )}
             </div>
-        </CommonPage>
+        </div>
     );
 }

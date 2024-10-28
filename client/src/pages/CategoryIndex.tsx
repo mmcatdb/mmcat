@@ -2,7 +2,7 @@ import { Suspense, useMemo } from 'react';
 import { Outlet, type Params, useLoaderData, useMatches, defer, Await } from 'react-router-dom';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { CustomLink } from '@/components/common';
-import { CommonPage, ThemeToggle } from '@/components/CommonPage';
+import { ThemeToggle } from '@/components/RootLayout';
 import { routes } from '../routes/routes';
 import { CollapseContextToggle } from '@/components/project/context';
 import { api, type Resolved } from '@/api';
@@ -10,15 +10,15 @@ import { SchemaCategoryInfo } from '@/types/schema';
 import { LoadingPage } from './errorPages';
 import { CategoryInfoProvider, useCategoryInfo } from '@/components/CategoryInfoProvider';
 
-export function ProjectIndex() {
-    const loaderData = useLoaderData() as ProjectIndexLoaderData;
+export function CategoryIndex() {
+    const loaderData = useLoaderData() as CategoryIndexLoaderData;
 
     return (
         <Suspense fallback={<LoadingPage />}>
             <Await resolve={loaderData.category}>
-                {(category: Resolved<ProjectIndexLoaderData, 'category'>) => (
+                {(category: Resolved<CategoryIndexLoaderData, 'category'>) => (
                     <CategoryInfoProvider category={category}>
-                        <ProjectIndexInner />
+                        <CategoryIndexInner />
                     </CategoryInfoProvider>
                 )}
             </Await>
@@ -26,30 +26,30 @@ export function ProjectIndex() {
     );
 }
 
-type ProjectIndexLoaderData = {
+type CategoryIndexLoaderData = {
     category: Promise<SchemaCategoryInfo>;
 };
 
-export function projectIndexLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+export function categoryIndexLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
-        throw new Error('Project ID is required');
+        throw new Error('Category ID is required');
 
     return defer({
         category: api.schemas.getCategoryInfo({ id: categoryId }).then(response => {
             if (!response.status)
-                throw new Error('Failed to load project info');
+                throw new Error('Failed to load category info');
 
             return SchemaCategoryInfo.fromServer(response.data);
         }),
-    } satisfies ProjectIndexLoaderData);
+    } satisfies CategoryIndexLoaderData);
 }
 
-function ProjectIndexInner() {
+function CategoryIndexInner() {
     const { theme, isCollapsed } = usePreferences().preferences;
     const { category } = useCategoryInfo();
 
     return (
-        <CommonPage>
+        <div>
             {/* <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}> */}
             {/* TODO: place category.label to navbar (via portal or sth) */}
             {/* <div className='mm-context-header flex items-center px-2'>
@@ -57,11 +57,11 @@ function ProjectIndexInner() {
                 </div> */}
             <Outlet />
             {/* </div> */}
-        </CommonPage>
+        </div>
     );
 }
 
-function ProjectMenu({ categoryId }: Readonly<{ categoryId: string }>) {
+function CategoryMenu({ categoryId }: Readonly<{ categoryId: string }>) {
     const menuItems = useMemo(() => createMenuItems(categoryId), [ categoryId ]);
     const matches = useMatches();
 
@@ -104,8 +104,8 @@ function createMenuItems(categoryId: string): MenuItem[] {
             path: routes.home.path,
         },
         {
-            label: 'Project',
-            icon: 'project',
+            label: 'Category',
+            icon: 'category',
             id: routes.category.index.id,
             path: routes.category.index.resolve({ categoryId }),
         },
