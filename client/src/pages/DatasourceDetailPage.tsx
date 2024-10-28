@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { ErrorPage } from '@/pages/errorPages';
-import { Breadcrumbs, BreadcrumbItem, Spinner } from '@nextui-org/react';
-import { Portal } from '@/components/common';
+import { Spinner } from '@nextui-org/react';
 
 export const DatasourceDetailPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -46,23 +45,6 @@ export const DatasourceDetailPage = () => {
 
     return (
         <div>
-            <Portal to='breadcrumb-portal'>
-                <Breadcrumbs className='breadcrumb'>
-                    <BreadcrumbItem>
-                        <Link
-                            to='/datasources'
-                            className='breadcrumb-item-link'
-                        >
-                            Datasources
-                        </Link>
-                    </BreadcrumbItem>
-                    <BreadcrumbItem>
-                        <Link to={`/datasources/${datasource?.id}`}>
-                            <span>Detail</span>
-                        </Link>
-                    </BreadcrumbItem>
-                </Breadcrumbs>
-            </Portal>
             <div className='mt-5'>
                 {loading ? (
                     <div>

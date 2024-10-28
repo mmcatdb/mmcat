@@ -1,10 +1,10 @@
 import clsx from 'clsx';
-import { Button, Navbar, NavbarContent, NavbarItem } from '@nextui-org/react';
+import { Button, Navbar, NavbarContent, NavbarItem, Breadcrumbs, BreadcrumbItem } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
 import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet, useMatches } from 'react-router-dom';
 
 export function RootLayout() {
     const { theme } = usePreferences().preferences;
@@ -16,7 +16,6 @@ export function RootLayout() {
                 <div className='flex flex-col flex-grow overflow-hidden'>
                     <CommonNavbar />
                     <main className='flex-grow overflow-auto w-full max-w-screen-xl mx-auto p-6'>
-                        {/* TODO: <Breadcrumb /> */}
                         <Outlet />
                     </main>
                 </div>
@@ -26,10 +25,20 @@ export function RootLayout() {
 }
 
 function CommonNavbar() {
+    const { theme } = usePreferences().preferences;
+
     return (
-        <Navbar className='z-20 w-full mx-auto border-b h-12' isBlurred={false} maxWidth='full'>
+        <Navbar
+            className={clsx(
+                'z-20 w-full mx-auto h-12 border-b',
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+            )}
+            isBlurred={false}
+            maxWidth='full'
+        >
             <NavbarContent justify='start'>
-                <div id='breadcrumb-portal'></div>
+                {/* <div id='breadcrumb-portal'></div> */}
+                <Breadcrumb />
             </NavbarContent>
             <NavbarContent justify='end'>
                 <NavbarItem>
@@ -40,11 +49,32 @@ function CommonNavbar() {
     );
 }
 
-
 type NavbarItem = {
     label: string;
     route: string;
 };
+
+function Breadcrumb() {
+    const matches = useMatches();
+
+    const breadcrumbs = matches
+        .filter((match) => match.handle?.breadcrumb)  // filter out routes without breadcrumb handle
+        .map((match) => ({
+            label: match.handle!.breadcrumb as string,
+            path: match.pathname,
+        }));
+
+    return (
+        // custom styles <Breadcrumbs className='breadcrumb'>, Link className='breadcrumb-item-link'
+        <Breadcrumbs separator='/'>
+            {breadcrumbs.map((crumb, index) => (
+                <BreadcrumbItem key={crumb.path} isCurrent={index === breadcrumbs.length - 1}>
+                    <Link to={crumb.path}> {crumb.label} </Link>
+                </BreadcrumbItem>
+            ))}
+        </Breadcrumbs>
+    );
+}
 
 type ThemeToggleProps = Readonly<{
     className?: string;

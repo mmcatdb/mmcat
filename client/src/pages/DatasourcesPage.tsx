@@ -4,8 +4,17 @@ import { DatasourceModal } from '@/components/datasources/DatasourceModal';
 import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
+import { Outlet } from 'react-router-dom';
 
 export function DatasourcesPage() {
+    return (
+        <div>
+            <Outlet />
+        </div>
+    );
+}
+
+export function DatasourcesPageOverview() {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);

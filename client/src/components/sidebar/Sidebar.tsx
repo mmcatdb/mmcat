@@ -50,9 +50,9 @@ export function Sidebar() {
     if (categoryId) {
         dynamicSidebarItems = [
             // Static separator 'Project'
-            { label: 'Project', isSeparator: true },
+            { label: 'Schema Category', isSeparator: true },
             {
-                label: 'Schema category',
+                label: 'Overview',
                 route: routes.category.index.resolve({ categoryId }),
                 iconName: 'documentText',
             },
