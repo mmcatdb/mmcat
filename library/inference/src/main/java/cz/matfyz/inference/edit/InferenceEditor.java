@@ -25,10 +25,6 @@ public class InferenceEditor {
     /**
      * Constructs an {@code InferenceEditor} with the specified schema, metadata, and edits.
      * This constructor is used when there are no initial mappings provided.
-     *
-     * @param schema The schema category to edit.
-     * @param metadata The metadata associated with the schema.
-     * @param edits The list of edits to apply.
      */
     public InferenceEditor(SchemaCategory schema, MetadataCategory metadata, List<InferenceEdit> edits) {
         this.schema = schema;
@@ -40,11 +36,6 @@ public class InferenceEditor {
     /**
      * Constructs an {@code InferenceEditor} with the specified schema, metadata, mappings, and edits.
      * This constructor is used when there are initial mappings provided.
-     *
-     * @param schema The schema category to edit.
-     * @param metadata The metadata associated with the schema.
-     * @param mappings The initial list of mappings to edit.
-     * @param edits The list of edits to apply.
      */
     public InferenceEditor(SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings, List<InferenceEdit> edits) {
         this.schema = schema;
@@ -54,10 +45,6 @@ public class InferenceEditor {
         filterActiveEdits();
     }
 
-    /**
-     * Filters the list of edits to identify those that are active.
-     * Active edits are those marked with {@code isActive} set to {@code true}.
-     */
     private void filterActiveEdits() {
         List<InferenceEdit> filteredEdits = new ArrayList<>();
         for (InferenceEdit edit : edits)
@@ -83,7 +70,6 @@ public class InferenceEditor {
         return this.mappings != null;
     }
 
-    /** A list of algorithms corresponding to the active edits. */
     private final List<InferenceEditAlgorithm> algorithms = new ArrayList<>();
 
     /**
@@ -96,9 +82,6 @@ public class InferenceEditor {
             applyMappingEdits();
     }
 
-    /**
-     * Applies all active category edits to the schema and metadata.
-     */
     private void applyCategoryEdits() {
         for (final var edit : activeEdits) {
             final var algorithm = edit.createAlgorithm();
@@ -110,10 +93,6 @@ public class InferenceEditor {
         }
     }
 
-    /**
-     * Applies all active mapping edits to the list of mappings.
-     * This method is only called if mappings are available.
-     */
     private void applyMappingEdits() {
         for (final var algorithm : algorithms)
             mappings = algorithm.applyMappingEdit(mappings);

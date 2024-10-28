@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
-
+import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -38,29 +38,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
-    /**
-     * Data class representing the parameters and state needed for the primary key merge.
-     */
     public static class Data extends InferenceEdit {
 
         @JsonProperty("primaryKey")
-        private Key primaryKey;
+        @Nullable public Key primaryKey;
 
         @JsonProperty("primaryKeyIdentified")
-        private Key primaryKeyIdentified;
+        @Nullable public Key primaryKeyIdentified;
 
         @JsonProperty("candidate")
-        private PrimaryKeyCandidate candidate;
+        @Nullable public PrimaryKeyCandidate candidate;
 
-        /**
-         * Constructs a {@code Data} instance with specified parameters.
-         *
-         * @param id The ID of the edit.
-         * @param isActive The active status of the edit.
-         * @param primaryKey The primary key involved in the merge.
-         * @param primaryKeyIdentified The identified primary key for the merge.
-         * @param candidate The candidate primary key information.
-         */
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
@@ -75,9 +63,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             this.candidate = candidate;
         }
 
-        /**
-         * Default constructor initializing data with default values.
-         */
         public Data() {
             setId(null);
             setActive(false);
@@ -86,44 +71,8 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             this.candidate = null;
         }
 
-        // FIXME This is a very good example that less is sometimes more.
-        // First, the primaryKey is private and it isn't changed anywhere in the class, so it could be final. Then there is no need for a getter.
-        // Second, the javadoc adds just zero additional information while taking 5 lines of vertical space.
-        // This comment applies for all following properties, as well as for other "-Merge" classes.
-
-        /**
-         * Gets the primary key involved in the merge.
-         *
-         * @return The primary key.
-         */
-        public Key getPrimaryKey() {
-            return primaryKey;
-        }
-
-        /**
-         * Gets the identified primary key for the merge.
-         *
-         * @return The identified primary key.
-         */
-        public Key getPrimaryKeyIdentified() {
-            return primaryKeyIdentified;
-        }
-
-        /**
-         * Gets the candidate primary key information.
-         *
-         * @return The primary key candidate.
-         */
-        public PrimaryKeyCandidate getCandidate() {
-            return candidate;
-        }
-
-        // FIXME This is similar to the javadoc comment above.
-        // For simple methods, it's usually better to not use the @return tag since it contains the same information as the description.
         /**
          * Creates an instance of the {@code PrimaryKeyMerge} algorithm.
-         *
-         * @return A new instance of {@code PrimaryKeyMerge}.
          */
         @Override
         public PrimaryKeyMerge createAlgorithm() {
@@ -140,11 +89,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     private Pair<Key, Signature> newSignaturePair;
     private Map<Key, Signature> oldSignatureMap = new HashMap<>();
 
-    /**
-     * Constructs a {@code PrimaryKeyMerge} instance with the specified data.
-     *
-     * @param data The data model containing primary key information and merge settings.
-     */
     public PrimaryKeyMerge(Data data) {
         this.data = data;
     }
@@ -184,13 +128,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         }
     }
 
-    /**
-     * Finds the primary key identified from the candidate within the schema.
-     *
-     * @param schema The schema category to search within.
-     * @return The key of the identified primary key.
-     * @throws NotFoundException if the primary key identified is not found.
-     */
     private Key findPrimaryKeyIdentifiedFromCandidate(SchemaCategory schema) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.cod().key().equals(data.primaryKey)) {
@@ -200,13 +137,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Primary Key Identified has not been found.");
     }
 
-    /**
-     * Finds the root of the primary key within the schema.
-     *
-     * @param schema The schema category to search within.
-     * @return The key of the primary key root.
-     * @throws NotFoundException if the primary key root is not found.
-     */
     private Key findPrimaryKeyRoot(SchemaCategory schema) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             // based on the assumption
@@ -240,22 +170,11 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         return signatureIds;
     }
 
-    /**
-     * Creates a new morphism from the provided schema object.
-     *
-     * @param cod The schema object to use for creating the new morphism.
-     * @return A map containing the keys and their corresponding new signatures.
-     */
     private Pair<Key, Signature> createNewMorphism(SchemaObject dom, SchemaObject cod) {
         Signature newSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, cod);
         return Pair.of(data.primaryKeyIdentified, newSignature);
     }
 
-    /**
-     * Finds objects and morphisms to delete based on the primary key label.
-     *
-     * @param primaryKeyLabel The label of the primary key used to find objects and morphisms to delete.
-     */
     private void findObjectsAndMorphismsToDelete(String primaryKeyLabel) {
         for (SchemaMorphism morphism : newSchema.allMorphisms()) {
             if (morphism.dom().key().equals(data.primaryKeyIdentified) &&
@@ -270,10 +189,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
     /**
      * Applies the mapping edit to a list of mappings.
-     * Assumes that the primary key has a unique name and all objects with this name are the same primary keys.
-     *
-     * @param mappings The list of mappings to edit.
-     * @return The updated list of mappings.
      */
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Primary Key Merge Edit on Mapping...");
@@ -289,13 +204,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         return mappings;
     }
 
-    /**
-     * Finds the mapping corresponding to the object identified with the primary key.
-     *
-     * @param mappings The list of mappings to search.
-     * @return The mapping corresponding to the identified primary key object.
-     * @throws NotFoundException if the mapping is not found.
-     */
     private Mapping findPrimaryKeyIdentifiedMapping(List<Mapping> mappings) {
         for (Mapping mapping : mappings) {
             if (mapping.rootObject().key().equals(data.primaryKeyIdentified)) {
@@ -305,32 +213,12 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Mapping for object identified with PK has not been found.");
     }
 
-    /**
-     * Creates a cleaned mapping by removing unwanted subpaths.
-     *
-     * @param mapping The original mapping to clean.
-     * @return The cleaned mapping.
-     * @throws Exception
-     */
     private Mapping createCleanedMapping(Mapping mapping) {
         ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
         return new Mapping(newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, mapping.primaryKey());
     }
 
-    /**
-     * Cleans the complex property by removing subpaths associated with old signatures.
-     *
-     * @param mapping The mapping containing the complex property to clean.
-     * @return The cleaned complex property.
-     * @throws Exception
-     */
-
-    // FIXME This is a good example why not to use the @throws tag in the Javadoc.
-    // If the method was able to throw an exception, it would require to put it in the method signature like `private ComplexProperty cleanComplexProperty(Mapping mapping) throws Exception {`.
-    // So the method probably did throw an exception in the past, but it was removed and the Javadoc was not updated.
-    // I would recommend to remove all @throws tags. Like they can be useful when throwing a very specific exception in some cases (like "if the second argument is zero, throws an ArithmeticException" for some mathematical method), but in most cases they are not needed. Especially if they throw only the generic Exception.
-
-    private ComplexProperty cleanComplexProperty(Mapping mapping){
+    private ComplexProperty cleanComplexProperty(Mapping mapping) {
         ComplexProperty complexProperty = mapping.accessPath();
         Signature oldSignature = oldSignatureMap.get(mapping.rootObject().key());
         AccessPath accessPathToDelete = complexProperty.getSubpathBySignature(oldSignature);

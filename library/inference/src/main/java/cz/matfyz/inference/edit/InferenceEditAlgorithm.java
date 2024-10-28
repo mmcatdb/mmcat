@@ -25,10 +25,6 @@ public abstract class InferenceEditAlgorithm {
     /**
      * Applies an edit to the schema category and metadata, creating new schema and metadata
      * instances that reflect the applied changes.
-     *
-     * @param oldSchema The original schema category to be edited.
-     * @param oldMetadata The original metadata associated with the schema.
-     * @return A {@code SchemaWithMetadata} object containing the edited schema and metadata.
      */
     public SchemaWithMetadata applyCategoryEdit(SchemaCategory oldSchema, MetadataCategory oldMetadata) {
         this.oldSchema = oldSchema;
@@ -41,37 +37,19 @@ public abstract class InferenceEditAlgorithm {
         return new SchemaWithMetadata(newSchema, newMetadata);
     }
 
-    /**
-     * Defines the inner logic of the category edit operation. Subclasses should implement this method
-     * to specify how the schema and metadata should be modified.
-     */
     protected abstract void innerCategoryEdit();
 
     /**
      * Applies an edit to a list of mappings. Subclasses should implement this method to specify
      * how the mappings should be modified based on the edit.
-     *
-     * @param mappings The list of mappings to be edited.
-     * @return A list of edited mappings.
      */
     public abstract List<Mapping> applyMappingEdit(List<Mapping> mappings);
 
-    /** The original schema category before the edit is applied. */
     protected SchemaCategory oldSchema;
-
-    /** The new schema category after the edit is applied. */
     protected SchemaCategory newSchema;
-
-    /** The original metadata associated with the schema before the edit is applied. */
     protected MetadataCategory oldMetadata;
-
-    /** The new metadata associated with the schema after the edit is applied. */
     protected MetadataCategory newMetadata;
-
-    /** A set of signatures that are marked for deletion as part of the edit. */
     protected Set<Signature> signaturesToDelete = new HashSet<>();
-
-    /** A set of keys that are marked for deletion as part of the edit. */
     protected Set<Key> keysToDelete = new HashSet<>();
 
 }

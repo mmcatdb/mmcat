@@ -38,14 +38,11 @@ public class InferenceEditorUtils {
 
     /**
      * Gets a new unique signature value for a schema.
-     *
-     * @param schema The schema category to generate a new signature value for.
-     * @return The new unique signature value.
      */
     private static int getNewSignatureValue(SchemaCategory schema) {
         int max = 0;
         for (SchemaMorphism morphism : schema.allMorphisms()) {
-            // TODO: current assumption: in inference I create only BaseSignatures
+            // assumes that in inference I create only BaseSignatures
             int signatureVal = Integer.parseInt(morphism.signature().toString());
             if (signatureVal > max)
                 max = signatureVal;
@@ -55,14 +52,10 @@ public class InferenceEditorUtils {
 
     /**
      * Gets a new unique key value for a schema.
-     *
-     * @param schema The schema category to generate a new key value for.
-     * @return The new unique key value.
      */
     private static int getNewKeyValue(SchemaCategory schema) {
         int max = 0;
         for (SchemaObject object : schema.allObjects()) {
-            // TODO: current assumption: in inference I create only BaseSignatures
             int keyVal = object.key().getValue();
             if (keyVal > max)
                 max = keyVal;
@@ -72,12 +65,6 @@ public class InferenceEditorUtils {
 
     /**
      * Creates and adds a new morphism to the schema and metadata.
-     *
-     * @param schema The schema category to add the morphism to.
-     * @param metadata The metadata category to update with the new morphism.
-     * @param dom The domain object of the morphism.
-     * @param cod The codomain object of the morphism.
-     * @return The signature of the newly created morphism.
      */
     public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, Signature signature) {
         final SchemaMorphism existingMorphism = getMorphismIfExists(schema, dom, cod);
@@ -95,18 +82,13 @@ public class InferenceEditorUtils {
         return newMorphism.signature();
     }
 
+    /**
+     * Creates and adds a new morphism to the schema and metadata.
+     */
     public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod) {
         return createAndAddMorphism(schema, metadata, dom, cod, null);
     }
 
-    /**
-     * Checks if a morphism already exists in the schema between the specified domain and codomain.
-     *
-     * @param schema The schema category to check for the existing morphism.
-     * @param dom The domain object.
-     * @param cod The codomain object.
-     * @return The existing morphism if found; {@code null} otherwise.
-     */
     private static SchemaMorphism getMorphismIfExists(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {
         for (SchemaMorphism morphism : schema.allMorphisms())
             if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
@@ -117,12 +99,6 @@ public class InferenceEditorUtils {
 
     /**
      * Creates and adds a new object to the schema and metadata.
-     *
-     * @param schema The schema category to add the object to.
-     * @param metadata The metadata category to update with the new object.
-     * @param ids The object identifiers for the new object.
-     * @param label The label for the new metadata object.
-     * @return The key of the newly created object.
      */
     public static Key createAndAddObject(SchemaCategory schema, MetadataCategory metadata, ObjectIds ids, String label) {
         final Key key = new Key(getNewKeyValue(schema));
@@ -136,10 +112,6 @@ public class InferenceEditorUtils {
 
     /**
      * Removes morphisms and objects from the schema based on the specified sets of signatures and keys.
-     *
-     * @param schema The schema category from which to remove morphisms and objects.
-     * @param signaturesToDelete The set of morphism signatures to delete.
-     * @param keysToDelete The set of object keys to delete.
      */
     public static void removeMorphismsAndObjects(SchemaCategory schema, Set<Signature> signaturesToDelete, Set<Key> keysToDelete) {
         for (Signature sig : signaturesToDelete) {
@@ -150,6 +122,10 @@ public class InferenceEditorUtils {
         editor.deleteObjects(keysToDelete);
     }
 
+    /**
+     * Updates the schema category by deleting a specified schema object and adding a new schema object in its place.
+     * This method also updates the associated metadata for the new object based on the metadata of the deleted object.
+     */
     public static void updateObjects(SchemaCategory schema, MetadataCategory metadata, SchemaObject objectToDelete, SchemaObject objectToAdd) {
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
         editor.deleteObject(objectToDelete.key());
@@ -162,12 +138,6 @@ public class InferenceEditorUtils {
 
     /**
      * Creates a new mapping by merging the specified mappings into a new mapping structure.
-     *
-     * @param schema The schema category for the new mapping.
-     * @param mapping The base mapping to merge into.
-     * @param mappingsToMerge The list of mappings to merge with the base mapping.
-     * @param accessPath The access path for the new mapping.
-     * @return The newly created merged mapping.
      */
     public static Mapping createNewMapping(SchemaCategory schema, Mapping mapping, List<Mapping> mappingsToMerge, ComplexProperty accessPath) {
         Collection<Signature> primaryKey = new HashSet<>();
@@ -183,11 +153,6 @@ public class InferenceEditorUtils {
 
     /**
      * Updates the list of mappings by removing the specified mappings to delete and adding the specified mapping to keep.
-     *
-     * @param mappings The original list of mappings.
-     * @param mappingsToDelete The list of mappings to delete from the original list.
-     * @param mappingToKeep The mapping to add to the updated list.
-     * @return The updated list of mappings.
      */
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, Mapping mappingToKeep) {
         return updateMappings(mappings, mappingsToDelete, Arrays.asList(mappingToKeep));
@@ -195,11 +160,6 @@ public class InferenceEditorUtils {
 
     /**
      * Updates the list of mappings by removing the specified mappings to delete and adding the specified mappings to keep.
-     *
-     * @param mappings The original list of mappings.
-     * @param mappingsToDelete The list of mappings to delete from the original list.
-     * @param mappingsToKeep The list of mappings to add to the updated list.
-     * @return The updated list of mappings.
      */
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, List<Mapping> mappingsToKeep) {
         List<Mapping> updatedMappings = new ArrayList<>();
@@ -215,9 +175,6 @@ public class InferenceEditorUtils {
 
     /**
      * Creates a deep copy of the specified schema category.
-     *
-     * @param original The original schema category to copy.
-     * @return A deep copy of the schema category.
      */
     public static SchemaCategory createSchemaCopy(SchemaCategory original) {
         final SchemaCategory copy = new SchemaCategory();
@@ -239,10 +196,6 @@ public class InferenceEditorUtils {
 
     /**
      * Creates a deep copy of the specified metadata category, based on a given schema.
-     *
-     * @param original The original metadata category to copy.
-     * @param schema The schema category associated with the metadata.
-     * @return A deep copy of the metadata category.
      */
     public static MetadataCategory createMetadataCopy(MetadataCategory original, SchemaCategory schema) {
         final MetadataCategory copy = MetadataCategory.createEmpty(schema);
@@ -262,13 +215,6 @@ public class InferenceEditorUtils {
 
     /**
      * Finds a key from a fully qualified name within the schema and metadata.
-     *
-     * @param schemaCategory The schema category to search within.
-     * @param metadata The metadata category associated with the schema.
-     * @param fullName The fully qualified name to search for.
-     * @return The key associated with the given name.
-     * @throws IllegalArgumentException if the full name format is invalid.
-     * @throws NotFoundException if the key cannot be found.
      */
     public static Key findKeyFromName(SchemaCategory schemaCategory, MetadataCategory metadata, String fullName) {
         String[] nameParts = fullName.split("/");
@@ -297,23 +243,14 @@ public class InferenceEditorUtils {
      */
     public static class SchemaCategoryEditor extends SchemaCategory.Editor {
 
-        /** The schema category being edited. */
         public final SchemaCategory schema;
 
-        /**
-         * Constructs a new {@code SchemaCategoryEditor} for the specified schema.
-         *
-         * @param schema The schema category to edit.
-         */
         public SchemaCategoryEditor(SchemaCategory schema) {
             this.schema = schema;
         }
 
         /**
          * Deletes an object from the schema by its key.
-         *
-         * @param key The key of the object to delete.
-         * @throws NotFoundException if the object with the specified key does not exist.
          */
         public void deleteObject(Key key) {
             final var objects = getObjects(schema);
@@ -325,8 +262,6 @@ public class InferenceEditorUtils {
 
         /**
          * Deletes multiple objects from the schema by their keys.
-         *
-         * @param keys The set of keys representing the objects to delete.
          */
         public void deleteObjects(Set<Key> keys) {
             for (Key key : keys) {

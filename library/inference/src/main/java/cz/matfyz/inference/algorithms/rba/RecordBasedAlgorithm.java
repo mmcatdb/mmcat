@@ -1,6 +1,5 @@
 package cz.matfyz.inference.algorithms.rba;
 
-import cz.matfyz.inference.algorithms.rba.functions.FilterInvalidRSDFunction;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
@@ -16,16 +15,9 @@ public class RecordBasedAlgorithm {
         wrapper.startSession();
 
         try {
-            long start = System.currentTimeMillis();
             JavaRDD<RecordSchemaDescription> allRSDs = wrapper.loadRSDs();
-            // System.out.println("RESULT_TIME_RBA OF MAPPIND AFTER: " + (System.currentTimeMillis() - start) + "ms");
 
-            // FIXME The filter function does literally nothing, it always returns true. Can this step be removed?
-            JavaRDD<RecordSchemaDescription> rsds = allRSDs.filter(new FilterInvalidRSDFunction());    // odstrani se prazdne nebo nevalidni RSDs
-            // System.out.println("RESULT_TIME_RBA OF FILTERING AFTER: " + (System.currentTimeMillis() - start) + "ms");
-
-            RecordSchemaDescription rsd = rsds.reduce(merge);
-            // System.out.println("RESULT_TIME_RBA OF MERGE AFTER: " + (System.currentTimeMillis() - start) + "ms");
+            RecordSchemaDescription rsd = allRSDs.reduce(merge);
             return rsd;
 
         } catch (Exception ex) {

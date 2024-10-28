@@ -23,15 +23,11 @@ public class SchemaConverter {
 
     private RecordSchemaDescription rsd;
 
-    /** The kind name used to label the root of the Schema Category and the mapping. */
-    public String kindName; // TODO: This needs to match the collection name in the case of MongoDB for pulling data.
+    public String kindName; // needs to match the collection name in the case of MongoDB for pulling data.
 
     private final UniqueNumberGenerator keyGenerator;
     private final UniqueNumberGenerator signatureGenerator;
 
-    /**
-     * Constructs a new {@code SchemaConverter} with initialized key and signature generators.
-     */
     public SchemaConverter() {
         this.keyGenerator = new UniqueNumberGenerator(0);
         this.signatureGenerator = new UniqueNumberGenerator(0);
@@ -39,9 +35,6 @@ public class SchemaConverter {
 
     /**
      * Sets a new {@link RecordSchemaDescription} (RSD) and kind name for the converter.
-     *
-     * @param rsd The new {@link RecordSchemaDescription} to set.
-     * @param kindName The kind name to use for the root of the Schema Category and mapping.
      */
     public void setNewRSD(RecordSchemaDescription rsd, String kindName) {
         this.rsd = rsd;
@@ -52,8 +45,6 @@ public class SchemaConverter {
      * Converts the current {@link RecordSchemaDescription} to a schema category and mapping.
      * This involves creating an access tree from the RSD, converting the tree to a schema category,
      * and generating the mapping for the schema category.
-     *
-     * @return A {@link CategoryMappingPair} containing the schema and its associated metadata and mappings.
      */
     public CategoryMappingPair convertToSchemaCategoryAndMapping() {
         LOGGER.info("Converting RSD to SchemaCategory...");
@@ -71,7 +62,7 @@ public class SchemaConverter {
         final var metadata = schemaWithMetadata.metadata();
 
         LOGGER.info("Creating the mapping for the schema category...");
-        final MappingCreator mappingCreator = new MappingCreator(root.getKey(), root);
+        final MappingCreator mappingCreator = new MappingCreator(root.key, root);
         final Mapping mapping = mappingCreator.createMapping(schema, this.kindName);
 
         return new CategoryMappingPair(schema, metadata, List.of(mapping));

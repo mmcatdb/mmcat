@@ -26,11 +26,6 @@ public class AccessTreeToSchemaCategoryConverter {
     private final MetadataCategory metadata;
     private final String kindName;
 
-    /**
-     * Constructs a new {@code AccessTreeToSchemaCategoryConverter} with a specified kind name.
-     *
-     * @param kindName The kind name to be used as the label for the root node in the schema.
-     */
     public AccessTreeToSchemaCategoryConverter(String kindName) {
         this.schema = new SchemaCategory();
         this.metadata = MetadataCategory.createEmpty(schema);
@@ -39,9 +34,6 @@ public class AccessTreeToSchemaCategoryConverter {
 
     /**
      * Converts the given access tree into a schema category and associated metadata.
-     *
-     * @param root The root node of the access tree to be converted.
-     * @return A {@link SchemaWithMetadata} object containing the converted schema and metadata.
      */
     public SchemaWithMetadata convert(AccessTreeNode root) {
         buildSchemaCategory(root);
@@ -50,11 +42,9 @@ public class AccessTreeToSchemaCategoryConverter {
 
     /**
      * Recursively builds the schema category from the provided access tree node.
-     *
-     * @param currentNode The current node in the access tree being processed.
      */
     private void buildSchemaCategory(AccessTreeNode currentNode) {
-        final var isRoot = currentNode.getState() == AccessTreeNode.State.ROOT;
+        final var isRoot = currentNode.getType() == AccessTreeNode.Type.ROOT;
         final var object = createSchemaObject(currentNode, isRoot);
 
         if (!isRoot)
@@ -66,52 +56,37 @@ public class AccessTreeToSchemaCategoryConverter {
 
     /**
      * Creates a schema object from the provided access tree node and adds it to the schema.
-     *
-     * @param node The access tree node representing the schema object.
-     * @param isRoot {@code true} if the node is the root of the tree; {@code false} otherwise.
-     * @return The created {@link SchemaObject}.
      */
     private SchemaObject createSchemaObject(AccessTreeNode node, boolean isRoot) {
         final var ids = isRoot || !node.getChildren().isEmpty()
             ? ObjectIds.createGenerated()
             : ObjectIds.createValue();
 
-        final SchemaObject object = new SchemaObject(node.getKey(), ids, SignatureId.createEmpty());
+        final SchemaObject object = new SchemaObject(node.key, ids, SignatureId.createEmpty());
         schema.addObject(object);
 
-        final var label = isRoot ? kindName : node.getName();
+        final var label = isRoot ? kindName : node.name;
         metadata.setObject(object, new MetadataObject(label, Position.createDefault()));
 
         return object;
     }
 
-    /**
-     * Creates a schema morphism between the parent and current schema objects based on the provided access tree node.
-     *
-     * @param node The access tree node representing the schema morphism.
-     * @param schemaObject The current schema object.
-     */
     private void createSchemaMorphism(AccessTreeNode node, SchemaObject schemaObject) {
         final var parentObject = schema.getObject(node.getParentKey());
 
-        if (parentObject == null) {
-            System.out.println("Node key: " + node.getKey());
-            System.out.println("Parent key: " + node.getParentKey());
-
+        if (parentObject == null)
             throw new RuntimeException("Error while creating morphism. Domain is null and codomain is " + schemaObject.key());
-        }
 
         SchemaObject dom = parentObject;
         SchemaObject cod = schemaObject;
 
-        if (node.getIsArrayType()) {
+        if (node.isArrayType) {
             dom = schemaObject;
             cod = parentObject;
         }
 
-        final SchemaMorphism sm = new SchemaMorphism(node.getSignature(), dom, cod, node.getMin(), Set.of());
+        final SchemaMorphism sm = new SchemaMorphism(node.signature, dom, cod, node.min, Set.of());
         schema.addMorphism(sm);
-
-        metadata.setMorphism(sm, new MetadataMorphism(node.getLabel()));
+        metadata.setMorphism(sm, new MetadataMorphism(node.label));
     }
 }

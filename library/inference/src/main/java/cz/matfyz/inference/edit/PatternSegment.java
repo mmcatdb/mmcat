@@ -7,10 +7,6 @@ package cz.matfyz.inference.edit;
  *
  * <p>The direction can have specific values: "", "->", "<-", "@->", or "@<-", where the "@" symbol
  * represents a morphism on itself.
- *
- * @param nodeName The name of the node in the pattern.
- * @param direction The direction of the transition from this node.
- *                  It can be "", "->", "<-", "@->", or "@<-".
  */
 public record PatternSegment(
     String nodeName,

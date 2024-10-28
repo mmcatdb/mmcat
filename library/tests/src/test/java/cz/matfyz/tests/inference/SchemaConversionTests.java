@@ -83,11 +83,11 @@ public class SchemaConversionTests {
 
     @Test
     void testAccessTreeToSchemaCategory() throws Exception {
-        AccessTreeNode root = new AccessTreeNode(AccessTreeNode.State.ROOT, "person", null, new Key(0), null, null, null, false);
-        AccessTreeNode child1 = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "name", Signature.createBase(0), new Key(1), new Key(0), null, null, false);
-        AccessTreeNode child2 = new AccessTreeNode(AccessTreeNode.State.COMPLEX, "adress", Signature.createBase(1), new Key(2), new Key(0), null, null, false);
-        AccessTreeNode grandChild1 = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "city", Signature.createBase(2), new Key(3), new Key(2), null, null, false);
-        AccessTreeNode grandChild2 = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "street", Signature.createBase(3), new Key(4), new Key(2), null, null, false);
+        AccessTreeNode root = new AccessTreeNode("person", null, new Key(0), null, null, null, false);
+        AccessTreeNode child1 = new AccessTreeNode("name", Signature.createBase(0), new Key(1), new Key(0), null, null, false);
+        AccessTreeNode child2 = new AccessTreeNode("adress", Signature.createBase(1), new Key(2), new Key(0), null, null, false);
+        AccessTreeNode grandChild1 = new AccessTreeNode("city", Signature.createBase(2), new Key(3), new Key(2), null, null, false);
+        AccessTreeNode grandChild2 = new AccessTreeNode("street", Signature.createBase(3), new Key(4), new Key(2), null, null, false);
 
         child2.addChild(grandChild1);
         child2.addChild(grandChild2);

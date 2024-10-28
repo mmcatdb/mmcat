@@ -57,20 +57,20 @@ public class InferenceEditSerializer {
 
         if (inferenceEdit instanceof PrimaryKeyMerge.Data primaryKeyData) {
             type = "PrimaryKey";
-            primaryKey = primaryKeyData.getPrimaryKey();
-            primaryKeyIdentified = primaryKeyData.getPrimaryKeyIdentified();
-            primaryKeyCandidate = primaryKeyData.getCandidate();
+            primaryKey = primaryKeyData.primaryKey;
+            primaryKeyIdentified = primaryKeyData.primaryKeyIdentified;
+            primaryKeyCandidate = primaryKeyData.candidate;
         } else if (inferenceEdit instanceof ReferenceMerge.Data referenceData) {
             type = "Reference";
-            referenceKey = referenceData.getReferenceKey();
-            referredKey = referenceData.getReferredKey();
-            referenceCandidate = referenceData.getCandidate();
+            referenceKey = referenceData.referenceKey;
+            referredKey = referenceData.referredKey;
+            referenceCandidate = referenceData.candidate;
         } else if (inferenceEdit instanceof ClusterMerge.Data clusterData) {
             type = "Cluster";
-            clusterKeys = clusterData.getClusterKeys();
+            clusterKeys = clusterData.clusterKeys;
         } else if (inferenceEdit instanceof RecursionMerge.Data recursionData) {
             type = "Recursion";
-            pattern = recursionData.getPattern();
+            pattern = recursionData.pattern;
         }
 
         return new SerializedInferenceEdit(

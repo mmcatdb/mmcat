@@ -36,10 +36,6 @@ public class Layout {
 
     /**
      * Applies a layout to the metadata of the given schema category based on the specified layout type.
-     *
-     * @param schema The {@link SchemaCategory} to which the layout is applied.
-     * @param metadata The {@link MetadataCategory} associated with the schema.
-     * @param layoutType The type of layout to apply, specified by {@link LayoutType}.
      */
     public static void applyToMetadata(SchemaCategory schema, MetadataCategory metadata, LayoutType layoutType) {
         final var positions = computeObjectsLayout(schema, layoutType);
@@ -51,40 +47,13 @@ public class Layout {
         }
     }
 
-    /**
-     * Computes the layout for the objects in the given schema category using a specified layout type.
-     * This method utilizes the JUNG library for layout computation.
-     *
-     * @param schema The {@link SchemaCategory} for which to compute the layout.
-     * @param layoutType The {@link LayoutType} specifying which layout algorithm to use.
-     * @return A {@link Map} of {@link Key} to {@link Position} representing the computed positions for each schema object.
-     */
     private static Map<Key, Position> computeObjectsLayout(SchemaCategory schema, LayoutType layoutType) {
         final var graph = createGraphFromSchemaCategory(schema);
 
         final int nodesAmount = schema.allObjects().size();
         final int layoutSize = Math.max(MIN_LAYOUT_SIZE, (int) (Math.log(nodesAmount + 1.0) * SIZE_MULTIPLIER));
 
-        AbstractLayout<SchemaObject, SchemaMorphism> layout;
-
-        // Select the appropriate layout algorithm based on the layout type
-        // FIXME This switch should be extracted to a separate method to improve readability. Also, it can directly return the instances without the need for the `break` statements.
-        switch (layoutType) {
-            case CIRCLE:
-                layout = new CircleLayout<>(graph);
-                break;
-            case KK:
-                layout = new KKLayout<>(graph);
-                break;
-            case ISOM:
-                layout = new ISOMLayout<>(graph);
-                break;
-            case FR:
-            default:
-                layout = new FRLayout<>(graph);
-                break;
-        }
-
+        AbstractLayout<SchemaObject, SchemaMorphism> layout = createLayout(graph, layoutType);
         layout.setSize(new Dimension(layoutSize, layoutSize));
 
         // Perform initial steps for the FRLayout to improve layout quality
@@ -103,12 +72,6 @@ public class Layout {
         return positions;
     }
 
-    /**
-     * Creates a directed sparse graph from the given schema category.
-     *
-     * @param schema The {@link SchemaCategory} from which to create the graph.
-     * @return A {@link DirectedSparseGraph} representing the schema objects and morphisms.
-     */
     private static DirectedSparseGraph<SchemaObject, SchemaMorphism> createGraphFromSchemaCategory(SchemaCategory schema) {
         final var graph = new DirectedSparseGraph<SchemaObject, SchemaMorphism>();
 
@@ -119,6 +82,20 @@ public class Layout {
             graph.addEdge(morphism, morphism.dom(), morphism.cod());
 
         return graph;
+    }
+
+    private static AbstractLayout<SchemaObject, SchemaMorphism> createLayout(DirectedSparseGraph<SchemaObject, SchemaMorphism> graph, LayoutType layoutType) {
+        switch (layoutType) {
+            case CIRCLE:
+                return new CircleLayout<>(graph);
+            case KK:
+                return new KKLayout<>(graph);
+            case ISOM:
+                return new ISOMLayout<>(graph);
+            case FR:
+            default:
+                return new FRLayout<>(graph);
+        }
     }
 
 }
