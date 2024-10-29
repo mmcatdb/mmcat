@@ -43,7 +43,10 @@ public class InferenceEditorUtils {
         int max = 0;
         for (SchemaMorphism morphism : schema.allMorphisms()) {
             // assumes that in inference I create only BaseSignatures
-            int signatureVal = Integer.parseInt(morphism.signature().toString());
+            Signature signature = morphism.signature();
+            if (signature.hasDual())
+                signature = signature.dual();
+            int signatureVal = Integer.parseInt(signature.toString());
             if (signatureVal > max)
                 max = signatureVal;
         }
@@ -66,13 +69,15 @@ public class InferenceEditorUtils {
     /**
      * Creates and adds a new morphism to the schema and metadata.
      */
-    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, Signature signature) {
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, boolean isDual) {
         final SchemaMorphism existingMorphism = getMorphismIfExists(schema, dom, cod);
         if (existingMorphism != null)
             return existingMorphism.signature();
 
-        if (signature == null)
-            signature = Signature.createBase(getNewSignatureValue(schema));
+        Signature signature = Signature.createBase(getNewSignatureValue(schema));
+
+        if (isDual)
+            signature = signature.dual();
 
         final SchemaMorphism newMorphism = new SchemaMorphism(signature, dom, cod, Min.ONE, Set.of());
 
@@ -86,7 +91,7 @@ public class InferenceEditorUtils {
      * Creates and adds a new morphism to the schema and metadata.
      */
     public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod) {
-        return createAndAddMorphism(schema, metadata, dom, cod, null);
+        return createAndAddMorphism(schema, metadata, dom, cod, false);
     }
 
     private static SchemaMorphism getMorphismIfExists(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {

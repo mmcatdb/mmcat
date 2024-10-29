@@ -90,6 +90,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private static final Logger LOGGER = Logger.getLogger(ClusterMerge.class.getName());
     private static final String TYPE_LABEL = "_type";
+    private static final String VALUE_LABEL = "_value";
     private static final int RND_CLUSTER_IDX = 0;
 
     private final Data data;
@@ -98,6 +99,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private Signature newClusterSignature;
     private String newClusterName;
     private Signature newTypeSignature;
+    private Signature newValueSignature;
 
     private Map<String, Signature> mapOldClusterNameSignature = new HashMap<>(); // this maps the original cluster names to their original signatures
     private Map<Signature, Signature> mapOldNewSignature = new HashMap<>(); // this maps the original signatures to the new signatures
@@ -121,8 +123,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Cluster Edit on Schema Category...");
 
-        System.out.println("clusterKeys: " + data.clusterKeys);
-
         final Key clusterRootKey = findClusterRootKey(newSchema);
 
         final List<String> oldClusterNames = getOldClusterNames();
@@ -135,8 +135,9 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         findMorphismsAndObjectsToDelete(clusterRootKey);
         InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
 
-        // finally add the _type object
+        // finally add the _type and _value object
         addTypeObjectAndMorphism();
+        addValueObjectAndMorphism();
     }
 
     private Key findClusterRootKey(SchemaCategory schema) {
@@ -327,7 +328,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             final Signature newSig = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, newSchema.getObject(mapOldNewKey.get(morphism.cod().key())));
             mapOldNewSignature.put(morphism.signature(), newSig);
         }
-        newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(clusterRootKey), newSchema.getObject(newClusterKey));
+        newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(clusterRootKey), true);
     }
 
     private void findMorphismsAndObjectsToDelete(Key clusterRootKey) {
@@ -345,8 +346,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private void addTypeObjectAndMorphism() {
         final Key typeKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), TYPE_LABEL);
-        this.newTypeSignature = Signature.concatenate(this.mapOldClusterNameSignature.values());
-        InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey), this.newTypeSignature);
+        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey));
+    }
+
+    private void addValueObjectAndMorphism() {
+        final Key valueKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), VALUE_LABEL);
+        this.newValueSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(valueKey));
     }
 
     /**
@@ -425,14 +430,14 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
             if (complexChanged) {
                 List<AccessPath> updatedSubpaths = complexProperty != null ? new ArrayList<>(complexProperty.subpaths()) : new ArrayList<>();
-                ComplexProperty newComplexProperty = createNewComplexProperty(firstClusterAccessPath);
-                updatedSubpaths.add(newComplexProperty);
+                AccessPath newAccessPath = createNewComplexProperty(firstClusterAccessPath);
+                updatedSubpaths.add(newAccessPath);
 
-                ComplexProperty resultProperty = complexProperty != null
+                AccessPath resultAccessPath = complexProperty != null
                     ? new ComplexProperty(complexProperty.name(), complexProperty.signature(), updatedSubpaths)
-                    : newComplexProperty;
+                    : newAccessPath;
 
-                newSubpaths.add(resultProperty);
+                newSubpaths.add(resultAccessPath);
             } else if (complexProperty != null) {
                 newSubpaths.add(complexProperty);
             }
@@ -441,14 +446,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return mappingBuilder.root(newSubpaths.toArray(new AccessPath[0]));
     }
 
-    private ComplexProperty createNewComplexProperty(AccessPath original) {
+    private AccessPath createNewComplexProperty(AccessPath original) {
         if (original instanceof SimpleProperty) {
-            final AccessPath subpath = new SimpleProperty(new DynamicName(this.newTypeSignature), this.newTypeSignature);
-            return new ComplexProperty(
-                new StaticName(newClusterName),
-                newClusterSignature,
-                List.of(subpath)
-            );
+            System.out.println("it was simple");
+            Signature dynamicNameSignature = this.newClusterSignature.concatenate(this.newTypeSignature);
+            Signature valueSignature = this.newClusterSignature.concatenate(this.newValueSignature);
+            return new SimpleProperty(new DynamicName(dynamicNameSignature), valueSignature);
         }
 
         final var newSubpaths = transformSubpaths(((ComplexProperty) original).subpaths());
