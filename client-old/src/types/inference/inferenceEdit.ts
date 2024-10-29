@@ -16,19 +16,18 @@ export interface InferenceEdit {
 
 /**
  * Creates an inference edit object from serialized server data.
- * @param {SerializedInferenceEdit} data - The serialized inference edit data from the server.
- * @returns {InferenceEdit} - The appropriate inference edit object based on the type.
  */
-export function createInferenceEditFromServer(data: SerializedInferenceEdit): InferenceEdit {
-    switch (data.type) {
+export function createInferenceEditFromServer(data: string): InferenceEdit {
+    const parsedData = JSON.parse(data) as SerializedInferenceEdit;
+    switch (parsedData.type) {
     case 'PrimaryKey':
-        return PrimaryKeyMergeInferenceEdit.fromServer(data);
+        return PrimaryKeyMergeInferenceEdit.fromServer(parsedData);
     case 'Reference':
-        return ReferenceMergeInferenceEdit.fromServer(data);
+        return ReferenceMergeInferenceEdit.fromServer(parsedData);
     case 'Cluster':
-        return ClusterInferenceEdit.fromServer(data);
+        return ClusterInferenceEdit.fromServer(parsedData);
     case 'Recursion':
-        return RecursionInferenceEdit.fromServer(data);
+        return RecursionInferenceEdit.fromServer(parsedData);
     default:
         throw new Error('Unknown edit type');
     }

@@ -121,6 +121,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Cluster Edit on Schema Category...");
 
+        System.out.println("clusterKeys: " + data.clusterKeys);
+
         final Key clusterRootKey = findClusterRootKey(newSchema);
 
         final List<String> oldClusterNames = getOldClusterNames();

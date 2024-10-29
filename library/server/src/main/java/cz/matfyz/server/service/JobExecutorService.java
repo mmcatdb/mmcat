@@ -22,7 +22,6 @@ import cz.matfyz.evolution.querying.QueryEvolutionResult;
 import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEdit;
-import cz.matfyz.inference.edit.InferenceEditSerializer;
 import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.Layout;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
@@ -62,6 +61,7 @@ import cz.matfyz.transformations.processes.InstanceToDatabase;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -336,8 +336,16 @@ public class JobExecutorService {
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
         final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
+        ObjectMapper mapper = new ObjectMapper();
+
         final List<InferenceEdit> edits = data.edits().stream()
-            .map(InferenceEditSerializer::deserialize)
+            .map(json -> {
+                try {
+                    return mapper.readValue(json, InferenceEdit.class);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error deserializing InferenceEdit", e);
+                }
+            })
             .collect(Collectors.toList());
 
         if (layoutType != null) {

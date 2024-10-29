@@ -12,15 +12,16 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedSchema;
 import cz.matfyz.inference.edit.InferenceEdit;
-import cz.matfyz.inference.edit.InferenceEditSerializer;
-import cz.matfyz.inference.edit.InferenceEditSerializer.SerializedInferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.entity.job.JobData;
 
+import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public record InferenceJobData(
-    List<SerializedInferenceEdit> edits,
+    List<String> edits,
     SerializedSchema inferenceSchema,
     SerializedSchema finalSchema,
     SerializedMetadata inferenceMetadata,
@@ -40,8 +41,19 @@ public record InferenceJobData(
         Candidates candidates,
         List<Mapping> mappings
     ) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        List<String> serializedEdits = edits.stream()
+            .map((InferenceEdit edit) -> {
+                try {
+                    return mapper.writeValueAsString(edit);
+                } catch (IOException e) {
+                    throw new RuntimeException("Error serializing InferenceEdit", e);
+                }
+            }).toList();
+
         return new InferenceJobData(
-            edits.stream().map(InferenceEditSerializer::serialize).toList(),
+            serializedEdits,
             SchemaSerializer.serialize(inferenceSchema),
             SchemaSerializer.serialize(finalSchema),
             MetadataSerializer.serialize(inferenceMetadata),
