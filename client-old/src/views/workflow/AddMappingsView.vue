@@ -56,7 +56,7 @@ function createMapping() {
 <template>
     <h1>Add mappings</h1>
     <p>
-        You should have at least one output mapping ...
+        Create an output mapping. Start fresh with a new mapping or modify an existing one to fit your needs. At least one mapping is needed to proceed.
     </p>
     <template v-if="datasources && mappings">
         <h2>Outputs</h2>

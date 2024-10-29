@@ -32,7 +32,7 @@ async function fetchJob() {
 <template>
     <h1>Inference job</h1>
     <p>
-        Once it's waiting, you can edit the category. Once it's finished, you can continue.
+        The Inference job has generated an initial Schema Category. While in 'Waiting' status, you can adjust the schema. Once edits are complete, click 'Save and Finish' to set the job status to 'Finished.' This confirms your edits and unlocks the next step in the workflow.
     </p>
     <div
         v-if="job"

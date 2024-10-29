@@ -74,7 +74,7 @@ async function selectAsInput(id: Id) {
 <template>
     <h1>Select input datasource</h1>
     <p>
-        This datasource will be used as ... TODO
+        Select a datasource as the primary input to the inference process. Choose from existing options or create a new datasource.
     </p>
     <template v-if="datasources && 'selected' in datasources">
         <div class="d-flex mt-3 gap-3 align-items-stretch">
