@@ -26,10 +26,16 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
         };
     }
     case 'submit_state': {
+        const activeLimit: number = state.form.limit;
+        const activeFilters: ColumnFilter[] = state.form.filters.map(filter => ({
+            ...filter,
+        }));
+
         return {
             ...state,
             active: {
-                ...state.form,
+                limit: activeLimit,
+                filters: activeFilters,
             },
         };
     }
