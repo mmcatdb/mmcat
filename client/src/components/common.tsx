@@ -1,7 +1,7 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Tooltip as NextuiTooltip, type TooltipProps } from '@nextui-org/react';
 import clsx from 'clsx';
-import { Link as ReactRouterLink, type UIMatch, useMatches, type LinkProps } from 'react-router-dom';
+import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 
 // The tooltip has no delay by default, so we add it here.
@@ -46,43 +46,3 @@ export function Portal({ children, to }: PortalProps) {
 export const portals = {
     context: 'context-portal',
 };
-
-export type AwaitedRouteData<TData> = TData extends Record<string, unknown> ? {
-    [TKey in keyof TData]: TData[TKey] extends Promise<infer TAwaitedData> ? TAwaitedData : TData[TKey];
-} : TData;
-
-export type AwaitedUIMatch<TData = unknown, THandle = unknown> = UIMatch<TData, THandle> & {
-    awaited: TData extends Record<string, unknown> ? AwaitedRouteData<TData> : TData;
-};
-
-export function useAwaitedMatches(): Promise<AwaitedUIMatch[]> {
-    const matches = useMatches();
-    return useMemo(() => matchesToPromise(matches), [ matches ]);
-}
-
-function matchesToPromise(matches: UIMatch[]): Promise<AwaitedUIMatch[]> {
-
-    // The matches are expected to look like this:
-    // { data: Record<string, Promise<unknown> | unknown> }
-    // We just simply translate all these promises to one via nested Promise.all calls.
-
-    // TODO error handling?
-
-    const promises = matches.map(match => {
-        const data = match.data;
-        if (!data || typeof data !== 'object')
-            return Promise.resolve({ ...match, awaited: data });
-
-        const routePromises = Object.values(data).filter(value => value instanceof Promise);
-
-        return Promise.all(routePromises).then(awaitedData => {
-            const awaited: Record<string, unknown> = { ...data };
-            Object.keys(data).forEach((key, index) => {
-                awaited[key] = awaitedData[index];
-            });
-            return { ...match, awaited };
-        });
-    });
-
-    return Promise.all(promises);
-}

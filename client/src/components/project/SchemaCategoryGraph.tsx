@@ -22,6 +22,6 @@ export function SchemaCategoryGraph({ category }: SchemaCategoryGraphProps) {
     }), [ category ]);
 
     return (
-        <GraphDisplay nodes={graphData.nodes} edges={graphData.edges} width={1200} height={800} />
+        <GraphDisplay nodes={graphData.nodes} edges={graphData.edges} width={1200} height={600} />
     );
 }

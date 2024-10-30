@@ -14,8 +14,6 @@ type CategoryInfoProviderProps = Readonly<{
 }>;
 
 export function CategoryInfoProvider({ children, category: inputCategory }: CategoryInfoProviderProps) {
-    console.log({ inputCategory });
-
     const [ category, setCategory ] = useState(inputCategory);
 
     return (

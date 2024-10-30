@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, useLoaderData, type Params } from 'react-router-dom';
 import { Home } from '@/pages/Home';
 import { SchemaCategory, schemaCategoryLoader } from '@/pages/category/SchemaCategory';
 import { About } from '@/pages/About';
@@ -12,7 +12,44 @@ import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
 import { ModelsPage } from '@/pages/ModelsPage';
 import { QueryingPage } from '@/pages/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
-import { type AwaitedRouteData } from '@/components/common';
+import { Mapping } from '@/types/mapping';
+import { api } from '@/api';
+import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+
+type MappingLoaderData = {
+    mapping: Mapping;
+};
+
+async function mappingLoader({ params: { mappingId } }: { params: Params<'mappingId'> }) {
+    if (!mappingId)
+        throw new Error('Mapping ID is required');
+
+    return {
+        mapping: await api.mappings.getMapping({ id: mappingId }).then(response => {
+            if (!response.status)
+                throw new Error('Failed to load mapping');
+
+            return Mapping.fromServer(response.data);
+        }),
+    };
+}
+
+function MappingDisplay() {
+    const { mapping } = useLoaderData() as MappingLoaderData;
+    const { category } = useCategoryInfo();
+
+    return (
+        <div className='p-4 bg-slate-500'>
+            <h1>Mapping {mapping.kindName}</h1>
+            <p>
+                Some text.
+            </p>
+            <p>
+                category 1: {category.label}
+            </p>
+        </div>
+    );
+}
 
 export const router = createBrowserRouter([
     {
@@ -61,7 +98,7 @@ export const router = createBrowserRouter([
                 path: routes.category.index.path,
                 Component: CategoryIndex,
                 loader: categoryIndexLoader,
-                handle: { breadcrumb: (data: AwaitedRouteData<CategoryIndexLoaderData>) => data.category.label },
+                handle: { breadcrumb: (data: CategoryIndexLoaderData) => data.category.label },
                 children: [
                     {
                         index: true,
@@ -82,6 +119,15 @@ export const router = createBrowserRouter([
                         path: routes.category.models.path,
                         Component: ModelsPage,
                         handle: { breadcrumb: 'Models' },
+                        children: [
+                            {
+                                id: 'mapping',
+                                path: 'mappings/:mappingId',
+                                loader: mappingLoader,
+                                Component: MappingDisplay,
+                                handle: { breadcrumb: (data: MappingLoaderData) => data.mapping.kindName },
+                            },
+                        ],
                     },
                     {
                         id: routes.category.querying.id,

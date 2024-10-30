@@ -1,47 +1,40 @@
-import { Suspense, useMemo } from 'react';
-import { Outlet, type Params, useLoaderData, useMatches, defer, Await } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Outlet, type Params, useLoaderData, useMatches } from 'react-router-dom';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { CustomLink } from '@/components/common';
 import { ThemeToggle } from '@/components/RootLayout';
 import { routes } from '../routes/routes';
 import { CollapseContextToggle } from '@/components/project/context';
-import { api, type Resolved } from '@/api';
+import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
-import { LoadingPage } from './errorPages';
 import { CategoryInfoProvider, useCategoryInfo } from '@/components/CategoryInfoProvider';
 
 export function CategoryIndex() {
-    const loaderData = useLoaderData() as CategoryIndexLoaderData;
+    const { category } = useLoaderData() as CategoryIndexLoaderData;
 
     return (
-        <Suspense fallback={<LoadingPage />}>
-            <Await resolve={loaderData.category}>
-                {(category: Resolved<CategoryIndexLoaderData, 'category'>) => (
-                    <CategoryInfoProvider category={category}>
-                        <CategoryIndexInner />
-                    </CategoryInfoProvider>
-                )}
-            </Await>
-        </Suspense>
+        <CategoryInfoProvider category={category}>
+            <CategoryIndexInner />
+        </CategoryInfoProvider>
     );
 }
 
 export type CategoryIndexLoaderData = {
-    category: Promise<SchemaCategoryInfo>;
+    category: SchemaCategoryInfo;
 };
 
-export function categoryIndexLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+export async function categoryIndexLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
         throw new Error('Category ID is required');
 
-    return defer({
-        category: api.schemas.getCategoryInfo({ id: categoryId }).then(response => {
+    return {
+        category: await api.schemas.getCategoryInfo({ id: categoryId }).then(response => {
             if (!response.status)
                 throw new Error('Failed to load category info');
 
             return SchemaCategoryInfo.fromServer(response.data);
         }),
-    } satisfies CategoryIndexLoaderData);
+    };
 }
 
 function CategoryIndexInner() {
@@ -52,9 +45,9 @@ function CategoryIndexInner() {
         <div>
             {/* <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}> */}
             {/* TODO: place category.label to navbar (via portal or sth) */}
-            {/* <div className='mm-context-header flex items-center px-2'>
-                    {category.label}
-                </div> */}
+            <h1 className='text-xl'>
+                {category.label}
+            </h1>
             <Outlet />
             {/* </div> */}
         </div>

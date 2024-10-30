@@ -16,11 +16,11 @@ export function SchemaCategoriesPage() {
             try {
                 setLoading(true);
                 const response = await api.schemas.getAllCategoryInfos({});
-                if (response.status && response.data) 
+                if (response.status && response.data)
                     setSchemaCategories(response.data);
-                else 
+                else
                     setError('Failed to load schema categories');
-                
+
             }
             catch (err) {
                 setError('Failed to load schema categories');
@@ -44,7 +44,7 @@ export function SchemaCategoriesPage() {
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <h1 className='heading-large'>Schema Categories</h1>
+                <h1>Schema Categories</h1>
                 <Button onClick={handleAddCategory} color='primary'>+ Add Schema Category</Button>
             </div>
             <div className='mt-5'>

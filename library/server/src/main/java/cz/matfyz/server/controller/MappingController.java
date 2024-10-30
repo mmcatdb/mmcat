@@ -23,7 +23,7 @@ public class MappingController {
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
-    public MappingWrapper getMapping(@PathVariable Id id) {
+    public MappingWrapper getMapping(@PathVariable Id id) throws Exception {
         return service.find(id);
     }
 

@@ -1,11 +1,11 @@
-import { Suspense, useMemo } from 'react';
+import { useMemo } from 'react';
 import clsx from 'clsx';
 import { Button, Navbar, NavbarContent, NavbarItem, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
-import { type AwaitedRouteData, type AwaitedUIMatch, Tooltip, useAwaitedMatches } from './common';
+import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
-import { Await, Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 
 export function RootLayout() {
     const { theme } = usePreferences().preferences;
@@ -49,47 +49,30 @@ function CommonNavbar() {
     );
 }
 
-function Breadcrumbs() {
-    const promise = useAwaitedMatches();
-
-    return (
-        <Suspense>
-            <Await resolve={promise}>
-                {(matches: AwaitedUIMatch[]) => (
-                    <BreadcrumbsLoaded matches={matches} />
-                )}
-            </Await>
-        </Suspense>
-    );
-}
-
 type BreadcrumbData = {
     path: string;
     label: string;
 };
 
-type BreadcrumbMatch<TData> = AwaitedUIMatch<TData, { breadcrumb: string | ((data: AwaitedRouteData<TData>) => string) }>;
+type BreadcrumbMatch<TData> = UIMatch<TData, { breadcrumb: string | ((data: TData) => string) }>;
 
-type BreadcrumbsLoadedProps = Readonly<{
-    matches: AwaitedUIMatch[];
-}>;
+function Breadcrumbs() {
+    const matches = useMatches();
 
-function BreadcrumbsLoaded({ matches }: BreadcrumbsLoadedProps) {
     const breadcrumbs: BreadcrumbData[] = useMemo(() => {
         return matches.
             filter((match): match is BreadcrumbMatch<unknown> => !!(match.handle && typeof match.handle === 'object' && 'breadcrumb' in match.handle))
             .map(match => ({
                 path: match.pathname,
-                label: typeof match.handle.breadcrumb === 'function' ? match.handle.breadcrumb(match.awaited) : match.handle.breadcrumb,
+                label: typeof match.handle.breadcrumb === 'function' ? match.handle.breadcrumb(match.data) : match.handle.breadcrumb,
             }));
     }, [ matches ]);
 
     return (
-        // custom styles <Breadcrumbs className='breadcrumb'>, Link className='breadcrumb-item-link'
         <NextUIBreadcrumbs separator='/'>
             {breadcrumbs.map((crumb, index) => (
                 <BreadcrumbItem key={crumb.path} isCurrent={index === breadcrumbs.length - 1}>
-                    <Link to={crumb.path}> {crumb.label} </Link>
+                    <Link to={crumb.path} className='text-danger-500'> {crumb.label} </Link>
                 </BreadcrumbItem>
             ))}
         </NextUIBreadcrumbs>

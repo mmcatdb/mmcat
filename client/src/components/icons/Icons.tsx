@@ -18,25 +18,27 @@ type IconSet = {
     solid: JSX.Element;
 };
 
+const className='mr-2 w-5 h-5';
+
 export const sidebarIconMap: Record<string, IconSet> = {
     heart: {
-        outline: <HeartIconOutline className='sidebar-icon' />,
-        solid: <HeartIconSolid className='sidebar-icon' />,
+        outline: <HeartIconOutline className={className} />,
+        solid: <HeartIconSolid className={className} />,
     },
     circleStack: {
-        outline: <CircleStackIconOutline className='sidebar-icon' />,
-        solid: <CircleStackIconSolid className='sidebar-icon' />,
+        outline: <CircleStackIconOutline className={className} />,
+        solid: <CircleStackIconSolid className={className} />,
     },
     codeBracketSquare: {
-        outline: <CodeBracketSquareIconOutline className='sidebar-icon' />,
-        solid: <CodeBracketSquareIconSolid className='sidebar-icon' />,
+        outline: <CodeBracketSquareIconOutline className={className} />,
+        solid: <CodeBracketSquareIconSolid className={className} />,
     },
     lightBulb: {
-        outline: <LightBulbIconOutline className='sidebar-icon' />,
-        solid: <LightBulbIconSolid className='sidebar-icon' />,
+        outline: <LightBulbIconOutline className={className} />,
+        solid: <LightBulbIconSolid className={className} />,
     },
     documentText: {
-        outline: <DocumentTextIconOutline className='sidebar-icon' />,
-        solid: <DocumentTextIconSolid className='sidebar-icon' />,
+        outline: <DocumentTextIconOutline className={className} />,
+        solid: <DocumentTextIconSolid className={className} />,
     },
 };

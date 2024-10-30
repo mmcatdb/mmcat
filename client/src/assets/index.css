@@ -1,5 +1,4 @@
 @import '_layout.css';
-@import 'styles.css';
 
 @tailwind base;
 @tailwind components;
@@ -24,5 +23,11 @@
         &::-webkit-scrollbar {
             display: none; /* Safari and Chrome */
         }
+    }
+}
+
+@layer base {
+    body {
+        @apply text-base;
     }
 }

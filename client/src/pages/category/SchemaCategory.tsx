@@ -1,66 +1,53 @@
-import { api, type Resolved } from '@/api';
+import { api } from '@/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { SchemaCategory as SchemaCategoryType } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
-import { Suspense } from 'react';
-import { type Params, useLoaderData, defer, Await } from 'react-router-dom';
-import { LoadingComponent } from '../errorPages';
+import { type Params, useLoaderData } from 'react-router-dom';
 import { Portal, portals } from '@/components/common';
 import { SchemaCategoryGraph } from '@/components/project/SchemaCategoryGraph';
 
 export function SchemaCategory() {
-    const loaderData = useLoaderData() as SchemaCategoryLoaderData;
+    const { category, updates } = useLoaderData() as SchemaCategoryLoaderData;
 
     return (
-        <Suspense fallback={<LoadingComponent />}>
-            <Await resolve={loaderData.data}>
-                {({ category, updates }: Resolved<SchemaCategoryLoaderData, 'data'>) => (
-                    <div>
-                        <SchemaCategoryContext category={category} />
-                        <h1>Schema category {category.label} overview</h1>
-                        <p>
-                            Some text.
-                        </p>
-                        {/* <p>
-                            updates: {updates.length}
-                        </p> */}
+        <div>
+            <SchemaCategoryContext category={category} />
+            <h1>Schema category {category.label} overview</h1>
+            <p>
+                Some text.
+            </p>
+            <p>
+                updates: {updates.length}
+            </p>
 
-                        <SchemaCategoryGraph category={category} />
-                    </div>
-                )}
-            </Await>
-        </Suspense>
+            <SchemaCategoryGraph category={category} />
+        </div>
     );
 }
 
 type SchemaCategoryLoaderData = {
-    data: Promise<{
         category: SchemaCategoryType;
         updates: SchemaUpdate[];
-    }>;
 };
 
-export function schemaCategoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+export async function schemaCategoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
         throw new Error('Category ID is required');
 
-    const data = Promise.all([
+    const [ categoryResponse, updatesResponse, modelsResponse ] = await Promise.all([
         api.schemas.getCategoryWrapper({ id: categoryId }),
         api.schemas.getCategoryUpdates({ id: categoryId }),
         api.logicalModels.getAllLogicalModelsInCategory({ categoryId: categoryId }),
-    ])
-        .then(([ categoryResponse, updatesResponse, modelsResponse ]) => {
-            if (!categoryResponse.status || !updatesResponse.status || !modelsResponse.status)
-                throw new Error('Failed to load schema category');
+    ]);
 
-            const updates = updatesResponse.data.map(SchemaUpdate.fromServer);
-            const logicalModels = modelsResponse.data.map(LogicalModel.fromServer);
-            const category = SchemaCategoryType.fromServer(categoryResponse.data, logicalModels);
+    if (!categoryResponse.status || !updatesResponse.status || !modelsResponse.status)
+        throw new Error('Failed to load schema category');
 
-            return { category, updates };
-        });
+    const updates = updatesResponse.data.map(SchemaUpdate.fromServer);
+    const logicalModels = modelsResponse.data.map(LogicalModel.fromServer);
+    const category = SchemaCategoryType.fromServer(categoryResponse.data, logicalModels);
 
-    return defer({ data } satisfies SchemaCategoryLoaderData);
+    return { category, updates };
 }
 
 type SchemaCategoryContextProps = Readonly<{

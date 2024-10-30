@@ -49,12 +49,13 @@ export function DatasourcesPageOverview() {
     const handleDeleteDatasource = async (id: string) => {
         try {
             const response = await api.datasources.deleteDatasource({ id });
-            
+
             if (response.status) {
                 setDatasources((prevDatasources) =>
                     prevDatasources.filter((datasource) => datasource.id !== id),
                 );
-            } else {
+            }
+            else {
                 toast.error('Failed to delete datasource. Please try again.');
             }
         }
@@ -67,12 +68,12 @@ export function DatasourcesPageOverview() {
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <h1 className='heading-large'>Datasources</h1>
+                <h1>Datasources</h1>
                 <DatasourceModal onDatasourceCreated={handleAddDatasource} />
             </div>
 
             <div className='mt-5'>
-                <DatasourcesTable 
+                <DatasourcesTable
                     datasources={datasources}
                     loading={loading}
                     error={error}
