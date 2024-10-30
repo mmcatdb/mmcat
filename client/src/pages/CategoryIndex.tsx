@@ -26,7 +26,7 @@ export function CategoryIndex() {
     );
 }
 
-type CategoryIndexLoaderData = {
+export type CategoryIndexLoaderData = {
     category: Promise<SchemaCategoryInfo>;
 };
 

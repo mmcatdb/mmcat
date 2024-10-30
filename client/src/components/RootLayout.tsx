@@ -1,10 +1,11 @@
+import { Suspense, useMemo } from 'react';
 import clsx from 'clsx';
-import { Button, Navbar, NavbarContent, NavbarItem, Breadcrumbs, BreadcrumbItem } from '@nextui-org/react';
+import { Button, Navbar, NavbarContent, NavbarItem, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
-import { Tooltip } from './common';
+import { type AwaitedRouteData, type AwaitedUIMatch, Tooltip, useAwaitedMatches } from './common';
 import { Sidebar } from './sidebar/Sidebar';
-import { Link, Outlet, useMatches } from 'react-router-dom';
+import { Await, Link, Outlet } from 'react-router-dom';
 
 export function RootLayout() {
     const { theme } = usePreferences().preferences;
@@ -37,8 +38,7 @@ function CommonNavbar() {
             maxWidth='full'
         >
             <NavbarContent justify='start'>
-                {/* <div id='breadcrumb-portal'></div> */}
-                <Breadcrumb />
+                <Breadcrumbs />
             </NavbarContent>
             <NavbarContent justify='end'>
                 <NavbarItem>
@@ -49,30 +49,50 @@ function CommonNavbar() {
     );
 }
 
-type NavbarItem = {
+function Breadcrumbs() {
+    const promise = useAwaitedMatches();
+
+    return (
+        <Suspense>
+            <Await resolve={promise}>
+                {(matches: AwaitedUIMatch[]) => (
+                    <BreadcrumbsLoaded matches={matches} />
+                )}
+            </Await>
+        </Suspense>
+    );
+}
+
+type BreadcrumbData = {
+    path: string;
     label: string;
-    route: string;
 };
 
-function Breadcrumb() {
-    const matches = useMatches();
+type BreadcrumbMatch<TData> = AwaitedUIMatch<TData, { breadcrumb: string | ((data: AwaitedRouteData<TData>) => string) }>;
 
-    const breadcrumbs = matches
-        .filter((match) => match.handle?.breadcrumb)  // filter out routes without breadcrumb handle
-        .map((match) => ({
-            label: match.handle!.breadcrumb as string,
-            path: match.pathname,
-        }));
+type BreadcrumbsLoadedProps = Readonly<{
+    matches: AwaitedUIMatch[];
+}>;
+
+function BreadcrumbsLoaded({ matches }: BreadcrumbsLoadedProps) {
+    const breadcrumbs: BreadcrumbData[] = useMemo(() => {
+        return matches.
+            filter((match): match is BreadcrumbMatch<unknown> => !!(match.handle && typeof match.handle === 'object' && 'breadcrumb' in match.handle))
+            .map(match => ({
+                path: match.pathname,
+                label: typeof match.handle.breadcrumb === 'function' ? match.handle.breadcrumb(match.awaited) : match.handle.breadcrumb,
+            }));
+    }, [ matches ]);
 
     return (
         // custom styles <Breadcrumbs className='breadcrumb'>, Link className='breadcrumb-item-link'
-        <Breadcrumbs separator='/'>
+        <NextUIBreadcrumbs separator='/'>
             {breadcrumbs.map((crumb, index) => (
                 <BreadcrumbItem key={crumb.path} isCurrent={index === breadcrumbs.length - 1}>
                     <Link to={crumb.path}> {crumb.label} </Link>
                 </BreadcrumbItem>
             ))}
-        </Breadcrumbs>
+        </NextUIBreadcrumbs>
     );
 }
 

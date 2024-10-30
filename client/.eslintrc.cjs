@@ -49,5 +49,7 @@ module.exports = {
         '@typescript-eslint/restrict-plus-operands': [ 'off' ],
         '@typescript-eslint/no-floating-promises': [ 'warn', { ignoreVoid: true, ignoreIIFE: true } ],
         '@typescript-eslint/no-misused-promises': [ 'warn', { checksVoidReturn: false } ],
+        '@typescript-eslint/no-unsafe-assignment': [ 'warn' ],
+        '@typescript-eslint/no-unsafe-member-access': [ 'warn' ],
     },
 }

@@ -4,7 +4,7 @@ import { SchemaCategory, schemaCategoryLoader } from '@/pages/category/SchemaCat
 import { About } from '@/pages/About';
 import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
-import { CategoryIndex, categoryIndexLoader } from '@/pages/CategoryIndex';
+import { CategoryIndex, categoryIndexLoader, type CategoryIndexLoaderData } from '@/pages/CategoryIndex';
 import { DatasourcesPage, DatasourcesPageOverview } from '@/pages/DatasourcesPage';
 import { DatasourceDetailPage } from '@/pages/DatasourceDetailPage';
 import { AdminerPage } from '@/pages/AdminerPage';
@@ -12,6 +12,7 @@ import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
 import { ModelsPage } from '@/pages/ModelsPage';
 import { QueryingPage } from '@/pages/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
+import { type AwaitedRouteData } from '@/components/common';
 
 export const router = createBrowserRouter([
     {
@@ -60,7 +61,7 @@ export const router = createBrowserRouter([
                 path: routes.category.index.path,
                 Component: CategoryIndex,
                 loader: categoryIndexLoader,
-                handle: { breadcrumb: 'Category' },
+                handle: { breadcrumb: (data: AwaitedRouteData<CategoryIndexLoaderData>) => data.category.label },
                 children: [
                     {
                         index: true,

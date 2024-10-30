@@ -7,34 +7,19 @@ type SchemaCategoryGraphProps = Readonly<{
 }>;
 
 export function SchemaCategoryGraph({ category }: SchemaCategoryGraphProps) {
-    const initialNodes = category.getObjects().map(object => ({
-        id: '' + object.key.value,
-        data: { label: object.current?.label },
-        position: object._position,
-    }));
-
-    const initialEdges = category.getMorphisms().map(morphism => ({
-        id: '' + morphism.signature.baseValue,
-        source: '' + morphism.current?.domKey.value,
-        target: '' + morphism.current?.codKey.value,
-        data: { label: morphism.current?.label },
-    }));
-
-    console.log({ initialNodes, initialEdges });
-
     const graphData = useMemo(() => ({
-        nodes: initialNodes.map(node => ({
-            id: node.id,
-            label: node.data.label ?? '',
-            position: { ...node.position },
+        nodes: category.getObjects().map(object => ({
+            id: '' + object.key.value,
+            label: object.current?.label ?? '',
+            position: { ...object._position },
         })),
-        edges: initialEdges.map(edge => ({
-            id: edge.id,
-            label: edge.data.label ?? '',
-            from: edge.source,
-            to: edge.target,
+        edges: category.getMorphisms().map(morphism => ({
+            id: '' + morphism.signature.baseValue,
+            label: morphism.current?.label ?? '',
+            from: '' + morphism.current?.domKey.value,
+            to: '' + morphism.current?.codKey.value,
         })),
-    }), []);
+    }), [ category ]);
 
     return (
         <GraphDisplay nodes={graphData.nodes} edges={graphData.edges} width={1200} height={800} />
