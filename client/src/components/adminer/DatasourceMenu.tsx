@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { api } from '@/api';
 import { Spinner, Button } from '@nextui-org/react';
 import { type Datasource, DatasourceType } from '@/types/datasource';
+import { type AdminerStateAction } from '@/types/adminer/Reducer';
 
 type DatasourceMenuProps = Readonly<{
     datasource: Datasource | undefined;
-    setDatasource: (datasource: Datasource) => void;
+    dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function DatasourceMenu({ datasource, setDatasource }: DatasourceMenuProps) {
+export function DatasourceMenu({ datasource, dispatch }: DatasourceMenuProps) {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | undefined>();
@@ -57,7 +58,7 @@ export function DatasourceMenu({ datasource, setDatasource }: DatasourceMenuProp
                 .map((item) => (
                     <Button
                         key={item.id}
-                        onPress={() => setDatasource(item)}
+                        onPress={() => dispatch({ type:'datasource', newDatasource: item })}
                         color={datasource === item ? 'primary' : 'default'}
                         className='flex-1 min-w-[150px] max-w-[200px]'
                     >

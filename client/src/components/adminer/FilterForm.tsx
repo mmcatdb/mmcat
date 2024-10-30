@@ -2,18 +2,18 @@ import { Button, Input } from '@nextui-org/react';
 import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 import { ColumnForm } from '@/components/adminer/ColumnForm';
-import type { AdminerFilterAction, AdminerFilterState } from '@/types/adminer/Reducer';
+import type { AdminerStateAction, AdminerState } from '@/types/adminer/Reducer';
 
 type FilterFormProps = Readonly<{
-    state: AdminerFilterState;
-    dispatch: React.Dispatch<AdminerFilterAction>;
+    state: AdminerState;
+    dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
 export function FilterForm({ state, dispatch }: FilterFormProps) {
     return (
         <div>
             <div>
-                {state.new.filters.map((filter) => (
+                {state.form.filters.map((filter) => (
                     <ColumnForm key={filter.id} filter={filter} dispatch={dispatch}/>
                 ))}
             </div>
@@ -30,8 +30,8 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                         type='number'
                         min='0'
                         placeholder='Enter limit'
-                        value={state.new.limit.toString()}
-                        onChange={(e) => dispatch({ type:'change_limit', newLimit: Number(e.target.value) })}
+                        value={state.form.limit.toString()}
+                        onChange={(e) => dispatch({ type: 'change_limit', newLimit: Number(e.target.value) })}
                         required
                     />
                 </div>
@@ -42,7 +42,7 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                     color='danger'
                     variant='ghost'
                     onPress={() => {
-                        dispatch({ type:'delete_filters' });
+                        dispatch({ type: 'delete_filters' });
                     }}
                 >
                     <IoTrashBin /> Delete filters
@@ -53,7 +53,7 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                     type='submit'
                     color='success'
                     variant='ghost'
-                    onPress={() => dispatch({ type:'add_filter' })}
+                    onPress={() => dispatch({ type: 'add_filter' })}
                 >
                     <FaPlusCircle /> Add filter
                 </Button>

@@ -1,93 +1,118 @@
-import type { AdminerFilterState, AdminerFilterAction } from '@/types/adminer/Reducer';
+import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 
-export function reducer(state: AdminerFilterState, action: AdminerFilterAction): AdminerFilterState {
-    const emptyState = { submitted: { limit: 50, filters: [] }, new: { limit: 50, filters: [] } };
-
+export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {
     switch (action.type) {
+    case 'datasource': {
+        return {
+            form: { limit: 50, filters: [] },
+            active: { limit: 50, filters: [] },
+            datasource: action.newDatasource,
+            view: state.view,
+        };
+    }
+    case 'kind': {
+        return {
+            ...state,
+            form: { limit: 50, filters: [] },
+            active: { limit: 50, filters: [] },
+            kind: action.newKind,
+        };
+    }
+    case 'view': {
+        return {
+            ...state,
+            view: action.newView,
+        };
+    }
     case 'submit_state': {
         return {
             ...state,
-            submitted: {
-                ...state.new,
+            active: {
+                ...state.form,
             },
         };
     }
     case 'change_limit': {
         return {
             ...state,
-            new: {
-                ...state.new,
+            form: {
+                ...state.form,
                 limit: action.newLimit,
             },
         };
     }
     case 'change_column_name': {
-        const newFilters: ColumnFilter[] = [ ...state.new.filters ];
+        const newFilters: ColumnFilter[] = [ ...state.form.filters ];
         newFilters[action.filterId].columnName = action.newName;
 
         return {
             ...state,
-            new: {
-                ...state.new,
+            form: {
+                ...state.form,
                 filters: newFilters,
             },
         };
     }
     case 'change_operator': {
-        const newFilters: ColumnFilter[] = [ ...state.new.filters ];
+        const newFilters: ColumnFilter[] = [ ...state.form.filters ];
         newFilters[action.filterId].operator = action.newOperator;
 
         return {
             ...state,
-            new: {
-                ...state.new,
+            form: {
+                ...state.form,
                 filters: newFilters,
             },
         };
     }
     case 'change_column_value': {
-        const newFilters: ColumnFilter[] = [ ...state.new.filters ];
+        const newFilters: ColumnFilter[] = [ ...state.form.filters ];
         newFilters[action.filterId].columnValue = action.newValue;
 
         return {
             ...state,
-            new: {
-                ...state.new,
+            form: {
+                ...state.form,
                 filters: newFilters,
             },
         };
     }
     case 'add_filter': {
-        const nextId: number = state.new.filters ? state.new.filters.length : 0;
+        const nextId: number = state.form.filters ? state.form.filters.length : 0;
         const newFilter: ColumnFilter = { id: nextId, columnName: '', operator: Operator.eq, columnValue: '' };
-        const newFilters: ColumnFilter[] = [ ...state.new.filters, newFilter ];
+        const newFilters: ColumnFilter[] = [ ...state.form.filters, newFilter ];
 
         return {
             ...state,
-            new: {
-                ...state.new,
+            form: {
+                ...state.form,
                 filters: newFilters,
             },
         };
     }
     case 'delete_filter': {
-        const submittedFilters: ColumnFilter[] = state.submitted.filters.filter(filter => filter.id !== action.filterID);
-        const newFilters: ColumnFilter[] = state.new.filters.filter(filter => filter.id !== action.filterID);
+        const activeFilters: ColumnFilter[] = state.active.filters.filter(filter => filter.id !== action.filterID);
+        const newFilters: ColumnFilter[] = state.form.filters.filter(filter => filter.id !== action.filterID);
 
         return {
-            submitted: {
-                ...state.submitted,
-                filters: submittedFilters,
+            ...state,
+            active: {
+                ...state.active,
+                filters: activeFilters,
             },
-            new: {
-                ...state.new,
+            form: {
+                ...state.form,
                 filters: newFilters,
             },
         };
     }
     case 'delete_filters': {
-        return emptyState;
+        return {
+            ...state,
+            form: { limit: 50, filters: [] },
+            active: { limit: 50, filters: [] },
+        };
     }
     default: {
         throw new Error('Unknown action');

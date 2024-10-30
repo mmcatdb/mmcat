@@ -1,11 +1,11 @@
 import { Input, Select, SelectItem, Button } from '@nextui-org/react';
 import { IoTrashBin } from 'react-icons/io5';
-import type { AdminerFilterAction } from '@/types/adminer/Reducer';
+import type { AdminerStateAction } from '@/types/adminer/Reducer';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 
 type ColumnFormProps = Readonly<{
     filter: ColumnFilter;
-    dispatch: React.Dispatch<AdminerFilterAction>;
+    dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
 export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
