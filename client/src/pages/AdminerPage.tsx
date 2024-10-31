@@ -27,7 +27,7 @@ export function AdminerPage() {
 
     return (
         <div>
-            <div className='mt-5 text-sm'>
+            <div className='mt-5'>
                 <DatasourceMenu datasource={datasource} setDatasource={setDatasource}/>
 
                 {datasource &&

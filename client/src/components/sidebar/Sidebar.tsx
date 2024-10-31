@@ -103,7 +103,7 @@ export function Sidebar() {
                             return (
                                 <p
                                     key={`separator-${item.label}`}
-                                    className='font-semibold px-2 py-2 text-sm'
+                                    className='font-semibold px-2 py-2'
                                 >
                                     {item.label}
                                 </p>
@@ -117,9 +117,9 @@ export function Sidebar() {
                         return (
                             <Link
                                 key={item.route}
-                                to={item.route || '#'}
+                                to={item.route ?? '#'}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className={`flex items-center px-2 py-2 text-sm rounded hover:bg-zinc-100 dark:hover:bg-zinc-900 transition duration-200 ${
+                                className={`flex items-center px-2 py-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-900 transition duration-200 ${
                                     isActive ? 'text-blue-600 font-semibold' : ''
                                 }`}
                             >

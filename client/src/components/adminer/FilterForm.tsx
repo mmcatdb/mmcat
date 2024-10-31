@@ -25,7 +25,7 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                     </label>
                     <Input
                         id='limit'
-                        className='text-xs max-h-10'
+                        className='text-sm max-h-10'
                         aria-label='Limit'
                         type='number'
                         min='0'

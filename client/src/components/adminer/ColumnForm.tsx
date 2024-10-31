@@ -12,7 +12,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
     return (
         <div className='mt-0 mr-5 inline-flex gap-1 items-center'>
             <Input
-                className='py-0.5 text-xs'
+                className='py-0.5 text-sm'
                 aria-label='Column name'
                 placeholder='Enter column name'
                 value={filter.columnName}
@@ -21,7 +21,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
             />
 
             <Select
-                className='py-0.5 text-xs'
+                className='py-0.5 text-sm'
                 aria-label='Operator'
                 placeholder='Select an operator'
                 value={filter.operator}
@@ -36,7 +36,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
             </Select>
 
             <Input
-                className='py-0.5 text-xs'
+                className='py-0.5 text-sm'
                 aria-label='Column value'
                 placeholder='Enter column value'
                 value={filter.columnValue}
@@ -45,7 +45,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
             />
 
             <Button
-                className='py-0.5 text-xs'
+                className='py-0.5 text-sm'
                 type='submit'
                 color='danger'
                 variant='ghost'

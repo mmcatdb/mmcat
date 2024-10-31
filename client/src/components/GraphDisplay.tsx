@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
+import { cn } from './utils';
 
 type Node = {
     id: string;
@@ -23,6 +24,8 @@ type GraphDisplayProps = Readonly<{
 
 export function GraphDisplay({ nodes, edges, width, height }: GraphDisplayProps) {
     const [ state, engine ] = useGraphEngine({ nodes, edges, width, height });
+
+    console.log(state.selectedNodes);
 
     return (
         <div
@@ -55,11 +58,13 @@ function NodeDisplay({ node, state, engine }: NodeDisplayProps) {
     const isHightlightAllowed = (!state.drag || isDragging) && !state.select;
     const isInSelecBox = state.select && isPointInBox(node.position, state.select);
     const isSelected = state.selectedNodes?.includes(node.id);
+    if (isSelected)
+        console.log(node);
 
     return (
         <div className='absolute w-0 h-0 select-none z-10' style={positionToOffset(node.position, state.coordinates)}>
             <div
-                className={clsx('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white active:bg-cyan-300',
+                className={cn('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white active:bg-cyan-300',
                     isHightlightAllowed && 'hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300',
                     isDragging ? 'cursor-grabbing pointer-events-none' : 'cursor-pointer',
                     isInSelecBox && 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-cyan-300',
