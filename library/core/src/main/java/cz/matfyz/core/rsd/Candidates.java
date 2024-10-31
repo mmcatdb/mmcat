@@ -8,8 +8,7 @@ public class Candidates {
     public final List<ReferenceCandidate> refCandidates = new ArrayList<>();
     //public final List<RedundancyCandidate> redCandidates = new ArrayList<>();
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "Candidates{" + "pkCandidates=" + pkCandidates + ", refCandidates=" + refCandidates + ", redCandidates=" + '}';
     }
 }

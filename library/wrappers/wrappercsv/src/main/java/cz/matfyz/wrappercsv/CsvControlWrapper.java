@@ -41,8 +41,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      * @param statement a collection of {@link AbstractStatement} objects to be executed.
      * @throws ExecuteException always thrown as this method is not implemented.
      */
-    @Override
-    public void execute(Collection<AbstractStatement> statement) throws ExecuteException {
+    @Override public void execute(Collection<AbstractStatement> statement) throws ExecuteException {
         throw new UnsupportedOperationException("CsvControlWrapper.execute not implemented.");
     }
 
@@ -52,8 +51,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      * @param path the file path to the script to be executed.
      * @throws ExecuteException always thrown as this method is not implemented.
      */
-    @Override
-    public void execute(Path path) throws ExecuteException {
+    @Override public void execute(Path path) throws ExecuteException {
         throw new UnsupportedOperationException("CsvControlWrapper.execute not implemented.");
     }
 
@@ -62,8 +60,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      *
      * @return an instance of {@link CsvDDLWrapper}.
      */
-    @Override
-    public CsvDDLWrapper getDDLWrapper() {
+    @Override public CsvDDLWrapper getDDLWrapper() {
         return new CsvDDLWrapper();
     }
 
@@ -72,8 +69,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      *
      * @return an instance of {@link AbstractICWrapper} that is empty.
      */
-    @Override
-    public AbstractICWrapper getICWrapper() {
+    @Override public AbstractICWrapper getICWrapper() {
         return AbstractICWrapper.createEmpty();
     }
 
@@ -82,8 +78,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      *
      * @return an instance of {@link CsvDMLWrapper}.
      */
-    @Override
-    public CsvDMLWrapper getDMLWrapper() {
+    @Override public CsvDMLWrapper getDMLWrapper() {
         return new CsvDMLWrapper();
     }
 
@@ -92,8 +87,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      *
      * @return an instance of {@link CsvPullWrapper}.
      */
-    @Override
-    public CsvPullWrapper getPullWrapper() {
+    @Override public CsvPullWrapper getPullWrapper() {
         return new CsvPullWrapper(provider);
     }
 
@@ -102,8 +96,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      *
      * @return an instance of {@link CsvPathWrapper}.
      */
-    @Override
-    public CsvPathWrapper getPathWrapper() {
+    @Override public CsvPathWrapper getPathWrapper() {
         return new CsvPathWrapper();
     }
 
@@ -113,8 +106,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      * @return nothing, as this method always throws an exception.
      * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
-    @Override
-    public AbstractQueryWrapper getQueryWrapper() {
+    @Override public AbstractQueryWrapper getQueryWrapper() {
         throw new UnsupportedOperationException("CsvControlWrapper.getQueryWrapper not implemented.");
     }
 
@@ -124,8 +116,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      * @param sparkSettings the settings for Spark to be used in the inference process.
      * @return an instance of {@link CsvInferenceWrapper}.
      */
-    @Override
-    public CsvInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+    @Override public CsvInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
         return new CsvInferenceWrapper(provider, sparkSettings);
     }
 

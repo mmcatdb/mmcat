@@ -46,8 +46,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
      * @return a {@link ForestOfRecords} containing the pulled records.
      * @throws PullForestException if an error occurs while pulling the forest of records.
      */
-    @Override
-    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+    @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         final var forest = new ForestOfRecords();
 
         try (InputStream inputStream = provider.getInputStream(path.name().toString());
@@ -138,8 +137,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
      * @return nothing, as this method always throws an exception.
      * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
-    @Override
-    public QueryResult executeQuery(QueryStatement statement) {
+    @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 }

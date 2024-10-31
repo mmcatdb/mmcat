@@ -18,8 +18,7 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
         kindName = name;
     }
 
-    @Override
-    public boolean isSchemaless() {
+    @Override public boolean isSchemaless() {
         return true;
     }
 
@@ -31,8 +30,7 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in CSV).
      * @return true if the property was successfully added.
      */
-    @Override
-    public boolean addSimpleProperty(String path, boolean required) {
+    @Override public boolean addSimpleProperty(String path, boolean required) {
         // The CSV structure is flat, therefore, the path should be equal to the simple name of the property.
         properties.add(path);
         return true;
@@ -46,8 +44,7 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in CSV).
      * @return false, as this operation is not supported.
      */
-    @Override
-    public boolean addSimpleArrayProperty(String path, boolean required) {
+    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
         return false;
     }
 
@@ -59,8 +56,7 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in CSV).
      * @return false, as this operation is not supported.
      */
-    @Override
-    public boolean addComplexProperty(String path, boolean required) {
+    @Override public boolean addComplexProperty(String path, boolean required) {
         return false;
     }
 
@@ -72,8 +68,7 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in CSV).
      * @return false, as this operation is not supported.
      */
-    @Override
-    public boolean addComplexArrayProperty(String path, boolean required) {
+    @Override public boolean addComplexArrayProperty(String path, boolean required) {
         return false;
     }
 
@@ -83,8 +78,7 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
      *
      * @return a {@link CsvCommandStatement} containing the generated DDL statement as a CSV header line.
      */
-    @Override
-    public CsvCommandStatement createDDLStatement() {
+    @Override public CsvCommandStatement createDDLStatement() {
         final String headerLine = String.join(",", properties);
         return new CsvCommandStatement(headerLine);
     }

@@ -96,8 +96,7 @@ class CsvTests {
             this.csvContent = csvContent;
         }
 
-        @Override
-        public InputStream getInputStream(String kindName) {
+        @Override public InputStream getInputStream(String kindName) {
             return new ByteArrayInputStream(csvContent.getBytes());
         }
     }

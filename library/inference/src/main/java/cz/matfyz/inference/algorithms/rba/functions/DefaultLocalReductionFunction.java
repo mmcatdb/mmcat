@@ -7,8 +7,7 @@ import cz.matfyz.core.rsd.RecordSchemaDescription;
 // FIXME This class would benefit from some documentation.
 public class DefaultLocalReductionFunction implements AbstractRSDsReductionFunction {
 
-    @Override
-    public RecordSchemaDescription call(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) throws Exception {
+    @Override public RecordSchemaDescription call(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) throws Exception {
         final RecordSchemaDescription result = new RecordSchemaDescription();    // replace result for rsd1
         final InferenceAlgorithmUtils utils = new InferenceAlgorithmUtils();
 

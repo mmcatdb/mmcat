@@ -5,8 +5,7 @@ import org.apache.spark.api.java.function.Function2;
 
 public class FinalizeCombFunction implements Function2<RecordSchemaDescription, RecordSchemaDescription, RecordSchemaDescription> {
 
-    @Override
-    public RecordSchemaDescription call(RecordSchemaDescription schemaRoot, RecordSchemaDescription property) throws Exception {
+    @Override public RecordSchemaDescription call(RecordSchemaDescription schemaRoot, RecordSchemaDescription property) throws Exception {
         String hierarchicalName = property.getName();
         String[] hierarchies = hierarchicalName.split("/");
         property.setName(hierarchies[hierarchies.length - 1]);

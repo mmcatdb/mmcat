@@ -38,8 +38,7 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Map<String, St
      * @param record a Map representing a CSV record, where each entry is a key-value pair.
      * @return an iterator over tuples containing keys and their corresponding {@link PropertyHeuristics}.
      */
-    @Override
-    public Iterator<Tuple2<String, PropertyHeuristics>> call(Map<String, String> record) {
+    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Map<String, String> record) {
         List<Tuple2<String, PropertyHeuristics>> result = record.entrySet().stream()
             .map(entry -> {
                 String key = fileName + '/' + entry.getKey();

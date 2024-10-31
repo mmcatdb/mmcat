@@ -24,8 +24,7 @@ public record ReferenceCandidate(
         this("reference", subsetType, referredProperty, referencingProperty, referred, referencing, weak, selected);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "ReferenceCandidate{" +
                "type=" + type +
                ", referencing=" + referencing +

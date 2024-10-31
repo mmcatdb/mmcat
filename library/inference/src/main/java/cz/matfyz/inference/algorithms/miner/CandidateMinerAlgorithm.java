@@ -46,8 +46,7 @@ public class CandidateMinerAlgorithm implements Serializable {
 
             // remove later
             all.foreach(new VoidFunction<PropertyHeuristics>() {
-                @Override
-                public void call(PropertyHeuristics h) throws Exception {
+                @Override public void call(PropertyHeuristics h) throws Exception {
                     System.out.println(h);
                 }
             });
@@ -55,8 +54,7 @@ public class CandidateMinerAlgorithm implements Serializable {
             // PrimaryKeyCandidates
             JavaRDD<PropertyHeuristics> primaryKeyCandidates = all.filter(
                 new Function<PropertyHeuristics, Boolean>() {
-                    @Override
-                    public Boolean call(PropertyHeuristics heuristics) throws Exception {
+                    @Override public Boolean call(PropertyHeuristics heuristics) throws Exception {
                         return (heuristics.isRequired() && heuristics.isUnique());
                     }
                 }
@@ -67,8 +65,7 @@ public class CandidateMinerAlgorithm implements Serializable {
 
             // remove later
             primaryKeyCandidates.foreach(new VoidFunction<PropertyHeuristics>() {
-                @Override
-                public void call(PropertyHeuristics h) throws Exception {
+                @Override public void call(PropertyHeuristics h) throws Exception {
                     System.out.println(h);
                 }
             });

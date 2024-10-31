@@ -9,8 +9,7 @@ public class FilterInvalidRSDFunction implements Function<RecordSchemaDescriptio
         super();
     }
 
-    @Override
-    public Boolean call(RecordSchemaDescription t1) throws Exception {
+    @Override public Boolean call(RecordSchemaDescription t1) throws Exception {
         return true;
     }
 

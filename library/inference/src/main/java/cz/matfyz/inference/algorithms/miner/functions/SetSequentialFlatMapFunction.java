@@ -4,8 +4,7 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import org.apache.spark.api.java.function.Function;
 
 public class SetSequentialFlatMapFunction implements Function<PropertyHeuristics, PropertyHeuristics> {
-    @Override
-    public PropertyHeuristics call(PropertyHeuristics heuristics) {
+    @Override public PropertyHeuristics call(PropertyHeuristics heuristics) {
         if (heuristics.getMin() instanceof Number && heuristics.getMax() instanceof Number) {
             double min = ((Number) heuristics.getMin()).doubleValue();
             double max = ((Number) heuristics.getMax()).doubleValue();

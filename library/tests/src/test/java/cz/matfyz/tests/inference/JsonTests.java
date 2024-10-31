@@ -109,8 +109,7 @@ class JsonTests {
             this.jsonContent = jsonContent;
         }
 
-        @Override
-        public InputStream getInputStream(String kindName) {
+        @Override public InputStream getInputStream(String kindName) {
             return new ByteArrayInputStream(jsonContent.getBytes());
         }
     }

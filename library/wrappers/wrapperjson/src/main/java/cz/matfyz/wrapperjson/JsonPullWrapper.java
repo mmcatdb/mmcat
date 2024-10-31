@@ -53,8 +53,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      * @return a {@link ForestOfRecords} containing the pulled records.
      * @throws PullForestException if an error occurs while pulling the forest of records.
      */
-    @Override
-    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+    @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         System.out.println("change propagated");
         final var forest = new ForestOfRecords();
 
@@ -187,8 +186,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      * @return nothing, as this method always throws an exception.
      * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
-    @Override
-    public QueryResult executeQuery(QueryStatement statement) {
+    @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 

@@ -36,13 +36,11 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
         this.provider = provider;
     }
 
-    @Override
-    public MongoDBInferenceWrapper copy() {
+    @Override public MongoDBInferenceWrapper copy() {
         return new MongoDBInferenceWrapper(this.provider, this.sparkSettings);
     }
 
-    @Override
-    public void buildSession() {
+    @Override public void buildSession() {
         // TODO the whole session management should be handled by the MongoDBProvider
         sparkSession = SparkSession.builder().master(sparkSettings.master())
             .config("spark.mongodb.input.uri", provider.settings.createSparkConnectionString())
@@ -51,8 +49,7 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
             .getOrCreate();
     }
 
-    @Override
-    public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
+    @Override public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         final JavaMongoRDD<Document> records = loadRecords();
 
         // TODO! MAPUJE SE VZDY SCHEMA? MAPUJI SE VZDY DATA?
@@ -68,14 +65,12 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
         return new Tuple2<>(t, new Share(t.getCount(), t.getFirst()));
     }
 
-    @Override
-    public JavaRDD<RecordSchemaDescription> loadRSDs() {
+    @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaMongoRDD<Document> records = loadRecords();
         return records.map(MapMongoDocument::process);
     }
 
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         JavaMongoRDD<Document> records = loadRecords();
         return records.mapToPair(t -> new Tuple2<>("_", MapMongoDocument.process(t)));
     }
@@ -88,8 +83,7 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
         return MongoSpark.load(context, readConfig);
     }
 
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         JavaMongoRDD<Document> records = loadRecords();
 
         return records
@@ -97,15 +91,13 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
             .mapToPair(t -> new Tuple2<>(t.getName(), t));
     }
 
-    @Override
-    public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
+    @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaMongoRDD<Document> records = loadRecords();
 
         return records.flatMapToPair(new RecordToHeuristicsMap(collectionName()));
     }
 
-    @Override
-    public List<String> getKindNames() {
+    @Override public List<String> getKindNames() {
         return provider.getDatabase().listCollectionNames().into(new ArrayList<>());
     }
 

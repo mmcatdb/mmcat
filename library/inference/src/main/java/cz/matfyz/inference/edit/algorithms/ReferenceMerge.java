@@ -177,8 +177,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     /**
      * Applies the mapping edit to a list of mappings.
      */
-    @Override
-    public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
+    @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Reference Merge Edit on Mapping...");
 
         /*

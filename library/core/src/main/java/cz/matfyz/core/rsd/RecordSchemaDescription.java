@@ -194,8 +194,7 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
 
     // end of utility methods
 
-    @Override
-    public int compareTo(RecordSchemaDescription o) {
+    @Override public int compareTo(RecordSchemaDescription o) {
         int comparedNames = name.compareTo(o.name);
         boolean typesAreEqual = types == o.types;
         if (comparedNames != 0) {
@@ -222,8 +221,7 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         return sb.toString();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
 //            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);    // pretty print

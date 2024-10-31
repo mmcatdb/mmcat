@@ -107,7 +107,6 @@ public class InstanceToDatabase {
         output.append(icStatement.getContent())
             .append("\n");
 
-
         for (final var dmlStatement : dmlStatements) {
             output.append(dmlStatement.getContent())
                 .append("\n");

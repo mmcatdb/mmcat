@@ -74,8 +74,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         /**
          * Creates an instance of the {@code PrimaryKeyMerge} algorithm.
          */
-        @Override
-        public PrimaryKeyMerge createAlgorithm() {
+        @Override public PrimaryKeyMerge createAlgorithm() {
             return new PrimaryKeyMerge(this);
         }
     }

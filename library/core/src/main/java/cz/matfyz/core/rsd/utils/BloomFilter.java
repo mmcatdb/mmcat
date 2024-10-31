@@ -89,8 +89,7 @@ public class BloomFilter implements Serializable {
         temp.addAll(anotherTemp);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "BloomFilter{" + "temp=" + temp + ", bloomFilter=" + Arrays.toString(bloomFilter) + ", count=" + count + '}';
     }
 

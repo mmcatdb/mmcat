@@ -25,8 +25,7 @@ public class RecordToPropertiesMap implements FlatMapFunction<Document, RecordSc
         this.collectionName = collectionName;
     }
 
-    @Override
-    public Iterator<RecordSchemaDescription> call(Document document) throws Exception {
+    @Override public Iterator<RecordSchemaDescription> call(Document document) throws Exception {
         // TODO: USE FAST UTIL!
         ObjectArrayList<RecordSchemaDescription> result = new ObjectArrayList<>();
 

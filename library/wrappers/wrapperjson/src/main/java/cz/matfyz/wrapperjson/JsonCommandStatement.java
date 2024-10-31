@@ -33,8 +33,7 @@ public class JsonCommandStatement implements AbstractStatement {
      *
      * @return the JSON schema as the content of this statement.
      */
-    @Override
-    public String getContent() {
+    @Override public String getContent() {
         return schema;
     }
 }

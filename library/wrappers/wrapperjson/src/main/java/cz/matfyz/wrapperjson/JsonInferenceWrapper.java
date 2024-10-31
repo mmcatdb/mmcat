@@ -57,8 +57,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return a new instance of {@code JsonInferenceWrapper} with the same provider and Spark settings.
      */
-    @Override
-    public AbstractInferenceWrapper copy() {
+    @Override public AbstractInferenceWrapper copy() {
         return new JsonInferenceWrapper(this.provider, this.sparkSettings);
     }
 
@@ -69,8 +68,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
      * @param loadData a boolean indicating whether to load the data.
      * @return null as this method is not implemented.
      */
-    @Override
-    public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
+    @Override public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
     }
 
@@ -79,8 +77,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return a {@link JavaRDD} of {@link RecordSchemaDescription} objects.
      */
-    @Override
-    public JavaRDD<RecordSchemaDescription> loadRSDs() {
+    @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
         return jsonDocuments.map(MapJsonDocument::process);
     }
@@ -131,8 +128,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return null as this method is not implemented.
      */
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
     }
 
@@ -142,8 +138,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
      * @return nothing, as this method always throws an exception.
      * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
     }
@@ -153,8 +148,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return a {@link JavaPairRDD} of string keys and {@link PropertyHeuristics} objects.
      */
-    @Override
-    public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
+    @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
 
         return jsonDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
@@ -166,8 +160,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
      * @return a list of JSON file names as strings.
      * @throws RuntimeException if an error occurs while retrieving the file names.
      */
-    @Override
-    public List<String> getKindNames() {
+    @Override public List<String> getKindNames() {
         try {
             return provider.getJsonFileNames();
         } catch (URISyntaxException | IOException e) {

@@ -19,8 +19,7 @@ public class CsvCommandStatement implements AbstractStatement {
         this.content = content;
     }
 
-    @Override
-    public String getContent() {
+    @Override public String getContent() {
         return content;
     }
 }

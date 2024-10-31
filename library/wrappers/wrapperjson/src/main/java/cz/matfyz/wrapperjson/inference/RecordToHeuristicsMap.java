@@ -45,8 +45,7 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, Stri
      * @param document a BSON {@link Document} representing a JSON document.
      * @return an iterator over tuples containing keys and their corresponding {@link PropertyHeuristics}.
      */
-    @Override
-    public Iterator<Tuple2<String, PropertyHeuristics>> call(Document document) {
+    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Document document) {
         ObjectArrayList<Tuple2<String, PropertyHeuristics>> result = new ObjectArrayList<>();
 
         appendHeuristics(collectionName, new Document(), 1, result, true);

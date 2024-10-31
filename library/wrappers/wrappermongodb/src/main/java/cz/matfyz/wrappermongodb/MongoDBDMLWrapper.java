@@ -11,6 +11,7 @@ import java.util.List;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
@@ -21,7 +22,7 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
         kindName = name;
     }
 
-    @Override public void append(String name, Object value) {
+    @Override public void append(String name, @Nullable Object value) {
         String stringValue = value == null ? null : value.toString();
         propertyValues.add(new PropertyValue(name, stringValue));
     }

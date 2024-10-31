@@ -10,13 +10,11 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
 
-    @Override
-    public void setKindName(String name) {
+    @Override public void setKindName(String name) {
         kindName = name;
     }
 
-    @Override
-    public boolean isSchemaless() {
+    @Override public boolean isSchemaless() {
         return true;
     }
 
@@ -28,8 +26,7 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in JSON).
      * @return false, as this operation is not supported.
      */
-    @Override
-    public boolean addSimpleProperty(String path, boolean required) {
+    @Override public boolean addSimpleProperty(String path, boolean required) {
         return false;
     }
 
@@ -41,8 +38,7 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in JSON).
      * @return false, as this operation is not supported.
      */
-    @Override
-    public boolean addSimpleArrayProperty(String path, boolean required) {
+    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
       return false;
     }
 
@@ -54,8 +50,7 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in JSON).
      * @return false, as this operation is not supported.
      */
-    @Override
-    public boolean addComplexProperty(String path, boolean required) {
+    @Override public boolean addComplexProperty(String path, boolean required) {
         return false;
     }
 
@@ -67,8 +62,7 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
      * @param required whether the property is required (not used in JSON).
      * @return false, as this operation is not supported.
      */
-    @Override
-    public boolean addComplexArrayProperty(String path, boolean required) {
+    @Override public boolean addComplexArrayProperty(String path, boolean required) {
        return false;
     }
 
@@ -77,8 +71,7 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
      *
      * @return a {@link JsonCommandStatement} containing the generated DDL statement.
      */
-    @Override
-    public JsonCommandStatement createDDLStatement() {
+    @Override public JsonCommandStatement createDDLStatement() {
         return new JsonCommandStatement("");
     }
 }

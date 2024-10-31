@@ -58,8 +58,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return a new instance of {@code CsvInferenceWrapper} with the same provider and Spark settings.
      */
-    @Override
-    public AbstractInferenceWrapper copy() {
+    @Override public AbstractInferenceWrapper copy() {
         return new CsvInferenceWrapper(this.provider, this.sparkSettings);
     }
 
@@ -70,8 +69,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      * @param loadData a boolean indicating whether to load the data.
      * @return null as this method is not implemented.
      */
-    @Override
-    public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
+    @Override public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
     }
 
@@ -80,8 +78,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return a {@link JavaRDD} of {@link RecordSchemaDescription} objects.
      */
-    @Override
-    public JavaRDD<RecordSchemaDescription> loadRSDs() {
+    @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
         return csvDocuments.map(MapCsvDocument::process);
     }
@@ -160,8 +157,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return null as this method is not implemented.
      */
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
     }
 
@@ -171,8 +167,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      * @return nothing, as this method always throws an exception.
      * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
     }
 
@@ -181,8 +176,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      *
      * @return a {@link JavaPairRDD} of string keys and {@link PropertyHeuristics} objects.
      */
-    @Override
-    public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
+    @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
         return csvDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
     }
@@ -193,8 +187,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      * @return a list of CSV file names as strings.
      * @throws RuntimeException if an error occurs while retrieving the file names.
      */
-    @Override
-    public List<String> getKindNames() {
+    @Override public List<String> getKindNames() {
         try {
             return provider.getCsvFileNames();
         } catch (URISyntaxException | IOException e) {

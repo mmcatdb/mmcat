@@ -41,8 +41,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      * @param statement a collection of {@link AbstractStatement} objects to be executed.
      * @throws ExecuteException always thrown as this method is not implemented.
      */
-    @Override
-    public void execute(Collection<AbstractStatement> statement) throws ExecuteException {
+    @Override public void execute(Collection<AbstractStatement> statement) throws ExecuteException {
         throw new UnsupportedOperationException("JsonControlWrapper.execute not implemented.");
     }
 
@@ -52,8 +51,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      * @param path the file path to the script to be executed.
      * @throws ExecuteException always thrown as this method is not implemented.
      */
-    @Override
-    public void execute(Path path) throws ExecuteException {
+    @Override public void execute(Path path) throws ExecuteException {
         throw new UnsupportedOperationException("JsonControlWrapper.execute not implemented.");
     }
 
@@ -62,8 +60,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      *
      * @return an instance of {@link JsonDDLWrapper}.
      */
-    @Override
-    public JsonDDLWrapper getDDLWrapper() {
+    @Override public JsonDDLWrapper getDDLWrapper() {
         return new JsonDDLWrapper();
     }
 
@@ -72,8 +69,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      *
      * @return an instance of {@link AbstractICWrapper} that is empty.
      */
-    @Override
-    public AbstractICWrapper getICWrapper() {
+    @Override public AbstractICWrapper getICWrapper() {
         return AbstractICWrapper.createEmpty();
     }
 
@@ -82,8 +78,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      *
      * @return an instance of {@link JsonDMLWrapper}.
      */
-    @Override
-    public JsonDMLWrapper getDMLWrapper() {
+    @Override public JsonDMLWrapper getDMLWrapper() {
         return new JsonDMLWrapper();
     }
 
@@ -92,8 +87,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      *
      * @return an instance of {@link JsonPullWrapper}.
      */
-    @Override
-    public JsonPullWrapper getPullWrapper() {
+    @Override public JsonPullWrapper getPullWrapper() {
         return new JsonPullWrapper(provider);
     }
 
@@ -102,8 +96,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      *
      * @return an instance of {@link JsonPathWrapper}.
      */
-    @Override
-    public JsonPathWrapper getPathWrapper() {
+    @Override public JsonPathWrapper getPathWrapper() {
         return new JsonPathWrapper();
     }
 
@@ -113,8 +106,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      * @return nothing, as this method always throws an exception.
      * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
-    @Override
-    public AbstractQueryWrapper getQueryWrapper() {
+    @Override public AbstractQueryWrapper getQueryWrapper() {
         throw new UnsupportedOperationException("JsonControlWrapper.getQueryWrapper not implemented.");
     }
 
@@ -124,8 +116,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
      * @param sparkSettings the settings for Spark to be used in the inference process.
      * @return an instance of {@link JsonInferenceWrapper}.
      */
-    @Override
-    public JsonInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+    @Override public JsonInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
         return new JsonInferenceWrapper(provider, sparkSettings);
     }
 

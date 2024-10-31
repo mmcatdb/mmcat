@@ -6,8 +6,7 @@ import org.apache.spark.api.java.function.Function2;
 
 public class ReduceRSDsFunction implements Function2<RecordSchemaDescription, RecordSchemaDescription, RecordSchemaDescription> {
 
-    @Override
-    public RecordSchemaDescription call(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) throws Exception {
+    @Override public RecordSchemaDescription call(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) throws Exception {
         rsd1.setShareFirst(rsd1.getShareFirst() + rsd2.getShareFirst());
         rsd1.setShareTotal(rsd1.getShareTotal() + rsd2.getShareTotal());
 

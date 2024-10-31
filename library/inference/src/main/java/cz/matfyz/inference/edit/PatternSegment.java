@@ -14,8 +14,7 @@ public record PatternSegment(
     String direction
 ) {
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return nodeName + " " + direction;
     }
 
