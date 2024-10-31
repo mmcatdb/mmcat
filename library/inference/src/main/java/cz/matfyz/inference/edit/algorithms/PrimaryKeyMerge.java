@@ -85,7 +85,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     private final Data data;
 
     private Key primaryKeyRoot;
-    private Signature primaryKeySignature;
     private Pair<Key, Signature> newSignaturePair;
     private Map<Key, Signature> oldSignatureMap = new HashMap<>();
 
@@ -106,19 +105,18 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         }
 
         this.primaryKeyRoot = findPrimaryKeyRoot(newSchema);
-        this.primaryKeySignature = findPKSignature();
+        final Signature primaryKeySignature = findPKSignature();
 
         if (!primaryKeyRoot.equals(data.primaryKeyIdentified)) { // TODO: if not, set the identification?, similarly in mapping
-
-            SchemaObject cod = newSchema.getObject(primaryKeyRoot);
-            SchemaObject dom = newSchema.getObject(data.primaryKeyIdentified);
+            final SchemaObject cod = newSchema.getObject(primaryKeyRoot);
+            final SchemaObject dom = newSchema.getObject(data.primaryKeyIdentified);
 
             final String primaryKeyLabel = newMetadata.getObject(data.primaryKey).label;
 
             this.newSignaturePair = createNewMorphism(dom, cod);
 
-            SchemaObject updatedCod = updateSchemaObjectIds(cod, this.primaryKeySignature);
-            SchemaObject updatedDom = updateSchemaObjectIds(dom, Signature.concatenate(this.newSignaturePair.getValue(), this.primaryKeySignature));
+            final SchemaObject updatedCod = updateSchemaObjectIds(cod, primaryKeySignature);
+            final SchemaObject updatedDom = updateSchemaObjectIds(dom, Signature.concatenate(this.newSignaturePair.getValue(), primaryKeySignature));
 
             InferenceEditorUtils.updateObjects(newSchema, newMetadata, cod, updatedCod);
             InferenceEditorUtils.updateObjects(newSchema, newMetadata, dom, updatedDom);
@@ -129,31 +127,28 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     }
 
     private Key findPrimaryKeyIdentifiedFromCandidate(SchemaCategory schema) {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
-            if (morphism.cod().key().equals(data.primaryKey)) {
+        for (SchemaMorphism morphism : schema.allMorphisms())
+            if (morphism.cod().key().equals(data.primaryKey))
                 return morphism.dom().key();
-            }
-        }
+
         throw new NotFoundException("Primary Key Identified has not been found.");
     }
 
     private Key findPrimaryKeyRoot(SchemaCategory schema) {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
+        for (SchemaMorphism morphism : schema.allMorphisms())
             // based on the assumption
-            if (morphism.cod().key().equals(data.primaryKey)) {
+            if (morphism.cod().key().equals(data.primaryKey))
                 return morphism.dom().key();
-            }
-        }
+
         throw new NotFoundException("Primary Key Root has not been found");
     }
 
     private Signature findPKSignature() {
-        for (SchemaMorphism morphism : newSchema.allMorphisms()) {
-            if (morphism.dom().key().equals(this.primaryKeyRoot) && morphism.cod().key().equals(data.primaryKey)) {
+        for (SchemaMorphism morphism : newSchema.allMorphisms())
+            if (morphism.dom().key().equals(this.primaryKeyRoot) && morphism.cod().key().equals(data.primaryKey))
                 return morphism.signature();
-            }
-        }
-        return null;
+
+        throw new NotFoundException("Primary Key Signature has not been found");
     }
 
     private SchemaObject updateSchemaObjectIds(SchemaObject schemaObject, Signature signature) {

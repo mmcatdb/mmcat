@@ -43,10 +43,12 @@ public record InferenceJobData(
     ) {
         ObjectMapper mapper = new ObjectMapper();
 
+        // FIXME Why is this serialized to string? The InferenceEdit is already serializable.
         List<String> serializedEdits = edits.stream()
             .map((InferenceEdit edit) -> {
                 try {
                     return mapper.writeValueAsString(edit);
+                    // FIXME Note: why would writing to json produce an IOException?
                 } catch (IOException e) {
                     throw new RuntimeException("Error serializing InferenceEdit", e);
                 }

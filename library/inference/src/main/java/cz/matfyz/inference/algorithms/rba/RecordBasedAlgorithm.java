@@ -3,23 +3,17 @@ package cz.matfyz.inference.algorithms.rba;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import org.apache.spark.api.java.JavaRDD;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RecordBasedAlgorithm {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RecordBasedAlgorithm.class);
 
     public RecordSchemaDescription process(AbstractInferenceWrapper wrapper, AbstractRSDsReductionFunction merge) {
         wrapper.startSession();
 
+        // FIXME What exception can be thrown here?
+        // If it's truly necessary, the result of this function should be @Nullable.
+        // Why isn't the result of this function checked for null in MMInferOneInAll? If we can't recover from an exception, we should ignore it and catch it on the top level.
         try {
-            JavaRDD<RecordSchemaDescription> allRSDs = wrapper.loadRSDs();
-
-            RecordSchemaDescription rsd = allRSDs.reduce(merge);
-            return rsd;
-
+            return wrapper.loadRSDs().reduce(merge);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return null;

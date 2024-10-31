@@ -12,7 +12,6 @@ import java.sql.Clob;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A function that maps a CSV record represented as a Map of key-value pairs
@@ -47,7 +46,7 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Map<String, St
                 PropertyHeuristics heuristics = buildHeuristics(key, entry.getValue(), 1, 1);
                 return new Tuple2<>(key + "::" + entry.getValue(), heuristics);
             })
-            .collect(Collectors.toList());
+            .toList();
 
         return result.iterator();
     }

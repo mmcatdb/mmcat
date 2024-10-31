@@ -60,8 +60,8 @@ public class MMInferOneInAll {
         SchemaConverter schemaConverter = new SchemaConverter();
         List<CategoryMappingPair> pairs = new ArrayList<>();
 
-        for (String kindName : rsds.keySet()) {
-            schemaConverter.setNewRSD(rsds.get(kindName), kindName);
+        for (final var entry : rsds.entrySet()) {
+            schemaConverter.setNewRSD(entry.getValue(), entry.getKey());
             pairs.add(schemaConverter.convertToSchemaCategoryAndMapping());
         }
         return new InferenceResult(pairs, candidates);
@@ -101,7 +101,7 @@ public class MMInferOneInAll {
      */
     public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
         BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
-        StartingEndingFilter.setParams(100000);
+        StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
         CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
 
         return candidateMiner.process(wrapper, kinds);

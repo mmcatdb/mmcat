@@ -9,7 +9,6 @@ import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -153,15 +152,13 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     private List<String> getOldClusterNames() {
-        final List<String> oldClusterNames = new ArrayList<>();
-        for (final Key key : data.clusterKeys)
-            oldClusterNames.add(newMetadata.getObject(key).label);
-
-        return oldClusterNames;
+        return data.clusterKeys.stream()
+            .map(key -> newMetadata.getObject(key).label)
+            .toList();
     }
 
     private String findRepeatingPattern(List<String> strings) {
-        if (strings == null || strings.isEmpty())
+        if (strings.isEmpty())
             return "";
 
         final List<String> normalizedStrings = new ArrayList<>();
@@ -176,67 +173,68 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     private String findLongestCommonSubstring(List<String> strings) {
-        if (strings == null || strings.isEmpty()) return "";
+        if (strings.isEmpty())
+            return "";
 
-        StringBuilder combined = new StringBuilder();
-        for (int i = 0; i < strings.size(); i++) {
-            combined.append(strings.get(i)).append((char) (i + 'a'));
-        }
+        final StringBuilder combinedBuilder = new StringBuilder();
+        for (int i = 0; i < strings.size(); i++)
+            combinedBuilder.append(strings.get(i)).append((char) (i + 'a'));
 
-        String combinedStr = combined.toString();
-        Integer[] suffixArray = buildSuffixArray(combinedStr);
-        int[] lcp = buildLCP(combinedStr, suffixArray);
+        final String combined = combinedBuilder.toString();
+        final Integer[] suffixArray = buildSuffixArray(combined);
+        final int[] lcp = buildLCP(combined, suffixArray);
 
         int maxLength = 0;
         int index = 0;
         for (int i = 1; i < lcp.length; i++) {
-            if (lcp[i] > maxLength) {
-                if (getStringIndex(suffixArray[i], strings) != getStringIndex(suffixArray[i - 1], strings)) {
-                    maxLength = lcp[i];
-                    index = suffixArray[i];
-                }
+            if (
+                lcp[i] > maxLength &&
+                getStringIndex(suffixArray[i], strings) != getStringIndex(suffixArray[i - 1], strings)
+            ) {
+                maxLength = lcp[i];
+                index = suffixArray[i];
             }
         }
 
-        return combinedStr.substring(index, index + maxLength);
+        return combined.substring(index, index + maxLength);
     }
 
     private int getStringIndex(int suffixIndex, List<String> strings) {
         int length = 0;
         for (int i = 0; i < strings.size(); i++) {
             length += strings.get(i).length() + 1;
-            if (suffixIndex < length) return i;
+            if (suffixIndex < length)
+                return i;
         }
         return -1;
     }
 
     private Integer[] buildSuffixArray(String s) {
-        int n = s.length();
-        Integer[] suffixArray = new Integer[n];
-        for (int i = 0; i < n; i++) {
+        final int n = s.length();
+        final Integer[] suffixArray = new Integer[n];
+        for (int i = 0; i < n; i++)
             suffixArray[i] = i;
-        }
+
         Arrays.sort(suffixArray, (a, b) -> s.substring(a).compareTo(s.substring(b)));
         return suffixArray;
     }
 
     private int[] buildLCP(String s, Integer[] suffixArray) {
-        int n = s.length();
-        int[] rank = new int[n];
-        for (int i = 0; i < n; i++) {
+        final int n = s.length();
+        final int[] rank = new int[n];
+        for (int i = 0; i < n; i++)
             rank[suffixArray[i]] = i;
-        }
 
-        int[] lcp = new int[n];
+        final int[] lcp = new int[n];
         int h = 0;
         for (int i = 0; i < n; i++) {
             if (rank[i] > 0) {
                 int j = suffixArray[rank[i] - 1];
-                while (i + h < n && j + h < n && s.charAt(i + h) == s.charAt(j + h)) {
+                while (i + h < n && j + h < n && s.charAt(i + h) == s.charAt(j + h))
                     h++;
-                }
                 lcp[rank[i]] = h;
-                if (h > 0) h--;
+                if (h > 0)
+                    h--;
             }
         }
         return lcp;
@@ -398,7 +396,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         boolean complexIsCluster = false;
 
         for (AccessPath subpath : clusterComplexProperty.subpaths()) {
-            ComplexProperty complexProperty = null;
+            @Nullable ComplexProperty complexProperty = null;
 
             if (subpath instanceof ComplexProperty tempComplexProperty) {
                 complexProperty = tempComplexProperty;
@@ -442,7 +440,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                 newSubpaths.add(complexProperty);
             }
         }
-        MappingBuilder mappingBuilder = new MappingBuilder();
+
+        final MappingBuilder mappingBuilder = new MappingBuilder();
         return mappingBuilder.root(newSubpaths.toArray(new AccessPath[0]));
     }
 
@@ -475,7 +474,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private List<AccessPath> transformSubpaths(Collection<AccessPath> originalSubpaths) {
         return originalSubpaths.stream()
             .map(this::transformSubpath)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private AccessPath transformSubpath(AccessPath original) {

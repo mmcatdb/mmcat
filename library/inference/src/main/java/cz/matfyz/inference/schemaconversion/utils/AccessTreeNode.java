@@ -17,6 +17,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class AccessTreeNode {
 
+    // FIXME The point of using a constant is to have one contant in the whole project. I.e., somewhere in the inference algorithms, there is bound to be used the "_" symbol. That one should be replaced with this constant.
+    // Even better, the original algorithm should define the costant and this class should use it.
     private static final String ARRAY_SYMBOL = "_";
 
     /**
@@ -42,7 +44,7 @@ public class AccessTreeNode {
     public final boolean isArrayType;
     private List<AccessTreeNode> children;
 
-    public AccessTreeNode(String name, BaseSignature signature, Key key, Key parentKey, String label, Min min, boolean isArrayType) {
+    public AccessTreeNode(String name, @Nullable BaseSignature signature, Key key, @Nullable Key parentKey, @Nullable String label, @Nullable Min min, boolean isArrayType) {
         this.name = name;
         this.signature = signature;
         this.key = key;
@@ -63,10 +65,6 @@ public class AccessTreeNode {
 
     public Key getParentKey() {
         return parentKey;
-    }
-
-    private void setParentKey(Key parentKey) {
-        this.parentKey = parentKey;
     }
 
     public List<AccessTreeNode> getChildren() {
@@ -116,7 +114,7 @@ public class AccessTreeNode {
     private void promoteChildren(AccessTreeNode child) {
         final List<AccessTreeNode> newChildren = new ArrayList<>(child.getChildren());
         for (final AccessTreeNode newChild : newChildren)
-            newChild.setParentKey(this.key);
+            newChild.parentKey = this.key;
 
         this.children = newChildren;
     }

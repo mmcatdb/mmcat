@@ -46,6 +46,8 @@ public class InferenceEditorUtils {
             Signature signature = morphism.signature();
             if (signature.hasDual())
                 signature = signature.dual();
+            // FIXME This line should be concidered a war crime according to the Geneva convention.
+            // Use Signature.Generator instead.
             int signatureVal = Integer.parseInt(signature.toString());
             if (signatureVal > max)
                 max = signatureVal;

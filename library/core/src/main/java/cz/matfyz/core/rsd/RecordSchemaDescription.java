@@ -202,6 +202,7 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
             return comparedNames;
         }
 
+        // FIXME This comparison isn't consistent! Just return types - o.types instead.
         return typesAreEqual ? 0 : -1;
     }
 

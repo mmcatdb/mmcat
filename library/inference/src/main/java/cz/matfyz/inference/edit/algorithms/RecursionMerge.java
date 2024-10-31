@@ -13,7 +13,6 @@ import cz.matfyz.inference.edit.PatternSegment;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -118,10 +117,10 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     private List<List<SchemaObject>> findAdjustedPatternOccurences() {
-        DfsFinder dfsFinder = new DfsFinder(this);
-        for (SchemaObject node : newSchema.allObjects()) {
+        final DfsFinder dfsFinder = new DfsFinder(this);
+        for (final SchemaObject node : newSchema.allObjects())
             dfsFinder.findOccurrences(node);
-        }
+
         return dfsFinder.result;
     }
 
@@ -133,8 +132,8 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
-    public SchemaObject findNextNode(SchemaCategory schema, SchemaObject currentNode, PatternSegment currentSegment) {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
+    public @Nullable SchemaObject findNextNode(SchemaCategory schema, SchemaObject currentNode, PatternSegment currentSegment) {
+        for (final SchemaMorphism morphism : schema.allMorphisms()) {
             if (currentSegment.direction().equals(FORWARD) && morphism.dom().equals(currentNode))
                 return morphism.cod();
             if (currentSegment.direction().equals(BACKWARD) && morphism.cod().equals(currentNode))
@@ -198,7 +197,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return newSchema.allMorphisms().stream()
             .filter(morphism -> morphism.dom().equals(schemaObject) || morphism.cod().equals(schemaObject))
             .map(SchemaMorphism::signature)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private void createRecursiveMorphisms(List<List<SchemaObject>> occurences) {
