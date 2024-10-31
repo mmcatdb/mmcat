@@ -1,55 +1,46 @@
-import { useState, useEffect, useReducer } from 'react';
+import { useReducer } from 'react';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
-import { TableMenu } from '@/components/adminer/TableMenu';
+import { KindMenu } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { reducer } from '@/components/adminer/reducer';
-import type { Datasource } from '@/types/datasource';
 import { View } from '@/types/adminer/View';
 
 const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 export function AdminerPage() {
-    const [ datasource, setDatasource ] = useState<Datasource>();
-    const [ tableName, setTableName ] = useState<string>();
-    const [ view, setView ] = useState<View>(View.table);
-    const [ state, dispatch ] = useReducer(reducer, { submitted: { limit: 50, filters: [] }, new: { limit: 50, filters: [] } });
-
-    useEffect(() => {
-        setTableName(undefined);
-        dispatch({ type:'delete_filters' });
-    }, [ datasource ]);
-
-    useEffect(() => {
-        dispatch({ type:'delete_filters' });
-    }, [ tableName ]);
+    const [ state, dispatch ] = useReducer(reducer, {
+        form: { limit: 50, filters: [] },
+        active: { limit: 50, filters: [] },
+        view: View.table,
+    });
 
     return (
         <div>
             <div className='mt-5'>
-                <DatasourceMenu datasource={datasource} setDatasource={setDatasource}/>
+                <DatasourceMenu datasource={state.datasource} dispatch={dispatch}/>
 
-                {datasource &&
+                {state.datasource &&
                 (
                     <>
                         <div className='mt-5'>
-                            <TableMenu apiUrl={`${BACKEND_API_URL}/adminer/${datasource.id}`} tableName={tableName} setTableName={setTableName}/>
+                            <KindMenu apiUrl={`${BACKEND_API_URL}/adminer/${state.datasource.id}`} kindName={state.kind} dispatch={dispatch}/>
                         </div>
 
                         <div className='mt-5'>
-                            <ViewMenu datasourceType={datasource.type} view={view} setView={setView}/>
+                            <ViewMenu datasourceType={state.datasource.type} view={state.view} dispatch={dispatch}/>
                         </div>
 
-                        {tableName && (
+                        {state.kind && (
                             <div className='mt-5'>
                                 <FilterForm state={state} dispatch={dispatch}/>
                             </div>
                         )}
 
                         <div className='mt-5'>
-                            {typeof tableName === 'string' && (
-                                <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer`} datasourceId={datasource.id} tableName={tableName} datasourceType={datasource.type} state={state} view={view}/>
+                            {typeof state.kind === 'string' && (
+                                <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer`} state={state}/>
                             )}
                         </div>
                     </>

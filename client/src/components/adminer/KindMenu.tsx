@@ -1,13 +1,14 @@
 import { useFetchData } from '@/components/adminer/useFetchData';
+import { type AdminerStateAction } from '@/types/adminer/Reducer';
 import { Spinner, Button } from '@nextui-org/react';
 
-type TableMenuProps = Readonly<{
+type KindMenuProps = Readonly<{
     apiUrl: string;
-    tableName: string | undefined;
-    setTableName: (tableName: string) => void;
+    kindName: string | undefined;
+    dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
+export function KindMenu({ apiUrl, kindName, dispatch }: KindMenuProps) {
     const { fetchedData, loading, error } = useFetchData(apiUrl);
 
     if (loading) {
@@ -28,9 +29,9 @@ export function TableMenu({ apiUrl, tableName, setTableName }: TableMenuProps) {
                 fetchedData.data.map((name, index) => (
                     <Button
                         key={index}
-                        onPress={() => setTableName(name)}
-                        color={tableName === name ? 'primary' : 'default'}
-                        variant={tableName === name ? 'solid' : 'ghost'}
+                        onPress={() =>  dispatch({ type:'kind', newKind: name }) }
+                        color={kindName === name ? 'primary' : 'default'}
+                        variant={kindName === name ? 'solid' : 'ghost'}
                         className='flex-1 min-w-[50px]'
                     >
                         <span className='truncate'>{name}</span>
