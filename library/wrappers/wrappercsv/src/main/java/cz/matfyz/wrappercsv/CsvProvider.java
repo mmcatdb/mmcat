@@ -35,6 +35,14 @@ public class CsvProvider {
         return settings.url;
     }
 
+    public char getSeparator() {
+        return settings.separator;
+    }
+
+    public boolean hasHeader() {
+        return settings.hasHeader;
+    }
+
     /**
      * Retrieves an input stream for the specified CSV file.
      * If the URL points directly to a CSV file, that file is used.
@@ -52,10 +60,16 @@ public class CsvProvider {
         }
     }
 
-    /**
-     * There is not a straightforward way to access filenames in remote folder
-     * Therefore, right now it is possible to access local folders or files and remote just files.
-    */
+    // FIXME This behavior isn't very intuitive - each file should have one URL. Also, we shouldn't force the users to use a specific file name (like .csv).
+    // Solution - there should be flag for a datasource to indicate if it is a file or a directory.
+    // Then, the kindname in the mapping should be the full path after the directory - e.g., "business/employess.tsv".
+    //
+    // We don't want to mess with URI schemes either - there are other protocols, like ftp.
+    // Luckily, if we fix the problem above, we should be able to use standard java functions to support any protocol.
+
+
+    // There is not a straightforward way to access filenames in a remote folder.
+    // Therefore, right now it is possible to access local folders or files and remote just files.
 
     /**
      * Retrieves a list of CSV file names from the specified URL.
@@ -127,7 +141,10 @@ public class CsvProvider {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record CsvSettings(
         String url,
+        char separator,
+        boolean hasHeader,
         boolean isWritable,
         boolean isQueryable
     ) {}
+
 }

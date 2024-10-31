@@ -28,7 +28,9 @@ type InnerValue = {
 
 const initialValue: InnerValue = props.datasource
     ? { ...props.datasource, settings: { ...props.datasource.settings } }
-    : { label: '', settings: {} };
+    : { label: '', settings: {
+        hasHeader: false,
+    } };
 
 const innerValue = ref<InnerValue>(initialValue);
 
@@ -188,6 +190,21 @@ async function deleteMethod() {
                 label="Password:"
             >
                 <input v-model="innerValue.settings.password" />
+            </ValueRow>
+            <ValueRow
+                v-if="innerValue.type === DatasourceType.csv"
+                label="Separator:"
+            >
+                <input v-model="innerValue.settings.separator" />
+            </ValueRow>
+            <ValueRow
+                v-if="innerValue.type === DatasourceType.csv"
+                label="Has header:"
+            >
+                <input
+                    v-model="innerValue.settings.hasHeader"
+                    type="checkbox"
+                />
             </ValueRow>
             <ValueRow
                 label="Is writable:"

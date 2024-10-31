@@ -12,8 +12,8 @@ import java.net.URL;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +21,8 @@ class CsvTests {
 
     private final SparkProvider sparkProvider = new SparkProvider();
 
-    CsvInferenceWrapper setup(CsvProvider csvProvider) {
-        final var wrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
+    CsvInferenceWrapper setup(CsvProvider provider) {
+        final var wrapper = new CsvControlWrapper(provider).getInferenceWrapper(sparkProvider.getSettings());
         wrapper.startSession();
 
         return wrapper;
@@ -31,68 +31,96 @@ class CsvTests {
     @Test
     void testServerUrl() throws Exception { // testing file
         @SuppressWarnings("deprecation")
-        URL url = new URL("https://data.mmcatdb.com/googleplaystore.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
-        final var csvProvider = new CsvProvider(settings);
+        final URL url = new URL("https://data.mmcatdb.com/googleplaystore.csv");
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
+        final var provider = new CsvProvider(settings);
 
-        final List<String> fileNames = csvProvider.getCsvFileNames();
+        final List<String> fileNames = provider.getCsvFileNames();
 
         assertEquals("googleplaystore", fileNames.get(0));
 
-        try (InputStream inputStream = csvProvider.getInputStream("googleplaystore")) {
+        try (
+            InputStream inputStream = provider.getInputStream("googleplaystore")
+        ) {
             assertNotNull(inputStream);
+        }
+        catch (Exception e) {
+            fail(e);
         }
     }
 
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
-        URL url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv"); // the file includes comma as a delimiter
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
-        final var csvProvider = new CsvProvider(settings);
-        CsvInferenceWrapper inferenceWrapper = setup(csvProvider);
+        final URL url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv"); // the file includes comma as a delimiter
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
+        final var provider = new CsvProvider(settings);
+        final CsvInferenceWrapper inferenceWrapper = setup(provider);
+        final var documents = inferenceWrapper.loadDocuments();
 
-        var documents = inferenceWrapper.loadDocuments();
-
-        assertNotNull(documents, "Documents should not be null");
-        assertFalse(documents.isEmpty(), "Documents should not be empty");
         assertEquals(3, documents.count(), "There should be three documents");
     }
 
     @Test
     void testDelimiterSemicolon() throws Exception {
-        String csvContent = "key1;key2\nvalue1;value2\nvalue3;value4";
-        CsvSettings settings = new CsvSettings("", false, false);
-        CsvProvider csvProvider = new StringCsvProvider(settings, csvContent);
+        final CsvProvider provider = new StringCsvProvider(';', true, """
+            key1;key2
+            value1;value2
+            value3;value4
+            """);
 
-        CsvInferenceWrapper inferenceWrapper = setup(csvProvider);
+        final CsvInferenceWrapper inferenceWrapper = setup(provider);
+        final var documents = inferenceWrapper.loadDocuments();
 
-        var documents = inferenceWrapper.loadDocuments();
-
-        assertNotNull(documents, "Documents should not be null");
-        assertFalse(documents.isEmpty(), "Documents should not be empty");
         assertEquals(2, documents.count(), "There should be two documents");
     }
 
     @Test
     void testDelimiterTab() throws Exception {
-        String csvContent = "key1\tkey2\nvalue1\tvalue2\nvalue3\tvalue4,value5";
-        CsvSettings settings = new CsvSettings("", false, false);
-        CsvProvider csvProvider = new StringCsvProvider(settings, csvContent);
+        final CsvProvider provider = new StringCsvProvider('\t', true, """
+            key1\tkey2
+            value1\tvalue2
+            value3\tvalue4,value5
+            """);
 
-        CsvInferenceWrapper inferenceWrapper = setup(csvProvider);
+        final CsvInferenceWrapper inferenceWrapper = setup(provider);
+        final var documents = inferenceWrapper.loadDocuments();
 
-        var documents = inferenceWrapper.loadDocuments();
-
-        assertNotNull(documents, "Documents should not be null");
-        assertFalse(documents.isEmpty(), "Documents should not be empty");
         assertEquals(2, documents.count(), "There should be two documents");
+    }
+
+    @Test
+    void testQuotes() throws Exception {
+        final CsvProvider provider = new StringCsvProvider(',', true, """
+            key1,key2
+            "valueA,valueB","valueC valueD"
+            "value1 \\" value3",value4 value5
+            """);
+
+        final CsvInferenceWrapper inferenceWrapper = setup(provider);
+        final var documents = inferenceWrapper.loadDocuments();
+
+        assertEquals(2, documents.count(), "There should be two documents");
+    }
+
+    @Test
+    void testNoHeader() throws Exception {
+        final CsvProvider provider = new StringCsvProvider(',', false, """
+            value1,value2
+            value3,value4
+            value5,value6
+            """);
+
+        final CsvInferenceWrapper inferenceWrapper = setup(provider);
+        final var documents = inferenceWrapper.loadDocuments();
+
+        assertEquals(3, documents.count(), "There should be two documents");
     }
 
     private static class StringCsvProvider extends CsvProvider {
         private final String csvContent;
 
-        StringCsvProvider(CsvSettings settings, String csvContent) {
-            super(settings);
+        StringCsvProvider(char separator, boolean hasHeader, String csvContent) {
+            super(new CsvSettings("", separator, hasHeader, false, false));
             this.csvContent = csvContent;
         }
 

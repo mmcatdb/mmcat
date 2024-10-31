@@ -8,19 +8,18 @@ import cz.matfyz.core.rsd.Share;
 import cz.matfyz.wrappercsv.inference.RecordToHeuristicsMap;
 import cz.matfyz.wrappercsv.inference.MapCsvDocument;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 
@@ -90,25 +89,46 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      * @return a {@link JavaRDD} of maps containing CSV row data.
      */
     public JavaRDD<Map<String, String>> loadDocuments() {
-        List<Map<String, String>> lines = new ArrayList<>();
-        String[] header = null;
+        final List<Map<String, String>> lines = new ArrayList<>();
 
-        try (InputStream inputStream = provider.getInputStream(kindName);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        final CsvSchema baseSchema = CsvSchema.emptySchema()
+            .withColumnSeparator(provider.getSeparator())
+            .withEscapeChar('\\');
 
-            String firstLine = reader.readLine();
-            if (firstLine == null) {
-                return context.emptyRDD();
+        try (
+            InputStream inputStream = provider.getInputStream(kindName);
+        ) {
+            if (!provider.hasHeader()) {
+                // If there is no header, we have to read the first line to get the number of columns and create a default header.
+                final MappingIterator<String[]> headerReader = new CsvMapper()
+                    .readerFor(String[].class)
+                    .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                    .with(baseSchema)
+                    .readValues(inputStream);
+
+                if (!headerReader.hasNext())
+                    return context.emptyRDD();
+
+                final String[] firstLine = headerReader.next();
+                final String[] header = new String[firstLine.length];
+                for (int i = 0; i < firstLine.length; i++)
+                    header[i] = "" + i;
+
+                // We have to read the lines as String[] and manually convert them to Map<String, String>, because the stream already started (we had to create the header).
+                // We can't "switch" to a different reader, because the stream is already consumed.
+                lines.add(createLineMap(header, firstLine));
+
+                while (headerReader.hasNext())
+                    lines.add(createLineMap(header, headerReader.next()));
             }
+            else {
+                final MappingIterator<Map<String, String>> reader = new CsvMapper()
+                    .readerFor(Map.class)
+                    .with(baseSchema.withHeader())
+                    .readValues(inputStream);
 
-            char delimiter = detectDelimiter(firstLine);
-            header = parseLine(firstLine, delimiter).toArray(new String[0]);
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                List<String> elements = parseLine(line, delimiter);
-                Map<String, String> lineMap = createLineMap(header, elements);
-                lines.add(lineMap);
+                while (reader.hasNext())
+                    lines.add(reader.next());
             }
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
@@ -118,36 +138,12 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
         return context.parallelize(lines);
     }
 
-    private char detectDelimiter(String line) {
-        char[] possibleDelimiters = {',', '\t', ';', '.'};
-        Map<Character, Integer> delimiterCount = new HashMap<>();
-        for (char delimiter : possibleDelimiters) {
-            int count = line.split(Pattern.quote(Character.toString(delimiter))).length - 1;
-            delimiterCount.put(delimiter, count);
-        }
-        return Collections.max(delimiterCount.entrySet(), Map.Entry.comparingByValue()).getKey();
-    }
+    private Map<String, String> createLineMap(String[] header, String[] elements) {
+        final Map<String, String> lineMap = new HashMap<>();
+        final int columns = Math.min(header.length, elements.length);
+        for (int i = 0; i < columns; i++)
+            lineMap.put(header[i], elements[i]);
 
-    private List<String> parseLine(String line, char delimiter) {
-        String escapedDelimiter = Pattern.quote(Character.toString(delimiter));
-        Pattern csvPattern = Pattern.compile("\"([^\"]*)\"|([^" + escapedDelimiter + "]+)");
-        List<String> elements = new ArrayList<>();
-        Matcher matcher = csvPattern.matcher(line);
-
-        while (matcher.find()) {
-            String value = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
-            elements.add(value);
-        }
-        return elements;
-    }
-
-    private Map<String, String> createLineMap(String[] header, List<String> elements) {
-        Map<String, String> lineMap = new HashMap<>();
-        for (int i = 0; i < elements.size(); i++) {
-            if (i < header.length) {
-                lineMap.put(header[i], elements.get(i));
-            }
-        }
         return lineMap;
     }
 

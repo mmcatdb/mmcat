@@ -7,9 +7,6 @@ import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.wrapperjson.JsonControlWrapper;
 import cz.matfyz.wrapperjson.JsonProvider;
 import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
-import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
-import cz.matfyz.wrappermongodb.MongoDBProvider;
-import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
 import cz.matfyz.wrappercsv.CsvProvider;
 import cz.matfyz.wrappercsv.CsvProvider.CsvSettings;
@@ -40,7 +37,7 @@ public class RSDTests {
     @Test
     void testRBAalgorithmCSV() throws Exception {
         final var url = ClassLoader.getSystemResource("RSDTestFile.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
         final var jsonProvider = new CsvProvider(settings);
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());

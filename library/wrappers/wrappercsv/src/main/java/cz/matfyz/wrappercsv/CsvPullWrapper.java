@@ -9,17 +9,15 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
-import cz.matfyz.core.record.RecordName;
-import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.Name;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
  * A pull wrapper implementation for CSV files that implements the {@link AbstractPullWrapper} interface.
@@ -49,21 +47,24 @@ public class CsvPullWrapper implements AbstractPullWrapper {
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         final var forest = new ForestOfRecords();
 
-        try (InputStream inputStream = provider.getInputStream(path.name().toString());
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            String headerLine = reader.readLine();
-            if (headerLine == null) {
-                throw new IOException("CSV file is empty");
-            }
+        final CsvSchema baseSchema = CsvSchema.emptySchema()
+            .withColumnSeparator(provider.getSeparator())
+            .withEscapeChar('\\');
 
-            String[] headers = headerLine.split(",");
+        final CsvSchema schema = provider.hasHeader()
+            ? baseSchema.withHeader()
+            : baseSchema.withColumnsFrom(createHeaderSchema(path));
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] values = line.split(",");
-                RootRecord rootRecord = createRecordFromCSVLine(headers, values, path);
-                forest.addRecord(rootRecord);
-            }
+        try (
+            InputStream inputStream = provider.getInputStream(path.name().toString());
+        ) {
+            final MappingIterator<Map<String, String>> reader = new CsvMapper()
+                .readerFor(Map.class)
+                .with(schema)
+                .readValues(inputStream);
+
+            while (reader.hasNext())
+                forest.addRecord(createRecord(path, reader.nextValue()));
         } catch (IOException e) {
             throw PullForestException.innerException(e);
         }
@@ -71,63 +72,24 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         return forest;
     }
 
-    /**
-     * Creates a {@link RootRecord} from a line of CSV data using the provided headers and values.
-     *
-     * @param headers an array of header names from the CSV file.
-     * @param values an array of values corresponding to a CSV row.
-     * @param path the complex property path used to map the CSV data to a record.
-     * @return a {@link RootRecord} created from the CSV line.
-     */
-    private RootRecord createRecordFromCSVLine(String[] headers, String[] values, ComplexProperty path) {
-        RootRecord record = new RootRecord();
-        for (AccessPath subpath : path.subpaths()) {
-            Name name = subpath.name();
-            if (name instanceof StaticName) {
-                StaticName staticName = (StaticName) name;
-                String fieldName = staticName.getStringName();
+    private CsvSchema createHeaderSchema(ComplexProperty path) {
+        // If no header is provided, we have to hope the columns are in the correct order ...
+        final var builder = CsvSchema.builder();
+        path.subpaths().stream()
+            .map(property -> ((StaticName) property.name()).getStringName())
+            .forEach(builder::addColumn);
 
-                int idx = findIndexOf(headers, fieldName);
-                String value = values[idx];
+        return builder.build();
+    }
 
-                // Assumes that the path has only simple properties (no complex or array) for CSV files (might change later).
-                if (subpath instanceof SimpleProperty simpleSubpath) {
-                    record.addSimpleValueRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), value);
-                }
-            }
+    private RootRecord createRecord(ComplexProperty path, Map<String, String> line) {
+        final RootRecord record = new RootRecord();
+        for (final AccessPath property : path.subpaths()) {
+            final var name = ((StaticName) property.name());
+            final String value = line.get(name.getStringName());
+            record.addSimpleValueRecord(name.toRecordName(), property.signature(), value);
         }
         return record;
-    }
-
-    /**
-     * Finds the index of a target string in an array.
-     *
-     * @param array the array to search in.
-     * @param target the string to find.
-     * @return the index of the target string, or -1 if not found.
-     */
-    public static int findIndexOf(String[] array, String target) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i].equals(target)) {
-                return i;
-            }
-        }
-        return -1;  // if not found
-    }
-
-    /**
-     * Converts a {@link Name} object to a {@link RecordName} based on its type (static or dynamic).
-     *
-     * @param name the name object to convert.
-     * @param valueIfDynamic the value to use if the name is dynamic.
-     * @return the converted {@link RecordName}.
-     */
-    private RecordName toRecordName(Name name, String valueIfDynamic) {
-        if (name instanceof DynamicName dynamicName)
-            return dynamicName.toRecordName(valueIfDynamic);
-
-        var staticName = (StaticName) name;
-        return staticName.toRecordName();
     }
 
     /**
