@@ -59,6 +59,7 @@ import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -345,7 +346,7 @@ public class JobExecutorService {
                     throw new RuntimeException("Error deserializing InferenceEdit", e);
                 }
             })
-            .toList();
+            .collect(Collectors.toList());
 
         if (layoutType != null) {
             Layout.applyToMetadata(schema, metadata, layoutType);

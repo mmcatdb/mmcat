@@ -118,10 +118,8 @@ public class RecursionMerge extends InferenceEditAlgorithm {
 
     private List<List<SchemaObject>> findAdjustedPatternOccurences() {
         final DfsFinder dfsFinder = new DfsFinder(this);
-        for (final SchemaObject node : newSchema.allObjects())
-            dfsFinder.findOccurrences(node);
-
-        return dfsFinder.result;
+        dfsFinder.findOccurrencesInAllNodes();
+        return dfsFinder.getResult();
     }
 
     public boolean containsRecursiveAlready(Set<SchemaObject> recursiveNodes, String currentNodeLabel) {

@@ -7,21 +7,14 @@ import Warning from './Warning.vue';
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {Graph} graph - The graph object used for recursion analysis.
  */
 const props = defineProps<{
+    /** The graph object used for recursion analysis. */
     graph: Graph;
 }>();
 
 /**
  * Emits custom events to the parent component.
- * @emits save - Emitted when the user saves the changes.
- * @emits cancel - Emitted when the user cancels the current operation.
- * @emits cancel-edit - Emitted when the user cancels the current edit.
- * @emits confirm - Emitted when the user confirms the recursion pattern.
- * @param {Node[]} nodes - The selected nodes for the recursion.
- * @param {Edge[]} edges - The selected edges for the recursion.
  */
 const emit = defineEmits<{
     (e: 'save'): void;
@@ -146,7 +139,6 @@ onUnmounted(() => {
  * Handles node tap events.
  * If it's a node's turn to be selected, the node is added to the selected list.
  * Otherwise, a warning message is displayed.
- * @param {Node} node - The tapped node.
  */
 function onNodeTapHandler(node: Node) {
     if (isNodeTurn.value) {
@@ -163,7 +155,6 @@ function onNodeTapHandler(node: Node) {
  * Handles edge tap events.
  * If it's an edge's turn to be selected, the edge is added to the selected list.
  * Otherwise, a warning message is displayed.
- * @param {Edge} edge - The tapped edge.
  */
 function onEdgeTapHandler(edge: Edge) {
     if (!isNodeTurn.value) {

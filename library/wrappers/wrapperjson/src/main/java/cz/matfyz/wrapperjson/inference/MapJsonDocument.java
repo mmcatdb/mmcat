@@ -30,7 +30,7 @@ public abstract class MapJsonDocument {
     public static RecordSchemaDescription process(Document t) {
         RecordSchemaDescription result = new RecordSchemaDescription();
 
-        result.setName("_");
+        result.setName(RecordSchemaDescription.ROOT_SYMBOL);
         result.setUnique(Char.FALSE);
         // result.setShare(new Share());
         result.setId(Char.FALSE);

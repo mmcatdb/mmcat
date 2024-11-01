@@ -1,6 +1,7 @@
 package cz.matfyz.wrappercsv.inference;
 
 import cz.matfyz.core.rsd.*;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public abstract class MapCsvDocument {
     public static RecordSchemaDescription process(Map<String, String> t) {
         RecordSchemaDescription result = new RecordSchemaDescription();
 
-        result.setName("_");
+        result.setName(RecordSchemaDescription.ROOT_SYMBOL);
         result.setUnique(Char.FALSE);
         //result.setShare(new Share());
         result.setId(Char.FALSE);

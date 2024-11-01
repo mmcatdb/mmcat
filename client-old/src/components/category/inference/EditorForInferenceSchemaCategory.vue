@@ -12,31 +12,20 @@ import Divider from '@/components/layout/Divider.vue';
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {Graph} graph - The graph instance used in the component.
- * @property {SchemaCategory} schemaCategory - The schema category.
- * @property {InferenceEdit[]} inferenceEdits - Array of inference edits.
- * @property {Candidates} candidates - The candidates for merging.
  */
 const props = defineProps<{
+    /** The graph instance used in the component. */
     graph: Graph;
+    /** The schema category. */
     schemaCategory: SchemaCategory;
+    /** Array of inference edits. */
     inferenceEdits: InferenceEdit[];
+    /** The candidates for merging. */
     candidates: Candidates;
 }>();
 
 /**
  * Emits custom events to the parent component.
- * @emits cancel-edit - Emitted when the user cancels the edit.
- * @emits confirm-reference-merge - Emitted when a reference merge is confirmed.
- * @emits confirm-primary-key-merge - Emitted when a primary key merge is confirmed.
- * @emits confirm-cluster - Emitted when a cluster operation is confirmed.
- * @emits confirm-recursion - Emitted when a recursion operation is confirmed.
- * @emits revert-edit - Emitted when an inference edit is reverted.
- * @param {Node[] | ReferenceCandidate} payload - Payload for the merge operation.
- * @param {Node[] | PrimaryKeyCandidate} nodes - Nodes for the merge operation.
- * @param {{nodes: Node[], edges: Edge[]}} payload - Payload for the recursion operation.
- * @param {InferenceEdit} edit - The inference edit to revert.
  */
 const emit = defineEmits<{
     (e: 'cancel-edit'): void;
@@ -49,7 +38,6 @@ const emit = defineEmits<{
 
 /**
  * Enum representing the different states of the editor.
- * @enum {number}
  */
 enum State {
     Default,
@@ -61,20 +49,11 @@ enum State {
 
 /**
  * Generic state value type used to manage the current state of the editor.
- * @template State
- * @template Value
- * @typedef {Object} GenericStateValue
- * @property {State} type - The current state type.
  */
 type GenericStateValue<State, Value> = { type: State } & Value;
 
 /**
  * State value representing the current state of the editor.
- * @typedef {GenericStateValue<State.Default, unknown> | 
- * GenericStateValue<State.Merge, unknown> |
- * GenericStateValue<State.Cluster, unknown> |
- * GenericStateValue<State.Recursion, unknown> |
- * GenericStateValue<State.Edits, unknown>} StateValue
  */
 type StateValue = 
     GenericStateValue<State.Default, unknown> |
@@ -125,7 +104,6 @@ function setStateToDefault() {
 
 /**
  * Emits the 'confirm-reference-merge' event when a reference merge is confirmed.
- * @param {Node[] | ReferenceCandidate} payload - The payload for the reference merge.
  */
 function confirmReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
     emit('confirm-reference-merge', payload);
@@ -133,7 +111,6 @@ function confirmReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
 
 /**
  * Emits the 'confirm-primary-key-merge' event when a primary key merge is confirmed.
- * @param {Node[] | PrimaryKeyCandidate} payload - The payload for the primary key merge.
  */
 function confirmPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
     emit('confirm-primary-key-merge', payload);
@@ -141,7 +118,6 @@ function confirmPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
 
 /**
  * Emits the 'confirm-cluster' event when a cluster operation is confirmed.
- * @param {Node[]} nodes - The selected nodes for clustering.
  */
 function confirmClusterEdit(nodes: Node[]) {
     emit('confirm-cluster', nodes);
@@ -149,8 +125,6 @@ function confirmClusterEdit(nodes: Node[]) {
 
 /**
  * Emits the 'confirm-recursion' event when a recursion operation is confirmed.
- * @param {Node[]} nodes - The nodes involved in the recursion.
- * @param {Edge[]} edges - The edges involved in the recursion.
  */
 function confirmRecursionEdit(nodes: Node[], edges: Edge[]) {
     emit('confirm-recursion', { nodes, edges });
@@ -165,7 +139,6 @@ function cancelEdit() {
 
 /**
  * Emits the 'revert-edit' event when an inference edit is reverted.
- * @param {InferenceEdit} edit - The edit to revert.
  */
 function revertEdit(edit: InferenceEdit) {
     emit('revert-edit', edit);

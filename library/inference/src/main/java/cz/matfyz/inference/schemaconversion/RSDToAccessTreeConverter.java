@@ -47,12 +47,11 @@ public class RSDToAccessTreeConverter {
 
             for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
                 boolean isArray = isTypeArray(rsdChild);
-                AccessTreeNode.Type state = rsdChild.getChildren().isEmpty() ? AccessTreeNode.Type.SIMPLE : AccessTreeNode.Type.COMPLEX;
                 BaseSignature signature = Signature.createBase(signatureGenerator.next());
                 Key keyChild = new Key(keyGenerator.next());
                 Min min = findMin(rsdParent, rsdChild);
 
-                if (rsdChild.getName().equals("_")) { // Check for mongo identifier
+                if (rsdChild.getName().equals(RecordSchemaDescription.ROOT_SYMBOL)) { // Check for mongo identifier
                     buildAccessTree(rsdChild, keyParent, i++, currentNode);
                 } else if (!rsdChild.getName().equals("_id")) {
                     String label = "";

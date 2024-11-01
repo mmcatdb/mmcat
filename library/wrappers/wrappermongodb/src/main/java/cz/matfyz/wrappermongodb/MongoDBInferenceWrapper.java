@@ -72,7 +72,7 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
 
     @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         JavaMongoRDD<Document> records = loadRecords();
-        return records.mapToPair(t -> new Tuple2<>("_", MapMongoDocument.process(t)));
+        return records.mapToPair(t -> new Tuple2<>(RecordSchemaDescription.ROOT_SYMBOL, MapMongoDocument.process(t)));
     }
 
     public JavaMongoRDD<Document> loadRecords() {

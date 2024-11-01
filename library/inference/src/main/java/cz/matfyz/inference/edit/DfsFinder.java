@@ -21,8 +21,7 @@ public class DfsFinder {
 
     private RecursionMerge recursionMerge;
     private List<SchemaObject> currentPath;
-    // FIXME Not great
-    public List<List<SchemaObject>> result;
+    private List<List<SchemaObject>> result;
     private final Set<SchemaObject> recursiveNodes;
 
     public DfsFinder(RecursionMerge recursionMerge) {
@@ -32,12 +31,24 @@ public class DfsFinder {
         this.recursiveNodes = new HashSet<>();
     }
 
+    public List<List<SchemaObject>> getResult() {
+        return result;
+    }
+
+    /**
+     * Initiates the search for occurrences starting from all schema objects in the schema.
+     */
+    public void findOccurrencesInAllNodes() {
+        for (SchemaObject node : recursionMerge.newSchema.allObjects()) {
+            findOccurrences(node);
+        }
+    }
+
     /**
      * Initiates the search for occurrences starting from the specified schema object.
      */
     public List<List<SchemaObject>> findOccurrences(SchemaObject startNode) {
         dfsFind(startNode, 0);
-        // FIXME Not terrible
         return cleanOccurrences(result);
     }
 

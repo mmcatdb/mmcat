@@ -8,21 +8,16 @@ import NodeInput from '@/components/input/NodeInput.vue';
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {Graph} graph - The graph object used for selecting nodes.
- * @property {Candidates} candidates - The candidates available for reference merging.
  */
 const props = defineProps<{
+    /** The graph object used for selecting nodes. */
     graph: Graph;
+    /** The candidates available for reference merging. */
     candidates: Candidates;
 }>();
 
 /**
  * Emits custom events to the parent component.
- * @emits confirm - Emitted when the user confirms the reference merge.
- * @emits cancel - Emitted when the user cancels the current operation.
- * @emits cancel-edit - Emitted when the user cancels the current edit.
- * @param {Node[] | ReferenceCandidate} payload - The selected nodes or reference candidate.
  */
 const emit = defineEmits<{
     (e: 'confirm', payload: Node[] | ReferenceCandidate): void;
@@ -67,8 +62,6 @@ const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
 /**
  * Confirms the selected reference candidate and emits the 'confirm' event.
- * @param {ReferenceCandidate} candidate - The reference candidate to confirm.
- * @param {number} index - The index of the selected candidate.
  */
 function confirmCandidate(candidate: ReferenceCandidate, index: number) {
     if (!clickedCandidates.value.includes(candidate)) 
@@ -116,8 +109,6 @@ function cancel() {
 
 /**
  * Splits the hierarchical name of a candidate into two parts.
- * @param {string} name - The hierarchical name to split.
- * @returns {Object} - The split name, with partA and partB.
  */
 function splitName(name: string) {
     const [ partA, partB ] = name.split('/');

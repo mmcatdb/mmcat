@@ -41,27 +41,27 @@ type StateValue = GenericStateValue<State.Default, unknown> |
 
 /**
  * Props for the AccessPathEditor component.
- * @property {Datasource} datasource - The datasource object.
- * @property {GraphRootProperty} rootProperty - The root property of the graph.
  */
 type AccessPathEditorProps = {
+    /** The datasource object. */
     datasource: Datasource;
+    /** The root property of the graph. */
     rootProperty: GraphRootProperty;
 };
 
 /**
  * Configuration for keyboard shortcuts used in the component.
- * @property {Object} insert - Shortcut for inserting nodes.
- * @property {Object} delete - Shortcut for deleting nodes.
- * @property {Object} setRoot - Shortcut for setting the root node.
  */
 type ShortcutConfig = {
+    /** Shortcut for inserting nodes. */
     insert?: {
         keyboard: string;
     };
+    /** Shortcut for deleting nodes. */
     delete?: {
         keyboard: string;
     };
+    /** Shortcut for setting the root node. */
     setRoot?: {
         keyboard: string;
     };
@@ -128,7 +128,6 @@ async function loadShortcuts() {
 
 /**
  * Handles keyboard shortcuts based on the current state of node selection.
- * @param {KeyboardEvent} event - The keyboard event triggered by user actions.
  */
 function handleKeyDown(event: KeyboardEvent) {
     const key = event.key.toLowerCase(); // normalize it
@@ -149,8 +148,6 @@ function handleKeyDown(event: KeyboardEvent) {
 
 /**
  * Returns the primary key of the given object IDs.
- * @param {ObjectIds} [ids] - Optional object IDs.
- * @returns {SignatureId} - The primary key signature ID.
  */
 function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     if (!ids)
@@ -166,7 +163,6 @@ const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schem
 
 /**
  * Requests to insert a node into the graph and update the root property.
- * @param {Node} node - The node to be inserted.
  */
 function insertRequested(node: Node) {
     if (insert(node))
@@ -177,8 +173,6 @@ function insertRequested(node: Node) {
 
 /**
  * Inserts a node into the graph and updates the parent property accordingly.
- * @param {Node} node - The node to insert.
- * @returns {boolean} - True if insertion was successful, otherwise false.
  */
 function insert(node: Node): boolean {
     const children = graph.getChildrenForNode(node);
@@ -245,18 +239,7 @@ function findPropertyInSubpaths(property: GraphParentProperty, node: Node): Grap
 }
 
 /**
- * Retrieves the parent property for a given parent node.
- * @param {Node} parentNode - The parent node to search for.
- * @returns {GraphParentProperty | undefined} - The parent property if found, otherwise undefined.
- */
-function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty | undefined {
-    return props.rootProperty ? searchSubpathsForNode(props.rootProperty, parentNode) : undefined;
-}
-
-/**
  * Finds a subpath corresponding to a node within the root property.
- * @param {Node} node - The node to search for.
- * @returns {GraphChildProperty | undefined} - The subpath if found, otherwise undefined.
  */
 function findSubpathForNode(node: Node): GraphChildProperty | undefined {
     return searchSubpathsForNode(props.rootProperty, node) as GraphChildProperty | undefined;
@@ -264,9 +247,6 @@ function findSubpathForNode(node: Node): GraphChildProperty | undefined {
 
 /**
  * Searches through subpaths of a property to find a node.
- * @param {GraphParentProperty} property - The property to search through.
- * @param {Node} node - The node to find.
- * @returns {GraphParentProperty | undefined} - The parent property if found, otherwise undefined.
  */
 function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
     if (property.node.equals(node)) return property;
@@ -285,7 +265,6 @@ function insertBetweenClicked() {
 
 /**
  * Deletes the requested nodes from the access path and updates the root property.
- * @param {Node[]} nodes - The nodes to be deleted.
  */
 function deleteRequested(nodes: Node[]) {
     nodes.forEach(node => {
@@ -300,7 +279,6 @@ function deleteRequested(nodes: Node[]) {
 
 /**
  * Sets the selected node as the root property and updates the root access path.
- * @param {Node} node - The node to set as the root.
  */
 function setRootRequested(node: Node) {
     const label = node.metadata.label.toLowerCase();
@@ -338,7 +316,6 @@ function finishMapping() {
 
 /**
  * Watches the selectedNodes array and updates the state based on the number of valid nodes selected.
- * @param {Node[]} nodes - The currently selected nodes.
  */
 watch(selectedNodes, (nodes) => {
     const validNodes = nodes.filter((node): node is Node => node !== undefined);
@@ -354,8 +331,6 @@ watch(selectedNodes, (nodes) => {
 
 /**
  * Checks if a node is part of the access path.
- * @param {Node} node - The node to check.
- * @returns {boolean} - True if the node is part of the access path, otherwise false.
  */
 function isNodeInAccessPath(node: Node): boolean {
     return localRootProperty.value.containsNode(node) ?? false;

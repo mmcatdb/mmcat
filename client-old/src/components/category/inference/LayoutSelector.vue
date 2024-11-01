@@ -4,17 +4,14 @@ import { LayoutType } from '@/types/inference/layoutType';
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {LayoutType} layoutType - The current layout type to be displayed and selected.
  */
 const props = defineProps<{
+    /** The current layout type to be displayed and selected. */
     layoutType: LayoutType;
 }>();
 
 /**
  * Emits custom events to the parent component.
- * @emits change-layout - Emitted when the user selects a new layout type.
- * @param {LayoutType} layoutType - The selected layout type.
  */
 const emit = defineEmits<{
     (e: 'change-layout', layoutType: LayoutType): void;
@@ -39,7 +36,6 @@ function toggleOptions() {
 
 /**
  * Changes the layout type and emits the 'change-layout' event.
- * @param {LayoutType} layoutType - The selected layout type.
  */
 function changeLayout(layoutType: LayoutType) {
     selectedLayout.value = layoutType;

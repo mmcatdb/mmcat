@@ -3,6 +3,7 @@ package cz.matfyz.inference.edit;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.Signature.Generator;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -39,20 +40,16 @@ public class InferenceEditorUtils {
     /**
      * Gets a new unique signature value for a schema.
      */
-    private static int getNewSignatureValue(SchemaCategory schema) {
-        int max = 0;
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
-            // assumes that in inference I create only BaseSignatures
-            Signature signature = morphism.signature();
-            if (signature.hasDual())
-                signature = signature.dual();
-            // FIXME This line should be concidered a war crime according to the Geneva convention.
-            // Use Signature.Generator instead.
-            int signatureVal = Integer.parseInt(signature.toString());
-            if (signatureVal > max)
-                max = signatureVal;
-        }
-        return max + 1;
+    //TODO: be aware of dual morphisms
+    private static Signature getNewSignatureValue(SchemaCategory schema) {
+        Collection<Signature> currentSignatures = new ArrayList<>();
+
+        for (SchemaMorphism morphism : schema.allMorphisms())
+            currentSignatures.add(morphism.signature());
+
+        Generator generator = new Generator(currentSignatures);
+
+        return generator.next();
     }
 
     /**
@@ -76,7 +73,7 @@ public class InferenceEditorUtils {
         if (existingMorphism != null)
             return existingMorphism.signature();
 
-        Signature signature = Signature.createBase(getNewSignatureValue(schema));
+        Signature signature = getNewSignatureValue(schema);
 
         if (isDual)
             signature = signature.dual();

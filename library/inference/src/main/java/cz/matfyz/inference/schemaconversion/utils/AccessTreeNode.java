@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
@@ -16,10 +17,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * construct an access path in the schema.
  */
 public class AccessTreeNode {
-
-    // FIXME The point of using a constant is to have one contant in the whole project. I.e., somewhere in the inference algorithms, there is bound to be used the "_" symbol. That one should be replaced with this constant.
-    // Even better, the original algorithm should define the costant and this class should use it.
-    private static final String ARRAY_SYMBOL = "_";
 
     /**
      * Enum representing the type of the {@code AccessTreeNode}.
@@ -103,7 +100,7 @@ public class AccessTreeNode {
     public void transformArrayNodes() {
         if (this.isArrayType && !this.children.isEmpty()) {
             final AccessTreeNode child = this.children.get(0); // getting the first child
-            if (child.name.equals(ARRAY_SYMBOL))
+            if (child.name.equals(RecordSchemaDescription.ROOT_SYMBOL))
                 promoteChildren(child);
         }
 

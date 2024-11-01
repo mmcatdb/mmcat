@@ -8,23 +8,16 @@ import PrimaryKeyMerge from '@/components/category/inference/PrimaryKeyMerge.vue
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {Graph} graph - The graph object used for merging operations.
- * @property {Candidates} candidates - Candidates for merging, either by reference or primary key.
  */
 const props = defineProps<{
+    /** The graph object used for merging operations. */
     graph: Graph;
+    /** Candidates for merging, either by reference or primary key. */
     candidates: Candidates;
 }>();
 
 /**
  * Emits custom events to the parent component.
- * @emits cancel - Emitted when the cancel button is clicked.
- * @emits cancel-edit - Emitted when the current edit is canceled.
- * @emits confirm-reference-merge - Emitted when a reference merge is confirmed.
- * @emits confirm-primary-key-merge - Emitted when a primary key merge is confirmed.
- * @param {Node[] | ReferenceCandidate} payload - The payload for the reference merge.
- * @param {Node[] | PrimaryKeyCandidate} nodes - The payload for the primary key merge.
  */
 const emit = defineEmits<{
     (e: 'cancel'): void;
@@ -40,7 +33,6 @@ const mergeType = ref<'reference' | 'primaryKey'>('reference');
 
 /**
  * Confirms the reference merge and emits the 'confirm-reference-merge' event.
- * @param {Node[] | ReferenceCandidate} payload - The payload for the reference merge.
  */
 function confirmReference(payload: Node[] | ReferenceCandidate ) {
     emit('confirm-reference-merge', payload);
@@ -48,7 +40,6 @@ function confirmReference(payload: Node[] | ReferenceCandidate ) {
 
 /**
  * Confirms the primary key merge and emits the 'confirm-primary-key-merge' event.
- * @param {Node[] | PrimaryKeyCandidate} payload - The payload for the primary key merge.
  */
 function confirmPrimaryKey(payload: Node[] | PrimaryKeyCandidate) {
     emit('confirm-primary-key-merge', payload);
@@ -70,7 +61,6 @@ function cancelEdit() {
 
 /**
  * Sets the current merge type to either 'reference' or 'primaryKey'.
- * @param {'reference' | 'primaryKey'} type - The type of merge to set.
  */
 function setMergeType(type: 'reference' | 'primaryKey') {
     mergeType.value = type;

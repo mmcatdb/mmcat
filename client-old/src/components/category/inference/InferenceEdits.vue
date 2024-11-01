@@ -7,18 +7,14 @@ import Divider from '@/components/layout/Divider.vue';
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {InferenceEdit[]} inferenceEdits - Array of inference edits.
  */
 const props = defineProps<{
+    /** Array of inference edits. */
     inferenceEdits: InferenceEdit[];
 }>();
 
 /**
  * Emits custom events to the parent component.
- * @emits cancel - Emitted when the cancel button is clicked.
- * @emits revert-edit - Emitted when an edit is reverted.
- * @param {InferenceEdit} edit - The inference edit to revert.
  */
 const emit = defineEmits<{
     (e: 'cancel'): void;
@@ -34,7 +30,6 @@ console.log('inference edits: ', props.inferenceEdits);
 
 /**
  * Emits the 'revert-edit' event when an inference edit is reverted.
- * @param {InferenceEdit} edit - The inference edit to revert.
  */
 function revertEdit(edit: InferenceEdit) {
     emit('revert-edit', edit);
@@ -49,8 +44,6 @@ function cancel() {
 
 /**
  * Returns a human-readable name for the edit type.
- * @param {string} editType - The type of the edit (PrimaryKey, Reference, Recursion, Cluster).
- * @returns {string} - The human-readable name of the edit type.
  */
 function getEditName(editType: string): string {
     switch (editType) {

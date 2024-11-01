@@ -7,20 +7,14 @@ import NodeInput from '@/components/input/NodeInput.vue';
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {Graph} graph - The graph object used in the NodeInput component.
  */
 const props = defineProps<{
+    /** The graph object used in the NodeInput component. */
     graph: Graph;
 }>();
 
 /**
  * Emits custom events to the parent component.
- * @emits save - Triggered when the "Save" button is clicked.
- * @emits cancel - Triggered when the "Cancel" button is clicked.
- * @emits cancel-edit - Triggered when the "Cancel" button is clicked after confirmation.
- * @emits confirm - Triggered when the "Confirm" button is clicked with the selected nodes.
- * @param {Node[]} nodes - Array of selected nodes emitted with the "confirm" event.
  */
 const emit = defineEmits<{
     (e: 'save'): void;

@@ -4,16 +4,14 @@ import { PrimaryKeyCandidate, ReferenceCandidate } from './candidates';
 import type { LayoutType } from '@/types/inference/layoutType';
 import type { SerializedPrimaryKeyCandidate, SerializedReferenceCandidate } from './candidates';
 
-// FIXME Use types instead of interfaces.
 /**
- * Interface representing an inference edit.
- * @interface
+ * Type representing an inference edit.
  */
-export interface InferenceEdit {
+export type InferenceEdit = {
     id: number | null;
     isActive: boolean;
     type: string;
-}
+};
 
 /**
  * Creates an inference edit object from serialized server data.
@@ -37,45 +35,35 @@ export function createInferenceEditFromServer(data: string): InferenceEdit {
 
 /**
  * Type representing serialized inference edit data received from the server.
- * @typedef {Object} SerializedInferenceEdit
- * @property {number | null} id - The ID of the edit.
- * @property {boolean} isActive - Whether the edit is active.
- * @property {'PrimaryKey' | 'Reference' | 'Cluster' | 'Recursion'} type - The type of the edit.
- * @property {KeyFromServer} [primaryKey] - The primary key involved in the edit (if applicable).
- * @property {KeyFromServer} [primaryKeyIdentified] - The identified primary key (if applicable).
- * @property {SerializedPrimaryKeyCandidate | SerializedReferenceCandidate} [candidate] - The candidate for the edit (if applicable).
- * @property {KeyFromServer} [referenceKey] - The reference key (if applicable).
- * @property {KeyFromServer} [referredKey] - The referred key (if applicable).
- * @property {KeyFromServer[]} [clusterKeys] - The cluster keys involved (if applicable).
- * @property {SerializedPatternSegment[]} [pattern] - The recursion pattern (if applicable).
  */
 export type SerializedInferenceEdit = {
     /** The ID of the edit. */
     id: number | null;
+    /** Whether the edit is active. */
     isActive: boolean;
+    /** The type of the edit. */
     type: 'PrimaryKey' | 'Reference' | 'Cluster' | 'Recursion';
+    /** The primary key involved in the edit (if applicable). */
     primaryKey?: KeyFromServer;
+    /** The identified primary key (if applicable). */
     primaryKeyIdentified?: KeyFromServer;
+    /** The candidate for the edit (if applicable). */
     candidate?: SerializedPrimaryKeyCandidate | SerializedReferenceCandidate;
+    /** The reference key (if applicable). */
     referenceKey?: KeyFromServer;
+    /** The referred key (if applicable). */
     referredKey?: KeyFromServer;
+    /** The cluster keys involved (if applicable). */
     clusterKeys?: KeyFromServer[];
+    /** The recursion pattern (if applicable). */
     pattern?: SerializedPatternSegment[];
 };
-
-// FIXME Transform all @property tags to comments on specific properties.
-// Remove all @typedef tags.
-
-const a: SerializedInferenceEdit = {} as SerializedInferenceEdit;
-
-a.id;
-a.isActive;
 
 /**
  * Class representing a primary key merge inference edit.
  * @implements {InferenceEdit}
  */
-export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
+export class PrimaryKeyMergeInferenceEdit {
     readonly type: string = 'PrimaryKey';
     readonly primaryKey?: Key;
     readonly primaryKeyIdentified?: Key;
@@ -85,10 +73,6 @@ export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
 
     /**
      * Constructs a `PrimaryKeyMergeInferenceEdit` from either keys or a candidate.
-     * @param {Key | PrimaryKeyCandidate} primaryKeyOrCandidate - The primary key or candidate involved in the edit.
-     * @param {Key | boolean} primaryKeyIdentifiedOrIsActive - The identified primary key or whether the edit is active.
-     * @param {boolean | number | null} [isActiveOrId] - Whether the edit is active or the edit ID.
-     * @param {number | null} [id=null] - The ID of the edit.
      */
     constructor(primaryKeyOrCandidate: Key | PrimaryKeyCandidate, primaryKeyIdentifiedOrIsActive: Key | boolean, isActiveOrId?: boolean | number | null, id: number | null = null) {
         if (primaryKeyOrCandidate instanceof Key && primaryKeyIdentifiedOrIsActive instanceof Key) {
@@ -109,8 +93,6 @@ export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
 
     /**
      * Creates a `PrimaryKeyMergeInferenceEdit` instance from serialized server data.
-     * @param {SerializedInferenceEdit} data - The serialized data from the server.
-     * @returns {PrimaryKeyMergeInferenceEdit} - The deserialized `PrimaryKeyMergeInferenceEdit` object.
      */
     static fromServer(data: SerializedInferenceEdit): PrimaryKeyMergeInferenceEdit {
         if (data.primaryKey != null && data.primaryKeyIdentified != null) {
@@ -136,7 +118,7 @@ export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
  * Class representing a reference merge inference edit.
  * @implements {InferenceEdit}
  */
-export class ReferenceMergeInferenceEdit implements InferenceEdit {
+export class ReferenceMergeInferenceEdit {
     readonly type: string = 'Reference';
     readonly referenceKey?: Key;
     readonly referredKey?: Key;
@@ -197,7 +179,7 @@ export class ReferenceMergeInferenceEdit implements InferenceEdit {
  * Class representing a cluster inference edit.
  * @implements {InferenceEdit}
  */
-export class ClusterInferenceEdit implements InferenceEdit {
+export class ClusterInferenceEdit {
     readonly type: string = 'Cluster';
     readonly clusterKeys: Key[];
     public isActive: boolean;
@@ -205,9 +187,6 @@ export class ClusterInferenceEdit implements InferenceEdit {
 
     /**
      * Constructs a `ClusterInferenceEdit`.
-     * @param {Key[]} clusterKeys - The keys involved in the cluster.
-     * @param {boolean} isActive - Whether the edit is active.
-     * @param {number | null} [id=null] - The ID of the edit.
      */
     constructor(clusterKeys: Key[], isActive: boolean, id: number | null = null) {
         this.clusterKeys = clusterKeys;
@@ -217,8 +196,6 @@ export class ClusterInferenceEdit implements InferenceEdit {
 
     /**
      * Creates a `ClusterInferenceEdit` instance from serialized server data.
-     * @param {SerializedInferenceEdit} data - The serialized data from the server.
-     * @returns {ClusterInferenceEdit} - The deserialized `ClusterInferenceEdit` object.
      */
     static fromServer(data: SerializedInferenceEdit): ClusterInferenceEdit {
         return new ClusterInferenceEdit(
@@ -233,7 +210,7 @@ export class ClusterInferenceEdit implements InferenceEdit {
  * Class representing a recursion inference edit.
  * @implements {InferenceEdit}
  */
-export class RecursionInferenceEdit implements InferenceEdit {
+export class RecursionInferenceEdit {
     readonly type: string = 'Recursion';
     readonly pattern: PatternSegment[];
     public isActive: boolean;
@@ -241,9 +218,6 @@ export class RecursionInferenceEdit implements InferenceEdit {
 
     /**
      * Constructs a `RecursionInferenceEdit`.
-     * @param {PatternSegment[]} pattern - The recursion pattern.
-     * @param {boolean} isActive - Whether the edit is active.
-     * @param {number | null} [id=null] - The ID of the edit.
      */
     constructor(pattern: PatternSegment[], isActive: boolean, id: number | null = null) {
         this.pattern = pattern;
@@ -253,8 +227,6 @@ export class RecursionInferenceEdit implements InferenceEdit {
 
     /**
      * Creates a `RecursionInferenceEdit` instance from serialized server data.
-     * @param {SerializedInferenceEdit} data - The serialized data from the server.
-     * @returns {RecursionInferenceEdit} - The deserialized `RecursionInferenceEdit` object.
      */
     static fromServer(data: SerializedInferenceEdit): RecursionInferenceEdit {
         return new RecursionInferenceEdit(
@@ -271,8 +243,6 @@ export class RecursionInferenceEdit implements InferenceEdit {
 export class PatternSegment {
     /**
      * Constructs a `PatternSegment`.
-     * @param {string} nodeName - The name of the node in the pattern.
-     * @param {string} direction - The direction of the recursion ('->', '<-', or '').
      */
     constructor(
         readonly nodeName: string,
@@ -281,8 +251,6 @@ export class PatternSegment {
 
     /**
      * Creates a `PatternSegment` instance from serialized server data.
-     * @param {SerializedPatternSegment} data - The serialized pattern segment data from the server.
-     * @returns {PatternSegment} - The deserialized `PatternSegment` object.
      */
     static fromServer(data: SerializedPatternSegment): PatternSegment {
         return new PatternSegment(data.nodeName, data.direction);
@@ -291,24 +259,22 @@ export class PatternSegment {
 
 /**
  * Type representing a serialized recursion pattern segment.
- * @typedef {Object} SerializedPatternSegment
- * @property {string} nodeName - The name of the node in the pattern.
- * @property {string} direction - The direction of the recursion.
  */
 export type SerializedPatternSegment = {
+    /** The name of the node in the pattern. */
     nodeName: string;
+    /** The direction of the recursion. */
     direction: string;
 };
 
 /**
  * Type representing the payload when saving a job result.
- * @typedef {Object} SaveJobResultPayload
- * @property {boolean | null} isFinal - Whether the job result is final.
- * @property {InferenceEdit | null} edit - The associated inference edit, if any.
- * @property {LayoutType | null} layoutType - The layout type used.
  */
 export type SaveJobResultPayload = {
+    /** Whether the job result is final. */
     isFinal: boolean | null;
+    /** The associated inference edit, if any. */
     edit: InferenceEdit | null;
+    /** The layout type used. */
     layoutType: LayoutType | null;
 };

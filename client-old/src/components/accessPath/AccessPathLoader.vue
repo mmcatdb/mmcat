@@ -18,10 +18,9 @@ const { graph } = $(useEvocat());
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {Datasource[]} datasources - Array of datasources.
  */
 const props = defineProps<{
+    /** Array of datasources. */
     datasources: Datasource[];
 }>();
 
@@ -38,14 +37,11 @@ const mappingConfirmed = ref(false);
 
 /**
  * Computed property that determines if the "Confirm" button should be disabled.
- * @type {import('vue').ComputedRef<boolean>}
  */
 const isConfirmDisabled = computed(() => !selectedMapping.value);
 
 /**
  * Emits custom events to the parent component.
- * @emits finish - Emitted when the mapping process is finished.
- * @emits cancel - Emitted when the operation is canceled.
  */
 const emit = defineEmits([ 'finish', 'cancel' ]);
 
@@ -87,7 +83,6 @@ async function loadMappingsForSelectedDatasource() {
 
 /**
  * Loads the selected mapping and updates the graph property to reflect the mapping's access path.
- * @param {Mapping} mapping - The selected mapping to load.
  */
 async function loadSelectedMapping(mapping: Mapping) {
     originalGraphProperty.value?.unhighlightPath();
@@ -115,7 +110,6 @@ function confirmMapping() {
 
 /**
  * Updates the root property when modified in the AccessPathEditor.
- * @param {GraphRootProperty} newRootProperty - The new root property to update.
  */
 function updateRootProperty(newRootProperty: GraphRootProperty) {
     accessPath.value?.node.removeRoot();
@@ -138,7 +132,6 @@ function undoAccessPath() {
 
 /**
  * Emits the finish event to create a mapping with the given primary key and selected mapping kind name.
- * @param {SignatureId} primaryKey - The primary key for the mapping.
  */
 function createMapping(primaryKey: SignatureId) {
     emit('finish', primaryKey, accessPath.value, selectedMapping.value?.kindName);

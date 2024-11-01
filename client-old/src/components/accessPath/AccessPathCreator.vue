@@ -19,10 +19,9 @@ const { graph } = $(useEvocat());
 
 /**
  * Props passed to the component.
- * @typedef {Object} Props
- * @property {Datasource} selectedDatasource - The selected datasource.
  */
 const props = defineProps<{
+    /** The selected datasource. */
     selectedDatasource: Datasource;
 }>();
 
@@ -33,26 +32,21 @@ const rootConfirmed = ref(false);
 
 /**
  * Stores the previous parent property used for path construction.
- * @type {GraphParentProperty}
  */
 let previousParentProperty: GraphParentProperty;
 
 /**
  * A set to track processed node keys.
- * @type {Set<number>}
  */
 let processedNodes = new Set<number>();
 
 /**
  * Computed property that generates a string of the labels for the selected nodes.
- * @type {import('vue').ComputedRef<string>}
  */
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
 /**
  * Emits custom events to the parent component.
- * @emits finish - Emitted when the mapping process is finished.
- * @emits cancel - Emitted when the operation is canceled.
  */
 const emit = defineEmits([ 'finish', 'cancel' ]);
 
@@ -87,7 +81,6 @@ function confirmSelectedNodes() {
 
 /**
  * Processes a single node by creating its subpath and adding it to the access path.
- * @param {Node} node - The node to be processed.
  */
 function processNode(node: Node) {
     if (!processedNodes.has(node.schemaObject.key.value)) {
@@ -101,8 +94,6 @@ function processNode(node: Node) {
 
 /**
  * Creates a subpath for the given node based on its children and parent property.
- * @param {Node} node - The node for which to create a subpath.
- * @returns {GraphChildProperty | undefined} - The created subpath, or undefined if creation failed.
  */
 function createSubpathForNode(node: Node): GraphChildProperty | undefined {
     if (!graph) {
@@ -142,8 +133,6 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
 
 /**
  * Filters the children nodes of the given node to only include those that are selected.
- * @param {Node} node - The node whose children are to be filtered.
- * @returns {Node[]} - The filtered list of child nodes.
  */
 function filterChildren(node: Node): Node[] {
     if (graph) {
@@ -158,8 +147,6 @@ function filterChildren(node: Node): Node[] {
 
 /**
  * Retrieves the parent property from the access path for the specified parent node.
- * @param {Node} parentNode - The parent node.
- * @returns {GraphParentProperty | undefined} - The parent property if found, otherwise undefined.
  */
 function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty | undefined {
     return accessPath.value ? searchSubpathsForNode(accessPath.value, parentNode) : undefined;
@@ -167,9 +154,6 @@ function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty 
 
 /**
  * Searches for the node within the subpaths of a given property.
- * @param {GraphParentProperty} property - The property to search within.
- * @param {Node} node - The node to find.
- * @returns {GraphParentProperty | undefined} - The corresponding property if found, otherwise undefined.
  */
 function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
     if (property.node.equals(node)) return property;
@@ -184,7 +168,6 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
 
 /**
  * Updates the root property with a new root property and highlights the path.
- * @param {GraphRootProperty} newRootProperty - The new root property to update.
  */
 function updateRootProperty(newRootProperty: GraphRootProperty) {
     undoAccessPath();
@@ -206,7 +189,6 @@ function undoAccessPath() {
 
 /**
  * Emits the finish event with the primary key and the access path, signaling the end of the mapping process.
- * @param {SignatureId} primaryKey - The primary key of the mapping.
  */
 function createMapping(primaryKey: SignatureId) {
     emit('finish', primaryKey, accessPath.value);
