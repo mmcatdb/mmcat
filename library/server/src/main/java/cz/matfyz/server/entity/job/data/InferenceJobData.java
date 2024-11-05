@@ -15,13 +15,10 @@ import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.entity.job.JobData;
 
-import java.io.IOException;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public record InferenceJobData(
-    List<String> edits,
+    List<InferenceEdit> edits,
     SerializedSchema inferenceSchema,
     SerializedSchema finalSchema,
     SerializedMetadata inferenceMetadata,
@@ -41,21 +38,8 @@ public record InferenceJobData(
         Candidates candidates,
         List<Mapping> mappings
     ) {
-        ObjectMapper mapper = new ObjectMapper();
-
-        // FIXME Why is this serialized to string? The InferenceEdit is already serializable.
-        List<String> serializedEdits = edits.stream()
-            .map((InferenceEdit edit) -> {
-                try {
-                    return mapper.writeValueAsString(edit);
-                    // FIXME Note: why would writing to json produce an IOException?
-                } catch (IOException e) {
-                    throw new RuntimeException("Error serializing InferenceEdit", e);
-                }
-            }).toList();
-
         return new InferenceJobData(
-            serializedEdits,
+            edits,
             SchemaSerializer.serialize(inferenceSchema),
             SchemaSerializer.serialize(finalSchema),
             MetadataSerializer.serialize(inferenceMetadata),
