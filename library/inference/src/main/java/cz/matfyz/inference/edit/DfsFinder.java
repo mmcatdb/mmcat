@@ -23,6 +23,7 @@ public class DfsFinder {
     private List<SchemaObject> currentPath;
     private List<List<SchemaObject>> result;
     private final Set<SchemaObject> recursiveNodes;
+    private final Set<SchemaObject> visitedNodes = new HashSet<>();
 
     public DfsFinder(RecursionMerge recursionMerge) {
         this.recursionMerge = recursionMerge;
@@ -42,19 +43,20 @@ public class DfsFinder {
         for (SchemaObject node : recursionMerge.newSchema.allObjects()) {
             findOccurrences(node);
         }
+        result = cleanOccurrences(result);
     }
 
     /**
      * Initiates the search for occurrences starting from the specified schema object.
      */
-    public List<List<SchemaObject>> findOccurrences(SchemaObject startNode) {
+    public void findOccurrences(SchemaObject startNode) {
         dfsFind(startNode, 0);
-        return cleanOccurrences(result);
     }
 
     private void dfsFind(SchemaObject currentNode, int patternIndex) {
-        if (currentNode == null || patternIndex >= recursionMerge.adjustedPattern.size())
+        if (currentNode == null || patternIndex >= recursionMerge.adjustedPattern.size() || visitedNodes.contains(currentNode))
             return;
+        visitedNodes.add(currentNode);
 
         PatternSegment currentSegment = recursionMerge.adjustedPattern.get(patternIndex);
         final var currentNodeLabel = recursionMerge.newMetadata.getObject(currentNode).label;
@@ -70,8 +72,10 @@ public class DfsFinder {
         currentPath.add(currentNode);
         updatePatternObjects(currentSegment, currentNode);
 
-        if (patternIndex == recursionMerge.adjustedPattern.size() - 1)
+        if (patternIndex == recursionMerge.adjustedPattern.size() - 1) {
             handleFullMatch(currentNode);
+            result.add(new ArrayList<>(currentPath));
+        }
         else
             processDirection(currentNode, patternIndex, currentSegment);
 

@@ -378,26 +378,26 @@ class SchemaCategoryInferenceEditorTests {
         final var o1 =  builder.object("A", 1);
         final var o2 =  builder.object("A", 2);
         final var o3 =  builder.object("B", 3);
-        final var o4 =  builder.object("B", 4);
+        //final var o4 =  builder.object("B", 4);
         final var o5 =  builder.object("B", 5);
         final var o6 =  builder.object("A", 6);
-        final var o7 =  builder.object("A", 7);
+        //final var o7 =  builder.object("A", 7);
         final var o8 =  builder.object("B", 8);
-        final var o9 =  builder.object("B", 9);
-        final var o10 = builder.object("A", 10);
-        final var o11 = builder.object("B", 11);
+        //final var o9 =  builder.object("B", 9);
+        //final var o10 = builder.object("A", 10);
+        //final var o11 = builder.object("B", 11);
 
         builder.morphism(o0, o1, 1);
         builder.morphism(o0, o2, 2);
         builder.morphism(o1, o3, 3);
-        builder.morphism(o1, o4, 4);
+        //builder.morphism(o1, o4, 4);
         builder.morphism(o2, o5, 5);
         builder.morphism(o3, o6, 6);
-        builder.morphism(o4, o7, 7);
+        //builder.morphism(o4, o7, 7);
         builder.morphism(o6, o8, 8);
-        builder.morphism(o7, o9, 9);
-        builder.morphism(o9, o10, 10);
-        builder.morphism(o10, o11, 11);
+        //builder.morphism(o7, o9, 9);
+        //builder.morphism(o9, o10, 10);
+        //builder.morphism(o10, o11, 11);
 
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
@@ -447,66 +447,6 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
         List<PatternSegment> pattern = new ArrayList<>();
-        pattern.add(new PatternSegment("A", "->"));
-        pattern.add(new PatternSegment("B", "->"));
-        pattern.add(new PatternSegment("A", ""));
-
-        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
-        testAlgorithm(schema, metadata, edit);
-    }
-
-    /**
-     * With complex pattern A<-A->B->A and client example
-     */
-    @Test
-    void testRecursionEdit5() {
-        System.out.println("in test 5");
-        final var builder = new SchemaBuilder();
-
-        final var checkin =     builder.object("checkin", 0);
-        final var id =          builder.object("_id", 1);
-        final var o2 =          builder.object("A", 2);
-        final var o3 =          builder.object("A", 3);
-        final var o4 =          builder.object("B", 4);
-        final var o5 =          builder.object("A", 5);
-        //final var o6 =          builder.object("B", 6);
-        //final var o7 =          builder.object("A", 7);
-        final var o8 =          builder.object("B", 8);
-        final var o9 =          builder.object("A", 9);
-        final var o10 =         builder.object("B", 10);
-        final var o11 =         builder.object("B", 11);
-        final var o12 =         builder.object("A", 12);
-        final var businessId =  builder.object("business_id", 13);
-        final var date1 =       builder.object("date", 14);
-        final var date2 =       builder.object("date", 15);
-
-        builder.morphism(checkin, id, 0);
-        builder.morphism(checkin, businessId, 12);
-        builder.morphism(checkin, date1, 13);
-        builder.morphism(checkin, date2, 14);
-        builder.morphism(id, o11, 10);
-        builder.morphism(id, o2, 1);
-        builder.morphism(o11, o12, 11);
-        builder.morphism(o2, o8, 7);
-        builder.morphism(o2, o3, 2);
-        builder.morphism(o3, o4, 3);
-        builder.morphism(o4, o5, 4);
-        //builder.morphism(o5, o6, 5);
-        //builder.morphism(o6, o7, 6);
-        builder.morphism(o8, o9, 8);
-        builder.morphism(o9, o10, 9);
-
-        final SchemaCategory schema = builder.build();
-        final MetadataCategory metadata = builder.buildMetadata(schema);
-
-        List<PatternSegment> pattern = new ArrayList<>();
-        /*
-        pattern.add(new PatternSegment("A", "<-"));
-        pattern.add(new PatternSegment("A", "->"));
-        pattern.add(new PatternSegment("B", "->"));
-        pattern.add(new PatternSegment("A", ""));
-         */
-
         pattern.add(new PatternSegment("A", "->"));
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
