@@ -126,15 +126,15 @@ function cancel() {
 </template>
 
 <style scoped>
+
 .cluster {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    position: relative;
 }
 
 .button-row {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    align-items: center;
+    margin-top: 10px;
 }
 </style>
