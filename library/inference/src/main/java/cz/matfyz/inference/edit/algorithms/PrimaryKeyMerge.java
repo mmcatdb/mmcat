@@ -18,6 +18,8 @@ import cz.matfyz.inference.edit.InferenceEditorUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -106,19 +108,20 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         this.primaryKeyRoot = findPrimaryKeyRoot(newSchema);
         final Signature primaryKeySignature = findPKSignature();
 
-        if (!primaryKeyRoot.equals(data.primaryKeyIdentified)) { // TODO: if not, set the identification?, similarly in mapping
-            final SchemaObject cod = newSchema.getObject(primaryKeyRoot);
-            final SchemaObject dom = newSchema.getObject(data.primaryKeyIdentified);
+        // update PK identification for the PK's parent
+        final SchemaObject pkRootObject = newSchema.getObject(primaryKeyRoot);
+        final SchemaObject updatedPkRootObject = updateSchemaObjectIds(pkRootObject, primaryKeySignature);
+        InferenceEditorUtils.updateObjects(newSchema, newMetadata, pkRootObject, updatedPkRootObject);
+
+        if (!primaryKeyRoot.equals(data.primaryKeyIdentified)) {
+            final SchemaObject pkIdentifiedObject = newSchema.getObject(data.primaryKeyIdentified);
 
             final String primaryKeyLabel = newMetadata.getObject(data.primaryKey).label;
 
-            this.newSignaturePair = createNewMorphism(dom, cod);
+            this.newSignaturePair = createNewMorphism(pkIdentifiedObject, pkRootObject);
 
-            final SchemaObject updatedCod = updateSchemaObjectIds(cod, primaryKeySignature);
-            final SchemaObject updatedDom = updateSchemaObjectIds(dom, Signature.concatenate(this.newSignaturePair.getValue(), primaryKeySignature));
-
-            InferenceEditorUtils.updateObjects(newSchema, newMetadata, cod, updatedCod);
-            InferenceEditorUtils.updateObjects(newSchema, newMetadata, dom, updatedDom);
+            final SchemaObject updatedpkIdentified = updateSchemaObjectIds(pkIdentifiedObject, Signature.concatenate(this.newSignaturePair.getValue(), primaryKeySignature));
+            InferenceEditorUtils.updateObjects(newSchema, newMetadata, pkIdentifiedObject, updatedpkIdentified);
 
             findObjectsAndMorphismsToDelete(primaryKeyLabel);
             InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
@@ -151,9 +154,10 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     }
 
     private SchemaObject updateSchemaObjectIds(SchemaObject schemaObject, Signature signature) {
+        SortedSet<SignatureId> signatureSet = new TreeSet<>(Collections.singleton(new SignatureId(signature)));
         ObjectIds updatedIds = schemaObject.ids().isSignatures()
             ? new ObjectIds(addSignatureToSet(schemaObject.ids(), signature))
-            : new ObjectIds(signature);
+            : new ObjectIds(signatureSet);
 
         return new SchemaObject(schemaObject.key(), updatedIds, schemaObject.superId());
     }
@@ -187,15 +191,16 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Primary Key Merge Edit on Mapping...");
 
+        Mapping primaryKeyMapping = findPrimaryKeyMapping(mappings);
+        Mapping adjustedPrimaryKeyMapping = adjustPKMapping(primaryKeyMapping);
+
         if (!primaryKeyRoot.equals(data.primaryKeyIdentified)) {
             Mapping primaryKeyIdentifiedMapping = findPrimaryKeyIdentifiedMapping(mappings);
+            Mapping cleanedPrimaryKeyIdentifiedMapping = createCleanedMapping(findPrimaryKeyIdentifiedMapping(mappings));
 
-            Mapping cleanedPrimaryKeyIdentifiedMapping = createCleanedMapping(primaryKeyIdentifiedMapping);
-
-            return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(primaryKeyIdentifiedMapping), Arrays.asList(cleanedPrimaryKeyIdentifiedMapping));
+            return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(primaryKeyIdentifiedMapping, primaryKeyMapping), Arrays.asList(cleanedPrimaryKeyIdentifiedMapping, adjustedPrimaryKeyMapping));
         }
-
-        return mappings;
+        return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(primaryKeyMapping), Arrays.asList(adjustedPrimaryKeyMapping));
     }
 
     private Mapping findPrimaryKeyIdentifiedMapping(List<Mapping> mappings) {
@@ -207,23 +212,56 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Mapping for object identified with PK has not been found.");
     }
 
+    private Mapping findPrimaryKeyMapping(List<Mapping> mappings) {
+        for (Mapping mapping : mappings) {
+            if (mapping.rootObject().key().equals(primaryKeyRoot)) {
+                return mapping;
+            }
+        }
+        throw new NotFoundException("Mapping for object identified with PK has not been found.");
+    }
+
+    private Mapping adjustPKMapping(Mapping mapping) {
+        Collection<Signature> currentPK = cleanFromEmpty(mapping.primaryKey());
+        currentPK.add(findPKSignature());
+        return new Mapping(mapping.datasource(), newSchema, mapping.rootObject().key(), mapping.kindName(), mapping.accessPath(), currentPK);
+    }
+
     private Mapping createCleanedMapping(Mapping mapping) {
         ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
-        return new Mapping(mapping.datasource(), newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, mapping.primaryKey());
+        Collection<Signature> currentPK = cleanFromEmpty(mapping.primaryKey());
+
+        if (primaryKeyRoot.equals(data.primaryKeyIdentified)) {
+            currentPK.add(newSignaturePair.getValue());
+        } else {
+            currentPK.add(Signature.concatenate(this.newSignaturePair.getValue(), findPKSignature()));
+        }
+        return new Mapping(mapping.datasource(), newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, currentPK);
+    }
+
+    private Collection<Signature> cleanFromEmpty(Collection<Signature> primaryKeys) {
+        if (primaryKeys.size() == 1) {
+            Signature primaryKey = primaryKeys.iterator().next();
+            if (primaryKey.isEmpty())
+                primaryKeys.remove(primaryKey);
+        }
+        return primaryKeys;
     }
 
     private ComplexProperty cleanComplexProperty(Mapping mapping) {
         ComplexProperty complexProperty = mapping.accessPath();
+
+        if (oldSignatureMap.isEmpty())
+            return complexProperty;
+
         Signature oldSignature = oldSignatureMap.get(mapping.rootObject().key());
         AccessPath accessPathToDelete = complexProperty.getSubpathBySignature(oldSignature);
         ComplexProperty cleanedComplexProperty = complexProperty.minusSubpath(accessPathToDelete);
-
         return adjustPKComplexProperty(cleanedComplexProperty, accessPathToDelete);
     }
 
     private ComplexProperty adjustPKComplexProperty(ComplexProperty complexProperty, AccessPath accessPathToDelete) {
-        Signature rootToPKSignature = findPKSignature();
-        Signature newPKSignature = Signature.concatenate(this.newSignaturePair.getValue(), rootToPKSignature);
+        Signature newPKSignature = Signature.concatenate(this.newSignaturePair.getValue(), findPKSignature());
         SimpleProperty pkProperty = new SimpleProperty(accessPathToDelete.name(), newPKSignature);
 
         List<AccessPath> newAccessPaths = new ArrayList<>(complexProperty.subpaths());

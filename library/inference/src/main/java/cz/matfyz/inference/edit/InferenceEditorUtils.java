@@ -64,10 +64,6 @@ public class InferenceEditorUtils {
      * Creates and adds a new morphism to the schema and metadata.
      */
     public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, boolean isDual) {
-        final SchemaMorphism existingMorphism = getMorphismIfExists(schema, dom, cod);
-        if (existingMorphism != null)
-            return existingMorphism.signature();
-
         Signature signature = getNewSignatureValue(schema);
 
         if (isDual)
