@@ -108,7 +108,7 @@ public class JobController {
         if (!(jobWithRun.job().data instanceof InferenceJobData inferenceJobData))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The job data is not an instance of InferenceJobData");
 
-        InferenceEdit edit = payload.isFinal ? null : payload.edit;
+        final InferenceEdit edit = payload.isFinal ? null : payload.edit;
         final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, payload.isFinal, payload.layoutType);
 
         return jobToJobDetail(service.transition(newJobWithRun, payload.isFinal ? State.Finished : State.Waiting));

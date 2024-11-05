@@ -16,16 +16,16 @@ export type InferenceEdit = {
 /**
  * Creates an inference edit object from serialized server data.
  */
-export function createInferenceEditFromServer(data: InferenceEdit): InferenceEdit {
+export function createInferenceEditFromServer(data: SerializedInferenceEdit): InferenceEdit {
     switch (data.type) {
     case 'PrimaryKey':
-        return PrimaryKeyMergeInferenceEdit.fromServer(data as SerializedInferenceEdit);
+        return PrimaryKeyMergeInferenceEdit.fromServer(data);
     case 'Reference':
-        return ReferenceMergeInferenceEdit.fromServer(data as SerializedInferenceEdit);
+        return ReferenceMergeInferenceEdit.fromServer(data);
     case 'Cluster':
-        return ClusterInferenceEdit.fromServer(data as SerializedInferenceEdit);
+        return ClusterInferenceEdit.fromServer(data);
     case 'Recursion':
-        return RecursionInferenceEdit.fromServer(data as SerializedInferenceEdit);
+        return RecursionInferenceEdit.fromServer(data);
     default:
         throw new Error('Unknown edit type');
     }
@@ -59,7 +59,6 @@ export type SerializedInferenceEdit = {
 
 /**
  * Class representing a primary key merge inference edit.
- * @implements {InferenceEdit}
  */
 export class PrimaryKeyMergeInferenceEdit {
     readonly type: string = 'PrimaryKey';
@@ -114,7 +113,6 @@ export class PrimaryKeyMergeInferenceEdit {
 
 /**
  * Class representing a reference merge inference edit.
- * @implements {InferenceEdit}
  */
 export class ReferenceMergeInferenceEdit {
     readonly type: string = 'Reference';
@@ -126,10 +124,10 @@ export class ReferenceMergeInferenceEdit {
 
     /**
      * Constructs a `ReferenceMergeInferenceEdit` from either keys or a candidate.
-     * @param {Key | ReferenceCandidate} referenceOrCandidate - The reference key or candidate involved in the edit.
-     * @param {Key | boolean} referredKeyOrIsActive - The referred key or whether the edit is active.
-     * @param {boolean | number | null} [isActiveOrId] - Whether the edit is active or the edit ID.
-     * @param {number | null} [id=null] - The ID of the edit.
+     * @param referenceOrCandidate - The reference key or candidate involved in the edit.
+     * @param referredKeyOrIsActive - The referred key or whether the edit is active.
+     * @param isActiveOrId - Whether the edit is active or the edit ID.
+     * @param id - The ID of the edit.
      */
     constructor(referenceOrCandidate: Key | ReferenceCandidate, referredKeyOrIsActive: Key | boolean, isActiveOrId?: boolean | number | null, id?: number | null) {
         if (referenceOrCandidate instanceof Key && referredKeyOrIsActive instanceof Key) {
@@ -150,8 +148,6 @@ export class ReferenceMergeInferenceEdit {
 
     /**
      * Creates a `ReferenceMergeInferenceEdit` instance from serialized server data.
-     * @param {SerializedInferenceEdit} data - The serialized data from the server.
-     * @returns {ReferenceMergeInferenceEdit} - The deserialized `ReferenceMergeInferenceEdit` object.
      */
     static fromServer(data: SerializedInferenceEdit): ReferenceMergeInferenceEdit {
         if (data.referenceKey != null && data.referredKey != null) {
@@ -175,7 +171,6 @@ export class ReferenceMergeInferenceEdit {
 
 /**
  * Class representing a cluster inference edit.
- * @implements {InferenceEdit}
  */
 export class ClusterInferenceEdit {
     readonly type: string = 'Cluster';
@@ -206,7 +201,6 @@ export class ClusterInferenceEdit {
 
 /**
  * Class representing a recursion inference edit.
- * @implements {InferenceEdit}
  */
 export class RecursionInferenceEdit {
     readonly type: string = 'Recursion';

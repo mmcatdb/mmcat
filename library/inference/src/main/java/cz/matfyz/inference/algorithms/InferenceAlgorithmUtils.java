@@ -13,7 +13,8 @@ public class InferenceAlgorithmUtils {
     }
 
     /**
-     * Merges two ordered lists of {@link RecordSchemaDescription} objects and removes duplicates.
+     * Merges two ordered lists of {@link RecordSchemaDescription} objects and removes duplicates (by merging both to one object).
+     * The input lists are expected to contain no duplicates by themselves, but the same object can be present in both lists.
      */
     public ObjectArrayList<RecordSchemaDescription> mergeOrderedLists(ObjectArrayList<RecordSchemaDescription> list1, ObjectArrayList<RecordSchemaDescription> list2) {
         final ObjectArrayList<RecordSchemaDescription> mergedList = new ObjectArrayList<>();
@@ -40,15 +41,11 @@ public class InferenceAlgorithmUtils {
             }
         }
 
-        while (i < list1.size()) {
+        for (; i < list1.size(); i++)
             mergedList.add(list1.get(i));
-            i++;
-        }
 
-        while (j < list2.size()) {
+        for (; j < list2.size(); j++)
             mergedList.add(list2.get(j));
-            j++;
-        }
 
         return mergedList;
     }

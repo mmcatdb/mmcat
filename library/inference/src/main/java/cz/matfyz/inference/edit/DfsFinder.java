@@ -165,14 +165,14 @@ public class DfsFinder {
     }
 
     private static List<List<SchemaObject>> cleanOccurrences(List<List<SchemaObject>> listOfLists) {
-        List<List<SchemaObject>> result = new ArrayList<>();
+        final List<List<SchemaObject>> result = new ArrayList<>();
 
         for (int i = 0; i < listOfLists.size(); i++) {
-            List<SchemaObject> currentList = listOfLists.get(i);
+            final List<SchemaObject> currentList = listOfLists.get(i);
             boolean isMergedOrSubsequence = false;
 
             for (int j = 0; j < result.size(); j++) {
-                List<SchemaObject> existingList = result.get(j);
+                final List<SchemaObject> existingList = result.get(j);
 
                 if (isSublist(existingList, currentList)) {
                     isMergedOrSubsequence = true;
