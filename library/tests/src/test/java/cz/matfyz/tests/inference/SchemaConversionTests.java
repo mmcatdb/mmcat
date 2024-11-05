@@ -12,7 +12,7 @@ import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.AccessTreeToSchemaCategoryConverter;
 import cz.matfyz.inference.schemaconversion.RSDToAccessTreeConverter;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 import cz.matfyz.tests.example.common.SparkProvider;
@@ -44,7 +44,9 @@ public class SchemaConversionTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var inferenceWrapper = new JsonControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .getInferenceWrapper();
 
         // accessing the private method with reflection w/o having to make it visible
         final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
@@ -116,15 +118,17 @@ public class SchemaConversionTests {
         final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
         final var csvProvider = new CsvProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var provider = new CsvControlWrapper(csvProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .createProvider();
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper)
+            .input(provider)
             .run();
 
-        final List<CategoryMappingPair> pairs = inferenceResult.pairs();
+        final List<CategoryMappingsPair> pairs = inferenceResult.pairs();
 
-        final var pair = CategoryMappingPair.merge(pairs);
+        final var pair = CategoryMappingsPair.merge(pairs);
         final SchemaCategory schema = pair.schema();
         final Mapping mapping = pair.mappings().get(0);
 
@@ -140,15 +144,17 @@ public class SchemaConversionTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var provider = new JsonControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .createProvider();
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper)
+            .input(provider)
             .run();
 
-        final List<CategoryMappingPair> pairs = inferenceResult.pairs();
+        final List<CategoryMappingsPair> pairs = inferenceResult.pairs();
 
-        final var pair = CategoryMappingPair.merge(pairs);
+        final var pair = CategoryMappingsPair.merge(pairs);
         final SchemaCategory schema = pair.schema();
         final Mapping mapping = pair.mappings().get(0);
 

@@ -1,7 +1,7 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
+import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.exception.DatasourceException;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WrapperService {
 
-    public AbstractControlWrapper getControlWrapper(DatasourceWrapper datasource) {
+    public BaseControlWrapper getControlWrapper(DatasourceWrapper datasource) {
         try {
             return switch (datasource.type) {
                 case mongodb -> new MongoDBControlWrapper(getProvider(

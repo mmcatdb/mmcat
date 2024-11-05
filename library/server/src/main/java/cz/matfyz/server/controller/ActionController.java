@@ -74,28 +74,28 @@ public class ActionController {
     }
 
     // TODO extremely unefficient - load all models and datasources at once.
-    // TODO switch to pattern matching when available.
     ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
-        if (payload instanceof ModelToCategoryPayload p) {
-            final var datasource = datasourceRepository.find(p.datasourceId());
-            final var detail = datasourceController.datasourceToDetail(datasource);
-            return new ModelToCategoryPayloadDetail(detail);
-        }
-        if (payload instanceof CategoryToModelPayload p) {
-            final var datasource = datasourceRepository.find(p.datasourceId());
-            final var detail = datasourceController.datasourceToDetail(datasource);
-            return new CategoryToModelPayloadDetail(detail);
-        }
-        if (payload instanceof UpdateSchemaPayload p) {
-            return new UpdateSchemaPayloadDetail(p.prevVersion(), p.nextVersion());
-        }
-        if (payload instanceof RSDToCategoryPayload p) {
-            final var datasource = datasourceRepository.find(p.datasourceId());
-            final var detail = datasourceController.datasourceToDetail(datasource);
-            return new RSDToCategoryPayloadDetail(detail);
-        }
-
-        throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
+        return switch (payload) {
+            case ModelToCategoryPayload p -> {
+                final var datasource = datasourceRepository.find(p.datasourceId());
+                final var detail = datasourceController.datasourceToDetail(datasource);
+                yield new ModelToCategoryPayloadDetail(detail);
+            }
+            case CategoryToModelPayload p -> {
+                final var datasource = datasourceRepository.find(p.datasourceId());
+                final var detail = datasourceController.datasourceToDetail(datasource);
+                yield new CategoryToModelPayloadDetail(detail);
+            }
+            case UpdateSchemaPayload p -> new UpdateSchemaPayloadDetail(p.prevVersion(), p.nextVersion());
+            case RSDToCategoryPayload p -> {
+                final var datasources = p.datasourceIds().stream()
+                    .map(datasourceRepository::find)
+                    .map(datasourceController::datasourceToDetail)
+                    .toList();
+                yield new RSDToCategoryPayloadDetail(datasources);
+            }
+            default -> throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
+        };
     }
 
     record ActionDetail(
@@ -132,7 +132,7 @@ public class ActionController {
     ) implements ActionPayloadDetail {}
 
     record RSDToCategoryPayloadDetail(
-        DatasourceDetail datasource
+        List<DatasourceDetail> datasources
     ) implements ActionPayloadDetail {}
 
 }

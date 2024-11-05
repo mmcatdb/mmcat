@@ -1,5 +1,6 @@
 package cz.matfyz.tests.example.common;
 
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -9,6 +10,8 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 
 import java.util.Collection;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TestMapping {
 
@@ -20,15 +23,15 @@ public class TestMapping {
         Collection<Signature> create(SchemaCategory schema, Key rootKey);
     }
 
-    private static final PrimaryKeyCreator defaultKeyCreator = (schema, rootKey) -> Mapping.defaultPrimaryKey(schema.getObject(rootKey));
-
+    private final Datasource datasource;
     private final SchemaCategory schema;
     private final Key rootKey;
     private final String kindName;
     private final AccessPathCreator pathCreator;
-    private final PrimaryKeyCreator keyCreator;
+    private final @Nullable PrimaryKeyCreator keyCreator;
 
-    public TestMapping(SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator, PrimaryKeyCreator keyCreator) {
+    public TestMapping(Datasource datasource, SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator, @Nullable PrimaryKeyCreator keyCreator) {
+        this.datasource = datasource;
         this.schema = schema;
         this.rootKey = rootKey;
         this.kindName = kindName;
@@ -36,15 +39,15 @@ public class TestMapping {
         this.keyCreator = keyCreator;
     }
 
-    public TestMapping(SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator) {
-        this(schema, rootKey, kindName, pathCreator, defaultKeyCreator);
+    public TestMapping(Datasource datasource, SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator) {
+        this(datasource, schema, rootKey, kindName, pathCreator, null);
     }
 
-    public TestMapping(SchemaCategory schema, BuilderObject rootObject, String kindName, AccessPathCreator pathCreator) {
-        this(schema, rootObject.key(), kindName, pathCreator, defaultKeyCreator);
+    public TestMapping(Datasource datasource, SchemaCategory schema, BuilderObject rootObject, String kindName, AccessPathCreator pathCreator) {
+        this(datasource, schema, rootObject.key(), kindName, pathCreator, null);
     }
 
-    private ComplexProperty accessPath;
+    private @Nullable ComplexProperty accessPath;
 
     public ComplexProperty accessPath() {
         if (accessPath == null)
@@ -53,11 +56,13 @@ public class TestMapping {
         return accessPath;
     }
 
-    private Mapping mapping;
+    private @Nullable Mapping mapping;
 
     public Mapping mapping() {
         if (mapping == null)
-            mapping = new Mapping(schema, rootKey, kindName, accessPath(), keyCreator.create(schema, rootKey));
+            mapping = keyCreator != null
+                ? new Mapping(datasource, schema, rootKey, kindName, accessPath(), keyCreator.create(schema, rootKey))
+                : Mapping.create(datasource, schema, rootKey, kindName, accessPath());
 
         return mapping;
     }

@@ -25,7 +25,9 @@ public class RSDTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .getInferenceWrapper();
 
         final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
         privateExecuteRBA.setAccessible(true);
@@ -40,7 +42,9 @@ public class RSDTests {
         final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
         final var jsonProvider = new CsvProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .getInferenceWrapper();
 
         final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
         privateExecuteRBA.setAccessible(true);

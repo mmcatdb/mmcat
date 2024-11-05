@@ -1,6 +1,7 @@
 package cz.matfyz.server.entity.datasource;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 
@@ -50,6 +51,10 @@ public class DatasourceWrapper extends Entity {
 
         if (data.settings() != null)
             this.settings = data.settings();
+    }
+
+    public Datasource toDatasource() {
+        return new Datasource(type, id().toString());
     }
 
     public record JsonValue(

@@ -1,5 +1,7 @@
 package cz.matfyz.tests.example.basic;
 
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -10,12 +12,14 @@ public abstract class PostgreSQL {
 
     private PostgreSQL() {}
 
+    public static final Datasource datasource = new Datasource(DatasourceType.postgresql, "postgresql");
+
     public static final String orderKind = "order";
     public static final String productKind = "product";
     public static final String itemKind = "order_item";
 
     public static TestMapping order(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             orderKind,
             b -> b.root(
@@ -32,7 +36,7 @@ public abstract class PostgreSQL {
     }
 
     public static TestMapping product(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.product,
             productKind,
             b -> b.root(
@@ -57,7 +61,7 @@ public abstract class PostgreSQL {
     }
 
     public static TestMapping item(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.item,
             itemKind,
             b -> b.root(

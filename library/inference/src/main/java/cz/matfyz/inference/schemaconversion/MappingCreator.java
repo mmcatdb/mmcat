@@ -3,6 +3,7 @@ package cz.matfyz.inference.schemaconversion;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.*;
@@ -30,9 +31,9 @@ public class MappingCreator {
     /**
      * Creates a new {@link Mapping} for the given schema category and kind name.
      */
-    public Mapping createMapping(SchemaCategory schemaCategory, String kindName) {
+    public Mapping createMapping(Datasource datasource, SchemaCategory schemaCategory, String kindName) {
         ComplexProperty accessPath = buildComplexPropertyFromNode(root);
-        return Mapping.create(schemaCategory, rootKey, kindName, accessPath);
+        return Mapping.create(datasource, schemaCategory, rootKey, kindName, accessPath);
     }
 
     /**

@@ -1,7 +1,8 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource;
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.querying.queryresult.ResultMap;
 import cz.matfyz.core.querying.queryresult.ResultNode;
@@ -29,11 +30,13 @@ class TempTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
     private static final Datasources datasources = new Datasources();
-    private static final List<Kind> kinds = defineKinds(List.of(datasources.postgreSQL()));
+    private static final DefaultControlWrapperProvider provider = new DefaultControlWrapperProvider();
+    private static final List<Kind> kinds = defineKinds(provider, List.of(datasources.postgreSQL()));
 
     @Test
     void test() {
         final Query query = QueryParser.parse(queryString);
+        query.context.setProvider(provider);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, datasources.schema, kinds, query.where);
         final var output = QueryResolver.run(query.context, queryTree);
 
@@ -50,14 +53,12 @@ class TempTests {
         }
     """;
 
-    private static List<Kind> defineKinds(List<TestDatasource<?>> testDatasources) {
+    private static List<Kind> defineKinds(DefaultControlWrapperProvider provider, List<TestDatasource<?>> testDatasources) {
         return testDatasources.stream()
             .flatMap(testDatasource -> {
-                final var builder = new Datasource.Builder(testDatasource.type, testDatasource.wrapper, testDatasource.id);
-                testDatasource.mappings.stream().forEach(builder::mapping);
-                final var datasource = builder.build();
-
-                return datasource.kinds.stream();
+                final var datasource = new Datasource(testDatasource.type, testDatasource.id);
+                provider.setControlWrapper(datasource, testDatasource.wrapper);
+                return testDatasource.mappings.stream().map(mapping -> new Kind(mapping, datasource));
             })
             .toList();
     }

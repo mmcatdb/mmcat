@@ -6,18 +6,17 @@ import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunctio
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.core.rsd.utils.BloomFilter;
 import cz.matfyz.core.rsd.utils.BasicHashFunction;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.utils.StartingEndingFilter;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.stream.Collectors;
+
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 
 /**
@@ -29,13 +28,13 @@ public class MMInferOneInAll {
 
     private static final int BLOOM_FILTER_SIZE = 100000;
 
-    private AbstractInferenceWrapper wrapper;
+    private ControlWrapperProvider provider;
 
     /**
      * Sets the input wrapper for the inference process.
      */
-    public MMInferOneInAll input(AbstractInferenceWrapper wrapper) {
-        this.wrapper = wrapper;
+    public MMInferOneInAll input(ControlWrapperProvider provider) {
+        this.provider = provider;
         return this;
     }
 
@@ -51,35 +50,33 @@ public class MMInferOneInAll {
         }
     }
 
+    private final SchemaConverter schemaConverter = new SchemaConverter();
+
     private InferenceResult innerRun() throws Exception {
-        Map<String, AbstractInferenceWrapper> wrappers = prepareWrappers(wrapper);
-        Map<String, RecordSchemaDescription> rsds = getRecordSchemaDescriptions(wrappers);
+        final List<CategoryMappingsPair> pairs = provider.getDatasources().stream()
+            .map(this::processDatasource)
+            .flatMap(list -> list.stream()).toList();
 
-        Candidates candidates = executeCandidateMiner(wrapper, wrapper.getKindNames());
+        // FIXME This is just a temporary solution
+        // Can the candidate miner be paralellized? Or does it need information about all datasources at once?
+        final var firstDatasource = provider.getDatasources().stream().findFirst().orElseThrow();
+        final var wrapper = this.provider.getControlWrapper(firstDatasource).getInferenceWrapper();
+        final Candidates candidates = executeCandidateMiner(wrapper);
 
-        SchemaConverter schemaConverter = new SchemaConverter();
-        List<CategoryMappingPair> pairs = new ArrayList<>();
-
-        for (final var entry : rsds.entrySet()) {
-            schemaConverter.setNewRSD(entry.getValue(), entry.getKey());
-            pairs.add(schemaConverter.convertToSchemaCategoryAndMapping());
-        }
         return new InferenceResult(pairs, candidates);
     }
 
-    private static Map<String, AbstractInferenceWrapper> prepareWrappers(AbstractInferenceWrapper inputWrapper) throws IllegalArgumentException {
-        Map<String, AbstractInferenceWrapper> wrappers = new HashMap<>();
-
-        inputWrapper.getKindNames().forEach(kindName -> {
-            final var wrapper = inputWrapper.copyForKind(kindName);
-            wrappers.put(kindName, wrapper);
-        });
-        return wrappers;
+    private List<CategoryMappingsPair> processDatasource(Datasource datasource) {
+        final var wrapper = this.provider.getControlWrapper(datasource).getInferenceWrapper();
+        return wrapper.getKindNames().stream()
+            .map(kindName -> processKind(wrapper, datasource, kindName))
+            .toList();
     }
 
-    private Map<String, RecordSchemaDescription> getRecordSchemaDescriptions(Map<String, AbstractInferenceWrapper> wrappers) {
-        return wrappers.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> executeRBA(entry.getValue(), true)));
+    private CategoryMappingsPair processKind(AbstractInferenceWrapper wrapper, Datasource datasource, String kindName) {
+        final var wrapperCopy = wrapper.copyForKind(kindName);
+        final var rsd = executeRBA(wrapperCopy, true);
+        return schemaConverter.convert(rsd, datasource, kindName);
     }
 
     private static RecordSchemaDescription executeRBA(AbstractInferenceWrapper wrapper, boolean printSchema) {
@@ -99,12 +96,12 @@ public class MMInferOneInAll {
     /**
      * Executes the Candidate Miner Algorithm to find potential candidates.
      */
-    public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
+    public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper) throws Exception {
         BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
         StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
         CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
 
-        return candidateMiner.process(wrapper, kinds);
+        return candidateMiner.process(wrapper, wrapper.getKindNames());
     }
 
 }

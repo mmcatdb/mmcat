@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.common;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.Configuration.SetupProperties;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;

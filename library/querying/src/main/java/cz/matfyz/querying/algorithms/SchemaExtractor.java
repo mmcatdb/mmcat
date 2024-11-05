@@ -1,6 +1,6 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -26,7 +26,7 @@ import java.util.TreeMap;
  */
 public class SchemaExtractor {
 
-    public static ExtractorResult run(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
+    public static List<KindPattern> run(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
         return new SchemaExtractor(context, schema, kinds, clause).run();
     }
 
@@ -42,11 +42,6 @@ public class SchemaExtractor {
         this.clause = clause;
     }
 
-    public record ExtractorResult(
-        SchemaCategory schema,
-        List<KindPattern> kindPatterns
-    ) {}
-
     private List<WhereTriple> triples;
     /**
      * List of all morphisms that appear directly in the pattern.
@@ -54,7 +49,7 @@ public class SchemaExtractor {
      */
     private List<SchemaMorphism> patternMorphisms;
 
-    private ExtractorResult run() {
+    private List<KindPattern> run() {
         triples = clause.termTree.toTriples(WhereClause::createTriple);
         patternMorphisms = triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
 
@@ -63,7 +58,7 @@ public class SchemaExtractor {
         final var patterns = createKindPatterns();
         // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the QueryPlanner shouldn't be able to create any plan.
 
-        return new ExtractorResult(newSchema, patterns);
+        return patterns;
     }
 
     // The schema category of all objects and morphisms that are reachable from the pattern plus those that are needed to identify the objects.

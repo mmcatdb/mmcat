@@ -1,5 +1,6 @@
 package cz.matfyz.core.mapping;
 
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -11,14 +12,15 @@ import java.util.List;
 
 public class Mapping implements Comparable<Mapping> {
 
+    private final Datasource datasource;
     private final SchemaCategory category;
     private final SchemaObject rootObject;
+    private final String kindName;
+    private final ComplexProperty accessPath;
+    private final Collection<Signature> primaryKey;
 
-    private String kindName;
-    private ComplexProperty accessPath;
-    private Collection<Signature> primaryKey;
-
-    public Mapping(SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+    public Mapping(Datasource datasource, SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+        this.datasource = datasource;
         this.category = category;
         this.rootObject = category.getObject(rootKey);
         this.kindName = kindName;
@@ -26,13 +28,13 @@ public class Mapping implements Comparable<Mapping> {
         this.primaryKey = primaryKey;
     }
 
-    public static Mapping create(SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath) {
+    public static Mapping create(Datasource datasource, SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath) {
         final var rootObject = category.getObject(rootKey);
 
-        return new Mapping(category, rootKey, kindName, accessPath, defaultPrimaryKey(rootObject));
+        return new Mapping(datasource, category, rootKey, kindName, accessPath, defaultPrimaryKey(rootObject));
     }
 
-    public static List<Signature> defaultPrimaryKey(SchemaObject object) {
+    private static List<Signature> defaultPrimaryKey(SchemaObject object) {
         return object.ids().isSignatures()
             ? object.ids().toSignatureIds().first().signatures().stream().toList()
             : List.of(Signature.createEmpty());
@@ -40,6 +42,10 @@ public class Mapping implements Comparable<Mapping> {
 
     public Mapping clone() {
         throw new UnsupportedOperationException("Mapping.clone not implemented");
+    }
+
+    public Datasource datasource() {
+        return datasource;
     }
 
     public SchemaCategory category() {
@@ -70,8 +76,10 @@ public class Mapping implements Comparable<Mapping> {
     }
 
     @Override public int compareTo(Mapping other) {
-        // This guarantees uniqueness in one datasource, however mappings between different datasources are never compared.
-        return kindName.compareTo(other.kindName);
+        final int datasourceComparison = datasource.compareTo(other.datasource);
+        return datasourceComparison != 0
+            ? datasourceComparison
+            : kindName.compareTo(other.kindName);
     }
 
     public record SerializedMapping(
@@ -90,8 +98,9 @@ public class Mapping implements Comparable<Mapping> {
             );
         }
 
-        public Mapping toMapping(SchemaCategory category) {
+        public Mapping toMapping(Datasource datasource, SchemaCategory category) {
             return new Mapping(
+                datasource,
                 category,
                 rootObjectKey,
                 kindName,

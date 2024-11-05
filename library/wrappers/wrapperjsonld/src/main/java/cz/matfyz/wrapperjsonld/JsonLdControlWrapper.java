@@ -1,6 +1,5 @@
 package cz.matfyz.wrapperjsonld;
 
-import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
@@ -10,8 +9,8 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -19,10 +18,14 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonLdControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
+public class JsonLdControlWrapper extends BaseControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonLdControlWrapper.class);
+
+    @Override protected DatasourceType getType() {
+        return DatasourceType.jsonld;
+    }
 
     private final JsonLdProvider provider;
 
@@ -63,7 +66,7 @@ public class JsonLdControlWrapper extends BaseControlWrapper implements Abstract
         throw new UnsupportedOperationException("JsonLdControlWrapper.getQueryWrapper not implemented.");
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+    @Override public AbstractInferenceWrapper getInferenceWrapper() {
         throw new UnsupportedOperationException("JsonLdControlWrapper.getInferenceWrapper not implemented.");
     }
 

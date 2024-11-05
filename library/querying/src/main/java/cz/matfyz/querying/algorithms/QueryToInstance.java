@@ -1,6 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.querying.queryresult.QueryResult;
@@ -19,12 +20,14 @@ import java.util.List;
  */
 public class QueryToInstance {
 
-    private final String queryString;
+    private final ControlWrapperProvider provider;
     private final SchemaCategory schema;
+    private final String queryString;
     private final List<Kind> kinds;
 
-    public QueryToInstance(SchemaCategory category, String queryString, List<Kind> kinds) {
-        this.schema = category;
+    public QueryToInstance(ControlWrapperProvider provider, SchemaCategory schema, String queryString, List<Kind> kinds) {
+        this.provider = provider;
+        this.schema = schema;
         this.queryString = queryString;
         this.kinds = kinds;
     }
@@ -43,6 +46,7 @@ public class QueryToInstance {
 
     private ResultList innerExecute() {
         final Query query = QueryParser.parse(queryString);
+        query.context.setProvider(provider);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
         final QueryResult selection = QueryResolver.run(query.context, queryTree);
         final QueryResult projection = QueryProjector.run(query.context, query.select, selection);
@@ -64,6 +68,7 @@ public class QueryToInstance {
 
     private QueryDescription innerDescribe() {
         final Query query = QueryParser.parse(queryString);
+        query.context.setProvider(provider);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
 
         return QueryDescriptor.run(query.context, queryTree);

@@ -6,8 +6,8 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
-import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.querying.QueryStructure;
 
 import java.util.ArrayList;

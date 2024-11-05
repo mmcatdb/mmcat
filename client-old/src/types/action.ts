@@ -146,21 +146,20 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
 }
 
 type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
-    datasource: DatasourceFromServer;
+    datasources: DatasourceFromServer[];
 };
 
 class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
     readonly type = ActionType.RSDToCategory;
 
     private constructor(
-        readonly datasource: Datasource,
+        readonly datasources: Datasource[],
     ) {
 
     }
 
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
-        const datasource =  Datasource.fromServer(input.datasource);
-        return new RSDToCategoryPayload(datasource);
+        return new RSDToCategoryPayload(input.datasources.map(Datasource.fromServer));
     }
 }
 

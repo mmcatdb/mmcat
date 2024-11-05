@@ -1,6 +1,6 @@
 package cz.matfyz.abstractwrappers.exception;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.io.Serializable;
 

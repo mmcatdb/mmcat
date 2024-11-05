@@ -1,13 +1,12 @@
 package cz.matfyz.wrapperneo4j;
 
-import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,10 +19,14 @@ import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
+public class Neo4jControlWrapper extends BaseControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jControlWrapper.class);
+
+    @Override protected DatasourceType getType() {
+        return DatasourceType.neo4j;
+    }
 
     static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
     static final String TO_NODE_PROPERTY_PREFIX = "_to.";
@@ -98,7 +101,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractC
         return new Neo4jQueryWrapper();
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+    @Override public AbstractInferenceWrapper getInferenceWrapper() {
         throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
     }
 

@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
@@ -12,7 +13,6 @@ import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdProvider;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.MappingRepository;
@@ -102,11 +102,13 @@ class ServerApplicationTests {
     }
 
     private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id datasourceId, int records) throws Exception {
+        final var datasourceWrapper = datasourceRepository.find(datasourceId);
         final var mappingWrapper = mappingRepository.find(mappingId);
-        final var mapping = createMapping(mappingWrapper);
 
-        final DatasourceWrapper datasource = datasourceRepository.find(datasourceId);
-        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final var datasource = datasourceWrapper.toDatasource();
+        final var mapping = createMapping(mappingWrapper, datasource);
+
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
 
         final var newInstance = new DatabaseToInstance()
             .input(mapping, instance, pullWrapper, new KindNameQuery(mapping.kindName(), records, null))
@@ -123,11 +125,13 @@ class ServerApplicationTests {
     }
 
     private void exportMapping(InstanceCategory instance, Id mappingId, Id datasourceId) throws Exception {
+        final var datasourceWrapper = datasourceRepository.find(datasourceId);
         final var mappingWrapper = mappingRepository.find(mappingId);
-        final var mapping = createMapping(mappingWrapper);
 
-        final DatasourceWrapper datasource = datasourceRepository.find(datasourceId);
-        final var control = wrapperService.getControlWrapper(datasource);
+        final var datasource = datasourceWrapper.toDatasource();
+        final var mapping = createMapping(mappingWrapper, datasource);
+
+        final var control = wrapperService.getControlWrapper(datasourceWrapper);
         final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
         final AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
         final AbstractICWrapper icWrapper = control.getICWrapper();
@@ -144,11 +148,11 @@ class ServerApplicationTests {
         Statistics.reset();
     }
 
-    private Mapping createMapping(MappingWrapper wrapper) {
+    private Mapping createMapping(MappingWrapper wrapper, Datasource datasource) {
         final var categoryWrapper = categoryRepository.find(wrapper.categoryId);
         final var category = categoryWrapper.toSchemaCategory();
 
-        return wrapper.toMapping(category);
+        return wrapper.toMapping(datasource, category);
     }
 
 }

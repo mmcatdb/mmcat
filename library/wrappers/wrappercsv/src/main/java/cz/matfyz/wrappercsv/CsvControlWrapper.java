@@ -5,8 +5,8 @@ import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -18,10 +18,14 @@ import org.slf4j.LoggerFactory;
  * A control wrapper for CSV files that provides various operations such as DDL, DML, and inference
  * functionalities. This class extends {@link BaseControlWrapper} and implements {@link AbstractControlWrapper}.
  */
-public class CsvControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
+public class CsvControlWrapper extends BaseControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvControlWrapper.class);
+
+    @Override protected DatasourceType getType() {
+        return DatasourceType.csv;
+    }
 
     private final CsvProvider provider;
 
@@ -116,8 +120,8 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
      * @param sparkSettings the settings for Spark to be used in the inference process.
      * @return an instance of {@link CsvInferenceWrapper}.
      */
-    @Override public CsvInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
-        return new CsvInferenceWrapper(provider, sparkSettings);
+    @Override public CsvInferenceWrapper getInferenceWrapper() {
+        return new CsvInferenceWrapper(provider, getSparkSettings());
     }
 
 }

@@ -209,7 +209,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
     private Mapping createCleanedMapping(Mapping mapping) {
         ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
-        return new Mapping(newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, mapping.primaryKey());
+        return new Mapping(mapping.datasource(), newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, mapping.primaryKey());
     }
 
     private ComplexProperty cleanComplexProperty(Mapping mapping) {

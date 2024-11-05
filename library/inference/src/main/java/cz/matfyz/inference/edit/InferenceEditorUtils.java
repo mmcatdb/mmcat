@@ -139,15 +139,14 @@ public class InferenceEditorUtils {
      * Creates a new mapping by merging the specified mappings into a new mapping structure.
      */
     public static Mapping createNewMapping(SchemaCategory schema, Mapping mapping, List<Mapping> mappingsToMerge, ComplexProperty accessPath) {
-        Collection<Signature> primaryKey = new HashSet<>();
-        if (mapping.primaryKey() != null)
-            primaryKey.addAll(mapping.primaryKey());
+        final Collection<Signature> primaryKey = new HashSet<>();
+        primaryKey.addAll(mapping.primaryKey());
 
-        for (Mapping mappingToMerge : mappingsToMerge)
+        for (final Mapping mappingToMerge : mappingsToMerge)
             if (mappingToMerge.primaryKey() != null)
                 primaryKey.addAll(mappingToMerge.primaryKey());
 
-        return new Mapping(schema, mapping.rootObject().key(), mapping.kindName(), accessPath, primaryKey);
+        return new Mapping(mapping.datasource(), schema, mapping.rootObject().key(), mapping.kindName(), accessPath, primaryKey);
     }
 
     /**

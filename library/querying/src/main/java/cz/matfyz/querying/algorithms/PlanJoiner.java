@@ -1,7 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
-import cz.matfyz.abstractwrappers.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
@@ -10,6 +10,7 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.core.utils.GraphUtils.Component;
 import cz.matfyz.querying.core.ObjectColoring;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.patterntree.KindPattern;
@@ -36,17 +37,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class PlanJoiner {
 
-    public static QueryNode run(Set<KindPattern> allKinds, SchemaCategory schema, TermTree<BaseSignature> termTree) {
-        return new PlanJoiner(allKinds, schema, termTree).run();
+    public static QueryNode run(QueryContext context, Set<KindPattern> allKinds, TermTree<BaseSignature> termTree) {
+        return new PlanJoiner(context, allKinds, termTree).run();
     }
 
+    private final QueryContext context;
     private final Set<KindPattern> allKinds;
-    private final SchemaCategory schema;
     private final TermTree<BaseSignature> termTree;
 
-    private PlanJoiner(Set<KindPattern> allKinds, SchemaCategory schema, TermTree<BaseSignature> termTree) {
+    private PlanJoiner(QueryContext context, Set<KindPattern> allKinds, TermTree<BaseSignature> termTree) {
         this.allKinds = allKinds;
-        this.schema = schema;
+        this.context = context;
         this.termTree = termTree;
     }
 
@@ -57,7 +58,7 @@ public class PlanJoiner {
         if (allKinds.size() == 1) {
             // If there is only one kind, there is nothing to join.
             final var onlyKind = allKinds.stream().findFirst().get(); // NOSONAR
-            final var patternNode = new PatternNode(allKinds, schema, List.of(), onlyKind.root.term);
+            final var patternNode = new PatternNode(allKinds, context.getSchema(), List.of(), onlyKind.root.term);
             final var datasource = onlyKind.kind.datasource;
 
             return new DatasourceNode(patternNode, datasource);
@@ -140,7 +141,7 @@ public class PlanJoiner {
             return null;
 
         final BaseSignature fromSignature = firstId.signatures().first().getLast();
-        final SchemaObject rootIdObject = schema.getEdge(fromSignature).to();
+        final SchemaObject rootIdObject = context.getSchema().getEdge(fromSignature).to();
         if (!idObject.equals(rootIdObject))
             return null;
 
@@ -256,7 +257,7 @@ public class PlanJoiner {
         // All of the candidates have to have the same datasource.
         final Datasource datasource = candidates.get(0).from().kind.datasource;
         // If the datasource supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
-        if (datasource.control.getQueryWrapper().isJoinSupported())
+        if (context.getProvider().getControlWrapper(datasource).getQueryWrapper().isJoinSupported())
             return GraphUtils.findComponents(candidates).stream().map(this::createQueryPart).toList();
 
         // Othervise, we have to create custom query part for each kind.
@@ -363,7 +364,7 @@ public class PlanJoiner {
     private QueryNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates) {
         final JoinTreeNode joinTree = computeJoinTree(queryParts, candidates);
         // The schema category is not splitted - it stays as is for all sub-patterns
-        return joinTree.toQueryNode(schema);
+        return joinTree.toQueryNode(context.getSchema());
     }
 
     private JoinTreeNode computeJoinTree(List<QueryPart> queryParts, List<JoinCandidate> candidates) {

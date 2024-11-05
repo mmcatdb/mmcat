@@ -6,7 +6,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
@@ -44,7 +44,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
     }
 
     private QueryStatement run() {
-        this.wrapper = datasourceNode.datasource.control.getQueryWrapper();
+        this.wrapper = context.getProvider().getControlWrapper(datasourceNode.datasource).getQueryWrapper();
         datasourceNode.child.accept(this);
 
         return this.wrapper.createDSLStatement();

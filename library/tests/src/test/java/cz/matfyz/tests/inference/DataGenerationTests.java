@@ -1,6 +1,5 @@
 package cz.matfyz.tests.inference;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.instance.InstanceCategory;
@@ -15,7 +14,7 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.algorithms.PrimaryKeyMerge;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
@@ -39,23 +38,21 @@ class DataGenerationTests {
         final var url = ClassLoader.getSystemResource("inferenceSampleYelpSimpleArray.json");
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
-        final var jsonControlWrapper = new JsonControlWrapper(jsonProvider);
-
-        final AbstractInferenceWrapper inferenceWrapper = jsonControlWrapper.getInferenceWrapper(sparkProvider.getSettings());
+        final var control = new JsonControlWrapper(jsonProvider).enableSpark(sparkProvider.getSettings());
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper)
+            .input(control.createProvider())
             .run();
 
-        final List<CategoryMappingPair> categoryMappingPairs = inferenceResult.pairs();
+        final List<CategoryMappingsPair> categoryMappingPairs = inferenceResult.pairs();
 
-        final var pair = CategoryMappingPair.merge(categoryMappingPairs);
+        final var pair = CategoryMappingsPair.merge(categoryMappingPairs);
         final SchemaCategory schema = pair.schema();
         final List<Mapping> mappings = pair.mappings();
 
         System.out.println("Mapping:" + mappings.get(0).accessPath());
 
-        final AbstractPullWrapper pullWrapper = jsonControlWrapper.getPullWrapper();
+        final AbstractPullWrapper pullWrapper = control.getPullWrapper();
         final InstanceCategory emptyInstance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
         final InstanceCategory instance = new DatabaseToInstance().input(mappings.getFirst(), emptyInstance, pullWrapper).run();
 
@@ -68,17 +65,16 @@ class DataGenerationTests {
         final var url = relativePath.toUri().toURL();
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
-        final var jsonControlWrapper = new JsonControlWrapper(jsonProvider);
+        final var control = new JsonControlWrapper(jsonProvider).enableSpark(sparkProvider.getSettings());
 
-        final AbstractInferenceWrapper inferenceWrapper = jsonControlWrapper.getInferenceWrapper(sparkProvider.getSettings());
-
+        final var provider = control.createProvider();
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper)
+            .input(provider)
             .run();
 
-        final List<CategoryMappingPair> categoryMappingPairs = inferenceResult.pairs();
+        final List<CategoryMappingsPair> categoryMappingPairs = inferenceResult.pairs();
 
-        final var pair = CategoryMappingPair.merge(categoryMappingPairs);
+        final var pair = CategoryMappingsPair.merge(categoryMappingPairs);
         final SchemaCategory schema = pair.schema();
         final MetadataCategory metadata = pair.metadata();
         final List<Mapping> mappings = pair.mappings();
@@ -107,10 +103,10 @@ class DataGenerationTests {
 
         final ComplexProperty newComplexProperty = mappingBuilder.complex(mappingBusiness.kindName(), mappingBusiness.accessPath().signature(), mappingBusiness.accessPath(), mappingCheckin.accessPath());
 
-        final Mapping finalMapping = Mapping.create(schema, mappingBusiness.rootObject().key(), mappingBusiness.kindName(), newComplexProperty);
+        final Mapping finalMapping = Mapping.create(provider.getDatasources().stream().findFirst().get(), schema, mappingBusiness.rootObject().key(), mappingBusiness.kindName(), newComplexProperty);
         System.out.println("Mapping C:\n" + finalMapping.accessPath());
 
-        final AbstractPullWrapper pullWrapper = jsonControlWrapper.getPullWrapper();
+        final AbstractPullWrapper pullWrapper = control.getPullWrapper();
         final InstanceCategory emptyInstance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
         //final InstanceCategory instance = new DatabaseToInstance().input(finalMapping, emptyInstance, pullWrapper).run();
 

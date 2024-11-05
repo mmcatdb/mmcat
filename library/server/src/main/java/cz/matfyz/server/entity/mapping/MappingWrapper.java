@@ -1,5 +1,6 @@
 package cz.matfyz.server.entity.mapping;
 
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -61,8 +62,9 @@ public class MappingWrapper extends VersionedEntity {
         );
     }
 
-    public Mapping toMapping(SchemaCategory category) {
+    public Mapping toMapping(Datasource datasource, SchemaCategory category) {
         return new Mapping(
+            datasource,
             category,
             rootObjectKey,
             kindName,

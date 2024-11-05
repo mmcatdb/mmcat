@@ -18,22 +18,22 @@ export type WorkflowInit = {
 export type WorkflowData = {
     type: 'inference';
 } & ({
-    step: 'selectInput';
-    inputDatasourceId?: Id;
+    step: 'selectInputs';
+    inputDatasourceIds: Id[];
 } | {
     step: 'editCategory';
-    inputDatasourceId: Id;
+    inputDatasourceIds: Id[];
     inferenceJobId: Id;
 } | {
     step: 'addMappings' | 'finish';
-    inputDatasourceId: Id;
+    inputDatasourceIds: Id[];
     inferenceJobId: Id;
     inputMappingIds: Id[];
 });
 
 export type InferenceWorkflowStep = typeof inferenceWorkflowSteps[number];
 export const inferenceWorkflowSteps = [
-    'selectInput',
+    'selectInputs',
     'editCategory',
     'addMappings',
     'finish',
