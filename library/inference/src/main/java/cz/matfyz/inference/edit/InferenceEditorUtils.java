@@ -40,14 +40,9 @@ public class InferenceEditorUtils {
     /**
      * Gets a new unique signature value for a schema.
      */
-    //TODO: be aware of dual morphisms
     private static Signature getNewSignatureValue(SchemaCategory schema) {
-        Collection<Signature> currentSignatures = new ArrayList<>();
-
-        for (SchemaMorphism morphism : schema.allMorphisms())
-            currentSignatures.add(morphism.signature());
-
-        Generator generator = new Generator(currentSignatures);
+        final var currentSignatures = schema.allMorphisms().stream().map(SchemaMorphism::signature).toList();
+        final Generator generator = new Generator(currentSignatures);
 
         return generator.next();
     }

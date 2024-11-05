@@ -1,6 +1,5 @@
 /**
  * Enum representing different types of graph layouts.
- * @enum {string}
  */
 export enum LayoutType {
     /** Force-directed layout. */

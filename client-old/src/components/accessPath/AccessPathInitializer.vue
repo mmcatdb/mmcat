@@ -33,9 +33,9 @@ provide(evocatKey, { evocat, graph } as EvocatContext);
 
 /**
  * Handles the creation of Evocat and graph instances when emitted by EvocatDisplay.
- * @param {Object} context - The Evocat and graph context.
- * @param {Evocat} context.evocat - The created Evocat instance.
- * @param {Graph} context.graph - The created Graph instance.
+ * @param context - The Evocat and graph context.
+ * @param context.evocat - The created Evocat instance.
+ * @param context.graph - The created Graph instance.
  */
 function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     evocat.value = context.evocat;
@@ -71,9 +71,9 @@ onMounted(async () => {
 
 /**
  * Creates a new mapping with the provided primary key, access path, and kind name.
- * @param {SignatureId} primaryKey - The primary key of the mapping.
- * @param {GraphRootProperty} accessPath - The root property of the access path.
- * @param {string | undefined} kindName - The name of the kind being created (optional).
+ * @param primaryKey - The primary key of the mapping.
+ * @param accessPath - The root property of the access path.
+ * @param kindName - The name of the kind being created (optional).
  */
 async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty, kindName: string | undefined) {
     if (!selectedDatasource.value || !graph.value || !accessPath)
@@ -97,7 +97,7 @@ async function createMapping(primaryKey: SignatureId, accessPath: GraphRootPrope
 
 /**
  * Sets the initialization type to either 'create' or 'load'.
- * @param {'create' | 'load'} type - The type of initialization to set.
+ * @param type - The type of initialization to set.
  */
 function setInitializeType(type: 'create' | 'load') {
     initializeType.value = type;

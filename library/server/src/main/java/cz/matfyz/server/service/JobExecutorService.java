@@ -58,6 +58,7 @@ import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -330,29 +331,18 @@ public class JobExecutorService {
         );
     }
 
-    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, InferenceEdit edit, boolean isFinal, LayoutType layoutType) {
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, @Nullable InferenceEdit edit, boolean isFinal, LayoutType layoutType) {
         final var schema = SchemaSerializer.deserialize(data.inferenceSchema());
         final var metadata = MetadataSerializer.deserialize(data.inferenceMetadata(), schema);
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
         final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
-        ObjectMapper mapper = new ObjectMapper();
+        List<InferenceEdit> edits = data.edits();
 
-        final List<InferenceEdit> edits = data.edits().stream()
-            .map(json -> {
-                try {
-                    return mapper.readValue(json, InferenceEdit.class);
-                } catch (Exception e) {
-                    throw new RuntimeException("Error deserializing InferenceEdit", e);
-                }
-            })
-            .collect(Collectors.toList());
-
-        if (layoutType != null) {
+        if (layoutType != null)
             Layout.applyToMetadata(schema, metadata, layoutType);
-        } else {
-            updateInferenceEdits(edits, edit, isFinal);
-        }
+        else
+            edits = updateInferenceEdits(edits, edit, isFinal);
 
         final InferenceEditor inferenceEditor = isFinal
             ? new InferenceEditor(schema, metadata, mappings, edits)
@@ -378,20 +368,26 @@ public class JobExecutorService {
     }
 
     // TODO: move this to an util class - should I?
-    private void updateInferenceEdits(List<InferenceEdit> edits, InferenceEdit edit, boolean isFinal) {
+    private List<InferenceEdit> updateInferenceEdits(List<InferenceEdit> edits, InferenceEdit edit, boolean isFinal) {
         if (edit == null) {
-            if (!isFinal && !edits.isEmpty())
-                edits.remove(edits.size() - 1);
-            return;
+            return isFinal || edits.isEmpty()
+                ? edits
+                : edits.subList(0, edits.size() - 1);
         }
-        Integer editIdx = findEditIdx(edit, edits);
-        if (editIdx == null) {
+
+        final Integer editIndex = findEditIdx(edit, edits);
+        if (editIndex == null) {
             edit.setId(edits.size());
-            edits.add(edit);
-        } else {
-            InferenceEdit existingEdit = edits.get(editIdx);
-            existingEdit.setActive(!existingEdit.isActive());
+            final var output = new ArrayList<>(edits);
+            output.add(edit);
+
+            return output;
         }
+
+        InferenceEdit existingEdit = edits.get(editIndex);
+        existingEdit.setActive(!existingEdit.isActive());
+
+        return edits;
     }
 
     private Integer findEditIdx(InferenceEdit edit, List<InferenceEdit> manual) {
