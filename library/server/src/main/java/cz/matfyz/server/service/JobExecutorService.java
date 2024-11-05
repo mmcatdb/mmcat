@@ -336,17 +336,7 @@ public class JobExecutorService {
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
         final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        final List<InferenceEdit> edits = data.edits().stream()
-            .map(json -> {
-                try {
-                    return mapper.readValue(json, InferenceEdit.class);
-                } catch (Exception e) {
-                    throw new RuntimeException("Error deserializing InferenceEdit", e);
-                }
-            })
-            .collect(Collectors.toList());
+        final List<InferenceEdit> edits = data.edits();
 
         if (layoutType != null) {
             Layout.applyToMetadata(schema, metadata, layoutType);
