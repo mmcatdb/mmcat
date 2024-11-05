@@ -58,10 +58,5 @@ The current version enables the user to work with multiple nodes at once. Furthe
 ![Mapping Editor](/img/mapping-editor.png)
 
 
-Notes:
-- this can happen as many times as user requests (the inference editing, also we have undo/redo)
-- seq diagram could be more complex (for example if I were to add the layout logic as well)
-- in seq diagrams I dont show mapping (mapping creation, mapping editing in inference editor, mapping editor)
-
 [^article]: Koupil, P., Hricko, S., & Holubová, I. Mm-infer: A tool for inference of multi-model
 schemas. (2022). https://doi.org/10.48786/EDBT.2022.52
