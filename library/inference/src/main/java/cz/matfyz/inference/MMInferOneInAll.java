@@ -1,6 +1,9 @@
 package cz.matfyz.inference;
 
 import cz.matfyz.inference.algorithms.miner.CandidateMinerAlgorithm;
+import cz.matfyz.inference.algorithms.pba.PropertyBasedAlgorithm;
+import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalCombFunction;
+import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalSeqFunction;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
@@ -79,10 +82,11 @@ public class MMInferOneInAll {
 
     private Map<String, RecordSchemaDescription> getRecordSchemaDescriptions(Map<String, AbstractInferenceWrapper> wrappers) {
         return wrappers.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> executeRBA(entry.getValue(), true)));
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> executeRBA(entry.getValue())));
+            //.collect(Collectors.toMap(Map.Entry::getKey, entry -> executePBA(entry.getValue())));
     }
 
-    private static RecordSchemaDescription executeRBA(AbstractInferenceWrapper wrapper, boolean printSchema) {
+    private static RecordSchemaDescription executeRBA(AbstractInferenceWrapper wrapper) {
         RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
         AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
 
@@ -95,6 +99,23 @@ public class MMInferOneInAll {
 
         return rsd;
     }
+
+    public static RecordSchemaDescription executePBA(AbstractInferenceWrapper wrapper) {
+        PropertyBasedAlgorithm pba = new PropertyBasedAlgorithm();
+
+        DefaultLocalSeqFunction seqFunction = new DefaultLocalSeqFunction();
+        DefaultLocalCombFunction combFunction = new DefaultLocalCombFunction();
+
+        long start = System.currentTimeMillis();
+        RecordSchemaDescription rsd = pba.process(wrapper, seqFunction, combFunction);
+
+        long end = System.currentTimeMillis();
+
+        System.out.print("RESULT_PROPERTY_BA: ");
+        System.out.println(rsd == null ? "NULL" : rsd);
+
+        return rsd;
+}
 
     /**
      * Executes the Candidate Miner Algorithm to find potential candidates.
