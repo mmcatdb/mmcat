@@ -1,4 +1,4 @@
-package cz.matfyz.abstractwrappers.datasource;
+package cz.matfyz.core.datasource;
 
 import cz.matfyz.core.mapping.Mapping;
 
@@ -9,7 +9,7 @@ public class Kind implements Comparable<Kind> {
 
     public final Datasource datasource;
     /**
-     * There has to be at most one mapping for each kind name in a given datasource.
+     * There can be at most one mapping for each kind name in a given datasource.
      * If not, many algorithms will broke.
      *
      * E.g., there is an algorithm for determining which kinds to join for a query. If we allowed multiple mappings for a single kind, we would have to use some other identifier (e.g., ID) to distinguish between them. However, the algorithm might then decide to join different mappings (i.e., with different IDs) for the same kind (one kindName). In that case, the joining would be much more complicated, because we can't join a kind with itself. We would need to merge the mappings of the kind together.
@@ -35,7 +35,7 @@ public class Kind implements Comparable<Kind> {
     }
 
     @Override public String toString() {
-        return datasource.identifier + "/" + mapping.kindName();
+        return datasource.getUniqueKindIdentifier(mapping.kindName());
     }
 
 }

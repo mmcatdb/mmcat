@@ -42,17 +42,17 @@ public class WorkflowService {
 
     private Workflow continueInference(Workflow workflow, InferenceWorkflowData data, Id sessionId) {
         switch (data.step()) {
-            case selectInput -> {
+            case selectInputs -> {
                 // The user has to select the input datasource. Then we can create the inference job and the user can continue.
-                if (data.inputDatasourceId() == null)
+                if (data.inputDatasourceIds().isEmpty())
                     throw new IllegalArgumentException("Input datasource is required.");
 
-                final var action = actionService.create(workflow.categoryId, "Schema inference", new RSDToCategoryPayload(data.inputDatasourceId()));
+                final var action = actionService.create(workflow.categoryId, "Schema inference", new RSDToCategoryPayload(data.inputDatasourceIds()));
                 final var inferenceJob = jobService.createUserRun(action, sessionId).job();
 
                 final var newData = new InferenceWorkflowData(
                     InferenceWorkflowStep.editCategory,
-                    data.inputDatasourceId(),
+                    data.inputDatasourceIds(),
                     inferenceJob.id(),
                     data.inputMappingIds()
                 );
@@ -76,7 +76,7 @@ public class WorkflowService {
                 workflow.jobId = null;
                 workflow.data = new InferenceWorkflowData(
                     InferenceWorkflowStep.addMappings,
-                    data.inputDatasourceId(),
+                    data.inputDatasourceIds(),
                     data.inferenceJobId(),
                     inputMappingIds
                 );
@@ -90,9 +90,11 @@ public class WorkflowService {
                 if (mappings.size() - data.inputMappingIds().size() < 1)
                     throw new IllegalArgumentException("At least one mapping is required.");
 
-                // First, we need to make MTC job for the input datasource.
-                final var mtcAction = actionService.create(workflow.categoryId, "Input", new ModelToCategoryPayload(data.inputDatasourceId()));
-                jobService.createUserRun(mtcAction, sessionId);
+                // First, we need to make MTC jobs for the input datasource.
+                data.inputDatasourceIds().forEach(id -> {
+                    final var mtcAction = actionService.create(workflow.categoryId, "Input", new ModelToCategoryPayload(id));
+                    jobService.createUserRun(mtcAction, sessionId);
+                });
 
                 // We need to make CTM job for each output datasource. Make sure they are unique ...
                 final var outputDatasourceIds = mappings.stream()

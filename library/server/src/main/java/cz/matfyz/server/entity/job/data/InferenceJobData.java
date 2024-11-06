@@ -15,7 +15,9 @@ import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.entity.job.JobData;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 public record InferenceJobData(
     List<InferenceEdit> edits,
@@ -25,7 +27,7 @@ public record InferenceJobData(
     SerializedMetadata finalMetadata,
     LayoutType layoutType,
     SerializedCandidates candidates,
-    List<SerializedMapping> mappings
+    List<SerializedDatasource> datasources
 ) implements JobData {
 
     public static InferenceJobData fromSchemaCategory(
@@ -38,6 +40,14 @@ public record InferenceJobData(
         Candidates candidates,
         List<Mapping> mappings
     ) {
+        final var datasources = new TreeMap<String, SerializedDatasource>();
+        mappings.forEach(mapping -> {
+            final var datasourceId = mapping.datasource().identifier;
+            datasources
+                .computeIfAbsent(datasourceId, id -> new SerializedDatasource(id, new ArrayList<>()))
+                .mappings().add(SerializedMapping.fromMapping(mapping));
+        });
+
         return new InferenceJobData(
             edits,
             SchemaSerializer.serialize(inferenceSchema),
@@ -46,8 +56,13 @@ public record InferenceJobData(
             MetadataSerializer.serialize(finalMetadata),
             layoutType,
             CandidatesSerializer.serialize(candidates),
-            mappings.stream().map(SerializedMapping::fromMapping).toList()
+            datasources.values().stream().toList()
         );
     }
+
+    public record SerializedDatasource(
+        String datasourceId,
+        List<SerializedMapping> mappings
+    ) {}
 
 }

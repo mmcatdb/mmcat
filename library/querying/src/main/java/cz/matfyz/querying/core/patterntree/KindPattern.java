@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core.patterntree;
 
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.Map;

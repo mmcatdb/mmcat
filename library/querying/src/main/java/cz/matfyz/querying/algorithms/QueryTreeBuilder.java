@@ -1,6 +1,6 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.KindPattern;
@@ -43,15 +43,16 @@ public class QueryTreeBuilder {
     }
 
     private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
-        final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause);
-        final List<Set<KindPattern>> plans = QueryPlanner.run(extracted.kindPatterns());
+        // TODO The QueryContext should be immutable. It should be created for each clause instead of updating the schema category in the same context.
+        final var extractedPatterns = SchemaExtractor.run(context, originalSchema, allKinds, clause);
+        final List<Set<KindPattern>> plans = QueryPlanner.run(extractedPatterns);
         if (plans.isEmpty())
             throw PlanningException.noPlans();
 
         // TODO better selection?
         final Set<KindPattern> selectedPlan = plans.get(0);
 
-        QueryNode currentNode = PlanJoiner.run(selectedPlan, extracted.schema(), clause.termTree);
+        QueryNode currentNode = PlanJoiner.run(context, selectedPlan, clause.termTree);
 
         for (final var filter : clause.conditionFilters)
             currentNode = new FilterNode(currentNode, filter);

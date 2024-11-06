@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A base class for all exceptions. It is supposed to be recognized by the client application.
@@ -16,9 +17,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 public abstract class NamedException extends RuntimeException {
 
     private final String name;
-    protected final Serializable data;
+    protected final @Nullable Serializable data;
 
-    protected NamedException(String name, Serializable data, Throwable cause) {
+    protected NamedException(String name, @Nullable Serializable data, @Nullable Throwable cause) {
         super(createMessage(name, data), cause);
         this.name = name;
         this.data = data;
@@ -43,7 +44,7 @@ public abstract class NamedException extends RuntimeException {
 
     public record SerializedException(
         String name,
-        Serializable data
+        @Nullable Serializable data
     ) implements Serializable {}
 
     public SerializedException toSerializedException() {

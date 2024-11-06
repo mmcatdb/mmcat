@@ -1,5 +1,7 @@
 package cz.matfyz.tests.example.basic;
 
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -9,6 +11,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public abstract class MongoDB {
 
     private MongoDB() {}
+
+    public static final Datasource datasource = new Datasource(DatasourceType.mongodb, "mongodb");
 
     public static final String orderKind = "order";
     public static final String addressKind = "address";
@@ -22,11 +26,17 @@ public abstract class MongoDB {
     public static final String noteKind = "note";
 
     public static TestMapping order(SchemaCategory schema) {
-        return PostgreSQL.order(schema);
+        return new TestMapping(datasource, schema,
+            Schema.order,
+            orderKind,
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber)
+            )
+        );
     }
 
     private static TestMapping addressInner(SchemaCategory schema, String kindName) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             kindName,
             b -> b.root(
@@ -70,7 +80,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping tag(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             tagKind,
             b -> b.root(
@@ -92,7 +102,7 @@ public abstract class MongoDB {
     }
 
     private static TestMapping createItem(SchemaCategory schema, String kindName) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             kindName,
             b -> b.root(
@@ -131,7 +141,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping contact(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             contactKind,
             b -> b.root(
@@ -163,7 +173,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping customer(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             customerKind,
             b -> b.root(
@@ -187,7 +197,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping note(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             noteKind,
             b -> b.root(

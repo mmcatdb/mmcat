@@ -19,7 +19,7 @@ async function continueWorkflow() {
 
 <template>
     <DatasourcesView
-        v-if="workflow.data.step === 'selectInput'"
+        v-if="workflow.data.step === 'selectInputs'"
         @continue="continueWorkflow"
     />
     <JobView

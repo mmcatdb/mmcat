@@ -22,10 +22,12 @@ class CsvTests {
     private final SparkProvider sparkProvider = new SparkProvider();
 
     CsvInferenceWrapper setup(CsvProvider provider) {
-        final var wrapper = new CsvControlWrapper(provider).getInferenceWrapper(sparkProvider.getSettings());
+        final var wrapper = new CsvControlWrapper(provider)
+            .enableSpark(sparkProvider.getSettings())
+            .getInferenceWrapper();
         wrapper.startSession();
 
-        return wrapper;
+        return (CsvInferenceWrapper) wrapper;
     }
 
     @Test

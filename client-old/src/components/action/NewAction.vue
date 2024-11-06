@@ -6,7 +6,7 @@ import type { Id } from '@/types/id';
 import { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
+import { type ActionPayloadInit, ACTION_TYPES, Action, ActionType } from '@/types/action';
 
 const emit = defineEmits<{
     (e: 'newAction', action: Action): void;
@@ -15,8 +15,18 @@ const emit = defineEmits<{
 const datasources = ref<Datasource[]>();
 const fetched = ref(false);
 const datasourceId = ref<Id>();
+const datasourceIds = ref<Id[]>([]);
+const selectedDatasources = computed(() => {
+    const all = datasources.value;
+    return all ? datasourceIds.value.map(id => all.find(ds => ds.id === id)!) : [];
+});
+const notSelectedDatasources = computed(() => {
+    const all = datasources.value;
+    return all ? all.filter(ds => !datasourceIds.value.includes(ds.id)) : [];
+});
 const actionName = ref<string>('');
-const actionType = ref(ACTION_TYPES[0].value);
+type AvailableOptions = typeof ACTION_TYPES[number]['value'];
+const actionType = ref<AvailableOptions>(ACTION_TYPES[0].value);
 const fetching = ref(false);
 
 const categoryId = useSchemaCategoryId();
@@ -33,14 +43,17 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    return !!datasourceId.value;
+    return actionType.value === ActionType.RSDToCategory ? !!datasourceIds.value.length : !!datasourceId.value;
 });
 
 async function createAction() {
     fetching.value = true;
-    const payload = {
+    const payload: ActionPayloadInit = actionType.value === ActionType.RSDToCategory ? {
         type: actionType.value,
-        datasourceId: datasourceId.value,
+        datasourceIds: datasourceIds.value,
+    } : {
+        type: actionType.value,
+        datasourceId: datasourceId.value as Id,
     };
 
     const result = await API.actions.createAction({}, {
@@ -53,6 +66,17 @@ async function createAction() {
 
     fetching.value = false;
 }
+
+function addDatasource() {
+    if (datasourceId.value && !datasourceIds.value.includes(datasourceId.value)) {
+        datasourceIds.value.unshift(datasourceId.value);
+        datasourceId.value = undefined;
+    }
+}
+
+function removeDatasource(id: Id) {
+    datasourceIds.value = datasourceIds.value.filter(dsId => dsId !== id);
+}
 </script>
 
 <template>
@@ -60,7 +84,10 @@ async function createAction() {
         <h2>Create a new action</h2>
         <ValueContainer>
             <ValueRow label="Type:">
-                <select v-model="actionType">
+                <select
+                    v-model="actionType"
+                    class="w-100"
+                >
                     <option
                         v-for="availableType in ACTION_TYPES"
                         :key="availableType.value"
@@ -71,9 +98,47 @@ async function createAction() {
                 </select>
             </ValueRow>
             <ValueRow label="Label:">
-                <input v-model="actionName" />
+                <input
+                    v-model="actionName"
+                    class="w-100"
+                />
             </ValueRow>
-            <ValueRow label="Datasource:">
+            <ValueRow
+                v-if="actionType === ActionType.RSDToCategory"
+                label="Datasources:"
+            >
+                <div class="d-flex align-items-center gap-2">
+                    <select
+                        v-model="datasourceId"
+                        style="width: 200px;"
+                    >
+                        <option
+                            v-for="datasource in notSelectedDatasources"
+                            :key="datasource.id"
+                            :value="datasource.id"
+                        >
+                            {{ datasource.label }}
+                        </option>
+                    </select>
+                    <button @click="addDatasource">
+                        Add
+                    </button>
+                </div>
+                <div
+                    v-for="datasource in selectedDatasources"
+                    :key="datasource.id"
+                    class="d-flex align-items-center gap-2 py-1"
+                >
+                    <button @click="removeDatasource(datasource.id)">
+                        x
+                    </button>
+                    {{ datasource.label }}
+                </div>
+            </ValueRow>
+            <ValueRow
+                v-else
+                label="Datasource:"
+            >
                 <select v-model="datasourceId">
                     <option
                         v-for="datasource in datasources"

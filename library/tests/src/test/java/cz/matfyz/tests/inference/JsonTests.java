@@ -22,10 +22,12 @@ class JsonTests {
     private final SparkProvider sparkProvider = new SparkProvider();
 
     JsonInferenceWrapper setup(JsonProvider jsonProvider) {
-        final var wrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var wrapper = new JsonControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .getInferenceWrapper();
         wrapper.startSession();
 
-        return wrapper;
+        return (JsonInferenceWrapper) wrapper;
     }
 
     @Test
@@ -49,7 +51,7 @@ class JsonTests {
         URL url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 
@@ -63,7 +65,7 @@ class JsonTests {
         JsonSettings settings = new JsonSettings("", false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, jsonArray);
 
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 
@@ -78,7 +80,7 @@ class JsonTests {
         JsonSettings settings = new JsonSettings("", false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, jsonObject);
 
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 
@@ -93,7 +95,7 @@ class JsonTests {
         JsonSettings settings = new JsonSettings("", false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, malformedJson);
 
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 

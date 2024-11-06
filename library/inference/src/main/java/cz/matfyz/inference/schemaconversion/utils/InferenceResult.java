@@ -6,9 +6,9 @@ import java.util.List;
 
 /**
  * A record representing the result of an inference operation, consisting of a list of
- * {@link CategoryMappingPair} instances and a {@link Candidates} object.
+ * {@link CategoryMappingsPair} instances and a {@link Candidates} object.
  */
 public record InferenceResult(
-    List<CategoryMappingPair> pairs,
+    List<CategoryMappingsPair> pairs,
     Candidates candidates
 ) {}

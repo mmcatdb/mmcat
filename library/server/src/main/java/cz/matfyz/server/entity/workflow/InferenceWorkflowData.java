@@ -10,15 +10,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record InferenceWorkflowData(
     InferenceWorkflowStep step,
-    @Nullable Id inputDatasourceId,
+    List<Id> inputDatasourceIds,
     @Nullable Id inferenceJobId,
     List<Id> inputMappingIds
 ) implements WorkflowData {
 
     public static InferenceWorkflowData createNew() {
         return new InferenceWorkflowData(
-            InferenceWorkflowStep.selectInput,
-            null,
+            InferenceWorkflowStep.selectInputs,
+            List.of(),
             null,
             new ArrayList<>()
         );
@@ -27,14 +27,14 @@ public record InferenceWorkflowData(
     public InferenceWorkflowData updateStep(InferenceWorkflowStep step) {
         return new InferenceWorkflowData(
             step,
-            inputDatasourceId,
+            inputDatasourceIds,
             inferenceJobId,
             inputMappingIds
         );
     }
 
     public enum InferenceWorkflowStep {
-        selectInput,
+        selectInputs,
         editCategory,
         addMappings,
         finish,

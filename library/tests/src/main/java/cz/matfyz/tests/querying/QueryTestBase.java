@@ -3,8 +3,9 @@ package cz.matfyz.tests.querying;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource;
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
@@ -57,8 +58,9 @@ public class QueryTestBase {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public void run() {
-        final var kinds = defineKinds();
-        final var queryToInstance = new QueryToInstance(schema, queryString, kinds);
+        final var provider = new DefaultControlWrapperProvider();
+        final var kinds = defineKinds(provider);
+        final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds);
 
         final ResultList result = queryToInstance.execute();
         final var jsonResults = result.toJsonArray();
@@ -69,14 +71,13 @@ public class QueryTestBase {
         assertEquals(expectedResult, jsonResult);
     }
 
-    private List<Kind> defineKinds() {
-        return datasources.stream().flatMap(testDatasource -> {
-            final var builder = new Datasource.Builder(testDatasource.type, testDatasource.wrapper, testDatasource.id);
-            testDatasource.mappings.forEach(builder::mapping);
-            final var datasource = builder.build();
-
-            return datasource.kinds.stream();
-        }).toList();
+    private List<Kind> defineKinds(DefaultControlWrapperProvider provider) {
+        return datasources.stream()
+            .flatMap(testDatasource -> {
+                final var datasource = new Datasource(testDatasource.type, testDatasource.id);
+                provider.setControlWrapper(datasource, testDatasource.wrapper);
+                return testDatasource.mappings.stream().map(mapping -> new Kind(mapping, datasource));
+            }).toList();
     }
 
     private JsonNode parseJsonResult(List<String> jsonResults) {

@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 
 import java.util.List;
 
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 
@@ -21,10 +22,6 @@ public class SchemaConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaConverter.class);
 
-    private RecordSchemaDescription rsd;
-
-    public String kindName; // needs to match the collection name in the case of MongoDB for pulling data.
-
     private final UniqueNumberGenerator keyGenerator;
     private final UniqueNumberGenerator signatureGenerator;
 
@@ -34,19 +31,10 @@ public class SchemaConverter {
     }
 
     /**
-     * Sets a new {@link RecordSchemaDescription} (RSD) and kind name for the converter.
-     */
-    public void setNewRSD(RecordSchemaDescription rsd, String kindName) {
-        this.rsd = rsd;
-        this.kindName = kindName;
-    }
-
-    /**
      * Converts the current {@link RecordSchemaDescription} to a schema category and mapping.
-     * This involves creating an access tree from the RSD, converting the tree to a schema category,
-     * and generating the mapping for the schema category.
+     * This involves creating an access tree from the RSD, converting the tree to a schema category, and generating the mapping for the schema category.
      */
-    public CategoryMappingPair convertToSchemaCategoryAndMapping() {
+    public CategoryMappingsPair convert(RecordSchemaDescription rsd, Datasource datasource, String kindName) {
         LOGGER.info("Converting RSD to SchemaCategory...");
 
         LOGGER.info("Creating the access tree from RSD...");
@@ -63,9 +51,9 @@ public class SchemaConverter {
 
         LOGGER.info("Creating the mapping for the schema category...");
         final MappingCreator mappingCreator = new MappingCreator(root.key, root);
-        final Mapping mapping = mappingCreator.createMapping(schema, this.kindName);
+        final Mapping mapping = mappingCreator.createMapping(datasource, schema, kindName);
 
-        return new CategoryMappingPair(schema, metadata, List.of(mapping));
+        return new CategoryMappingsPair(schema, metadata, List.of(mapping));
     }
 
     /**

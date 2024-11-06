@@ -379,7 +379,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private Mapping createMergedMapping(Mapping clusterMapping) {
         ComplexProperty changedComplexProperty = changeComplexProperties(clusterMapping.accessPath());
-        return new Mapping(newSchema, clusterMapping.rootObject().key(), clusterMapping.kindName(), changedComplexProperty, clusterMapping.primaryKey());
+        return new Mapping(clusterMapping.datasource(), newSchema, clusterMapping.rootObject().key(), clusterMapping.kindName(), changedComplexProperty, clusterMapping.primaryKey());
     }
 
     private ComplexProperty changeComplexProperties(ComplexProperty clusterComplexProperty) {

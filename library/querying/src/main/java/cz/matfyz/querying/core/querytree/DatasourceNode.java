@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core.querytree;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource;
 
 /**
  * The whole subtree starting with the child node can be processed withing the specified datasource.

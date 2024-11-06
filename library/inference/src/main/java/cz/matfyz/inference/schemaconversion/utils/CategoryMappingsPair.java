@@ -13,7 +13,7 @@ import cz.matfyz.core.metadata.MetadataCategory;
  * A record to hold the final result of schema conversion, consisting of a schema category,
  * associated metadata, and a list of mappings.
  */
-public record CategoryMappingPair(
+public record CategoryMappingsPair(
     SchemaCategory schema,
     MetadataCategory metadata,
     List<Mapping> mappings
@@ -23,11 +23,11 @@ public record CategoryMappingPair(
      * Merges multiple {@code CategoryMappingPair} instances into a single instance.
      * The merged instance contains a combined schema, metadata, and mappings from all provided pairs.
      */
-    public static CategoryMappingPair merge(List<CategoryMappingPair> pairs) {
+    public static CategoryMappingsPair merge(List<CategoryMappingsPair> pairs) {
         final SchemaCategory mergedSchema = new SchemaCategory();
         final MetadataCategory mergedMetadata = MetadataCategory.createEmpty(mergedSchema);
 
-        for (final CategoryMappingPair pair : pairs) {
+        for (final CategoryMappingsPair pair : pairs) {
             for (final SchemaObject object : pair.schema.allObjects()) {
                 mergedSchema.addObject(object);
                 mergedMetadata.setObject(object, pair.metadata.getObject(object));
@@ -41,7 +41,7 @@ public record CategoryMappingPair(
 
         final List<Mapping> mappings = pairs.stream().flatMap(pair -> pair.mappings.stream()).toList();
 
-        return new CategoryMappingPair(mergedSchema, mergedMetadata, mappings);
+        return new CategoryMappingsPair(mergedSchema, mergedMetadata, mappings);
     }
 
 }

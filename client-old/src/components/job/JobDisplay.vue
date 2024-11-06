@@ -111,9 +111,18 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                 <template v-if="job.payload.type === ActionType.UpdateSchema">
                     <VersionDisplay :version-id="job.payload.prevVersion" /> -> <VersionDisplay :version-id="job.payload.nextVersion" />
                 </template>
-                <template v-else>
+                <template v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
                     <FixedRouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id } }">
                         {{ job.payload.datasource.label }}
+                    </FixedRouterLink>
+                </template>
+                <template v-else>
+                    <FixedRouterLink
+                        v-for="datasource in job.payload.datasources"
+                        :key="datasource.id"
+                        :to="{ name: 'datasource', params: { id: datasource.id } }"
+                    >
+                        {{ datasource.label }}
                     </FixedRouterLink>
                 </template>
             </div>

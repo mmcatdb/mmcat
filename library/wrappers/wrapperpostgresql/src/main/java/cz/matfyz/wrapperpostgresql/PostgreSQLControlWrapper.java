@@ -1,12 +1,11 @@
 package cz.matfyz.wrapperpostgresql;
 
-import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,10 +18,14 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PostgreSQLControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
+public class PostgreSQLControlWrapper extends BaseControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLControlWrapper.class);
+
+    @Override protected DatasourceType getType() {
+        return DatasourceType.postgresql;
+    }
 
     private final PostgreSQLProvider provider;
 
@@ -91,7 +94,7 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper implements Abst
         return new PostgreSQLQueryWrapper();
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+    @Override public AbstractInferenceWrapper getInferenceWrapper() {
         throw new UnsupportedOperationException("PostgreSQLControlWrapper.getInferenceWrapper not implemented.");
     }
 

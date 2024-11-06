@@ -17,10 +17,6 @@ import org.apache.spark.api.java.JavaPairRDD;
 import scala.Tuple2;
 import cz.matfyz.inference.algorithms.miner.functions.ReferenceTupleToPairWithSubsetTypeMapFunction;
 
-/*
- * When I got this class, the process() method was not returning anything.
- * I added the return statement (and the conversions from raw candidates)
- */
 public class CandidateMinerAlgorithm implements Serializable {
 
     public Candidates process(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {

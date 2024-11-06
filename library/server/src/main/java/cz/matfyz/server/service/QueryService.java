@@ -1,7 +1,9 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource;
-import cz.matfyz.abstractwrappers.datasource.Kind;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
@@ -21,6 +23,7 @@ import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -55,21 +58,21 @@ public class QueryService {
     public ResultList executeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
-        final var kindsAndDatasources = getDatasources(categoryWrapper.id(), category);
+        final var datasources = getDatasources(categoryWrapper.id(), category);
 
-        return new QueryToInstance(category, queryString, kindsAndDatasources.kinds).execute();
+        return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).execute();
     }
 
     public QueryDescription describeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
-        final var kindsAndDatasources = getDatasources(categoryWrapper.id(), category);
+        final var datasources = getDatasources(categoryWrapper.id(), category);
 
-        final var rawDescriptions = new QueryToInstance(category, queryString, kindsAndDatasources.kinds).describe();
+        final var rawDescriptions = new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).describe();
 
         final var parts = rawDescriptions.parts().stream().map(description -> {
-            final var datasource = kindsAndDatasources.datasourceWrappers.get(new Id(description.datasourceIdentifier()));
-            final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
+            final var wrapper = datasources.datasourceWrappers.get(new Id(description.datasourceIdentifier()));
+            final var datasourceDetail = datasourceController.datasourceToDetail(wrapper);
             return new QueryPartDescription(datasourceDetail, description.query());
         }).toList();
 
@@ -78,13 +81,15 @@ public class QueryService {
 
     private record KindsAndDatasources(
         List<Kind> kinds,
-        Map<Id, DatasourceWrapper> datasourceWrappers
+        Map<Id, DatasourceWrapper> datasourceWrappers,
+        ControlWrapperProvider provider
     ) {}
 
     private KindsAndDatasources getDatasources(Id categoryId, SchemaCategory category) {
-        final Map<Id, DatasourceWrapper> datasourceWrappers = new TreeMap<>();
-        final Map<Id, Datasource.Builder> datasourceBuilders = new TreeMap<>();
+        final var provider = new DefaultControlWrapperProvider();
 
+        final Map<Id, Datasource> datasources = new TreeMap<>();
+        final Map<Id, DatasourceWrapper> datasourceWrappers = new TreeMap<>();
         datasourceRepository
             .findAllInCategory(categoryId)
             .forEach(wrapper -> {
@@ -92,26 +97,23 @@ public class QueryService {
                 if (!control.isQueryable())
                     return;
 
+                final var datasource = wrapper.toDatasource();
+                datasources.put(wrapper.id(), datasource);
                 datasourceWrappers.put(wrapper.id(), wrapper);
-
-                final var builder = new Datasource.Builder(wrapper.type, control, wrapper.id().toString());
-                datasourceBuilders.put(wrapper.id(), builder);
+                provider.setControlWrapper(datasource, control);
             });
 
+
+        final List<Kind> kinds = new ArrayList<>();
         mappingRepository
             .findAllInCategory(categoryId)
             .forEach(wrapper -> {
-                final var mapping = wrapper.toMapping(category);
-                final var builder = datasourceBuilders.get(wrapper.datasourceId);
-                builder.mapping(mapping);
+                final var datasource = datasources.get(wrapper.datasourceId);
+                final var mapping = wrapper.toMapping(datasource, category);
+                kinds.add(new Kind(mapping, datasource));
             });
 
-        final var kinds = datasourceBuilders.values().stream()
-            .map(Datasource.Builder::build)
-            .flatMap(datasource -> datasource.kinds.stream())
-            .toList();
-
-       return new KindsAndDatasources(kinds, datasourceWrappers);
+       return new KindsAndDatasources(kinds, datasourceWrappers, provider);
     }
 
     public Query create(QueryInit init) {

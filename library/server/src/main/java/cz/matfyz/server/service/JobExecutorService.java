@@ -1,9 +1,10 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
@@ -24,7 +25,7 @@ import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.Layout;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.Configuration.ServerProperties;
@@ -60,9 +61,9 @@ import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.TreeMap;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,8 +175,8 @@ public class JobExecutorService {
         if (run.sessionId == null)
             throw SessionException.notFound(run.id());
 
-        final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
-        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
         final List<MappingWrapper> mappingWrappers = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
@@ -188,8 +189,9 @@ public class JobExecutorService {
         System.out.println("instance before");
         System.out.println(instance);
 
+        final Datasource datasource = datasourceWrapper.toDatasource();
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
-            final Mapping mapping = mappingWrapper.toMapping(schema);
+            final Mapping mapping = mappingWrapper.toMapping(datasource, schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
         }
 
@@ -211,12 +213,13 @@ public class JobExecutorService {
             ? instanceWrapper.toInstanceCategory(schema)
             : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
-        final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
+        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
+        final Datasource datasource = datasourceWrapper.toDatasource();
         final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
-            .map(wrapper -> wrapper.toMapping(schema))
+            .map(wrapper -> wrapper.toMapping(datasource, schema))
             .toList();
 
-        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasource);
+        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
 
         final var output = new StringBuilder();
         for (final Mapping mapping : mappings) {
@@ -299,20 +302,26 @@ public class JobExecutorService {
     }
 
     private void rsdToCategoryAlgorithm(Run run, Job job, RSDToCategoryPayload payload) {
-        // extracting the empty SK wrapper
-        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
-
         final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
-        final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
+
+        final List<Datasource> datasources = new ArrayList<>();
+        final var provider = new DefaultControlWrapperProvider();
+        payload.datasourceIds().forEach(id -> {
+            final var datasourceWrapper = datasourceRepository.find(id);
+            final var datasource = datasourceWrapper.toDatasource();
+            final var control = wrapperService.getControlWrapper(datasourceWrapper).enableSpark(sparkSettings);
+            datasources.add(datasource);
+            provider.setControlWrapper(datasource, control);
+        });
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper)
+            .input(provider)
             .run();
 
         final Candidates candidates = inferenceResult.candidates();
-        final List<CategoryMappingPair> categoryMappingPairs = inferenceResult.pairs();
+        final List<CategoryMappingsPair> categoryMappingPairs = inferenceResult.pairs();
 
-        final var pair = CategoryMappingPair.merge(categoryMappingPairs);
+        final var pair = CategoryMappingsPair.merge(categoryMappingPairs);
         final SchemaCategory schema = pair.schema();
         final MetadataCategory metadata = pair.metadata();
         final List<Mapping> mappings = pair.mappings();
@@ -335,7 +344,12 @@ public class JobExecutorService {
         final var schema = SchemaSerializer.deserialize(data.inferenceSchema());
         final var metadata = MetadataSerializer.deserialize(data.inferenceMetadata(), schema);
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
-        final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
+
+        final var mappings = data.datasources().stream().flatMap(serializedDatasource -> {
+            final var datasourceWrapper = datasourceRepository.find(new Id(serializedDatasource.datasourceId()));
+            final var datasource = datasourceWrapper.toDatasource();
+            return serializedDatasource.mappings().stream().map(serializedMapping -> serializedMapping.toMapping(datasource, schema));
+        }).toList();
 
         List<InferenceEdit> edits = data.edits();
 
@@ -399,17 +413,18 @@ public class JobExecutorService {
     }
 
     private void finishRSDToCategoryProcessing(JobWithRun job, SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings) {
-        final var wrapper = schemaRepository.find(job.run().categoryId);
+        final var categoryWrapper = schemaRepository.find(job.run().categoryId);
 
-        final var version = wrapper.systemVersion().generateNext();
-        wrapper.update(version, schema, metadata);
-        schemaRepository.save(wrapper);
+        final var version = categoryWrapper.systemVersion().generateNext();
+        categoryWrapper.update(version, schema, metadata);
+        schemaRepository.save(categoryWrapper);
 
         final RSDToCategoryPayload payload = (RSDToCategoryPayload) job.job().payload;
-        final DatasourceWrapper datasource = datasourceRepository.find(payload.datasourceId());
+        final Map<Id, DatasourceWrapper> datasourceWrappers = new TreeMap<>();
+        payload.datasourceIds().stream().map(datasourceRepository::find).forEach(dw -> datasourceWrappers.put(dw.id(), dw));
 
         for (final Mapping mapping : mappings) {
-            final MappingInit init = MappingInit.fromMapping(mapping, wrapper.id(), datasource.id());
+            final MappingInit init = MappingInit.fromMapping(mapping, categoryWrapper.id(), new Id(mapping.datasource().identifier));
             mappingService.create(init);
         }
     }

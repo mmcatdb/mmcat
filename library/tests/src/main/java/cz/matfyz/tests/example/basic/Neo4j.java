@@ -1,5 +1,7 @@
 package cz.matfyz.tests.example.basic;
 
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
@@ -7,11 +9,13 @@ public abstract class Neo4j {
 
     private Neo4j() {}
 
+    public static final Datasource datasource = new Datasource(DatasourceType.neo4j, "neo4j");
+
     public static final String orderKind = "Order";
     public static final String itemKind = "ITEM";
 
     public static TestMapping order(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             orderKind,
             b -> b.root(
@@ -22,7 +26,7 @@ public abstract class Neo4j {
     }
 
     public static TestMapping item(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.item,
             itemKind,
             b -> b.root(

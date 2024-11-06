@@ -60,11 +60,23 @@ async function deleteAction() {
                 <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
             </ValueRow>
             <ValueRow
-                v-else
+                v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
                 label="Datasource:"
             >
                 <FixedRouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id } }">
                     {{ action.payload.datasource.label }}
+                </FixedRouterLink>
+            </ValueRow>
+            <ValueRow
+                v-else
+                label="Datasources:"
+            >
+                <FixedRouterLink
+                    v-for="datasource in action.payload.datasources"
+                    :key="datasource.id"
+                    :to="{ name: 'datasource', params: {id: datasource.id } }"
+                >
+                    {{ datasource.label }}
                 </FixedRouterLink>
             </ValueRow>
             <!--

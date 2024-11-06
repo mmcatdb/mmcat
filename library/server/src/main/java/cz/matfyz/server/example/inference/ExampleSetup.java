@@ -12,6 +12,8 @@ import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.service.SchemaCategoryService;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -34,7 +36,7 @@ public class ExampleSetup {
 
         final SchemaCategoryWrapper schemaCategory = createEmptySchemaCategory();
 
-        RSDToCategoryPayload inferencePayload = new RSDToCategoryPayload(datasource.id());
+        RSDToCategoryPayload inferencePayload = new RSDToCategoryPayload(List.of(datasource.id()));
 
         Action inferenceAction = createAndSaveAction(inferencePayload, schemaCategory.id(), "inference");
 

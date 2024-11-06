@@ -85,7 +85,7 @@ async function createNew() {
     const newDatasource = Datasource.fromServer(result.data);
 
     if (workflow && isSelecting.value) {
-        const newData: WorkflowData = { ...workflow.value.data, inputDatasourceId: newDatasource.id };
+        const newData: WorkflowData = { ...workflow.value.data, inputDatasourceIds: [ ...workflow.value.data.inputDatasourceIds, newDatasource.id ] };
         const result = await API.workflows.updateWorkflowData({ id: workflow.value.id }, newData);
         if (!result.status)
             return;

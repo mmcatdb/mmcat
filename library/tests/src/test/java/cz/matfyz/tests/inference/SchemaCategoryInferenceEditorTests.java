@@ -1,5 +1,7 @@
 package cz.matfyz.tests.inference;
 
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.MappingBuilder;
@@ -22,6 +24,9 @@ import org.junit.jupiter.api.Test;
 
 class SchemaCategoryInferenceEditorTests {
 
+    // The type literally doesn't matter.
+    private static final Datasource datasource = new Datasource(DatasourceType.mongodb, "test");
+
     @Test
     void testReferenceMergeEditArray() {
         final SchemaBuilder sbA = new SchemaBuilder();
@@ -35,7 +40,8 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schemaA = sbA.build();
 
         final MappingBuilder mbA = new MappingBuilder();
-        final Mapping mappingA = new Mapping(
+        final Mapping mappingA = Mapping.create(
+            datasource,
             schemaA,
             name.key(),
             "kindNameA",
@@ -44,8 +50,7 @@ class SchemaCategoryInferenceEditorTests {
                 mbA.complex("reviews", reviewsAToApp.dual(),
                     mbA.simple("_index", reviewsAToIndex)
                 )
-            ),
-            null
+            )
         );
 
         System.out.println(mappingA.accessPath());
@@ -59,14 +64,14 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schemaB = sbB.build();
 
         final MappingBuilder mbB = new MappingBuilder();
-        final Mapping mappingB = new Mapping(
+        final Mapping mappingB = Mapping.create(
+            datasource,
             schemaB,
             reviewsB.key(),
             "kindNameB",
             mbB.root(
                 mbB.simple("text", reviewsBToText)
-            ),
-            null
+            )
         );
 
         System.out.println(mappingB.accessPath());
@@ -95,15 +100,15 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schemaA = sbA.build();
 
         final MappingBuilder mbA = new MappingBuilder();
-        final Mapping mappingA = new Mapping(
+        final Mapping mappingA = Mapping.create(
+            datasource,
             schemaA,
             name.key(),
             "kindNameA",
             mbA.root(
                 mbA.simple("name", appToName),
                 mbA.simple("reviews", appToReviewsA)
-            ),
-            null
+            )
         );
 
         System.out.println(mappingA.accessPath());
@@ -117,14 +122,14 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schemaB = sbB.build();
 
         final MappingBuilder mbB = new MappingBuilder();
-        final Mapping mappingB = new Mapping(
+        final Mapping mappingB = Mapping.create(
+            datasource,
             schemaB,
             reviewsB.key(),
             "kindNameB",
             mbB.root(
                 mbB.simple("text", reviewsBToText)
-            ),
-            null
+            )
         );
 
         System.out.println(mappingB.accessPath());
@@ -153,15 +158,15 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schemaA = sbA.build();
 
         final MappingBuilder mbA = new MappingBuilder();
-        final Mapping mappingA = new Mapping(
+        final Mapping mappingA = Mapping.create(
+            datasource,
             schemaA,
             app.key(),
             "kindNameA",
             mbA.root(
                 mbA.simple("name", appToAppIdA),
                 mbA.simple("app_id", appToName)
-            ),
-            null
+            )
         );
 
         System.out.println(mappingA.accessPath());
@@ -177,15 +182,15 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schemaB = sbB.build();
 
         final MappingBuilder mbB = new MappingBuilder();
-        final Mapping mappingB = new Mapping(
+        final Mapping mappingB = Mapping.create(
+            datasource,
             schemaB,
             reviews.key(),
             "kindNameB",
             mbB.root(
                 mbB.simple("text", reviewsToText),
                 mbB.simple("app_id", reviewsToAppIdB)
-            ),
-            null
+            )
         );
 
         System.out.println(mappingB.accessPath());
@@ -229,7 +234,8 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
         final MappingBuilder mb = new MappingBuilder();
-        final Mapping mapping = new Mapping(
+        final Mapping mapping = Mapping.create(
+            datasource,
             schema,
             world.key(),
             "kindName",
@@ -245,8 +251,7 @@ class SchemaCategoryInferenceEditorTests {
                         mb.simple("b", country2ToB)
                             )
                         )
-            ),
-            null
+            )
         );
 
         System.out.println("Mapping before edit:");
@@ -291,7 +296,8 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
         final MappingBuilder mb = new MappingBuilder();
-        final Mapping mapping = new Mapping(
+        final Mapping mapping = Mapping.create(
+            datasource,
             schema,
             user.key(),
             "kindName",
@@ -303,8 +309,7 @@ class SchemaCategoryInferenceEditorTests {
                 mb.complex("compliment_funny", userToCompliment2,
                     mb.simple("rating", compliment2ToRating),
                     mb.simple("comments", compliment2ToComments))
-            ),
-            null
+            )
         );
 
         System.out.println("Mapping before edit:");
@@ -341,7 +346,8 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
         final MappingBuilder mb = new MappingBuilder();
-        final Mapping mapping = new Mapping(
+        final Mapping mapping = Mapping.create(
+            datasource,
             schema,
             user.key(),
             "kindName",
@@ -349,8 +355,7 @@ class SchemaCategoryInferenceEditorTests {
                 mb.simple("name", userToName),
                 mb.simple("compliment_cute", userToCompliment1),
                 mb.simple("compliment_funny", userToCompliment2)
-            ),
-            null
+            )
         );
 
         System.out.println("Mapping before edit:");
