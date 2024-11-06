@@ -11,7 +11,7 @@ import { Action } from '@/types/action';
 const actions = shallowRef<Action[]>();
 
 function addNewAction(action: Action) {
-    actions.value?.push(action);
+    actions.value = [ ...(actions.value ?? []), action ];
 }
 
 function deleteAction(id: Id) {

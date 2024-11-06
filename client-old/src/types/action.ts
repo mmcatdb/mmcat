@@ -40,20 +40,16 @@ export enum ActionType {
     RSDToCategory = 'RSDToCategory'
 }
 
-export const ACTION_TYPES = [
-    {
-        label: 'Model to Category',
-        value: ActionType.ModelToCategory,
-    },
-    {
-        label: 'Category to Model',
-        value: ActionType.CategoryToModel,
-    },
-    {
-        label: 'RSD to Category',
-        value: ActionType.RSDToCategory,
-    },
-];
+export const ACTION_TYPES = [ {
+    label: 'Model to Category',
+    value: ActionType.ModelToCategory,
+}, {
+    label: 'Category to Model',
+    value: ActionType.CategoryToModel,
+}, {
+    label: 'RSD to Category',
+    value: ActionType.RSDToCategory,
+} ] as const;
 
 type ActionPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
@@ -84,8 +80,11 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
 }
 
 export type ActionPayloadInit = {
-    type: ActionType.ModelToCategory | ActionType.CategoryToModel | ActionType.RSDToCategory;
+    type: ActionType.ModelToCategory | ActionType.CategoryToModel;
     datasourceId: Id;
+} | {
+    type: ActionType.RSDToCategory;
+    datasourceIds: Id[];
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {

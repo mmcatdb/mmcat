@@ -18,7 +18,7 @@ public record InferenceWorkflowData(
     public static InferenceWorkflowData createNew() {
         return new InferenceWorkflowData(
             InferenceWorkflowStep.selectInputs,
-            null,
+            List.of(),
             null,
             new ArrayList<>()
         );
