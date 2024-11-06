@@ -29,8 +29,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
 
     /**
      * Constructs a new {@code CsvPullWrapper} with the specified CSV provider.
-     *
-     * @param provider the CSV provider used to access CSV files.
      */
     public CsvPullWrapper(CsvProvider provider) {
         this.provider = provider;
@@ -38,11 +36,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
 
     /**
      * Pulls a forest of records from a CSV file based on a complex property path and query content.
-     *
-     * @param path the complex property path specifying the structure of the records.
-     * @param query the query content used to filter or modify the records pulled.
-     * @return a {@link ForestOfRecords} containing the pulled records.
-     * @throws PullForestException if an error occurs while pulling the forest of records.
      */
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         final var forest = new ForestOfRecords();
@@ -56,7 +49,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
             : baseSchema.withColumnsFrom(createHeaderSchema(path));
 
         try (
-            InputStream inputStream = provider.getInputStream(path.name().toString());
+            InputStream inputStream = provider.getInputStream();
         ) {
             final MappingIterator<Map<String, String>> reader = new CsvMapper()
                 .readerFor(Map.class)

@@ -10,7 +10,6 @@ import cz.matfyz.wrappercsv.inference.MapCsvDocument;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +33,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Constructs a new {@code CsvInferenceWrapper} with the specified CSV provider and Spark settings.
-     *
-     * @param provider the CSV provider used to access CSV files.
-     * @param sparkSettings the Spark settings used for configuring the Spark context.
      */
     public CsvInferenceWrapper(CsvProvider provider, SparkSettings sparkSettings) {
         super(sparkSettings);
@@ -45,8 +41,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Returns the name of the CSV file currently being processed.
-     *
-     * @return the kind name as a string.
      */
     private String fileName() {
         return kindName;
@@ -54,8 +48,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Creates a copy of this inference wrapper.
-     *
-     * @return a new instance of {@code CsvInferenceWrapper} with the same provider and Spark settings.
      */
     @Override public AbstractInferenceWrapper copy() {
         return new CsvInferenceWrapper(this.provider, this.sparkSettings);
@@ -63,10 +55,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Loads properties from the CSV data. This method is currently not implemented.
-     *
-     * @param loadSchema a boolean indicating whether to load the schema.
-     * @param loadData a boolean indicating whether to load the data.
-     * @return null as this method is not implemented.
      */
     @Override public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
@@ -74,8 +62,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Loads record schema descriptions (RSDs) from the CSV data.
-     *
-     * @return a {@link JavaRDD} of {@link RecordSchemaDescription} objects.
      */
     @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
@@ -85,8 +71,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     /**
      * Loads documents from the CSV file and parses them into a list of maps,
      * where each map represents a CSV row with header names as keys.
-     *
-     * @return a {@link JavaRDD} of maps containing CSV row data.
      */
     public JavaRDD<Map<String, String>> loadDocuments() {
         final List<Map<String, String>> lines = new ArrayList<>();
@@ -96,7 +80,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
             .withEscapeChar('\\');
 
         try (
-            InputStream inputStream = provider.getInputStream(kindName);
+            InputStream inputStream = provider.getInputStream();
         ) {
             if (!provider.hasHeader()) {
                 // If there is no header, we have to read the first line to get the number of columns and create a default header.
@@ -150,8 +134,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     /**
      * Loads pairs of strings and record schema descriptions (RSDs) from the CSV data.
      * This method is currently not implemented.
-     *
-     * @return null as this method is not implemented.
      */
     @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
@@ -159,9 +141,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Loads property schema pairs from the CSV data. This method is currently not implemented.
-     *
-     * @return nothing, as this method always throws an exception.
-     * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
     @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
@@ -169,8 +148,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Loads property data from the CSV documents and maps them to {@link PropertyHeuristics}.
-     *
-     * @return a {@link JavaPairRDD} of string keys and {@link PropertyHeuristics} objects.
      */
     @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
@@ -179,15 +156,8 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     /**
      * Retrieves a list of kind names (CSV file names) from the provider.
-     *
-     * @return a list of CSV file names as strings.
-     * @throws RuntimeException if an error occurs while retrieving the file names.
      */
     @Override public List<String> getKindNames() {
-        try {
-            return provider.getCsvFileNames();
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException("Error getting csv file names", e);
-        }
+        return List.of(provider.getCsvFileNames());
     }
 }

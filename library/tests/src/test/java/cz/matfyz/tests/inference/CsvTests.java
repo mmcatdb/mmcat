@@ -37,12 +37,12 @@ class CsvTests {
         final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
         final var provider = new CsvProvider(settings);
 
-        final List<String> fileNames = provider.getCsvFileNames();
+        final List<String> fileNames = List.of(provider.getCsvFileNames());
 
         assertEquals("googleplaystore", fileNames.get(0));
 
         try (
-            InputStream inputStream = provider.getInputStream("googleplaystore")
+            InputStream inputStream = provider.getInputStream()
         ) {
             assertNotNull(inputStream);
         }
@@ -126,7 +126,7 @@ class CsvTests {
             this.csvContent = csvContent;
         }
 
-        @Override public InputStream getInputStream(String kindName) {
+        @Override public InputStream getInputStream() {
             return new ByteArrayInputStream(csvContent.getBytes());
         }
     }
