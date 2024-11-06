@@ -1,9 +1,9 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -26,16 +26,16 @@ import java.util.TreeMap;
  */
 public class SchemaExtractor {
 
-    public static List<KindPattern> run(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
+    public static List<KindPattern> run(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
         return new SchemaExtractor(context, schema, kinds, clause).run();
     }
 
     private final QueryContext context;
     private final SchemaCategory schema;
-    private final List<Kind> kinds;
+    private final List<Mapping> kinds;
     private final WhereClause clause;
 
-    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
+    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
         this.context = context;
         this.schema = schema;
         this.kinds = kinds;
@@ -116,11 +116,11 @@ public class SchemaExtractor {
 
     private List<KindPattern> createKindPatterns() {
         return kinds.stream()
-            .filter(kind -> newSchema.hasObject(kind.mapping.rootObject().key()))
+            .filter(kind -> newSchema.hasObject(kind.rootObject().key()))
             .map(kind -> {
-                final var rootObject = kind.mapping.rootObject();
+                final var rootObject = kind.rootObject();
                 final var rootNode = PatternObject.createRoot(rootObject, keyToTerm.get(rootObject.key()));
-                processComplexProperty(rootNode, kind.mapping.accessPath());
+                processComplexProperty(rootNode, kind.accessPath());
 
                 return new KindPattern(kind, rootNode);
             }).toList();

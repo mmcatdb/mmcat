@@ -1,7 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.querytree.FilterNode;
@@ -22,16 +22,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class QueryTreeBuilder {
 
-    public static QueryNode run(QueryContext context, SchemaCategory originalSchema, List<Kind> allKinds, WhereClause rootClause) {
+    public static QueryNode run(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, WhereClause rootClause) {
         return new QueryTreeBuilder(context, originalSchema, allKinds, rootClause).run();
     }
 
     private final QueryContext context;
     private final SchemaCategory originalSchema;
-    private final List<Kind> allKinds;
+    private final List<Mapping> allKinds;
     private final WhereClause rootClause;
 
-    private QueryTreeBuilder(QueryContext context, SchemaCategory originalSchema, List<Kind> allKinds, WhereClause rootClause) {
+    private QueryTreeBuilder(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, WhereClause rootClause) {
         this.context = context;
         this.originalSchema = originalSchema;
         this.allKinds = allKinds;

@@ -103,7 +103,7 @@ class DataGenerationTests {
 
         final ComplexProperty newComplexProperty = mappingBuilder.complex(mappingBusiness.kindName(), mappingBusiness.accessPath().signature(), mappingBusiness.accessPath(), mappingCheckin.accessPath());
 
-        final Mapping finalMapping = Mapping.create(provider.getDatasources().stream().findFirst().get(), schema, mappingBusiness.rootObject().key(), mappingBusiness.kindName(), newComplexProperty);
+        final Mapping finalMapping = Mapping.create(provider.getDatasources().stream().findFirst().get(), mappingBusiness.kindName(), schema, mappingBusiness.rootObject().key(), newComplexProperty);
         System.out.println("Mapping C:\n" + finalMapping.accessPath());
 
         final AbstractPullWrapper pullWrapper = control.getPullWrapper();

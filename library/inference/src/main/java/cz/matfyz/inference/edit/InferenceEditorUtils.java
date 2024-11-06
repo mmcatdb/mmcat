@@ -142,7 +142,7 @@ public class InferenceEditorUtils {
             if (mappingToMerge.primaryKey() != null)
                 primaryKey.addAll(mappingToMerge.primaryKey());
 
-        return new Mapping(mapping.datasource(), schema, mapping.rootObject().key(), mapping.kindName(), accessPath, primaryKey);
+        return mapping.withSchema(schema, accessPath, primaryKey);
     }
 
     /**

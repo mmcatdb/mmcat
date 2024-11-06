@@ -78,7 +78,7 @@ public class MMInferOneInAll {
 
     private CategoryMappingsPair processKind(AbstractInferenceWrapper wrapper, Datasource datasource, String kindName) {
         final var wrapperCopy = wrapper.copyForKind(kindName);
-        final var rsd = executeRBA(wrapperCopy, true);
+        final var rsd = executeRBA(wrapperCopy);
         return schemaConverter.convert(rsd, datasource, kindName);
     }
 

@@ -42,9 +42,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mbA = new MappingBuilder();
         final Mapping mappingA = Mapping.create(
             datasource,
+            "kindNameA",
             schemaA,
             name.key(),
-            "kindNameA",
             mbA.root(
                 mbA.simple("name", appToName),
                 mbA.complex("reviews", reviewsAToApp.dual(),
@@ -66,9 +66,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mbB = new MappingBuilder();
         final Mapping mappingB = Mapping.create(
             datasource,
+            "kindNameB",
             schemaB,
             reviewsB.key(),
-            "kindNameB",
             mbB.root(
                 mbB.simple("text", reviewsBToText)
             )
@@ -102,9 +102,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mbA = new MappingBuilder();
         final Mapping mappingA = Mapping.create(
             datasource,
+            "kindNameA",
             schemaA,
             name.key(),
-            "kindNameA",
             mbA.root(
                 mbA.simple("name", appToName),
                 mbA.simple("reviews", appToReviewsA)
@@ -124,9 +124,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mbB = new MappingBuilder();
         final Mapping mappingB = Mapping.create(
             datasource,
+            "kindNameB",
             schemaB,
             reviewsB.key(),
-            "kindNameB",
             mbB.root(
                 mbB.simple("text", reviewsBToText)
             )
@@ -160,9 +160,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mbA = new MappingBuilder();
         final Mapping mappingA = Mapping.create(
             datasource,
+            "kindNameA",
             schemaA,
             app.key(),
-            "kindNameA",
             mbA.root(
                 mbA.simple("name", appToAppIdA),
                 mbA.simple("app_id", appToName)
@@ -184,9 +184,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mbB = new MappingBuilder();
         final Mapping mappingB = Mapping.create(
             datasource,
+            "kindNameB",
             schemaB,
             reviews.key(),
-            "kindNameB",
             mbB.root(
                 mbB.simple("text", reviewsToText),
                 mbB.simple("app_id", reviewsToAppIdB)
@@ -236,9 +236,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mb = new MappingBuilder();
         final Mapping mapping = Mapping.create(
             datasource,
+            "kindName",
             schema,
             world.key(),
-            "kindName",
             mb.root(
                 mb.complex("continent", worldToContinent,
                     mb.complex("country_1", continentToCountry1,
@@ -298,9 +298,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mb = new MappingBuilder();
         final Mapping mapping = Mapping.create(
             datasource,
+            "kindName",
             schema,
             user.key(),
-            "kindName",
             mb.root(
                 mb.simple("name", userToName),
                 mb.complex("compliment_cute", userToCompliment1,
@@ -348,9 +348,9 @@ class SchemaCategoryInferenceEditorTests {
         final MappingBuilder mb = new MappingBuilder();
         final Mapping mapping = Mapping.create(
             datasource,
+            "kindName",
             schema,
             user.key(),
-            "kindName",
             mb.root(
                 mb.simple("name", userToName),
                 mb.simple("compliment_cute", userToCompliment1),

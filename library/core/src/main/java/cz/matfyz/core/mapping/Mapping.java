@@ -12,26 +12,19 @@ import java.util.List;
 
 public class Mapping implements Comparable<Mapping> {
 
-    private final Datasource datasource;
-    private final SchemaCategory category;
-    private final SchemaObject rootObject;
-    private final String kindName;
-    private final ComplexProperty accessPath;
-    private final Collection<Signature> primaryKey;
-
-    public Mapping(Datasource datasource, SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+    public Mapping(Datasource datasource, String kindName, SchemaCategory category, Key rootKey, ComplexProperty accessPath, Collection<Signature> primaryKey) {
         this.datasource = datasource;
+        this.kindName = kindName;
         this.category = category;
         this.rootObject = category.getObject(rootKey);
-        this.kindName = kindName;
         this.accessPath = accessPath;
         this.primaryKey = primaryKey;
     }
 
-    public static Mapping create(Datasource datasource, SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath) {
+    public static Mapping create(Datasource datasource, String kindName, SchemaCategory category, Key rootKey, ComplexProperty accessPath) {
         final var rootObject = category.getObject(rootKey);
 
-        return new Mapping(datasource, category, rootKey, kindName, accessPath, defaultPrimaryKey(rootObject));
+        return new Mapping(datasource, kindName, category, rootKey, accessPath, defaultPrimaryKey(rootObject));
     }
 
     private static List<Signature> defaultPrimaryKey(SchemaObject object) {
@@ -44,29 +37,43 @@ public class Mapping implements Comparable<Mapping> {
         throw new UnsupportedOperationException("Mapping.clone not implemented");
     }
 
+    private final Datasource datasource;
     public Datasource datasource() {
         return datasource;
     }
 
-    public SchemaCategory category() {
-        return category;
-    }
-
-    public SchemaObject rootObject() {
-        return rootObject;
-    }
-
-    public ComplexProperty accessPath() {
-        return accessPath;
-    }
-
+    private final String kindName;
     public String kindName() {
         return kindName;
     }
 
+    private final SchemaCategory category;
+    public SchemaCategory category() {
+        return category;
+    }
+
+    private final SchemaObject rootObject;
+    public SchemaObject rootObject() {
+        return rootObject;
+    }
+
+    private final ComplexProperty accessPath;
+    public ComplexProperty accessPath() {
+        return accessPath;
+    }
+
+    private final Collection<Signature> primaryKey;
     public Collection<Signature> primaryKey() {
         return primaryKey;
     }
+
+    // Updating
+
+    public Mapping withSchema(SchemaCategory category, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+        return new Mapping(datasource, kindName, category, rootObject.key(), accessPath, primaryKey);
+    }
+
+    // Identification
 
     @Override public boolean equals(Object other) {
         if (this == other)
@@ -80,6 +87,12 @@ public class Mapping implements Comparable<Mapping> {
         return datasourceComparison != 0
             ? datasourceComparison
             : kindName.compareTo(other.kindName);
+    }
+
+    // Debug
+
+    @Override public String toString() {
+        return datasource.getUniqueKindIdentifier(kindName);
     }
 
     public record SerializedMapping(
@@ -101,9 +114,9 @@ public class Mapping implements Comparable<Mapping> {
         public Mapping toMapping(Datasource datasource, SchemaCategory category) {
             return new Mapping(
                 datasource,
+                kindName,
                 category,
                 rootObjectKey,
-                kindName,
                 accessPath,
                 primaryKey
             );

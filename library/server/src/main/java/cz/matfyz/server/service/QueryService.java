@@ -3,7 +3,7 @@ package cz.matfyz.server.service;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
 import cz.matfyz.core.datasource.Datasource;
-import cz.matfyz.core.datasource.Kind;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
@@ -80,7 +80,7 @@ public class QueryService {
     }
 
     private record KindsAndDatasources(
-        List<Kind> kinds,
+        List<Mapping> kinds,
         Map<Id, DatasourceWrapper> datasourceWrappers,
         ControlWrapperProvider provider
     ) {}
@@ -104,13 +104,12 @@ public class QueryService {
             });
 
 
-        final List<Kind> kinds = new ArrayList<>();
+        final List<Mapping> kinds = new ArrayList<>();
         mappingRepository
             .findAllInCategory(categoryId)
             .forEach(wrapper -> {
                 final var datasource = datasources.get(wrapper.datasourceId);
-                final var mapping = wrapper.toMapping(datasource, category);
-                kinds.add(new Kind(mapping, datasource));
+                kinds.add(wrapper.toMapping(datasource, category));
             });
 
        return new KindsAndDatasources(kinds, datasourceWrappers, provider);

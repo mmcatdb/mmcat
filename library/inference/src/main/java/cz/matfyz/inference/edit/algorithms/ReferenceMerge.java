@@ -225,7 +225,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
 
     private Mapping createCleanedMapping(Mapping mapping) {
         ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
-        return new Mapping(mapping.datasource(), newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, mapping.primaryKey());
+        return mapping.withSchema(newSchema, cleanedComplexProperty, mapping.primaryKey());
     }
 
     private ComplexProperty cleanComplexProperty(Mapping mapping) {

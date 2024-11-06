@@ -4,7 +4,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
-import cz.matfyz.core.datasource.Kind;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 
@@ -80,7 +80,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         if (projections.isEmpty())
             throw QueryException.message("No tables are selected in FROM clause.");
 
-        final String kindName = projections.getFirst().property().kind.mapping.kindName();
+        final String kindName = projections.getFirst().property().kind.kindName();
         builder
             .append(escapeName(kindName))
             .append("\n");
@@ -89,17 +89,17 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     private void addJoins() {
         // TODO add support for optional joins
 
-        final var joinedKinds = new TreeSet<Kind>();
+        final var joinedKinds = new TreeSet<Mapping>();
 
-        final Kind fromKind = joins.get(0).from();
+        final Mapping fromKind = joins.get(0).from();
         joinedKinds.add(fromKind);
 
         builder
-            .append(escapeName(fromKind.mapping.kindName()))
+            .append(escapeName(fromKind.kindName()))
             .append("\n");
 
         for (final var join : joins) {
-            Kind newKind;
+            Mapping newKind;
             if (!joinedKinds.contains(join.to()))
                 newKind = join.to();
             else if (!joinedKinds.contains(join.from()))
@@ -119,7 +119,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
             builder
                 .append(" JOIN ")
-                .append(escapeName(newKind.mapping.kindName()))
+                .append(escapeName(newKind.kindName()))
                 .append(" ON (")
                 .append(conditions)
                 .append(")\n");
@@ -198,12 +198,12 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private String getPropertyNameWithoutAggregation(Property property) {
-        return escapeName(property.kind.mapping.kindName()) + "." + escapeName(getRawAttributeName(property));
+        return escapeName(property.kind.kindName()) + "." + escapeName(getRawAttributeName(property));
     }
 
     private String getRawAttributeName(Property property) {
         // Direct subpath is ok since the postgresql mapping must be flat.
-        final var subpath = property.kind.mapping.accessPath().getDirectSubpath(property.path);
+        final var subpath = property.kind.accessPath().getDirectSubpath(property.path);
         if (
             subpath == null ||
             !(subpath instanceof SimpleProperty simpleSubpath) ||

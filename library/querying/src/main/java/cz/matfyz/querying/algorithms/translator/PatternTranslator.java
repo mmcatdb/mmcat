@@ -5,8 +5,8 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
-import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
@@ -130,7 +130,7 @@ class PatternTranslator {
         private final Map<Property, QueryStructure> propertyToStructure = new TreeMap<>();
         private final Map<QueryStructure, Property> structureToProperty = new TreeMap<>();
 
-        Property createProperty(Kind kind, StackItem item) {
+        Property createProperty(Mapping kind, StackItem item) {
             final var property = new Property(kind, item.pathFromParent, item.preservedParent);
             propertyToTerm.put(property, item.object.term);
 

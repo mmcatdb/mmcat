@@ -33,7 +33,7 @@ public class MappingCreator {
      */
     public Mapping createMapping(Datasource datasource, SchemaCategory schemaCategory, String kindName) {
         ComplexProperty accessPath = buildComplexPropertyFromNode(root);
-        return Mapping.create(datasource, schemaCategory, rootKey, kindName, accessPath);
+        return Mapping.create(datasource, kindName, schemaCategory, rootKey, accessPath);
     }
 
     /**

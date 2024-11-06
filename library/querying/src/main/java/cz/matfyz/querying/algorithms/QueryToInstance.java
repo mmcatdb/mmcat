@@ -1,9 +1,9 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
-import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -23,9 +23,9 @@ public class QueryToInstance {
     private final ControlWrapperProvider provider;
     private final SchemaCategory schema;
     private final String queryString;
-    private final List<Kind> kinds;
+    private final List<Mapping> kinds;
 
-    public QueryToInstance(ControlWrapperProvider provider, SchemaCategory schema, String queryString, List<Kind> kinds) {
+    public QueryToInstance(ControlWrapperProvider provider, SchemaCategory schema, String queryString, List<Mapping> kinds) {
         this.provider = provider;
         this.schema = schema;
         this.queryString = queryString;

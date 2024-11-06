@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
 import cz.matfyz.core.datasource.Datasource;
-import cz.matfyz.core.datasource.Kind;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
@@ -71,12 +71,12 @@ public class QueryTestBase {
         assertEquals(expectedResult, jsonResult);
     }
 
-    private List<Kind> defineKinds(DefaultControlWrapperProvider provider) {
+    private List<Mapping> defineKinds(DefaultControlWrapperProvider provider) {
         return datasources.stream()
             .flatMap(testDatasource -> {
                 final var datasource = new Datasource(testDatasource.type, testDatasource.id);
                 provider.setControlWrapper(datasource, testDatasource.wrapper);
-                return testDatasource.mappings.stream().map(mapping -> new Kind(mapping, datasource));
+                return testDatasource.mappings.stream();
             }).toList();
     }
 

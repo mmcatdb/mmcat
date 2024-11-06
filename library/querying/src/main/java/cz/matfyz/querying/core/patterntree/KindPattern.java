@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core.patterntree;
 
-import cz.matfyz.core.datasource.Kind;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.Map;
@@ -13,12 +13,12 @@ import java.util.TreeMap;
  */
 public class KindPattern implements Comparable<KindPattern> {
 
-    public final Kind kind;
+    public final Mapping kind;
     public final PatternObject root;
 
     private final Map<SchemaObject, PatternObject> schemaObjectToPatternObject = new TreeMap<>();
 
-    public KindPattern(Kind kind, PatternObject root) {
+    public KindPattern(Mapping kind, PatternObject root) {
         this.kind = kind;
         this.root = root;
 

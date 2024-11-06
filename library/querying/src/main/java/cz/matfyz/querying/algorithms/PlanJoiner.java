@@ -59,7 +59,7 @@ public class PlanJoiner {
             // If there is only one kind, there is nothing to join.
             final var onlyKind = allKinds.stream().findFirst().get(); // NOSONAR
             final var patternNode = new PatternNode(allKinds, context.getSchema(), List.of(), onlyKind.root.term);
-            final var datasource = onlyKind.kind.datasource;
+            final var datasource = onlyKind.kind.datasource();
 
             return new DatasourceNode(patternNode, datasource);
         }
@@ -167,8 +167,8 @@ public class PlanJoiner {
     /** A pair of datasources. Both can be the same datasource! */
     private record DatasourcePair(Datasource first, Datasource second) implements Comparable<DatasourcePair> {
         public static DatasourcePair create(JoinCandidate candidate) {
-            final var a = candidate.from().kind.datasource;
-            final var b = candidate.to().kind.datasource;
+            final var a = candidate.from().kind.datasource();
+            final var b = candidate.to().kind.datasource();
             final boolean comparison = a.compareTo(b) > 0;
 
             return new DatasourcePair(comparison ? a : b, comparison ? b : a);
@@ -255,7 +255,7 @@ public class PlanJoiner {
             return List.of();
 
         // All of the candidates have to have the same datasource.
-        final Datasource datasource = candidates.get(0).from().kind.datasource;
+        final Datasource datasource = candidates.get(0).from().kind.datasource();
         // If the datasource supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
         if (context.getProvider().getControlWrapper(datasource).getQueryWrapper().isJoinSupported())
             return GraphUtils.findComponents(candidates).stream().map(this::createQueryPart).toList();
@@ -350,7 +350,7 @@ public class PlanJoiner {
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
             final var patternNode = new PatternNode(queryPart.kinds, schema, queryPart.joinCandidates, queryPart.rootTerm);
-            final var datasource = queryPart.kinds.stream().findFirst().get().kind.datasource;
+            final var datasource = queryPart.kinds.stream().findFirst().get().kind.datasource();
 
             return new DatasourceNode(patternNode, datasource);
         }

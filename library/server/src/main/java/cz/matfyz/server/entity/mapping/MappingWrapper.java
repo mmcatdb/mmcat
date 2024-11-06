@@ -65,9 +65,9 @@ public class MappingWrapper extends VersionedEntity {
     public Mapping toMapping(Datasource datasource, SchemaCategory category) {
         return new Mapping(
             datasource,
+            kindName,
             category,
             rootObjectKey,
-            kindName,
             accessPath,
             primaryKey
         );

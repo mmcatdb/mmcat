@@ -1,8 +1,8 @@
 package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
-import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.schema.SchemaObject;
 
@@ -66,12 +66,12 @@ public interface AbstractQueryWrapper {
      *  - Otherwise, the path is relative to the parent property.
      */
     class Property implements Comparable<Property>, Serializable {
-        public final Kind kind;
+        public final Mapping kind;
         public final @Nullable Property parent;
         public final Signature path;
         public final SchemaObject schemaObject;
 
-        public Property(Kind kind, Signature path, @Nullable Property parent) {
+        public Property(Mapping kind, Signature path, @Nullable Property parent) {
             this.kind = kind;
             this.path = path;
             this.parent = parent;
@@ -80,10 +80,10 @@ public interface AbstractQueryWrapper {
 
         private SchemaObject findSchemaObject() {
             if (!path.isEmpty())
-                return kind.mapping.category().getEdge(path.getLast()).to();
+                return kind.category().getEdge(path.getLast()).to();
 
             return parent == null
-                ? kind.mapping.rootObject()
+                ? kind.rootObject()
                 : parent.schemaObject;
         }
 
@@ -107,7 +107,7 @@ public interface AbstractQueryWrapper {
         public final Signature aggregationRoot;
         public final AggregationOperator aggregationOperator;
 
-        public PropertyWithAggregation(Kind kind, Signature path, @Nullable Property parent, Signature aggregationRoot, AggregationOperator aggregationOperator) {
+        public PropertyWithAggregation(Mapping kind, Signature path, @Nullable Property parent, Signature aggregationRoot, AggregationOperator aggregationOperator) {
             super(kind, path, parent);
             this.aggregationRoot = aggregationRoot;
             this.aggregationOperator = aggregationOperator;
@@ -131,7 +131,7 @@ public interface AbstractQueryWrapper {
      * @param repetition If not 1, the join will be recursive.
      * @param isOptional If true, the join will be optional.
      */
-    void addJoin(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional);
+    void addJoin(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional);
 
     /**
      * Adds a filtering between two variables or aggregations. E.g.:

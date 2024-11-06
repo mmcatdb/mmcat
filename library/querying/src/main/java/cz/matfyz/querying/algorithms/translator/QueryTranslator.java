@@ -6,8 +6,8 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.core.datasource.Kind;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
@@ -89,7 +89,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
         throw new UnsupportedOperationException("Can't create property from term: " + term.getClass().getSimpleName() + ".");
     }
 
-    private Signature findAggregationRoot(Kind kind, Signature path) {
+    private Signature findAggregationRoot(Mapping kind, Signature path) {
         // TODO
         throw new UnsupportedOperationException("QueryTranslator.findAggregationRoot not implemented.");
     }

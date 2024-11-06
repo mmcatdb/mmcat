@@ -224,7 +224,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     private Mapping adjustPKMapping(Mapping mapping) {
         Collection<Signature> currentPK = cleanFromEmpty(mapping.primaryKey());
         currentPK.add(findPKSignature());
-        return new Mapping(mapping.datasource(), newSchema, mapping.rootObject().key(), mapping.kindName(), mapping.accessPath(), currentPK);
+        return mapping.withSchema(newSchema, mapping.accessPath(), currentPK);
     }
 
     private Mapping createCleanedMapping(Mapping mapping) {
@@ -236,7 +236,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         } else {
             currentPK.add(Signature.concatenate(this.newSignaturePair.getValue(), findPKSignature()));
         }
-        return new Mapping(mapping.datasource(), newSchema, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, currentPK);
+        return mapping.withSchema(newSchema, cleanedComplexProperty, currentPK);
     }
 
     private Collection<Signature> cleanFromEmpty(Collection<Signature> primaryKeys) {

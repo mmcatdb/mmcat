@@ -61,8 +61,8 @@ public class TestMapping {
     public Mapping mapping() {
         if (mapping == null)
             mapping = keyCreator != null
-                ? new Mapping(datasource, schema, rootKey, kindName, accessPath(), keyCreator.create(schema, rootKey))
-                : Mapping.create(datasource, schema, rootKey, kindName, accessPath());
+                ? new Mapping(datasource, kindName, schema, rootKey, accessPath(), keyCreator.create(schema, rootKey))
+                : Mapping.create(datasource, kindName, schema, rootKey, accessPath());
 
         return mapping;
     }
