@@ -37,11 +37,11 @@ class JsonTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final List<String> fileNames = jsonProvider.getJsonFileNames();
+        final List<String> fileNames = List.of(jsonProvider.getJsonFileNames());
 
         assertEquals("yelp_business_sample", fileNames.get(0));
 
-        try (InputStream inputStream = jsonProvider.getInputStream("yelpbusinesssampel")) {
+        try (InputStream inputStream = jsonProvider.getInputStream()) {
             assertNotNull(inputStream);
         }
     }
@@ -111,7 +111,7 @@ class JsonTests {
             this.jsonContent = jsonContent;
         }
 
-        @Override public InputStream getInputStream(String kindName) {
+        @Override public InputStream getInputStream() {
             return new ByteArrayInputStream(jsonContent.getBytes());
         }
     }

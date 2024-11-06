@@ -1,12 +1,7 @@
 package cz.matfyz.wrappercsv;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -24,8 +19,6 @@ public class CsvProvider {
 
     /**
      * Constructs a new {@code CsvProvider} with the specified settings.
-     *
-     * @param settings the settings used to configure this provider.
      */
     public CsvProvider(CsvSettings settings) {
         this.settings = settings;
@@ -45,94 +38,18 @@ public class CsvProvider {
 
     /**
      * Retrieves an input stream for the specified CSV file.
-     * If the URL points directly to a CSV file, that file is used.
-     * Otherwise, a CSV file corresponding to the kind name is accessed.
-     *
-     * @param kindName the name of the CSV kind or type.
-     * @return an input stream for the CSV file.
-     * @throws IOException if an I/O error occurs while retrieving the input stream.
      */
-    public InputStream getInputStream(String kindName) throws IOException {
-        if (settings.url.endsWith(".csv")) {
-            return new UrlInputStreamProvider(settings.url).getInputStream();
-        } else {
-            return new UrlInputStreamProvider(settings.url + kindName + ".csv").getInputStream();
-        }
+    public InputStream getInputStream() throws IOException {
+        return new UrlInputStreamProvider(settings.url).getInputStream();
     }
-
-    // FIXME This behavior isn't very intuitive - each file should have one URL. Also, we shouldn't force the users to use a specific file name (like .csv).
-    // Solution - there should be flag for a datasource to indicate if it is a file or a directory.
-    // Then, the kindname in the mapping should be the full path after the directory - e.g., "business/employess.tsv".
-    //
-    // We don't want to mess with URI schemes either - there are other protocols, like ftp.
-    // Luckily, if we fix the problem above, we should be able to use standard java functions to support any protocol.
-
-
-    // There is not a straightforward way to access filenames in a remote folder.
-    // Therefore, right now it is possible to access local folders or files and remote just files.
 
     /**
      * Retrieves a list of CSV file names from the specified URL.
      * Supports both local directories and remote file access.
-     *
-     * @return a list of CSV file names (without the ".csv" extension).
-     * @throws URISyntaxException if the URL is not formatted correctly.
-     * @throws IOException if an I/O error occurs while accessing local or remote files.
      */
-    public List<String> getCsvFileNames() throws URISyntaxException, IOException {
-        URI uri = new URI(settings.url);
-        if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
-            return getRemoteCsvFileNames(uri);
-        } else if ("file".equals(uri.getScheme())) {
-            return getLocalCsvFileNames(uri);
-        } else {
-            throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
-        }
-    }
-
-    /**
-     * Retrieves a list of CSV file names from a remote location.
-     * Currently only supports URLs pointing directly to a CSV file.
-     *
-     * @param uri the URI pointing to the remote location.
-     * @return a list of CSV file names (without the ".csv" extension).
-     */
-    private List<String> getRemoteCsvFileNames(URI uri) {
-        List<String> csvFileNames = new ArrayList<>();
-        if (settings.url.endsWith(".csv")) {
-            csvFileNames.add(new File(uri.getPath()).getName().replace(".csv", ""));
-        } else {
-            throw new IllegalArgumentException("The provided URL does not point to a directory.");
-        }
-        return csvFileNames;
-    }
-
-    /**
-     * Retrieves a list of CSV file names from a local directory or file.
-     *
-     * @param uri the URI pointing to the local directory or file.
-     * @return a list of CSV file names (without the ".csv" extension).
-     */
-    private List<String> getLocalCsvFileNames(URI uri) {
-        List<String> csvFileNames = new ArrayList<>();
-        File file = new File(uri);
-        if (settings.url.endsWith(".csv")) {
-            if (file.exists()) {
-                csvFileNames.add(file.getName().replace(".csv", ""));
-            } else {
-                throw new IllegalArgumentException("The provided URL does not point to an existing file.");
-            }
-        } else if (file.isDirectory()) {
-            File[] files = file.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
-            if (files != null) {
-                for (File csvFile : files) {
-                    csvFileNames.add(csvFile.getName().replace(".csv", ""));
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("The provided URL does not point to a directory or a valid file.");
-        }
-        return csvFileNames;
+    public String getCsvFileNames() {
+        String url = settings.url;
+        return url.substring(url.lastIndexOf('/') + 1);
     }
 
     /**

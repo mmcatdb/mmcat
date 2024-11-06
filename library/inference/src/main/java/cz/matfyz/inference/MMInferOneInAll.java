@@ -60,11 +60,12 @@ public class MMInferOneInAll {
             .map(this::processDatasource)
             .flatMap(list -> list.stream()).toList();
 
-        // FIXME This is just a temporary solution
-        // Can the candidate miner be paralellized? Or does it need information about all datasources at once?
-        final var firstDatasource = provider.getDatasources().stream().findFirst().orElseThrow();
-        final var wrapper = this.provider.getControlWrapper(firstDatasource).getInferenceWrapper();
-        final Candidates candidates = executeCandidateMiner(wrapper);
+        // TODO This is just a temporary solution
+        List<AbstractInferenceWrapper> wrappers = provider.getDatasources().stream()
+            .map(d -> provider.getControlWrapper(d).getInferenceWrapper())
+            .toList();
+
+        final Candidates candidates = executeCandidateMiner(wrappers);
 
         return new InferenceResult(pairs, candidates);
     }
@@ -104,10 +105,9 @@ public class MMInferOneInAll {
 
         long start = System.currentTimeMillis();
         RecordSchemaDescription rsd = pba.process(wrapper, seqFunction, combFunction);
-
         long end = System.currentTimeMillis();
 
-        System.out.print("RESULT_PROPERTY_BA: ");
+        System.out.println("RESULT_TIME_PROPERTY_BA TOTAL: " + (end - start) + "ms");
         System.out.println(rsd == null ? "NULL" : rsd);
 
         return rsd;
@@ -116,12 +116,21 @@ public class MMInferOneInAll {
     /**
      * Executes the Candidate Miner Algorithm to find potential candidates.
      */
+    /*
     public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper) throws Exception {
         BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
         StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
         CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
 
         return candidateMiner.process(wrapper, wrapper.getKindNames());
+    }
+        */
+    public static Candidates executeCandidateMiner(List<AbstractInferenceWrapper> wrappers) throws Exception {
+            BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
+            StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
+            CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
+    
+            return candidateMiner.process(wrappers);
     }
 
 }

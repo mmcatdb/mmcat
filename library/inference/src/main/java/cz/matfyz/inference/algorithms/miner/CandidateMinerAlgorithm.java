@@ -9,6 +9,8 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
@@ -19,25 +21,25 @@ import cz.matfyz.inference.algorithms.miner.functions.ReferenceTupleToPairWithSu
 
 public class CandidateMinerAlgorithm implements Serializable {
 
-    public Candidates process(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
+    public Candidates process(List<AbstractInferenceWrapper> wrappers) throws Exception {
 
         Candidates candidates = new Candidates();
-
-        List<AbstractInferenceWrapper> wrappers = new ArrayList<>();
+        List<AbstractInferenceWrapper> sessionWrappers = new ArrayList<>();
 
         try {
             JavaRDD<PropertyHeuristics> all = null;
 
-            for (String kind : kinds) {
-                System.out.println("Current kind while processing candidates: " + kind);
-                final var w = wrapper.copyForKind(kind);
-                wrappers.add(w);
-                w.startSession();
-                JavaRDD<PropertyHeuristics> heuristics = Footprinter.INSTANCE.process(w);
-                if (all == null)
-                    all = heuristics;
-                else
-                    all.union(heuristics);
+            for (AbstractInferenceWrapper wrapper : wrappers) {
+                for (String kind : wrapper.getKindNames()) {
+                    final var w = wrapper.copyForKind(kind);
+                    sessionWrappers.add(w);
+                    w.startSession();
+                    JavaRDD<PropertyHeuristics> heuristics = Footprinter.INSTANCE.process(w);
+                    if (all == null)
+                        all = heuristics;
+                    else
+                        all = all.union(heuristics);
+                }
             }
 
             // remove later
@@ -78,21 +80,18 @@ public class CandidateMinerAlgorithm implements Serializable {
                 .filter(pair -> pair._2 != SubsetType.EMPTY);
 
             System.out.println("----------------------- Reference Candidates --------------------------------------");
-            List<Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType>>  rc = new ArrayList<>(referenceCandidates.collect());
+            List<Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType>> rc = new ArrayList<>(referenceCandidates.collect());
 
-            for (Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> t: rc) {
+            for (Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> t : rc) {
                 System.out.println(t);
             }
 
-
-            // TODO: redundancy
-
+            // Collect primary key and reference candidates
             primaryKeyCandidates.collect().forEach(heuristics -> {
                 PrimaryKeyCandidate pkCandidate = toPrimaryKeyCandidate(heuristics);
                 candidates.pkCandidates.add(pkCandidate);
             });
 
-            // Convert reference candidates to ReferenceCandidate and add to candidates
             rc.forEach(tuple -> {
                 PropertyHeuristics referencing = tuple._1._1;
                 PropertyHeuristics referred = tuple._1._2;
@@ -102,9 +101,8 @@ public class CandidateMinerAlgorithm implements Serializable {
             });
 
             return candidates;
-        }
-        finally {
-            for (AbstractInferenceWrapper wrap : wrappers) {
+        } finally {
+            for (AbstractInferenceWrapper wrap : sessionWrappers) {
                 wrap.stopSession();
             }
         }
