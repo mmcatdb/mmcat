@@ -59,14 +59,38 @@ async function deleteAction() {
             >
                 <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
             </ValueRow>
-            <ValueRow
+            <template
                 v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
-                label="Datasource:"
             >
-                <FixedRouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id } }">
-                    {{ action.payload.datasource.label }}
-                </FixedRouterLink>
-            </ValueRow>
+                <ValueRow
+                    label="Datasource:"
+                >
+                    <FixedRouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id } }">
+                        {{ action.payload.datasource.label }}
+                    </FixedRouterLink>
+                </ValueRow>
+                <ValueRow
+                    v-if="action.payload.mappings"
+                    label="Mappings:"
+                >
+                    <div class="d-flex flex-wrap">
+                        <span
+                            v-for="(mapping, index) in action.payload.mappings"
+                            :key="mapping.id"
+                        >
+                            <FixedRouterLink 
+                                :to="{ name: 'mapping', params: {id: mapping.id } }"
+                            >
+                                {{ mapping.kindName }}
+                            </FixedRouterLink>
+                            <span
+                                v-if="index !== action.payload.mappings.length - 1"
+                                class="px-1"
+                            >,</span>
+                        </span>
+                    </div>
+                </ValueRow>
+            </template>
             <ValueRow
                 v-else
                 label="Datasources:"
@@ -121,6 +145,6 @@ async function deleteAction() {
     border: 1px solid var(--color-primary);
     margin-right: 16px;
     margin-bottom: 16px;
-    min-width: 284px;
+    width: 420px;
 }
 </style>

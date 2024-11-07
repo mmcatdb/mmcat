@@ -153,12 +153,6 @@ function setToDefault() {
 </template>
 
 <style>
-.button-row {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
 .editor {
     display: flex;
     flex-direction: column;

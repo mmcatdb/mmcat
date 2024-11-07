@@ -4,11 +4,13 @@ import API from '@/utils/api';
 import { Datasource } from '@/types/datasource';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
-import { useSchemaCategoryId } from '@/utils/injects';
+import { tryUseWorkflow, useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { useFixedRouter } from '@/router/specificRoutes';
 
 const categoryId = useSchemaCategoryId();
+
+const isInWorkflow = !!tryUseWorkflow();
 
 const datasources = shallowRef<{
     inCategory: Datasource[];
@@ -45,7 +47,13 @@ function edit(id: Id) {
 
 <template>
     <div>
-        <h1>Datasources in category</h1>
+        <h1>Datasources in {{ isInWorkflow ? 'workflow' : 'category' }}</h1>
+        <button
+            v-if="isInWorkflow"
+            @click="router.push({ name: 'index' })"
+        >
+            Back
+        </button>
         <template v-if="datasources && 'inCategory' in datasources">
             <div class="d-flex flex-wrap mt-3 gap-3 align-items-stretch">
                 <DatasourceDisplay

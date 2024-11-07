@@ -250,11 +250,4 @@ function splitName(name: string) {
     font-weight: bold;
     margin: 0 10px;
 }
-
-.button-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
 </style>

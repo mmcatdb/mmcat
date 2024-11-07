@@ -1,9 +1,11 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.evolution.Version;
+import cz.matfyz.server.controller.MappingController.MappingInfo;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.DatasourceRepository;
+import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
@@ -38,6 +40,9 @@ public class ActionController {
     private DatasourceRepository datasourceRepository;
 
     @Autowired
+    private MappingRepository mappingRepository;
+
+    @Autowired
     private DatasourceController datasourceController;
 
     @GetMapping("/schema-categories/{categoryId}/actions")
@@ -70,21 +75,37 @@ public class ActionController {
     }
 
     private ActionDetail actionToDetail(Action action) {
-        return new ActionDetail(action, actionPayloadToDetail(action.payload));
+        return new ActionDetail(action, actionPayloadToDetail(action.payload, action.categoryId));
     }
 
     // TODO extremely unefficient - load all models and datasources at once.
-    ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
+    ActionPayloadDetail actionPayloadToDetail(ActionPayload payload, Id categoryId) {
         return switch (payload) {
             case ModelToCategoryPayload p -> {
                 final var datasource = datasourceRepository.find(p.datasourceId());
-                final var detail = datasourceController.datasourceToDetail(datasource);
-                yield new ModelToCategoryPayloadDetail(detail);
+                final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
+                if (p.mappingIds() == null)
+                    yield new ModelToCategoryPayloadDetail(datasourceDetail, List.of());
+
+                final var mappingInfos = mappingRepository.findAllInCategory(categoryId, datasource.id()).stream()
+                    .filter(wrapper -> p.mappingIds().contains(wrapper.id()))
+                    .map(MappingInfo::fromWrapper)
+                    .toList();
+
+                yield new ModelToCategoryPayloadDetail(datasourceDetail, mappingInfos);
             }
             case CategoryToModelPayload p -> {
                 final var datasource = datasourceRepository.find(p.datasourceId());
-                final var detail = datasourceController.datasourceToDetail(datasource);
-                yield new CategoryToModelPayloadDetail(detail);
+                final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
+                if (p.mappingIds() == null)
+                    yield new CategoryToModelPayloadDetail(datasourceDetail, List.of());
+
+                final var mappingInfos = mappingRepository.findAllInCategory(categoryId, datasource.id()).stream()
+                    .filter(wrapper -> p.mappingIds().contains(wrapper.id()))
+                    .map(MappingInfo::fromWrapper)
+                    .toList();
+
+                yield new CategoryToModelPayloadDetail(datasourceDetail, mappingInfos);
             }
             case UpdateSchemaPayload p -> new UpdateSchemaPayloadDetail(p.prevVersion(), p.nextVersion());
             case RSDToCategoryPayload p -> {
@@ -119,11 +140,13 @@ public class ActionController {
     interface ActionPayloadDetail {}
 
     record CategoryToModelPayloadDetail(
-        DatasourceDetail datasource
+        DatasourceDetail datasource,
+        List<MappingInfo> mappings
     ) implements ActionPayloadDetail {}
 
     record ModelToCategoryPayloadDetail(
-        DatasourceDetail datasource
+        DatasourceDetail datasource,
+        List<MappingInfo> mappings
     ) implements ActionPayloadDetail {}
 
     record UpdateSchemaPayloadDetail(

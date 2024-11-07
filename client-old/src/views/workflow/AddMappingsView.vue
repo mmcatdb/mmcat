@@ -7,6 +7,7 @@ import { useFixedRouter } from '@/router/specificRoutes';
 import { Mapping } from '@/types/mapping';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import { Datasource } from '@/types/datasource';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 
 const workflow = useWorkflow();
 const emit = defineEmits([ 'continue' ]);
@@ -56,7 +57,14 @@ function createMapping() {
 <template>
     <h1>Add mappings</h1>
     <p>
-        Create an output mapping. Start fresh with a new mapping or modify an existing one to fit your needs. At least one mapping is needed to proceed.
+        Create output mappings. Start fresh with a new mapping or modify an existing one to fit your needs. At least one mapping is needed to proceed.
+    </p>
+    <p>
+        Need to create a new datasource?
+        <FixedRouterLink :to="{ name: 'workflow-datasources' }">
+            Go to datasources
+        </FixedRouterLink>
+        .
     </p>
     <template v-if="datasources && mappings">
         <h2>Outputs</h2>

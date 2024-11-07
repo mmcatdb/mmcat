@@ -27,6 +27,18 @@ async function fetchJob() {
 
     return true;
 }
+
+async function updateJob(newJob: Job) {
+    const isRestarted = newJob.id !== job.value?.id;
+    job.value = newJob;
+
+    if (!isRestarted)
+        return;
+
+    const workflowResult = await API.workflows.getWorkflow({ id: workflow.value.id });
+    if (workflowResult.status) 
+        workflow.value = workflowResult.data;
+}
 </script>
 
 <template>
@@ -41,10 +53,11 @@ async function fetchJob() {
         <JobDisplay
             :job="job"
             :is-show-detail="true"
-            @update-job="newJob => job = newJob"
+            @update-job="updateJob"
         />
     </div>
     <ResourceLoader
+        :key="'inferenceJobId' in workflow.data ? workflow.data.inferenceJobId : ''"
         :loading-function="fetchJob"
         :refresh-period="2000"
     />

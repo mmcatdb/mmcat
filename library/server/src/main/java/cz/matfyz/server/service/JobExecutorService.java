@@ -45,7 +45,6 @@ import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
 import cz.matfyz.server.entity.job.data.ModelJobData;
 import cz.matfyz.server.entity.mapping.MappingInit;
-import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.DatasourceRepository;
@@ -175,10 +174,6 @@ public class JobExecutorService {
         if (run.sessionId == null)
             throw SessionException.notFound(run.id());
 
-        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
-        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
-        final List<MappingWrapper> mappingWrappers = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId());
-
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
         final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
 
@@ -186,14 +181,20 @@ public class JobExecutorService {
             ? instanceWrapper.toInstanceCategory(schema)
             : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
+        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
+        final Datasource datasource = datasourceWrapper.toDatasource();
+        final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
+            .filter(wrapper -> payload.mappingIds() == null || payload.mappingIds().contains(wrapper.id()))
+            .map(wrapper -> wrapper.toMapping(datasource, schema))
+            .toList();
+
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
+
         System.out.println("instance before");
         System.out.println(instance);
 
-        final Datasource datasource = datasourceWrapper.toDatasource();
-        for (final MappingWrapper mappingWrapper : mappingWrappers) {
-            final Mapping mapping = mappingWrapper.toMapping(datasource, schema);
+        for (final Mapping mapping : mappings)
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
-        }
 
         System.out.println("instance after");
         System.out.println(instance);
@@ -216,6 +217,7 @@ public class JobExecutorService {
         final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
         final Datasource datasource = datasourceWrapper.toDatasource();
         final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
+            .filter(wrapper -> payload.mappingIds() == null || payload.mappingIds().contains(wrapper.id()))
             .map(wrapper -> wrapper.toMapping(datasource, schema))
             .toList();
 

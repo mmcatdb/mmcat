@@ -6,6 +6,7 @@ import { useSchemaCategoryInfo } from '@/utils/injects';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 import { useRoute } from 'vue-router';
+import { useFixedRouter } from '@/router/specificRoutes';
 
 const job = ref<Job>();
 const info = useSchemaCategoryInfo();
@@ -23,6 +24,16 @@ async function fetchJob() {
 
     return true;
 }
+
+const router = useFixedRouter();
+
+function updateJob(newJob: Job) {
+    // If the job is reseted, we navigate to the new job's page.
+    if (newJob.id !== job.value?.id) 
+        router.push({ name: 'job', params: { id: newJob.id } });
+    
+    job.value = newJob;
+}
 </script>
 
 <template>
@@ -34,10 +45,11 @@ async function fetchJob() {
         <JobDisplay
             :job="job"
             :is-show-detail="true"
-            @update-job="newJob => job = newJob"
+            @update-job="updateJob"
         />
     </div>
     <ResourceLoader
+        :key="route.params.id as string"
         :loading-function="fetchJob"
         :refresh-period="2000"
     />

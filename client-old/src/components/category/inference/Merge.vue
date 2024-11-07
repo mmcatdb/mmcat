@@ -104,11 +104,3 @@ function setMergeType(type: 'reference' | 'primaryKey') {
         />
     </div>
 </template>
-
-<style scoped>
-.button-row {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-</style>

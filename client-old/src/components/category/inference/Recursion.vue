@@ -142,10 +142,11 @@ onUnmounted(() => {
  */
 function onNodeTapHandler(node: Node) {
     if (isNodeTurn.value) {
-        nodes.value = [...nodes.value, node];
+        nodes.value = [ ...nodes.value, node ];
         node.select({ type: SelectionType.Root, level: 0 });
         showWarning.value = false;
-    } else {
+    }
+    else {
         showWarning.value = true;
         warningMessage.value = 'Please select an edge next.';
     }
@@ -158,9 +159,10 @@ function onNodeTapHandler(node: Node) {
  */
 function onEdgeTapHandler(edge: Edge) {
     if (!isNodeTurn.value) {
-        edges.value = [...edges.value, edge];
+        edges.value = [ ...edges.value, edge ];
         showWarning.value = false;
-    } else {
+    }
+    else {
         showWarning.value = true;
         warningMessage.value = 'Please select a node next.';
     }
@@ -169,7 +171,7 @@ function onEdgeTapHandler(edge: Edge) {
 </script>
 
 <template>
-    <div class="recursion">
+    <div class="position-relative">
         <Warning 
             :show="showWarning"
             :message="warningMessage"
@@ -203,16 +205,3 @@ function onEdgeTapHandler(edge: Edge) {
         </div>
     </div>
 </template>
-
-<style scoped>
-.recursion {
-    position: relative;
-}
-
-.button-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
-</style>

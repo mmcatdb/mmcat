@@ -15,6 +15,7 @@ import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.service.JobExecutorService;
 import cz.matfyz.server.service.JobService;
+import cz.matfyz.server.service.WorkflowService;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -49,6 +50,9 @@ public class JobController {
     @Autowired
     private ActionController actionController;
 
+    @Autowired
+    private WorkflowService workflowService;
+
     @GetMapping("/schema-categories/{categoryId}/jobs")
     public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
         if (sessionId.isEmpty())
@@ -76,9 +80,13 @@ public class JobController {
 
     @PostMapping("/jobs/{id}/restart")
     public JobDetail createRestartedJob(@PathVariable Id id) {
-        final var jobWithRun = repository.find(id);
+        final var oldJob = repository.find(id);
+        final var newJob = service.createRestartedJob(oldJob);
 
-        return jobToJobDetail(service.createRestartedJob(jobWithRun));
+        // We have to update all workflows that depend on the job.
+        workflowService.updateWorkflowsWithRestartedJob(oldJob.job(), newJob.job());
+
+        return jobToJobDetail(newJob);
     }
 
     @PostMapping("/jobs/{id}/pause")
@@ -121,7 +129,7 @@ public class JobController {
     ) {}
 
     private JobDetail jobToJobDetail(JobWithRun job) {
-        final var payload = actionController.actionPayloadToDetail(job.job().payload);
+        final var payload = actionController.actionPayloadToDetail(job.job().payload, job.run().categoryId);
 
         return JobDetail.create(job, payload);
     }

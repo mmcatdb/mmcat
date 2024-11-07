@@ -89,7 +89,7 @@ function cancel() {
 </script>
 
 <template>
-    <div class="cluster">
+    <div class="position-relative">
         <h2>Cluster Objects</h2>
         <ValueContainer>
             <ValueRow label="Objects forming a cluster:"> 
@@ -124,17 +124,3 @@ function cancel() {
         </div>
     </div>
 </template>
-
-<style scoped>
-
-.cluster {
-    position: relative;
-}
-
-.button-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
-</style>

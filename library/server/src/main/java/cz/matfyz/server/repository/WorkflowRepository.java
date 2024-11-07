@@ -71,6 +71,27 @@ public class WorkflowRepository {
         });
     }
 
+    public List<Workflow> findAllByJob(Id jobId) {
+        return db.getMultiple((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    id,
+                    category_id,
+                    label,
+                    job_id,
+                    json_value
+                FROM workflow
+                WHERE job_id = ?
+                ORDER BY id;
+                """);
+            setId(statement, 1, jobId);
+            final var resultSet = statement.executeQuery();
+
+            while (resultSet.next())
+                output.add(fromResultSet(resultSet));
+        });
+    }
+
     public void save(Workflow workflow) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""

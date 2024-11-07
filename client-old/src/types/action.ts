@@ -1,5 +1,6 @@
 import type { Entity, Id, VersionId } from './id';
 import {  Datasource, type DatasourceFromServer } from './datasource';
+import { MappingInfo, type MappingInfoFromServer } from './mapping';
 
 export type ActionFromServer = {
     id: Id;
@@ -82,6 +83,8 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
 export type ActionPayloadInit = {
     type: ActionType.ModelToCategory | ActionType.CategoryToModel;
     datasourceId: Id;
+    /** If provided, only the selected mappings from this datasource will be used. */
+    mappingIds: Id[] | undefined;
 } | {
     type: ActionType.RSDToCategory;
     datasourceIds: Id[];
@@ -89,6 +92,7 @@ export type ActionPayloadInit = {
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
     datasource: DatasourceFromServer;
+    mappings: MappingInfoFromServer[];
 };
 
 class ModelToCategoryPayload implements ActionPayloadType<ActionType.ModelToCategory> {
@@ -96,17 +100,20 @@ class ModelToCategoryPayload implements ActionPayloadType<ActionType.ModelToCate
 
     private constructor(
         readonly datasource: Datasource,
+        readonly mappings: MappingInfo[],
     ) {}
 
     static fromServer(input: ModelToCategoryPayloadFromServer): ModelToCategoryPayload {
         return new ModelToCategoryPayload(
             Datasource.fromServer(input.datasource),
+            input.mappings.map(MappingInfo.fromServer),
         );
     }
 }
 
 type CategoryToModelPayloadFromServer = ActionPayloadFromServer<ActionType.CategoryToModel> & {
     datasource: DatasourceFromServer;
+    mappings: MappingInfoFromServer[];
 };
 
 class CategoryToModelPayload implements ActionPayloadType<ActionType.CategoryToModel> {
@@ -114,11 +121,13 @@ class CategoryToModelPayload implements ActionPayloadType<ActionType.CategoryToM
 
     private constructor(
         readonly datasource: Datasource,
+        readonly mappings: MappingInfo[],
     ) {}
 
     static fromServer(input: CategoryToModelPayloadFromServer): CategoryToModelPayload {
         return new CategoryToModelPayload(
             Datasource.fromServer(input.datasource),
+            input.mappings.map(MappingInfo.fromServer),
         );
     }
 }

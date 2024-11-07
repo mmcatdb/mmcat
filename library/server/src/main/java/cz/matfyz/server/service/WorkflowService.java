@@ -90,9 +90,11 @@ public class WorkflowService {
                 if (mappings.size() - data.inputMappingIds().size() < 1)
                     throw new IllegalArgumentException("At least one mapping is required.");
 
-                // First, we need to make MTC jobs for the input datasource.
+                // TODO mappings
+
+                // First, we need to make MTC jobs for the input datasources.
                 data.inputDatasourceIds().forEach(id -> {
-                    final var mtcAction = actionService.create(workflow.categoryId, "Input", new ModelToCategoryPayload(id));
+                    final var mtcAction = actionService.create(workflow.categoryId, "Input", new ModelToCategoryPayload(id, null));
                     jobService.createUserRun(mtcAction, sessionId);
                 });
 
@@ -102,7 +104,7 @@ public class WorkflowService {
                     .map(mapping -> mapping.datasourceId).distinct().toList();
 
                 for (final var id : outputDatasourceIds) {
-                    final var ctmAction = actionService.create(workflow.categoryId, "Output", new CategoryToModelPayload(id));
+                    final var ctmAction = actionService.create(workflow.categoryId, "Output", new CategoryToModelPayload(id, null));
                     jobService.createUserRun(ctmAction, sessionId);
                 }
 
@@ -115,6 +117,29 @@ public class WorkflowService {
             }
             default -> throw new IllegalArgumentException("Unknown inference workflow step.");
         }
+    }
+
+    public void updateWorkflowsWithRestartedJob(Job oldJob, Job newJob) {
+        final var dependentWorkflows = repository.findAllByJob(oldJob.id());
+        for (final var workflow : dependentWorkflows) {
+            workflow.jobId = newJob.id();
+
+            workflow.data = switch (workflow.data) {
+                case InferenceWorkflowData data -> updateInferenceDataJob(workflow, data, newJob);
+                default -> throw new IllegalArgumentException("Unknown workflow type.");
+            };
+
+            repository.save(workflow);
+        }
+    }
+
+    private InferenceWorkflowData updateInferenceDataJob(Workflow workflow, InferenceWorkflowData data, Job newJob) {
+        return new InferenceWorkflowData(
+            data.step(),
+            data.inputDatasourceIds(),
+            newJob.id(),
+            data.inputMappingIds()
+        );
     }
 
 }

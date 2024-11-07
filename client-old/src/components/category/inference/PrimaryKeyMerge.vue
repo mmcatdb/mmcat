@@ -238,12 +238,4 @@ function splitName(name: string) {
     text-align: left;
     justify-content: center;
 }
-
-.button-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
-
 </style>

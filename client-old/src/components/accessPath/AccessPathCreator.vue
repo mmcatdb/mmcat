@@ -237,13 +237,18 @@ function cancel() {
                 </div>
                 <ValueContainer v-if="rootConfirmed">
                     <ValueRow label="AccessPath objects:">
-                        {{ selectedNodeLabels }}
-                        <NodeInput
-                            :graph="graph"
-                            :model-value="selectedNodes"
-                            :type="SelectionType.Selected"
-                            @update:modelValue="selectedNodes = $event"
-                        />
+                        <div
+                            class="d-flex flex-wrap"
+                            style="width: 300px"
+                        >
+                            {{ selectedNodeLabels }}
+                            <NodeInput
+                                :graph="graph"
+                                :model-value="selectedNodes"
+                                :type="SelectionType.Selected"
+                                @update:modelValue="selectedNodes = $event"
+                            />
+                        </div>
                     </ValueRow>
                 </ValueContainer>
                 <div 

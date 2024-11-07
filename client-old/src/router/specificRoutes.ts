@@ -48,7 +48,7 @@ commonRoutes.accessPathEditor,
 }, {
     path: 'datasources',
     name: 'datasources',
-    component: () => import('@/views/category/DatasourcesView.vue'),
+    component: () => import('@/views/common/DatasourcesView.vue'),
 },
 commonRoutes.datasource,
 {
@@ -72,6 +72,10 @@ const workflowRoutes: RouteRecordRaw[] = [ {
     path: '',
     name: 'index',
     component: () => import('@/views/workflow/IndexView.vue'),
+}, {
+    path: 'datasources',
+    name: 'workflow-datasources',
+    component: () => import('@/views/common/DatasourcesView.vue'),
 },
 commonRoutes.datasource,
 commonRoutes.mapping,
