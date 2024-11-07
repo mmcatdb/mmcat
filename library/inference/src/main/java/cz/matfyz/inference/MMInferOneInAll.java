@@ -66,6 +66,7 @@ public class MMInferOneInAll {
             .toList();
 
         final Candidates candidates = executeCandidateMiner(wrappers);
+        candidates.sortPkCandidates();
 
         return new InferenceResult(pairs, candidates);
     }
@@ -111,25 +112,13 @@ public class MMInferOneInAll {
         System.out.println(rsd == null ? "NULL" : rsd);
 
         return rsd;
-}
-
-    /**
-     * Executes the Candidate Miner Algorithm to find potential candidates.
-     */
-    /*
-    public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper) throws Exception {
-        BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
-        StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
-        CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
-
-        return candidateMiner.process(wrapper, wrapper.getKindNames());
     }
-        */
+
     public static Candidates executeCandidateMiner(List<AbstractInferenceWrapper> wrappers) throws Exception {
             BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
             StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
             CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
-    
+
             return candidateMiner.process(wrappers);
     }
 

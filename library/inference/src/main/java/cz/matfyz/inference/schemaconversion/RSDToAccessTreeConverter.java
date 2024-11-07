@@ -17,6 +17,9 @@ import cz.matfyz.core.rsd.Char;
  */
 public class RSDToAccessTreeConverter {
 
+    public static final String INDEX_LABEL = "_index";
+    public static final String VALUE_LABEL = "_value";
+
     private AccessTreeNode root;
     private final String kindName;
     private final KeyGenerator keyGenerator;
@@ -58,13 +61,12 @@ public class RSDToAccessTreeConverter {
                     AccessTreeNode child = new AccessTreeNode(rsdChild.getName(), signature, keyChild, keyParent, label, min, isArray);
                     currentNode.addChild(child);
 
-                    // Add _index node if parent is array and the _index is not yet present
-                    if (isArray && !hasIndexChild(child)) {
-                        BaseSignature signatureIndex = signatureGenerator.next();
-                        Key keyIndex = keyGenerator.next();
-                        AccessTreeNode indexChild = new AccessTreeNode("_index", signatureIndex, keyIndex, keyChild, "", Min.ONE, false);
-                        child.addChild(indexChild);
+                    // Add _index and _value nodes if parent is array and they are not yet present
+                    if (isArray) {
+                        addChildIfMissing(child, keyChild, INDEX_LABEL);
+                        addChildIfMissing(child, keyChild, VALUE_LABEL);
                     }
+
                     buildAccessTree(rsdChild, keyChild, i++, child);
                 }
             }
@@ -75,13 +77,26 @@ public class RSDToAccessTreeConverter {
         return (rsd.getTypes() & Type.ARRAY) != 0;
     }
 
-    private boolean hasIndexChild(AccessTreeNode node) {
+    private void addChildIfMissing(AccessTreeNode node, Key key, String label) {
+        if (!hasChildWithLabel(node, label)) {
+            addExtraNode(node, key, label);
+        }
+    }
+
+    private boolean hasChildWithLabel(AccessTreeNode node, String label) {
         for (AccessTreeNode childNode : node.getChildren()) {
-            if (childNode.name.equals("_index")) {
+            if (childNode.name.equals(label)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private void addExtraNode(AccessTreeNode currentNode, Key currentKey, String label) {
+        BaseSignature signatureIndex = signatureGenerator.next();
+        Key keyIndex = keyGenerator.next();
+        AccessTreeNode indexChild = new AccessTreeNode(label, signatureIndex, keyIndex, currentKey, "", Min.ONE, false);
+        currentNode.addChild(indexChild);
     }
 
     private Min findMin(RecordSchemaDescription rsdParent, RecordSchemaDescription rsdChild) {
@@ -98,13 +113,4 @@ public class RSDToAccessTreeConverter {
         return Min.ONE;
     }
 
-    private String createLabel(RecordSchemaDescription rsd, boolean isArray) {
-        if (isArray)
-            return SchemaConverter.Label.RELATIONAL.name();
-
-        if (rsd.getUnique() == Char.TRUE)
-            return SchemaConverter.Label.IDENTIFIER.name();
-
-        return null;
-    }
 }
