@@ -25,7 +25,7 @@ docker compose -f compose.app.prod.yaml up -d --build
 
 - There is another compose setup for development outside of docker.
 ```bash
-docker compose -f compose.db.dev.yaml up -d --build
+docker compose up -d --build
 ```
 - Now you should be able to access [adminer](http://localhost:3203/adminer.php?pgsql=mmcat-database&username=mmcat&db=mmcat&ns=public) for the server database.
 - Then follow installation guides in the `library` and `client` directories.
