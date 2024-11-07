@@ -6,7 +6,7 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -99,9 +99,9 @@ class DataGenerationTests {
                 mappingCheckin = mapping;
         }
 
-        final MappingBuilder mappingBuilder = new MappingBuilder();
+        final AccessPathBuilder builder = new AccessPathBuilder();
 
-        final ComplexProperty newComplexProperty = mappingBuilder.complex(mappingBusiness.kindName(), mappingBusiness.accessPath().signature(), mappingBusiness.accessPath(), mappingCheckin.accessPath());
+        final ComplexProperty newComplexProperty = builder.complex(mappingBusiness.kindName(), mappingBusiness.accessPath().signature(), mappingBusiness.accessPath(), mappingCheckin.accessPath());
 
         final Mapping finalMapping = Mapping.create(provider.getDatasources().stream().findFirst().get(), mappingBusiness.kindName(), schema, mappingBusiness.rootObject().key(), newComplexProperty);
         System.out.println("Mapping C:\n" + finalMapping.accessPath());

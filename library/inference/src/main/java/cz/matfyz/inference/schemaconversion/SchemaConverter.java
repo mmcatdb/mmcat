@@ -5,11 +5,12 @@ import org.slf4j.LoggerFactory;
 
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
-import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 
 import java.util.List;
 
 import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.identifiers.Key.KeyGenerator;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 
@@ -22,13 +23,8 @@ public class SchemaConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaConverter.class);
 
-    private final UniqueNumberGenerator keyGenerator;
-    private final UniqueNumberGenerator signatureGenerator;
-
-    public SchemaConverter() {
-        this.keyGenerator = new UniqueNumberGenerator(0);
-        this.signatureGenerator = new UniqueNumberGenerator(0);
-    }
+    private final KeyGenerator keyGenerator = KeyGenerator.create();
+    private final SignatureGenerator signatureGenerator = SignatureGenerator.create();
 
     /**
      * Converts the current {@link RecordSchemaDescription} to a schema category and mapping.
@@ -50,8 +46,8 @@ public class SchemaConverter {
         final var metadata = schemaWithMetadata.metadata();
 
         LOGGER.info("Creating the mapping for the schema category...");
-        final MappingCreator mappingCreator = new MappingCreator(root.key, root);
-        final Mapping mapping = mappingCreator.createMapping(datasource, schema, kindName);
+        final MappingConverter mappingConverter = new MappingConverter(root.key, root);
+        final Mapping mapping = mappingConverter.createMapping(datasource, schema, kindName);
 
         return new CategoryMappingsPair(schema, metadata, List.of(mapping));
     }

@@ -11,21 +11,21 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 
 /**
- * The {@code MappingCreator} class is responsible for creating mappings for a schema category
+ * The {@code MappingConverter} class is responsible for creating mappings for a schema category
  * based on an access tree structure represented by {@link AccessTreeNode}. It utilizes a
- * {@link MappingBuilder} to construct complex properties and mappings.
+ * {@link AccessPathBuilder} to construct complex properties and mappings.
  */
-public class MappingCreator {
+public class MappingConverter {
 
     public final Key rootKey;
     public final AccessTreeNode root;
 
-    private final MappingBuilder builder;
+    private final AccessPathBuilder builder;
 
-    public MappingCreator(Key rootKey, AccessTreeNode root) {
+    public MappingConverter(Key rootKey, AccessTreeNode root) {
         this.rootKey = rootKey;
         this.root = root;
-        this.builder = new MappingBuilder();
+        this.builder = new AccessPathBuilder();
     }
 
     /**

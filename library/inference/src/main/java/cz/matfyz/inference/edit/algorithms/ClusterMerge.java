@@ -7,7 +7,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -441,8 +441,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             }
         }
 
-        final MappingBuilder mappingBuilder = new MappingBuilder();
-        return mappingBuilder.root(newSubpaths.toArray(new AccessPath[0]));
+        final AccessPathBuilder builder = new AccessPathBuilder();
+        return builder.root(newSubpaths.toArray(AccessPath[]::new));
     }
 
     private AccessPath createNewComplexProperty(AccessPath original) {

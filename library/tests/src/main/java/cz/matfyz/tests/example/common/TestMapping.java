@@ -5,7 +5,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 
@@ -16,7 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class TestMapping {
 
     public interface AccessPathCreator {
-        ComplexProperty create(MappingBuilder builder);
+        ComplexProperty create(AccessPathBuilder builder);
     }
 
     public interface PrimaryKeyCreator {
@@ -51,7 +51,7 @@ public class TestMapping {
 
     public ComplexProperty accessPath() {
         if (accessPath == null)
-            accessPath = pathCreator.create(new MappingBuilder());
+            accessPath = pathCreator.create(new AccessPathBuilder());
 
         return accessPath;
     }

@@ -1,7 +1,7 @@
 package cz.matfyz.tests.transformations;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.utils.UniqueIdProvider;
+import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.tests.example.basic.Schema;
 import cz.matfyz.tests.example.basic.MongoDB;
 import cz.matfyz.tests.example.basic.PostgreSQL;
@@ -15,7 +15,7 @@ class MTCAlgorithmTests {
 
     @BeforeEach
     void setup() {
-        UniqueIdProvider.reset();
+        UniqueIdGenerator.makeDeterministic();
     }
 
     @Test

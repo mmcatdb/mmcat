@@ -5,7 +5,7 @@ import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 
 import java.util.List;
 
-public class MappingBuilder {
+public class AccessPathBuilder {
 
     // Complex property
 

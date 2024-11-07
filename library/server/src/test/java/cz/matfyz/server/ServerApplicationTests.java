@@ -11,7 +11,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
 import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
-import cz.matfyz.core.utils.UniqueIdProvider;
+import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.DatasourceRepository;
@@ -48,7 +48,7 @@ class ServerApplicationTests {
 
     @BeforeEach
     public void setup() {
-        UniqueIdProvider.reset();
+        UniqueIdGenerator.makeDeterministic();
         Statistics.reset();
     }
 

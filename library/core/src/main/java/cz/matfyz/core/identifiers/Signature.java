@@ -2,6 +2,7 @@ package cz.matfyz.core.identifiers;
 
 import cz.matfyz.core.exception.SignatureException;
 import cz.matfyz.core.utils.ArrayUtils;
+import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -327,19 +328,26 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     }
 
-    public static class Generator {
+    public static class SignatureGenerator {
 
-        private int max;
+        private final UniqueSequentialGenerator idGenerator;
 
-        public Generator(Collection<Signature> current) {
-            max = current.stream().flatMapToInt(signature -> Arrays.stream(signature.ids))
-                .map(Math::abs)
-                .reduce(0, Math::max);
+        private SignatureGenerator(UniqueSequentialGenerator idGenerator) {
+            this.idGenerator = idGenerator;
         }
 
-        public Signature next() {
-            max++;
-            return Signature.createBase(max);
+        public static SignatureGenerator create() {
+            return new SignatureGenerator(UniqueSequentialGenerator.create());
+        }
+
+        public static SignatureGenerator create(Collection<Signature> current) {
+            final var currentIds = current.stream().flatMapToInt(signature -> Arrays.stream(signature.ids))
+                .map(Math::abs).toArray();
+            return new SignatureGenerator(UniqueSequentialGenerator.create(currentIds));
+        }
+
+        public BaseSignature next() {
+            return Signature.createBase(idGenerator.next());
         }
 
     }

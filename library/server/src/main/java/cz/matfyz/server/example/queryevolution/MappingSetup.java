@@ -6,7 +6,7 @@ import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.service.MappingService;
 import cz.matfyz.tests.example.queryevolution.MongoDB;
 import cz.matfyz.tests.example.queryevolution.PostgreSQL;
-import cz.matfyz.server.example.common.MappingBuilder;
+import cz.matfyz.server.example.common.MappingWrapperBuilder;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ class MappingSetup {
     private MappingService mappingService;
 
     List<MappingWrapper> createMappings(List<DatasourceWrapper> datasources, SchemaCategoryWrapper schemaWrapper, int version) {
-        final var builder = new MappingBuilder(datasources, schemaWrapper);
+        final var builder = new MappingWrapperBuilder(datasources, schemaWrapper);
 
         if (version == 3) {
             return builder

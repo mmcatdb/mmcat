@@ -3,6 +3,8 @@ package cz.matfyz.tests.inference;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.Key.KeyGenerator;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
@@ -14,7 +16,6 @@ import cz.matfyz.inference.schemaconversion.RSDToAccessTreeConverter;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
-import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
 import cz.matfyz.wrappercsv.CsvProvider;
@@ -49,13 +50,13 @@ public class SchemaConversionTests {
             .getInferenceWrapper();
 
         // accessing the private method with reflection w/o having to make it visible
-        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
+        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class);
         privateExecuteRBA.setAccessible(true);
 
         final MMInferOneInAll mmInferOneInAll = new MMInferOneInAll();
-        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper, false);
+        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper);
 
-        final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter("business", new UniqueNumberGenerator(0), new UniqueNumberGenerator(0));
+        final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter("business", KeyGenerator.create(), SignatureGenerator.create());
         final AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
 
         // capture the output of the printTree method

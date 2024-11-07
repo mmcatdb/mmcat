@@ -7,7 +7,7 @@ import cz.matfyz.server.service.MappingService;
 import cz.matfyz.tests.example.basic.MongoDB;
 import cz.matfyz.tests.example.basic.Neo4j;
 import cz.matfyz.tests.example.basic.PostgreSQL;
-import cz.matfyz.server.example.common.MappingBuilder;
+import cz.matfyz.server.example.common.MappingWrapperBuilder;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ class MappingSetup {
     private MappingService mappingService;
 
     List<MappingWrapper> createMappings(List<DatasourceWrapper> datasources, SchemaCategoryWrapper schemaWrapper) {
-        return new MappingBuilder(datasources, schemaWrapper)
+        return new MappingWrapperBuilder(datasources, schemaWrapper)
             .add(0, PostgreSQL::order)
             .add(0, PostgreSQL::product)
             .add(0, PostgreSQL::item)

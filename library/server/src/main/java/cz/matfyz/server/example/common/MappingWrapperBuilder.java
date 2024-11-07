@@ -13,24 +13,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class MappingBuilder {
+public class MappingWrapperBuilder {
 
     private final List<DatasourceWrapper> datasources;
     private final Id categoryId;
     private final SchemaCategory schema;
     private List<MappingInit> inits = new ArrayList<>();
 
-    public MappingBuilder(List<DatasourceWrapper> datasources, SchemaCategoryWrapper wrapper) {
+    public MappingWrapperBuilder(List<DatasourceWrapper> datasources, SchemaCategoryWrapper wrapper) {
         this.datasources = datasources;
         this.categoryId = wrapper.id();
         schema = wrapper.toSchemaCategory();
     }
 
-    public MappingBuilder add(int index, Function<SchemaCategory, TestMapping> initCreator) {
+    public MappingWrapperBuilder add(int index, Function<SchemaCategory, TestMapping> initCreator) {
         return add(datasources.get(index), initCreator);
     }
 
-    public MappingBuilder add(DatasourceWrapper datasource, Function<SchemaCategory, TestMapping> initCreator) {
+    public MappingWrapperBuilder add(DatasourceWrapper datasource, Function<SchemaCategory, TestMapping> initCreator) {
         final Mapping mapping = initCreator.apply(schema).mapping();
         final var init = MappingInit.fromMapping(mapping, categoryId, datasource.id());
         inits.add(init);

@@ -4,7 +4,7 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -39,16 +39,16 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsAToIndex = sbA.morphism(reviewsA, index, 3);
         final SchemaCategory schemaA = sbA.build();
 
-        final MappingBuilder mbA = new MappingBuilder();
+        final AccessPathBuilder apbA = new AccessPathBuilder();
         final Mapping mappingA = Mapping.create(
             datasource,
             "kindNameA",
             schemaA,
             name.key(),
-            mbA.root(
-                mbA.simple("name", appToName),
-                mbA.complex("reviews", reviewsAToApp.dual(),
-                    mbA.simple("_index", reviewsAToIndex)
+            apbA.root(
+                apbA.simple("name", appToName),
+                apbA.complex("reviews", reviewsAToApp.dual(),
+                    apbA.simple("_index", reviewsAToIndex)
                 )
             )
         );
@@ -63,14 +63,14 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
         final SchemaCategory schemaB = sbB.build();
 
-        final MappingBuilder mbB = new MappingBuilder();
+        final AccessPathBuilder apbB = new AccessPathBuilder();
         final Mapping mappingB = Mapping.create(
             datasource,
             "kindNameB",
             schemaB,
             reviewsB.key(),
-            mbB.root(
-                mbB.simple("text", reviewsBToText)
+            apbB.root(
+                apbB.simple("text", reviewsBToText)
             )
         );
 
@@ -99,15 +99,15 @@ class SchemaCategoryInferenceEditorTests {
         final var appToReviewsA =   sbA.morphism(app, reviewsA, 2);
         final SchemaCategory schemaA = sbA.build();
 
-        final MappingBuilder mbA = new MappingBuilder();
+        final AccessPathBuilder apbA = new AccessPathBuilder();
         final Mapping mappingA = Mapping.create(
             datasource,
             "kindNameA",
             schemaA,
             name.key(),
-            mbA.root(
-                mbA.simple("name", appToName),
-                mbA.simple("reviews", appToReviewsA)
+            apbA.root(
+                apbA.simple("name", appToName),
+                apbA.simple("reviews", appToReviewsA)
             )
         );
 
@@ -121,14 +121,14 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
         final SchemaCategory schemaB = sbB.build();
 
-        final MappingBuilder mbB = new MappingBuilder();
+        final AccessPathBuilder apbB = new AccessPathBuilder();
         final Mapping mappingB = Mapping.create(
             datasource,
             "kindNameB",
             schemaB,
             reviewsB.key(),
-            mbB.root(
-                mbB.simple("text", reviewsBToText)
+            apbB.root(
+                apbB.simple("text", reviewsBToText)
             )
         );
 
@@ -157,15 +157,15 @@ class SchemaCategoryInferenceEditorTests {
         final var appToName =   sbA.morphism(app, name, 2);
         final SchemaCategory schemaA = sbA.build();
 
-        final MappingBuilder mbA = new MappingBuilder();
+        final AccessPathBuilder apbA = new AccessPathBuilder();
         final Mapping mappingA = Mapping.create(
             datasource,
             "kindNameA",
             schemaA,
             app.key(),
-            mbA.root(
-                mbA.simple("name", appToAppIdA),
-                mbA.simple("app_id", appToName)
+            apbA.root(
+                apbA.simple("name", appToAppIdA),
+                apbA.simple("app_id", appToName)
             )
         );
 
@@ -181,15 +181,15 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsToText =   sbB.morphism(reviews, text, 4);
         final SchemaCategory schemaB = sbB.build();
 
-        final MappingBuilder mbB = new MappingBuilder();
+        final AccessPathBuilder apbB = new AccessPathBuilder();
         final Mapping mappingB = Mapping.create(
             datasource,
             "kindNameB",
             schemaB,
             reviews.key(),
-            mbB.root(
-                mbB.simple("text", reviewsToText),
-                mbB.simple("app_id", reviewsToAppIdB)
+            apbB.root(
+                apbB.simple("text", reviewsToText),
+                apbB.simple("app_id", reviewsToAppIdB)
             )
         );
 
@@ -233,22 +233,22 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
-        final MappingBuilder mb = new MappingBuilder();
+        final AccessPathBuilder apb = new AccessPathBuilder();
         final Mapping mapping = Mapping.create(
             datasource,
             "kindName",
             schema,
             world.key(),
-            mb.root(
-                mb.complex("continent", worldToContinent,
-                    mb.complex("country_1", continentToCountry1,
-                        mb.complex("a", country1ToA,
-                            mb.simple("c", aToC1)),
-                        mb.simple("b", country1ToB)),
-                    mb.complex("country_2", continentToCountry2,
-                        mb.complex("a", country2ToA,
-                            mb.simple("c", aToC2)),
-                        mb.simple("b", country2ToB)
+            apb.root(
+                apb.complex("continent", worldToContinent,
+                    apb.complex("country_1", continentToCountry1,
+                        apb.complex("a", country1ToA,
+                            apb.simple("c", aToC1)),
+                        apb.simple("b", country1ToB)),
+                    apb.complex("country_2", continentToCountry2,
+                        apb.complex("a", country2ToA,
+                            apb.simple("c", aToC2)),
+                        apb.simple("b", country2ToB)
                             )
                         )
             )
@@ -295,20 +295,20 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
-        final MappingBuilder mb = new MappingBuilder();
+        final AccessPathBuilder apb = new AccessPathBuilder();
         final Mapping mapping = Mapping.create(
             datasource,
             "kindName",
             schema,
             user.key(),
-            mb.root(
-                mb.simple("name", userToName),
-                mb.complex("compliment_cute", userToCompliment1,
-                    mb.simple("rating", compliment1ToRating),
-                    mb.simple("comments", compliment1ToComments)),
-                mb.complex("compliment_funny", userToCompliment2,
-                    mb.simple("rating", compliment2ToRating),
-                    mb.simple("comments", compliment2ToComments))
+            apb.root(
+                apb.simple("name", userToName),
+                apb.complex("compliment_cute", userToCompliment1,
+                    apb.simple("rating", compliment1ToRating),
+                    apb.simple("comments", compliment1ToComments)),
+                apb.complex("compliment_funny", userToCompliment2,
+                    apb.simple("rating", compliment2ToRating),
+                    apb.simple("comments", compliment2ToComments))
             )
         );
 
@@ -345,16 +345,16 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
-        final MappingBuilder mb = new MappingBuilder();
+        final AccessPathBuilder apb = new AccessPathBuilder();
         final Mapping mapping = Mapping.create(
             datasource,
             "kindName",
             schema,
             user.key(),
-            mb.root(
-                mb.simple("name", userToName),
-                mb.simple("compliment_cute", userToCompliment1),
-                mb.simple("compliment_funny", userToCompliment2)
+            apb.root(
+                apb.simple("name", userToName),
+                apb.simple("compliment_cute", userToCompliment1),
+                apb.simple("compliment_funny", userToCompliment2)
             )
         );
 

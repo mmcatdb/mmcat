@@ -35,7 +35,7 @@ Takes the input RSD structure, traverses it and creates an instance of a tree ob
 
 Traverses the tree structure and converts it into a Schema Category.
 
-### `MappingCreator`
+### `MappingConverter`
 
 Last, but not least, the information collected in the tree is also used for the creation of Mapping.
 

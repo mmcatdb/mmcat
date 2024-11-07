@@ -3,7 +3,7 @@ package cz.matfyz.inference.edit;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.Signature.Generator;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -42,7 +42,7 @@ public class InferenceEditorUtils {
      */
     private static Signature getNewSignatureValue(SchemaCategory schema) {
         final var currentSignatures = schema.allMorphisms().stream().map(SchemaMorphism::signature).toList();
-        final Generator generator = new Generator(currentSignatures);
+        final SignatureGenerator generator = SignatureGenerator.create(currentSignatures);
 
         return generator.next();
     }

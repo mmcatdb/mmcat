@@ -1,11 +1,11 @@
 package cz.matfyz.inference.schemaconversion;
 
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
-import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.BaseSignature;
-import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.Key.KeyGenerator;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Type;
 import cz.matfyz.core.rsd.Char;
@@ -19,10 +19,10 @@ public class RSDToAccessTreeConverter {
 
     private AccessTreeNode root;
     private final String kindName;
-    private final UniqueNumberGenerator keyGenerator;
-    private final UniqueNumberGenerator signatureGenerator;
+    private final KeyGenerator keyGenerator;
+    private final SignatureGenerator signatureGenerator;
 
-    public RSDToAccessTreeConverter(String kindName, UniqueNumberGenerator keyGenerator, UniqueNumberGenerator signatureGenerator) {
+    public RSDToAccessTreeConverter(String kindName, KeyGenerator keyGenerator, SignatureGenerator signatureGenerator) {
         this.keyGenerator = keyGenerator;
         this.signatureGenerator = signatureGenerator;
         this.kindName = kindName;
@@ -34,7 +34,7 @@ public class RSDToAccessTreeConverter {
      */
     public AccessTreeNode convert(RecordSchemaDescription rsd) {
         rsd.setName("root");
-        root = new AccessTreeNode(kindName, null, new Key(keyGenerator.next()), null, null, null, false);
+        root = new AccessTreeNode(kindName, null, keyGenerator.next(), null, null, null, false);
         buildAccessTree(rsd, root.key, 1, root);
         root.transformArrayNodes();
         return root;
@@ -47,8 +47,8 @@ public class RSDToAccessTreeConverter {
 
             for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
                 boolean isArray = isTypeArray(rsdChild);
-                BaseSignature signature = Signature.createBase(signatureGenerator.next());
-                Key keyChild = new Key(keyGenerator.next());
+                BaseSignature signature = signatureGenerator.next();
+                Key keyChild = keyGenerator.next();
                 Min min = findMin(rsdParent, rsdChild);
 
                 if (rsdChild.getName().equals(RecordSchemaDescription.ROOT_SYMBOL)) { // Check for mongo identifier
@@ -60,8 +60,8 @@ public class RSDToAccessTreeConverter {
 
                     // Add _index node if parent is array and the _index is not yet present
                     if (isArray && !hasIndexChild(child)) {
-                        BaseSignature signatureIndex = Signature.createBase(signatureGenerator.next());
-                        Key keyIndex = new Key(keyGenerator.next());
+                        BaseSignature signatureIndex = signatureGenerator.next();
+                        Key keyIndex = keyGenerator.next();
                         AccessTreeNode indexChild = new AccessTreeNode("_index", signatureIndex, keyIndex, keyChild, "", Min.ONE, false);
                         child.addChild(indexChild);
                     }
