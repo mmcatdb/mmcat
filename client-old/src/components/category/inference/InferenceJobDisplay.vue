@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, watch } from 'vue';
+import { shallowRef, watch, ref } from 'vue';
 import type { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
@@ -30,6 +30,8 @@ const props = defineProps<InferenceJobDisplayProps>();
 
 const graph = shallowRef<Graph>();
 
+const showSignatures = ref(true); 
+
 /**
  * Emits custom events to the parent component.
  */
@@ -45,11 +47,14 @@ const emit = defineEmits<{
  */
 watch(() => props.schemaCategory, (newCategory, oldCategory) => {
     if (newCategory && newCategory !== oldCategory) {
-        if (graph.value) 
+        if (graph.value) {
             newCategory.graph = graph.value;
-        
+
+            graph.value.toggleEdgeLabels(showSignatures.value);
+        }
     }
 }, { immediate: true });
+
 
 /**
  * Handles the graph creation event from the GraphDisplay component.
@@ -167,6 +172,12 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
+function handleShowSignaturesUpdate(newState: boolean) {
+    showSignatures.value = newState;
+    if (graph.value)
+        graph.value.toggleEdgeLabels(newState);
+}
+
 </script>
 
 <template>
@@ -175,7 +186,10 @@ function cancelEdit() {
         class="d-flex flex-column"
     >
         <div class="divide">
-            <GraphDisplay @graph-created="graphCreated" />
+            <GraphDisplay 
+                @graph-created="graphCreated"
+                @update-show-signatures="handleShowSignaturesUpdate"
+            />
             <div v-if="graph">
                 <LayoutSelector
                     :layout-type="props.layoutType"
