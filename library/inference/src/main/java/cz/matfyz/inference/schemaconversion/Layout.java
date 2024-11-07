@@ -17,8 +17,7 @@ import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 import java.awt.Dimension;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The {@code Layout} class provides functionality for applying various graph layout algorithms
@@ -31,6 +30,8 @@ public class Layout {
     private static final int MIN_LAYOUT_SIZE = 600;
     private static final double SIZE_MULTIPLIER = 200.0;
     private static final int INITIAL_STEPS = 1000;
+    private static final int MIN_SUBGRAPH_SIZE = 100;
+    private static final int SUBGRAPH_PADDING = 50;
 
     private Layout() {}
 
@@ -47,41 +48,107 @@ public class Layout {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<Key, Position> computeObjectsLayout(SchemaCategory schema, LayoutType layoutType) {
-        final var graph = createGraphFromSchemaCategory(schema);
-
-        final int nodesAmount = schema.allObjects().size();
-        final int layoutSize = Math.max(MIN_LAYOUT_SIZE, (int) (Math.log(nodesAmount + 1.0) * SIZE_MULTIPLIER));
-
-        AbstractLayout<SchemaObject, SchemaMorphism> layout = createLayout(graph, layoutType);
-        layout.setSize(new Dimension(layoutSize, layoutSize));
-
-        // Perform initial steps for the FRLayout to improve layout quality
-        if (layout instanceof FRLayout) {
-            for (int i = 0; i < INITIAL_STEPS; i++) {
-                ((FRLayout<SchemaObject, SchemaMorphism>) layout).step();
-            }
-        }
-
+        List<DirectedSparseGraph<SchemaObject, SchemaMorphism>> subgraphs = partitionIntoSubgraphs(schema);
         final var positions = new HashMap<Key, Position>();
-        for (final SchemaObject node : graph.getVertices()) {
-            final var position = new Position(layout.getX(node), layout.getY(node));
-            positions.put(node.key(), position);
+
+        int canvasSize = calculateCanvasSize(schema.allObjects().size());
+        int subgraphSize = calculateSubgraphSize(canvasSize, subgraphs.size());
+        int subgraphSpacing = subgraphSize + SUBGRAPH_PADDING;
+        int subgraphCountPerRow = calculateSubgraphCountPerRow(subgraphs.size());
+
+        int currentXOffset = subgraphSpacing / 2;
+        int currentYOffset = subgraphSpacing / 2;
+
+        for (int i = 0; i < subgraphs.size(); i++) {
+            DirectedSparseGraph<SchemaObject, SchemaMorphism> subgraph = subgraphs.get(i);
+            AbstractLayout<SchemaObject, SchemaMorphism> layout = createLayout(subgraph, layoutType);
+
+            layout.setSize(new Dimension(subgraphSize, subgraphSize));
+            layout.initialize();
+
+            if (layout instanceof FRLayout frLayout) {
+                runInitialLayoutSteps(frLayout);
+            }
+
+            storeSubgraphPositions(subgraph, layout, positions, currentXOffset, currentYOffset);
+
+            currentXOffset += subgraphSpacing;
+            if ((i + 1) % subgraphCountPerRow == 0) {
+                currentXOffset = subgraphSpacing / 2;
+                currentYOffset += subgraphSpacing;
+            }
         }
 
         return positions;
     }
 
-    private static DirectedSparseGraph<SchemaObject, SchemaMorphism> createGraphFromSchemaCategory(SchemaCategory schema) {
-        final var graph = new DirectedSparseGraph<SchemaObject, SchemaMorphism>();
+    private static int calculateCanvasSize(int nodesAmount) {
+        return Math.max(MIN_LAYOUT_SIZE, (int) (Math.log(nodesAmount + 1.0) * SIZE_MULTIPLIER));
+    }
 
-        for (SchemaObject object : schema.allObjects())
-            graph.addVertex(object);
+    private static int calculateSubgraphSize(int canvasSize, int subgraphCount) {
+        return Math.max(MIN_SUBGRAPH_SIZE, canvasSize / (int) Math.sqrt(subgraphCount) - SUBGRAPH_PADDING);
+    }
 
-        for (SchemaMorphism morphism : schema.allMorphisms())
-            graph.addEdge(morphism, morphism.dom(), morphism.cod());
+    private static int calculateSubgraphCountPerRow(int subgraphCount) {
+        int subgraphCountPerRow = (int) Math.ceil(Math.sqrt(subgraphCount));
+        while ((subgraphCount / subgraphCountPerRow) > (subgraphCountPerRow - 1)) {
+            subgraphCountPerRow++;
+        }
+        return subgraphCountPerRow;
+    }
 
-        return graph;
+    private static void runInitialLayoutSteps(FRLayout<SchemaObject, SchemaMorphism> layout) {
+        for (int j = 0; j < INITIAL_STEPS; j++) {
+            layout.step();
+        }
+    }
+
+    private static void storeSubgraphPositions(DirectedSparseGraph<SchemaObject, SchemaMorphism> subgraph,
+                                               AbstractLayout<SchemaObject, SchemaMorphism> layout,
+                                               Map<Key, Position> positions,
+                                               int xOffset,
+                                               int yOffset) {
+        for (SchemaObject node : subgraph.getVertices()) {
+            double x = layout.getX(node) + xOffset;
+            double y = layout.getY(node) + yOffset;
+            positions.put(node.key(), new Position(x, y));
+        }
+    }
+
+    private static List<DirectedSparseGraph<SchemaObject, SchemaMorphism>> partitionIntoSubgraphs(SchemaCategory schema) {
+        List<DirectedSparseGraph<SchemaObject, SchemaMorphism>> subgraphs = new ArrayList<>();
+        Set<SchemaObject> visited = new HashSet<>();
+
+        for (SchemaObject object : schema.allObjects()) {
+            if (!visited.contains(object)) {
+                DirectedSparseGraph<SchemaObject, SchemaMorphism> subgraph = new DirectedSparseGraph<>();
+                Queue<SchemaObject> queue = new LinkedList<>();
+                queue.add(object);
+
+                while (!queue.isEmpty()) {
+                    SchemaObject current = queue.poll();
+                    if (!visited.contains(current)) {
+                        visited.add(current);
+                        subgraph.addVertex(current);
+
+                        for (SchemaMorphism morphism : schema.allMorphisms()) {
+                            if (morphism.dom().equals(current) || morphism.cod().equals(current)) {
+                                subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
+                                SchemaObject next = morphism.dom().equals(current) ? morphism.cod() : morphism.dom();
+                                if (!visited.contains(next)) {
+                                    queue.add(next);
+                                }
+                            }
+                        }
+                    }
+                }
+                subgraphs.add(subgraph);
+            }
+        }
+        return subgraphs;
     }
 
     private static AbstractLayout<SchemaObject, SchemaMorphism> createLayout(DirectedSparseGraph<SchemaObject, SchemaMorphism> graph, LayoutType layoutType) {
@@ -97,5 +164,4 @@ public class Layout {
                 return new FRLayout<>(graph);
         }
     }
-
 }

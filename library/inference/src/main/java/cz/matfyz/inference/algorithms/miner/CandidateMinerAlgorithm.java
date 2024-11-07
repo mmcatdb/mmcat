@@ -3,6 +3,7 @@ package cz.matfyz.inference.algorithms.miner;
 import cz.matfyz.inference.algorithms.Footprinter;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.PropertyHeuristics;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.PrimaryKeyCandidate;
 import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
@@ -51,8 +52,11 @@ public class CandidateMinerAlgorithm implements Serializable {
             // PrimaryKeyCandidates
             JavaRDD<PropertyHeuristics> primaryKeyCandidates = all.filter(
                 new Function<PropertyHeuristics, Boolean>() {
-                    @Override public Boolean call(PropertyHeuristics heuristics) throws Exception {
-                        return (heuristics.isRequired() && heuristics.isUnique());
+                    @Override
+                    public Boolean call(PropertyHeuristics heuristics) throws Exception {
+                        boolean maxNotArray = heuristics.getMax() == null || !(heuristics.getMax() instanceof java.util.ArrayList);
+                        boolean hierarchicalNameValid = heuristics.getHierarchicalName() == null || !heuristics.getHierarchicalName().endsWith(RecordSchemaDescription.ROOT_SYMBOL);
+                        return heuristics.isRequired() && heuristics.isUnique() && maxNotArray && hierarchicalNameValid;
                     }
                 }
             );

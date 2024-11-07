@@ -9,7 +9,10 @@ import { style, groupColors } from './defaultGraphStyle';
 cytoscape.use(fcose);
 cytoscape.use(layoutUtilities);
 
-const emit = defineEmits([ 'graphCreated' ]);
+const emit = defineEmits<{
+    (e: 'graphCreated', newGraph: Graph): void;
+    (e: 'update-show-signatures', newValue: boolean): void;
+}>();
 
 const graph = shallowRef<Graph>();
 
@@ -28,6 +31,8 @@ onMounted(() => {
 watch(showSignatures, (newValue) => {
     if (graph.value) 
         graph.value.toggleEdgeLabels(newValue);
+
+    emit('update-show-signatures', newValue);
 });
 
 function getContainer(): HTMLElement | undefined {
