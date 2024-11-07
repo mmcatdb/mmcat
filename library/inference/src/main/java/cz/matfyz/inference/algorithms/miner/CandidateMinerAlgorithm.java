@@ -9,7 +9,6 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
@@ -30,8 +29,8 @@ public class CandidateMinerAlgorithm implements Serializable {
             JavaRDD<PropertyHeuristics> all = null;
 
             for (AbstractInferenceWrapper wrapper : wrappers) {
-                for (String kind : wrapper.getKindNames()) {
-                    final var w = wrapper.copyForKind(kind);
+                for (final String kindName : wrapper.getKindNames()) {
+                    final var w = wrapper.copyForKind(kindName);
                     sessionWrappers.add(w);
                     w.startSession();
                     JavaRDD<PropertyHeuristics> heuristics = Footprinter.INSTANCE.process(w);

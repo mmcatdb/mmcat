@@ -11,7 +11,7 @@ import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryContext;
-import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.parsing.Term;
@@ -60,12 +60,12 @@ class PatternTranslator {
         Signature pathFromParent
     ) {}
 
-    private KindPattern kind;
+    private PatternForKind pattern;
     private Set<PatternObject> preservedObjects;
     private Deque<StackItem> stack;
 
-    private void processKind(KindPattern kind) {
-        this.kind = kind;
+    private void processKind(PatternForKind kind) {
+        this.pattern = kind;
         preservedObjects = findPreservedObjects(kind.root);
         stack = new ArrayDeque<>();
 
@@ -81,7 +81,7 @@ class PatternTranslator {
         }
 
         final Term term = item.object.term;
-        final var objectProperty = wrapperContext.createProperty(kind.kind, item);
+        final var objectProperty = wrapperContext.createProperty(pattern.kind, item);
 
         if (term instanceof StringValue constantObject)
             wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value())), ComparisonOperator.Equal);
@@ -98,7 +98,7 @@ class PatternTranslator {
 
         final var isNewParent = preservedObjects.contains(item.object);
         if (isNewParent) {
-            preservedParent = wrapperContext.createProperty(kind.kind, item);
+            preservedParent = wrapperContext.createProperty(pattern.kind, item);
             pathFromParent = Signature.createEmpty();
         }
         else {

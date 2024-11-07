@@ -81,9 +81,9 @@ public class QueryTranslator implements QueryVisitor<Void> {
 
         if (term instanceof Aggregation aggregation) {
             final var property = createProperty(aggregation.variable());
-            final var root = findAggregationRoot(property.kind, property.path);
+            final var root = findAggregationRoot(property.mapping, property.path);
 
-            return new PropertyWithAggregation(property.kind, property.path, null, root, aggregation.operator());
+            return new PropertyWithAggregation(property.mapping, property.path, null, root, aggregation.operator());
         }
 
         throw new UnsupportedOperationException("Can't create property from term: " + term.getClass().getSimpleName() + ".");

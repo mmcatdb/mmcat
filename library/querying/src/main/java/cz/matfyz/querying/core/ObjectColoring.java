@@ -1,7 +1,7 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 
 import java.util.Collection;
@@ -13,13 +13,13 @@ import java.util.TreeSet;
 
 public class ObjectColoring {
 
-    private final Map<SchemaObject, Set<KindPattern>> objectToColors;
+    private final Map<SchemaObject, Set<PatternForKind>> objectToColors;
 
-    private ObjectColoring(Map<SchemaObject, Set<KindPattern>> objectToColors) {
+    private ObjectColoring(Map<SchemaObject, Set<PatternForKind>> objectToColors) {
         this.objectToColors = objectToColors;
     }
 
-    public static ObjectColoring create(Collection<KindPattern> kinds) {
+    public static ObjectColoring create(Collection<PatternForKind> kinds) {
         final var coloring = new ObjectColoring(new TreeMap<>());
 
         for (final var kind : kinds)
@@ -28,7 +28,7 @@ public class ObjectColoring {
         return coloring;
     }
 
-    private void colorObjects(KindPattern kind, PatternObject object) {
+    private void colorObjects(PatternForKind kind, PatternObject object) {
         objectToColors
             .computeIfAbsent(object.schemaObject, x -> new TreeSet<>())
             .add(kind);
@@ -44,7 +44,7 @@ public class ObjectColoring {
         return objectToColors.keySet().stream().filter(key -> objectToColors.get(key).size() > 1).toList();
     }
 
-    public Set<KindPattern> getColors(SchemaObject object) {
+    public Set<PatternForKind> getColors(SchemaObject object) {
         return objectToColors.get(object);
     }
 

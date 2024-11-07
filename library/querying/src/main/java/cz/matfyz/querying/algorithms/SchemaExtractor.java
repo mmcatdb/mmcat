@@ -10,7 +10,7 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternObject;
-import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.parsing.Term;
 import cz.matfyz.querying.parsing.WhereClause;
 import cz.matfyz.querying.parsing.WhereClause.WhereTriple;
@@ -26,7 +26,7 @@ import java.util.TreeMap;
  */
 public class SchemaExtractor {
 
-    public static List<KindPattern> run(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
+    public static List<PatternForKind> run(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
         return new SchemaExtractor(context, schema, kinds, clause).run();
     }
 
@@ -49,13 +49,13 @@ public class SchemaExtractor {
      */
     private List<SchemaMorphism> patternMorphisms;
 
-    private List<KindPattern> run() {
+    private List<PatternForKind> run() {
         triples = clause.termTree.toTriples(WhereClause::createTriple);
         patternMorphisms = triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
 
         createNewCategory();
         updateContext();
-        final var patterns = createKindPatterns();
+        final var patterns = createPatternsForKinds();
         // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the QueryPlanner shouldn't be able to create any plan.
 
         return patterns;
@@ -114,7 +114,7 @@ public class SchemaExtractor {
         });
     }
 
-    private List<KindPattern> createKindPatterns() {
+    private List<PatternForKind> createPatternsForKinds() {
         return kinds.stream()
             .filter(kind -> newSchema.hasObject(kind.rootObject().key()))
             .map(kind -> {
@@ -122,7 +122,7 @@ public class SchemaExtractor {
                 final var rootNode = PatternObject.createRoot(rootObject, keyToTerm.get(rootObject.key()));
                 processComplexProperty(rootNode, kind.accessPath());
 
-                return new KindPattern(kind, rootNode);
+                return new PatternForKind(kind, rootNode);
             }).toList();
     }
 

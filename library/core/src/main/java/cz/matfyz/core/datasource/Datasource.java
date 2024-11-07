@@ -17,7 +17,6 @@ public class Datasource implements Comparable<Datasource> {
 
     public final DatasourceType type;
     public final String identifier;
-    // The set ensures there is at most one mapping for each kindName in the datasource.
 
     public Datasource(DatasourceType type, String identifier) {
         this.type = type;

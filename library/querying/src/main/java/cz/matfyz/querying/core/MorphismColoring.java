@@ -2,7 +2,7 @@ package cz.matfyz.querying.core;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.utils.printable.*;
-import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 
 import java.util.Collection;
@@ -14,43 +14,43 @@ import java.util.TreeSet;
 
 public class MorphismColoring implements Printable {
 
-    /** Set of all kinds that use given morphism. */
-    private final Map<BaseSignature, Set<KindPattern>> morphismToColors;
+    /** Set of all kinds that use given morphism (with their respective patterns). */
+    private final Map<BaseSignature, Set<PatternForKind>> morphismToColors;
     /** Set of all morphisms in given kind pattern. */
-    private final Map<KindPattern, Set<BaseSignature>> colorToMorphisms;
+    private final Map<PatternForKind, Set<BaseSignature>> colorToMorphisms;
 
-    private MorphismColoring(Map<BaseSignature, Set<KindPattern>> morphismToColors, Map<KindPattern, Set<BaseSignature>> colorToMorphisms) {
+    private MorphismColoring(Map<BaseSignature, Set<PatternForKind>> morphismToColors, Map<PatternForKind, Set<BaseSignature>> colorToMorphisms) {
         this.morphismToColors = morphismToColors;
         this.colorToMorphisms = colorToMorphisms;
     }
 
-    public static MorphismColoring create(Collection<KindPattern> kindPatterns) {
+    public static MorphismColoring create(Collection<PatternForKind> patterns) {
         final var coloring = new MorphismColoring(new TreeMap<>(), new TreeMap<>());
 
-        for (final var kindPattern : kindPatterns)
-            coloring.colorMorphisms(kindPattern, kindPattern.root);
+        for (final var pattern : patterns)
+            coloring.colorMorphisms(pattern, pattern.root);
 
         return coloring;
     }
 
-    private void colorMorphisms(KindPattern kind, PatternObject object) {
+    private void colorMorphisms(PatternForKind pattern, PatternObject object) {
         for (final var child : object.children()) {
             morphismToColors
                 .computeIfAbsent(child.signatureFromParent(), x -> new TreeSet<>())
-                .add(kind);
+                .add(pattern);
 
             colorToMorphisms
-                .computeIfAbsent(kind, x -> new TreeSet<>())
+                .computeIfAbsent(pattern, x -> new TreeSet<>())
                 .add(child.signatureFromParent());
 
-            colorMorphisms(kind, child);
+            colorMorphisms(pattern, child);
         }
     }
 
-    private Map<KindPattern, Integer> kindCosts = new TreeMap<>();
+    private Map<PatternForKind, Integer> patternCosts = new TreeMap<>();
 
-    public int getKindCost(KindPattern kindPattern) {
-        return kindCosts.computeIfAbsent(kindPattern, k -> computePatternCost(kindPattern.root));
+    public int getPatternCost(PatternForKind pattern) {
+        return patternCosts.computeIfAbsent(pattern, k -> computePatternCost(pattern.root));
     }
 
     /**
@@ -77,36 +77,36 @@ public class MorphismColoring implements Printable {
         return min;
     }
 
-    private record KindWithCost(KindPattern kind, int cost) {}
+    private record PatternWithCost(PatternForKind pattern, int cost) {}
 
     /**
-     * Sorts given kinds based on the coloring.
-     * Also removes the zero-cost kinds because they aren't needed anymore.
+     * Sorts given patterns based on the coloring.
+     * Also removes the zero-cost patterns because they aren't needed anymore.
      */
-    public List<KindPattern> sortKinds(List<KindPattern> kindPatterns) {
-        return kindPatterns.stream()
-            .map(kindPattern -> new KindWithCost(kindPattern, getKindCost(kindPattern)))
-            .filter(kindWithCost -> kindWithCost.cost != 0)
+    public List<PatternForKind> sortPatterns(List<PatternForKind> patterns) {
+        return patterns.stream()
+            .map(pattern -> new PatternWithCost(pattern, getPatternCost(pattern)))
+            .filter(patternWithCost -> patternWithCost.cost != 0)
             .sorted((a, b) -> a.cost - b.cost)
-            .map(KindWithCost::kind)
+            .map(PatternWithCost::pattern)
             .toList();
     }
 
     /**
      * Creates a new coloring (the current one stays unchanged).
-     * For each morphism in the given kind, we zero the cost of the morphism in all the other kinds.
+     * For each morphism in the given pattern, we zero the cost of the morphism in all the other patterns.
      * This basically means that we just remove all colors of the morphism.
      */
-    public MorphismColoring removeKind(KindPattern kind) {
-        final Set<BaseSignature> removedMorphisms = colorToMorphisms.get(kind);
-        final var newColors = new TreeMap<BaseSignature, Set<KindPattern>>();
+    public MorphismColoring removePattern(PatternForKind pattern) {
+        final Set<BaseSignature> removedMorphisms = colorToMorphisms.get(pattern);
+        final var newColors = new TreeMap<BaseSignature, Set<PatternForKind>>();
         morphismToColors.forEach((signature, set) -> {
             if (!removedMorphisms.contains(signature))
                 newColors.put(signature, new TreeSet<>(set));
         });
 
         final var newMorphisms = new TreeMap<>(colorToMorphisms);
-        newMorphisms.remove(kind);
+        newMorphisms.remove(pattern);
 
         return new MorphismColoring(newColors, newMorphisms);
     }

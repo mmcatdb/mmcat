@@ -80,7 +80,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         if (projections.isEmpty())
             throw QueryException.message("No tables are selected in FROM clause.");
 
-        final String kindName = projections.getFirst().property().kind.kindName();
+        final String kindName = projections.getFirst().property().mapping.kindName();
         builder
             .append(escapeName(kindName))
             .append("\n");
@@ -198,12 +198,12 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private String getPropertyNameWithoutAggregation(Property property) {
-        return escapeName(property.kind.kindName()) + "." + escapeName(getRawAttributeName(property));
+        return escapeName(property.mapping.kindName()) + "." + escapeName(getRawAttributeName(property));
     }
 
     private String getRawAttributeName(Property property) {
         // Direct subpath is ok since the postgresql mapping must be flat.
-        final var subpath = property.kind.accessPath().getDirectSubpath(property.path);
+        final var subpath = property.mapping.accessPath().getDirectSubpath(property.path);
         if (
             subpath == null ||
             !(subpath instanceof SimpleProperty simpleSubpath) ||

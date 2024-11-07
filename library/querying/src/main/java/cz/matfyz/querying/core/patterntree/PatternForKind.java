@@ -11,14 +11,14 @@ import java.util.TreeMap;
  * It's also mapped to a schema category.
  * Because each kind has a mappings which is a tree, this class also contains a root of a tree.
  */
-public class KindPattern implements Comparable<KindPattern> {
+public class PatternForKind implements Comparable<PatternForKind> {
 
     public final Mapping kind;
     public final PatternObject root;
 
     private final Map<SchemaObject, PatternObject> schemaObjectToPatternObject = new TreeMap<>();
 
-    public KindPattern(Mapping kind, PatternObject root) {
+    public PatternForKind(Mapping kind, PatternObject root) {
         this.kind = kind;
         this.root = root;
 
@@ -30,7 +30,7 @@ public class KindPattern implements Comparable<KindPattern> {
         patternObject.children().forEach(this::addObject);
     }
 
-    @Override public int compareTo(KindPattern other) {
+    @Override public int compareTo(PatternForKind other) {
         return this.kind.compareTo(other.kind);
     }
 
