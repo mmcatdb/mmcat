@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.StaticName;
 
 import java.io.IOException;
@@ -57,7 +57,7 @@ class JsonTests {
 
     @Test
     void accessPath() {
-        final var builder = new MappingBuilder();
+        final var builder = new AccessPathBuilder();
 
         final var simple = builder.simple("simple", Signature.createBase(1));
         fullTest(simple);

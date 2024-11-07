@@ -5,6 +5,8 @@ import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class DummyDMLWrapper implements AbstractDMLWrapper {
     //private List<String> methods = new ArrayList<>();
 
@@ -20,7 +22,7 @@ public class DummyDMLWrapper implements AbstractDMLWrapper {
         structure = new DMLTestStructure(name);
     }
 
-    @Override public void append(String name, Object value) {
+    @Override public void append(String name, @Nullable Object value) {
         //methods.add("append(" + name + ", " + value + ")");
         structure.add("append(" + name + ", " + value + ")");
     }

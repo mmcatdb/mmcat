@@ -4,27 +4,30 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataObject;
+import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataMorphism;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
-import cz.matfyz.server.entity.evolution.SchemaModificationOperation.Composite;
-import cz.matfyz.server.entity.evolution.SchemaModificationOperation.CreateMorphism;
-import cz.matfyz.server.entity.evolution.SchemaModificationOperation.CreateObject;
-import cz.matfyz.server.entity.evolution.SchemaModificationOperation.EditMorphism;
-import cz.matfyz.server.entity.evolution.SchemaModificationOperation.EditObject;
-import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.evolution.VersionedSMO;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaMorphismWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
+import cz.matfyz.evolution.metadata.MMO;
+import cz.matfyz.evolution.metadata.MorphismMetadata;
+import cz.matfyz.evolution.metadata.ObjectMetadata;
+import cz.matfyz.evolution.schema.Composite;
+import cz.matfyz.evolution.schema.CreateMorphism;
+import cz.matfyz.evolution.schema.CreateObject;
+import cz.matfyz.evolution.schema.UpdateMorphism;
+import cz.matfyz.evolution.schema.UpdateObject;
+import cz.matfyz.evolution.schema.SMO;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,45 +39,52 @@ public abstract class SchemaBase {
 
     // The wrapper is needed for updates (if the schema isn't created from scratch, we need the previous data).
     private final SchemaCategoryWrapper wrapper;
-    private final SchemaCategory schema;
-    private final VersionCounter counter;
 
-    protected SchemaBase(SchemaCategoryWrapper wrapper, String lastUpdateVersion, SchemaCategory schema) {
+    /** The example schema category from which we take inspiration for objects and morphisms in the new one. */
+    private final SchemaCategory originalSchema;
+    // The original metadata isn't needes since it's mostly included in the builder objects and morphisms. Except for the positions, but those are specified manually.
+
+    /** The new schema category as it's being created from scratch. */
+    private final SchemaCategory newSchema;
+    private final MetadataCategory newMetadata;
+
+    protected SchemaBase(SchemaCategoryWrapper wrapper, SchemaCategory schema) {
         this.wrapper = wrapper;
-        this.schema = schema;
-        this.counter = VersionCounter.fromString(lastUpdateVersion);
+        this.originalSchema = schema;
+        this.newSchema = new SchemaCategory();
+        this.newMetadata = MetadataCategory.createEmpty(newSchema);
     }
 
-    protected SchemaUpdateInit innerCreateNewUpdate() {
+    private SerializedObject getOldObject(Key key) {
+        final var object = newSchema.getObject(key);
+        return new SerializedObject(key, object.ids(), object.superId());
+    }
+
+    protected SchemaEvolutionInit innerCreateNewUpdate() {
         createOperations();
 
-        return new SchemaUpdateInit(wrapper.version, operations, metadata);
+        return new SchemaEvolutionInit(wrapper.version(), schemaOperations, metadataOperations);
     }
 
     protected abstract void createOperations();
 
-    private List<VersionedSMO> operations = new ArrayList<>();
+    private List<SMO> schemaOperations = new ArrayList<>();
 
-    private Map<Key, SchemaObjectWrapper.Data> wrapperCache = new TreeMap<>();
-
-    private SchemaObjectWrapper.Data getObjectData(Key key) {
-        return wrapperCache.containsKey(key)
-            ? wrapperCache.get(key)
-            : Stream.of(wrapper.objects).filter(object -> object.key().equals(key)).findFirst().get().data();
+    private void addSchemaOperation(SMO smo) {
+        schemaOperations.add(smo);
+        smo.up(newSchema);
     }
 
-    private List<MetadataUpdate> metadata = new ArrayList<>();
+    private List<MMO> metadataOperations = new ArrayList<>();
 
-    protected void moveObject(Key key, double x, double y) {
-        metadata.add(new MetadataUpdate(key, new Position(x * POSITION_UNIT, y * POSITION_UNIT)));
+    protected void addMetadataOperation(MMO mmo) {
+        metadataOperations.add(mmo);
+        mmo.up(newMetadata);
     }
 
-    protected void moveObject(BuilderObject object, double x, double y) {
-        moveObject(object.key(), x, y);
-    }
-
-    protected void addObject(Key key, double x, double y) {
-        final var object = schema.getObject(key);
+    protected void addObject(BuilderObject builderObject, double x, double y) {
+        final var key = builderObject.key();
+        final var object = originalSchema.getObject(key);
         // Signature ids can't be defined yet because there are no morphisms. Even in the composite operations the ids are defined later.
         final ObjectIds ids = !object.ids().isSignatures()
                 ? object.ids()
@@ -83,95 +93,74 @@ public abstract class SchemaBase {
             ? ids.generateDefaultSuperId()
             : new SignatureId();
 
-        final var data = new SchemaObjectWrapper.Data(object.label(), ids, superId);
-        wrapperCache.put(key, data);
-
-        operations.add(new VersionedSMO(
-            counter.next(),
-            new CreateObject(key, data)
-        ));
-
-        moveObject(key, x, y);
+        addSchemaOperation(new CreateObject(new SerializedObject(key, ids, superId)));
+        final var mo = new SerializedMetadataObject(key, builderObject.label(), createPosition(x, y));
+        addMetadataOperation(new ObjectMetadata(mo, null));
     }
 
-    protected void addObject(BuilderObject object, double x, double y) {
-        addObject(object.key(), x, y);
+    private static Position createPosition(double x, double y) {
+        return new Position(x * POSITION_UNIT, y * POSITION_UNIT);
     }
 
-    protected void addIds(Key key) {
-        final var object = schema.getObject(key);
-        final var data = getObjectData(key);
-        final var newData = new SchemaObjectWrapper.Data(data.label(), object.ids(), object.superId());
-        wrapperCache.put(key, newData);
+    protected void addIds(BuilderObject builderObject) {
+        final var key = builderObject.key();
+        final var object = originalSchema.getObject(key);
+        final var newObject = new SerializedObject(key, object.ids(), object.superId());
+        final var oldObject = getOldObject(key);
 
-        operations.add(new VersionedSMO(
-            counter.next(),
-            new EditObject(key, newData, data)
-        ));
+        addSchemaOperation(new UpdateObject(newObject, oldObject));
     }
 
-    protected void addIds(BuilderObject object) {
-        addIds(object.key());
+    protected void editIds(BuilderObject builderObject, ObjectIds ids) {
+        final var key = builderObject.key();
+        final var newObject = new SerializedObject(key, ids, ids.generateDefaultSuperId());
+        final var oldObject = getOldObject(key);
+
+        addSchemaOperation(new UpdateObject(newObject, oldObject));
     }
 
-    protected void editIds(Key key, ObjectIds ids) {
-        final var data = getObjectData(key);
-        final var newData = new SchemaObjectWrapper.Data(data.label(), ids, ids.generateDefaultSuperId());
-        wrapperCache.put(key, newData);
+    protected void addMorphism(BuilderMorphism builderMorphism) {
+        final var signature = builderMorphism.signature();
+        final var morphism = originalSchema.getMorphism(signature);
 
-        operations.add(new VersionedSMO(
-            counter.next(),
-            new EditObject(key, newData, data)
-        ));
+        addSchemaOperation(new CreateMorphism(SerializedMorphism.serialize(morphism)));
+        final var mm = new SerializedMetadataMorphism(signature, builderMorphism.label());
+        addMetadataOperation(new MorphismMetadata(mm, null));
     }
 
-    protected void editIds(BuilderObject object, ObjectIds ids) {
-        editIds(object.key(), ids);
-    }
-
-    protected void addMorphism(Signature signature) {
-        final var morphism = schema.getMorphism(signature);
-
-        operations.add(new VersionedSMO(
-            counter.next(),
-            new CreateMorphism(SchemaMorphismWrapper.fromSchemaMorphism(morphism))
-        ));
-    }
-
-    protected void addMorphism(BuilderMorphism morphism) {
-        addMorphism(morphism.signature());
-    }
-
-    protected void editMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
-        final var morphism = schema.getMorphism(signature);
-        final var newWrapper = new SchemaMorphismWrapper(
-            morphism.signature(),
-            morphism.label,
-            newDom != null ? newDom : morphism.dom().key(),
-            newCod != null ? newCod : morphism.cod().key(),
-            morphism.min(),
-            morphism.tags()
+    protected void updateMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
+        final var oldMorphism = SerializedMorphism.serialize(originalSchema.getMorphism(signature));
+        final var newMorphism = new SerializedMorphism(
+            oldMorphism.signature(),
+            newDom != null ? newDom : oldMorphism.domKey(),
+            newCod != null ? newCod : oldMorphism.codKey(),
+            oldMorphism.min(),
+            oldMorphism.tags()
         );
 
-        operations.add(new VersionedSMO(
-            counter.next(),
-            new EditMorphism(newWrapper, SchemaMorphismWrapper.fromSchemaMorphism(morphism))
-        ));
+        addSchemaOperation(new UpdateMorphism(newMorphism, oldMorphism));
     }
 
-    protected void editMorphism(BuilderMorphism morphism, @Nullable BuilderObject newDom, @Nullable BuilderObject newCod) {
-        editMorphism(morphism.signature(), newDom != null ? newDom.key() : null, newCod != null ? newCod.key() : null);
+    protected void updateMorphism(BuilderMorphism morphism, @Nullable BuilderObject newDom, @Nullable BuilderObject newCod) {
+        updateMorphism(morphism.signature(), newDom != null ? newDom.key() : null, newCod != null ? newCod.key() : null);
     }
 
-    protected interface CompositeOperationContent {
-        void apply();
+    protected void moveObject(BuilderObject object, double x, double y) {
+        final var key = object.key();
+        final var oldMo = newMetadata.getObject(key);
+        final var serializedOldMo = new SerializedMetadataObject(key, oldMo.label, oldMo.position);
+
+        final var mo = new SerializedMetadataObject(key, oldMo.label, createPosition(x, y));
+        addMetadataOperation(new ObjectMetadata(mo, serializedOldMo));
     }
 
-    protected void addComposite(String name, CompositeOperationContent content) {
-        counter.nextLevel();
-        content.apply();
-        counter.prevLevel();
-        operations.add(new VersionedSMO(counter.next(), new Composite(name)));
+    protected void addComposite(String name, Runnable content) {
+        final var innerContext = new ArrayList<SMO>();
+        final var currentContext = schemaOperations;
+        schemaOperations = innerContext;
+        content.run();
+        schemaOperations = currentContext;
+        addSchemaOperation(new Composite(name, innerContext));
     }
 
     protected static final String ADD_PROPERTY = "addProperty";
@@ -180,20 +169,16 @@ public abstract class SchemaBase {
 
     private static class VersionCounter {
 
-        private final int branchId;
         private final List<Integer> levelIds;
 
-        VersionCounter(int branchId, Collection<Integer> levelIds) {
-            this.branchId = branchId;
+        VersionCounter(Collection<Integer> levelIds) {
             this.levelIds = new ArrayList<>(levelIds);
         }
 
         static VersionCounter fromString(String version) {
-            final var parts = version.split(":");
-            final var branchId = Integer.parseInt(parts[0]);
-            final var levelIds = Stream.of(parts[1].split("\\.")).map(Integer::parseInt).toList();
+            final var levelIds = Stream.of(version.split("\\.")).map(Integer::parseInt).toList();
 
-            return new VersionCounter(branchId, levelIds);
+            return new VersionCounter(levelIds);
         }
 
         private int last() {
@@ -211,7 +196,7 @@ public abstract class SchemaBase {
         String next() {
             levelIds.set(last(), levelIds.get(last()) + 1);
 
-            return branchId + ":" + levelIds.stream().map(Object::toString).collect(Collectors.joining("."));
+            return levelIds.stream().map(Object::toString).collect(Collectors.joining("."));
         }
 
     }

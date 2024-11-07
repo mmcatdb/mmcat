@@ -1,6 +1,6 @@
 package cz.matfyz.querying.exception;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.querying.core.querytree.QueryNode;
 
 import java.io.Serializable;

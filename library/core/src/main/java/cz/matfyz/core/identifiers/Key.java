@@ -1,20 +1,26 @@
 package cz.matfyz.core.identifiers;
 
+import cz.matfyz.core.utils.UniqueSequentialGenerator;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * This class represents a 'key' of an object as is described in the paper. It's basically just a number with extra steps.
  */
 @JsonSerialize(using = Key.Serializer.class)
+@JsonDeserialize(using = Key.Deserializer.class)
 public class Key implements Serializable, Comparable<Key> {
 
     private final int value;
@@ -23,8 +29,7 @@ public class Key implements Serializable, Comparable<Key> {
         return value;
     }
 
-    @JsonCreator
-    public Key(@JsonProperty("value") int value) {
+    public Key(int value) {
         this.value = value;
     }
 
@@ -61,24 +66,53 @@ public class Key implements Serializable, Comparable<Key> {
         }
 
         @Override public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-            generator.writeNumberField("value", key.value);
-            generator.writeEndObject();
+            generator.writeNumber(key.value);
         }
 
     }
 
-    public static class Generator {
+    public static class Deserializer extends StdDeserializer<Key> {
 
-        private int max;
+        public Deserializer() {
+            this(null);
+        }
 
-        public Generator(Collection<Key> current) {
-            max = current.stream().map(key -> key.value).reduce(0, Math::max);
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        @Override public Key deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            if (node.has("value")) {
+                return new Key(node.get("value").asInt());
+            } else {
+                return new Key(node.asInt());
+            }
+        }
+
+    }
+
+
+    public static class KeyGenerator {
+
+        private final UniqueSequentialGenerator idGenerator;
+
+        private KeyGenerator(UniqueSequentialGenerator idGenerator) {
+            this.idGenerator = idGenerator;
+        }
+
+        public static KeyGenerator create() {
+            return new KeyGenerator(UniqueSequentialGenerator.create());
+        }
+
+        public static KeyGenerator create(Collection<Key> current) {
+            final var currentIds = current.stream().map(key -> key.value).toList();
+            return new KeyGenerator(UniqueSequentialGenerator.create(currentIds));
         }
 
         public Key next() {
-            max++;
-            return new Key(max);
+            return new Key(idGenerator.next());
         }
 
     }

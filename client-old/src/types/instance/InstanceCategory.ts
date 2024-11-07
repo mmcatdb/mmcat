@@ -8,8 +8,10 @@ import type { SchemaCategory } from '../schema';
 export type InstanceCategoryFromServer = {
     sessionId: Id;
     categoryId: Id;
-    objects: InstanceObjectFromServer[];
-    morphisms: InstanceMorphismFromServer[];
+    data: {
+        objects: InstanceObjectFromServer[];
+        morphisms: InstanceMorphismFromServer[];
+    };
 };
 
 export class InstanceCategory {
@@ -26,13 +28,13 @@ export class InstanceCategory {
             new ComparableMap(signature => signature.value),
         );
 
-        for (const inputObject of input.objects) {
+        for (const inputObject of input.data.objects) {
             const object = InstanceObject.fromServer(inputObject, schema);
             if (object)
                 instance.objects.set(object.schema.key, object);
         }
 
-        for (const inputMorphism of input.morphisms) {
+        for (const inputMorphism of input.data.morphisms) {
             const morphism = InstanceMorphism.fromServer(inputMorphism, instance);
             if (morphism)
                 instance.morphisms.set(morphism.schema.signature, morphism);

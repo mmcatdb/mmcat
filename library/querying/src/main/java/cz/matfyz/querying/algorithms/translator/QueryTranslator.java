@@ -6,8 +6,8 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
@@ -44,7 +44,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
     }
 
     private QueryStatement run() {
-        this.wrapper = datasourceNode.datasource.control.getQueryWrapper();
+        this.wrapper = context.getProvider().getControlWrapper(datasourceNode.datasource).getQueryWrapper();
         datasourceNode.child.accept(this);
 
         return this.wrapper.createDSLStatement();
@@ -81,15 +81,15 @@ public class QueryTranslator implements QueryVisitor<Void> {
 
         if (term instanceof Aggregation aggregation) {
             final var property = createProperty(aggregation.variable());
-            final var root = findAggregationRoot(property.kind, property.path);
+            final var root = findAggregationRoot(property.mapping, property.path);
 
-            return new PropertyWithAggregation(property.kind, property.path, null, root, aggregation.operator());
+            return new PropertyWithAggregation(property.mapping, property.path, null, root, aggregation.operator());
         }
 
         throw new UnsupportedOperationException("Can't create property from term: " + term.getClass().getSimpleName() + ".");
     }
 
-    private Signature findAggregationRoot(Kind kind, Signature path) {
+    private Signature findAggregationRoot(Mapping kind, Signature path) {
         // TODO
         throw new UnsupportedOperationException("QueryTranslator.findAggregationRoot not implemented.");
     }

@@ -33,14 +33,14 @@ public class JsonDMLConstructor {
     }
 
     private List<Key> createKeys(String path) {
-        String[] split = path.split(AbstractDDLWrapper.PATH_SEPARATOR);
-        List<Key> output = new ArrayList<>();
+        final String[] split = path.split(AbstractDDLWrapper.PATH_SEPARATOR);
+        final List<Key> output = new ArrayList<>();
 
         for (int i = 0; i < split.length; i++) {
-            Matcher arrayMatcher = arrayPattern.matcher(split[i]);
+            final Matcher arrayMatcher = arrayPattern.matcher(split[i]);
             if (arrayMatcher.find()) {
-                String name = arrayMatcher.group(1);
-                int index = Integer.parseInt(arrayMatcher.group(2));
+                final String name = arrayMatcher.group(1);
+                final int index = Integer.parseInt(arrayMatcher.group(2));
 
                 output.add(new Key(name));
                 output.add(new Key(index));
@@ -54,7 +54,7 @@ public class JsonDMLConstructor {
     }
 
     private void add(JsonNode parent, List<Key> path, String value) throws Exception {
-        Key key = path.get(0);
+        final Key key = path.get(0);
 
         if (path.size() == 1) {
             parent.put(key, value);
@@ -64,7 +64,7 @@ public class JsonDMLConstructor {
         path.remove(0);
 
         if (parent.has(key)) {
-            JsonNode child = parent.get(key);
+            final JsonNode child = parent.get(key);
             add(child, path, value);
             return;
         }
@@ -74,8 +74,8 @@ public class JsonDMLConstructor {
     }
 
     private JsonNode create(List<Key> path, String value) throws Exception {
-        Key key = path.get(0);
-        JsonNode output = JsonNodeBase.fromKey(key);
+        final Key key = path.get(0);
+        final JsonNode output = JsonNodeBase.fromKey(key);
 
         if (path.size() == 1) {
             output.put(key, value);
@@ -124,13 +124,13 @@ public class JsonDMLConstructor {
 
     private interface JsonNodeBase {
 
-        static JsonNode fromObject(Object object) {
+        static JsonNode fromObject(Object object) throws JSONException {
             if (object instanceof JSONObject jsonObject)
                 return new JsonObjectNode(jsonObject);
-            else if (object instanceof JSONArray jsonArray)
+            if (object instanceof JSONArray jsonArray)
                 return new JsonArrayNode(jsonArray);
-            else
-                return null;
+
+            throw new JSONException("Can't create JsonNode from object: " + object);
         }
 
         static JsonNode fromKey(Key key) {

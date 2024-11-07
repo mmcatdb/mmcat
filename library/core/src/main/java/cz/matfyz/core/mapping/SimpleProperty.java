@@ -34,17 +34,13 @@ public class SimpleProperty extends AccessPath {
         super(name, signature);
     }
 
-    @Override protected boolean hasSignature(Signature signature) {
-        return this.signature.equals(signature);
-    }
-
     @Override protected @Nullable List<AccessPath> getPropertyPathInternal(Signature signature) {
         return signature.isEmpty()
             ? new ArrayList<>(List.of(this))
             : null;
     }
 
-    @Override public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
 
         return morphism.dom().key().equals(key) ? this : null;

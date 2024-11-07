@@ -1,6 +1,7 @@
 package cz.matfyz.server.entity.datasource;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 
@@ -27,7 +28,7 @@ public class DatasourceWrapper extends Entity {
 
     public static DatasourceWrapper createNew(DatasourceInit init) {
         return new DatasourceWrapper(
-            Id.createNewUUID(),
+            Id.createNew(),
             init.label(),
             init.type(),
             init.settings()
@@ -52,6 +53,10 @@ public class DatasourceWrapper extends Entity {
             this.settings = data.settings();
     }
 
+    public Datasource toDatasource() {
+        return new Datasource(type, id().toString());
+    }
+
     public record JsonValue(
         String label,
         DatasourceType type,
@@ -61,13 +66,13 @@ public class DatasourceWrapper extends Entity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static DatasourceWrapper fromJsonValue(Id id, String jsonValueString) throws JsonProcessingException {
-        final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
+    public static DatasourceWrapper fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
+        final JsonValue json = jsonValueReader.readValue(jsonValue);
         return new DatasourceWrapper(
             id,
-            jsonValue.label(),
-            jsonValue.type(),
-            jsonValue.settings()
+            json.label(),
+            json.type(),
+            json.settings()
         );
     }
 

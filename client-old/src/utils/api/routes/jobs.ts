@@ -1,6 +1,7 @@
 import type { StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
 import type { JobFromServer, SessionFromServer } from '@/types/job';
+import type { SaveJobResultPayload } from '@/types/inference/inferenceEdit';
 
 const jobs = {
     getAllJobsInCategory: GET<{ categoryId: StringLike }, JobFromServer[]>(
@@ -20,6 +21,9 @@ const jobs = {
     ),
     cancelJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/cancel`,
+    ),
+    updateJobResult: POST<{ id: StringLike }, JobFromServer, SaveJobResultPayload>(
+        u => `/jobs/${u.id}/updateResult`,
     ),
     getAllSessionsInCategory: GET<{ categoryId: StringLike }, SessionFromServer[]>(
         u => `/schema-categories/${u.categoryId}/sessions`,

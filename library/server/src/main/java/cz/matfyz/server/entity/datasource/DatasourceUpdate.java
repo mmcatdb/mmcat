@@ -11,8 +11,9 @@ public record DatasourceUpdate(
         return this.settings.has(DatasourceWrapper.PASSWORD_FIELD_NAME);
     }
 
-    public void setPasswordFrom(DatasourceWrapper datasource) {
-        this.settings.set(DatasourceWrapper.PASSWORD_FIELD_NAME, datasource.settings.get(DatasourceWrapper.PASSWORD_FIELD_NAME));
+    public void trySetPasswordFrom(DatasourceWrapper datasource) {
+        if (datasource.settings.has(DatasourceWrapper.PASSWORD_FIELD_NAME))
+            this.settings.set(DatasourceWrapper.PASSWORD_FIELD_NAME, datasource.settings.get(DatasourceWrapper.PASSWORD_FIELD_NAME));
     }
 
 }

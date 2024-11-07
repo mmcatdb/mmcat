@@ -1,120 +1,280 @@
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, shallowRef } from 'vue';
-import { GraphRootProperty } from '@/types/accessPath/graph';
+import { computed, ref } from 'vue';
+import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
+import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SignatureId, StaticName } from '@/types/identifiers';
-import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
+import { type Node, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
-import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
-import API from '@/utils/api';
-import { useRoute, useRouter } from 'vue-router';
+import { useEvocat } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
-import type { Evocat } from '@/types/evocat/Evocat';
-import EvocatDisplay from '../category/EvocatDisplay.vue';
+import NodeInput from '@/components/input/NodeInput.vue';
+import { Datasource } from '@/types/datasource';
 
-const route = useRoute();
-const router = useRouter();
+/**
+ * Extracts the graph object from Evocat.
+ */
+const { graph } = $(useEvocat());
 
-const evocat = shallowRef<Evocat>();
-const graph = shallowRef<Graph>();
-provide(evocatKey, { evocat, graph } as EvocatContext);
-
-function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
-    evocat.value = context.evocat;
-    graph.value = context.graph;
-}
+/**
+ * Props passed to the component.
+ */
+const props = defineProps<{
+    /** The selected datasource. */
+    selectedDatasource: Datasource;
+}>();
 
 const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
-const logicalModels = shallowRef<LogicalModel[]>([]);
-const selectedLogicalModel = shallowRef<LogicalModel>();
+const selectedNodes = ref<Node[]>([]);
+const rootConfirmed = ref(false);
 
-const datasourceAndRootNodeValid = computed(() => !!selectedLogicalModel.value && !!selectingRootNode.value);
+/**
+ * Stores the previous parent property used for path construction.
+ */
+let previousParentProperty: GraphParentProperty;
 
-const categoryId = useSchemaCategoryId();
-const category = useSchemaCategoryInfo();
+/**
+ * A set to track processed node keys.
+ */
+let processedNodes = new Set<number>();
 
-onMounted(async () => {
-    const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
-    if (result.status) {
-        logicalModels.value = result.data.map(LogicalModel.fromServer);
-        selectedLogicalModel.value = logicalModels.value.find(model => model.id.toString() === route.query.logicalModelId);
-    }
-});
+/**
+ * Computed property that generates a string of the labels for the selected nodes.
+ */
+const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
+/**
+ * Emits custom events to the parent component.
+ */
+const emit = defineEmits([ 'finish', 'cancel' ]);
+
+/**
+ * Confirms the selected datasource and root node. It marks the root node as selected and finalizes the root.
+ */
 function confirmDatasourceAndRootNode() {
-    if (!selectedLogicalModel.value || !selectingRootNode.value)
+    if (!props.selectedDatasource || !selectingRootNode.value)
         return;
 
     selectingRootNode.value.unselect();
     selectingRootNode.value.becomeRoot();
-    const label = selectingRootNode.value.schemaObject.label.toLowerCase();
+    rootConfirmed.value = true;
+}
+
+/**
+ * Confirms the selected nodes and constructs the access path from the root node and the selected nodes.
+ */
+function confirmSelectedNodes() {
+    if (!props.selectedDatasource || !selectingRootNode.value) return;
+
+    const label = selectingRootNode.value.metadata.label.toLowerCase();
     accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
+    
+    if (selectedNodes.value.length !== 0) {
+        selectedNodes.value.forEach(node => processNode(node));
+        processedNodes.clear();
+    }
+
+    accessPath.value?.highlightPath();
 }
 
-async function createMapping(primaryKey: SignatureId) {
-    if (! selectedLogicalModel.value || !graph.value || !accessPath.value)
+/**
+ * Processes a single node by creating its subpath and adding it to the access path.
+ */
+function processNode(node: Node) {
+    if (!processedNodes.has(node.schemaObject.key.value)) {
+        const subpath = createSubpathForNode(node);
+        if (subpath) {
+            accessPath.value?.updateOrAddSubpath(subpath);        
+            processedNodes.add(node.schemaObject.key.value);
+        }
+    }
+}
+
+/**
+ * Creates a subpath for the given node based on its children and parent property.
+ */
+function createSubpathForNode(node: Node): GraphChildProperty | undefined {
+    if (!graph) {
+        console.error('Graph instance is not available.');
         return;
+    }
 
-    const result = await API.mappings.createNewMapping({}, {
-        logicalModelId: selectedLogicalModel.value.id,
-        rootObjectKey: accessPath.value.node.schemaObject.key,
-        primaryKey: new SignatureId(selectedLogicalModel.value.datasource.configuration.isSchemaless ? [] : primaryKey.signatures).toServer(),
-        kindName: accessPath.value.name.toString(),
-        accessPath: accessPath.value.toServer(),
-        categoryVersion: category.value.versionId,
-    });
-    if (result.status)
-        router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });
+    const children = filterChildren(node);
+    const parentNode = graph.getParentNode(node);
+
+    if (!parentNode) return;
+
+    const signature = graph.getSignature(node, parentNode);
+    const label = node.metadata.label.toLowerCase(); // for normalization?
+    let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) ?? previousParentProperty : previousParentProperty;
+
+    if (!parentProperty) return;
+
+    let subpath: GraphChildProperty;
+    if (children.length === 0) 
+        subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
+    else 
+        subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
+
+    if (subpath instanceof GraphComplexProperty) {
+        previousParentProperty = subpath;
+        const childSubpaths = children.map(child => createSubpathForNode(child));
+        childSubpaths.forEach(childSubpath => {
+            if (childSubpath) 
+                subpath.updateOrAddSubpath(childSubpath);            
+        });
+    }
+
+    processedNodes.add(node.schemaObject.key.value);
+    return subpath;
 }
+
+/**
+ * Filters the children nodes of the given node to only include those that are selected.
+ */
+function filterChildren(node: Node): Node[] {
+    if (graph) {
+        const allChildren = graph.getChildrenForNode(node);
+        return allChildren.filter(child => 
+            selectedNodes.value.some(selectedNode => selectedNode.equals(child)) &&
+            !processedNodes.has(child.schemaObject.key.value),
+        );
+    }
+    return [];
+}
+
+/**
+ * Retrieves the parent property from the access path for the specified parent node.
+ */
+function getParentPropertyFromAccessPath(parentNode: Node): GraphParentProperty | undefined {
+    return accessPath.value ? searchSubpathsForNode(accessPath.value, parentNode) : undefined;
+}
+
+/**
+ * Searches for the node within the subpaths of a given property.
+ */
+function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
+    if (property.node.equals(node)) return property;
+
+    if (property instanceof GraphComplexProperty) {
+        for (const subpath of property.subpaths) {
+            const result = searchSubpathsForNode(subpath, node);
+            if (result) return result;            
+        }
+    }
+}
+
+/**
+ * Updates the root property with a new root property and highlights the path.
+ */
+function updateRootProperty(newRootProperty: GraphRootProperty) {
+    undoAccessPath();
+    newRootProperty.node.becomeRoot();
+    accessPath.value = newRootProperty;
+    accessPath.value.highlightPath();
+}
+
+/**
+ * Resets the access path and clears root node status and highlights.
+ */
+function undoAccessPath() {
+    rootConfirmed.value = false;
+    accessPath.value?.node.removeRoot();
+    accessPath.value?.unhighlightPath();
+    selectingRootNode.value?.unhighlight();
+    selectingRootNode.value?.removeRoot();
+}
+
+/**
+ * Emits the finish event with the primary key and the access path, signaling the end of the mapping process.
+ */
+function createMapping(primaryKey: SignatureId) {
+    emit('finish', primaryKey, accessPath.value);
+}
+
+/**
+ * Cancels the current operation, resets the access path, and emits the cancel event.
+ */
+function cancel() {
+    undoAccessPath();
+    emit('cancel');
+}
+ 
 </script>
 
 <template>
     <div class="divide">
-        <EvocatDisplay @evocat-created="evocatCreated" />
-        <div v-if="evocat">
-            <div>
+        <div>
+            <div
+                v-if="!accessPath || !selectedDatasource"
+                class="editor"
+            >
+                <ValueContainer v-if="!rootConfirmed">
+                    <ValueRow label="Root object:">
+                        <SingleNodeInput
+                            v-model="selectingRootNode"                                
+                            :type="SelectionType.Root"
+                        />
+                    </ValueRow>
+                </ValueContainer>
                 <div
-                    v-if="!accessPath || !selectedLogicalModel"
-                    class="editor"
+                    v-if="!rootConfirmed"
+                    class="button-row"
                 >
-                    <ValueContainer>
-                        <ValueRow label="Logical model:">
-                            <select v-model="selectedLogicalModel">
-                                <option
-                                    v-for="logicalModel in logicalModels"
-                                    :key="logicalModel.id"
-                                    :value="logicalModel"
-                                >
-                                    {{ logicalModel.label }}
-                                </option>
-                            </select>
-                        </ValueRow>
-                        <ValueRow label="Root object:">
-                            <SingleNodeInput
-                                v-model="selectingRootNode"
-                                :type="SelectionType.Root"
-                            />
-                        </ValueRow>
-                    </ValueContainer>
-                    <div class="button-row">
-                        <button
-                            :disabled="!selectedLogicalModel || !selectingRootNode"
-                            @click="confirmDatasourceAndRootNode"
-                        >
-                            Confirm
-                        </button>
-                    </div>
+                    <button
+                        :disabled="!selectedDatasource || !selectingRootNode || rootConfirmed"
+                        @click="confirmDatasourceAndRootNode"
+                    >
+                        Confirm
+                    </button>
+                    <button
+                        @click="cancel"
+                    >
+                        Cancel
+                    </button>
                 </div>
-                <AccessPathEditor
-                    v-else
-                    :datasource="selectedLogicalModel.datasource"
-                    :root-property="accessPath"
-                    @finish="createMapping"
-                />
+                <ValueContainer v-if="rootConfirmed">
+                    <ValueRow label="AccessPath objects:">
+                        <div
+                            class="d-flex flex-wrap"
+                            style="width: 300px"
+                        >
+                            {{ selectedNodeLabels }}
+                            <NodeInput
+                                :graph="graph"
+                                :model-value="selectedNodes"
+                                :type="SelectionType.Selected"
+                                @update:modelValue="selectedNodes = $event"
+                            />
+                        </div>
+                    </ValueRow>
+                </ValueContainer>
+                <div 
+                    v-if="rootConfirmed" 
+                    class="button-row"
+                >
+                    <button
+                        @click="confirmSelectedNodes"
+                    >
+                        Confirm
+                    </button>
+                    <button
+                        @click="cancel"
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
+            <AccessPathEditor
+                v-else
+                :datasource="selectedDatasource"
+                :root-property="accessPath"
+                @finish="createMapping"
+                @update:rootProperty="updateRootProperty"
+                @cancel="cancel"
+            />
         </div>
     </div>
 </template>

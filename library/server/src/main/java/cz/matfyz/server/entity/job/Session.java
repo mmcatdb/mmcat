@@ -26,7 +26,7 @@ public class Session extends Entity {
 
     public static Session createNew(Id categoryId) {
         return new Session(
-            Id.createNewUUID(),
+            Id.createNew(),
             categoryId,
             new Date()
         );
@@ -39,13 +39,12 @@ public class Session extends Entity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static Session fromJsonValue(Id id, Id categoryId, String jsonValueString) throws JsonProcessingException {
-        final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
-
+    public static Session fromJsonValue(Id id, Id categoryId, String jsonValue) throws JsonProcessingException {
+        final JsonValue json = jsonValueReader.readValue(jsonValue);
         return new Session(
             id,
             categoryId,
-            jsonValue.createdAt
+            json.createdAt
         );
     }
 

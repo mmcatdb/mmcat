@@ -1,9 +1,10 @@
 package cz.matfyz.tests.example.common;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -18,7 +19,7 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestDatasource.class);
 
-    private static int lastId = 0;
+    private static UniqueSequentialGenerator idGenerator = UniqueSequentialGenerator.create();
 
     public final DatasourceType type;
     public final String id;
@@ -29,7 +30,7 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
 
     public TestDatasource(DatasourceType type, TWrapper wrapper, SchemaCategory schema, String setupFileName) {
         this.type = type;
-        this.id = "" + lastId++;
+        this.id = idGenerator.nextString();
         this.wrapper = wrapper;
         this.schema = schema;
         this.setupFileName = setupFileName;

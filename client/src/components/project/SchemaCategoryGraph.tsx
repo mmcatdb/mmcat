@@ -10,12 +10,12 @@ export function SchemaCategoryGraph({ category }: SchemaCategoryGraphProps) {
     const graphData = useMemo(() => ({
         nodes: category.getObjects().map(object => ({
             id: '' + object.key.value,
-            label: object.current?.label ?? '',
-            position: { ...object._position },
+            label: object.metadata.label,
+            position: { ...object.metadata.position },
         })),
         edges: category.getMorphisms().map(morphism => ({
             id: '' + morphism.signature.baseValue,
-            label: morphism.current?.label ?? '',
+            label: morphism.metadata.label,
             from: '' + morphism.current?.domKey.value,
             to: '' + morphism.current?.codKey.value,
         })),

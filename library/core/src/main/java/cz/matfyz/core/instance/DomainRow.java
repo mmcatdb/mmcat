@@ -1,13 +1,13 @@
 package cz.matfyz.core.instance;
 
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
-import cz.matfyz.core.instance.InstanceCategory.InstancePath;
+import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
+import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.IterableUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -58,57 +58,50 @@ public class DomainRow implements Comparable<DomainRow> {
         return superId.getValue(signature);
     }
 
+    public record MappingsFor(InstanceMorphism morphism, Set<MappingRow> mappings) {
+        public MappingsFor(InstanceMorphism morphism) {
+            this(morphism, new TreeSet<>());
+        }
+    }
+
     // These properties are managed by the morphisms, so they should not be cloned
-    private final Map<InstanceMorphism, Set<MappingRow>> mappingsFrom = new TreeMap<>();
-    private final Map<InstanceMorphism, Set<MappingRow>> mappingsTo = new TreeMap<>();
+    private final Map<Signature, MappingsFor> mappingsFrom = new TreeMap<>();
+    private final Map<Signature, MappingsFor> mappingsTo = new TreeMap<>();
 
-    /**
-     * Warning: this is a low-level method that works as intended only for the base morphisms. For the composite ones, an empty set might be returned even if connections exist.
-     */
-    public Set<MappingRow> getMappingsFromForMorphism(InstanceMorphism morphism) {
-        var mappings = mappingsFrom.computeIfAbsent(morphism, x -> new TreeSet<>());
-        return mappings != null ? mappings : new TreeSet<>();
+    public Set<MappingRow> getMappingsForEdge(SchemaEdge edge) {
+        final var mappingsFor = (edge.direction() ? mappingsFrom : mappingsTo).get(edge.morphism().signature());
+        return mappingsFor != null ? mappingsFor.mappings : Set.of();
     }
 
-    public Set<MappingRow> getMappingsToForMorphism(InstanceMorphism morphism) {
-        var mappings = mappingsTo.get(morphism);
-        return mappings != null ? mappings : new TreeSet<>();
-    }
-
-    public Set<MappingRow> getMappingsForEdge(InstanceEdge edge) {
-        var mappings = (edge.direction() ? mappingsFrom : mappingsTo).get(edge.morphism());
-        return mappings != null ? mappings : new TreeSet<>();
-    }
-
-    public List<DomainRow> getCodomainForEdge(InstanceEdge edge) {
+    public List<DomainRow> getCodomainForEdge(SchemaEdge edge) {
         return getMappingsForEdge(edge).stream().map(mappingRow -> edge.direction() ? mappingRow.codomainRow() : mappingRow.domainRow()).toList();
     }
 
-    public Set<Entry<InstanceMorphism, Set<MappingRow>>> getAllMappingsFrom() {
-        return mappingsFrom.entrySet();
+    public Collection<MappingsFor> getAllMappingsFrom() {
+        return mappingsFrom.values();
     }
 
     void addMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
-        var mappingsOfSameType = mappingsFrom.computeIfAbsent(morphism, x -> new TreeSet<>());
-        mappingsOfSameType.add(mapping);
+        final var mappingsOfSameType = mappingsFrom.computeIfAbsent(morphism.schema.signature(), x -> new MappingsFor(morphism));
+        mappingsOfSameType.mappings.add(mapping);
     }
 
     void removeMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
-        var mappingsOfSameType = mappingsFrom.get(morphism);
-        mappingsOfSameType.remove(mapping);
+        final var mappingsOfSameType = mappingsFrom.get(morphism.schema.signature());
+        mappingsOfSameType.mappings.remove(mapping);
     }
 
     void addMappingTo(InstanceMorphism morphism, MappingRow mapping) {
-        var mappingsOfSameType = mappingsTo.computeIfAbsent(morphism, x -> new TreeSet<>());
-        mappingsOfSameType.add(mapping);
+        final var mappingsOfSameType = mappingsTo.computeIfAbsent(morphism.schema.signature(), x -> new MappingsFor(morphism));
+        mappingsOfSameType.mappings.add(mapping);
     }
 
     void removeMappingTo(InstanceMorphism morphism, MappingRow mapping) {
-        var mappingsOfSameType = mappingsTo.get(morphism);
-        mappingsOfSameType.remove(mapping);
+        final var mappingsOfSameType = mappingsTo.get(morphism.schema.signature());
+        mappingsOfSameType.mappings.remove(mapping);
     }
 
-    public Set<DomainRow> traverseThrough(InstancePath path) {
+    public Set<DomainRow> traverseThrough(SchemaPath path) {
         var currentSet = new TreeSet<DomainRow>();
         currentSet.add(this);
 
@@ -126,8 +119,9 @@ public class DomainRow implements Comparable<DomainRow> {
     record SignatureWithValue(Signature signature, String value) {}
 
     List<SignatureWithValue> getAndRemovePendingReferencePairs() {
-        var pendingSignatures = pendingReferences.stream().filter(this::hasSignature).toList();
+        final var pendingSignatures = pendingReferences.stream().filter(this::hasSignature).toList();
         pendingReferences.removeAll(pendingSignatures);
+
         return pendingSignatures.stream().map(signature -> new SignatureWithValue(signature, getValue(signature))).toList();
     }
 
@@ -144,12 +138,12 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     @Override public String toString() {
-        var builder = new StringBuilder();
+        final var builder = new StringBuilder();
         builder.append(superId.toString());
         if (!technicalIds.isEmpty()) {
             builder.append("[");
             var notFirst = false;
-            for (var technicalId : technicalIds) {
+            for (final var technicalId : technicalIds) {
                 if (notFirst)
                     builder.append(", ");
                 notFirst = true;

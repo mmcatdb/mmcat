@@ -1,11 +1,10 @@
 package cz.matfyz.wrappermongodb;
 
-import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,10 +17,14 @@ import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MongoDBControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
+public class MongoDBControlWrapper extends BaseControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBControlWrapper.class);
+
+    @Override protected DatasourceType getType() {
+        return DatasourceType.mongodb;
+    }
 
     private final MongoDBProvider provider;
 
@@ -86,8 +89,8 @@ public class MongoDBControlWrapper extends BaseControlWrapper implements Abstrac
         return new MongoDBQueryWrapper();
     }
 
-    @Override public MongoDBInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
-        return new MongoDBInferenceWrapper(provider, sparkSettings);
+    @Override public MongoDBInferenceWrapper getInferenceWrapper() {
+        return new MongoDBInferenceWrapper(provider, getSparkSettings());
     }
 
 }

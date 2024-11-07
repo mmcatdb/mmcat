@@ -1,7 +1,7 @@
 <template>
     <nav
         id="app-left-bar-content"
-        class="left-bar"
+        class="left-bar flex-column"
     >
         <slot />
     </nav>
@@ -21,7 +21,7 @@
 }
 
 .left-bar a {
-  display: inline-block;
+  display: inline-flex;
   padding: 0 16px;
   border-top: 1px solid var(--color-border);
 }

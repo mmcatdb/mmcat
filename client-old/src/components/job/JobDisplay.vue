@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import API from '@/utils/api';
-import { Job, JobState } from '@/types/job';
+import { Job, JobState, type ModelJobData } from '@/types/job';
 import { ActionType } from '@/types/action';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
+import InferenceJobDisplay from '@/components/category/inference/InferenceJobDisplay.vue';
+import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/inferenceEdit';
+import type { InferenceJobData } from '@/types/inference/InferenceJobData';
+import type { LayoutType } from '@/types/inference/layoutType';
+import { useSchemaCategoryInfo } from '@/utils/injects';
 
 type JobDisplayProps = {
     job: Job;
@@ -15,7 +20,6 @@ type JobDisplayProps = {
 
 const props = defineProps<JobDisplayProps>();
 const error = computed(() => props.job.error ? { name: props.job.error.name, data: stringify(props.job.error.data) } : undefined);
-const result = computed(() => stringify(props.job.result));
 
 function stringify(value: unknown): string | undefined {
     if (value === undefined || value === null)
@@ -33,34 +37,47 @@ const emit = defineEmits<{
 
 const fetching = ref(false);
 
+const inferenceJobData = computed(() => {
+    if (props.job.payload.type === ActionType.RSDToCategory) 
+        return props.job.data as InferenceJobData;
+    else
+        throw new Error('Expected job payload type to be RSDToCategory, but got ' + props.job.payload.type);
+}); 
+
+const info = useSchemaCategoryInfo();
+
 async function startJob() {
     fetching.value = true;
-
     const result = await API.jobs.startJob({ id: props.job.id });
-    if (result.status)
-        emit('updateJob', Job.fromServer(result.data));
-
     fetching.value = false;
+    if (result.status)
+        emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
 async function cancelJob() {
     fetching.value = true;
-
     const result = await API.jobs.cancelJob({ id: props.job.id });
-    if (result.status)
-        emit('updateJob', Job.fromServer(result.data));
-
     fetching.value = false;
+    if (result.status)
+        emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
 async function restartJob() {
     fetching.value = true;
-
     const result = await API.jobs.createRestartedJob({ id: props.job.id });
-    if (result.status)
-        emit('updateJob', Job.fromServer(result.data));
-
     fetching.value = false;
+    if (result.status)
+        emit('updateJob', Job.fromServer(result.data, info.value));
+}
+
+async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | null, layoutType: LayoutType | null) {
+    fetching.value = true;
+
+    const payload: SaveJobResultPayload = { isFinal, edit, layoutType };
+    const result = await API.jobs.updateJobResult({ id: props.job.id }, payload);
+    fetching.value = false;
+    if (result.status) 
+        emit('updateJob', Job.fromServer(result.data, info.value));
 }
 </script>
 
@@ -77,11 +94,11 @@ async function restartJob() {
             </div>
             <div class="col-4 d-flex align-items-center gap-3">
                 <div>
-                    <CleverRouterLink :to="{name: 'job', params: { id: job.id } }">
+                    <FixedRouterLink :to="{ name: 'job', params: { id: job.id } }">
                         <div class="fs-6 fw-bold">
                             {{ job.label }}
                         </div>
-                    </CleverRouterLink>
+                    </FixedRouterLink>
                     <div class="text-secondary small">
                         {{ job.id }}
                     </div>
@@ -91,18 +108,41 @@ async function restartJob() {
                 {{ job.payload.type }}
             </div>
             <div class="col-3">
-                <template v-if="job.payload.type === ActionType.RSDToCategory">
-                    <RouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id }, query: { categoryId: job.categoryId } }">
+                <template v-if="job.payload.type === ActionType.UpdateSchema">
+                    <VersionDisplay :version-id="job.payload.prevVersion" /> -> <VersionDisplay :version-id="job.payload.nextVersion" />
+                </template>
+                <div v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
+                    <FixedRouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id } }">
                         {{ job.payload.datasource.label }}
-                    </RouterLink>
-                </template>
-                <template v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
-                    <RouterLink :to="{ name: 'logicalModel', params: { id: job.payload.logicalModel.id } }">
-                        {{ job.payload.logicalModel.label }}
-                    </RouterLink>
-                </template>
+                    </FixedRouterLink>
+                    <div
+                        v-if="job.payload.mappings"
+                        class="d-flex flex-wrap"
+                    >
+                        <span
+                            v-for="(mapping, index) in job.payload.mappings"
+                            :key="mapping.id"
+                        >
+                            <FixedRouterLink 
+                                :to="{ name: 'mapping', params: {id: mapping.id } }"
+                            >
+                                {{ mapping.kindName }}
+                            </FixedRouterLink>
+                            <span
+                                v-if="index !== job.payload.mappings.length - 1"
+                                class="px-1"
+                            >,</span>
+                        </span>
+                    </div>
+                </div>
                 <template v-else>
-                    <VersionDisplay :version-id="job.payload.prevVersion" /> --> <VersionDisplay :version-id="job.payload.nextVersion" />
+                    <FixedRouterLink
+                        v-for="datasource in job.payload.datasources"
+                        :key="datasource.id"
+                        :to="{ name: 'datasource', params: { id: datasource.id } }"
+                    >
+                        {{ datasource.label }}
+                    </FixedRouterLink>
                 </template>
             </div>
             <div class="flex-grow-1">
@@ -146,6 +186,30 @@ async function restartJob() {
         <div
             v-if="isShowDetail"
         >
+            <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
+                <InferenceJobDisplay 
+                    :job="job"
+                    :schema-category="inferenceJobData?.finalSchema"
+                    :inference-edits="inferenceJobData?.edits"
+                    :layout-type="inferenceJobData?.layoutType"
+                    :candidates="inferenceJobData?.candidates"
+                    @update-edit="(edit) => updateJobResult(edit, false, null)"
+                    @cancel-edit="updateJobResult(null, false, null)"
+                    @change-layout="(newLayoutType) => updateJobResult(null, null, newLayoutType)"
+                >
+                    <template #below-editor>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button 
+                                :disabled="fetching"
+                                class="primary"
+                                @click="() => updateJobResult(null, true, null)"
+                            >
+                                Save and Finish
+                            </button>
+                        </div>
+                    </template>
+                </InferenceJobDisplay>
+            </template>
             <TextArea
                 v-if="error"
                 v-model="error.data"
@@ -154,12 +218,12 @@ async function restartJob() {
                 :min-rows="1"
             />
             <TextArea
-                v-if="result"
-                v-model="result"
+                v-else-if="job.payload.type !== ActionType.RSDToCategory && job.data"
+                v-model="(job.data as ModelJobData).value"
                 class="w-100 mt-2"
                 readonly
                 :min-rows="1"
-            />
+            /> 
         </div>
     </div>
 </template>

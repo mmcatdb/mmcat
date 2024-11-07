@@ -47,7 +47,7 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
 
     public QueryResult visit(DatasourceNode node) {
         final QueryStatement query = QueryTranslator.run(context, node);
-        final var pullWrapper = node.datasource.control.getPullWrapper();
+        final var pullWrapper = context.getProvider().getControlWrapper(node.datasource).getPullWrapper();
 
         return pullWrapper.executeQuery(query);
     }

@@ -18,7 +18,7 @@
     "parserOptions": {
         "parser": "@typescript-eslint/parser",
         "ecmaVersion": 2021,
-        "project": "tsconfig.json"
+        "project": "./client-old/tsconfig.json"
     },
     "plugins": [
         "vue",
@@ -50,6 +50,7 @@
         "comma-dangle": [ "warn", "always-multiline" ],
         "vue/valid-template-root": "off",
         "quotes": [ "warn", "single", { "allowTemplateLiterals": true } ],
-        "@typescript-eslint/unbound-method": [ "error", { "ignoreStatic": true } ]
+        "@typescript-eslint/unbound-method": [ "error", { "ignoreStatic": true } ],
+        "@typescript-eslint/no-non-null-assertion": "off"
     }
 }

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import type { SchemaObject } from '@/types/schema';
+import type { MetadataObject, SchemaObject } from '@/types/schema';
 import type { Signature } from '@/types/identifiers/Signature';
 
 export type Column = {
     signature: Signature;
     schemaObject: SchemaObject | undefined;
+    metadata: MetadataObject | undefined;
     isClickable: boolean;
 };
 
@@ -32,7 +33,7 @@ function columnClicked(column: Column) {
         @click="() => columnClicked(column)"
     >
         <span class="text-bold">
-            {{ column.schemaObject?.label }}
+            {{ column.metadata?.label }}
         </span>
         <br />
         <span class="signature-span">

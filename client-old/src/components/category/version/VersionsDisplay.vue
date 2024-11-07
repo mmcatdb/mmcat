@@ -3,7 +3,7 @@ import { computed, watch } from 'vue';
 
 import { useEvocat } from '@/utils/injects';
 
-import { computeLatestVersions, type Version } from '@/types/evocat/Version';
+// import { computeLatestVersions, type Version } from '@/types/evocat/Version';
 
 type VersionsDisplayProps = {
     allVersions: Version[];
@@ -87,7 +87,7 @@ const displayedVersions = computed(() => {
             :style="{ marginTop: `${8 * version.level}px` }"
             @click="() => version.id !== currentVersion.id && evocat.move(version)"
         >
-            {{ showAll ? version.id : version.branchlessId }}
+            {{ version.id }}
         </div>
     </div>
 </template>

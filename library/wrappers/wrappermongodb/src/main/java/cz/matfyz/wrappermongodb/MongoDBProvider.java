@@ -2,6 +2,7 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -42,6 +43,7 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
             mongoClient.close();
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record MongoDBSettings(
         String host,
         String port,

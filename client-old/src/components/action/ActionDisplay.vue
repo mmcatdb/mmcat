@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import API from '@/utils/api';
 import { Action, ActionType } from '@/types/action';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
@@ -43,9 +43,9 @@ async function deleteAction() {
 
 <template>
     <div class="action-display">
-        <CleverRouterLink :to="{ name: 'action', params: { id: action.id } }">
+        <FixedRouterLink :to="{ name: 'action', params: { id: action.id } }">
             <h2>{{ action.label }}</h2>
-        </CleverRouterLink>
+        </FixedRouterLink>
         <ValueContainer>
             <ValueRow label="Id:">
                 {{ action.id }}
@@ -54,32 +54,54 @@ async function deleteAction() {
                 {{ action.payload.type }}
             </ValueRow>
             <ValueRow
-                v-if="action.payload.type === ActionType.RSDToCategory "
-                label="Data source:"
-            >
-                <RouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id }, query: { categoryId: action.categoryId } }">
-                    {{ action.payload.datasource.label }}
-                </RouterLink>
-            </ValueRow>
-            <ValueRow
-                v-if="action.payload.type === ActionType.RSDToCategory"
-                label="Kind Name:"
-            >
-                {{ action.payload.kindName }}
-            </ValueRow>
-            <ValueRow
-                v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
-                label="Logical model:"
-            >
-                <RouterLink :to="{ name: 'logicalModel', params: { id: action.payload.logicalModel.id } }">
-                    {{ action.payload.logicalModel.label }}
-                </RouterLink>
-            </ValueRow>
-            <ValueRow
-                v-else-if="action.payload.type === ActionType.UpdateSchema"
+                v-if="action.payload.type === ActionType.UpdateSchema"
                 label="Versions:"
             >
                 <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
+            </ValueRow>
+            <template
+                v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
+            >
+                <ValueRow
+                    label="Datasource:"
+                >
+                    <FixedRouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id } }">
+                        {{ action.payload.datasource.label }}
+                    </FixedRouterLink>
+                </ValueRow>
+                <ValueRow
+                    v-if="action.payload.mappings"
+                    label="Mappings:"
+                >
+                    <div class="d-flex flex-wrap">
+                        <span
+                            v-for="(mapping, index) in action.payload.mappings"
+                            :key="mapping.id"
+                        >
+                            <FixedRouterLink 
+                                :to="{ name: 'mapping', params: {id: mapping.id } }"
+                            >
+                                {{ mapping.kindName }}
+                            </FixedRouterLink>
+                            <span
+                                v-if="index !== action.payload.mappings.length - 1"
+                                class="px-1"
+                            >,</span>
+                        </span>
+                    </div>
+                </ValueRow>
+            </template>
+            <ValueRow
+                v-else
+                label="Datasources:"
+            >
+                <FixedRouterLink
+                    v-for="datasource in action.payload.datasources"
+                    :key="datasource.id"
+                    :to="{ name: 'datasource', params: {id: datasource.id } }"
+                >
+                    {{ datasource.label }}
+                </FixedRouterLink>
             </ValueRow>
             <!--
                 <ValueRow label="State:">
@@ -123,6 +145,6 @@ async function deleteAction() {
     border: 1px solid var(--color-primary);
     margin-right: 16px;
     margin-bottom: 16px;
-    min-width: 284px;
+    width: 420px;
 }
 </style>

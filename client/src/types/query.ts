@@ -3,88 +3,50 @@ import type { Entity, Id, VersionId } from './id';
 
 export type QueryFromServer = {
     id: Id;
+    version: VersionId;
+    lastValid: VersionId;
     categoryId: Id;
     label: string;
+    content: string;
+    errors: QueryEvolutionError[];
 };
 
 export class Query implements Entity {
     private constructor(
         readonly id: Id,
+        readonly version: VersionId,
+        readonly lastValid: VersionId,
         readonly categoryId: Id,
         readonly label: string,
+        readonly content: string,
+        readonly errors: QueryEvolutionError[],
     ) {}
 
     static fromServer(input: QueryFromServer): Query {
         return new Query(
             input.id,
+            input.version,
+            input.lastValid,
             input.categoryId,
             input.label,
-        );
-    }
-}
-
-export type QueryVersionFromServer = {
-    id: Id;
-    queryId: Id;
-    version: VersionId;
-    content: string;
-    errors: QueryUpdateError[];
-};
-
-export class QueryVersion implements Entity {
-    private constructor(
-        readonly id: Id,
-        readonly query: Query,
-        readonly version: VersionId,
-        readonly content: string,
-        readonly errors: QueryUpdateError[],
-    ) {}
-
-    static fromServer(input: QueryVersionFromServer, query: Query): QueryVersion {
-        return new QueryVersion(
-            input.id,
-            query,
-            input.version,
             input.content,
             input.errors,
         );
     }
 }
 
-export type QueryVersionUpdate = {
-    version: VersionId;
-    content: string;
-    errors: QueryUpdateError[];
-};
-
-export type QueryInit = Omit<QueryVersionUpdate, 'errors'> & {
+export type QueryInit = {
     categoryId: Id;
     label: string;
-};
-
-export type QueryWithVersionFromServer = {
-    query: QueryFromServer;
-    version: QueryVersionFromServer;
-};
-
-export type QueryWithVersion = {
-    query: Query;
-    version: QueryVersion;
-};
-
-export function queryWithVersionFromServer(qv: QueryWithVersionFromServer): QueryWithVersion {
-    const query = Query.fromServer(qv.query);
-    const version = QueryVersion.fromServer(qv.version, query);
-
-    return { query, version };
-}
-
-export type QueryWithVersionsFromServer = {
-    query: QueryFromServer;
-    versions: QueryVersionFromServer[];
+    content: string;
 };
 
 // Evolution
+
+export type QueryEdit = {
+    content: string;
+    errors: QueryEvolutionError[];
+};
 
 export enum ErrorType {
     ParseError = 'ParseError',
@@ -92,7 +54,7 @@ export enum ErrorType {
     UpdateError = 'UpdateError',
 }
 
-export type QueryUpdateError = {
+export type QueryEvolutionError = {
     type: ErrorType;
     message: string;
     data: unknown;

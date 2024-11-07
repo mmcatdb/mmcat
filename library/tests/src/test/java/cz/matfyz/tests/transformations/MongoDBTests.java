@@ -186,4 +186,39 @@ public class MongoDBTests {
             """)
             .run();
     }
+
+    @Test
+    void getForestForMissingSimpleTest() throws Exception {
+        new PullForestTestBase(MongoDB.addressMissingSimple(schema), datasource.wrapper.getPullWrapper())
+            .expected("""
+                [{
+                    "number": "o_100",
+                    "address": {
+                        "street": "Ke Karlovu 2027/3",
+                        "zip": "121 16"
+                    }
+                }, {
+                    "number": "o_200",
+                    "address": {
+                        "street": "Malostranské nám. 2/25",
+                        "zip": "118 00"
+                    }
+                }]
+            """)
+            .run();
+    }
+
+    @Test
+    void getForestForMissingComplexTest() throws Exception {
+        new PullForestTestBase(MongoDB.addressMissingComplex(schema), datasource.wrapper.getPullWrapper())
+            .expected("""
+                [{
+                    "number": "o_100",
+                }, {
+                    "number": "o_200"
+                }]
+            """)
+            .run();
+    }
+
 }

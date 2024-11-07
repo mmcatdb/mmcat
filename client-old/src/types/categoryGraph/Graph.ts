@@ -1,11 +1,12 @@
-import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from 'cytoscape';
-import type { ComparablePosition, GroupData, SchemaMorphism, SchemaObject } from '../schema';
+import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular, Position } from 'cytoscape';
+import type { GroupData, SchemaMorphism, SchemaObject, VersionedSchemaMorphism, VersionedSchemaObject } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Id } from '../id';
 import { shallowRef } from 'vue';
+import { SequenceSignature } from '../accessPath/graph';
 
 export type TemporaryEdge = {
     delete: () => void;
@@ -23,6 +24,49 @@ export class Graph {
         this.eventListener = new GraphEventListener(cytoscape);
         this.highlights = new GraphHighlights({ nodes: this.nodes, edges: this.edges, cytoscape });
     }
+
+    /// functions for Mapping editor
+    public getChildrenForNode(node: Node): Node[] {
+        const outgoingEdges = Array.from(this.edges.values()).filter(edge => edge.domainNode.equals(node));
+        return outgoingEdges.map(edge => edge.codomainNode);
+    }
+
+    public getSignature(node: Node, parentNode: Node): SequenceSignature {
+        const edge = Array.from(this.edges.values())
+            .find(edge =>
+                ((edge.domainNode.equals(parentNode) && edge.codomainNode.equals(node)) ||
+                (edge.domainNode.equals(node) && edge.codomainNode.equals(parentNode))),
+            );
+
+        if (!edge) {
+            console.warn(`No edge found between parent ${parentNode.schemaObject.key.value} and node ${node.schemaObject.key.value}`);
+            return SequenceSignature.empty(node);
+        }
+
+        if (edge.domainNode.equals(node))
+            return SequenceSignature.fromSignature(edge.schemaMorphism.signature.dual(), parentNode);
+        else
+            return SequenceSignature.fromSignature(edge.schemaMorphism.signature, parentNode);
+    }
+
+    public getEdges(node: Node): Edge[] {
+        return Array.from(this.edges.values())
+            .filter(edge =>
+                edge.domainNode.equals(node) || edge.codomainNode.equals(node),
+            );
+    }
+
+    public getParentNode(node: Node): Node | undefined {
+        const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));
+
+        if (incomingEdges.length === 0) {
+            console.warn('No incoming edges found for node:', node);
+            return undefined;
+        }
+
+        return incomingEdges[0].domainNode;
+    }
+    ///
 
     public resetElements(groupsData: GroupData[]): void {
         this.cytoscape.elements().remove();
@@ -44,10 +88,10 @@ export class Graph {
         this.nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
-    createNode(object: SchemaObject, position: ComparablePosition, groupIds: string[]): Node {
+    createNode(object: VersionedSchemaObject, schemaObject: SchemaObject, position: Position, groupIds: string[]): Node {
         const nodeGroups = groupIds.map(groupId => this.highlights.getOrCreateGroup(groupId));
-        const node = Node.create(this.cytoscape, object, position, nodeGroups);
-        this.nodes.set(object.key, node);
+        const node = Node.create(this.cytoscape, object, schemaObject, position, nodeGroups);
+        this.nodes.set(schemaObject.key, node);
 
         return node;
     }
@@ -64,12 +108,12 @@ export class Graph {
         // TODO might not be true anymore.
     }
 
-    createEdge(morphism: SchemaMorphism): Edge {
-        const dom = this.nodes.get(morphism.domKey) as Node;
-        const cod = this.nodes.get(morphism.codKey) as Node;
+    createEdge(morphism: VersionedSchemaMorphism, schemaMorphism: SchemaMorphism): Edge {
+        const dom = this.nodes.get(schemaMorphism.domKey) as Node;
+        const cod = this.nodes.get(schemaMorphism.codKey) as Node;
 
-        const edge = Edge.create(this.cytoscape, morphism, dom, cod);
-        this.edges.set(morphism.signature, edge);
+        const edge = Edge.create(this.cytoscape, morphism, schemaMorphism, dom, cod);
+        this.edges.set(schemaMorphism.signature, edge);
 
         return edge;
     }
@@ -148,6 +192,18 @@ export class Graph {
     getEdge(signature: Signature): Edge | undefined {
         return this.edges.get(signature);
     }
+
+    public toggleEdgeLabels(show: boolean): void {
+        const labelStyle = show ? { 'text-opacity': 1 } : { 'text-opacity': 0 };
+
+        this.cytoscape.edges().forEach(edge => {
+            const currentLabel = edge.data('label');
+            edge.style({
+                'label': currentLabel,
+                ...labelStyle,
+            });
+        });
+    }
 }
 
 class GraphEventListener {
@@ -167,7 +223,7 @@ class GraphEventListener {
         return session;
     }
 
-    onSessionClose(sessionId: number) {
+    closeSession(sessionId: number) {
         this.openSessions.delete(sessionId);
     }
 
@@ -185,7 +241,7 @@ type EventHandlerObject = {
     handler: EventHandler;
 };
 
-class ListenerSession {
+export class ListenerSession {
     private lastHandlerId = -1;
 
     constructor(
@@ -198,7 +254,7 @@ class ListenerSession {
 
     close() {
         [ ...this.eventHandlers.keys() ].forEach(handler => this.removeEventHandler(handler));
-        this.eventListener.onSessionClose(this.id);
+        this.eventListener.closeSession(this.id);
     }
 
     private createEventHandler(event: string, handler: EventHandler, selector?: string): number {
@@ -306,7 +362,7 @@ class GraphHighlights {
             node: this.control.cytoscape.add({
                 data: {
                     id: 'group_' + id,
-                    label: groupData.logicalModel.label,
+                    label: groupData.logicalModel.datasource.label,
                 },
                 classes: 'group ' + 'group-' + id,
             }),

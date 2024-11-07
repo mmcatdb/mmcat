@@ -21,6 +21,9 @@ const jobs = {
     cancelJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/cancel`,
     ),
+    saveJobResult: POST<{ id: StringLike }, JobFromServer>(
+        u => `/jobs/${u.id}/save-result`,
+    ),
     getAllSessionsInCategory: GET<{ categoryId: StringLike }, SessionFromServer[]>(
         u => `/schema-categories/${u.categoryId}/sessions`,
     ),

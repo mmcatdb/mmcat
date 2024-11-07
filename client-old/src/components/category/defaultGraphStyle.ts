@@ -76,6 +76,14 @@ export const style: cytoscape.Stylesheet[] = [
         },
     },
     {
+        selector: 'node.highlighted',
+        style: {
+            'background-color': '#ffcc00',
+            'border-color': '#ff9900',    
+            'border-width': '3px',        
+        },
+    },
+    {
         selector: '.tag-root',
         style: {
             'background-color': 'red',

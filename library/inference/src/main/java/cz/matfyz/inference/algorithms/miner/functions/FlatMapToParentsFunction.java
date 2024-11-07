@@ -8,8 +8,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
 public class FlatMapToParentsFunction implements PairFlatMapFunction<PropertyHeuristics, String, PropertyHeuristics> {
-    @Override
-    public Iterator<Tuple2<String, PropertyHeuristics>> call(PropertyHeuristics heuristics) {
+    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(PropertyHeuristics heuristics) {
         List<Tuple2<String, PropertyHeuristics>> list = new ArrayList<>();
         list.add(new Tuple2<>(heuristics.getHierarchicalName(), heuristics));
         int index = heuristics.getHierarchicalName().lastIndexOf("/");

@@ -1,18 +1,17 @@
 package cz.matfyz.server.repository.utils;
 
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.exception.RepositoryException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class Utils {
@@ -23,65 +22,33 @@ public abstract class Utils {
         return input == 0 ? null : input;
     }
 
-    public static Id getId(ResultSet resultSet, String columnName) throws SQLException {
-        return new Id(resultSet.getString(columnName));
-    }
-
-    public static @Nullable Id getIdOrNull(ResultSet resultSet, String columnName) throws SQLException {
+    public static @Nullable Id getId(ResultSet resultSet, String columnName) throws SQLException {
         final var idString = resultSet.getString(columnName);
         return idString == null ? null : new Id(idString);
     }
 
-    public static void setId(PreparedStatement statement, int position, @Nullable Id id, boolean isUuid) throws SQLException {
+    public static void setId(PreparedStatement statement, int position, @Nullable Id id) throws SQLException {
         if (id == null)
-            statement.setNull(position, isUuid ? Types.OTHER : Types.INTEGER);
+            statement.setNull(position, Types.OTHER);
         else
-            setId(statement, position, id);
+            statement.setObject(position, id.toUUID());
     }
 
-    public static void setId(PreparedStatement statement, int position, Id id) throws SQLException {
-        if (id.isUuid()) {
-            statement.setObject(position, UUID.fromString(id.toString()));
-            return;
-        }
+    public static void setIds(PreparedStatement statement, int position, List<Id> ids) throws SQLException {
+        final var uuids = ids.stream().map(Id::toUUID).toArray(UUID[]::new);
+        statement.setArray(position, statement.getConnection().createArrayOf("UUID", uuids));
+    }
 
-        try {
-            //statement.setString(position, id.value);
-            statement.setInt(position, Integer.parseInt(id.toString()));
-        }
-        catch (NumberFormatException e) {
-            statement.setInt(position, 0);
-        }
+    public static void executeChecked(PreparedStatement statement) throws SQLException {
+        final int affectedRows = statement.executeUpdate();
+        if (affectedRows == 0)
+            throw RepositoryException.nothingUpdated();
     }
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static String toJson(Object object) throws JsonProcessingException {
         return mapper.writeValueAsString(object);
-    }
-
-    @SuppressWarnings("deprecation")
-    public static String toJsonWithoutProperties(Object object, String propertyName) throws JsonProcessingException {
-        try {
-            final var node = (ObjectNode) mapper.valueToTree(object);
-            node.remove(propertyName);
-            return node.toString();
-        }
-        catch (IllegalArgumentException e) {
-            throw new JsonMappingException(e.getMessage(), e);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    public static String toJsonWithoutProperties(Object object, Collection<String> propertyNames) throws JsonProcessingException {
-        try {
-            final var node = (ObjectNode) mapper.valueToTree(object);
-            node.remove(propertyNames);
-            return node.toString();
-        }
-        catch (IllegalArgumentException e) {
-            throw new JsonMappingException(e.getMessage(), e);
-        }
     }
 
 }

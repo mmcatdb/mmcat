@@ -1,7 +1,7 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.service.DatasourceService;
+import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.service.WrapperService;
 import cz.matfyz.core.record.AdminerFilter;
 
@@ -19,13 +19,12 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class AdminerController {
 
     @Autowired
-    private DatasourceService datasourceService;
+    private DatasourceRepository datasourceRepository;
 
     @Autowired
     private WrapperService wrapperService;
@@ -37,7 +36,7 @@ public class AdminerController {
 
     @GetMapping(value = "/adminer/{db}")
     public ResponseEntity<String> getTableNames(@PathVariable Id db, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
-        final var datasource = datasourceService.find(db);
+        final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -51,7 +50,7 @@ public class AdminerController {
 
     @GetMapping(value = "/adminer/{db}/{table}")
     public ResponseEntity<String> getTable(@PathVariable Id db, @PathVariable String table, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
-        final var datasource = datasourceService.find(db);
+        final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -65,7 +64,7 @@ public class AdminerController {
 
     @GetMapping(value = "/adminer/{db}/{table}", params = {"filters"})
     public ResponseEntity<String> getRows(@PathVariable Id db, @PathVariable String table, @RequestParam String filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
-        final var datasource = datasourceService.find(db);
+        final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

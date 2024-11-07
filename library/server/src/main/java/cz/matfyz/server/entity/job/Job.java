@@ -22,6 +22,8 @@ public class Job extends Entity {
         Ready,
         /** The job is currently being processed. */
         Running,
+        /** The job is waiting for a manual input. */
+        Waiting,
         /** The job is finished, either with a success or with an error. */
         Finished,
         /** The job was canceled while being in one of the previous states. It can never be started (again). */
@@ -36,7 +38,8 @@ public class Job extends Entity {
     /** The job contains all information needed to execute it. */
     public final ActionPayload payload;
     public State state;
-    public @Nullable Serializable data = null;
+    public @Nullable JobData data = null;
+    public @Nullable Serializable error = null;
 
     private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state) {
         super(id);
@@ -49,7 +52,7 @@ public class Job extends Entity {
 
     public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually) {
         return new Job(
-            Id.createNewUUID(),
+            Id.createNew(),
             runId,
             label,
             new Date(),
@@ -63,23 +66,25 @@ public class Job extends Entity {
         Date createdAt,
         ActionPayload payload,
         State state,
-        @Nullable Serializable data
+        @Nullable JobData data,
+        @Nullable Serializable error
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static Job fromJsonValue(Id id, Id runId, String jsonValueString) throws JsonProcessingException {
-        final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
+    public static Job fromJsonValue(Id id, Id runId, String jsonValue) throws JsonProcessingException {
+        final JsonValue json = jsonValueReader.readValue(jsonValue);
         final var job = new Job(
             id,
             runId,
-            jsonValue.label,
-            jsonValue.createdAt,
-            jsonValue.payload,
-            jsonValue.state
+            json.label,
+            json.createdAt,
+            json.payload,
+            json.state
         );
-        job.data = jsonValue.data;
+        job.data = json.data;
+        job.error = json.error;
 
         return job;
     }
@@ -90,7 +95,8 @@ public class Job extends Entity {
             createdAt,
             payload,
             state,
-            data
+            data,
+            error
         ));
     }
 

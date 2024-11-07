@@ -1,28 +1,24 @@
 package cz.matfyz.evolution.schema;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
 
-public class DeleteObject extends SchemaCategory.Editor implements SchemaModificationOperation {
+public record DeleteObject(
+    SerializedObject object
+) implements SMO {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
-    public final SchemaObject object;
+    @Override public void up(SchemaCategory schema) {
+        CreateObject.assertObjectIsSingle(schema, object.deserialize());
 
-    public DeleteObject(SchemaObject object) {
-        this.object = object;
+        (new SchemaEditor(schema)).getObjects().remove(object.key());
     }
 
-    @Override public void up(SchemaCategory category) {
-        CreateObject.assertObjectIsSingle(category, object);
-
-        getObjectContext(category).deleteUniqueObject(object);
-    }
-
-    @Override public void down(SchemaCategory category) {
-        getObjectContext(category).createUniqueObject(object);
+    @Override public void down(SchemaCategory schema) {
+        (new SchemaEditor(schema)).getObjects().put(object.key(), object.deserialize());
     }
 
 }

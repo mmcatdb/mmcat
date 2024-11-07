@@ -65,8 +65,8 @@ public class ProcessedProperty implements Serializable, Comparable<ProcessedProp
     public void addChild(ProcessedProperty child) {
         this.children.add(child);
     }
-    @Override
-    public int compareTo(ProcessedProperty o) {
+
+    @Override public int compareTo(ProcessedProperty o) {
         return this.hierarchicalName.compareTo(o.hierarchicalName);
     }
 

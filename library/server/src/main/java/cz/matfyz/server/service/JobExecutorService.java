@@ -1,57 +1,68 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataSerializer;
+import cz.matfyz.core.rsd.Candidates;
+import cz.matfyz.core.rsd.CandidatesSerializer;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
-import cz.matfyz.evolution.querying.QueryUpdateResult;
-import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.matfyz.evolution.querying.QueryEvolutionResult;
+import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.inference.MMInferOneInAll;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
-import cz.matfyz.server.builder.MetadataContext;
+import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditor;
+import cz.matfyz.inference.schemaconversion.Layout;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
+import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
+import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
+import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.InstanceCategoryWrapper;
+import cz.matfyz.server.entity.Query;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
-import cz.matfyz.server.entity.evolution.SchemaUpdate;
+import cz.matfyz.server.entity.evolution.QueryEvolution;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
-import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
-import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.entity.query.QueryVersion;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
+import cz.matfyz.server.entity.job.data.InferenceJobData;
+import cz.matfyz.server.entity.job.data.ModelJobData;
+import cz.matfyz.server.entity.mapping.MappingInit;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.exception.SessionException;
+import cz.matfyz.server.repository.DatasourceRepository;
+import cz.matfyz.server.repository.EvolutionRepository;
+import cz.matfyz.server.repository.InstanceCategoryRepository;
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.MappingRepository;
+import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
-import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
+import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
-import java.awt.Dimension;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,13 +79,19 @@ public class JobExecutorService {
     private JobRepository repository;
 
     @Autowired
+    private MappingRepository mappingRepository;
+
+    @Autowired
     private MappingService mappingService;
 
     @Autowired
-    private LogicalModelService logicalModelService;
+    private EvolutionRepository evolutionRepository;
 
     @Autowired
-    private SchemaCategoryService schemaService;
+    private SchemaCategoryRepository schemaRepository;
+
+    @Autowired
+    private InstanceCategoryRepository instanceRepository;
 
     @Autowired
     private InstanceCategoryService instanceService;
@@ -92,7 +109,7 @@ public class JobExecutorService {
     private QueryRepository queryRepository;
 
     @Autowired
-    private DatasourceService datasourceService;
+    private DatasourceRepository datasourceRepository;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
@@ -111,26 +128,30 @@ public class JobExecutorService {
         final var job = jobWithRun.job();
 
         if (job.state != Job.State.Ready) {
-            LOGGER.info("Job { id: {}, name: '{}' } is not ready.", job.id, job.label);
+            LOGGER.info("Job { id: {}, name: '{}' } is not ready.", job.id(), job.label);
             return;
         }
 
         job.state = Job.State.Running;
         repository.save(job);
-        LOGGER.info("Job { id: {}, name: '{}' } started.", job.id, job.label);
+        LOGGER.info("Job { id: {}, name: '{}' } started.", job.id(), job.label);
 
         try {
             processJobByType(run, job);
-            LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
-            job.state = Job.State.Finished;
+            LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id(), job.label);
+            if (job.payload instanceof RSDToCategoryPayload) {
+                job.state = Job.State.Waiting;
+            } else {
+                job.state = Job.State.Finished;
+            }
             repository.save(job);
         }
         catch (Exception e) {
             final NamedException finalException = e instanceof NamedException namedException ? namedException : new OtherException(e);
 
-            LOGGER.error(String.format("Job { id: %s, name: '%s' } failed.", job.id, job.label), finalException);
+            LOGGER.error(String.format("Job { id: %s, name: '%s' } failed.", job.id(), job.label), finalException);
             job.state = Job.State.Failed;
-            job.data = finalException.toSerializedException();
+            job.error = finalException.toSerializedException();
             repository.save(job);
         }
     }
@@ -143,7 +164,7 @@ public class JobExecutorService {
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
         else if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload)
-            rsdToCategoryAlgorithm(run, rsdToCategoryPayload);
+            rsdToCategoryAlgorithm(run, job, rsdToCategoryPayload);
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
@@ -151,26 +172,29 @@ public class JobExecutorService {
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
         if (run.sessionId == null)
-            throw SessionException.notFound(run.id);
+            throw SessionException.notFound(run.id());
 
-        final DatasourceWrapper datasource = logicalModelService.find(payload.logicalModelId()).datasource();
-        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
+        final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
+        final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
 
-        final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
-        //System.out.println("jobexecutor: " + instance.objects());
-        //System.out.println("print if non empty");
+        InstanceCategory instance = instanceWrapper != null
+            ? instanceWrapper.toInstanceCategory(schema)
+            : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+
+        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
+        final Datasource datasource = datasourceWrapper.toDatasource();
+        final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
+            .filter(wrapper -> payload.mappingIds() == null || payload.mappingIds().contains(wrapper.id()))
+            .map(wrapper -> wrapper.toMapping(datasource, schema))
+            .toList();
+
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
+
         System.out.println("instance before");
         System.out.println(instance);
 
-        if (mappingWrappers.isEmpty())
-            System.out.println("mapping wrappers is empty");
-
-        for (final MappingWrapper mappingWrapper : mappingWrappers) {
-            final Mapping mapping = mappingWrapper.toMapping(schema);
+        for (final Mapping mapping : mappings)
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
-        }
 
         System.out.println("instance after");
         System.out.println(instance);
@@ -181,17 +205,23 @@ public class JobExecutorService {
 
     private void categoryToModelAlgorithm(Run run, Job job, CategoryToModelPayload payload) {
         if (run.sessionId == null)
-            throw SessionException.notFound(job.id);
+            throw SessionException.notFound(job.id());
 
-        final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
+        final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
+        final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
 
-        final DatasourceWrapper datasource = logicalModelService.find(payload.logicalModelId()).datasource();
-        final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
-            .map(wrapper -> wrapper.toMapping(schema))
+        final InstanceCategory instance = instanceWrapper != null
+            ? instanceWrapper.toInstanceCategory(schema)
+            : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+
+        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
+        final Datasource datasource = datasourceWrapper.toDatasource();
+        final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
+            .filter(wrapper -> payload.mappingIds() == null || payload.mappingIds().contains(wrapper.id()))
+            .map(wrapper -> wrapper.toMapping(datasource, schema))
             .toList();
 
-        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasource);
+        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
 
         final var output = new StringBuilder();
         for (final Mapping mapping : mappings) {
@@ -219,120 +249,186 @@ public class JobExecutorService {
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
-            /*else { LOGGER.info("Models didn't get executed. Yikes");}*/
+            /*else { LOGGER.info("Models didn't get executed.");}*/
             /* for now I choose not to execute the statements, but just see if they even get created
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
             LOGGER.info("... models executed."); */
         }
-
-        job.data = output.toString();
+        System.out.println(output.toString());
+        job.data = new ModelJobData(output.toString());
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {
-        final List<QueryWithVersion> prevQueries = queryRepository.findAllInCategoryWithVersion(run.categoryId, payload.prevVersion());
-        final List<QueryWithVersion> nextQueries = queryRepository.findAllInCategoryWithVersion(run.categoryId, payload.nextVersion());
-        final List<QueryWithVersion> filteredPrevQueries = ArrayUtils.filterSorted(prevQueries, nextQueries);
+        // FIXME filter correctly by versions.
+        final List<Query> prevQueries = queryRepository.findAllInCategory(run.categoryId, payload.prevVersion());
+        final List<Query> nextQueries = queryRepository.findAllInCategory(run.categoryId, payload.nextVersion());
+
+        // Some high order magic right here because Java generics suck ass!
+        @SuppressWarnings("unchecked")
+        final List<Query> filteredPrevQueries = (List<Query>) (Object) ArrayUtils.filterSorted((List<Entity>) (Object) prevQueries, (List<Entity>) (Object) nextQueries);
 
         final QueryEvolver evolver = createQueryEvolver(run.categoryId, payload.prevVersion(), payload.nextVersion());
 
-        for (final var query : filteredPrevQueries) {
-            final QueryUpdateResult updateResult = evolver.run(query.version().content);
-            final var newVersion = QueryVersion.createNew(
-                query.query().id,
-                payload.nextVersion(),
-                updateResult.nextContent,
-                updateResult.errors
-            );
-            queryRepository.save(newVersion);
-        }
+        // FIXME doesn't do anything now.
+        // for (final var query : filteredPrevQueries) {
+        //     final QueryEvolutionResult updateResult = evolver.run(query.content);
+        //     final var newVersion = QueryEvolution.createNew(
+        //         run.categoryId,
+        //         // FIXME get system version
+        //         payload.nextVersion(),
+        //         query.id(),
+        //         updateResult.nextContent,
+        //         updateResult.errors
+        //     );
+        //     evolutionRepository.create(newVersion);
+        // }
     }
 
     private QueryEvolver createQueryEvolver(Id categoryId, Version prevVersion, Version nextVersion) {
-        final SchemaCategoryWrapper wrapper = schemaService.find(categoryId);
-        final List<SchemaCategoryUpdate> updates = schemaService
-            .findAllUpdates(categoryId).stream()
-            .filter(u -> u.prevVersion.compareTo(prevVersion) >= 0 && u.nextVersion.compareTo(nextVersion) <= 0)
-            .map(SchemaUpdate::toEvolution).toList();
+        final SchemaCategoryWrapper wrapper = schemaRepository.find(categoryId);
+        final List<SchemaEvolutionAlgorithm> updates = evolutionRepository
+            .findAllSchemaEvolutions(categoryId).stream()
+            // TODO Check if the version comparison is correct (with respect to the previous algorithm)
+            .filter(u -> u.version.compareTo(prevVersion) > 0 && u.version.compareTo(nextVersion) <= 0)
+            // .filter(u -> u.prevVersion.compareTo(prevVersion) >= 0 && u.nextVersion.compareTo(nextVersion) <= 0)
+            .map(u -> u.toSchemaAlgorithm(prevVersion)).toList();
+            // .map(SchemaUpdate::toEvolution).toList();
 
         final SchemaCategory prevCategory = wrapper.toSchemaCategory();
         final SchemaCategory nextCategory = wrapper.toSchemaCategory();
-        SchemaCategoryUpdate.setToVersion(prevCategory, updates, wrapper.version, prevVersion);
-        SchemaCategoryUpdate.setToVersion(nextCategory, updates, wrapper.version, nextVersion);
+        SchemaEvolutionAlgorithm.setToVersion(prevCategory, updates, wrapper.version(), prevVersion);
+        SchemaEvolutionAlgorithm.setToVersion(nextCategory, updates, wrapper.version(), nextVersion);
 
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
-    private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
-        // extracting the empty SK wrapper
-        final SchemaCategoryWrapper originalSchemaWrapper = schemaService.find(run.categoryId);
-        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
-
+    private void rsdToCategoryAlgorithm(Run run, Job job, RSDToCategoryPayload payload) {
         final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
-        final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
-            .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
+        final List<Datasource> datasources = new ArrayList<>();
+        final var provider = new DefaultControlWrapperProvider();
+        payload.datasourceIds().forEach(id -> {
+            final var datasourceWrapper = datasourceRepository.find(id);
+            final var datasource = datasourceWrapper.toDatasource();
+            final var control = wrapperService.getControlWrapper(datasourceWrapper).enableSpark(sparkSettings);
+            datasources.add(datasource);
+            provider.setControlWrapper(datasource, control);
+        });
+
+        final InferenceResult inferenceResult = new MMInferOneInAll()
+            .input(provider)
             .run();
 
-        //System.out.println(categoryMappingPair.schemaCat().allObjects());
-        //System.out.println(categoryMappingPair.schemaCat().allMorphisms());
-        final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+        final Candidates candidates = inferenceResult.candidates();
+        final List<CategoryMappingsPair> categoryMappingPairs = inferenceResult.pairs();
 
-        // what about this label?
-        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model");
-        LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
+        final var pair = CategoryMappingsPair.merge(categoryMappingPairs);
+        final SchemaCategory schema = pair.schema();
+        final MetadataCategory metadata = pair.metadata();
+        final List<Mapping> mappings = pair.mappings();
 
-        schemaService.overwriteInfo(schemaWrapper, run.categoryId);
-        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
+        Layout.applyToMetadata(schema, metadata, LayoutType.FR);
+
+        job.data = InferenceJobData.fromSchemaCategory(
+            List.of(),
+            schema,
+            schema,
+            metadata,
+            metadata,
+            LayoutType.FR,
+            candidates,
+            mappings
+        );
     }
 
-    /**
-     * Layout algo using JUNG library
-     */
-    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
-        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, @Nullable InferenceEdit edit, boolean isFinal, LayoutType layoutType) {
+        final var schema = SchemaSerializer.deserialize(data.inferenceSchema());
+        final var metadata = MetadataSerializer.deserialize(data.inferenceMetadata(), schema);
+        final var candidates = CandidatesSerializer.deserialize(data.candidates());
 
-        for (SchemaObject o : objects) {
-            graph.addVertex(o);
-        }
-        System.out.println("Adding morphisms to graph");
-        for (SchemaMorphism m : morphisms) {
-            if (m.dom() != null && m.cod() != null) {
-                System.out.println("Domain: " + m.dom().label());
-                System.out.println("Codomain: " + m.cod().label());
-                System.out.println();
-                graph.addEdge(m, m.dom(), m.cod());
-            }
-        }
+        final var mappings = data.datasources().stream().flatMap(serializedDatasource -> {
+            final var datasourceWrapper = datasourceRepository.find(new Id(serializedDatasource.datasourceId()));
+            final var datasource = datasourceWrapper.toDatasource();
+            return serializedDatasource.mappings().stream().map(serializedMapping -> serializedMapping.toMapping(datasource, schema));
+        }).toList();
 
-        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
-        layout.setSize(new Dimension(600, 600));
+        List<InferenceEdit> edits = data.edits();
 
-        for (int i = 0; i < 1000; i++) { // initialize positions
-            layout.step();
-        }
+        if (layoutType != null)
+            Layout.applyToMetadata(schema, metadata, layoutType);
+        else
+            edits = updateInferenceEdits(edits, edit, isFinal);
 
-        Map<Key, Position> positions = new HashMap<>();
-        for (SchemaObject node : graph.getVertices()) {
-            double x = layout.getX(node);
-            double y = layout.getY(node);
-            positions.put(node.key(), new Position(x, y));
-        }
+        final InferenceEditor inferenceEditor = isFinal
+            ? new InferenceEditor(schema, metadata, mappings, edits)
+            : new InferenceEditor(schema, metadata, edits);
 
-        return positions;
+        inferenceEditor.applyEdits();
+
+        job.job().data = InferenceJobData.fromSchemaCategory(
+            edits,
+            schema,
+            inferenceEditor.getSchemaCategory(),
+            metadata,
+            inferenceEditor.getMetadata(),
+            layoutType != null ? layoutType : data.layoutType(),
+            candidates,
+            mappings
+        );
+
+        if (isFinal)
+            finishRSDToCategoryProcessing(job, inferenceEditor.getSchemaCategory(), inferenceEditor.getMetadata(), inferenceEditor.getMappings());
+
+        return job;
     }
 
-    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-        MetadataContext context = new MetadataContext();
+    // TODO: move this to an util class - should I?
+    private List<InferenceEdit> updateInferenceEdits(List<InferenceEdit> edits, InferenceEdit edit, boolean isFinal) {
+        if (edit == null) {
+            return isFinal || edits.isEmpty()
+                ? edits
+                : edits.subList(0, edits.size() - 1);
+        }
 
-        context.setId(new Id(null)); // is null ok?
-        context.setVersion(Version.generateInitial());
+        final Integer editIndex = findEditIdx(edit, edits);
+        if (editIndex == null) {
+            edit.setId(edits.size());
+            final var output = new ArrayList<>(edits);
+            output.add(edit);
 
-        Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());
-        positions.forEach(context::setPosition);
+            return output;
+        }
 
-        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
+        InferenceEdit existingEdit = edits.get(editIndex);
+        existingEdit.setActive(!existingEdit.isActive());
+
+        return edits;
+    }
+
+    private Integer findEditIdx(InferenceEdit edit, List<InferenceEdit> manual) {
+        for (int i = 0; i < manual.size(); i++)
+            if (manual.get(i).getId().equals(edit.getId()))
+                return i;
+
+        return null;
+    }
+
+    private void finishRSDToCategoryProcessing(JobWithRun job, SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings) {
+        final var categoryWrapper = schemaRepository.find(job.run().categoryId);
+
+        final var version = categoryWrapper.systemVersion().generateNext();
+        categoryWrapper.update(version, schema, metadata);
+        schemaRepository.save(categoryWrapper);
+
+        final RSDToCategoryPayload payload = (RSDToCategoryPayload) job.job().payload;
+        final Map<Id, DatasourceWrapper> datasourceWrappers = new TreeMap<>();
+        payload.datasourceIds().stream().map(datasourceRepository::find).forEach(dw -> datasourceWrappers.put(dw.id(), dw));
+
+        for (final Mapping mapping : mappings) {
+            final MappingInit init = MappingInit.fromMapping(mapping, categoryWrapper.id(), new Id(mapping.datasource().identifier));
+            mappingService.create(init);
+        }
     }
 
 }

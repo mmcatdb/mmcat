@@ -23,7 +23,7 @@ public class Action extends Entity {
 
     public static Action createNew(Id categoryId, String label, ActionPayload payload) {
         return new Action(
-            Id.createNewUUID(),
+            Id.createNew(),
             categoryId,
             label,
             payload
@@ -38,14 +38,13 @@ public class Action extends Entity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static Action fromJsonValue(Id id, Id categoryId, String jsonValueString) throws JsonProcessingException {
-        final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
-
+    public static Action fromJsonValue(Id id, Id categoryId, String jsonValue) throws JsonProcessingException {
+        final JsonValue json = jsonValueReader.readValue(jsonValue);
         return new Action(
             id,
             categoryId,
-            jsonValue.label,
-            jsonValue.payload
+            json.label,
+            json.payload
         );
     }
 

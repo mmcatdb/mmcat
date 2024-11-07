@@ -72,16 +72,13 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
-        System.out.println("mongo pullwrapper");
-        System.out.println("query: " + query);
         final var forest = new ForestOfRecords();
 
         try (
-            var iterator = getDocumentIterator(query);
+            final var iterator = getDocumentIterator(query);
         ) {
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
-                System.out.println("document to json: " + document.toJson());
                 final var rootRecord = new RootRecord();
                 getDataFromDocument(rootRecord, document, path);
                 forest.addRecord(rootRecord);
@@ -97,12 +94,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     private void getDataFromDocument(ComplexRecord parentRecord, Document document, ComplexProperty path) {
         boolean hasSubpathWithDynamicName = false;
 
-        for (AccessPath subpath : path.subpaths()) {
-            System.out.println("getDataFromDocu name of path: " + subpath.name());
-            if (subpath.name() instanceof StaticName staticName) {
-                System.out.println(subpath.name() + "is about to enter getFieldFromObjectForSubpath");
+        for (final AccessPath subpath : path.subpaths()) {
+            if (subpath.name() instanceof StaticName staticName)
                 getFieldFromObjectForSubpath(parentRecord, document, staticName.getStringName(), subpath);
-            }
             else
                 hasSubpathWithDynamicName = true;
         }
@@ -114,7 +108,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, Document document, ComplexProperty path) {
         // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name.
         AccessPath subpathWithDynamicName = null;
-        Set<String> otherSubpathNames = new TreeSet<>();
+        final Set<String> otherSubpathNames = new TreeSet<>();
 
         for (AccessPath subpath : path.subpaths()) {
             if (subpath.name() instanceof StaticName staticName)
@@ -124,31 +118,21 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
 
         // For all keys in the object where the key is not a known static name do ...
-        for (String key : document.keySet()) {
+        for (final String key : document.keySet()) {
             if (!otherSubpathNames.contains(key))
                 getFieldFromObjectForSubpath(parentRecord, document, key, subpathWithDynamicName);
         }
     }
 
     private void getFieldFromObjectForSubpath(ComplexRecord parentRecord, Document document, String key, AccessPath subpath) {
-        // TODO Check for the null values if necessary.
-        /*
-        if (document.isNull(key)) // Returns if the value is null or if the value doesn't exist.
+        final var value = document.get(key);
+        if (value == null)
             return;
-        */
 
-        //var value = document.get(key);
-        //if (key.equals("monday")) {System.out.println("changing up that key, girl"); key = "Monday";}
-        var value = document.get(key);
-        System.out.println("getFieldFromObjectForSubpath key:" + key);
-        System.out.println("getFieldFromObjectForSubpath value: " + value);
-
-        if (subpath instanceof ComplexProperty complexSubpath) {
-            System.out.println(subpath.name() + "is about to enter getFieldFromObjectForComplexSubpath");
-            getFieldFromObjectForComplexSubpath(parentRecord, key, value, complexSubpath); }
-        else if (subpath instanceof SimpleProperty simpleSubpath) {
-            System.out.println(subpath.name() + "is about to enter getFieldFromObjectForSimpleSubpath");
-            getFieldFromObjectForSimpleSubpath(parentRecord, key, value, simpleSubpath); }
+        if (subpath instanceof ComplexProperty complexSubpath)
+            getFieldFromObjectForComplexSubpath(parentRecord, key, value, complexSubpath);
+        else if (subpath instanceof SimpleProperty simpleSubpath)
+            getFieldFromObjectForSimpleSubpath(parentRecord, key, value, simpleSubpath);
     }
 
     private void getFieldFromObjectForComplexSubpath(ComplexRecord parentRecord, String key, Object value, ComplexProperty complexSubpath) {
@@ -163,8 +147,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private void getFieldFromObjectForSimpleSubpath(ComplexRecord parentRecord, String key, Object value, SimpleProperty simpleSubpath) {
         if (value instanceof ArrayList<?> simpleArray) {
-            System.out.println(simpleSubpath.name() + "is simpleArray");
-            var values = new ArrayList<String>();
+            final var values = new ArrayList<String>();
 
             for (int i = 0; i < simpleArray.size(); i++)
                 values.add(simpleArray.get(i).toString());
@@ -172,7 +155,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), key), simpleSubpath.signature(), values);
         }
         else {
-            RecordName recordName = toRecordName(simpleSubpath.name(), key);
+            final RecordName recordName = toRecordName(simpleSubpath.name(), key);
             parentRecord.addSimpleValueRecord(recordName, simpleSubpath.signature(), value.toString());
         }
     }
@@ -192,16 +175,15 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         if (name instanceof DynamicName dynamicName)
             return dynamicName.toRecordName(valueIfDynamic);
 
-        var staticName = (StaticName) name;
-        return staticName.toRecordName();
+        return ((StaticName) name).toRecordName();
     }
 
     public String readCollectionAsStringForTests(String kindName) {
-        var database = provider.getDatabase();
-        MongoCollection<Document> collection = database.getCollection(kindName);
-        Iterator<Document> iterator = collection.find().iterator();
+        final var database = provider.getDatabase();
+        final MongoCollection<Document> collection = database.getCollection(kindName);
+        final Iterator<Document> iterator = collection.find().iterator();
 
-        var output = new StringBuilder();
+        final var output = new StringBuilder();
         while (iterator.hasNext())
             output.append(iterator.next().toString());
 

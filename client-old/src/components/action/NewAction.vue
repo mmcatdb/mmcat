@@ -1,69 +1,107 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import API from '@/utils/api';
-import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
+import { type ActionPayloadInit, ACTION_TYPES, Action, ActionType } from '@/types/action';
+import { Mapping } from '@/types/mapping';
 
 const emit = defineEmits<{
     (e: 'newAction', action: Action): void;
 }>();
 
-const logicalModels = ref<LogicalModel[]>();
 const datasources = ref<Datasource[]>();
-const fetched = ref(false);
-const logicalModelId = ref<Id>();
-const datasourceId = ref<Id>();
-const kindName = ref('');
-const actionName = ref<string>('');
-const actionType = ref(ACTION_TYPES[0].value);
-const fetching = ref(false);
+const mappings = ref<Mapping[]>();
 
-const categoryId = useSchemaCategoryId();
+// Common
+
+const actionName = ref<string>('');
+type AvailableTypes = typeof ACTION_TYPES[number]['value'];
+const actionType = ref<AvailableTypes>(ACTION_TYPES[0].value);
+const datasourceId = ref<Id>();
+
+// For RSDToCategory
+
+const datasourceIds = ref<Id[]>([]);
+const selectedDatasources = computed(() => {
+    const all = datasources.value;
+    return all ? datasourceIds.value.map(id => all.find(ds => ds.id === id)!) : [];
+});
+const availableDatasources = computed(() => {
+    return datasources.value?.filter(ds => !datasourceIds.value.includes(ds.id)) ?? [];
+});
+
+function addDatasource() {
+    if (datasourceId.value && !datasourceIds.value.includes(datasourceId.value)) {
+        datasourceIds.value.unshift(datasourceId.value);
+        datasourceId.value = undefined;
+    }
+}
+
+function removeDatasource(id: Id) {
+    datasourceIds.value = datasourceIds.value.filter(dsId => dsId !== id);
+}
+
+// For ModelToCategory and CategoryToModel
+
+const mappingIds = ref<Id[]>([]);
+const selectedMappings = computed(() => {
+    const all = mappings.value;
+    if (!all)
+        return [];
+
+    return mappingIds.value
+        .map(id => all.find(m => m.id === id)!)
+        .filter(m => m.datasourceId === datasourceId.value);
+});
+const availableMappings = computed(() => {
+    return mappings.value
+        ?.filter(m => m.datasourceId === datasourceId.value)
+        .filter(m => !mappingIds.value.includes(m.id)) ?? [];
+});
+
+function toggleMapping(id: Id) {
+    if (mappingIds.value.includes(id))
+        mappingIds.value = mappingIds.value.filter(mId => mId !== id);
+    else
+        mappingIds.value.push(id);
+}
 
 onMounted(async () => {
-    const logicalModelResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
-    if (logicalModelResult.status)
-        logicalModels.value = logicalModelResult.data.map(LogicalModel.fromServer);
+    const results = await Promise.all([
+        API.datasources.getAllDatasources({}),
+        API.mappings.getAllMappingsInCategory({}, { categoryId }),
+    ]);
 
-    const datasourceResult = await API.datasources.getAllDatasources({});
-    if (datasourceResult.status)
-        datasources.value = datasourceResult.data.map(Datasource.fromServer);
-
-    fetched.value = true;
+    if (results[0].status)
+        datasources.value = results[0].data.map(Datasource.fromServer);
+    if (results[1].status)
+        mappings.value = results[1].data.map(Mapping.fromServer);
 });
+
+const fetching = ref(false);
+const categoryId = useSchemaCategoryId();
 
 const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    if (actionType.value === ActionType.RSDToCategory)
-        return !!datasourceId.value && !!kindName.value; // this will fail, if kindName will be null
-    else return !!logicalModelId.value;
-
+    return actionType.value === ActionType.RSDToCategory ? !!datasourceIds.value.length : !!datasourceId.value;
 });
 
 async function createAction() {
     fetching.value = true;
-    let payload;
-
-    if (actionType.value === ActionType.RSDToCategory) {
-        payload = {
-            type: actionType.value,
-            datasourceId: datasourceId.value,
-            kindName: kindName.value,
-        };
-    }
-    else {
-        payload = {
-            type: actionType.value,
-            logicalModelId: logicalModelId.value,
-        };
-    }
+    const payload: ActionPayloadInit = actionType.value === ActionType.RSDToCategory ? {
+        type: actionType.value,
+        datasourceIds: datasourceIds.value,
+    } : {
+        type: actionType.value,
+        datasourceId: datasourceId.value as Id,
+        mappingIds: selectedMappings.value.length === 0 ? undefined : selectedMappings.value.map(m => m.id),
+    };
 
     const result = await API.actions.createAction({}, {
         categoryId,
@@ -80,57 +118,138 @@ async function createAction() {
 <template>
     <div class="newAction">
         <h2>Create a new action</h2>
-        <ValueContainer>
-            <ValueRow label="Type:">
-                <select v-model="actionType">
-                    <option
-                        v-for="availableType in ACTION_TYPES"
-                        :key="availableType.value"
-                        :value="availableType.value"
+        <div class="d-flex flex-column">
+            <div class="row align-items-center gx-1">
+                <span class="col-3 text-end">Type:</span>
+                <div class="col">
+                    <select
+                        v-model="actionType"
+                        class="w-100"
                     >
-                        {{ availableType.label }}
-                    </option>
-                </select>
-            </ValueRow>
-            <ValueRow label="Label:">
-                <input v-model="actionName" />
-            </ValueRow>
-            <ValueRow
+                        <option
+                            v-for="availableType in ACTION_TYPES"
+                            :key="availableType.value"
+                            :value="availableType.value"
+                        >
+                            {{ availableType.label }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="row align-items-center gx-1">
+                <span class="col-3 text-end">Label:</span>
+                <div class="col">
+                    <input
+                        v-model="actionName"
+                        class="w-100"
+                    />
+                </div>
+            </div>
+            <div
                 v-if="actionType === ActionType.RSDToCategory"
-                label="Data source:"
+                class="row align-items-center gx-1"
             >
-                <select v-model="datasourceId">
-                    <option
-                        v-for="datasource in datasources"
-                        :key="datasource.id"
-                        :value="datasource.id"
+                <span class="col-3 text-end">Datasources:</span>
+                <div class="col">
+                    <div class="d-flex align-items-center gap-2">
+                        <select
+                            v-model="datasourceId"
+                            class="flex-grow-1"
+                        >
+                            <option
+                                v-for="datasource in availableDatasources"
+                                :key="datasource.id"
+                                :value="datasource.id"
+                            >
+                                {{ datasource.label }}
+                            </option>
+                        </select>
+                        <button @click="addDatasource">
+                            Add
+                        </button>
+                    </div>
+                </div>
+                <div class="row gx-1">
+                    <div class="col-3" />
+                    <div class="col">
+                        <div
+                            v-for="datasource in selectedDatasources"
+                            :key="datasource.id"
+                            class="d-flex align-items-center gap-2 py-1"
+                        >
+                            <button @click="removeDatasource(datasource.id)">
+                                x
+                            </button>
+                            {{ datasource.label }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <template v-else>
+                <div class="row align-items-center gx-1">
+                    <span class="col-3 text-end">Datasource:</span>
+                    <div class="col">
+                        <select
+                            v-model="datasourceId"
+                            class="w-100"
+                        >
+                            <option
+                                v-for="datasource in datasources"
+                                :key="datasource.id"
+                                :value="datasource.id"
+                            >
+                                {{ datasource.label }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row gx-1">
+                    <span class="col-3 text-end">Mappings:</span>
+                    <div class="col">
+                        <div
+                            v-if="selectedMappings.length > 0"
+                            class="d-flex flex-wrap gap-1"
+                        >
+                            <button
+                                v-for="mapping in selectedMappings"
+                                :key="mapping.id"
+                                @click="toggleMapping(mapping.id)"
+                            >
+                                {{ mapping.kindName }}
+                            </button>
+                        </div>
+                        <div
+                            v-else
+                            class="fw-bold"
+                        >
+                            All
+                        </div>
+                    </div>
+                    <div
+                        v-if="availableMappings.length > 0"
+                        class="row"
                     >
-                        {{ datasource.label }}
-                    </option>
-                </select>
-            </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.RSDToCategory"
-                label="Kind name:"
-            >
-                <input v-model="kindName" />
-            </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"
-                label="Logical model:"
-            >
-                <select v-model="logicalModelId">
-                    <option
-                        v-for="logicalModel in logicalModels"
-                        :key="logicalModel.id"
-                        :value="logicalModel.id"
-                    >
-                        {{ logicalModel.label }}
-                    </option>
-                </select>
-            </ValueRow>
-            <ValueRow>&nbsp;</ValueRow><!-- To make the NewAction tile look the same as the ActionDisplay tile. -->
-        </ValueContainer>
+                        <div class="col-3" />
+                        <div class="col">
+                            <div class="mt-2">
+                                Available:
+                            </div>
+                            <div
+                                class="d-flex flex-wrap gap-1"
+                            >
+                                <button
+                                    v-for="mapping in availableMappings"
+                                    :key="mapping.id"
+                                    @click="toggleMapping(mapping.id)"
+                                >
+                                    {{ mapping.kindName }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
         <div class="button-row">
             <button
                 :disabled="(fetching || !dataValid)"
@@ -148,6 +267,6 @@ async function createAction() {
     border: 1px solid var(--color-primary);
     margin-right: 16px;
     margin-bottom: 16px;
-    min-width: 284px;
+    width: 420px;
 }
 </style>

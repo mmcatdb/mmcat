@@ -1,10 +1,9 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.instance.InstanceCategoryWrapper;
+import cz.matfyz.server.entity.InstanceCategoryWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -22,7 +21,7 @@ public class InstanceCategoryRepository {
             final var statement = connection.prepareStatement("""
                 SELECT
                     instance_data,
-                    schema_category_id
+                    category_id
                 FROM session
                 WHERE id = ?;
                 """);
@@ -36,14 +35,14 @@ public class InstanceCategoryRepository {
                     return;
                 }
 
-                final var schemaCategoryId = getId(resultSet, "schema_category_id");
+                final var schemaCategoryId = getId(resultSet, "category_id");
                 output.set(InstanceCategoryWrapper.fromJsonValue(schemaCategoryId, sessionId, instanceData));
             }
         });
     }
 
-    public boolean save(InstanceCategoryWrapper wrapper) {
-        return db.getBoolean((connection, output) -> {
+    public void save(InstanceCategoryWrapper wrapper) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 UPDATE session
                 SET instance_data = ?::jsonb
@@ -52,9 +51,7 @@ public class InstanceCategoryRepository {
             );
             statement.setString(1, wrapper.toJsonValue());
             setId(statement, 2, wrapper.sessionId());
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            executeChecked(statement);
         });
     }
 

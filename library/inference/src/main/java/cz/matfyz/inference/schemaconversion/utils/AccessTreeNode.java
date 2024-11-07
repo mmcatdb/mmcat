@@ -2,111 +2,129 @@ package cz.matfyz.inference.schemaconversion.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
- * Class to hold info about properties in SchemaCat, so that an access path can be
- * later constructed.
+ * The {@code AccessTreeNode} class represents a node in a tree structure that
+ * holds information about properties in a schema category. This is used to
+ * construct an access path in the schema.
  */
 public class AccessTreeNode {
 
-    public enum State {
-        Root,
-        Simple,
-        Complex,
+    /**
+     * Enum representing the type of the {@code AccessTreeNode}.
+     * <ul>
+     *   <li>{@link #ROOT} - Represents the root node of the tree.</li>
+     *   <li>{@link #SIMPLE} - Represents a simple node.</li>
+     *   <li>{@link #COMPLEX} - Represents a complex node.</li>
+     * </ul>
+     */
+    public enum Type {
+        ROOT,
+        SIMPLE,
+        COMPLEX,
     }
 
-    public State state;
-    public String name;
-    public Integer sigVal;
-    public List<AccessTreeNode> children;
-    public Key key;
-    public Key parentKey;
-    public String label;
-    public Min min;
-    public Signature sig;
-    public boolean isArrayType;
+    public final String name;
+    @Nullable public final BaseSignature signature;
+    public final Key key;
+    @Nullable private Key parentKey;
+    @Nullable public final String label;
+    @Nullable public final Min min;
+    public final boolean isArrayType;
+    private List<AccessTreeNode> children;
 
-    public AccessTreeNode(State state, String name, Integer sigVal, Key key, Key parentKey, String label, Min min, boolean isArrayType) {
-        this.state = state;
+    public AccessTreeNode(String name, @Nullable BaseSignature signature, Key key, @Nullable Key parentKey, @Nullable String label, @Nullable Min min, boolean isArrayType) {
         this.name = name;
-        this.sigVal = sigVal; // a node contains signature between itself and its parent
-        this.children = new ArrayList<>();
+        this.signature = signature;
         this.key = key;
         this.parentKey = parentKey;
         this.label = label;
         this.min = min;
         this.isArrayType = isArrayType;
+        this.children = new ArrayList<>();
     }
 
-    public void addChild(AccessTreeNode child) {
-        children.add(child);
+    public Type getType() {
+        if (parentKey == null)
+            return Type.ROOT;
+        if (!children.isEmpty())
+            return Type.COMPLEX;
+        return Type.SIMPLE;
+    }
+
+    public Key getParentKey() {
+        return parentKey;
     }
 
     public List<AccessTreeNode> getChildren() {
         return children;
     }
 
-    public State getState() {
-        return state;
+    /**
+     * Adds a child node to the list of children.
+     */
+    public void addChild(AccessTreeNode child) {
+        children.add(child);
     }
 
-    public String getName() {
-        return name;
-    }
-    public int getSigVal() {
-        return sigVal;
-    }
-    public Key getKey() {
-        return key;
-    }
-    public Key getParentKey() {
-        return parentKey;
-    }
-    public String getLabel() {
-        return label;
-    }
-    public Min getMin() {
-        return min;
-    }
-    public Signature getSig() {
-        return sig;
+    /**
+     * Finds a node with the specified key starting from the given node.
+     */
+    public static AccessTreeNode findNodeWithKey(Key targetKey, AccessTreeNode node) throws NoSuchElementException {
+        if (node.key.equals(targetKey))
+            return node;
+
+        for (final AccessTreeNode child : node.children) {
+            AccessTreeNode result = findNodeWithKey(targetKey, child);
+            if (result != null)
+                return result;
+        }
+
+        throw new NoSuchElementException("Node with key " + targetKey + " not found.");
     }
 
-    public AccessTreeNode findNodeWithName(String targetName) {
-        if (this.name.equals(targetName)) {
-            return this;
+    /**
+     * Transforms the tree structure starting from this node by handling array nodes.
+     * If the node is of type {@code isArrayType}, it checks its children for any node named ARRAY_SYMBOL.
+     * It removes the intermediate ARRAY_SYMBOL node and promotes its children to be direct children
+     * of the {@code isArrayType} node.
+     */
+    public void transformArrayNodes() {
+        if (this.isArrayType && !this.children.isEmpty()) {
+            final AccessTreeNode child = this.children.get(0); // getting the first child
+            if (child.name.equals(RecordSchemaDescription.ROOT_SYMBOL))
+                promoteChildren(child);
         }
-        for (AccessTreeNode child : this.children) {
-            if (child.findNodeWithName(targetName) != null) {
-                return child;
-            }
-        }
-        return null;
+
+        for (final AccessTreeNode child : this.children)
+            child.transformArrayNodes();
     }
 
-    public static AccessTreeNode assignSignatures(AccessTreeNode node, Map<Integer, Integer> mappedSigVals) {
-        if (node.state != State.Root) {
-            int newSigVal = mappedSigVals.get(node.getSigVal());
-            node.sig = Signature.createBase(newSigVal); // but in sigVal, there is still the old value
-        }
-        for (AccessTreeNode child : node.getChildren()) {
-            assignSignatures(child, mappedSigVals);
-        }
-        return node;
+    private void promoteChildren(AccessTreeNode child) {
+        final List<AccessTreeNode> newChildren = new ArrayList<>(child.getChildren());
+        for (final AccessTreeNode newChild : newChildren)
+            newChild.parentKey = this.key;
+
+        this.children = newChildren;
     }
 
     public void printTree(String prefix) {
-        System.out.println(prefix + "Name: " + this.name + ", State: " + this.state + ", Signature: " + (this.sig != null ? this.sig.toString() : "None") +
-                ", Signature Value: " + this.sigVal + ", Key: " + this.key + ", Parent Key: " + this.parentKey);
-        for (AccessTreeNode child : this.children) {
+        System.out.println(prefix + "Name: " + this.name +
+                                    ", Type: " + this.getType() +
+                                    ", Signature: " + (this.signature != null ? this.signature.toString() : "None") +
+                                    ", Key: " + this.key +
+                                    ", Parent Key: " + this.parentKey +
+                                    ", isArrayType: " + this.isArrayType);
+
+        for (AccessTreeNode child : this.children)
             child.printTree(prefix + "    ");
-        }
     }
-
 }
-

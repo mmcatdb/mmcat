@@ -1,6 +1,8 @@
 # MM-cat
 
-A set of tools for modeling, evolution and querying of multi-model data based on category theory. There are the following modules:
+A set of tools for modeling, evolution and querying of multi-model data based on category theory. First and foremost, read our awesome [wiki](https://mmcatdb.com/)!
+
+This project is being developed as a monorepo. It consists of the following parts:
 - [library](./library/README.md) - A java framework containing most of the algorithms and a web server.
 - [client](./client-old/README.md) - A client part of the web application which serves as an UI for the whole framework.
 
@@ -23,7 +25,7 @@ docker compose -f compose.app.prod.yaml up -d --build
 
 - There is another compose setup for development outside of docker.
 ```bash
-docker compose -f compose.db.dev.yaml up -d --build
+docker compose up -d --build
 ```
 - And for the application
 ```bash

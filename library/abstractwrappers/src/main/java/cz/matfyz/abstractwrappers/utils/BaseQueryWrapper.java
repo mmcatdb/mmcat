@@ -6,8 +6,8 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
-import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.QueryStructure;
 
 import java.util.ArrayList;
@@ -62,11 +62,11 @@ public abstract class BaseQueryWrapper {
 
     // Joins
 
-    protected record Join(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional) {}
+    protected record Join(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional) {}
 
     protected List<Join> joins = new ArrayList<>();
 
-    public void addJoin(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional) {
+    public void addJoin(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional) {
         joins.add(new Join(from, to, conditions, repetition, isOptional));
     }
 

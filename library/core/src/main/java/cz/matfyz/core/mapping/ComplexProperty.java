@@ -8,11 +8,11 @@ import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -35,12 +35,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = ComplexProperty.Deserializer.class)
 public class ComplexProperty extends AccessPath {
 
-    public ComplexProperty(Name name, Signature signature, List<AccessPath> subpaths) {
+    public ComplexProperty(Name name, Signature signature, Iterable<AccessPath> subpaths) {
         super(name, signature);
 
-        this.subpathsMap = new TreeMap<>();
-        subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
-        this.subpaths = new ArrayList<>(this.subpathsMap.values());
+        this.subpaths = new TreeMap<>();
+        subpaths.forEach(subpath -> this.subpaths.put(subpath.signature(), subpath));
     }
 
     /** A very specific thing for the MTC algorithm. */
@@ -54,22 +53,21 @@ public class ComplexProperty extends AccessPath {
     }
 
     public boolean hasDynamicKeys() {
-        return this.subpaths.size() == 1 && this.subpaths.get(0).name instanceof DynamicName;
+        return this.subpaths.size() == 1 && this.subpaths().iterator().next().name instanceof DynamicName;
     }
 
-    private final ArrayList<AccessPath> subpaths;
-    private final Map<Signature, AccessPath> subpathsMap;
+    private final Map<Signature, AccessPath> subpaths;
 
-    public List<AccessPath> subpaths() {
-        return subpaths;
+    public Collection<AccessPath> subpaths() {
+        return subpaths.values();
     }
 
     public AccessPath getDirectSubpath(Signature signature) {
-        return subpathsMap.get(signature);
+        return subpaths.get(signature);
     }
 
-    public AccessPath getDirectSubpath(Name name) {
-        final var optional = subpathsMap.values().stream().filter(subpath -> subpath.name.equals(name)).findAny();
+    public @Nullable AccessPath getDirectSubpath(Name name) {
+        final var optional = subpaths().stream().filter(subpath -> subpath.name.equals(name)).findAny();
 
         return optional.isPresent() ? optional.get() : null;
     }
@@ -85,8 +83,7 @@ public class ComplexProperty extends AccessPath {
      * @param signature
      * @return the closest subpath with given signature (or null if none such exists).
      */
-    @Nullable
-    public AccessPath getSubpathBySignature(Signature signature) {
+    public @Nullable AccessPath getSubpathBySignature(Signature signature) {
         /*
         if (this.signature.equals(signature))
             return this;
@@ -143,10 +140,6 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override protected boolean hasSignature(Signature signature) {
-        return this.signature.equals(signature);
-    }
-
     /**
      * Finds the path with the given signature and returns the properties along the way. This property itself isn't included.
      * If the signature isn't found, null is returned.
@@ -166,7 +159,7 @@ public class ComplexProperty extends AccessPath {
         if (signature.isEmpty())
             return new ArrayList<>(List.of(this));
 
-        for (var subpath : subpaths) {
+        for (final var subpath : subpaths()) {
             final var subSignature = signature.cutPrefix(subpath.signature);
             if (subSignature == null)
                 continue;
@@ -182,12 +175,12 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
         if (morphism.dom().key().equals(key))
             return this;
 
-        for (final var subpath : subpaths) {
+        for (final var subpath : subpaths()) {
             final var subProperty = subpath.tryGetSubpathForObject(key, schema);
             if (subProperty != null)
                 return subProperty;
@@ -202,9 +195,9 @@ public class ComplexProperty extends AccessPath {
      * @return a copy of this without subpath.
      */
     public ComplexProperty minusSubpath(AccessPath subpath) {
-        assert subpaths.stream().anyMatch(path -> path.equals(subpath)) : "Subpath not found in accessPath in minusSubtree";
+        assert subpaths().stream().anyMatch(path -> path.equals(subpath)) : "Subpath not found in accessPath in minusSubtree";
 
-        final List<AccessPath> newSubpaths = subpaths.stream().filter(path -> path.equals(subpath)).toList();
+        final List<AccessPath> newSubpaths = subpaths().stream().filter(path -> !path.equals(subpath)).toList();
 
         return new ComplexProperty(name, signature, newSubpaths);
     }
@@ -216,8 +209,8 @@ public class ComplexProperty extends AccessPath {
 
         printer.append("{").down().nextLine();
 
-        for (int i = 0; i < subpaths.size(); i++)
-            printer.append(subpaths.get(i)).append(",").nextLine();
+        for (final var subpath : subpaths())
+            printer.append(subpath).append(",").nextLine();
 
         printer.remove().up().nextLine()
             .append("}");
@@ -253,12 +246,6 @@ public class ComplexProperty extends AccessPath {
         return newSubpaths;
     }
 
-    public List<String> getSubpathNames() {
-        return subpaths.stream()
-                    .map(subpath -> subpath.name.toString())
-                    .collect(Collectors.toList());
-    }
-
     public static class Serializer extends StdSerializer<ComplexProperty> {
 
         public Serializer() {
@@ -275,7 +262,7 @@ public class ComplexProperty extends AccessPath {
             generator.writePOJOField("signature", property.signature);
 
             generator.writeArrayFieldStart("subpaths");
-            for (final var subpath : property.subpaths)
+            for (final var subpath : property.subpaths())
                 generator.writePOJO(subpath);
             generator.writeEndArray();
 

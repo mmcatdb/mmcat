@@ -4,6 +4,9 @@ import API from '@/utils/api';
 import { computed, ref, watch } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { useRoute } from 'vue-router';
+import { tryUseWorkflow } from '@/utils/injects';
+import { type WorkflowData } from '@/types/workflow';
 
 const props = defineProps<{
     datasource?: Datasource;
@@ -17,7 +20,6 @@ const emit = defineEmits<{
 
 const fetching = ref(false);
 
-
 type InnerValue = {
     type?: DatasourceType;
     label: string;
@@ -26,7 +28,9 @@ type InnerValue = {
 
 const initialValue: InnerValue = props.datasource
     ? { ...props.datasource, settings: { ...props.datasource.settings } }
-    : { label: '', settings: {} };
+    : { label: '', settings: {
+        hasHeader: false,
+    } };
 
 const innerValue = ref<InnerValue>(initialValue);
 
@@ -64,6 +68,11 @@ async function save() {
     fetching.value = false;
 }
 
+// If we are in the phase of creating and selecting a new datasource as input for the workflow, we need to set it on the workflow.
+const route = useRoute();
+const isSelecting = ref(route.query.state === 'selecting');
+const workflow = tryUseWorkflow();
+
 async function createNew() {
     const init = innerValue.value;
     if (!init.type)
@@ -74,6 +83,16 @@ async function createNew() {
         return;
 
     const newDatasource = Datasource.fromServer(result.data);
+
+    if (workflow && isSelecting.value) {
+        const newData: WorkflowData = { ...workflow.value.data, inputDatasourceIds: [ ...workflow.value.data.inputDatasourceIds, newDatasource.id ] };
+        const result = await API.workflows.updateWorkflowData({ id: workflow.value.id }, newData);
+        if (!result.status)
+            return;
+
+        workflow.value = result.data;
+    }
+
     emit('save', newDatasource);
 }
 
@@ -108,7 +127,7 @@ async function deleteMethod() {
 
 <template>
     <div class="editor">
-        <h2>{{ isNew ? 'Add' : 'Edit' }} Data Source</h2>
+        <h2>{{ isNew ? 'Add' : 'Edit' }} Datasource</h2>
         <ValueContainer>
             <ValueRow label="Type:">
                 <select
@@ -171,6 +190,21 @@ async function deleteMethod() {
                 label="Password:"
             >
                 <input v-model="innerValue.settings.password" />
+            </ValueRow>
+            <ValueRow
+                v-if="innerValue.type === DatasourceType.csv"
+                label="Separator:"
+            >
+                <input v-model="innerValue.settings.separator" />
+            </ValueRow>
+            <ValueRow
+                v-if="innerValue.type === DatasourceType.csv"
+                label="Has header:"
+            >
+                <input
+                    v-model="innerValue.settings.hasHeader"
+                    type="checkbox"
+                />
             </ValueRow>
             <ValueRow
                 label="Is writable:"

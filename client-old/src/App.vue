@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
 import TopBar from '@/components/layout/TopBar.vue';
 import LeftBar from '@/components/layout/LeftBar.vue';
 import Content from '@/components/layout/Content.vue';
+import FixedRouterLink from './components/common/FixedRouterLink.vue';
 </script>
 
 <template>
     <TopBar>
         <template #left>
-            <RouterLink
+            <FixedRouterLink
                 :to="{ name: 'home' }"
                 class="home-link"
+                always-link
             >
                 MM-cat
-            </RouterLink>
+            </FixedRouterLink>
         </template>
         <template #center />
     </TopBar>

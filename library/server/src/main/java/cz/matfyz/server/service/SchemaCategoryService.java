@@ -1,23 +1,27 @@
 package cz.matfyz.server.service;
 
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataSerializer;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
-import cz.matfyz.server.builder.MetadataContext;
+import cz.matfyz.core.schema.SchemaSerializer;
+import cz.matfyz.evolution.Version;
+import cz.matfyz.evolution.exception.VersionException;
+import cz.matfyz.evolution.metadata.MMO;
+import cz.matfyz.evolution.metadata.MetadataEvolutionAlgorithm;
+import cz.matfyz.evolution.schema.SMO;
+import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
-import cz.matfyz.server.entity.evolution.SchemaUpdate;
-import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
+import cz.matfyz.server.entity.evolution.SchemaEvolution;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
+import cz.matfyz.server.repository.EvolutionRepository;
 
-import java.util.List;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SchemaCategoryService {
@@ -26,104 +30,76 @@ public class SchemaCategoryService {
     private SchemaCategoryRepository repository;
 
     @Autowired
+    private EvolutionRepository evolutionRepository;
+
+    @Autowired
     private JobService jobService;
 
-    public List<SchemaCategoryInfo> findAllInfos() {
-        return repository.findAllInfos();
+    public SchemaCategoryWrapper create(String label) {
+        final String finalLabel = findUniqueLabel(label);
+
+        final var schema = new SchemaCategory();
+        final var metadata = MetadataCategory.createEmpty(schema);
+        final var wrapper = SchemaCategoryWrapper.createNew(finalLabel, schema, metadata);
+
+        repository.save(wrapper);
+        jobService.createSession(wrapper.id());
+
+        return wrapper;
     }
 
-    public SchemaCategoryInfo createNewInfo(SchemaCategoryInit init) {
-        if (init.label() == null)
-            return null;
+    private String findUniqueLabel(String label) {
+        final var used = repository.findAllInfos().stream().map(info -> info.label()).collect(Collectors.toSet());
 
-        final var newWrapper = SchemaCategoryWrapper.createNew(init.label());
-        final Id generatedId = repository.add(newWrapper);
+        if (!used.contains(label))
+            return label;
 
-        if (generatedId == null)
-            return null;
+        for (int i = 1; i < Integer.MAX_VALUE; i++) {
+            final var newLabel = label + " (" + i + ")";
+            if (!used.contains(newLabel))
+                return newLabel;
+        }
 
-        jobService.createSession(generatedId);
-
-        return new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version);
+        throw new IllegalStateException("No unique label found");
     }
 
-    /*
-     * Created for the case when I receive SchemaCategoryWrapper from mminfer
-     * Be aware of the label in creating SchemaCategoryInit
-     * Maybe now, I will have to accept SK not SKWrapper! and make the contentext here!
-     * */
-    public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {
-        final Id generatedId = repository.add(wrapper);
-        //System.out.println("This is the generated ID: " + generatedId);
+    public record SchemaEvolutionInit(
+        Version prevVersion,
+        List<SMO> schema,
+        List<MMO> metadata
+    ) {}
 
-        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "new_label", wrapper.version);
-    }
-
-    /***
-     * Temporary workaround method for inference
-     * Overwrites the existing empty SchemaCategory
-     */
-    public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
-        final boolean saved = repository.save(wrapper, id);
-
-        return saved ? new SchemaCategoryInfo(id, "new_label", wrapper.version) : null;
-    }
-
-    public SchemaCategoryInfo findInfo(Id id) {
-        return repository.findInfo(new Id("" + id));
-    }
-
-    public SchemaCategoryWrapper find(Id id) {
-        return repository.find(id);
-    }
-
-
-    public @Nullable SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
+    public SchemaCategoryWrapper update(Id id, SchemaEvolutionInit evolutionInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);
-        final var update = SchemaUpdate.fromInit(updateInit, id);
+        if (!evolutionInit.prevVersion().equals(wrapper.version()))
+            throw VersionException.mismatch(evolutionInit.prevVersion(), wrapper.version());
 
-        if (!update.prevVersion.equals(wrapper.version))
-            return null;
+        final var newVersion = wrapper.systemVersion.generateNext();
+        final var evolution = SchemaEvolution.createFromInit(id, newVersion, evolutionInit);
 
-        final MetadataContext context = new MetadataContext();
-        final SchemaCategoryUpdate evolutionUpdate = update.toEvolution();
-        final SchemaCategory category = wrapper.toSchemaCategory(context);
-        evolutionUpdate.up(category);
+        final SchemaEvolutionAlgorithm schemaAlgorithm = evolution.toSchemaAlgorithm(evolutionInit.prevVersion());
+        final SchemaCategory schema = wrapper.toSchemaCategory();
+        schemaAlgorithm.up(schema);
 
-        // The metadata is not versioned.
-        // However, without it, the schema category can't be restored to it's previous version.
-        // So, we might need to keep all metadata somewhere. Maybe even version it ...
-        updateInit.metadata().forEach(m -> context.setPosition(m.key(), m.position()));
-        context.setVersion(update.nextVersion);
+        final MetadataEvolutionAlgorithm metadataAlgorithm = evolution.toMetadataAlgorithm(evolutionInit.prevVersion());
+        final MetadataCategory metadata = wrapper.toMetadataCategory(schema);
+        metadataAlgorithm.up(metadata);
 
-        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
+        wrapper.updateVersion(newVersion, wrapper.systemVersion);
+        wrapper.systemVersion = newVersion;
+        wrapper.schema = SchemaSerializer.serialize(schema);
+        wrapper.metadata = MetadataSerializer.serialize(metadata);
 
-        if (!repository.update(newWrapper, update))
-            return null;
+        repository.save(wrapper);
+        evolutionRepository.create(evolution);
 
         jobService.createSystemRun(
             id,
-            "Update queries to v. " + update.nextVersion,
-            new UpdateSchemaPayload(update.prevVersion, update.nextVersion)
+            "Update queries to v. " + evolution.version,
+            new UpdateSchemaPayload(evolutionInit.prevVersion(), evolution.version)
         );
 
-        return newWrapper;
-    }
-
-    public boolean updateMetadata(Id id, List<MetadataUpdate> metadataUpdates) {
-        final var wrapper = repository.find(id);
-
-        final var context = new MetadataContext();
-        final var category = wrapper.toSchemaCategory(context);
-        metadataUpdates.forEach(m -> context.setPosition(m.key(), m.position()));
-
-        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
-
-        return repository.updateMetadata(newWrapper);
-    }
-
-    public List<SchemaUpdate> findAllUpdates(Id id) {
-        return repository.findAllUpdates(id);
+        return wrapper;
     }
 
 }

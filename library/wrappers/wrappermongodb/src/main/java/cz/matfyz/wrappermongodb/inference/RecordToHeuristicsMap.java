@@ -28,8 +28,7 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, Stri
         this.collectionName = collectionName;
     }
 
-    @Override
-    public Iterator<Tuple2<String, PropertyHeuristics>> call(Document document) {
+    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Document document) {
         ObjectArrayList<Tuple2<String, PropertyHeuristics>> result = new ObjectArrayList<Tuple2<String, PropertyHeuristics>>();
 
         appendHeuristics(collectionName, new Document(), 1, result, true);

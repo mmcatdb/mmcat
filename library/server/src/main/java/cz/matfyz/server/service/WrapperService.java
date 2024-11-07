@@ -1,7 +1,7 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
+import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.exception.DatasourceException;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WrapperService {
 
-    public AbstractControlWrapper getControlWrapper(DatasourceWrapper datasource) {
+    public BaseControlWrapper getControlWrapper(DatasourceWrapper datasource) {
         try {
             return switch (datasource.type) {
                 case mongodb -> new MongoDBControlWrapper(getProvider(
@@ -79,7 +79,7 @@ public class WrapperService {
         final TSettings settings = mapper.treeToValue(datasource.settings, clazz);
 
         // First, we try to get the provider from the cache. If it's there and still valid, we return it.
-        final TProvider cached = (TProvider) cachedProviders.get(datasource.id);
+        final TProvider cached = (TProvider) cachedProviders.get(datasource.id());
         if (cached != null && cached.isStillValid(settings))
             return cached;
 
@@ -94,7 +94,7 @@ public class WrapperService {
 
         // If the provider is not in the cache or is not valid anymore, we create a new one and put it into the cache.
         final TProvider provider = create.apply(settings);
-        cachedProviders.put(datasource.id, provider);
+        cachedProviders.put(datasource.id(), provider);
 
         return provider;
     }
@@ -102,40 +102,28 @@ public class WrapperService {
     // JsonLd
 
     private JsonLdControlWrapper getJsonLdControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var provider = createJsonLdProvider(datasource);
-        return new JsonLdControlWrapper(provider);
-    }
-
-    private static JsonLdProvider createJsonLdProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, JsonLdSettings.class);
+        final var provider = new JsonLdProvider(settings);
 
-        return new JsonLdProvider(settings);
+        return new JsonLdControlWrapper(provider);
     }
 
     // Json
 
     private JsonControlWrapper getJsonControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var provider = createJsonProvider(datasource);
-        return new JsonControlWrapper(provider);
-    }
-
-    private static JsonProvider createJsonProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, JsonSettings.class);
+        final var provider = new JsonProvider(settings);
 
-        return new JsonProvider(settings);
+        return new JsonControlWrapper(provider);
     }
 
     // Csv
 
     private CsvControlWrapper getCsvControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        final var provider = createCsvProvider(datasource);
-        return new CsvControlWrapper(provider);
-    }
-
-    private static CsvProvider createCsvProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, CsvSettings.class);
+        final var provider = new CsvProvider(settings);
 
-        return new CsvProvider(settings);
+        return new CsvControlWrapper(provider);
     }
 
 }

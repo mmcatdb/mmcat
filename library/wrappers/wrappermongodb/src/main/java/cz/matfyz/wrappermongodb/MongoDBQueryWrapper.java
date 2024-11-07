@@ -49,7 +49,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
 
     public QueryStatement createDSLStatement() {
         // Mongo doesn't allow joins so there is only one mapping.
-        final Mapping mapping = projections.getFirst().property().kind.mapping;
+        final Mapping mapping = projections.getFirst().property().mapping;
         final String collectionName = mapping.kindName();
         final Bson projection = createProjections();
         final var pipeline = List.of(
@@ -90,7 +90,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         }
 
         private void run(Projection projection) {
-            lastAccessPath = projection.property().kind.mapping.accessPath();
+            lastAccessPath = projection.property().mapping.accessPath();
             final QueryStructure structure = projection.structure();
 
             for (final QueryStructure step : structure.getPathFromRoot()) {

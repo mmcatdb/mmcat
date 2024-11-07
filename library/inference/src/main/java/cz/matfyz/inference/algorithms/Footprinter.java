@@ -67,8 +67,7 @@ public enum Footprinter {
 
         // remove later
         /*heuristics.foreach(new VoidFunction<PropertyHeuristics>() {
-            @Override
-            public void call(PropertyHeuristics h) throws Exception {
+            @Override public void call(PropertyHeuristics h) throws Exception {
                 System.out.println(h);
             }
         });*/

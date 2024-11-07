@@ -2,8 +2,6 @@ package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.DomainRow;
-import cz.matfyz.core.instance.InstanceCategory.InstancePath;
-import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -13,7 +11,9 @@ import cz.matfyz.core.record.IComplexRecord;
 import cz.matfyz.core.record.SimpleArrayRecord;
 import cz.matfyz.core.record.SimpleRecord;
 import cz.matfyz.core.record.SimpleValueRecord;
-import cz.matfyz.core.utils.UniqueIdProvider;
+import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
+import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayList;
@@ -31,8 +31,8 @@ public class SuperIdsFetcher {
      * @param morphism Morphism from the parent schema object to the currently processed one.
      * @return
      */
-    public static Iterable<FetchedSuperId> fetch(IComplexRecord parentRecord, DomainRow parentRow, InstancePath path, AccessPath childAccessPath) {
-        final var fetcher = new SuperIdsFetcher(parentRow, path, childAccessPath);
+    public static Iterable<FetchedSuperId> fetch(UniqueIdGenerator idGenerator, IComplexRecord parentRecord, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
+        final var fetcher = new SuperIdsFetcher(idGenerator, parentRow, path, childAccessPath);
         fetcher.process(parentRecord);
 
         return fetcher.output;
@@ -40,13 +40,15 @@ public class SuperIdsFetcher {
 
     public record FetchedSuperId(SuperIdWithValues superId, IComplexRecord childRecord) {}
 
-    final List<FetchedSuperId> output;
-    final DomainRow parentRow;
-    final Signature parentToChild;
-    final InstanceObject childObject;
-    final AccessPath childAccessPath;
+    private final UniqueIdGenerator idGenerator;
+    private final List<FetchedSuperId> output;
+    private final DomainRow parentRow;
+    private final Signature parentToChild;
+    private final SchemaObject childObject;
+    private final AccessPath childAccessPath;
 
-    private SuperIdsFetcher(DomainRow parentRow, InstancePath path, AccessPath childAccessPath) {
+    private SuperIdsFetcher(UniqueIdGenerator idGenerator, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
+        this.idGenerator = idGenerator;
         this.output = new ArrayList<>();
         this.parentRow = parentRow;
         this.parentToChild = path.signature();
@@ -65,11 +67,11 @@ public class SuperIdsFetcher {
                     // They don't represent any (string) value so an unique identifier must be generated instead.
                     // But their complex value will be processed later.
                     for (IComplexRecord childRecord : parentRecord.getComplexRecords(parentToChild))
-                        addSimpleValueWithChildRecordToOutput(UniqueIdProvider.getNext(), childRecord);
+                        addSimpleValueWithChildRecordToOutput(idGenerator.next(), childRecord);
                 }
             }
             else {
-                addSimpleValueToOutput(UniqueIdProvider.getNext());
+                addSimpleValueToOutput(idGenerator.next());
             }
         }
         else if (childObject.ids().isValue()) {

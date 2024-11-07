@@ -9,14 +9,45 @@ import java.util.List;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SparkSession;
 
 public abstract class AbstractInferenceWrapper {
 
-    public String kindName;
+    protected String kindName;
 
-    public abstract void buildSession();
+    protected final SparkSettings sparkSettings;
+    protected SparkSession sparkSession;
+    protected JavaSparkContext context;
 
-    public abstract void stopSession();
+    protected AbstractInferenceWrapper(SparkSettings sparkSettings) {
+        this.sparkSettings = sparkSettings;
+    }
+
+    public AbstractInferenceWrapper copyForKind(String kindName) {
+        AbstractInferenceWrapper copy = copy();
+        copy.kindName = kindName;
+
+        return copy;
+    }
+
+    protected abstract AbstractInferenceWrapper copy();
+
+    public void startSession() {
+        buildSession();
+        context = new JavaSparkContext(sparkSession.sparkContext());
+        context.setCheckpointDir(sparkSettings.checkpointDir());
+    }
+
+    protected void buildSession() {
+        sparkSession = SparkSession.builder()
+            .master(sparkSettings.master())
+            .getOrCreate();
+    }
+
+    public void stopSession() {
+        sparkSession.stop();
+    }
 
     public abstract JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData);
 
@@ -24,22 +55,11 @@ public abstract class AbstractInferenceWrapper {
 
     public abstract JavaPairRDD<String, PropertyHeuristics> loadPropertyData();
 
-    public abstract void initiateContext();
-
     public abstract JavaRDD<RecordSchemaDescription> loadRSDs();
 
     public abstract JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs();
 
-    public abstract AbstractInferenceWrapper copy();
-
-    /**
-     * This is a default implementation for files (e.g., json, csv) that have only one "kind". It needs to be overriden for proper databases.
-     */
-    public List<String> getKindNames() {
-        return singleCollection;
-    }
-
-    private final List<String> singleCollection = List.of("single-collection");
+    public abstract List<String> getKindNames();
 
     public record SparkSettings(
         String master,

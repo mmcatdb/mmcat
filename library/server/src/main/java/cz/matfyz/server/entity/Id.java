@@ -2,7 +2,6 @@ package cz.matfyz.server.entity;
 
 import java.io.IOException;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -20,15 +19,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = Id.Deserializer.class)
 public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.lang.CharSequence {
 
-    @NonNull
-    private final String value;
+    private final @NonNull String value;
 
-    public Id(String value) {
-        this.value = value != null ? value : "";
+    public Id(@NonNull String value) {
+        this.value = value;
     }
 
-    public static Id createNewUUID() {
+    public static Id createNew() {
         return new Id(UUID.randomUUID().toString());
+    }
+
+    public UUID toUUID() {
+        return UUID.fromString(value);
     }
 
     @Override public String toString() {
@@ -51,21 +53,11 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
         return value.isEmpty();
     }
 
-    public @Nullable Id toNullable() {
-        return value.isEmpty() ? null : this;
-    }
-
-    private static final Pattern UUID_REGEX = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
-
-    public boolean isUuid() {
-        return UUID_REGEX.matcher(value).matches();
-    }
-
     public int compareTo(Id another) {
         return value.compareTo(another.value);
     }
 
-    @Override public boolean equals(Object object) {
+    @Override public boolean equals(@Nullable Object object) {
         return object instanceof Id another && another != null && value.equals(another.value);
     }
 

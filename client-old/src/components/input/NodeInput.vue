@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { SelectionType, Node } from '@/types/categoryGraph';
-import { onMounted, onUnmounted, shallowRef, watch } from 'vue';
+import type { SelectionType, Node, Graph } from '@/types/categoryGraph';
+import { onMounted, onUnmounted, shallowRef, watch, computed, watchEffect } from 'vue';
 import { useEvocat } from '@/utils/injects';
 
-const { graph } = $(useEvocat());
+//const { graph } = $(useEvocat());
 
 type NodeInputProps = {
     modelValue: (Node | undefined)[];
+    graph?: any; // optional graph prop
     count?: number;
     type: SelectionType;
     disabled?: boolean;
@@ -20,12 +21,39 @@ const innerValue = shallowRef([ ...props.modelValue ]);
 // The index can't be greater than count - 1 (if count is defined).
 const lastIndex = shallowRef((props.count && props.modelValue.length >= props.count) ? props.count - 1 : props.modelValue.length);
 
+const graph = computed(() => {
+    if (props.graph) 
+        return props.graph;
+    
+    return useEvocat().graph.value;
+});
+
 watch(() => props.modelValue, (newValue: (Node | undefined)[]) => {
     innerValue.value.forEach(node => node?.unselect());
     innerValue.value = [ ...newValue ];
     innerValue.value.forEach((node, index) => node?.select({ type: props.type, level: index }));
 }, { immediate: true });
 
+let listener: any;
+
+onMounted(() => {
+    if (!graph.value) return;
+
+    listener = graph.value.listen();
+
+    innerValue.value.forEach((node, index) => node?.select({ type: props.type, level: index }));
+    if (!props.disabled) 
+        listener.onNode('tap', onNodeTapHandler);
+    
+});
+
+onUnmounted(() => {
+    if (listener) {
+        innerValue.value.forEach(node => node?.unselect());
+        listener.close();
+    }
+});
+/*
 const listener = graph.listen();
 
 onMounted(() => {
@@ -37,7 +65,7 @@ onMounted(() => {
 onUnmounted(() => {
     innerValue.value.forEach(node => node?.unselect());
     listener.close();
-});
+});*/
 
 function getNextAvailableIndex(): number {
     for (let i = 0; !props.count || i < props.count; i++) {

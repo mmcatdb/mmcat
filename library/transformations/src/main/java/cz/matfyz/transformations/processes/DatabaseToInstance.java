@@ -49,17 +49,17 @@ public class DatabaseToInstance {
     private InstanceCategory innerRun() throws Exception {
         Statistics.start(Interval.DATABASE_TO_INSTANCE);
 
-        var finalQuery = query != null ? query : new KindNameQuery(mapping.kindName());
+        final var finalQuery = query != null ? query : new KindNameQuery(mapping.kindName());
 
-        ForestOfRecords forest = pullWrapper.pullForest(mapping.accessPath(), finalQuery);
+        final ForestOfRecords forest = pullWrapper.pullForest(mapping.accessPath(), finalQuery);
 
         Statistics.set(Counter.PULLED_RECORDS, forest.size());
 
-        InstanceCategory instance = currentInstance != null
+        final InstanceCategory instance = currentInstance != null
             ? currentInstance
             : new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
 
-        var tform = new MTCAlgorithm();
+        final var tform = new MTCAlgorithm();
         tform.input(mapping, instance, forest);
 
         Statistics.start(Interval.MTC_ALGORIGHM);

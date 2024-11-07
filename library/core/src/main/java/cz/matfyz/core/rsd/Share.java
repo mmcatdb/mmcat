@@ -33,8 +33,7 @@ public class Share implements Serializable {
         this.first = first;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "Share{" + total + "/" + first + '}';
     }
 

@@ -5,6 +5,7 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
+import cz.matfyz.wrapperjson.inference.RecordToHeuristicsMap;
 import cz.matfyz.wrapperjson.inference.MapJsonDocument;
 
 import java.io.BufferedReader;
@@ -13,105 +14,128 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SparkSession;
 import org.bson.Document;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * An inference wrapper for JSON files that extends {@link AbstractInferenceWrapper}.
+ * This class provides methods for loading and processing JSON data to infer schema descriptions
+ * and properties using Spark RDDs.
+ */
 public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     private final JsonProvider provider;
-    private final SparkSettings sparkSettings;
 
-    private SparkSession sparkSession;
-    private JavaSparkContext context;
-
+    /**
+     * Constructs a new {@code JsonInferenceWrapper} with the specified JSON provider and Spark settings.
+     */
     public JsonInferenceWrapper(JsonProvider provider, SparkSettings sparkSettings) {
+        super(sparkSettings);
         this.provider = provider;
-        this.sparkSettings = sparkSettings;
     }
 
-    @Override
-    public void buildSession() {
-        sparkSession = SparkSession.builder().master(sparkSettings.master())
-            .getOrCreate();
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");
-
+    /**
+     * Returns the name of the JSON file currently being processed.
+     */
+    private String fileName() {
+        return kindName;
     }
 
-    @Override
-    public void stopSession() {
-            sparkSession.stop();
+    /**
+     * Creates a copy of this inference wrapper.
+     */
+    @Override public AbstractInferenceWrapper copy() {
+        return new JsonInferenceWrapper(this.provider, this.sparkSettings);
     }
 
-    @Override
-    public void initiateContext() {
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");
-    }
-
-    @Override
-    public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
+    /**
+     * Loads properties from the JSON data. This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
     }
 
-    @Override
-    // assuming that in the json file one line represent one object
-    public JavaRDD<RecordSchemaDescription> loadRSDs() {
+    /**
+     * Loads record schema descriptions (RSDs) from the JSON data.
+     */
+    @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
         return jsonDocuments.map(MapJsonDocument::process);
     }
 
+    /**
+     * Loads documents from the JSON file and parses them into a list of BSON {@link Document} objects.
+     */
     public JavaRDD<Document> loadDocuments() {
-        JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
-        newContext.setLogLevel("ERROR");
-        newContext.setCheckpointDir(sparkSettings.checkpointDir());
+        List<Document> documents = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        List<String> lines = new ArrayList<>();
         try (
             InputStream inputStream = provider.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
+            String content = reader.lines().collect(Collectors.joining("\n"));
+            try {
+                JsonNode jsonNode = objectMapper.readTree(content);
+                if (jsonNode.isArray()) {
+                    for (JsonNode node : jsonNode) {
+                        documents.add(Document.parse(node.toString()));
+                    }
+                } else {
+                    documents.add(Document.parse(jsonNode.toString()));
+                }
+            } catch (IOException e) {
+                reader.lines().forEach(line -> {
+                    try {
+                        documents.add(Document.parse(line));
+                    } catch (Exception ex) {
+                        System.err.println("Error parsing line as JSON: " + ex.getMessage());
+                    }
+                });
             }
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
             return context.emptyRDD();
         }
-        JavaRDD<String> jsonLines = context.parallelize(lines);
-        JavaRDD<Document> jsonDocuments = jsonLines.map(Document::parse);
+        JavaRDD<Document> jsonDocuments = context.parallelize(documents);
         return jsonDocuments;
     }
 
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
+    /**
+     * Loads pairs of strings and record schema descriptions (RSDs) from the JSON data.
+     * This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
-
     }
 
-     @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
+    /**
+     * Loads property schema pairs from the JSON data. This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
     }
 
-    @Override
-    public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'loadPropertyData'");
+    /**
+     * Loads property data from the JSON documents and maps them to {@link PropertyHeuristics}.
+     */
+    @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
+        JavaRDD<Document> jsonDocuments = loadDocuments();
+
+        return jsonDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
     }
 
-    @Override
-    public AbstractInferenceWrapper copy() {
-        return new JsonInferenceWrapper(
-            this.provider, 
-            this.sparkSettings
-        );
+    /**
+     * Retrieves a list of kind names (JSON file names) from the provider.
+     */
+    @Override public List<String> getKindNames() {
+        return List.of(provider.getJsonFileNames());
     }
 
 }

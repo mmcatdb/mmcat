@@ -5,19 +5,18 @@ import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
 import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
-import cz.matfyz.core.utils.UniqueIdProvider;
+import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.service.DatasourceService;
-import cz.matfyz.server.service.LogicalModelService;
-import cz.matfyz.server.service.MappingService;
-import cz.matfyz.server.service.SchemaCategoryService;
+import cz.matfyz.server.repository.DatasourceRepository;
+import cz.matfyz.server.repository.MappingRepository;
+import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.service.WrapperService;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
@@ -36,23 +35,20 @@ class ServerApplicationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);
 
     @Autowired
-    private MappingService mappingService;
+    private MappingRepository mappingRepository;
 
     @Autowired
-    private LogicalModelService logicalModelService;
+    private DatasourceRepository datasourceRepository;
 
     @Autowired
-    private DatasourceService datasourceService;
-
-    @Autowired
-    private SchemaCategoryService categoryService;
+    private SchemaCategoryRepository categoryRepository;
 
     @Autowired
     private WrapperService wrapperService;
 
     @BeforeEach
-    public void setUp() {
-        UniqueIdProvider.reset();
+    public void setup() {
+        UniqueIdGenerator.makeDeterministic();
         Statistics.reset();
     }
 
@@ -106,13 +102,15 @@ class ServerApplicationTests {
     }
 
     private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id datasourceId, int records) throws Exception {
-        var mappingWrapper = mappingService.find(mappingId);
-        var mapping = createMapping(mappingWrapper);
+        final var datasourceWrapper = datasourceRepository.find(datasourceId);
+        final var mappingWrapper = mappingRepository.find(mappingId);
 
-        DatasourceWrapper datasource = datasourceService.find(datasourceId);
-        AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final var datasource = datasourceWrapper.toDatasource();
+        final var mapping = createMapping(mappingWrapper, datasource);
 
-        var newInstance = new DatabaseToInstance()
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
+
+        final var newInstance = new DatabaseToInstance()
             .input(mapping, instance, pullWrapper, new KindNameQuery(mapping.kindName(), records, null))
             .run();
 
@@ -127,16 +125,18 @@ class ServerApplicationTests {
     }
 
     private void exportMapping(InstanceCategory instance, Id mappingId, Id datasourceId) throws Exception {
-        var mappingWrapper = mappingService.find(mappingId);
-        var mapping = createMapping(mappingWrapper);
+        final var datasourceWrapper = datasourceRepository.find(datasourceId);
+        final var mappingWrapper = mappingRepository.find(mappingId);
 
-        DatasourceWrapper datasource = datasourceService.find(datasourceId);
-        final var control = wrapperService.getControlWrapper(datasource);
-        AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
-        AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
-        AbstractICWrapper icWrapper = control.getICWrapper();
+        final var datasource = datasourceWrapper.toDatasource();
+        final var mapping = createMapping(mappingWrapper, datasource);
 
-        var process = new InstanceToDatabase();
+        final var control = wrapperService.getControlWrapper(datasourceWrapper);
+        final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
+        final AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
+        final AbstractICWrapper icWrapper = control.getICWrapper();
+
+        final var process = new InstanceToDatabase();
         process.input(mapping, List.of(mapping), instance, ddlWrapper, dmlWrapper, icWrapper);
         process.run();
 
@@ -148,12 +148,11 @@ class ServerApplicationTests {
         Statistics.reset();
     }
 
-    private Mapping createMapping(MappingWrapper mappingWrapper) {
-        final var model = logicalModelService.find(mappingWrapper.logicalModelId());
-        final var categoryWrapper = categoryService.find(model.logicalModel().categoryId);
+    private Mapping createMapping(MappingWrapper wrapper, Datasource datasource) {
+        final var categoryWrapper = categoryRepository.find(wrapper.categoryId);
         final var category = categoryWrapper.toSchemaCategory();
 
-        return mappingWrapper.toMapping(category);
+        return wrapper.toMapping(datasource, category);
     }
 
 }

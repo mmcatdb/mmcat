@@ -1,15 +1,21 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.JobData;
 import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.entity.job.Job.State;
+import cz.matfyz.server.entity.job.data.InferenceJobData;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
+import cz.matfyz.server.service.JobExecutorService;
 import cz.matfyz.server.service.JobService;
+import cz.matfyz.server.service.WorkflowService;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -22,6 +28,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,10 +42,16 @@ public class JobController {
     private JobService service;
 
     @Autowired
+    private JobExecutorService jobExecutorService;
+
+    @Autowired
     private ActionRepository actionRepository;
 
     @Autowired
     private ActionController actionController;
+
+    @Autowired
+    private WorkflowService workflowService;
 
     @GetMapping("/schema-categories/{categoryId}/jobs")
     public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
@@ -67,9 +80,13 @@ public class JobController {
 
     @PostMapping("/jobs/{id}/restart")
     public JobDetail createRestartedJob(@PathVariable Id id) {
-        final var jobWithRun = repository.find(id);
+        final var oldJob = repository.find(id);
+        final var newJob = service.createRestartedJob(oldJob);
 
-        return jobToJobDetail(service.createRestartedJob(jobWithRun));
+        // We have to update all workflows that depend on the job.
+        workflowService.updateWorkflowsWithRestartedJob(oldJob.job(), newJob.job());
+
+        return jobToJobDetail(newJob);
     }
 
     @PostMapping("/jobs/{id}/pause")
@@ -93,8 +110,26 @@ public class JobController {
         return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
     }
 
+    @PostMapping("/jobs/{id}/updateResult")
+    public JobDetail updateJobResult(@PathVariable Id id, @RequestBody SaveJobResultPayload payload) {
+        final var jobWithRun = repository.find(id);
+        if (!(jobWithRun.job().data instanceof InferenceJobData inferenceJobData))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The job data is not an instance of InferenceJobData");
+
+        final InferenceEdit edit = payload.isFinal ? null : payload.edit;
+        final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, payload.isFinal, payload.layoutType);
+
+        return jobToJobDetail(service.transition(newJobWithRun, payload.isFinal ? State.Finished : State.Waiting));
+    }
+
+    private record SaveJobResultPayload(
+        @Nullable boolean isFinal,
+        @Nullable InferenceEdit edit,
+        @Nullable LayoutType layoutType
+    ) {}
+
     private JobDetail jobToJobDetail(JobWithRun job) {
-        final var payload = actionController.actionPayloadToDetail(job.job().payload);
+        final var payload = actionController.actionPayloadToDetail(job.job().payload, job.run().categoryId);
 
         return JobDetail.create(job, payload);
     }
@@ -108,19 +143,20 @@ public class JobController {
         Date createdAt,
         Job.State state,
         ActionPayloadDetail payload,
-        @Nullable Serializable data
+        @Nullable JobData data,
+        @Nullable Serializable error
     ) implements IEntity {
         public static JobDetail create(JobWithRun jobWithRun, ActionPayloadDetail payload) {
             final var job = jobWithRun.job();
             final var run = jobWithRun.run();
 
-            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.createdAt, job.state, payload, job.data);
+            return new JobDetail(job.id(), run.categoryId, run.id(), run.actionId, job.label, job.createdAt, job.state, payload, job.data, job.error);
         }
     }
 
     @GetMapping("/schema-categories/{categoryId}/sessions")
     public List<Session> getAllSessions(@PathVariable Id categoryId) {
-        return service.findAllSessions(categoryId);
+        return repository.findAllSessionsInCategory(categoryId);
     }
 
     @PostMapping("/schema-categories/{categoryId}/sessions")

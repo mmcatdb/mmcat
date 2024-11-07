@@ -18,4 +18,8 @@ public class RepositoryException extends ServerException {
         return new RepositoryException("processJson", cause);
     }
 
+    public static RepositoryException nothingUpdated() {
+        return new RepositoryException("nothingUpdated", null);
+    }
+
 }

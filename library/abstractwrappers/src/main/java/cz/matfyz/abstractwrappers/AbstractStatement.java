@@ -4,7 +4,7 @@ public interface AbstractStatement {
 
     String getContent();
 
-    public static AbstractStatement createEmpty() {
+    static AbstractStatement createEmpty() {
         return StringStatement.empty;
     }
 

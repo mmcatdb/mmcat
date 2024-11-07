@@ -1,5 +1,7 @@
 package cz.matfyz.tests.example.queryevolution;
 
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
@@ -7,11 +9,13 @@ public abstract class MongoDB {
 
     private MongoDB() {}
 
+    public static final Datasource datasource = new Datasource(DatasourceType.mongodb, "mongodb");
+
     public static final String ordersKind = "orders";
     public static final String orderKind = "order";
 
     public static TestMapping orders(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             ordersKind,
             b -> b.root(
@@ -41,7 +45,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping order(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             orderKind,
             b -> b.root(

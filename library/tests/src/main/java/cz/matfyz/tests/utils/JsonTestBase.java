@@ -20,18 +20,6 @@ public class JsonTestBase {
         this.isVerbose = isVerbose;
     }
 
-    private static String serialize(Object object) throws IOException {
-        return mapper.writeValueAsString(object);
-    }
-
-    private static Object deserialize(String json) throws IOException {
-        return mapper.readValue(json, Object.class);
-    }
-
-    private static class Output { String value = ""; }
-
-    private static final String WHITE_COLOR_CODE = "\u001b[1;37m";
-
     public void fullTest(Object object) {
         final Output json = serializationTest(object);
 
@@ -51,6 +39,18 @@ public class JsonTestBase {
         });
 
         return json;
+    }
+
+    private static class Output { String value = ""; }
+
+    private static final String WHITE_COLOR_CODE = "\u001b[1;37m";
+
+    private static String serialize(Object object) throws IOException {
+        return mapper.writeValueAsString(object);
+    }
+
+    private static Object deserialize(String json) throws IOException {
+        return mapper.readValue(json, Object.class);
     }
 
 }

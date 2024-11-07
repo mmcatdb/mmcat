@@ -1,6 +1,7 @@
 package cz.matfyz.tests.example.basic;
 
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
@@ -11,7 +12,7 @@ public abstract class Schema {
 
     public static final String schemaLabel = "Basic Schema";
 
-    private static final SchemaBuilder builder = new SchemaBuilder(schemaLabel);
+    private static final SchemaBuilder builder = new SchemaBuilder();
 
     // Keys
 
@@ -106,8 +107,12 @@ public abstract class Schema {
     /**
      * Create new full schema category.
      */
-    public static SchemaCategory newSchemaCategory() {
+    public static SchemaCategory newSchema() {
         return builder.build();
+    }
+
+    public static MetadataCategory newMetadata(SchemaCategory schema) {
+        return builder.buildMetadata(schema);
     }
 
     private Schema() {}

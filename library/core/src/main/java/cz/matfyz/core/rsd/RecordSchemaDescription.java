@@ -8,6 +8,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 public final class RecordSchemaDescription implements Serializable, Comparable<RecordSchemaDescription> {
 
+    public static final String ROOT_SYMBOL = "_";
+
     private String name;
 
     private int unique;    // TODO: rozepsat na konstanty vestaveneho datoveho typu char, podobne jako typy a modely
@@ -47,6 +49,20 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.types = 0;
         this.models = 0;
         this.children = children;
+    }
+    // constructor for cloning
+    public RecordSchemaDescription(RecordSchemaDescription other) {
+        this.name = other.name;
+        this.unique = other.unique;
+        this.shareTotal = other.shareTotal;
+        this.shareFirst = other.shareFirst;
+        this.id = other.id;
+        this.types = other.types;
+        this.models = other.models;
+        this.children = new ObjectArrayList<>();
+        for (RecordSchemaDescription child : other.children) {
+            this.children.add(new RecordSchemaDescription(child));
+        }
     }
 
     public String getName() {
@@ -120,21 +136,74 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.children = children;
     }
 
-    @Override
-    public int compareTo(RecordSchemaDescription o) {
-        // WARN: TOHLE JE SPATNE, JE TU BUG! TAKHLE SE TO POROVNAVAT NEDA
-        // A NAVIC JE TO PRASARNA
+    // Utility methods
+    public boolean hasParentWithChildName(String childName) {
+        for (RecordSchemaDescription child : this.children) {
+            if (child.getName().equals(childName))
+                return true;
+            child.hasParentWithChildName(childName);
+        }
+        return false;
+    }
+
+    public boolean addChildrenIfNameMatches(RecordSchemaDescription rsd) {
+        if (this.name.equals(rsd.getName())) {
+            if (isReferencingRSD(this)) {
+                ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
+                this.setChildren(newChildren);
+            }
+            for (RecordSchemaDescription child : rsd.getChildren()) {
+                addChildren(child);
+            }
+            return true;
+        }
+        for (RecordSchemaDescription oldChild : this.children) {
+            if (oldChild.addChildrenIfNameMatches(rsd)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addChildren(RecordSchemaDescription child) {
+        ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
+        for (RecordSchemaDescription oldChild : this.children) {
+            newChildren.add(oldChild);
+        }
+        newChildren.add(child);
+        this.setChildren(newChildren);
+    }
+
+    private boolean isReferencingRSD(RecordSchemaDescription rsd) {
+        for (RecordSchemaDescription child : rsd.getChildren()) {
+            if (!child.getName().equals(ROOT_SYMBOL)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean removeChildByName(String name) {
+        for (RecordSchemaDescription child : children) {
+            if (child.getName().equals(name)) {
+                children.remove(child);
+                return true;
+            } else if (child.removeChildByName(name))
+                return true;
+        }
+        return false;
+    }
+
+    // end of utility methods
+
+    @Override public int compareTo(RecordSchemaDescription o) {
         int comparedNames = name.compareTo(o.name);
-        boolean typesAreEqual = types == o.types;
-//        boolean typesAreEqual = types.equals(o.types);
         if (comparedNames != 0) {
             return comparedNames;
         }
-
-        return typesAreEqual ? 0 : -1;
+        return types - o.types;
     }
 
-//    @Override
     public String _toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("RecordSchemaDescription{");
@@ -151,11 +220,9 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         return sb.toString();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-//            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);    // pretty print
             objectMapper.disable(SerializationFeature.INDENT_OUTPUT);    // pretty print disabled
 
             return objectMapper.writeValueAsString(this);
@@ -164,5 +231,4 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
             return _toString(); // super.toString(); // Fallback to the default toString() if an exception occurs
         }
     }
-
 }

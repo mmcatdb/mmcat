@@ -16,4 +16,3 @@ Most projects are of technical nature, i.e., developing new features, integratin
 - The initial proposal and development of the MM-cat framework was supported by the GAČR grant *Unified Management of Multi-Model Data* (no. 20-22276S).
 
 - Currently, the framework is being developed with the support of the GAČR grant *Self-Adapting Management of Multi-Model Databases* (no. 23-07781S) and the GAUK grant *Samoadaptivní správa multi-modelových databází* (no. 292323).
-

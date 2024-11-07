@@ -80,7 +80,7 @@ const isNextButtonDisabled = computed(() => {
 
 function confirmSignature() {
     const node = signature.value.sequence.lastNode;
-    const staticNameString = (!signature.value.isEmpty || node.schemaObject.idsChecked.isSignatures) ? node.schemaObject.label.toLowerCase() : 'id';
+    const staticNameString = (!signature.value.isEmpty || node.schemaObject.idsChecked.isSignatures) ? node.metadata.label.toLowerCase() : 'id';
     name.value = StaticName.fromString(staticNameString);
     const newType = determinePropertyType(node);
 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class ICAlgorithmTests {
 
-    private static final SchemaCategory schema = Schema.newSchemaCategory();
+    private static final SchemaCategory schema = Schema.newSchema();
 
     @Test
     void basicPrimaryKeyTest() {

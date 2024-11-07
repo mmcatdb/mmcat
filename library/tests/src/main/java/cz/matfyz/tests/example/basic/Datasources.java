@@ -9,9 +9,9 @@ import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 
 public class Datasources {
 
-    public final SchemaCategory schema = Schema.newSchemaCategory();
+    public final SchemaCategory schema = Schema.newSchema();
 
-    private static final DatasourceProvider databaseProvider = new DatasourceProvider("tests");
+    private static final DatasourceProvider datasourceProvider = new DatasourceProvider("tests");
 
     // PostgreSQL
 
@@ -28,7 +28,7 @@ public class Datasources {
     }
 
     public TestDatasource<PostgreSQLControlWrapper> createNewPostgreSQL() {
-        return databaseProvider.createPostgreSQL(schema, "setupPostgresqlBasic.sql");
+        return datasourceProvider.createPostgreSQL(schema, "setupPostgresqlBasic.sql");
     }
 
     // MongoDB
@@ -50,7 +50,7 @@ public class Datasources {
     }
 
     public TestDatasource<MongoDBControlWrapper> createNewMongoDB() {
-        return databaseProvider.createMongoDB(schema, "setupMongodbBasic.js");
+        return datasourceProvider.createMongoDB(schema, "setupMongodbBasic.js");
     }
 
     // Neo4j
@@ -67,7 +67,7 @@ public class Datasources {
     }
 
     public TestDatasource<Neo4jControlWrapper> createNewNeo4j() {
-        return databaseProvider.createNeo4j(schema, "setupNeo4j.cypher");
+        return datasourceProvider.createNeo4j(schema, "setupNeo4j.cypher");
     }
 
 }

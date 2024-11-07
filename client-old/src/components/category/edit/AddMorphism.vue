@@ -42,8 +42,8 @@ function save() {
         return;
 
     evocat.createMorphism({
-        dom: node1.schemaObject,
-        cod: node2.schemaObject,
+        domKey: node1.schemaObject.key,
+        codKey: node2.schemaObject.key,
         min: min.value,
         label: label.value,
     });
@@ -66,10 +66,10 @@ function switchNodes() {
         <h2>Add Schema Morphism</h2>
         <ValueContainer>
             <ValueRow label="Domain object:">
-                {{ nodes[0]?.schemaObject.label }}
+                {{ nodes[0]?.metadata.label }}
             </ValueRow>
             <ValueRow label="Codomain object:">
-                {{ nodes[1]?.schemaObject.label }}
+                {{ nodes[1]?.metadata.label }}
             </ValueRow>
             <ValueRow label="Label?:">
                 <input v-model="label" />

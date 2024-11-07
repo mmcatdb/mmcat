@@ -24,5 +24,10 @@
             <artifactId>spark-core_2.12</artifactId>
             <version>${spark.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
     </dependencies>
 </project>

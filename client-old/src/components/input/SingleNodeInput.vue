@@ -40,6 +40,6 @@ function onValueUpdate(newValue: Node[]) {
         @update:model-value="onValueUpdate"
     />
     <span>
-        {{ innerValue?.schemaObject.label }}
+        {{ innerValue?.metadata.label }}
     </span>
 </template>

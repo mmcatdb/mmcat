@@ -1,7 +1,7 @@
 package cz.matfyz.tests.transformations;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.utils.UniqueIdProvider;
+import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.tests.example.basic.Schema;
 import cz.matfyz.tests.example.basic.MongoDB;
 import cz.matfyz.tests.example.basic.PostgreSQL;
@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 
 class MTCAlgorithmTests {
 
-    private static final SchemaCategory schema = Schema.newSchemaCategory();
+    private static final SchemaCategory schema = Schema.newSchema();
 
     @BeforeEach
-    void setUp() {
-        UniqueIdProvider.reset();
+    void setup() {
+        UniqueIdGenerator.makeDeterministic();
     }
 
     @Test
@@ -238,7 +238,7 @@ class MTCAlgorithmTests {
             .mappingWithRecords(MongoDB.address(schema), """
                 [{
                     "number": "o_100",
-                    "nested": null
+                    "address": null
                 }, {
                     "number": "o_200"
                 }]
