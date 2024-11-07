@@ -22,10 +22,12 @@ class JsonTests {
     private final SparkProvider sparkProvider = new SparkProvider();
 
     JsonInferenceWrapper setup(JsonProvider jsonProvider) {
-        final var wrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var wrapper = new JsonControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .getInferenceWrapper();
         wrapper.startSession();
 
-        return wrapper;
+        return (JsonInferenceWrapper) wrapper;
     }
 
     @Test
@@ -35,44 +37,11 @@ class JsonTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final List<String> fileNames = jsonProvider.getJsonFileNames();
+        final List<String> fileNames = List.of(jsonProvider.getJsonFileNames());
 
         assertEquals("yelp_business_sample", fileNames.get(0));
 
-        try (InputStream inputStream = jsonProvider.getInputStream("yelpbusinesssampel")) {
-            assertNotNull(inputStream);
-        }
-    }
-
-    @Test
-    void testLocalUrlFolder() throws Exception {
-        @SuppressWarnings("deprecation")
-        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/test_json_folder/");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
-        final var jsonProvider = new JsonProvider(settings);
-
-        final List<String> fileNames = jsonProvider.getJsonFileNames();
-
-        for (String fileName : fileNames) {
-            System.out.println(fileName);
-            try (InputStream inputStream = jsonProvider.getInputStream(fileName)) {
-                assertNotNull(inputStream);
-            }
-        }
-    }
-
-    @Test
-    void testLocalUrlFile() throws Exception {
-        @SuppressWarnings("deprecation")
-        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/test_json_folder/customer.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
-        final var jsonProvider = new JsonProvider(settings);
-
-        final List<String> fileNames = jsonProvider.getJsonFileNames();
-
-        assertEquals("customer", fileNames.get(0));
-
-        try (InputStream inputStream = jsonProvider.getInputStream("yelpbusinesssampel")) {
+        try (InputStream inputStream = jsonProvider.getInputStream()) {
             assertNotNull(inputStream);
         }
     }
@@ -82,7 +51,7 @@ class JsonTests {
         URL url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 
@@ -96,7 +65,7 @@ class JsonTests {
         JsonSettings settings = new JsonSettings("", false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, jsonArray);
 
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 
@@ -111,7 +80,7 @@ class JsonTests {
         JsonSettings settings = new JsonSettings("", false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, jsonObject);
 
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 
@@ -120,13 +89,13 @@ class JsonTests {
         assertEquals(1, documents.count(), "There should be one document");
     }
 
-    @Test // TODO: handle malformed files better
+    @Test
     void testLoadDocumentsWithMalformedJson() throws Exception {
         String malformedJson = "{\"key\":\"value\"}\n{\"malformedJson\"";
         JsonSettings settings = new JsonSettings("", false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, malformedJson);
 
-        JsonInferenceWrapper inferenceWrapper = setup(jsonProvider);
+        final var inferenceWrapper = setup(jsonProvider);
 
         var documents = inferenceWrapper.loadDocuments();
 
@@ -134,7 +103,6 @@ class JsonTests {
         assertFalse(documents.isEmpty(), "Documents should not be empty");
     }
 
-    // test class to test json formats w/o having to load a file
     private static class StringJsonProvider extends JsonProvider {
         private final String jsonContent;
 
@@ -143,8 +111,7 @@ class JsonTests {
             this.jsonContent = jsonContent;
         }
 
-        @Override
-        public InputStream getInputStream(String kindName) {
+        @Override public InputStream getInputStream() {
             return new ByteArrayInputStream(jsonContent.getBytes());
         }
     }

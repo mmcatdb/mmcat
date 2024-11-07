@@ -1,6 +1,6 @@
 import type { Entity, Id, VersionId } from './id';
-import { LogicalModelInfo, type LogicalModelFromServer, type LogicalModelInfoFromServer } from './logicalModel';
 import {  Datasource, type DatasourceFromServer } from './datasource';
+import { MappingInfo, type MappingInfoFromServer } from './mapping';
 
 export type ActionFromServer = {
     id: Id;
@@ -41,20 +41,16 @@ export enum ActionType {
     RSDToCategory = 'RSDToCategory'
 }
 
-export const ACTION_TYPES = [
-    {
-        label: 'Model to Category',
-        value: ActionType.ModelToCategory,
-    },
-    {
-        label: 'Category to Model',
-        value: ActionType.CategoryToModel,
-    },
-    {
-        label: 'RSD to Category',
-        value: ActionType.RSDToCategory,
-    },
-];
+export const ACTION_TYPES = [ {
+    label: 'Model to Category',
+    value: ActionType.ModelToCategory,
+}, {
+    label: 'Category to Model',
+    value: ActionType.CategoryToModel,
+}, {
+    label: 'RSD to Category',
+    value: ActionType.RSDToCategory,
+} ] as const;
 
 type ActionPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
@@ -86,45 +82,52 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
 
 export type ActionPayloadInit = {
     type: ActionType.ModelToCategory | ActionType.CategoryToModel;
-    logicalModelId: Id;
+    datasourceId: Id;
+    /** If provided, only the selected mappings from this datasource will be used. */
+    mappingIds: Id[] | undefined;
 } | {
     type: ActionType.RSDToCategory;
-    datasourceId: Id;
-    kindName: string;
+    datasourceIds: Id[];
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
-    logicalModel: LogicalModelInfoFromServer;
+    datasource: DatasourceFromServer;
+    mappings: MappingInfoFromServer[];
 };
 
 class ModelToCategoryPayload implements ActionPayloadType<ActionType.ModelToCategory> {
     readonly type = ActionType.ModelToCategory;
 
     private constructor(
-        readonly logicalModel: LogicalModelInfo,
+        readonly datasource: Datasource,
+        readonly mappings: MappingInfo[],
     ) {}
 
     static fromServer(input: ModelToCategoryPayloadFromServer): ModelToCategoryPayload {
         return new ModelToCategoryPayload(
-            LogicalModelInfo.fromServer(input.logicalModel),
+            Datasource.fromServer(input.datasource),
+            input.mappings.map(MappingInfo.fromServer),
         );
     }
 }
 
 type CategoryToModelPayloadFromServer = ActionPayloadFromServer<ActionType.CategoryToModel> & {
-    logicalModel: LogicalModelInfoFromServer;
+    datasource: DatasourceFromServer;
+    mappings: MappingInfoFromServer[];
 };
 
 class CategoryToModelPayload implements ActionPayloadType<ActionType.CategoryToModel> {
     readonly type = ActionType.CategoryToModel;
 
     private constructor(
-        readonly logicalModel: LogicalModelInfo,
+        readonly datasource: Datasource,
+        readonly mappings: MappingInfo[],
     ) {}
 
     static fromServer(input: CategoryToModelPayloadFromServer): CategoryToModelPayload {
         return new CategoryToModelPayload(
-            LogicalModelInfo.fromServer(input.logicalModel),
+            Datasource.fromServer(input.datasource),
+            input.mappings.map(MappingInfo.fromServer),
         );
     }
 }
@@ -151,24 +154,20 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
 }
 
 type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
-    datasource: DatasourceFromServer;
-    kindName: string;
+    datasources: DatasourceFromServer[];
 };
 
 class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
     readonly type = ActionType.RSDToCategory;
 
     private constructor(
-        readonly datasource: Datasource,
-        readonly kindName: string,
+        readonly datasources: Datasource[],
     ) {
 
     }
 
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
-        const datasource =  Datasource.fromServer(input.datasource);
-        const kindName = input.kindName;
-        return new RSDToCategoryPayload(datasource, kindName);
+        return new RSDToCategoryPayload(input.datasources.map(Datasource.fromServer));
     }
 }
 

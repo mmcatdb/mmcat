@@ -1,11 +1,14 @@
 package cz.matfyz.wrappermongodb;
 
+import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class MongoDBProvider {
+public class MongoDBProvider implements AbstractDatasourceProvider {
 
     public final MongoDBSettings settings;
 
@@ -24,6 +27,23 @@ public class MongoDBProvider {
         return mongoClient.getDatabase(settings.database);
     }
 
+    public boolean isStillValid(Object settings) {
+        if (!(settings instanceof MongoDBSettings mongoDBSettings))
+            return false;
+
+        return this.settings.host.equals(mongoDBSettings.host)
+            && this.settings.port.equals(mongoDBSettings.port)
+            && this.settings.database.equals(mongoDBSettings.database)
+            && this.settings.isWritable == mongoDBSettings.isWritable
+            && this.settings.isQueryable == mongoDBSettings.isQueryable;
+    }
+
+    public void close() {
+        if (mongoClient != null)
+            mongoClient.close();
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record MongoDBSettings(
         String host,
         String port,

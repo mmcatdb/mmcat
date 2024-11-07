@@ -1,16 +1,16 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternObject;
-import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.parsing.Term;
 import cz.matfyz.querying.parsing.WhereClause;
 import cz.matfyz.querying.parsing.WhereClause.WhereTriple;
@@ -26,26 +26,21 @@ import java.util.TreeMap;
  */
 public class SchemaExtractor {
 
-    public static ExtractorResult run(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
+    public static List<PatternForKind> run(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
         return new SchemaExtractor(context, schema, kinds, clause).run();
     }
 
     private final QueryContext context;
     private final SchemaCategory schema;
-    private final List<Kind> kinds;
+    private final List<Mapping> kinds;
     private final WhereClause clause;
 
-    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
+    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
         this.context = context;
         this.schema = schema;
         this.kinds = kinds;
         this.clause = clause;
     }
-
-    public record ExtractorResult(
-        SchemaCategory schema,
-        List<KindPattern> kindPatterns
-    ) {}
 
     private List<WhereTriple> triples;
     /**
@@ -54,16 +49,16 @@ public class SchemaExtractor {
      */
     private List<SchemaMorphism> patternMorphisms;
 
-    private ExtractorResult run() {
+    private List<PatternForKind> run() {
         triples = clause.termTree.toTriples(WhereClause::createTriple);
         patternMorphisms = triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
 
         createNewCategory();
         updateContext();
-        final var patterns = createKindPatterns();
+        final var patterns = createPatternsForKinds();
         // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the QueryPlanner shouldn't be able to create any plan.
 
-        return new ExtractorResult(newSchema, patterns);
+        return patterns;
     }
 
     // The schema category of all objects and morphisms that are reachable from the pattern plus those that are needed to identify the objects.
@@ -119,15 +114,15 @@ public class SchemaExtractor {
         });
     }
 
-    private List<KindPattern> createKindPatterns() {
+    private List<PatternForKind> createPatternsForKinds() {
         return kinds.stream()
-            .filter(kind -> newSchema.hasObject(kind.mapping.rootObject().key()))
+            .filter(kind -> newSchema.hasObject(kind.rootObject().key()))
             .map(kind -> {
-                final var rootObject = kind.mapping.rootObject();
+                final var rootObject = kind.rootObject();
                 final var rootNode = PatternObject.createRoot(rootObject, keyToTerm.get(rootObject.key()));
-                processComplexProperty(rootNode, kind.mapping.accessPath());
+                processComplexProperty(rootNode, kind.accessPath());
 
-                return new KindPattern(kind, rootNode);
+                return new PatternForKind(kind, rootNode);
             }).toList();
     }
 

@@ -1,22 +1,22 @@
-import type { Graph } from '@/types/categoryGraph';
-import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism } from '@/types/schema';
-import type { LogicalModel } from '../logicalModel';
+import { isPositionEqual, type Graph, type ListenerSession } from '@/types/categoryGraph';
+import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism, MetadataObject, MetadataMorphism } from '@/types/schema';
 import type { Result } from '../api/result';
-import { type Version, VersionContext, computeLatestVersions } from './Version';
-import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, EditMorphism, EditObject } from '../schema/operation';
-import type { MetadataUpdate, SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
-import { VersionedSMO } from '../schema/VersionedSMO';
+import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, UpdateMorphism, UpdateObject } from '../schema/operation';
+import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
+import type { MMO } from './metadata/mmo';
+import { MorphismMetadata } from './metadata/morphismMetadata';
+import { ObjectMetadata } from './metadata/objectMetadata';
+import type { ObjectIds } from '../identifiers';
+import { type LogicalModel } from '../datasource';
 
 type UpdateFunction = (udpate: SchemaUpdateInit, logicalModels: LogicalModel[]) => Promise<Result<SchemaCategory>>;
-type UpdateMetadataFunction = (metadata: MetadataUpdate[]) => Promise<void>;
 
 export type EvocatApi = {
     update: UpdateFunction;
-    updateMetadata: UpdateMetadataFunction;
 };
 
 export class Evocat {
-    readonly versionContext;
+    readonly uncommitedOperations = new SmoContext();
 
     private constructor(
         public schemaCategory: SchemaCategory,
@@ -24,9 +24,6 @@ export class Evocat {
         private readonly logicalModels: LogicalModel[],
         private readonly api: EvocatApi,
     ) {
-        const operations = updates.flatMap(update => update.operations);
-        this.operations = new Map(operations.map(operation => [ operation.version.id, operation ]));
-        this.versionContext = VersionContext.create(operations.map(operation => operation.version));
     }
 
     static create(schemaCategory: SchemaCategory, updates: SchemaUpdate[], logicalModels: LogicalModel[], api: EvocatApi): Evocat {
@@ -42,11 +39,6 @@ export class Evocat {
 
     async update() {
         const updateObject = this.getUpdateObject();
-        if (updateObject.operations.length === 0) {
-            // If there are no SMOs to create, we just update the metadata.
-            await this.api.updateMetadata(updateObject.metadata);
-            return;
-        }
 
         const result = await this.api.update(updateObject, this.logicalModels);
         if (!result.status)
@@ -57,101 +49,139 @@ export class Evocat {
         this.schemaCategory.graph = beforeCategory.graph;
     }
 
-    async updateMetadata() {
-        await this.api.updateMetadata(this.getMetadataUpdates());
-    }
+    private graphListener?: ListenerSession;
 
     get graph(): Graph | undefined {
         return this.schemaCategory.graph;
     }
 
     set graph(newGraph: Graph | undefined) {
+        this.graphListener?.close();
         this.schemaCategory.graph = newGraph;
+        this.graphListener = this.schemaCategory.graph?.listen();
+        this.graphListener?.onNode('dragfreeon', node => {
+            const newPosition = { ...node.cytoscapeIdAndPosition.position };
+            node.object.metadata = MetadataObject.create(node.object.metadata.label, newPosition);
+        });
     }
 
-    private readonly operations: Map<string, VersionedSMO>;
-
-    private commitOperation(smo: SMO) {
-        const version = this.versionContext.createNextVersion();
-
-        this.operations.set(version.id, VersionedSMO.create(version, smo));
-        console.log(`[${version}] : ${smo.type}`);
-
+    private addOperation(smo: SMO) {
+        this.uncommitedOperations.add(smo);
         smo.up(this.schemaCategory);
     }
 
     private getUpdateObject(): SchemaUpdateInit {
-        const newOperations = computeLatestVersions(this.versionContext.root)
-            .map(version => this.operations.get(version.id))
-            .filter((operation): operation is VersionedSMO => !!operation)
-            .filter(operation => operation.isNew);
-
-        const operationsToServer = newOperations.map(operation => operation.toServer());
-
-        newOperations.forEach(operation => operation.isNew = false);
-        const versionsToRemove = [ ...this.operations.values() ]
-            .filter(operation => operation.isNew)
-            .map(operation => operation.version);
-
-        versionsToRemove.forEach(version => this.operations.delete(version.id));
-        this.versionContext.removeVersions(versionsToRemove);
+        const schemaOperations = this.uncommitedOperations.collectAndReset();
+        const schemaToServer = schemaOperations.map(operation => operation.toServer());
 
         return {
             prevVersion: this.schemaCategory.versionId,
-            operations: operationsToServer,
-            metadata: this.getMetadataUpdates(),
+            schema: schemaToServer,
+            metadata: this.getMetadataUpdates(schemaOperations).map(operation => operation.toServer()),
         };
     }
 
-    private getMetadataUpdates(): MetadataUpdate[] {
-        return this.schemaCategory.getObjects().map(object => ({
-            key: object.key.toServer(),
-            position: object.position,
-        }));
-    }
+    private getMetadataUpdates(schemaOperations: SMO[]): MMO[] {
+        const createdObjects = new Set(
+            schemaOperations.filter((o): o is CreateObject => o instanceof CreateObject).map(o => o.object.key.value),
+        );
+        const deletedObjects = new Set(
+            schemaOperations.filter((o): o is DeleteObject => o instanceof DeleteObject).map(o => o.object.key.value),
+        );
 
-    undo(skipLowerLevels = true) {
-        this.versionContext.undo(skipLowerLevels).forEach(version => {
-            const operation = this.operations.get(version.id)?.smo;
-            if (!operation)
-                throw new Error(`Undo error: Operation for version: ${version} not found.`);
+        const output: MMO[] = [];
+        this.schemaCategory.getObjects().forEach(object => {
+            const metadata = object.metadata;
+            const og = object.originalMetadata;
 
-            operation.down(this.schemaCategory);
-        });
-    }
+            if (createdObjects.has(object.key.value)) {
+                output.push(ObjectMetadata.create(object.key, metadata));
+                return;
+            }
 
-    redo(skipLowerLevels = true) {
-        this.versionContext.redo(skipLowerLevels).forEach(version => {
-            const operation = this.operations.get(version.id)?.smo;
-            if (!operation)
-                throw new Error(`Redo error: Operation for version: ${version} not found.`);
+            if (deletedObjects.has(object.key.value)) {
+                output.push(ObjectMetadata.create(object.key, undefined, og));
+                return;
+            }
 
-            operation.up(this.schemaCategory);
-        });
-    }
+            if (isPositionEqual(og.position, metadata.position) && og.label === metadata.label)
+                return;
 
-    move(target: Version) {
-        const { undo, redo } = this.versionContext.move(target);
-
-        undo.forEach(version => {
-            const operation = this.operations.get(version.id)?.smo;
-            if (!operation)
-                throw new Error(`Move error: Operation for version: ${version} not found.`);
-
-            operation.down(this.schemaCategory);
+            output.push(ObjectMetadata.create(object.key, metadata, og));
         });
 
-        redo.forEach(version => {
-            const operation = this.operations.get(version.id)?.smo;
-            if (!operation)
-                throw new Error(`Move error: Operation for version: ${version} not found.`);
+        const createdMorphisms = new Set(
+            schemaOperations.filter((o): o is CreateMorphism => o instanceof CreateMorphism).map(o => o.morphism.signature.value),
+        );
+        const deletedMorphisms = new Set(
+            schemaOperations.filter((o): o is DeleteMorphism => o instanceof DeleteMorphism).map(o => o.morphism.signature.value),
+        );
 
-            operation.up(this.schemaCategory);
+        this.schemaCategory.getMorphisms().forEach(morphism => {
+            const metadata = morphism.metadata;
+            const og = morphism.originalMetadata;
+
+            if (createdMorphisms.has(morphism.signature.value)) {
+                output.push(MorphismMetadata.create(morphism.signature, metadata));
+                return;
+            }
+
+            if (deletedMorphisms.has(morphism.signature.value)) {
+                output.push(MorphismMetadata.create(morphism.signature, undefined, og));
+                return;
+            }
+
+            if (og.label === metadata.label)
+                return;
+
+            output.push(MorphismMetadata.create(morphism.signature, metadata, og));
         });
+
+        return output;
     }
+
+    // undo(skipLowerLevels = true) {
+    //     this.versionContext.undo(skipLowerLevels).forEach(version => {
+    //         const operation = this.operations.get(version.id)?.smo;
+    //         if (!operation)
+    //             throw new Error(`Undo error: Operation for version: ${version} not found.`);
+
+    //         operation.down(this.schemaCategory);
+    //     });
+    // }
+
+    // redo(skipLowerLevels = true) {
+    //     this.versionContext.redo(skipLowerLevels).forEach(version => {
+    //         const operation = this.operations.get(version.id)?.smo;
+    //         if (!operation)
+    //             throw new Error(`Redo error: Operation for version: ${version} not found.`);
+
+    //         operation.up(this.schemaCategory);
+    //     });
+    // }
+
+    // move(target: Version) {
+    //     const { undo, redo } = this.versionContext.move(target);
+
+    //     undo.forEach(version => {
+    //         const operation = this.operations.get(version.id)?.smo;
+    //         if (!operation)
+    //             throw new Error(`Move error: Operation for version: ${version} not found.`);
+
+    //         operation.down(this.schemaCategory);
+    //     });
+
+    //     redo.forEach(version => {
+    //         const operation = this.operations.get(version.id)?.smo;
+    //         if (!operation)
+    //             throw new Error(`Move error: Operation for version: ${version} not found.`);
+
+    //         operation.up(this.schemaCategory);
+    //     });
+    // }
 
     compositeOperation<T = void>(name: string, callback: () => T): T {
-        this.versionContext.nextLevel();
+        this.uncommitedOperations.down();
         const result = callback();
 
         this.finishCompositeOperation(name);
@@ -160,10 +190,12 @@ export class Evocat {
     }
 
     finishCompositeOperation(name: string) {
-        this.versionContext.prevLevel();
+        const children = this.uncommitedOperations.tryUp();
+        if (!children)
+            throw new Error('Composite operation finished before it was started.');
 
-        const operation = Composite.create(name);
-        this.commitOperation(operation);
+        const operation = Composite.create(name, children);
+        this.addOperation(operation);
     }
 
     /**
@@ -173,29 +205,40 @@ export class Evocat {
         const versionedObject = this.schemaCategory.createObject();
         const object = SchemaObject.createNew(versionedObject.key, def);
         const operation = CreateObject.create(object);
-        this.commitOperation(operation);
+        this.addOperation(operation);
+
+        versionedObject.metadata = MetadataObject.create(def.label, { x: 0, y: 0 });
 
         return object;
     }
 
     deleteObject(object: SchemaObject) {
         const operation = DeleteObject.create(object);
-        this.commitOperation(operation);
+        this.addOperation(operation);
     }
 
-    editObject(update: ObjectDefinition, oldObject: SchemaObject): SchemaObject {
-        const newObject = oldObject.createCopy(update);
-        const operation = EditObject.create(newObject, oldObject);
-        this.commitOperation(operation);
+    updateObject(oldObject: SchemaObject, update: {
+        label?: string;
+        ids?: ObjectIds | null;
+    }): SchemaObject {
+        const newObject = oldObject.update(update);
+        if (newObject) {
+            const operation = UpdateObject.create(newObject, oldObject);
+            this.addOperation(operation);
+        }
 
-        return newObject;
+        const versionedObject = this.schemaCategory.getObject(oldObject.key);
+        if (update.label && update.label !== versionedObject.metadata.label)
+            versionedObject.metadata = MetadataObject.create(update.label, versionedObject.metadata.position);
+
+        return newObject ?? oldObject;
     }
 
     createMorphism(def: MorphismDefinition): SchemaMorphism {
         const versionedMorphism = this.schemaCategory.createMorphism();
         const morphism = SchemaMorphism.createNew(versionedMorphism.signature, def);
         const operation = CreateMorphism.create(morphism);
-        this.commitOperation(operation);
+        this.addOperation(operation);
 
         return morphism;
     }
@@ -203,14 +246,67 @@ export class Evocat {
     deleteMorphism(morphism: SchemaMorphism) {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (only if the cardinality changed).
         const operation = DeleteMorphism.create(morphism);
-        this.commitOperation(operation);
+        this.addOperation(operation);
     }
 
-    editMorphism(update: MorphismDefinition, oldMorphism: SchemaMorphism): SchemaMorphism {
-        const newMorphism = oldMorphism.createCopy(update);
-        const operation = EditMorphism.create(newMorphism, oldMorphism);
-        this.commitOperation(operation);
+    updateMorphism(oldMorphism: SchemaMorphism, update: Partial<MorphismDefinition>): SchemaMorphism {
+        const newMorphism = oldMorphism.update(update);
+        if (newMorphism) {
+            const operation = UpdateMorphism.create(newMorphism, oldMorphism);
+            this.addOperation(operation);
+        }
 
-        return newMorphism;
+        const versionedMorphism = this.schemaCategory.getMorphism(oldMorphism.signature);
+        if (update.label && update.label !== versionedMorphism.metadata.label)
+            versionedMorphism.metadata = MetadataMorphism.create(update.label);
+
+        return newMorphism ?? oldMorphism;
+    }
+}
+
+class SmoContext {
+    private levels: SMO[][] = [ [] ];
+
+    down() {
+        this.levels.push([]);
+    }
+
+    tryUp(): SMO[] | undefined {
+        return this.levels.pop();
+    }
+
+    add(smo: SMO) {
+        this.levels[this.levels.length - 1].push(smo);
+    }
+
+    isRoot() {
+        return this.levels.length === 1;
+    }
+
+    collectAndReset(): SMO[] {
+        if (!this.isRoot())
+            throw new Error('Cannot reset SMO context when not at root level.');
+
+        const smo = this.levels[0];
+        this.levels = [ [] ];
+
+        return smo;
+    }
+}
+
+type UserAction = SMO | MMO;
+
+/**
+ * Action is anything that can be undone or redone.
+ * E.g., SMOs, position changes, etc.
+ */
+class ActionContext {
+    private actions: UserAction[] = [];
+    private current = 0;
+
+    undo() {
+    }
+
+    redo() {
     }
 }

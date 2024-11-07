@@ -1,5 +1,6 @@
 package cz.matfyz.core.mapping;
 
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -11,28 +12,22 @@ import java.util.List;
 
 public class Mapping implements Comparable<Mapping> {
 
-    private final SchemaCategory category;
-    private final SchemaObject rootObject;
-
-    private String kindName;
-    private ComplexProperty accessPath;
-    private Collection<Signature> primaryKey;
-
-    public Mapping(SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+    public Mapping(Datasource datasource, String kindName, SchemaCategory category, Key rootKey, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+        this.datasource = datasource;
+        this.kindName = kindName;
         this.category = category;
         this.rootObject = category.getObject(rootKey);
-        this.kindName = kindName;
         this.accessPath = accessPath;
         this.primaryKey = primaryKey;
     }
 
-    public static Mapping create(SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath) {
+    public static Mapping create(Datasource datasource, String kindName, SchemaCategory category, Key rootKey, ComplexProperty accessPath) {
         final var rootObject = category.getObject(rootKey);
 
-        return new Mapping(category, rootKey, kindName, accessPath, defaultPrimaryKey(rootObject));
+        return new Mapping(datasource, kindName, category, rootKey, accessPath, defaultPrimaryKey(rootObject));
     }
 
-    public static List<Signature> defaultPrimaryKey(SchemaObject object) {
+    private static List<Signature> defaultPrimaryKey(SchemaObject object) {
         return object.ids().isSignatures()
             ? object.ids().toSignatureIds().first().signatures().stream().toList()
             : List.of(Signature.createEmpty());
@@ -42,25 +37,43 @@ public class Mapping implements Comparable<Mapping> {
         throw new UnsupportedOperationException("Mapping.clone not implemented");
     }
 
-    public SchemaCategory category() {
-        return category;
+    private final Datasource datasource;
+    public Datasource datasource() {
+        return datasource;
     }
 
-    public SchemaObject rootObject() {
-        return rootObject;
-    }
-
-    public ComplexProperty accessPath() {
-        return accessPath;
-    }
-
+    private final String kindName;
     public String kindName() {
         return kindName;
     }
 
+    private final SchemaCategory category;
+    public SchemaCategory category() {
+        return category;
+    }
+
+    private final SchemaObject rootObject;
+    public SchemaObject rootObject() {
+        return rootObject;
+    }
+
+    private final ComplexProperty accessPath;
+    public ComplexProperty accessPath() {
+        return accessPath;
+    }
+
+    private final Collection<Signature> primaryKey;
     public Collection<Signature> primaryKey() {
         return primaryKey;
     }
+
+    // Updating
+
+    public Mapping withSchema(SchemaCategory category, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+        return new Mapping(datasource, kindName, category, rootObject.key(), accessPath, primaryKey);
+    }
+
+    // Identification
 
     @Override public boolean equals(Object other) {
         if (this == other)
@@ -70,8 +83,16 @@ public class Mapping implements Comparable<Mapping> {
     }
 
     @Override public int compareTo(Mapping other) {
-        // This guarantees uniqueness in one logical model, however mappings between different logical models are never compared.
-        return kindName.compareTo(other.kindName);
+        final int datasourceComparison = datasource.compareTo(other.datasource);
+        return datasourceComparison != 0
+            ? datasourceComparison
+            : kindName.compareTo(other.kindName);
+    }
+
+    // Debug
+
+    @Override public String toString() {
+        return datasource.getUniqueKindIdentifier(kindName);
     }
 
     public record SerializedMapping(
@@ -90,11 +111,12 @@ public class Mapping implements Comparable<Mapping> {
             );
         }
 
-        public Mapping toMapping(SchemaCategory category) {
+        public Mapping toMapping(Datasource datasource, SchemaCategory category) {
             return new Mapping(
+                datasource,
+                kindName,
                 category,
                 rootObjectKey,
-                kindName,
                 accessPath,
                 primaryKey
             );

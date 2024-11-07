@@ -8,115 +8,156 @@ import cz.matfyz.core.rsd.Share;
 import cz.matfyz.wrappercsv.inference.RecordToHeuristicsMap;
 import cz.matfyz.wrappercsv.inference.MapCsvDocument;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 
+/**
+ * An inference wrapper for CSV files that extends {@link AbstractInferenceWrapper}.
+ * This class provides methods for loading and processing CSV data to infer schema descriptions
+ * and properties using Spark RDDs.
+ */
 public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     private final CsvProvider provider;
 
-    private String fileName() {
-        return kindName;
-    }
-
+    /**
+     * Constructs a new {@code CsvInferenceWrapper} with the specified CSV provider and Spark settings.
+     */
     public CsvInferenceWrapper(CsvProvider provider, SparkSettings sparkSettings) {
         super(sparkSettings);
         this.provider = provider;
     }
 
-    @Override
-    public AbstractInferenceWrapper copy() {
+    /**
+     * Returns the name of the CSV file currently being processed.
+     */
+    private String fileName() {
+        return kindName;
+    }
+
+    /**
+     * Creates a copy of this inference wrapper.
+     */
+    @Override public AbstractInferenceWrapper copy() {
         return new CsvInferenceWrapper(this.provider, this.sparkSettings);
     }
 
-    @Override
-    public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
+    /**
+     * Loads properties from the CSV data. This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
     }
 
-    @Override
-    // assuming that the first line of the csv is the header, the csv is comma delimited and there are no missing data
-    // TODO: get rid of assumptions
-    public JavaRDD<RecordSchemaDescription> loadRSDs() {
+    /**
+     * Loads record schema descriptions (RSDs) from the CSV data.
+     */
+    @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
         return csvDocuments.map(MapCsvDocument::process);
     }
 
+    /**
+     * Loads documents from the CSV file and parses them into a list of maps,
+     * where each map represents a CSV row with header names as keys.
+     */
     public JavaRDD<Map<String, String>> loadDocuments() {
-        List<Map<String, String>> lines = new ArrayList<>();
-        boolean firstLine = false;
-        String[] header = null;
+        final List<Map<String, String>> lines = new ArrayList<>();
 
-        try (InputStream inputStream = provider.getInputStream(kindName);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                char delimiter = detectDelimiter(line);
-                String[] elements = line.split(Character.toString(delimiter) + "\\s*");
-                if (!firstLine) {
-                    header = elements;
-                    firstLine = true;
-                } else {
-                    Map<String, String> lineMap = new HashMap<>();
-                    for (int i = 0; i < elements.length; i++) {
-                        lineMap.put(header[i], elements[i]);
-                    }
-                    lines.add(lineMap);
-                }
+        final CsvSchema baseSchema = CsvSchema.emptySchema()
+            .withColumnSeparator(provider.getSeparator())
+            .withEscapeChar('\\');
+
+        try (
+            InputStream inputStream = provider.getInputStream();
+        ) {
+            if (!provider.hasHeader()) {
+                // If there is no header, we have to read the first line to get the number of columns and create a default header.
+                final MappingIterator<String[]> headerReader = new CsvMapper()
+                    .readerFor(String[].class)
+                    .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                    .with(baseSchema)
+                    .readValues(inputStream);
+
+                if (!headerReader.hasNext())
+                    return context.emptyRDD();
+
+                final String[] firstLine = headerReader.next();
+                final String[] header = new String[firstLine.length];
+                for (int i = 0; i < firstLine.length; i++)
+                    header[i] = "" + i;
+
+                // We have to read the lines as String[] and manually convert them to Map<String, String>, because the stream already started (we had to create the header).
+                // We can't "switch" to a different reader, because the stream is already consumed.
+                lines.add(createLineMap(header, firstLine));
+
+                while (headerReader.hasNext())
+                    lines.add(createLineMap(header, headerReader.next()));
+            }
+            else {
+                final MappingIterator<Map<String, String>> reader = new CsvMapper()
+                    .readerFor(Map.class)
+                    .with(baseSchema.withHeader())
+                    .readValues(inputStream);
+
+                while (reader.hasNext())
+                    lines.add(reader.next());
             }
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
             return context.emptyRDD();
         }
-        JavaRDD<Map<String, String>> csvDocuments = context.parallelize(lines);
-        return csvDocuments;
+
+        return context.parallelize(lines);
     }
 
-    // The allowed delimiters: {',', '\t', ';'}
-    private char detectDelimiter(String line) {
-        char[] possibleDelimiters = {',', '\t', ';'};
-        Map<Character, Integer> delimiterCount = new HashMap<>();
-        for (char delimiter : possibleDelimiters) {
-            int count = line.split(Character.toString(delimiter)).length - 1;
-            delimiterCount.put(delimiter, count);
-        }
-        return Collections.max(delimiterCount.entrySet(), Map.Entry.comparingByValue()).getKey();
+    private Map<String, String> createLineMap(String[] header, String[] elements) {
+        final Map<String, String> lineMap = new HashMap<>();
+        final int columns = Math.min(header.length, elements.length);
+        for (int i = 0; i < columns; i++)
+            lineMap.put(header[i], elements[i]);
+
+        return lineMap;
     }
 
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
+    /**
+     * Loads pairs of strings and record schema descriptions (RSDs) from the CSV data.
+     * This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
-
     }
 
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
+    /**
+     * Loads property schema pairs from the CSV data. This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
     }
 
-    @Override
-    public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
+    /**
+     * Loads property data from the CSV documents and maps them to {@link PropertyHeuristics}.
+     */
+    @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
-
         return csvDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
     }
 
-    @Override
-    public List<String> getKindNames() {
-        try {
-            return provider.getCsvFileNames();
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException("Error getting csv file names", e);
-        }
+    /**
+     * Retrieves a list of kind names (CSV file names) from the provider.
+     */
+    @Override public List<String> getKindNames() {
+        return List.of(provider.getCsvFileNames());
     }
 }

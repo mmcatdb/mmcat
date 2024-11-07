@@ -12,7 +12,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,42 +22,61 @@ import org.bson.Document;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
+/**
+ * An inference wrapper for JSON files that extends {@link AbstractInferenceWrapper}.
+ * This class provides methods for loading and processing JSON data to infer schema descriptions
+ * and properties using Spark RDDs.
+ */
 public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     private final JsonProvider provider;
 
-    private String fileName() {
-        return kindName;
-    }
-
+    /**
+     * Constructs a new {@code JsonInferenceWrapper} with the specified JSON provider and Spark settings.
+     */
     public JsonInferenceWrapper(JsonProvider provider, SparkSettings sparkSettings) {
         super(sparkSettings);
         this.provider = provider;
     }
 
-    @Override
-    public AbstractInferenceWrapper copy() {
+    /**
+     * Returns the name of the JSON file currently being processed.
+     */
+    private String fileName() {
+        return kindName;
+    }
+
+    /**
+     * Creates a copy of this inference wrapper.
+     */
+    @Override public AbstractInferenceWrapper copy() {
         return new JsonInferenceWrapper(this.provider, this.sparkSettings);
     }
 
-    @Override
-    public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
+    /**
+     * Loads properties from the JSON data. This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
     }
 
-    @Override
-    public JavaRDD<RecordSchemaDescription> loadRSDs() {
+    /**
+     * Loads record schema descriptions (RSDs) from the JSON data.
+     */
+    @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
         return jsonDocuments.map(MapJsonDocument::process);
     }
 
+    /**
+     * Loads documents from the JSON file and parses them into a list of BSON {@link Document} objects.
+     */
     public JavaRDD<Document> loadDocuments() {
         List<Document> documents = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
         try (
-            InputStream inputStream = provider.getInputStream(kindName);
+            InputStream inputStream = provider.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             String content = reader.lines().collect(Collectors.joining("\n"));
@@ -88,32 +106,36 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         return jsonDocuments;
     }
 
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
+    /**
+     * Loads pairs of strings and record schema descriptions (RSDs) from the JSON data.
+     * This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
-
     }
 
-    @Override
-    public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
+    /**
+     * Loads property schema pairs from the JSON data. This method is currently not implemented.
+     */
+    @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
     }
 
-    @Override
-    public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
+    /**
+     * Loads property data from the JSON documents and maps them to {@link PropertyHeuristics}.
+     */
+    @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
 
         return jsonDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
     }
 
-    @Override
-    public List<String> getKindNames() {
-        try {
-            return provider.getJsonFileNames();
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException("Error getting jsonc file names", e);
-        }
+    /**
+     * Retrieves a list of kind names (JSON file names) from the provider.
+     */
+    @Override public List<String> getKindNames() {
+        return List.of(provider.getJsonFileNames());
     }
 
 }

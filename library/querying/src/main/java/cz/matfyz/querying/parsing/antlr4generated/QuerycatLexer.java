@@ -101,15 +101,12 @@ public class QuerycatLexer extends Lexer {
         }
     }
 
-    @Override
-    @Deprecated
+    @Override @Deprecated
     public String[] getTokenNames() {
         return tokenNames;
     }
 
-    @Override
-
-    public Vocabulary getVocabulary() {
+    @Override public Vocabulary getVocabulary() {
         return VOCABULARY;
     }
 
@@ -119,23 +116,17 @@ public class QuerycatLexer extends Lexer {
         _interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
     }
 
-    @Override
-    public String getGrammarFileName() { return "Querycat.g4"; }
+    @Override public String getGrammarFileName() { return "Querycat.g4"; }
 
-    @Override
-    public String[] getRuleNames() { return ruleNames; }
+    @Override public String[] getRuleNames() { return ruleNames; }
 
-    @Override
-    public String getSerializedATN() { return _serializedATN; }
+    @Override public String getSerializedATN() { return _serializedATN; }
 
-    @Override
-    public String[] getChannelNames() { return channelNames; }
+    @Override public String[] getChannelNames() { return channelNames; }
 
-    @Override
-    public String[] getModeNames() { return modeNames; }
+    @Override public String[] getModeNames() { return modeNames; }
 
-    @Override
-    public ATN getATN() { return _ATN; }
+    @Override public ATN getATN() { return _ATN; }
 
     public static final String _serializedATN =
         "\u0004\u0000G\u023b\u0006\uffff\uffff\u0002\u0000\u0007\u0000\u0002\u0001"+

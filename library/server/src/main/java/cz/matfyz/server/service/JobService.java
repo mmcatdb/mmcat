@@ -12,7 +12,6 @@ import cz.matfyz.server.exception.InvalidTransitionException;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -82,10 +81,6 @@ public class JobService {
         output.put(State.Waiting, Set.of(State.Waiting));
 
         return output;
-    }
-
-    public List<Session> findAllSessions(Id categoryId) {
-        return repository.findAllSessionsInCategory(categoryId);
     }
 
     public Session createSession(Id categoryId) {

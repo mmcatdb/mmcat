@@ -3,7 +3,7 @@ package cz.matfyz.server.repository;
 import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.instance.InstanceCategoryWrapper;
+import cz.matfyz.server.entity.InstanceCategoryWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -21,7 +21,7 @@ public class InstanceCategoryRepository {
             final var statement = connection.prepareStatement("""
                 SELECT
                     instance_data,
-                    schema_category_id
+                    category_id
                 FROM session
                 WHERE id = ?;
                 """);
@@ -35,7 +35,7 @@ public class InstanceCategoryRepository {
                     return;
                 }
 
-                final var schemaCategoryId = getId(resultSet, "schema_category_id");
+                final var schemaCategoryId = getId(resultSet, "category_id");
                 output.set(InstanceCategoryWrapper.fromJsonValue(schemaCategoryId, sessionId, instanceData));
             }
         });

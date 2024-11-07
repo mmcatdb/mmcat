@@ -1,14 +1,13 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.evolution.Version;
-import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
+import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.Query;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
-import cz.matfyz.server.entity.query.Query;
-import cz.matfyz.server.entity.query.QueryVersion;
+import cz.matfyz.server.entity.evolution.QueryEvolution;
+import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.QueryRepository;
-import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.server.service.QueryService;
 
 import java.util.List;
@@ -30,6 +29,9 @@ public class QueryController {
 
     @Autowired
     private QueryRepository repository;
+
+    @Autowired
+    private EvolutionRepository evolutionRepository;
 
     public record QueryInput(
         Id categoryId,
@@ -67,26 +69,27 @@ public class QueryController {
     }
 
     @GetMapping("/schema-categories/{categoryId}/queries")
-    public List<QueryWithVersion> getQueriesInCategory(@PathVariable Id categoryId) {
-        return repository.findAllInCategory(categoryId);
+    public List<Query> getQueriesInCategory(@PathVariable Id categoryId) {
+        return repository.findAllInCategory(categoryId, null);
     }
 
     @GetMapping("/queries/{queryId}")
-    public QueryWithVersion getQuery(@PathVariable Id queryId) {
+    public Query getQuery(@PathVariable Id queryId) {
         return repository.find(queryId);
     }
 
     private record QueryWithVersions(
         Query query,
-        List<QueryVersion> versions
+        List<QueryEvolution> versions
     ) {}
 
+    /** @deprecated Currently not used, but might be ... Delete if necessary. */
     @GetMapping("/queries/{queryId}/with-versions")
     public QueryWithVersions getQueryWithVersions(@PathVariable Id queryId) {
-        final var queryWithVersion = repository.find(queryId);
-        final var versions = repository.findAllVersionsByQuery(queryId);
+        final var query = repository.find(queryId);
+        final var versions = evolutionRepository.findAllQueryEvolutions(queryId);
 
-        return new QueryWithVersions(queryWithVersion.query(), versions);
+        return new QueryWithVersions(query, versions);
     }
 
     public record QueryInit(
@@ -96,24 +99,26 @@ public class QueryController {
     ) {}
 
     @PostMapping("/queries")
-    public QueryWithVersion createQuery(@RequestBody QueryInit init) {
-        return service.createQuery(init);
+    public Query createQuery(@RequestBody QueryInit init) {
+        return service.create(init);
     }
 
     @DeleteMapping("/queries/{queryId}")
     public void deleteQuery(@PathVariable Id queryId) {
-        service.deleteQueryWithVersions(queryId);
+        service.delete(queryId);
     }
 
-    public record QueryVersionUpdate(
-        Version version,
+    private record QueryEdit(
         String content,
-        List<QueryUpdateError> errors
+        List<QueryEvolutionError> errors
     ) {}
 
-    @PutMapping("/query-versions/{versionId}")
-    public QueryVersion updateQueryVersion(@PathVariable Id versionId, @RequestBody QueryVersionUpdate update) {
-        return service.updateQueryVersion(versionId, update);
+    @PutMapping("/queries/{queryId}")
+    public Query updateQuery(@PathVariable Id queryId, @RequestBody QueryEdit update) {
+        final var query = repository.find(queryId);
+        service.update(query, update.content, update.errors);
+
+        return query;
     }
 
 }

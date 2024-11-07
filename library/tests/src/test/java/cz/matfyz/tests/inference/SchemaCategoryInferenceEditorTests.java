@@ -1,8 +1,10 @@
 package cz.matfyz.tests.inference;
 
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -22,6 +24,9 @@ import org.junit.jupiter.api.Test;
 
 class SchemaCategoryInferenceEditorTests {
 
+    // The type literally doesn't matter.
+    private static final Datasource datasource = new Datasource(DatasourceType.mongodb, "test");
+
     @Test
     void testReferenceMergeEditArray() {
         final SchemaBuilder sbA = new SchemaBuilder();
@@ -34,18 +39,18 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsAToIndex = sbA.morphism(reviewsA, index, 3);
         final SchemaCategory schemaA = sbA.build();
 
-        final MappingBuilder mbA = new MappingBuilder();
-        final Mapping mappingA = new Mapping(
+        final AccessPathBuilder apbA = new AccessPathBuilder();
+        final Mapping mappingA = Mapping.create(
+            datasource,
+            "kindNameA",
             schemaA,
             name.key(),
-            "kindNameA",
-            mbA.root(
-                mbA.simple("name", appToName),
-                mbA.complex("reviews", reviewsAToApp.dual(),
-                    mbA.simple("_index", reviewsAToIndex)
+            apbA.root(
+                apbA.simple("name", appToName),
+                apbA.complex("reviews", reviewsAToApp.dual(),
+                    apbA.simple("_index", reviewsAToIndex)
                 )
-            ),
-            null
+            )
         );
 
         System.out.println(mappingA.accessPath());
@@ -58,15 +63,15 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
         final SchemaCategory schemaB = sbB.build();
 
-        final MappingBuilder mbB = new MappingBuilder();
-        final Mapping mappingB = new Mapping(
+        final AccessPathBuilder apbB = new AccessPathBuilder();
+        final Mapping mappingB = Mapping.create(
+            datasource,
+            "kindNameB",
             schemaB,
             reviewsB.key(),
-            "kindNameB",
-            mbB.root(
-                mbB.simple("text", reviewsBToText)
-            ),
-            null
+            apbB.root(
+                apbB.simple("text", reviewsBToText)
+            )
         );
 
         System.out.println(mappingB.accessPath());
@@ -75,7 +80,7 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
         final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        final ReferenceMerge edit = (new ReferenceMerge.Data(reviewsA.key(), reviewsB.key())).createAlgorithm();
+        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key(), null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
@@ -94,16 +99,16 @@ class SchemaCategoryInferenceEditorTests {
         final var appToReviewsA =   sbA.morphism(app, reviewsA, 2);
         final SchemaCategory schemaA = sbA.build();
 
-        final MappingBuilder mbA = new MappingBuilder();
-        final Mapping mappingA = new Mapping(
+        final AccessPathBuilder apbA = new AccessPathBuilder();
+        final Mapping mappingA = Mapping.create(
+            datasource,
+            "kindNameA",
             schemaA,
             name.key(),
-            "kindNameA",
-            mbA.root(
-                mbA.simple("name", appToName),
-                mbA.simple("reviews", appToReviewsA)
-            ),
-            null
+            apbA.root(
+                apbA.simple("name", appToName),
+                apbA.simple("reviews", appToReviewsA)
+            )
         );
 
         System.out.println(mappingA.accessPath());
@@ -116,15 +121,15 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
         final SchemaCategory schemaB = sbB.build();
 
-        final MappingBuilder mbB = new MappingBuilder();
-        final Mapping mappingB = new Mapping(
+        final AccessPathBuilder apbB = new AccessPathBuilder();
+        final Mapping mappingB = Mapping.create(
+            datasource,
+            "kindNameB",
             schemaB,
             reviewsB.key(),
-            "kindNameB",
-            mbB.root(
-                mbB.simple("text", reviewsBToText)
-            ),
-            null
+            apbB.root(
+                apbB.simple("text", reviewsBToText)
+            )
         );
 
         System.out.println(mappingB.accessPath());
@@ -133,7 +138,7 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
         final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        final ReferenceMerge edit = (new ReferenceMerge.Data(reviewsA.key(), reviewsB.key())).createAlgorithm();
+        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key(), null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
@@ -152,16 +157,16 @@ class SchemaCategoryInferenceEditorTests {
         final var appToName =   sbA.morphism(app, name, 2);
         final SchemaCategory schemaA = sbA.build();
 
-        final MappingBuilder mbA = new MappingBuilder();
-        final Mapping mappingA = new Mapping(
+        final AccessPathBuilder apbA = new AccessPathBuilder();
+        final Mapping mappingA = Mapping.create(
+            datasource,
+            "kindNameA",
             schemaA,
             app.key(),
-            "kindNameA",
-            mbA.root(
-                mbA.simple("name", appToAppIdA),
-                mbA.simple("app_id", appToName)
-            ),
-            null
+            apbA.root(
+                apbA.simple("name", appToAppIdA),
+                apbA.simple("app_id", appToName)
+            )
         );
 
         System.out.println(mappingA.accessPath());
@@ -176,16 +181,16 @@ class SchemaCategoryInferenceEditorTests {
         final var reviewsToText =   sbB.morphism(reviews, text, 4);
         final SchemaCategory schemaB = sbB.build();
 
-        final MappingBuilder mbB = new MappingBuilder();
-        final Mapping mappingB = new Mapping(
+        final AccessPathBuilder apbB = new AccessPathBuilder();
+        final Mapping mappingB = Mapping.create(
+            datasource,
+            "kindNameB",
             schemaB,
             reviews.key(),
-            "kindNameB",
-            mbB.root(
-                mbB.simple("text", reviewsToText),
-                mbB.simple("app_id", reviewsToAppIdB)
-            ),
-            null
+            apbB.root(
+                apbB.simple("text", reviewsToText),
+                apbB.simple("app_id", reviewsToAppIdB)
+            )
         );
 
         System.out.println(mappingB.accessPath());
@@ -194,18 +199,14 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
         final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(appIdA.key())).createAlgorithm();
+        final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, appIdA.key(), reviews.key(), null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
-/*
-        System.out.println();
-        System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());*/
     }
 
     @Test
-    void testClusterEdit() {
+    void testClusterComplexEdit() {
         final var builder = new SchemaBuilder();
 
         final var world =       builder.object("world", 0);
@@ -219,46 +220,159 @@ class SchemaCategoryInferenceEditorTests {
         final var o8 =          builder.object("b", 8);
         final var o9 =          builder.object("c", 9);
 
-        builder.morphism(world, continent, 1);
-        builder.morphism(continent, country1, 2);
-        builder.morphism(continent, country2, 3);
-        builder.morphism(country1, o3, 4);
-        builder.morphism(country1, o4, 5);
-        builder.morphism(o3, o5, 6);
-        builder.morphism(country2, o7, 7);
-        builder.morphism(country2, o8, 8);
-        builder.morphism(o7, o9, 9);
+        final var worldToContinent =        builder.morphism(world, continent, 1);
+        final var continentToCountry1 =     builder.morphism(continent, country1, 2);
+        final var continentToCountry2 =     builder.morphism(continent, country2, 3);
+        final var country1ToA =             builder.morphism(country1, o3, 4);
+        final var country1ToB =             builder.morphism(country1, o4, 5);
+        final var aToC1 =                   builder.morphism(o3, o5, 6);
+        final var country2ToA =             builder.morphism(country2, o7, 7);
+        final var country2ToB =             builder.morphism(country2, o8, 8);
+        final var aToC2 =                   builder.morphism(o7, o9, 9);
 
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
-        /*
-        MappingBuilder builder = new MappingBuilder();
+        final AccessPathBuilder apb = new AccessPathBuilder();
+        final Mapping mapping = Mapping.create(
+            datasource,
+            "kindName",
+            schema,
+            world.key(),
+            apb.root(
+                apb.complex("continent", worldToContinent,
+                    apb.complex("country_1", continentToCountry1,
+                        apb.complex("a", country1ToA,
+                            apb.simple("c", aToC1)),
+                        apb.simple("b", country1ToB)),
+                    apb.complex("country_2", continentToCountry2,
+                        apb.complex("a", country2ToA,
+                            apb.simple("c", aToC2)),
+                        apb.simple("b", country2ToB)
+                            )
+                        )
+            )
+        );
 
-        List<AccessPath> subpaths = new ArrayList<>();
-        subpaths.add(builder.simple("c", Signature.createBase(6)));
-        subpaths.add(builder.simple("b", Signature.createBase(5)));
-
-        ComplexProperty complexProperty = builder.complex("app", Signature.createBase(0), subpaths.toArray(new AccessPath[0]));
-
-        Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
+        System.out.println("Mapping before edit:");
         System.out.println(mapping.accessPath());
-*/
 
-        //List<Mapping> mappings = new ArrayList<>();
-        //mappings.add(mapping);
+
         List<Key> clusterKeys = new ArrayList<>();
         clusterKeys.add(country1.key());
         clusterKeys.add(country2.key());
 
-        final ClusterMerge edit = (new ClusterMerge.Data(clusterKeys)).createAlgorithm();
+        final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
-        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
-/*
-        System.out.println();
-        System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());*/
+        final List<Mapping> editMappings = edit.applyMappingEdit(List.of(mapping));
+
+        System.out.println("Mapping after edit:");
+        System.out.println(editMappings.get(0).accessPath());
+    }
+
+    @Test
+    void testClusterIntermediateEdit() {
+        final var builder = new SchemaBuilder();
+
+        final var user =            builder.object("user", 0);
+        final var name =            builder.object("name", 1);
+        final var compliment1 =     builder.object("compliment_cute", 2);
+        final var rating1 =         builder.object("rating", 3);
+        final var comments1 =       builder.object("comments", 4);
+        final var compliment2 =     builder.object("compliment_funny", 5);
+        final var rating2 =         builder.object("rating", 6);
+        final var comments2 =       builder.object("comments", 7);
+
+        final var userToName =              builder.morphism(user, name, 1);
+        final var userToCompliment1 =       builder.morphism(user, compliment1, 2);
+        final var compliment1ToRating =     builder.morphism(compliment1, rating1, 3);
+        final var compliment1ToComments =   builder.morphism(compliment1, comments1, 4);
+        final var userToCompliment2 =       builder.morphism(user, compliment2, 5);
+        final var compliment2ToRating =     builder.morphism(compliment2, rating2, 6);
+        final var compliment2ToComments =   builder.morphism(compliment2, comments2, 7);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
+
+        final AccessPathBuilder apb = new AccessPathBuilder();
+        final Mapping mapping = Mapping.create(
+            datasource,
+            "kindName",
+            schema,
+            user.key(),
+            apb.root(
+                apb.simple("name", userToName),
+                apb.complex("compliment_cute", userToCompliment1,
+                    apb.simple("rating", compliment1ToRating),
+                    apb.simple("comments", compliment1ToComments)),
+                apb.complex("compliment_funny", userToCompliment2,
+                    apb.simple("rating", compliment2ToRating),
+                    apb.simple("comments", compliment2ToComments))
+            )
+        );
+
+        System.out.println("Mapping before edit:");
+        System.out.println(mapping.accessPath());
+
+
+        List<Key> clusterKeys = new ArrayList<>();
+        clusterKeys.add(compliment1.key());
+        clusterKeys.add(compliment2.key());
+
+        final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
+
+        final List<Mapping> editMappings = edit.applyMappingEdit(List.of(mapping));
+
+        System.out.println("Mapping after edit:");
+        System.out.println(editMappings.get(0).accessPath());
+    }
+
+    @Test
+    void testClusterSimpleEdit() {
+        final var builder = new SchemaBuilder();
+
+        final var user =            builder.object("user", 0);
+        final var name =            builder.object("name", 1);
+        final var compliment1 =     builder.object("compliment_cute", 2);
+        final var compliment2 =     builder.object("compliment_funny", 3);
+
+        final var userToName =              builder.morphism(user, name, 1);
+        final var userToCompliment1 =       builder.morphism(user, compliment1, 2);
+        final var userToCompliment2 =       builder.morphism(user, compliment2, 3);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
+
+        final AccessPathBuilder apb = new AccessPathBuilder();
+        final Mapping mapping = Mapping.create(
+            datasource,
+            "kindName",
+            schema,
+            user.key(),
+            apb.root(
+                apb.simple("name", userToName),
+                apb.simple("compliment_cute", userToCompliment1),
+                apb.simple("compliment_funny", userToCompliment2)
+            )
+        );
+
+        System.out.println("Mapping before edit:");
+        System.out.println(mapping.accessPath());
+
+
+        List<Key> clusterKeys = new ArrayList<>();
+        clusterKeys.add(compliment1.key());
+        clusterKeys.add(compliment2.key());
+
+        final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
+
+        final List<Mapping> editMappings = edit.applyMappingEdit(List.of(mapping));
+
+        System.out.println("Mapping after edit:");
+        System.out.println(editMappings.get(0).accessPath());
     }
 
     @Test
@@ -269,57 +383,37 @@ class SchemaCategoryInferenceEditorTests {
         final var o1 =  builder.object("A", 1);
         final var o2 =  builder.object("A", 2);
         final var o3 =  builder.object("B", 3);
-        final var o4 =  builder.object("B", 4);
+        //final var o4 =  builder.object("B", 4);
         final var o5 =  builder.object("B", 5);
         final var o6 =  builder.object("A", 6);
-        final var o7 =  builder.object("A", 7);
+        //final var o7 =  builder.object("A", 7);
         final var o8 =  builder.object("B", 8);
-        final var o9 =  builder.object("B", 9);
-        final var o10 = builder.object("A", 10);
-        final var o11 = builder.object("B", 11);
+        //final var o9 =  builder.object("B", 9);
+        //final var o10 = builder.object("A", 10);
+        //final var o11 = builder.object("B", 11);
 
         builder.morphism(o0, o1, 1);
         builder.morphism(o0, o2, 2);
         builder.morphism(o1, o3, 3);
-        builder.morphism(o1, o4, 4);
+        //builder.morphism(o1, o4, 4);
         builder.morphism(o2, o5, 5);
         builder.morphism(o3, o6, 6);
-        builder.morphism(o4, o7, 7);
+        //builder.morphism(o4, o7, 7);
         builder.morphism(o6, o8, 8);
-        builder.morphism(o7, o9, 9);
-        builder.morphism(o9, o10, 10);
-        builder.morphism(o10, o11, 11);
+        //builder.morphism(o7, o9, 9);
+        //builder.morphism(o9, o10, 10);
+        //builder.morphism(o10, o11, 11);
 
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
-        /*
-        MappingBuilder builder = new MappingBuilder();
-
-        List<AccessPath> subpaths = new ArrayList<>();
-        subpaths.add(builder.simple("c", Signature.createBase(6)));
-        subpaths.add(builder.simple("b", Signature.createBase(5)));
-
-        ComplexProperty complexProperty = builder.complex("app", Signature.createBase(0), subpaths.toArray(new AccessPath[0]));
-
-        Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
-        System.out.println(mapping.accessPath());
-*/
-        //List<Mapping> mappings = new ArrayList<>();
-        //mappings.add(mapping);
         List<PatternSegment> pattern = new ArrayList<>();
         pattern.add(new PatternSegment("A", "->"));
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        final RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
+        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
-
-        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
-/*
-        System.out.println();
-        System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());*/
     }
 
     /**
@@ -362,138 +456,7 @@ class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        final RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
-        testAlgorithm(schema, metadata, edit);
-    }
-
-    /**
-     * With complex pattern A<-A->B->A and notebook example short version
-     */
-    @Test
-    void testRecursionEdit3() {
-        final var builder = new SchemaBuilder();
-
-        final var id =  builder.object("_id", 0);
-        final var o1 =  builder.object("A", 1);
-        final var o3 =  builder.object("B", 3);
-        final var o4 =  builder.object("A", 4);
-        final var o6 =  builder.object("A", 6);
-        final var o8 =  builder.object("B", 8);
-
-        builder.morphism(id, o1, 1);
-        builder.morphism(o1, o3, 3);
-        builder.morphism(o1, o4, 4);
-        builder.morphism(o3, o6, 6);
-        builder.morphism(o6, o8, 8);
-
-        final SchemaCategory schema = builder.build();
-        final MetadataCategory metadata = builder.buildMetadata(schema);
-
-        List<PatternSegment> pattern = new ArrayList<>();
-        pattern.add(new PatternSegment("A", "<-"));
-        pattern.add(new PatternSegment("A", "->"));
-        pattern.add(new PatternSegment("B", "->"));
-        pattern.add(new PatternSegment("A", ""));
-
-        final RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
-        testAlgorithm(schema, metadata, edit);
-    }
-
-    /**
-     * With complex pattern A<-A->B->A and notebook example long version
-     */
-    @Test
-    void testRecursionEdit4() {
-        final var builder = new SchemaBuilder();
-
-        final var id =  builder.object("_id", 0);
-        final var o1 =  builder.object("A", 1);
-        final var o2 =  builder.object("B", 2);
-        final var o3 =  builder.object("B", 3);
-        final var o4 =  builder.object("A", 4);
-        final var o5 =  builder.object("A", 5);
-        final var o6 =  builder.object("A", 6);
-        final var o7 =  builder.object("B", 7);
-        final var o8 =  builder.object("B", 8);
-        final var o9 =  builder.object("A", 9);
-        final var o10 = builder.object("B", 10);
-        final var o11 = builder.object("A", 11);
-
-        builder.morphism(id, o1, 1);
-        builder.morphism(id, o2, 2);
-        builder.morphism(o1, o3, 3);
-        builder.morphism(o1, o4, 4);
-        builder.morphism(o2, o5, 5);
-        builder.morphism(o3, o6, 6);
-        builder.morphism(o4, o7, 7);
-        builder.morphism(o6, o8, 8);
-        builder.morphism(o7, o9, 9);
-        builder.morphism(o9, o10, 10);
-        builder.morphism(o10, o11, 11);
-
-        final SchemaCategory schema = builder.build();
-        final MetadataCategory metadata = builder.buildMetadata(schema);
-
-        List<PatternSegment> pattern = new ArrayList<>();
-        pattern.add(new PatternSegment("A", "<-"));
-        pattern.add(new PatternSegment("A", "->"));
-        pattern.add(new PatternSegment("B", "->"));
-        pattern.add(new PatternSegment("A", ""));
-
-        final RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
-        testAlgorithm(schema, metadata, edit);
-    }
-
-    /**
-     * With complex pattern A<-A->B->A and client example
-     */
-    @Test
-    void testRecursionEdit5() {
-        final var builder = new SchemaBuilder();
-
-        final var checkin =     builder.object("checkin", 0);
-        final var id =          builder.object("_id", 1);
-        final var o2 =          builder.object("A", 2);
-        final var o3 =          builder.object("A", 3);
-        final var o4 =          builder.object("B", 4);
-        final var o5 =          builder.object("A", 5);
-        final var o6 =          builder.object("B", 6);
-        final var o7 =          builder.object("A", 7);
-        final var o8 =          builder.object("B", 8);
-        final var o9 =          builder.object("A", 9);
-        final var o10 =         builder.object("B", 10);
-        final var o11 =         builder.object("B", 11);
-        final var o12 =         builder.object("A", 12);
-        final var businessId =  builder.object("business_id", 13);
-        final var date1 =       builder.object("date", 14);
-        final var date2 =       builder.object("date", 15);
-
-        builder.morphism(checkin, id, 0);
-        builder.morphism(checkin, businessId, 12);
-        builder.morphism(checkin, date1, 13);
-        builder.morphism(checkin, date2, 14);
-        builder.morphism(id, o11, 10);
-        builder.morphism(id, o2, 1);
-        builder.morphism(o11, o12, 11);
-        builder.morphism(o2, o8, 7);
-        builder.morphism(o2, o3, 2);
-        builder.morphism(o3, o4, 3);
-        builder.morphism(o4, o5, 4);
-        builder.morphism(o5, o6, 5);
-        builder.morphism(o6, o7, 6);
-        builder.morphism(o8, o9, 8);
-        builder.morphism(o9, o10, 9);
-
-        final SchemaCategory schema = builder.build();
-        final MetadataCategory metadata = builder.buildMetadata(schema);
-
-        List<PatternSegment> pattern = new ArrayList<>();
-        pattern.add(new PatternSegment("A", "<-"));
-        pattern.add(new PatternSegment("A", "->"));
-        pattern.add(new PatternSegment("B", "->"));
-        pattern.add(new PatternSegment("A", ""));
-
-        final RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
+        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
     }
 

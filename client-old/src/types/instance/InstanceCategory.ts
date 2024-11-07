@@ -8,7 +8,7 @@ import type { SchemaCategory } from '../schema';
 export type InstanceCategoryFromServer = {
     sessionId: Id;
     categoryId: Id;
-    instance: {
+    data: {
         objects: InstanceObjectFromServer[];
         morphisms: InstanceMorphismFromServer[];
     };
@@ -28,13 +28,13 @@ export class InstanceCategory {
             new ComparableMap(signature => signature.value),
         );
 
-        for (const inputObject of input.instance.objects) {
+        for (const inputObject of input.data.objects) {
             const object = InstanceObject.fromServer(inputObject, schema);
             if (object)
                 instance.objects.set(object.schema.key, object);
         }
 
-        for (const inputMorphism of input.instance.morphisms) {
+        for (const inputMorphism of input.data.morphisms) {
             const morphism = InstanceMorphism.fromServer(inputMorphism, instance);
             if (morphism)
                 instance.morphisms.set(morphism.schema.signature, morphism);

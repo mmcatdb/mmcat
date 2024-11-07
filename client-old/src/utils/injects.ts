@@ -2,17 +2,8 @@ import type { Graph } from '@/types/categoryGraph';
 import type { Evocat } from '@/types/evocat/Evocat';
 import type { Id } from '@/types/id';
 import type { SchemaCategoryInfo } from '@/types/schema';
+import type { Workflow } from '@/types/workflow';
 import { inject, type InjectionKey, type Ref, type ShallowRef } from 'vue';
-
-export const categoryIdKey: InjectionKey<Ref<Id>> = Symbol('categoryId');
-
-export function useSchemaCategoryId(): Id {
-    const id = inject(categoryIdKey);
-    if (id === undefined)
-        throw new Error('Schema category id not injected.');
-
-    return id.value;
-}
 
 export const categoryInfoKey: InjectionKey<Ref<SchemaCategoryInfo>> = Symbol('category');
 
@@ -22,6 +13,14 @@ export function useSchemaCategoryInfo(): Ref<SchemaCategoryInfo> {
         throw new Error('Schema category info not injected.');
 
     return category;
+}
+
+export function useSchemaCategoryId(): Id {
+    return useSchemaCategoryInfo().value.id;
+}
+
+export function tryUseSchemaCategoryId(): Id | undefined {
+    return inject(categoryInfoKey, undefined)?.value.id;
 }
 
 export type EvocatContext = {
@@ -37,4 +36,18 @@ export function useEvocat(): EvocatContext {
         throw new Error('Evocat not injected.');
 
     return evocatContext;
+}
+
+export const workflowKey: InjectionKey<Ref<Workflow>> = Symbol('workflow');
+
+export function useWorkflow(): Ref<Workflow> {
+    const workflow = inject(workflowKey);
+    if (workflow === undefined)
+        throw new Error('Workflow not injected.');
+
+    return workflow;
+}
+
+export function tryUseWorkflow(): Ref<Workflow> | undefined {
+    return inject(workflowKey, undefined);
 }

@@ -1,10 +1,11 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.evolution.Version;
-import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
+import cz.matfyz.server.controller.MappingController.MappingInfo;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.DatasourceRepository;
+import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
@@ -12,7 +13,6 @@ import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
-
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
@@ -34,13 +34,13 @@ public class ActionController {
     private ActionService service;
 
     @Autowired
-    private LogicalModelRepository logicalModelRepository;
-
-    @Autowired
-    private LogicalModelController logicalModelController;
+    private ActionRepository repository;
 
     @Autowired
     private DatasourceRepository datasourceRepository;
+
+    @Autowired
+    private MappingRepository mappingRepository;
 
     @Autowired
     private DatasourceController datasourceController;
@@ -54,7 +54,7 @@ public class ActionController {
 
     @GetMapping("/actions/{id}")
     public ActionDetail getAction(@PathVariable Id id) {
-        return actionToDetail(service.find(id));
+        return actionToDetail(repository.find(id));
     }
 
     public record ActionInit(
@@ -64,43 +64,59 @@ public class ActionController {
     ) {}
 
     @PostMapping("/actions")
-    public ActionDetail createAction(@RequestBody ActionInit actionInit) {
-        return actionToDetail(service.create(actionInit));
+    public ActionDetail createAction(@RequestBody ActionInit init) {
+        final var action = service.create(init.categoryId(), init.label(), init.payload());
+        return actionToDetail(action);
     }
 
     @DeleteMapping("/actions/{id}")
     public void deleteAction(@PathVariable Id id) {
-        service.delete(id);
+        repository.delete(id);
     }
 
     private ActionDetail actionToDetail(Action action) {
-        return new ActionDetail(action, actionPayloadToDetail(action.payload));
+        return new ActionDetail(action, actionPayloadToDetail(action.payload, action.categoryId));
     }
 
-    // TODO extremely unefficient - load all models and data sources at once.
-    // TODO switch to pattern matching when available.
-    ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
-        if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
-            final var model = logicalModelRepository.find(modelToCategoryPayload.logicalModelId());
-            final var info = logicalModelController.createInfo(model);
-            return new ModelToCategoryPayloadDetail(info);
-        }
-        if (payload instanceof CategoryToModelPayload categoryToModelPayload) {
-            final var model = logicalModelRepository.find(categoryToModelPayload.logicalModelId());
-            final var info = logicalModelController.createInfo(model);
-            return new CategoryToModelPayloadDetail(info);
-        }
-        if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
-            return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
-        }
-        if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
-            final var datasource = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
-            final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
-            final var kindName = rsdToCategoryPayload.kindName();
-            return new RSDToCategoryPayloadDetail(datasourceDetail, kindName);
-        }
+    // TODO extremely unefficient - load all models and datasources at once.
+    ActionPayloadDetail actionPayloadToDetail(ActionPayload payload, Id categoryId) {
+        return switch (payload) {
+            case ModelToCategoryPayload p -> {
+                final var datasource = datasourceRepository.find(p.datasourceId());
+                final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
+                if (p.mappingIds() == null)
+                    yield new ModelToCategoryPayloadDetail(datasourceDetail, List.of());
 
-        throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
+                final var mappingInfos = mappingRepository.findAllInCategory(categoryId, datasource.id()).stream()
+                    .filter(wrapper -> p.mappingIds().contains(wrapper.id()))
+                    .map(MappingInfo::fromWrapper)
+                    .toList();
+
+                yield new ModelToCategoryPayloadDetail(datasourceDetail, mappingInfos);
+            }
+            case CategoryToModelPayload p -> {
+                final var datasource = datasourceRepository.find(p.datasourceId());
+                final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
+                if (p.mappingIds() == null)
+                    yield new CategoryToModelPayloadDetail(datasourceDetail, List.of());
+
+                final var mappingInfos = mappingRepository.findAllInCategory(categoryId, datasource.id()).stream()
+                    .filter(wrapper -> p.mappingIds().contains(wrapper.id()))
+                    .map(MappingInfo::fromWrapper)
+                    .toList();
+
+                yield new CategoryToModelPayloadDetail(datasourceDetail, mappingInfos);
+            }
+            case UpdateSchemaPayload p -> new UpdateSchemaPayloadDetail(p.prevVersion(), p.nextVersion());
+            case RSDToCategoryPayload p -> {
+                final var datasources = p.datasourceIds().stream()
+                    .map(datasourceRepository::find)
+                    .map(datasourceController::datasourceToDetail)
+                    .toList();
+                yield new RSDToCategoryPayloadDetail(datasources);
+            }
+            default -> throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
+        };
     }
 
     record ActionDetail(
@@ -124,11 +140,13 @@ public class ActionController {
     interface ActionPayloadDetail {}
 
     record CategoryToModelPayloadDetail(
-        LogicalModelInfo logicalModel
+        DatasourceDetail datasource,
+        List<MappingInfo> mappings
     ) implements ActionPayloadDetail {}
 
     record ModelToCategoryPayloadDetail(
-        LogicalModelInfo logicalModel
+        DatasourceDetail datasource,
+        List<MappingInfo> mappings
     ) implements ActionPayloadDetail {}
 
     record UpdateSchemaPayloadDetail(
@@ -137,8 +155,7 @@ public class ActionController {
     ) implements ActionPayloadDetail {}
 
     record RSDToCategoryPayloadDetail(
-        DatasourceDetail datasource,
-        String kindName
+        List<DatasourceDetail> datasources
     ) implements ActionPayloadDetail {}
 
 }

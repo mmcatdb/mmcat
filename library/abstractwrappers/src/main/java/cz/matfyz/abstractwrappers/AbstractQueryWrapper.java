@@ -1,8 +1,8 @@
 package cz.matfyz.abstractwrappers;
 
-import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.schema.SchemaObject;
 
@@ -61,18 +61,18 @@ public interface AbstractQueryWrapper {
     }
 
     /**
-     * A queryable property. It's defined by the kind and a path from its root.
-     *  - If the `parent` property is null, the path is relative to the root of the kind.
+     * A queryable property. It's defined by the mapping and a path from its root.
+     *  - If the `parent` property is null, the path is relative to the root of the mapping.
      *  - Otherwise, the path is relative to the parent property.
      */
     class Property implements Comparable<Property>, Serializable {
-        public final Kind kind;
+        public final Mapping mapping;
         public final @Nullable Property parent;
         public final Signature path;
         public final SchemaObject schemaObject;
 
-        public Property(Kind kind, Signature path, @Nullable Property parent) {
-            this.kind = kind;
+        public Property(Mapping mapping, Signature path, @Nullable Property parent) {
+            this.mapping = mapping;
             this.path = path;
             this.parent = parent;
             this.schemaObject = findSchemaObject();
@@ -80,17 +80,17 @@ public interface AbstractQueryWrapper {
 
         private SchemaObject findSchemaObject() {
             if (!path.isEmpty())
-                return kind.mapping.category().getEdge(path.getLast()).to();
+                return mapping.category().getEdge(path.getLast()).to();
 
             return parent == null
-                ? kind.mapping.rootObject()
+                ? mapping.rootObject()
                 : parent.schemaObject;
         }
 
         @Override public int compareTo(Property other) {
-            final int kindComparison = kind.compareTo(other.kind);
-            return kindComparison != 0
-                ? kindComparison
+            final int mappingComparison = mapping.compareTo(other.mapping);
+            return mappingComparison != 0
+                ? mappingComparison
                 : schemaObject.compareTo(other.schemaObject);
         }
 
@@ -107,8 +107,8 @@ public interface AbstractQueryWrapper {
         public final Signature aggregationRoot;
         public final AggregationOperator aggregationOperator;
 
-        public PropertyWithAggregation(Kind kind, Signature path, @Nullable Property parent, Signature aggregationRoot, AggregationOperator aggregationOperator) {
-            super(kind, path, parent);
+        public PropertyWithAggregation(Mapping mapping, Signature path, @Nullable Property parent, Signature aggregationRoot, AggregationOperator aggregationOperator) {
+            super(mapping, path, parent);
             this.aggregationRoot = aggregationRoot;
             this.aggregationOperator = aggregationOperator;
         }
@@ -125,13 +125,13 @@ public interface AbstractQueryWrapper {
 
     /**
      * Adds a join (or graph traversal).
-     * @param from Kind from which we are joining.
-     * @param to Kind to which we are joining.
-     * @param conditions List of paths from both kinds to the joining properties.
+     * @param from Mapping from which we are joining.
+     * @param to Mapping to which we are joining.
+     * @param conditions List of paths from both mappings to the joining properties.
      * @param repetition If not 1, the join will be recursive.
      * @param isOptional If true, the join will be optional.
      */
-    void addJoin(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional);
+    void addJoin(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional);
 
     /**
      * Adds a filtering between two variables or aggregations. E.g.:

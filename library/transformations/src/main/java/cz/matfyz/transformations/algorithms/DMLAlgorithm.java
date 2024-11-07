@@ -20,6 +20,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,27 +162,19 @@ public class DMLAlgorithm {
         throw InvalidStateException.dynamicNameNotFound(dynamicName);
     }
 
-    private class NameValuePair {
-        public final String name;
-        public final String simpleValue;
-        public final DomainRow complexValue;
-        public final ComplexProperty subpath;
-        public final boolean isSimple;
-
-        NameValuePair(String name, String simpleValue) {
-            this.name = name;
-            this.simpleValue = simpleValue;
-            this.complexValue = null;
-            this.subpath = null;
-            this.isSimple = true;
+    private record NameValuePair(
+        String name,
+        @Nullable String simpleValue,
+        @Nullable DomainRow complexValue,
+        @Nullable ComplexProperty subpath,
+        boolean isSimple
+    ) {
+        NameValuePair(String name, @Nullable String simpleValue) {
+            this(name, simpleValue, null, null, true);
         }
 
         NameValuePair(String name, DomainRow complexValue, ComplexProperty subpath) {
-            this.name = name;
-            this.simpleValue = null;
-            this.complexValue = complexValue;
-            this.subpath = subpath;
-            this.isSimple = false;
+            this(name, null, complexValue, subpath, false);
         }
 
         @Override public String toString() {

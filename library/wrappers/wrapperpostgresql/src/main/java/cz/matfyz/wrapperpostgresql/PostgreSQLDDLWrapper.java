@@ -2,8 +2,8 @@ package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.abstractwrappers.exception.UnsupportedException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.ArrayList;
 import java.util.List;

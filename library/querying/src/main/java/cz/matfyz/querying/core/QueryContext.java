@@ -1,11 +1,14 @@
 package cz.matfyz.querying.core;
 
+import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.querying.parsing.Term;
 
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * This class collects and provides global information about the whole query.
@@ -36,14 +39,28 @@ public class QueryContext {
 
     // TODO - should be unique per nested clause. However, the variables probably should be as well, so ...
 
-    private SchemaCategory schema;
+    private @Nullable SchemaCategory schema;
 
-    public SchemaCategory getSchema() {
+    public @Nullable SchemaCategory getSchema() {
         return schema;
     }
 
     public QueryContext setSchema(SchemaCategory schema) {
         this.schema = schema;
+
+        return this;
+    }
+
+    // Querying
+
+    private @Nullable ControlWrapperProvider provider;
+
+    public @Nullable ControlWrapperProvider getProvider() {
+        return provider;
+    }
+
+    public QueryContext setProvider(ControlWrapperProvider provider) {
+        this.provider = provider;
 
         return this;
     }

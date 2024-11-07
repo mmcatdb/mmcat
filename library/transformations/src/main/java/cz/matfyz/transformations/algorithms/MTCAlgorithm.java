@@ -17,7 +17,7 @@ import cz.matfyz.core.record.SimpleRecord;
 import cz.matfyz.core.record.SimpleValueRecord;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
-import cz.matfyz.core.utils.UniqueIdProvider;
+import cz.matfyz.core.utils.UniqueIdGenerator;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -41,6 +41,8 @@ public class MTCAlgorithm {
         this.mapping = mapping;
         this.instance = instance;
     }
+
+    private final UniqueIdGenerator idGenerator = UniqueIdGenerator.create();
 
     public void algorithm() {
         LOGGER.debug("Model To Category algorithm");
@@ -66,7 +68,7 @@ public class MTCAlgorithm {
         InstanceObject instanceObject = instance.getObject(object);
         // If the root object has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root object always is).
         SuperIdWithValues superId = object.ids().isGenerated()
-            ? SuperIdWithValues.fromEmptySignature(UniqueIdProvider.getNext())
+            ? SuperIdWithValues.fromEmptySignature(idGenerator.next())
             : fetchSuperId(object.superId(), rootRecord);
 
         Deque<StackTriple> masterStack = new ArrayDeque<>();
@@ -99,7 +101,7 @@ public class MTCAlgorithm {
 
     private void processTopOfStack(Deque<StackTriple> masterStack) {
         StackTriple triple = masterStack.pop();
-        final var superIds = SuperIdsFetcher.fetch(instance, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
+        final var superIds = SuperIdsFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
         InstanceObject childInstance = instance.getObject(triple.parentToChild.to());
 

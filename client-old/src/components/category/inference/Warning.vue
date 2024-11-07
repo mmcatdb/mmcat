@@ -6,8 +6,11 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="warning" v-if="show">
-      <p>{{ message }}</p>
+    <div
+        v-if="show"
+        class="warning"
+    >
+        <p>{{ message }}</p>
     </div>
 </template>
   

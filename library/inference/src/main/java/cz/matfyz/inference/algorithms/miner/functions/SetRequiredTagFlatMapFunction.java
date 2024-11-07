@@ -8,8 +8,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
 public class SetRequiredTagFlatMapFunction implements PairFlatMapFunction<Tuple2<String, Iterable<PropertyHeuristics>>, String, PropertyHeuristics> {
-    @Override
-    public Iterator<Tuple2<String, PropertyHeuristics>> call(Tuple2<String, Iterable<PropertyHeuristics>> tuple) {
+    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Tuple2<String, Iterable<PropertyHeuristics>> tuple) {
         List<Tuple2<String, PropertyHeuristics>> result = new ArrayList<>();
         int parentCount = 0;
         PropertyHeuristics parent = null;

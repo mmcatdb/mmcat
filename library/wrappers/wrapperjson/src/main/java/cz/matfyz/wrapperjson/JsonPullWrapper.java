@@ -26,29 +26,45 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * A pull wrapper implementation for JSON files that implements the {@link AbstractPullWrapper} interface.
+ * This class provides methods for pulling data from JSON files and converting it into a {@link ForestOfRecords}.
+ */
 public class JsonPullWrapper implements AbstractPullWrapper {
 
     private final JsonProvider provider;
 
+    /**
+     * Constructs a new {@code JsonPullWrapper} with the specified JSON provider.
+     */
     public JsonPullWrapper(JsonProvider provider) {
         this.provider = provider;
     }
 
-    @Override
-    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
-        System.out.println("json pullwrapper");
-        System.out.println("query: " + query);
+    /**
+     * Pulls a forest of records from a JSON file based on a complex property path and query content.
+     */
+    @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) {
         final var forest = new ForestOfRecords();
 
-        try (InputStream inputStream = provider.getInputStream(path.name().toString())) {
-            processJsonStream(inputStream, forest, path);
-        } catch (IOException e) {
+        //try {
+            String fileName = provider.getJsonFileNames();
+            try (InputStream inputStream = provider.getInputStream()) {
+                processJsonStream(inputStream, forest, path);
+            } catch (IOException e) {
+                System.err.println("Error processing file: " + fileName + " - " + e.getMessage());
+            }
+        /*
+        } catch (IOException | URISyntaxException e) {
             throw PullForestException.innerException(e);
-        }
+        }*/
 
         return forest;
     }
 
+    /**
+     * Processes a JSON input stream and populates a {@link ForestOfRecords} with data parsed from the stream.
+     */
     private void processJsonStream(InputStream inputStream, ForestOfRecords forest, ComplexProperty path) throws IOException {
         JsonFactory factory = new JsonFactory();
         JsonParser parser = factory.createParser(inputStream);
@@ -56,7 +72,6 @@ public class JsonPullWrapper implements AbstractPullWrapper {
 
         while (parser.nextToken() != null) {
             if (parser.currentToken() == JsonToken.START_OBJECT) {
-                System.out.println("current token in processJsonStream: " + parser.currentToken());
                 JsonNode jsonNode = objectMapper.readTree(parser);
                 RootRecord rootRecord = new RootRecord();
                 getDataFromJsonNode(rootRecord, jsonNode, path);
@@ -65,6 +80,9 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Recursively extracts data from a {@link JsonNode} and populates a {@link ComplexRecord}.
+     */
     public void getDataFromJsonNode(ComplexRecord parentRecord, JsonNode jsonNode, ComplexProperty path) {
         for (AccessPath subpath : path.subpaths()) {
             Name name = subpath.name();
@@ -89,6 +107,9 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Handles JSON arrays and populates a {@link ComplexRecord} with array elements.
+     */
     private void handleJsonArray(ComplexRecord parentRecord, JsonNode arrayNode, ComplexProperty complexSubpath, String fieldName) {
         for (JsonNode itemNode : arrayNode) {
             if (itemNode.isObject()) {
@@ -98,6 +119,9 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Handles simple properties in the JSON data and populates a {@link ComplexRecord} with the property values.
+     */
     private void handleSimpleProperty(ComplexRecord parentRecord, JsonNode valueNode, SimpleProperty simpleSubpath, String fieldName) {
         if (valueNode.isArray()) {
             ArrayList<String> values = new ArrayList<>();
@@ -110,6 +134,9 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Converts a {@link Name} object to a {@link RecordName} based on its type (static or dynamic).
+     */
     private RecordName toRecordName(Name name, String valueIfDynamic) {
         if (name instanceof DynamicName dynamicName)
             return dynamicName.toRecordName(valueIfDynamic);
@@ -118,8 +145,10 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         return staticName.toRecordName();
     }
 
-    @Override
-    public QueryResult executeQuery(QueryStatement statement) {
+    /**
+     * Executes a query statement. This method is currently not implemented.
+     */
+    @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 

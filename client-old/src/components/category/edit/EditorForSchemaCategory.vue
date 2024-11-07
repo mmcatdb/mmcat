@@ -4,8 +4,8 @@ import { onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import AddComplexStructure from './AddComplexStructure.vue';
-import EditObject from './EditObject.vue';
-import EditMorphism from './EditMorphism.vue';
+import UpdateObject from './UpdateObject.vue';
+import UpdateMorphism from './UpdateMorphism.vue';
 import Divider from '@/components/layout/Divider.vue';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import EditGroup from './EditGroup.vue';
@@ -18,8 +18,8 @@ enum State {
     AddObject,
     AddMorphism,
     AddComplexStructure,
-    EditObject,
-    EditMorphism,
+    UpdateObject,
+    UpdateMorphism,
     EditGroup,
 }
 
@@ -30,14 +30,14 @@ type StateValue =
     GenericStateValue<State.AddObject, unknown> |
     GenericStateValue<State.AddMorphism, unknown> |
     GenericStateValue<State.AddComplexStructure, unknown> |
-    GenericStateValue<State.EditObject, { node: Node }> |
-    GenericStateValue<State.EditMorphism, { edge: Edge }> |
+    GenericStateValue<State.UpdateObject, { node: Node }> |
+    GenericStateValue<State.UpdateMorphism, { edge: Edge }> |
     GenericStateValue<State.EditGroup, { nodes: Node[] }>;
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
-const editedObject = ref<InstanceType<typeof EditObject>>();
-const editedMorphism = ref<InstanceType<typeof EditMorphism>>();
+const editedObject = ref<InstanceType<typeof UpdateObject>>();
+const editedMorphism = ref<InstanceType<typeof UpdateMorphism>>();
 
 const listener = graph.listen();
 
@@ -64,10 +64,10 @@ function addComplexStructureClicked() {
 }
 
 function setStateToDefault() {
-    if (state.value.type === State.EditObject)
+    if (state.value.type === State.UpdateObject)
         state.value.node.unselect();
 
-    if (state.value.type === State.EditMorphism)
+    if (state.value.type === State.UpdateMorphism)
         state.value.edge.unselect();
 
     if (state.value.type === State.EditGroup)
@@ -86,7 +86,7 @@ function onNodeTapHandler(node: Node) {
                 node.unselect();
 
                 if (state.value.nodes.length === 1) {
-                    state.value = { type: State.EditObject, node: state.value.nodes[0] };
+                    state.value = { type: State.UpdateObject, node: state.value.nodes[0] };
                     return;
                 }
             }
@@ -100,15 +100,15 @@ function onNodeTapHandler(node: Node) {
             // Disband the group and then proceed in the same way as if the node was clicked.
             state.value.nodes.forEach(n => n.unselect());
             node.select({ type: SelectionType.Root, level: 0 });
-            state.value = { type: State.EditObject, node };
+            state.value = { type: State.UpdateObject, node };
             return;
         }
     }
 
-    if (state.value.type !== State.Default && state.value.type !== State.EditObject)
+    if (state.value.type !== State.Default && state.value.type !== State.UpdateObject)
         return;
 
-    if (state.value.type === State.EditObject) {
+    if (state.value.type === State.UpdateObject) {
         if (editedObject.value?.changed) {
             return;
         }
@@ -129,23 +129,23 @@ function onNodeTapHandler(node: Node) {
     }
 
     node.select({ type: SelectionType.Root, level: 0 });
-    state.value = { type: State.EditObject, node };
+    state.value = { type: State.UpdateObject, node };
 }
 
 function onEdgeTapHandler(edge: Edge) {
-    if (state.value.type === State.EditObject) {
+    if (state.value.type === State.UpdateObject) {
         if (editedObject.value?.changed)
             return;
 
         state.value.node.unselect();
-        state.value = { type: State.EditMorphism, edge };
+        state.value = { type: State.UpdateMorphism, edge };
         return;
     }
 
-    if (state.value.type !== State.Default && state.value.type !== State.EditMorphism)
+    if (state.value.type !== State.Default && state.value.type !== State.UpdateMorphism)
         return;
 
-    if (state.value.type === State.EditMorphism) {
+    if (state.value.type === State.UpdateMorphism) {
         if (editedMorphism.value?.changed) {
             return;
         }
@@ -155,17 +155,17 @@ function onEdgeTapHandler(edge: Edge) {
         }
     }
 
-    state.value = { type: State.EditMorphism, edge };
+    state.value = { type: State.UpdateMorphism, edge };
 }
 
 function onCanvasTapHandler() {
-    if (state.value.type === State.EditObject) {
+    if (state.value.type === State.UpdateObject) {
         if (editedObject.value?.changed)
             return;
         setStateToDefault();
     }
 
-    if (state.value.type === State.EditMorphism) {
+    if (state.value.type === State.UpdateMorphism) {
         if (editedMorphism.value?.changed)
             return;
         setStateToDefault();
@@ -228,8 +228,8 @@ async function save() {
                 @cancel="setStateToDefault"
             />
         </template>
-        <template v-else-if="state.type === State.EditObject">
-            <EditObject
+        <template v-else-if="state.type === State.UpdateObject">
+            <UpdateObject
                 ref="editedObject"
                 :key="state.node.schemaObject.key.value"
                 :node="state.node"
@@ -237,8 +237,8 @@ async function save() {
                 @cancel="setStateToDefault"
             />
         </template>
-        <template v-else-if="state.type === State.EditMorphism">
-            <EditMorphism
+        <template v-else-if="state.type === State.UpdateMorphism">
+            <UpdateMorphism
                 ref="editedMorphism"
                 :key="state.edge.schemaMorphism.signature.value"
                 :edge="state.edge"

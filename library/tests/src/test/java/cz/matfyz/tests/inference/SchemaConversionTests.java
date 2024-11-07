@@ -3,6 +3,8 @@ package cz.matfyz.tests.inference;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.Key.KeyGenerator;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
@@ -12,8 +14,8 @@ import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.AccessTreeToSchemaCategoryConverter;
 import cz.matfyz.inference.schemaconversion.RSDToAccessTreeConverter;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
-import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
+import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
 import cz.matfyz.wrappercsv.CsvProvider;
@@ -25,7 +27,6 @@ import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,16 +45,18 @@ public class SchemaConversionTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var inferenceWrapper = new JsonControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .getInferenceWrapper();
 
         // accessing the private method with reflection w/o having to make it visible
-        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
+        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class);
         privateExecuteRBA.setAccessible(true);
 
         final MMInferOneInAll mmInferOneInAll = new MMInferOneInAll();
-        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper, false);
+        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper);
 
-        final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter("business", new UniqueNumberGenerator(0), new UniqueNumberGenerator(0));
+        final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter("business", KeyGenerator.create(), SignatureGenerator.create());
         final AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
 
         // capture the output of the printTree method
@@ -83,11 +86,11 @@ public class SchemaConversionTests {
 
     @Test
     void testAccessTreeToSchemaCategory() throws Exception {
-        AccessTreeNode root = new AccessTreeNode(AccessTreeNode.State.ROOT, "person", null, new Key(0), null, null, null, false);
-        AccessTreeNode child1 = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "name", Signature.createBase(0), new Key(1), new Key(0), null, null, false);
-        AccessTreeNode child2 = new AccessTreeNode(AccessTreeNode.State.COMPLEX, "adress", Signature.createBase(1), new Key(2), new Key(0), null, null, false);
-        AccessTreeNode grandChild1 = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "city", Signature.createBase(2), new Key(3), new Key(2), null, null, false);
-        AccessTreeNode grandChild2 = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "street", Signature.createBase(3), new Key(4), new Key(2), null, null, false);
+        AccessTreeNode root = new AccessTreeNode("person", null, new Key(0), null, null, null, false);
+        AccessTreeNode child1 = new AccessTreeNode("name", Signature.createBase(0), new Key(1), new Key(0), null, null, false);
+        AccessTreeNode child2 = new AccessTreeNode("adress", Signature.createBase(1), new Key(2), new Key(0), null, null, false);
+        AccessTreeNode grandChild1 = new AccessTreeNode("city", Signature.createBase(2), new Key(3), new Key(2), null, null, false);
+        AccessTreeNode grandChild2 = new AccessTreeNode("street", Signature.createBase(3), new Key(4), new Key(2), null, null, false);
 
         child2.addChild(grandChild1);
         child2.addChild(grandChild2);
@@ -113,16 +116,20 @@ public class SchemaConversionTests {
     @Test
     void testBasicRSDToSchemaCategoryAndMapping() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
         final var csvProvider = new CsvProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var provider = new CsvControlWrapper(csvProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .createProvider();
 
-        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
-            .input(inferenceWrapper, "apps")
+        final InferenceResult inferenceResult = new MMInferOneInAll()
+            .input(provider)
             .run();
 
-        final var pair = CategoryMappingPair.merge(pairs);
+        final List<CategoryMappingsPair> pairs = inferenceResult.pairs();
+
+        final var pair = CategoryMappingsPair.merge(pairs);
         final SchemaCategory schema = pair.schema();
         final Mapping mapping = pair.mappings().get(0);
 
@@ -138,13 +145,17 @@ public class SchemaConversionTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        final var provider = new JsonControlWrapper(jsonProvider)
+            .enableSpark(sparkProvider.getSettings())
+            .createProvider();
 
-        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
-            .input(inferenceWrapper, "business")
+        final InferenceResult inferenceResult = new MMInferOneInAll()
+            .input(provider)
             .run();
 
-        final var pair = CategoryMappingPair.merge(pairs);
+        final List<CategoryMappingsPair> pairs = inferenceResult.pairs();
+
+        final var pair = CategoryMappingsPair.merge(pairs);
         final SchemaCategory schema = pair.schema();
         final Mapping mapping = pair.mappings().get(0);
 
@@ -166,32 +177,6 @@ public class SchemaConversionTests {
             }
         }
         return count;
-    }
-
-    // TODO: try a different folder, this one has no candidates
-    @Test
-    void testMultipleRSDToSchemaCategoryAndMapping() throws Exception {
-        @SuppressWarnings("deprecation")
-        final var url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
-        final var csvProvider = new CsvProvider(settings);
-
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
-
-        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
-            .input(inferenceWrapper, "user")
-            .run();
-
-        final var pair = CategoryMappingPair.merge(pairs);
-        final SchemaCategory schema = pair.schema();
-        final Mapping mapping = pair.mappings().get(0);
-
-        System.out.println(schema.allObjects());
-
-        //assertEquals(22, schema.allObjects().size(), "There should be 10 Schema Objects.");
-        //assertEquals(21, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
-
-        //assertEquals(3, countComplexProperties(mapping), "There should be 3 complex properties");
     }
 
 }

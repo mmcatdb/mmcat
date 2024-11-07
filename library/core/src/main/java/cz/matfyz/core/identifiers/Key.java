@@ -1,5 +1,7 @@
 package cz.matfyz.core.identifiers;
 
+import cz.matfyz.core.utils.UniqueSequentialGenerator;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
@@ -82,23 +84,35 @@ public class Key implements Serializable, Comparable<Key> {
         @Override public Key deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            return new Key(node.asInt());
+            if (node.has("value")) {
+                return new Key(node.get("value").asInt());
+            } else {
+                return new Key(node.asInt());
+            }
         }
 
     }
 
 
-    public static class Generator {
+    public static class KeyGenerator {
 
-        private int max;
+        private final UniqueSequentialGenerator idGenerator;
 
-        public Generator(Collection<Key> current) {
-            max = current.stream().map(key -> key.value).reduce(0, Math::max);
+        private KeyGenerator(UniqueSequentialGenerator idGenerator) {
+            this.idGenerator = idGenerator;
+        }
+
+        public static KeyGenerator create() {
+            return new KeyGenerator(UniqueSequentialGenerator.create());
+        }
+
+        public static KeyGenerator create(Collection<Key> current) {
+            final var currentIds = current.stream().map(key -> key.value).toList();
+            return new KeyGenerator(UniqueSequentialGenerator.create(currentIds));
         }
 
         public Key next() {
-            max++;
-            return new Key(max);
+            return new Key(idGenerator.next());
         }
 
     }

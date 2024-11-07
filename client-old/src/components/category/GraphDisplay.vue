@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, shallowRef } from 'vue';
+import { onMounted, shallowRef, ref, watch } from 'vue';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import layoutUtilities from 'cytoscape-layout-utilities';
@@ -9,9 +9,14 @@ import { style, groupColors } from './defaultGraphStyle';
 cytoscape.use(fcose);
 cytoscape.use(layoutUtilities);
 
-const emit = defineEmits([ 'graphCreated', 'updatePositions' ]);
+const emit = defineEmits<{
+    (e: 'graphCreated', newGraph: Graph): void;
+    (e: 'update-show-signatures', newValue: boolean): void;
+}>();
 
 const graph = shallowRef<Graph>();
+
+const showSignatures = ref(true);
 
 withDefaults(defineProps<{ fetching?: boolean }>(), {
     fetching: false,
@@ -21,6 +26,13 @@ onMounted(() => {
     const newGraph = createGraph();
     graph.value = newGraph;
     emit('graphCreated', newGraph);
+});
+
+watch(showSignatures, (newValue) => {
+    if (graph.value) 
+        graph.value.toggleEdgeLabels(newValue);
+
+    emit('update-show-signatures', newValue);
 });
 
 function getContainer(): HTMLElement | undefined {
@@ -76,13 +88,6 @@ function toggleGroup(groupId: string) {
         <template v-if="graph">
             <div class="category-command-panel p-2 d-flex align-items-start gap-2">
                 <button
-                    :disabled="fetching"
-                    class="text-nowrap"
-                    @click="() => emit('updatePositions')"
-                >
-                    Save positions
-                </button>
-                <button
                     class="text-nowrap"
                     @click="graph?.center"
                 >
@@ -94,6 +99,12 @@ function toggleGroup(groupId: string) {
                 >
                     Reset layout
                 </button>
+                <label>
+                    <input
+                        v-model="showSignatures"
+                        type="checkbox"
+                    /> Show Signatures
+                </label>
                 <div class="d-flex gap-3 px-2 justify-content-end flex-grow-1 flex-wrap">
                     <label
 

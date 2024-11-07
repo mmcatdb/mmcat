@@ -2,14 +2,13 @@ import { UniqueIdProvider } from '@/utils/UniqueIdProvider';
 import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import type { Entity, Id, VersionId } from '../id';
 import { DynamicName, Key, type KeyFromServer, Signature, type SignatureFromServer } from '../identifiers';
-import type { LogicalModel } from '../logicalModel';
 import { type MetadataMorphismFromServer, SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
 import { type MetadataObjectFromServer, SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Mapping } from '../mapping';
 import { ComparableSet } from '@/utils/ComparableSet';
-import type { DatasourceType } from '../datasource';
+import type { DatasourceType, LogicalModel } from '../datasource';
 
 export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
     schema: SerializedSchema;
@@ -36,8 +35,9 @@ export class SchemaCategory implements Entity {
         readonly id: Id,
         readonly label: string,
         readonly versionId: VersionId,
+        readonly systemVersionId: VersionId,
         objects: VersionedSchemaObject[],
-        morphisms: SchemaMorphism[],
+        morphisms: VersionedSchemaMorphism[],
         logicalModels: LogicalModel[],
     ) {
         objects.forEach(object => {
@@ -49,8 +49,11 @@ export class SchemaCategory implements Entity {
         });
 
         morphisms.forEach(morphism => {
-            const versionedMorphism = this.getMorphism(morphism.signature);
-            versionedMorphism.current = morphism;
+            if (!morphism.current)
+                return;
+
+            this.morphisms.set(morphism.signature, morphism);
+            this.signatureProvider.add(morphism.signature);
         });
 
         this.groups = createGroups(logicalModels, objects, morphisms);
@@ -73,12 +76,13 @@ export class SchemaCategory implements Entity {
         const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
             input.metadata.morphisms.map(m => [ m.signature, m ]),
         );
-        const morphisms = input.schema.morphisms.map(m => SchemaMorphism.fromServer(m, morphismMetadata.get(m.signature)!));
+        const morphisms = input.schema.morphisms.map(m => VersionedSchemaMorphism.fromServer(m, morphismMetadata.get(m.signature)!));
 
         return new SchemaCategory(
             input.id,
             input.label,
             input.version,
+            input.systemVersion,
             objects,
             morphisms,
             logicalModels,
@@ -86,7 +90,7 @@ export class SchemaCategory implements Entity {
     }
 
     static fromServerWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): SchemaCategory {
-        return this.fromServer({ ...info, version: info.versionId, schema, metadata }, []);
+        return this.fromServer({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata }, []);
     }
 
     private objects = new ComparableMap<Key, number, VersionedSchemaObject>(key => key.value);
@@ -130,6 +134,10 @@ export class SchemaCategory implements Entity {
         return morphism;
     }
 
+    getMorphisms(): VersionedSchemaMorphism[] {
+        return [ ...this.morphisms.values() ];
+    }
+
     private _graph?: Graph;
 
     get graph(): Graph | undefined {
@@ -161,6 +169,7 @@ export type SchemaCategoryInfoFromServer = {
     id: Id;
     label: string;
     version: VersionId;
+    systemVersion: VersionId;
 };
 
 export class SchemaCategoryInfo implements Entity {
@@ -168,6 +177,7 @@ export class SchemaCategoryInfo implements Entity {
         public readonly id: Id,
         public readonly label: string,
         public readonly versionId: VersionId,
+        public readonly systemVersionId: VersionId,
     ) {}
 
     static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
@@ -175,6 +185,7 @@ export class SchemaCategoryInfo implements Entity {
             input.id,
             input.label,
             input.version,
+            input.systemVersion,
         );
     }
 }
@@ -201,7 +212,7 @@ type Context = {
     morphisms: ComparableMap<Signature, string, SchemaMorphism>;
 };
 
-function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObject[], morphisms: SchemaMorphism[]): GroupData[] {
+function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObject[], morphisms: VersionedSchemaMorphism[]): GroupData[] {
     const context: Context = {
         objects: new ComparableMap(key => key.value),
         morphisms: new ComparableMap(signature => signature.value),
@@ -212,7 +223,10 @@ function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObj
         .filter((o): o is SchemaObject => !!o)
         .forEach(object => context.objects.set(object.key, object));
 
-    morphisms.forEach(morphism => context.morphisms.set(morphism.signature, morphism));
+    morphisms
+        .map(morphism => morphism.current)
+        .filter((m): m is SchemaMorphism => !!m)
+        .forEach(morphism => context.morphisms.set(morphism.signature, morphism));
 
     const typeIndices = new Map<DatasourceType, number>();
 

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,35 +22,21 @@ public abstract class Utils {
         return input == 0 ? null : input;
     }
 
-    public static Id getId(ResultSet resultSet, String columnName) throws SQLException {
-        return new Id(resultSet.getString(columnName));
-    }
-
-    public static @Nullable Id getIdOrNull(ResultSet resultSet, String columnName) throws SQLException {
+    public static @Nullable Id getId(ResultSet resultSet, String columnName) throws SQLException {
         final var idString = resultSet.getString(columnName);
         return idString == null ? null : new Id(idString);
     }
 
-    public static void setId(PreparedStatement statement, int position, @Nullable Id id, boolean isUuid) throws SQLException {
+    public static void setId(PreparedStatement statement, int position, @Nullable Id id) throws SQLException {
         if (id == null)
-            statement.setNull(position, isUuid ? Types.OTHER : Types.INTEGER);
+            statement.setNull(position, Types.OTHER);
         else
-            setId(statement, position, id);
+            statement.setObject(position, id.toUUID());
     }
 
-    public static void setId(PreparedStatement statement, int position, Id id) throws SQLException {
-        if (id.isUuid()) {
-            statement.setObject(position, UUID.fromString(id.toString()));
-            return;
-        }
-
-        try {
-            //statement.setString(position, id.value);
-            statement.setInt(position, Integer.parseInt(id.toString()));
-        }
-        catch (NumberFormatException e) {
-            statement.setInt(position, 0);
-        }
+    public static void setIds(PreparedStatement statement, int position, List<Id> ids) throws SQLException {
+        final var uuids = ids.stream().map(Id::toUUID).toArray(UUID[]::new);
+        statement.setArray(position, statement.getConnection().createArrayOf("UUID", uuids));
     }
 
     public static void executeChecked(PreparedStatement statement) throws SQLException {

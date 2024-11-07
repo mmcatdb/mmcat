@@ -22,16 +22,6 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         role,
     }
 
-    /** A unique identifier of the morphism (within one schema category). */
-    private final Signature signature;
-    /** The domain object (i.e., the source of the arrow). */
-    private SchemaObject dom;
-    /** The codomain object (i.e., the target of the arrow). */
-    private SchemaObject cod;
-    /** Cardinality of the morphism - either 1..0 or 1..1. The cardinality in the opposite direction isn't defined. */
-    private final Min min;
-    /** Some other qualities of the morphism (e.g., inheritance in the form of the ISA hierarchy). */
-    private final Set<Tag> tags;
 
     public SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Set<Tag> tags) {
         this.signature = signature;
@@ -41,6 +31,8 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         this.tags = Set.of(tags.toArray(Tag[]::new));
     }
 
+    private final Signature signature;
+    /** A unique identifier of the morphism (within one schema category). */
     public Signature signature() {
         return signature;
     }
@@ -49,18 +41,26 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         return signature instanceof BaseSignature;
     }
 
+    private SchemaObject dom;
+    /** The domain object (i.e., the source of the arrow). */
     public SchemaObject dom() {
         return dom;
     }
 
+    private SchemaObject cod;
+    /** The codomain object (i.e., the target of the arrow). */
     public SchemaObject cod() {
         return cod;
     }
 
+    private final Min min;
+    /** Cardinality of the morphism - either 1..0 or 1..1. The cardinality in the opposite direction isn't defined. */
     public Min min() {
         return min;
     }
 
+    private final Set<Tag> tags;
+    /** Some other qualities of the morphism (e.g., inheritance in the form of the ISA hierarchy). */
     public Set<Tag> tags() {
         return tags;
     }
@@ -91,6 +91,12 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
     @Override public int hashCode() {
         return signature.hashCode();
+    }
+
+    // Debug
+
+    @Override public String toString() {
+        return "M: " + dom.key() + " -[" + signature + "]-> " + cod.key();
     }
 
 }

@@ -1,65 +1,134 @@
 <script setup lang="ts">
-import { shallowRef, watch } from 'vue';
+import { shallowRef, watch, ref } from 'vue';
 import type { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
 import type { SchemaCategory } from '@/types/schema';
-import EditorForInferenceSchemaCategory from '@/components/category/inference/EditorForInferenceSchemaCategory.vue';
+import EditorForInferenceSchemaCategory from './EditorForInferenceSchemaCategory.vue';
+import LayoutSelector from './LayoutSelector.vue';
+import type { LayoutType } from '@/types/inference/layoutType';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
+import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates'; 
 
 type InferenceJobDisplayProps = {
+    /** The current inference job. */
     job: Job;
+    /** The schema category used in the job. */
     schemaCategory: SchemaCategory;
+    /** List of inference edits. */
+    inferenceEdits: InferenceEdit[];
+    /** The current layout type. */
+    layoutType: LayoutType;
+    /** The candidates for merges and edits. */
+    candidates: Candidates;
 };
 
+/**
+ * Props passed to the component.
+ */
 const props = defineProps<InferenceJobDisplayProps>();
 
 const graph = shallowRef<Graph>();
 
+const showSignatures = ref(true); 
+
+/**
+ * Emits custom events to the parent component.
+ */
 const emit = defineEmits<{
+    (e: 'change-layout', newLayoutType: LayoutType): void;
     (e: 'update-edit', edit: InferenceEdit): void;
     (e: 'cancel-edit'): void;
 }>();
 
+/**
+ * Watches for changes in the schema category and updates the graph when it changes.
+ * If the graph is available, it assigns the graph to the new schema category.
+ */
 watch(() => props.schemaCategory, (newCategory, oldCategory) => {
     if (newCategory && newCategory !== oldCategory) {
-        if (graph.value) 
+        if (graph.value) {
             newCategory.graph = graph.value;
-        
+
+            graph.value.toggleEdgeLabels(showSignatures.value);
+        }
     }
 }, { immediate: true });
 
+
+/**
+ * Handles the graph creation event from the GraphDisplay component.
+ */
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
-    if (!props.schemaCategory) {
-        console.log('This should not happen. - schemaCategory.value empty');
+    if (!props.schemaCategory)
         return;
-    }
+    
+    // eslint-disable-next-line vue/no-mutating-props
     props.schemaCategory.graph = newGraph;
 }
 
-function createReferenceMergeEdit(nodes: Node[]) {
-    const referenceKey = nodes[0].schemaObject.key;
-    const referredKey = nodes[1].schemaObject.key;
-
-    const edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey);
-    confirm(edit);
+/**
+ * Emits the 'change-layout' event when the layout type is changed.
+ */
+function changeLayout(newLayoutType: LayoutType) {
+    emit('change-layout', newLayoutType);
 }
 
-function createPrimaryKeyMergeEdit(nodes: Node[]) {
-    const primaryKey = nodes[0].schemaObject.key;
 
-    const edit = new PrimaryKeyMergeInferenceEdit(primaryKey);
-    confirm(edit);
+/**
+ * Creates a reference merge edit from the provided payload.
+ * Emits the 'update-edit' event with the new edit.
+ */
+function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
+    let edit;
+
+    if (payload instanceof ReferenceCandidate) {
+        edit = new ReferenceMergeInferenceEdit(payload, true);
+    }
+    else {
+        const referenceKey = payload[0].schemaObject.key;
+        const referredKey = payload[1].schemaObject.key;
+
+        edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey, true);
+    }
+    confirmOrRevert(edit);
 }
 
+/**
+ * Creates a primary key merge edit from the provided payload.
+ * Emits the 'update-edit' event with the new edit.
+ */
+function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
+    let edit;
+
+    if (payload instanceof PrimaryKeyCandidate) {
+        edit = new PrimaryKeyMergeInferenceEdit(payload, true);
+    }
+    else {
+        const primaryKey = payload[0].schemaObject.key;
+        const primaryKeyIdentified = payload[1].schemaObject.key;
+
+        edit = new PrimaryKeyMergeInferenceEdit(primaryKey, primaryKeyIdentified, true);
+    }
+    confirmOrRevert(edit);
+}
+
+/**
+ * Creates a cluster edit from the selected nodes.
+ * Emits the 'update-edit' event with the new cluster edit.
+ */
 function createClusterEdit(nodes: Node[]) {
     const clusterKeys = nodes.map(node => node.schemaObject.key);
 
-    const edit = new ClusterInferenceEdit(clusterKeys);
-    confirm(edit);
+    const edit = new ClusterInferenceEdit(clusterKeys, true);
+    confirmOrRevert(edit);
 }
 
+/**
+ * Creates a recursion edit based on the provided nodes and edges.
+ * Emits the 'update-edit' event with the new recursion edit.
+ */
 function createRecursionEdit(payload: { nodes: Node[], edges: Edge[] }) {
     const { nodes, edges } = payload;
 
@@ -67,7 +136,7 @@ function createRecursionEdit(payload: { nodes: Node[], edges: Edge[] }) {
 
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
-        const nodeName = node.schemaObject.label;
+        const nodeName = node.metadata.label;
         let direction: '->' | '<-' | '' = '';
 
         if (i < edges.length) {
@@ -85,16 +154,28 @@ function createRecursionEdit(payload: { nodes: Node[], edges: Edge[] }) {
     }
     
 
-    const edit = new RecursionInferenceEdit(pattern);   
-    confirm(edit);
+    const edit = new RecursionInferenceEdit(pattern, true);   
+    confirmOrRevert(edit);
 }
 
-function confirm(edit: InferenceEdit) {
+/**
+ * Confirms or reverts the provided edit by emitting the 'update-edit' event.
+ */
+function confirmOrRevert(edit: InferenceEdit) {
     emit('update-edit', edit);
 }
 
+/**
+ * Cancels the current edit by emitting the 'cancel-edit' event.
+ */
 function cancelEdit() {
     emit('cancel-edit');
+}
+
+function handleShowSignaturesUpdate(newState: boolean) {
+    showSignatures.value = newState;
+    if (graph.value)
+        graph.value.toggleEdgeLabels(newState);
 }
 
 </script>
@@ -105,16 +186,26 @@ function cancelEdit() {
         class="d-flex flex-column"
     >
         <div class="divide">
-            <GraphDisplay @graph-created="graphCreated" />
+            <GraphDisplay 
+                @graph-created="graphCreated"
+                @update-show-signatures="handleShowSignaturesUpdate"
+            />
             <div v-if="graph">
+                <LayoutSelector
+                    :layout-type="props.layoutType"
+                    @change-layout="changeLayout"
+                />
                 <EditorForInferenceSchemaCategory 
                     :graph="graph" 
                     :schema-category="props.schemaCategory" 
+                    :inference-edits="props.inferenceEdits"
+                    :candidates="props.candidates"
                     @confirm-reference-merge="createReferenceMergeEdit"    
                     @confirm-primary-key-merge="createPrimaryKeyMergeEdit"
                     @confirm-cluster="createClusterEdit"
                     @confirm-recursion="createRecursionEdit"
-                    @cancel-edit="cancelEdit"            
+                    @cancel-edit="cancelEdit"   
+                    @revert-edit="confirmOrRevert"         
                 />
                 <slot name="below-editor" />
             </div>

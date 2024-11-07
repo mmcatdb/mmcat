@@ -1,24 +1,23 @@
 <script setup lang="ts">
 import type { Datasource } from '@/types/datasource';
-import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import type { Id } from '@/types/id';
 import IriDisplay from '../common/IriDisplay.vue';
 
 defineProps<{
     datasource: Datasource;
-    categoryId?: Id;
+    scondaryButton?: string;
 }>();
 
-const emit = defineEmits([ 'edit' ]);
+const emit = defineEmits([ 'edit', 'onSecondaryClick' ]);
 </script>
 
 <template>
-    <div class="datasource-display">
-        <CleverRouterLink :to="{ name: 'datasource', params: { id: datasource.id }, query: { categoryId } }">
+    <div class="datasource-display d-flex flex-column">
+        <FixedRouterLink :to="{ name: 'datasource', params: { id: datasource.id } }">
             <h2>{{ datasource.label }}</h2>
-        </CleverRouterLink>
+        </FixedRouterLink>
         <ValueContainer>
             <ValueRow label="Id:">
                 {{ datasource.id }}
@@ -37,11 +36,18 @@ const emit = defineEmits([ 'edit' ]);
                 />
             </ValueRow>
         </ValueContainer>
+        <div class="flex-grow-1" />
         <div class="button-row">
             <button
                 @click="emit('edit')"
             >
                 Edit
+            </button>
+            <button
+                v-if="scondaryButton"
+                @click="emit('onSecondaryClick')"
+            >
+                {{ scondaryButton }}
             </button>
         </div>
     </div>
@@ -51,8 +57,6 @@ const emit = defineEmits([ 'edit' ]);
 .datasource-display {
     padding: 12px;
     border: 1px solid var(--color-primary);
-    margin-right: 16px;
-    margin-bottom: 16px;
     min-width: 204px;
 }
 </style>

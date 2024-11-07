@@ -66,13 +66,11 @@ public class RawProperty implements Serializable, Comparable<RawProperty> {
         this.first = first;
     }
 
-    @Override
-    public int compareTo(RawProperty o) {
+    @Override public int compareTo(RawProperty o) {
         return this.key.compareTo(o.key);
     }
 
-    @Override
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -83,13 +81,11 @@ public class RawProperty implements Serializable, Comparable<RawProperty> {
         return Objects.equals(key, that.key) && Objects.equals(value, that.value);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return Objects.hash(key, value);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("RawProperty{");
         sb.append("key=").append(key);

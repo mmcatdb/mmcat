@@ -73,12 +73,12 @@ public abstract class MapMongoRecord {
 
         for (Object value : t1) {
             if (value == null) {
-                children.add(process("_", value, true, true));
+                children.add(process(RecordSchemaDescription.ROOT_SYMBOL, value, true, true));
             } else if (visited.stream().anyMatch(v -> value.getClass().isInstance(v))) {
-                children.add(process("_", value, true, false));
+                children.add(process(RecordSchemaDescription.ROOT_SYMBOL, value, true, false));
             } else {
                 visited.add(value);
-                children.add(process("_", value, true, true));
+                children.add(process(RecordSchemaDescription.ROOT_SYMBOL, value, true, true));
             }
 
         }

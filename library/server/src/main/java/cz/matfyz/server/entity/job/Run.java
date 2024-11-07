@@ -22,7 +22,7 @@ public class Run extends Entity {
 
     public static Run createSystem(Id categoryId) {
         return new Run(
-            Id.createNewUUID(),
+            Id.createNew(),
             categoryId,
             null,
             null
@@ -31,7 +31,7 @@ public class Run extends Entity {
 
     public static Run createUser(Id categoryId, Id actionId, Id sessionId) {
         return new Run(
-            Id.createNewUUID(),
+            Id.createNew(),
             categoryId,
             actionId,
             sessionId

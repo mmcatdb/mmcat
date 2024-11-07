@@ -279,7 +279,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         return schema.hashCode();
     }
 
-    // Identification
+    // Debug
 
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();

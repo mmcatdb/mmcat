@@ -7,6 +7,8 @@ import cz.matfyz.abstractwrappers.exception.InvalidNameException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;
@@ -22,7 +24,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
         kindName = name;
     }
 
-    @Override public void append(String name, Object value) {
+    @Override public void append(String name, @Nullable Object value) {
         if (!nameIsValid(name))
             throw InvalidNameException.property(name);
 

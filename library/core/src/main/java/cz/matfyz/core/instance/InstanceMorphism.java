@@ -70,7 +70,7 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
         return schema.hashCode();
     }
 
-    // Identification
+    // Debug
 
     @Override public String toString() {
         var builder = new StringBuilder();

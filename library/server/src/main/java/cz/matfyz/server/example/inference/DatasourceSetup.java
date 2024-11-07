@@ -26,7 +26,7 @@ class DatasourceSetup {
 
     DatasourceWrapper createDatasource() {
         DatasourceInit init = settings.createMongoDB("MongoDB - Inference");
-        return datasourceService.createNew(init);
+        return datasourceService.create(init);
     }
 
     List<DatasourceWrapper> createDatasourceForMapping() {

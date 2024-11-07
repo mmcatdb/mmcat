@@ -1,5 +1,7 @@
 package cz.matfyz.tests.example.basic;
 
+import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -10,8 +12,12 @@ public abstract class MongoDB {
 
     private MongoDB() {}
 
+    public static final Datasource datasource = new Datasource(DatasourceType.mongodb, "mongodb");
+
     public static final String orderKind = "order";
     public static final String addressKind = "address";
+    public static final String addressMissingSimpleKind = "addressMissingSimple";
+    public static final String addressMissingComplexKind = "addressMissingComplex";
     public static final String tagKind = "tag";
     public static final String itemKind = "orderItem";
     public static final String itemEmptyKind = "orderItemEmpty";
@@ -20,13 +26,19 @@ public abstract class MongoDB {
     public static final String noteKind = "note";
 
     public static TestMapping order(SchemaCategory schema) {
-        return PostgreSQL.order(schema);
+        return new TestMapping(datasource, schema,
+            Schema.order,
+            orderKind,
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber)
+            )
+        );
     }
 
-    public static TestMapping address(SchemaCategory schema) {
-        return new TestMapping(schema,
+    private static TestMapping addressInner(SchemaCategory schema, String kindName) {
+        return new TestMapping(datasource, schema,
             Schema.order,
-            addressKind,
+            kindName,
             b -> b.root(
                 b.simple("number", Schema.orderToNumber),
                 b.complex("address", Schema.orderToAddress,
@@ -36,6 +48,18 @@ public abstract class MongoDB {
                 )
             )
         );
+    }
+
+    public static TestMapping address(SchemaCategory schema) {
+        return addressInner(schema, addressKind);
+    }
+
+    public static TestMapping addressMissingSimple(SchemaCategory schema) {
+        return addressInner(schema, addressMissingSimpleKind);
+    }
+
+    public static TestMapping addressMissingComplex(SchemaCategory schema) {
+        return addressInner(schema, addressMissingComplexKind);
     }
 
     public static void addAddress(InstanceBuilder builder, int orderIndex, String uniqueId, @Nullable String streetValue, @Nullable String cityValue, @Nullable String zipValue) {
@@ -56,7 +80,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping tag(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             tagKind,
             b -> b.root(
@@ -78,7 +102,7 @@ public abstract class MongoDB {
     }
 
     private static TestMapping createItem(SchemaCategory schema, String kindName) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             kindName,
             b -> b.root(
@@ -117,7 +141,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping contact(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             contactKind,
             b -> b.root(
@@ -149,7 +173,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping customer(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             customerKind,
             b -> b.root(
@@ -173,7 +197,7 @@ public abstract class MongoDB {
     }
 
     public static TestMapping note(SchemaCategory schema) {
-        return new TestMapping(schema,
+        return new TestMapping(datasource, schema,
             Schema.order,
             noteKind,
             b -> b.root(

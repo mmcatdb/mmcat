@@ -1,29 +1,28 @@
-DROP TABLE IF EXISTS query_version;
-DROP TABLE IF EXISTS query;
+DROP TABLE IF EXISTS workflow;
+
 DROP TABLE IF EXISTS job;
 DROP TABLE IF EXISTS run;
 DROP TABLE IF EXISTS session;
 DROP TABLE IF EXISTS action;
-DROP TABLE IF EXISTS mapping;
-DROP TABLE IF EXISTS logical_model;
-DROP TABLE IF EXISTS datasource;
 
-DROP TABLE IF EXISTS schema_category_update;
+DROP TABLE IF EXISTS query_version;
+DROP TABLE IF EXISTS mapping_update;
+DROP TABLE IF EXISTS schema_update;
+DROP TABLE IF EXISTS evolution;
+
+DROP TABLE IF EXISTS query;
+DROP TABLE IF EXISTS mapping;
+DROP TABLE IF EXISTS datasource;
 DROP TABLE IF EXISTS schema_category;
 
--- Incrementation of the sequnce for generating ids:
--- SELECT nextval('tableName_seq_id')
-
--- TODO name to label
+-- Schema
 
 CREATE TABLE schema_category (
-    id SERIAL PRIMARY KEY,
-    json_value JSONB NOT NULL
-);
-
-CREATE TABLE schema_category_update (
-    id SERIAL PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    id UUID PRIMARY KEY,
+    version VARCHAR(255) NOT NULL,
+    last_valid VARCHAR(255) NOT NULL,
+    label VARCHAR(255) NOT NULL,
+    system_version VARCHAR(255) NOT NULL,
     json_value JSONB NOT NULL
 );
 
@@ -34,7 +33,7 @@ CREATE TABLE datasource (
 
 INSERT INTO datasource (id, json_value)
 VALUES
-    ('119dd3fc-aabd-4195-9d12-94abf4fceeb0', '{
+    ('00000000-aabd-4195-9d12-94abf4fceeb0', '{
         "label": "Czech business registry",
         "type": "jsonld",
         "settings": {
@@ -42,45 +41,80 @@ VALUES
             "isWritable": false,
             "isQueryable": false
         }
+    }'),
+    ('00000001-aabd-4195-ad12-94abf4fceeb0', '{
+        "label": "Yelp business sample",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/yelp_business_sample.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
     }');
 
-CREATE TABLE logical_model (
-    id SERIAL PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+CREATE TABLE mapping (
+    id UUID PRIMARY KEY,
+    version VARCHAR(255) NOT NULL,
+    last_valid VARCHAR(255) NOT NULL,
+    category_id UUID NOT NULL REFERENCES schema_category,
     datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
 );
 
-CREATE TABLE mapping (
-    id SERIAL PRIMARY KEY,
-    logical_model_id INTEGER NOT NULL REFERENCES logical_model,
+-- Querying
+
+CREATE TABLE query (
+    id UUID PRIMARY KEY,
+    version VARCHAR(255) NOT NULL,
+    last_valid VARCHAR(255) NOT NULL,
+    category_id UUID NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
 );
 
--- databázový systém může obsahovat více databázových instancí
-    -- - v jedné db instanci musí být jména kindů atd unikátní
+-- Evolution
 
--- Property kindName is supposed to have the same value as the static name of the root property.
--- The reasons are that:
---      a) Sometimes we want to show only the label of the mapping, so we use the kindName for it without the necessity to access whole access path.
---      b) Some display components on the frontent use only the access path, so the information should be there.
+CREATE TABLE evolution (
+    id UUID PRIMARY KEY,
+    category_id UUID NOT NULL REFERENCES schema_category,
+    version VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE category_evolution (
+    id UUID PRIMARY KEY REFERENCES evolution ON DELETE CASCADE,
+    json_value JSONB NOT NULL
+);
+
+CREATE TABLE mapping_evolution (
+    id UUID PRIMARY KEY REFERENCES evolution ON DELETE CASCADE,
+    mapping_id UUID NOT NULL REFERENCES mapping,
+    json_value JSONB NOT NULL
+);
+
+CREATE TABLE query_evolution (
+    id UUID PRIMARY KEY REFERENCES evolution ON DELETE CASCADE,
+    query_id UUID NOT NULL REFERENCES query,
+    json_value JSONB NOT NULL
+);
+
+-- Actions
 
 CREATE TABLE action (
     id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
 );
 
 CREATE TABLE session (
     id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL,
     instance_data JSONB DEFAULT NULL
 );
 
 CREATE TABLE run (
     id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category,
     action_id UUID REFERENCES action,
     session_id UUID REFERENCES session
 );
@@ -91,14 +125,12 @@ CREATE TABLE job (
     json_value JSONB NOT NULL
 );
 
-CREATE TABLE query (
-    id UUID PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
-    json_value JSONB NOT NULL
-);
+-- Workflow
 
-CREATE TABLE query_version (
+CREATE TABLE workflow (
     id UUID PRIMARY KEY,
-    query_id UUID NOT NULL REFERENCES query,
+    category_id UUID NOT NULL REFERENCES schema_category,
+    label VARCHAR(255) NOT NULL,
+    job_id UUID REFERENCES job,
     json_value JSONB NOT NULL
 );

@@ -5,22 +5,17 @@ import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataMorphism;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class MorphismMetadata extends MetadataCategory.Editor implements MetadataModificationOperation {
+public record MorphismMetadata(
+    @Nullable SerializedMetadataMorphism newMorphism,
+    @Nullable SerializedMetadataMorphism oldMorphism
+) implements MMO {
 
     @Override public <T> T accept(MetadataEvolutionVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
-    public final @Nullable SerializedMetadataMorphism newMorphism;
-    public final @Nullable SerializedMetadataMorphism oldMorphism;
-
-    public MorphismMetadata(@Nullable SerializedMetadataMorphism newMorphism, @Nullable SerializedMetadataMorphism oldMorphism) {
-        this.newMorphism = newMorphism;
-        this.oldMorphism = oldMorphism;
-    }
-
     @Override public void up(MetadataCategory metadata) {
-        final var morphisms = getMorphisms(metadata);
+        final var morphisms = (new MetadataEditor(metadata)).getMorphisms();
 
         if (newMorphism == null)
             morphisms.remove(oldMorphism.signature());
@@ -29,7 +24,7 @@ public class MorphismMetadata extends MetadataCategory.Editor implements Metadat
     }
 
     @Override public void down(MetadataCategory metadata) {
-        final var morphisms = getMorphisms(metadata);
+        final var morphisms = (new MetadataEditor(metadata)).getMorphisms();
 
         if (oldMorphism == null)
             morphisms.remove(newMorphism.signature());

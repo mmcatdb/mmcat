@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ErrorType, QueryDescription, QueryVersion } from '@/types/query';
+import { ErrorType, Query, QueryDescription } from '@/types/query';
 import TextArea from '@/components/input/TextArea.vue';
 import VersionDisplay from '../VersionDisplay.vue';
 import { useSchemaCategoryInfo } from '@/utils/injects';
@@ -8,13 +8,13 @@ import API from '@/utils/api';
 import OpenCloseToggle from '@/components/common/OpenCloseToggle.vue';
 import type { QueryResult } from '@/utils/api/routes/queries';
 import QueryResultDisplay from './QueryResultDisplay.vue';
-import QueryUpdateErrorDisplay from './QueryUpdateErrorDisplay.vue';
-import QueryUpdateErrorBadge from './QueryUpdateErrorBadge.vue';
+import QueryEvolutionErrorDisplay from './QueryEvolutionErrorDisplay.vue';
+import QueryEvolutionErrorBadge from './QueryEvolutionErrorBadge.vue';
 import QueryDescriptionDisplay from './QueryDescriptionDisplay.vue';
 import QueryErrorDisplay from './QueryErrorDisplay.vue';
 
 type QueryDisplayProps = {
-    version: QueryVersion;
+    query: Query;
     defaultIsOpened?: boolean;
     defaultResult?: QueryResult;
     defaultError?: any;
@@ -24,12 +24,12 @@ const props = defineProps<QueryDisplayProps>();
 const categoryInfo = useSchemaCategoryInfo();
 
 const emit = defineEmits<{
-    (e: 'createQueryVersion', version: QueryVersion): void;
+    (e: 'updateQuery', version: Query): void;
     (e: 'deleteQuery'): void;
 }>();
 
-const content = ref(props.version.content);
-const errors = ref(props.version.errors);
+const content = ref(props.query.content);
+const errors = ref(props.query.errors);
 const uniqueErrors = computed(() => {
     const output = new Map<ErrorType, number>();
     for (const error of errors.value)
@@ -37,14 +37,13 @@ const uniqueErrors = computed(() => {
     return [ ...output.entries() ].map(([ type, count ]) => ({ type, count }));
 });
 
-const isVersionOld = computed(() => props.version.version !== categoryInfo.value.versionId);
+const isVersionOld = computed(() => props.query.version !== categoryInfo.value.versionId);
 
 const isFetching = ref(false);
 
 async function saveChanges() {
     isFetching.value = true;
-    const result = await API.queries.updateQueryVersion({ versionId: props.version.id }, {
-        version: categoryInfo.value.versionId,
+    const result = await API.queries.updateQuery({ queryId: props.query.id }, {
         content: content.value,
         errors: errors.value,
     });
@@ -52,12 +51,12 @@ async function saveChanges() {
     if (!result.status)
         return;
 
-    const newVersion = QueryVersion.fromServer(result.data, props.version.query);
-    emit('createQueryVersion', newVersion);
+    const newQuery = Query.fromServer(result.data);
+    emit('updateQuery', newQuery);
 }
 
 const isOpened = ref(props.defaultIsOpened);
-const isChanged = computed(() => content.value !== props.version.content || errors.value.length !== props.version.errors.length);
+const isChanged = computed(() => content.value !== props.query.content || errors.value.length !== props.query.errors.length);
 
 const queryError = ref(props.defaultError);
 const queryResult = ref(props.defaultResult);
@@ -96,7 +95,7 @@ async function describeQuery() {
 }
 
 async function deleteQuery() {
-    const result = await API.queries.deleteQuery({ queryId: props.version.query.id });
+    const result = await API.queries.deleteQuery({ queryId: props.query.id });
     if (result.status)
         emit('deleteQuery');
 }
@@ -107,12 +106,12 @@ async function deleteQuery() {
         <div class="d-flex align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-baseline gap-3">
                 <h3 class="m-0">
-                    {{ props.version.query.label }}{{ isChanged ? '*' : '' }}
+                    {{ props.query.label }}{{ isChanged ? '*' : '' }}
                 </h3>
                 <span>
                     v.
                     <VersionDisplay
-                        :version-id="version.version"
+                        :version-id="query.version"
                         :error="isVersionOld"
                     />
                 </span>
@@ -147,7 +146,7 @@ async function deleteQuery() {
                     </button>
                 </template>
                 <template v-else>
-                    <QueryUpdateErrorBadge
+                    <QueryEvolutionErrorBadge
                         v-for="error in uniqueErrors"
                         :key="error.type"
                         :type="error.type"
@@ -158,7 +157,7 @@ async function deleteQuery() {
             </div>
         </div>
         <template v-if="isOpened">
-            <QueryUpdateErrorDisplay
+            <QueryEvolutionErrorDisplay
                 v-for="(error, index) in errors"
                 :key="index"
                 :error="error"

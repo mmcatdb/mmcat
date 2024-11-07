@@ -142,16 +142,9 @@ button.warning:hover, button.warning.selected {
 .button-row {
     display: flex;
     flex-direction: row;
+    align-items: center;
     margin-top: 12px;
-    margin-bottom: 12px;
-}
-
-.button-row:last-child {
-    margin-bottom: 0px;
-}
-
-.button-row button + button {
-    margin-left: 12px;
+    gap: 12px;
 }
 
 .button-icon:hover {

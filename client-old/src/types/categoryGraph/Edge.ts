@@ -1,5 +1,5 @@
 import type { Core, EdgeSingular, ElementDefinition } from 'cytoscape';
-import type { SchemaMorphism } from '../schema';
+import type { MetadataMorphism, SchemaMorphism, VersionedSchemaMorphism } from '../schema';
 import type { Node } from './Node';
 import type { Signature } from '../identifiers';
 
@@ -43,14 +43,15 @@ export class Edge {
     }
 
     private constructor(
+        readonly morphism: VersionedSchemaMorphism,
         readonly schemaMorphism: SchemaMorphism,
         readonly domainNode: Node,
         readonly codomainNode: Node,
     ) {}
 
-    static create(cytoscape: Core, morphism: SchemaMorphism, dom: Node, cod: Node): Edge {
-        const edge = new Edge(morphism, dom, cod);
-        const definition = createEdgeDefinition(morphism, edge, morphism.isNew ? 'new' : '');
+    static create(cytoscape: Core, morphism: VersionedSchemaMorphism, schemaMorphism: SchemaMorphism, dom: Node, cod: Node): Edge {
+        const edge = new Edge(morphism, schemaMorphism, dom, cod);
+        const definition = createEdgeDefinition(schemaMorphism, edge, schemaMorphism.isNew ? 'new' : '');
         const cytoscapeEdge = cytoscape.add(definition);
         edge.setCytoscapeEdge(cytoscapeEdge);
 
@@ -71,9 +72,13 @@ export class Edge {
         this.codomainNode.removeNeighbor(this.domainNode);
     }
 
+    get metadata(): MetadataMorphism {
+        return this.morphism.metadata;
+    }
+
     get label(): string {
         return this.schemaMorphism.signature +
-            (this.schemaMorphism.label === '' ? '' : ' - ' + this.schemaMorphism.label) +
+            (this.metadata.label === '' ? '' : ' - ' + this.metadata.label) +
             (this.schemaMorphism.tags.length === 0 ? '' : ' - ' + this.schemaMorphism.tags.map(tag => '#' + tag).join(' '));
     }
 

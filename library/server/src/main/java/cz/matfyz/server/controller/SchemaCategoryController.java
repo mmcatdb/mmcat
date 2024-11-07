@@ -1,91 +1,73 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.evolution.metadata.MetadataModificationOperation;
+import cz.matfyz.evolution.Version;
+import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.evolution.SchemaUpdate;
-import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
-import cz.matfyz.server.entity.schema.SchemaCategoryInit;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.service.SchemaCategoryService;
+import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class SchemaCategoryController {
 
     @Autowired
+    private SchemaCategoryRepository repository;
+
+    @Autowired
     private SchemaCategoryService service;
+
+    public record SchemaCategoryInfo(
+        Id id,
+        Version version,
+        Version lastValid,
+        String label,
+        /** The current version of the whole project. */
+        Version systemVersion
+    ) implements IEntity {
+
+        public static SchemaCategoryInfo fromWrapper(SchemaCategoryWrapper wrapper) {
+            return new SchemaCategoryInfo(wrapper.id(), wrapper.version(), wrapper.lastValid(), wrapper.label, wrapper.systemVersion());
+        }
+
+    }
 
     @GetMapping("/schema-categories")
     public List<SchemaCategoryInfo> getAllCategoryInfos() {
-        return service.findAllInfos();
+        return repository.findAllInfos();
     }
+
+    public record SchemaCategoryInit(
+        String label
+    ) {}
 
     @PostMapping("/schema-categories")
     public SchemaCategoryInfo createNewCategory(@RequestBody SchemaCategoryInit init) {
-        if (init.label() == null)
-            return null;
-
-        return SchemaCategoryInfo.fromWrapper(service.create(init));
+        return SchemaCategoryInfo.fromWrapper(service.create(init.label));
     }
 
     @GetMapping("/schema-categories/{id}/info")
     public SchemaCategoryInfo getCategoryInfo(@PathVariable Id id) {
-        SchemaCategoryInfo schema;
-
-
-        schema = service.findInfo(id);
-
-        if (schema == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        return schema;
+        return repository.findInfo(id);
     }
 
     @GetMapping("/schema-categories/{id}")
-    public SchemaCategoryWrapper getCategoryWrapper(@PathVariable Id id) {
-        SchemaCategoryWrapper schema = service.find(id);
-
-        if (schema == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        return schema;
+    public SchemaCategoryWrapper getCategory(@PathVariable Id id) {
+        return repository.find(id);
     }
 
     @PostMapping("/schema-categories/{id}/updates")
-    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaUpdateInit update) {
-        SchemaCategoryWrapper updatedWrapper = service.update(id, update);
-
-        if (updatedWrapper == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-
-        return updatedWrapper;
-    }
-
-    @GetMapping("/schema-categories/{id}/updates")
-    public List<SchemaUpdate> getCategoryUpdates(@PathVariable Id id) {
-        final var updates = service.findAllUpdates(id);
-
-        if (updates == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        return updates;
-    }
-
-    @PutMapping("/schema-categories/{id}/metadata")
-    public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataModificationOperation> metadataUpdates) {
-        service.updateMetadata(id, metadataUpdates);
+    public SchemaCategoryWrapper updateCategory(@PathVariable Id id, @RequestBody SchemaEvolutionInit update) {
+        return service.update(id, update);
     }
 
 }

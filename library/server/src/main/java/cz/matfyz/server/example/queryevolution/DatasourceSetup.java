@@ -30,7 +30,7 @@ class DatasourceSetup {
         inits.add(settings.createPostgreSQL("PostgreSQL"));
         inits.add(settings.createMongoDB("MongoDB"));
 
-        return inits.stream().map(datasourceService::createNew).toList();
+        return inits.stream().map(datasourceService::create).toList();
     }
 
 }

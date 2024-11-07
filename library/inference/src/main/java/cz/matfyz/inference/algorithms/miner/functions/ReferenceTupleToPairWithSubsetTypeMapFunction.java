@@ -11,8 +11,7 @@ import org.apache.spark.api.java.function.PairFunction;
 import scala.Tuple2;
 
 public class ReferenceTupleToPairWithSubsetTypeMapFunction implements PairFunction<Tuple2<PropertyHeuristics, PropertyHeuristics>, Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> {
-    @Override
-    public Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> call(Tuple2<PropertyHeuristics, PropertyHeuristics> tuple) throws Exception {
+    @Override public Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> call(Tuple2<PropertyHeuristics, PropertyHeuristics> tuple) throws Exception {
         SubsetType type = formsSubset(tuple._1, tuple._2);
         return new Tuple2<>(tuple, type);
     }

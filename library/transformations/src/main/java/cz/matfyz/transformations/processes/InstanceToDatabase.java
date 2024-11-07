@@ -88,7 +88,7 @@ public class InstanceToDatabase {
 
         Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());
 
-        final var statementsAsString = statementsToString(ddlStatement, icStatement, dmlStatements);
+        final var statementsAsString = statementsToString(ddlStatement, icStatement, dmlStatements, dmlWrapper);
         final var statements = new ArrayList<AbstractStatement>();
         statements.add(ddlStatement);
         statements.add(icStatement);
@@ -99,19 +99,15 @@ public class InstanceToDatabase {
         return new InstanceToDatabaseResult(statementsAsString, statements);
     }
 
-    private String statementsToString(AbstractStatement ddlStatement, AbstractStatement icStatement, List<AbstractStatement> dmlStatements) {
+    private String statementsToString(AbstractStatement ddlStatement, AbstractStatement icStatement, List<AbstractStatement> dmlStatements, AbstractDMLWrapper dmlWrapper) {
         final var output = new StringBuilder();
-        output.append(ddlStatement.getContent())
-            .append("\n");
+        if (!ddlStatement.getContent().isEmpty())
+            output.append(ddlStatement.getContent()).append("\n");
 
-        output.append(icStatement.getContent())
-            .append("\n");
+        if (!icStatement.getContent().isEmpty())
+            output.append(icStatement.getContent()).append("\n");
 
-
-        for (final var dmlStatement : dmlStatements) {
-            output.append(dmlStatement.getContent())
-                .append("\n");
-        }
+        output.append(dmlWrapper.joinStatements(dmlStatements));
 
         return output.toString();
     }

@@ -16,8 +16,7 @@ public record PrimaryKeyCandidate(
         this("primary", property, hierarchicalName, selected);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "PrimaryKeyCandidate{" +
                 "type=" + type +
                 ", hierarchicalName=" + hierarchicalName +

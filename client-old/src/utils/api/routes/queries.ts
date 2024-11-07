@@ -1,7 +1,7 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { DELETE, GET, POST, PUT } from '../routeFunctions';
 import type { Id } from '@/types/id';
-import type { QueryDescriptionFromServer, QueryInit, QueryVersionFromServer, QueryVersionUpdate, QueryWithVersionFromServer, QueryWithVersionsFromServer } from '@/types/query';
+import type { QueryDescriptionFromServer, QueryFromServer, QueryInit, QueryEdit } from '@/types/query';
 
 export type QueryInput = {
     categoryId: Id;
@@ -19,23 +19,20 @@ const queries = {
     describe: POST<Empty, QueryDescriptionFromServer, QueryInput>(
         () => `/queries/describe`,
     ),
-    getQueriesInCategory: GET<{ categoryId: StringLike }, QueryWithVersionFromServer[]>(
+    getQueriesInCategory: GET<{ categoryId: StringLike }, QueryFromServer[]>(
         u => `/schema-categories/${u.categoryId}/queries`,
     ),
-    getQuery: GET<{ queryId: StringLike }, QueryWithVersionFromServer>(
+    getQuery: GET<{ queryId: StringLike }, QueryFromServer>(
         u => `queries/${u.queryId}`,
     ),
-    getQueryWithVersions: GET<{ queryId: StringLike }, QueryWithVersionsFromServer>(
-        u => `queries/${u.queryId}/with-versions`,
-    ),
-    createQuery: POST<Empty, QueryWithVersionFromServer, QueryInit>(
+    createQuery: POST<Empty, QueryFromServer, QueryInit>(
         () => `/queries`,
     ),
     deleteQuery: DELETE<{ queryId: StringLike }, void>(
         u => `/queries/${u.queryId}`,
     ),
-    updateQueryVersion: PUT<{ versionId: StringLike }, QueryVersionFromServer, QueryVersionUpdate>(
-        u => `/query-versions/${u.versionId}`,
+    updateQuery: PUT<{ queryId: StringLike }, QueryFromServer, QueryEdit>(
+        u => `/queries/${u.queryId}`,
     ),
 };
 

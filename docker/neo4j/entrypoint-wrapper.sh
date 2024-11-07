@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Starting entrypoint-wrapper.sh"
+
 # Enable job monitor.
 set -m
 

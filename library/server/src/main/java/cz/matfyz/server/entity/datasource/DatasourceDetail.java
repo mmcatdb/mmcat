@@ -1,7 +1,7 @@
 package cz.matfyz.server.entity.datasource;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Id;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -19,7 +19,8 @@ public record DatasourceDetail(
             datasource.id(),
             datasource.type,
             datasource.label,
-            datasource.settings,
+            // Don't forget to sanitize the settings.
+            datasource.getSanitizedSettings(),
             configuration
         );
     }

@@ -8,6 +8,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 public final class RecordSchemaDescription implements Serializable, Comparable<RecordSchemaDescription> {
 
+    public static final String ROOT_SYMBOL = "_";
+
     private String name;
 
     private int unique;    // TODO: rozepsat na konstanty vestaveneho datoveho typu char, podobne jako typy a modely
@@ -135,7 +137,6 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
     }
 
     // Utility methods
-    // TODO: make it prettier; this kinda nasty
     public boolean hasParentWithChildName(String childName) {
         for (RecordSchemaDescription child : this.children) {
             if (child.getName().equals(childName))
@@ -175,7 +176,7 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
 
     private boolean isReferencingRSD(RecordSchemaDescription rsd) {
         for (RecordSchemaDescription child : rsd.getChildren()) {
-            if (!child.getName().equals("_")) {
+            if (!child.getName().equals(ROOT_SYMBOL)) {
                 return false;
             }
         }
@@ -195,18 +196,12 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
 
     // end of utility methods
 
-    @Override
-    public int compareTo(RecordSchemaDescription o) {
-        // WARN: TOHLE JE SPATNE, JE TU BUG! TAKHLE SE TO POROVNAVAT NEDA
-        // A NAVIC JE TO PRASARNA
+    @Override public int compareTo(RecordSchemaDescription o) {
         int comparedNames = name.compareTo(o.name);
-        boolean typesAreEqual = types == o.types;
-//        boolean typesAreEqual = types.equals(o.types);
         if (comparedNames != 0) {
             return comparedNames;
         }
-
-        return typesAreEqual ? 0 : -1;
+        return types - o.types;
     }
 
     public String _toString() {
@@ -225,11 +220,9 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         return sb.toString();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-//            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);    // pretty print
             objectMapper.disable(SerializationFeature.INDENT_OUTPUT);    // pretty print disabled
 
             return objectMapper.writeValueAsString(this);

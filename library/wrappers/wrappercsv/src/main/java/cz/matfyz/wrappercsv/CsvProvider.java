@@ -1,19 +1,25 @@
 package cz.matfyz.wrappercsv;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
 
+/**
+ * A provider class for accessing CSV files based on given settings.
+ * This class provides methods to retrieve input streams and CSV file names
+ * from both local and remote sources.
+ */
 public class CsvProvider {
 
+    /** The settings used by this provider for accessing CSV files. */
     public final CsvSettings settings;
 
+    /**
+     * Constructs a new {@code CsvProvider} with the specified settings.
+     */
     public CsvProvider(CsvSettings settings) {
         this.settings = settings;
     }
@@ -22,64 +28,40 @@ public class CsvProvider {
         return settings.url;
     }
 
-    public InputStream getInputStream(String kindName) throws IOException {
-        if (settings.url.endsWith(".csv")) {
-            return new UrlInputStreamProvider(settings.url).getInputStream();
-        } else {
-            return new UrlInputStreamProvider(settings.url + kindName + ".csv").getInputStream();
-        }
+    public char getSeparator() {
+        return settings.separator;
+    }
+
+    public boolean hasHeader() {
+        return settings.hasHeader;
     }
 
     /**
-     * There is not a straightforward way to access filenames in remote folder
-     * Therefore, right now it is possible to access local folders or files and remote just files.
+     * Retrieves an input stream for the specified CSV file.
      */
-    public List<String> getCsvFileNames() throws URISyntaxException, IOException {
-        URI uri = new URI(settings.url);
-        if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
-            return getRemoteCsvFileNames(uri);
-        } else if ("file".equals(uri.getScheme())) {
-            return getLocalCsvFileNames(uri);
-        } else {
-            throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
-        }
+    public InputStream getInputStream() throws IOException {
+        return new UrlInputStreamProvider(settings.url).getInputStream();
     }
 
-    private List<String> getRemoteCsvFileNames(URI uri) {
-        List<String> csvFileNames = new ArrayList<>();
-        if (settings.url.endsWith(".csv")) {
-            csvFileNames.add(new File(uri.getPath()).getName().replace(".csv", ""));
-        } else {
-            throw new IllegalArgumentException("The provided URL does not point to a directory.");
-        }
-        return csvFileNames;
+    /**
+     * Retrieves a list of CSV file names from the specified URL.
+     * Supports both local directories and remote file access.
+     */
+    public String getCsvFileNames() {
+        String url = settings.url;
+        return url.substring(url.lastIndexOf('/') + 1);
     }
 
-    private List<String> getLocalCsvFileNames(URI uri) {
-        List<String> csvFileNames = new ArrayList<>();
-        File file = new File(uri);
-        if (settings.url.endsWith(".csv")) {
-            if (file.exists()) {
-                csvFileNames.add(file.getName().replace(".csv", ""));
-            } else {
-                throw new IllegalArgumentException("The provided URL does not point to an existing file.");
-            }
-        } else if (file.isDirectory()) {
-            File[] files = file.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
-            if (files != null) {
-                for (File csvFile : files) {
-                    csvFileNames.add(csvFile.getName().replace(".csv", ""));
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("The provided URL does not point to a directory or a valid file.");
-        }
-        return csvFileNames;
-    }
-
+    /**
+     * A record representing CSV settings, including the URL, writability, and queryability of the CSV source.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record CsvSettings(
         String url,
+        char separator,
+        boolean hasHeader,
         boolean isWritable,
         boolean isQueryable
     ) {}
+
 }

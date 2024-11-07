@@ -2,7 +2,7 @@ package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.MorphismColoring;
-import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.core.patterntree.PatternForKind;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -22,20 +22,20 @@ public class QueryPlanner {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryPlanner.class);
 
     /**
-     * @param allKinds All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
+     * @param allPatterns All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
      * @return
      */
-    public static List<Set<KindPattern>> run(List<KindPattern> allKinds) {
-        return new QueryPlanner(allKinds).run();
+    public static List<Set<PatternForKind>> run(List<PatternForKind> allPatterns) {
+        return new QueryPlanner(allPatterns).run();
     }
 
-    private final List<KindPattern> allKinds;
+    private final List<PatternForKind> allPatterns;
 
-    private QueryPlanner(List<KindPattern> allKinds) {
-        this.allKinds = allKinds;
+    private QueryPlanner(List<PatternForKind> allPatterns) {
+        this.allPatterns = allPatterns;
     }
 
-    private List<Set<KindPattern>> run() {
+    private List<Set<PatternForKind>> run() {
         createQueryPlans();
 
         return plans;
@@ -46,9 +46,9 @@ public class QueryPlanner {
      */
     private record StackItem(
         /** These kinds are already part of a plan. */
-        Set<KindPattern> selected,
+        Set<PatternForKind> selected,
         /** These kinds are yet to be processed. */
-        List<KindPattern> rest,
+        List<PatternForKind> rest,
         MorphismColoring coloring
     ) implements Printable {
         @Override public void printTo(Printer printer) {
@@ -65,12 +65,12 @@ public class QueryPlanner {
         }
     }
 
-    private List<Set<KindPattern>> plans = new ArrayList<>();
+    private List<Set<PatternForKind>> plans = new ArrayList<>();
     private Deque<StackItem> stack = new ArrayDeque<>();
 
     private void createQueryPlans() {
-        final MorphismColoring initialColoring = MorphismColoring.create(allKinds);
-        final List<KindPattern> initialSortedKinds = initialColoring.sortKinds(allKinds);
+        final MorphismColoring initialColoring = MorphismColoring.create(allPatterns);
+        final List<PatternForKind> initialSortedKinds = initialColoring.sortPatterns(allPatterns);
 
         stack.push(new StackItem(new TreeSet<>(), initialSortedKinds, initialColoring));
 
@@ -86,14 +86,14 @@ public class QueryPlanner {
             return;
         }
 
-        for (final KindPattern kind : getKindsWithMinimalPrice(item.rest, item.coloring)) {
-            LOGGER.debug("Kind: {}, price: {}", kind, item.coloring.getKindCost(kind));
-            final List<KindPattern> restWithoutKind = item.rest.stream().filter(k -> !k.equals(kind)).toList();
+        for (final PatternForKind pattern : getPatternsWithMinimalPrice(item.rest, item.coloring)) {
+            LOGGER.debug("Kind: {}, price: {}", pattern, item.coloring.getPatternCost(pattern));
+            final List<PatternForKind> restWithoutKind = item.rest.stream().filter(k -> !k.equals(pattern)).toList();
 
-            final var coloringWithoutKind = item.coloring.removeKind(kind);
-            final var sortedRestKinds = coloringWithoutKind.sortKinds(restWithoutKind);
+            final var coloringWithoutKind = item.coloring.removePattern(pattern);
+            final var sortedRestKinds = coloringWithoutKind.sortPatterns(restWithoutKind);
             final var selectedWithKind = new TreeSet<>(item.selected);
-            selectedWithKind.add(kind);
+            selectedWithKind.add(pattern);
 
             stack.push(new StackItem(selectedWithKind, sortedRestKinds, coloringWithoutKind));
         }
@@ -102,15 +102,15 @@ public class QueryPlanner {
     /**
      * Returns all kinds from the given queue with the minimal price.
      */
-    private List<KindPattern> getKindsWithMinimalPrice(List<KindPattern> kindQueue, MorphismColoring coloring) {
-        final int lowestCost = coloring.getKindCost(kindQueue.get(0));
-        final List<KindPattern> output = new ArrayList<>();
+    private List<PatternForKind> getPatternsWithMinimalPrice(List<PatternForKind> patternQueue, MorphismColoring coloring) {
+        final int lowestCost = coloring.getPatternCost(patternQueue.get(0));
+        final List<PatternForKind> output = new ArrayList<>();
 
-        for (final var kind : kindQueue) {
-            if (coloring.getKindCost(kind) != lowestCost)
+        for (final var pattern : patternQueue) {
+            if (coloring.getPatternCost(pattern) != lowestCost)
                 break;
 
-            output.add(kind);
+            output.add(pattern);
         }
 
         return output;

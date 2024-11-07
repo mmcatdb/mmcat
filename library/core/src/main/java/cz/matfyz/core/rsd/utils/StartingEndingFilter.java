@@ -119,8 +119,7 @@ public class StartingEndingFilter implements Serializable {
             return this.startingEndingArray;
         }
 
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return "{starting array: " + Arrays.toString(startingArray)
                 + ", strating ending array: " + Arrays.toString(startingEndingArray)
                 + ", tempStartingIndexes: " + tempStartingIndexes

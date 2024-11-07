@@ -52,8 +52,6 @@ public abstract class AccessPath implements Printable {
         this.signature = signature;
     }
 
-    protected abstract boolean hasSignature(Signature signature);
-
     /**
      * Find the path to the given signature in and return the properties along the way.
      * The list is "reversed", meaning that the last subpath is first and the root property is last.
@@ -61,7 +59,7 @@ public abstract class AccessPath implements Printable {
      */
     protected abstract @Nullable List<AccessPath> getPropertyPathInternal(Signature signature);
 
-    public abstract AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
+    public abstract @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
 
     @Override public boolean equals(Object object) {
         return object instanceof AccessPath path && name.equals(path.name);

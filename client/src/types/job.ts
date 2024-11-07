@@ -78,7 +78,7 @@ function jobDataFromServer(input: JobDataFromServer, info: SchemaCategoryInfo): 
 
 export type ModelJobData = {
     type: JobDataType.Model;
-    model: string;
+    value: string;
 };
 
 export type SessionFromServer = {

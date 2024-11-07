@@ -31,7 +31,7 @@ class DatasourceSetup {
         inits.add(settings.createMongoDB("MongoDB - Basic"));
         inits.add(settings.createNeo4j("Neo4j - Basic"));
 
-        return inits.stream().map(datasourceService::createNew).toList();
+        return inits.stream().map(datasourceService::create).toList();
     }
 
 }

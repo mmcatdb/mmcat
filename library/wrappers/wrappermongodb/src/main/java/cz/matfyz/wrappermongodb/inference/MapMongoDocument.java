@@ -20,7 +20,7 @@ public abstract class MapMongoDocument {
     public static RecordSchemaDescription process(Document t) {
         RecordSchemaDescription result = new RecordSchemaDescription();
 
-        result.setName("_");
+        result.setName(RecordSchemaDescription.ROOT_SYMBOL);
         result.setUnique(Char.FALSE);
         result.setShareTotal(1);
         result.setShareFirst(1);

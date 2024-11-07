@@ -40,6 +40,19 @@ export class GraphComplexProperty {
         this._subpaths = this._subpaths.filter(subpath => !subpath.signature.equals(oldSubpath.signature));
     }
 
+    removeSubpathForNode(node: Node): void {
+        const subpathToRemove = this._subpaths.find(subpath => subpath.node.equals(node));
+        if (subpathToRemove) {
+            this.removeSubpath(subpathToRemove);
+            return;
+        }
+
+        for (const subpath of this._subpaths) {
+            if (subpath instanceof GraphComplexProperty) 
+                subpath.removeSubpathForNode(node);            
+        }
+    }
+
     get isAuxiliary(): boolean {
         return this._signature.isEmpty;
     }

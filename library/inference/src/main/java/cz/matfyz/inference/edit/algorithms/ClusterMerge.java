@@ -7,8 +7,8 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -16,6 +16,7 @@ import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -32,36 +33,72 @@ import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * The {@code ClusterMerge} class implements an algorithm to merge clusters within a schema.
+ * It extends the {@link InferenceEditAlgorithm} and operates on schema categories to modify
+ * the structure and metadata according to the specified cluster merging rules.
+ */
 public class ClusterMerge extends InferenceEditAlgorithm {
 
-    public record Data(
-        List<Key> clusterKeys
-    ) implements InferenceEdit {
+    /**
+     * Represents the data model used by the ClusterMerge algorithm, including cluster keys
+     * and activity status.
+     */
+    public static class Data extends InferenceEdit {
 
+        @JsonProperty("clusterKeys")
+        @Nullable public List<Key> clusterKeys;
+
+        /**
+         * Constructor for deserialization with JSON properties.
+         *
+         * @param id The ID of the edit.
+         * @param isActive The active status of the edit.
+         * @param clusterKeys The list of keys representing clusters to merge.
+         */
+        @JsonCreator
+        public Data(
+                @JsonProperty("id") Integer id,
+                @JsonProperty("isActive") boolean isActive,
+                @JsonProperty("clusterKeys") List<Key> clusterKeys) {
+            setId(id);
+            setActive(isActive);
+            this.clusterKeys = clusterKeys;
+        }
+
+        public Data() {
+            setId(null);
+            setActive(false);
+            this.clusterKeys = null;
+        }
+
+        /**
+         * Creates an instance of the {@code ClusterMerge} algorithm.
+         */
         @Override public ClusterMerge createAlgorithm() {
             return new ClusterMerge(this);
         }
-
     }
 
     private static final Logger LOGGER = Logger.getLogger(ClusterMerge.class.getName());
     private static final String TYPE_LABEL = "_type";
+    private static final String VALUE_LABEL = "_value";
     private static final int RND_CLUSTER_IDX = 0;
 
     private final Data data;
-
-    public ClusterMerge(Data data) {
-        this.data = data;
-    }
 
     private Key newClusterKey;
     private Signature newClusterSignature;
     private String newClusterName;
     private Signature newTypeSignature;
+    private Signature newValueSignature;
 
     private Map<String, Signature> mapOldClusterNameSignature = new HashMap<>(); // this maps the original cluster names to their original signatures
     private Map<Signature, Signature> mapOldNewSignature = new HashMap<>(); // this maps the original signatures to the new signatures
@@ -69,9 +106,18 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private SchemaCategory newSchemaPart;
     private MetadataCategory newMetadataPart;
 
-    /*
-     * Assumption: The startKey can have ingoing and outgoing edges,
-     * however we assume that one ingoing edge is from the root cluster
+    /**
+     * Constructs a {@code ClusterMerge} instance with the specified data.
+     *
+     * @param data The data model containing cluster information and merge settings.
+     */
+    public ClusterMerge(Data data) {
+        this.data = data;
+    }
+
+    /**
+     * Applies the cluster merging algorithm to the schema category.
+     * Assumes that the startKey can have ingoing and outgoing edges, with one ingoing edge from the root cluster.
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Cluster Edit on Schema Category...");
@@ -87,32 +133,32 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
         findMorphismsAndObjectsToDelete(clusterRootKey);
         InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
+
+        // finally add the _type and _value object
+        addTypeObjectAndMorphism();
+        addValueObjectAndMorphism();
     }
 
-    // The cluster root is the object, which has an outgoing morphisms to all of the clusterKeys
-    // we assume there is only one such object
     private Key findClusterRootKey(SchemaCategory schema) {
         final Multiset<Key> rootCandidates = HashMultiset.create();
         for (final SchemaMorphism morphism : schema.allMorphisms())
             if (data.clusterKeys.contains(morphism.cod().key()))
                 rootCandidates.add(morphism.dom().key());
 
-        return rootCandidates.stream()
+             return rootCandidates.stream()
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
             .entrySet().stream().max((o1, o2) -> o1.getValue().compareTo(o2.getValue()))
             .map(Map.Entry::getKey).orElse(null);
-}
+    }
 
     private List<String> getOldClusterNames() {
-        final List<String> oldClusterNames = new ArrayList<>();
-        for (final Key key : data.clusterKeys)
-            oldClusterNames.add(newMetadata.getObject(key).label);
-
-        return oldClusterNames;
+        return data.clusterKeys.stream()
+            .map(key -> newMetadata.getObject(key).label)
+            .toList();
     }
 
     private String findRepeatingPattern(List<String> strings) {
-        if (strings == null || strings.isEmpty())
+        if (strings.isEmpty())
             return "";
 
         final List<String> normalizedStrings = new ArrayList<>();
@@ -127,30 +173,73 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     private String findLongestCommonSubstring(List<String> strings) {
-        if (strings.size() == 1) {
-            return strings.get(0);
-        }
-        String reference = strings.get(0);
-        String longestCommonSubstring = "";
-        for (int length = reference.length(); length > 0; length--) {
-            for (int start = 0; start <= reference.length() - length; start++) {
-                String candidate = reference.substring(start, start + length);
-                boolean isCommon = true;
-                for (int i = 1; i < strings.size(); i++) {
-                    if (!strings.get(i).contains(candidate)) {
-                        isCommon = false;
-                        break;
-                    }
-                }
-                if (isCommon && candidate.length() > longestCommonSubstring.length()) {
-                    longestCommonSubstring = candidate;
-                }
+        if (strings.isEmpty())
+            return "";
+
+        final StringBuilder combinedBuilder = new StringBuilder();
+        for (int i = 0; i < strings.size(); i++)
+            combinedBuilder.append(strings.get(i)).append((char) (i + 'a'));
+
+        final String combined = combinedBuilder.toString();
+        final Integer[] suffixArray = buildSuffixArray(combined);
+        final int[] lcp = buildLCP(combined, suffixArray);
+
+        int maxLength = 0;
+        int index = 0;
+        for (int i = 1; i < lcp.length; i++) {
+            if (
+                lcp[i] > maxLength &&
+                getStringIndex(suffixArray[i], strings) != getStringIndex(suffixArray[i - 1], strings)
+            ) {
+                maxLength = lcp[i];
+                index = suffixArray[i];
             }
         }
-        return longestCommonSubstring;
+
+        return combined.substring(index, index + maxLength);
     }
 
-    // Note: Consumers (+ other functional interfaces) are pretty cool
+    private int getStringIndex(int suffixIndex, List<String> strings) {
+        int length = 0;
+        for (int i = 0; i < strings.size(); i++) {
+            length += strings.get(i).length() + 1;
+            if (suffixIndex < length)
+                return i;
+        }
+        return -1;
+    }
+
+    private Integer[] buildSuffixArray(String s) {
+        final int n = s.length();
+        final Integer[] suffixArray = new Integer[n];
+        for (int i = 0; i < n; i++)
+            suffixArray[i] = i;
+
+        Arrays.sort(suffixArray, (a, b) -> s.substring(a).compareTo(s.substring(b)));
+        return suffixArray;
+    }
+
+    private int[] buildLCP(String s, Integer[] suffixArray) {
+        final int n = s.length();
+        final int[] rank = new int[n];
+        for (int i = 0; i < n; i++)
+            rank[suffixArray[i]] = i;
+
+        final int[] lcp = new int[n];
+        int h = 0;
+        for (int i = 0; i < n; i++) {
+            if (rank[i] > 0) {
+                int j = suffixArray[rank[i] - 1];
+                while (i + h < n && j + h < n && s.charAt(i + h) == s.charAt(j + h))
+                    h++;
+                lcp[rank[i]] = h;
+                if (h > 0)
+                    h--;
+            }
+        }
+        return lcp;
+    }
+
     private void traverseAndPerform(Key startKey, Key clusterRootKey, Consumer<SchemaObject> objectConsumer, Consumer<SchemaMorphism> morphismConsumer) {
         Set<Key> visited = new HashSet<>();
         Queue<SchemaObject> queue = new LinkedList<>();
@@ -211,7 +300,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private void addSchemaPart(List<String> oldClusterNames, Key clusterRootKey) {
         final Map<Key, Key> mapOldNewKey = addObjects(oldClusterNames);
         addMorphisms(mapOldNewKey, clusterRootKey);
-        addTypeObjectAndMorphism();
     }
 
     private Map<Key, Key> addObjects(List<String> oldClusterNames) {
@@ -238,12 +326,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             final Signature newSig = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, newSchema.getObject(mapOldNewKey.get(morphism.cod().key())));
             mapOldNewSignature.put(morphism.signature(), newSig);
         }
-        newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(clusterRootKey), newSchema.getObject(newClusterKey));
-    }
-
-    private void addTypeObjectAndMorphism() {
-        final Key typeKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), TYPE_LABEL);
-        newTypeSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey));
+        newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(clusterRootKey), true);
     }
 
     private void findMorphismsAndObjectsToDelete(Key clusterRootKey) {
@@ -259,6 +342,19 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         }
     }
 
+    private void addTypeObjectAndMorphism() {
+        final Key typeKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), TYPE_LABEL);
+        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey));
+    }
+
+    private void addValueObjectAndMorphism() {
+        final Key valueKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), VALUE_LABEL);
+        this.newValueSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(valueKey));
+    }
+
+    /**
+     * Applies the mapping edit to a list of mappings.
+     */
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Cluster Edit on Mapping...");
 
@@ -283,7 +379,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private Mapping createMergedMapping(Mapping clusterMapping) {
         ComplexProperty changedComplexProperty = changeComplexProperties(clusterMapping.accessPath());
-        return new Mapping(newSchema, clusterMapping.rootObject().key(), clusterMapping.kindName(), changedComplexProperty, clusterMapping.primaryKey());
+        return clusterMapping.withSchema(newSchema, changedComplexProperty, clusterMapping.primaryKey());
     }
 
     private ComplexProperty changeComplexProperties(ComplexProperty clusterComplexProperty) {
@@ -297,72 +393,100 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private ComplexProperty getNewComplexProperty(AccessPath firstClusterAccessPath, ComplexProperty clusterComplexProperty) {
         List<AccessPath> newSubpaths = new ArrayList<>();
         boolean complexChanged = false;
+        boolean complexIsCluster = false;
 
         for (AccessPath subpath : clusterComplexProperty.subpaths()) {
-            if (!(subpath instanceof ComplexProperty complexProperty)) {
-                newSubpaths.add(subpath);
-                continue;
+            @Nullable ComplexProperty complexProperty = null;
+
+            if (subpath instanceof ComplexProperty tempComplexProperty) {
+                complexProperty = tempComplexProperty;
             }
 
-            if (!complexChanged) {
+            if (!(mapOldClusterNameSignature.values().contains(subpath.signature()))) {
+                newSubpaths.add(subpath);
+                continue;
+            } else {
+                complexChanged = true;
+            }
+
+            if (!complexChanged || complexIsCluster) {
                 for (Signature oldSignature : mapOldClusterNameSignature.values()) {
-                    AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
-                    if (currentSubpath != null) {
-                        complexProperty = complexProperty.minusSubpath(currentSubpath);
+                    if (complexProperty != null && complexProperty.signature().equals(oldSignature)) {
+                        complexProperty = null;
                         complexChanged = true;
+                        complexIsCluster = true;
+                        break;
+                    } else if (complexProperty != null) { // remove the old cluster members
+                        AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
+                        if (currentSubpath != null) {
+                            complexProperty = complexProperty.minusSubpath(currentSubpath);
+                            complexChanged = true;
+                        }
                     }
                 }
             }
 
             if (complexChanged) {
-                List<AccessPath> currentAccessPaths = complexProperty.subpaths();
-                currentAccessPaths.add(createNewComplexProperty((ComplexProperty) firstClusterAccessPath));
-                newSubpaths.add(new ComplexProperty(complexProperty.name(), complexProperty.signature(), currentAccessPaths));
-            } else {
+                List<AccessPath> updatedSubpaths = complexProperty != null ? new ArrayList<>(complexProperty.subpaths()) : new ArrayList<>();
+                AccessPath newAccessPath = createNewComplexProperty(firstClusterAccessPath);
+                updatedSubpaths.add(newAccessPath);
+
+                AccessPath resultAccessPath = complexProperty != null
+                    ? new ComplexProperty(complexProperty.name(), complexProperty.signature(), updatedSubpaths)
+                    : newAccessPath;
+
+                newSubpaths.add(resultAccessPath);
+            } else if (complexProperty != null) {
                 newSubpaths.add(complexProperty);
             }
         }
-        return new ComplexProperty(clusterComplexProperty.name(), newClusterSignature, newSubpaths);
+
+        final AccessPathBuilder builder = new AccessPathBuilder();
+        return builder.root(newSubpaths.toArray(AccessPath[]::new));
     }
 
-    public ComplexProperty createNewComplexProperty(ComplexProperty original) {
-        List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
-        String name;
-        Signature complexPropertySignature;
+    private AccessPath createNewComplexProperty(AccessPath original) {
+        if (original instanceof SimpleProperty) {
+            System.out.println("it was simple");
+            Signature dynamicNameSignature = this.newClusterSignature.concatenate(this.newTypeSignature);
+            Signature valueSignature = this.newClusterSignature.concatenate(this.newValueSignature);
+            return new SimpleProperty(new DynamicName(dynamicNameSignature), valueSignature);
+        }
+
+        final var newSubpaths = transformSubpaths(((ComplexProperty) original).subpaths());
 
         if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
-            complexPropertySignature = newClusterSignature;
-            name = newClusterName;
-            // add the _type object
-            newSubpaths.add(new SimpleProperty(new DynamicName(newTypeSignature), newTypeSignature));
-        } else {
-            complexPropertySignature = mapOldNewSignature.get(original.signature());
-            if (complexPropertySignature == null) { //meaning the original was an array object and so the signature was dual
-                complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
-            }
-            name = original.name().toString();
+            return new ComplexProperty(
+                new DynamicName(newClusterSignature),
+                newClusterSignature,
+                newSubpaths
+            );
         }
-        return new ComplexProperty(new StaticName(name), complexPropertySignature, newSubpaths);
+
+        Signature complexPropertySignature = mapOldNewSignature.get(original.signature());
+        if (complexPropertySignature == null)
+            // Meaning the original was an array object and so the signature was dual.
+            complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
+
+        return new ComplexProperty(original.name(), complexPropertySignature, newSubpaths);
     }
 
-    private List<AccessPath> transformSubpaths(List<AccessPath> originalSubpaths) {
+    private List<AccessPath> transformSubpaths(Collection<AccessPath> originalSubpaths) {
         return originalSubpaths.stream()
-                .map(this::transformSubpath)
-                .collect(Collectors.toList());
+            .map(this::transformSubpath)
+            .toList();
     }
 
     private AccessPath transformSubpath(AccessPath original) {
-        if (original instanceof SimpleProperty) {
+        if (original instanceof SimpleProperty)
             return createNewSimpleProperty((SimpleProperty) original);
-        } else if (original instanceof ComplexProperty) {
+        if (original instanceof ComplexProperty)
             return createNewComplexProperty((ComplexProperty) original);
-        } else {
-            throw new IllegalArgumentException("Unknown AccessPath type");
-        }
+
+        throw new IllegalArgumentException("Unknown AccessPath type");
     }
 
     private SimpleProperty createNewSimpleProperty(SimpleProperty original) {
         return new SimpleProperty(original.name(), mapOldNewSignature.get(original.signature()));
     }
-
 }

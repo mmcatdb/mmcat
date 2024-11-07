@@ -1,6 +1,6 @@
 import { Key, Signature, type KeyFromServer, type SignatureFromServer } from '../identifiers';
-import type { SchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
+import { isArrayEqual } from '@/utils/common';
 
 export type SchemaMorphismFromServer = {
     signature: SignatureFromServer;
@@ -14,9 +14,6 @@ export type MetadataMorphismFromServer = {
     signature: SignatureFromServer;
     label: string;
 };
-
-// TODO
-const TEMP_METADATA_MORPHISM: MetadataMorphismFromServer = { signature: '0', label: '' };
 
 export enum Cardinality {
     Zero = 'ZERO',
@@ -38,18 +35,16 @@ export class SchemaMorphism {
         readonly domKey: Key,
         readonly codKey: Key,
         readonly min: Min,
-        readonly label: string,
         readonly tags: Tag[],
         private _isNew: boolean,
     ) {}
 
-    static fromServer(schema: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer = TEMP_METADATA_MORPHISM): SchemaMorphism {
+    static fromServer(schema: SchemaMorphismFromServer): SchemaMorphism {
         return new SchemaMorphism(
             Signature.fromServer(schema.signature),
             Key.fromServer(schema.domKey),
             Key.fromServer(schema.codKey),
             schema.min,
-            metadata.label,
             schema.tags ? schema.tags : [],
             false,
         );
@@ -58,17 +53,35 @@ export class SchemaMorphism {
     static createNew(signature: Signature, def: MorphismDefinition): SchemaMorphism {
         return new SchemaMorphism(
             signature,
-            def.dom.key,
-            def.cod.key,
+            def.domKey,
+            def.codKey,
             def.min,
-            def.label ?? '',
             def.tags ?? [],
             true,
         );
     }
 
-    createCopy(def: MorphismDefinition): SchemaMorphism {
-        return SchemaMorphism.createNew(this.signature, def);
+    /** If there is nothing to update, undefined will be returned. */
+    update({ domKey, codKey, min, tags }: Partial<Omit<MorphismDefinition, 'label'>>): SchemaMorphism | undefined {
+        const update: Partial<Omit<MorphismDefinition, 'label'>> = {};
+        if (domKey && !this.domKey.equals(domKey))
+            update.domKey = domKey;
+        if (codKey && !this.codKey.equals(codKey))
+            update.codKey = codKey;
+        if (min && this.min !== min)
+            update.min = min;
+        if (tags && !isArrayEqual(this.tags, tags))
+            update.tags = tags;
+
+        if (Object.keys(update).length === 0)
+            return;
+
+        return SchemaMorphism.createNew(this.signature, {
+            domKey: update.domKey ?? this.domKey,
+            codKey: update.codKey ?? this.codKey,
+            min: update.min ?? this.min,
+            tags: update.tags ?? this.tags,
+        });
     }
 
     toServer(): SchemaMorphismFromServer {
@@ -100,22 +113,69 @@ export class SchemaMorphism {
 }
 
 export type MorphismDefinition = {
-    dom: SchemaObject;
-    cod: SchemaObject;
+    domKey: Key;
+    codKey: Key;
     min: Min;
     label?: string;
     tags?: Tag[];
 };
 
+export class MetadataMorphism {
+    private constructor(
+        readonly label: string,
+    ) {}
+
+    static fromServer(input: MetadataMorphismFromServer): MetadataMorphism {
+        return new MetadataMorphism(
+            input.label,
+        );
+    }
+
+    static createDefault(): MetadataMorphism {
+        return new MetadataMorphism(
+            '',
+        );
+    }
+
+    static create(label: string): MetadataMorphism {
+        return new MetadataMorphism(
+            label,
+        );
+    }
+
+    toServer(signature: Signature): MetadataMorphismFromServer {
+        return {
+            signature: signature.toServer(),
+            label: this.label,
+        };
+    }
+}
+
 export class VersionedSchemaMorphism {
+    public readonly originalMetadata: MetadataMorphism;
+
     private constructor(
         readonly signature: Signature,
+        private _metadata: MetadataMorphism,
         private _graph?: Graph,
-    ) {}
+    ) {
+        this.originalMetadata = _metadata;
+    }
+
+    static fromServer(input: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer): VersionedSchemaMorphism {
+        const output = new VersionedSchemaMorphism(
+            Signature.fromServer(input.signature),
+            MetadataMorphism.fromServer(metadata),
+        );
+        output.current = SchemaMorphism.fromServer(input);
+
+        return output;
+    }
 
     static create(signature: Signature, graph: Graph | undefined): VersionedSchemaMorphism {
         return new VersionedSchemaMorphism(
             signature,
+            MetadataMorphism.createDefault(),
             graph,
         );
     }
@@ -140,9 +200,21 @@ export class VersionedSchemaMorphism {
             this.updateGraph(this._graph);
     }
 
+    get metadata(): MetadataMorphism {
+        return this._metadata;
+    }
+
+    set metadata(value: MetadataMorphism) {
+        const isUpdateNeeded = this._metadata.label !== value.label;
+        this._metadata = value;
+
+        if (isUpdateNeeded && this._graph)
+            this.updateGraph(this._graph);
+    }
+
     private updateGraph(graph: Graph) {
         graph.deleteEdge(this.signature);
         if (this._current)
-            graph.createEdge(this._current);
+            graph.createEdge(this, this._current);
     }
 }

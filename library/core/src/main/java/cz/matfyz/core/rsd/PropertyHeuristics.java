@@ -262,8 +262,7 @@ public class PropertyHeuristics implements Serializable {
         bloomFilter.merge(heuristics.getBloomFilter());
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "PropertyHeuristics{"
             + "unique=" + isUnique()
             + ", required=" + isRequired()

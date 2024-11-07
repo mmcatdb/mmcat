@@ -8,7 +8,7 @@ import QueryResultDisplay from './QueryResultDisplay.vue';
 import type { Result } from '@/types/api/result';
 import type { QueryResult } from '@/utils/api/routes/queries';
 import OpenCloseToggle from '../common/OpenCloseToggle.vue';
-import { QueryDescription, type QueryWithVersion } from '@/types/query';
+import { Query, QueryDescription } from '@/types/query';
 import QueryDisplay from './QueryDisplay.vue';
 import QueryDescriptionDisplay from './QueryDescriptionDisplay.vue';
 import QueryErrorDisplay from './QueryErrorDisplay.vue';
@@ -71,9 +71,9 @@ async function executeQuery() {
 
 const isOpened = ref(!props.initialData);
 
-const savedQuery = ref<QueryWithVersion>();
+const savedQuery = ref<Query>();
 
-function querySaved(query: QueryWithVersion) {
+function querySaved(query: Query) {
     savedQuery.value = query;
 }
 
@@ -96,7 +96,7 @@ async function describeQuery() {
 <template>
     <template v-if="savedQuery">
         <QueryDisplay
-            :version="savedQuery.version"
+            :query="savedQuery"
             default-is-opened
             :default-result="queryResult"
             :default-error="queryError"

@@ -1,6 +1,6 @@
 package cz.matfyz.tests.example.common;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.Config;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
