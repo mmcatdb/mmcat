@@ -185,7 +185,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public JSONObject getTable(String tableName, String limit, String offset) {
-        return getQuery("FROM " + tableName, limit, offset);
+        return getQuery("FROM \"" + tableName + "\"", limit, offset);
     }
 
     private String createWhereClause(List<AdminerFilter> filters) {
@@ -215,7 +215,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
         String whereClause = createWhereClause(filter);
-        return getQuery("FROM " + tableName +  " " + whereClause, limit, offset);
+        return getQuery("FROM \"" + tableName +  "\" " + whereClause, limit, offset);
     }
 
     private JSONObject getQuery(String queryBase, String limit, String offset) {
