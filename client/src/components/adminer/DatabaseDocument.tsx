@@ -17,7 +17,7 @@ export function DatabaseDocument({ apiUrl, setRowCount }: DatabaseDocumentProps)
 
     if (loading) {
         return (
-            <div>
+            <div className='h-10 flex items-center justify-center'>
                 <Spinner />
             </div>
         );

@@ -19,34 +19,35 @@ export function AdminerPage() {
 
     return (
         <div>
-            <div className='mt-5'>
-                <DatasourceMenu datasource={state.datasource} dispatch={dispatch}/>
+            <div className='mt-5 flex flex-wrap gap-3 items-center'>
+
+                <DatasourceMenu dispatch={dispatch}/>
 
                 {state.datasource &&
                 (
                     <>
-                        <div className='mt-5'>
-                            <KindMenu apiUrl={`${BACKEND_API_URL}/adminer/${state.datasource.id}`} kindName={state.kind} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
-                        </div>
+                        <KindMenu apiUrl={`${BACKEND_API_URL}/adminer/${state.datasource.id}`} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
-                        <div className='mt-5'>
-                            <ViewMenu datasourceType={state.datasource.type} view={state.view} dispatch={dispatch}/>
-                        </div>
-
-                        {state.kind && (
-                            <div className='mt-5'>
-                                <FilterForm state={state} dispatch={dispatch}/>
-                            </div>
-                        )}
-
-                        <div className='mt-5'>
-                            {typeof state.kind === 'string' && (
-                                <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer`} state={state}/>
-                            )}
-                        </div>
+                        <ViewMenu datasourceType={state.datasource.type} dispatch={dispatch}/>
                     </>
                 )}
             </div>
+
+            {state.datasource && (
+                <div className='mt-5'>
+                    {state.kind && (
+                        <div className='mt-5'>
+                            <FilterForm state={state} dispatch={dispatch}/>
+                        </div>
+                    )}
+
+                    <div className='mt-5'>
+                        {typeof state.kind === 'string' && (
+                            <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer`} state={state}/>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

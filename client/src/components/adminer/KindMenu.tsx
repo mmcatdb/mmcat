@@ -1,20 +1,19 @@
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { type AdminerStateAction } from '@/types/adminer/Reducer';
-import { Spinner, Button } from '@nextui-org/react';
+import { Spinner, Select, SelectItem } from '@nextui-org/react';
 
 type KindMenuProps = Readonly<{
     apiUrl: string;
-    kindName: string | undefined;
     showUnlabeled: boolean;
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function KindMenu({ apiUrl, kindName, showUnlabeled, dispatch }: KindMenuProps) {
+export function KindMenu({ apiUrl, showUnlabeled, dispatch }: KindMenuProps) {
     const { fetchedData, loading, error } = useFetchData(apiUrl);
 
     if (loading) {
         return (
-            <div>
+            <div className='h-10 flex items-center justify-center'>
                 <Spinner />
             </div>
         );
@@ -23,38 +22,33 @@ export function KindMenu({ apiUrl, kindName, showUnlabeled, dispatch }: KindMenu
     if (error)
         return <p>{error}</p>;
 
-
     return (
-        <div className='flex flex-wrap gap-3 items-center'>
-            {fetchedData && fetchedData.data.length > 0 ? (
-                <>
-                    {showUnlabeled && (
-                        <Button
-                            key='unlabeled'
-                            onPress={() => dispatch({ type: 'kind', newKind: 'unlabeled' })}
-                            color={kindName === 'unlabeled' ? 'primary' : 'default'}
-                            variant={kindName === 'unlabeled' ? 'solid' : 'ghost'}
-                            className='flex-1 min-w-[50px]'
-                        >
-                            <span className='truncate'>Unlabeled</span>
-                        </Button>
-                    )}
+        fetchedData && fetchedData.data.length > 0 ? (
+            <Select
+                label='Kind'
+                placeholder='Select kind'
+                className='max-w-xs'
+            >
+                {fetchedData.data.map((name, index) => (
+                    <SelectItem
+                        key={index}
+                        onPress={() => dispatch({ type: 'kind', newKind: name })}
+                    >
+                        {name}
+                    </SelectItem>
+                ))}
 
-                    {fetchedData.data.map((name, index) => (
-                        <Button
-                            key={index}
-                            onPress={() => dispatch({ type: 'kind', newKind: name })}
-                            color={kindName === name ? 'primary' : 'default'}
-                            variant={kindName === name ? 'solid' : 'ghost'}
-                            className='flex-1 min-w-[50px]'
-                        >
-                            <span className='truncate'>{name}</span>
-                        </Button>
-                    ))}
-                </>
-            ) : (
-                <span>No kinds to display.</span>
-            )}
-        </div>
+                {showUnlabeled && (<SelectItem
+                    key='unlabeled'
+                    onPress={() => dispatch({ type: 'kind', newKind: 'unlabeled' })}
+                >
+                    Unlabeled
+                </SelectItem>
+                )}
+
+            </Select>
+        ) : (
+            <span>No kinds to display.</span>
+        )
     );
 }

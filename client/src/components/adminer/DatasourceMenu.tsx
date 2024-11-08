@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/api';
-import { Spinner, Button } from '@nextui-org/react';
+import { Spinner, Select, SelectItem } from '@nextui-org/react';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 import { type AdminerStateAction } from '@/types/adminer/Reducer';
 
 type DatasourceMenuProps = Readonly<{
-    datasource: Datasource | undefined;
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function DatasourceMenu({ datasource, dispatch }: DatasourceMenuProps) {
+export function DatasourceMenu({ dispatch }: DatasourceMenuProps) {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | undefined>();
@@ -38,7 +37,7 @@ export function DatasourceMenu({ datasource, dispatch }: DatasourceMenuProps) {
 
     if (loading) {
         return (
-            <div>
+            <div className='h-10 flex items-center justify-center'>
                 <Spinner />
             </div>
         );
@@ -48,7 +47,11 @@ export function DatasourceMenu({ datasource, dispatch }: DatasourceMenuProps) {
         return <p>{error}</p>;
 
     return (
-        <div className='flex flex-wrap gap-3 items-center'>
+        <Select
+            label='Datasource'
+            placeholder='Select datasource'
+            className='max-w-xs'
+        >
             {datasources
                 .filter((item) =>
                     item.type === DatasourceType.postgresql ||
@@ -56,15 +59,13 @@ export function DatasourceMenu({ datasource, dispatch }: DatasourceMenuProps) {
                     item.type === DatasourceType.neo4j,
                 )
                 .map((item) => (
-                    <Button
+                    <SelectItem
                         key={item.id}
                         onPress={() => dispatch({ type:'datasource', newDatasource: item })}
-                        color={datasource === item ? 'primary' : 'default'}
-                        className='flex-1 min-w-[150px] max-w-[200px]'
                     >
-                        <span className='truncate'>{item.label}</span>
-                    </Button>
+                        {item.label}
+                    </SelectItem>
                 ))}
-        </div>
+        </Select>
     );
 }
