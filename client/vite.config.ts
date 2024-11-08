@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import { fileURLToPath, URL } from 'url';
 import react from '@vitejs/plugin-react-swc';
 import { createHtmlPlugin } from 'vite-plugin-html';
+import tailwindcss from 'tailwindcss';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -27,6 +28,11 @@ export default defineConfig(({ mode }) => {
         base,
         server: {
             port: Number.parseInt(env.VITE_DEV_SERVER_PORT),
+        },
+        css: {
+            postcss: {
+                plugins: [ tailwindcss ],
+            },
         },
     };
 });

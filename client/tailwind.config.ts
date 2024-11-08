@@ -1,7 +1,8 @@
+import type { Config } from 'tailwindcss';
 import { nextui } from '@nextui-org/react';
 
-/** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         './index.html',
         './src/**/*.{js,ts,jsx,tsx}',
@@ -13,6 +14,5 @@ export default {
         contextWidth: '20rem',
         layoutBorderWidth: '1px',
     },
-    darkMode: 'class',
     plugins: [ nextui() ],
-}
+} satisfies Config;
