@@ -422,7 +422,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             return getNodes(limit, offset);
         }
 
-        if (tableName.equals("relationships")) {
+        if (tableName.equals("relationships") || tableName.equals("unlabeled")) {
             return getRelationships(limit, offset);
         }
 

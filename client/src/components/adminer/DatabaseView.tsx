@@ -78,7 +78,7 @@ export function DatabaseView({ apiUrl, state }: DatabaseViewProps) {
                     }}
                     color='primary'
                 />
-                {rowCount && (
+                {rowCount != undefined && rowCount > 0 && (
                     <p>Number of rows: {rowCount}</p>
                 )}
             </div>

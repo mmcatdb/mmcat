@@ -6,6 +6,7 @@ import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { reducer } from '@/components/adminer/reducer';
 import { View } from '@/types/adminer/View';
+import { DatasourceType } from '@/types/datasource';
 
 const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
@@ -25,7 +26,7 @@ export function AdminerPage() {
                 (
                     <>
                         <div className='mt-5'>
-                            <KindMenu apiUrl={`${BACKEND_API_URL}/adminer/${state.datasource.id}`} kindName={state.kind} dispatch={dispatch}/>
+                            <KindMenu apiUrl={`${BACKEND_API_URL}/adminer/${state.datasource.id}`} kindName={state.kind} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
                         </div>
 
                         <div className='mt-5'>
