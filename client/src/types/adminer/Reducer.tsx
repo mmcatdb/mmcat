@@ -16,14 +16,40 @@ export type AdminerState = {
 }
 
 export type AdminerStateAction =
-| { type: 'datasource', newDatasource : Datasource}
-| { type: 'kind', newKind : string}
-| { type: 'view', newView : View}
-| { type: 'submit_state'}
-| { type: 'change_limit', newLimit : number }
-| { type: 'change_column_name', filterId: number, newName: string }
-| { type: 'change_operator', filterId: number, newOperator: Operator }
-| { type: 'change_column_value', filterId: number, newValue: string }
-| { type: 'add_filter'}
-| { type: 'delete_filter', filterID: number}
-| { type: 'delete_filters'};
+| DatasourceAction
+| KindAction
+| ViewAction
+| InputAction
+| FormAction
+| SubmitAction;
+
+type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
+  ? { type: T }
+  : { type: T } & P;
+
+type InputAction = AdminerTypedAction<'input', {
+    field: 'limit';
+    value: number;
+} | {
+    field: 'columnName' | 'columnValue';
+    id: number;
+    value: string;
+} | {
+    field: 'operator';
+    id: number;
+    value: Operator;
+}>;
+
+type FormAction = AdminerTypedAction<'form', {
+    action: 'add_filter';
+} | {
+    action: 'delete_filter';
+    id: number;
+} | {
+    action: 'delete_filters';
+}>;
+
+type DatasourceAction = AdminerTypedAction<'datasource', { newDatasource: Datasource }>;
+type KindAction = AdminerTypedAction<'kind', { newKind: string }>;
+type ViewAction = AdminerTypedAction<'view', { newView: View }>;
+type SubmitAction = AdminerTypedAction<'submit'>;

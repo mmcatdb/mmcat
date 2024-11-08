@@ -25,103 +25,85 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
             view: action.newView,
         };
     }
-    case 'submit_state': {
-        const activeLimit: number = state.form.limit;
-        const activeFilters: ColumnFilter[] = state.form.filters.map(filter => ({
-            ...filter,
-        }));
-
+    case 'submit': {
         return {
             ...state,
             active: {
-                limit: activeLimit,
-                filters: activeFilters,
+                limit: state.form.limit,
+                filters: state.form.filters.map(filter => ({ ...filter })),
             },
         };
     }
-    case 'change_limit': {
-        return {
-            ...state,
-            form: {
-                ...state.form,
-                limit: action.newLimit,
-            },
-        };
-    }
-    case 'change_column_name': {
-        const newFilters: ColumnFilter[] = [ ...state.form.filters ];
-        newFilters[action.filterId].columnName = action.newName;
+    case 'input': {
+        const { field, value } = action;
 
-        return {
-            ...state,
-            form: {
-                ...state.form,
-                filters: newFilters,
-            },
-        };
-    }
-    case 'change_operator': {
-        const newFilters: ColumnFilter[] = [ ...state.form.filters ];
-        newFilters[action.filterId].operator = action.newOperator;
+        if (field === 'limit') {
+            return {
+                ...state,
+                form: {
+                    ...state.form,
+                    limit: value,
+                },
+            };
+        }
+        else {
+            const updatedFilters = state.form.filters.map(filter =>
+                filter.id === action.id
+                    ? { ...filter, [field]: value }
+                    : filter,
+            );
 
-        return {
-            ...state,
-            form: {
-                ...state.form,
-                filters: newFilters,
-            },
-        };
+            return {
+                ...state,
+                form: {
+                    ...state.form,
+                    filters: updatedFilters,
+                },
+            };
+        }
     }
-    case 'change_column_value': {
-        const newFilters: ColumnFilter[] = [ ...state.form.filters ];
-        newFilters[action.filterId].columnValue = action.newValue;
+    case 'form': {
+        const { action: formAction } = action;
 
-        return {
-            ...state,
-            form: {
-                ...state.form,
-                filters: newFilters,
-            },
-        };
+        switch (formAction) {
+        case 'add_filter': {
+            const nextId = state.form.filters ? state.form.filters.length : 0;
+            const newFilter: ColumnFilter = {
+                id: nextId,
+                columnName: '',
+                operator: Operator.eq,
+                columnValue: '',
+            };
+            return {
+                ...state,
+                form: { ...state.form, filters: [ ...state.form.filters, newFilter ] },
+            };
+        }
+        case 'delete_filter': {
+            const activeFilters = state.active.filters.filter(filter => filter.id !== action.id);
+            const newFilters = state.form.filters.filter(filter => filter.id !== action.id);
+            return {
+                ...state,
+                active: {
+                    ...state.active,
+                    filters: activeFilters,
+                },
+                form: { ...state.form, filters: newFilters },
+            };
+        }
+        case 'delete_filters': {
+            return {
+                ...state,
+                form: { limit: 50, filters: [] },
+                active: { limit: 50, filters: [] },
+            };
+        }
+        default:
+            throw new Error('Unknown action');
+        }
     }
-    case 'add_filter': {
-        const nextId: number = state.form.filters ? state.form.filters.length : 0;
-        const newFilter: ColumnFilter = { id: nextId, columnName: '', operator: Operator.eq, columnValue: '' };
-        const newFilters: ColumnFilter[] = [ ...state.form.filters, newFilter ];
-
-        return {
-            ...state,
-            form: {
-                ...state.form,
-                filters: newFilters,
-            },
-        };
-    }
-    case 'delete_filter': {
-        const activeFilters: ColumnFilter[] = state.active.filters.filter(filter => filter.id !== action.filterID);
-        const newFilters: ColumnFilter[] = state.form.filters.filter(filter => filter.id !== action.filterID);
-
-        return {
-            ...state,
-            active: {
-                ...state.active,
-                filters: activeFilters,
-            },
-            form: {
-                ...state.form,
-                filters: newFilters,
-            },
-        };
-    }
-    case 'delete_filters': {
-        return {
-            ...state,
-            form: { limit: 50, filters: [] },
-            active: { limit: 50, filters: [] },
-        };
-    }
-    default: {
+    default:
         throw new Error('Unknown action');
     }
-    }
 }
+

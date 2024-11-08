@@ -16,7 +16,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
                 aria-label='Column name'
                 placeholder='Enter column name'
                 value={filter.columnName}
-                onChange={(e) => dispatch({ type: 'change_column_name', filterId: filter.id, newName: e.target.value })}
+                onChange={(e) => dispatch({ type: 'input', field: 'columnName', id: filter.id, value: e.target.value })}
                 required
             />
 
@@ -25,7 +25,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
                 aria-label='Operator'
                 placeholder='Select an operator'
                 value={filter.operator}
-                onChange={(e) => dispatch({ type: 'change_operator', filterId: filter.id, newOperator: e.target.value as Operator })}
+                onChange={(e) => dispatch({ type: 'input', field: 'operator', id: filter.id, value: e.target.value as Operator })}
                 required
             >
                 {Object.entries(Operator).map(([ key, value ]) => (
@@ -40,7 +40,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
                 aria-label='Column value'
                 placeholder='Enter column value'
                 value={filter.columnValue}
-                onChange={(e) => dispatch({ type: 'change_column_value', filterId: filter.id, newValue: e.target.value })}
+                onChange={(e) => dispatch({ type: 'input', field: 'columnValue', id: filter.id, value: e.target.value })}
                 required
             />
 
@@ -50,7 +50,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
                 color='danger'
                 variant='ghost'
                 onPress={() => {
-                    dispatch({ type:'delete_filter', filterID: filter.id });
+                    dispatch({ type:'form', action: 'delete_filter', id: filter.id });
                 }}
             >
                 <IoTrashBin />

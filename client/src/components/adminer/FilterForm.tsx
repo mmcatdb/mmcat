@@ -31,7 +31,7 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                         min='0'
                         placeholder='Enter limit'
                         value={state.form.limit.toString()}
-                        onChange={(e) => dispatch({ type: 'change_limit', newLimit: Number(e.target.value) })}
+                        onChange={(e) => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
                         required
                     />
                 </div>
@@ -42,7 +42,7 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                     color='danger'
                     variant='ghost'
                     onPress={() => {
-                        dispatch({ type: 'delete_filters' });
+                        dispatch({ type: 'form', action: 'delete_filters' });
                     }}
                 >
                     <IoTrashBin /> Delete filters
@@ -53,7 +53,7 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                     type='submit'
                     color='success'
                     variant='ghost'
-                    onPress={() => dispatch({ type: 'add_filter' })}
+                    onPress={() => dispatch({ type: 'form', action: 'add_filter' })}
                 >
                     <FaPlusCircle /> Add filter
                 </Button>
@@ -62,7 +62,7 @@ export function FilterForm({ state, dispatch }: FilterFormProps) {
                     className='items-center gap-1 min-w-40'
                     type='submit'
                     color='primary'
-                    onPress={() => dispatch({ type: 'submit_state' })}
+                    onPress={() => dispatch({ type: 'submit' })}
                 >
                     <FaSave /> SUBMIT
                 </Button>
