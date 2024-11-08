@@ -1,14 +1,35 @@
 import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import { DatasourceType } from '@/types/datasource';
+import { View } from '@/types/adminer/View';
 
 export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {
     switch (action.type) {
     case 'datasource': {
+        let view: View;
+        switch (action.newDatasource.type) {
+        case DatasourceType.postgresql: {
+            view = View.table;
+            break;
+        }
+        case DatasourceType.mongodb: {
+            view = View.document;
+            break;
+        }
+        case DatasourceType.neo4j: {
+            view = state.view;
+            break;
+        }
+        default: {
+            throw new Error('Invalid type');
+        }
+        }
+
         return {
             form: { limit: 50, filters: [] },
             active: { limit: 50, filters: [] },
             datasource: action.newDatasource,
-            view: state.view,
+            view: view,
         };
     }
     case 'kind': {
