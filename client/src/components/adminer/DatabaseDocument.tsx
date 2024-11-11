@@ -6,15 +6,16 @@ import type { FetchKindParams } from '@/types/adminer/FetchParams';
 
 type DatabaseDocumentProps = Readonly<{
     urlParams: FetchKindParams;
-    setRowCount: (rowCount: number | undefined) => void;
+    setRowCount: (rowCount: number) => void;
 }>;
 
 export function DatabaseDocument({ urlParams, setRowCount }: DatabaseDocumentProps) {
     const { fetchedData, loading, error } = useFetchData(urlParams);
 
     useEffect(() => {
-        setRowCount(fetchedData?.metadata.rowCount);
-    }, [ fetchedData, setRowCount ]);
+        const count = fetchedData?.metadata.rowCount;
+        count ? setRowCount(count) : setRowCount(0);
+    }, [ fetchedData ]);
 
     if (loading) {
         return (

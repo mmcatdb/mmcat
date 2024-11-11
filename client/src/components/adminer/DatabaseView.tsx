@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Pagination } from '@nextui-org/react';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
@@ -32,40 +32,39 @@ function getUrlParams(state: AdminerState, offset: number) {
 }
 
 export function DatabaseView({ state }: DatabaseViewProps) {
-    const [ paginationState, setPaginationState ] = useState({
-        currentPage: 1,
-        offset: 0,
-        rowCount: undefined as number | undefined,
-        totalPages: 1,
-    });
+    const [ currentPage, setCurrentPage ] = useState(1);
+    const [ offset, setOffset ] = useState<number>(0);
+    const [ rowCount, setRowCount ] = useState<number | undefined>();
+    const [ totalPages, setTotalPages ] = useState<number>(1);
+    const [ urlParams, setUrlParams ] = useState<FetchKindParams>(getUrlParams(state, offset));
 
-    const { currentPage, offset, rowCount, totalPages } = paginationState;
+    useEffect(() => {
+        if (rowCount)
+            setTotalPages(Math.ceil(rowCount / state.active.limit));
 
-    const urlParams = useMemo(() => getUrlParams(state, offset), [ state.datasource, state.kind, state.view , state.active, offset ]);
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+            setOffset(state.active.limit * (totalPages - 1));
+        }
+    }, [ rowCount, offset, currentPage, totalPages, state.active.limit ]);
 
-    const updatePaginationState = (newRowCount?: number) => {
-        setPaginationState((prev) => {
-            const newRow = newRowCount ?? prev.rowCount;
-            const calculatedTotalPages = newRow ? Math.ceil(newRow / state.active.limit) : 1;
-            const newPage = Math.min(prev.currentPage, calculatedTotalPages);
-            const newOffset = state.active.limit * (newPage - 1);
+    useEffect(() => {
+        setUrlParams(getUrlParams(state, offset));
+    }, [ state.active, state.datasource, state.kind, state.view, offset ]);
 
-            return {
-                ...prev,
-                rowCount: newRow,
-                totalPages: calculatedTotalPages,
-                currentPage: newPage,
-                offset: newOffset,
-            };
-        });
-    };
+    useEffect(() => {
+        setRowCount(undefined);
+        setTotalPages(1);
+        setCurrentPage(1);
+        setOffset(0);
+    }, [ state.active, state.datasource, state.kind, state.view ]);
 
     return (
         <div className='mt-5'>
             {state.view === View.table ? (
-                <DatabaseTable urlParams={urlParams} setRowCount={updatePaginationState}/>
+                <DatabaseTable urlParams={urlParams} setRowCount={setRowCount}/>
             ) : (
-                <DatabaseDocument urlParams={urlParams} setRowCount={updatePaginationState}/>
+                <DatabaseDocument urlParams={urlParams} setRowCount={setRowCount}/>
             )}
 
             <div className='mt-5 inline-flex gap-3 items-center'>
@@ -73,15 +72,12 @@ export function DatabaseView({ state }: DatabaseViewProps) {
                     total={totalPages}
                     page={currentPage}
                     onChange={(page) => {
-                        setPaginationState((prev) => ({
-                            ...prev,
-                            currentPage: page,
-                            offset: state.active.limit * (page - 1),
-                        }));
+                        setCurrentPage(page);
+                        setOffset(state.active.limit * (page - 1));
                     }}
                     color='primary'
                 />
-                {rowCount != undefined && rowCount > 0 && (
+                {rowCount && (
                     <p>Number of rows: {rowCount}</p>
                 )}
             </div>
