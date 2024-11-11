@@ -35,7 +35,7 @@ public class AdminerController {
     }
 
     @GetMapping(value = "/adminer/{db}")
-    public ResponseEntity<String> getTableNames(@PathVariable Id db, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
+    public ResponseEntity<String> getKindNames(@PathVariable Id db, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
@@ -43,13 +43,13 @@ public class AdminerController {
         }
 
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONObject json = myWrapper.getTableNames(limit, offset);
+        JSONObject json = myWrapper.getKindNames(limit, offset);
 
         return getJsonResponse(json);
     }
 
-    @GetMapping(value = "/adminer/{db}/{table}")
-    public ResponseEntity<String> getTable(@PathVariable Id db, @PathVariable String table, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
+    @GetMapping(value = "/adminer/{db}/{kind}")
+    public ResponseEntity<String> getKind(@PathVariable Id db, @PathVariable String kind, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
@@ -57,13 +57,13 @@ public class AdminerController {
         }
 
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONObject json = myWrapper.getTable(table, limit, offset);
+        JSONObject json = myWrapper.getKind(kind, limit, offset);
 
         return getJsonResponse(json);
     }
 
-    @GetMapping(value = "/adminer/{db}/{table}", params = {"filters"})
-    public ResponseEntity<String> getRows(@PathVariable Id db, @PathVariable String table, @RequestParam String filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
+    @GetMapping(value = "/adminer/{db}/{kind}", params = {"filters"})
+    public ResponseEntity<String> getRows(@PathVariable Id db, @PathVariable String kind, @RequestParam String filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
@@ -87,7 +87,7 @@ public class AdminerController {
         }
 
         final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
-        JSONObject json = myWrapper.getRows(table, filterList, limit, offset);
+        JSONObject json = myWrapper.getRows(kind, filterList, limit, offset);
 
         return getJsonResponse(json);
     }

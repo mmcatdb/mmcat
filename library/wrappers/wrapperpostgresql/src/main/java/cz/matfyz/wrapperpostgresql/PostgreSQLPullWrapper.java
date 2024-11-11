@@ -160,7 +160,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return result;
     }
 
-    @Override public JSONObject getTableNames(String limit, String offset) {
+    @Override public JSONObject getKindNames(String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
@@ -170,8 +170,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             JSONArray resultData = new JSONArray();
 
             while (resultSet.next()) {
-                String tableName = resultSet.getString(1);
-                resultData.put(tableName);
+                String kindName = resultSet.getString(1);
+                resultData.put(kindName);
             }
 
             String countQuery = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public';";
@@ -184,8 +184,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 		}
     }
 
-    @Override public JSONObject getTable(String tableName, String limit, String offset) {
-        return getQuery("FROM \"" + tableName + "\"", limit, offset);
+    @Override public JSONObject getKind(String kindName, String limit, String offset) {
+        return getQuery("FROM \"" + kindName + "\"", limit, offset);
     }
 
     private String createWhereClause(List<AdminerFilter> filters) {
@@ -213,9 +213,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return whereClause.toString();
     }
 
-    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
+    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
         String whereClause = createWhereClause(filter);
-        return getQuery("FROM \"" + tableName +  "\" " + whereClause, limit, offset);
+        return getQuery("FROM \"" + kindName +  "\" " + whereClause, limit, offset);
     }
 
     private JSONObject getQuery(String queryBase, String limit, String offset) {

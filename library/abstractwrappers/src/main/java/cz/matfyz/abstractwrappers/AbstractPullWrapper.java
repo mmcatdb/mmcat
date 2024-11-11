@@ -18,10 +18,10 @@ public interface AbstractPullWrapper {
 
     QueryResult executeQuery(QueryStatement statement);
 
-    JSONObject getTableNames(String limit, String offset);
+    JSONObject getKindNames(String limit, String offset);
 
-    JSONObject getTable(String tableName, String limit, String offset);
+    JSONObject getKind(String kindName, String limit, String offset);
 
-    JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset);
+    JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset);
 
 }

@@ -332,7 +332,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return result;
     }
 
-    @Override public JSONObject getTableNames(String limit, String offset) {
+    @Override public JSONObject getKindNames(String limit, String offset) {
         try (Session session = provider.getSession()) {
             JSONArray resultData = new JSONArray();
 
@@ -417,16 +417,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override public JSONObject getTable(String tableName, String limit, String offset) {
-        if (tableName.equals("nodes")) {
+    @Override public JSONObject getKind(String kindName, String limit, String offset) {
+        if (kindName.equals("nodes")) {
             return getNodes(limit, offset);
         }
 
-        if (tableName.equals("relationships") || tableName.equals("unlabeled")) {
+        if (kindName.equals("relationships") || kindName.equals("unlabeled")) {
             return getRelationships(limit, offset);
         }
 
-        return getByLabel(tableName, limit, offset);
+        return getByLabel(kindName, limit, offset);
     }
 
     private String createWhereClause(List<AdminerFilter> filters, String name) {
@@ -515,16 +515,16 @@ private JSONObject getByLabelAndId(String label, List<AdminerFilter> filters, St
 }
 
 
-    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filters, String limit, String offset) {
-        if (tableName.equals("nodes")) {
+    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filters, String limit, String offset) {
+        if (kindName.equals("nodes")) {
             return getNode(filters, limit, offset);
         }
 
-        if (tableName.equals("relationships")) {
+        if (kindName.equals("relationships")) {
             return getRelationship(filters, limit, offset);
         }
 
-        return getByLabelAndId(tableName, filters, limit, offset);
+        return getByLabelAndId(kindName, filters, limit, offset);
     }
 
 }

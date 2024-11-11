@@ -155,15 +155,15 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 
-    @Override public JSONObject getTableNames(String limit, String offset) {
-        throw new UnsupportedOperationException("JsonPullWrapper.getTableNames not implemented.");
+    @Override public JSONObject getKindNames(String limit, String offset) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
     }
 
-    @Override public JSONObject getTable(String tableName, String limit, String offset) {
-        throw new UnsupportedOperationException("JsonPullWrapper.gatTable not implemented.");
+    @Override public JSONObject getKind(String kindName, String limit, String offset) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getKind not implemented.");
     }
 
-    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
+    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
     }
 

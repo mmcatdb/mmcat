@@ -100,15 +100,15 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 
-    @Override public JSONObject getTableNames(String limit, String offset) {
-        throw new UnsupportedOperationException("CsvPullWrapper.getTableNames not implemented.");
+    @Override public JSONObject getKindNames(String limit, String offset) {
+        throw new UnsupportedOperationException("CsvPullWrapper.getKindNames not implemented.");
     }
 
-    @Override public JSONObject getTable(String tableName, String limit, String offset) {
-        throw new UnsupportedOperationException("CsvPullWrapper.gatTable not implemented.");
+    @Override public JSONObject getKind(String kindName, String limit, String offset) {
+        throw new UnsupportedOperationException("CsvPullWrapper.getKind not implemented.");
     }
 
-    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filter, String limit, String offset) {
+    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("CsvPullWrapper.getRow not implemented.");
     }
 

@@ -265,9 +265,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         return result;
     }
 
-    @Override public JSONObject getTableNames(String limit, String offsetString) {
+    @Override public JSONObject getKindNames(String limit, String offsetString) {
         try {
-            MongoIterable<String> tableNames = provider.getDatabase().listCollectionNames();
+            MongoIterable<String> kindNames = provider.getDatabase().listCollectionNames();
             JSONArray resultData = new JSONArray();
 
             int lim = Integer.parseInt(limit);
@@ -276,9 +276,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             int index = 0;
             int count = 0;
 
-            for (String tableName : tableNames) {
+            for (String kindName : kindNames) {
                 if (index >= offset && count < lim) {
-                    resultData.put(tableName);
+                    resultData.put(kindName);
                     count++;
                 }
 
@@ -292,10 +292,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 		}
     }
 
-    @Override public JSONObject getTable(String tableName, String limit, String offsetString){
+    @Override public JSONObject getKind(String kindName, String limit, String offsetString){
         try {
             JSONArray resultData = new JSONArray();
-            MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
+            MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
             FindIterable<Document> documents = collection.find();
 
             int lim = Integer.parseInt(limit);
@@ -370,10 +370,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     return Filters.and(filterList);
 }
 
-    @Override public JSONObject getRows(String tableName, List<AdminerFilter> filters, String limit, String offsetString){
+    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filters, String limit, String offsetString){
         try {
             JSONArray resultData = new JSONArray();
-            MongoCollection<Document> collection = provider.getDatabase().getCollection(tableName);
+            MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
             Bson filter = createFilter(filters);
             FindIterable<Document> documents = collection.find(filter);
 
