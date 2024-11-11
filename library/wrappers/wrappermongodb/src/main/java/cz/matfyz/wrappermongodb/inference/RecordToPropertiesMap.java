@@ -123,6 +123,10 @@ public class RecordToPropertiesMap implements FlatMapFunction<Document, RecordSc
     }
 
     private static int getTypeIndex(Object value) {
+        // TODO: Take care of null values in the data. (For now we deal with them as if they were string)
+        if (value == null)
+            return 2;
+
         return switch (value) {
             case Number number -> 0;
             case Boolean bool -> 1;
