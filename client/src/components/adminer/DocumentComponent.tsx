@@ -11,7 +11,12 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
 
     if (!isOpen) {
         return (
-            <Button onPress={() => setIsOpen(true)}>Open</Button>
+            <Button
+                className='mx-2 h-5'
+                variant='ghost'
+                onPress={() => setIsOpen(true)}>
+                Open
+            </Button>
         );
     }
 
@@ -19,29 +24,34 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
         // If value is an object, create another unordered list for its key-value pairs
         const len = Object.entries(value).length;
         return (
-            <span className='mx-3'>
-                {depth > 0 && '{'}
+            <span>
+                {'{'}
 
                 {/* If length is 1, just render a single line, otherwise render the entire list */}
                 {len === 1 ? (
                     <span className='mx-3'>
-                        <strong>{Object.keys(value)[0]}:</strong>
+                        <strong className='mr-3'>{Object.keys(value)[0]}:</strong>
                         <DocumentComponent value={Object.values(value)[0] as unknown} depth={depth + 1} />
                     </span>
                 ) : (
-                    <ul className='ps-8' onClick={(e) => {
-                        e.stopPropagation(); setIsOpen(false);
-                    }}>
+                    <ul>
                         {Object.entries(value).map(([ key, val ]) => (
                             <li className='ps-8' key={key}>
-                                <strong>{key}:</strong>
+                                <strong className='mr-3'>{key}:</strong>
                                 <DocumentComponent value={val as unknown} depth={depth + 1} />
                             </li>
                         ))}
                     </ul>
                 )}
 
-                {depth > 0 && '}'}
+                {'}'}
+
+                <Button
+                    className='mx-2 h-5'
+                    variant='ghost'
+                    onPress={() => setIsOpen(false)}>
+                    Close
+                </Button>
             </span>
         );
     }
@@ -50,24 +60,30 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
         // If value is an array, create a list for each item
         const len = value.length;
         return (
-            <span className='mx-3'>
-                {depth > 0 && '{'}
+            <span>
+                {'{'}
 
                 {/* If length is 1, just render a single line, otherwise render the entire list */}
                 {len === 1 ? (
-                    <span className='mx-3'>
+                    <span>
                         <DocumentComponent value={value[0] as unknown} depth={depth + 1} />
                     </span>
                 ) : (
-                    <ul className='ps8' onClick={(e) => {
-                        e.stopPropagation(); setIsOpen(false);
-                    }}>
+                    <ul>
                         {value.map((item, index) => (
                             <li className='ps-8' key={index}><DocumentComponent value={item as unknown} depth={depth + 1} /></li>
                         ))}
                     </ul>
                 )}
-                {depth > 0 && '}'}
+
+                {'}'}
+
+                <Button
+                    className='mx-2 h-5'
+                    variant='ghost'
+                    onPress={() => setIsOpen(false)}>
+                    Close
+                </Button>
             </span>
         );
     }
