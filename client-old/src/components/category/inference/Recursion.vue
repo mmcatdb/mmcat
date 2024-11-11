@@ -189,8 +189,6 @@ function onEdgeTapHandler(edge: Edge) {
             >
                 Confirm
             </button>
-        </div>
-        <div class="button-row">
             <button
                 :disabled="!confirmClicked"
                 @click="save"

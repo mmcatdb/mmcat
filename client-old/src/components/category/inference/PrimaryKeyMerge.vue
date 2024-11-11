@@ -174,8 +174,6 @@ function splitName(name: string) {
             >
                 Confirm
             </button>
-        </div>
-        <div class="button-row">
             <button
                 :disabled="!confirmClicked"
                 @click="save"

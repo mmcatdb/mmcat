@@ -108,8 +108,6 @@ function cancel() {
             >
                 Confirm
             </button>
-        </div>
-        <div class="button-row">
             <button
                 :disabled="!confirmClicked"
                 @click="save"
