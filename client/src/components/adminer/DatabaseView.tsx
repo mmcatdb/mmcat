@@ -4,8 +4,8 @@ import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { Operator } from '@/types/adminer/ColumnFilter';
 import { View } from '@/types/adminer/View';
-import { type AdminerState } from '@/types/adminer/Reducer';
-import { type FetchKindParams } from '@/types/adminer/FetchParams';
+import type { AdminerState } from '@/types/adminer/Reducer';
+import type { FetchKindParams } from '@/types/adminer/FetchParams';
 
 type DatabaseViewProps = Readonly<{
     state: AdminerState;

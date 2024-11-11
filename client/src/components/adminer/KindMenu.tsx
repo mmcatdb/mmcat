@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { useFetchData } from '@/components/adminer/useFetchData';
-import { type AdminerStateAction } from '@/types/adminer/Reducer';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
+import { useFetchData } from '@/components/adminer/useFetchData';
+import type { AdminerStateAction } from '@/types/adminer/Reducer';
 
 type KindMenuProps = Readonly<{
     datasourceId: string;

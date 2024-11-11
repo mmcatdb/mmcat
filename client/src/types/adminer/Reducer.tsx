@@ -1,6 +1,6 @@
-import { type ColumnFilter, type Operator } from '@/types/adminer/ColumnFilter';
-import { type Datasource } from '@/types/datasource';
-import { type View } from '@/types/adminer/View';
+import type { ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import type { Datasource } from '@/types/datasource';
+import type { View } from '@/types/adminer/View';
 
 type KindFilterState = {
     limit: number;

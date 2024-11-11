@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
+import { useFetchData } from './useFetchData';
 import type { BackendTableResponse } from '@/types/adminer/BackendResponse';
 import type { FetchKindParams } from '@/types/adminer/FetchParams';
-import { useFetchData } from './useFetchData';
 
 type DatabaseTableProps = Readonly<{
     urlParams: FetchKindParams;

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { api } from '@/api';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
+import { api } from '@/api';
 import { type Datasource, DatasourceType } from '@/types/datasource';
-import { type AdminerStateAction } from '@/types/adminer/Reducer';
+import type { AdminerStateAction } from '@/types/adminer/Reducer';
 
 type DatasourceMenuProps = Readonly<{
     dispatch: React.Dispatch<AdminerStateAction>;

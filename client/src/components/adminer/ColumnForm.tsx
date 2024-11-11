@@ -1,7 +1,7 @@
 import { Input, Select, SelectItem, Button } from '@nextui-org/react';
 import { IoTrashBin } from 'react-icons/io5';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import type { AdminerStateAction } from '@/types/adminer/Reducer';
 
 type ColumnFormProps = Readonly<{
     filter: ColumnFilter;

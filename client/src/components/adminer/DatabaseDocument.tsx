@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { Spinner } from '@nextui-org/react';
-import type { FetchKindParams } from '@/types/adminer/FetchParams';
 import { useFetchData } from './useFetchData';
+import { DocumentComponent } from '@/components/adminer/DocumentComponent';
+import type { FetchKindParams } from '@/types/adminer/FetchParams';
 
 type DatabaseDocumentProps = Readonly<{
     urlParams: FetchKindParams;

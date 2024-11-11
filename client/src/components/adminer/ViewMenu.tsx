@@ -1,7 +1,7 @@
 import { Select, SelectItem } from '@nextui-org/react';
 import { DatasourceType } from '@/types/datasource';
 import { View } from '@/types/adminer/View';
-import { type AdminerStateAction } from '@/types/adminer/Reducer';
+import type { AdminerStateAction } from '@/types/adminer/Reducer';
 
 type ViewMenuProps = Readonly<{
     datasourceType: DatasourceType;

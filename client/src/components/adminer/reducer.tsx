@@ -1,7 +1,7 @@
-import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
-import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 import { DatasourceType } from '@/types/datasource';
 import { View } from '@/types/adminer/View';
+import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 
 export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {
     switch (action.type) {
