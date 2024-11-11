@@ -74,11 +74,6 @@ public enum Footprinter {
 
         List<PropertyHeuristics> list = new ObjectArrayList<>(heuristics.collect());
 
-        // remove later
-        for (PropertyHeuristics item : list) {
-            System.out.println(item.toString());
-        }
-
         long end = System.currentTimeMillis();
         System.out.println("RESULT_TIME_NEW_FOOTPRINTER WITHOUT LIST CONVERSION: " + (end - start) + "ms");
 

@@ -120,7 +120,6 @@ public class JobController {
         if (!(jobWithRun.job().data instanceof InferenceJobData inferenceJobData))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The job data is not an instance of InferenceJobData");
 
-        System.out.println("positionsMap in controller: " + payload.positions());
         Map<Key, Position> positionsMap = extractPositions(payload.positions());
 
         final InferenceEdit edit = payload.isFinal() ? null : payload.edit();

@@ -208,7 +208,7 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                     @save-positions="(map) => updateJobResult(null, false, null, map)"
                 >
                     <template #below-editor>
-                        <div class="d-flex justify-content-end mt-2">
+                        <div class="d-flex justify-content-center mt-2">
                             <button 
                                 :disabled="fetching"
                                 class="primary"
