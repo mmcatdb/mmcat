@@ -1,15 +1,20 @@
+import { useMemo } from 'react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { type AdminerStateAction } from '@/types/adminer/Reducer';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
 
 type KindMenuProps = Readonly<{
-    apiUrl: string;
+    datasourceId: string;
     showUnlabeled: boolean;
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function KindMenu({ apiUrl, showUnlabeled, dispatch }: KindMenuProps) {
-    const { fetchedData, loading, error } = useFetchData(apiUrl);
+export function KindMenu({ datasourceId, showUnlabeled, dispatch }: KindMenuProps) {
+    const urlParams = useMemo(() => {
+        return { datasourceId: datasourceId };
+    }, [ datasourceId ]);
+
+    const { fetchedData, loading, error } = useFetchData(urlParams);
 
     if (loading) {
         return (

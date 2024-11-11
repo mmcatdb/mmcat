@@ -1,3 +1,5 @@
+export type BackendResponse = BackendTableResponse | BackendDocumentResponse | BackendGraphResponse;
+
 export type BackendTableResponse = {
     metadata: {
         rowCount: number;
@@ -6,7 +8,7 @@ export type BackendTableResponse = {
     data: string[];
 };
 
-export type BackendDocumentResponse = {
+type BackendDocumentResponse = {
     metadata: {
         rowCount: number;
         [key: string]: unknown;
@@ -14,7 +16,7 @@ export type BackendDocumentResponse = {
     data: Record<string, unknown>[];
 };
 
-export type BackendGraphResponse = {
+type BackendGraphResponse = {
     metadata: {
         rowCount: number;
         [key: string]: unknown;

@@ -1,9 +1,9 @@
-import { type BackendDocumentResponse, type BackendGraphResponse, type BackendTableResponse } from '@/types/adminer/BackendResponse';
 import { useState, useEffect } from 'react';
+import { api } from '@/api';
+import type { FetchParams } from '@/types/adminer/FetchParams';
+import type { BackendResponse } from '@/types/adminer/BackendResponse';
 
-type BackendResponse = BackendTableResponse | BackendDocumentResponse | BackendGraphResponse;
-
-export function useFetchData<T extends BackendResponse>(url: string) {
+export function useFetchData<T extends BackendResponse>( params: FetchParams ) {
     const [ fetchedData, setFetchedData ] = useState<T | undefined>();
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | undefined>();
@@ -14,13 +14,14 @@ export function useFetchData<T extends BackendResponse>(url: string) {
                 setLoading(true);
                 setError(undefined);
 
-                const response = await fetch(url);
+                const response = await ('kindId' in params
+                    ? api.adminer.getKind({ datasourceId: params.datasourceId, kindId: params.kindId }, params.queryParams)
+                    : api.adminer.getKindNames({ datasourceId: params.datasourceId })).then(data => data);
 
-                if (!response.ok)
-                    throw new Error(`Failed to fetch data from ${url}`);
+                if (!response.status)
+                    throw new Error(`Failed to fetch data`);
 
-
-                const data = await response.json() as T;
+                const data = await response.data as T;
 
                 setFetchedData(data);
             }
@@ -36,7 +37,7 @@ export function useFetchData<T extends BackendResponse>(url: string) {
                 setLoading(false);
             }
         })();
-    }, [ url ]);
+    }, [ params ]);
 
     return { fetchedData, loading, error };
 }

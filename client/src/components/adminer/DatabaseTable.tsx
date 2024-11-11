@@ -1,15 +1,16 @@
 import { useEffect } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import type { BackendTableResponse } from '@/types/adminer/BackendResponse';
+import type { FetchKindParams } from '@/types/adminer/FetchParams';
 import { useFetchData } from './useFetchData';
 
 type DatabaseTableProps = Readonly<{
-    apiUrl: string;
+    urlParams: FetchKindParams;
     setRowCount: (rowCount: number | undefined) => void;
 }>;
 
-export function DatabaseTable({ apiUrl, setRowCount }: DatabaseTableProps ) {
-    let { fetchedData, loading, error } = useFetchData(apiUrl);
+export function DatabaseTable({ urlParams, setRowCount }: DatabaseTableProps ) {
+    let { fetchedData, loading, error } = useFetchData(urlParams);
 
     useEffect(() => {
         setRowCount(fetchedData?.metadata.rowCount);

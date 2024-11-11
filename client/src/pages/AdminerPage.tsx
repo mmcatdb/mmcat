@@ -8,8 +8,6 @@ import { reducer } from '@/components/adminer/reducer';
 import { View } from '@/types/adminer/View';
 import { DatasourceType } from '@/types/datasource';
 
-const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
-
 export function AdminerPage() {
     const [ state, dispatch ] = useReducer(reducer, {
         form: { limit: 50, filters: [] },
@@ -26,7 +24,7 @@ export function AdminerPage() {
                 {state.datasource &&
                 (
                     <>
-                        <KindMenu apiUrl={`${BACKEND_API_URL}/adminer/${state.datasource.id}`} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
+                        <KindMenu datasourceId={state.datasource.id} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
                         <ViewMenu datasourceType={state.datasource.type} dispatch={dispatch}/>
                     </>
@@ -43,7 +41,7 @@ export function AdminerPage() {
 
                     <div className='mt-5'>
                         {typeof state.kind === 'string' && (
-                            <DatabaseView apiUrl={`${BACKEND_API_URL}/adminer`} state={state}/>
+                            <DatabaseView state={state}/>
                         )}
                     </div>
                 </div>

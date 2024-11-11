@@ -1,34 +1,37 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Pagination } from '@nextui-org/react';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { Operator } from '@/types/adminer/ColumnFilter';
 import { View } from '@/types/adminer/View';
 import { type AdminerState } from '@/types/adminer/Reducer';
+import { type FetchKindParams } from '@/types/adminer/FetchParams';
 
 type DatabaseViewProps = Readonly<{
-    apiUrl: string;
     state: AdminerState;
 }>;
 
-function generateUrl(apiUrl: string, state: AdminerState, offset: number) {
+function getUrlParams(state: AdminerState, offset: number) {
     const filterExist = state.active.filters?.some((filter) => {
         return filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0;
     });
 
+    const urlParams: FetchKindParams = { datasourceId: state.datasource!.id, kindId: state.kind!, queryParams: { limit: state.active.limit, offset: offset } };
+
     if (state.active.filters && filterExist) {
-        return `${apiUrl}/${state.datasource!.id}/${state.kind}?filters=${state.active.filters
+        const queryFilters = `${state.active.filters
             .map(
                 (filter) =>
                     filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0 ? `(${filter.columnName},${Operator[filter.operator as keyof typeof Operator]},${filter.columnValue})` : '',
             )
-            .join('')}&limit=${state.active.limit}&offset=${offset}`;
+            .join('')}`;
+        urlParams.queryParams.filters = queryFilters;
     }
 
-    return `${apiUrl}/${state.datasource!.id}/${state.kind}?limit=${state.active.limit}&offset=${offset}`;
+    return urlParams;
 }
 
-export function DatabaseView({ apiUrl, state }: DatabaseViewProps) {
+export function DatabaseView({ state }: DatabaseViewProps) {
     const [ paginationState, setPaginationState ] = useState({
         currentPage: 1,
         offset: 0,
@@ -38,7 +41,7 @@ export function DatabaseView({ apiUrl, state }: DatabaseViewProps) {
 
     const { currentPage, offset, rowCount, totalPages } = paginationState;
 
-    const url = generateUrl(apiUrl, state, offset);
+    const urlParams = useMemo(() => getUrlParams(state, offset), [ state.datasource, state.kind, state.view , state.active, offset ]);
 
     const updatePaginationState = (newRowCount?: number) => {
         setPaginationState((prev) => {
@@ -60,9 +63,9 @@ export function DatabaseView({ apiUrl, state }: DatabaseViewProps) {
     return (
         <div className='mt-5'>
             {state.view === View.table ? (
-                <DatabaseTable apiUrl={url} setRowCount={updatePaginationState}/>
+                <DatabaseTable urlParams={urlParams} setRowCount={updatePaginationState}/>
             ) : (
-                <DatabaseDocument apiUrl={url} setRowCount={updatePaginationState}/>
+                <DatabaseDocument urlParams={urlParams} setRowCount={updatePaginationState}/>
             )}
 
             <div className='mt-5 inline-flex gap-3 items-center'>

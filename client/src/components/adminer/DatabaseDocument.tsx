@@ -1,15 +1,16 @@
 import { useEffect } from 'react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { Spinner } from '@nextui-org/react';
+import type { FetchKindParams } from '@/types/adminer/FetchParams';
 import { useFetchData } from './useFetchData';
 
 type DatabaseDocumentProps = Readonly<{
-    apiUrl: string;
+    urlParams: FetchKindParams;
     setRowCount: (rowCount: number | undefined) => void;
 }>;
 
-export function DatabaseDocument({ apiUrl, setRowCount }: DatabaseDocumentProps) {
-    const { fetchedData, loading, error } = useFetchData(apiUrl);
+export function DatabaseDocument({ urlParams, setRowCount }: DatabaseDocumentProps) {
+    const { fetchedData, loading, error } = useFetchData(urlParams);
 
     useEffect(() => {
         setRowCount(fetchedData?.metadata.rowCount);
