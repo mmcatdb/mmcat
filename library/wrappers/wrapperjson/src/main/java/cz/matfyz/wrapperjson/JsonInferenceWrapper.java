@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.spark.SparkUnsupportedOperationException;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bson.Document;
@@ -69,7 +71,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     /**
-     * Loads documents from the JSON file and parses them into a list of BSON {@link Document} objects.
+     * Loads documents from the JSON file and parses them into a list of BSON {@link Document} objects. Parses both JSON file types - array of json documents as well as newline delimited documents.
      */
     public JavaRDD<Document> loadDocuments() {
         List<Document> documents = new ArrayList<>();
@@ -80,6 +82,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             String content = reader.lines().collect(Collectors.joining("\n"));
+
             try {
                 JsonNode jsonNode = objectMapper.readTree(content);
                 if (jsonNode.isArray()) {
@@ -87,23 +90,28 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
                         documents.add(Document.parse(node.toString()));
                     }
                 } else {
-                    documents.add(Document.parse(jsonNode.toString()));
+                    try (BufferedReader lineReader = new BufferedReader(new InputStreamReader(provider.getInputStream()))) {
+                        lineReader.lines().forEach(line -> {
+                            if (!line.trim().isEmpty()) {
+                                try {
+                                    documents.add(Document.parse(line));
+                                } catch (Exception ex) {
+                                    System.err.println("Error parsing line as JSON: " + ex.getMessage());
+                                }
+                            }
+                        });
+                    }
                 }
             } catch (IOException e) {
-                reader.lines().forEach(line -> {
-                    try {
-                        documents.add(Document.parse(line));
-                    } catch (Exception ex) {
-                        System.err.println("Error parsing line as JSON: " + ex.getMessage());
-                    }
-                });
+                System.err.println("Error parsing JSON content: " + e.getMessage());
+                return context.emptyRDD();
             }
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
             return context.emptyRDD();
         }
-        JavaRDD<Document> jsonDocuments = context.parallelize(documents);
-        return jsonDocuments;
+
+        return context.parallelize(documents);
     }
 
     /**
