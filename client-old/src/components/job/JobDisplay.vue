@@ -145,13 +145,17 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                     </div>
                 </div>
                 <template v-else>
-                    <FixedRouterLink
-                        v-for="datasource in job.payload.datasources"
+                    <span
+                        v-for="(datasource, index) in job.payload.datasources"
                         :key="datasource.id"
-                        :to="{ name: 'datasource', params: { id: datasource.id } }"
                     >
-                        {{ datasource.label }}
-                    </FixedRouterLink>
+                        <FixedRouterLink
+                            :to="{ name: 'datasource', params: { id: datasource.id } }"
+                        >
+                            {{ datasource.label }}
+                        </FixedRouterLink>
+                        <span v-if="index !== job.payload.datasources.length - 1">, </span>
+                    </span>
                 </template>
             </div>
             <div class="flex-grow-1">
