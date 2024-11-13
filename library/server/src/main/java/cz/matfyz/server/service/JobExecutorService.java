@@ -192,9 +192,6 @@ public class JobExecutorService {
 
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
 
-        System.out.println("instance before");
-        System.out.println(instance);
-
         for (final Mapping mapping : mappings)
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
 
@@ -251,11 +248,6 @@ public class JobExecutorService {
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
-            /*else { LOGGER.info("Models didn't get executed.");}*/
-            /* for now I choose not to execute the statements, but just see if they even get created
-            LOGGER.info("Start executing models ...");
-            control.execute(result.statements());
-            LOGGER.info("... models executed."); */
         }
         System.out.println(output.toString());
         job.data = new ModelJobData(output.toString());
