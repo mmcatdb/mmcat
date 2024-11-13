@@ -50,7 +50,74 @@ VALUES
             "isWritable": false,
             "isQueryable": false
         }
+    }'),
+    -- Files for Bug1
+    ('00000002-aabd-4195-1d12-94abf4fceeb0', '{
+        "label": "Bug1 Yelp Business",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/bug1/business.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
+    }'),
+    ('00000003-aabd-4195-5d12-94abf4fceeb0', '{
+        "label": "Bug1 Yelp User",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/bug1/user.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
+    }'),
+    ('00000004-aabd-4195-7d12-94abf4fceeb0', '{
+        "label": "Bug1 Yelp Review",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/bug1/review.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
+    }'),
+    ('00000005-aabd-4195-bd12-94abf4fceeb0', '{
+        "label": "Bug1 Yelp Tip",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/bug1/tip.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
+    }'),
+    ('00000006-aabd-4195-3d12-94abf4fceeb0', '{
+        "label": "Bug1 Yelp Checkin",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/bug1/checkin.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
+    }'),
+    -- Files for Bug2
+    ('00000007-aabd-4195-4d12-94abf4fceeb0', '{
+        "label": "Bug2 Yelp Business",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/bug2/business.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
+    }'),
+    ('00000008-aabd-4195-cd12-94abf4fceeb0', '{
+        "label": "Bug2 Yelp Checkin",
+        "type": "json",
+        "settings": {
+            "url": "https://data.mmcatdb.com/bug2/checkin.json",
+            "isWritable": false,
+            "isQueryable": false
+        }
     }');
+
+
 
 CREATE TABLE mapping (
     id UUID PRIMARY KEY,
