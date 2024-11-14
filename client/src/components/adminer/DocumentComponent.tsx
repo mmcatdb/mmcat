@@ -65,7 +65,7 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
 
                 {/* If length is 1, just render a single line, otherwise render the entire list */}
                 {len === 1 ? (
-                    <span>
+                    <span className='mx-3'>
                         <DocumentComponent value={value[0] as unknown} depth={depth + 1} />
                     </span>
                 ) : (
