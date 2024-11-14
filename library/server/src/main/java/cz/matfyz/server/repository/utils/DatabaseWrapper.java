@@ -1,10 +1,10 @@
 package cz.matfyz.server.repository.utils;
 
 import cz.matfyz.core.exception.OtherException;
-import cz.matfyz.server.Configuration.DatabaseProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.exception.NotFoundException;
 import cz.matfyz.server.exception.RepositoryException;
+import cz.matfyz.server.global.Configuration.DatabaseProperties;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 

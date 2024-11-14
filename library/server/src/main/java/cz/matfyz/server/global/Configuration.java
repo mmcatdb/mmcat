@@ -1,4 +1,4 @@
-package cz.matfyz.server;
+package cz.matfyz.server.global;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

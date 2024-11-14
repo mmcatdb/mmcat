@@ -2,7 +2,7 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.Action;
-import cz.matfyz.server.entity.action.ActionPayload;
+import cz.matfyz.server.entity.job.JobPayload;
 import cz.matfyz.server.repository.ActionRepository;
 
 import java.util.List;
@@ -20,8 +20,8 @@ public class ActionService {
         return repository.findAllInCategory(categoryId);
     }
 
-    public Action create(Id categoryId, String label, ActionPayload payload) {
-        final var action = Action.createNew(categoryId, label, payload);
+    public Action create(Id categoryId, String label, List<JobPayload> payloads) {
+        final var action = Action.createNew(categoryId, label, payloads);
         repository.save(action);
 
         return action;

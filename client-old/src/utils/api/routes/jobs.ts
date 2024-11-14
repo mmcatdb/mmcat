@@ -1,6 +1,6 @@
 import type { StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
-import type { JobFromServer, SessionFromServer } from '@/types/job';
+import type { JobFromServer, RunFromServer, SessionFromServer } from '@/types/job';
 import type { SaveJobResultPayload } from '@/types/inference/inferenceEdit';
 
 const jobs = {
@@ -10,20 +10,20 @@ const jobs = {
     getJob: GET<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}`,
     ),
-    createRun: POST<{ actionId: StringLike }, JobFromServer>(
+    createRun: POST<{ actionId: StringLike }, RunFromServer>(
         u => `/actions/${u.actionId}/jobs`,
     ),
     createRestartedJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/restart`,
     ),
-    startJob: POST<{ id: StringLike }, JobFromServer>(
-        u => `/jobs/${u.id}/start`,
+    enableJob: POST<{ id: StringLike }, JobFromServer>(
+        u => `/jobs/${u.id}/enable`,
     ),
-    cancelJob: POST<{ id: StringLike }, JobFromServer>(
-        u => `/jobs/${u.id}/cancel`,
+    disableJob: POST<{ id: StringLike }, JobFromServer>(
+        u => `/jobs/${u.id}/disable`,
     ),
     updateJobResult: POST<{ id: StringLike }, JobFromServer, SaveJobResultPayload>(
-        u => `/jobs/${u.id}/updateResult`,
+        u => `/jobs/${u.id}/update-result`,
     ),
     getAllSessionsInCategory: GET<{ categoryId: StringLike }, SessionFromServer[]>(
         u => `/schema-categories/${u.categoryId}/sessions`,

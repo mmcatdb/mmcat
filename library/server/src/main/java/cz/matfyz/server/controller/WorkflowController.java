@@ -11,7 +11,6 @@ import cz.matfyz.server.service.WorkflowService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,9 +66,9 @@ public class WorkflowController {
     }
 
     @PostMapping("/workflows/{id}/continue")
-    public Workflow continueWorkflow(@PathVariable Id id, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
+    public Workflow continueWorkflow(@PathVariable Id id) {
         final var workflow = repository.find(id);
-        return service.continueWorkflow(workflow, sessionId);
+        return service.continueWorkflow(workflow);
     }
 
 }

@@ -1,44 +1,105 @@
-import { type ActionPayload, actionPayloadFromServer, type ActionPayloadFromServer } from './action';
+import { type JobPayload, type JobPayloadFromServer, jobPayloadFromServer, type JobPayloadInit } from './action';
 import type { Entity, Id } from './id';
 import { InferenceJobData, type InferenceJobDataFromServer } from './inference/InferenceJobData';
 import type { SchemaCategoryInfo } from './schema';
 
-export type JobFromServer = {
+type JobInfoFromServer = {
     id: Id;
-    categoryId: Id;
-    actionId: Id | null;
     label: string;
-    state: JobState;
-    payload: ActionPayloadFromServer;
-    data?: JobDataFromServer;
-    error?: JobError;
     createdAt: string;
+    payload: JobPayloadInit;
+    state: JobState;
 };
 
-export class Job implements Entity {
+export class JobInfo {
+    constructor(
+        public readonly id: Id,
+        public readonly label: string,
+        public readonly createdAt: Date,
+        public readonly payload: JobPayload,
+        public readonly state: JobState,
+    ) {}
+
+    static fromServer(input: JobInfoFromServer): JobInfo {
+        return new JobInfo(
+            input.id,
+            input.label,
+            new Date(input.createdAt),
+            jobPayloadFromServer(input.payload),
+            input.state,
+        );
+    }
+}
+
+export type RunFromServer = {
+    id: Id;
+    categoryId: Id;
+    actionId?: Id;
+    label: string;
+    jobs: JobInfoFromServer[];
+};
+
+export class Run implements Entity {
     private constructor(
         public readonly id: Id,
         public readonly categoryId: Id,
         public readonly actionId: Id | undefined,
         public readonly label: string,
+        public readonly jobs: JobInfo[],
+    ) {}
+
+    static fromServer(input: RunFromServer): Run {
+        return new Run(
+            input.id,
+            input.categoryId,
+            input.actionId,
+            input.label,
+            input.jobs.map(JobInfo.fromServer),
+        );
+    }
+}
+
+export type JobFromServer = Omit<JobInfoFromServer, 'payload'> & {
+    index: number;
+    payload: JobPayloadFromServer;
+    data?: JobDataFromServer;
+    error?: JobError;
+    runId: Id;
+    categoryId: Id;
+    runLabel: string;
+    actionId: Id | null;
+};
+
+export class Job implements Entity {
+    private constructor(
+        public readonly id: Id,
+        public readonly index: number,
+        public readonly label: string,
         public state: JobState,
-        public readonly payload: ActionPayload,
+        public readonly payload: JobPayload,
         public readonly data: JobData | undefined,
         public readonly error: JobError | undefined,
         public readonly createdAt: Date,
+        public readonly runId: Id,
+        public readonly categoryId: Id,
+        public readonly runLabel: string,
+        public readonly actionId: Id | undefined,
     ) {}
 
     static fromServer(input: JobFromServer, info: SchemaCategoryInfo): Job {
         return new Job(
             input.id,
-            input.categoryId,
-            input.actionId ?? undefined,
+            input.index,
             input.label,
             input.state,
-            actionPayloadFromServer(input.payload),
+            jobPayloadFromServer(input.payload),
             input.data && jobDataFromServer(input.data, info),
             input.error,
             new Date(input.createdAt),
+            input.runId,
+            input.categoryId,
+            input.runLabel,
+            input.actionId ?? undefined,
         );
     }
 
@@ -48,12 +109,11 @@ export class Job implements Entity {
 }
 
 export enum JobState {
-    Paused = 'Paused',
+    Disabled = 'Disabled',
     Ready = 'Ready',
     Running = 'Running',
     Waiting = 'Waiting',
     Finished = 'Finished',
-    Canceled = 'Canceled',
     Failed = 'Failed',
 }
 

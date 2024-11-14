@@ -2,26 +2,33 @@ package cz.matfyz.server.entity.action;
 
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.job.JobPayload;
+
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+/**
+ * Predefined user actions that can repeatedly spawn runs.
+ */
 public class Action extends Entity {
 
     public final Id categoryId;
     public final String label;
-    public final ActionPayload payload;
+    // TODO Enable dependencies between jobs (now it's just a list of jobs, so they have to be processed in a sequential order).
+    public final List<JobPayload> payloads;
 
-    private Action(Id id, Id categoryId, String label, ActionPayload payload) {
+    private Action(Id id, Id categoryId, String label, List<JobPayload> payload) {
         super(id);
         this.categoryId = categoryId;
         this.label = label;
-        this.payload = payload;
+        this.payloads = payload;
     }
 
-    public static Action createNew(Id categoryId, String label, ActionPayload payload) {
+    public static Action createNew(Id categoryId, String label, List<JobPayload> payload) {
         return new Action(
             Id.createNew(),
             categoryId,
@@ -32,7 +39,7 @@ public class Action extends Entity {
 
     private record JsonValue(
         String label,
-        ActionPayload payload
+        List<JobPayload> payloads
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
@@ -44,14 +51,14 @@ public class Action extends Entity {
             id,
             categoryId,
             json.label,
-            json.payload
+            json.payloads
         );
     }
 
     public String toJsonValue() throws JsonProcessingException {
         return jsonValueWriter.writeValueAsString(new JsonValue(
             label,
-            payload
+            payloads
         ));
     }
 

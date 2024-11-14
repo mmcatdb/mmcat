@@ -182,8 +182,13 @@ CREATE TABLE session (
 CREATE TABLE run (
     id UUID PRIMARY KEY,
     category_id UUID NOT NULL REFERENCES schema_category,
+    label VARCHAR(255) NOT NULL,
     action_id UUID REFERENCES action,
-    session_id UUID REFERENCES session
+    session_id UUID REFERENCES session,
+    -- Whether the run should be considered during execution.
+    -- During the execution, the run is marked inactive. Whenever a job is changed, the run is marked active again.
+    -- This is a database-only field, it doesn't need to be exposed to the application.
+    is_active BOOLEAN NOT NULL
 );
 
 CREATE TABLE job (

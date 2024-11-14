@@ -23,7 +23,7 @@ If the instance category is empty or if it even does not exist, yet there will n
 
 ## Create
 
-To create a job, specify its name, type and select a mapping. Then click on the `Create job` button.
+To create a job, specify its name, type and select a mapping. Then click on the `Create run` button.
 
 ## Delete
 

@@ -1,4 +1,4 @@
-package cz.matfyz.server;
+package cz.matfyz.server.global;
 
 import cz.matfyz.core.exception.NamedException;
 

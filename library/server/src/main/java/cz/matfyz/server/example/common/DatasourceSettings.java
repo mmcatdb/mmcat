@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.common;
 
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.server.Configuration.SetupProperties;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
+import cz.matfyz.server.global.Configuration.SetupProperties;
 import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
 import cz.matfyz.wrapperneo4j.Neo4jProvider.Neo4jSettings;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;

@@ -1,4 +1,4 @@
-package cz.matfyz.server.entity.action;
+package cz.matfyz.server.entity.job;
 
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
@@ -9,6 +9,9 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -17,6 +20,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = UpdateSchemaPayload.class, name = "UpdateSchema"),
     @JsonSubTypes.Type(value = RSDToCategoryPayload.class, name = "RSDToCategory"),
 })
-public interface ActionPayload extends Serializable {
+public interface JobPayload extends Serializable {
+
+    static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JobPayload.class);
+
+    public static JobPayload fromJsonValue(String jsonValue) throws JsonProcessingException {
+        return jsonValueReader.readValue(jsonValue);
+    }
 
 }

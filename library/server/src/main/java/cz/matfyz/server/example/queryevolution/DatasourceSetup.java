@@ -1,9 +1,9 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.Configuration.SetupProperties;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.example.common.DatasourceSettings;
+import cz.matfyz.server.global.Configuration.SetupProperties;
 import cz.matfyz.server.service.DatasourceService;
 
 import java.util.ArrayList;
