@@ -11,6 +11,8 @@ import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/infe
 import type { InferenceJobData } from '@/types/inference/InferenceJobData';
 import type { LayoutType } from '@/types/inference/layoutType';
 import { useSchemaCategoryInfo } from '@/utils/injects';
+import { Key } from '@/types/identifiers';
+import type { Position } from 'cytoscape';
 import JobPayloadDisplay from './JobPayloadDisplay.vue';
 
 type JobDisplayProps = {
@@ -70,10 +72,17 @@ async function restartJob() {
         emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
-async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | null, layoutType: LayoutType | null) {
+async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | null, layoutType: LayoutType | null, positionsMap: Map<Key, Position> | null) {
     fetching.value = true;
 
-    const payload: SaveJobResultPayload = { isFinal, edit, layoutType };
+    const positions = positionsMap
+        ? [ ...positionsMap.entries() ].map(([ key, position ]) => ({
+            key,
+            position,
+        }))
+        : null;
+
+    const payload: SaveJobResultPayload = { isFinal, edit, layoutType, positions };
     const result = await API.jobs.updateJobResult({ id: props.job.id }, payload);
     fetching.value = false;
     if (result.status) 
@@ -161,16 +170,17 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                     :inference-edits="inferenceJobData?.edits"
                     :layout-type="inferenceJobData?.layoutType"
                     :candidates="inferenceJobData?.candidates"
-                    @update-edit="(edit) => updateJobResult(edit, false, null)"
-                    @cancel-edit="updateJobResult(null, false, null)"
-                    @change-layout="(newLayoutType) => updateJobResult(null, null, newLayoutType)"
+                    @update-edit="(edit) => updateJobResult(edit, false, null, null)"
+                    @cancel-edit="updateJobResult(null, false, null, null)"
+                    @change-layout="(newLayoutType) => updateJobResult(null, null, newLayoutType, null)"
+                    @save-positions="(map) => updateJobResult(null, false, null, map)"
                 >
                     <template #below-editor>
-                        <div class="d-flex justify-content-end mt-2">
+                        <div class="d-flex justify-content-center mt-2">
                             <button 
                                 :disabled="fetching"
                                 class="primary"
-                                @click="() => updateJobResult(null, true, null)"
+                                @click="() => updateJobResult(null, true, null, null)"
                             >
                                 Save and Finish
                             </button>

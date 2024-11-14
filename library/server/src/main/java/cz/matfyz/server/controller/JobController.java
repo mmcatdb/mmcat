@@ -1,5 +1,7 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.metadata.MetadataObject.Position;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.controller.ActionController.JobPayloadDetail;
@@ -21,7 +23,9 @@ import cz.matfyz.server.service.WorkflowService;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,18 +113,42 @@ public class JobController {
         if (!(jobWithRun.job().data instanceof InferenceJobData inferenceJobData))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The job data is not an instance of InferenceJobData");
 
-        final InferenceEdit edit = payload.isFinal ? null : payload.edit;
-        final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, payload.isFinal, payload.layoutType);
+        final @Nullable Map<Key, Position> positionsMap = payload.positions() == null ? null : extractPositions(payload.positions());
+
+        final @Nullable InferenceEdit edit = payload.isFinal() ? null : payload.edit();
+
+        final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(
+            jobWithRun,
+            inferenceJobData,
+            edit,
+            payload.isFinal(),
+            payload.layoutType(),
+            positionsMap
+        );
 
         repository.save(jobWithRun.job());
 
         return jobToJobDetail(newJobWithRun);
     }
 
+    private Map<Key, Position> extractPositions(List<PositionUpdate> positionUpdates) {
+        final Map<Key, Position> positionsMap = new HashMap<>();
+        for (final PositionUpdate positionUpdate : positionUpdates)
+            positionsMap.put(positionUpdate.key(), positionUpdate.position());
+
+        return positionsMap;
+    }
+
     private record SaveJobResultPayload(
         @Nullable boolean isFinal,
         @Nullable InferenceEdit edit,
-        @Nullable LayoutType layoutType
+        @Nullable LayoutType layoutType,
+        @Nullable List<PositionUpdate> positions
+    ) {}
+
+    private record PositionUpdate(
+        Key key,
+        Position position
     ) {}
 
     private JobDetail jobToJobDetail(JobWithRun job) {

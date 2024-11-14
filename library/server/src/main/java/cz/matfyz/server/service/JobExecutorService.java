@@ -7,10 +7,12 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvid
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataObject.Position;
 import cz.matfyz.core.metadata.MetadataSerializer;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.CandidatesSerializer;
@@ -206,9 +208,6 @@ public class JobExecutorService {
 
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
 
-        System.out.println("instance before");
-        System.out.println(instance);
-
         for (final Mapping mapping : mappings)
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
 
@@ -265,11 +264,6 @@ public class JobExecutorService {
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
-            /*else { LOGGER.info("Models didn't get executed.");}*/
-            /* for now I choose not to execute the statements, but just see if they even get created
-            LOGGER.info("Start executing models ...");
-            control.execute(result.statements());
-            LOGGER.info("... models executed."); */
         }
         System.out.println(output.toString());
         job.data = new ModelJobData(output.toString());
@@ -358,7 +352,7 @@ public class JobExecutorService {
         );
     }
 
-    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, @Nullable InferenceEdit edit, boolean isFinal, LayoutType layoutType) {
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, @Nullable InferenceEdit edit, boolean isFinal, @Nullable LayoutType layoutType, @Nullable Map<Key, Position> positionsMap) {
         final var schema = SchemaSerializer.deserialize(data.inferenceSchema());
         final var metadata = MetadataSerializer.deserialize(data.inferenceMetadata(), schema);
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
@@ -373,6 +367,8 @@ public class JobExecutorService {
 
         if (layoutType != null)
             Layout.applyToMetadata(schema, metadata, layoutType);
+        else if (positionsMap != null)
+            Layout.updatePositions(schema, metadata, positionsMap);
         else
             edits = updateInferenceEdits(edits, edit, isFinal);
 

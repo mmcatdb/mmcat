@@ -9,6 +9,8 @@ import LayoutSelector from './LayoutSelector.vue';
 import type { LayoutType } from '@/types/inference/layoutType';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
 import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates'; 
+import { Key } from '@/types/identifiers';
+import type { Position } from 'cytoscape';
 
 type InferenceJobDisplayProps = {
     /** The current inference job. */
@@ -39,6 +41,7 @@ const emit = defineEmits<{
     (e: 'change-layout', newLayoutType: LayoutType): void;
     (e: 'update-edit', edit: InferenceEdit): void;
     (e: 'cancel-edit'): void;
+    (e: 'save-positions', map: Map<Key, Position>): void; 
 }>();
 
 /**
@@ -172,6 +175,13 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
+function savePositions(map: Map<Key, Position>) {
+    emit('save-positions', map);
+}
+
+/**
+ * Handles signatures view when graph updated
+ */
 function handleShowSignaturesUpdate(newState: boolean) {
     showSignatures.value = newState;
     if (graph.value)
@@ -205,7 +215,8 @@ function handleShowSignaturesUpdate(newState: boolean) {
                     @confirm-cluster="createClusterEdit"
                     @confirm-recursion="createRecursionEdit"
                     @cancel-edit="cancelEdit"   
-                    @revert-edit="confirmOrRevert"         
+                    @revert-edit="confirmOrRevert"    
+                    @save-positions="savePositions"     
                 />
                 <slot name="below-editor" />
             </div>

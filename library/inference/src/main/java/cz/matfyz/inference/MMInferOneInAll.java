@@ -81,6 +81,7 @@ public class MMInferOneInAll {
     private CategoryMappingsPair processKind(AbstractInferenceWrapper wrapper, Datasource datasource, String kindName) {
         final var wrapperCopy = wrapper.copyForKind(kindName);
         final var rsd = executeRBA(wrapperCopy);
+        //final var rsd = executePBA(wrapperCopy);
         return schemaConverter.convert(rsd, datasource, kindName);
     }
 
@@ -115,11 +116,11 @@ public class MMInferOneInAll {
     }
 
     public static Candidates executeCandidateMiner(List<AbstractInferenceWrapper> wrappers) throws Exception {
-            BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
-            StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
-            CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
+        BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
+        StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
+        CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
 
-            return candidateMiner.process(wrappers);
+        return candidateMiner.process(wrappers, false);
     }
 
 }

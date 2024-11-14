@@ -223,19 +223,24 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
     private Mapping adjustPKMapping(Mapping mapping) {
         Collection<Signature> currentPK = cleanFromEmpty(mapping.primaryKey());
-        currentPK.add(findPKSignature());
+        Signature pkSignature = findPKSignature();
+        if (!currentPK.contains(pkSignature))
+            currentPK.add(findPKSignature());
         return mapping.withSchema(newSchema, mapping.accessPath(), currentPK);
     }
 
     private Mapping createCleanedMapping(Mapping mapping) {
         ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
         Collection<Signature> currentPK = cleanFromEmpty(mapping.primaryKey());
+        Signature newSignature;
 
         if (primaryKeyRoot.equals(data.primaryKeyIdentified)) {
-            currentPK.add(newSignaturePair.getValue());
+            newSignature = newSignaturePair.getValue();
         } else {
-            currentPK.add(Signature.concatenate(this.newSignaturePair.getValue(), findPKSignature()));
+            newSignature = Signature.concatenate(this.newSignaturePair.getValue(), findPKSignature());
         }
+        if (!currentPK.contains(newSignature))
+            currentPK.add(newSignature);
         return mapping.withSchema(newSchema, cleanedComplexProperty, currentPK);
     }
 

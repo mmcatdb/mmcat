@@ -447,7 +447,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private AccessPath createNewComplexProperty(AccessPath original) {
         if (original instanceof SimpleProperty) {
-            System.out.println("it was simple");
             Signature dynamicNameSignature = this.newClusterSignature.concatenate(this.newTypeSignature);
             Signature valueSignature = this.newClusterSignature.concatenate(this.newValueSignature);
             return new SimpleProperty(new DynamicName(dynamicNameSignature), valueSignature);
