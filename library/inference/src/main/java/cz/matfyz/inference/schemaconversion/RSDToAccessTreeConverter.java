@@ -8,7 +8,6 @@ import cz.matfyz.core.identifiers.Key.KeyGenerator;
 import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Type;
-import cz.matfyz.core.rsd.Char;
 
 /**
  * The {@code RSDToAccessTreeConverter} class is responsible for converting a {@link RecordSchemaDescription}
