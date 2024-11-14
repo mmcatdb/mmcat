@@ -2,7 +2,7 @@ package cz.matfyz.server.entity.job;
 
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.action.ActionPayload;
+import cz.matfyz.server.repository.JobRepository.JobInfo;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,12 +13,16 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * A single unit of work that can be executed.
+ * Once processed, it can't be restarted. However, a new job can be created instead.
+ */
 public class Job extends Entity {
 
     public enum State {
-        /** The job can be started/resumed. */
-        Paused,
-        /** The job will soon be started automatically. */
+        /** The job won't start automatically. */
+        Disabled,
+        /** The job will be started automatically as soon as possible (when the jobs it depends on finish). */
         Ready,
         /** The job is currently being processed. */
         Running,
@@ -26,45 +30,48 @@ public class Job extends Entity {
         Waiting,
         /** The job is finished, either with a success or with an error. */
         Finished,
-        /** The job was canceled while being in one of the previous states. It can never be started (again). */
-        Canceled,
         /** The job failed. */
         Failed,
     }
 
     public final Id runId;
+    /** Sequential order in the run. */
+    public final int index;
     public final String label;
     public final Date createdAt;
     /** The job contains all information needed to execute it. */
-    public final ActionPayload payload;
+    public final JobPayload payload;
     public State state;
     public @Nullable JobData data = null;
     public @Nullable Serializable error = null;
 
-    private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state) {
+    private Job(Id id, Id runId, int index, String label, Date createdAt, JobPayload payload, State state) {
         super(id);
         this.runId = runId;
+        this.index = index;
         this.label = label;
         this.createdAt = createdAt;
         this.payload = payload;
         this.state = state;
     }
 
-    public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually) {
+    public static Job createNew(Id runId, int index, String label, JobPayload payload, boolean isManual) {
         return new Job(
             Id.createNew(),
             runId,
+            index,
             label,
             new Date(),
             payload,
-            isStartedManually ? State.Paused : State.Ready
+            isManual ? State.Disabled : State.Ready
         );
     }
 
     private record JsonValue(
+        int index,
         String label,
         Date createdAt,
-        ActionPayload payload,
+        JobPayload payload,
         State state,
         @Nullable JobData data,
         @Nullable Serializable error
@@ -78,6 +85,7 @@ public class Job extends Entity {
         final var job = new Job(
             id,
             runId,
+            json.index,
             json.label,
             json.createdAt,
             json.payload,
@@ -91,6 +99,7 @@ public class Job extends Entity {
 
     public String toJsonValue() throws JsonProcessingException {
         return jsonValueWriter.writeValueAsString(new JsonValue(
+            index,
             label,
             createdAt,
             payload,
@@ -98,6 +107,24 @@ public class Job extends Entity {
             data,
             error
         ));
+    }
+
+    /**
+     * Sorts the jobs by their indexes (smaller indexes first) and then by their creation times (earlier first).
+     * So the last job with each index is the one "active" job for the index.
+     */
+    public int compareInRun(Job other) {
+        final var indexComparison = index - other.index;
+        return indexComparison != 0
+            ? indexComparison
+            : createdAt.compareTo(other.createdAt);
+    }
+
+    public static int compareInRun(JobInfo a, JobInfo b) {
+        final var indexComparison = a.index() - b.index();
+        return indexComparison != 0
+            ? indexComparison
+            : a.createdAt().compareTo(b.createdAt());
     }
 
 }

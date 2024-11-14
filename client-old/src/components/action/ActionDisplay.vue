@@ -6,6 +6,7 @@ import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
+import JobPayloadDisplay from '../job/JobPayloadDisplay.vue';
 
 type ActionDisplayProps = {
     action: Action;
@@ -46,87 +47,35 @@ async function deleteAction() {
         <FixedRouterLink :to="{ name: 'action', params: { id: action.id } }">
             <h2>{{ action.label }}</h2>
         </FixedRouterLink>
-        <ValueContainer>
-            <ValueRow label="Id:">
-                {{ action.id }}
-            </ValueRow>
-            <ValueRow label="Type:">
-                {{ action.payload.type }}
-            </ValueRow>
-            <ValueRow
-                v-if="action.payload.type === ActionType.UpdateSchema"
-                label="Versions:"
+        <div>
+            <div><span class="text-bold me-2">Id:</span> {{ action.id }}</div>
+        </div>
+        <div>
+            <div
+                v-for="(payload, index) in action.payloads"
+                :key="index"
+                class="d-flex mt-1"
             >
-                <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
-            </ValueRow>
-            <template
-                v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
-            >
-                <ValueRow
-                    label="Datasource:"
-                >
-                    <FixedRouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id } }">
-                        {{ action.payload.datasource.label }}
-                    </FixedRouterLink>
-                </ValueRow>
-                <ValueRow
-                    v-if="action.payload.mappings"
-                    label="Mappings:"
-                >
-                    <div class="d-flex flex-wrap">
-                        <span
-                            v-for="(mapping, index) in action.payload.mappings"
-                            :key="mapping.id"
-                        >
-                            <FixedRouterLink 
-                                :to="{ name: 'mapping', params: {id: mapping.id } }"
-                            >
-                                {{ mapping.kindName }}
-                            </FixedRouterLink>
-                            <span
-                                v-if="index !== action.payload.mappings.length - 1"
-                                class="px-1"
-                            >,</span>
-                        </span>
-                    </div>
-                </ValueRow>
-            </template>
-            <ValueRow
-                v-else
-                label="Datasources:"
-            >
-                <FixedRouterLink
-                    v-for="datasource in action.payload.datasources"
-                    :key="datasource.id"
-                    :to="{ name: 'datasource', params: {id: datasource.id } }"
-                >
-                    {{ datasource.label }}
-                </FixedRouterLink>
-            </ValueRow>
-            <!--
-                <ValueRow label="State:">
-                    <span :class="jobStateClass">
-                        {{ action.state }}
-                    </span>
-                </ValueRow>
-            <ValueRow
-                v-if="action.state === JobState.Failed && action.data"
-                label="Error:"
-            >
-                {{ action.data.name }}
-            </ValueRow>
-            <ValueRow v-else>
-                &nbsp;
-            </ValueRow>
-        -->
-        </ValueContainer>
+                <div
+                    class="mx-2 my-1 rounded-circle bg-white align-self-stretch"
+                    :style="{ width: '2px' }"
+                />
+                <div>
+                    <span class="text-bold me-2">Type:</span> {{ payload.type }}
+                    <JobPayloadDisplay
+                        :payload="payload"
+                        with-labels
+                    />
+                </div>
+            </div>
+        </div>
         <div class="button-row">
             <button
                 :disabled="fetching"
                 class="success"
                 @click="createRun"
             >
-                Create job
+                Create run
             </button>
             <button
                 :disabled="fetching"

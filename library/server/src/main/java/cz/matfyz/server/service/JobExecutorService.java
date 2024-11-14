@@ -28,8 +28,6 @@ import cz.matfyz.inference.schemaconversion.Layout;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
-import cz.matfyz.server.Configuration.ServerProperties;
-import cz.matfyz.server.Configuration.SparkProperties;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.InstanceCategoryWrapper;
@@ -47,11 +45,14 @@ import cz.matfyz.server.entity.job.data.ModelJobData;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.exception.SessionException;
+import cz.matfyz.server.global.Configuration.ServerProperties;
+import cz.matfyz.server.global.Configuration.SparkProperties;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.InstanceCategoryRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.MappingRepository;
+import cz.matfyz.server.repository.JobRepository.JobInfo;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
@@ -77,6 +78,9 @@ public class JobExecutorService {
 
     @Autowired
     private JobRepository repository;
+
+    @Autowired
+    private JobService service;
 
     @Autowired
     private MappingRepository mappingRepository;
@@ -112,14 +116,26 @@ public class JobExecutorService {
     private DatasourceRepository datasourceRepository;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
-    // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
+    // There is an opportunity for optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require synchronization on the instance level in the transformation algorithms.
 
     // This method will be executed 2 seconds after the previous execution finished.
     @Scheduled(fixedDelay = 2000)
-    public void executeAllJobs() {
-        final var readyIds = repository.findAllReadyIds();
-        for (final var jobId : readyIds)
-            executeJob(jobId);
+    public void processAllRuns() {
+        final var activeRunIds = repository.findAllActiveRunIds();
+        for (final var runId : activeRunIds)
+            processRun(runId);
+    }
+
+    private void processRun(Id runId) {
+        final var run = repository.findRunWithJobs(runId);
+        final @Nullable JobInfo nextJob = service.getNextReadyJob(run.jobs());
+        if (nextJob != null) {
+            executeJob(nextJob.id());
+            return;
+        }
+
+        // The job can't be executed, so we mark the run as inactive. As soon as any job in the run changes, the run will be marked as active again.
+        repository.deactivateRun(runId);
     }
 
     private void executeJob(Id jobId) {
@@ -172,7 +188,7 @@ public class JobExecutorService {
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
         if (run.sessionId == null)
-            throw SessionException.notFound(run.id());
+            throw SessionException.runNotInSession(run.id());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
         final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
@@ -184,7 +200,7 @@ public class JobExecutorService {
         final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
         final Datasource datasource = datasourceWrapper.toDatasource();
         final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
-            .filter(wrapper -> payload.mappingIds() == null || payload.mappingIds().contains(wrapper.id()))
+            .filter(wrapper -> payload.mappingIds().isEmpty() || payload.mappingIds().contains(wrapper.id()))
             .map(wrapper -> wrapper.toMapping(datasource, schema))
             .toList();
 
@@ -205,7 +221,7 @@ public class JobExecutorService {
 
     private void categoryToModelAlgorithm(Run run, Job job, CategoryToModelPayload payload) {
         if (run.sessionId == null)
-            throw SessionException.notFound(job.id());
+            throw SessionException.runNotInSession(run.id());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
         final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
@@ -217,7 +233,7 @@ public class JobExecutorService {
         final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
         final Datasource datasource = datasourceWrapper.toDatasource();
         final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
-            .filter(wrapper -> payload.mappingIds() == null || payload.mappingIds().contains(wrapper.id()))
+            .filter(wrapper -> payload.mappingIds().isEmpty() || payload.mappingIds().contains(wrapper.id()))
             .map(wrapper -> wrapper.toMapping(datasource, schema))
             .toList();
 
@@ -429,6 +445,8 @@ public class JobExecutorService {
             final MappingInit init = MappingInit.fromMapping(mapping, categoryWrapper.id(), new Id(mapping.datasource().identifier));
             mappingService.create(init);
         }
+
+        job.job().state = Job.State.Finished;
     }
 
 }

@@ -2,17 +2,19 @@ package cz.matfyz.server.controller;
 
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
-import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
+import cz.matfyz.server.controller.ActionController.JobPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.JobData;
 import cz.matfyz.server.entity.job.Session;
-import cz.matfyz.server.entity.job.Job.State;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
+import cz.matfyz.server.global.RequestContext;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.JobRepository.JobInfo;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
+import cz.matfyz.server.repository.JobRepository.RunWithJobs;
 import cz.matfyz.server.service.JobExecutorService;
 import cz.matfyz.server.service.JobService;
 import cz.matfyz.server.service.WorkflowService;
@@ -24,7 +26,6 @@ import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +35,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class JobController {
+
+    @Autowired
+    private RequestContext request;
 
     @Autowired
     private JobRepository repository;
@@ -54,11 +58,8 @@ public class JobController {
     private WorkflowService workflowService;
 
     @GetMapping("/schema-categories/{categoryId}/jobs")
-    public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
-        if (sessionId.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session ID is required.");
-
-        final var jobs = repository.findAllInCategory(categoryId, sessionId);
+    public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId) {
+        final var jobs = repository.findAllInCategory(categoryId, request.getSessionId());
 
         return jobs.stream().map(this::jobToJobDetail).toList();
     }
@@ -69,13 +70,10 @@ public class JobController {
     }
 
     @PostMapping("/actions/{actionId}/jobs")
-    public JobDetail createRun(@PathVariable Id actionId, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
-        if (sessionId.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session ID is required.");
-
+    public RunDetail createRun(@PathVariable Id actionId) {
         final var action = actionRepository.find(actionId);
 
-        return jobToJobDetail(service.createUserRun(action, sessionId));
+        return RunDetail.create(service.createRun(action));
     }
 
     @PostMapping("/jobs/{id}/restart")
@@ -89,28 +87,23 @@ public class JobController {
         return jobToJobDetail(newJob);
     }
 
-    @PostMapping("/jobs/{id}/pause")
-    public JobDetail pauseJob(@PathVariable Id id) {
+    @PostMapping("/jobs/{id}/enable")
+    public JobDetail enableJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
+        service.enableJob(jobWithRun.job());
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Paused));
+        return jobToJobDetail(jobWithRun);
     }
 
-    @PostMapping("/jobs/{id}/start")
-    public JobDetail startJob(@PathVariable Id id) {
+    @PostMapping("/jobs/{id}/disable")
+    public JobDetail disableJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
+        service.disableJob(jobWithRun.job());
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Ready));
+        return jobToJobDetail(jobWithRun);
     }
 
-    @PostMapping("/jobs/{id}/cancel")
-    public JobDetail cancelJob(@PathVariable Id id) {
-        final var jobWithRun = repository.find(id);
-
-        return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
-    }
-
-    @PostMapping("/jobs/{id}/updateResult")
+    @PostMapping("/jobs/{id}/update-result")
     public JobDetail updateJobResult(@PathVariable Id id, @RequestBody SaveJobResultPayload payload) {
         final var jobWithRun = repository.find(id);
         if (!(jobWithRun.job().data instanceof InferenceJobData inferenceJobData))
@@ -119,7 +112,9 @@ public class JobController {
         final InferenceEdit edit = payload.isFinal ? null : payload.edit;
         final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, payload.isFinal, payload.layoutType);
 
-        return jobToJobDetail(service.transition(newJobWithRun, payload.isFinal ? State.Finished : State.Waiting));
+        repository.save(jobWithRun.job());
+
+        return jobToJobDetail(newJobWithRun);
     }
 
     private record SaveJobResultPayload(
@@ -129,28 +124,42 @@ public class JobController {
     ) {}
 
     private JobDetail jobToJobDetail(JobWithRun job) {
-        final var payload = actionController.actionPayloadToDetail(job.job().payload, job.run().categoryId);
+        final var payload = actionController.jobPayloadToDetail(job.job().payload, job.run().categoryId);
 
         return JobDetail.create(job, payload);
     }
 
     private record JobDetail(
         Id id,
-        Id categoryId,
-        Id runId,
-        @Nullable Id actionId,
+        int index,
         String label,
         Date createdAt,
         Job.State state,
-        ActionPayloadDetail payload,
+        JobPayloadDetail payload,
         @Nullable JobData data,
-        @Nullable Serializable error
+        @Nullable Serializable error,
+        Id runId,
+        Id categoryId,
+        String runLabel,
+        @Nullable Id actionId
     ) implements IEntity {
-        public static JobDetail create(JobWithRun jobWithRun, ActionPayloadDetail payload) {
+        public static JobDetail create(JobWithRun jobWithRun, JobPayloadDetail payload) {
             final var job = jobWithRun.job();
             final var run = jobWithRun.run();
+            return new JobDetail(job.id(), job.index, job.label, job.createdAt, job.state, payload, job.data, job.error, run.id(), run.categoryId, run.label, run.actionId);
+        }
+    }
 
-            return new JobDetail(job.id(), run.categoryId, run.id(), run.actionId, job.label, job.createdAt, job.state, payload, job.data, job.error);
+    private record RunDetail(
+        Id id,
+        Id categoryId,
+        @Nullable Id actionId,
+        String label,
+        List<JobInfo> jobs
+    ) implements IEntity {
+        public static RunDetail create(RunWithJobs runWithJobs) {
+            final var run = runWithJobs.run();
+            return new RunDetail(run.id(), run.categoryId, run.actionId, run.label, runWithJobs.jobs());
         }
     }
 

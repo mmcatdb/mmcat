@@ -5,7 +5,7 @@ export type ActionFromServer = {
     id: Id;
     categoryId: Id;
     label: string;
-    payload: ActionPayloadFromServer;
+    payload: JobPayloadFromServer;
 };
 
 export class Action implements Entity {
@@ -13,7 +13,7 @@ export class Action implements Entity {
         public readonly id: Id,
         public readonly categoryId: Id,
         public readonly label: string,
-        public readonly payload: ActionPayload,
+        public readonly payload: JobPayload,
     ) {}
 
     static fromServer(input: ActionFromServer): Action {
@@ -21,7 +21,7 @@ export class Action implements Entity {
             input.id,
             input.categoryId,
             input.label,
-            actionPayloadFromServer(input.payload),
+            jobPayloadFromServer(input.payload),
         );
     }
 }
@@ -29,7 +29,7 @@ export class Action implements Entity {
 export type ActionInit = {
     categoryId: Id;
     label: string;
-    payload: ActionPayloadInit;
+    payloads: JobPayloadInit[];
 };
 
 export enum ActionType {
@@ -54,22 +54,22 @@ export const ACTION_TYPES = [
     },
 ];
 
-type ActionPayloadType<TType extends ActionType = ActionType> = {
+type JobPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
 }
 
-export type ActionPayload =
+export type JobPayload =
     | ModelToCategoryPayload
     | CategoryToModelPayload
     | UpdateSchemaPayload
     | RSDToCategoryPayload
     ;
 
-export type ActionPayloadFromServer<T extends ActionType = ActionType> = {
+export type JobPayloadFromServer<T extends ActionType = ActionType> = {
     type: T;
 };
 
-export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionPayload {
+export function jobPayloadFromServer(input: JobPayloadFromServer): JobPayload {
     switch (input.type) {
     case ActionType.ModelToCategory:
         return ModelToCategoryPayload.fromServer(input as ModelToCategoryPayloadFromServer);
@@ -82,16 +82,16 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
     }
 }
 
-export type ActionPayloadInit = {
+export type JobPayloadInit = {
     type: ActionType.ModelToCategory | ActionType.CategoryToModel | ActionType.RSDToCategory;
     datasourceId: Id;
 };
 
-type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
+type ModelToCategoryPayloadFromServer = JobPayloadFromServer<ActionType.ModelToCategory> & {
     datasource: DatasourceFromServer;
 };
 
-class ModelToCategoryPayload implements ActionPayloadType<ActionType.ModelToCategory> {
+class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategory> {
     readonly type = ActionType.ModelToCategory;
 
     private constructor(
@@ -105,11 +105,11 @@ class ModelToCategoryPayload implements ActionPayloadType<ActionType.ModelToCate
     }
 }
 
-type CategoryToModelPayloadFromServer = ActionPayloadFromServer<ActionType.CategoryToModel> & {
+type CategoryToModelPayloadFromServer = JobPayloadFromServer<ActionType.CategoryToModel> & {
     datasource: DatasourceFromServer;
 };
 
-class CategoryToModelPayload implements ActionPayloadType<ActionType.CategoryToModel> {
+class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToModel> {
     readonly type = ActionType.CategoryToModel;
 
     private constructor(
@@ -123,12 +123,12 @@ class CategoryToModelPayload implements ActionPayloadType<ActionType.CategoryToM
     }
 }
 
-type UpdateSchemaPayloadFromServer = ActionPayloadFromServer<ActionType.UpdateSchema> & {
+type UpdateSchemaPayloadFromServer = JobPayloadFromServer<ActionType.UpdateSchema> & {
     prevVersion: VersionId;
     nextVersion: VersionId;
 };
 
-class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> {
+class UpdateSchemaPayload implements JobPayloadType<ActionType.UpdateSchema> {
     readonly type = ActionType.UpdateSchema;
 
     private constructor(
@@ -144,11 +144,11 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
     }
 }
 
-type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
+type RSDToCategoryPayloadFromServer = JobPayloadFromServer<ActionType.RSDToCategory> & {
     datasources: DatasourceFromServer[];
 };
 
-class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
+class RSDToCategoryPayload implements JobPayloadType<ActionType.RSDToCategory> {
     readonly type = ActionType.RSDToCategory;
 
     private constructor(

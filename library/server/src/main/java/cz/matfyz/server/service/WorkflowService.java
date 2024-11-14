@@ -1,16 +1,19 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.JobPayload;
 import cz.matfyz.server.entity.workflow.InferenceWorkflowData;
 import cz.matfyz.server.entity.workflow.Workflow;
 import cz.matfyz.server.entity.workflow.InferenceWorkflowData.InferenceWorkflowStep;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.WorkflowRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,31 +36,32 @@ public class WorkflowService {
     @Autowired
     private MappingRepository mappingRepository;
 
-    public Workflow continueWorkflow(Workflow workflow, Id sessionId) {
+    public Workflow continueWorkflow(Workflow workflow) {
         return switch (workflow.data) {
-            case InferenceWorkflowData data -> continueInference(workflow, data, sessionId);
+            case InferenceWorkflowData data -> continueInference(workflow, data);
             default -> throw new IllegalArgumentException("Unknown workflow type.");
         };
     }
 
-    private Workflow continueInference(Workflow workflow, InferenceWorkflowData data, Id sessionId) {
+    private Workflow continueInference(Workflow workflow, InferenceWorkflowData data) {
         switch (data.step()) {
             case selectInputs -> {
                 // The user has to select the input datasource. Then we can create the inference job and the user can continue.
                 if (data.inputDatasourceIds().isEmpty())
                     throw new IllegalArgumentException("Input datasource is required.");
 
-                final var action = actionService.create(workflow.categoryId, "Schema inference", new RSDToCategoryPayload(data.inputDatasourceIds()));
-                final var inferenceJob = jobService.createUserRun(action, sessionId).job();
+                final var inferenceJobId = jobService
+                    .createRun(workflow.categoryId, "Schema inference", List.of(new RSDToCategoryPayload(data.inputDatasourceIds())))
+                    .jobs().get(0).id();
 
                 final var newData = new InferenceWorkflowData(
                     InferenceWorkflowStep.editCategory,
                     data.inputDatasourceIds(),
-                    inferenceJob.id(),
+                    inferenceJobId,
                     data.inputMappingIds()
                 );
 
-                workflow.jobId = inferenceJob.id();
+                workflow.jobId = inferenceJobId;
                 workflow.data = newData;
                 repository.save(workflow);
                 return workflow;
@@ -92,10 +96,11 @@ public class WorkflowService {
 
                 // TODO mappings
 
+                final var jobPayloads = new ArrayList<JobPayload>();
+
                 // First, we need to make MTC jobs for the input datasources.
                 data.inputDatasourceIds().forEach(id -> {
-                    final var mtcAction = actionService.create(workflow.categoryId, "Input", new ModelToCategoryPayload(id, null));
-                    jobService.createUserRun(mtcAction, sessionId);
+                    jobPayloads.add(new ModelToCategoryPayload(id, null));
                 });
 
                 // We need to make CTM job for each output datasource. Make sure they are unique ...
@@ -103,10 +108,11 @@ public class WorkflowService {
                     .filter(mapping -> !data.inputMappingIds().contains(mapping.id()))
                     .map(mapping -> mapping.datasourceId).distinct().toList();
 
-                for (final var id : outputDatasourceIds) {
-                    final var ctmAction = actionService.create(workflow.categoryId, "Output", new CategoryToModelPayload(id, null));
-                    jobService.createUserRun(ctmAction, sessionId);
-                }
+                for (final var id : outputDatasourceIds)
+                    jobPayloads.add(new CategoryToModelPayload(id, null));
+
+                // Only one run is created which forces all the jobs to run in the original order.
+                jobService.createRun(workflow.categoryId, "Transformation", jobPayloads);
 
                 workflow.data = data.updateStep(InferenceWorkflowStep.finish);
                 repository.save(workflow);
