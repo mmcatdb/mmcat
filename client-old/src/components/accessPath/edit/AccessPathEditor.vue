@@ -306,8 +306,7 @@ function setRootRequested(node: Node) {
 }
 
 function renameClicked() {
-    if (state.value.type === State.OneNode)
-        console.log('Renaming node:', state.value.node);
+    console.log('Renaming node:', state.value.node);
 }
 
 /**
@@ -393,6 +392,7 @@ function cancel() {
                         </button>
                         <button 
                             v-if="isNodeInAccessPath(state.node)"
+                            :disabled="true"
                             @click="renameClicked"
                         >
                             Rename
@@ -401,7 +401,10 @@ function cancel() {
                 </template>
                 <template v-if="state.type === State.TwoNodes">
                     <div class="options">
-                        <button @click="insertBetweenClicked">
+                        <button 
+                            :disabled="true"
+                            @click="insertBetweenClicked"
+                        >
                             Insert Between
                         </button>
                         <button @click="deleteRequested(state.nodes)">
