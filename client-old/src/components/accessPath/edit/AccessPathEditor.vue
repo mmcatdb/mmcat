@@ -296,6 +296,9 @@ function setRootRequested(node: Node) {
     if (newSubpaths) 
         newRoot.updateOrAddSubpath(newSubpaths);
 
+    const ids = node.schemaObject?.ids;
+    primaryKey.value = getInitialPrimaryKey(ids);
+
     node.unselect();
     selectedNodes.value = [];
     emit('update:rootProperty', newRoot);
