@@ -61,8 +61,6 @@ public class RSDToAccessTreeConverter {
             }
 
             boolean isArray = isTypeArray(rsdChild);
-            System.out.println("is array parent" + isTypeArray(rsdParent));
-            System.out.println("rsd child name" + rsdChild.getName());
             String name = (isTypeArray(rsdParent) && rsdChild.getName().equals(RecordSchemaDescription.ROOT_SYMBOL)) ? VALUE_LABEL : rsdChild.getName();
             BaseSignature signature = signatureGenerator.next();
             Key keyChild = keyGenerator.next();
