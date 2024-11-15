@@ -326,7 +326,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             final Signature newSig = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, newSchema.getObject(mapOldNewKey.get(morphism.cod().key())));
             mapOldNewSignature.put(morphism.signature(), newSig);
         }
-        newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(clusterRootKey), true);
+        newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(clusterRootKey), true, null);
     }
 
     private void findMorphismsAndObjectsToDelete(Key clusterRootKey) {
