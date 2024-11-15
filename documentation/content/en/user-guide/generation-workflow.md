@@ -57,12 +57,34 @@ View the saved edits and undo or redo them as you like.
 If you wish to manually adjust the schema layout, do so by dragging the graph nodes around. Once you are done, save the new positions by clicking this button.
 
 ## Step 3
-Define at least one output Mapping. First, select the output Datasource. Then define the Mappings. You can either load an initial Mapping or create a new one from scratch. Both options enable you to edit the Mapping as you go in the [Mapping Editor](../project-documentation/inference.md) using the context menu or the keyboard shortcuts. Press "Finish Mapping" when your done defining your output Mappings. To see the results press "Continue".
+Define at least one output Mapping. First, select the output Datasource. Then define the Mappings. You can either load an initial Mapping or create a new one from scratch. Both options enable you to edit the Mapping as you go in the [Mapping Editor](../project-documentation/inference.md) using the context menu or the keyboard shortcuts. Press "Finish Mapping" when you are done defining your output Mappings. To see the results press "Continue". See below for full description of Mapping Editor.
 
 ![Workflow Mapping Addition](/img/add-mappings.png)
 
+#### Select Mapping Initialization
+Start by selecting the means of initializing new Mapping.
+
+![Mapping Editor - select initialization](/img/select-mapping-initialization.png)
+
+The **Load Initial** option prompts you to select Datasource and Kind whose Mapping you can edit.
+
+When **Create new** selected, you are asked to first choose node representing the root of the Mapping and then nodes representing the attributes of the root. Feel free to choose as many or as little attributes as you like. However, be aware that a node which does not have a direct morphism with any of the nodes already selected will not be added to the Mapping.
+
+![Mapping Editor - select root](/img/root-object.png)
+
+![Mapping Editor - select accesspath objects](/img/accesspath-objects.png)
+
+#### Edit the Mapping
+After selecting the means of creating first draft of the output Mapping you enter the edit mode. Edit the Mapping to your liking. Delete or Insert nodes as you like. You can also reset the root node. To edit the Mapping select a single node, two nodes or a multiple and apply the operation using either the context menu or keyboard shortcuts.
+
+*Note*: Please note, that the Mapping Editor is still a work in progress. Therefore, some of the buttons are currently disabled.  
+
+![Mapping Editor - edit node 1](/img/edit-node-1.png)
+
+![Mapping Editor - edit node 2](/img/edit-node-2.png)
+
 ## Step 4
-Depending on the type of the output Datasource, you will see either Data Manipulation Language (DML) commands or generated files.
+Depending on the type of the output Datasource, you will see either Data Manipulation Language (DML) commands or generated files. It is up to your preference to have the commands executed or not.
 
 ![Workflow Result View](/img/view-results.png)
 

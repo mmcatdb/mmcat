@@ -120,7 +120,9 @@ function setToDefault() {
                 v-if="initializeType === 'default'" 
                 class="editor"
             >
-                <h5>Select Mapping initialization:</h5>
+                <h5 style="text-align: center;">
+                    Select Mapping Initialization
+                </h5>
                 <div 
                     class="button-row"
                 >
