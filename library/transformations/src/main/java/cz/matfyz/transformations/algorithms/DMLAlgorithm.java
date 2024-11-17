@@ -50,9 +50,9 @@ public class DMLAlgorithm {
         if (domainRows.isEmpty())
             System.out.println("domain rows are empty");
 
-        for (DomainRow domainRow : domainRows) {
-            System.out.println("domain row: " + domainRow);
-            masterStack.push(new DMLStackTriple(domainRow, AbstractDDLWrapper.EMPTY_NAME, mapping.accessPath()));
+        for (final DomainRow row : domainRows) {
+            System.out.println("domain row: " + row);
+            masterStack.push(new DMLStackTriple(row, AbstractDDLWrapper.EMPTY_NAME, mapping.accessPath()));
             output.add(buildStatement(masterStack));
         }
 
@@ -68,10 +68,10 @@ public class DMLAlgorithm {
         wrapper.setKindName(mapping.kindName());
 
         while (!masterStack.isEmpty()) {
-            DMLStackTriple triple = masterStack.pop();
-            List<NameValuePair> pairs = collectNameValuePairs(triple.t, triple.pid);
+            final DMLStackTriple triple = masterStack.pop();
+            final List<NameValuePair> pairs = collectNameValuePairs(triple.complexProperty, triple.row);
 
-            for (var pair : pairs) {
+            for (final var pair : pairs) {
                 String newName = DDLAlgorithm.concatenatePaths(triple.name, pair.name);
 
                 if (pair.isSimple)

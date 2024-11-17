@@ -4,15 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.instance.DomainRow;
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.instance.InstanceObject;
+import cz.matfyz.core.instance.InstanceBuilder.InstanceAdder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
-import cz.matfyz.tests.example.common.InstanceBuilder.InstanceAdder;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;
 import cz.matfyz.wrapperdummy.DummyPullWrapper;
 
@@ -46,7 +45,7 @@ public class MTCAlgorithmTestBase {
 
     public void run() {
         final SchemaCategory schema = kinds.get(0).mapping.category();
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+        final InstanceCategory instance = new InstanceBuilder(schema).build();
 
         for (final MappingWithRecords kind : kinds) {
             ForestOfRecords forest;

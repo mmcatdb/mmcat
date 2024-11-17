@@ -4,8 +4,8 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -34,7 +34,7 @@ public class PullToDDLAndDMLTestBase {
     }
 
     public void run() {
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
+        final InstanceCategory instance = new InstanceBuilder(mapping.category()).build();
 
         ForestOfRecords forest;
         try {
@@ -47,21 +47,21 @@ public class PullToDDLAndDMLTestBase {
 
         LOGGER.trace("Pulled Forest Of Records:\n" + forest);
 
-        var tform = new MTCAlgorithm();
+        final var tform = new MTCAlgorithm();
         tform.input(mapping, instance, forest);
         tform.algorithm();
 
         LOGGER.trace("Created Instance Category:\n" + instance);
 
-        var ddlAlgorithm = new DDLAlgorithm();
+        final var ddlAlgorithm = new DDLAlgorithm();
         ddlAlgorithm.input(mapping, mapping.category(), ddlWrapper);
-        var ddlStatement = ddlAlgorithm.algorithm();
+        final var ddlStatement = ddlAlgorithm.algorithm();
 
         LOGGER.info("Created DDL Statement:\n" + ddlStatement.getContent());
 
-        var dmlAlgorithm = new DMLAlgorithm();
+        final var dmlAlgorithm = new DMLAlgorithm();
         dmlAlgorithm.input(mapping, instance, dmlWrapper);
-        var dmlStatements = dmlAlgorithm.algorithm();
+        final var dmlStatements = dmlAlgorithm.algorithm();
 
         LOGGER.info("Created DML Statement-s:\n" + String.join("\n", dmlStatements.stream().map(statement -> statement.getContent()).toList()));
 

@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * A pull wrapper implementation for JSON files that implements the {@link AbstractPullWrapper} interface.
  * This class provides methods for pulling data from JSON files and converting it into a {@link ForestOfRecords}.
+ * This wrapper also supports the JSON Lines format (newline-delimited JSON).
  */
 public class JsonPullWrapper implements AbstractPullWrapper {
 
@@ -47,17 +48,11 @@ public class JsonPullWrapper implements AbstractPullWrapper {
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) {
         final var forest = new ForestOfRecords();
 
-        //try {
-            String fileName = provider.getJsonFileNames();
-            try (InputStream inputStream = provider.getInputStream()) {
-                processJsonStream(inputStream, forest, path);
-            } catch (IOException e) {
-                System.err.println("Error processing file: " + fileName + " - " + e.getMessage());
-            }
-        /*
-        } catch (IOException | URISyntaxException e) {
+        try (InputStream inputStream = provider.getInputStream()) {
+            processJsonStream(inputStream, forest, path);
+        } catch (IOException e) {
             throw PullForestException.innerException(e);
-        }*/
+        }
 
         return forest;
     }
@@ -124,10 +119,10 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      */
     private void handleSimpleProperty(ComplexRecord parentRecord, JsonNode valueNode, SimpleProperty simpleSubpath, String fieldName) {
         if (valueNode.isArray()) {
-            ArrayList<String> values = new ArrayList<>();
-            for (JsonNode itemNode : valueNode) {
+            final ArrayList<String> values = new ArrayList<>();
+            for (final JsonNode itemNode : valueNode)
                 values.add(itemNode.asText());
-            }
+
             parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), values);
         } else {
             parentRecord.addSimpleValueRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), valueNode.asText());

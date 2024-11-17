@@ -18,10 +18,10 @@ import cz.matfyz.inference.edit.InferenceEditorUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.HashMap;
@@ -154,12 +154,12 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     }
 
     private SchemaObject updateSchemaObjectIds(SchemaObject schemaObject, Signature signature) {
-        SortedSet<SignatureId> signatureSet = new TreeSet<>(Collections.singleton(new SignatureId(signature)));
+        SortedSet<SignatureId> signatureSet = new TreeSet<>(Set.of(new SignatureId(signature)));
         ObjectIds updatedIds = schemaObject.ids().isSignatures()
             ? new ObjectIds(addSignatureToSet(schemaObject.ids(), signature))
             : new ObjectIds(signatureSet);
 
-        return new SchemaObject(schemaObject.key(), updatedIds, schemaObject.superId());
+        return new SchemaObject(schemaObject.key(), updatedIds, updatedIds.generateDefaultSuperId());
     }
 
     private SortedSet<SignatureId> addSignatureToSet(ObjectIds ids, Signature signature) {

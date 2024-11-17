@@ -42,10 +42,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     private MongoCursor<Document> getDocumentIterator(QueryContent query) {
-        if (query instanceof KindNameQuery kindNameQuery)
+        if (query instanceof final KindNameQuery kindNameQuery)
             return getDocumentIteratorFromKindName(kindNameQuery);
 
-        if (query instanceof MongoDBQuery mongoQuery)
+        if (query instanceof final MongoDBQuery mongoQuery)
             return provider.getDatabase().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline).iterator();
 
         throw PullForestException.invalidQuery(this, query);
@@ -119,14 +119,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         if (value == null)
             return;
 
-        if (subpath instanceof ComplexProperty complexSubpath)
+        if (subpath instanceof final ComplexProperty complexSubpath)
             getFieldFromObjectForComplexSubpath(parentRecord, key, value, complexSubpath);
-        else if (subpath instanceof SimpleProperty simpleSubpath)
+        else if (subpath instanceof final SimpleProperty simpleSubpath)
             getFieldFromObjectForSimpleSubpath(parentRecord, key, value, simpleSubpath);
     }
 
     private void getFieldFromObjectForComplexSubpath(ComplexRecord parentRecord, String key, Object value, ComplexProperty complexSubpath) {
-        if (value instanceof ArrayList<?> childArray) {
+        if (value instanceof final ArrayList<?> childArray) {
             for (int i = 0; i < childArray.size(); i++)
                 if (childArray.get(i) instanceof Document childDocument)
                     addComplexValueToRecord(parentRecord, childDocument, key, complexSubpath);
@@ -136,7 +136,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     private void getFieldFromObjectForSimpleSubpath(ComplexRecord parentRecord, String key, Object value, SimpleProperty simpleSubpath) {
-        if (value instanceof ArrayList<?> simpleArray) {
+        if (value instanceof final ArrayList<?> simpleArray) {
             final var values = new ArrayList<String>();
 
             for (int i = 0; i < simpleArray.size(); i++)
