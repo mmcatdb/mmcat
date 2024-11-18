@@ -91,7 +91,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
 
     /*
      * Applies the primary key merging algorithm to the schema category.
-     * It account for the reference being both a single object as well as an array.
+     * It accounts for the reference being both a single object as well as an array.
+     * If the reference is an array, it assumes that the elements of the array are simple elements. Meaning the reference has only value and index outgoing morphisms.
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Reference Merge Edit on Schema Category...");
