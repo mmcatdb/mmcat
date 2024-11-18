@@ -100,15 +100,17 @@ function emitComplexClick(): void {
                     @simple:click="reEmitSimpleClick"
                     @add:click="reEmitAddClick"
                 />
-                <ButtonIcon
-                    v-if="!disableAdditions"
-                    class="name-text"
-                    @click="emit('add:click', property)"
-                    @mouseenter="highlighted = true;"
-                    @mouseleave="highlighted = false"
-                >
-                    <IconPlusSquare />
-                </ButtonIcon>
+                <template v-if="false"> <!-- Hiding the Plus button for now, might use later -->
+                    <ButtonIcon
+                        v-if="!disableAdditions"
+                        class="name-text"
+                        @click="emit('add:click', property)"
+                        @mouseenter="highlighted = true;"
+                        @mouseleave="highlighted = false"
+                    >
+                        <IconPlusSquare />
+                    </ButtonIcon>
+                </template>
             </div>
         </div>
         <div>

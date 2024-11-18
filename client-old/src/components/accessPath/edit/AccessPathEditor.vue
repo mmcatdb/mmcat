@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GraphComplexProperty, GraphSimpleProperty, GraphRootProperty } from '@/types/accessPath/graph';
+import { GraphComplexProperty, GraphSimpleProperty, GraphRootProperty, SequenceSignature } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SelectionType, type Node, type Edge } from '@/types/categoryGraph';
 import { shallowRef, ref, watch, computed, onMounted, onUnmounted } from 'vue';
@@ -178,23 +178,33 @@ function insertRequested(node: Node) {
 function insert(node: Node): boolean {
     const children = graph.getChildrenForNode(node);
     const label = node.metadata.label.toLowerCase();
-    //let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : undefined;
-    // assume we the new property is connected to the root (parentProperty)
     const edges = graph.getEdges(node);
     const parentProperty = findMatchingProperty(edges, localRootProperty.value);
 
-    if (!parentProperty) return false;
+    const targetParent = parentProperty || props.rootProperty;
+    const signature = graph.getSignature(node, targetParent.node);
 
-    const signature = graph.getSignature(node, parentProperty.node);
+    if (signature.isEmpty)
+        return false;
 
-    let subpath: GraphChildProperty;
-    if (children.length === 0)
-        subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
-    else 
-        subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
+    const subpath = createSubpath(label, signature, targetParent, children);
+    targetParent.updateOrAddSubpath(subpath);
 
-    parentProperty.updateOrAddSubpath(subpath);
     return true;
+}
+
+function createSubpath(
+    label: string,
+    signature: SequenceSignature,
+    parent: GraphParentProperty,
+    children: Node[]
+): GraphChildProperty {
+    const staticLabel = StaticName.fromString(label);
+
+    if (children.length === 0) 
+        return new GraphSimpleProperty(staticLabel, signature, parent);
+    else 
+        return new GraphComplexProperty(staticLabel, signature, parent, []);
 }
 
 function findMatchingProperty(edges: Edge[], property: GraphRootProperty): GraphParentProperty | undefined {

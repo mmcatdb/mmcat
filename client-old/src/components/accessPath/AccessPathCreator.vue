@@ -101,13 +101,16 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
         return;
     }
 
-    const children = filterChildren(node);
-    const parentNode = graph.getParentNode(node);
+    // for complex properties I also add their children, because adding just the property w/o them would not make sense
+    //const children = filterChildren(node);
+    const children = graph.getChildrenForNode(node);
+    //const parentNode = graph.getParentNode(node);
+    const parentNode = accessPath.value?.node;
 
     if (!parentNode) return;
 
     const signature = graph.getSignature(node, parentNode);
-    const label = node.metadata.label.toLowerCase(); // for normalization?
+    const label = node.metadata.label.toLowerCase();
     let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) ?? previousParentProperty : previousParentProperty;
 
     if (!parentProperty) return;
