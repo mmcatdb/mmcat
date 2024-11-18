@@ -8,8 +8,8 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataObject.Position;
@@ -197,7 +197,7 @@ public class JobExecutorService {
 
         InstanceCategory instance = instanceWrapper != null
             ? instanceWrapper.toInstanceCategory(schema)
-            : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+            : new InstanceBuilder(schema).build();
 
         final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
         final Datasource datasource = datasourceWrapper.toDatasource();
@@ -227,7 +227,7 @@ public class JobExecutorService {
 
         final InstanceCategory instance = instanceWrapper != null
             ? instanceWrapper.toInstanceCategory(schema)
-            : new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+            : new InstanceBuilder(schema).build();
 
         final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
         final Datasource datasource = datasourceWrapper.toDatasource();

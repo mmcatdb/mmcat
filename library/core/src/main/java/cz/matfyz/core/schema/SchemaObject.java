@@ -22,14 +22,14 @@ public class SchemaObject implements Identified<SchemaObject, Key> {
 
     private final ObjectIds ids;
     /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key). */
-    public SignatureId superId() {
-        return superId;
+    public ObjectIds ids() {
+        return ids;
     }
 
     private final SignatureId superId;
     /** A union of all ids (super key). */
-    public ObjectIds ids() {
-        return ids;
+    public SignatureId superId() {
+        return superId;
     }
 
     // Identification

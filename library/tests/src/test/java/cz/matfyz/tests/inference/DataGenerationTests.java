@@ -2,8 +2,8 @@ package cz.matfyz.tests.inference;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.AccessPathBuilder;
@@ -53,7 +53,7 @@ class DataGenerationTests {
         System.out.println("Mapping:" + mappings.get(0).accessPath());
 
         final AbstractPullWrapper pullWrapper = control.getPullWrapper();
-        final InstanceCategory emptyInstance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+        final InstanceCategory emptyInstance = new InstanceBuilder(schema).build();
         final InstanceCategory instance = new DatabaseToInstance().input(mappings.getFirst(), emptyInstance, pullWrapper).run();
 
         System.out.println("Instance: " + instance);
@@ -107,7 +107,7 @@ class DataGenerationTests {
         System.out.println("Mapping C:\n" + finalMapping.accessPath());
 
         final AbstractPullWrapper pullWrapper = control.getPullWrapper();
-        final InstanceCategory emptyInstance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+        final InstanceCategory emptyInstance = new InstanceBuilder(schema).build();
         //final InstanceCategory instance = new DatabaseToInstance().input(finalMapping, emptyInstance, pullWrapper).run();
 
         //System.out.println("Instance: " + instance);

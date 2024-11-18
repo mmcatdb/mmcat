@@ -94,13 +94,13 @@ public class WorkflowService {
                 if (mappings.size() - data.inputMappingIds().size() < 1)
                     throw new IllegalArgumentException("At least one mapping is required.");
 
-                // TODO mappings
-
                 final var jobPayloads = new ArrayList<JobPayload>();
 
                 // First, we need to make MTC jobs for the input datasources.
                 data.inputDatasourceIds().forEach(id -> {
-                    jobPayloads.add(new ModelToCategoryPayload(id, null));
+                    // TODO enable selecting only some mappings
+                    // jobPayloads.add(new ModelToCategoryPayload(id, null));
+                    jobPayloads.add(new ModelToCategoryPayload(id, List.of()));
                 });
 
                 // We need to make CTM job for each output datasource. Make sure they are unique ...
@@ -109,7 +109,9 @@ public class WorkflowService {
                     .map(mapping -> mapping.datasourceId).distinct().toList();
 
                 for (final var id : outputDatasourceIds)
-                    jobPayloads.add(new CategoryToModelPayload(id, null));
+                    // TODO enable selecting only some mappings
+                    // jobPayloads.add(new CategoryToModelPayload(id, null));
+                    jobPayloads.add(new CategoryToModelPayload(id, List.of()));
 
                 // Only one run is created which forces all the jobs to run in the original order.
                 jobService.createRun(workflow.categoryId, "Transformation", jobPayloads);

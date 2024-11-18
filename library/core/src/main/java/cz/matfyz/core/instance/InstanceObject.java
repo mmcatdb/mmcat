@@ -8,6 +8,7 @@ import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
+import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,7 +31,10 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     InstanceObject(SchemaObject schema, InstanceCategory instance) {
         this.schema = schema;
         this.instance = instance;
+        this.technicalIdGenerator = UniqueSequentialGenerator.create();
     }
+
+
 
     public boolean isEmpty() {
         return domain.isEmpty() && domainByTechnicalIds.isEmpty();
@@ -127,16 +131,18 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         return getActualRow(row.superId, row.technicalIds);
     }
 
-    // The point of a technical id is to differentiate two rows from each other, but only if they do not have any common id that could differentiate them (or unify them, if both of them have the same value of the id).
-    private int lastTechnicalId = 0;
+    /** The package access is just for serialization. */
+    UniqueSequentialGenerator technicalIdGenerator;
 
-    public String generateTechnicalId() {
-        lastTechnicalId++;
-        return "#" + lastTechnicalId;
+    /**
+     * The point of a technical id is to differentiate two rows from each other, but only if they do not have any common id that could differentiate them (or unify them, if both of them have the same value of the id).
+     */
+    private String generateTechnicalId() {
+        return "#" + technicalIdGenerator.next();
     }
 
     public SortedSet<DomainRow> allRowsToSet() {
-        var output = new TreeSet<DomainRow>();
+        final var output = new TreeSet<DomainRow>();
 
         for (var innerMap : domain.values())
             output.addAll(innerMap.values());
@@ -147,10 +153,10 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     }
 
     public SuperIdWithValues findTechnicalSuperId(Set<String> technicalIds, Set<DomainRow> outOriginalRows) {
-        var builder = new SuperIdWithValues.Builder();
+        final var builder = new SuperIdWithValues.Builder();
 
-        for (var technicalId : technicalIds) {
-            var row = getRowByTechnicalId(technicalId);
+        for (final var technicalId : technicalIds) {
+            final var row = getRowByTechnicalId(technicalId);
             if (!outOriginalRows.contains(row)) {
                 outOriginalRows.add(row);
                 builder.add(row.superId);

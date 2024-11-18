@@ -4,8 +4,8 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.utils.Statistics;
@@ -57,7 +57,7 @@ public class DatabaseToInstance {
 
         final InstanceCategory instance = currentInstance != null
             ? currentInstance
-            : new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
+            : new InstanceBuilder(mapping.category()).build();
 
         final var tform = new MTCAlgorithm();
         tform.input(mapping, instance, forest);

@@ -2,8 +2,8 @@ package cz.matfyz.tests.example.basic;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,7 +31,7 @@ public abstract class PostgreSQL {
     public static void addOrder(InstanceBuilder builder, String numberValue) {
         builder.morphism(Schema.orderToNumber,
             builder.value(Schema.orderToNumber, numberValue).object(Schema.order),
-            builder.valueObject(numberValue, Schema.number)
+            builder.valueObject(Schema.number, numberValue)
         );
     }
 
@@ -51,13 +51,13 @@ public abstract class PostgreSQL {
         final var product = builder.value(Schema.productToId, idValue).object(Schema.product);
 
         if (idValue != null)
-            builder.morphism(Schema.productToId, product, builder.valueObject(idValue, Schema.id));
+            builder.morphism(Schema.productToId, product, builder.valueObject(Schema.id, idValue));
 
         if (labelValue != null)
-            builder.morphism(Schema.productToLabel, product, builder.valueObject(labelValue, Schema.label));
+            builder.morphism(Schema.productToLabel, product, builder.valueObject(Schema.label, labelValue));
 
         if (priceValue != null)
-            builder.morphism(Schema.productToPrice, product, builder.valueObject(priceValue, Schema.price));
+            builder.morphism(Schema.productToPrice, product, builder.valueObject(Schema.price, priceValue));
     }
 
     public static TestMapping item(SchemaCategory schema) {
@@ -82,9 +82,7 @@ public abstract class PostgreSQL {
         final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).object(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);
         builder.morphism(Schema.itemToProduct, item, product);
-        builder.morphism(Schema.itemToQuantity, item,
-            builder.valueObject(quantityValue, Schema.quantity)
-        );
+        builder.morphism(Schema.itemToQuantity, item, builder.valueObject(Schema.quantity, quantityValue));
     }
 
 }

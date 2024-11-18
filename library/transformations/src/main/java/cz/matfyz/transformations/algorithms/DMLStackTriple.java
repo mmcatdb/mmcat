@@ -6,22 +6,22 @@ import cz.matfyz.core.utils.printable.*;
 
 public class DMLStackTriple implements Printable {
 
-    public final DomainRow pid;
+    public final DomainRow row;
     public final String name;
-    public final ComplexProperty t;
+    public final ComplexProperty complexProperty;
 
-    public DMLStackTriple(DomainRow pid, String name, ComplexProperty t) {
-        this.pid = pid;
+    public DMLStackTriple(DomainRow row, String name, ComplexProperty t) {
+        this.row = row;
         this.name = name;
-        this.t = t;
+        this.complexProperty = t;
     }
 
     @Override public void printTo(Printer printer) {
         printer.append("<").down().nextLine();
 
-        printer.append("pid: ").append(pid).append(",").nextLine();
+        printer.append("pid: ").append(row).append(",").nextLine();
         printer.append("name: ").append(name).append(",").nextLine();
-        printer.append("t: ").append(t).append(",");
+        printer.append("t: ").append(complexProperty).append(",");
 
         printer.up().nextLine().append(">");
     }
