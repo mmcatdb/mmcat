@@ -3,7 +3,7 @@ title: "Frontend Application"
 weight: 30
 ---
 
-The application is located in the `client` package. It is based on the [Vue 3](https://vuejs.org/) framework with [Vite](https://vitejs.dev/), TypeScript and Composition API.
+The application is located in the `client-old` package. It is based on the [Vue 3](https://vuejs.org/) framework with [Vite](https://vitejs.dev/), TypeScript and Composition API. *Currently, a new version of the frontend (based on [React](https://reactjs.org/)) is being developed in the `client` package.*
 
 ## Architecture
 
