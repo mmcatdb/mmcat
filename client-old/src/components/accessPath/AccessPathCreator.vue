@@ -173,6 +173,7 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
  * Updates the root property with a new root property and highlights the path.
  */
 function updateRootProperty(newRootProperty: GraphRootProperty) {
+    console.log('newRootProperty ', newRootProperty._subpaths );
     undoAccessPath();
     newRootProperty.node.becomeRoot();
     accessPath.value = newRootProperty;

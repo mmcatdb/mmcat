@@ -33,72 +33,25 @@ export class Graph {
     }
 
     /**
-     * Finds signature between a node and a parent node. If there does not exist a direct edge between node and parentNode it returns the concatenated Signatures along the path from parentNode to node.
+     * Finds signature between a node and a parent node, if there is a direct edge.
      */
     public getSignature(node: Node, parentNode: Node): SequenceSignature {
-        // Check for a direct edge first
-        const directEdge = [ ...this.edges.values() ]
+        const edge = [ ...this.edges.values() ]
             .find(edge =>
-                (edge.domainNode.equals(parentNode) && edge.codomainNode.equals(node)) ||
-                (edge.domainNode.equals(node) && edge.codomainNode.equals(parentNode)),
+                ((edge.domainNode.equals(parentNode) && edge.codomainNode.equals(node)) ||
+                (edge.domainNode.equals(node) && edge.codomainNode.equals(parentNode))),
             );
 
-        if (directEdge) {
-            if (directEdge.domainNode.equals(node))
-                return SequenceSignature.fromSignature(directEdge.schemaMorphism.signature.dual(), parentNode);
-            else
-                return SequenceSignature.fromSignature(directEdge.schemaMorphism.signature, parentNode);
-        }
-
-        function findPath(
-            currentNode: Node,
-            targetNode: Node,
-            visited: Set<Node>,
-            currentPath: Edge[],
-        ): Edge[] | null {
-            if (currentNode.equals(targetNode)) 
-                return [ ...currentPath ];
-
-            visited.add(currentNode);
-
-            const connectedEdges = [ ...this.edges.values() ]
-                .filter(edge => 
-                    edge.domainNode.equals(currentNode) || edge.codomainNode.equals(currentNode),
-                );
-
-            for (const edge of connectedEdges) {
-                const nextNode = edge.domainNode.equals(currentNode) ? edge.codomainNode : edge.domainNode;
-
-                if (nextNode.equals(parentNode))
-                    continue;
-
-                if (visited.has(nextNode))
-                    continue;
-
-                currentPath.push(edge);
-                const result = findPath.call(this, nextNode, targetNode, visited, currentPath);
-
-                if (result)
-                    return result;      
-
-                currentPath.pop();
-            }
-
-            visited.delete(currentNode);
-            return null;
-        }
-
-        const path = findPath.call(this, parentNode, node, new Set(), []);
-
-        if (!path)
+        if (!edge) {
+            console.warn(`No edge found between parent ${parentNode.schemaObject.key.value} and node ${node.schemaObject.key.value}`);
             return SequenceSignature.empty(node);
+        }
 
-        let concatenatedSignature = Signature.empty;
-        for (const edge of path) 
-            concatenatedSignature = concatenatedSignature.concatenate(edge.schemaMorphism.signature);
-
-        return SequenceSignature.fromSignature(concatenatedSignature, parentNode);
-    }    
+        if (edge.domainNode.equals(node))
+            return SequenceSignature.fromSignature(edge.schemaMorphism.signature.dual(), parentNode);
+        else
+            return SequenceSignature.fromSignature(edge.schemaMorphism.signature, parentNode);
+    }
 
     public getEdges(node: Node): Edge[] {
         return [ ...this.edges.values() ]
