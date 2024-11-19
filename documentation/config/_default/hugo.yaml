@@ -1,5 +1,5 @@
 baseURL: 'https://mmcatdb.com/'
-title: MM-cat docs
+title: MM-cat Docs
 theme: hugo-geekdoc
 defaultContentLanguage: en
 languages:

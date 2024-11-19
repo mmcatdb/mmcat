@@ -1,0 +1,15 @@
+html {
+    overflow-y: scroll;
+}
+
+:root {
+    --color-primary: #7E00BD;
+
+    --header-background: var(--color-primary) !important;
+    --button-background: var(--color-primary) !important;
+    --button-border-color: var(--color-primary) !important;
+    --link-color: var(--color-primary) !important;
+    --link-color-visited: var(--color-primary) !important;
+    --footer-link-color: var(--color-primary) !important;
+    --footer-link-color-visited: var(--color-primary) !important;
+}
