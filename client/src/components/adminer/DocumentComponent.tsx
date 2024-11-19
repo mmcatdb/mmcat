@@ -22,7 +22,7 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
 
     if (typeof value === 'object' && value && !Array.isArray(value)) {
         // If value is an object, create another unordered list for its key-value pairs
-        const len = Object.entries(value).length;
+        const len = Object.entries(value).filter(([ key ]) => key !== '_id').length;
         return (
             <span>
                 {'{'}
@@ -35,12 +35,14 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
                     </span>
                 ) : (
                     <ul>
-                        {Object.entries(value).map(([ key, val ]) => (
-                            <li className='ps-8' key={key}>
-                                <strong className='mr-3'>{key}:</strong>
-                                <DocumentComponent value={val as unknown} depth={depth + 1} />
-                            </li>
-                        ))}
+                        {Object.entries(value)
+                            .filter(([ key ]) => key !== '_id')
+                            .map(([ key, val ]) => (
+                                <li className='ps-8' key={key}>
+                                    <strong className='mr-3'>{key}:</strong>
+                                    <DocumentComponent value={val as unknown} depth={depth + 1} />
+                                </li>
+                            ))}
                     </ul>
                 )}
 
