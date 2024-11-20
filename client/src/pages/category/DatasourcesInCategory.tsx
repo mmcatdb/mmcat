@@ -5,23 +5,39 @@ import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { Button } from '@nextui-org/react';
 
 export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
-    const [ datasources, setDatasources ] = useState<Datasource[]>([]);
+    const [ datasourcesInCategory, setDatasourcesInCategory ] = useState<Datasource[]>([]);
+    const [ otherDatasources, setOtherDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchDatasourcesInCategory = async () => {
+        const fetchDatasources = async () => {
             try {
                 setLoading(true);
-                const response = await api.datasources.getAllDatasources({}, { categoryId: category.id });
-                if (response.status && response.data)
-                    setDatasources(response.data);
-                else
-                    setError('Failed to load data');
-            }
+
+                // Fetch datasources in category
+                const inCategoryResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
+                if (inCategoryResponse.status && inCategoryResponse.data) {
+                    setDatasourcesInCategory(inCategoryResponse.data);
+                } else {
+                    throw new Error('Failed to fetch datasources in category');
+                }
+
+                // Fetch all datasources and filter out ds in category
+                const allDatasourcesResponse = await api.datasources.getAllDatasources({});
+                if (allDatasourcesResponse.status && allDatasourcesResponse.data) {
+                    const notInCategory = allDatasourcesResponse.data.filter(
+                        ds => !inCategoryResponse.data.some(inCat => inCat.id === ds.id),
+                    );
+                    setOtherDatasources(notInCategory);
+                } else {
+                    throw new Error('Failed to fetch all datasources');
+                }
+            } 
             catch (err) {
                 setError('Failed to load data');
             }
@@ -30,12 +46,16 @@ export function DatasourcesInCategoryPage() {
             }
         };
 
-        fetchDatasourcesInCategory();
-    }, []);
+        fetchDatasources();
+    }, [category.id]);
 
     // callback to add new datasource
     const handleAddDatasource = (newDatasource: Datasource) => {
-        setDatasources((prevDatasources) => [ ...prevDatasources, newDatasource ]);
+        setOtherDatasources(prev => [...prev, newDatasource]);
+    };
+
+    const handleAddDatasourceInCategory = () => {
+        toast.error('Is it possible to add datasource to specific schema?');
     };
 
     // callback to delete a datasource
@@ -44,9 +64,8 @@ export function DatasourcesInCategoryPage() {
             const response = await api.datasources.deleteDatasource({ id });
 
             if (response.status) {
-                setDatasources((prevDatasources) =>
-                    prevDatasources.filter((datasource) => datasource.id !== id),
-                );
+                setDatasourcesInCategory(prev => prev.filter(ds => ds.id !== id));
+                setOtherDatasources(prev => prev.filter(ds => ds.id !== id));
             }
             else {
                 toast.error('Failed to delete datasource. Please try again.');
@@ -61,13 +80,27 @@ export function DatasourcesInCategoryPage() {
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <h1>Datasources</h1>
+                <h1 className='text-xl'>Datasources in {category.label}</h1>
+                <Button onClick={handleAddDatasourceInCategory}>Add Datasource?</Button>
+            </div>
+
+            <div className='mt-5'>
+                <DatasourcesTable
+                    datasources={datasourcesInCategory}
+                    loading={loading}
+                    error={error}
+                    onDeleteDatasource={handleDeleteDatasource}
+                />
+            </div>
+
+            <div className='flex items-center justify-between mt-10'>
+                <h1 className='text-xl'>Other Datasources</h1>
                 <DatasourceModal onDatasourceCreated={handleAddDatasource} />
             </div>
 
             <div className='mt-5'>
                 <DatasourcesTable
-                    datasources={datasources}
+                    datasources={otherDatasources}
                     loading={loading}
                     error={error}
                     onDeleteDatasource={handleDeleteDatasource}
