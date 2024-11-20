@@ -71,6 +71,11 @@ export function Sidebar() {
                 route: routes.category.querying.resolve({ categoryId }),
                 iconName: 'documentText',
             },
+            {
+                label: 'Datasources',
+                route: routes.category.datasources.resolve({ categoryId }),
+                iconName: 'documentText',
+            },
         ];
     }
 

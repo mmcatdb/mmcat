@@ -15,6 +15,7 @@ import { RootLayout } from '@/components/RootLayout';
 import { Mapping } from '@/types/mapping';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategory';
 
 type MappingLoaderData = {
     mapping: Mapping;
@@ -134,6 +135,12 @@ export const router = createBrowserRouter([
                         path: routes.category.querying.path,
                         Component: QueryingPage,
                         handle: { breadcrumb: 'Querying' },
+                    },
+                    {
+                        id: routes.category.datasources.id,
+                        path: routes.category.datasources.path,
+                        Component: DatasourcesInCategoryPage,
+                        handle: { breadcrumb: 'Datasources' },
                     },
                 ],
             },
