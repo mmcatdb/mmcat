@@ -48,4 +48,14 @@ public class UniqueSequentialGenerator {
         return "" + next();
     }
 
+    public record SerializedUniqueSequentialGenerator(int nextValue) {}
+
+    public SerializedUniqueSequentialGenerator serialize() {
+        return new SerializedUniqueSequentialGenerator(nextValue);
+    }
+
+    public static UniqueSequentialGenerator deserialize(SerializedUniqueSequentialGenerator serialized) {
+        return new UniqueSequentialGenerator(serialized.nextValue);
+    }
+
 }

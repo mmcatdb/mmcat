@@ -4,7 +4,6 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
@@ -84,20 +83,12 @@ public class InferenceEditorUtils {
         return createAndAddMorphism(schema, metadata, dom, cod, false);
     }
 
-    private static SchemaMorphism getMorphismIfExists(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {
-        for (SchemaMorphism morphism : schema.allMorphisms())
-            if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
-                return morphism;
-
-        return null;
-    }
-
     /**
      * Creates and adds a new object to the schema and metadata.
      */
     public static Key createAndAddObject(SchemaCategory schema, MetadataCategory metadata, ObjectIds ids, String label) {
         final Key key = new Key(getNewKeyValue(schema));
-        final SchemaObject object = new SchemaObject(key, ids, SignatureId.createEmpty());
+        final SchemaObject object = new SchemaObject(key, ids, ids.generateDefaultSuperId());
 
         schema.addObject(object);
         metadata.setObject(object, new MetadataObject(label, Position.createDefault()));

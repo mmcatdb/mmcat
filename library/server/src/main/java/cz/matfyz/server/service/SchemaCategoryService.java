@@ -13,6 +13,7 @@ import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.evolution.SchemaEvolution;
+import cz.matfyz.server.global.RequestContext;
 import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
@@ -25,6 +26,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class SchemaCategoryService {
+
+    @Autowired
+    private RequestContext request;
 
     @Autowired
     private SchemaCategoryRepository repository;
@@ -43,7 +47,8 @@ public class SchemaCategoryService {
         final var wrapper = SchemaCategoryWrapper.createNew(finalLabel, schema, metadata);
 
         repository.save(wrapper);
-        jobService.createSession(wrapper.id());
+        final var session = jobService.createSession(wrapper.id());
+        request.setup(session.id());
 
         return wrapper;
     }
@@ -93,10 +98,10 @@ public class SchemaCategoryService {
         repository.save(wrapper);
         evolutionRepository.create(evolution);
 
-        jobService.createSystemRun(
+        jobService.createRun(
             id,
             "Update queries to v. " + evolution.version,
-            new UpdateSchemaPayload(evolutionInit.prevVersion(), evolution.version)
+            List.of(new UpdateSchemaPayload(evolutionInit.prevVersion(), evolution.version))
         );
 
         return wrapper;

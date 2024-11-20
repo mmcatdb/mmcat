@@ -36,6 +36,21 @@ public class Layout {
     private Layout() {}
 
     /**
+     * Updates objects positions in the given schema category.
+     */
+    public static void updatePositions(SchemaCategory schema, MetadataCategory metadata, Map<Key, Position> positionsMap) {
+        for (Map.Entry<Key, Position> entry : positionsMap.entrySet()) {
+            final var key = entry.getKey();
+            final var position = entry.getValue();
+
+            final var object = schema.getObject(key);
+            final var metadataObject = metadata.getObject(key);
+            final var updatedMetadata = new MetadataObject(metadataObject.label, position);
+            metadata.setObject(object, updatedMetadata);
+        }
+    }
+
+    /**
      * Applies a layout to the metadata of the given schema category based on the specified layout type.
      */
     public static void applyToMetadata(SchemaCategory schema, MetadataCategory metadata, LayoutType layoutType) {

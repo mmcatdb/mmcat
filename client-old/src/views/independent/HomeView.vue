@@ -16,7 +16,7 @@ const newCategoryLabel = ref('');
 
 const EXAMPLE_SCHEMAS = [
     'basic',
-    'inference',
+    //'inference', // Maybe will be used later
 ] as const;
 
 type ExampleSchema = typeof EXAMPLE_SCHEMAS[number];

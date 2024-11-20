@@ -2,20 +2,26 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.Action;
-import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.JobPayload;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.entity.job.Job.State;
 import cz.matfyz.server.exception.InvalidTransitionException;
+import cz.matfyz.server.global.RequestContext;
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.JobRepository.JobInfo;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
+import cz.matfyz.server.repository.JobRepository.RunWithJobs;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,64 +29,62 @@ import org.springframework.stereotype.Service;
 public class JobService {
 
     @Autowired
+    private RequestContext request;
+
+    @Autowired
     private JobRepository repository;
 
-    public JobWithRun createSystemRun(Id categoryId, String label, ActionPayload payload) {
-        final var run = Run.createSystem(categoryId);
-        final var job = Job.createNew(run.id(), label, payload, isJobStartedManually(payload));
-
-        repository.save(run);
-        repository.save(job);
-
-        return new JobWithRun(job, run);
+    public RunWithJobs createRun(Action action) {
+        return createRunInner(action.categoryId, action.label, action.payloads, action.id());
     }
 
-    public JobWithRun createUserRun(Action action, Id sessionId) {
-        final var run = Run.createUser(action.categoryId, action.id(), sessionId);
-        final var job = Job.createNew(run.id(), action.label, action.payload, isJobStartedManually(action.payload));
-
-        repository.save(run);
-        repository.save(job);
-
-        return new JobWithRun(job, run);
+    public RunWithJobs createRun(Id categoryId, String label, List<JobPayload> payloads) {
+        return createRunInner(categoryId, label, payloads, null);
     }
 
-    private boolean isJobStartedManually(ActionPayload payload) {
+    private RunWithJobs createRunInner(Id categoryId, String label, List<JobPayload> payloads, @Nullable Id actionId) {
+        final var run = Run.create(categoryId, label, actionId, request.getSessionId());
+        repository.save(run);
+
+        final var jobs = new ArrayList<Job>();
+        int index = 0;
+        for (final var payload : payloads) {
+            // TODO find a better way to get the job label. Probably from the payload? Or some other configuration object?
+            final var job = Job.createNew(run.id(), index++, payload.getClass().getSimpleName(), payload, isJobStartedManually(payload));
+            repository.save(job);
+            jobs.add(job);
+        }
+
+        return new RunWithJobs(run, jobs.stream().map(JobInfo::fromJob).toList());
+    }
+
+    private boolean isJobStartedManually(JobPayload payload) {
         return payload instanceof UpdateSchemaPayload;
     }
 
     public JobWithRun createRestartedJob(JobWithRun jobWithRun) {
         final var job = jobWithRun.job();
-        final var newJob = Job.createNew(job.runId, job.label, job.payload, false);
+        final var newJob = Job.createNew(job.runId, job.index, job.label, job.payload, false);
 
         repository.save(newJob);
 
         return new JobWithRun(newJob, jobWithRun.run());
     }
 
-    public JobWithRun transition(JobWithRun jobWithRun, State newState) {
-        final var job = jobWithRun.job();
-        final State prevState = job.state;
-        if (!allowedTransitions.containsKey(newState) || !allowedTransitions.get(newState).contains(prevState))
-            throw InvalidTransitionException.job(job.id(), prevState, newState);
+    public void enableJob(Job job) {
+        if (job.state != State.Disabled)
+            throw InvalidTransitionException.job(job.id(), job.state, State.Ready);
 
-        job.state = newState;
+        job.state = State.Ready;
         repository.save(job);
-
-        return new JobWithRun(job, jobWithRun.run());
     }
 
-    private static final Map<State, Set<State>> allowedTransitions = defineAllowedTransitions();
+    public void disableJob(Job job) {
+        if (job.state != State.Ready)
+            throw InvalidTransitionException.job(job.id(), job.state, State.Disabled);
 
-    private static Map<State, Set<State>> defineAllowedTransitions() {
-        final var output = new TreeMap<State, Set<State>>();
-        output.put(State.Paused, Set.of(State.Ready));
-        output.put(State.Ready, Set.of(State.Paused));
-        output.put(State.Canceled, Set.of(State.Paused, State.Ready));
-        output.put(State.Finished, Set.of(State.Waiting));
-        output.put(State.Waiting, Set.of(State.Waiting));
-
-        return output;
+        job.state = State.Disabled;
+        repository.save(job);
     }
 
     public Session createSession(Id categoryId) {
@@ -88,6 +92,30 @@ public class JobService {
         repository.save(session);
 
         return session;
+    }
+
+    /**
+     * All jobs are expected to be in the same run.
+     */
+    public @Nullable JobInfo getNextReadyJob(List<JobInfo> jobs) {
+        final var sortedJobs = jobs.stream().sorted(Job::compareInRun).toList();
+        final var activeJobs = new ArrayList<JobInfo>();
+
+        for (int i = 1; i < sortedJobs.size(); i++)
+            if (sortedJobs.get(i).index() != sortedJobs.get(i - 1).index())
+                activeJobs.add(sortedJobs.get(i - 1));
+        activeJobs.add(sortedJobs.get(sortedJobs.size() - 1));
+
+        for (final var job : activeJobs) {
+            if (job.state() == State.Ready)
+                return job;
+            if (job.state() == State.Finished)
+                continue;
+
+            break;
+        }
+
+        return null;
     }
 
 }

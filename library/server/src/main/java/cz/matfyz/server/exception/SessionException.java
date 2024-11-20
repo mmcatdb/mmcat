@@ -10,12 +10,16 @@ public class SessionException extends ServerException {
         super("session." + name, null, null);
     }
 
+    public static SessionException notSet() {
+        return new SessionException("notSet", null);
+    }
+
     private record RunData(
-        Id id
+        Id runId
     ) implements Serializable {}
 
-    public static SessionException notFound(Id runId) {
-        return new SessionException("notFound", new RunData(runId));
+    public static SessionException runNotInSession(Id runId) {
+        return new SessionException("runNotInSession", new RunData(runId));
     }
 
 }

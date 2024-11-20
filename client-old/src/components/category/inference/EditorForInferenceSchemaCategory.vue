@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue';
+import { shallowRef, onMounted, ref } from 'vue';
 import Merge from './Merge.vue';
 import Cluster from './Cluster.vue';
 import Recursion from './Recursion.vue';
@@ -9,6 +9,8 @@ import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inf
 import { Graph, Node, Edge } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 import Divider from '@/components/layout/Divider.vue';
+import { Key } from '@/types/identifiers';
+import type { Position } from 'cytoscape';
 
 /**
  * Props passed to the component.
@@ -34,6 +36,7 @@ const emit = defineEmits<{
     (e: 'confirm-cluster', nodes: Node[]): void;
     (e: 'confirm-recursion', payload: { nodes: Node[], edges: Edge[] }): void;
     (e: 'revert-edit', edit: InferenceEdit): void;
+    (e: 'save-positions', map: Map<Key, Position>): void;
 }>();
 
 /**
@@ -52,6 +55,8 @@ enum State {
  */
 type GenericStateValue<State, Value> = { type: State } & Value;
 
+const updatedPositionsMap = new Map<Key, Position>();
+
 /**
  * State value representing the current state of the editor.
  */
@@ -66,6 +71,13 @@ type StateValue =
  * Tracks the current state of the editor.
  */
 const state = shallowRef<StateValue>({ type: State.Default });
+
+onMounted(() => {
+    props.graph.listen()?.onNode('dragfreeon', node => {
+        const newPosition = { ...node.cytoscapeIdAndPosition.position };
+        updatedPositionsMap.set(node.object.key, newPosition);
+    });
+});
 
 /**
  * Sets the state to 'Edits' when the user clicks the edits button.
@@ -144,6 +156,16 @@ function revertEdit(edit: InferenceEdit) {
     emit('revert-edit', edit);
 }
 
+/**
+ * Emits the 'save-positions' even when positions are saved.
+ */
+ function savePositions() {
+    if (updatedPositionsMap.size > 0) {
+        emit('save-positions', updatedPositionsMap);
+        //updatedPositionsMap.clear();
+    }
+}
+
 </script>
 
 <template>
@@ -164,6 +186,10 @@ function revertEdit(edit: InferenceEdit) {
             <Divider />
             <button @click="editsClicked">
                 Edits
+            </button>
+            <Divider />
+            <button @click="savePositions">
+                Save Positions
             </button>
         </div>
         <template v-else-if="state.type === State.Merge">

@@ -18,10 +18,10 @@ import cz.matfyz.inference.edit.InferenceEditorUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.HashMap;
@@ -154,12 +154,12 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     }
 
     private SchemaObject updateSchemaObjectIds(SchemaObject schemaObject, Signature signature) {
-        SortedSet<SignatureId> signatureSet = new TreeSet<>(Collections.singleton(new SignatureId(signature)));
+        SortedSet<SignatureId> signatureSet = new TreeSet<>(Set.of(new SignatureId(signature)));
         ObjectIds updatedIds = schemaObject.ids().isSignatures()
             ? new ObjectIds(addSignatureToSet(schemaObject.ids(), signature))
             : new ObjectIds(signatureSet);
 
-        return new SchemaObject(schemaObject.key(), updatedIds, schemaObject.superId());
+        return new SchemaObject(schemaObject.key(), updatedIds, updatedIds.generateDefaultSuperId());
     }
 
     private SortedSet<SignatureId> addSignatureToSet(ObjectIds ids, Signature signature) {
@@ -223,19 +223,24 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
     private Mapping adjustPKMapping(Mapping mapping) {
         Collection<Signature> currentPK = cleanFromEmpty(mapping.primaryKey());
-        currentPK.add(findPKSignature());
+        Signature pkSignature = findPKSignature();
+        if (!currentPK.contains(pkSignature))
+            currentPK.add(findPKSignature());
         return mapping.withSchema(newSchema, mapping.accessPath(), currentPK);
     }
 
     private Mapping createCleanedMapping(Mapping mapping) {
         ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
         Collection<Signature> currentPK = cleanFromEmpty(mapping.primaryKey());
+        Signature newSignature;
 
         if (primaryKeyRoot.equals(data.primaryKeyIdentified)) {
-            currentPK.add(newSignaturePair.getValue());
+            newSignature = newSignaturePair.getValue();
         } else {
-            currentPK.add(Signature.concatenate(this.newSignaturePair.getValue(), findPKSignature()));
+            newSignature = Signature.concatenate(this.newSignaturePair.getValue(), findPKSignature());
         }
+        if (!currentPK.contains(newSignature))
+            currentPK.add(newSignature);
         return mapping.withSchema(newSchema, cleanedComplexProperty, currentPK);
     }
 

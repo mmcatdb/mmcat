@@ -7,12 +7,12 @@ import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.entity.action.Action;
-import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
+import cz.matfyz.server.entity.job.JobPayload;
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
@@ -57,15 +57,15 @@ public class ActionController {
         return actionToDetail(repository.find(id));
     }
 
-    public record ActionInit(
+    private record ActionInit(
         Id categoryId,
         String label,
-        ActionPayload payload
+        List<JobPayload> payloads
     ) {}
 
     @PostMapping("/actions")
     public ActionDetail createAction(@RequestBody ActionInit init) {
-        final var action = service.create(init.categoryId(), init.label(), init.payload());
+        final var action = service.create(init.categoryId(), init.label(), init.payloads());
         return actionToDetail(action);
     }
 
@@ -75,16 +75,17 @@ public class ActionController {
     }
 
     private ActionDetail actionToDetail(Action action) {
-        return new ActionDetail(action, actionPayloadToDetail(action.payload, action.categoryId));
+        final var payloads = action.payloads.stream().map(p -> jobPayloadToDetail(p, action.categoryId)).toList();
+        return new ActionDetail(action, payloads);
     }
 
     // TODO extremely unefficient - load all models and datasources at once.
-    ActionPayloadDetail actionPayloadToDetail(ActionPayload payload, Id categoryId) {
+    JobPayloadDetail jobPayloadToDetail(JobPayload payload, Id categoryId) {
         return switch (payload) {
             case ModelToCategoryPayload p -> {
                 final var datasource = datasourceRepository.find(p.datasourceId());
                 final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
-                if (p.mappingIds() == null)
+                if (p.mappingIds().isEmpty())
                     yield new ModelToCategoryPayloadDetail(datasourceDetail, List.of());
 
                 final var mappingInfos = mappingRepository.findAllInCategory(categoryId, datasource.id()).stream()
@@ -97,7 +98,7 @@ public class ActionController {
             case CategoryToModelPayload p -> {
                 final var datasource = datasourceRepository.find(p.datasourceId());
                 final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
-                if (p.mappingIds() == null)
+                if (p.mappingIds().isEmpty())
                     yield new CategoryToModelPayloadDetail(datasourceDetail, List.of());
 
                 final var mappingInfos = mappingRepository.findAllInCategory(categoryId, datasource.id()).stream()
@@ -123,10 +124,10 @@ public class ActionController {
         Id id,
         Id categoryId,
         String label,
-        ActionPayloadDetail payload
+        List<JobPayloadDetail> payloads
     ) {
-        ActionDetail(Action action, ActionPayloadDetail payload) {
-            this(action.id(), action.categoryId, action.label, payload);
+        ActionDetail(Action action, List<JobPayloadDetail> payloads) {
+            this(action.id(), action.categoryId, action.label, payloads);
         }
     }
 
@@ -137,25 +138,25 @@ public class ActionController {
         @JsonSubTypes.Type(value = UpdateSchemaPayloadDetail.class, name = "UpdateSchema"),
         @JsonSubTypes.Type(value = RSDToCategoryPayloadDetail.class, name = "RSDToCategory"),
     })
-    interface ActionPayloadDetail {}
+    interface JobPayloadDetail {}
 
     record CategoryToModelPayloadDetail(
         DatasourceDetail datasource,
         List<MappingInfo> mappings
-    ) implements ActionPayloadDetail {}
+    ) implements JobPayloadDetail {}
 
     record ModelToCategoryPayloadDetail(
         DatasourceDetail datasource,
         List<MappingInfo> mappings
-    ) implements ActionPayloadDetail {}
+    ) implements JobPayloadDetail {}
 
     record UpdateSchemaPayloadDetail(
         Version prevVersion,
         Version nextVersion
-    ) implements ActionPayloadDetail {}
+    ) implements JobPayloadDetail {}
 
     record RSDToCategoryPayloadDetail(
         List<DatasourceDetail> datasources
-    ) implements ActionPayloadDetail {}
+    ) implements JobPayloadDetail {}
 
 }

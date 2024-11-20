@@ -12,103 +12,91 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.VoidFunction;
 import cz.matfyz.core.rsd.SubsetType;
-import org.apache.spark.api.java.JavaPairRDD;
 import scala.Tuple2;
 import cz.matfyz.inference.algorithms.miner.functions.ReferenceTupleToPairWithSubsetTypeMapFunction;
 
 public class CandidateMinerAlgorithm implements Serializable {
 
-    public Candidates process(List<AbstractInferenceWrapper> wrappers) throws Exception {
-
+    // TODO: CandidateMiner needs optimalization. When datasets have too many attributes the algorithm runs out of memory quickly looking for the Reference Candidates
+    public Candidates process(List<AbstractInferenceWrapper> wrappers, boolean mineReferences) {
         Candidates candidates = new Candidates();
         List<AbstractInferenceWrapper> sessionWrappers = new ArrayList<>();
 
         try {
-            JavaRDD<PropertyHeuristics> all = null;
-
-            for (AbstractInferenceWrapper wrapper : wrappers) {
-                for (final String kindName : wrapper.getKindNames()) {
-                    final var w = wrapper.copyForKind(kindName);
-                    sessionWrappers.add(w);
-                    w.startSession();
-                    JavaRDD<PropertyHeuristics> heuristics = Footprinter.INSTANCE.process(w);
-                    if (all == null)
-                        all = heuristics;
-                    else
-                        all = all.union(heuristics);
-                }
+            JavaRDD<PropertyHeuristics> allHeuristics = collectAllHeuristics(wrappers, sessionWrappers);
+            if (allHeuristics == null) {
+                return candidates;
             }
 
-            // remove later
-            all.foreach(new VoidFunction<PropertyHeuristics>() {
-                @Override public void call(PropertyHeuristics h) throws Exception {
-                    System.out.println(h);
-                }
-            });
-
-            // PrimaryKeyCandidates
-            JavaRDD<PropertyHeuristics> primaryKeyCandidates = all.filter(
-                new Function<PropertyHeuristics, Boolean>() {
-                    @Override
-                    public Boolean call(PropertyHeuristics heuristics) throws Exception {
-                        boolean maxNotArray = heuristics.getMax() == null || !(heuristics.getMax() instanceof java.util.ArrayList);
-                        boolean hierarchicalNameValid = heuristics.getHierarchicalName() == null || !heuristics.getHierarchicalName().endsWith(RecordSchemaDescription.ROOT_SYMBOL);
-                        return heuristics.isRequired() && heuristics.isUnique() && maxNotArray && hierarchicalNameValid;
-                    }
-                }
-            );
-
-            // remove later
-            System.out.println("----------------------- Primary Key Candidates --------------------------------------");
-
-            // remove later
-            primaryKeyCandidates.foreach(new VoidFunction<PropertyHeuristics>() {
-                @Override public void call(PropertyHeuristics h) throws Exception {
-                    System.out.println(h);
-                }
-            });
-
-            // ReferenceCandidates
-            JavaRDD<PropertyHeuristics> suitableProperties = all.filter(heuristics -> heuristics.getMin() != null);
+            JavaRDD<PropertyHeuristics> primaryKeyCandidates = filterPrimaryKeyCandidates(allHeuristics);
+            JavaRDD<PropertyHeuristics> suitableProperties = allHeuristics.filter(heuristics -> heuristics.getMin() != null);
             JavaRDD<PropertyHeuristics> suitablePrimaryKeys = primaryKeyCandidates.filter(heuristics -> heuristics.getMin() != null);
+            collectPrimaryKeyCandidates(primaryKeyCandidates, candidates);
 
-            // first heuristics are primaryKey, second the referenced property, SubsetType is reference type
-            JavaPairRDD<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> referenceCandidates = suitablePrimaryKeys
-                .cartesian(suitableProperties)
-                .map(pair -> new Tuple2<>(pair._1, pair._2))
-                .mapToPair(new ReferenceTupleToPairWithSubsetTypeMapFunction())
-                .filter(pair -> pair._2 != SubsetType.EMPTY);
-
-            System.out.println("----------------------- Reference Candidates --------------------------------------");
-            List<Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType>> rc = new ArrayList<>(referenceCandidates.collect());
-
-            for (Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType> t : rc) {
-                System.out.println(t);
+            if (mineReferences) {
+                List<Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType>> referenceCandidateList = collectReferenceCandidates(suitablePrimaryKeys, suitableProperties);
+                collectReferenceCandidates(referenceCandidateList, candidates);
             }
-
-            // Collect primary key and reference candidates
-            primaryKeyCandidates.collect().forEach(heuristics -> {
-                PrimaryKeyCandidate pkCandidate = toPrimaryKeyCandidate(heuristics);
-                candidates.pkCandidates.add(pkCandidate);
-            });
-
-            rc.forEach(tuple -> {
-                PropertyHeuristics referencing = tuple._1._1;
-                PropertyHeuristics referred = tuple._1._2;
-                SubsetType subsetType = tuple._2;
-                ReferenceCandidate refCandidate = toReferenceCandidate(referencing, referred, subsetType);
-                candidates.refCandidates.add(refCandidate);
-            });
 
             return candidates;
         } finally {
-            for (AbstractInferenceWrapper wrap : sessionWrappers) {
-                wrap.stopSession();
+            stopAllSessions(sessionWrappers);
+        }
+    }
+
+    private JavaRDD<PropertyHeuristics> collectAllHeuristics(List<AbstractInferenceWrapper> wrappers, List<AbstractInferenceWrapper> sessionWrappers) {
+        JavaRDD<PropertyHeuristics> all = null;
+
+        for (AbstractInferenceWrapper wrapper : wrappers) {
+            for (String kindName : wrapper.getKindNames()) {
+                AbstractInferenceWrapper w = wrapper.copyForKind(kindName);
+                sessionWrappers.add(w);
+                w.startSession();
+                JavaRDD<PropertyHeuristics> heuristics = Footprinter.INSTANCE.process(w);
+                all = (all == null) ? heuristics : all.union(heuristics);
             }
         }
+
+        return all;
+    }
+
+    private JavaRDD<PropertyHeuristics> filterPrimaryKeyCandidates(JavaRDD<PropertyHeuristics> allHeuristics) {
+        return allHeuristics.filter(heuristics -> {
+            boolean maxNotArray = heuristics.getMax() == null || !(heuristics.getMax() instanceof java.util.ArrayList);
+            boolean hierarchicalNameValid = heuristics.getHierarchicalName() == null || !heuristics.getHierarchicalName().endsWith(RecordSchemaDescription.ROOT_SYMBOL);
+            return heuristics.isRequired() && heuristics.isUnique() && maxNotArray && hierarchicalNameValid;
+        });
+    }
+
+    private List<Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType>> collectReferenceCandidates(JavaRDD<PropertyHeuristics> suitablePrimaryKeys, JavaRDD<PropertyHeuristics> suitableProperties) {
+        return suitablePrimaryKeys.cartesian(suitableProperties)
+            .map(pair -> new Tuple2<>(pair._1, pair._2))
+            .mapToPair(new ReferenceTupleToPairWithSubsetTypeMapFunction())
+            .filter(pair -> pair._2 != SubsetType.EMPTY)
+            .collect();
+    }
+
+    private void collectPrimaryKeyCandidates(JavaRDD<PropertyHeuristics> primaryKeyCandidates, Candidates candidates) {
+        primaryKeyCandidates.collect().forEach(heuristics -> {
+            PrimaryKeyCandidate pkCandidate = toPrimaryKeyCandidate(heuristics);
+            candidates.pkCandidates.add(pkCandidate);
+        });
+    }
+
+    private void collectReferenceCandidates(List<Tuple2<Tuple2<PropertyHeuristics, PropertyHeuristics>, SubsetType>> referenceCandidateList, Candidates candidates) {
+        referenceCandidateList.forEach(tuple -> {
+            PropertyHeuristics referencing = tuple._1._1;
+            PropertyHeuristics referred = tuple._1._2;
+            SubsetType subsetType = tuple._2;
+            ReferenceCandidate refCandidate = toReferenceCandidate(referencing, referred, subsetType);
+            candidates.refCandidates.add(refCandidate);
+        });
+    }
+
+    private void stopAllSessions(List<AbstractInferenceWrapper> sessionWrappers) {
+        for (AbstractInferenceWrapper wrap : sessionWrappers)
+            wrap.stopSession();
     }
 
     private PrimaryKeyCandidate toPrimaryKeyCandidate(PropertyHeuristics heuristics) {
@@ -118,5 +106,4 @@ public class CandidateMinerAlgorithm implements Serializable {
     private ReferenceCandidate toReferenceCandidate(PropertyHeuristics referencing, PropertyHeuristics referred, SubsetType subsetType) {
         return new ReferenceCandidate(subsetType, referred, referencing, referred.getHierarchicalName(), referencing.getHierarchicalName(), false, false);
     }
-
 }

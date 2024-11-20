@@ -186,8 +186,6 @@ function splitName(name: string) {
             >
                 Confirm
             </button>
-        </div>
-        <div class="button-row">
             <button
                 :disabled="!confirmClicked"
                 @click="save"
@@ -230,6 +228,23 @@ function splitName(name: string) {
 
 .candidate-button:hover:not(.clicked) {
     background-color: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .candidate-button {
+        background-color: #2a2a2a; /* Dark background */
+        border-color: #444; /* Dark border */
+        color: #f5f5f5; /* Light text color for readability */
+    }
+
+    .candidate-button.clicked {
+        background-color: #3b5998; /* Slightly highlighted dark color */
+        border-color: #2d4373;
+    }
+
+    .candidate-button:hover:not(.clicked) {
+        background-color: #444; /* Hover color for dark mode */
+    }
 }
 
 .candidate-content {

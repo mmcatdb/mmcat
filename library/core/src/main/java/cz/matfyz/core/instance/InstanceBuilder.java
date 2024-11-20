@@ -1,15 +1,13 @@
-package cz.matfyz.tests.example.common;
+package cz.matfyz.core.instance;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.instance.DomainRow;
-import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceCategoryBuilder;
-import cz.matfyz.core.instance.MappingRow;
-import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
+import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +19,45 @@ public class InstanceBuilder {
     private final InstanceCategory instance;
 
     public InstanceBuilder(SchemaCategory schema) {
-        this.instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+        this.instance = createEmptyInstance(schema);
+    }
+
+    private static InstanceCategory createEmptyInstance(SchemaCategory schema) {
+        final Map<Key, InstanceObject> objects = new TreeMap<>();
+        final Map<Signature, InstanceMorphism> morphisms = new TreeMap<>();
+        final var instance = new InstanceCategory(schema, objects, morphisms);
+
+        for (SchemaObject schemaObject : schema.allObjects()) {
+            final InstanceObject instanceObject = new InstanceObject(schemaObject, instance);
+            objects.put(instanceObject.schema.key(), instanceObject);
+        }
+
+        // The base moprhisms must be created first because the composite ones use them.
+        final var baseMorphisms = schema.allMorphisms().stream().filter(SchemaMorphism::isBase).toList();
+        for (final var schemaMorphism : baseMorphisms) {
+            final var instanceMorphism = new InstanceMorphism(schemaMorphism);
+            morphisms.put(schemaMorphism.signature(), instanceMorphism);
+        }
+
+        final var compositeMorphisms = schema.allMorphisms().stream().filter(morphism -> !morphism.isBase()).toList();
+        for (final var schemaMorphism : compositeMorphisms) {
+            final var instanceMorphism = new InstanceMorphism(schemaMorphism);
+            morphisms.put(schemaMorphism.signature(), instanceMorphism);
+        }
+
+        return instance;
+    }
+
+    public InstanceBuilder technicalIdGenerator(Key key, UniqueSequentialGenerator generator) {
+        instance.getObject(key).technicalIdGenerator = generator;
+        return this;
     }
 
     public InstanceCategory build() {
         return this.instance;
     }
+
+    // Building domain rows
 
     private final SuperIdWithValues.Builder superIdBuilder = new SuperIdWithValues.Builder();
 
@@ -57,13 +88,15 @@ public class InstanceBuilder {
         return object(object.key());
     }
 
-    public DomainRow valueObject(String value, BuilderObject object) {
-        return valueObject(value, object.key());
+    public DomainRow valueObject(BuilderObject object, String value) {
+        return valueObject(object.key(), value);
     }
 
-    public DomainRow valueObject(String value, Key key) {
+    public DomainRow valueObject(Key key, String value) {
         return value(Signature.createEmpty(), value).object(key);
     }
+
+    // Building mapping rows
 
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {
         var row = new MappingRow(domainRow, codomainRow);
@@ -84,8 +117,9 @@ public class InstanceBuilder {
         instance.getMorphism(signature);
     }
 
-    private Map<Key, List<DomainRow>> createdRows = new TreeMap<>();
+    // Getters for rows to allow creating mapping rows
 
+    private Map<Key, List<DomainRow>> createdRows = new TreeMap<>();
 
     public List<DomainRow> getRows(Key key) {
         return createdRows.get(key);

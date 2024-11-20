@@ -4,10 +4,10 @@ import API from '@/utils/api';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { Datasource } from '@/types/datasource';
-import ValueContainer from '@/components/layout/page/ValueContainer.vue';
-import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { type ActionPayloadInit, ACTION_TYPES, Action, ActionType } from '@/types/action';
+import { type JobPayloadInit, ACTION_TYPES, Action, ActionType } from '@/types/action';
 import { Mapping } from '@/types/mapping';
+import type { ActionStepInnerValue } from './NewActionStep.vue';
+import NewActionStep from './NewActionStep.vue';
 
 const emit = defineEmits<{
     (e: 'newAction', action: Action): void;
@@ -16,58 +16,26 @@ const emit = defineEmits<{
 const datasources = ref<Datasource[]>();
 const mappings = ref<Mapping[]>();
 
-// Common
-
 const actionName = ref<string>('');
 type AvailableTypes = typeof ACTION_TYPES[number]['value'];
 const actionType = ref<AvailableTypes>(ACTION_TYPES[0].value);
-const datasourceId = ref<Id>();
 
-// For RSDToCategory
+const steps = ref<ActionStepInnerValue[]>([ {
+    datasourceId: undefined,
+    datasourceIds: [],
+    mappingIds: [],
+} ]);
 
-const datasourceIds = ref<Id[]>([]);
-const selectedDatasources = computed(() => {
-    const all = datasources.value;
-    return all ? datasourceIds.value.map(id => all.find(ds => ds.id === id)!) : [];
-});
-const availableDatasources = computed(() => {
-    return datasources.value?.filter(ds => !datasourceIds.value.includes(ds.id)) ?? [];
-});
-
-function addDatasource() {
-    if (datasourceId.value && !datasourceIds.value.includes(datasourceId.value)) {
-        datasourceIds.value.unshift(datasourceId.value);
-        datasourceId.value = undefined;
-    }
+function addStep() {
+    steps.value.push({
+        datasourceId: undefined,
+        datasourceIds: [],
+        mappingIds: [],
+    });
 }
 
-function removeDatasource(id: Id) {
-    datasourceIds.value = datasourceIds.value.filter(dsId => dsId !== id);
-}
-
-// For ModelToCategory and CategoryToModel
-
-const mappingIds = ref<Id[]>([]);
-const selectedMappings = computed(() => {
-    const all = mappings.value;
-    if (!all)
-        return [];
-
-    return mappingIds.value
-        .map(id => all.find(m => m.id === id)!)
-        .filter(m => m.datasourceId === datasourceId.value);
-});
-const availableMappings = computed(() => {
-    return mappings.value
-        ?.filter(m => m.datasourceId === datasourceId.value)
-        .filter(m => !mappingIds.value.includes(m.id)) ?? [];
-});
-
-function toggleMapping(id: Id) {
-    if (mappingIds.value.includes(id))
-        mappingIds.value = mappingIds.value.filter(mId => mId !== id);
-    else
-        mappingIds.value.push(id);
+function removeStep(index: number) {
+    steps.value.splice(index, 1);
 }
 
 onMounted(async () => {
@@ -85,28 +53,33 @@ onMounted(async () => {
 const fetching = ref(false);
 const categoryId = useSchemaCategoryId();
 
-const dataValid = computed(() => {
+const isDataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    return actionType.value === ActionType.RSDToCategory ? !!datasourceIds.value.length : !!datasourceId.value;
+    return actionType.value === ActionType.RSDToCategory
+        ? steps.value.every(step => !!step.datasourceIds.length)
+        : steps.value.every(step => !!step.datasourceId);
 });
 
 async function createAction() {
     fetching.value = true;
-    const payload: ActionPayloadInit = actionType.value === ActionType.RSDToCategory ? {
-        type: actionType.value,
-        datasourceIds: datasourceIds.value,
-    } : {
-        type: actionType.value,
-        datasourceId: datasourceId.value as Id,
-        mappingIds: selectedMappings.value.length === 0 ? undefined : selectedMappings.value.map(m => m.id),
-    };
+    const payloads: JobPayloadInit[] = steps.value.map(step => {
+        return actionType.value === ActionType.RSDToCategory
+            ? {
+                type: actionType.value,
+                datasourceIds: step.datasourceIds,
+            } : {
+                type: actionType.value,
+                datasourceId: step.datasourceId as Id,
+                mappingIds: step.mappingIds,
+            };
+    });
 
     const result = await API.actions.createAction({}, {
         categoryId,
         label: actionName.value,
-        payload: payload as ActionPayloadInit,
+        payloads,
     });
     if (result.status)
         emit('newAction', Action.fromServer(result.data));
@@ -136,7 +109,7 @@ async function createAction() {
                     </select>
                 </div>
             </div>
-            <div class="row align-items-center gx-1">
+            <div class="row align-items-center gx-1 mt-2">
                 <span class="col-3 text-end">Label:</span>
                 <div class="col">
                     <input
@@ -145,117 +118,46 @@ async function createAction() {
                     />
                 </div>
             </div>
-            <div
-                v-if="actionType === ActionType.RSDToCategory"
-                class="row align-items-center gx-1"
-            >
-                <span class="col-3 text-end">Datasources:</span>
-                <div class="col">
-                    <div class="d-flex align-items-center gap-2">
-                        <select
-                            v-model="datasourceId"
-                            class="flex-grow-1"
-                        >
-                            <option
-                                v-for="datasource in availableDatasources"
-                                :key="datasource.id"
-                                :value="datasource.id"
-                            >
-                                {{ datasource.label }}
-                            </option>
-                        </select>
-                        <button @click="addDatasource">
-                            Add
-                        </button>
+            <template v-if="mappings && datasources">
+                <div class="row gx-1 mt-2">
+                    <div class="col-3 text-end">
+                        Steps:
                     </div>
                 </div>
-                <div class="row gx-1">
-                    <div class="col-3" />
-                    <div class="col">
-                        <div
-                            v-for="datasource in selectedDatasources"
-                            :key="datasource.id"
-                            class="d-flex align-items-center gap-2 py-1"
-                        >
-                            <button @click="removeDatasource(datasource.id)">
+                <div class="d-flex flex-column gap-3">
+                    <div
+                        v-for="(_, index) in steps"
+                        :key="index"
+                        class="row gx-1"
+                    >
+                        <div class="col-3 d-flex align-items-center justify-content-center border-end border-2 my-1">
+                            <button
+                                :disabled="steps.length === 1"
+                                @click="removeStep(index)"
+                            >
                                 x
                             </button>
-                            {{ datasource.label }}
                         </div>
-                    </div>
-                </div>
-            </div>
-            <template v-else>
-                <div class="row align-items-center gx-1">
-                    <span class="col-3 text-end">Datasource:</span>
-                    <div class="col">
-                        <select
-                            v-model="datasourceId"
-                            class="w-100"
-                        >
-                            <option
-                                v-for="datasource in datasources"
-                                :key="datasource.id"
-                                :value="datasource.id"
-                            >
-                                {{ datasource.label }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row gx-1">
-                    <span class="col-3 text-end">Mappings:</span>
-                    <div class="col">
-                        <div
-                            v-if="selectedMappings.length > 0"
-                            class="d-flex flex-wrap gap-1"
-                        >
-                            <button
-                                v-for="mapping in selectedMappings"
-                                :key="mapping.id"
-                                @click="toggleMapping(mapping.id)"
-                            >
-                                {{ mapping.kindName }}
-                            </button>
-                        </div>
-                        <div
-                            v-else
-                            class="fw-bold"
-                        >
-                            All
-                        </div>
-                    </div>
-                    <div
-                        v-if="availableMappings.length > 0"
-                        class="row"
-                    >
-                        <div class="col-3" />
-                        <div class="col">
-                            <div class="mt-2">
-                                Available:
-                            </div>
-                            <div
-                                class="d-flex flex-wrap gap-1"
-                            >
-                                <button
-                                    v-for="mapping in availableMappings"
-                                    :key="mapping.id"
-                                    @click="toggleMapping(mapping.id)"
-                                >
-                                    {{ mapping.kindName }}
-                                </button>
-                            </div>
-                        </div>
+                        <NewActionStep
+                            v-model="steps[index]"
+                            class="col"
+                            :type="actionType"
+                            :datasources="datasources"
+                            :mappings="mappings"
+                        />
                     </div>
                 </div>
             </template>
         </div>
-        <div class="button-row">
+        <div class="button-row mt-4">
             <button
-                :disabled="(fetching || !dataValid)"
+                :disabled="(fetching || !isDataValid)"
                 @click="createAction"
             >
                 Create action
+            </button>
+            <button @click="addStep">
+                Add step
             </button>
         </div>
     </div>
@@ -267,6 +169,6 @@ async function createAction() {
     border: 1px solid var(--color-primary);
     margin-right: 16px;
     margin-bottom: 16px;
-    width: 420px;
+    width: 500px;
 }
 </style>

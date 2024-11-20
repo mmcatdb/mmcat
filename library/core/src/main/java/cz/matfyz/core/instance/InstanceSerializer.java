@@ -3,6 +3,8 @@ package cz.matfyz.core.instance;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.utils.UniqueSequentialGenerator;
+import cz.matfyz.core.utils.UniqueSequentialGenerator.SerializedUniqueSequentialGenerator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,7 +22,8 @@ public class InstanceSerializer {
 
     public record SerializedInstanceObject(
         Key key,
-        List<SerializedDomainRow> rows
+        List<SerializedDomainRow> rows,
+        SerializedUniqueSequentialGenerator technicalIdGenerator
     ) {}
 
     public record SerializedDomainRow(
@@ -81,7 +84,8 @@ public class InstanceSerializer {
 
         return new SerializedInstanceObject(
             object.schema.key(),
-            rows
+            rows,
+            object.technicalIdGenerator.serialize()
         );
     }
 
@@ -102,14 +106,14 @@ public class InstanceSerializer {
         );
     }
 
-    public static InstanceCategory deserialize(SerializedInstance serializedInstance, SchemaCategory schemaCategory) {
-        return new InstanceSerializer().deserializeInstance(serializedInstance, schemaCategory);
+    public static InstanceCategory deserialize(SerializedInstance serializedInstance, SchemaCategory schema) {
+        return new InstanceSerializer().deserializeInstance(serializedInstance, schema);
     }
 
     private final Map<Key, Map<Integer, DomainRow>> keyToIdToRow = new TreeMap<>();
 
-    private InstanceCategory deserializeInstance(SerializedInstance serializedInstance, SchemaCategory schemaCategory) {
-        final var instance = new InstanceCategoryBuilder().setSchemaCategory(schemaCategory).build();
+    private InstanceCategory deserializeInstance(SerializedInstance serializedInstance, SchemaCategory schema) {
+        final var instance = new InstanceBuilder(schema).build();
 
         for (final SerializedInstanceObject serializedObject : serializedInstance.objects)
             deserializeObject(serializedObject, instance);
@@ -122,6 +126,7 @@ public class InstanceSerializer {
 
     private void deserializeObject(SerializedInstanceObject serializedObject, InstanceCategory instance) {
         final var object = instance.getObject(serializedObject.key);
+        object.technicalIdGenerator = UniqueSequentialGenerator.deserialize(serializedObject.technicalIdGenerator);
 
         final Map<Integer, DomainRow> idToRow = new TreeMap<>();
         keyToIdToRow.put(serializedObject.key, idToRow);

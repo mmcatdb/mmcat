@@ -43,10 +43,10 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     private PreparedStatement prepareStatement(Connection connection, QueryContent query) throws SQLException {
-        if (query instanceof StringQuery stringQuery)
+        if (query instanceof final StringQuery stringQuery)
             return connection.prepareStatement(stringQuery.content);
 
-        if (query instanceof KindNameQuery kindNameQuery)
+        if (query instanceof final KindNameQuery kindNameQuery)
             return connection.prepareStatement(kindNameQueryToString(kindNameQuery));
 
         throw PullForestException.invalidQuery(this, query);
@@ -73,15 +73,15 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             LOGGER.info("Execute PostgreSQL query:\n{}", statement);
 
             try (ResultSet resultSet = statement.executeQuery()) {
-                ForestOfRecords forest = new ForestOfRecords();
+                final ForestOfRecords forest = new ForestOfRecords();
 
                 while (resultSet.next()) {
-                    var rootRecord = new RootRecord();
+                    final var rootRecord = new RootRecord();
 
-                    for (AccessPath subpath : path.subpaths()) {
-                        if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.name() instanceof StaticName staticName) {
-                            String name = staticName.getStringName();
-                            String value = resultSet.getString(name);
+                    for (final AccessPath subpath : path.subpaths()) {
+                        if (subpath instanceof final SimpleProperty simpleProperty && simpleProperty.name() instanceof StaticName staticName) {
+                            final String name = staticName.getStringName();
+                            final String value = resultSet.getString(name);
                             rootRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.signature(), value);
                         }
                     }
@@ -105,7 +105,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             try (
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM \"" + kindName + "\";")
             ) {
-                var output = new StringBuilder();
+                final var output = new StringBuilder();
                 while (resultSet.next())
                     output.append(resultSet.getString("number")).append("\n");
 

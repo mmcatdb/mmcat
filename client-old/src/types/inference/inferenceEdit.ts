@@ -3,6 +3,7 @@ import type { KeyFromServer } from '../identifiers';
 import { PrimaryKeyCandidate, ReferenceCandidate } from './candidates';
 import type { LayoutType } from '@/types/inference/layoutType';
 import type { SerializedPrimaryKeyCandidate, SerializedReferenceCandidate } from './candidates';
+import type { Position } from 'cytoscape';
 
 /**
  * Type representing an inference edit.
@@ -269,4 +270,6 @@ export type SaveJobResultPayload = {
     edit: InferenceEdit | null;
     /** The layout type used. */
     layoutType: LayoutType | null;
+    /** An array of key-position pairs representing updated positions. */
+    positions: { key: Key, position: Position }[] | null;
 };

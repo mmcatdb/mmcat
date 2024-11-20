@@ -5,13 +5,15 @@ import { Job, JobState, type ModelJobData } from '@/types/job';
 import { ActionType } from '@/types/action';
 import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
-import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
 import InferenceJobDisplay from '@/components/category/inference/InferenceJobDisplay.vue';
 import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/inferenceEdit';
 import type { InferenceJobData } from '@/types/inference/InferenceJobData';
 import type { LayoutType } from '@/types/inference/layoutType';
 import { useSchemaCategoryInfo } from '@/utils/injects';
+import { Key } from '@/types/identifiers';
+import type { Position } from 'cytoscape';
+import JobPayloadDisplay from './JobPayloadDisplay.vue';
 
 type JobDisplayProps = {
     job: Job;
@@ -46,17 +48,17 @@ const inferenceJobData = computed(() => {
 
 const info = useSchemaCategoryInfo();
 
-async function startJob() {
+async function enableJob() {
     fetching.value = true;
-    const result = await API.jobs.startJob({ id: props.job.id });
+    const result = await API.jobs.enableJob({ id: props.job.id });
     fetching.value = false;
     if (result.status)
         emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
-async function cancelJob() {
+async function disableJob() {
     fetching.value = true;
-    const result = await API.jobs.cancelJob({ id: props.job.id });
+    const result = await API.jobs.disableJob({ id: props.job.id });
     fetching.value = false;
     if (result.status)
         emit('updateJob', Job.fromServer(result.data, info.value));
@@ -70,10 +72,17 @@ async function restartJob() {
         emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
-async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | null, layoutType: LayoutType | null) {
+async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | null, layoutType: LayoutType | null, positionsMap: Map<Key, Position> | null) {
     fetching.value = true;
 
-    const payload: SaveJobResultPayload = { isFinal, edit, layoutType };
+    const positions = positionsMap
+        ? [ ...positionsMap.entries() ].map(([ key, position ]) => ({
+            key,
+            position,
+        }))
+        : null;
+
+    const payload: SaveJobResultPayload = { isFinal, edit, layoutType, positions };
     const result = await API.jobs.updateJobResult({ id: props.job.id }, payload);
     fetching.value = false;
     if (result.status) 
@@ -95,8 +104,10 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
             <div class="col-4 d-flex align-items-center gap-3">
                 <div>
                     <FixedRouterLink :to="{ name: 'job', params: { id: job.id } }">
-                        <div class="fs-6 fw-bold">
-                            {{ job.label }}
+                        <div class="fs-6">
+                            <span>#</span>
+                            <span class="fw-bold me-2">{{ job.index }}</span>
+                            <span class="fw-bold">{{ job.runLabel }}</span>
                         </div>
                     </FixedRouterLink>
                     <div class="text-secondary small">
@@ -107,44 +118,10 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
             <div>
                 {{ job.payload.type }}
             </div>
-            <div class="col-3">
-                <template v-if="job.payload.type === ActionType.UpdateSchema">
-                    <VersionDisplay :version-id="job.payload.prevVersion" /> -> <VersionDisplay :version-id="job.payload.nextVersion" />
-                </template>
-                <div v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
-                    <FixedRouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id } }">
-                        {{ job.payload.datasource.label }}
-                    </FixedRouterLink>
-                    <div
-                        v-if="job.payload.mappings"
-                        class="d-flex flex-wrap"
-                    >
-                        <span
-                            v-for="(mapping, index) in job.payload.mappings"
-                            :key="mapping.id"
-                        >
-                            <FixedRouterLink 
-                                :to="{ name: 'mapping', params: {id: mapping.id } }"
-                            >
-                                {{ mapping.kindName }}
-                            </FixedRouterLink>
-                            <span
-                                v-if="index !== job.payload.mappings.length - 1"
-                                class="px-1"
-                            >,</span>
-                        </span>
-                    </div>
-                </div>
-                <template v-else>
-                    <FixedRouterLink
-                        v-for="datasource in job.payload.datasources"
-                        :key="datasource.id"
-                        :to="{ name: 'datasource', params: { id: datasource.id } }"
-                    >
-                        {{ datasource.label }}
-                    </FixedRouterLink>
-                </template>
-            </div>
+            <JobPayloadDisplay
+                :payload="job.payload"
+                class="col-3"
+            />
             <div class="flex-grow-1">
                 <div
                     v-if="job.error"
@@ -158,23 +135,23 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
             </div>
             <div class="d-flex gap-3 align-self-center">
                 <button
-                    v-if="job.state === JobState.Paused"
+                    v-if="job.state === JobState.Disabled"
                     :disabled="fetching"
                     class="success"
-                    @click="startJob"
+                    @click="enableJob"
                 >
-                    Start
+                    Enable
                 </button>
                 <button
-                    v-if="job.state === JobState.Paused || job.state === JobState.Ready"
+                    v-if="job.state === JobState.Ready"
                     :disabled="fetching"
                     class="warning"
-                    @click="cancelJob"
+                    @click="disableJob"
                 >
-                    Cancel
+                    Disable
                 </button>
                 <button
-                    v-if="job.state === JobState.Finished || job.state === JobState.Failed || job.state === JobState.Canceled"
+                    v-if="job.state === JobState.Finished || job.state === JobState.Failed"
                     :disabled="fetching"
                     class="info"
                     @click="restartJob"
@@ -193,16 +170,17 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                     :inference-edits="inferenceJobData?.edits"
                     :layout-type="inferenceJobData?.layoutType"
                     :candidates="inferenceJobData?.candidates"
-                    @update-edit="(edit) => updateJobResult(edit, false, null)"
-                    @cancel-edit="updateJobResult(null, false, null)"
-                    @change-layout="(newLayoutType) => updateJobResult(null, null, newLayoutType)"
+                    @update-edit="(edit) => updateJobResult(edit, false, null, null)"
+                    @cancel-edit="updateJobResult(null, false, null, null)"
+                    @change-layout="(newLayoutType) => updateJobResult(null, null, newLayoutType, null)"
+                    @save-positions="(map) => updateJobResult(null, false, null, map)"
                 >
                     <template #below-editor>
-                        <div class="d-flex justify-content-end mt-2">
+                        <div class="d-flex justify-content-center mt-2">
                             <button 
                                 :disabled="fetching"
                                 class="primary"
-                                @click="() => updateJobResult(null, true, null)"
+                                @click="() => updateJobResult(null, true, null, null)"
                             >
                                 Save and Finish
                             </button>

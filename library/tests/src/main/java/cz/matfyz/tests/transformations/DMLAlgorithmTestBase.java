@@ -1,10 +1,10 @@
 package cz.matfyz.tests.transformations;
 
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.core.instance.InstanceBuilder.InstanceAdder;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
-import cz.matfyz.tests.example.common.InstanceBuilder.InstanceAdder;
 import cz.matfyz.transformations.algorithms.DMLAlgorithm;
 import cz.matfyz.wrapperdummy.DMLTestStructure;
 import cz.matfyz.wrapperdummy.DummyDMLWrapper;

@@ -121,7 +121,8 @@ async function loadShortcuts() {
             shortcutConfig.value = await response.json();
         else 
             console.error('Failed to load shortcut config');
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error loading shortcuts:', error);
     }
 }
@@ -418,7 +419,7 @@ function cancel() {
         <NodeInput
             :model-value="selectedNodes"
             :type="SelectionType.Selected" 
-            @update:modelValue="selectedNodes = $event"
+            @update:model-value="selectedNodes = $event"
         />
         <ParentPropertyDisplay
             :property="localRootProperty"

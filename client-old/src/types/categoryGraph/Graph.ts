@@ -27,12 +27,12 @@ export class Graph {
 
     /// functions for Mapping editor
     public getChildrenForNode(node: Node): Node[] {
-        const outgoingEdges = Array.from(this.edges.values()).filter(edge => edge.domainNode.equals(node));
+        const outgoingEdges = [ ...this.edges.values() ].filter(edge => edge.domainNode.equals(node));
         return outgoingEdges.map(edge => edge.codomainNode);
     }
 
     public getSignature(node: Node, parentNode: Node): SequenceSignature {
-        const edge = Array.from(this.edges.values())
+        const edge = [ ...this.edges.values() ]
             .find(edge =>
                 ((edge.domainNode.equals(parentNode) && edge.codomainNode.equals(node)) ||
                 (edge.domainNode.equals(node) && edge.codomainNode.equals(parentNode))),
@@ -50,14 +50,14 @@ export class Graph {
     }
 
     public getEdges(node: Node): Edge[] {
-        return Array.from(this.edges.values())
+        return [ ...this.edges.values() ]
             .filter(edge =>
                 edge.domainNode.equals(node) || edge.codomainNode.equals(node),
             );
     }
 
     public getParentNode(node: Node): Node | undefined {
-        const incomingEdges = Array.from(this.edges.values()).filter(edge => edge.codomainNode.equals(node));
+        const incomingEdges = [ ...this.edges.values() ].filter(edge => edge.codomainNode.equals(node));
 
         if (incomingEdges.length === 0) {
             console.warn('No incoming edges found for node:', node);
