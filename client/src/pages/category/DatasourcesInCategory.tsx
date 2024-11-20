@@ -21,11 +21,11 @@ export function DatasourcesInCategoryPage() {
 
                 // Fetch datasources in category
                 const inCategoryResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
-                if (inCategoryResponse.status && inCategoryResponse.data) {
+                if (inCategoryResponse.status && inCategoryResponse.data) 
                     setDatasourcesInCategory(inCategoryResponse.data);
-                } else {
+                else 
                     throw new Error('Failed to fetch datasources in category');
-                }
+                
 
                 // Fetch all datasources and filter out ds in category
                 const allDatasourcesResponse = await api.datasources.getAllDatasources({});
@@ -34,7 +34,8 @@ export function DatasourcesInCategoryPage() {
                         ds => !inCategoryResponse.data.some(inCat => inCat.id === ds.id),
                     );
                     setOtherDatasources(notInCategory);
-                } else {
+                }
+                else {
                     throw new Error('Failed to fetch all datasources');
                 }
             } 
@@ -47,11 +48,11 @@ export function DatasourcesInCategoryPage() {
         };
 
         fetchDatasources();
-    }, [category.id]);
+    }, [ category.id ]);
 
     // callback to add new datasource
     const handleAddDatasource = (newDatasource: Datasource) => {
-        setOtherDatasources(prev => [...prev, newDatasource]);
+        setOtherDatasources(prev => [ ...prev, newDatasource ]);
     };
 
     const handleAddDatasourceInCategory = () => {
