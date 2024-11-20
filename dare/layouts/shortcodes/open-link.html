@@ -1,0 +1,15 @@
+{{ $url := .Get "url" }}
+{{ $label := .Get "label" }}
+{{ $style := "margin-bottom: 10px; text-align: center;" }}
+{{ if isset .Params "style" }}
+    {{ $style = .Get "style" }}
+{{ end }}
+
+<div style="{{ $style }}">
+    <button
+        onclick="window.open('{{ $url }}', '_blank');"
+        style="cursor: pointer; padding: 10px 20px; font-size: 16px;"
+    >
+        {{ $label }}
+    </button>
+</div>
