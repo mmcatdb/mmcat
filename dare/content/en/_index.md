@@ -21,6 +21,8 @@ The Yelp dataset includes business information, including reviews, user data and
 <img src="/img/yelp-dataset-sk.png" alt="Yelp dataset SK" width="300">
 
 <br />
+<br />
+<br />
 
 {{< button size="large" relref="datasets/imdb-dataset.md" >}}IMDb dataset{{< /button >}}
 
