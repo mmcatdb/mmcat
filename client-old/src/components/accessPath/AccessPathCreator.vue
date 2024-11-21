@@ -45,6 +45,8 @@ let processedNodes = new Set<number>();
  */
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
+const kindName = ref<string | undefined>(undefined);
+
 /**
  * Emits custom events to the parent component.
  */
@@ -69,7 +71,20 @@ function confirmSelectedNodes() {
     if (!props.selectedDatasource || !selectingRootNode.value) return;
 
     const label = selectingRootNode.value.metadata.label.toLowerCase();
-    accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
+    // I need to find the root's root first though
+    /*
+    const trueRoot = graph.getParentNode(selectingRootNode.value);
+    if (trueRoot) {
+        const trueLabel = trueRoot.metadata.label.toLowerCase();
+        accessPath.value = new GraphRootProperty(StaticName.fromString(trueLabel), trueRoot);
+        processNode(selectingRootNode.value);
+        kindName.value = label;
+    } else {
+        accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
+    }*/
+    accessPath.value = new GraphRootProperty(StaticName._anonymousInstance, selectingRootNode.value);
+    processNode(selectingRootNode.value);
+    kindName.value = label;
     
     if (selectedNodes.value.length !== 0) {
         selectedNodes.value.forEach(node => processNode(node));
@@ -101,9 +116,8 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
         return;
     }
 
-    // for complex properties I also add their children, because adding just the property w/o them would not make sense
-    //const children = filterChildren(node);
-    const children = graph.getChildrenForNode(node);
+    const children = filterChildren(node);
+    //const children = graph.getChildrenForNode(node);
     //const parentNode = graph.getParentNode(node);
     const parentNode = accessPath.value?.node;
 
@@ -116,7 +130,7 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
     if (!parentProperty) return;
 
     let subpath: GraphChildProperty;
-    if (children.length === 0) 
+    if (graph.getChildrenForNode(node).length === 0) 
         subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
     else 
         subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
@@ -173,7 +187,6 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
  * Updates the root property with a new root property and highlights the path.
  */
 function updateRootProperty(newRootProperty: GraphRootProperty) {
-    console.log('newRootProperty ', newRootProperty._subpaths );
     undoAccessPath();
     newRootProperty.node.becomeRoot();
     accessPath.value = newRootProperty;
@@ -195,7 +208,7 @@ function undoAccessPath() {
  * Emits the finish event with the primary key and the access path, signaling the end of the mapping process.
  */
 function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath.value);
+    emit('finish', primaryKey, accessPath.value, kindName.value);
 }
 
 /**
