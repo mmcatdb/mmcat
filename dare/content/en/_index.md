@@ -31,3 +31,15 @@ The IMDb dataset contains multiple files covering a wide range of information ab
 **Original Contents:**: 7 TSV files, ~1,100KB
 
 <img src="/img/imdb-dataset-sk.png" alt="Yelp dataset SK" width="300">
+
+<br />
+<br />
+<br />
+
+{{< button size="large" relref="datasets/swapi-dataset.md" >}}SWAPI dataset{{< /button >}}
+
+The SWAPI dataset holds detailed information about the Star Wars universe, covering a variety of entities and their interrelations. 
+
+**Original Contents**: 6 JSON files, ~61KB
+
+<img src="/img/swapi-dataset-sk.png" alt="Yelp dataset SK" width="300">
