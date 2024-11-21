@@ -9,7 +9,6 @@ import { DatasourcesPage, DatasourcesPageOverview } from '@/pages/DatasourcesPag
 import { DatasourceDetailPage } from '@/pages/DatasourceDetailPage';
 import { AdminerPage } from '@/pages/AdminerPage';
 import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
-import { ModelsPage } from '@/pages/ModelsPage';
 import { QueryingPage } from '@/pages/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
 import { Mapping } from '@/types/mapping';
@@ -116,21 +115,6 @@ export const router = createBrowserRouter([
                         handle: { breadcrumb: 'Editor' },
                     },
                     {
-                        id: routes.category.models.id,
-                        path: routes.category.models.path,
-                        Component: ModelsPage,
-                        handle: { breadcrumb: 'Models' },
-                        children: [
-                            {
-                                id: 'mapping',
-                                path: 'mappings/:mappingId',
-                                loader: mappingLoader,
-                                Component: MappingDisplay,
-                                handle: { breadcrumb: (data: MappingLoaderData) => data.mapping.kindName },
-                            },
-                        ],
-                    },
-                    {
                         id: routes.category.querying.id,
                         path: routes.category.querying.path,
                         Component: QueryingPage,
@@ -141,6 +125,15 @@ export const router = createBrowserRouter([
                         path: routes.category.datasources.path,
                         Component: DatasourcesInCategoryPage,
                         handle: { breadcrumb: 'Datasources' },
+                        children: [
+                            {
+                                id: 'mapping',
+                                path: 'mappings/:mappingId',
+                                loader: mappingLoader,
+                                Component: MappingDisplay,
+                                handle: { breadcrumb: (data: MappingLoaderData) => data.mapping.kindName },
+                            },
+                        ],
                     },
                 ],
             },

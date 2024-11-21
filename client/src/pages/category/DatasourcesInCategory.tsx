@@ -6,6 +6,7 @@ import type { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { Button } from '@nextui-org/react';
+import { Link } from 'react-router-dom';
 
 export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
@@ -55,10 +56,6 @@ export function DatasourcesInCategoryPage() {
         setOtherDatasources(prev => [ ...prev, newDatasource ]);
     };
 
-    const handleAddDatasourceInCategory = () => {
-        toast.error('Is it possible to add datasource to specific schema?');
-    };
-
     // callback to delete a datasource
     const handleDeleteDatasource = async (id: string) => {
         try {
@@ -80,9 +77,11 @@ export function DatasourcesInCategoryPage() {
 
     return (
         <div>
+            <Link to='mappings/1'>
+            Go here (/mappings/specificMapping)
+            </Link>
             <div className='flex items-center justify-between'>
                 <h1 className='text-xl'>Datasources in {category.label}</h1>
-                <Button onClick={handleAddDatasourceInCategory}>Add Datasource?</Button>
             </div>
 
             <div className='mt-5'>

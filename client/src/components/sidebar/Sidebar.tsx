@@ -62,11 +62,6 @@ export function Sidebar() {
                 iconName: 'documentText',
             },
             {
-                label: 'Models',
-                route: routes.category.models.resolve({ categoryId }),
-                iconName: 'documentText',
-            },
-            {
                 label: 'Querying',
                 route: routes.category.querying.resolve({ categoryId }),
                 iconName: 'documentText',
