@@ -29,3 +29,5 @@ The Yelp dataset includes business information, including reviews, user data and
 The IMDb dataset contains multiple files covering a wide range of information about films, TV shows, and media professionals.
 
 **Original Contents:**: 7 TSV files, ~1,100KB
+
+<img src="/img/imdb-dataset-sk.png" alt="Yelp dataset SK" width="300">
