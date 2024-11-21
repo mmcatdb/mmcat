@@ -211,9 +211,6 @@ public class JobExecutorService {
         for (final Mapping mapping : mappings)
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
 
-        System.out.println("instance after");
-        System.out.println(instance);
-
         if (instance != null)
             instanceService.saveCategory(run.sessionId, run.categoryId, instance);
     }
@@ -265,7 +262,6 @@ public class JobExecutorService {
                 LOGGER.info("... models executed.");
             }
         }
-        System.out.println(output.toString());
         job.data = new ModelJobData(output.toString());
     }
 

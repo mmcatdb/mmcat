@@ -47,11 +47,8 @@ public class DMLAlgorithm {
         final Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
         final Deque<DMLStackTriple> masterStack = new ArrayDeque<>();
         final List<AbstractStatement> output = new ArrayList<>();
-        if (domainRows.isEmpty())
-            System.out.println("domain rows are empty");
 
         for (final DomainRow row : domainRows) {
-            System.out.println("domain row: " + row);
             masterStack.push(new DMLStackTriple(row, AbstractDDLWrapper.EMPTY_NAME, mapping.accessPath()));
             output.add(buildStatement(masterStack));
         }

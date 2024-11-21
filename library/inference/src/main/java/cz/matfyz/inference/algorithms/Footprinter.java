@@ -22,7 +22,6 @@ public enum Footprinter {
     private static final Logger LOGGER = LoggerFactory.getLogger(Footprinter.class);
 
     public JavaRDD<PropertyHeuristics> process(AbstractInferenceWrapper wrapper) {
-        long start = System.currentTimeMillis();
 
         JavaPairRDD<String, PropertyHeuristics> heuristicsToReduce = wrapper.loadPropertyData();
 
@@ -73,9 +72,6 @@ public enum Footprinter {
         });*/
 
         List<PropertyHeuristics> list = new ObjectArrayList<>(heuristics.collect());
-
-        long end = System.currentTimeMillis();
-        System.out.println("RESULT_TIME_NEW_FOOTPRINTER WITHOUT LIST CONVERSION: " + (end - start) + "ms");
 
         return heuristics;
     }
