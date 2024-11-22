@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button, Modal, ModalHeader, ModalBody, ModalFooter, ModalContent } from '@nextui-org/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/datasource';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
 
@@ -72,6 +72,7 @@ type DatasourceTableProps = {
 
 function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSortChange }: DatasourceTableProps) {
     const { showTableIDs } = usePreferences().preferences;
+    const { categoryId } = useParams();
 
     const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
     const [ selectedDatasourceId, setSelectedDatasourceId ] = useState<string | null>(null);
@@ -95,9 +96,16 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     };
 
     const handleRowAction = (key: React.Key) => {
-        navigate(`/datasources/${key}`, {
-            state: { sortDescriptor },
-        });
+        if (categoryId) {
+            navigate(`/category/${categoryId}/datasources/${key}`, {
+                state: { sortDescriptor },
+            });
+        }
+        else {
+            navigate(`/datasources/${key}`, {
+                state: { sortDescriptor },
+            });
+        }
     };
 
     return (

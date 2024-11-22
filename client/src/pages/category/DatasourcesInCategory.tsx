@@ -5,7 +5,6 @@ import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
-import { Button } from '@nextui-org/react';
 import { Link } from 'react-router-dom';
 
 export function DatasourcesInCategoryPage() {
