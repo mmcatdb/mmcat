@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ShowTableIDsSwitch } from '../RootLayout';
 
 type SidebarItem = {
     label: string;
@@ -128,6 +129,9 @@ export function Sidebar() {
                             </Link>
                         );
                     })}
+                </div>
+                <div className='absolute bottom-5 left-5 w-full'>
+                    <ShowTableIDsSwitch />
                 </div>
             </div>
 

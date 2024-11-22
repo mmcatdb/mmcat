@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import clsx from 'clsx';
-import { Button, Navbar, NavbarContent, NavbarItem, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem } from '@nextui-org/react';
+import { Button, Navbar, NavbarContent, NavbarItem, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
 import { Tooltip } from './common';
@@ -110,4 +110,28 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 
 function toggleTheme(theme: Theme) {
     return theme === 'dark' ? 'light' : 'dark';
+}
+
+type ShowTableIDsSwitchProps = {
+    className?: string;
+};
+
+export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
+    const { preferences, setPreferences } = usePreferences();
+    const { showTableIDs } = preferences;
+
+    const handleChange = (isChecked: boolean) => {
+        setPreferences({ ...preferences, showTableIDs: isChecked });
+    };
+
+    return (
+        <div className={className}>
+            <Switch
+                isSelected={showTableIDs}
+                onChange={(e) => handleChange(e.target.checked)}
+            >
+                Show Table IDs
+            </Switch>
+        </div>
+    );
 }

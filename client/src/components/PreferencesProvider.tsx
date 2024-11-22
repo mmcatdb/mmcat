@@ -8,6 +8,7 @@ export type Theme = 'dark' | 'light';
 type Preferences = {
     theme: Theme;
     isCollapsed: boolean;
+    showTableIDs: boolean;
 };
 
 type PreferencesContext = {
@@ -18,6 +19,7 @@ type PreferencesContext = {
 type StoredPreferences = {
     theme: Theme;
     isCollapsed: boolean;
+    showTableIDs: boolean;
 };
 
 function fromStored(): Preferences {
@@ -26,6 +28,7 @@ function fromStored(): Preferences {
     return {
         theme: stored.theme ?? 'dark',
         isCollapsed: stored.isCollapsed ?? false,
+        showTableIDs: stored.showTableIDs ?? false,
     };
 }
 
@@ -35,6 +38,7 @@ function toStored(preferences: Preferences): StoredPreferences {
     return {
         theme: preferences.theme,
         isCollapsed: preferences.isCollapsed,
+        showTableIDs: preferences.showTableIDs,
     };
 }
 

@@ -3,6 +3,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/datasource';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { usePreferences } from '../PreferencesProvider';
 
 type SchemaCategoriesTableProps = {
     categories: Datasource[];
@@ -40,6 +41,7 @@ type DatasourceTableProps = {
 };
 
 function DatasourceTable({ categories }: DatasourceTableProps) {
+    const { showTableIDs } = usePreferences().preferences;
     const navigate = useNavigate();
 
     const handleRowAction = (key: React.Key) => {
@@ -59,13 +61,19 @@ function DatasourceTable({ categories }: DatasourceTableProps) {
                 isCompact
             >
                 <TableHeader>
-                    <TableColumn key='id'>
-                        ID
-                    </TableColumn>
-                    <TableColumn key='label'>
-                        Label
-                    </TableColumn>
-                    <TableColumn>Actions</TableColumn>
+                    {[
+                        ...(showTableIDs
+                            ? [
+                                <TableColumn key='id'>
+                                    ID
+                                </TableColumn>,
+                            ]
+                            : []),
+                        <TableColumn key='label'>
+                            Label
+                        </TableColumn>,
+                        <TableColumn key='actions'>Actions</TableColumn>,
+                    ]}
                 </TableHeader>
                 <TableBody emptyContent={'No rows to display.'}>
                     {categories.map((category) => (
@@ -73,19 +81,23 @@ function DatasourceTable({ categories }: DatasourceTableProps) {
                             key={category.id}
                             className='hover:bg-zinc-100 focus:bg-zinc-200 dark:hover:bg-zinc-800 dark:focus:bg-zinc-700 cursor-pointer'
                         >
-                            <TableCell>{category.id}</TableCell>
-                            <TableCell>{category.label}</TableCell>
-                            <TableCell>
-                                <Button
-                                    isIconOnly
-                                    aria-label='Delete'
-                                    color='danger'
-                                    variant='light'
-                                    onPress={() => handleDeleteClick(category.id)}
-                                >
-                                    <TrashIcon className='w-5 h-5' />
-                                </Button>
-                            </TableCell>
+                            {[
+                                ...(showTableIDs
+                                    ? [ <TableCell key='id'>{category.id}</TableCell> ]
+                                    : []),
+                                <TableCell key='label'>{category.label}</TableCell>,
+                                <TableCell key='actions'>
+                                    <Button
+                                        isIconOnly
+                                        aria-label='Delete'
+                                        color='danger'
+                                        variant='light'
+                                        onPress={() => handleDeleteClick(category.id)}
+                                    >
+                                        <TrashIcon className='w-5 h-5' />
+                                    </Button>
+                                </TableCell>,
+                            ]}
                         </TableRow>
                     ))}
                 </TableBody>

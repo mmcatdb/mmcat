@@ -4,6 +4,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/datasource';
 import { useNavigate } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
+import { usePreferences } from '../PreferencesProvider';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
@@ -70,6 +71,8 @@ type DatasourceTableProps = {
 };
 
 function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSortChange }: DatasourceTableProps) {
+    const { showTableIDs } = usePreferences().preferences;
+
     const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
     const [ selectedDatasourceId, setSelectedDatasourceId ] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -108,17 +111,24 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                 isCompact
             >
                 <TableHeader>
-                    <TableColumn key='id' allowsSorting>
-                        ID
-                    </TableColumn>
-                    <TableColumn key='type' allowsSorting>
-                        Type
-                    </TableColumn>
-                    <TableColumn key='label' allowsSorting>
-                        Label
-                    </TableColumn>
-                    <TableColumn>Settings</TableColumn>
-                    <TableColumn>Actions</TableColumn>
+                    {/* Conditional contruct of columns before rendering */}
+                    {[
+                        ...(showTableIDs
+                            ? [
+                                <TableColumn key='id' allowsSorting>
+                                    ID
+                                </TableColumn>,
+                            ]
+                            : []),
+                        <TableColumn key='type' allowsSorting>
+                            Type
+                        </TableColumn>,
+                        <TableColumn key='label' allowsSorting>
+                            Label
+                        </TableColumn>,
+                        <TableColumn key='settings'>Settings</TableColumn>,
+                        <TableColumn key='actions'>Actions</TableColumn>,
+                    ]}
                 </TableHeader>
                 <TableBody emptyContent={'No rows to display.'}>
                     {datasources.map((datasource) => (
@@ -126,23 +136,27 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                             key={datasource.id}
                             className='hover:bg-zinc-100 focus:bg-zinc-200 dark:hover:bg-zinc-800 dark:focus:bg-zinc-700 cursor-pointer'
                         >
-                            <TableCell>{datasource.id}</TableCell>
-                            <TableCell>{datasource.type}</TableCell>
-                            <TableCell>{datasource.label}</TableCell>
-                            <TableCell>
-                                {JSON.stringify(datasource.settings, null, 2)}
-                            </TableCell>
-                            <TableCell>
-                                <Button
-                                    isIconOnly
-                                    aria-label='Delete'
-                                    color='danger'
-                                    variant='light'
-                                    onPress={() => handleDeleteClick(datasource.id)}
-                                >
-                                    <TrashIcon className='w-5 h-5' />
-                                </Button>
-                            </TableCell>
+                            {[
+                                ...(showTableIDs
+                                    ? [ <TableCell key='id'>{datasource.id}</TableCell> ]
+                                    : []),
+                                <TableCell key='type'>{datasource.type}</TableCell>,
+                                <TableCell key='label'>{datasource.label}</TableCell>,
+                                <TableCell key='settings'>
+                                    {JSON.stringify(datasource.settings, null, 2)}
+                                </TableCell>,
+                                <TableCell key='actions'>
+                                    <Button
+                                        isIconOnly
+                                        aria-label='Delete'
+                                        color='danger'
+                                        variant='light'
+                                        onPress={() => handleDeleteClick(datasource.id)}
+                                    >
+                                        <TrashIcon className='w-5 h-5' />
+                                    </Button>
+                                </TableCell>,
+                            ]}
                         </TableRow>
                     ))}
                 </TableBody>
