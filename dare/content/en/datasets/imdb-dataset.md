@@ -5,7 +5,7 @@ weight: 0
 
 The IMDb dataset is a comprehensive collection of information about movies, TV shows, and the entertainment industry. It includes metadata such as titles, genres, release dates, ratings, cast and crew details, and user reviews.
 
-It is structure in TSV format including the following files:
+It is structured in TSV format including the following files:
 - `name.basics.tsv` with information about individuals in the industry
 - `title.akas.tsv` with alternative title for movies and TV shows
 - `title.basics.tsv` with fundamental details about titles

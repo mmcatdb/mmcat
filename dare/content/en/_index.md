@@ -30,7 +30,7 @@ The IMDb dataset contains multiple files covering a wide range of information ab
 
 **Original Contents:**: 7 TSV files, ~1,100KB
 
-<img src="/img/imdb-dataset-sk.png" alt="Yelp dataset SK" width="300">
+<img src="/img/imdb-dataset-sk.png" alt="IMDb dataset SK" width="300">
 
 <br />
 <br />
@@ -42,4 +42,16 @@ The SWAPI dataset holds detailed information about the Star Wars universe, cover
 
 **Original Contents**: 6 JSON files, ~61KB
 
-<img src="/img/swapi-dataset-sk.png" alt="Yelp dataset SK" width="300">
+<img src="/img/swapi-dataset-sk.png" alt="SWAPI dataset SK" width="300">
+
+<br />
+<br />
+<br />
+
+{{< button size="large" relref="datasets/bible-dataset.md" >}}BibleData dataset{{< /button >}}
+
+The BibleData dataset is a complex dataset containing structured information on Bible texts, translations, and metadata.
+
+**Original Contents**: 9 CSV files, ~2,800KB
+
+<img src="/img/bible-dataset-sk.png" alt="BibleData dataset SK" width="300">
