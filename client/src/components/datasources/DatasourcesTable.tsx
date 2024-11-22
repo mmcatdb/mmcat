@@ -128,11 +128,11 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                                 </TableColumn>,
                             ]
                             : []),
-                        <TableColumn key='type' allowsSorting>
-                            Type
-                        </TableColumn>,
                         <TableColumn key='label' allowsSorting>
                             Label
+                        </TableColumn>,
+                        <TableColumn key='type' allowsSorting>
+                            Type
                         </TableColumn>,
                         <TableColumn key='settings'>Settings</TableColumn>,
                         <TableColumn key='actions'>Actions</TableColumn>,
@@ -148,8 +148,8 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                                 ...(showTableIDs
                                     ? [ <TableCell key='id'>{datasource.id}</TableCell> ]
                                     : []),
-                                <TableCell key='type'>{datasource.type}</TableCell>,
                                 <TableCell key='label'>{datasource.label}</TableCell>,
+                                <TableCell key='type'>{datasource.type}</TableCell>,
                                 <TableCell key='settings'>
                                     {JSON.stringify(datasource.settings, null, 2)}
                                 </TableCell>,

@@ -5,25 +5,29 @@ import { ShowTableIDsSwitch } from '../RootLayout';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/project/context';
 
-type SidebarItem = {
+type NormalSidebarItem = {
+    type: 'normal';
     label: string;
-    route?: string;
-    iconName?: keyof typeof sidebarIconMap;
-    isSeparator?: boolean;   // because of this separator all other options (except label) may be optional
-    collapsedLabel?: string;
+    route: string;
+    iconName: keyof typeof sidebarIconMap;
 };
+
+type SeparatorSidebarItem = {
+    type: 'separator';
+    label: string;
+    collapsedLabel: string;
+};
+
+type SidebarItem = NormalSidebarItem | SeparatorSidebarItem;
 
 export function Sidebar() {
     const location = useLocation();
     const { categoryId } = useParams<'categoryId'>();
     const { isCollapsed } = usePreferences().preferences;
 
-    // Category is not open, show the general sidebar items
-    let dynamicSidebarItems: SidebarItem[] = generalSidebarItems;
-
-    // If categoryId exists, replace the items in the sidebar with project-specific ones
-    if (categoryId) 
-        dynamicSidebarItems = SideBarItemsinCategory(categoryId);
+    const dynamicSidebarItems: SidebarItem[] = categoryId
+        ? SideBarItemsinCategory(categoryId)
+        : generalSidebarItems;
 
     return (
         <div
@@ -43,7 +47,7 @@ export function Sidebar() {
             {/* Sidebar Items */}
             <div className='flex flex-col'>
                 {dynamicSidebarItems.map((item) => {
-                    if (item.isSeparator) {
+                    if (item.type === 'separator') {
                         return (
                             <p
                                 key={`separator-${item.label}`}
@@ -55,12 +59,12 @@ export function Sidebar() {
                     }
 
                     const isActive = item.route === location.pathname;
-                    const icon = item.iconName ? sidebarIconMap[item.iconName] : null;
+                    const icon = sidebarIconMap[item.iconName];
 
                     return (
                         <Link
                             key={item.route}
-                            to={item.route ?? '#'}
+                            to={item.route}
                             className={`flex items-center px-3 py-3 mx-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 ${
                                 isActive ? 'text-blue-600 font-semibold' : ''
                             }`}
@@ -68,7 +72,7 @@ export function Sidebar() {
                             <span className='flex-shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
                     
                             <span
-                                className={`ml-2 whitespace-nowrap overflow-hidden   ${
+                                className={`ml-2 whitespace-nowrap overflow-hidden ${
                                     isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
                                 }`}
                             >
@@ -95,21 +99,25 @@ export function Sidebar() {
 
 const generalSidebarItems: SidebarItem[] = [
     {
+        type: 'normal',
         label: 'Schema categories',
         route: '/schema-categories',
         iconName: 'heart',
     },
     {
+        type: 'normal',
         label: 'About',
         route: '/about',
         iconName: 'lightBulb',
     },
     {
+        type: 'normal',
         label: 'Datasources',
         route: '/datasources',
         iconName: 'circleStack',
     },
     {
+        type: 'normal',
         label: 'Adminer',
         route: '/adminer',
         iconName: 'codeBracketSquare',
@@ -117,23 +125,31 @@ const generalSidebarItems: SidebarItem[] = [
 ];
 
 const SideBarItemsinCategory = (categoryId: string): SidebarItem[] => [
-    { label: 'Schema Category', isSeparator: true, collapsedLabel: 'SC' },
     {
+        type: 'separator',
+        label: 'Schema Category',
+        collapsedLabel: 'SC',
+    },
+    {
+        type: 'normal',
         label: 'Overview',
         route: routes.category.index.resolve({ categoryId }),
         iconName: 'documentText',
     },
     {
+        type: 'normal',
         label: 'Editor',
         route: routes.category.editor.resolve({ categoryId }),
         iconName: 'documentText',
     },
     {
+        type: 'normal',
         label: 'Querying',
         route: routes.category.querying.resolve({ categoryId }),
         iconName: 'documentText',
     },
     {
+        type: 'normal',
         label: 'Datasources',
         route: routes.category.datasources.resolve({ categoryId }),
         iconName: 'documentText',
