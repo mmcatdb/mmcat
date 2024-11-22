@@ -72,7 +72,7 @@ function confirmSelectedNodes() {
 
     const label = selectingRootNode.value.metadata.label.toLowerCase();
     // I need to find the root's root first though
-    /*
+    
     const trueRoot = graph.getParentNode(selectingRootNode.value);
     if (trueRoot) {
         const trueLabel = trueRoot.metadata.label.toLowerCase();
@@ -81,10 +81,12 @@ function confirmSelectedNodes() {
         kindName.value = label;
     } else {
         accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
-    }*/
+    }
+   /*
     accessPath.value = new GraphRootProperty(StaticName._anonymousInstance, selectingRootNode.value);
     processNode(selectingRootNode.value);
     kindName.value = label;
+    */
     
     if (selectedNodes.value.length !== 0) {
         selectedNodes.value.forEach(node => processNode(node));

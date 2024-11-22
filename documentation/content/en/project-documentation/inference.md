@@ -17,6 +17,8 @@ And finally, the addition of the inference functionality showed the need for an 
 
 Through this integration, users are now able to infer and adjust a Schema Category from any input data stored in a single-model format. 
 
+![Architecture with Inference](/img/architecture-overall.png)
+
 ## Class Design
 
 Detailed class design and structure of MM-infer is documented separately in the tool's documentation, here we present the underlying classes that make up the Schema Conversion Component and the Inference Editor. 
