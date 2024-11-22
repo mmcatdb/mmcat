@@ -6,15 +6,21 @@ import { usePreferences, type Theme } from './PreferencesProvider';
 import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
+import { cn } from './utils';
 
 export function RootLayout() {
-    const { theme } = usePreferences().preferences;
+    const { theme, isCollapsed } = usePreferences().preferences;
 
     return (
-        <div className={clsx('h-screen overflow-hidden text-foreground bg-background', theme)}>
+        <div className={cn('h-screen overflow-hidden text-foreground bg-background', theme)}>
             <div className='flex h-full'>
                 <Sidebar />
-                <div className='flex flex-col flex-grow overflow-hidden'>
+                <div
+                    className={cn(
+                        'flex flex-col flex-grow overflow-hidden transition-all duration-200',
+                        isCollapsed ? 'ml-16' : 'ml-64',
+                    )}
+                >
                     <CommonNavbar />
                     <main className='flex-grow overflow-auto w-full max-w-screen-xl mx-auto p-6'>
                         <Outlet />

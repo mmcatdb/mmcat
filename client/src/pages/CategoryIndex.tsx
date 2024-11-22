@@ -44,7 +44,6 @@ function CategoryIndexInner() {
     return (
         <div>
             {/* <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}> */}
-            {/* TODO: place category.label to navbar (via portal or sth) */}
             <h1 className='text-xl'>
                 {category.label}
             </h1>
