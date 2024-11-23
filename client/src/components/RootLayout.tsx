@@ -17,13 +17,17 @@ export function RootLayout() {
                 <Sidebar />
                 <div
                     className={cn(
-                        'flex flex-col flex-grow overflow-hidden transition-all duration-200',
+                        'flex flex-col flex-grow transition-all duration-200',
                         isCollapsed ? 'ml-16' : 'ml-64',
                     )}
                 >
                     <CommonNavbar />
-                    <main className='flex-grow overflow-auto w-full max-w-screen-xl mx-auto p-6'>
-                        <Outlet />
+                    <main className='flex-grow relative overflow-hidden'>
+                        <div className='absolute inset-0 overflow-y-auto'>
+                            <div className='w-full max-w-screen-xl mx-auto p-6'>
+                                <Outlet />
+                            </div>
+                        </div>
                     </main>
                 </div>
             </div>
