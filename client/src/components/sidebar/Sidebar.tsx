@@ -4,6 +4,7 @@ import { sidebarIconMap } from '@/components/icons/Icons';
 import { ShowTableIDsSwitch } from '../RootLayout';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/project/context';
+import { Tooltip } from '@nextui-org/react';
 
 type NormalSidebarItem = {
     type: 'normal';
@@ -35,59 +36,19 @@ export function Sidebar() {
                 isCollapsed ? 'w-16' : 'w-64'
             }`}
         >
-            {/* Title (also link to Main page) */}
-            <Link to={routes.home.path} className='flex items-center mb-6'>
-                <h1
-                    className={`text-xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden `}
-                >
-                    {isCollapsed ? 'MM' : 'MM-cat'}
-                </h1>
-            </Link>
+            <SidebarHeader isCollapsed={isCollapsed} />
 
-            {/* Sidebar Items */}
             <div className='flex flex-col'>
-                {dynamicSidebarItems.map((item) => {
-                    if (item.type === 'separator') {
-                        return (
-                            <p
-                                key={`separator-${item.label}`}
-                                className={`font-semibold px-4 py-3 transition-all whitespace-nowrap duration-300 overflow-hidden`}
-                            >
-                                {isCollapsed ? item.collapsedLabel : item.label}
-                            </p>
-                        );
-                    }
-
-                    const isActive = item.route === location.pathname;
-                    const icon = sidebarIconMap[item.iconName];
-
-                    return (
-                        <Link
-                            key={item.route}
-                            to={item.route}
-                            className={`flex items-center px-3 py-3 mx-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 ${
-                                isActive ? 'text-blue-600 font-semibold' : ''
-                            }`}
-                        >
-                            <span className='flex-shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
+                {dynamicSidebarItems.map((item) => (
+                    <SideBarItemComponent key={item.label} item={item} isCollapsed={isCollapsed} currentPath={location.pathname} />
                     
-                            <span
-                                className={`ml-2 whitespace-nowrap overflow-hidden ${
-                                    isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
-                                }`}
-                            >
-                                {item.label}
-                            </span>
-                        </Link>
-                    );
-                })}
+                ))}
             </div>
 
             <div className='px-3 py-2'>
                 <CollapseContextToggle />
             </div>
 
-            {/* Footer */}
             <div className='absolute bottom-5 left-5 w-full'>
                 <ShowTableIDsSwitch />
             </div>
@@ -96,6 +57,76 @@ export function Sidebar() {
 
     );
 }
+
+const SidebarHeader = ({ isCollapsed }: { isCollapsed: boolean }) => (
+    <Link to={routes.home.path} className='flex items-center mb-6'>
+        <h1
+            className={`text-xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden `}
+        >
+            {isCollapsed ? 'MM' : 'MM-cat'}
+        </h1>
+    </Link>
+);
+
+const SideBarItemComponent = ({ 
+    item,
+    isCollapsed,
+    currentPath,
+}: {
+    item : SidebarItem;
+    isCollapsed: boolean;
+    currentPath: string;
+}) => {
+    switch (item.type) {
+    case 'separator':
+        return (
+            <p
+                key={`separator-${item.label}`}
+                className={`font-semibold px-4 py-3 transition-all whitespace-nowrap duration-300 overflow-hidden`}
+            >
+                {isCollapsed ? item.collapsedLabel : item.label}
+            </p>
+        );
+            
+    case 'normal': {
+        const isActive = item.route === currentPath;
+        const icon = sidebarIconMap[item.iconName];
+
+        const linkContent = (
+            <Link
+                key={item.route}
+                to={item.route}
+                className={`flex items-center px-3 py-3 mx-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 ${
+                    isActive ? 'text-blue-600 font-semibold' : ''
+                }`}
+            >
+                <span className='flex-shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
+        
+                <span
+                    className={`ml-2 whitespace-nowrap overflow-hidden ${
+                        isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                    }`}
+                >
+                    {item.label}
+                </span>
+            </Link>
+        );
+
+        return isCollapsed ? (
+            <Tooltip key={item.label} placement='right' content={item.label}>
+                {linkContent}
+            </Tooltip>
+        ) : (
+            linkContent
+        );
+    }
+
+    default: {
+        const _exhaustiveCheck: never = item;
+        throw new Error(`Unhandled SidebarItem type: ${_exhaustiveCheck}`);
+    }
+    }
+};
 
 const generalSidebarItems: SidebarItem[] = [
     {
