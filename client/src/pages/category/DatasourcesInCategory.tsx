@@ -5,7 +5,6 @@ import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
-import { Link } from 'react-router-dom';
 
 export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
@@ -76,9 +75,6 @@ export function DatasourcesInCategoryPage() {
 
     return (
         <div>
-            <Link to='mappings/1'>
-            Go here (/mappings/specificMapping)
-            </Link>
             <div className='flex items-center justify-between'>
                 <h1 className='text-xl'>Datasources in {category.label}</h1>
             </div>

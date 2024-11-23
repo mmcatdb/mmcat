@@ -135,8 +135,9 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
             <Switch
                 isSelected={showTableIDs}
                 onChange={(e) => handleChange(e.target.checked)}
+                size='sm'
             >
-                Show Table IDs
+                <p className='text-small'>Show Table IDs</p>
             </Switch>
         </div>
     );

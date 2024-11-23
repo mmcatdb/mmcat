@@ -18,7 +18,7 @@ type IconSet = {
     solid: JSX.Element;
 };
 
-const className='mr-2 w-5 h-5';
+const className='mr-2 w-6 h-6';
 
 export const sidebarIconMap: Record<string, IconSet> = {
     heart: {

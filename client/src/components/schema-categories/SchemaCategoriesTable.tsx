@@ -2,17 +2,28 @@ import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCel
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/datasource';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { usePreferences } from '../PreferencesProvider';
+import { ConfirmationModal, useSortableData } from '../TableCommon';
+import { type SortDescriptor } from '@react-types/shared';
+import { useState } from 'react';
 
 type SchemaCategoriesTableProps = {
     categories: Datasource[];
     loading: boolean;
     error: string | null;
-    onDeleteDatasource: (id: string) => void;
+    onDeleteCategory: (id: string) => void;
 };
 
-export const SchemaCategoriesTable = ({ categories, loading, error, onDeleteDatasource }: SchemaCategoriesTableProps) => {
+export const SchemaCategoriesTable = ({ categories, loading, error, onDeleteCategory }: SchemaCategoriesTableProps) => {
+    const { sortedData: sortedCategories, sortDescriptor, setSortDescriptor } = useSortableData(categories, {
+        column: 'label',
+        direction: 'ascending',
+    });
+
+    const handleSortChange = (newSortDescriptor: SortDescriptor) => {
+        setSortDescriptor(newSortDescriptor);
+    };
+
     if (loading) {
         return (
             <div>
@@ -21,42 +32,64 @@ export const SchemaCategoriesTable = ({ categories, loading, error, onDeleteData
         );
     }
 
-    // TODO: error page
+    // TODO: error component
     if (error) 
         return <p>{error}</p>;
 
     return (
         <div>
-            <DatasourceTable
-                categories={categories}
-                onDeleteDatasource={onDeleteDatasource}
+            <CategoriesTable
+                categories={sortedCategories}
+                onDeleteCategory={onDeleteCategory}
+                sortDescriptor={sortDescriptor}
+                onSortChange={handleSortChange}
             />
         </div>
     );
 };
 
-type DatasourceTableProps = {
+type CategoriesTableProps = {
   categories: Datasource[];
-  onDeleteDatasource: (id: string) => void;
+  onDeleteCategory: (id: string) => void;
+  sortDescriptor: SortDescriptor;
+  onSortChange: (sortDescriptor: SortDescriptor) => void;
 };
 
-function DatasourceTable({ categories }: DatasourceTableProps) {
+function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortChange }: CategoriesTableProps) {
     const { showTableIDs } = usePreferences().preferences;
     const navigate = useNavigate();
+    const [ selectedCategoryId, setSelectedCategoryId ] = useState<string | null>(null);
+    const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
 
     const handleRowAction = (key: React.Key) => {
         navigate(`/category/${key}`, {});
     };
 
-    function handleDeleteClick(id: string): void {
-        toast.error('Not implemented yet. Can\'t delete ' + id);
-    }
+    const handleDeleteClick = (id: string) => {
+        setSelectedCategoryId(id);
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setSelectedCategoryId(null);
+        setModalOpen(false);
+    };
+
+    const confirmDelete = () => {
+        if (selectedCategoryId)
+            onDeleteCategory(selectedCategoryId);
+
+        setModalOpen(false);
+    };
+
 
     return (
         <>
             <Table 
                 aria-label='Datasource Table'
                 onRowAction={handleRowAction}
+                sortDescriptor={sortDescriptor}
+                onSortChange={onSortChange}
                 removeWrapper
                 isCompact
             >
@@ -64,12 +97,12 @@ function DatasourceTable({ categories }: DatasourceTableProps) {
                     {[
                         ...(showTableIDs
                             ? [
-                                <TableColumn key='id'>
+                                <TableColumn key='id' allowsSorting>
                                     ID
                                 </TableColumn>,
                             ]
                             : []),
-                        <TableColumn key='label'>
+                        <TableColumn key='label' allowsSorting>
                             Label
                         </TableColumn>,
                         <TableColumn key='actions'>Actions</TableColumn>,
@@ -102,8 +135,17 @@ function DatasourceTable({ categories }: DatasourceTableProps) {
                     ))}
                 </TableBody>
             </Table>
+
+            <ConfirmationModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                onConfirm={confirmDelete}
+                title='Confirm Deletion?'
+                message='This will permanently delete the selected datasource.'
+                confirmButtonText='Yes, Delete'
+                cancelButtonText='Cancel'
+                confirmButtonColor='danger'
+            />
         </>
     );
 }
-
-export default SchemaCategoriesTable;

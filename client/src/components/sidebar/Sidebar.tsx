@@ -49,7 +49,7 @@ export function Sidebar() {
                 <CollapseContextToggle />
             </div>
 
-            <div className='absolute bottom-5 left-5 w-full'>
+            <div className='absolute bottom-5 left-3 w-full'>
                 <ShowTableIDsSwitch />
             </div>
         </div>
@@ -113,7 +113,7 @@ const SideBarItemComponent = ({
         );
 
         return isCollapsed ? (
-            <Tooltip key={item.label} placement='right' content={item.label}>
+            <Tooltip delay={200} closeDelay={0} key={item.label} placement='right' content={item.label} showArrow>
                 {linkContent}
             </Tooltip>
         ) : (
@@ -175,14 +175,14 @@ const SideBarItemsinCategory = (categoryId: string): SidebarItem[] => [
     },
     {
         type: 'normal',
-        label: 'Querying',
-        route: routes.category.querying.resolve({ categoryId }),
-        iconName: 'documentText',
+        label: 'Datasources',
+        route: routes.category.datasources.resolve({ categoryId }),
+        iconName: 'circleStack',
     },
     {
         type: 'normal',
-        label: 'Datasources',
-        route: routes.category.datasources.resolve({ categoryId }),
+        label: 'Querying',
+        route: routes.category.querying.resolve({ categoryId }),
         iconName: 'documentText',
     },
 ];

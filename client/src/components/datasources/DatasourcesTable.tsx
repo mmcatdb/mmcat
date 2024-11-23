@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button, Modal, ModalHeader, ModalBody, ModalFooter, ModalContent } from '@nextui-org/react';
+import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/datasource';
 import { useNavigate, useParams } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
+import { ConfirmationModal, useSortableData } from '../TableCommon';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
@@ -14,25 +15,9 @@ type DatasourcesTableProps = {
 };
 
 export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasource }: DatasourcesTableProps) => {
-    const [ sortDescriptor, setSortDescriptor ] = useState<SortDescriptor>({
-        column: 'id',
+    const { sortedData: sortedDatasources, sortDescriptor, setSortDescriptor } = useSortableData(datasources, {
+        column: 'label',
         direction: 'ascending',
-    });
-
-    const sortedDatasources = [ ...datasources ].sort((a, b) => {
-        let fieldA = a[sortDescriptor.column as keyof Datasource];
-        let fieldB = b[sortDescriptor.column as keyof Datasource];
-
-        if (typeof fieldA === 'string' && typeof fieldB === 'string') {
-            fieldA = fieldA.toLowerCase();
-            fieldB = fieldB.toLowerCase();
-        }
-
-        if (fieldA < fieldB)
-            return sortDescriptor.direction === 'ascending' ? -1 : 1;
-        if (fieldA > fieldB)
-            return sortDescriptor.direction === 'ascending' ? 1 : -1;
-        return 0;
     });
 
     const handleSortChange = (newSortDescriptor: SortDescriptor) => {
@@ -47,7 +32,7 @@ export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasour
         );
     }
 
-    // TODO: error page
+    // TODO: error component
     if (error)
         return <p>{error}</p>;
 
@@ -170,30 +155,16 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                 </TableBody>
             </Table>
 
-            {/* Confirmation of datasource delete */}
-            <Modal
+            <ConfirmationModal
                 isOpen={isModalOpen}
                 onClose={closeModal}
-            >
-                <ModalContent>
-                    <ModalHeader>
-                        <p>Confirm Deletion?</p>
-                    </ModalHeader>
-                    <ModalBody>
-                        <p>This will permanently delete the selected datasource.</p>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button onPress={closeModal}>
-                            Cancel
-                        </Button>
-                        <Button color='danger' onPress={confirmDelete}>
-                            Yes, Delete
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+                onConfirm={confirmDelete}
+                title='Confirm Deletion?'
+                message='This will permanently delete the selected datasource.'
+                confirmButtonText='Yes, Delete'
+                cancelButtonText='Cancel'
+                confirmButtonColor='danger'
+            />
         </>
     );
 }
-
-export default DatasourcesTable;

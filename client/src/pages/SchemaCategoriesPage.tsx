@@ -14,7 +14,7 @@ export function SchemaCategoriesPage() {
     const [ schemaCategories, setSchemaCategories ] = useState<SchemaCategoryInfoFromServer[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
-    const [isCreatingSchema, setIsCreatingSchema] = useState<boolean>(false);
+    const [ isCreatingSchema, setIsCreatingSchema ] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchSchemaCategories = async () => {
@@ -48,14 +48,17 @@ export function SchemaCategoriesPage() {
             const response = await api.schemas.createExampleCategory({ name });
             if (response.status && response.data) {
                 const newCategory = response.data;
-                setSchemaCategories((categories) => [...categories, newCategory]);
+                setSchemaCategories((categories) => [ ...categories, newCategory ]);
                 toast.success(`Example schema '${name}' created successfully!`);
-            } else {
+            }
+            else {
                 toast.error('Failed to create example schema.');
             }
-        } catch (err) {
+        }
+        catch (err) {
             toast.error('Error occurred while creating example schema.');
-        } finally {
+        }
+        finally {
             setIsCreatingSchema(false);
         }
     }, []);
@@ -79,6 +82,7 @@ export function SchemaCategoriesPage() {
             </div>
             <div className='mt-5'>
                 <SchemaCategoriesTable
+                    // TODO: fix this
                     categories={schemaCategories}
                     loading={loading}
                     error={error}
