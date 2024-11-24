@@ -18,7 +18,11 @@ public class AccessPathBuilder {
     }
 
     public ComplexProperty complex(Signature name, Signature signature, AccessPath... subpaths) {
-        return new ComplexProperty(new DynamicName(name), signature, List.of(subpaths));
+        return new ComplexProperty(new DynamicName(name, null), signature, List.of(subpaths));
+    }
+
+    public ComplexProperty complex(Signature name, String pattern, Signature signature, AccessPath... subpaths) {
+        return new ComplexProperty(new DynamicName(name, pattern), signature, List.of(subpaths));
     }
 
     public ComplexProperty complex(BuilderMorphism name, BuilderMorphism morphism, AccessPath... subpaths) {
@@ -30,7 +34,11 @@ public class AccessPathBuilder {
     }
 
     public ComplexProperty auxiliary(Signature name, AccessPath... subpaths) {
-        return new ComplexProperty(new DynamicName(name), Signature.createEmpty(), List.of(subpaths));
+        return new ComplexProperty(new DynamicName(name, null), Signature.createEmpty(), List.of(subpaths));
+    }
+
+    public ComplexProperty auxiliary(Signature name, String pattern, AccessPath... subpaths) {
+        return new ComplexProperty(new DynamicName(name, pattern), Signature.createEmpty(), List.of(subpaths));
     }
 
     public ComplexProperty auxiliary(BuilderMorphism name, AccessPath... subpaths) {
@@ -52,7 +60,11 @@ public class AccessPathBuilder {
     }
 
     public SimpleProperty simple(Signature name, Signature signature) {
-        return new SimpleProperty(new DynamicName(name), signature);
+        return new SimpleProperty(new DynamicName(name, null), signature);
+    }
+
+    public SimpleProperty simple(Signature name, String pattern, Signature signature) {
+        return new SimpleProperty(new DynamicName(name, pattern), signature);
     }
 
     public SimpleProperty simple(BuilderMorphism name, BuilderMorphism morphism) {

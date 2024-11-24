@@ -45,14 +45,17 @@ class JsonTests {
 
     @Test
     void name() {
-        final var anonymous = StaticName.createAnonymous();
-        fullTest(anonymous);
+        final var anonymous1 = StaticName.createAnonymous();
+        fullTest(anonymous1);
 
-        final var _static = new StaticName("Static name");
-        fullTest(_static);
+        final var static1 = new StaticName("Static name");
+        fullTest(static1);
 
-        final var dynamic = new DynamicName(Signature.createBase(69));
-        fullTest(dynamic);
+        final var dynamic1 = new DynamicName(Signature.createBase(69), null);
+        fullTest(dynamic1);
+
+        final var dynamic2 = new DynamicName(Signature.createBase(69), "*xxx*");
+        fullTest(dynamic2);
     }
 
     @Test

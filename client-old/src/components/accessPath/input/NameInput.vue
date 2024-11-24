@@ -93,7 +93,7 @@ function updateInnerValue() {
         v-model="type"
         type="radio"
         :value="NameType.Dynamic"
-        :disabled="disabled || !datasource.configuration.isDynamicNamingAllowed || isSelfIdentifier"
+        :disabled="disabled || isSelfIdentifier"
         @change="updateInnerValue"
     />
     <label

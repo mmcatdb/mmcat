@@ -33,11 +33,6 @@ public interface AbstractPathWrapper {
     boolean isGroupingAllowed();
 
     /**
-     * Names of properties can be dynamic, meaning that the name of the property is derived from the data (so it is basically just another value).
-     */
-    boolean isDynamicNamingAllowed();
-
-    /**
      * Properties can be anonymous, meaning they have "no name". This is the case for, e.g., property representing elements in an array.
      * Note that the root property of an access path can be anonymous regardless of this rule (although it might be worthy to investigate if that makes sense).
      */

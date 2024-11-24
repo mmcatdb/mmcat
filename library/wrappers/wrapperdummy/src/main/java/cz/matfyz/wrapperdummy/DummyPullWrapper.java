@@ -8,19 +8,14 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
-import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,7 +26,6 @@ public class DummyPullWrapper implements AbstractPullWrapper {
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         if (!(query instanceof StringQuery stringQuery))
             throw PullForestException.invalidQuery(this, query);
-
         try {
             return innerPullForest(path, stringQuery);
         }
@@ -40,110 +34,73 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    private Map<DynamicName, DynamicNameReplacement> replacedNames;
+
     private ForestOfRecords innerPullForest(ComplexProperty path, StringQuery query) throws JSONException {
-        var json = new JSONArray(query.content);
-        var forest = new ForestOfRecords();
+        final var json = new JSONArray(query.content);
+        final var forest = new ForestOfRecords();
+
+        replacedNames = path.copyWithoutDynamicNames().replacedNames();
 
         for (int i = 0; i < json.length(); i++) {
-            JSONObject object = json.getJSONObject(i);
-            var rootRecord = new RootRecord();
+            final JSONObject object = json.getJSONObject(i);
+            final var rootRecord = new RootRecord();
 
-            getDataFromObject(rootRecord, object, path);
+            addKeysToRecord(rootRecord, path, object);
             forest.addRecord(rootRecord);
         }
 
         return forest;
     }
 
-    private void getDataFromObject(ComplexRecord parentRecord, JSONObject object, ComplexProperty path) throws JSONException {
-        boolean hasSubpathWithDynamicName = false;
-
-        for (AccessPath subpath : path.subpaths()) {
-            if (subpath.name() instanceof StaticName staticName)
-                getFieldWithKeyForSubpathFromObject(parentRecord, object, staticName.getStringName(), subpath);
-            else
-                hasSubpathWithDynamicName = true;
-        }
-
-        if (hasSubpathWithDynamicName)
-            getDataFromDynamicFieldsOfObject(parentRecord, object, path);
-    }
-
-    private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, JSONObject object, ComplexProperty path) throws JSONException {
-        // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name
-        AccessPath subpathWithDynamicName = null;
-        Set<String> otherSubpathNames = new TreeSet<>();
-
-        for (AccessPath subpath : path.subpaths()) {
-            if (subpath.name() instanceof StaticName staticName)
-                otherSubpathNames.add(staticName.getStringName());
-            else
-                subpathWithDynamicName = subpath;
-
-        }
-
-        // For all keys in the object where the key is not a known static name do ...
-        Iterator<?> iterator = object.keys();
+    private void addKeysToRecord(ComplexRecord record, ComplexProperty path, JSONObject object) throws JSONException {
+        final var iterator = object.keys();
         while (iterator.hasNext()) {
-            if (iterator.next() instanceof String key && !otherSubpathNames.contains(key)) {
-                getFieldWithKeyForSubpathFromObject(parentRecord, object, key, subpathWithDynamicName);
+            final var key = (String) iterator.next();
+            if (object.isNull(key))
+                continue;
+
+            final var subpath = path.findSubpathByName(key);
+            if (subpath == null)
+                continue;
+
+            final var value = object.get(key);
+            if (!(subpath.name() instanceof final DynamicName dynamicName)) {
+                addValueToRecord(record, subpath, value);
+                continue;
             }
+
+            // Replace the dynamically named property with an object containing both name and value properties.
+            final var replacement = replacedNames.get(dynamicName);
+            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
+            addValueToRecord(replacer, replacement.value(), value);
         }
     }
 
-    private void getFieldWithKeyForSubpathFromObject(ComplexRecord parentRecord, JSONObject object, String key, AccessPath subpath) throws JSONException {
-        if (object.isNull(key)) // Returns if the value is null or if the value doesn't exist.
+    private void addValueToRecord(ComplexRecord parentRecord, AccessPath property, Object value) throws JSONException {
+        if (value instanceof final JSONArray array) {
+            // If it's array, we flatten it.
+            for (int i = 0; i < array.length(); i++)
+                addValueToRecord(parentRecord, property, array.get(i));
             return;
-
-        var value = object.get(key);
-
-        if (subpath instanceof ComplexProperty complexSubpath) {
-            if (value instanceof JSONArray childArray) {
-                for (int i = 0; i < childArray.length(); i++)
-                    addComplexValueToRecord(parentRecord, childArray.getJSONObject(i), key, complexSubpath);
-            }
-            else if (value instanceof JSONObject childObject)
-                addComplexValueToRecord(parentRecord, childObject, key, complexSubpath);
         }
-        else if (subpath instanceof SimpleProperty simpleSubpath) {
-            if (value instanceof JSONArray simpleArray) {
-                var values = new ArrayList<String>();
 
-                for (int i = 0; i < simpleArray.length(); i++)
-                    values.add(simpleArray.get(i).toString());
-
-                parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), key), simpleSubpath.signature(), values);
-            }
-            else {
-                RecordName recordName = toRecordName(simpleSubpath.name(), key);
-                parentRecord.addSimpleValueRecord(recordName, simpleSubpath.signature(), value.toString());
-            }
+        if (property instanceof final SimpleProperty simpleProperty) {
+            // If it's a simple value, we add it to the record.
+            parentRecord.addSimpleRecord(simpleProperty.signature(), value.toString());
+            return;
         }
-    }
 
-    private void addComplexValueToRecord(ComplexRecord parentRecord, JSONObject value, String key, ComplexProperty complexProperty) throws JSONException {
+        final var complexProperty = (ComplexProperty) property;
+        final var object = (JSONObject) value;
+
         // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
         // We do so by passing the parent record instead of creating a new one.
-        if (complexProperty.isAuxiliary())
-            getDataFromObject(parentRecord, value, complexProperty);
-        else {
-            ComplexRecord childRecord = parentRecord.addComplexRecord(toRecordName(complexProperty.name(), key), complexProperty.signature());
-            getDataFromObject(childRecord, value, complexProperty);
+        final ComplexRecord childRecord = complexProperty.isAuxiliary()
+            ? parentRecord
+            : parentRecord.addComplexRecord(complexProperty.signature());
 
-            // Dynamic complex property is just a normal complex property with additional simple property for name.
-            /*
-            if (complexProperty.name() instanceof DynamicName dynamicName)
-                childRecord.addSimpleValueRecord(RecordName.LeftDynamic(), dynamicName.signature(), childRecord.name().value());
-            */
-        }
-    }
-
-    private RecordName toRecordName(Name name, String valueIfDynamic) {
-        if (name instanceof DynamicName dynamicName)
-            return dynamicName.toRecordName(valueIfDynamic);
-
-        var staticName = (StaticName) name;
-        return staticName.toRecordName();
+        addKeysToRecord(childRecord, complexProperty, object);
     }
 
     @Override public QueryResult executeQuery(QueryStatement statement) {

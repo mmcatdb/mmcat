@@ -449,14 +449,14 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         if (original instanceof SimpleProperty) {
             Signature dynamicNameSignature = this.newClusterSignature.concatenate(this.newTypeSignature);
             Signature valueSignature = this.newClusterSignature.concatenate(this.newValueSignature);
-            return new SimpleProperty(new DynamicName(dynamicNameSignature), valueSignature);
+            return new SimpleProperty(new DynamicName(dynamicNameSignature, null), valueSignature);
         }
 
         final var newSubpaths = transformSubpaths(((ComplexProperty) original).subpaths());
 
         if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
             return new ComplexProperty(
-                new DynamicName(newClusterSignature),
+                new DynamicName(newClusterSignature, null),
                 newClusterSignature,
                 newSubpaths
             );

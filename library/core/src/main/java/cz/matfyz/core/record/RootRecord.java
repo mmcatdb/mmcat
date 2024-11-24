@@ -6,7 +6,7 @@ package cz.matfyz.core.record;
 public class RootRecord extends ComplexRecord {
 
     public RootRecord() {
-        super(null);
+        super();
     }
 
 }

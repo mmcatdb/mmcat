@@ -1,7 +1,5 @@
 package cz.matfyz.core.mapping;
 
-import cz.matfyz.core.record.StaticRecordName;
-
 import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -17,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = StaticName.Serializer.class)
 @JsonDeserialize(using = StaticName.Deserializer.class)
 public class StaticName extends Name {
+
     private final String value;
     private final Type type;
 
@@ -24,7 +23,6 @@ public class StaticName extends Name {
         super();
         this.value = name;
         this.type = Type.STATIC;
-        this.staticRecordNameFlyweight = new StaticRecordName(value, type);
     }
 
     // Anonymous name
@@ -32,7 +30,6 @@ public class StaticName extends Name {
         super();
         this.value = "";
         this.type = Type.ANONYMOUS;
-        this.staticRecordNameFlyweight = new StaticRecordName(value, type);
     }
 
     private static final StaticName anonymous = new StaticName();
@@ -44,12 +41,6 @@ public class StaticName extends Name {
     public enum Type {
         STATIC,
         ANONYMOUS, // Also known as Empty
-    }
-
-    private final StaticRecordName staticRecordNameFlyweight;
-
-    public StaticRecordName toRecordName() {
-        return staticRecordNameFlyweight;
     }
 
     public String getStringName() {

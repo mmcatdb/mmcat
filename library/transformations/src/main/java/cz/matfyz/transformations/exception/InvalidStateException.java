@@ -16,12 +16,16 @@ public class InvalidStateException extends TransformationException {
         return new InvalidStateException("simpleRecordIsNotValue", simpleRecord);
     }
 
-    public static InvalidStateException complexRecordHasArrayValue() {
-        return new InvalidStateException("complexRecordHasArrayValue", null);
+    public static InvalidStateException superIdHasArrayValue() {
+        return new InvalidStateException("superIdHasArrayValue", null);
     }
 
     public static InvalidStateException dynamicNameNotFound(DynamicName dynamicName) {
         return new InvalidStateException("dynamicNameNotFound", dynamicName);
+    }
+
+    public static InvalidStateException dynamicNameNotUnique(DynamicName dynamicName) {
+        return new InvalidStateException("dynamicNameNotUnique", dynamicName);
     }
 
     public static InvalidStateException nameIsNotStatic(Name name) {

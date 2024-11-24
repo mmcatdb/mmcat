@@ -6,15 +6,18 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
-import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
+import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
+import java.util.Map;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
@@ -66,9 +69,13 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    private Map<DynamicName, DynamicNameReplacement> replacedNames;
+
     private ForestOfRecords innerPullForest(ComplexProperty path, QueryContent query) {
-        final var fromNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
-        final var toNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
+        replacedNames = path.copyWithoutDynamicNames().replacedNames();
+
+        final @Nullable ComplexProperty fromNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
+        final @Nullable ComplexProperty toNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
         final boolean isRelationship = fromNodeSubpath != null && toNodeSubpath != null;
 
         return isRelationship
@@ -76,27 +83,20 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             : pullNodePath(path, query);
     }
 
-    private static ComplexProperty findSubpathByPrefix(ComplexProperty path, String namePrefix) {
-        final var foundSubpath = path.subpaths().stream().filter(subpath -> {
-            if (!(subpath.name() instanceof StaticName staticName))
-                return false;
+    private static @Nullable ComplexProperty findSubpathByPrefix(ComplexProperty path, String namePrefix) {
+        for (final var subpath : path.subpaths()) {
+            if (
+                (subpath.name() instanceof final StaticName staticName)
+                && staticName.getStringName().startsWith(namePrefix)
+                && subpath instanceof final ComplexProperty complexSubpath
+            )
+                return complexSubpath;
+        }
 
-            return staticName.getStringName().startsWith(namePrefix);
-        })
-            .findFirst();
-
-        if (foundSubpath.isEmpty())
-            return null;
-
-        return foundSubpath.get() instanceof ComplexProperty complexSubpath
-            ? complexSubpath
-            : null;
+        return null;
     }
 
     private ForestOfRecords pullRelationshipPath(ComplexProperty path, ComplexProperty fromNodeSubpath, ComplexProperty toNodeSubpath, QueryContent query) {
-        final var fromNodeRecordName = ((StaticName) fromNodeSubpath.name()).toRecordName();
-        final var toNodeRecordName = ((StaticName) toNodeSubpath.name()).toRecordName();
-
         final var forest = new ForestOfRecords();
 
         try (
@@ -111,13 +111,13 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                         .stream()
                         .map(result -> {
                             final var rootRecord = new RootRecord();
-                            addValuePropertiesToRecord(result.get("relationship"), path, rootRecord);
+                            addValuePropertiesToRecord(rootRecord, path, result.get("relationship"));
 
-                            final var fromNodeRecord = rootRecord.addComplexRecord(fromNodeRecordName, fromNodeSubpath.signature());
-                            addValuePropertiesToRecord(result.get("from_node"), fromNodeSubpath, fromNodeRecord);
+                            final var fromNodeRecord = rootRecord.addComplexRecord(fromNodeSubpath.signature());
+                            addValuePropertiesToRecord(fromNodeRecord, fromNodeSubpath, result.get("from_node"));
 
-                            final var toNodeRecord = rootRecord.addComplexRecord(toNodeRecordName, toNodeSubpath.signature());
-                            addValuePropertiesToRecord(result.get("to_node"), toNodeSubpath, toNodeRecord);
+                            final var toNodeRecord = rootRecord.addComplexRecord(toNodeSubpath.signature());
+                            addValuePropertiesToRecord(toNodeRecord, toNodeSubpath, result.get("to_node"));
 
                             return rootRecord;
                         })
@@ -144,7 +144,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                         .stream()
                         .map(result -> {
                             final var rootRecord = new RootRecord();
-                            addValuePropertiesToRecord(result.get("node"), path, rootRecord);
+                            addValuePropertiesToRecord(rootRecord, path, result.get("node"));
                             return rootRecord;
                         })
                         .toList();
@@ -155,17 +155,25 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return forest;
     }
 
-    private void addValuePropertiesToRecord(Value value, ComplexProperty path, ComplexRecord complexRecord) {
-        for (final AccessPath subpath : path.subpaths()) {
-            if (
-                !(subpath instanceof SimpleProperty simpleProperty)
-                    || !(simpleProperty.name() instanceof StaticName staticName)
-            )
+    private void addValuePropertiesToRecord(ComplexRecord record, ComplexProperty path, Value parentValue) {
+        for (final String key : parentValue.keys()) {
+            final Value value = parentValue.get(key);
+
+            if (value.isNull())
                 continue;
 
-            final String name = staticName.getStringName();
-            final String stringValue = value.get(name).asString();
-            complexRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.signature(), stringValue);
+            final var property = path.findSubpathByName(key);
+            if (property == null)
+                continue;
+
+            if (!(property.name() instanceof final DynamicName dynamicName)) {
+                record.addSimpleRecord(property.signature(), value.asString());
+                continue;
+            }
+
+            final var replacement = replacedNames.get(dynamicName);
+            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
+            replacer.addSimpleRecord(replacement.value().signature(), value.asString());
         }
     }
 

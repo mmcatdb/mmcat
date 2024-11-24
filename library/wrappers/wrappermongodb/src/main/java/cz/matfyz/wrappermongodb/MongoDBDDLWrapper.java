@@ -1,6 +1,8 @@
 package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.exception.InvalidPathException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import org.bson.BsonDocument;
 import org.bson.BsonString;
@@ -17,20 +19,8 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
         return true;
     }
 
-    @Override public boolean addSimpleProperty(String path, boolean required) {
-        return false;
-    }
-
-    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
-        return false;
-    }
-
-    @Override public boolean addComplexProperty(String path, boolean required) {
-        return false;
-    }
-
-    @Override public boolean addComplexArrayProperty(String path, boolean required) {
-        return false;
+    @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {
+        throw InvalidPathException.isSchemaless(DatasourceType.mongodb, path);
     }
 
     @Override public MongoDBCommandStatement createDDLStatement() {

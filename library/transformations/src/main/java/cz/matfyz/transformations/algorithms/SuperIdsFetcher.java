@@ -5,12 +5,8 @@ import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.record.DynamicRecordName;
-import cz.matfyz.core.record.DynamicRecordWrapper;
-import cz.matfyz.core.record.IComplexRecord;
-import cz.matfyz.core.record.SimpleArrayRecord;
+import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.SimpleRecord;
-import cz.matfyz.core.record.SimpleValueRecord;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueIdGenerator;
@@ -19,7 +15,8 @@ import cz.matfyz.transformations.exception.InvalidStateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SuperIdsFetcher {
     /**
@@ -31,14 +28,14 @@ public class SuperIdsFetcher {
      * @param morphism Morphism from the parent schema object to the currently processed one.
      * @return
      */
-    public static Iterable<FetchedSuperId> fetch(UniqueIdGenerator idGenerator, IComplexRecord parentRecord, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
+    public static Iterable<FetchedSuperId> fetch(UniqueIdGenerator idGenerator, ComplexRecord parentRecord, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
         final var fetcher = new SuperIdsFetcher(idGenerator, parentRow, path, childAccessPath);
         fetcher.process(parentRecord);
 
         return fetcher.output;
     }
 
-    public record FetchedSuperId(SuperIdWithValues superId, IComplexRecord childRecord) {}
+    public record FetchedSuperId(SuperIdWithValues superId, ComplexRecord childRecord) {}
 
     private final UniqueIdGenerator idGenerator;
     private final List<FetchedSuperId> output;
@@ -56,22 +53,22 @@ public class SuperIdsFetcher {
         this.childAccessPath = childAccessPath;
     }
 
-    private void process(IComplexRecord parentRecord) {
+    private void process(ComplexRecord parentRecord) {
         if (childObject.ids().isGenerated()) {
             // If the id is generated, we have to generate it now.
-            // It's not possible for any record to have a clue about the value of this id, and this is also the only id of the child row.
+            // It's not possible for any record to have any clue about the value of this id, and this is also the only id of the child row.
             if (childAccessPath instanceof ComplexProperty) {
-                // It has to be a nested document (not auxiliary).
-                if (parentRecord.hasComplexRecords(parentToChild)) {
-                    // There are complex records with given signature in the parent record.
-                    // They don't represent any (string) value so an unique identifier must be generated instead.
-                    // But their complex value will be processed later.
-                    for (IComplexRecord childRecord : parentRecord.getComplexRecords(parentToChild))
-                        addSimpleValueWithChildRecordToOutput(idGenerator.next(), childRecord);
-                }
+                // Now we are a nested document (not auxiliary).
+
+                // If there are complex records with given signature in the parent record, we have to process them.
+                // They don't represent any (string) value so an unique identifier must be generated instead.
+                // But their complex value will be processed later.
+                final var children = parentRecord.getComplexRecords(parentToChild);
+                if (children != null)
+                    children.stream().forEach(childRecord -> addSimpleWithChildRecordToOutput(idGenerator.next(), childRecord));
             }
             else {
-                addSimpleValueToOutput(idGenerator.next());
+                addSimpleToOutput(idGenerator.next());
             }
         }
         else if (childObject.ids().isValue()) {
@@ -79,110 +76,63 @@ public class SuperIdsFetcher {
             // The output will have only one tuple: (<signature>, <value>).
             if (parentRow.hasSignature(parentToChild)) {
                 // Value is in the parent domain row.
-                String valueFromParentRow = parentRow.getValue(parentToChild);
-                addSimpleValueToOutput(valueFromParentRow);
+                final String valueFromParentRow = parentRow.getValue(parentToChild);
+                addSimpleToOutput(valueFromParentRow);
             }
-            else if (parentRecord.hasSimpleRecord(parentToChild)) {
+            else if (parentRecord.getSimpleRecords(parentToChild) != null) {
                 // There is simple value/array record with given signature in the parent record.
-                addSuperIdsFromSimpleRecordToOutput(parentRecord.getSimpleRecord(parentToChild));
+                addSuperIdsFromSimpleRecordToOutput(parentRecord.getSimpleRecords(parentToChild));
             }
         }
-        else if (parentRecord.hasComplexRecords(parentToChild)) {
+        else {
             // The superId isn't empty so we need to find value for each signature in superId and return the tuples (<signature>, <value>).
             // Because there are multiple signatures in the superId, we are dealing with a complex property (resp. properties, i.e., children of given parentRecord).
-            for (IComplexRecord childRecord : parentRecord.getComplexRecords(parentToChild))
-                processComplexRecord(childRecord);
+            final var children = parentRecord.getComplexRecords(parentToChild);
+            if (children != null)
+                children.stream().forEach(this::processComplexRecord);
         }
     }
 
-    private void addSuperIdsFromSimpleRecordToOutput(SimpleRecord<?> simpleRecord) {
-        if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
-            addSimpleValueToOutput(simpleValueRecord.getValue().toString());
-        else if (simpleRecord instanceof SimpleArrayRecord<?> simpleArrayRecord)
-            simpleArrayRecord.getValues().stream()
-                .forEach(valueObject -> addSimpleValueToOutput(valueObject.toString()));
+    private void addSuperIdsFromSimpleRecordToOutput(List<SimpleRecord<?>> simpleRecord) {
+        simpleRecord.stream().forEach(valueObject -> addSimpleToOutput(valueObject.getValue().toString()));
     }
 
-    private void addSimpleValueToOutput(String value) {
-        // It doesn't matter if there is null because the accessPath is also null so it isn't further traversed
-        addSimpleValueWithChildRecordToOutput(value, null);
+    private void addSimpleToOutput(String value) {
+        // It doesn't matter if there is null because the accessPath is also null so it isn't further traversed.
+        addSimpleWithChildRecordToOutput(value, null);
     }
 
-    private void addSimpleValueWithChildRecordToOutput(String value, IComplexRecord childRecord) {
-        var builder = new SuperIdWithValues.Builder();
+    private void addSimpleWithChildRecordToOutput(String value, ComplexRecord childRecord) {
+        final var builder = new SuperIdWithValues.Builder();
         builder.add(Signature.createEmpty(), value);
         output.add(new FetchedSuperId(builder.build(), childRecord));
     }
 
-    private void processComplexRecord(IComplexRecord childRecord) {
-        // If the record has children/values with dynamic names for a signature, it is not allowed to have any other children/values (even with static names) for any other signature.
-        // So there are two different complex records - one with static children/values (with possibly different signatures) and the other with only dynamic ones (with the same signature).
-        if (childRecord.hasDynamicNameChildren())
-            processComplexRecordWithDynamicChildren(childRecord);
-        else if (childRecord.hasDynamicNameValues())
-            processComplexRecordWithDynamicValues(childRecord);
-        else
-            processStaticComplexRecord(childRecord);
-    }
-
-    private void processComplexRecordWithDynamicChildren(IComplexRecord childRecord) {
-        for (IComplexRecord dynamicNameChild : childRecord.getDynamicNameChildren()) {
-            var builder = new SuperIdWithValues.Builder();
-            addStaticNameSignaturesToBuilder(builder, childObject.superId().signatures(), dynamicNameChild);
-            output.add(new FetchedSuperId(builder.build(), new DynamicRecordWrapper(childRecord, dynamicNameChild)));
-        }
-    }
-
-    private void processComplexRecordWithDynamicValues(IComplexRecord childRecord) {
-        for (SimpleValueRecord<?> dynamicNameValue : childRecord.getDynamicNameValues()) {
-            var builder = new SuperIdWithValues.Builder();
-            Set<Signature> staticNameSignatures = new TreeSet<>();
-
-            for (Signature signature : childObject.superId().signatures()) {
-                if (dynamicNameValue.signature().equals(signature))
-                    builder.add(signature, dynamicNameValue.getValue().toString());
-                else if (dynamicNameValue.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))
-                    builder.add(signature, dynamicNameValue.name().value());
-                // If the signature is not the dynamic value nor its dynamic name, it is static and we have to find it elsewhere.
-                else
-                    staticNameSignatures.add(signature);
-            }
-
-            addStaticNameSignaturesToBuilder(builder, staticNameSignatures, childRecord);
-
-            output.add(new FetchedSuperId(builder.build(), childRecord));
-        }
-    }
-
-    private void processStaticComplexRecord(IComplexRecord childRecord) {
-        var builder = new SuperIdWithValues.Builder();
+    private void processComplexRecord(ComplexRecord childRecord) {
+        final var builder = new SuperIdWithValues.Builder();
         addStaticNameSignaturesToBuilder(builder, childObject.superId().signatures(), childRecord);
         output.add(new FetchedSuperId(builder.build(), childRecord));
     }
 
-    private void addStaticNameSignaturesToBuilder(SuperIdWithValues.Builder builder, Set<Signature> signatures, IComplexRecord childRecord) {
-        for (Signature signature : signatures) {
-            System.out.println("superidfetcher signature: " + signature);
+    private void addStaticNameSignaturesToBuilder(SuperIdWithValues.Builder builder, Set<Signature> signatures, ComplexRecord childRecord) {
+        for (final Signature signature : signatures) {
             // How the signature looks like from the parent object.
-            var signatureInParentRow = signature.traverseThrough(parentToChild);
-
-            // Why java still doesn't support output arguments?
-            String value;
-            if (signatureInParentRow == null) {
-                //here simpleRecord is null
-                SimpleRecord<?> simpleRecord = childRecord.getSimpleRecord(signature);
-                //System.out.println("superidfetcher simple record type: " + simpleRecord.getClass());
-                if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
-                    value = simpleValueRecord.getValue().toString();
-                else if (childRecord.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))
-                    value = dynamicName.value();
-                else
-                    throw InvalidStateException.complexRecordHasArrayValue();
+            final var signatureInParentRow = signature.traverseThrough(parentToChild);
+            if (signatureInParentRow != null) {
+                // If the value is in the parent row, we just add it and move on with our lives.
+                builder.add(signature, parentRow.getValue(signatureInParentRow));
+                continue;
             }
-            else
-                value = parentRow.getValue(signatureInParentRow);
 
-            builder.add(signature, value);
+            final @Nullable List<SimpleRecord<?>> simpleRecords = childRecord.getSimpleRecords(signature);
+            if (simpleRecords == null)
+                continue;
+
+            if (simpleRecords.size() != 1)
+                throw InvalidStateException.superIdHasArrayValue();
+
+            builder.add(signature, simpleRecords.get(0).getValue().toString());
         }
     }
+
 }

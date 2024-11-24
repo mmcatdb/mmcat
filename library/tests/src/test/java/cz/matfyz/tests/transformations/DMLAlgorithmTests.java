@@ -357,6 +357,43 @@ class DMLAlgorithmTests {
             .run();
     }
 
+    @Test
+    void dynamicNamesTest() {
+        new DMLAlgorithmTestBase(PostgreSQL.dynamic(schema))
+            .instance(builder -> {
+                PostgreSQL.addDynamic(builder, 0);
+                PostgreSQL.addDynamic(builder, 1);
+            })
+            .expected("""
+                [{
+                    "name": "dynamic",
+                    "values": [
+                        "append(id, id-0)",
+                        "append(label, label-0)",
+                        "append(px_a, px-a-0)",
+                        "append(py_a, py-a-0)",
+                        "append(px_b, px-b-0)",
+                        "append(py_b, py-b-0)",
+                        "append(catch_all_a, catch-all-a-0)",
+                        "append(catch_all_b, catch-all-b-0)"
+                    ]
+                }, {
+                    "name": "dynamic",
+                    "values": [
+                        "append(id, id-1)",
+                        "append(label, label-1)",
+                        "append(px_a, px-a-1)",
+                        "append(py_a, py-a-1)",
+                        "append(px_b, px-b-1)",
+                        "append(py_b, py-b-1)",
+                        "append(catch_all_a, catch-all-a-1)",
+                        "append(catch_all_b, catch-all-b-1)"
+                    ]
+                }]
+            """)
+            .run();
+    }
+
     // TODO see MTC
 
     // @Test

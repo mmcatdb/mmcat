@@ -22,24 +22,10 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
         return false;
     }
 
-    @Override public boolean addSimpleProperty(String path, boolean required) {
-        methods.add("addSimpleProperty(" + path + ", " + required + ")");
-        return true;
-    }
-
-    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
-        methods.add("addSimpleArrayProperty(" + path + ", " + required + ")");
-        return true;
-    }
-
-    @Override public boolean addComplexProperty(String path, boolean required) {
-        methods.add("addComplexProperty(" + path + ", " + required + ")");
-        return true;
-    }
-
-    @Override public boolean addComplexArrayProperty(String path, boolean required) {
-        methods.add("addComplexArrayProperty(" + path + ", " + required + ")");
-        return true;
+    @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {
+        final String complex = isComplex ? "complex" : "simple";
+        final String required = isRequired ? "required" : "optional";
+        methods.add("addProperty(" + path.toString() + ", " + complex + ", " + required + ")");
     }
 
     @Override public DummyStatement createDDLStatement() {

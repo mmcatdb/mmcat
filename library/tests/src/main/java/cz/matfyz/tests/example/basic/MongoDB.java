@@ -146,8 +146,8 @@ public abstract class MongoDB {
             contactKind,
             b -> b.root(
                 b.simple("number", Schema.orderToNumber),
-                b.complex("contact", Schema.contactToOrder.dual(),
-                    b.simple(Schema.contactToType, Schema.contactToValue)
+                b.auxiliary("contact",
+                    b.simple(Schema.orderToType, Schema.orderToValue)
                 )
             )
         );
@@ -160,7 +160,7 @@ public abstract class MongoDB {
         final var contact = builder
             .value(Schema.contactToNumber, numberValue)
             .value(Schema.contactToType, typeValue)
-            .value(Schema.contactToValue, valueValue).object(Schema.contact);
+            .object(Schema.contact);
 
         builder.morphism(Schema.contactToOrder, contact, order);
 
@@ -202,8 +202,8 @@ public abstract class MongoDB {
             noteKind,
             b -> b.root(
                 b.simple("number", Schema.orderToNumber),
-                b.complex("note", Schema.noteToOrder.dual(),
-                    b.complex(Schema.noteToLocale, Schema.noteToData,
+                b.auxiliary("note",
+                    b.complex(Schema.orderToLocale, Schema.orderToData,
                         b.simple("subject", Schema.dataToSubject),
                         b.simple("content", Schema.dataToContent)
                     )
@@ -218,7 +218,8 @@ public abstract class MongoDB {
 
         final var note = builder
             .value(Schema.noteToNumber, numberValue)
-            .value(Schema.noteToLocale, localeValue).object(Schema.note);
+            .value(Schema.noteToLocale, localeValue)
+            .object(Schema.note);
 
         builder.morphism(Schema.noteToOrder, note, order);
         builder.morphism(Schema.noteToLocale, note,

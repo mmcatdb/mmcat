@@ -6,18 +6,15 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
-import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -89,8 +86,9 @@ public class JsonPullWrapper implements AbstractPullWrapper {
                 if (valueNode != null) {
                     if (subpath instanceof ComplexProperty complexSubpath) {
                         if (valueNode.isObject()) {
-                            ComplexRecord childRecord = parentRecord.addComplexRecord(toRecordName(complexSubpath.name(), fieldName), complexSubpath.signature());
-                            getDataFromJsonNode(childRecord, valueNode, complexSubpath);
+                            // TODO
+                            // ComplexRecord childRecord = parentRecord.addComplexRecord(complexSubpath.name().toRecordName(fieldName), complexSubpath.signature());
+                            // getDataFromJsonNode(childRecord, valueNode, complexSubpath);
                         } else if (valueNode.isArray()) {
                             handleJsonArray(parentRecord, valueNode, complexSubpath, fieldName);
                         }
@@ -108,8 +106,9 @@ public class JsonPullWrapper implements AbstractPullWrapper {
     private void handleJsonArray(ComplexRecord parentRecord, JsonNode arrayNode, ComplexProperty complexSubpath, String fieldName) {
         for (JsonNode itemNode : arrayNode) {
             if (itemNode.isObject()) {
-                ComplexRecord childRecord = parentRecord.addComplexRecord(toRecordName(complexSubpath.name(), fieldName), complexSubpath.signature());
-                getDataFromJsonNode(childRecord, itemNode, complexSubpath);
+                // TODO
+                // ComplexRecord childRecord = parentRecord.addComplexRecord(complexSubpath.name().toRecordName(fieldName), complexSubpath.signature());
+                // getDataFromJsonNode(childRecord, itemNode, complexSubpath);
             }
         }
     }
@@ -119,25 +118,13 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      */
     private void handleSimpleProperty(ComplexRecord parentRecord, JsonNode valueNode, SimpleProperty simpleSubpath, String fieldName) {
         if (valueNode.isArray()) {
-            final ArrayList<String> values = new ArrayList<>();
-            for (final JsonNode itemNode : valueNode)
-                values.add(itemNode.asText());
-
-            parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), values);
+            // TODO
+            // for (final JsonNode itemNode : valueNode)
+            //     parentRecord.addSimpleRecord(simpleSubpath.name().toRecordName(fieldName), simpleSubpath.signature(), itemNode.asText());
         } else {
-            parentRecord.addSimpleValueRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), valueNode.asText());
+            // TODO
+            // parentRecord.addSimpleRecord(simpleSubpath.name().toRecordName(fieldName), simpleSubpath.signature(), valueNode.asText());
         }
-    }
-
-    /**
-     * Converts a {@link Name} object to a {@link RecordName} based on its type (static or dynamic).
-     */
-    private RecordName toRecordName(Name name, String valueIfDynamic) {
-        if (name instanceof DynamicName dynamicName)
-            return dynamicName.toRecordName(valueIfDynamic);
-
-        var staticName = (StaticName) name;
-        return staticName.toRecordName();
     }
 
     /**

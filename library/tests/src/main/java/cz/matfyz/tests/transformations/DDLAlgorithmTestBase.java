@@ -10,12 +10,17 @@ import cz.matfyz.wrapperdummy.DummyDDLWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.json.JSONArray;
 import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DDLAlgorithmTestBase {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DDLAlgorithmTestBase.class);
 
     private final Mapping mapping;
 
@@ -42,8 +47,8 @@ public class DDLAlgorithmTestBase {
     }
 
     private List<String> buildExpectedResult() throws Exception {
-        var json = new JSONArray(expected);
-        var lines = new ArrayList<String>();
+        final var json = new JSONArray(expected);
+        final var lines = new ArrayList<String>();
 
         for (int i = 0; i < json.length(); i++)
             lines.add(json.getString(i));
@@ -61,35 +66,29 @@ public class DDLAlgorithmTestBase {
             return;
         }
 
-        var wrapper = new DummyDDLWrapper();
-        var tform = new DDLAlgorithm();
-        tform.input(mapping, mapping.category(), wrapper);
+        final var wrapper = new DummyDDLWrapper();
+        final var tform = new DDLAlgorithm();
+        tform.input(mapping, inputInstance, wrapper);
         tform.algorithm();
 
-        List<String> result = wrapper.methods();
+        final List<String> actualResult = wrapper.methods();
 
-        printResult(result);
+        final var actualString = resultToString(actualResult);
+        LOGGER.debug("ACTUAL:\n{}", actualString);
+        final var expectedString = resultToString(expectedResult);
+        LOGGER.debug("EXPECTED:\n{}", expectedString);
 
-        Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
+        assertEquals(expectedString, actualString);
     }
 
-    private static void printResult(List<String> result) {
-        var builder = new StringBuilder();
+    private static String resultToString(List<String> result) {
+        final var builder = new StringBuilder();
 
         builder.append("[\n");
-        result.forEach(line -> builder.append("    ").append(line).append("\n"));
+        result.stream().sorted().forEach(line -> builder.append("    ").append(line).append(",\n"));
         builder.append("]");
 
-        System.out.println(builder.toString());
+        return builder.toString();
     }
 
-    private static boolean resultsEquals(List<String> result1, List<String> result2) {
-        if (result1.size() != result2.size())
-            return false;
-
-        var set1 = new TreeSet<>(result1);
-        var set2 = new TreeSet<>(result2);
-
-        return set1.equals(set2);
-    }
 }

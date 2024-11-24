@@ -19,8 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MTCAlgorithmTestBase {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithmTestBase.class);
 
     private record MappingWithRecords(
         Mapping mapping,
@@ -45,7 +49,7 @@ public class MTCAlgorithmTestBase {
 
     public void run() {
         final SchemaCategory schema = kinds.get(0).mapping.category();
-        final InstanceCategory instance = new InstanceBuilder(schema).build();
+        final InstanceCategory actualInstance = new InstanceBuilder(schema).build();
 
         for (final MappingWithRecords kind : kinds) {
             ForestOfRecords forest;
@@ -57,20 +61,25 @@ public class MTCAlgorithmTestBase {
                 return;
             }
 
+            LOGGER.debug("FOREST ({}):\n{}", kind.mapping.toString(), forest);
+
             final var tform = new MTCAlgorithm();
-            tform.input(kind.mapping, instance, forest);
+            tform.input(kind.mapping, actualInstance, forest);
             tform.algorithm();
         }
 
         final var builder = new InstanceBuilder(schema);
         instanceAdder.add(builder);
-        InstanceCategory expectedInstance = builder.build();
+        final InstanceCategory expectedInstance = builder.build();
 
-        assertEquals(expectedInstance.allObjects(), instance.allObjects(), "Test objects differ from the expected objects.");
-        assertEquals(expectedInstance.allMorphisms(), instance.allMorphisms(), "Test morphisms differ from the expected morphisms.");
+        LOGGER.debug("ACTUAL:\n{}", actualInstance);
+        LOGGER.debug("EXPECTED:\n{}", expectedInstance);
+
+        assertEquals(expectedInstance.allObjects(), actualInstance.allObjects(), "Test objects differ from the expected objects.");
+        assertEquals(expectedInstance.allMorphisms(), actualInstance.allMorphisms(), "Test morphisms differ from the expected morphisms.");
 
         for (final var expectedObject : expectedInstance.allObjects()) {
-            final var object = instance.getObject(expectedObject.schema.key());
+            final var object = actualInstance.getObject(expectedObject.schema.key());
 
             final var expectedString = expectedObject.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObject)).toList();
             final var string = object.allRowsToSet().stream().map(row -> rowToMappingsString(row, object)).toList();

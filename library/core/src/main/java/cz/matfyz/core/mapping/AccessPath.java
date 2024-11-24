@@ -2,11 +2,13 @@ package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -60,6 +62,12 @@ public abstract class AccessPath implements Printable {
     protected abstract @Nullable List<AccessPath> getPropertyPathInternal(Signature signature);
 
     public abstract @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
+
+    /**
+     * Creates copy of this property but with a new name and signature.
+     * @param replacedNames If not null, all dynamic names in children will be replaced. The results will be added to this map.
+     */
+    protected abstract AccessPath copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames);
 
     @Override public boolean equals(Object object) {
         return object instanceof AccessPath path && name.equals(path.name);

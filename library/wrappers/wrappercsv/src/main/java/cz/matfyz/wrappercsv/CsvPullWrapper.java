@@ -80,7 +80,9 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         for (final AccessPath property : path.subpaths()) {
             final var name = ((StaticName) property.name());
             final String value = line.get(name.getStringName());
-            record.addSimpleValueRecord(name.toRecordName(), property.signature(), value);
+            // TODO
+
+            // record.addSimpleRecord(name.toRecordName("TODO"), property.signature(), value);
         }
         return record;
     }

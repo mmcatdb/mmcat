@@ -84,15 +84,11 @@ public class Key implements Serializable, Comparable<Key> {
         @Override public Key deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            if (node.has("value")) {
-                return new Key(node.get("value").asInt());
-            } else {
-                return new Key(node.asInt());
-            }
+            final int value = node.has("value") ? node.get("value").asInt() : node.asInt();
+            return new Key(value);
         }
 
     }
-
 
     public static class KeyGenerator {
 

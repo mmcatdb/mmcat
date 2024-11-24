@@ -2,7 +2,6 @@ package cz.matfyz.core.identifiers;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;

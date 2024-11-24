@@ -1,6 +1,8 @@
 package cz.matfyz.wrappercsv;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.exception.InvalidPathException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,54 +24,19 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
         return true;
     }
 
-    /**
-     * Adds a simple property to the CSV schema. Since the CSV structure is flat,
-     * the path should be equal to the simple name of the property.
-     *
-     * @param path the name of the property.
-     * @param required whether the property is required (not used in CSV).
-     * @return true if the property was successfully added.
-     */
-    @Override public boolean addSimpleProperty(String path, boolean required) {
-        // The CSV structure is flat, therefore, the path should be equal to the simple name of the property.
-        properties.add(path);
-        return true;
-    }
+    @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {
+        if (path.segments().size() != 1)
+            throw InvalidPathException.wrongLength(DatasourceType.csv, path);
 
-    /**
-     * Attempts to add a simple array property to the CSV schema. This operation is not
-     * supported for CSV and always returns false.
-     *
-     * @param path the path of the property.
-     * @param required whether the property is required (not used in CSV).
-     * @return false, as this operation is not supported.
-     */
-    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
-        return false;
-    }
+        final PathSegment segment = path.segments().get(0);
+        // The postgres structure is flat.
+        if (isComplex)
+            throw InvalidPathException.isComplex(DatasourceType.csv, path);
 
-    /**
-     * Attempts to add a complex property to the CSV schema. This operation is not
-     * supported for CSV and always returns false.
-     *
-     * @param path the path of the property.
-     * @param required whether the property is required (not used in CSV).
-     * @return false, as this operation is not supported.
-     */
-    @Override public boolean addComplexProperty(String path, boolean required) {
-        return false;
-    }
+        if (segment.isArray())
+            throw InvalidPathException.isArray(DatasourceType.csv, path);
 
-    /**
-     * Attempts to add a complex array property to the CSV schema. This operation is not
-     * supported for CSV and always returns false.
-     *
-     * @param path the path of the property.
-     * @param required whether the property is required (not used in CSV).
-     * @return false, as this operation is not supported.
-     */
-    @Override public boolean addComplexArrayProperty(String path, boolean required) {
-        return false;
+        properties.addAll(segment.names());
     }
 
     /**
