@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { SchemaCategoriesTable } from '@/components/schema-categories/SchemaCategoriesTable';
-// import { SchemaCategoryModal } from '@/components/schemaCategories/SchemaCategoryModal';
 import { api } from '@/api';
 import { type SchemaCategoryInfoFromServer } from '@/types/schema';
 import { toast } from 'react-toastify';
@@ -82,7 +81,6 @@ export function SchemaCategoriesPage() {
             </div>
             <div className='mt-5'>
                 <SchemaCategoriesTable
-                    // TODO: fix this
                     categories={schemaCategories}
                     loading={loading}
                     error={error}

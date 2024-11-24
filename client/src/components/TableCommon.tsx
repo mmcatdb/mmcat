@@ -71,3 +71,31 @@ export const ConfirmationModal = ({
         </Modal>
     );
 };
+
+type EmptyStateProps = {
+    message: string;
+    buttonText: string;
+    onButtonClick: () => void;
+    className?: string;
+    buttonClassName?: string;
+};
+
+export const EmptyState = ({
+    message,
+    buttonText,
+    onButtonClick,
+    className = 'text-center border border-zinc-500 p-6',
+    buttonClassName = 'px-4 py-2',
+}: EmptyStateProps) => {
+    return (
+        <div className={className}>
+            <p className='text-lg mb-4'>{message}</p>
+            <Button
+                className={buttonClassName}
+                onClick={onButtonClick}
+            >
+                {buttonText}
+            </Button>
+        </div>
+    );
+};

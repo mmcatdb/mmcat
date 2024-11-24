@@ -1,6 +1,6 @@
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import type { Datasource } from '@/types/datasource';
+import type { SchemaCategoryInfoFromServer } from '@/types/schema';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
@@ -8,7 +8,7 @@ import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
 
 type SchemaCategoriesTableProps = {
-    categories: Datasource[];
+    categories: SchemaCategoryInfoFromServer[];
     loading: boolean;
     error: string | null;
     onDeleteCategory: (id: string) => void;
@@ -49,7 +49,7 @@ export const SchemaCategoriesTable = ({ categories, loading, error, onDeleteCate
 };
 
 type CategoriesTableProps = {
-  categories: Datasource[];
+  categories: SchemaCategoryInfoFromServer[];
   onDeleteCategory: (id: string) => void;
   sortDescriptor: SortDescriptor;
   onSortChange: (sortDescriptor: SortDescriptor) => void;

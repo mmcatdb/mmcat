@@ -5,6 +5,9 @@ import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { Button } from '@nextui-org/react';
+import { AddIcon } from '@/components/icons/PlusIcon';
+import { EmptyState } from '@/components/TableCommon';
 
 export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
@@ -12,6 +15,7 @@ export function DatasourcesInCategoryPage() {
     const [ otherDatasources, setOtherDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
+    const [ isModalOpen, setModalOpen ] = useState(false);
 
     useEffect(() => {
         const fetchDatasources = async () => {
@@ -20,7 +24,7 @@ export function DatasourcesInCategoryPage() {
 
                 // Fetch datasources in category
                 const inCategoryResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
-                if (inCategoryResponse.status && inCategoryResponse.data) 
+                if (inCategoryResponse.status && inCategoryResponse.data)  
                     setDatasourcesInCategory(inCategoryResponse.data);
                 else 
                     throw new Error('Failed to fetch datasources in category');
@@ -76,7 +80,7 @@ export function DatasourcesInCategoryPage() {
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <h1 className='text-xl'>Datasources in {category.label}</h1>
+                <h1 className='text-xl'>Datasources in {category.label} (with mapping)</h1>
             </div>
 
             <div className='mt-5'>
@@ -90,17 +94,37 @@ export function DatasourcesInCategoryPage() {
 
             <div className='flex items-center justify-between mt-10'>
                 <h1 className='text-xl'>Other Datasources</h1>
-                <DatasourceModal onDatasourceCreated={handleAddDatasource} />
+                <Button 
+                    onPress={() => setModalOpen(true)} 
+                    color='primary' 
+                    startContent={<AddIcon />}
+                >
+                    Add Datasource
+                </Button>
             </div>
 
             <div className='mt-5'>
-                <DatasourcesTable
-                    datasources={otherDatasources}
-                    loading={loading}
-                    error={error}
-                    onDeleteDatasource={handleDeleteDatasource}
-                />
+                {otherDatasources.length > 0 ? (
+                    <DatasourcesTable
+                        datasources={otherDatasources}
+                        loading={loading}
+                        error={error}
+                        onDeleteDatasource={handleDeleteDatasource}
+                    />
+                ) : (
+                    <EmptyState
+                        message='No other datasources available.'
+                        buttonText='+ Add Datasource'
+                        onButtonClick={() => setModalOpen(true)}
+                    />
+                )}
             </div>
+
+            <DatasourceModal 
+                isOpen={isModalOpen} 
+                onClose={() => setModalOpen(false)} 
+                onDatasourceCreated={handleAddDatasource} 
+            />
         </div>
     );
 }

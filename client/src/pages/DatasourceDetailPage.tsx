@@ -6,6 +6,8 @@ import { ErrorPage } from '@/pages/errorPages';
 import { Spinner } from '@nextui-org/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/schema-categories/MappingsTable';
+import { toast } from 'react-toastify';
+import { EmptyState } from '@/components/TableCommon';
 
 type DatasourceDetailProps = {
     datasourceId: string;
@@ -56,6 +58,10 @@ export const DatasourceInCategoryDetailPage = () => {
     if (!categoryId || !id) 
         return <ErrorPage />;
 
+    const handleAddMapping = () => {
+        toast.error('Add mapping functionality not implemented yet');
+    };
+
     return (
         <div>
             <DatasourceDetail datasourceId={id} />
@@ -63,11 +69,17 @@ export const DatasourceInCategoryDetailPage = () => {
                 <p className='text-xl pb-6'>Mappings Table</p>
                 {loading ? (
                     <Spinner />
-                ) : (
+                ) : mappings.length > 0 ? (
                     <MappingsTable
                         mappings={mappings}
                         loading={loading}
                         error={error}
+                    />
+                ) : (
+                    <EmptyState 
+                        message='This datasource does not have a mapping yet.'
+                        buttonText='+ Add Mapping'
+                        onButtonClick={handleAddMapping}
                     />
                 )}
             </div>
