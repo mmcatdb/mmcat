@@ -61,7 +61,7 @@ public class DynamicName extends Name implements Comparable<DynamicName> {
     private static final Pattern patternValidator = Pattern.compile("^[a-zA-Z0-9._\\-*]+$");
 
     @Override public String toString() {
-        return signature.toString();
+        return "<" + signature.toString() + ">";
     }
 
     @Override public boolean equals(Object object) {

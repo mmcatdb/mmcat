@@ -80,7 +80,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     private ForestOfRecords innerPullForest(ComplexProperty path, ResultSet resultSet) throws SQLException {
         final ForestOfRecords forest = new ForestOfRecords();
-        final List<Column> columns = prepareColumns(resultSet, path);
+        final List<Column> columns = createColumns(resultSet, path);
         final var replacedNames = path.copyWithoutDynamicNames().replacedNames();
 
         while (resultSet.next()) {
@@ -107,7 +107,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     private record Column(int index, String name, SimpleProperty property) {}
 
-    private List<Column> prepareColumns(ResultSet resultSet, ComplexProperty path) throws SQLException {
+    private List<Column> createColumns(ResultSet resultSet, ComplexProperty path) throws SQLException {
         final var metadata = resultSet.getMetaData();
         final int count = metadata.getColumnCount();
         final List<Column> columns = new ArrayList<>();
@@ -118,7 +118,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
             if (property != null)
                 columns.add(new Column(i, name, (SimpleProperty) property));
-                continue;
         }
 
         return columns;

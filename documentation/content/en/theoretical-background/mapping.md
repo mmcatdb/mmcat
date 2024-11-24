@@ -28,6 +28,7 @@ The last thing a node needs to be able to define mapping is a name. For a relati
 The last one might be little confusing, but it is just a way how to represent a map. For example, consider a property contact with subproperties like:
 - `email: example@example.com`
 - `phone: 123456789`
+
 and similar. If the data structure is dynamic, we have no way of knowing what names these properties have. So we have to map both their values and their names in the same time.
 
 ## Representation
@@ -35,18 +36,18 @@ and similar. If the data structure is dynamic, we have no way of knowing what na
 The access path can be represented by a JSON-like structure. For example, let us consider a kind `user`:
 ```js
 {
-    name: 1,        // Simple property
-    address: 3.2 {  // Complex property
+    name: 1,            // Simple property
+    address: 3.2 {      // Complex property
         ...
     },
-    contact: 4 {
-        6.5: 7      // Property with a dynamic name
+    contact: {
+        <-4.5>: -4.6    // Property with a dynamic name
     }
 }
 ```
-The first line defines a simple property with static name `name` and signature `1`. The second line describes a complex property `address` with signature `2.3`. This property can contain any number of other properties, for example `street`, `city` and `ZIP`. The `contact` is a complex property which contains subproperties with dynamic names. Note that those subproperties have to be contained in the `contact` property because they would not be recognizable from other properties (e.g. `name`) otherwise. Morphism with signature `6.5` defines the name of the property while `7` determines its value.
+The first line defines a simple property with static name `name` and signature `1`. The second line describes a complex property `address` with signature `2.3`. This property can contain any number of other properties, for example `street`, `city` and `ZIP`. The `contact` is a complex property which contains subproperty with dynamic name. There is no signature because the property is auxiliary. That means it corresponds to the same schema object as the parent property. The `-4.5` denotes the signature of the dynamic name while `-4.6` is the signature of the value. Note that those signatures need to have a common prefix (in this case `-4`) because they need to be connected to the same object (which is then connected as an array to the original object).
 
-Also be aware that the cardinalities of the properties are not defined explicitly because they can be derived from the cardinalities of the morphisms instead. So if the morphism `3.2` have cardinality `0..*` or `1..*` the property is an array.
+Also be aware that the cardinalities of the properties are not defined explicitly because they can be derived from the cardinalities of the morphisms instead. So if the morphism `3.2` has cardinality `0..*` or `1..*`, the property is an array.
 
 ### Example
 

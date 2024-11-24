@@ -26,6 +26,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         if (!(query instanceof StringQuery stringQuery))
             throw PullForestException.invalidQuery(this, query);
+
         try {
             return innerPullForest(path, stringQuery);
         }
