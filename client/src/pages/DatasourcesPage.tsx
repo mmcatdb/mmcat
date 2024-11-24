@@ -8,6 +8,7 @@ import { Outlet } from 'react-router-dom';
 import { EmptyState } from '@/components/TableCommon';
 import { Button } from '@nextui-org/react';
 import { AddIcon } from '@/components/icons/PlusIcon';
+import { LoadingPage } from './errorPages';
 
 export function DatasourcesPage() {
     return (
@@ -79,13 +80,16 @@ export function DatasourcesPageOverview() {
                     onPress={() => setModalOpen(true)} 
                     color='primary' 
                     startContent={<AddIcon />}
+                    isDisabled={loading}
                 >
                     Add Datasource
                 </Button>
             </div>
 
             <div className='mt-5'>
-                {datasources.length > 0 ? (
+                {loading ? (
+                    <LoadingPage />
+                ) : datasources.length > 0 ? (
                     <DatasourcesTable
                         datasources={datasources}
                         loading={loading}
@@ -104,7 +108,7 @@ export function DatasourcesPageOverview() {
             <DatasourceModal 
                 isOpen={isModalOpen} 
                 onClose={() => setModalOpen(false)} 
-                onDatasourceCreated={handleAddDatasource} 
+                onDatasourceCreated={handleAddDatasource}
             />
         </div>
     );

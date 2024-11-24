@@ -4,6 +4,7 @@ import { api } from '@/api';
 import { type SchemaCategoryInfoFromServer } from '@/types/schema';
 import { toast } from 'react-toastify';
 import { Button } from '@nextui-org/react';
+import { LoadingPage } from './errorPages';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -48,7 +49,7 @@ export function SchemaCategoriesPage() {
             if (response.status && response.data) {
                 const newCategory = response.data;
                 setSchemaCategories((categories) => [ ...categories, newCategory ]);
-                toast.success(`Example schema '${name}' created successfully!`);
+                toast.success(`Example schema '${newCategory.label}' created successfully!`);
             }
             else {
                 toast.error('Failed to create example schema.');
@@ -73,20 +74,26 @@ export function SchemaCategoriesPage() {
                             onPress={() => createExampleSchema(example)}
                             isLoading={isCreatingSchema}
                             color='primary'
+                            isDisabled={loading}
                         >
                             + Add {example} Schema
                         </Button>
                     ))}
                 </div>
             </div>
-            <div className='mt-5'>
-                <SchemaCategoriesTable
-                    categories={schemaCategories}
-                    loading={loading}
-                    error={error}
-                    onDeleteCategory={handleDeleteCategory}
-                />
-            </div>
+
+            {loading ? (
+                <LoadingPage />
+            ) : 
+                <div className='mt-5'>
+                    <SchemaCategoriesTable
+                        categories={schemaCategories}
+                        loading={loading}
+                        error={error}
+                        onDeleteCategory={handleDeleteCategory}
+                    />
+                </div>
+            }
         </div>
     );
 }

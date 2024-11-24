@@ -8,6 +8,7 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { Button } from '@nextui-org/react';
 import { AddIcon } from '@/components/icons/PlusIcon';
 import { EmptyState } from '@/components/TableCommon';
+import { LoadingPage } from '../errorPages';
 
 export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
@@ -76,6 +77,9 @@ export function DatasourcesInCategoryPage() {
             toast.error('An error occurred while deleting the datasource.');
         }
     };
+
+    if (loading) 
+        return <LoadingPage />;
 
     return (
         <div>

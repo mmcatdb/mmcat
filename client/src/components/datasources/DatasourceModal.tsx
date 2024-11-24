@@ -17,10 +17,15 @@ type DatasourceModalProps = {
     onDatasourceCreated: (newDatasource: Datasource) => void;
 };
 
-export const DatasourceModal = ({ isOpen, onClose, onDatasourceCreated }: DatasourceModalProps) => {
+export const DatasourceModal = ({ 
+    isOpen, 
+    onClose, 
+    onDatasourceCreated,
+}: DatasourceModalProps) => {
     const [ datasourceType, setDatasourceType ] = useState<DatasourceType | ''>('');
     const [ datasourceName, setDatasourceLabel ] = useState('');
     const [ settings, setSettings ] = useState<Settings>({});
+    const [ isCreatingDatasource, setIsCreatingDatasource] = useState<boolean>(false);
 
     const resetForm = () => {
         setDatasourceType('');
@@ -47,6 +52,7 @@ export const DatasourceModal = ({ isOpen, onClose, onDatasourceCreated }: Dataso
         }
     
         try {
+            setIsCreatingDatasource(true);
             const newDatasource: DatasourceInit = {
                 type: datasourceType,
                 label: datasourceName,
@@ -70,6 +76,9 @@ export const DatasourceModal = ({ isOpen, onClose, onDatasourceCreated }: Dataso
         catch (error) {
             console.error('An unexpected error occurred:', error);
             toast.error('An unexpected error occurred. Please try again.');
+        }
+        finally {
+            setIsCreatingDatasource(false);
         }
     };
 
@@ -165,10 +174,19 @@ export const DatasourceModal = ({ isOpen, onClose, onDatasourceCreated }: Dataso
                             )}
                         </ModalBody>
                         <ModalFooter>
-                            <Button color='danger' variant='light' onPress={onClose}>
+                            <Button
+                                color='danger'
+                                variant='light'
+                                onPress={onClose}
+                                isDisabled={isCreatingDatasource}
+                            >
                                     Close
                             </Button>
-                            <Button color='primary' onPress={handleSubmit}>
+                            <Button
+                                color='primary'
+                                onPress={handleSubmit}
+                                isLoading={isCreatingDatasource}
+                            >
                                     Submit
                             </Button>
                         </ModalFooter>

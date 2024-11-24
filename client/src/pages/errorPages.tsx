@@ -19,7 +19,7 @@ export function ErrorPage() {
 
 export function LoadingPage() {
     return (
-        <div>
+        <div className='flex items-center justify-center pt-10'>
             <Spinner />
         </div>
     );

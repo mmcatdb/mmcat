@@ -86,7 +86,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
     return (
         <>
             <Table 
-                aria-label='Datasource Table'
+                aria-label='Schema Categories Table'
                 onRowAction={handleRowAction}
                 sortDescriptor={sortDescriptor}
                 onSortChange={onSortChange}
@@ -141,7 +141,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                 onClose={closeModal}
                 onConfirm={confirmDelete}
                 title='Confirm Deletion?'
-                message='This will permanently delete the selected datasource.'
+                message='This will permanently delete the selected schema category.'
                 confirmButtonText='Yes, Delete'
                 cancelButtonText='Cancel'
                 confirmButtonColor='danger'
