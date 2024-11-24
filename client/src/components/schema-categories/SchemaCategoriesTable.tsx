@@ -84,7 +84,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
 
 
     return (
-        <>
+        <div className='overflow-x-auto w-full'>
             <Table 
                 aria-label='Schema Categories Table'
                 onRowAction={handleRowAction}
@@ -146,6 +146,6 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                 cancelButtonText='Cancel'
                 confirmButtonColor='danger'
             />
-        </>
+        </div>
     );
 }

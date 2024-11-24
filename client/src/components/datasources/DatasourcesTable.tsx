@@ -94,7 +94,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     };
 
     return (
-        <>
+        <div className='overflow-x-auto w-full'>
             <Table
                 aria-label='Datasource Table'
                 onRowAction={handleRowAction}
@@ -165,6 +165,6 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                 cancelButtonText='Cancel'
                 confirmButtonColor='danger'
             />
-        </>
+        </div>
     );
 }

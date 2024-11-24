@@ -53,7 +53,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
     const { showTableIDs } = usePreferences().preferences;
 
     return (
-        <>
+        <div className='overflow-x-auto w-full'>
             <Table
                 aria-label='Mappings Table'
                 sortDescriptor={sortDescriptor}
@@ -107,6 +107,6 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                     ))}
                 </TableBody>
             </Table>
-        </>
+        </div>
     );
 }
