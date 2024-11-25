@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '@/api';
-import type { Datasource } from '@/types/datasource';
+import type { Datasource, Settings } from '@/types/datasource';
 import { ErrorPage } from '@/pages/errorPages';
-import { Spinner } from '@nextui-org/react';
+import { Button, Checkbox, Input, Spinner } from '@nextui-org/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/schema-categories/MappingsTable';
 import { toast } from 'react-toastify';
@@ -91,6 +91,11 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
     const [ datasource, setDatasource ] = useState<Datasource | null>(null);
     const [ loading, setLoading ] = useState(true);
     const [ error, setError ] = useState<string | null>(null);
+    const [ showConfiguration, setShowConfiguration ] = useState(false);
+
+    // for edit mode
+    const [ isEditing, setIsEditing ] = useState(false);
+    const [ formValues, setFormValues ] = useState<Settings | null>(null);
 
     useEffect(() => {
         const fetchDatasource = async () => {
@@ -98,10 +103,13 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                 setLoading(true);
                 const response = await api.datasources.getDatasource({ id: datasourceId });
 
-                if (response.status && response.data) 
+                if (response.status && response.data) {
                     setDatasource(response.data);
-                else 
+                    setFormValues(response.data.settings);
+                }
+                else {
                     setError('Failed to load datasource details.');
+                }
                 
             }
             catch {
@@ -114,6 +122,34 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
 
         fetchDatasource();
     }, [ datasourceId ]);
+
+    const handleInputChange = (field: keyof Settings, value: string | boolean | undefined) => {
+        if (!formValues) 
+            return;
+
+        setFormValues({ ...formValues, [field]: value });
+    };
+
+    const handleSaveChanges = async () => {
+        if (!formValues) 
+            return;
+
+        try {
+            const updatedDatasource = await api.datasources.updateDatasource(
+                { id: datasourceId },
+                { label: datasource?.label ?? '', settings: formValues },
+            );
+            
+            setDatasource(updatedDatasource.data);
+            toast.success('Datasource updated successfully!');
+        }
+        catch (e) {
+            toast.error('Failed to update datasource.');
+        }
+        finally {
+            setIsEditing(false);
+        }
+    };
 
     if (error ?? (!datasource && !loading)) 
         return <ErrorPage />;
@@ -129,8 +165,116 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                     <div>
                         <h1 className='heading-main my-5'>{datasource?.label}</h1>
                         <p className='mb-5'>Type: {datasource?.type}</p>
-                        <pre>{JSON.stringify(datasource?.settings, null, 2)}</pre>
-                        <pre className='text-zinc-400'>{JSON.stringify(datasource?.configuration, null, 2)}</pre>
+
+                        {!isEditing ? (
+                            // View Mode
+                            <>
+                                <pre>{JSON.stringify(datasource?.settings, null, 2)}</pre>
+                                <Button
+                                    onClick={() => setIsEditing(true)}
+                                    className='mt-5'
+                                >
+                                    Edit
+                                </Button>
+                            </>
+                        ) : (
+                            // Edit Mode
+                            <form className='grid grid-cols-1 gap-4'>
+                                <Input
+                                    label='Host'
+                                    value={formValues?.host ?? ''}
+                                    onChange={(e) =>
+                                        handleInputChange('host', e.target.value)
+                                    }
+                                />
+                                <Input
+                                    label='Port'
+                                    value={formValues?.port?.toString() ?? ''}
+                                    type='number'
+                                    onChange={(e) =>
+                                        handleInputChange('port', e.target.value)
+                                    }
+                                />
+                                <Input
+                                    label='Database'
+                                    value={formValues?.database ?? ''}
+                                    onChange={(e) =>
+                                        handleInputChange('database', e.target.value)
+                                    }
+                                />
+                                <Input
+                                    label='Username'
+                                    value={formValues?.username ?? ''}
+                                    onChange={(e) =>
+                                        handleInputChange('username', e.target.value)
+                                    }
+                                />
+                                <Input
+                                    label='Password'
+                                    placeholder='Enter new password'
+                                    type='password'
+                                    onChange={(e) =>
+                                        handleInputChange('password', e.target.value)
+                                    }
+                                />
+                                <Input
+                                    label='Authentication Database'
+                                    value={formValues?.authenticationDatabase ?? ''}
+                                    onChange={(e) =>
+                                        handleInputChange(
+                                            'authenticationDatabase',
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                                <Checkbox
+                                    isSelected={formValues?.isWritable}
+                                    onChange={(e) => handleInputChange('isWritable', e.target.checked)}
+                                >
+                                    Is Writable?
+                                </Checkbox>
+                                <Checkbox
+                                    isSelected={formValues?.isQueryable}
+                                    onChange={(e) =>
+                                        handleInputChange('isQueryable', e.target.checked)
+                                    }
+                                >
+                                    Is Queryable?
+                                </Checkbox>
+                                <div className='flex gap-4 mt-4'>
+                                    <Button
+                                        color='primary'
+                                        onClick={handleSaveChanges}
+                                    >
+                                        Save
+                                    </Button>
+                                    {/* // TODO: cancel confirmation modal if some changes */}
+                                    <Button
+                                        color='danger'
+                                        variant='light'
+                                        onClick={() => setIsEditing(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </form>
+                        )}
+
+                        <div className='pt-5'>
+                            <Button 
+                                size='sm'
+                                variant='bordered'
+                                onPress={() => setShowConfiguration((prev) => !prev)}
+                            >
+                                {showConfiguration ? 'Hide Configuration' : 'Show Configuration'}
+                            </Button>
+        
+                            {showConfiguration && (
+                                <pre className='text-zinc-400 mt-4'>
+                                    {JSON.stringify(datasource?.configuration, null, 2)}
+                                </pre>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
