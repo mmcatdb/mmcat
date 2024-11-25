@@ -25,6 +25,7 @@ withDefaults(defineProps<{ fetching?: boolean }>(), {
 onMounted(() => {
     const newGraph = createGraph();
     graph.value = newGraph;
+    showSignatures.value = false;
     emit('graphCreated', newGraph);
 });
 

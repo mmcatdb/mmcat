@@ -2,7 +2,7 @@ import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, Node
 import type { GroupData, SchemaMorphism, SchemaObject, VersionedSchemaMorphism, VersionedSchemaObject } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
-import type { Key, Signature } from '../identifiers';
+import { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Id } from '../id';
 import { shallowRef } from 'vue';
@@ -26,11 +26,15 @@ export class Graph {
     }
 
     /// functions for Mapping editor
+
     public getChildrenForNode(node: Node): Node[] {
         const outgoingEdges = [ ...this.edges.values() ].filter(edge => edge.domainNode.equals(node));
         return outgoingEdges.map(edge => edge.codomainNode);
     }
 
+    /**
+     * Finds signature between a node and a parent node, if there is a direct edge.
+     */
     public getSignature(node: Node, parentNode: Node): SequenceSignature {
         const edge = [ ...this.edges.values() ]
             .find(edge =>
@@ -59,10 +63,8 @@ export class Graph {
     public getParentNode(node: Node): Node | undefined {
         const incomingEdges = [ ...this.edges.values() ].filter(edge => edge.codomainNode.equals(node));
 
-        if (incomingEdges.length === 0) {
-            console.warn('No incoming edges found for node:', node);
+        if (incomingEdges.length === 0)
             return undefined;
-        }
 
         return incomingEdges[0].domainNode;
     }

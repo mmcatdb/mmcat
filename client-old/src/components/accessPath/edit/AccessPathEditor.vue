@@ -9,6 +9,8 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { ObjectIds, SignatureId, SignatureIdFactory, StaticName } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
+import EditProperty from './EditProperty.vue';
+import AddProperty from './AddProperty.vue';
 
 /**
  * Enum for the different states of node selection.
@@ -16,12 +18,16 @@ import { useEvocat } from '@/utils/injects';
  * - OneNode: One node selected
  * - TwoNodes: Two nodes selected
  * - MultipleNodes: More than two nodes selected
+ * - AddProperty: Add property
+ * - EditProperty: Edit property
  */
 enum State {
     Default, // user should select some nodes to create a kind
     OneNode,
     TwoNodes, 
-    MultipleNodes
+    MultipleNodes,
+    AddProperty,
+    EditProperty
 }
 
 /**
@@ -37,7 +43,9 @@ type GenericStateValue<State, Value> = { type: State } & Value;
 type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.OneNode, { node: Node }> |
     GenericStateValue<State.TwoNodes, { nodes: Node[] }> |
-    GenericStateValue<State.MultipleNodes, { nodes: Node[] }>;
+    GenericStateValue<State.MultipleNodes, { nodes: Node[] }> |
+    GenericStateValue<State.AddProperty, { parent: GraphParentProperty }> |
+    GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
 
 /**
  * Props for the AccessPathEditor component.
@@ -84,6 +92,7 @@ const emit = defineEmits([ 'finish', 'update:rootProperty', 'cancel' ]);
 const localRootProperty = shallowRef<GraphRootProperty>(props.rootProperty);
 const state = shallowRef<StateValue>({ type: State.Default });
 const selectedNodes = ref<Node[]>([]);
+const supressStateUpdate = ref(false);
 
 /**
  * Computed property to generate labels of selected nodes.
@@ -179,7 +188,7 @@ function insert(node: Node): boolean {
     const children = graph.getChildrenForNode(node);
     const label = node.metadata.label.toLowerCase();
     //let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) : undefined;
-    // assume we the new property is connected to the root (parentProperty)
+    // assume the new property is connected to the root (parentProperty)
     const edges = graph.getEdges(node);
     const parentProperty = findMatchingProperty(edges, localRootProperty.value);
 
@@ -297,15 +306,34 @@ function setRootRequested(node: Node) {
     if (newSubpaths) 
         newRoot.updateOrAddSubpath(newSubpaths);
 
+    const ids = node.schemaObject?.ids;
+    primaryKey.value = getInitialPrimaryKey(ids);
+
     node.unselect();
     selectedNodes.value = [];
     emit('update:rootProperty', newRoot);
     localRootProperty.value = newRoot;
 }
 
-function renameClicked() {
-    if (state.value.type === State.OneNode)
-        console.log('Renaming node:', state.value.node);
+function editPropertyClicked(property: GraphChildProperty) {
+    state.value = {
+        type: State.EditProperty,
+        property,
+    };
+}
+
+function addPropertyClicked(parentProperty: GraphComplexProperty) {
+    supressStateUpdate.value = true;
+    state.value = {
+        type: State.AddProperty,
+        parent: parentProperty,
+    };
+}
+
+function setStateToDefault() {
+    supressStateUpdate.value = false;
+    state.value = { type: State.Default };
+    emit('update:rootProperty', props.rootProperty);
 }
 
 /**
@@ -319,6 +347,9 @@ function finishMapping() {
  * Watches the selectedNodes array and updates the state based on the number of valid nodes selected.
  */
 watch(selectedNodes, (nodes) => {
+    if (supressStateUpdate.value)
+        return;
+
     const validNodes = nodes.filter((node): node is Node => node !== undefined);
     if (validNodes.length === 0)
         state.value = { type: State.Default };
@@ -344,13 +375,21 @@ function cancel() {
     emit('cancel');
 }
 
+const showSelectedNodes = computed(() => {
+    return (
+        state.value.type !== State.Default &&
+        state.value.type !== State.AddProperty &&
+        state.value.type !== State.EditProperty
+    );
+});
+
 </script>
 
 <template>
     <div>
         <div>
             <div class="editor">
-                <template v-if="state.type !== State.Default">
+                <template v-if="showSelectedNodes">
                     <ValueRow label="Selected Nodes:">
                         {{ selectedNodeLabels }}
                     </ValueRow>
@@ -389,17 +428,14 @@ function cancel() {
                         <button @click="setRootRequested(state.node)">
                             Set Root
                         </button>
-                        <button 
-                            v-if="isNodeInAccessPath(state.node)"
-                            @click="renameClicked"
-                        >
-                            Rename
-                        </button>
                     </div>
                 </template>
                 <template v-if="state.type === State.TwoNodes">
                     <div class="options">
-                        <button @click="insertBetweenClicked">
+                        <button 
+                            :disabled="true"
+                            @click="insertBetweenClicked"
+                        >
                             Insert Between
                         </button>
                         <button @click="deleteRequested(state.nodes)">
@@ -414,6 +450,22 @@ function cancel() {
                         </button>
                     </div>
                 </template>
+                <template v-if="state.type === State.AddProperty">
+                    <AddProperty
+                        :datasource="props.datasource"
+                        :parent-property="state.parent"
+                        @save="setStateToDefault"
+                        @cancel="setStateToDefault"
+                    />
+                </template>
+                <template v-if="state.type === State.EditProperty">
+                    <EditProperty
+                        :datasource="props.datasource"
+                        :property="state.property"
+                        @save="setStateToDefault"
+                        @cancel="setStateToDefault"
+                    />
+                </template>
             </div>
         </div>
         <NodeInput
@@ -423,6 +475,9 @@ function cancel() {
         />
         <ParentPropertyDisplay
             :property="localRootProperty"
+            @complex:click="editPropertyClicked"
+            @simple:click="editPropertyClicked"
+            @add:click="addPropertyClicked"
         />
         <div class="shortcuts-box">
             <table class="shortcut-table">

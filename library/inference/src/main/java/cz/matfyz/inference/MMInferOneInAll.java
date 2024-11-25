@@ -110,7 +110,7 @@ public class MMInferOneInAll {
         long end = System.currentTimeMillis();
 
         System.out.println("RESULT_TIME_PROPERTY_BA TOTAL: " + (end - start) + "ms");
-        System.out.println(rsd == null ? "NULL" : rsd);
+        System.out.println("RSD: " + rsd == null ? "NULL" : rsd);
 
         return rsd;
     }

@@ -19,30 +19,21 @@ public class PropertyBasedAlgorithm {
 
     public RecordSchemaDescription process(AbstractInferenceWrapper wrapper, AbstractSeqFunction merge, AbstractCombFunction merge2) {
 
-        // create Spark Session (and initiate context)
         wrapper.startSession();
 
         try {
-            long start = System.currentTimeMillis();
-
             JavaPairRDD<String, RecordSchemaDescription> propertiesToReduce = wrapper.loadPropertySchema();
-            System.out.println("RESULT_TIME_PBA AFTER MAPPING: " + (System.currentTimeMillis() - start) + "ms");
 
             JavaPairRDD<String, RecordSchemaDescription> reducedProperties = propertiesToReduce.reduceByKey(
                 new ReduceRSDsFunction()
             );
 
-//            long count = reducedProperties.count();
-//            System.out.println("RESULT_TIME_PBA COUNT OPTIMISED: " + count);
-//            return null;
             JavaRDD<RecordSchemaDescription> schemas = reducedProperties.map(Tuple2::_2);
 
             RecordSchemaDescription result = schemas.aggregate(new RecordSchemaDescription(), new FinalizeCombFunction(), new FinalizeSeqFunction());
-            System.out.println("RESULT_TIME_PBA AFTER_AGGREGATION_TO_SINGLE_RSD " + (System.currentTimeMillis() - start) + "ms");
             return result;
 
         } finally {
-            // stop the Spark Session when everything is computed
             wrapper.stopSession();
         }
     }
