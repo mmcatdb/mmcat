@@ -17,6 +17,20 @@ And finally, the addition of the inference functionality showed the need for an 
 
 Through this integration, users are now able to infer and adjust a Schema Category from any input data stored in a single-model format. 
 
+### Architecture
+
+The overall architecture of the integrated tools as well as the data flow during multi-model data generation is depicted on the picture below.  
+
+It consists of three main modules with the flow beginning at the Input Layer, where data, such as raw files or data stored in database systems is ingested into the system. 
+
+In the **MM-infer Module**, the system applies a two-tier schema inference approach. First, the Local Schema Inferer analyzes the raw input data to generate raw schema descriptions (RSDs). These RSDs are then reduced and processed to produce statistical data and candidate properties, which are further refined in the Global Schema Inferer. At this stage, redundant information is removed, and integrity constraints are validated. The resulting consolidated RSDs and candidate properties are prepared for the next stage of the process.
+
+The data then flows into the **Schema Conversion Module**. This module converts the raw schema descriptions into a more structured and intermediate representation called AccessTree. The Schema Converter transforms these AccessTrees into schema categories and mappings, which define how the input data can be interpreted and organized. The Inference Editor provides tools to refine these schema categories and mappings.
+
+Once the schema categories and mappings are finalized, the data transitions to the **MM-cat Module**. This module is responsible for transforming the refined schema categories and mappings into models suitable for specific outputs. The Mapping Editor enables users to create or adjust mappings that translate schema categories into output formats or database models. These mappings can then be applied to generate Instance Categories, which represent structured data ready for storage or further use. The MM-cat module supports exporting the data into various outputs.
+
+This modular architecture ensures a streamlined and efficient process, from raw data ingestion to multi-model outputs. Each module contributes a distinct functionality, while their integration creates a cohesive system capable of handling complex multi-model data generation tasks.
+
 ![Architecture with Inference](/img/architecture-overall.png)
 
 ## Class Design
@@ -55,9 +69,11 @@ The wrapper class for inferred Schema Category editing. Created with a list of i
 
 ## Mapping Editor
 
-The current version enables the user to work with multiple nodes at once. Furthermore, it offers context menu as well as keyboard shortcuts for smooth and quick work flow.
+The Mapping Editor is a powerful tool in our application that enables users to  create and manage mappings for multi-model data generation. This editor is an extension of an already existing mapping editor. Previously, users could add and edit properties by selecting nodes in the schema and manually adjusting them. The new Mapping Editor builds upon this foundation by introducing enhanced functionality and a streamlined workflow, offering a context menu as well as keyboard shortcuts for smooth and quick workflow.
 
-![Mapping Editor](/img/mapping-editor.png)
+See the [Generation Workflow](user-guide/generation-workflow.md) to learn more about the Mapping Editor.
+
+![Mapping Editor - edit node 1](/img/edit-node-1.png)
 
 
 [^article]: Koupil, P., Hricko, S., & Holubová, I. Mm-infer: A tool for inference of multi-model
