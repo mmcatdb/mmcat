@@ -1,0 +1,31 @@
+{
+    "_": {
+      "person_label_id": 27,
+      "english_label": 29,
+      "hebrew_label_transliterated": 33,
+      "hebrew_strongs_number": 37,
+      "greek_label_transliterated": 41,
+      "greek_label_meaning": 42,
+      "greek_strongs_number": 43,
+      "label_reference_id": 44,
+      "label_type": 45,
+      "label-given_by_god": 46,
+      "label_notes": 47,
+      "person_label_count": 48,
+      "label_sequence": 49,
+      "person_id": 110.0,
+      "greek_label": {
+        "_index": 39,
+        "_value": 40
+      },
+      "hebrew_label_meaning": {
+        "_index": 35,
+        "_value": 36
+      },
+      "hebrew_label": {
+        "_index": 31,
+        "_value": 32
+      }
+    }
+  }
+  

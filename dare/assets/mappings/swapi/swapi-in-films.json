@@ -1,0 +1,36 @@
+{
+    "_": {
+      "created": 49,
+      "director": 50,
+      "edited": 51,
+      "episode_id": 52,
+      "opening_crawl": 53,
+      "producer": 57,
+      "release_date": 58,
+      "title": 65,
+      "url": 66,
+      "Array": [
+        {
+          "_index": 68,
+          "vehicles.json": 69
+        },
+        {
+          "_index": 63,
+          "starships.json": 64
+        },
+        {
+          "_index": 60,
+          "species.json": 61
+        },
+        {
+          "_index": 55,
+          "planets.json": 56
+        },
+        {
+          "_index": 47,
+          "people.json": 48
+        }
+      ]
+    }
+  }
+  

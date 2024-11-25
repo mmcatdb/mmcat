@@ -1,7 +1,10 @@
-{{ $code := .Get "code" }}
-{{ $buttonLabel := .Get "label" }}
 {{ $id := .Get "id" }}
+{{ $buttonLabel := .Get "label" }}
+{{ $file := .Get "file" }}
+{{ $filePath := printf "assets/mappings/%s.json" $file }}
+{{ $jsonContent := readFile $filePath }}
 
+{{ if $jsonContent }}
 <div style="text-align: center;">
     <a
         href="javascript:void(0);"
@@ -11,7 +14,10 @@
         {{ $buttonLabel }}
     </a>
     <br />
-    <div id="{{ $id }}" style="display: none; text-align: left; background-color: #f4f4f4; border: 1px solid #ccc; font-family: monospace; overflow: auto;">
-        {{ $code | safeHTML }}
+    <div id="{{ $id }}" style="display: none; text-align: left; background-color: #f4f4f4; border: 1px solid #ccc; font-family: monospace; overflow: auto; padding: 1em;">
+        <pre><code>{{ $jsonContent | safeHTML }}</code></pre>
     </div>
 </div>
+{{ else }}
+<p>File "{{ $file }}" not found at "{{ $filePath }}"</p>
+{{ end }}

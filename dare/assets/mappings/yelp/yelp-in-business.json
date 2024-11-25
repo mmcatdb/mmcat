@@ -1,0 +1,24 @@
+{
+    "_": {
+      "address": 0,
+      "attributes": {
+        "AcceptsInsurance": 3,
+        "AgesAllowed": 4,
+        "Alcohol": 5,
+        "Ambience": 6
+      },
+      "business_id": 42,
+      "categories": 43,
+      "city": 44,
+      "hours": {
+        "Friday": 47,
+        "Monday": 48,
+        "Saturday": 49,
+        "Sunday": 50,
+        "Thursday": 51,
+        "Tuesday": 52,
+        "Wednesday": 53
+      }
+    }
+}
+  

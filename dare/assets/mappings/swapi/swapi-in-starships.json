@@ -1,0 +1,31 @@
+{
+    "_": {
+      "MGLT": 24,
+      "cargo_capacity": 25,
+      "consumables": 26,
+      "cost_in_credits": 27,
+      "created": 28,
+      "crew": 29,
+      "edited": 30,
+      "hyperdrive_rating": 34,
+      "length": 35,
+      "manufacturer": 36,
+      "max_atmosphering_speed": 37,
+      "model": 38,
+      "name": 39,
+      "passengers": 40,
+      "starship_class": 44,
+      "url": 45,
+      "Array": [
+        {
+          "_index": 42,
+          "people.json": 43
+        },
+        {
+          "_index": 32,
+          "films.json": 33
+        }
+      ]
+    }
+  }
+  

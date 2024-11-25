@@ -1,0 +1,28 @@
+{
+    "_": {
+      "average_height": 70,
+      "average_lifespan": 71,
+      "classification": 72,
+      "created": 73,
+      "designation": 74,
+      "edited": 75,
+      "eye_colors": 76,
+      "hair_colors": 80,
+      "homeworld": 81,
+      "language": 82,
+      "name": 83,
+      "skin_colors": 87,
+      "url": 88,
+      "Array": [
+        {
+          "_index": 85,
+          "people.json": 86
+        },
+        {
+          "_index": 78,
+          "films.json": 79
+        }
+      ]
+    }
+  }
+  
