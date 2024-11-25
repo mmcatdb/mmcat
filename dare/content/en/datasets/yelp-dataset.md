@@ -150,4 +150,4 @@ The Yelp Tip data is transformed into a flat CSV file. Each row in the CSV file 
 
 <br />
 
-Generated File: {{< open-link url="https://data.mmcatdb.com/dare/yelp/output/C/commands.txt" label="File Link" >}}
+Generated File: {{< open-link url="https://data.mmcatdb.com/dare/yelp/output/C/file.csv" label="File Link" >}}
