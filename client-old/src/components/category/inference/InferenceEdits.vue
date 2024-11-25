@@ -103,7 +103,7 @@ function getEditName(editType: string): string {
             <button
                 @click="cancel"
             >
-                Cancel
+                Back
             </button>
         </div>
     </div>
