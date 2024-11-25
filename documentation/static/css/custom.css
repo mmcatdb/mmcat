@@ -3,7 +3,7 @@ html {
 }
 
 :root {
-    --color-primary: hsla(160, 100%, 37%, 1);
+    --color-primary: #00bd7e;
 
     --header-background: var(--color-primary) !important;
     --button-background: var(--color-primary) !important;

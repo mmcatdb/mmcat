@@ -1,0 +1,26 @@
+{{ $src := .Get "src" }}
+{{ $alt := .Get "alt" }}
+{{ $width := "auto" }}
+{{ if isset .Params "width" }}
+    {{ $width = .Get "width" }}
+{{ end }}
+{{ $caption := "" }}
+{{ if isset .Params "caption" }}
+    {{ $caption = .Get "caption" }}
+{{ end }}
+
+<div style="text-align: center;">
+    <img
+        src="{{ $src }}"
+        alt="{{ $alt }}"
+        decoding="async"
+        width="{{ $width }}"
+        title="{{ $caption }}"
+    />
+    {{ if isset .Params "caption" }}
+        <br />
+        <span style="font-style: italic;">
+            {{ $caption }}
+        </span>
+    {{ end }}
+</div>
