@@ -1,16 +1,14 @@
 {
     "_": {
       "tconst": 58.13,
-      "Array": [
-        {
+      "Array": -50 {
           "_index": 51,
           "name.basics.tsv": 52
         },
-        {
+      "Array": -47 {
           "_index": 48,
           "name.basics.tsv": 49
         }
-      ]
     }
   }
   

@@ -16,16 +16,14 @@
       "passengers": 40,
       "starship_class": 44,
       "url": 45,
-      "Array": [
-        {
+      "Array": -41 {
           "_index": 42,
           "people.json": 43
         },
-        {
+      "Array": -31 {
           "_index": 32,
           "films.json": 33
         }
-      ]
     }
   }
   

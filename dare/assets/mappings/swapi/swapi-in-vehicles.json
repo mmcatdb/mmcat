@@ -14,16 +14,14 @@
       "passengers": 103,
       "url": 107,
       "vehicle_class": 108,
-      "Array": [
-        {
+      "Array": -104 {
           "_index": 105,
           "people.json": 106
         },
-        {
+      "Array": -95 {
           "_index": 96,
           "films.json": 97
         }
-      ]
     }
   }
   

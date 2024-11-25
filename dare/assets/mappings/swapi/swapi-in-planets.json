@@ -12,16 +12,14 @@
       "surface_water": 124,
       "terrain": 125,
       "url": 126,
-      "Array": [
-        {
+      "Array": -120 {
           "_index": 121,
           "people.json": 122
         },
-        {
+      "Array": -113 {
           "_index": 114,
           "films.json": 115
         }
-      ]
     }
   }
   

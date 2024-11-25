@@ -13,16 +13,14 @@
       "name": 83,
       "skin_colors": 87,
       "url": 88,
-      "Array": [
-        {
+      "Array": -84 {
           "_index": 85,
           "people.json": 86
         },
-        {
+      "Array": -77 {
           "_index": 78,
           "films.json": 79
         }
-      ]
     }
   }
   

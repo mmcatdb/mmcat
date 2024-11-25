@@ -12,7 +12,7 @@
       "event_location": 60,
       "event_location_reference_id": 61,
       "person_id": 111.0,
-      "event_notes": {
+      "event_notes": -62 {
         "_index": 63,
         "_value": 64
       }

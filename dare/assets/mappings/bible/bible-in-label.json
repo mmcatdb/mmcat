@@ -14,15 +14,15 @@
       "person_label_count": 48,
       "label_sequence": 49,
       "person_id": 110.0,
-      "greek_label": {
+      "greek_label": -38 {
         "_index": 39,
         "_value": 40
       },
-      "hebrew_label_meaning": {
+      "hebrew_label_meaning": -34 {
         "_index": 35,
         "_value": 36
       },
-      "hebrew_label": {
+      "hebrew_label": -30 {
         "_index": 31,
         "_value": 32
       }
