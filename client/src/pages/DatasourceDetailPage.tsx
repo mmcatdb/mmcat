@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '@/api';
 import type { Datasource, Settings } from '@/types/datasource';
-import { ErrorPage } from '@/pages/errorPages';
+import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 import { Button, Checkbox, Input, Spinner } from '@nextui-org/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/schema-categories/MappingsTable';
@@ -58,6 +58,9 @@ export const DatasourceInCategoryDetailPage = () => {
     if (!categoryId || !id) 
         return <ErrorPage />;
 
+    if (loading)
+        return <LoadingPage />;
+
     const handleAddMapping = () => {
         toast.error('Add mapping functionality not implemented yet');
     };
@@ -96,6 +99,7 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
     // for edit mode
     const [ isEditing, setIsEditing ] = useState(false);
     const [ formValues, setFormValues ] = useState<Settings | null>(null);
+    const [ isSaving, setIsSaving ] = useState(false);
 
     useEffect(() => {
         const fetchDatasource = async () => {
@@ -110,7 +114,6 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                 else {
                     setError('Failed to load datasource details.');
                 }
-                
             }
             catch {
                 setError('An error occurred while loading the datasource details.');
@@ -135,20 +138,95 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
             return;
 
         try {
+            setIsSaving(true);
             const updatedDatasource = await api.datasources.updateDatasource(
                 { id: datasourceId },
                 { label: datasource?.label ?? '', settings: formValues },
             );
-            
-            setDatasource(updatedDatasource.data);
-            toast.success('Datasource updated successfully!');
+
+            if (updatedDatasource.status) {
+                setDatasource(updatedDatasource.data);
+                toast.success('Datasource updated successfully!');
+            }
+            else {
+                toast.error('Something went wrong when updating datsource');
+            }
         }
         catch (e) {
             toast.error('Failed to update datasource.');
         }
         finally {
+            setIsSaving(false);
             setIsEditing(false);
         }
+    };
+
+    const renderEditFields = () => {
+        if (!formValues || !datasource) 
+            return null;
+
+        const { type } = datasource;
+
+        if ([ 'mongodb', 'postgresql', 'neo4j' ].includes(type)) {
+            return (
+                <>
+                    <Input
+                        label='Host'
+                        value={formValues.host ?? ''}
+                        onChange={(e) => handleInputChange('host', e.target.value)}
+                        disabled={isSaving}
+                    />
+                    <Input
+                        label='Port'
+                        value={formValues.port != null ? String(formValues.port) : ''}
+                        type='number'
+                        onChange={(e) => handleInputChange('port', e.target.value)}
+                        disabled={isSaving}
+                    />
+                    <Input
+                        label='Database'
+                        value={formValues.database ?? ''}
+                        onChange={(e) => handleInputChange('database', e.target.value)}
+                        disabled={isSaving}
+                    />
+                    <Input
+                        label='Username'
+                        value={formValues.username ?? ''}
+                        onChange={(e) => handleInputChange('username', e.target.value)}
+                        disabled={isSaving}
+                    />
+                    <Input
+                        label='Password'
+                        placeholder='Enter new password'
+                        type='password'
+                        onChange={(e) => handleInputChange('password', e.target.value)}
+                        disabled={isSaving}
+                    />
+                    {[ 'mongodb' ].includes(type) && (
+                        <Input
+                            label='Authentication Database'
+                            value={formValues.authenticationDatabase ?? ''}
+                            onChange={(e) => handleInputChange('authenticationDatabase', e.target.value)}
+                            disabled={isSaving}
+                        />
+                    )}
+                </>
+            );
+        }
+
+        if ([ 'csv', 'json', 'jsonld' ].includes(type)) {
+            return (
+                <Input
+                    label='File URL'
+                    value={formValues.url ?? ''}
+                    onChange={(e) => handleInputChange('url', e.target.value)}
+                    disabled={isSaving}
+                    required
+                />
+            );
+        }
+
+        return null;
     };
 
     if (error ?? (!datasource && !loading)) 
@@ -180,56 +258,11 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                         ) : (
                             // Edit Mode
                             <form className='grid grid-cols-1 gap-4'>
-                                <Input
-                                    label='Host'
-                                    value={formValues?.host ?? ''}
-                                    onChange={(e) =>
-                                        handleInputChange('host', e.target.value)
-                                    }
-                                />
-                                <Input
-                                    label='Port'
-                                    value={formValues?.port?.toString() ?? ''}
-                                    type='number'
-                                    onChange={(e) =>
-                                        handleInputChange('port', e.target.value)
-                                    }
-                                />
-                                <Input
-                                    label='Database'
-                                    value={formValues?.database ?? ''}
-                                    onChange={(e) =>
-                                        handleInputChange('database', e.target.value)
-                                    }
-                                />
-                                <Input
-                                    label='Username'
-                                    value={formValues?.username ?? ''}
-                                    onChange={(e) =>
-                                        handleInputChange('username', e.target.value)
-                                    }
-                                />
-                                <Input
-                                    label='Password'
-                                    placeholder='Enter new password'
-                                    type='password'
-                                    onChange={(e) =>
-                                        handleInputChange('password', e.target.value)
-                                    }
-                                />
-                                <Input
-                                    label='Authentication Database'
-                                    value={formValues?.authenticationDatabase ?? ''}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            'authenticationDatabase',
-                                            e.target.value,
-                                        )
-                                    }
-                                />
+                                {renderEditFields()}
                                 <Checkbox
                                     isSelected={formValues?.isWritable}
                                     onChange={(e) => handleInputChange('isWritable', e.target.checked)}
+                                    isDisabled={isSaving}
                                 >
                                     Is Writable?
                                 </Checkbox>
@@ -238,6 +271,7 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                                     onChange={(e) =>
                                         handleInputChange('isQueryable', e.target.checked)
                                     }
+                                    isDisabled={isSaving}
                                 >
                                     Is Queryable?
                                 </Checkbox>
@@ -245,6 +279,7 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                                     <Button
                                         color='primary'
                                         onClick={handleSaveChanges}
+                                        isLoading={isSaving}
                                     >
                                         Save
                                     </Button>
@@ -253,6 +288,7 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                                         color='danger'
                                         variant='light'
                                         onClick={() => setIsEditing(false)}
+                                        isDisabled={isSaving}
                                     >
                                         Cancel
                                     </Button>
