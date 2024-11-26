@@ -47,21 +47,15 @@ public class PullToDDLAndDMLTestBase {
 
         LOGGER.trace("Pulled Forest Of Records:\n" + forest);
 
-        final var tform = new MTCAlgorithm();
-        tform.input(mapping, instance, forest);
-        tform.algorithm();
+        MTCAlgorithm.run(mapping, instance, forest);
 
         LOGGER.trace("Created Instance Category:\n" + instance);
 
-        final var ddlAlgorithm = new DDLAlgorithm();
-        ddlAlgorithm.input(mapping, instance, ddlWrapper);
-        final var ddlStatement = ddlAlgorithm.algorithm();
+        final var ddlStatement = DDLAlgorithm.run(mapping, instance, ddlWrapper);
 
         LOGGER.info("Created DDL Statement:\n" + ddlStatement.getContent());
 
-        final var dmlAlgorithm = new DMLAlgorithm();
-        dmlAlgorithm.input(mapping, instance, dmlWrapper);
-        final var dmlStatements = dmlAlgorithm.algorithm();
+        final var dmlStatements = DMLAlgorithm.run(mapping, instance, dmlWrapper);
 
         LOGGER.info("Created DML Statement-s:\n" + String.join("\n", dmlStatements.stream().map(statement -> statement.getContent()).toList()));
 

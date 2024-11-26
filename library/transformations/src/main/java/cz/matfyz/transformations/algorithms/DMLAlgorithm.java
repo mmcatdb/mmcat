@@ -33,19 +33,23 @@ public class DMLAlgorithm {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DMLAlgorithm.class);
 
-    private Mapping mapping;
-    private InstanceCategory instance;
-    private AbstractDMLWrapper wrapper;
-    private Map<DynamicName, DynamicNameReplacement> replacedNames;
+    public static List<AbstractStatement> run(Mapping mapping, InstanceCategory instance, AbstractDMLWrapper wrapper) {
+        return new DMLAlgorithm(mapping, instance, wrapper).run();
+    }
 
-    public void input(Mapping mapping, InstanceCategory instance, AbstractDMLWrapper wrapper) {
+    private final Mapping mapping;
+    private final InstanceCategory instance;
+    private final AbstractDMLWrapper wrapper;
+    private final Map<DynamicName, DynamicNameReplacement> replacedNames;
+
+    private DMLAlgorithm(Mapping mapping, InstanceCategory instance, AbstractDMLWrapper wrapper) {
         this.mapping = mapping;
         this.instance = instance;
         this.wrapper = wrapper;
         this.replacedNames = mapping.accessPath().copyWithoutDynamicNames().replacedNames();
     }
 
-    public List<AbstractStatement> algorithm() {
+    private List<AbstractStatement> run() {
         final InstanceObject instanceObject = instance.getObject(mapping.rootObject());
         final Set<DomainRow> domainRows = instanceObject.allRowsToSet();
         final Deque<DMLStackTriple> masterStack = new ArrayDeque<>();

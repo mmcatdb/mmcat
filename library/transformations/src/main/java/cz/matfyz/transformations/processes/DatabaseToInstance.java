@@ -59,12 +59,10 @@ public class DatabaseToInstance {
             ? currentInstance
             : new InstanceBuilder(mapping.category()).build();
 
-        final var tform = new MTCAlgorithm();
-        tform.input(mapping, instance, forest);
-
         Statistics.start(Interval.MTC_ALGORIGHM);
-        tform.algorithm();
+        MTCAlgorithm.run(mapping, instance, forest);
         Statistics.end(Interval.MTC_ALGORIGHM);
+
         Statistics.end(Interval.DATABASE_TO_INSTANCE);
 
         return instance;
