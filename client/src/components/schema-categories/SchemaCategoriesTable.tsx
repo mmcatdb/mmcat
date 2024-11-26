@@ -105,6 +105,9 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                         <TableColumn key='label' allowsSorting>
                             Label
                         </TableColumn>,
+                        <TableColumn key='version' allowsSorting>
+                            System Version
+                        </TableColumn>,
                         <TableColumn key='actions'>Actions</TableColumn>,
                     ]}
                 </TableHeader>
@@ -119,6 +122,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                                     ? [ <TableCell key='id'>{category.id}</TableCell> ]
                                     : []),
                                 <TableCell key='label'>{category.label}</TableCell>,
+                                <TableCell key='label'>{category.systemVersion}</TableCell>,
                                 <TableCell key='actions'>
                                     <Button
                                         isIconOnly

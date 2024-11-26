@@ -3,6 +3,7 @@ import { usePreferences } from '../PreferencesProvider';
 import { useSortableData } from '../TableCommon';
 import { type SortDescriptor } from '@react-types/shared';
 import type { Mapping } from '@/types/mapping';
+import { useCategoryInfo } from '../CategoryInfoProvider';
 
 type MappingsTableProps = {
     mappings: Mapping[];
@@ -51,6 +52,7 @@ type MappingsTableContentProps = {
 
 function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: MappingsTableContentProps) {
     const { showTableIDs } = usePreferences().preferences;
+    const { category } = useCategoryInfo();
 
     return (
         <div className='overflow-x-auto w-full'>
@@ -95,7 +97,11 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                     ? [ <TableCell key='id'>{mapping.id}</TableCell> ]
                                     : []),
                                 <TableCell key='kindName'>{mapping.kindName}</TableCell>,
-                                <TableCell key='version'>{mapping.version}</TableCell>,
+                                <TableCell key='version'>
+                                    <span className={Number(category.systemVersionId) > Number(mapping.version) ? 'text-red-500' : ''}>
+                                        {mapping.version}
+                                    </span>
+                                </TableCell>,
                                 <TableCell key='rootObject'>
                                     {mapping.rootObjectKey.value}
                                 </TableCell>,

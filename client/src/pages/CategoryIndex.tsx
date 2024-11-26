@@ -45,7 +45,7 @@ function CategoryIndexInner() {
         <div>
             {/* <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}> */}
             <h1 className='text-xl'>
-                {category.label}
+                {category.label}, sv.{category.systemVersionId}
             </h1>
             <Outlet />
             {/* </div> */}
