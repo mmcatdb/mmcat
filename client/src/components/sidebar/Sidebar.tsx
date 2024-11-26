@@ -181,6 +181,12 @@ const SideBarItemsinCategory = (categoryId: string): SidebarItem[] => [
     },
     {
         type: 'normal',
+        label: 'Actions',
+        route: routes.category.actions.resolve({ categoryId }),
+        iconName: 'documentText',
+    },
+    {
+        type: 'normal',
         label: 'Querying',
         route: routes.category.querying.resolve({ categoryId }),
         iconName: 'documentText',

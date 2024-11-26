@@ -42,6 +42,9 @@ export function DatasourcesInCategoryPage() {
                 else {
                     throw new Error('Failed to fetch all datasources');
                 }
+                // TODO: delete this, for debugging purposes
+                // setDatasourcesInCategory([  ]);
+                // setOtherDatasources([ ]);
             } 
             catch (err) {
                 setError('Failed to load data');

@@ -15,6 +15,7 @@ import { Mapping } from '@/types/mapping';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategory';
+import { ActionsPage } from '@/pages/category/ActionsPage';
 
 type MappingLoaderData = {
     mapping: Mapping;
@@ -143,6 +144,12 @@ export const router = createBrowserRouter([
                                 handle: { breadcrumb: (data: MappingLoaderData) => data.mapping.kindName },
                             },
                         ],
+                    },
+                    {
+                        id: routes.category.actions.id,
+                        path: routes.category.actions.path,
+                        Component: ActionsPage,
+                        handle: { breadcrumb: 'Actions' },
                     },
                 ],
             },

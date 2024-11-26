@@ -283,7 +283,7 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
                                     >
                                         Save
                                     </Button>
-                                    {/* // TODO: cancel confirmation modal if some changes */}
+                                    {/* // TODO: confirmation modal if some changes and want to Cancel*/}
                                     <Button
                                         color='danger'
                                         variant='light'
