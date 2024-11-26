@@ -1,0 +1,11 @@
+_: {
+  ordering: 39,
+  category: 41,
+  job: 42,
+  tconst: 55.13,
+  nconst: 56.28,
+  characters: -43 {
+    _index: 44,
+    _value: 45
+  }
+}

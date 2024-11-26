@@ -1,0 +1,20 @@
+_: {
+  book_name: 9,
+  hebrew_name: 10,
+  hebrew_transliteration: 11,
+  hebrew_meaning: 12,
+  greek_name: 13,
+  greek_transliteration: 14,
+  greek_meaning: 15,
+  chapter_count: 16,
+  verse_count: 17,
+  book_id: 18,
+  christian_sequence: 19,
+  hebrew_sequence: 20,
+  short_name: 21,
+  usx_code: 22,
+  writer_id: 23,
+  written_start_date: 24,
+  written_end_date: 25,
+  written_location_id: 26
+}

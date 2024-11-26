@@ -1,0 +1,11 @@
+_: {
+  cool: 85,
+  date: 86,
+  funny: 87,
+  review_id: 88,
+  stars: 89,
+  text: 90,
+  useful: 91,
+  business_id: 100.42,
+  user_id: 101.82
+}

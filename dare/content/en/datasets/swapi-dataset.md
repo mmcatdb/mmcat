@@ -61,6 +61,30 @@ It is structured in JSON format. The files are the following:
 
 ## Generated Dataset Specifications
 
+### Case A: Embedding Film Data with Related Details from Referenced Files in MongoDB
+
+The film data is enriched by embedding detailed information from all referenced entities. Instead of storing only references (URLs) to related data, the selected details of these references are included as embedded objects within the film documents. The transformed dataset is then stored in MongoDB, with each film represented as a comprehensive, self-contained document.
+
+By embedding all related details into each film document and storing it in MongoDB, the transformed SWAPI dataset becomes highly accessible, efficient, and scalable. It supports a wide range of applications, from backend APIs to analytical tools, and aligns well with MongoDB’s strengths in handling nested, hierarchical data.
+
+<table style="width: 100%; border-collapse: collapse; text-align: left;">
+  <thead>
+    <tr>
+      <th style="border: 1px solid #ddd; padding: 8px;">Entity</th>
+      <th style="border: 1px solid #ddd; padding: 8px;">Output Mapping</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border: 1px solid #ddd; padding: 8px;">Films</td>
+      <td style="border: 1px solid #ddd; padding: 8px;">{{< show-code id="7" file="swapi/swapi-A-films" label="Output Mapping" >}}</td>
+    </tr>
+  </tbody>
+</table>
+
+*Note*: While it is technically possible to define a mapping that embeds the film data with details from referenced entities, it is currently not possible to generate the transformed data. This limitation arises because the Transformation modules in MM-cat are not yet equipped to handle array references effectively. Therefore, we do not provide the transformed dataset at this stage. Enhancements to the Transformation modules to address this limitation are planned for **future development**.
+
+
 
 
 

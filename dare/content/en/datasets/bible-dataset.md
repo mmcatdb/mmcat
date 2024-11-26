@@ -80,6 +80,40 @@ The whole dataset contains 18 CSV files. To maintain readability of the inferred
 
 ## Generated Dataset Specifications
 
+### Case A: Transforming Person Relationships and Labels into Neo4j
+
+The Person, PersonLabel, and PersonRelationship data are transformed into a graph structure and stored in Neo4j, a graph database. The original data contains relational information about biblical figures, and their relationships with one another. This inherent graph-like structure makes Neo4j an ideal choice for storing and analyzing this data.
+
+The relationships in the dataset form a natural graph structure, with people as nodes and their connections as edges. Neo4j is specifically designed to store, query, and analyze such graph data efficiently.
+
+<table style="width: 100%; border-collapse: collapse; text-align: left;">
+  <thead>
+    <tr>
+      <th style="border: 1px solid #ddd; padding: 8px;">Entity</th>
+      <th style="border: 1px solid #ddd; padding: 8px;">Output Mapping</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border: 1px solid #ddd; padding: 8px;">Person</td>
+      <td style="border: 1px solid #ddd; padding: 8px;">{{< show-code id="10" file="bible/bible-A-person" label="Output Mapping" >}}</td>
+    </tr>
+        <tr>
+      <td style="border: 1px solid #ddd; padding: 8px;">PersonLabel</td>
+      <td style="border: 1px solid #ddd; padding: 8px;">{{< show-code id="11" file="bible/bible-A-label" label="Output Mapping" >}}</td>
+    </tr>
+        <tr>
+      <td style="border: 1px solid #ddd; padding: 8px;">PersonRelationship</td>
+      <td style="border: 1px solid #ddd; padding: 8px;">{{< show-code id="12" file="bible/bible-A-relationship" label="Output Mapping" >}}</td>
+    </tr>
+  </tbody>
+</table>
+
+<br />
+
+Generated Commands: {{< open-link url="https://data.mmcatdb.com/dare/bible/output/A/commands.txt" label="Commands Link" >}}
+
+
 
 
 

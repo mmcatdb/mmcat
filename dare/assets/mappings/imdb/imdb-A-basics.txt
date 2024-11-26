@@ -1,0 +1,15 @@
+_: {
+    tconst: 13,
+    titleType: 14,
+    primaryTitle: 15,
+    originalTitle: 16,
+    isAdult: 17,
+    startYear: 18,
+    endYear: 19,
+    runtimeMinutes: 20,
+    genres: -21.23,
+    title.akas.tsv: -54 {
+        title: 5,
+        language: 7
+    }
+}

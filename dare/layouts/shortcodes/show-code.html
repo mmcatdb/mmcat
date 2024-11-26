@@ -1,10 +1,10 @@
 {{ $id := .Get "id" }}
 {{ $buttonLabel := .Get "label" }}
 {{ $file := .Get "file" }}
-{{ $filePath := printf "assets/mappings/%s.json" $file }}
-{{ $jsonContent := readFile $filePath }}
+{{ $filePath := printf "assets/mappings/%s.txt" $file }}
+{{ $fileContent := readFile $filePath }}
 
-{{ if $jsonContent }}
+{{ if $fileContent }}
 <div style="text-align: center;">
     <a
         href="javascript:void(0);"
@@ -15,7 +15,7 @@
     </a>
     <br />
     <div id="{{ $id }}" style="display: none; text-align: left; background-color: #f4f4f4; border: 1px solid #ccc; font-family: monospace; overflow: auto; padding: 1em;">
-        <pre><code>{{ $jsonContent | safeHTML }}</code></pre>
+        <pre><code>{{ $fileContent | safeHTML }}</code></pre>
     </div>
 </div>
 {{ else }}
