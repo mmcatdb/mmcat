@@ -166,8 +166,13 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     /**
      * Applies the mapping edit to a list of mappings.
      */
+    // adjusted for array, because for now we dont support indexing
     @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Reference Merge Edit on Mapping...");
+
+        // arrays will be dealt with once indexing in enabled
+        if (referenceIsArray)
+            return mappings;
 
         Mapping referenceMapping = findReferenceMapping(mappings);
 
