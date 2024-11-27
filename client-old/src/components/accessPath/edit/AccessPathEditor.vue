@@ -280,9 +280,12 @@ function deleteRequested(nodes: Node[]) {
     nodes.forEach(node => {
         if (isNodeInAccessPath(node)) {
             node.unhighlight();
+            props.rootProperty.unhighlightPath();
             props.rootProperty.removeSubpathForNode(node);
+            props.rootProperty.highlightPath();
         }
     });
+
     selectedNodes.value = [];
     emit('update:rootProperty', localRootProperty.value);
 }
