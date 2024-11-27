@@ -6,7 +6,7 @@ import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
 import { CategoryIndex, categoryIndexLoader, type CategoryIndexLoaderData } from '@/pages/CategoryIndex';
 import { DatasourcesPage, DatasourcesPageOverview } from '@/pages/DatasourcesPage';
-import { DatasourceDetailPage, DatasourceInCategoryDetailPage } from '@/pages/DatasourceDetailPage';
+import { datasourceDetailLoader, type DatasourceDetailLoaderData, DatasourceDetailPage, DatasourceInCategoryDetailPage } from '@/pages/DatasourceDetailPage';
 import { AdminerPage } from '@/pages/AdminerPage';
 import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
 import { QueryingPage } from '@/pages/QueryingPage';
@@ -86,7 +86,10 @@ export const router = createBrowserRouter([
                     {
                         path: ':id',
                         Component: DatasourceDetailPage,
-                        handle: { breadcrumb: 'Detail' },
+                        loader: datasourceDetailLoader,
+                        handle: {
+                            breadcrumb: (data: DatasourceDetailLoaderData) => data.datasource.label,
+                        },
                     },
                 ],
             },
@@ -134,7 +137,10 @@ export const router = createBrowserRouter([
                             {
                                 path: ':id',
                                 Component: DatasourceInCategoryDetailPage,
-                                handle: { breadcrumb: 'Detail' },
+                                loader: datasourceDetailLoader,
+                                handle: {
+                                    breadcrumb: (data: DatasourceDetailLoaderData) => data.datasource.label,
+                                },
                             },
                             {
                                 id: 'mapping',

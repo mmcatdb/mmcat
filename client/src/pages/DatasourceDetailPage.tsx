@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { type Params, useParams } from 'react-router-dom';
 import { api } from '@/api';
-import type { Datasource, Settings } from '@/types/datasource';
+import { Datasource, type Settings } from '@/types/datasource';
 import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 import { Button, Checkbox, Input, Spinner } from '@nextui-org/react';
 import { Mapping } from '@/types/mapping';
@@ -21,6 +21,24 @@ export const DatasourceDetailPage = () => {
 
     return <DatasourceDetail datasourceId={id} />;
 };
+
+export type DatasourceDetailLoaderData = {
+    datasource: Datasource;
+};
+
+export async function datasourceDetailLoader({ params: { id } }: { params: Params<'id'> }): Promise<DatasourceDetailLoaderData> {
+    if (!id) 
+        throw new Error('Datasource ID is required');
+
+    const response = await api.datasources.getDatasource({ id });
+    if (!response.status) 
+        throw new Error('Failed to load datasource info');
+    
+
+    return {
+        datasource: Datasource.fromServer(response.data),
+    };
+}
 
 export const DatasourceInCategoryDetailPage = () => {
     const { categoryId, id } = useParams<{ categoryId: string, id: string }>();
