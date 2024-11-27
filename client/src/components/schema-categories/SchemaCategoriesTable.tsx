@@ -122,7 +122,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                                     ? [ <TableCell key='id'>{category.id}</TableCell> ]
                                     : []),
                                 <TableCell key='label'>{category.label}</TableCell>,
-                                <TableCell key='label'>{category.systemVersion}</TableCell>,
+                                <TableCell key='version'>{category.systemVersion}</TableCell>,
                                 <TableCell key='actions'>
                                     <Button
                                         isIconOnly
