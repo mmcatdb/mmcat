@@ -13,15 +13,20 @@ import java.util.List;
  */
 public class CsvDDLWrapper implements AbstractDDLWrapper {
 
-    private String kindName = null;
-    private List<String> properties = new ArrayList<>();
-
-    public void setKindName(String name) {
-        kindName = name;
-    }
-
     @Override public boolean isSchemaless() {
         return true;
+    }
+
+    @Override public void clear() {
+        kindName = null;
+        properties.clear();
+    }
+
+    private String kindName = null;
+    private final List<String> properties = new ArrayList<>();
+
+    @Override public void setKindName(String name) {
+        kindName = name;
     }
 
     @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {

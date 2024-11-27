@@ -10,14 +10,18 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
  */
 public class JsonDDLWrapper implements AbstractDDLWrapper {
 
+    @Override public boolean isSchemaless() {
+        return true;
+    }
+
+    @Override public void clear() {
+        kindName = null;
+    }
+
     private String kindName = null;
 
     @Override public void setKindName(String name) {
         kindName = name;
-    }
-
-    @Override public boolean isSchemaless() {
-        return true;
     }
 
     @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {

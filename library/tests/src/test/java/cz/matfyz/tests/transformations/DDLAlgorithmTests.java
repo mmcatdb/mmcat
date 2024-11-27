@@ -20,6 +20,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(order)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -40,6 +41,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(address)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -64,6 +66,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(tag)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -91,6 +94,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(orderItem)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -118,6 +122,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(contact)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -140,6 +145,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(customer)",
                     "isSchemaless()",
                     "addProperty(customer, complex, required)",
@@ -162,6 +168,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(address)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -184,6 +191,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(address)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -206,6 +214,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(orderItem)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -233,6 +242,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(note)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -263,6 +273,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(orderItem)",
                     "isSchemaless()",
                     "addProperty(number, simple, required)",
@@ -286,6 +297,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(dynamic)",
                     "isSchemaless()",
                     "addProperty(id, simple, required)",
@@ -317,6 +329,7 @@ class DDLAlgorithmTests {
     // }
 
     // [
+    //     "clear()",
     //     "setKindName(order_v3)",
     //     "isSchemaless()",
     //     "addProperty(id, simple, required)",

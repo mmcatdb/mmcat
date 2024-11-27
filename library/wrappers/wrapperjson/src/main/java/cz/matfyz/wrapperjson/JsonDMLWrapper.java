@@ -19,9 +19,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class JsonDMLWrapper implements AbstractDMLWrapper {
 
+    @Override public void clear() {
+        kindName = null;
+        propertyValues.clear();
+        constructor = new JsonDMLConstructor();
+    }
+
     private String kindName = null;
+    private final List<PropertyValue> propertyValues = new ArrayList<>();
     private JsonDMLConstructor constructor = new JsonDMLConstructor();
-    private List<PropertyValue> propertyValues = new ArrayList<>();
 
     @Override public void setKindName(String name) {
         kindName = name;
@@ -57,15 +63,6 @@ public class JsonDMLWrapper implements AbstractDMLWrapper {
         }
     }
 
-    /**
-     * Clears the current state of the DML wrapper, resetting the kind name, property values, and JSON constructor.
-     */
-    @Override public void clear() {
-        kindName = null;
-        propertyValues = new ArrayList<>();
-        constructor = new JsonDMLConstructor();
-    }
-
     @Override public String joinStatements(Iterable<AbstractStatement> statements) {
         final String content = StreamSupport.stream(statements.spliterator(), false)
             .map(AbstractStatement::getContent)
@@ -75,4 +72,5 @@ public class JsonDMLWrapper implements AbstractDMLWrapper {
             ? "[]"
             : "[\n" + content + "\n]";
     }
+
 }

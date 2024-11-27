@@ -11,11 +11,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
+    @Override public void clear() {
+        kindName = null;
+        propertyValues.clear();
+    }
+
     private String kindName = null;
 
     private record PropertyValue(String name, String value) {}
 
-    private List<PropertyValue> propertyValues = new ArrayList<>();
+    private final List<PropertyValue> propertyValues = new ArrayList<>();
 
     @Override public void setKindName(String name) {
         if (!nameIsValid(name))
@@ -51,11 +56,6 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
         return input == null
             ? "NULL"
             : "'" + input.replace("'", "''") + "'";
-    }
-
-    @Override public void clear() {
-        kindName = null;
-        propertyValues = new ArrayList<>();
     }
 
 }

@@ -15,8 +15,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
+    @Override public void clear() {
+        kindName = null;
+        propertyValues.clear();
+    }
+
     private String kindName = null;
-    private List<PropertyValue> propertyValues = new ArrayList<>();
+    private final List<PropertyValue> propertyValues = new ArrayList<>();
 
     @Override public void setKindName(String name) {
         kindName = name;
@@ -53,10 +58,5 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
         return "\"" + input.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
     */
-
-    @Override public void clear() {
-        kindName = null;
-        propertyValues = new ArrayList<>();
-    }
 
 }

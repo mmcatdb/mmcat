@@ -47,6 +47,7 @@ public class DDLAlgorithm {
     ) {}
 
     private AbstractStatement run() {
+        wrapper.clear();
         wrapper.setKindName(mapping.kindName());
 
         if (!wrapper.isSchemaless()) {
