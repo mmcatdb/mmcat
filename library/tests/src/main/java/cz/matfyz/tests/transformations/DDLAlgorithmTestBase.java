@@ -67,9 +67,7 @@ public class DDLAlgorithmTestBase {
         }
 
         final var wrapper = new DummyDDLWrapper();
-        final var tform = new DDLAlgorithm();
-        tform.input(mapping, inputInstance, wrapper);
-        tform.algorithm();
+        DDLAlgorithm.run(mapping, inputInstance, wrapper);
 
         final List<String> actualResult = wrapper.methods();
 

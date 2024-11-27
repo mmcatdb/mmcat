@@ -63,9 +63,7 @@ public class MTCAlgorithmTestBase {
 
             LOGGER.debug("FOREST ({}):\n{}", kind.mapping.toString(), forest);
 
-            final var tform = new MTCAlgorithm();
-            tform.input(kind.mapping, actualInstance, forest);
-            tform.algorithm();
+            MTCAlgorithm.run(kind.mapping, actualInstance, forest);
         }
 
         final var builder = new InstanceBuilder(schema);

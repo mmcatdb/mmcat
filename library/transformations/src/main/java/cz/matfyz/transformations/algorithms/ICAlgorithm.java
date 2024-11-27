@@ -21,20 +21,24 @@ import java.util.TreeSet;
 
 public class ICAlgorithm {
 
-    private Mapping mapping;
-    private Map<SchemaObject, Mapping> mappingsByObjects;
-    private AbstractICWrapper wrapper;
+    public static AbstractStatement run(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
+        return new ICAlgorithm(mapping, allMappings, wrapper).run();
+    }
 
-    private Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
+    private final Mapping mapping;
+    private final Map<SchemaObject, Mapping> mappingsByObjects;
+    private final AbstractICWrapper wrapper;
 
-    public void input(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
+    private ICAlgorithm(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
         this.mapping = mapping;
         this.wrapper = wrapper;
         this.mappingsByObjects = new TreeMap<>();
         allMappings.forEach(m -> mappingsByObjects.put(m.rootObject(), m));
     }
 
-    public AbstractStatement algorithm() {
+    private final Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
+
+    private AbstractStatement run() {
         // Primary key constraint
         IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
         // If there are no signatures, we can't create the primary key.

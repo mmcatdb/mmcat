@@ -25,24 +25,28 @@ import java.util.TreeSet;
 
 public class DDLAlgorithm {
 
-    private Mapping mapping;
-    private InstanceCategory instance;
-    private AbstractDDLWrapper wrapper;
-    private Map<DynamicName, DynamicNameReplacement> replacedNames;
+    public static AbstractStatement run(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper) {
+        return new DDLAlgorithm(mapping, instance, wrapper).run();
+    }
 
-    public void input(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper) {
+    private final Mapping mapping;
+    private final InstanceCategory instance;
+    private final AbstractDDLWrapper wrapper;
+    private final Map<DynamicName, DynamicNameReplacement> replacedNames;
+
+    private DDLAlgorithm(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper) {
         this.mapping = mapping;
         this.instance = instance;
         this.wrapper = wrapper;
         this.replacedNames = mapping.accessPath().copyWithoutDynamicNames().replacedNames();
     }
 
-    record StackElement(
+    private record StackElement(
         PropertyPath path,
         AccessPath property
     ) {}
 
-    public AbstractStatement algorithm() {
+    private AbstractStatement run() {
         wrapper.setKindName(mapping.kindName());
 
         if (!wrapper.isSchemaless()) {

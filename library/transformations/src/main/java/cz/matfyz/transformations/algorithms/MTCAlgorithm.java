@@ -30,11 +30,15 @@ public class MTCAlgorithm {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
 
-    private ForestOfRecords forest;
-    private Mapping mapping;
-    private InstanceCategory instance;
+    public static void run(Mapping mapping, InstanceCategory instance, ForestOfRecords forest) {
+        new MTCAlgorithm(mapping, instance, forest).run();
+    }
 
-    public void input(Mapping mapping, InstanceCategory instance, ForestOfRecords forest) {
+    private final ForestOfRecords forest;
+    private final Mapping mapping;
+    private final InstanceCategory instance;
+
+    private MTCAlgorithm(Mapping mapping, InstanceCategory instance, ForestOfRecords forest) {
         this.forest = forest;
         this.mapping = mapping;
         this.instance = instance;
@@ -42,7 +46,7 @@ public class MTCAlgorithm {
 
     private final UniqueIdGenerator idGenerator = UniqueIdGenerator.create();
 
-    public void algorithm() {
+    private void run() {
         LOGGER.debug("Model To Category algorithm");
         final ComplexProperty rootAccessPath = mapping.accessPath()
             // The auxiliary nodes are merged with their parents during the pull forest algorithm.

@@ -62,10 +62,9 @@ public class ICAlgorithmTestBase {
 
         final var wrapper = new DummyICWrapper();
 
-        final var tform = new ICAlgorithm();
         otherMappings.add(mapping);
-        tform.input(mapping, otherMappings, wrapper);
-        tform.algorithm();
+
+        ICAlgorithm.run(mapping, otherMappings, wrapper);
 
         final List<String> result = wrapper.methods();
 
