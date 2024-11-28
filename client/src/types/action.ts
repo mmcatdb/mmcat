@@ -14,7 +14,6 @@ export class Action implements Entity {
         public readonly id: Id,
         public readonly categoryId: Id,
         public readonly label: string,
-        // TODO: ještě je tam mapování
         public readonly payloads: JobPayload[],
     ) {}
 

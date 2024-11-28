@@ -1,35 +1,60 @@
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Table, TableBody, TableCell, TableHeader, TableRow } from '@nextui-org/react';
-import { AddIcon } from '@/components/icons/PlusIcon';
-import { EmptyState } from '@/components/TableCommon';
-import { ErrorPage, LoadingPage } from '@/pages/errorPages';
-import { Action, ACTION_TYPES, type JobPayloadInit, type ActionInit, type ActionType } from '@/types/action';
-import { toast } from 'react-toastify';
-import { useActions } from '@/components/schema-categories/ActionsReducer';
-import { useState } from 'react';
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { Action } from '@/types/action';
+import { useEffect, useState } from 'react';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
-
+import { toast } from 'react-toastify';
+import { LoadingPage } from '../errorPages';
+import { EmptyState } from '@/components/TableCommon';
+import { AddIcon } from '@/components/icons/PlusIcon';
 
 export function ActionsPage() {
-    const {
-        actions,
-        loading,
-        error,
-        isModalOpen,
-        setModalOpen,
-        addAction,
-        deleteAction,
-    } = useActions();
+    const [ actions, setActions ] = useState<Action[]>([]);
+    const [ loading, setLoading ] = useState(false);
+    const [ isModalOpen, setIsModalOpen ] = useState(false);
+    const { category } = useCategoryInfo();
 
-    if (error)
-        return <ErrorPage />;
+    useEffect(() => {
+        const fetchActions = async () => {
+            setLoading(true);
+
+            const response = await api.actions.getAllActionsInCategory({
+                categoryId: category.id,
+            });
+
+            if (!response.status) 
+                return false;
+            
+            const actionsFromServer = response.data.map(Action.fromServer);
+            console.log('Got HERE, Fetched Actions:', actionsFromServer);
+            setActions(actionsFromServer);
+
+            setLoading(false);
+            return true;
+        };
+
+        fetchActions();
+    }, [ category.id ]);
+
+    // Delete an action
+    const deleteAction = async (actionId: string) => {
+        try {
+            await api.actions.deleteAction({ id: actionId });
+            setActions((prev) => prev.filter((action) => action.id !== actionId));
+            toast.success('Action deleted successfully');
+        }
+        catch (error) {
+            toast.error('Error deleting action');
+            console.error(error);
+        }
+    };
 
     return (
-        <div>
-            <div className='flex items-center justify-between'>
-                <h1>Actions</h1>
+        <div className='p-6'>
+            <div className='flex items-center justify-between mb-4'>
+                <h1 className='text-xl font-semibold'>Actions</h1>
                 <Button
-                    onPress={() => setModalOpen(true)}
+                    onPress={() => setIsModalOpen(true)}
                     color='primary'
                     startContent={<AddIcon />}
                     isDisabled={loading}
@@ -38,30 +63,19 @@ export function ActionsPage() {
                 </Button>
             </div>
 
-            <div className='mt-5'>
+            <div>
                 {loading ? (
                     <LoadingPage />
                 ) : actions.length > 0 ? (
-                    <ActionsTable
-                        actions={actions}
-                        onDeleteAction={deleteAction}
-                    />
+                    <ActionsTable actions={actions} onDeleteAction={deleteAction} />
                 ) : (
                     <EmptyState
                         message='No actions available.'
                         buttonText='+ Add Action'
-                        onButtonClick={() => toast.error('Not implemented')}
+                        onButtonClick={() => setIsModalOpen(true)}
                     />
                 )}
             </div>
-
-            {isModalOpen && (
-                <AddActionModal
-                    isOpen={isModalOpen}
-                    onClose={() => setModalOpen(false)}
-                    onAddAction={addAction}
-                />
-            )}
         </div>
     );
 }
@@ -71,27 +85,27 @@ type ActionsTableProps = {
     onDeleteAction: (id: string) => void;
 };
 
-export function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
+function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     return (
-        <Table>
+        <Table aria-label='Actions table'>
             <TableHeader>
-                <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Actions</TableCell>
-                </TableRow>
+                <TableColumn key='id'>ID</TableColumn>
+                <TableColumn key='label'>Label</TableColumn>
+                <TableColumn>Type</TableColumn>
+                <TableColumn key='actions'>Actions</TableColumn>
             </TableHeader>
             <TableBody>
                 {actions.map((action) => (
                     <TableRow key={action.id}>
-                        <TableCell>{action.id}</TableCell>
-                        <TableCell>{action.payload.type}</TableCell>
-                        <TableCell>
+                        <TableCell key='id'>{action.id}</TableCell>
+                        <TableCell key='label'>{action.label}</TableCell>
+                        <TableCell>{action.payloads.map((p) => p.type).join(', ')}</TableCell>
+                        <TableCell key='actions'>
                             <Button color='danger' onPress={() => onDeleteAction(action.id)}>
                                 Delete
                             </Button>
                             <Button color='primary' className='ml-2'>
-                                Create Job
+                                Create Run
                             </Button>
                         </TableCell>
                     </TableRow>
@@ -101,126 +115,3 @@ export function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     );
 }
 
-type AddActionModalProps = {
-    isOpen: boolean;
-    onClose: () => void;
-    onAddAction: (newAction: Action) => void;
-};
-
-export function AddActionModal({ isOpen, onClose, onAddAction }: AddActionModalProps) {
-    const [ label, setLabel ] = useState('');
-    const [ type, setType ] = useState<ActionType | ''>('');
-    const [ loading, setLoading ] = useState(false);
-    const [ error, setError ] = useState<string | null>(null);
-    const { category } = useCategoryInfo();
-
-    const [ payloads, setPayloads ] = useState<JobPayloadInit[]>([]);
-
-    const addPayload = (newPayload: JobPayloadInit) => {
-        setPayloads((prev) => [ ...prev, newPayload ]);
-    };
-
-    const handlePayloadChange = (updatedPayload: JobPayloadInit[]) => {
-        setPayloads(updatedPayload);
-    };
-
-    const handleSubmit = async () => {
-        if (!label || !type) {
-            setError('All fields are required.');
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        const newAction: ActionInit = {
-            categoryId: category.id,
-            label,
-            payloads,
-        };
-
-        try {
-            const response = await api.actions.createAction({}, newAction);
-            if (response.status && response.data) {
-                const createdAction = Action.fromServer(response.data);
-                onAddAction(createdAction);
-                onClose();
-            }
-            else {
-                setError('Failed to create action.');
-            }
-        }
-        catch (err) {
-            setError('Error occurred while creating the action.');
-        }
-        finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalContent>
-                <ModalHeader>
-                    <p>Add Action</p>
-                </ModalHeader>
-                <ModalBody>
-                    {error && <p className='text-red-500'>{error}</p>}
-                    <Input
-                        label='Label'
-                        value={label}
-                        onChange={(e) => setLabel(e.target.value)}
-                        placeholder='Enter action label'
-                    />
-                    <SelectActionType
-                        actionType={type}
-                        setActionType={(type) => {
-                            console.log('Selected action type:', type);
-                            setType(type);
-                        }}
-                        isDisabled={false}
-                    />
-                </ModalBody>
-                <ModalFooter>
-                    <Button onPress={onClose} isDisabled={loading}>
-                        Cancel
-                    </Button>
-                    <Button
-                        color='primary'
-                        onPress={handleSubmit}
-                        isDisabled={loading || !label || !type}
-                        isLoading={loading}
-                    >
-                        Add Action
-                    </Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
-    );
-}
-
-type SelectActionTypeProps = {
-    actionType: ActionType | '';
-    setActionType: (type: ActionType) => void;
-    isDisabled: boolean;
-};
-  
-const SelectActionType = ({
-    actionType,
-    setActionType,
-    isDisabled,
-}: SelectActionTypeProps) => (
-    <Select
-        items={ACTION_TYPES}
-        label='Action Type'
-        placeholder='Select an Action Type'
-        selectedKeys={actionType ? new Set([ actionType ]) : new Set()}
-        onSelectionChange={(e) => {
-            const selectedType = Array.from(e as Set<ActionType>)[0];
-            setActionType(selectedType);
-        }}
-        isDisabled={isDisabled}
-    >
-        {(item) => <SelectItem key={item.value}>{item.label}</SelectItem>}
-    </Select>
-);
