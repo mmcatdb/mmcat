@@ -326,7 +326,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             final Signature newSig = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, newSchema.getObject(mapOldNewKey.get(morphism.cod().key())));
             mapOldNewSignature.put(morphism.signature(), newSig);
         }
-        newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(clusterRootKey), true, null);
+        this.newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(clusterRootKey), false, null).dual();
     }
 
     private void findMorphismsAndObjectsToDelete(Key clusterRootKey) {
@@ -449,14 +449,14 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         if (original instanceof SimpleProperty) {
             Signature dynamicNameSignature = this.newClusterSignature.concatenate(this.newTypeSignature);
             Signature valueSignature = this.newClusterSignature.concatenate(this.newValueSignature);
-            return new SimpleProperty(new DynamicName(dynamicNameSignature, null), valueSignature);
+            return new SimpleProperty(new DynamicName(dynamicNameSignature, newClusterName + "*"), valueSignature);
         }
 
         final var newSubpaths = transformSubpaths(((ComplexProperty) original).subpaths());
 
         if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
             return new ComplexProperty(
-                new DynamicName(newClusterSignature, null),
+                new DynamicName(newClusterSignature, newClusterName + "*"),
                 newClusterSignature,
                 newSubpaths
             );
