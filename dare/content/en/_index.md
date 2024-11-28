@@ -6,7 +6,7 @@ geekdocAnchor: false
 geekdocBreadcrumb: false
 ---
 
-The **DaRe** (Dataset Repository) was created to document and showcase the transformation of various single-model datasets into their various multi-model representations. For each dataset, DaRe provides a comprehensive record of initial data as well as newly generated multi-model data. Choose a dataset and explore!
+The **DaRe** (Dataset Repository) was created to document and showcase the transformation of single-model datasets into their various multi-model representations. For each dataset, DaRe provides a comprehensive record of initial data as well as details of the multi-model data generation process. Learn more [here](about/introduction.md) or choose a dataset and explore!
 
 <br />
 <br />
