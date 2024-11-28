@@ -57,7 +57,7 @@ View the saved edits and undo or redo them as you like.
 If you wish to manually adjust the schema layout, do so by dragging the graph nodes around. Once you are done, save the new positions by clicking this button.
 
 ## Step 3
-Define at least one output Mapping. First, select the output Datasource. Then define the Mappings. You can either load an initial Mapping or create a new one from scratch. Both options enable you to edit the Mapping as you go in the [Mapping Editor](../project-documentation/inference.md) using the context menu or the keyboard shortcuts. Press "Finish Mapping" when you are done defining your output Mappings. To see the results press "Continue". See below for full description of Mapping Editor.
+Define at least one output Mapping. First, select the output Datasource. Then define the Mappings. You can either load an initial Mapping or create a new one from scratch. Both options enable you to edit the Mapping as you go in the [Mapping Editor](../project-documentation/inference.md) using the context menu, the keyboard shortcuts or the AccessPath. Press "Finish Mapping" when you are done defining your output Mappings. To see the results press "Continue". See below for full description of Mapping Editor.
 
 ![Workflow Mapping Addition](/img/add-mappings.png)
 
@@ -75,16 +75,28 @@ When **Create new** selected, you are asked to first choose node representing th
 ![Mapping Editor - select accesspath objects](/img/accesspath-objects.png)
 
 #### Edit the Mapping
-After selecting the means of creating first draft of the output Mapping you enter the edit mode. Edit the Mapping to your liking. Delete or Insert nodes as you like. You can also reset the root node. To edit the Mapping select a single node, two nodes or a multiple and apply the operation using either the context menu or keyboard shortcuts.
+After selecting the means of creating first draft of the output Mapping you enter the edit mode. Edit the Mapping to your liking. Delete, Insert or Edit nodes. You can also reset the root node. 
 
-*Note*: Please note, that the Mapping Editor is still a work in progress. Therefore, some of the buttons are currently disabled.  
+To use the context menu or keyboard shortcuts, first select a single node, two nodes or multiple and apply any of the operations provided.
 
 ![Mapping Editor - edit node 1](/img/edit-node-1.png)
 
 ![Mapping Editor - edit node 2](/img/edit-node-2.png)
 
+To use the AccessPath you can either click on a property name in the AccessPath and edit it...
+
+![AccessPath - edit property](/img/accesspath-edit-property.png)
+![Edit property](/img/edit-property.png)
+
+...or you can add a new property to the AccessPath with the plus button.
+
+![AccessPath - add property](/img/accesspath-add-property.png)
+![Add property](/img/add-property.png)
+
+*Note*: Please note, that the Mapping Editor is still a work in progress. Therefore, some of the buttons are currently disabled.  
+
 ## Step 4
-Depending on the type of the output Datasource, you will see either Data Manipulation Language (DML) commands or generated files. It is up to your preference to have the commands executed or not.
+The transformations has run and the results appear. Depending on the type of the output Datasource, you will see either Data Manipulation Language (DML) commands or generated files. DML command execution will take place based on your [user configuration](https://github.com/mmcatdb/mmcat/blob/master/library/server/README.md).
 
 ![Workflow Result View](/img/view-results.png)
 
