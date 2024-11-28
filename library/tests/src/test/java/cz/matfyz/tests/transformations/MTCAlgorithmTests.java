@@ -426,6 +426,37 @@ class MTCAlgorithmTests {
             .run();
     }
 
+    @Test
+    void dynamicNamesTest() {
+        new MTCAlgorithmTestBase()
+            .mappingWithRecords(PostgreSQL.dynamic(schema), """
+                [{
+                    "id": "id-0",
+                    "label": "label-0",
+                    "px_a": "px-a-0",
+                    "py_a": "py-a-0",
+                    "px_b": "px-b-0",
+                    "py_b": "py-b-0",
+                    "catch_all_a": "catch-all-a-0",
+                    "catch_all_b": "catch-all-b-0"
+                }, {
+                    "id": "id-1",
+                    "label": "label-1",
+                    "px_a": "px-a-1",
+                    "py_a": "py-a-1",
+                    "px_b": "px-b-1",
+                    "py_b": "py-b-1",
+                    "catch_all_a": "catch-all-a-1",
+                    "catch_all_b": "catch-all-b-1"
+                }]
+            """)
+            .expected(builder -> {
+                PostgreSQL.addDynamic(builder, 0);
+                PostgreSQL.addDynamic(builder, 1);
+            })
+            .run();
+    }
+
     // TODO This test probably don't bring anything new as it just maps one value to another. However, an object with multiple identifiers from which one is an EMPTY signature, might be more interesting.
 
     // @Test
