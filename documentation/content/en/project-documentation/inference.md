@@ -9,7 +9,7 @@ The Inference functionality empowers users to effortlessly generate multi-model 
 
 The integration of the inference functionality was achieved by incorporating **MM-infer**[^article]—a tool previously developed by our research team members—as a dedicated module within the system. This module leverages MM-infer’s schema inference capabilities, enabling the automatic generation of schema representations from single-model datasets.
 
-A key component of this integration is the creation of a new **Schema Conversion Component**. This component is responsible for converting the output of MM-infer, the Record Schema Description (RSD), into the Schema Category format, while also managing the creation of Mapping.
+A key component of this integration is the creation of a new **Schema Conversion Component**. This component is responsible for converting the output of MM-infer, the Record Schema Description (RSD)[^article], into the [Schema Category](../theoretical-background/schema-category.md) format, while also managing the creation of Mapping.
 
 Furthermore, the integration was enhanced by **Inference Editor** which enables real live editing of the inferred Schema Category.
 
@@ -27,7 +27,7 @@ In the **MM-infer Module**, the system applies a two-tier schema inference appro
 
 The data then flows into the **Schema Conversion Module**. This module converts the raw schema descriptions into a more structured and intermediate representation called AccessTree. The Schema Converter transforms these AccessTrees into schema categories and mappings, which define how the input data can be interpreted and organized. The Inference Editor provides tools to refine these schema categories and mappings.
 
-Once the schema categories and mappings are finalized, the data transitions to the **MM-cat Module**. This module is responsible for transforming the refined schema categories and mappings into models suitable for specific outputs. The Mapping Editor enables users to create or adjust mappings that translate schema categories into output formats or database models. These mappings can then be applied to generate Instance Categories, which represent structured data ready for storage or further use. The MM-cat module supports exporting the data into various outputs.
+Once the schema categories and mappings are finalized, the data transitions to the **MM-cat Module**. This module is responsible for transforming the refined schema categories and mappings into models suitable for specific outputs. The Mapping Editor enables users to create or adjust mappings that translate schema categories into output formats or database models. These mappings can then be applied to generate [Instance Categories](../theoretical-background/instance-category.md), which represent structured data ready for storage or further use. The MM-cat module supports exporting the data into various outputs.
 
 This modular architecture ensures a streamlined and efficient process, from raw data ingestion to multi-model outputs. Each module contributes a distinct functionality, while their integration creates a cohesive system capable of handling complex multi-model data generation tasks.
 
