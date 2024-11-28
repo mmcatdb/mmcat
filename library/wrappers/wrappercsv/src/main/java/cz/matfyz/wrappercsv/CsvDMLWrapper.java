@@ -16,8 +16,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class CsvDMLWrapper implements AbstractDMLWrapper {
 
+    @Override public void clear() {
+        kindName = null;
+        rowData.clear();
+    }
+
     private String kindName = null;
-    private Map<String, String> rowData = new LinkedHashMap<>();
+    private final Map<String, String> rowData = new LinkedHashMap<>();
 
     @Override public void setKindName(String name) {
         this.kindName = name;
@@ -52,13 +57,6 @@ public class CsvDMLWrapper implements AbstractDMLWrapper {
         } catch (Exception e) {
             throw new OtherException(e);
         }
-    }
-
-    /**
-     * Clears the current row data, resetting the state of the DML wrapper.
-     */
-    @Override public void clear() {
-        rowData.clear();
     }
 
 }

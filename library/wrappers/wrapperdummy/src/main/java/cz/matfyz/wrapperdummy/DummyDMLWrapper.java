@@ -10,8 +10,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class DummyDMLWrapper implements AbstractDMLWrapper {
     //private List<String> methods = new ArrayList<>();
 
-    private final List<DMLTestStructure> structures = new ArrayList<>();
+    @Override public void clear() {
+        //methods.add("clear()");
+        structure = null;
+    }
+
     private DMLTestStructure structure;
+    private final List<DMLTestStructure> structures = new ArrayList<>();
 
     public List<DMLTestStructure> structures() {
         return structures;
@@ -25,11 +30,6 @@ public class DummyDMLWrapper implements AbstractDMLWrapper {
     @Override public void append(String name, @Nullable Object value) {
         //methods.add("append(" + name + ", " + value + ")");
         structure.add("append(" + name + ", " + value + ")");
-    }
-
-    @Override public void clear() {
-        //methods.add("clear()");
-        structure = null;
     }
 
     @Override public DummyStatement createDMLStatement() {

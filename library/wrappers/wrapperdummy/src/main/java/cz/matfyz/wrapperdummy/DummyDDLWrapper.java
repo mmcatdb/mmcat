@@ -7,19 +7,23 @@ import java.util.List;
 
 public class DummyDDLWrapper implements AbstractDDLWrapper {
 
-    private List<String> methods = new ArrayList<>();
+    private final List<String> methods = new ArrayList<>();
 
     public List<String> methods() {
         return methods;
     }
 
-    @Override public void setKindName(String name) {
-        methods.add("setKindName(" + name + ")");
-    }
-
     @Override public boolean isSchemaless() {
         methods.add("isSchemaless()");
         return false;
+    }
+
+    @Override public void clear() {
+        methods.add("clear()");
+    }
+
+    @Override public void setKindName(String name) {
+        methods.add("setKindName(" + name + ")");
     }
 
     @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {

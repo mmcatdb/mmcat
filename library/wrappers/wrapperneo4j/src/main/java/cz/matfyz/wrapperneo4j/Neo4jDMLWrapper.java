@@ -10,14 +10,23 @@ import java.util.List;
 
 public class Neo4jDMLWrapper implements AbstractDMLWrapper {
 
+    @Override public void clear() {
+        kindName = null;
+        propertyValues.clear();
+        fromNodeLabel = null;
+        fromNodeValues.clear();
+        toNodeLabel = null;
+        toNodeValues.clear();
+    }
+
     private record PropertyValue(String name, String value) {}
 
     private String kindName = null;
-    private List<PropertyValue> propertyValues = new ArrayList<>();
+    private final List<PropertyValue> propertyValues = new ArrayList<>();
     private String fromNodeLabel = null;
-    private List<PropertyValue> fromNodeValues = new ArrayList<>();
+    private final List<PropertyValue> fromNodeValues = new ArrayList<>();
     private String toNodeLabel = null;
-    private List<PropertyValue> toNodeValues = new ArrayList<>();
+    private final List<PropertyValue> toNodeValues = new ArrayList<>();
 
     @Override public void setKindName(String name) {
         if (!nameIsValid(name))
@@ -122,15 +131,6 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
         return input == null
             ? "null"
             : "'" + input.replace("'", "\\'") + "'";
-    }
-
-    @Override public void clear() {
-        kindName = null;
-        propertyValues = new ArrayList<>();
-        fromNodeLabel = null;
-        fromNodeValues = new ArrayList<>();
-        toNodeLabel = null;
-        toNodeValues = new ArrayList<>();
     }
 
 }

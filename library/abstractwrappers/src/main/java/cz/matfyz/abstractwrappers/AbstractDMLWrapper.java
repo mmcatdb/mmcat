@@ -7,13 +7,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractDMLWrapper {
 
+    /**
+     * Prepares the wrapper for the next kind. Very important - don't underestimate!
+     */
+    void clear();
+
     void setKindName(String name);
 
     void append(String name, @Nullable Object value);
 
     AbstractStatement createDMLStatement();
-
-    void clear();
 
     /**
      * The statements are joined depending on the datasource. E.g., JSON statements have to be put into array and joined with commas, while SQL statements don't really care.

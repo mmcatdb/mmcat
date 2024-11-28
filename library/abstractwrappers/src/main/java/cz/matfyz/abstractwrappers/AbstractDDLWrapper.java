@@ -14,9 +14,14 @@ public interface AbstractDDLWrapper {
     String EMPTY_NAME = StaticName.createAnonymous().getStringName();
     String INDENTATION = "    ";
 
-    void setKindName(String name);
-
     boolean isSchemaless();
+
+    /**
+     * Prepares the wrapper for the next kind. Very important - don't underestimate!
+     */
+    void clear();
+
+    void setKindName(String name);
 
     /**
      * Throws an exception if the operation isn't supported.
@@ -25,7 +30,10 @@ public interface AbstractDDLWrapper {
 
     AbstractStatement createDDLStatement();
 
-    /** Immutable - all methods just create a new path. */
+
+    /**
+     * Immutable - all methods just create a new path.
+     */
     public record PropertyPath(
         List<PathSegment> segments
     ) implements Serializable {
@@ -33,7 +41,9 @@ public interface AbstractDDLWrapper {
             return new PropertyPath(new ArrayList<>());
         }
 
-        /** Creates a new path with the added value. */
+        /**
+         * Creates a new path with the added value.
+         */
         public PropertyPath add(PathSegment segment) {
             List<PathSegment> newSegments = new ArrayList<>(segments);
             newSegments.add(segment);
