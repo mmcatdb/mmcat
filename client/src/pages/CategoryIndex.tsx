@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Outlet, type Params, useLoaderData, useMatches } from 'react-router-dom';
-import { usePreferences } from '@/components/PreferencesProvider';
 import { CustomLink } from '@/components/common';
 import { ThemeToggle } from '@/components/RootLayout';
 import { routes } from '../routes/routes';
@@ -38,17 +37,14 @@ export async function categoryIndexLoader({ params: { categoryId } }: { params: 
 }
 
 function CategoryIndexInner() {
-    const { theme, isCollapsed } = usePreferences().preferences;
     const { category } = useCategoryInfo();
 
     return (
         <div>
-            {/* <div className={clsx('mm-layout text-foreground bg-background', theme, isCollapsed && 'collapsed')}> */}
             <h1 className='text-xl'>
                 {category.label}, sv.{category.systemVersionId}
             </h1>
             <Outlet />
-            {/* </div> */}
         </div>
     );
 }

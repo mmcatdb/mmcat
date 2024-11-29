@@ -15,7 +15,8 @@ import { Mapping } from '@/types/mapping';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategory';
-import { ActionsPage } from '@/pages/category/ActionsPage';
+import { ActionsPage, ActionsPageOverview } from '@/pages/category/ActionsPage';
+import { AddActionPage } from '@/components/schema-categories/AddActionPage';
 
 type MappingLoaderData = {
     mapping: Mapping;
@@ -155,7 +156,20 @@ export const router = createBrowserRouter([
                         id: routes.category.actions.id,
                         path: routes.category.actions.path,
                         Component: ActionsPage,
+                        // TODO: loader
                         handle: { breadcrumb: 'Actions' },
+                        children: [
+                            {
+                                index: true,
+                                Component: ActionsPageOverview,
+                            },
+                            {
+                                id: 'add-action',
+                                path: 'add',
+                                Component: AddActionPage,
+                                handle: { breadcrumb: 'Add' },
+                            },
+                        ],
                     },
                 ],
             },

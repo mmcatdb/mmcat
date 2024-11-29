@@ -44,12 +44,14 @@ export const DatasourceInCategoryDetailPage = () => {
     const { categoryId, id } = useParams<{ categoryId: string, id: string }>();
     const [ mappings, setMappings ] = useState<Mapping[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | null>(null);
+    const [ error, setError ] = useState<string>();
 
     useEffect(() => {
         if (!categoryId || !id) 
             return;
 
+        // TODO: tady nedělat obalování try, catch 
+        // if (!response.data) dát jako první
         const fetchMappings = async () => {
             try {
                 setLoading(true);

@@ -8,10 +8,10 @@ import { useCategoryInfo } from '../CategoryInfoProvider';
 type MappingsTableProps = {
     mappings: Mapping[];
     loading: boolean;
-    error: string | null;
+    error: string | undefined;
 };
 
-export const MappingsTable = ({ mappings, loading, error }: MappingsTableProps) => {
+export function MappingsTable({ mappings, loading, error }: MappingsTableProps) {
     const { sortedData: sortedMappings, sortDescriptor, setSortDescriptor } = useSortableData(mappings, {
         column: 'kindName',
         direction: 'ascending',
@@ -42,7 +42,7 @@ export const MappingsTable = ({ mappings, loading, error }: MappingsTableProps) 
             />
         </div>
     );
-};
+}
 
 type MappingsTableContentProps = {
     mappings: Mapping[];
