@@ -135,17 +135,17 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                 : []),
                             <TableCell key='label'>{action.label}</TableCell>,
                             <TableCell key='type'>{action.payloads.map((p) => p.type).join(', ')}</TableCell>,
-                            <TableCell key='actions'>
+                            <TableCell key='actions' className='flex items-center space-x-2'>
                                 <Button
                                     isIconOnly
-                                    aria-label='Delete'
+                                    aria-label='Delete action'
                                     color='danger'
                                     variant='light' 
                                     onPress={() => onDeleteAction(action.id)}
                                 >
                                     <TrashIcon className='w-5 h-5' />
                                 </Button>
-                                <Button color='primary' className='ml-2'>
+                                <Button color='primary' variant='bordered'>
                                     Create Run
                                 </Button>
                             </TableCell>,
