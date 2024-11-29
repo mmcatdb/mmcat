@@ -30,8 +30,11 @@ The Inference Editor provides multiple editing options, affecting both the struc
 #### Layout
 Choose from the available layouts the one that best fits your schema. Change your choice even while schema structure editing.
 
-#### Merge
-This structure editing operation enables you to identify objects which define relationships in the schema. Choose to define a Reference or a Primary Key. Both of these options provide a Manual or a Candidate choice. Click on objects to define the edit manually or select from a list of candidates. See an example of suggested candidates below, see manual choice in the picture in [Step 2](#step-2).
+#### Reference
+This structure editing operation allows you to define relationships in the schema by identifying objects as references. References help establish connections between different entities within the schema. You can choose between a Manual or a Candidate approach. For the manual approach: click on objects in the schema to manually define the reference. For the Candidate approach: select from a list of suggested references provided by the system. See an example of suggested candidates in the figure below.
+
+#### Primary Key
+The primary key merge operation builds on the functionality of references. In addition to defining a relationship between objects, marking an object as a Primary Key designates it as the unique identifier for that entity. As with references, you can define primary keys manually by clicking on objects or choose from a list of candidates suggested by the system. See the manual choice process in the picture in [Step 2](#step-2).
 
 ![Primary Key Candidates](/img/primary-key-candidates.png)
 
