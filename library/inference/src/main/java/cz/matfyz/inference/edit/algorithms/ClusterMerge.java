@@ -161,15 +161,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         if (strings.isEmpty())
             return "";
 
-        final List<String> normalizedStrings = new ArrayList<>();
-        for (final String str : strings)
-            normalizedStrings.add(normalizeString(str));
-
-        return findLongestCommonSubstring(normalizedStrings);
-    }
-
-    private String normalizeString(String str) {
-        return str.replaceAll("[._:,-]", "");
+        return findLongestCommonSubstring(strings);
     }
 
     private String findLongestCommonSubstring(List<String> strings) {
@@ -177,8 +169,9 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             return "";
 
         final StringBuilder combinedBuilder = new StringBuilder();
-        for (int i = 0; i < strings.size(); i++)
+        for (int i = 0; i < strings.size(); i++) {
             combinedBuilder.append(strings.get(i)).append((char) (i + 'a'));
+        }
 
         final String combined = combinedBuilder.toString();
         final Integer[] suffixArray = buildSuffixArray(combined);
@@ -186,17 +179,30 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
         int maxLength = 0;
         int index = 0;
+
         for (int i = 1; i < lcp.length; i++) {
             if (
                 lcp[i] > maxLength &&
                 getStringIndex(suffixArray[i], strings) != getStringIndex(suffixArray[i - 1], strings)
             ) {
-                maxLength = lcp[i];
-                index = suffixArray[i];
+                String candidate = combined.substring(suffixArray[i], suffixArray[i] + lcp[i]);
+                if (isCommonSubstring(candidate, strings)) {
+                    maxLength = lcp[i];
+                    index = suffixArray[i];
+                }
             }
         }
 
         return combined.substring(index, index + maxLength);
+    }
+
+    private boolean isCommonSubstring(String substring, List<String> strings) {
+        for (String string : strings) {
+            if (!string.contains(substring)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private int getStringIndex(int suffixIndex, List<String> strings) {
