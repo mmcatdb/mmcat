@@ -14,6 +14,8 @@ DaRe has been created as part of the [MM-cat framework](https://github.com/mmcat
 For those interested in exploring our approach, you are warmly invited to try out the MM-cat tool and its inference capabilities. 
 Learn more about MM-cat [here](https://mmcatdb.com/).
 
+![Schema Category](/img/schema-category.png)
+
 ### Collaboration
 
 If you wish to contribute to this repository—by enhancing documentation, suggesting new datasets, or extending multi-model generation approaches—please reach out to us via email: xxx.

@@ -111,7 +111,7 @@ The relationships in the dataset form a natural graph structure, with people as 
 
 <br />
 
-Generated Commands: {{< open-link url="https://data.mmcatdb.com/dare/bible/output/A/commands.txt" label="Commands Link" >}}
+Generated Data Manipulation Language (DML) Commands: {{< open-link url="https://data.mmcatdb.com/dare/bible/output/A/commands.txt" label="Commands Link" >}}
 
 
 
