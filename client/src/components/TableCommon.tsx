@@ -3,6 +3,7 @@ import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
 
 // Sorting of specified data
+// using SortDescriptor for NextUI's Table onSortChange()
 export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescriptor) {
     const [ sortDescriptor, setSortDescriptor ] = useState<SortDescriptor>(initialSortDescriptor);
 
@@ -29,7 +30,6 @@ export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescrip
 
     return { sortedData, sortDescriptor, setSortDescriptor };
 }
-
 
 type ConfirmationModalProps = {
     isOpen: boolean;

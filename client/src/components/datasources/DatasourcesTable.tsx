@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
+import { ErrorPage } from '@/pages/errorPages';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
@@ -32,9 +33,13 @@ export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasour
         );
     }
 
-    // TODO: error component
-    if (error)
-        return <p>{error}</p>;
+    if (error) {
+        return (
+            <div>
+                <ErrorPage />
+            </div>
+        );
+    }
 
     return (
         <div>

@@ -1,15 +1,15 @@
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { Button, type SortDescriptor, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
 import { Action } from '@/types/action';
 import { useEffect, useState } from 'react';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
 import { LoadingPage } from '../errorPages';
-import { EmptyState } from '@/components/TableCommon';
+import { EmptyState, useSortableData } from '@/components/TableCommon';
 import { AddIcon } from '@/components/icons/PlusIcon';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { TrashIcon } from '@heroicons/react/24/solid';
+import { TrashIcon } from '@heroicons/react/24/outline'; 
 
 export function ActionsPage() {
     return (
@@ -97,25 +97,37 @@ type ActionsTableProps = {
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     const { showTableIDs } = usePreferences().preferences;
+    const { sortedData: sortedActions, sortDescriptor, setSortDescriptor } = useSortableData(actions, {
+        column: 'label',
+        direction: 'ascending',
+    });
+
+    const handleSortChange = (newSortDescriptor: SortDescriptor) => {
+        setSortDescriptor(newSortDescriptor);
+    };
 
     return (
-        <Table aria-label='Actions table'>
+        <Table 
+            aria-label='Actions table'
+            sortDescriptor={sortDescriptor}
+            onSortChange={handleSortChange}
+        >
             <TableHeader>
                 {[
                     ...(showTableIDs
                         ? [
-                            <TableColumn key='id'>
+                            <TableColumn key='id' allowsSorting>
                                 ID
                             </TableColumn>,
                         ]
                         : []),
-                    <TableColumn key='label'>Label</TableColumn>,
-                    <TableColumn key='type'>Type</TableColumn>,
+                    <TableColumn key='label' allowsSorting>Label</TableColumn>,
+                    <TableColumn key='type' allowsSorting>Type</TableColumn>,
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
             <TableBody emptyContent={'No mappings to display.'}>
-                {actions.map((action) => (
+                {sortedActions.map((action) => (
                     <TableRow key={action.id}>
                         {[
                             ...(showTableIDs
@@ -124,7 +136,13 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                             <TableCell key='label'>{action.label}</TableCell>,
                             <TableCell key='type'>{action.payloads.map((p) => p.type).join(', ')}</TableCell>,
                             <TableCell key='actions'>
-                                <Button color='danger' onPress={() => onDeleteAction(action.id)}>
+                                <Button
+                                    isIconOnly
+                                    aria-label='Delete'
+                                    color='danger'
+                                    variant='light' 
+                                    onPress={() => onDeleteAction(action.id)}
+                                >
                                     <TrashIcon className='w-5 h-5' />
                                 </Button>
                                 <Button color='primary' className='ml-2'>

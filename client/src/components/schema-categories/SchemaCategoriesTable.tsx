@@ -1,4 +1,4 @@
-import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { SchemaCategoryInfoFromServer } from '@/types/schema';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
+import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 
 type SchemaCategoriesTableProps = {
     categories: SchemaCategoryInfoFromServer[];
@@ -26,15 +27,15 @@ export const SchemaCategoriesTable = ({ categories, loading, error, onDeleteCate
 
     if (loading) {
         return (
-            <div>
-                <Spinner />
-            </div>
+            <LoadingPage />
         );
     }
 
-    // TODO: error component
-    if (error) 
-        return <p>{error}</p>;
+    if (error) {
+        return (
+            <ErrorPage />
+        );
+    }
 
     return (
         <div>
