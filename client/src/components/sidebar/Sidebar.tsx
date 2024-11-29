@@ -27,8 +27,8 @@ export function Sidebar() {
     const { isCollapsed } = usePreferences().preferences;
 
     const dynamicSidebarItems: SidebarItem[] = categoryId
-        ? SideBarItemsinCategory(categoryId)
-        : generalSidebarItems;
+        ? categorySidebarItems(categoryId)
+        : generalSidebarItems();
 
     return (
         <div
@@ -38,15 +38,15 @@ export function Sidebar() {
         >
             <SidebarHeader isCollapsed={isCollapsed} />
 
-            <div className='flex flex-col'>
-                {dynamicSidebarItems.map((item) => (
-                    <SideBarItemComponent key={item.label} item={item} isCollapsed={isCollapsed} currentPath={location.pathname} />
-                    
-                ))}
-            </div>
-
             <div className='px-3 py-2'>
                 <CollapseContextToggle />
+            </div>
+
+            <div className='flex flex-col'>
+                {dynamicSidebarItems.map((item) => (
+                    <SideBarItem key={item.label} item={item} isCollapsed={isCollapsed} currentPath={location.pathname} />
+                    
+                ))}
             </div>
 
             <div className='absolute bottom-5 left-3 w-full'>
@@ -58,17 +58,19 @@ export function Sidebar() {
     );
 }
 
-const SidebarHeader = ({ isCollapsed }: { isCollapsed: boolean }) => (
-    <Link to={routes.home.path} className='flex items-center mb-6'>
-        <h1
-            className={`text-xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden `}
-        >
-            {isCollapsed ? 'MM' : 'MM-cat'}
-        </h1>
-    </Link>
-);
+function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
+    return (
+        <Link to={routes.home.path} className='flex items-center mb-6'>
+            <h1
+                className={`text-xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden `}
+            >
+                {isCollapsed ? 'MM' : 'MM-cat'}
+            </h1>
+        </Link>
+    );
+}
 
-const SideBarItemComponent = ({ 
+function SideBarItem({ 
     item,
     isCollapsed,
     currentPath,
@@ -76,7 +78,7 @@ const SideBarItemComponent = ({
     item : SidebarItem;
     isCollapsed: boolean;
     currentPath: string;
-}) => {
+}) {
     switch (item.type) {
     case 'separator':
         return (
@@ -121,74 +123,78 @@ const SideBarItemComponent = ({
         );
     }
 
-    default: {
-        const _exhaustiveCheck: never = item;
-        throw new Error(`Unhandled SidebarItem type: ${_exhaustiveCheck}`);
+    default:
+        throw new Error(`Unhandled SidebarItem type: ${JSON.stringify(item)}`);
     }
-    }
-};
+}
 
-const generalSidebarItems: SidebarItem[] = [
-    {
-        type: 'normal',
-        label: 'Schema categories',
-        route: '/schema-categories',
-        iconName: 'heart',
-    },
-    {
-        type: 'normal',
-        label: 'About',
-        route: '/about',
-        iconName: 'lightBulb',
-    },
-    {
-        type: 'normal',
-        label: 'Datasources',
-        route: '/datasources',
-        iconName: 'circleStack',
-    },
-    {
-        type: 'normal',
-        label: 'Adminer',
-        route: '/adminer',
-        iconName: 'codeBracketSquare',
-    },
-];
+function generalSidebarItems(): SidebarItem[] {
+    return (
+        [
+            {
+                type: 'normal',
+                label: 'Schema categories',
+                route: '/schema-categories',
+                iconName: 'heart',
+            },
+            {
+                type: 'normal',
+                label: 'About',
+                route: '/about',
+                iconName: 'lightBulb',
+            },
+            {
+                type: 'normal',
+                label: 'Datasources',
+                route: '/datasources',
+                iconName: 'circleStack',
+            },
+            {
+                type: 'normal',
+                label: 'Adminer',
+                route: '/adminer',
+                iconName: 'codeBracketSquare',
+            },
+        ]
+    );
+}
 
-const SideBarItemsinCategory = (categoryId: string): SidebarItem[] => [
-    {
-        type: 'separator',
-        label: 'Schema Category',
-        collapsedLabel: 'SC',
-    },
-    {
-        type: 'normal',
-        label: 'Overview',
-        route: routes.category.index.resolve({ categoryId }),
-        iconName: 'documentText',
-    },
-    {
-        type: 'normal',
-        label: 'Editor',
-        route: routes.category.editor.resolve({ categoryId }),
-        iconName: 'documentText',
-    },
-    {
-        type: 'normal',
-        label: 'Datasources',
-        route: routes.category.datasources.resolve({ categoryId }),
-        iconName: 'circleStack',
-    },
-    {
-        type: 'normal',
-        label: 'Actions',
-        route: routes.category.actions.resolve({ categoryId }),
-        iconName: 'documentText',
-    },
-    {
-        type: 'normal',
-        label: 'Querying',
-        route: routes.category.querying.resolve({ categoryId }),
-        iconName: 'documentText',
-    },
-];
+function categorySidebarItems(categoryId: string): SidebarItem[] {
+    return [
+        {
+            type: 'separator',
+            label: 'Schema Category',
+            collapsedLabel: 'SC',
+        },
+        {
+            type: 'normal',
+            label: 'Overview',
+            route: routes.category.index.resolve({ categoryId }),
+            iconName: 'documentText',
+        },
+        {
+            type: 'normal',
+            label: 'Editor',
+            route: routes.category.editor.resolve({ categoryId }),
+            iconName: 'documentText',
+        },
+        {
+            type: 'normal',
+            label: 'Datasources',
+            route: routes.category.datasources.resolve({ categoryId }),
+            iconName: 'circleStack',
+        },
+        {
+            type: 'normal',
+            label: 'Actions',
+            route: routes.category.actions.resolve({ categoryId }),
+            iconName: 'documentText',
+        },
+        {
+            type: 'normal',
+            label: 'Querying',
+            route: routes.category.querying.resolve({ categoryId }),
+            iconName: 'documentText',
+        },
+    ];
+}
