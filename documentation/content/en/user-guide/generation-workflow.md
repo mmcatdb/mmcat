@@ -3,7 +3,9 @@ title: "Generation Workflow"
 weight: 30
 ---
 
-We have introduced workflows to guide users through various use cases. The Generation Workflow offers step-by-step directions through the process of generating multi-model data from a single model input. It encompasses the complete process, including the inference of a schema from raw data, editing the inferred schema category, creating mappings, and generating the multi-model data itself. Following steps will guide you through the process:
+We have introduced workflows to guide users through various use cases. The Generation Workflow offers step-by-step directions through the process of generating multi-model data from a single model input. It encompasses the complete process, including the inference of a schema from raw data, editing the inferred schema category, creating mappings, and generating the multi-model data itself. The following video and written tutorial will guide you through the process:
+
+{{< youtube Aiw815OaAb4 >}}
 
 ## Step 0
 The Home page of the MM-cat client presents the user with multiple options. To start the workflow process, fill in the workflow label and press "Confirm".
