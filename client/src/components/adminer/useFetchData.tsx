@@ -1,43 +1,52 @@
 import { useState, useEffect } from 'react';
-import { api } from '@/api';
-import type { FetchParams } from '@/types/adminer/FetchParams';
-import type { BackendResponse } from '@/types/adminer/BackendResponse';
+import { type Result } from '@/types/api/result';
 
-export function useFetchData<T extends BackendResponse>( params: FetchParams ) {
-    const [ fetchedData, setFetchedData ] = useState<T | undefined>();
-    const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | undefined>();
+type FetchFunction<T> = () => Promise<Result<T>>;
+
+type FetchResult<T> = {
+    fetchedData: T;
+    loading: boolean;
+    error: undefined;
+} | {
+    fetchedData: undefined;
+    loading: boolean;
+    error: string;
+};
+
+export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<T> {
+    const [ result, setResult ] = useState<FetchResult<T>>({
+        fetchedData: undefined,
+        loading: true,
+        error: `No fetched data`,
+    });
 
     useEffect(() => {
         (async () => {
-            try {
-                setLoading(true);
-                setError(undefined);
+            setResult({
+                fetchedData: undefined,
+                loading: true,
+                error: `No fetched data`,
+            });
 
-                const response = await ('kindId' in params
-                    ? api.adminer.getKind({ datasourceId: params.datasourceId, kindId: params.kindId }, params.queryParams)
-                    : api.adminer.getKindNames({ datasourceId: params.datasourceId })).then(data => data);
+            const response = await fetchFunction();
 
-                if (!response.status)
-                    throw new Error(`Failed to fetch data`);
-
-                const data = await response.data as T;
-
-                setFetchedData(data);
+            if (!response.status) {
+                setResult({
+                    fetchedData: undefined,
+                    loading: false,
+                    error: `Failed to fetch data`,
+                });
             }
-            catch (err) {
-                if (err instanceof Error)
-                    setError(err.message);
 
-                else
-                    setError('Failed to load data');
-
-            }
-            finally {
-                setLoading(false);
+            if ('data' in response) {
+                setResult({
+                    fetchedData: response.data,
+                    loading: false,
+                    error: undefined,
+                });
             }
         })();
-    }, [ params ]);
+    }, [ fetchFunction ]);
 
-    return { fetchedData, loading, error };
+    return result;
 }

@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Pagination } from '@nextui-org/react';
+import { useState, useEffect, useMemo } from 'react';
+import { Spinner, Pagination } from '@nextui-org/react';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { Operator } from '@/types/adminer/ColumnFilter';
 import { View } from '@/types/adminer/View';
 import type { AdminerState } from '@/types/adminer/Reducer';
 import type { FetchKindParams } from '@/types/adminer/FetchParams';
+import { useFetchReferences } from './useFetchReferences';
 
 type DatabaseViewProps = Readonly<{
     state: AdminerState;
@@ -32,11 +33,12 @@ function getUrlParams(state: AdminerState, offset: number) {
 }
 
 export function DatabaseView({ state }: DatabaseViewProps) {
+    const { references, loading, error } = useFetchReferences(state);
+
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ offset, setOffset ] = useState<number>(0);
     const [ rowCount, setRowCount ] = useState<number | undefined>();
     const [ totalPages, setTotalPages ] = useState<number>(1);
-    const [ urlParams, setUrlParams ] = useState<FetchKindParams>(getUrlParams(state, offset));
 
     useEffect(() => {
         if (rowCount)
@@ -48,8 +50,8 @@ export function DatabaseView({ state }: DatabaseViewProps) {
         }
     }, [ rowCount, offset, currentPage, totalPages, state.active.limit ]);
 
-    useEffect(() => {
-        setUrlParams(getUrlParams(state, offset));
+    const urlParams = useMemo(() => {
+        return getUrlParams(state, offset);
     }, [ state.active, state.datasource, state.kind, state.view, offset ]);
 
     useEffect(() => {
@@ -59,12 +61,23 @@ export function DatabaseView({ state }: DatabaseViewProps) {
         setOffset(0);
     }, [ state.active, state.datasource, state.kind, state.view ]);
 
+    if (loading) {
+        return (
+            <div className='h-10 flex items-center justify-center'>
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (error)
+        return <p>{error}</p>;
+
     return (
         <div className='mt-5'>
             {state.view === View.table ? (
-                <DatabaseTable urlParams={urlParams} setRowCount={setRowCount}/>
+                <DatabaseTable urlParams={urlParams} setRowCount={setRowCount} references={references}/>
             ) : (
-                <DatabaseDocument urlParams={urlParams} setRowCount={setRowCount}/>
+                <DatabaseDocument urlParams={urlParams} setRowCount={setRowCount} references={references}/>
             )}
 
             <div className='mt-5 inline-flex gap-3 items-center'>

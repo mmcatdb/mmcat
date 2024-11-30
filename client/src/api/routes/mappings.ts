@@ -7,7 +7,7 @@ const mappings = {
     getMapping: GET<{ id: StringLike }, MappingFromServer>(
         u => `/mappings/${u.id}`,
     ),
-    getAllMappings: GET<Empty, MappingFromServer>(
+    getAllMappings: GET<Empty, MappingFromServer[]>(
         () => `/mappings/all`,
     ),
     getAllMappingsInCategory: GET<Empty, MappingFromServer[], { categoryId: Id, datasourceId?: Id }>(

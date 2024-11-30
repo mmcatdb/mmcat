@@ -1,16 +1,23 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import { useFetchData } from './useFetchData';
 import type { BackendTableResponse } from '@/types/adminer/BackendResponse';
 import type { FetchKindParams } from '@/types/adminer/FetchParams';
+import { type AdminerReference } from '@/types/adminer/AdminerReference';
+import { api } from '@/api';
 
 type DatabaseTableProps = Readonly<{
     urlParams: FetchKindParams;
     setRowCount: (rowCount: number) => void;
+    references: AdminerReference | undefined;
 }>;
 
-export function DatabaseTable({ urlParams, setRowCount }: DatabaseTableProps ) {
-    let { fetchedData, loading, error } = useFetchData(urlParams);
+export function DatabaseTable({ urlParams, setRowCount, references }: DatabaseTableProps ) {
+    const fetchFunction = useCallback(() => {
+        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindId: urlParams.kindId }, urlParams.queryParams);
+    }, [ urlParams ]);
+
+    let { fetchedData, loading, error } = useFetchData(fetchFunction);
 
     useEffect(() => {
         const count = fetchedData?.metadata.rowCount;

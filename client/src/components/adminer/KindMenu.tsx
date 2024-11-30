@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import type { AdminerStateAction } from '@/types/adminer/Reducer';
+import { api } from '@/api';
 
 type KindMenuProps = Readonly<{
     datasourceId: string;
@@ -10,11 +11,10 @@ type KindMenuProps = Readonly<{
 }>;
 
 export function KindMenu({ datasourceId, showUnlabeled, dispatch }: KindMenuProps) {
-    const urlParams = useMemo(() => {
-        return { datasourceId: datasourceId };
+    const fetchFunction = useCallback(() => {
+        return api.adminer.getKindNames({ datasourceId });
     }, [ datasourceId ]);
-
-    const { fetchedData, loading, error } = useFetchData(urlParams);
+    const { fetchedData, loading, error } = useFetchData(fetchFunction);
 
     if (loading) {
         return (

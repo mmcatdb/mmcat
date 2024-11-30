@@ -26,7 +26,7 @@ export function AdminerPage() {
                     <>
                         <KindMenu datasourceId={state.datasource.id} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
-                        <ViewMenu datasourceType={state.datasource.type} dispatch={dispatch}/>
+                        <ViewMenu datasourceType={state.datasource.type} view={state.view} dispatch={dispatch}/>
                     </>
                 )}
             </div>
@@ -39,11 +39,11 @@ export function AdminerPage() {
                         </div>
                     )}
 
-                    <div className='mt-5'>
-                        {typeof state.kind === 'string' && (
+                    {typeof state.kind === 'string' && (
+                        <div className='mt-5'>
                             <DatabaseView state={state}/>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

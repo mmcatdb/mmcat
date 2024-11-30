@@ -1,5 +1,5 @@
 export enum View {
-    table,
-    document,
-    graph
+    table = 'Table',
+    document = 'Document',
+    graph = 'Graph',
 }
