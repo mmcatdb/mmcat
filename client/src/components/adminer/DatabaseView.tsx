@@ -23,7 +23,7 @@ function getUrlParams(state: AdminerState, offset: number) {
         const queryFilters = `${state.active.filters
             .map(
                 (filter) =>
-                    filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0 ? `(${filter.columnName},${Operator[filter.operator as keyof typeof Operator]},${filter.columnValue})` : '',
+                    filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0 ? `(${filter.columnName},${Operator[filter.operator as unknown as keyof typeof Operator]},${filter.columnValue})` : '',
             )
             .join('')}`;
         urlParams.queryParams.filters = queryFilters;
@@ -80,21 +80,20 @@ export function DatabaseView({ state }: DatabaseViewProps) {
                 <DatabaseDocument urlParams={urlParams} setRowCount={setRowCount} references={references}/>
             )}
 
-            <div className='mt-5 inline-flex gap-3 items-center'>
-                <Pagination
-                    total={totalPages}
-                    page={currentPage}
-                    onChange={(page) => {
-                        setCurrentPage(page);
-                        setOffset(state.active.limit * (page - 1));
-                    }}
-                    color='primary'
-                />
-                {rowCount && (
+            {rowCount !== undefined && rowCount > 0 && (
+                <div className='mt-5 inline-flex gap-3 items-center'>
+                    <Pagination
+                        total={totalPages}
+                        page={currentPage}
+                        onChange={(page) => {
+                            setCurrentPage(page);
+                            setOffset(state.active.limit * (page - 1));
+                        }}
+                        color='primary'
+                    />
                     <p>Number of rows: {rowCount}</p>
-                )}
-            </div>
-
+                </div>
+            )}
         </div>
     );
 }

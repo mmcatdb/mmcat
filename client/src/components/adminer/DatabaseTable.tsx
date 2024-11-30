@@ -35,7 +35,7 @@ export function DatabaseTable({ urlParams, setRowCount, references }: DatabaseTa
     if (error)
         return <p>{error}</p>;
 
-    if (fetchedData === undefined)
+    if (fetchedData === undefined || fetchedData.data.length === 0)
         return <p>No data to display.</p>;
 
     // If the data are for graph database, we want to display just properties in the table view
