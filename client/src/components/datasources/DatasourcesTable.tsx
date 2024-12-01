@@ -99,7 +99,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     };
 
     return (
-        <div className='overflow-x-auto w-full'>
+        <div>
             <Table
                 aria-label='Datasource Table'
                 onRowAction={handleRowAction}
@@ -140,7 +140,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                                     : []),
                                 <TableCell key='label'>{datasource.label}</TableCell>,
                                 <TableCell key='type'>{datasource.type}</TableCell>,
-                                <TableCell key='settings'>
+                                <TableCell key='settings' className='break-all'>
                                     {JSON.stringify(datasource.settings, null, 2)}
                                 </TableCell>,
                                 <TableCell key='actions'>

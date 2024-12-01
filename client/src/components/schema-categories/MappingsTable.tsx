@@ -55,7 +55,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
     const { category } = useCategoryInfo();
 
     return (
-        <div className='overflow-x-auto w-full'>
+        <div>
             <Table
                 aria-label='Mappings Table'
                 sortDescriptor={sortDescriptor}

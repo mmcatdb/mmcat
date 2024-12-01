@@ -85,7 +85,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
 
 
     return (
-        <div className='overflow-x-auto w-full'>
+        <div>
             <Table 
                 aria-label='Schema Categories Table'
                 onRowAction={handleRowAction}
