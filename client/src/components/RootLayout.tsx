@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import clsx from 'clsx';
-import { Button, Navbar, NavbarContent, NavbarItem, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch } from '@nextui-org/react';
+import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences, type Theme } from './PreferencesProvider';
 import { Tooltip } from './common';
@@ -41,20 +41,21 @@ function CommonNavbar() {
     return (
         <Navbar
             className={clsx(
-                'z-20 w-full mx-auto h-12 border-b',
+                'z-20 w-full h-12 border-b',
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}
             isBlurred={false}
             maxWidth='full'
         >
-            <NavbarContent justify='start'>
-                <Breadcrumbs />
-            </NavbarContent>
-            <NavbarContent justify='end'>
-                <NavbarItem>
-                    <ThemeToggle className='min-w-8 w-8 h-8' />
-                </NavbarItem>
-            </NavbarContent>
+            <div className='flex items-center h-full w-full'>
+                <div className='flex flex-1 items-center overflow-hidden'>
+                    <Breadcrumbs />
+                </div>
+
+                <div className='flex items-center shrink-0 ml-4'>
+                    <ThemeToggle className='w-8 h-8' />
+                </div>
+            </div>
         </Navbar>
     );
 }
@@ -69,6 +70,9 @@ type BreadcrumbMatch<TData> = UIMatch<TData, { breadcrumb: string | ((data: TDat
 function Breadcrumbs() {
     const matches = useMatches();
 
+    const truncateText = (text: string, maxLength: number) =>
+        text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+
     const breadcrumbs: BreadcrumbData[] = useMemo(() => {
         return matches.
             filter((match): match is BreadcrumbMatch<unknown> => !!(match.handle && typeof match.handle === 'object' && 'breadcrumb' in match.handle))
@@ -82,7 +86,10 @@ function Breadcrumbs() {
         <NextUIBreadcrumbs separator='/'>
             {breadcrumbs.map((crumb, index) => (
                 <BreadcrumbItem key={crumb.path} isCurrent={index === breadcrumbs.length - 1}>
-                    <Link to={crumb.path} className='text-danger-500'> {crumb.label} </Link>
+                    <Link to={crumb.path} className='text-danger-500' title={crumb.label}>
+                        {/* Truncate the crumb.label to a specific size, because the length of dynamic breadcrumbs is not limited (e.g. Label of datasource) */}
+                        {truncateText(crumb.label, 23)}
+                    </Link>
                 </BreadcrumbItem>
             ))}
         </NextUIBreadcrumbs>

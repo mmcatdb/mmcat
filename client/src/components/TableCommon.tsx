@@ -3,7 +3,8 @@ import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
 
 // Sorting of specified data
-// using SortDescriptor for NextUI's Table onSortChange()
+// using SortDescriptor for NextUI's 2.0 Table onSortChange()
+// hours wasted: 5
 export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescriptor) {
     const [ sortDescriptor, setSortDescriptor ] = useState<SortDescriptor>(initialSortDescriptor);
 

@@ -122,7 +122,6 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                         ]
                         : []),
                     <TableColumn key='label' allowsSorting>Label</TableColumn>,
-                    <TableColumn key='type' allowsSorting>Type</TableColumn>,
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
@@ -134,7 +133,8 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                 ? [ <TableCell key='id'>{action.id}</TableCell> ]
                                 : []),
                             <TableCell key='label'>{action.label}</TableCell>,
-                            <TableCell key='type'>{action.payloads.map((p) => p.type).join(', ')}</TableCell>,
+                            // TODO: udělat detail Action s přiřazenými typy, Datasources a mapováním
+                            // <TableCell key='type'>{action.payloads.map((p) => p.type).join(', ')}</TableCell>,
                             <TableCell key='actions' className='flex items-center space-x-2'>
                                 <Button
                                     isIconOnly

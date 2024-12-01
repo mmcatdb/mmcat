@@ -65,7 +65,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     const { categoryId } = useParams();
 
     const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
-    const [ selectedDatasourceId, setSelectedDatasourceId ] = useState<string | null>(null);
+    const [ selectedDatasourceId, setSelectedDatasourceId ] = useState<string>();
     const navigate = useNavigate();
 
     const handleDeleteClick = (id: string) => {
@@ -81,7 +81,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     };
 
     const closeModal = () => {
-        setSelectedDatasourceId(null);
+        setSelectedDatasourceId(undefined);
         setModalOpen(false);
     };
 
