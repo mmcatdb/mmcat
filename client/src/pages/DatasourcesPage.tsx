@@ -43,7 +43,7 @@ export function DatasourcesPageOverview() {
     );
 }
 
-export function useDatasources() {
+function useDatasources() {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
@@ -51,49 +51,36 @@ export function useDatasources() {
 
     useEffect(() => {
         const fetchDatasources = async () => {
-            try {
-                setLoading(true);
-                const response = await api.datasources.getAllDatasources({});
-                if (response.status && response.data)
-                    setDatasources(response.data);
-                else
-                    setError('Failed to load data');
-                // TODO: delete this, for debugging purposes
-                // setDatasources([  ]);
-            }
-            catch (err) {
+            setLoading(true);
+            const response = await api.datasources.getAllDatasources({});
+            
+            if (response.status && response.data)
+                setDatasources(response.data);
+            else
                 setError('Failed to load data');
-            }
-            finally {
-                setLoading(false);
-            }
+            
+            setLoading(false);
         };
 
         fetchDatasources();
     }, []);
 
-    const addDatasource = (newDatasource: Datasource) => {
+    function addDatasource(newDatasource: Datasource) {
         setDatasources((prevDatasources) => [ ...prevDatasources, newDatasource ]);
-    };
+    }
 
-    const deleteDatasource = async (id: string) => {
-        try {
-            const response = await api.datasources.deleteDatasource({ id });
+    async function deleteDatasource(id: string) {
+        const response = await api.datasources.deleteDatasource({ id });
 
-            if (response.status) {
-                setDatasources((prevDatasources) =>
-                    prevDatasources.filter((datasource) => datasource.id !== id),
-                );
-            }
-            else {
-                toast.error('Failed to delete datasource. Please try again.');
-            }
+        if (!response.status) {
+            toast.error('Failed to delete datasource.');
+            return;
         }
-        catch (error) {
-            console.error('Error deleting datasource:', error);
-            toast.error('An error occurred while deleting the datasource.');
-        }
-    };
+
+        setDatasources((prevDatasources) =>
+            prevDatasources.filter((datasource) => datasource.id !== id),
+        );
+    }
 
     return {
         datasources,
@@ -117,7 +104,7 @@ type DatasourcesPageOverviewProps = {
     onCloseModal: () => void;
 };
 
-export function DatasourcesPageOverviewUI({
+function DatasourcesPageOverviewUI({
     datasources,
     loading,
     error,

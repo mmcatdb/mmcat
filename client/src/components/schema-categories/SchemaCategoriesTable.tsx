@@ -1,6 +1,6 @@
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import type { SchemaCategoryInfoFromServer } from '@/types/schema';
+import type { SchemaCategoryInfo } from '@/types/schema';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
@@ -9,13 +9,13 @@ import { useState } from 'react';
 import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 
 type SchemaCategoriesTableProps = {
-    categories: SchemaCategoryInfoFromServer[];
+    categories: SchemaCategoryInfo[];
     loading: boolean;
-    error: string | null;
+    error: string | undefined;
     onDeleteCategory: (id: string) => void;
 };
 
-export const SchemaCategoriesTable = ({ categories, loading, error, onDeleteCategory }: SchemaCategoriesTableProps) => {
+export function SchemaCategoriesTable({ categories, loading, error, onDeleteCategory }: SchemaCategoriesTableProps) {
     const { sortedData: sortedCategories, sortDescriptor, setSortDescriptor } = useSortableData(categories, {
         column: 'label',
         direction: 'ascending',
@@ -47,10 +47,10 @@ export const SchemaCategoriesTable = ({ categories, loading, error, onDeleteCate
             />
         </div>
     );
-};
+}
 
 type CategoriesTableProps = {
-  categories: SchemaCategoryInfoFromServer[];
+  categories: SchemaCategoryInfo[];
   onDeleteCategory: (id: string) => void;
   sortDescriptor: SortDescriptor;
   onSortChange: (sortDescriptor: SortDescriptor) => void;
@@ -59,29 +59,29 @@ type CategoriesTableProps = {
 function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortChange }: CategoriesTableProps) {
     const { showTableIDs } = usePreferences().preferences;
     const navigate = useNavigate();
-    const [ selectedCategoryId, setSelectedCategoryId ] = useState<string | null>(null);
+    const [ selectedCategoryId, setSelectedCategoryId ] = useState<string>();
     const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
 
-    const handleRowAction = (key: React.Key) => {
+    function handleRowAction(key: React.Key) {
         navigate(`/category/${key}`, {});
-    };
+    }
 
-    const handleDeleteClick = (id: string) => {
+    function handleDeleteClick(id: string) {
         setSelectedCategoryId(id);
         setModalOpen(true);
-    };
+    }
 
-    const closeModal = () => {
-        setSelectedCategoryId(null);
+    function closeModal() {
+        setSelectedCategoryId(undefined);
         setModalOpen(false);
-    };
+    }
 
-    const confirmDelete = () => {
+    function confirmDelete() {
         if (selectedCategoryId)
             onDeleteCategory(selectedCategoryId);
 
         setModalOpen(false);
-    };
+    }
 
 
     return (
@@ -123,7 +123,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                                     ? [ <TableCell key='id'>{category.id}</TableCell> ]
                                     : []),
                                 <TableCell key='label'>{category.label}</TableCell>,
-                                <TableCell key='version'>{category.systemVersion}</TableCell>,
+                                <TableCell key='version'>{category.systemVersionId}</TableCell>,
                                 <TableCell key='actions'>
                                     <Button
                                         isIconOnly

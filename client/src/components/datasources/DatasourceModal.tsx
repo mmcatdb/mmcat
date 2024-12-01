@@ -17,35 +17,35 @@ type DatasourceModalProps = {
     onDatasourceCreated: (newDatasource: Datasource) => void;
 };
 
-export const DatasourceModal = ({ 
+export function DatasourceModal({ 
     isOpen, 
     onClose, 
     onDatasourceCreated,
-}: DatasourceModalProps) => {
+}: DatasourceModalProps) {
     const [ datasourceType, setDatasourceType ] = useState<DatasourceType | ''>('');
     const [ datasourceName, setDatasourceLabel ] = useState('');
     const [ settings, setSettings ] = useState<Settings>({});
-    const [ isCreatingDatasource, setIsCreatingDatasource] = useState<boolean>(false);
+    const [ isCreatingDatasource, setIsCreatingDatasource ] = useState<boolean>(false);
 
-    const resetForm = () => {
+    function resetForm() {
         setDatasourceType('');
         setDatasourceLabel('');
         setSettings({});
-    };
+    }
 
     useEffect(() => {
         if (!isOpen) 
             resetForm();
     }, [ isOpen ]);
 
-    const handleSettingsChange = (field: keyof Settings, value: unknown) => {
+    function handleSettingsChange(field: keyof Settings, value: unknown) {
         setSettings((prevSettings) => ({
             ...prevSettings,
             [field]: value,
         }));
-    };
+    }
 
-    const handleSubmit = async () => {
+    async function handleSubmit() {
         if (!datasourceType || !validateSettings(settings, datasourceType)) {
             toast.error('Please fill out all fields.');
             return;
@@ -80,7 +80,7 @@ export const DatasourceModal = ({
         finally {
             setIsCreatingDatasource(false);
         }
-    };
+    }
 
     return (
         <Modal 
@@ -98,7 +98,6 @@ export const DatasourceModal = ({
                             <SelectDatasourceType 
                                 datasourceType={datasourceType}
                                 setDatasourceType={setDatasourceType}
-                                isDisabled={isCreatingDatasource}
                             />
 
                             <Input
@@ -107,7 +106,6 @@ export const DatasourceModal = ({
                                 onChange={(e) => setDatasourceLabel(e.target.value)}
                                 fullWidth
                                 required
-                                isDisabled={isCreatingDatasource}
                             />
 
                             {datasourceType && (
@@ -121,7 +119,6 @@ export const DatasourceModal = ({
                                                 onChange={(e) => handleSettingsChange('host', e.target.value)}
                                                 fullWidth
                                                 required
-                                                isDisabled={isCreatingDatasource}
                                             />
                                             <Input
                                                 label='Port'
@@ -130,7 +127,6 @@ export const DatasourceModal = ({
                                                 onChange={(e) => handleSettingsChange('port', Number(e.target.value))}
                                                 fullWidth
                                                 required
-                                                isDisabled={isCreatingDatasource}
                                             />
                                             <Input
                                                 label='Database'
@@ -138,7 +134,6 @@ export const DatasourceModal = ({
                                                 onChange={(e) => handleSettingsChange('database', e.target.value)}
                                                 fullWidth
                                                 required
-                                                isDisabled={isCreatingDatasource}
                                             />
                                             <Input
                                                 label='Username'
@@ -146,7 +141,6 @@ export const DatasourceModal = ({
                                                 onChange={(e) => handleSettingsChange('username', e.target.value)}
                                                 fullWidth
                                                 required
-                                                isDisabled={isCreatingDatasource}
                                             />
                                             <Input
                                                 label='Password'
@@ -155,7 +149,6 @@ export const DatasourceModal = ({
                                                 onChange={(e) => handleSettingsChange('password', e.target.value)}
                                                 fullWidth
                                                 required
-                                                isDisabled={isCreatingDatasource}
                                             />
                                             {datasourceType === DatasourceType.mongodb && (
                                                 <Input
@@ -164,7 +157,6 @@ export const DatasourceModal = ({
                                                     onChange={(e) => handleSettingsChange('authenticationDatabase', e.target.value)}
                                                     fullWidth
                                                     required
-                                                    isDisabled={isCreatingDatasource}
                                                 />
                                             )}
                                         </>
@@ -177,7 +169,6 @@ export const DatasourceModal = ({
                                             onChange={(e) => handleSettingsChange('url', e.target.value)}
                                             fullWidth
                                             required
-                                            isDisabled={isCreatingDatasource}
                                         />
                                     )}
                                 </>
@@ -206,30 +197,30 @@ export const DatasourceModal = ({
         </Modal>
 
     );
-};
+}
 
 type SelectDatasourceTypeProps = {
     datasourceType: DatasourceType | '';
     setDatasourceType: (type: DatasourceType) => void;
-    isDisabled: boolean;
 };
 
-const SelectDatasourceType = ({ datasourceType, setDatasourceType, isDisabled }: SelectDatasourceTypeProps) => (
-    <Select
-        items={DATASOURCE_TYPES}
-        label='Type'
-        placeholder='Select a Type'
-        selectedKeys={datasourceType ? new Set([ datasourceType ]) : new Set()}
-        onSelectionChange={(e) => {
-            const selectedType = Array.from(e as Set<DatasourceType>)[0];
-            setDatasourceType(selectedType);
-        }}
-        isDisabled={isDisabled}
-    >
-        {(item) => (
-            <SelectItem key={item.type}>
-                {item.label}
-            </SelectItem>
-        )}
-    </Select>
-);
+function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatasourceTypeProps) {
+    return (
+        <Select
+            items={DATASOURCE_TYPES}
+            label='Type'
+            placeholder='Select a Type'
+            selectedKeys={datasourceType ? new Set([ datasourceType ]) : new Set()}
+            onSelectionChange={(e) => {
+                const selectedType = Array.from(e as Set<DatasourceType>)[0];
+                setDatasourceType(selectedType);
+            }}
+        >
+            {(item) => (
+                <SelectItem key={item.type}>
+                    {item.label}
+                </SelectItem>
+            )}
+        </Select>
+    );
+}

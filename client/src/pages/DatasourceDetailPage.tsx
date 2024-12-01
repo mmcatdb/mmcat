@@ -13,14 +13,14 @@ type DatasourceDetailProps = {
     datasourceId: string;
 }
 
-export const DatasourceDetailPage = () => {
+export function DatasourceDetailPage() {
     const { id } = useParams<{ id: string }>();
 
     if (!id) 
         return <ErrorPage />;
 
     return <DatasourceDetail datasourceId={id} />;
-};
+}
 
 export type DatasourceDetailLoaderData = {
     datasource: Datasource;
@@ -40,7 +40,7 @@ export async function datasourceDetailLoader({ params: { id } }: { params: Param
     };
 }
 
-export const DatasourceInCategoryDetailPage = () => {
+export function DatasourceInCategoryDetailPage() {
     const { categoryId, id } = useParams<{ categoryId: string, id: string }>();
     const [ mappings, setMappings ] = useState<Mapping[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
@@ -50,26 +50,18 @@ export const DatasourceInCategoryDetailPage = () => {
         if (!categoryId || !id) 
             return;
 
-        // TODO: tady nedělat obalování try, catch 
-        // if (!response.data) dát jako první
         const fetchMappings = async () => {
-            try {
-                setLoading(true);
-                const response = await api.mappings.getAllMappingsInCategory({}, {
-                    categoryId,
-                    datasourceId: id,
-                });
-                if (response.status && response.data)
-                    setMappings(response.data.map(Mapping.fromServer));
-                else
-                    setError('Failed to load data');
-            }
-            catch (e) {
-                setError('Failed to load mappings.');
-            }
-            finally {
-                setLoading(false);
-            }
+            setLoading(true);
+            const response = await api.mappings.getAllMappingsInCategory({}, {
+                categoryId,
+                datasourceId: id,
+            });
+            setLoading(false);
+
+            if (response.status)
+                setMappings(response.data.map(Mapping.fromServer));
+            else 
+                setError('Failed to load data');
         };
 
         fetchMappings();
@@ -81,9 +73,9 @@ export const DatasourceInCategoryDetailPage = () => {
     if (loading)
         return <LoadingPage />;
 
-    const handleAddMapping = () => {
+    function handleAddMapping() {
         toast.error('Add mapping functionality not implemented yet');
-    };
+    }
 
     return (
         <div>
@@ -108,17 +100,17 @@ export const DatasourceInCategoryDetailPage = () => {
             </div>
         </div>
     );
-};
+}
 
-export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
-    const [ datasource, setDatasource ] = useState<Datasource | null>(null);
+function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
+    const [ datasource, setDatasource ] = useState<Datasource>();
     const [ loading, setLoading ] = useState(true);
-    const [ error, setError ] = useState<string | null>(null);
+    const [ error, setError ] = useState<string>();
     const [ showConfiguration, setShowConfiguration ] = useState(false);
 
     // for edit mode
     const [ isEditing, setIsEditing ] = useState(false);
-    const [ formValues, setFormValues ] = useState<Settings | null>(null);
+    const [ formValues, setFormValues ] = useState<Settings>();
     const [ isSaving, setIsSaving ] = useState(false);
 
     useEffect(() => {
@@ -146,14 +138,14 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
         fetchDatasource();
     }, [ datasourceId ]);
 
-    const handleInputChange = (field: keyof Settings, value: string | boolean | undefined) => {
+    function handleInputChange(field: keyof Settings, value: string | boolean | undefined) {
         if (!formValues) 
             return;
 
         setFormValues({ ...formValues, [field]: value });
-    };
+    }
 
-    const handleSaveChanges = async () => {
+    async function handleSaveChanges() {
         if (!formValues) 
             return;
 
@@ -179,9 +171,9 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
             setIsSaving(false);
             setIsEditing(false);
         }
-    };
+    }
 
-    const renderEditFields = () => {
+    function renderEditFields() {
         if (!formValues || !datasource) 
             return null;
 
@@ -247,7 +239,7 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
         }
 
         return null;
-    };
+    }
 
     if (error ?? (!datasource && !loading)) 
         return <ErrorPage />;
@@ -336,4 +328,4 @@ export const DatasourceDetail = ({ datasourceId }: DatasourceDetailProps) => {
             </div>
         </div>
     );
-};
+}

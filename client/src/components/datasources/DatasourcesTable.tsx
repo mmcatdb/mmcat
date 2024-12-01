@@ -15,15 +15,15 @@ type DatasourcesTableProps = {
     onDeleteDatasource: (id: string) => void;
 };
 
-export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasource }: DatasourcesTableProps) => {
+export function DatasourcesTable({ datasources, loading, error, onDeleteDatasource }: DatasourcesTableProps) {
     const { sortedData: sortedDatasources, sortDescriptor, setSortDescriptor } = useSortableData(datasources, {
         column: 'label',
         direction: 'ascending',
     });
 
-    const handleSortChange = (newSortDescriptor: SortDescriptor) => {
+    function handleSortChange(newSortDescriptor: SortDescriptor) {
         setSortDescriptor(newSortDescriptor);
-    };
+    }
 
     if (loading) {
         return (
@@ -51,7 +51,7 @@ export const DatasourcesTable = ({ datasources, loading, error, onDeleteDatasour
             />
         </div>
     );
-};
+}
 
 type DatasourceTableProps = {
   datasources: Datasource[];
@@ -68,24 +68,24 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
     const [ selectedDatasourceId, setSelectedDatasourceId ] = useState<string>();
     const navigate = useNavigate();
 
-    const handleDeleteClick = (id: string) => {
+    function handleDeleteClick(id: string) {
         setSelectedDatasourceId(id);
         setModalOpen(true);
-    };
+    }
 
-    const confirmDelete = () => {
+    function confirmDelete() {
         if (selectedDatasourceId)
             onDeleteDatasource(selectedDatasourceId);
 
         setModalOpen(false);
-    };
+    }
 
-    const closeModal = () => {
+    function closeModal() {
         setSelectedDatasourceId(undefined);
         setModalOpen(false);
-    };
+    }
 
-    const handleRowAction = (key: React.Key) => {
+    function handleRowAction(key: React.Key) {
         if (categoryId) {
             navigate(`/category/${categoryId}/datasources/${key}`, {
                 state: { sortDescriptor },
@@ -96,7 +96,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                 state: { sortDescriptor },
             });
         }
-    };
+    }
 
     return (
         <div>

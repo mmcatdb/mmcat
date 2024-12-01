@@ -29,7 +29,7 @@ type LoadingComponentProps = Readonly<{
     className?: string;
 }>;
 
-export function LoadingComponent({ className }: LoadingComponentProps) {
+function LoadingComponent({ className }: LoadingComponentProps) {
     const { theme } = usePreferences().preferences;
 
     return (

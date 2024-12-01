@@ -25,7 +25,7 @@ export function ActionsPageOverview() {
     const { category } = useCategoryInfo();
 
     useEffect(() => {
-        const fetchActions = async () => {
+        async function fetchActions() {
             setLoading(true);
 
             const response = await api.actions.getAllActionsInCategory({
@@ -40,12 +40,12 @@ export function ActionsPageOverview() {
 
             setLoading(false);
             return true;
-        };
+        }
 
         fetchActions();
     }, [ category.id ]);
 
-    const deleteAction = async (actionId: string) => {
+    async function deleteAction(actionId: string) {
         const result = await api.actions.deleteAction({ id: actionId });
 
         if (!result.status) {
@@ -55,7 +55,7 @@ export function ActionsPageOverview() {
         
         setActions((prev) => prev.filter((action) => action.id !== actionId));
         toast.success('Action deleted successfully');
-    };
+    }
 
     const navigate = useNavigate();
 
@@ -102,9 +102,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         direction: 'ascending',
     });
 
-    const handleSortChange = (newSortDescriptor: SortDescriptor) => {
+    function handleSortChange(newSortDescriptor: SortDescriptor) {
         setSortDescriptor(newSortDescriptor);
-    };
+    }
 
     return (
         <Table 

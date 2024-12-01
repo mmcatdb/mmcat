@@ -43,7 +43,7 @@ type ConfirmationModalProps = {
     confirmButtonColor: 'success' | 'danger' | 'warning';
 };
 
-export const ConfirmationModal = ({
+export function ConfirmationModal({
     isOpen,
     onClose,
     onConfirm,
@@ -52,7 +52,7 @@ export const ConfirmationModal = ({
     confirmButtonText = 'Confirm',
     cancelButtonText = 'Cancel',
     confirmButtonColor,
-}: ConfirmationModalProps) => {
+}: ConfirmationModalProps) {
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalContent>
@@ -71,7 +71,7 @@ export const ConfirmationModal = ({
             </ModalContent>
         </Modal>
     );
-};
+}
 
 type EmptyStateProps = {
     message: string;
@@ -81,13 +81,13 @@ type EmptyStateProps = {
     buttonClassName?: string;
 };
 
-export const EmptyState = ({
+export function EmptyState({
     message,
     buttonText,
     onButtonClick,
     className = 'text-center border border-zinc-500 p-6',
     buttonClassName = 'px-4 py-2',
-}: EmptyStateProps) => {
+}: EmptyStateProps) {
     return (
         <div className={className}>
             <p className='text-lg mb-4'>{message}</p>
@@ -99,4 +99,4 @@ export const EmptyState = ({
             </Button>
         </div>
     );
-};
+}

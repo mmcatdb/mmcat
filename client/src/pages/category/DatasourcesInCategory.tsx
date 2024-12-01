@@ -19,7 +19,7 @@ export function DatasourcesInCategoryPage() {
     const [ isModalOpen, setModalOpen ] = useState(false);
 
     useEffect(() => {
-        const fetchDatasources = async () => {
+        async function fetchDatasources() {
             try {
                 setLoading(true);
 
@@ -42,9 +42,6 @@ export function DatasourcesInCategoryPage() {
                 else {
                     throw new Error('Failed to fetch all datasources');
                 }
-                // TODO: delete this, for debugging purposes
-                // setDatasourcesInCategory([  ]);
-                // setOtherDatasources([ ]);
             } 
             catch (err) {
                 setError('Failed to load data');
@@ -52,18 +49,18 @@ export function DatasourcesInCategoryPage() {
             finally {
                 setLoading(false);
             }
-        };
+        }
 
         fetchDatasources();
     }, [ category.id ]);
 
     // callback to add new datasource
-    const handleAddDatasource = (newDatasource: Datasource) => {
+    function handleAddDatasource(newDatasource: Datasource) {
         setOtherDatasources(prev => [ ...prev, newDatasource ]);
-    };
+    }
 
     // callback to delete a datasource
-    const handleDeleteDatasource = async (id: string) => {
+    async function handleDeleteDatasource(id: string) {
         try {
             const response = await api.datasources.deleteDatasource({ id });
 
@@ -79,7 +76,7 @@ export function DatasourcesInCategoryPage() {
             console.error('Error deleting datasource:', error);
             toast.error('An error occurred while deleting the datasource.');
         }
-    };
+    }
 
     if (loading) 
         return <LoadingPage />;
