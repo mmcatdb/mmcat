@@ -2,7 +2,7 @@
 import { GraphComplexProperty, GraphSimpleProperty, GraphRootProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SelectionType, type Node, type Edge } from '@/types/categoryGraph';
-import { shallowRef, ref, watch, computed, onMounted, onUnmounted } from 'vue';
+import { shallowRef, ref, watch, computed, onMounted, onUnmounted, Static } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { Datasource } from '@/types/datasource';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
@@ -280,9 +280,12 @@ function deleteRequested(nodes: Node[]) {
     nodes.forEach(node => {
         if (isNodeInAccessPath(node)) {
             node.unhighlight();
+            props.rootProperty.unhighlightPath();
             props.rootProperty.removeSubpathForNode(node);
+            props.rootProperty.highlightPath();
         }
     });
+
     selectedNodes.value = [];
     emit('update:rootProperty', localRootProperty.value);
 }

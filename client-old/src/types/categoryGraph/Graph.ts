@@ -63,10 +63,17 @@ export class Graph {
     public getParentNode(node: Node): Node | undefined {
         const incomingEdges = [ ...this.edges.values() ].filter(edge => edge.codomainNode.equals(node));
 
-        if (incomingEdges.length === 0)
+        if (incomingEdges.length === 0 )
             return undefined;
 
-        return incomingEdges[0].domainNode;
+        for (const edge of incomingEdges) {
+            console.log('is dual: ', edge.morphism.signature.isBaseDual);
+            if (!edge.morphism.signature.isBaseDual)
+                return edge.domainNode;
+        }
+        
+        //return incomingEdges[0].domainNode;
+        return undefined;
     }
     ///
 

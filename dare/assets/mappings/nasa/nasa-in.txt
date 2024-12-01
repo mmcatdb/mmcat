@@ -1,0 +1,49 @@
+_: {
+    $schema: 0,
+    agency: 1,
+    version: 36,
+    measurementType: 2 {
+        method: 3
+    }
+    releases: -4 {
+        _index: 37,
+        _value: 6 {
+            date_AI_tags: 13,
+            description: 14,
+            homepageURL: 15,
+            laborHours: 16,
+            local-id: 17,
+            name: 18,
+            organization: 19,
+            repositoryURL: 28,
+            service_version: 29,
+            tags: -33 {
+                _index: 38
+                _value: 35
+            }
+            sti_keywords_passed_thresholds: -30 {
+                _index: 39
+                _value: 32
+            }
+            contact: 7 {
+                email: 8,
+                name: 9,
+                phone: 10
+            }
+            date: 11 {
+                metadataLastUpdated: 12
+            }
+            permissions: 20 {
+                exemptionText: 21,
+                usageType: 27,
+                licenses: -22 {
+                    _index: 40,
+                    _value: 24 {
+                        URL: 25,
+                        name: 26
+                    }
+                }
+            }
+        }
+    }
+}

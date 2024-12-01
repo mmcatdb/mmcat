@@ -1,0 +1,6 @@
+_: {
+  parentTconst: 25,
+  seasonNumber: 26,
+  episodeNumber: 27,
+  tconst: 57.13
+}  

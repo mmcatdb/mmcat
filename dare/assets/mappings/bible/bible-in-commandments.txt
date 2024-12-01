@@ -1,0 +1,15 @@
+_: {
+  commandment_number: 82,
+  commandment_concept: 83,
+  commandment_polarity: 84,
+  scripture_english: 86,
+  scripture_hebrew: 87,
+  scripture_greek: 88,
+  scripture_parashah: 89,
+  sefer_hachinuch_number: 90,
+  mishneh_torah_book_number: 91,
+  mishneh_torah_book_name: 92,
+  mishneh_torah_category: 93,
+  p119f_category: 94,
+  reference_id: 116.68
+}

@@ -1,0 +1,11 @@
+_: {
+  person_id: 0,
+  person_name: 1,
+  surname: 2,
+  unique_attribute: 3,
+  sex: 4,
+  tribe: 5,
+  person_notes: 6,
+  name_instance: 7,
+  person_sequence: 8
+}

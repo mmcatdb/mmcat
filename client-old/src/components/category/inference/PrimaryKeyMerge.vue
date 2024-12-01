@@ -5,6 +5,7 @@ import { Candidates, PrimaryKeyCandidate } from '@/types/inference/candidates';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
+import Message from './Message.vue';
 
 /**
  * Props passed to the component.
@@ -56,11 +57,24 @@ const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
 const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
 /**
+ * Reactive reference to control the visibility of the warning message.
+ */
+const showMessage = ref(false);
+
+/**
+ * Reactive reference to hold the warning message text.
+ */
+const messageText = ref('');
+
+/**
  * Confirms the selected primary key candidate and emits the 'confirm' event.
  */
 function confirmCandidate(candidate: PrimaryKeyCandidate) {
-    if (!clickedCandidates.value.includes(candidate)) 
+    if (!clickedCandidates.value.includes(candidate)) {
         clickedCandidates.value.push(candidate);
+        messageText.value = 'Candidate applied. Save to confirm.';
+        showMessage.value = true;
+    }
 
     confirmClicked.value = true;
     emit('confirm', candidate);
@@ -79,6 +93,7 @@ function confirmNodes() {
  * Emits the 'cancel' event.
  */
 function save() {
+    showMessage.value = false;
     emit('cancel');
 }
 
@@ -97,6 +112,8 @@ function cancel() {
         emit('cancel-edit');
         confirmClicked.value = false;
     }
+
+    showMessage.value = false;
 }
 
 /**
@@ -110,7 +127,11 @@ function splitName(name: string) {
 </script>
 
 <template>
-    <div class="primaryKeyMerge">
+    <div class="position-relative">
+        <Message 
+            :show="showMessage"
+            :message="messageText"
+        />
         <div class="input-type">
             <label class="radio-label">
                 <input

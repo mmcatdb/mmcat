@@ -1,0 +1,17 @@
+_: {
+    id: 95,
+    book_name: 97,
+    chapter: 98,
+    verse: 99,
+    world_english_bible_web: 100,
+    king_james_bible_kjv: 101,
+    leningrad_codex: 102,
+    jewish_publication_society_jps: 103,
+    codex_alexandrinus: 104,
+    brenton: 105,
+    samaritan_pentateuch: 106,
+    samaritan_pentateuch_english: 107,
+    onkelos_aramaic: 108,
+    onkelos_english: 109,
+    book_id: 117.18
+}  
