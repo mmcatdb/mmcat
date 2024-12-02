@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select, SelectItem } from '@nextui-org/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select, SelectItem, Checkbox } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
 import { api } from '@/api';
 import {
@@ -159,17 +159,71 @@ export function DatasourceModal({
                                                     required
                                                 />
                                             )}
+                                            <Checkbox
+                                                defaultSelected={true}
+                                                onChange={(checked) => handleSettingsChange('isWritable', checked)}
+                                            >
+                                                Is Writable?
+                                            </Checkbox>
+
+                                            <Checkbox
+                                                defaultSelected={true}
+                                                onChange={(checked) => handleSettingsChange('isQueryable', checked)}
+                                            >
+                                                Is Queryable?
+                                            </Checkbox>
                                         </>
                                     )}
 
                                     {[ 'csv', 'json', 'jsonld' ].includes(datasourceType) && (
-                                        <Input
-                                            label='File URL'
-                                            value={settings.url ?? ''}
-                                            onChange={(e) => handleSettingsChange('url', e.target.value)}
-                                            fullWidth
-                                            required
-                                        />
+                                        <>
+                                            <Input
+                                                label='File URL'
+                                                value={settings.url ?? ''}
+                                                onChange={(e) => handleSettingsChange('url', e.target.value)}
+                                                fullWidth
+                                                required
+                                            />
+                                        </>
+                                    )}
+
+                                    {[ 'csv' ].includes(datasourceType) && (
+                                        <>
+                                            <Input
+                                                label='Separator'
+                                                value={settings.separator ?? ''}
+                                                // Has to be one char
+                                                maxLength={1}
+                                                onChange={(e) => handleSettingsChange('separator', e.target.value)}
+                                                fullWidth
+                                                required
+                                            />
+                                            <Checkbox
+                                                defaultSelected={false}
+                                                onChange={(checked) => handleSettingsChange('hasHeader', checked)}
+                                            >
+                                                Has Header?
+                                            </Checkbox>
+                                        </>
+                                    )}
+
+                                    {[ 'csv', 'json', 'jsonld' ].includes(datasourceType) && (
+                                        <>
+                                            {/* // TODO: change / unchange behaviour, set default for different types */}
+                                            <Checkbox
+                                                defaultSelected={false}
+                                                onChange={(checked) => handleSettingsChange('isWritable', checked)}
+                                            >
+                                                Is Writable?
+                                            </Checkbox>
+
+                                            <Checkbox
+                                                defaultSelected={false}
+                                                onChange={(checked) => handleSettingsChange('isQueryable', checked)}
+                                            >
+                                                Is Queryable?
+                                            </Checkbox>
+                                        </>
                                     )}
                                 </>
                             )}
@@ -181,14 +235,14 @@ export function DatasourceModal({
                                 onPress={onClose}
                                 isDisabled={isCreatingDatasource}
                             >
-                                    Close
+                                Close
                             </Button>
                             <Button
                                 color='primary'
                                 onPress={handleSubmit}
                                 isLoading={isCreatingDatasource}
                             >
-                                    Submit
+                                Submit
                             </Button>
                         </ModalFooter>
                     </>
