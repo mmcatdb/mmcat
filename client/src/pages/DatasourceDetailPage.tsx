@@ -146,6 +146,10 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
         setFormValues({ ...formValues, [field]: value });
     }
 
+    function handleLabelChange(newLabel: string) {
+        setDatasource((prev) => ({ ...prev, label: newLabel } as Datasource));
+    }
+
     function startEditing() {
         if (datasource && formValues) 
             setOriginalValues({ ...formValues }); // store original values for revert
@@ -199,55 +203,69 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
                         label='Host'
                         value={formValues.host ?? ''}
                         onChange={(e) => handleInputChange('host', e.target.value)}
-                        disabled={isSaving}
                     />
                     <Input
                         label='Port'
                         value={formValues.port != null ? String(formValues.port) : ''}
                         type='number'
                         onChange={(e) => handleInputChange('port', e.target.value)}
-                        disabled={isSaving}
                     />
                     <Input
                         label='Database'
                         value={formValues.database ?? ''}
                         onChange={(e) => handleInputChange('database', e.target.value)}
-                        disabled={isSaving}
                     />
                     <Input
                         label='Username'
                         value={formValues.username ?? ''}
                         onChange={(e) => handleInputChange('username', e.target.value)}
-                        disabled={isSaving}
                     />
                     <Input
                         label='Password'
                         placeholder='Enter new password'
                         type='password'
                         onChange={(e) => handleInputChange('password', e.target.value)}
-                        disabled={isSaving}
                     />
                     {[ 'mongodb' ].includes(type) && (
                         <Input
                             label='Authentication Database'
                             value={formValues.authenticationDatabase ?? ''}
                             onChange={(e) => handleInputChange('authenticationDatabase', e.target.value)}
-                            disabled={isSaving}
                         />
                     )}
                 </>
             );
         }
 
-        if ([ 'csv', 'json', 'jsonld' ].includes(type)) {
+        if ([ 'json', 'jsonld' ].includes(type)) {
             return (
                 <Input
                     label='File URL'
                     value={formValues.url ?? ''}
                     onChange={(e) => handleInputChange('url', e.target.value)}
-                    disabled={isSaving}
                     required
                 />
+            );
+        }
+
+        if ([ 'csv' ].includes(type)) {
+            return (
+                <>
+                    <Input
+                        label='File URL'
+                        value={formValues.url ?? ''}
+                        onChange={(e) => handleInputChange('url', e.target.value)}
+                        required
+                    />
+                    <Checkbox
+                        isSelected={formValues?.hasHeader ?? false}
+                        onChange={(e) =>
+                            handleInputChange('hasHeader', e.target.checked)
+                        }
+                    >
+                        Has header
+                    </Checkbox>
+                </>
             );
         }
 
@@ -266,59 +284,74 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
                     </div>
                 ) : (
                     <div>
-                        <h1 className='heading-main my-5'>{datasource?.label}</h1>
-                        <p className='mb-5'>Type: {datasource?.type}</p>
-
                         {!isEditing ? (
                             // View Mode
                             <>
-                                <pre>{JSON.stringify(datasource?.settings, null, 2)}</pre>
+                                <h1 className='text-2xl font-bold text-zinc-800 my-5 dark:text-zinc-200'>
+                                    {datasource?.label}
+                                </h1>
+                                <p className='text-zinc-800 mb-5 dark:text-zinc-200'>Type: {datasource?.type}</p>
+                                <pre className='p-4 bg-zinc-50 rounded-md text-sm text-zinc-700 dark:bg-zinc-900 dark:text-zinc-50'>
+                                    {JSON.stringify(datasource?.settings, null, 2)}
+                                </pre>
                                 <Button
                                     onClick={startEditing}
                                     className='mt-5'
+                                    color='primary'
                                 >
                                     Edit
                                 </Button>
                             </>
                         ) : (
                             // Edit Mode
-                            <form className='grid grid-cols-1 gap-4'>
-                                {renderEditFields()}
-                                <Checkbox
-                                    isSelected={formValues?.isWritable}
-                                    onChange={(e) => handleInputChange('isWritable', e.target.checked)}
-                                    isDisabled={isSaving}
-                                >
-                                    Is Writable?
-                                </Checkbox>
-                                <Checkbox
-                                    isSelected={formValues?.isQueryable}
-                                    onChange={(e) =>
-                                        handleInputChange('isQueryable', e.target.checked)
-                                    }
-                                    isDisabled={isSaving}
-                                >
-                                    Is Queryable?
-                                </Checkbox>
-                                <div className='flex gap-4 mt-4'>
-                                    <Button
-                                        color='primary'
-                                        onClick={handleSaveChanges}
-                                        isLoading={isSaving}
+                            <div className='bg-zinc-50 p-6 rounded-lg border border-blue-200 dark:bg-zinc-900'>
+                                <h2 className='text-xl font-semibold text-blue-700 mb-4 dark:text-blue-500'>
+                                    Edit Datasource
+                                </h2>
+                                <Input
+                                    label='Datasource Label'
+                                    value={datasource?.label ?? ''}
+                                    onChange={(e) => handleLabelChange(e.target.value)}
+                                    className='mb-5'
+                                />
+                                <p className='text-zinc-800 mb-5 dark:text-zinc-50'>Type: {datasource?.type}</p>
+                                <form className='grid grid-cols-1 gap-4'>
+                                    {renderEditFields()}
+                                    <Checkbox
+                                        isSelected={formValues?.isWritable}
+                                        onChange={(e) => handleInputChange('isWritable', e.target.checked)}
                                     >
-                                        Save
-                                    </Button>
-                                    {/* // TODO: confirmation modal if some changes and want to Cancel*/}
-                                    <Button
-                                        color='danger'
-                                        variant='light'
-                                        onClick={cancelEditing}
-                                        isDisabled={isSaving}
+                                        Is Writable?
+                                    </Checkbox>
+                                    <Checkbox
+                                        isSelected={formValues?.isQueryable}
+                                        onChange={(e) =>
+                                            handleInputChange('isQueryable', e.target.checked)
+                                        }
                                     >
-                                        Cancel
-                                    </Button>
-                                </div>
-                            </form>
+                                        Is Queryable?
+                                    </Checkbox>
+                                    <div className='flex gap-2 mt-6'>
+                                        <Button
+                                            color='success'
+                                            onClick={handleSaveChanges}
+                                            isLoading={isSaving}
+                                            className='px-6'
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            color='danger'
+                                            variant='light'
+                                            onClick={cancelEditing}
+                                            isDisabled={isSaving}
+                                            className='px-6'
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </form>
+                            </div>
                         )}
 
                         <div className='pt-5'>
@@ -326,12 +359,12 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
                                 size='sm'
                                 variant='bordered'
                                 onPress={() => setShowConfiguration((prev) => !prev)}
+                                className='text-blue-700 border-blue-500 dark:text-blue-400'
                             >
                                 {showConfiguration ? 'Hide Configuration' : 'Show Configuration'}
                             </Button>
-        
                             {showConfiguration && (
-                                <pre className='text-zinc-400 mt-4'>
+                                <pre className='bg-zinc-50 text-zinc-700 mt-4 p-4 rounded-md text-sm dark:bg-zinc-900 dark:text-zinc-50'>
                                     {JSON.stringify(datasource?.configuration, null, 2)}
                                 </pre>
                             )}
