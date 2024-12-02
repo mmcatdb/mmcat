@@ -6,9 +6,10 @@ import type { AdminerStateAction } from '@/types/adminer/Reducer';
 
 type DatasourceMenuProps = Readonly<{
     dispatch: React.Dispatch<AdminerStateAction>;
+    datasource: Datasource | undefined;
 }>;
 
-export function DatasourceMenu({ dispatch }: DatasourceMenuProps) {
+export function DatasourceMenu({ dispatch, datasource }: DatasourceMenuProps) {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | undefined>();
@@ -26,7 +27,7 @@ export function DatasourceMenu({ dispatch }: DatasourceMenuProps) {
                     setError('Failed to load data');
 
             }
-            catch (err) {
+            catch {
                 setError('Failed to load data');
             }
             finally {
@@ -51,6 +52,7 @@ export function DatasourceMenu({ dispatch }: DatasourceMenuProps) {
             label='Datasource'
             placeholder='Select datasource'
             className='max-w-xs'
+            defaultSelectedKeys={ datasource ? [ datasource.id ] : [] }
         >
             {datasources
                 .filter((item) =>

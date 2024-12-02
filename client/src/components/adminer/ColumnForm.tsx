@@ -24,7 +24,7 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
                 className='py-0.5 text-sm'
                 aria-label='Operator'
                 placeholder='Select an operator'
-                value={filter.operator}
+                defaultSelectedKeys={ [ filter.operator ] }
                 onChange={(e) => dispatch({ type: 'input', field: 'operator', id: filter.id, value: e.target.value as Operator })}
                 required
             >

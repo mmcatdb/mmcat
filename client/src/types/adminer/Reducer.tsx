@@ -2,7 +2,7 @@ import type { ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 import type { Datasource } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
 
-type KindFilterState = {
+export type KindFilterState = {
     limit: number;
     filters: ColumnFilter[];
 }
@@ -21,7 +21,8 @@ export type AdminerStateAction =
 | ViewAction
 | InputAction
 | FormAction
-| SubmitAction;
+| SubmitAction
+| InitializeAction;
 
 type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
   ? { type: T }
@@ -53,3 +54,4 @@ type DatasourceAction = AdminerTypedAction<'datasource', { newDatasource: Dataso
 type KindAction = AdminerTypedAction<'kind', { newKind: string }>;
 type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
+type InitializeAction = AdminerTypedAction<'initialize', { state: AdminerState }>;

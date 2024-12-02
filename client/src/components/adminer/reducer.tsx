@@ -4,6 +4,11 @@ import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 
 export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {
     switch (action.type) {
+    case 'initialize': {
+        return {
+            ...action.state,
+        };
+    }
     case 'datasource': {
         return {
             form: { limit: 50, filters: [] },

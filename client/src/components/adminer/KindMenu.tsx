@@ -6,11 +6,12 @@ import { api } from '@/api';
 
 type KindMenuProps = Readonly<{
     datasourceId: string;
+    kind: string | undefined;
     showUnlabeled: boolean;
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function KindMenu({ datasourceId, showUnlabeled, dispatch }: KindMenuProps) {
+export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMenuProps) {
     const fetchFunction = useCallback(() => {
         return api.adminer.getKindNames({ datasourceId });
     }, [ datasourceId ]);
@@ -33,6 +34,7 @@ export function KindMenu({ datasourceId, showUnlabeled, dispatch }: KindMenuProp
                 label='Kind'
                 placeholder='Select kind'
                 className='max-w-xs'
+                defaultSelectedKeys={ [ kind && fetchedData.data.includes(kind) ? fetchedData.data.findIndex(name => name === kind).toString() : '' ] }
             >
                 {fetchedData.data.map((name, index) => (
                     <SelectItem
