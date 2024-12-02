@@ -9,8 +9,6 @@ export type DatasourceConfigurationFromServer = {
     isReferenceAllowed: boolean;
     isComplexPropertyAllowed: boolean;
     isSchemaless: boolean;
-    isWritable: boolean;
-    isQueryable: boolean;
 };
 
 export class DatasourceConfiguration {
@@ -24,8 +22,6 @@ export class DatasourceConfiguration {
     readonly isReferenceAllowed: boolean; // TODO The IC reference algorithm.
     readonly isComplexPropertyAllowed: boolean;
     readonly isSchemaless: boolean;
-    readonly isWritable: boolean;
-    readonly isQueryable: boolean;
 
     public constructor(input: DatasourceConfigurationFromServer) {
         this.isPropertyToOneAllowed = input.isPropertyToOneAllowed;
@@ -38,7 +34,5 @@ export class DatasourceConfiguration {
         this.isReferenceAllowed = input.isReferenceAllowed;
         this.isComplexPropertyAllowed = input.isComplexPropertyAllowed;
         this.isSchemaless = input.isSchemaless;
-        this.isWritable = input.isWritable;
-        this.isQueryable = input.isQueryable;
     }
 }

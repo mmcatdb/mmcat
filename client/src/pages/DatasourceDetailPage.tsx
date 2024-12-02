@@ -112,6 +112,7 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
     const [ isEditing, setIsEditing ] = useState(false);
     const [ formValues, setFormValues ] = useState<Settings>();
     const [ isSaving, setIsSaving ] = useState(false);
+    const [ originalValues, setOriginalValues ] = useState<Settings>(); // store for reverting (if editing canceled)
 
     useEffect(() => {
         const fetchDatasource = async () => {
@@ -143,6 +144,18 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
             return;
 
         setFormValues({ ...formValues, [field]: value });
+    }
+
+    function startEditing() {
+        if (datasource && formValues) 
+            setOriginalValues({ ...formValues }); // store original values for revert
+        setIsEditing(true);
+    }
+
+    function cancelEditing() {
+        if (originalValues) 
+            setFormValues(originalValues); // revert to original values
+        setIsEditing(false);
     }
 
     async function handleSaveChanges() {
@@ -261,7 +274,7 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
                             <>
                                 <pre>{JSON.stringify(datasource?.settings, null, 2)}</pre>
                                 <Button
-                                    onClick={() => setIsEditing(true)}
+                                    onClick={startEditing}
                                     className='mt-5'
                                 >
                                     Edit
@@ -299,7 +312,7 @@ function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {
                                     <Button
                                         color='danger'
                                         variant='light'
-                                        onClick={() => setIsEditing(false)}
+                                        onClick={cancelEditing}
                                         isDisabled={isSaving}
                                     >
                                         Cancel
