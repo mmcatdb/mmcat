@@ -39,13 +39,15 @@ public class ICAlgorithm {
     private final Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
 
     private AbstractStatement run() {
-        // Primary key constraint
-        IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
+        wrapper.clear();
+
+        // Primary key constraint.
+        final IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
         // If there are no signatures, we can't create the primary key.
         if (!identifierStructure.isEmpty())
             wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
 
-        // Reference keys constraints
+        // Reference keys constraints.
         processPath(mapping.accessPath(), mapping, Signature.createEmpty());
         referencesForAllKinds.forEach((referencedKindName, references) -> wrapper.appendReference(mapping.kindName(), referencedKindName, references));
 

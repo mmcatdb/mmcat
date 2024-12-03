@@ -6,6 +6,11 @@ import java.util.Set;
 
 public interface AbstractICWrapper {
 
+    /**
+     * Prepares the wrapper for the next kind. Very important - don't underestimate!
+     */
+    void clear();
+
     void appendIdentifier(String kindName, IdentifierStructure identifier);
 
     record AttributePair(String referencing, String referenced) implements Comparable<AttributePair> {
@@ -32,6 +37,10 @@ public interface AbstractICWrapper {
         private EmptyICWrapper() {}
 
         private static final EmptyICWrapper instance = new EmptyICWrapper();
+
+        @Override public void clear() {
+            // This method intentionally does nothing.
+        }
 
         @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {
             // This method intentionally does nothing.

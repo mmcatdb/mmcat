@@ -12,6 +12,10 @@ import java.util.Set;
 
 public class PostgreSQLICWrapper implements AbstractICWrapper {
 
+    @Override public void clear() {
+        constraints.clear();
+    }
+
     private final List<Constraint> constraints = new ArrayList<>();
 
     @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {

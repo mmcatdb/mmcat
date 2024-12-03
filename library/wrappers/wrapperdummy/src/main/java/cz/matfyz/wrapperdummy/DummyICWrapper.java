@@ -9,6 +9,10 @@ import java.util.Set;
 
 public class DummyICWrapper implements AbstractICWrapper {
 
+    @Override public void clear() {
+        methods.add("clear()");
+    }
+
     private List<String> methods = new ArrayList<>();
 
     public List<String> methods() {
