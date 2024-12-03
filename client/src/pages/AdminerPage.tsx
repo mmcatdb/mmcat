@@ -51,7 +51,9 @@ export function AdminerPage() {
                     <>
                         <KindMenu datasourceId={state.datasource.id} kind={state.kind} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
-                        <ViewMenu datasourceType={state.datasource.type} view={state.view} dispatch={dispatch}/>
+                        {state.kind !== undefined && (
+                            <ViewMenu datasourceType={state.datasource.type} view={state.view} dispatch={dispatch}/>
+                        )}
                     </>
                 )}
             </div>
