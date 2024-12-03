@@ -25,7 +25,7 @@ export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<
             setResult({
                 fetchedData: undefined,
                 loading: true,
-                error: `No fetched data`,
+                error: ``,
             });
 
             const response = await fetchFunction();
@@ -36,6 +36,7 @@ export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<
                     loading: false,
                     error: `Failed to fetch data`,
                 });
+                return;
             }
 
             if ('data' in response) {
@@ -44,7 +45,14 @@ export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<
                     loading: false,
                     error: undefined,
                 });
+                return;
             }
+
+            setResult({
+                fetchedData: undefined,
+                loading: true,
+                error: `No fetched data`,
+            });
         })();
     }, [ fetchFunction ]);
 
