@@ -9,10 +9,6 @@ import { MappingsTable } from '@/components/schema-categories/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 
-type DatasourceDetailProps = {
-    datasourceId: string;
-}
-
 export function DatasourceDetailPage() {
     const { id } = useParams<{ id: string }>();
 
@@ -100,6 +96,10 @@ export function DatasourceInCategoryDetailPage() {
             </div>
         </div>
     );
+}
+
+type DatasourceDetailProps = {
+    datasourceId: string;
 }
 
 function DatasourceDetail({ datasourceId }: DatasourceDetailProps) {

@@ -4,6 +4,8 @@ import { useSortableData } from '../TableCommon';
 import { type SortDescriptor } from '@react-types/shared';
 import type { Mapping } from '@/types/mapping';
 import { useCategoryInfo } from '../CategoryInfoProvider';
+import { ErrorPage } from '@/pages/errorPages';
+import { AccessPathTooltip } from './AccessPathTooltip';
 
 type MappingsTableProps = {
     mappings: Mapping[];
@@ -29,9 +31,8 @@ export function MappingsTable({ mappings, loading, error }: MappingsTableProps) 
         );
     }
 
-    // TODO: Add a custom error component
     if (error) 
-        return <p>{error}</p>;
+        return <ErrorPage />;
 
     return (
         <div>
@@ -84,6 +85,9 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                         <TableColumn key='primaryKey'>
                             Primary Key
                         </TableColumn>,
+                        <TableColumn key='accessPath'>
+                            Access Path
+                        </TableColumn>,
                     ]}
                 </TableHeader>
                 <TableBody emptyContent={'No mappings to display.'}>
@@ -103,10 +107,14 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                     </span>
                                 </TableCell>,
                                 <TableCell key='rootObject'>
+                                    {/* // TODO - load whole schema category and display the object name that corresponds to this key */}
                                     {mapping.rootObjectKey.value}
                                 </TableCell>,
                                 <TableCell key='primaryKey'>
                                     {mapping.primaryKey.signatures.join(', ')}
+                                </TableCell>,
+                                <TableCell key='accessPath'>
+                                    <AccessPathTooltip accessPath={mapping.accessPath} />
                                 </TableCell>,
                             ]}
                         </TableRow>
