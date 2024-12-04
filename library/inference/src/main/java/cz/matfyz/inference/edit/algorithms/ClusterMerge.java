@@ -314,7 +314,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             final var mo = newMetadataPart.getObject(object);
             Key newKey;
             if (oldClusterNames.contains(mo.label)) {
-                newKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, object.ids(), newClusterName);
+                newKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createGenerated(), newClusterName);
                 newClusterKey = newKey;
             } else {
                 newKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, object.ids(), mo.label);
