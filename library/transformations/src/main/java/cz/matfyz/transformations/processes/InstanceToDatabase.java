@@ -87,36 +87,30 @@ public class InstanceToDatabase {
 
         final var sortedIcStatements = AbstractStatement.sortByPriority(icStatements);
 
-        final var statementsAsString = statementsToString(ddlStatements, sortedIcStatements, dmlStatements, dmlWrapper);
-
         // The mappings can be processed in whatever order. However, the final statements must be:
         //  - All DDL statements.
-        //  - All IC statements.
         //  - All DML statements.
-        // So that the IC statements can work with tables defined by the DDL statements and so on.
+        //  - All IC statements.
+        // So that the IC statements can work with tables defined by the DDL statements and there are no FK constraints violations in the DML statements.
+        // Also, there might be several dependency groups of IC statements, so they must be sorted by priority.
 
         final var statements = new ArrayList<AbstractStatement>();
         statements.addAll(ddlStatements);
-        statements.addAll(sortedIcStatements);
         statements.addAll(dmlStatements);
+        statements.addAll(sortedIcStatements);
 
         Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());
-
         Statistics.end(Interval.INSTANCE_TO_DATABASE);
+
+        final var statementsAsString = statementsToString(statements, dmlWrapper);
 
         return new InstanceToDatabaseResult(statementsAsString, statements);
     }
 
-    private String statementsToString(Collection<AbstractStatement> ddlStatements, Collection<AbstractStatement> icStatements, Collection<AbstractStatement> dmlStatements, AbstractDMLWrapper dmlWrapper) {
+    private String statementsToString(Collection<AbstractStatement> statements, AbstractDMLWrapper dmlWrapper) {
         final var output = new StringBuilder();
-        for (final var ddlStatement : ddlStatements)
+        for (final var ddlStatement : statements)
             output.append(ddlStatement.getContent()).append("\n");
-
-        for (final var icStatement : icStatements)
-            output.append(icStatement.getContent()).append("\n");
-
-        for (final var dmlStatement : dmlStatements)
-            output.append(dmlStatement.getContent()).append("\n");
 
         return output.toString();
     }
