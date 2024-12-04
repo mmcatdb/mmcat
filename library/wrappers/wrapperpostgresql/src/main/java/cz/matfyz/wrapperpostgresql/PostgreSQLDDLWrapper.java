@@ -50,7 +50,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
             );
             """, kindName, commands);
 
-        return new StringStatement(content);
+        return StringStatement.create(content);
     }
 
     private record Property(

@@ -1,6 +1,7 @@
 package cz.matfyz.wrappercsv;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
@@ -47,11 +48,9 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
     /**
      * Creates a DDL statement for the CSV schema by generating a header line with the
      * specified properties.
-     *
-     * @return a {@link CsvCommandStatement} containing the generated DDL statement as a CSV header line.
      */
-    @Override public CsvCommandStatement createDDLStatement() {
+    @Override public StringStatement createDDLStatement() {
         final String headerLine = String.join(",", properties);
-        return new CsvCommandStatement(headerLine);
+        return StringStatement.create(headerLine);
     }
 }

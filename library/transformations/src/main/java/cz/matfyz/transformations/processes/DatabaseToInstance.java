@@ -59,9 +59,9 @@ public class DatabaseToInstance {
             ? currentInstance
             : new InstanceBuilder(mapping.category()).build();
 
-        Statistics.start(Interval.MTC_ALGORIGHM);
+        Statistics.start(Interval.MTC_ALGORITHM);
         MTCAlgorithm.run(mapping, instance, forest);
-        Statistics.end(Interval.MTC_ALGORIGHM);
+        Statistics.end(Interval.MTC_ALGORITHM);
 
         Statistics.end(Interval.DATABASE_TO_INSTANCE);
 

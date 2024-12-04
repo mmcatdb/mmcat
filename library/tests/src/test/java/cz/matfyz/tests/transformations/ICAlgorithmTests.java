@@ -18,7 +18,7 @@ class ICAlgorithmTests {
                 [
                     "clear()",
                     "appendIdentifier(order, [ number ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -32,7 +32,7 @@ class ICAlgorithmTests {
                 [
                     "clear()",
                     "appendIdentifier(order_item, [ order_number, product_id ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -48,7 +48,7 @@ class ICAlgorithmTests {
                     "clear()",
                     "appendIdentifier(order_item, [ order_number, product_id ])",
                     "appendReference(order_item, order, [ (order_number, number) ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -65,7 +65,7 @@ class ICAlgorithmTests {
                     "appendIdentifier(order_item, [ order_number, product_id ])",
                     "appendReference(order_item, product, [ (product_id, id) ])",
                     "appendReference(order_item, order, [ (order_number, number) ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -88,7 +88,7 @@ class ICAlgorithmTests {
 
     // [
     //     "appendIdentifier(order_v3, [ id ])",
-    //     "createICStatement()"
+    //     "createICStatements()"
     // ]
 
 }

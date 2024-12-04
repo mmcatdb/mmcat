@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperdummy;
 
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +33,9 @@ public class DummyDMLWrapper implements AbstractDMLWrapper {
         structure.add("append(" + name + ", " + value + ")");
     }
 
-    @Override public DummyStatement createDMLStatement() {
+    @Override public AbstractStatement createDMLStatement() {
         //methods.add("createDMLStatement()");
         structures.add(structure);
-        return new DummyStatement("");
+        return AbstractStatement.createEmpty();
     }
 }

@@ -83,7 +83,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     }
 
     private StringStatement processNode() {
-        return new StringStatement(
+        return StringStatement.create(
             createMergeForNode("", kindName, propertyValues) + ";"
         );
     }
@@ -96,7 +96,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
         final String toNodeMerge = createMergeForNode("to", toNodeLabel, toNodeValues);
         final String relationshipMerge = String.format("MERGE (from)-[:%s %s]->(to)", kindName, propertiesToString(propertyValues));
 
-        return new StringStatement(
+        return StringStatement.create(
             fromNodeMerge + "\n"
             + toNodeMerge + "\n"
             + relationshipMerge + ";"

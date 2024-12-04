@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperdummy;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +33,9 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
         methods.add("addProperty(" + path.toString() + ", " + complex + ", " + required + ")");
     }
 
-    @Override public DummyStatement createDDLStatement() {
+    @Override public AbstractStatement createDDLStatement() {
         methods.add("createDDLStatement()");
-        return new DummyStatement("");
+        return AbstractStatement.createEmpty();
     }
 
 }

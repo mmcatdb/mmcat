@@ -33,7 +33,7 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
     }
 
     @Override public MongoDBCommandStatement createDMLStatement() {
-        var constructor = new JsonDMLConstructor();
+        final var constructor = new JsonDMLConstructor();
 
         String content = "";
         try {

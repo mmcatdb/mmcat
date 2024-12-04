@@ -19,9 +19,14 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/**
+ * This algorithm creates integrity constraint statements.
+ * It creates multiple statements because some of them need to be executed before others.
+ * So, all statements for all kinds in a given datasource should be created first and then sorted.
+ */
 public class ICAlgorithm {
 
-    public static AbstractStatement run(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
+    public static Collection<AbstractStatement> run(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
         return new ICAlgorithm(mapping, allMappings, wrapper).run();
     }
 
@@ -38,7 +43,7 @@ public class ICAlgorithm {
 
     private final Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
 
-    private AbstractStatement run() {
+    private Collection<AbstractStatement> run() {
         wrapper.clear();
 
         // Primary key constraint.
@@ -51,7 +56,7 @@ public class ICAlgorithm {
         processPath(mapping.accessPath(), mapping, Signature.createEmpty());
         referencesForAllKinds.forEach((referencedKindName, references) -> wrapper.appendReference(mapping.kindName(), referencedKindName, references));
 
-        return wrapper.createICStatement();
+        return wrapper.createICStatements();
     }
 
     /**

@@ -116,7 +116,7 @@ class ServerApplicationTests {
 
         message += "#" + mapping.kindName()
             + ", " + Statistics.getInfo(Counter.PULLED_RECORDS)
-            + ", " + Statistics.getInfo(Interval.MTC_ALGORIGHM)
+            + ", " + Statistics.getInfo(Interval.MTC_ALGORITHM)
             + ", " + Statistics.getInfo(Interval.DATABASE_TO_INSTANCE);
 
         Statistics.reset();
@@ -145,7 +145,7 @@ class ServerApplicationTests {
 
         message += "#" + mapping.kindName()
             + ", " + Statistics.getInfo(Counter.CREATED_STATEMENTS)
-            + ", " + Statistics.getInfo(Interval.CTM_ALGORIGHM)
+            + ", " + Statistics.getInfo(Interval.CTM_ALGORITHM)
             + ", " + Statistics.getInfo(Interval.INSTANCE_TO_DATABASE);
 
         Statistics.reset();

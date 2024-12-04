@@ -76,16 +76,18 @@ public class InstanceToDatabase {
         final var dmlStatements = new ArrayList<AbstractStatement>();
 
         for (final var mapping : allMappings) {
-            Statistics.start(Interval.CTM_ALGORIGHM);
+            Statistics.start(Interval.CTM_ALGORITHM);
 
             ddlStatements.add(DDLAlgorithm.run(mapping, instance, ddlWrapper));
-            icStatements.add(ICAlgorithm.run(mapping, allMappings, icWrapper));
+            icStatements.addAll(ICAlgorithm.run(mapping, allMappings, icWrapper));
             dmlStatements.addAll(DMLAlgorithm.run(mapping, instance, dmlWrapper));
 
-            Statistics.end(Interval.CTM_ALGORIGHM);
+            Statistics.end(Interval.CTM_ALGORITHM);
         }
 
-        final var statementsAsString = statementsToString(ddlStatements, icStatements, dmlStatements, dmlWrapper);
+        final var sortedIcStatements = AbstractStatement.sortByPriority(icStatements);
+
+        final var statementsAsString = statementsToString(ddlStatements, sortedIcStatements, dmlStatements, dmlWrapper);
 
         // The mappings can be processed in whatever order. However, the final statements must be:
         //  - All DDL statements.
@@ -95,7 +97,7 @@ public class InstanceToDatabase {
 
         final var statements = new ArrayList<AbstractStatement>();
         statements.addAll(ddlStatements);
-        statements.addAll(icStatements);
+        statements.addAll(sortedIcStatements);
         statements.addAll(dmlStatements);
 
         Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());
@@ -105,7 +107,7 @@ public class InstanceToDatabase {
         return new InstanceToDatabaseResult(statementsAsString, statements);
     }
 
-    private String statementsToString(List<AbstractStatement> ddlStatements, List<AbstractStatement> icStatements, List<AbstractStatement> dmlStatements, AbstractDMLWrapper dmlWrapper) {
+    private String statementsToString(Collection<AbstractStatement> ddlStatements, Collection<AbstractStatement> icStatements, Collection<AbstractStatement> dmlStatements, AbstractDMLWrapper dmlWrapper) {
         final var output = new StringBuilder();
         for (final var ddlStatement : ddlStatements)
             output.append(ddlStatement.getContent()).append("\n");

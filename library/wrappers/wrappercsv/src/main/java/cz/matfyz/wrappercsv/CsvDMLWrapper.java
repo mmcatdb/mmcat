@@ -2,7 +2,7 @@ package cz.matfyz.wrappercsv;
 
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
-import cz.matfyz.core.exception.OtherException;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -43,20 +43,13 @@ public class CsvDMLWrapper implements AbstractDMLWrapper {
     /**
      * Creates a DML statement by joining the row data into a single CSV line.
      * The CSV data is properly escaped to handle commas and quotes.
-     *
-     * @return a {@link CsvCommandStatement} containing the generated CSV line.
-     * @throws OtherException if an error occurs while creating the DML statement.
      */
     @Override public AbstractStatement createDMLStatement() {
-        try {
-            StringJoiner joiner = new StringJoiner(",");
-            // Properly escape CSV data that may contain commas or quotes
-            rowData.values().forEach(value -> joiner.add("\"" + value.replace("\"", "\"\"") + "\""));
-            String csvLine = joiner.toString();
-            return new CsvCommandStatement(csvLine);
-        } catch (Exception e) {
-            throw new OtherException(e);
-        }
+        final StringJoiner joiner = new StringJoiner(",");
+        // Properly escape CSV data that may contain commas or quotes
+        rowData.values().forEach(value -> joiner.add("\"" + value.replace("\"", "\"\"") + "\""));
+        final String csvLine = joiner.toString();
+        return StringStatement.create(csvLine);
     }
 
 }

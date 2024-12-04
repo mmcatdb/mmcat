@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperjson;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
@@ -30,10 +31,8 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
 
     /**
      * Creates a DDL statement for the JSON schema.
-     *
-     * @return a {@link JsonCommandStatement} containing the generated DDL statement.
      */
-    @Override public JsonCommandStatement createDDLStatement() {
-        return new JsonCommandStatement("");
+    @Override public AbstractStatement createDDLStatement() {
+        return AbstractStatement.createEmpty();
     }
 }

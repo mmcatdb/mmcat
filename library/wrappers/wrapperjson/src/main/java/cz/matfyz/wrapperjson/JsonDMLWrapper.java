@@ -2,6 +2,7 @@ package cz.matfyz.wrapperjson;
 
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.utils.JsonDMLConstructor;
 import cz.matfyz.abstractwrappers.utils.JsonDMLConstructor.PropertyValue;
 import cz.matfyz.core.exception.OtherException;
@@ -47,17 +48,14 @@ public class JsonDMLWrapper implements AbstractDMLWrapper {
 
     /**
      * Creates a DML statement by constructing a JSON representation of the appended fields.
-     *
-     * @return a {@link JsonCommandStatement} containing the generated JSON content.
-     * @throws OtherException if an error occurs while creating the DML statement.
      */
-    @Override public JsonCommandStatement createDMLStatement() {
+    @Override public StringStatement createDMLStatement() {
         try {
-            for (PropertyValue propertyValue : propertyValues) {
+            for (final PropertyValue propertyValue : propertyValues)
                 constructor.addProperty(propertyValue);
-            }
-            String jsonContent = constructor.toPrettyString();
-            return new JsonCommandStatement(jsonContent);
+
+            final String jsonContent = constructor.toPrettyString();
+            return StringStatement.create(jsonContent);
         } catch (Exception e) {
             throw new OtherException(e);
         }

@@ -2,6 +2,8 @@ package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.core.mapping.IdentifierStructure;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public interface AbstractICWrapper {
@@ -24,9 +26,9 @@ public interface AbstractICWrapper {
 
     void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs);
 
-    AbstractStatement createICStatement();
+    Collection<AbstractStatement> createICStatements();
 
-    AbstractStatement createICRemoveStatement();
+    Collection<AbstractStatement> dropICStatements();
 
     static AbstractICWrapper createEmpty() {
         return EmptyICWrapper.instance;
@@ -50,12 +52,12 @@ public interface AbstractICWrapper {
             // This method intentionally does nothing.
         }
 
-        @Override public AbstractStatement createICStatement() {
-            return AbstractStatement.createEmpty();
+        @Override public Collection<AbstractStatement> createICStatements() {
+            return List.of();
         }
 
-        @Override public AbstractStatement createICRemoveStatement() {
-            return AbstractStatement.createEmpty();
+        @Override public Collection<AbstractStatement> dropICStatements() {
+            return List.of();
         }
 
     }

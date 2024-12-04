@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractICWrapper.AttributePair;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.core.mapping.IdentifierStructure;
@@ -26,23 +27,27 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
         constraints.add(new ReferenceConstraint(referencingKind, referencedKind, attributePairs));
     }
 
-    @Override public StringStatement createICStatement() {
-        String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::addCommand).toList()) + "\n";
-        return new StringStatement(content);
+    @Override public List<AbstractStatement> createICStatements() {
+        return constraints.stream()
+            .map(constraint -> (AbstractStatement) StringStatement.create(constraint.createCommand(), constraint.getPriority(true)))
+            .toList();
     }
 
-    @Override public StringStatement createICRemoveStatement() {
-        String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::dropCommand).toList()) + "\n";
-        return new StringStatement(content);
+    @Override public List<AbstractStatement> dropICStatements() {
+        return constraints.stream()
+            .map(constraint -> (AbstractStatement) StringStatement.create(constraint.dropCommand(), constraint.getPriority(false)))
+            .toList();
     }
 
 }
 
 interface Constraint {
 
-    String addCommand();
+    String createCommand();
 
     String dropCommand();
+
+    int getPriority(boolean isCreate);
 
 }
 
@@ -60,7 +65,7 @@ class IdentifierConstraint implements Constraint {
         return "#" + kindName + "_PRIMARY_KEY";
     }
 
-    @Override public String addCommand() {
+    @Override public String createCommand() {
         return "ALTER TABLE \"" + kindName + "\""
             + "\nADD CONSTRAINT \"" + getName() + "\""
             + "\nPRIMARY KEY (\"" + String.join("\", \"", properties) + "\")" + ";";
@@ -69,6 +74,12 @@ class IdentifierConstraint implements Constraint {
     @Override public String dropCommand() {
         return "\nALTER TABLE \"" + kindName + "\""
             + "\nDROP CONSTRAINT \"" + getName() + "\";";
+    }
+
+    @Override public int getPriority(boolean isCreate) {
+        // The identifiers have to be created before we can reference them as foreign keys.
+        // However, it's the other way around for dropping.
+        return isCreate ? 0 : 1;
     }
 
 }
@@ -91,7 +102,7 @@ class ReferenceConstraint implements Constraint {
         return "#" + referencingKind + "_REFERENCES_" + referencedKind;
     }
 
-    @Override public String addCommand() {
+    @Override public String createCommand() {
         return "ALTER TABLE \"" + referencingKind + "\""
             + "\nADD CONSTRAINT \"" + getName() + "\""
             + "\nFOREIGN KEY (\"" + String.join("\", \"", referencingAttributes) + "\")"
@@ -101,6 +112,10 @@ class ReferenceConstraint implements Constraint {
     @Override public String dropCommand() {
         return "ALTER TABLE \"" + referencingKind + "\""
             + "\nDROP CONSTRAINT \"" + getName() + "\";";
+    }
+
+    @Override public int getPriority(boolean isCreate) {
+        return isCreate ? 1 : 0;
     }
 
 }

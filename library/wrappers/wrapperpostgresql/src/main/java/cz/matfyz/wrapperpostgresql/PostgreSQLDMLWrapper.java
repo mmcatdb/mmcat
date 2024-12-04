@@ -49,7 +49,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
         List<String> escapedValues = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
 
         String content = String.format("INSERT INTO \"%s\" (%s)\nVALUES (%s);", kindName, String.join(", ", escapedNames), String.join(", ", escapedValues));
-        return new StringStatement(content);
+        return StringStatement.create(content);
     }
 
     private String escapeString(String input) {
