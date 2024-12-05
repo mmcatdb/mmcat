@@ -14,7 +14,7 @@ export function useFetchReferences( state: AdminerState ) {
             setReferences(undefined);
             setLoading(false);
         })();
-    }, [ state.datasource, state.kind ]);
+    }, [ state.datasourceId, state.kindName ]);
 
     return { references, loading, error };
 }

@@ -1,6 +1,7 @@
 import type { ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 import type { Datasource } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
+import type { Id } from '@/types/id';
 
 export type KindFilterState = {
     limit: number;
@@ -10,8 +11,8 @@ export type KindFilterState = {
 export type AdminerState = {
     form: KindFilterState;
     active: KindFilterState;
-    datasource?: Datasource;
-    kind?: string;
+    datasourceId?: Id;
+    kindName?: string;
     view: View;
 }
 

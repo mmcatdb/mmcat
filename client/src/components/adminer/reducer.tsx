@@ -13,7 +13,7 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
         return {
             form: { limit: 50, filters: [] },
             active: { limit: 50, filters: [] },
-            datasource: action.newDatasource,
+            datasourceId: action.newDatasource.id,
             view: getNewView(state.view, action.newDatasource.type),
         };
     }
@@ -22,7 +22,7 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
             ...state,
             form: { limit: 50, filters: [] },
             active: { limit: 50, filters: [] },
-            kind: action.newKind,
+            kindName: action.newKind,
         };
     }
     case 'view': {

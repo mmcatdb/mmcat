@@ -17,7 +17,7 @@ function getUrlParams(state: AdminerState, offset: number) {
         return filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0;
     });
 
-    const urlParams: FetchKindParams = { datasourceId: state.datasource!.id, kindId: state.kind!, queryParams: { limit: state.active.limit, offset: offset } };
+    const urlParams: FetchKindParams = { datasourceId: state.datasourceId!, kindId: state.kindName!, queryParams: { limit: state.active.limit, offset: offset } };
 
     if (state.active.filters && filterExist) {
         const queryFilters = `${state.active.filters
@@ -52,14 +52,14 @@ export function DatabaseView({ state }: DatabaseViewProps) {
 
     const urlParams = useMemo(() => {
         return getUrlParams(state, offset);
-    }, [ state.active, state.datasource, state.kind, state.view, offset ]);
+    }, [ state.active, state.datasourceId, state.kindName, state.view, offset ]);
 
     useEffect(() => {
         setRowCount(undefined);
         setTotalPages(1);
         setCurrentPage(1);
         setOffset(0);
-    }, [ state.active, state.datasource, state.kind, state.view ]);
+    }, [ state.active, state.datasourceId, state.kindName, state.view ]);
 
     if (loading) {
         return (

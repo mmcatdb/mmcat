@@ -1,11 +1,12 @@
 import { useCallback } from 'react';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
 import { api } from '@/api';
+import type { AdminerStateAction } from '@/types/adminer/Reducer';
+import type { Id } from '@/types/id';
 
 type KindMenuProps = Readonly<{
-    datasourceId: string;
+    datasourceId: Id;
     kind: string | undefined;
     showUnlabeled: boolean;
     dispatch: React.Dispatch<AdminerStateAction>;
@@ -34,11 +35,11 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
                 label='Kind'
                 placeholder='Select kind'
                 className='max-w-xs'
-                defaultSelectedKeys={ [ kind && fetchedData.data.includes(kind) ? fetchedData.data.findIndex(name => name === kind).toString() : kind ? kind : '' ] }
+                defaultSelectedKeys={ kind ? [ kind ] : undefined }
             >
                 {fetchedData.data.map((name, index) => (
                     <SelectItem
-                        key={index}
+                        key={name}
                         onPress={() => dispatch({ type: 'kind', newKind: name })}
                     >
                         {name}

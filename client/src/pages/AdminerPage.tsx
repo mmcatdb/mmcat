@@ -1,5 +1,6 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Spinner } from '@nextui-org/react';
 import { getStateFromURLParams, getURLParamsFromState } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { KindMenu } from '@/components/adminer/KindMenu';
@@ -7,66 +8,83 @@ import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { reducer } from '@/components/adminer/reducer';
+import { api } from '@/api';
 import { View } from '@/types/adminer/View';
-import { DatasourceType } from '@/types/datasource';
+import { type Datasource, DatasourceType } from '@/types/datasource';
 
 export function AdminerPage() {
-    const [ initialized, setInitialized ] = useState(false);
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(reducer, {
         form: { limit: 50, filters: [] },
         active: { limit: 50, filters: [] },
         view: View.table,
     });
+    const [ datasource, setDatasource ] = useState<Datasource>();
+    const [ allDatasources, setAllDatasources ] = useState<Datasource[]>();
 
-    useEffect(() => {
-        const getState = async () => {
-            const stateFromParams = await getStateFromURLParams(searchParams);
+    useMemo(() => {
+        const stateFromParams = getStateFromURLParams(searchParams);
 
+        if (stateFromParams.active !== state.active || stateFromParams.datasourceId !== state.datasourceId || stateFromParams.kindName !== state.kindName || stateFromParams.view !== state.view)
             dispatch({ type: 'initialize', state: stateFromParams });
-        };
-
-        getState()
-            .catch(() => console.error('Error getting state from URL parameters.'))
-            .finally(() => setInitialized(true));
     }, [ searchParams ]);
 
-    useEffect(() => {
-        if (!initialized)
-            return;
-
+    useMemo(() => {
         const params = getURLParamsFromState(state);
 
-        setSearchParams(params);
-    }, [ state, initialized, setSearchParams ]);
+        if (params !== searchParams)
+            setSearchParams(params);
+    }, [ state ]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const response = await api.datasources.getAllDatasources({});
+
+                if (response.status && response.data)
+                    setAllDatasources(response.data);
+            }
+            catch {
+                console.error('Failed to load datasources data');
+            }
+        })();
+    }, []);
+
+    useMemo(() => {
+        setDatasource(allDatasources?.find((source) => source.id === state.datasourceId));
+    }, [ state.datasourceId, allDatasources ]);
 
     return (
         <div>
             <div className='mt-5 flex flex-wrap gap-3 items-center'>
 
-                <DatasourceMenu dispatch={dispatch} datasource={state.datasource}/>
+                {allDatasources ? (
+                    <DatasourceMenu dispatch={dispatch} datasourceId={state.datasourceId} datasources={allDatasources}/>
+                ) : (
+                    <div className='h-10 flex items-center justify-center'>
+                        <Spinner />
+                    </div>
+                )}
 
-                {state.datasource &&
+                {datasource &&
                 (
                     <>
-                        <KindMenu datasourceId={state.datasource.id} kind={state.kind} showUnlabeled={state.datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
+                        <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
-                        {state.kind !== undefined && (
-                            <ViewMenu datasourceType={state.datasource.type} view={state.view} dispatch={dispatch}/>
+                        {state.kindName !== undefined && (
+                            <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
                         )}
                     </>
                 )}
             </div>
 
-            {state.datasource && (
+            {datasource && state.kindName && (
                 <div className='mt-5'>
-                    {state.kind && (
-                        <div className='mt-5'>
-                            <FilterForm state={state} dispatch={dispatch}/>
-                        </div>
-                    )}
+                    <div className='mt-5'>
+                        <FilterForm state={state} dispatch={dispatch}/>
+                    </div>
 
-                    {typeof state.kind === 'string' && (
+                    {typeof state.kindName === 'string' && (
                         <div className='mt-5'>
                             <DatabaseView state={state}/>
                         </div>
