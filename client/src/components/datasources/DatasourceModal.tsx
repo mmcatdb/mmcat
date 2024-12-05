@@ -38,6 +38,7 @@ export function DatasourceModal({
             resetForm();
     }, [ isOpen ]);
 
+    // console.log(settings);
     function handleSettingsChange(field: keyof Settings, value: unknown) {
         setSettings((prevSettings) => ({
             ...prevSettings,
@@ -91,50 +92,48 @@ export function DatasourceModal({
             hideCloseButton
         >
             <ModalContent>
-                {() => (
-                    <>
-                        <ModalHeader className='flex flex-col gap-1'>Add Datasource</ModalHeader>
-                        <ModalBody>
-                            <SelectDatasourceType 
-                                datasourceType={datasourceType}
-                                setDatasourceType={setDatasourceType}
-                            />
+                <ModalHeader className='flex flex-col gap-1'>Add Datasource</ModalHeader>
+                <ModalBody>
+                    <SelectDatasourceType
+                        datasourceType={datasourceType}
+                        // TODO: selectPredefinedSettings, updateDatasourceType
+                        // TODO: do this also for isQueryable
+                        setDatasourceType={t => setDatasourceType(t) || setSettings(s => ({ ...s, isWritable: true }))}
+                    />
 
-                            <Input
-                                label='Datasource Label'
-                                value={datasourceName}
-                                onChange={(e) => setDatasourceLabel(e.target.value)}
-                                fullWidth
-                                required
-                            />
+                    <Input
+                        label='Datasource Label'
+                        value={datasourceName}
+                        onChange={(e) => setDatasourceLabel(e.target.value)}
+                        fullWidth
+                        required
+                    />
 
-                            {datasourceType && (
-                                <DatasourceSpecificFields
-                                    datasourceType={datasourceType}
-                                    settings={settings}
-                                    handleSettingsChange={handleSettingsChange}
-                                />
-                            )}
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button
-                                color='danger'
-                                variant='light'
-                                onPress={onClose}
-                                isDisabled={isCreatingDatasource}
-                            >
+                    {datasourceType && (
+                        <DatasourceSpecificFields
+                            datasourceType={datasourceType}
+                            settings={settings}
+                            handleSettingsChange={handleSettingsChange}
+                        />
+                    )}
+                </ModalBody>
+                <ModalFooter>
+                    <Button
+                        color='danger'
+                        variant='light'
+                        onPress={onClose}
+                        isDisabled={isCreatingDatasource}
+                    >
                                 Close
-                            </Button>
-                            <Button
-                                color='primary'
-                                onPress={handleSubmit}
-                                isLoading={isCreatingDatasource}
-                            >
+                    </Button>
+                    <Button
+                        color='primary'
+                        onPress={handleSubmit}
+                        isLoading={isCreatingDatasource}
+                    >
                                 Submit
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
+                    </Button>
+                </ModalFooter>
             </ModalContent>
         </Modal>
 
@@ -173,7 +172,7 @@ type DatasourceSpecificFieldsProps = {
     handleSettingsChange: (field: keyof Settings, value: unknown) => void;
 };
 
-function DatasourceSpecificFields({ datasourceType, settings, handleSettingsChange }: DatasourceSpecificFieldsProps) {
+export function DatasourceSpecificFields({ datasourceType, settings, handleSettingsChange }: DatasourceSpecificFieldsProps) {
     if ([ 'mongodb', 'postgresql', 'neo4j' ].includes(datasourceType)) {
         return (
             <>
