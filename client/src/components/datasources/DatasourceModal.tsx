@@ -38,7 +38,6 @@ export function DatasourceModal({
             resetForm();
     }, [ isOpen ]);
 
-    // console.log(settings);
     function handleSettingsChange(field: keyof Settings, value: unknown) {
         setSettings((prevSettings) => ({
             ...prevSettings,
@@ -52,35 +51,37 @@ export function DatasourceModal({
             return;
         }
     
-        try {
-            setIsCreatingDatasource(true);
-            const newDatasource: DatasourceInit = {
-                type: datasourceType,
-                label: datasourceName,
-                settings: settings,
-            };
+        setIsCreatingDatasource(true);
+        const newDatasource: DatasourceInit = {
+            type: datasourceType,
+            label: datasourceName,
+            settings: settings,
+        };
     
-            // Call the API to create the datasource
-            const createdDatasource = await api.datasources.createDatasource({}, newDatasource);
+        // Call the API to create the datasource
+        const createdDatasource = await api.datasources.createDatasource({}, newDatasource);
 
-            if (createdDatasource.status && createdDatasource.data) {
-                // Notify parent
-                onDatasourceCreated(createdDatasource.data);
-                resetForm();
-                onClose();
-                toast.success('Datasource created.');
-            }
-            else {
-                toast.error('Failed to create datasource. Please try again.');
-            }
+        if (createdDatasource.status && createdDatasource.data) {
+            // Notify parent
+            onDatasourceCreated(createdDatasource.data);
+            resetForm();
+            onClose();
+            toast.success('Datasource created.');
         }
-        catch (error) {
-            console.error('An unexpected error occurred:', error);
-            toast.error('An unexpected error occurred. Please try again.');
+        else {
+            toast.error('Failed to create datasource. Please try again.');
         }
-        finally {
-            setIsCreatingDatasource(false);
-        }
+        setIsCreatingDatasource(false);
+        
+    }
+
+    function updateSettingsForType(type: DatasourceType, currentSettings: Settings): Settings {
+        const isDatabaseType = [ 'mongodb', 'postgresql', 'neo4j' ].includes(type);
+        return {
+            ...currentSettings,
+            isWritable: isDatabaseType,
+            isQueryable: isDatabaseType,
+        };
     }
 
     return (
@@ -96,9 +97,10 @@ export function DatasourceModal({
                 <ModalBody>
                     <SelectDatasourceType
                         datasourceType={datasourceType}
-                        // TODO: selectPredefinedSettings, updateDatasourceType
-                        // TODO: do this also for isQueryable
-                        setDatasourceType={t => setDatasourceType(t) || setSettings(s => ({ ...s, isWritable: true }))}
+                        setDatasourceType={(t) => {
+                            setDatasourceType(t);
+                            setSettings((s) => updateSettingsForType(t, s));
+                        }}
                     />
 
                     <Input
@@ -124,14 +126,14 @@ export function DatasourceModal({
                         onPress={onClose}
                         isDisabled={isCreatingDatasource}
                     >
-                                Close
+                        Close
                     </Button>
                     <Button
                         color='primary'
                         onPress={handleSubmit}
                         isLoading={isCreatingDatasource}
                     >
-                                Submit
+                        Submit
                     </Button>
                 </ModalFooter>
             </ModalContent>
