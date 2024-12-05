@@ -39,10 +39,16 @@ export function AdminerPage() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await api.datasources.getAllDatasources({});
+                while (true) {
+                    const response = await api.datasources.getAllDatasources({});
 
-                if (response.status && response.data)
-                    setAllDatasources(response.data);
+                    if (response.status && response.data){
+                        setAllDatasources(response.data);
+                        return;
+                    }
+
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                }
             }
             catch {
                 console.error('Failed to load datasources data');
