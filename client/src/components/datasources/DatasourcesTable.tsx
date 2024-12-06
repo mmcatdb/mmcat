@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/datasource';
 import { useNavigate, useParams } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
-import { ErrorPage } from '@/pages/errorPages';
+import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
     loading: boolean;
-    error: string | null;
+    error: boolean;
     onDeleteDatasource: (id: string) => void;
 };
 
@@ -27,17 +27,13 @@ export function DatasourcesTable({ datasources, loading, error, onDeleteDatasour
 
     if (loading) {
         return (
-            <div>
-                <Spinner />
-            </div>
+            <LoadingPage />
         );
     }
 
     if (error) {
         return (
-            <div>
-                <ErrorPage />
-            </div>
+            <ErrorPage />
         );
     }
 
@@ -105,8 +101,6 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                 onRowAction={handleRowAction}
                 sortDescriptor={sortDescriptor}
                 onSortChange={onSortChange}
-                removeWrapper
-                isCompact
             >
                 <TableHeader>
                     {/* Conditional contruct of columns before rendering */}
@@ -124,7 +118,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                         <TableColumn key='type' allowsSorting>
                             Type
                         </TableColumn>,
-                        <TableColumn key='settings'>Settings</TableColumn>,
+                        // <TableColumn key='settings'>Settings</TableColumn>,
                         <TableColumn key='actions'>Actions</TableColumn>,
                     ]}
                 </TableHeader>
@@ -140,9 +134,9 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                                     : []),
                                 <TableCell key='label'>{datasource.label}</TableCell>,
                                 <TableCell key='type'>{datasource.type}</TableCell>,
-                                <TableCell key='settings' className='break-all'>
-                                    {JSON.stringify(datasource.settings, null, 2)}
-                                </TableCell>,
+                                // <TableCell key='settings' className='break-all'>
+                                //     {JSON.stringify(datasource.settings, null, 2)}
+                                // </TableCell>,
                                 <TableCell key='actions'>
                                     <Button
                                         isIconOnly

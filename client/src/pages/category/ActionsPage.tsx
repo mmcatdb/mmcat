@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
-import { LoadingPage } from '../errorPages';
+import { LoadingPage, ReloadPage } from '../errorPages';
 import { EmptyState, useSortableData } from '@/components/TableCommon';
 import { AddIcon } from '@/components/icons/PlusIcon';
 import { usePreferences } from '@/components/PreferencesProvider';
@@ -22,27 +22,29 @@ export function ActionsPage() {
 export function ActionsPageOverview() {
     const [ actions, setActions ] = useState<Action[]>([]);
     const [ loading, setLoading ] = useState(false);
+    const [ error, setError ] = useState(false);
     const { category } = useCategoryInfo();
 
-    useEffect(() => {
-        async function fetchActions() {
-            setLoading(true);
+    async function fetchActions() {
+        setLoading(true);
+        setError(false);
 
-            const response = await api.actions.getAllActionsInCategory({
-                categoryId: category.id,
-            });
+        const response = await api.actions.getAllActionsInCategory({
+            categoryId: category.id,
+        });
+        setLoading(false);
 
-            if (!response.status) 
-                return false;
-            
-            const actionsFromServer = response.data.map(Action.fromServer);
-            setActions(actionsFromServer);
-
-            setLoading(false);
-            return true;
+        if (!response.status) {
+            setError(true);
+            return;
         }
+            
+        const actionsFromServer = response.data.map(Action.fromServer);
+        setActions(actionsFromServer);
+    }
 
-        fetchActions();
+    useEffect(() => {
+        void fetchActions();
     }, [ category.id ]);
 
     async function deleteAction(actionId: string) {
@@ -59,8 +61,14 @@ export function ActionsPageOverview() {
 
     const navigate = useNavigate();
 
+    if (loading)
+        return <LoadingPage />;
+
+    if (error) 
+        return <ReloadPage onReload={fetchActions} title='Actions' message='Failed to load actions.'/>;
+
     return (
-        <div className='p-6'>
+        <div>
             <div className='flex items-center justify-between mb-4'>
                 <h1 className='text-xl font-semibold'>Actions</h1>
                 <Button
@@ -74,9 +82,7 @@ export function ActionsPageOverview() {
             </div>
 
             <div>
-                {loading ? (
-                    <LoadingPage />
-                ) : actions.length > 0 ? (
+                {actions.length > 0 ? (
                     <ActionsTable actions={actions} onDeleteAction={deleteAction} />
                 ) : (
                     <EmptyState
@@ -101,16 +107,34 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         column: 'label',
         direction: 'ascending',
     });
+    const [ isCreatingRun, setIsCreatingRun ] = useState(false);
 
     function handleSortChange(newSortDescriptor: SortDescriptor) {
         setSortDescriptor(newSortDescriptor);
     }
 
+    async function createRun(actionId: string) {
+        setIsCreatingRun(true);
+        
+        const response = await api.jobs.createRun({ actionId });
+
+        if (!response.status) {
+            toast.error('Error creating run');
+            return;
+        }
+
+        toast.success('Run created successfully');
+        console.log('New Run:', response.data); // TODO: navigate to Runs page, or specific run
+
+        setIsCreatingRun(false);
+    }
+
     return (
-        <Table 
+        <Table
             aria-label='Actions table'
             sortDescriptor={sortDescriptor}
             onSortChange={handleSortChange}
+            // onRowAction={handleRowAction}
         >
             <TableHeader>
                 {[
@@ -133,20 +157,23 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                 ? [ <TableCell key='id'>{action.id}</TableCell> ]
                                 : []),
                             <TableCell key='label'>{action.label}</TableCell>,
-                            // TODO: udělat detail Action s přiřazenými typy, Datasources a mapováním
-                            // <TableCell key='type'>{action.payloads.map((p) => p.type).join(', ')}</TableCell>,
                             <TableCell key='actions' className='flex items-center space-x-2'>
                                 <Button
                                     isIconOnly
                                     aria-label='Delete action'
                                     color='danger'
-                                    variant='light' 
+                                    variant='light'
                                     onPress={() => onDeleteAction(action.id)}
                                 >
                                     <TrashIcon className='w-5 h-5' />
                                 </Button>
-                                <Button color='primary' variant='bordered'>
-                                    Create Run
+                                <Button
+                                    color='primary'
+                                    variant='bordered'
+                                    isDisabled={isCreatingRun}
+                                    onPress={() => createRun(action.id)}
+                                >
+                                    {isCreatingRun ? 'Creating...' : 'Create Run'}
                                 </Button>
                             </TableCell>,
                         ]}

@@ -9,4 +9,4 @@ export function QueryingPage() {
             <p>Template page</p>
         </div>
     );
-};
+}

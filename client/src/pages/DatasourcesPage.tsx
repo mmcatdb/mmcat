@@ -8,7 +8,7 @@ import { Outlet } from 'react-router-dom';
 import { EmptyState } from '@/components/TableCommon';
 import { Button } from '@nextui-org/react';
 import { AddIcon } from '@/components/icons/PlusIcon';
-import { LoadingPage } from './errorPages';
+import { ErrorPage, LoadingPage } from './errorPages';
 
 export function DatasourcesPage() {
     return (
@@ -29,6 +29,13 @@ export function DatasourcesPageOverview() {
         deleteDatasource,
     } = useDatasources();
 
+    if (loading)
+        return <LoadingPage />;
+
+    // TODO: ReloadPage
+    if (error)
+        return <ErrorPage />;
+
     return (
         <DatasourcesPageOverviewUI
             datasources={datasources}
@@ -46,7 +53,7 @@ export function DatasourcesPageOverview() {
 function useDatasources() {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | null>(null);
+    const [ error, setError ] = useState<boolean>(false);
     const [ isModalOpen, setModalOpen ] = useState(false);
 
     useEffect(() => {
@@ -57,7 +64,7 @@ function useDatasources() {
             if (response.status && response.data)
                 setDatasources(response.data);
             else
-                setError('Failed to load data');
+                setError(true);
             
             setLoading(false);
         };
@@ -96,7 +103,7 @@ function useDatasources() {
 type DatasourcesPageOverviewProps = {
     datasources: Datasource[];
     loading: boolean;
-    error: string | null;
+    error: boolean;
     isModalOpen: boolean;
     onAddDatasource: (newDatasource: Datasource) => void;
     onDeleteDatasource: (id: string) => void;
@@ -122,7 +129,6 @@ function DatasourcesPageOverviewUI({
                     onPress={onOpenModal}
                     color='primary' 
                     startContent={<AddIcon />}
-                    isDisabled={loading}
                 >
                     Add Datasource
                 </Button>

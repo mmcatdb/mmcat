@@ -8,50 +8,46 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { Button } from '@nextui-org/react';
 import { AddIcon } from '@/components/icons/PlusIcon';
 import { EmptyState } from '@/components/TableCommon';
-import { LoadingPage } from '../errorPages';
+import { LoadingPage, ReloadPage } from '../errorPages';
 
 export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
     const [ datasourcesInCategory, setDatasourcesInCategory ] = useState<Datasource[]>([]);
     const [ otherDatasources, setOtherDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string | null>(null);
+    const [ error, setError ] = useState<boolean>(false);
     const [ isModalOpen, setModalOpen ] = useState(false);
 
-    useEffect(() => {
-        async function fetchDatasources() {
-            try {
-                setLoading(true);
+    async function fetchDatasources() {
+        // TODO: no fetch, data via loader
+        setLoading(true);
+        setError(false);
+        // Fetch datasources in category
+        const inCategoryResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
+        setLoading(false);
 
-                // Fetch datasources in category
-                const inCategoryResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
-                if (inCategoryResponse.status && inCategoryResponse.data)  
-                    setDatasourcesInCategory(inCategoryResponse.data);
-                else 
-                    throw new Error('Failed to fetch datasources in category');
-                
-
-                // Fetch all datasources and filter out ds in category
-                const allDatasourcesResponse = await api.datasources.getAllDatasources({});
-                if (allDatasourcesResponse.status && allDatasourcesResponse.data) {
-                    const notInCategory = allDatasourcesResponse.data.filter(
-                        ds => !inCategoryResponse.data.some(inCat => inCat.id === ds.id),
-                    );
-                    setOtherDatasources(notInCategory);
-                }
-                else {
-                    throw new Error('Failed to fetch all datasources');
-                }
-            } 
-            catch (err) {
-                setError('Failed to load data');
-            }
-            finally {
-                setLoading(false);
-            }
+        if (!inCategoryResponse.status) {
+            setError(true);
+            return;
         }
+            
+        setDatasourcesInCategory(inCategoryResponse.data);
 
-        fetchDatasources();
+        // Fetch all datasources and filter out ds in category
+        const allDatasourcesResponse = await api.datasources.getAllDatasources({});
+        if (!allDatasourcesResponse.status) {
+            setError(true);
+            return;
+        }
+            
+        const notInCategory = allDatasourcesResponse.data.filter(
+            ds => !inCategoryResponse.data.some(inCat => inCat.id === ds.id),
+        );
+        setOtherDatasources(notInCategory);
+    }
+
+    useEffect(() => {
+        void fetchDatasources();
     }, [ category.id ]);
 
     // callback to add new datasource
@@ -80,6 +76,9 @@ export function DatasourcesInCategoryPage() {
 
     if (loading) 
         return <LoadingPage />;
+
+    if (error)
+        return <ReloadPage onReload={fetchDatasources} title='Datasources' message='Failed to load Datasources.' />;
 
     return (
         <div>

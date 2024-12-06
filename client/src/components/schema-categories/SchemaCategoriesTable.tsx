@@ -11,7 +11,7 @@ import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 type SchemaCategoriesTableProps = {
     categories: SchemaCategoryInfo[];
     loading: boolean;
-    error: string | undefined;
+    error: boolean;
     onDeleteCategory: (id: string) => void;
 };
 
@@ -91,8 +91,6 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                 onRowAction={handleRowAction}
                 sortDescriptor={sortDescriptor}
                 onSortChange={onSortChange}
-                removeWrapper
-                isCompact
             >
                 <TableHeader>
                     {[

@@ -5,7 +5,6 @@ import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { Button } from '@nextui-org/react';
 import { toast } from 'react-toastify';
-import { LoadingPage } from './errorPages';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
@@ -77,7 +76,7 @@ export function Home() {
                     ))}
                 </div>
             </>) : (
-                <LoadingPage />
+                <p>Loading...</p>
             )}
         </div>
     );
