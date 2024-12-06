@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, shallowRef, computed } from 'vue';
 import { type Graph, SelectionType, type Node } from '@/types/categoryGraph';
-import { Candidates, ReferenceCandidate } from '@/types/inference/candidates';
+import type { Candidates, ReferenceCandidate } from '@/types/inference/candidates';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';

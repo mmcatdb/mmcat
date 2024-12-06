@@ -78,7 +78,7 @@ function cancel() {
         emit('cancel');
     
     
-    nodes.value = [ undefined, undefined ];  // unselect selected nodes
+    nodes.value = [];  // unselect selected nodes
 
     if (confirmClicked.value) {
         emit('cancel-edit');

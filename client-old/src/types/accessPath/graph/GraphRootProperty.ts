@@ -6,7 +6,7 @@ import type { GraphChildProperty, GraphParentProperty } from './compositeTypes';
 import { SequenceSignature } from './SequenceSignature';
 import { GraphComplexProperty } from './GraphComplexProperty';
 import { GraphSimpleProperty } from './GraphSimpleProperty';
-import { type ChildProperty } from '@/types/accessPath/basic/compositeTypes';
+import type { ChildProperty } from '@/types/accessPath/basic/compositeTypes';
 
 export class GraphRootProperty {
     name: StaticName;
@@ -20,19 +20,29 @@ export class GraphRootProperty {
     }
 
     containsNode(node: Node): boolean {
-        if (this.node.equals(node)) return true;      
-
-        return this._subpaths.some(subpath => this.searchSubpathsForNode(subpath, node));
-    }
+        if (this.node.equals(node)) return true;
+    
+        return this._subpaths.some(subpath => {
+            if (subpath instanceof GraphComplexProperty || subpath instanceof GraphRootProperty)
+                return this.searchSubpathsForNode(subpath, node);
+            return false;
+        });
+    }    
 
     searchSubpathsForNode(property: GraphParentProperty, node: Node): boolean {
-        if (property.node.equals(node)) return true;        
-
-        if (property instanceof GraphComplexProperty) 
-            return property.subpaths.some(subpath => this.searchSubpathsForNode(subpath, node));
-        
+        if (property.node.equals(node)) return true;
+    
+        if (property instanceof GraphComplexProperty) {
+            return property.subpaths.some(subpath => {
+                if (subpath instanceof GraphComplexProperty || subpath instanceof GraphRootProperty)
+                    return this.searchSubpathsForNode(subpath, node);
+                return false;
+            });
+        }
+    
         return false;
     }
+    
 
     highlightPath() {
         this.node.highlight();

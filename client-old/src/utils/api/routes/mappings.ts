@@ -1,7 +1,7 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
 import type { MappingFromServer, MappingInit } from '@/types/mapping';
-import { type Id } from '@/types/id';
+import type { Id } from '@/types/id';
 
 const mappings = {
     getMapping: GET<{ id: StringLike }, MappingFromServer>(

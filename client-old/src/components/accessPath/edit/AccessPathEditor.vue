@@ -91,7 +91,7 @@ const emit = defineEmits([ 'finish', 'update:rootProperty', 'cancel' ]);
  */
 const localRootProperty = shallowRef<GraphRootProperty>(props.rootProperty);
 const state = shallowRef<StateValue>({ type: State.Default });
-const selectedNodes = ref<Node[]>([]);
+const selectedNodes = shallowRef<Node[]>([]);
 const supressStateUpdate = ref(false);
 
 /**
@@ -261,10 +261,12 @@ function findSubpathForNode(node: Node): GraphChildProperty | undefined {
 function searchSubpathsForNode(property: GraphParentProperty, node: Node): GraphParentProperty | undefined {
     if (property.node.equals(node)) return property;
 
-    if (property instanceof GraphComplexProperty || property instanceof GraphRootProperty) {
+    if (property instanceof GraphComplexProperty) {
         for (const subpath of property.subpaths) {
-            const result = searchSubpathsForNode(subpath, node);
-            if (result) return result;
+            if (subpath instanceof GraphComplexProperty) {
+                const result = searchSubpathsForNode(subpath, node);
+                if (result) return result;
+            }
         }
     }
 }

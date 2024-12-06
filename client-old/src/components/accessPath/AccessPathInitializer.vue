@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, provide, ref, shallowRef } from 'vue';
-import { GraphRootProperty } from '@/types/accessPath/graph';
+import type { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId } from '@/types/identifiers';
-import { type Graph } from '@/types/categoryGraph';
+import type { Graph } from '@/types/categoryGraph';
 import { useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute } from 'vue-router';

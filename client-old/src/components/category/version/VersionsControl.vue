@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
+import { computed, ref, shallowRef } from 'vue';
 
 import { useEvocat } from '@/utils/injects';
 

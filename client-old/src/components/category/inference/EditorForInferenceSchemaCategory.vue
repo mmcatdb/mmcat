@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { shallowRef, onMounted, ref } from 'vue';
+import { shallowRef, onMounted } from 'vue';
 import Merge from './Merge.vue';
 import Cluster from './Cluster.vue';
 import Recursion from './Recursion.vue';
 import InferenceEdits from './InferenceEdits.vue';
 import type { InferenceEdit } from '@/types/inference/inferenceEdit';
-import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates';
-import { Graph, Node, Edge } from '@/types/categoryGraph';
-import { SchemaCategory } from '@/types/schema';
+import type { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates';
+import type { Graph, Node, Edge } from '@/types/categoryGraph';
+import type { SchemaCategory } from '@/types/schema';
 import Divider from '@/components/layout/Divider.vue';
-import { Key } from '@/types/identifiers';
+import type { Key } from '@/types/identifiers';
 import type { Position } from 'cytoscape';
 
 /**
