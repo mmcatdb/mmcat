@@ -2,7 +2,7 @@ import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, Node
 import type { GroupData, SchemaMorphism, SchemaObject, VersionedSchemaMorphism, VersionedSchemaObject } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
-import { Key, Signature } from '../identifiers';
+import type { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Id } from '../id';
 import { shallowRef } from 'vue';

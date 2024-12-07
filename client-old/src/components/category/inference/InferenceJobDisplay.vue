@@ -9,7 +9,7 @@ import LayoutSelector from './LayoutSelector.vue';
 import type { LayoutType } from '@/types/inference/layoutType';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
 import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates'; 
-import { Key } from '@/types/identifiers';
+import type { Key } from '@/types/identifiers';
 import type { Position } from 'cytoscape';
 
 type InferenceJobDisplayProps = {

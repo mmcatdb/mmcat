@@ -5,7 +5,6 @@ import EditorForSchemaCategory from '@/components/category/edit/EditorForSchemaC
 import { evocatKey, type EvocatContext } from '@/utils/injects';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '@/components/category/EvocatDisplay.vue';
-import VersionsControl from '@/components/category/version/VersionsControl.vue';
 
 const evocat = shallowRef<Evocat>();
 const graph = shallowRef<Graph>();
@@ -29,6 +28,5 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     </div>
     <div v-if="evocat">
         <!-- TODO display of previous versions -->
-        <!-- <VersionsControl /> -->
     </div>
 </template>

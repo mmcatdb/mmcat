@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import type { Graph, Node } from '@/types/categoryGraph';
 import Divider from '@/components/layout/Divider.vue';
-import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates';
+import type { Candidates, ReferenceCandidate,  PrimaryKeyCandidate } from '@/types/inference/candidates';
 import ReferenceMerge from '@/components/category/inference/ReferenceMerge.vue';
 import PrimaryKeyMerge from '@/components/category/inference/PrimaryKeyMerge.vue';
 

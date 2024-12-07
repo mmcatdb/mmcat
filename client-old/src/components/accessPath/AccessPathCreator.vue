@@ -9,7 +9,7 @@ import { useEvocat } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
-import { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 
 /**
  * Extracts the graph object from Evocat.
@@ -28,7 +28,8 @@ const accessPath = ref<GraphRootProperty>();
 const nodes = shallowRef<(Node)[]>([]);
 const selectingRootNode = ref<Node>();
 const selectingOriginalRootNode = ref<Node>();
-const selectedNodes = ref<Node[]>([]);
+//const selectedNodes = ref<Node[]>([]);
+const selectedNodes = shallowRef<Node[]>([]);
 const rootConfirmed = ref(false);
 
 const isConfirmButtonDisabled = computed(() => {
@@ -145,7 +146,7 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
         previousParentProperty = subpath;
         const childSubpaths = children.map(child => createSubpathForNode(child));
         childSubpaths.forEach(childSubpath => {
-            if (childSubpath) 
+            if (childSubpath && subpath instanceof GraphComplexProperty) 
                 subpath.updateOrAddSubpath(childSubpath);            
         });
     }
@@ -183,11 +184,14 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
 
     if (property instanceof GraphComplexProperty) {
         for (const subpath of property.subpaths) {
-            const result = searchSubpathsForNode(subpath, node);
-            if (result) return result;            
+            if (subpath instanceof GraphComplexProperty) {
+                const result = searchSubpathsForNode(subpath, node);
+                if (result) return result;
+            }
         }
     }
 }
+
 
 /**
  * Updates the root property with a new root property and highlights the path.

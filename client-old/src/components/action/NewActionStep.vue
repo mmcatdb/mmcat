@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from 'vue';
 import type { Id } from '@/types/id';
-import { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 import { ActionType } from '@/types/action';
-import { Mapping } from '@/types/mapping';
+import type { Mapping } from '@/types/mapping';
 
 export type ActionStepInnerValue = {
     datasourceId?: Id;

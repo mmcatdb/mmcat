@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
-import { SignatureId } from '@/types/identifiers';
+import type { SignatureId } from '@/types/identifiers';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat, useSchemaCategoryId } from '@/utils/injects';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
-import { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 
 const categoryId = useSchemaCategoryId();
 
