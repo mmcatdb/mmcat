@@ -59,6 +59,7 @@ export class Run implements Entity {
 }
 
 export type JobFromServer = Omit<JobInfoFromServer, 'payload'> & {
+    index: number;
     payload: JobPayloadFromServer;
     data?: JobDataFromServer;
     error?: JobError;
@@ -71,6 +72,7 @@ export type JobFromServer = Omit<JobInfoFromServer, 'payload'> & {
 export class Job implements Entity {
     private constructor(
         public readonly id: Id,
+        public readonly index: number,
         public readonly label: string,
         public state: JobState,
         public readonly payload: JobPayload,
@@ -86,6 +88,7 @@ export class Job implements Entity {
     static fromServer(input: JobFromServer, info: SchemaCategoryInfo): Job {
         return new Job(
             input.id,
+            input.index,
             input.label,
             input.state,
             jobPayloadFromServer(input.payload),
@@ -120,6 +123,7 @@ type JobError = {
 
 export enum JobDataType {
     Model = 'Model',
+    Inference = 'Inference',
 }
 
 type JobDataFromServer = ModelJobData;

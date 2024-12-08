@@ -37,5 +37,6 @@ export const routes = {
         datasources: categoryIndex.child('/datasources', 'datasources'),
         querying: categoryIndex.child('/querying', 'querying'),
         actions: categoryIndex.child('/actions', 'actions'),
+        jobs: categoryIndex.child('/jobs', 'jobs'),
     },
 } as const;

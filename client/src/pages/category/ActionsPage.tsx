@@ -167,6 +167,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                 >
                                     <TrashIcon className='w-5 h-5' />
                                 </Button>
+                                {/* TODO: reapir this Creating... do for just specific button, not for all. */}
                                 <Button
                                     color='primary'
                                     variant='bordered'

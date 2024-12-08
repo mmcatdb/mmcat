@@ -17,6 +17,7 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategory';
 import { ActionsPage, ActionsPageOverview } from '@/pages/category/ActionsPage';
 import { AddActionPage } from '@/components/schema-categories/AddActionPage';
+import { JobsPage, RunsPageOverview } from '@/pages/category/JobsPage';
 
 type MappingLoaderData = {
     mapping: Mapping;
@@ -168,6 +169,18 @@ export const router = createBrowserRouter([
                                 path: 'add',
                                 Component: AddActionPage,
                                 handle: { breadcrumb: 'Add' },
+                            },
+                        ],
+                    },
+                    {
+                        id: routes.category.jobs.id,
+                        path: routes.category.jobs.path,
+                        Component: JobsPage,
+                        handle: { breadcrumb: 'Jobs' },
+                        children: [
+                            {
+                                index: true,
+                                Component: RunsPageOverview,
                             },
                         ],
                     },

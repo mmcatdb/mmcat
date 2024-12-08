@@ -188,7 +188,13 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
             type: 'normal',
             label: 'Actions',
             route: routes.category.actions.resolve({ categoryId }),
-            iconName: 'documentText',
+            iconName: 'rocket',
+        },
+        {
+            type: 'normal',
+            label: 'Jobs',
+            route: routes.category.jobs.resolve({ categoryId }),
+            iconName: 'playCircle',
         },
         {
             type: 'normal',
