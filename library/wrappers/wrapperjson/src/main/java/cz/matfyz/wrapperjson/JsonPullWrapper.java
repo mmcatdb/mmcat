@@ -8,6 +8,7 @@ import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -161,6 +162,10 @@ public class JsonPullWrapper implements AbstractPullWrapper {
 
     @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
+    }
+
+    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getForeignKeys not implemented.");
     }
 
 }

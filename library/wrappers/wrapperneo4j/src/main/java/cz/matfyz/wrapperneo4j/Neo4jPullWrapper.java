@@ -7,6 +7,7 @@ import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
@@ -18,6 +19,8 @@ import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
 import java.util.List;
+
+import javax.swing.JList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -525,6 +528,10 @@ private JSONObject getByLabelAndId(String label, List<AdminerFilter> filters, St
         }
 
         return getByLabelAndId(kindName, filters, limit, offset);
+    }
+
+    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+        throw new UnsupportedOperationException("Neo4jPullWrapper.getForeignKeys not implemented.");
     }
 
 }

@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -163,6 +164,10 @@ public class DummyPullWrapper implements AbstractPullWrapper {
 
     @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("DummyPullWrapper.getRow not implemented.");
+    }
+
+    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+        throw new UnsupportedOperationException("DummyPullWrapper.getForeignKeys not implemented.");
     }
 
 }

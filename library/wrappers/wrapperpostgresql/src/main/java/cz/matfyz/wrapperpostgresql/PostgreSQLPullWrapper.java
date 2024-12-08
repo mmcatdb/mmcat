@@ -6,6 +6,7 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
@@ -247,6 +248,73 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             ResultSet countResultSet = stmt.executeQuery(countQuery);
 
             return getResultObject(countResultSet, resultData);
+        }
+        catch (Exception e) {
+			throw PullForestException.innerException(e);
+		}
+    }
+
+    /**
+     * Retrieves foreign key relationships from the database for the specified kind.
+     *
+     * @param stmt       The {@link Statement} object used to execute the SQL query.
+     * @param keys       A {@link List} of {@link ForeignKey} objects to which the results will be added.
+     * @param kindName   The name of the kind for which foreign key relationships are to be retrieved.
+     * @param outgoing   A boolean flag indicating the direction of the foreign key relationship:
+     *                   <ul>
+     *                       <li><code>true</code> for outgoing foreign keys (keys where the kind references other kinds).</li>
+     *                       <li><code>false</code> for incoming foreign keys (keys where other kinds reference the kind).</li>
+     *                   </ul>
+     * @return           A {@link List} of {@link ForeignKey} objects representing the foreign key relationships for the specified kind.
+     * @throws SQLException If an SQL error occurs while executing the query or processing the result set.
+     */
+    private List<ForeignKey> getForeignKeysFromDatabase(Statement stmt, List<ForeignKey> keys, String kindName, boolean outgoing) throws SQLException {
+        String actualKind = outgoing ? "kcu" : "ccu";
+        String foreignKind = outgoing ? "ccu" : "kcu";
+
+        String query = String.format("""
+                SELECT
+                    %s.column_name AS column,
+                    %s.table_name AS foreign_table,
+                    %s.column_name AS foreign_column
+                FROM
+                    information_schema.key_column_usage kcu
+                JOIN
+                    information_schema.referential_constraints rc
+                    ON kcu.constraint_name = rc.constraint_name
+                    AND kcu.table_schema = rc.constraint_schema
+                JOIN
+                    information_schema.constraint_column_usage ccu
+                    ON rc.unique_constraint_name = ccu.constraint_name
+                    AND rc.unique_constraint_schema = ccu.constraint_schema
+                WHERE
+                    kcu.table_schema = 'public'
+                    AND %s.table_name = '%s';
+                """, actualKind, foreignKind, foreignKind, actualKind, kindName);
+        ResultSet result = stmt.executeQuery(query);
+
+        while (result.next()) {
+            String column = result.getString("column");
+            String foreignTable = result.getString("foreign_table");
+            String foreignColumn = result.getString("foreign_column");
+
+            ForeignKey foreignKey = new ForeignKey(foreignTable, column, foreignColumn);
+            keys.add(foreignKey);
+        }
+
+        return keys;
+    }
+
+    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+        try(
+            Connection connection = provider.getConnection();
+            Statement stmt = connection.createStatement();
+        ){
+            List<ForeignKey> foreignKeys = new ArrayList<>();
+            foreignKeys = getForeignKeysFromDatabase(stmt, foreignKeys, kindName, true);
+            foreignKeys = getForeignKeysFromDatabase(stmt, foreignKeys, kindName, false);
+
+            return foreignKeys;
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

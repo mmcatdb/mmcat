@@ -6,6 +6,7 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
@@ -110,6 +111,10 @@ public class CsvPullWrapper implements AbstractPullWrapper {
 
     @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
         throw new UnsupportedOperationException("CsvPullWrapper.getRow not implemented.");
+    }
+
+    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+        throw new UnsupportedOperationException("CsvPullWrapper.getForeignKeys not implemented.");
     }
 
 }

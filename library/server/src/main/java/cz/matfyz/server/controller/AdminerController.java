@@ -3,6 +3,7 @@ package cz.matfyz.server.controller;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.service.WrapperService;
+import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.record.AdminerFilter;
 
 import org.springframework.http.ResponseEntity;
@@ -90,6 +91,19 @@ public class AdminerController {
         JSONObject json = myWrapper.getRows(kind, filterList, limit, offset);
 
         return getJsonResponse(json);
+    }
+
+    @GetMapping(value = "/adminer/{db}/{kind}/foreignkeys")
+    public List<ForeignKey> getForeignKeys(@PathVariable Id db, @PathVariable String kind) {
+        final var datasource = datasourceRepository.find(db);
+
+        if (datasource == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+
+        return myWrapper.getForeignKeys(kind);
     }
 
 }

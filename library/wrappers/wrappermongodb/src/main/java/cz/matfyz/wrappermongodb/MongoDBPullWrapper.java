@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
+import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -411,6 +412,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
+    }
+
+    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+        throw new UnsupportedOperationException("MongoDBPullWrapper.getForeignKeys not implemented.");
     }
 
 }
