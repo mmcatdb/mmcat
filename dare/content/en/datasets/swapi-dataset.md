@@ -3,7 +3,7 @@ title: "SWAPI Dataset"
 weight: 0
 ---
 
-SWAPI (Star Wars API) is a web-based API providing structured and detailed information about the Star Wars universe, covering a variety of entities and their interrelations. The SWAPI dataset covers all the available data from the API.
+[SWAPI (Star Wars API)](https://swapi.dev/) is a web-based API providing structured and detailed information about the Star Wars universe, covering a variety of entities and their interrelations. The SWAPI dataset covers all the available data from the API.
 
 It is structured in JSON format. The files are the following:
 - `people` with detailed information about characters

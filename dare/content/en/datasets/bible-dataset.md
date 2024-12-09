@@ -3,7 +3,7 @@ title: "BibleData Dataset"
 weight: 0
 ---
 
-The BibleData dataset provides a comprehensive collection of structured biblical texts and metadata, covering various translations, alongside historical texts.
+The [BibleData dataset](https://www.kaggle.com/datasets/bradystephenson/bibledata) provides a comprehensive collection of structured biblical texts and metadata, covering various translations, alongside historical texts.
 
 The whole dataset contains 18 CSV files. To maintain readability of the inferred Schema Category and overall clarity we have worked with these 9 files:
 - `AlamoPolyglot.csv` with plain-text data as well as metadata entries for the Bible manuscripts

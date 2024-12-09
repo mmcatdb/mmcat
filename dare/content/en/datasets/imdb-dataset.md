@@ -3,7 +3,7 @@ title: "IMDb Dataset"
 weight: 0
 ---
 
-The IMDb dataset is a comprehensive collection of information about movies, TV shows, and the entertainment industry. It includes metadata such as titles, genres, release dates, ratings, cast and crew details, and user reviews.
+The [IMDb dataset](https://developer.imdb.com/non-commercial-datasets/) is a comprehensive collection of information about movies, TV shows, and the entertainment industry. It includes metadata such as titles, genres, release dates, ratings, cast and crew details, and user reviews.
 
 It is structured in TSV format including the following files:
 - `name.basics.tsv` with information about individuals in the industry

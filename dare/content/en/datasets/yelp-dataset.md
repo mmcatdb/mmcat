@@ -3,7 +3,7 @@ title: "Yelp Dataset"
 weight: 0
 ---
 
-The Yelp dataset includes business information, including reviews, user data, check-ins, and business attributes, offering a view of consumer interactions and feedback. 
+The [Yelp dataset](https://www.yelp.com/dataset) includes business information, including reviews, user data, check-ins, and business attributes, offering a view of consumer interactions and feedback. 
 
 It is structured in JSON format, with each file containing distinct data types. The files are the following:
 - `business.json` with business details

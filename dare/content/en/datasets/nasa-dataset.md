@@ -3,7 +3,7 @@ title: "NASA Dataset"
 weight: 0
 ---
 
-The NASA dataset consists of a single large JSON file called `code_projects.json` detailing NASA's various code projects. The inferred schema has a unique structure because of the nature of the file - it includes a single document with various attributes one of which is an array of subdocuments each representing a NASA's code project.
+The [NASA dataset](https://data.nasa.gov/Software/NASA-open-source-code-projects-with-A-I-generated-/3efg-u4v8/about_data) consists of a single large JSON file called `code_projects.json` detailing NASA's various code projects. The inferred schema has a unique structure because of the nature of the file - it includes a single document with various attributes one of which is an array of subdocuments each representing a NASA's code project.
 
 ![NASA dataset](/img/nasa-dataset-sk.png)
 
