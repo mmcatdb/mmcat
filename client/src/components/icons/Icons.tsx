@@ -16,7 +16,10 @@ import {
     RocketLaunchIcon as RocketLaunchIconSolid,
     PlayCircleIcon as PlayCircleIconSolid,
 } from '@heroicons/react/24/solid';
-import { ArrowPathIcon, CheckCircleIcon, ExclamationCircleIcon, PauseCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, QuestionMarkCircleIcon, 
+    PauseCircleIcon, XCircleIcon, EllipsisHorizontalCircleIcon,
+    StopCircleIcon,
+} from '@heroicons/react/24/outline';
 
 type IconSet = {
     outline: JSX.Element;
@@ -61,11 +64,11 @@ const jobStatusIconStyle = 'w-8 h-8';
 export function getJobStatusIcon(state: string): JSX.Element {
     switch (state) {
     case 'Disabled':
-        return <ExclamationCircleIcon className={`text-gray-400 ${jobStatusIconStyle}`} />;
+        return <StopCircleIcon className={`text-zinc-400 ${jobStatusIconStyle}`} />;
     case 'Ready':
-        return <ArrowPathIcon className={`text-blue-400 ${jobStatusIconStyle}`} />;
+        return <PlayCircleIconOutline className={`text-blue-400 ${jobStatusIconStyle}`} />;
     case 'Running':
-        return <ArrowPathIcon className={`text-blue-500 animate-spin ${jobStatusIconStyle}`} />;
+        return <EllipsisHorizontalCircleIcon className={`text-blue-500 animate-spin ${jobStatusIconStyle}`} />;
     case 'Waiting':
         return <PauseCircleIcon className={`text-yellow-500 ${jobStatusIconStyle}`} />;
     case 'Finished':
@@ -73,6 +76,6 @@ export function getJobStatusIcon(state: string): JSX.Element {
     case 'Failed':
         return <XCircleIcon className={`text-red-500 ${jobStatusIconStyle}`} />;
     default:
-        return <ExclamationCircleIcon className={`text-gray-200 ${jobStatusIconStyle}`} />;
+        return <QuestionMarkCircleIcon className={`text-zinc-200 ${jobStatusIconStyle}`} />;
     }
 }

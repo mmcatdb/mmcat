@@ -107,26 +107,26 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         column: 'label',
         direction: 'ascending',
     });
-    const [ isCreatingRun, setIsCreatingRun ] = useState(false);
+    const [ loadingMap, setLoadingMap ] = useState<Record<string, boolean>>({});
 
     function handleSortChange(newSortDescriptor: SortDescriptor) {
         setSortDescriptor(newSortDescriptor);
     }
 
     async function createRun(actionId: string) {
-        setIsCreatingRun(true);
-        
+        setLoadingMap((prev) => ({ ...prev, [actionId]: true }));
+
         const response = await api.jobs.createRun({ actionId });
 
         if (!response.status) {
             toast.error('Error creating run');
-            return;
+        }
+        else {
+            toast.success('Run created successfully.');
+            console.log('New Run:', response.data); // TODO: navigate to Runs page, or specific run
         }
 
-        toast.success('Run created successfully');
-        console.log('New Run:', response.data); // TODO: navigate to Runs page, or specific run
-
-        setIsCreatingRun(false);
+        setLoadingMap((prev) => ({ ...prev, [actionId]: false }));
     }
 
     return (
@@ -134,7 +134,6 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
             aria-label='Actions table'
             sortDescriptor={sortDescriptor}
             onSortChange={handleSortChange}
-            // onRowAction={handleRowAction}
         >
             <TableHeader>
                 {[
@@ -145,7 +144,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                             </TableColumn>,
                         ]
                         : []),
-                    <TableColumn key='label' allowsSorting>Label</TableColumn>,
+                    <TableColumn key='label' allowsSorting>
+                        Label
+                    </TableColumn>,
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
@@ -167,14 +168,13 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                 >
                                     <TrashIcon className='w-5 h-5' />
                                 </Button>
-                                {/* TODO: reapir this Creating... do for just specific button, not for all. */}
                                 <Button
                                     color='primary'
                                     variant='bordered'
-                                    isDisabled={isCreatingRun}
+                                    isDisabled={loadingMap[action.id]}
                                     onPress={() => createRun(action.id)}
                                 >
-                                    {isCreatingRun ? 'Creating...' : 'Create Run'}
+                                    {loadingMap[action.id] ? 'Creating...' : 'Create Run'}
                                 </Button>
                             </TableCell>,
                         ]}
