@@ -10,27 +10,35 @@ type DatasourceMenuProps = Readonly<{
 }>;
 
 export function DatasourceMenu({ dispatch, datasourceId, datasources }: DatasourceMenuProps) {
+    const sources = datasources
+        .filter((item) =>
+            item.type === DatasourceType.postgresql ||
+            item.type === DatasourceType.mongodb ||
+            item.type === DatasourceType.neo4j,
+        );
+
+    if (sources.length > 0) {
+        return (
+            <Select
+                label='Datasource'
+                placeholder='Select datasource'
+                className='max-w-xs'
+                defaultSelectedKeys={ datasourceId ? [ datasourceId ] : [] }
+            >
+                {sources
+                    .map((item) => (
+                        <SelectItem
+                            key={item.id}
+                            onPress={() => dispatch({ type:'datasource', newDatasource: item })}
+                        >
+                            {item.label}
+                        </SelectItem>
+                    ))}
+            </Select>
+        );
+    }
+
     return (
-        <Select
-            label='Datasource'
-            placeholder='Select datasource'
-            className='max-w-xs'
-            defaultSelectedKeys={ datasourceId ? [ datasourceId ] : [] }
-        >
-            {datasources
-                .filter((item) =>
-                    item.type === DatasourceType.postgresql ||
-                    item.type === DatasourceType.mongodb ||
-                    item.type === DatasourceType.neo4j,
-                )
-                .map((item) => (
-                    <SelectItem
-                        key={item.id}
-                        onPress={() => dispatch({ type:'datasource', newDatasource: item })}
-                    >
-                        {item.label}
-                    </SelectItem>
-                ))}
-        </Select>
+        <p>No datasources to display.</p>
     );
 }
