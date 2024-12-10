@@ -25,4 +25,6 @@ setup.isInDocker=true" >> application.properties
 RUN mvn clean package -DskipTests
 
 # The file without -app is the original .jar file before repackage.
-CMD [ "java", "-jar", "server/target/server-1.0-SNAPSHOT-app.jar" ]
+# CMD [ "java", "-jar", "server/target/server-1.0-SNAPSHOT-app.jar" ]
+# Arguments needed in order to make apache spark work with java 21. Remove them as soon as we upgrade!
+CMD ["java", "--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED", "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED", "--add-opens=java.base/java.net=ALL-UNNAMED", "--add-opens=java.base/java.nio=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED", "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED", "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens=java.base/sun.nio.cs=ALL-UNNAMED", "--add-opens=java.base/sun.security.action=ALL-UNNAMED", "--add-opens=java.base/sun.util.calendar=ALL-UNNAMED", "--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED", "-Djava.security.manager=allow", "-jar", "server/target/server-1.0-SNAPSHOT-app.jar"]
