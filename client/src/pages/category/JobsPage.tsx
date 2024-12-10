@@ -6,6 +6,7 @@ import { Tooltip } from '@nextui-org/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
 import { getJobStatusIcon } from '@/components/icons/Icons';
+import { usePreferences } from '@/components/PreferencesProvider';
 
 export function JobsPage() {
     return (
@@ -16,6 +17,7 @@ export function JobsPage() {
 }
 
 export function RunsPageOverview() {
+    const { showTableIDs } = usePreferences().preferences;
     const { category } = useCategoryInfo();
     const [ groupedJobs, setGroupedJobs ] = useState<Record<string, Job[]>>({});
     const [ isInitialLoad, setIsInitialLoad ] = useState(true);
@@ -86,12 +88,12 @@ export function RunsPageOverview() {
     return (
         <div className='p-4'>
             <h1 className='text-2xl font-bold mb-4'>Runs</h1>
-            <table className='table-auto w-full border-collapse border border-gray-300'>
+            <table className='table-auto w-full border-collapse border border-zinc-300'>
                 <thead>
                     <tr>
-                        <th className='border border-gray-300 px-4 py-2 text-left'>Run ID</th>
-                        <th className='border border-gray-300 px-4 py-2 text-left'>Run Label</th>
-                        <th className='border border-gray-300 px-4 py-2 text-left'>Jobs</th>
+                        {showTableIDs && <th className='border border-zinc-300 px-4 py-2 text-left'>Run ID</th>}
+                        <th className='border border-zinc-300 px-4 py-2 text-left'>Run Label</th>
+                        <th className='border border-zinc-300 px-4 py-2 text-left'>Jobs</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -114,6 +116,7 @@ export function RunsPageOverview() {
 
 function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
     const navigate = useNavigate();
+    const { showTableIDs } = usePreferences().preferences;
 
     // Keep only the most recent job per index
     const newestJobs = Object.values(
@@ -126,10 +129,10 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
     );
 
     return (
-        <tr className='hover:bg-gray-100'>
-            <td className='border border-gray-300 px-4 py-2'>{runId}</td>
-            <td className='border border-gray-300 px-4 py-2'>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
-            <td className='border border-gray-300 px-4 py-2'>
+        <tr className='hover:bg-zinc-100'>
+            {showTableIDs && <td className='border border-zinc-300 px-4 py-2'>{runId}</td>}
+            <td className='border border-zinc-300 px-4 py-2'>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
+            <td className='border border-zinc-300 px-4 py-2'>
                 <div className='flex items-center gap-2'>
                     {newestJobs.map((job) => (
                         <Tooltip
@@ -199,7 +202,7 @@ export function JobDetailPage() {
         <div className='p-4'>
             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
             {job ? (
-                <div className='border border-gray-300 rounded-lg p-4'>
+                <div className='border border-zinc-300 rounded-lg p-4'>
                     <p>
                         <strong>ID:</strong> {job.id}
                     </p>

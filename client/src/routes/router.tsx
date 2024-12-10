@@ -15,7 +15,7 @@ import { Mapping } from '@/types/mapping';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategory';
-import { ActionsPage, ActionsPageOverview } from '@/pages/category/ActionsPage';
+import { ActionDetailPage, actionLoader, type ActionLoaderData, ActionsPage, ActionsPageOverview } from '@/pages/category/ActionsPage';
 import { AddActionPage } from '@/components/schema-categories/AddActionPage';
 import { JobDetailPage, JobsPage, RunsPageOverview } from '@/pages/category/JobsPage';
 
@@ -169,6 +169,13 @@ export const router = createBrowserRouter([
                                 path: 'add',
                                 Component: AddActionPage,
                                 handle: { breadcrumb: 'Add' },
+                            },
+                            {
+                                id: 'action',
+                                path: ':actionId',
+                                loader: actionLoader,
+                                Component: ActionDetailPage,
+                                handle: { breadcrumb: (data: ActionLoaderData) => data.action.label },
                             },
                         ],
                     },
