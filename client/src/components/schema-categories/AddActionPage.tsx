@@ -11,12 +11,14 @@ import { logicalModelsFromServer } from '@/types/datasource';
 
 export function AddActionPage() {
     const [ label, setLabel ] = useState('');
-    const [ type, setType ] = useState<ActionType | ''>('');
     const [ loading, setLoading ] = useState(false);
     const [ error, setError ] = useState(false);
-    const [ steps, setSteps ] = useState<JobPayloadInit[]>([]);
     const { category } = useCategoryInfo();
     const navigate = useNavigate();
+    const [ type, setType ] = useState<ActionType>(ActionType.ModelToCategory); // Default preselect
+    const [ steps, setSteps ] = useState<JobPayloadInit[]>([
+        { type: ActionType.ModelToCategory, datasourceId: '', mappingIds: [] }, // Default step
+    ]);
 
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ logicalModels, setLogicalModels ] = useState<ReturnType<typeof logicalModelsFromServer>>([]);
@@ -53,19 +55,17 @@ export function AddActionPage() {
             setSteps((prevSteps) => [ ...prevSteps, { type, datasourceId: '', mappingIds: [] } ]);
         else if (type === ActionType.RSDToCategory) 
             setSteps((prevSteps) => [ ...prevSteps, { type, datasourceIds: [] } ]);
-        
     }
 
     function removeStep(index: number) {
+        if (steps.length <= 1) {
+            toast.error('At least one step is required.');
+            return;
+        }
         setSteps((prevSteps) => prevSteps.filter((_, i) => i !== index));
     }
 
-    function updateStep(index: number, updatedStep: JobPayloadInit) {
-        setSteps((prevSteps) => prevSteps.map((step, i) => (i === index ? updatedStep : step)));
-    }
-
     async function handleSubmit() {
-        // TODO: one step that is not empty !!!
         if (!label || !type || steps.length === 0) {
             toast.error('All fields and at least one step are required.');
             return;
@@ -89,7 +89,7 @@ export function AddActionPage() {
         }
         toast.success('Action created successfully.');
         navigate(-1);
-        
+
         setLoading(false);
     }
 
@@ -123,8 +123,9 @@ export function AddActionPage() {
                         type={type}
                         datasources={datasources}
                         mappings={logicalModels}
-                        updateStep={(updatedStep) => updateStep(index, updatedStep)}
+                        updateStep={(updatedStep) => setSteps((prev) => prev.map((s, i) => (i === index ? updatedStep : s)))}
                         removeStep={() => removeStep(index)}
+                        steps={steps}
                     />
                 ))}
             </div>
@@ -180,23 +181,36 @@ type StepFormProps = {
     mappings: ReturnType<typeof logicalModelsFromServer>;
     updateStep: (step: JobPayloadInit) => void;
     removeStep: () => void;
+    steps: JobPayloadInit[];
 };
 
-function StepForm({ step, type, datasources, mappings, updateStep, removeStep }: StepFormProps) {
-    // TODO: properly udělat narrowing
+function StepForm({ step, type, datasources, mappings, updateStep, removeStep, steps }: StepFormProps) {
     if (type === ActionType.ModelToCategory || type === ActionType.CategoryToModel) {
-        step.type = type;
-        const datasourceMappings = mappings.find((m) => m.datasource.id === step.datasourceId);
+        // narrowing ActionType
+        const modelToCategoryStep = step as {
+            type: ActionType.ModelToCategory | ActionType.CategoryToModel;
+            datasourceId: string;
+            mappingIds: string[];
+        };
+
+        modelToCategoryStep.type = type;
+        const datasourceMappings = mappings.find((m) => m.datasource.id === modelToCategoryStep.datasourceId);
 
         return (
             <div className='mb-4 p-4 border rounded'>
                 <Select
                     label='Datasource'
-                    selectedKeys={step.datasourceId ? new Set([ step.datasourceId ]) : new Set()}
+                    selectedKeys={
+                        modelToCategoryStep.datasourceId ? new Set([ modelToCategoryStep.datasourceId ]) : new Set()
+                    }
                     placeholder='Select a datasource'
                     onSelectionChange={(e) => {
                         const selectedDatasourceId = Array.from(e as Set<string>)[0];
-                        updateStep({ ...step, datasourceId: selectedDatasourceId, mappingIds: [] });
+                        updateStep({
+                            ...modelToCategoryStep,
+                            datasourceId: selectedDatasourceId,
+                            mappingIds: [],
+                        });
                     }}
                 >
                     {datasources.map((ds) => (
@@ -206,12 +220,15 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep }:
                 {datasourceMappings && (
                     <Select
                         label='Mappings'
-                        selectedKeys={new Set(step.mappingIds)}
+                        selectedKeys={new Set(modelToCategoryStep.mappingIds)}
                         placeholder='Select mappings'
                         selectionMode='multiple'
                         onSelectionChange={(e) => {
                             const selectedMappingIds = Array.from(e as Set<string>);
-                            updateStep({ ...step, mappingIds: selectedMappingIds });
+                            updateStep({
+                                ...modelToCategoryStep,
+                                mappingIds: selectedMappingIds,
+                            });
                         }}
                     >
                         {datasourceMappings.mappings.map((mapping) => (
@@ -219,7 +236,12 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep }:
                         ))}
                     </Select>
                 )}
-                <Button color='danger' onPress={removeStep} className='mt-2'>
+                <Button
+                    color='danger'
+                    onPress={removeStep}
+                    className='mt-2'
+                    isDisabled={steps.length === 1}
+                >
                     Remove Step
                 </Button>
             </div>
@@ -227,17 +249,25 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep }:
     }
 
     if (type === ActionType.RSDToCategory) {
-        step.type = type;
+        const rsdToCategoryStep = step as {
+            type: ActionType.RSDToCategory;
+            datasourceIds: string[];
+        };
+
+        rsdToCategoryStep.type = type;
+
         return (
             <div className='mb-4 p-4 border rounded'>
-                {/* TODO: do sth else than select */}
                 <Select
                     label='Datasources'
-                    selectedKeys={new Set(step.datasourceIds)}
+                    selectedKeys={new Set(rsdToCategoryStep.datasourceIds)}
                     placeholder='Select datasources'
                     onSelectionChange={(e) => {
                         const selectedDatasourceIds = Array.from(e as Set<string>);
-                        updateStep({ ...step, datasourceIds: selectedDatasourceIds });
+                        updateStep({
+                            ...rsdToCategoryStep,
+                            datasourceIds: selectedDatasourceIds,
+                        });
                     }}
                 >
                     {datasources.map((ds) => (
