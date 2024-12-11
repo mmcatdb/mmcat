@@ -48,17 +48,18 @@ public abstract class BaseControlWrapper implements AbstractControlWrapper {
     protected abstract DatasourceType getType();
 
     /**
-     * Convenience method for creating a provider with a single datasource. Useful for testing or simple use cases wherer only one datasource is needed.
+     * Convenience method for creating a provider with a single datasource. Useful for testing or simple use cases where only one datasource is needed.
      */
-    public SingleControlWrapperProvider createProvider(String datasourceIdentifier) {
-        return new SingleControlWrapperProvider(new Datasource(getType(), datasourceIdentifier), this);
+    public DefaultControlWrapperProvider createProvider(String datasourceIdentifier) {
+        return new DefaultControlWrapperProvider()
+            .setControlWrapper(new Datasource(getType(), datasourceIdentifier), this);
     }
 
     /**
      * Convenience shortcut for the convenience method for creating a provider with a single datasource.
      * The datasource identifier is automatically generated each time to ensure uniqueness.
      */
-    public SingleControlWrapperProvider createProvider() {
+    public DefaultControlWrapperProvider createProvider() {
         return createProvider(createNextUniqueIdentifier());
     }
 
@@ -67,6 +68,11 @@ public abstract class BaseControlWrapper implements AbstractControlWrapper {
         return "datasource-" + lastUniqueIdentifier++;
     }
 
+    /**
+     * A provider that generates control wrappers for datasources.
+     * In general, many algorithms need (a) one or more datasources to operate on and (b) a control wrapper for each of these datasources.
+     * This class enables us to create the wrappers in advance and then pass them to the algorithms (because creating them usually involves some configuration, caching, etc.).
+     */
     public interface ControlWrapperProvider {
 
         Collection<Datasource> getDatasources();
@@ -94,33 +100,6 @@ public abstract class BaseControlWrapper implements AbstractControlWrapper {
                 throw new IllegalArgumentException("No wrapper for datasource " + datasource.identifier);
 
             return wrappers.get(datasource);
-        }
-
-    }
-
-    public static class SingleControlWrapperProvider implements ControlWrapperProvider {
-
-        private final Datasource datasource;
-        private final AbstractControlWrapper wrapper;
-
-        public SingleControlWrapperProvider(Datasource datasource, AbstractControlWrapper wrapper) {
-            this.datasource = datasource;
-            this.wrapper = wrapper;
-        }
-
-        public Datasource getDatasource() {
-            return datasource;
-        }
-
-        @Override public Collection<Datasource> getDatasources() {
-            return Set.of(datasource);
-        }
-
-        @Override public AbstractControlWrapper getControlWrapper(Datasource datasource) {
-            if (!datasource.equals(this.datasource))
-                throw new IllegalArgumentException("No wrapper for datasource " + datasource.identifier);
-
-            return wrapper;
         }
 
     }
