@@ -8,6 +8,7 @@ import { ErrorPage } from '@/pages/errorPages';
 import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES } from '@/types/action';
 import { Datasource } from '@/types/datasource';
 import { logicalModelsFromServer } from '@/types/datasource';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 export function AddActionPage() {
     const [ label, setLabel ] = useState('');
@@ -197,7 +198,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
         const datasourceMappings = mappings.find((m) => m.datasource.id === modelToCategoryStep.datasourceId);
 
         return (
-            <div className='mb-4 p-4 border rounded'>
+            <div className='mb-4 p-2 border rounded flex justify-between items-center'>
                 <Select
                     label='Datasource'
                     selectedKeys={
@@ -212,6 +213,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                             mappingIds: [],
                         });
                     }}
+                    className='pr-2'
                 >
                     {datasources.map((ds) => (
                         <SelectItem key={ds.id}>{ds.label}</SelectItem>
@@ -230,6 +232,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                                 mappingIds: selectedMappingIds,
                             });
                         }}
+                        className='pr-2'
                     >
                         {datasourceMappings.mappings.map((mapping) => (
                             <SelectItem key={mapping.id}>{mapping.kindName}</SelectItem>
@@ -237,12 +240,15 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                     </Select>
                 )}
                 <Button
+                    isIconOnly
+                    aria-label='Delete step'
                     color='danger'
+                    variant='light'
                     onPress={removeStep}
-                    className='mt-2'
                     isDisabled={steps.length === 1}
+                    className='p-1'
                 >
-                    Remove Step
+                    <TrashIcon className='w-5 h-5' />
                 </Button>
             </div>
         );
@@ -257,7 +263,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
         rsdToCategoryStep.type = type;
 
         return (
-            <div className='mb-4 p-4 border rounded'>
+            <div className='mb-4 p-2 border rounded flex justify-between items-center'>
                 <Select
                     label='Datasources'
                     selectedKeys={new Set(rsdToCategoryStep.datasourceIds)}
@@ -269,13 +275,22 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                             datasourceIds: selectedDatasourceIds,
                         });
                     }}
+                    className='pr-2'
                 >
                     {datasources.map((ds) => (
                         <SelectItem key={ds.id}>{ds.label}</SelectItem>
                     ))}
                 </Select>
-                <Button color='danger' onPress={removeStep} className='mt-2'>
-                    Remove Step
+                <Button
+                    isIconOnly
+                    aria-label='Delete step'
+                    color='danger'
+                    variant='light'
+                    onPress={removeStep}
+                    isDisabled={steps.length === 1}
+                    className='p-1'
+                >
+                    <TrashIcon className='w-5 h-5' />
                 </Button>
             </div>
         );
