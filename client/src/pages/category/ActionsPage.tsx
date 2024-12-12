@@ -1,5 +1,5 @@
 import { Button, type SortDescriptor, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
-import { Action, ActionType } from '@/types/action';
+import { Action, ActionType, type JobPayload } from '@/types/action';
 import { useEffect, useState } from 'react';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
@@ -127,7 +127,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         }
         else {
             toast.success('Run created successfully.');
-            console.log('New Run:', response.data); // TODO: navigate to Runs page, or specific run
+            console.log('New Run:', response.data);
         }
 
         setLoadingMap((prev) => ({ ...prev, [actionId]: false }));
@@ -289,7 +289,7 @@ export function ActionDetailPage() {
         }
         else {
             toast.success('Run created successfully.');
-            console.log('New Run:', response.data); // TODO: navigate to Runs page, or specific run
+            console.log('New Run:', response.data);
         }
     }
 
@@ -302,66 +302,7 @@ export function ActionDetailPage() {
 
             <div className='mb-6'>
                 <h2 className='text-xl font-semibold mb-2'>Steps</h2>
-                {action.payloads && action.payloads.length > 0 ? (
-                    <Table aria-label='Steps table'>
-                        <TableHeader>
-                            <TableColumn>Index</TableColumn>
-                            <TableColumn>Type</TableColumn>
-                            <TableColumn>Datasource</TableColumn>
-                            <TableColumn>Mappings</TableColumn>
-                        </TableHeader>
-                        <TableBody>
-                            {/* TODO: komponenta ds element */}
-                            {action.payloads.map((payload, index) => {
-                                let datasourceElement = <span>N/A</span>;
-                                let mappings = 'N/A';
-
-                                if (payload.type === ActionType.ModelToCategory || payload.type === ActionType.CategoryToModel) {
-                                    // datasource = payload.datasource?.label || 'N/A';
-                                    if (payload.datasource) {
-                                        datasourceElement = (
-                                            <Link
-                                                to={`/category/${action.categoryId}/datasources/${payload.datasource.id}`}
-                                                className='text-blue-500 hover:underline'
-                                            >
-                                                {payload.datasource.label}
-                                            </Link>
-                                        );
-                                    }
-                                    mappings = payload.mappings?.map((m) => m.kindName).join(', ') || 'N/A';
-                                }
-                                else if (payload.type === ActionType.RSDToCategory) {
-                                    // datasource = payload.datasources?.map((ds) => ds.label).join(', ') || 'N/A';
-                                    datasourceElement = (
-                                        <div className='space-y-1'>
-                                            {payload.datasources?.map((ds) => (
-                                                <Link
-                                                    key={ds.id}
-                                                    to={`/category/${action.categoryId}/datasources/${ds.id}`}
-                                                    className='text-blue-500 hover:underline'
-                                                >
-                                                    {ds.label}
-                                                </Link>
-                                            )) || 'N/A'}
-                                        </div>
-                                    );
-                                }
-
-                                return (
-                                    <TableRow key={index}>
-                                        <TableCell>{index}</TableCell>
-                                        <TableCell>{payload.type}</TableCell>
-                                        {/* <TableCell>{datasource}</TableCell> */}
-                                        <TableCell>{datasourceElement}</TableCell>
-                                        <TableCell>{mappings}</TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                ) : (
-                    <p className='text-gray-500'>No steps available.</p>
-                )}
+                <StepsTable payloads={action.payloads} categoryId={action.categoryId} />
             </div>
 
             <div className='flex space-x-4'>
@@ -376,7 +317,7 @@ export function ActionDetailPage() {
                 <Button
                     color='danger'
                     variant='bordered'
-                    onPress={() => openModal()}
+                    onPress={openModal}
                     isDisabled={isDeleting}
                 >
                     Delete
@@ -388,11 +329,96 @@ export function ActionDetailPage() {
                 onClose={closeModal}
                 onConfirm={confirmDelete}
                 title='Confirm Deletion?'
-                message='This will permanently delete the selected datasource.'
+                message='This will permanently delete the action.'
                 confirmButtonText='Yes, Delete'
                 cancelButtonText='Cancel'
                 confirmButtonColor='danger'
             />
         </div>
     );
+}
+
+type StepsTableProps = {
+    payloads: JobPayload[];
+    categoryId: string;
+}
+
+function StepsTable({ payloads, categoryId }: StepsTableProps) {
+    if (!payloads || payloads.length === 0) 
+        return <p className='text-gray-500'>No steps available.</p>;
+    
+    return (
+        <Table aria-label='Steps table'>
+            <TableHeader>
+                <TableColumn>Index</TableColumn>
+                <TableColumn>Type</TableColumn>
+                <TableColumn>Datasource</TableColumn>
+                <TableColumn>Mappings</TableColumn>
+            </TableHeader>
+            <TableBody>
+                {payloads.map((payload, index) => {
+                    const datasourceElement = renderDatasourceElement({ payload, categoryId });
+                    const mappings = renderMappings(payload);
+
+                    return (
+                        <TableRow key={index}>
+                            <TableCell>{index}</TableCell>
+                            <TableCell>{payload.type}</TableCell>
+                            <TableCell>{datasourceElement}</TableCell>
+                            <TableCell>{mappings}</TableCell>
+                        </TableRow>
+                    );
+                })}
+            </TableBody>
+        </Table>
+    );
+}
+
+type renderDatasourceElementProps = {
+    payload: JobPayload;
+    categoryId: string;
+}
+
+function renderDatasourceElement({ payload, categoryId }: renderDatasourceElementProps) {
+    if (payload.type === ActionType.ModelToCategory || payload.type === ActionType.CategoryToModel) {
+        if (payload.datasource) {
+            return (
+                <Link
+                    to={`/category/${categoryId}/datasources/${payload.datasource.id}`}
+                    className='text-blue-500 hover:underline'
+                >
+                    {payload.datasource.label}
+                </Link>
+            );
+        }
+        return <span>N/A</span>;
+    }
+
+    if (payload.type === ActionType.RSDToCategory) {
+        return (
+            <div className='space-y-1'>
+                {payload.datasources?.map((ds) => (
+                    <Link
+                        key={ds.id}
+                        to={`/category/${categoryId}/datasources/${ds.id}`}
+                        className='text-blue-500 hover:underline'
+                    >
+                        {ds.label}
+                    </Link>
+                )) || <span>N/A</span>}
+            </div>
+        );
+    }
+
+    return <span>N/A</span>;
+}
+
+function renderMappings(payload : JobPayload) {
+    if (
+        payload.type === ActionType.ModelToCategory ||
+        payload.type === ActionType.CategoryToModel
+    ) 
+        return payload.mappings?.map((m) => m.kindName).join(', ') || 'N/A';
+    
+    return 'N/A';
 }

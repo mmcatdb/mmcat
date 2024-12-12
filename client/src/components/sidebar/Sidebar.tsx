@@ -139,26 +139,26 @@ function generalSidebarItems(): SidebarItem[] {
             {
                 type: 'normal',
                 label: 'Schema categories',
-                route: '/schema-categories',
+                route: routes.categories,
                 iconName: 'heart',
             },
             {
                 type: 'normal',
                 label: 'About',
-                route: '/about',
+                route: routes.about,
                 iconName: 'lightBulb',
             },
             {
                 type: 'normal',
                 label: 'Datasources',
-                route: '/datasources',
+                route: routes.datasources,
                 iconName: 'circleStack',
                 match: [ '/datasources/:id' ],
             },
             {
                 type: 'normal',
                 label: 'Adminer',
-                route: '/adminer',
+                route: routes.adminer,
                 iconName: 'codeBracketSquare',
             },
         ]

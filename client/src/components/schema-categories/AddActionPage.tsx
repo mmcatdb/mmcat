@@ -24,7 +24,6 @@ export function AddActionPage() {
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ logicalModels, setLogicalModels ] = useState<ReturnType<typeof logicalModelsFromServer>>([]);
 
-    // TODO: NEFETCHOVAT, ALE PŘEDÁVAT ZESHORA
     useEffect(() => {
         async function fetchDatasourcesAndMappings() {
             const dsResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });

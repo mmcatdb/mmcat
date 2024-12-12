@@ -27,10 +27,10 @@ const categoryIndex = new ParametrizedRoute<'categoryId'>('/category/:categoryId
 
 export const routes = {
     home: new ParametrizedRoute('/', 'home'),
-    categories: 'schema-categories',
-    about: 'about',
-    datasources: 'datasources',
-    adminer: 'adminer',
+    categories: '/schema-categories',
+    about: '/about',
+    datasources: '/datasources',
+    adminer: '/adminer',
     category: {
         index: categoryIndex,
         editor: categoryIndex.child('/editor', 'editor'),
