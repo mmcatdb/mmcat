@@ -21,24 +21,15 @@ export class GraphRootProperty {
 
     containsNode(node: Node): boolean {
         if (this.node.equals(node)) return true;
-    
-        return this._subpaths.some(subpath => {
-            if (subpath instanceof GraphComplexProperty || subpath instanceof GraphRootProperty)
-                return this.searchSubpathsForNode(subpath, node);
-            return false;
-        });
+
+        return this._subpaths.some(subpath => this.searchSubpathsForNode(subpath, node));
     }    
 
-    searchSubpathsForNode(property: GraphParentProperty, node: Node): boolean {
+    searchSubpathsForNode(property: GraphParentProperty | GraphSimpleProperty, node: Node): boolean {
         if (property.node.equals(node)) return true;
-    
-        if (property instanceof GraphComplexProperty) {
-            return property.subpaths.some(subpath => {
-                if (subpath instanceof GraphComplexProperty || subpath instanceof GraphRootProperty)
-                    return this.searchSubpathsForNode(subpath, node);
-                return false;
-            });
-        }
+
+        if (property instanceof GraphComplexProperty) 
+            return property.subpaths.some(subpath => this.searchSubpathsForNode(subpath, node));
     
         return false;
     }
