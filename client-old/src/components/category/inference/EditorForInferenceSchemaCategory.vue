@@ -159,17 +159,17 @@ function revertEdit(edit: InferenceEdit) {
 /**
  * Emits the 'save-positions' even when positions are saved.
  */
- function savePositions() {
-    if (updatedPositionsMap.size > 0) {
+function savePositions() {
+    if (updatedPositionsMap.size > 0) 
         emit('save-positions', updatedPositionsMap);
         //updatedPositionsMap.clear();
-    }
+    
 }
 
 </script>
 
 <template>
-    <div class="editor">
+    <div class="editor border-top-0">
         <div
             v-if="state.type === State.Default"
             class="options"

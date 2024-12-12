@@ -28,7 +28,7 @@ public class Datasources {
     }
 
     public TestDatasource<PostgreSQLControlWrapper> createNewPostgreSQL() {
-        return datasourceProvider.createPostgreSQL(schema, "setupPostgresqlBasic.sql");
+        return datasourceProvider.createPostgreSQL(PostgreSQL.datasource.identifier, schema, "setupPostgresqlBasic.sql");
     }
 
     // MongoDB
@@ -50,7 +50,7 @@ public class Datasources {
     }
 
     public TestDatasource<MongoDBControlWrapper> createNewMongoDB() {
-        return datasourceProvider.createMongoDB(schema, "setupMongodbBasic.js");
+        return datasourceProvider.createMongoDB(MongoDB.datasource.identifier, schema, "setupMongodbBasic.js");
     }
 
     // Neo4j
@@ -67,7 +67,7 @@ public class Datasources {
     }
 
     public TestDatasource<Neo4jControlWrapper> createNewNeo4j() {
-        return datasourceProvider.createNeo4j(schema, "setupNeo4j.cypher");
+        return datasourceProvider.createNeo4j(Neo4j.datasource.identifier, schema, "setupNeo4j.cypher");
     }
 
 }
