@@ -25,8 +25,6 @@ type GraphDisplayProps = Readonly<{
 export function GraphDisplay({ nodes, edges, width, height }: GraphDisplayProps) {
     const [ state, engine ] = useGraphEngine({ nodes, edges, width, height });
 
-    console.log(state.selectedNodes);
-
     return (
         <div
             style={{ width, height }}
@@ -180,11 +178,34 @@ function computeInitialState({ nodes, edges, width, height }: GraphDisplayProps)
     };
 }
 
+type FullGraphOptions = {
+    snapToGrid: boolean;
+    /** All positions will be rounded to multiples of this size. In the relative units. */
+    gridSize: number;
+    /** Over how relative units we have to drag the node to start the dragging. */
+    nodeDraggingThreshold: number | null;
+};
+
+type GraphOptions = Partial<FullGraphOptions>;
+
+const defaultGraphOptions: FullGraphOptions = {
+    snapToGrid: true,
+    /** All positions will be rounded to multiples of this size. In the relative units. */
+    gridSize: 20,
+    /** Over how relative units we have to drag the node to start the dragging. */
+    nodeDraggingThreshold: 20,
+};
+
 class GraphEngine {
+    private readonly options: FullGraphOptions;
+
     constructor(
         private readonly setState: Dispatch<SetStateAction<GraphState>>,
         readonly canvasRef: React.RefObject<HTMLDivElement>,
-    ) {}
+        options: GraphOptions = {},
+    ) {
+        this.options = { ...defaultGraphOptions, ...options };
+    }
 
     get canvas(): HTMLDivElement {
         return this.canvasRef.current!;
@@ -247,7 +268,11 @@ class GraphEngine {
         });
     }
 
-    private dragging?: 'node' | 'canvas';
+    private dragging?: {
+        type: 'node' | 'canvas';
+        /** The difference between node position and mouse position. It should be kept constant during whole dragging process. */
+        mouseDelta: Position;
+    };
     // We don't want to start dragging the node immediately after the mouse down event. We wait for a small movement.
     private startDragging?: {
         nodeId: string;
@@ -262,7 +287,10 @@ class GraphEngine {
             return;
 
         if (actions.drag.canvas === event.button) {
-            this.dragging = 'canvas';
+            this.dragging = {
+                type: 'canvas',
+                mouseDelta: { x: 0, y: 0 },
+            };
             this.setState(state => {
                 const draggedPoint = getMousePosition(event, this.canvas, state.coordinates);
                 return { ...state, drag: { draggedPoint } };
@@ -289,45 +317,60 @@ class GraphEngine {
     }
 
     private globalMove(event: MouseEvent) {
-        if (this.startDragging) {
-            const { nodeId, initialMouseOffset } = this.startDragging;
-
-            this.setState(state => {
-                // We want to precisely calculate the initial drag threshold, because the node might not be grabbed by its center.
-                const initialMousePosition = offsetToPosition(initialMouseOffset, state.coordinates);
-                const mousePosition = getMousePosition(event, this.canvas, state.coordinates);
-
-                if (
-                    Math.abs(initialMousePosition.x - mousePosition.x) < NODE_DRAGGING_THRESHOLD &&
-                    Math.abs(initialMousePosition.y - mousePosition.y) < NODE_DRAGGING_THRESHOLD
-                )
-                    return state;
-
-                // However, after the threshold is reached, the node is dragged by its center.
-                const nodes = state.nodes.map(node => node.id !== nodeId ? node : { ...node, position: roundPosition(mousePosition) });
-                this.startDragging = undefined;
-                this.dragging = 'node';
-                return { ...state, nodes, drag: { nodeId } };
-            });
-            return;
-        }
-
-        if (this.dragging)
+        if (this.startDragging)
+            this.moveDragStart(event);
+        else if (this.dragging)
             this.moveDrag(event);
         else if (this.isSelecting)
             this.moveSelect(event);
     }
 
+    /**
+     * Handle the first mouse move after the node was grabbed.
+     */
+    private moveDragStart(event: MouseEvent) {
+        const { nodeId, initialMouseOffset } = this.startDragging!;
+
+        this.setState(state => {
+            // We want to precisely calculate the initial drag threshold, because the node might not be grabbed by its center.
+            const initialMousePosition = offsetToPosition(initialMouseOffset, state.coordinates);
+            const mousePosition = getMousePosition(event, this.canvas, state.coordinates);
+
+            if (
+                this.options.nodeDraggingThreshold !== null &&
+                Math.abs(initialMousePosition.x - mousePosition.x) < this.options.nodeDraggingThreshold &&
+                Math.abs(initialMousePosition.y - mousePosition.y) < this.options.nodeDraggingThreshold
+            )
+                // If there is threshold, we have to wait until it's reached.
+                return state;
+
+            // After the threshold is reached, the node starts being dragged.
+            this.startDragging = undefined;
+            const initialNodePosition = state.nodes.find(node => node.id === nodeId)!.position;
+            const mouseDelta = this.options.snapToGrid
+                // When snapping, we want to keep the mouse in the center of the node. However, this might change in the future if we introduce larger notes for which it would be unintuitive.
+                ? { x: 0, y: 0 }
+                : { x: initialNodePosition.x - initialMousePosition.x, y: initialNodePosition.y - initialMousePosition.y };
+
+            this.dragging = { type: 'node', mouseDelta };
+
+            const nodes = state.nodes.map(node => node.id !== nodeId ? node : { ...node, position: this.calculateNewNodePosition(mousePosition) });
+            return { ...state, nodes, drag: { nodeId } };
+        });
+    }
+
+    /**
+     * Handle a mouse move while in the node-dragging state.
+     */
     private moveDrag(event: MouseEvent) {
         this.setState(state => {
-            if (!state.drag)
+            if (!state.drag || !this.dragging)
                 throw new Error('Unexpected state.');
 
             if ('nodeId' in state.drag) {
                 const nodeId = state.drag.nodeId;
-                const mousePosition = roundPosition(getMousePosition(event, this.canvas, state.coordinates));
-                const nodes = state.nodes.map(node => node.id !== nodeId ? node : { ...node, position: mousePosition });
-
+                const mousePosition = getMousePosition(event, this.canvas, state.coordinates);
+                const nodes = state.nodes.map(node => node.id !== nodeId ? node : { ...node, position: this.calculateNewNodePosition(mousePosition) });
                 return { ...state, nodes };
             }
 
@@ -345,6 +388,24 @@ class GraphEngine {
         });
     }
 
+    /** Use this only when dragging! */
+    private calculateNewNodePosition(mousePosition: Position): Position {
+        const mouseDelta = this.dragging!.mouseDelta;
+        const newNodePosition: Position = {
+            x: mousePosition.x + mouseDelta.x,
+            y: mousePosition.y + mouseDelta.y,
+        };
+
+        return this.options.snapToGrid ? this.roundPositionToGrid(newNodePosition) : newNodePosition;
+    }
+
+    private roundPositionToGrid(position: Position): Position {
+        return {
+            x: Math.round(position.x / this.options.gridSize) * this.options.gridSize,
+            y: Math.round(position.y / this.options.gridSize) * this.options.gridSize,
+        };
+    }
+
     private moveSelect(event: MouseEvent) {
         this.setState(state => {
             if (!state.select)
@@ -359,7 +420,7 @@ class GraphEngine {
         this.startDragging = undefined;
 
         if (this.dragging) {
-            if (actions.drag[this.dragging] !== event.button)
+            if (actions.drag[this.dragging.type] !== event.button)
                 return;
 
             event.stopPropagation();
@@ -452,18 +513,6 @@ function getMouseOffset(event: { clientX: number, clientY: number }, canvas: HTM
 
 function getMousePosition(event: { clientX: number, clientY: number }, canvas: HTMLDivElement, coordinates: Coordinates): Position {
     return offsetToPosition(getMouseOffset(event, canvas), coordinates);
-}
-
-/** All positions will be rounded to multiples of this size. In the relative units. */
-const GRID_SIZE = 20;
-/** Over how relative units we have to drag the node to start the dragging. */
-const NODE_DRAGGING_THRESHOLD = 20;
-
-function roundPosition(position: Position): Position {
-    return {
-        x: Math.round(position.x / GRID_SIZE) * GRID_SIZE,
-        y: Math.round(position.y / GRID_SIZE) * GRID_SIZE,
-    };
 }
 
 function computeInitialCoordinates(nodes: Node[], width: number, height: number): Coordinates {
