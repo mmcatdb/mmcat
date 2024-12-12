@@ -7,6 +7,7 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
 import { getJobStatusIcon } from '@/components/icons/Icons';
 import { usePreferences } from '@/components/PreferencesProvider';
+import { cn } from '@/components/utils';
 
 export function JobsPage() {
     return (
@@ -17,7 +18,7 @@ export function JobsPage() {
 }
 
 export function RunsPageOverview() {
-    const { showTableIDs } = usePreferences().preferences;
+    const { theme, showTableIDs } = usePreferences().preferences;
     const { category } = useCategoryInfo();
     const [ groupedJobs, setGroupedJobs ] = useState<Record<string, Job[]>>({});
     const [ isInitialLoad, setIsInitialLoad ] = useState(true);
@@ -85,15 +86,17 @@ export function RunsPageOverview() {
     if (error) 
         return <ReloadPage onReload={fetchJobs} />;
 
+    const classNameTR = cn('px-4 py-2 text-left border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300');
+
     return (
         <div className='p-4'>
             <h1 className='text-2xl font-bold mb-4'>Runs</h1>
-            <table className='table-auto w-full border-collapse border border-zinc-300'>
+            <table className={cn('table-auto w-full border-collapse border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300')}>
                 <thead>
                     <tr>
-                        {showTableIDs && <th className='border border-zinc-300 px-4 py-2 text-left'>Run ID</th>}
-                        <th className='border border-zinc-300 px-4 py-2 text-left'>Run Label</th>
-                        <th className='border border-zinc-300 px-4 py-2 text-left'>Jobs</th>
+                        {showTableIDs && <th className={classNameTR}>Run ID</th>}
+                        <th className={classNameTR}>Run Label</th>
+                        <th className={classNameTR}>Jobs</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,7 +119,7 @@ export function RunsPageOverview() {
 
 function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
     const navigate = useNavigate();
-    const { showTableIDs } = usePreferences().preferences;
+    const { theme, showTableIDs } = usePreferences().preferences;
 
     // Keep only the most recent job per index
     const newestJobs = Object.values(
@@ -128,11 +131,13 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
         }, {} as Record<number, Job>),
     );
 
+    const classNameTD = cn('border px-4 py-2', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300');
+
     return (
-        <tr className='hover:bg-zinc-100'>
-            {showTableIDs && <td className='border border-zinc-300 px-4 py-2'>{runId}</td>}
-            <td className='border border-zinc-300 px-4 py-2'>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
-            <td className='border border-zinc-300 px-4 py-2'>
+        <tr className={cn(theme === 'dark' ? 'hover:bg-zinc-800' : 'hover:bg-zinc-100')}>
+            {showTableIDs && <td className={classNameTD}>{runId}</td>}
+            <td className={classNameTD}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
+            <td className={classNameTD}>
                 <div className='flex items-center gap-2'>
                     {newestJobs.map((job) => (
                         <Tooltip
@@ -170,6 +175,7 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
 }
 
 export function JobDetailPage() {
+    const { theme } = usePreferences().preferences;
     const { jobId } = useParams<{ jobId: string }>();
     const [ job, setJob ] = useState<Job | null>(null);
     const [ loading, setLoading ] = useState(false);
@@ -202,7 +208,7 @@ export function JobDetailPage() {
         <div className='p-4'>
             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
             {job ? (
-                <div className='border border-zinc-300 rounded-lg p-4'>
+                <div className={cn('border rounded-lg p-4', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300')}>
                     <p>
                         <strong>ID:</strong> {job.id}
                     </p>

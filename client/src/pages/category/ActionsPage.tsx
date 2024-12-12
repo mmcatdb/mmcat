@@ -10,6 +10,7 @@ import { AddIcon } from '@/components/icons/PlusIcon';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { Link, Outlet, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline'; 
+import { cn } from '@/components/utils';
 
 export function ActionsPage() {
     return (
@@ -102,7 +103,7 @@ type ActionsTableProps = {
 };
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
-    const { showTableIDs } = usePreferences().preferences;
+    const { theme, showTableIDs } = usePreferences().preferences;
     const { sortedData: sortedActions, sortDescriptor, setSortDescriptor } = useSortableData(actions, {
         column: 'label',
         direction: 'ascending',
@@ -186,7 +187,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                     {sortedActions.map((action) => (
                         <TableRow
                             key={action.id}
-                            className='hover:bg-zinc-100 focus:bg-zinc-200 dark:hover:bg-zinc-800 dark:focus:bg-zinc-700 cursor-pointer'
+                            className={cn('cursor-pointer',
+                                theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200',
+                            )}
                         >
                             {[
                                 ...(showTableIDs
@@ -308,6 +311,7 @@ export function ActionDetailPage() {
                             <TableColumn>Mappings</TableColumn>
                         </TableHeader>
                         <TableBody>
+                            {/* TODO: komponenta ds element */}
                             {action.payloads.map((payload, index) => {
                                 let datasourceElement = <span>N/A</span>;
                                 let mappings = 'N/A';

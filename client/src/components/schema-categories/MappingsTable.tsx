@@ -6,6 +6,7 @@ import type { Mapping } from '@/types/mapping';
 import { useCategoryInfo } from '../CategoryInfoProvider';
 import { ErrorPage } from '@/pages/errorPages';
 import { AccessPathTooltip } from './AccessPathTooltip';
+import { cn } from '@/components/utils';
 
 type MappingsTableProps = {
     mappings: Mapping[];
@@ -52,7 +53,7 @@ type MappingsTableContentProps = {
 };
 
 function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: MappingsTableContentProps) {
-    const { showTableIDs } = usePreferences().preferences;
+    const { theme, showTableIDs } = usePreferences().preferences;
     const { category } = useCategoryInfo();
 
     return (
@@ -94,7 +95,8 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                     {mappings.map((mapping) => (
                         <TableRow
                             key={mapping.id}
-                            className='hover:bg-zinc-100 focus:bg-zinc-200 dark:hover:bg-zinc-800 dark:focus:bg-zinc-700 cursor-pointer'
+                            className={cn('cursor-pointer', 
+                                theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
                         >
                             {[
                                 ...(showTableIDs
