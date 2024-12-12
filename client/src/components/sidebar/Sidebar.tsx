@@ -1,16 +1,18 @@
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, matchPath, useLocation, useParams } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
 import { ShowTableIDsSwitch } from '../RootLayout';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/project/context';
 import { Tooltip } from '@nextui-org/react';
+import { cn } from '@/components/utils';
 
 type NormalSidebarItem = {
     type: 'normal';
     label: string;
     route: string;
     iconName: keyof typeof sidebarIconMap;
+    match?: string[];
 };
 
 type SeparatorSidebarItem = {
@@ -24,7 +26,7 @@ type SidebarItem = NormalSidebarItem | SeparatorSidebarItem;
 export function Sidebar() {
     const location = useLocation();
     const { categoryId } = useParams<'categoryId'>();
-    const { isCollapsed } = usePreferences().preferences;
+    const { theme, isCollapsed } = usePreferences().preferences;
 
     const dynamicSidebarItems: SidebarItem[] = categoryId
         ? categorySidebarItems(categoryId)
@@ -32,9 +34,10 @@ export function Sidebar() {
 
     return (
         <div
-            className={`fixed border-r border-zinc-200 dark:border-zinc-800 h-screen z-10 transition-all duration-300 ease-in-out ${
-                isCollapsed ? 'w-16' : 'w-64'
-            }`}
+            className={cn('fixed border-r h-screen z-10 transition-all duration-300 ease-in-out',
+                theme === 'dark' ? 'border-zinc-800' : 'border-zinc-200',
+                isCollapsed ? 'w-16' : 'w-64',
+            )}
         >
             <SidebarHeader isCollapsed={isCollapsed} />
 
@@ -44,7 +47,7 @@ export function Sidebar() {
 
             <div className='flex flex-col'>
                 {dynamicSidebarItems.map((item) => (
-                    <SideBarItem key={item.label} item={item} isCollapsed={isCollapsed} currentPath={location.pathname} />
+                    <SidebarItemDisplay key={item.label} item={item} currentPath={location.pathname} />
                     
                 ))}
             </div>
@@ -62,7 +65,7 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
     return (
         <Link to={routes.home.path} className='flex items-center mb-6'>
             <h1
-                className={`text-xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden `}
+                className='text-xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden'
             >
                 {isCollapsed ? 'MM' : 'MM-cat'}
             </h1>
@@ -70,15 +73,15 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
     );
 }
 
-function SideBarItem({ 
+function SidebarItemDisplay({ 
     item,
-    isCollapsed,
     currentPath,
 }: {
     item : SidebarItem;
-    isCollapsed: boolean;
     currentPath: string;
 }) {
+    const { theme, isCollapsed } = usePreferences().preferences;
+
     switch (item.type) {
     case 'separator':
         return (
@@ -91,16 +94,18 @@ function SideBarItem({
         );
             
     case 'normal': {
-        const isActive = item.route === currentPath;
+        const isMatched = item.match?.some(path => matchPath(path, currentPath));
+        const isActive = item.route === currentPath || isMatched;
         const icon = sidebarIconMap[item.iconName];
 
         const linkContent = (
             <Link
                 key={item.route}
                 to={item.route}
-                className={`flex items-center px-3 py-3 mx-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 ${
-                    isActive ? 'text-blue-600 font-semibold' : ''
-                }`}
+                className={cn('flex items-center px-3 py-3 mx-2 rounded-md',
+                    isActive ? 'text-blue-600 font-semibold' : '',
+                    theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100',
+                )}
             >
                 <span className='flex-shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
         
@@ -148,6 +153,7 @@ function generalSidebarItems(): SidebarItem[] {
                 label: 'Datasources',
                 route: '/datasources',
                 iconName: 'circleStack',
+                match: [ '/datasources/:id' ],
             },
             {
                 type: 'normal',
@@ -183,18 +189,24 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
             label: 'Datasources',
             route: routes.category.datasources.resolve({ categoryId }),
             iconName: 'circleStack',
+            match: [ routes.category.datasources.resolve({ categoryId }) + '/:id' ],
         },
         {
             type: 'normal',
             label: 'Actions',
             route: routes.category.actions.resolve({ categoryId }),
             iconName: 'rocket',
+            match: [ 
+                routes.category.actions.resolve({ categoryId }) + '/:id',
+                routes.category.actions.resolve({ categoryId }) + '/add',
+            ],
         },
         {
             type: 'normal',
             label: 'Jobs',
             route: routes.category.jobs.resolve({ categoryId }),
             iconName: 'playCircle',
+            match: [ routes.category.jobs.resolve({ categoryId }) + '/:id' ],
         },
         {
             type: 'normal',
