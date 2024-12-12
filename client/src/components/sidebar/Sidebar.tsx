@@ -3,7 +3,7 @@ import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
 import { ShowTableIDsSwitch } from '../RootLayout';
 import { usePreferences } from '../PreferencesProvider';
-import { CollapseContextToggle } from '@/components/project/context';
+import { CollapseContextToggle } from '@/components/CollapseContextToggle';
 import { Tooltip } from '@nextui-org/react';
 import { cn } from '@/components/utils';
 
@@ -48,7 +48,7 @@ export function Sidebar() {
             <div className='flex flex-col'>
                 {dynamicSidebarItems.map((item) => (
                     <SidebarItemDisplay key={item.label} item={item} currentPath={location.pathname} />
-                    
+
                 ))}
             </div>
 
@@ -73,7 +73,7 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
     );
 }
 
-function SidebarItemDisplay({ 
+function SidebarItemDisplay({
     item,
     currentPath,
 }: {
@@ -92,7 +92,7 @@ function SidebarItemDisplay({
                 {isCollapsed ? item.collapsedLabel : item.label}
             </p>
         );
-            
+
     case 'normal': {
         const isMatched = item.match?.some(path => matchPath(path, currentPath));
         const isActive = item.route === currentPath || isMatched;
@@ -108,7 +108,7 @@ function SidebarItemDisplay({
                 )}
             >
                 <span className='flex-shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
-        
+
                 <span
                     className={`ml-2 whitespace-nowrap overflow-hidden ${
                         isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
@@ -196,7 +196,7 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
             label: 'Actions',
             route: routes.category.actions.resolve({ categoryId }),
             iconName: 'rocket',
-            match: [ 
+            match: [
                 routes.category.actions.resolve({ categoryId }) + '/:id',
                 routes.category.actions.resolve({ categoryId }) + '/add',
             ],

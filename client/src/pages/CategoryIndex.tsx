@@ -3,7 +3,7 @@ import { Outlet, type Params, useLoaderData, useMatches } from 'react-router-dom
 import { CustomLink } from '@/components/common';
 import { ThemeToggle } from '@/components/RootLayout';
 import { routes } from '../routes/routes';
-import { CollapseContextToggle } from '@/components/project/context';
+import { CollapseContextToggle } from '@/components/CollapseContextToggle';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { CategoryInfoProvider, useCategoryInfo } from '@/components/CategoryInfoProvider';
