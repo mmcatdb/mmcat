@@ -1,6 +1,6 @@
 import { Button } from '@nextui-org/react';
-import { usePreferences } from '../PreferencesProvider';
-import { Tooltip } from '../common';
+import { usePreferences } from './PreferencesProvider';
+import { Tooltip } from './common';
 import { BsWindowSidebar } from 'react-icons/bs';
 
 export function CollapseContextToggle() {

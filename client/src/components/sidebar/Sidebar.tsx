@@ -3,7 +3,7 @@ import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
 import { ShowTableIDsSwitch } from '../RootLayout';
 import { usePreferences } from '../PreferencesProvider';
-import { CollapseContextToggle } from '@/components/project/context';
+import { CollapseContextToggle } from '@/components/CollapseContextToggle';
 import { Tooltip } from '@nextui-org/react';
 
 type NormalSidebarItem = {
@@ -45,7 +45,7 @@ export function Sidebar() {
             <div className='flex flex-col'>
                 {dynamicSidebarItems.map((item) => (
                     <SideBarItem key={item.label} item={item} isCollapsed={isCollapsed} currentPath={location.pathname} />
-                    
+
                 ))}
             </div>
 
@@ -70,7 +70,7 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
     );
 }
 
-function SideBarItem({ 
+function SideBarItem({
     item,
     isCollapsed,
     currentPath,
@@ -89,7 +89,7 @@ function SideBarItem({
                 {isCollapsed ? item.collapsedLabel : item.label}
             </p>
         );
-            
+
     case 'normal': {
         const isActive = item.route === currentPath;
         const icon = sidebarIconMap[item.iconName];
@@ -103,7 +103,7 @@ function SideBarItem({
                 }`}
             >
                 <span className='flex-shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
-        
+
                 <span
                     className={`ml-2 whitespace-nowrap overflow-hidden ${
                         isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
