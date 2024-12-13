@@ -22,19 +22,18 @@ export function DatasourcesInCategoryPage() {
         // TODO: no fetch, data via loader
         setLoading(true);
         setError(false);
-        // Fetch datasources in category
+        // Fetch datasources in category, and then all datasources
         const inCategoryResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
+        const allDatasourcesResponse = await api.datasources.getAllDatasources({});
         setLoading(false);
 
         if (!inCategoryResponse.status) {
             setError(true);
             return;
         }
-            
         setDatasourcesInCategory(inCategoryResponse.data);
 
-        // Fetch all datasources and filter out ds in category
-        const allDatasourcesResponse = await api.datasources.getAllDatasources({});
+        // filter out datasources in category   
         if (!allDatasourcesResponse.status) {
             setError(true);
             return;
