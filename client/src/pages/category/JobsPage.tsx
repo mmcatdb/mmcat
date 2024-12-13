@@ -1,11 +1,11 @@
 import { api } from '@/api';
-import { Job } from '@/types/job';
+import { Job, JobState } from '@/types/job';
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { Tooltip } from '@nextui-org/react';
+import { Button, Tooltip } from '@nextui-org/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
-import { getJobStatusIcon } from '@/components/icons/Icons';
+import { getJobStateTextStyle, getJobStatusIcon } from '@/components/icons/Icons';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { cn } from '@/components/utils';
 
@@ -90,7 +90,7 @@ export function RunsPageOverview() {
 
     return (
         <div className='p-4'>
-            <h1 className='text-2xl font-bold mb-4'>Runs</h1>
+            <h1 className='text-2xl font-bold mb-4'>Jobs in Runs</h1>
             <table className={cn('table-auto w-full border-collapse border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300')}>
                 <thead>
                     <tr>
@@ -174,56 +174,335 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
     );
 }
 
+// export function JobDetailPage() {
+//     const { theme } = usePreferences().preferences;
+//     const { jobId } = useParams<{ jobId: string }>();
+//     const [ job, setJob ] = useState<Job | null>(null);
+//     const [ initialLoading, setInitialLoading ] = useState(true);
+//     const [ error, setError ] = useState(false);
+//     const [ polling, setPolling ] = useState(true);
+//     const { category } = useCategoryInfo();
+//     const navigate = useNavigate();
+
+//     async function fetchJobDetails() {
+//         setError(false);
+//         const response = await api.jobs.getJob({ id: jobId });
+//         setInitialLoading(false);
+
+//         if (!response.status) {
+//             setError(true);
+//             return;
+//         }
+
+//         const fetchedJob = Job.fromServer(response.data, category);
+//         setJob(fetchedJob);
+
+//         // Stop polling if the job state is Finished or Failed
+//         if (fetchedJob.state === JobState.Finished || fetchedJob.state === JobState.Failed) 
+//             setPolling(false);
+        
+//     }
+
+//     const pollInterval = 3000;  // Poll every 3 seconds
+
+//     useEffect(() => {
+//         let intervalId: NodeJS.Timeout | null = null;
+
+//         const startPolling = () => {
+//             intervalId = setInterval(() => {
+//                 void fetchJobDetails();
+//             }, pollInterval);
+//         };
+
+//         void fetchJobDetails();
+
+//         if (polling) 
+//             startPolling();
+
+//         return () => {
+//             if (intervalId) 
+//                 clearInterval(intervalId);
+//         };
+//     }, [ jobId, polling ]);
+
+//     async function handleEnableJob() {
+//         setPolling(true);
+//         const result = await api.jobs.enableJob({ id: job?.id });
+//         if (result.status) 
+//             setJob(Job.fromServer(result.data, category));
+//     }
+
+//     async function handleDisableJob() {
+//         setPolling(true);
+//         const result = await api.jobs.disableJob({ id: job?.id });
+//         if (result.status) 
+//             setJob(Job.fromServer(result.data, category));
+//     }
+
+//     async function handleRestartJob() {
+//         const result = await api.jobs.createRestartedJob({ id: job?.id });
+//         setPolling(true);
+//         if (result.status) {
+//             const newJobId = result.data.id;
+//             navigate(`/category/${category.id}/jobs/${newJobId}`);
+//         }
+//     }
+
+//     function renderJobStateButton(customClassName: string) {
+//         if (!job) 
+//             return null;
+
+//         switch (job.state) {
+//         case JobState.Disabled:
+//             return (
+//                 <Button
+//                     onClick={handleEnableJob}
+//                     color='success'
+//                     className={customClassName}
+//                 >
+//                         Enable
+//                 </Button>
+//             );
+
+//         case JobState.Ready:
+//             return (
+//                 <Button
+//                     onClick={handleDisableJob}
+//                     color='warning'
+//                     className={customClassName}
+//                 >
+//                         Disable
+//                 </Button>
+//             );
+
+//         case JobState.Finished:
+//         case JobState.Failed:
+//             return (
+//                 <Button
+//                     onClick={handleRestartJob}
+//                     color='primary'
+//                     className={customClassName}
+//                 >
+//                         Restart
+//                 </Button>
+//             );
+
+//         default:
+//             return null;
+//         }
+//     }
+
+//     if (initialLoading) 
+//         return <LoadingPage />;
+//     if (error) 
+//         return <ReloadPage onReload={fetchJobDetails} />;
+
+//     return (
+//         <div className='p-4'>
+//             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
+//             {job ? (
+//                 <div>
+//                     <div
+//                         className={cn(
+//                             'border rounded-lg p-4',
+//                             theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300',
+//                         )}
+//                     >
+//                         <p>
+//                             <strong>ID:</strong> {job.id}
+//                         </p>
+//                         <p>
+//                             <strong>Run ID:</strong> {job.runId}
+//                         </p>
+//                         <p>
+//                             <strong>Index:</strong> {job.index}
+//                         </p>
+//                         <p className='my-2'>
+//                             <strong>State:</strong>
+//                             <span
+//                                 className={cn(
+//                                     'm-2 px-3 py-1 rounded-full font-semibold',
+//                                     getJobStateTextStyle(job.state),
+//                                 )}
+//                             >
+//                                 {job.state}
+//                             </span>
+//                         </p>
+//                         <p>
+//                             <strong>Created At:</strong> {new Date(job.createdAt).toString()}
+//                         </p>
+//                     </div>
+
+//                     {renderJobStateButton('mt-5')}
+//                 </div>
+//             ) : (
+//                 <p>No job details available.</p>
+//             )}
+//         </div>
+//     );
+// }
+
+type JobDetailStatus = {
+    loading: boolean;
+    error: boolean;
+    polling: boolean;
+};
+
 export function JobDetailPage() {
     const { theme } = usePreferences().preferences;
     const { jobId } = useParams<{ jobId: string }>();
     const [ job, setJob ] = useState<Job | null>(null);
-    const [ loading, setLoading ] = useState(false);
-    const [ error, setError ] = useState(false);
+    const [ jobStatus, setJobStatus ] = useState<JobDetailStatus>({
+        loading: true,
+        error: false,
+        polling: true,
+    });
     const { category } = useCategoryInfo();
+    const navigate = useNavigate();
 
-    const fetchJobDetails = async () => {
-        setLoading(true);
-        setError(false);
+    async function fetchJobDetails() {
+        setJobStatus((prev) => ({ ...prev, error: false }));
         const response = await api.jobs.getJob({ id: jobId });
-        setLoading(false);
+        setJobStatus((prev) => ({ ...prev, loading: false }));
 
         if (!response.status) {
-            setError(true); return; 
+            setJobStatus((prev) => ({ ...prev, error: true }));
+            return;
         }
 
-        setJob(Job.fromServer(response.data, category));
-    };
+        const fetchedJob = Job.fromServer(response.data, category);
+        setJob(fetchedJob);
+
+        if ([ JobState.Finished, JobState.Failed ].includes(fetchedJob.state)) 
+            setJobStatus((prev) => ({ ...prev, polling: false }));
+        
+    }
+
+    const pollInterval = 3000;
 
     useEffect(() => {
-        void fetchJobDetails();
-    }, [ jobId ]);
+        let intervalId: NodeJS.Timeout | null = null;
 
-    if (loading) 
+        const startPolling = () => {
+            intervalId = setInterval(() => void fetchJobDetails(), pollInterval);
+        };
+
+        void fetchJobDetails();
+
+        if (jobStatus.polling) 
+            startPolling();
+
+        return () => {
+            if (intervalId) 
+                clearInterval(intervalId);
+        };
+    }, [ jobId, jobStatus.polling ]);
+
+    async function handleEnableJob() {
+        setJobStatus((prev) => ({ ...prev, polling: true }));
+        const result = await api.jobs.enableJob({ id: job?.id });
+        if (result.status) 
+            setJob(Job.fromServer(result.data, category));
+    }
+
+    async function handleDisableJob() {
+        setJobStatus((prev) => ({ ...prev, polling: true }));
+        const result = await api.jobs.disableJob({ id: job?.id });
+        if (result.status) 
+            setJob(Job.fromServer(result.data, category));
+    }
+
+    async function handleRestartJob() {
+        const result = await api.jobs.createRestartedJob({ id: job?.id });
+        setJobStatus((prev) => ({ ...prev, polling: true }));
+        if (result.status) 
+            navigate(`/category/${category.id}/jobs/${result.data.id}`);
+        
+    }
+
+    function renderJobStateButton(customClassName: string) {
+        if (!job) 
+            return null;
+
+        switch (job.state) {
+        case JobState.Disabled:
+            return (
+                <Button
+                    onClick={handleEnableJob}
+                    color='success'
+                    className={customClassName}
+                >
+                        Enable
+                </Button>
+            );
+        case JobState.Ready:
+            return (
+                <Button
+                    onClick={handleDisableJob}
+                    color='warning'
+                    className={customClassName}
+                >
+                        Disable
+                </Button>
+            );
+        case JobState.Finished:
+        case JobState.Failed:
+            return (
+                <Button
+                    onClick={handleRestartJob}
+                    color='primary'
+                    className={customClassName}
+                >
+                        Restart
+                </Button>
+            );
+        default:
+            return null;
+        }
+    }
+
+    if (jobStatus.loading) 
         return <LoadingPage />;
-    if (error) 
+    if (jobStatus.error) 
         return <ReloadPage onReload={fetchJobDetails} />;
 
     return (
         <div className='p-4'>
             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
             {job ? (
-                <div className={cn('border rounded-lg p-4', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300')}>
-                    <p>
-                        <strong>ID:</strong> {job.id}
-                    </p>
-                    <p>
-                        <strong>Run ID:</strong> {job.runId}
-                    </p>
-                    <p>
-                        <strong>Index:</strong> {job.index}
-                    </p>
-                    <p>
-                        <strong>State:</strong> {job.state}
-                    </p>
-                    <p>
-                        <strong>Created At:</strong> {new Date(job.createdAt).toString()}
-                    </p>
+                <div>
+                    <div
+                        className={cn(
+                            'border rounded-lg p-4',
+                            theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300',
+                        )}
+                    >
+                        <p>
+                            <strong>ID:</strong> {job.id}
+                        </p>
+                        <p>
+                            <strong>Run ID:</strong> {job.runId}
+                        </p>
+                        <p>
+                            <strong>Index:</strong> {job.index}
+                        </p>
+                        <p className='my-2'>
+                            <strong>State:</strong>
+                            <span
+                                className={cn(
+                                    'm-2 px-3 py-1 rounded-full font-semibold',
+                                    getJobStateTextStyle(job.state),
+                                )}
+                            >
+                                {job.state}
+                            </span>
+                        </p>
+                        <p>
+                            <strong>Created At:</strong> {new Date(job.createdAt).toString()}
+                        </p>
+                    </div>
+
+                    {renderJobStateButton('mt-5')}
                 </div>
             ) : (
                 <p>No job details available.</p>

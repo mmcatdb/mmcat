@@ -20,6 +20,7 @@ import { CheckCircleIcon, QuestionMarkCircleIcon,
     PauseCircleIcon, XCircleIcon, EllipsisHorizontalCircleIcon,
     StopCircleIcon,
 } from '@heroicons/react/24/outline';
+import { type JobState } from '@/types/job';
 
 type IconSet = {
     outline: JSX.Element;
@@ -61,20 +62,39 @@ export const sidebarIconMap: Record<string, IconSet> = {
 
 const jobStatusIconStyle = 'w-8 h-8';
 
+const jobStateStyles: Record<JobState, { color: string, bg: string }> = {
+    Disabled: { color: 'text-zinc-400', bg: 'bg-zinc-400' },
+    Ready: { color: 'text-blue-400', bg: 'bg-blue-400' },
+    Running: { color: 'text-blue-500', bg: 'bg-blue-500' },
+    Waiting: { color: 'text-yellow-500', bg: 'bg-yellow-500' },
+    Finished: { color: 'text-green-500', bg: 'bg-green-500' },
+    Failed: { color: 'text-red-500', bg: 'bg-red-500' },
+};
+
+export function getJobStateTextStyle(state: JobState): string {
+    return jobStateStyles[state]?.bg;
+}
+
+function getJobStateIconStyle(state: JobState): string {
+    return jobStateStyles[state]?.color;
+}
+
 export function getJobStatusIcon(state: string): JSX.Element {
+    const iconColor = getJobStateIconStyle(state as JobState);
+
     switch (state) {
     case 'Disabled':
-        return <StopCircleIcon className={`text-zinc-400 ${jobStatusIconStyle}`} />;
+        return <StopCircleIcon className={`${iconColor} ${jobStatusIconStyle}`} />;
     case 'Ready':
-        return <PlayCircleIconOutline className={`text-blue-400 ${jobStatusIconStyle}`} />;
+        return <PlayCircleIconOutline className={`${iconColor} ${jobStatusIconStyle}`} />;
     case 'Running':
-        return <EllipsisHorizontalCircleIcon className={`text-blue-500 animate-spin ${jobStatusIconStyle}`} />;
+        return <EllipsisHorizontalCircleIcon className={`${iconColor} animate-spin ${jobStatusIconStyle}`} />;
     case 'Waiting':
-        return <PauseCircleIcon className={`text-yellow-500 ${jobStatusIconStyle}`} />;
+        return <PauseCircleIcon className={`${iconColor} ${jobStatusIconStyle}`} />;
     case 'Finished':
-        return <CheckCircleIcon className={`text-green-500 ${jobStatusIconStyle}`} />;
+        return <CheckCircleIcon className={`${iconColor} ${jobStatusIconStyle}`} />;
     case 'Failed':
-        return <XCircleIcon className={`text-red-500 ${jobStatusIconStyle}`} />;
+        return <XCircleIcon className={`${iconColor} ${jobStatusIconStyle}`} />;
     default:
         return <QuestionMarkCircleIcon className={`text-zinc-200 ${jobStatusIconStyle}`} />;
     }
