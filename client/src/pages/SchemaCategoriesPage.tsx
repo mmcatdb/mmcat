@@ -5,6 +5,7 @@ import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
 import { Button } from '@nextui-org/react';
 import { LoadingPage, ReloadPage } from './errorPages';
+import { AddSchemaModal } from './Home';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -15,6 +16,8 @@ export function SchemaCategoriesPage() {
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<boolean>(false);
     const [ isCreatingSchema, setIsCreatingSchema ] = useState<boolean>(false);
+    const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
+    const [ isModalOpen, setIsModalOpen ] = useState(false);
 
     const fetchSchemaCategories = async () => {
         setLoading(true);
@@ -38,20 +41,32 @@ export function SchemaCategoriesPage() {
         toast.error('Not handled yet. TODO this.');
     }
 
-    const createExampleSchema = useCallback(async (name: string) => {
-        setIsCreatingSchema(true);
-        const response = await api.schemas.createExampleCategory({ name });
-        setIsCreatingSchema(false);
+    const handleCreateSchema = useCallback(
+        async (name: string, isExample = false) => {
+            isExample ? setIsCreatingExampleSchema(true) : setIsCreatingSchema(true);
 
-        if (response.status && response.data) {
+            const response = isExample
+                ? await api.schemas.createExampleCategory({ name })
+                : await api.schemas.createNewCategory({}, { label: name });
+
+            isExample ? setIsCreatingExampleSchema(false) : setIsCreatingSchema(false);
+
+            if (!response.status) {
+                toast.error('Error creating schema category.');
+                return;
+            }
+
             const newCategory = SchemaCategoryInfo.fromServer(response.data);
-            setSchemaCategories((categories) => [ ...categories, newCategory ]);
-            toast.success(`Example schema '${newCategory.label}' created successfully!`);
-        }
-        else {
-            toast.error('Failed to create example schema.');
-        }
-    }, []);
+            setSchemaCategories((categories) =>
+                categories ? [ ...categories, newCategory ] : [ newCategory ],
+            );
+
+            toast.success(
+                `${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`,
+            );
+        },
+        [],
+    );
 
     if (loading)
         return <LoadingPage />;
@@ -67,14 +82,24 @@ export function SchemaCategoriesPage() {
                     {EXAMPLE_SCHEMAS.map((example) => (
                         <Button
                             key={example}
-                            onPress={() => createExampleSchema(example)}
-                            isLoading={isCreatingSchema}
+                            onPress={() => handleCreateSchema(example, true)}
+                            isLoading={isCreatingExampleSchema}
                             color='primary'
+                            variant='bordered'
                             isDisabled={loading}
                         >
                             + Add {example} Schema
                         </Button>
                     ))}
+                    <Button
+                        key={'newSchema'} 
+                        onPress={() => setIsModalOpen(true)}
+                        isLoading={isCreatingSchema}
+                        color='primary'
+                        className='ml-2'
+                    >
+                        + Add schema
+                    </Button>
                 </div>
             </div>
             <div className='mt-5'>
@@ -85,6 +110,13 @@ export function SchemaCategoriesPage() {
                     onDeleteCategory={handleDeleteCategory}
                 />
             </div>
+
+            <AddSchemaModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={(label) => handleCreateSchema(label, false)}
+                isSubmitting={isCreatingSchema}
+            />
         </div>
     );
 }
