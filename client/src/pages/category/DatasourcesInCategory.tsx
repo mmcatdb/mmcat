@@ -86,12 +86,18 @@ export function DatasourcesInCategoryPage() {
             </div>
 
             <div className='mt-5'>
-                <DatasourcesTable
-                    datasources={datasourcesInCategory}
-                    loading={loading}
-                    error={error}
-                    onDeleteDatasource={handleDeleteDatasource}
-                />
+                {datasourcesInCategory.length > 0 ? (
+                    <DatasourcesTable
+                        datasources={datasourcesInCategory}
+                        loading={loading}
+                        error={error}
+                        onDeleteDatasource={handleDeleteDatasource}
+                    />
+                ) : (
+                    <div className = 'text-center border border-zinc-500 p-6'>
+                        There is no datasources with mappings available. You can add mapping via Other Datasources.
+                    </div>
+                )}
             </div>
 
             <div className='flex items-center justify-between mt-10'>

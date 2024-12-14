@@ -335,6 +335,20 @@ export function JobDetailPage() {
                     </div>
 
                     {renderJobStateButton('mt-5')}
+
+                    {job.error === null ? (
+                        <span></span>
+                    ) : (
+                        <div className='mt-5 text-red-500'>
+                            <span className='font-bold'>Error: {job.error?.name}</span>
+                            <div className={cn('p-4 mt-2 rounded-md text-sm border border-red-500',
+                                theme === 'dark' ? 'bg-zinc-900 text-zinc-50' : 'bg-zinc-50 text-zinc-700',
+                            )}>
+                                {JSON.stringify(job.error?.data)}
+                            </div>
+                        </div>
+                    )}
+                    
                 </div>
             ) : (
                 <p>No job details available.</p>
