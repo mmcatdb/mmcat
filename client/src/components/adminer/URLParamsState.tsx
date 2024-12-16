@@ -19,10 +19,11 @@ export function getStateFromURLParams(params: URLSearchParams): AdminerState {
     const view = Object.values(View).includes(viewParam as View)
         ? (viewParam as View)
         : View.table;
+    const filters: KindFilterState = JSON.parse(params.get('active') ?? '{"limit":50,"filters":[]}') as KindFilterState;
 
     return {
-        form: JSON.parse(params.get('active') ?? '{"limit":50,"filters":[]}') as KindFilterState,
-        active: JSON.parse(params.get('active') ?? '{"limit":50,"filters":[]}') as KindFilterState,
+        form: filters,
+        active: filters,
         datasourceId: params.get('datasourceId') ?? undefined,
         kindName: params.get('kindName') ?? undefined,
         view: view,

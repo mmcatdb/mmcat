@@ -9,27 +9,15 @@ import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
-import { View } from '@/types/adminer/View';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
 export function AdminerPage() {
     const [ searchParams, setSearchParams ] = useSearchParams();
-    const [ state, dispatch ] = useReducer(reducer, {
-        form: { limit: 50, filters: [] },
-        active: { limit: 50, filters: [] },
-        view: View.table,
-    });
+    const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
     const [ allDatasources, setAllDatasources ] = useState<Datasource[]>();
 
-    useMemo(() => {
-        const stateFromParams = getStateFromURLParams(searchParams);
-
-        if (stateFromParams.active !== state.active || stateFromParams.datasourceId !== state.datasourceId || stateFromParams.kindName !== state.kindName || stateFromParams.view !== state.view)
-            dispatch({ type: 'initialize', state: stateFromParams });
-    }, [ searchParams ]);
-
-    useMemo(() => {
+    useEffect(() => {
         const params = getURLParamsFromState(state);
 
         if (params !== searchParams)
@@ -38,21 +26,10 @@ export function AdminerPage() {
 
     useEffect(() => {
         (async () => {
-            try {
-                while (true) {
-                    const response = await api.datasources.getAllDatasources({});
+            const response = await api.datasources.getAllDatasources({});
 
-                    if (response.status && response.data){
-                        setAllDatasources(response.data);
-                        return;
-                    }
-
-                    await new Promise((resolve) => setTimeout(resolve, 100));
-                }
-            }
-            catch {
-                console.error('Failed to load datasources data');
-            }
+            if (response.status && response.data)
+                setAllDatasources(response.data);
         })();
     }, []);
 
