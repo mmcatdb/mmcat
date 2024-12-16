@@ -1,18 +1,18 @@
 import { useCallback, useEffect } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import { useFetchData } from './useFetchData';
-import type { BackendTableResponse } from '@/types/adminer/BackendResponse';
+import type { TableResponse } from '@/types/adminer/BackendResponse';
 import type { FetchKindParams } from '@/types/adminer/FetchParams';
 import { type AdminerReference } from '@/types/adminer/AdminerReference';
 import { api } from '@/api';
 
 type DatabaseTableProps = Readonly<{
     urlParams: FetchKindParams;
-    setRowCount: (rowCount: number) => void;
+    setItemCount: (itemCount: number) => void;
     references: AdminerReference | undefined;
 }>;
 
-export function DatabaseTable({ urlParams, setRowCount, references }: DatabaseTableProps ) {
+export function DatabaseTable({ urlParams, setItemCount, references }: DatabaseTableProps ) {
     const fetchFunction = useCallback(() => {
         return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindId: urlParams.kindId }, urlParams.queryParams);
     }, [ urlParams ]);
@@ -20,8 +20,8 @@ export function DatabaseTable({ urlParams, setRowCount, references }: DatabaseTa
     let { fetchedData, loading, error } = useFetchData(fetchFunction);
 
     useEffect(() => {
-        const count = fetchedData?.metadata.rowCount;
-        count ? setRowCount(count) : setRowCount(0);
+        const count = fetchedData?.metadata.itemCount;
+        count ? setItemCount(count) : setItemCount(0);
     }, [ fetchedData ]);
 
     if (loading) {
@@ -40,7 +40,7 @@ export function DatabaseTable({ urlParams, setRowCount, references }: DatabaseTa
 
     // If the data are for graph database, we want to display just properties in the table view
     if (fetchedData.data.every((item: any) => 'properties' in item)){
-        const modifiedData = { metadata: fetchedData.metadata, data: [] } as BackendTableResponse;
+        const modifiedData = { metadata: fetchedData.metadata, data: [] } as TableResponse;
 
         for (const element of fetchedData.data)
             modifiedData.data.push(element.properties);

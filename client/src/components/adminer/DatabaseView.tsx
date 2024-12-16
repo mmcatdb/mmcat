@@ -37,25 +37,25 @@ export function DatabaseView({ state }: DatabaseViewProps) {
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ offset, setOffset ] = useState<number>(0);
-    const [ rowCount, setRowCount ] = useState<number | undefined>();
+    const [ itemCount, setItemCount ] = useState<number | undefined>();
     const [ totalPages, setTotalPages ] = useState<number>(1);
 
     useEffect(() => {
-        if (rowCount)
-            setTotalPages(Math.ceil(rowCount / state.active.limit));
+        if (itemCount)
+            setTotalPages(Math.ceil(itemCount / state.active.limit));
 
         if (currentPage > totalPages) {
             setCurrentPage(totalPages);
             setOffset(state.active.limit * (totalPages - 1));
         }
-    }, [ rowCount, offset, currentPage, totalPages, state.active.limit ]);
+    }, [ itemCount, offset, currentPage, totalPages, state.active.limit ]);
 
     const urlParams = useMemo(() => {
         return getUrlParams(state, offset);
     }, [ state.active, state.datasourceId, state.kindName, state.view, offset ]);
 
     useEffect(() => {
-        setRowCount(undefined);
+        setItemCount(undefined);
         setTotalPages(1);
         setCurrentPage(1);
         setOffset(0);
@@ -75,12 +75,12 @@ export function DatabaseView({ state }: DatabaseViewProps) {
     return (
         <div className='mt-5'>
             {state.view === View.table ? (
-                <DatabaseTable urlParams={urlParams} setRowCount={setRowCount} references={references}/>
+                <DatabaseTable urlParams={urlParams} setItemCount={setItemCount} references={references}/>
             ) : (
-                <DatabaseDocument urlParams={urlParams} setRowCount={setRowCount} references={references}/>
+                <DatabaseDocument urlParams={urlParams} setItemCount={setItemCount} references={references}/>
             )}
 
-            {rowCount !== undefined && rowCount > 0 && (
+            {itemCount !== undefined && itemCount > 0 && (
                 <div className='mt-5 inline-flex gap-3 items-center'>
                     <Pagination
                         total={totalPages}
@@ -91,7 +91,7 @@ export function DatabaseView({ state }: DatabaseViewProps) {
                         }}
                         color='primary'
                     />
-                    <p>Number of rows: {rowCount}</p>
+                    <p>Number of rows: {itemCount}</p>
                 </div>
             )}
         </div>

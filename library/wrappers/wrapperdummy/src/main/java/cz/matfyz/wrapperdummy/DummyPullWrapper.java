@@ -5,7 +5,9 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -28,6 +30,8 @@ import java.util.TreeSet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class DummyPullWrapper implements AbstractPullWrapper {
 
@@ -154,16 +158,12 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("DummyPullWrapper.executeQuery not implemented.");
     }
 
-    @Override public JSONObject getKindNames(String limit, String offset) {
+    @Override public KindNameResponse getKindNames(String limit, String offset) {
         throw new UnsupportedOperationException("DummyPullWrapper.getKindNames not implemented.");
     }
 
-    @Override public JSONObject getKind(String kindName, String limit, String offset) {
+    @Override public DataResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
         throw new UnsupportedOperationException("DummyPullWrapper.getKind not implemented.");
-    }
-
-    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
-        throw new UnsupportedOperationException("DummyPullWrapper.getRow not implemented.");
     }
 
     @Override public List<ForeignKey> getForeignKeys(String kindName) {

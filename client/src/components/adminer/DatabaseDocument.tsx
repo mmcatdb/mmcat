@@ -8,11 +8,11 @@ import { api } from '@/api';
 
 type DatabaseDocumentProps = Readonly<{
     urlParams: FetchKindParams;
-    setRowCount: (rowCount: number) => void;
+    setItemCount: (itemCount: number) => void;
     references: AdminerReference | undefined;
 }>;
 
-export function DatabaseDocument({ urlParams, setRowCount, references }: DatabaseDocumentProps) {
+export function DatabaseDocument({ urlParams, setItemCount, references }: DatabaseDocumentProps) {
     const fetchFunction = useCallback(() => {
         return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindId: urlParams.kindId }, urlParams.queryParams);
     }, [ urlParams ]);
@@ -20,8 +20,8 @@ export function DatabaseDocument({ urlParams, setRowCount, references }: Databas
     const { fetchedData, loading, error } = useFetchData(fetchFunction);
 
     useEffect(() => {
-        const count = fetchedData?.metadata.rowCount;
-        count ? setRowCount(count) : setRowCount(0);
+        const count = fetchedData?.metadata.itemCount;
+        count ? setItemCount(count) : setItemCount(0);
     }, [ fetchedData ]);
 
     if (loading) {

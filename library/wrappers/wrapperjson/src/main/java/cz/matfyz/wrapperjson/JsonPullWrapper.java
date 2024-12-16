@@ -8,7 +8,9 @@ import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -29,6 +31,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.json.JSONObject;
 
 /**
@@ -152,15 +155,11 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 
-    @Override public JSONObject getKindNames(String limit, String offset) {
+    @Override public KindNameResponse getKindNames(String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
     }
 
-    @Override public JSONObject getKind(String kindName, String limit, String offset) {
-        throw new UnsupportedOperationException("JsonPullWrapper.getKind not implemented.");
-    }
-
-    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
+    @Override public DataResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
         throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
     }
 
