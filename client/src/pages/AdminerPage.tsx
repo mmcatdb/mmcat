@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Spinner } from '@nextui-org/react';
 import { getStateFromURLParams, getURLParamsFromState } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
@@ -11,11 +11,20 @@ import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
+export async function adminerLoader(): Promise<Datasource[]> {
+    const response = await api.datasources.getAllDatasources({});
+
+    if (!response.status)
+        throw new Error('Failed to load datasources');
+
+    return response.data;
+}
+
 export function AdminerPage() {
+    const allDatasources = useLoaderData() as Datasource[];
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
-    const [ allDatasources, setAllDatasources ] = useState<Datasource[]>();
 
     useEffect(() => {
         const params = getURLParamsFromState(state);
@@ -23,15 +32,6 @@ export function AdminerPage() {
         if (params !== searchParams)
             setSearchParams(params);
     }, [ state ]);
-
-    useEffect(() => {
-        (async () => {
-            const response = await api.datasources.getAllDatasources({});
-
-            if (response.status && response.data)
-                setAllDatasources(response.data);
-        })();
-    }, []);
 
     useMemo(() => {
         setDatasource(allDatasources?.find((source) => source.id === state.datasourceId));

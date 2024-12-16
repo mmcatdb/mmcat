@@ -7,7 +7,7 @@ import { ErrorPage } from '@/pages/errorPages';
 import { CategoryIndex, categoryIndexLoader, type CategoryIndexLoaderData } from '@/pages/CategoryIndex';
 import { DatasourcesPage, DatasourcesPageOverview } from '@/pages/DatasourcesPage';
 import { datasourceDetailLoader, type DatasourceDetailLoaderData, DatasourceDetailPage, DatasourceInCategoryDetailPage } from '@/pages/DatasourceDetailPage';
-import { AdminerPage } from '@/pages/AdminerPage';
+import { adminerLoader, AdminerPage } from '@/pages/AdminerPage';
 import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
 import { QueryingPage } from '@/pages/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
@@ -98,6 +98,7 @@ export const router = createBrowserRouter([
             {
                 path: routes.adminer,
                 Component: AdminerPage,
+                loader: adminerLoader,
                 handle: { breadcrumb: 'Adminer' },
             },
             {
