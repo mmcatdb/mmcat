@@ -5,7 +5,6 @@ import { getStateFromURLParams, getURLParamsFromState } from '@/components/admin
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { KindMenu } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
-import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
@@ -61,17 +60,9 @@ export function AdminerPage() {
                 )}
             </div>
 
-            {datasource && state.kindName && (
+            {datasource && state.kindName && typeof state.kindName === 'string' &&(
                 <div className='mt-5'>
-                    <div className='mt-5'>
-                        <FilterForm state={state} dispatch={dispatch}/>
-                    </div>
-
-                    {typeof state.kindName === 'string' && (
-                        <div className='mt-5'>
-                            <DatabaseView state={state}/>
-                        </div>
-                    )}
+                    <DatabaseView state={state} dispatch={dispatch}/>
                 </div>
             )}
         </div>
