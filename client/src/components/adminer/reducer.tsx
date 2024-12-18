@@ -1,4 +1,5 @@
 import { getNewView } from './Views';
+import { View } from '@/types/adminer/View';
 import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
 import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 
@@ -6,7 +7,11 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
     switch (action.type) {
     case 'initialize': {
         return {
-            ...action.state,
+            form: { limit: 50, filters: [] },
+            active: { limit: 50, filters: [] },
+            view: View.table,
+            datasourceId: undefined,
+            kindName: undefined,
         };
     }
     case 'datasource': {

@@ -23,7 +23,7 @@ export function DatasourceMenu({ dispatch, datasourceId, datasources }: Datasour
                 label='Datasource'
                 placeholder='Select datasource'
                 className='max-w-xs'
-                defaultSelectedKeys={ datasourceId ? [ datasourceId ] : [] }
+                selectedKeys={ datasourceId ? [ datasourceId ] : [] }
             >
                 {sources
                     .map((item) => (

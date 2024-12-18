@@ -55,4 +55,4 @@ type DatasourceAction = AdminerTypedAction<'datasource', { newDatasource: Dataso
 type KindAction = AdminerTypedAction<'kind', { newKind: string }>;
 type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
-type InitializeAction = AdminerTypedAction<'initialize', { state: AdminerState }>;
+type InitializeAction = AdminerTypedAction<'initialize'>;

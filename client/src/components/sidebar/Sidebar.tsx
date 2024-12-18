@@ -158,7 +158,7 @@ function generalSidebarItems(): SidebarItem[] {
             {
                 type: 'normal',
                 label: 'Adminer',
-                route: routes.adminer,
+                route: `${routes.adminer}?reload=true`,
                 iconName: 'codeBracketSquare',
             },
         ]
