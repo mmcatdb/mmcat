@@ -6,16 +6,14 @@ import { router } from '@/routes/router';
 const App = () => {
     const { preferences } = usePreferences();
 
-    return (
-        <>
-            <RouterProvider router={router} />
-            <ToastContainer
-                position='bottom-right'
-                theme={preferences.theme}
-                autoClose={2000}
-            />
-        </>
-    );
+    return (<>
+        <RouterProvider router={router} future={{ v7_startTransition: true }}/>
+        <ToastContainer
+            position='bottom-right'
+            theme={preferences.theme}
+            autoClose={2000}
+        />
+    </>);
 };
 
 export default App;

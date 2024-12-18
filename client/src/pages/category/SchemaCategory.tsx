@@ -6,7 +6,7 @@ import { Portal, portals } from '@/components/common';
 import { logicalModelsFromServer } from '@/types/datasource';
 import { type Dispatch, type SetStateAction, useState } from 'react';
 import { GraphDisplay } from '@/components/GraphDisplay';
-import { type GraphValue } from '@/components/graph';
+import { type GraphValue } from '@/components/useGraphEngine';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 import { Key } from '@/types/identifiers';

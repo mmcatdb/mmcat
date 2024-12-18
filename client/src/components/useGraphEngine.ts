@@ -43,7 +43,9 @@ export type GraphOptions = Partial<FullGraphOptions>;
 const defaultGraphOptions: FullGraphOptions = {
     snapToGrid: false,
     gridSize: 20,
-    nodeDraggingThreshold: null,
+    // At least some threshold is needed to prevent accidental dragging.
+    // TODO find a better way (maybe with shift/ctrl or something).
+    nodeDraggingThreshold: 2,
     initialWidth: 1200,
     initialHeight: 600,
 };

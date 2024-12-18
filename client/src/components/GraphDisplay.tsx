@@ -1,6 +1,6 @@
 import { type Dispatch, type SetStateAction, useMemo } from 'react';
 import { cn } from './utils';
-import { type Edge, type GraphEngine, type GraphOptions, type GraphValue, isPointInBox, type Node, positionToOffset, type ReactiveGraphState, useGraphEngine } from './graph';
+import { type Edge, type GraphEngine, type GraphOptions, type GraphValue, isPointInBox, type Node, positionToOffset, type ReactiveGraphState, useGraphEngine } from './useGraphEngine';
 
 type GraphDisplayProps = Readonly<{
     /** The public value that the graph exposes. Its updates are reflected in the graph display. */

@@ -9,7 +9,7 @@ import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Mapping } from '../mapping';
 import { ComparableSet } from '@/types/utils/ComparableSet';
 import type { DatasourceType, LogicalModel } from '../datasource';
-import { type GraphValue } from '@/components/graph';
+import { type GraphValue } from '@/components/useGraphEngine';
 
 export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
     schema: SerializedSchema;
