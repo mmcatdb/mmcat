@@ -1,7 +1,15 @@
 package cz.matfyz.tests.querying;
 
+import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.core.querytree.FilterNode;
+import cz.matfyz.querying.core.querytree.PatternNode;
+import cz.matfyz.querying.parsing.Filter;
+import cz.matfyz.querying.parsing.Term.Variable;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
+import cz.matfyz.wrapperpostgresql.PostgreSQLQueryWrapper;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -275,7 +283,7 @@ class QueryTests {
 
     @Test
     void filterPostgreSQL() {
-        new QueryCustomTreeTest(
+        new QueryCustomTreeTest<>(
             datasources,
             datasources.postgreSQL(),
             """
@@ -288,7 +296,60 @@ class QueryTests {
                     FILTER(?number = \"o_100\")
                 }
             """,
-            null, // TODO
+            (schema, datasource, plan) -> {
+                final var onlyPattern = plan.stream().findFirst().get();
+
+                return new DatasourceNode(
+                    new FilterNode(
+                        new PatternNode(
+                            plan,
+                            schema,
+                            List.of(),
+                            onlyPattern.root.term
+                        ),
+                        new Filter.ValueFilter((Variable)onlyPattern.root.children().stream().findFirst().get().term, List.of("o_100"))
+                    ),
+                    datasource
+                );
+            },
+            """
+                [ {
+                    "number": "o_100"
+                } ]
+            """).run();
+    }
+
+    @Test
+    void filterMongoDB() {
+        new QueryCustomTreeTest<>(
+            datasources,
+            datasources.mongoDB(),
+            """
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = \"o_100\")
+                }
+            """,
+            (schema, datasource, plan) -> {
+                final var onlyPattern = plan.stream().findFirst().get();
+
+                return new DatasourceNode(
+                    new FilterNode(
+                        new PatternNode(
+                            plan,
+                            schema,
+                            List.of(),
+                            onlyPattern.root.term
+                        ),
+                        new Filter.ValueFilter((Variable)onlyPattern.root.children().stream().findFirst().get().term, List.of("o_100"))
+                    ),
+                    datasource
+                );
+            },
             """
                 [ {
                     "number": "o_100"

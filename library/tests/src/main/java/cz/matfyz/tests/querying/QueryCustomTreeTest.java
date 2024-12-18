@@ -9,10 +9,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
+import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
@@ -30,26 +33,31 @@ import cz.matfyz.querying.parsing.Term.Variable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class QueryCustomTreeTest {
+public class QueryCustomTreeTest<TWrapper extends AbstractControlWrapper> {
+
+    @FunctionalInterface
+    public static interface QueryTreeBuilderFunction {
+        QueryNode build(SchemaCategory schema, Datasource datasource, Set<PatternForKind> plan);
+    }
 
     public QueryCustomTreeTest(
         Datasources datasources,
-        TestDatasource testDatasource,
+        TestDatasource<TWrapper> testDatasource,
         String queryString,
-        QueryNode queryTree,
+        QueryTreeBuilderFunction queryTreeBuilder,
         String expectedResult
     ) {
         this.datasources = datasources;
         this.testDatasource = testDatasource;
         this.queryString = queryString;
-        this.queryTree = queryTree;
+        this.queryTreeBuilder = queryTreeBuilder;
         this.expectedResult = expectedResult;
     }
 
     private final Datasources datasources;
-    private final TestDatasource testDatasource;
+    private final TestDatasource<TWrapper> testDatasource;
+    private final QueryTreeBuilderFunction queryTreeBuilder;
     private final String queryString;
-    private final QueryNode queryTree;
     private final String expectedResult;
 
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -74,21 +82,8 @@ public class QueryCustomTreeTest {
         final List<Set<PatternForKind>> plans = QueryPlanner.run(extracted);
 
         final var plan = plans.get(0);
-        final var patternForKind = plan.stream().findFirst().get();
 
-        // TODO
-        var queryTree = new DatasourceNode(
-            new FilterNode(
-                new PatternNode(
-                    plan,
-                    schema,
-                    List.of(),
-                    patternForKind.root.term
-                ),
-                new Filter.ValueFilter((Variable)patternForKind.root.children().stream().findFirst().get().term, List.of("o_100"))
-            ),
-            datasource
-        );
+        final var queryTree = queryTreeBuilder.build(schema, datasource, plan);
 
         // ! the rest is left unchanged
         final QueryResult selection = QueryResolver.run(query.context, queryTree);
