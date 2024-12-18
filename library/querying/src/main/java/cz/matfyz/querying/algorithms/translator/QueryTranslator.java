@@ -70,13 +70,24 @@ public class QueryTranslator implements QueryVisitor<Void> {
             wrapper.addFilter(property, new Constant(valueFilter.allowedValues()), ComparisonOperator.Equal);
         }
 
+        // propagate (it probably doesn't matter whether before or after processing this node)
+        node.child.accept(this);
+
         return null;
     }
 
     private Property createProperty(Term term) {
         if (term instanceof Variable variable) {
-            // TODO
-            return new Property(null, null, null);
+            // TODO: is the retyping to Variable needed? This can be applied to any term (at least type-wise).
+            final var ctx = context.getContext(variable);
+            final var mappings = ctx.mappings();
+            final var signatures = ctx.signatures();
+
+            if (signatures.size() != 1) {
+                throw new UnsupportedOperationException("Cannot choose between multiple possible signatures.");
+            }
+
+            return new Property(mappings.get(0), signatures.get(0), null);
         }
 
         if (term instanceof Aggregation aggregation) {

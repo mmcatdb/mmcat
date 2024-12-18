@@ -2,6 +2,7 @@ package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -120,13 +121,13 @@ public class SchemaExtractor {
             .map(kind -> {
                 final var rootObject = kind.rootObject();
                 final var rootNode = PatternObject.createRoot(rootObject, keyToTerm.get(rootObject.key()));
-                processComplexProperty(rootNode, kind.accessPath());
+                processComplexProperty(rootNode, kind, Signature.createEmpty(), kind.accessPath());
 
                 return new PatternForKind(kind, rootNode);
             }).toList();
     }
 
-    private void processComplexProperty(PatternObject node, ComplexProperty path) {
+    private void processComplexProperty(PatternObject node, Mapping kind, Signature prevSignature, ComplexProperty path) {
         path.subpaths().stream()
             .forEach(subpath -> {
                 // TODO - is this going to work? Because it might not be possible to browse a database with composed signatures only.
@@ -134,19 +135,21 @@ public class SchemaExtractor {
                 //     return;
 
                 var currentNode = node;
+                var nextSignature = prevSignature;
                 for (final BaseSignature baseSignature : subpath.signature().toBases()) {
                     if (!newSchema.hasEdge(baseSignature))
                         return;
 
+                    nextSignature = nextSignature.concatenate(baseSignature);
                     final SchemaEdge edge = schema.getEdge(baseSignature);
-                    final Term childTerm = getOrCreateCodTermForEdge(edge);
+                    final Term childTerm = getOrCreateCodTermForEdge(edge, kind, nextSignature);
 
                     currentNode = currentNode.getOrCreateChild(edge, childTerm);
                 }
                 // If the subpath is an auxiliary property, the signature split leads to an empty list. Therefore, it's automatically skipped and we continue with its children.
 
                 if (subpath instanceof ComplexProperty complex)
-                    processComplexProperty(currentNode, complex);
+                    processComplexProperty(currentNode, kind, nextSignature, complex);
             });
     }
 
@@ -155,16 +158,15 @@ public class SchemaExtractor {
      * The only valid reason for it to be missing is that the object was added during the extraction because it's an identifier of some other object.
      * The created variable is a variable only - no triple is created for it.
      */
-    private Term getOrCreateCodTermForEdge(SchemaEdge edge) {
-        final Term foundTerm = keyToTerm.get(edge.to().key());
-        if (foundTerm != null)
-            return foundTerm;
+    private Term getOrCreateCodTermForEdge(SchemaEdge edge, Mapping kind, Signature signature) {
+        Term term = keyToTerm.get(edge.to().key());
+        if (term == null) {
+            term = clause.termBuilder.generatedVariable();
+            keyToTerm.put(edge.to().key(), term);
+        }
 
-        final var newVariable = clause.termBuilder.generatedVariable();
-        context.addTerm(newVariable, edge.to());
-        keyToTerm.put(edge.to().key(), newVariable);
-
-        return newVariable;
+        context.addOrUpdateTerm(term, edge.to(), kind, signature);
+        return term;
     }
 
 }

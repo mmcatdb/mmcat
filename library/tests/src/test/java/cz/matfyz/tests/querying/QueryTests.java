@@ -274,6 +274,29 @@ class QueryTests {
     }
 
     @Test
+    void filterPostgreSQL() {
+        new QueryCustomTreeTest(
+            datasources,
+            datasources.postgreSQL(),
+            """
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = \"o_100\")
+                }
+            """,
+            null, // TODO
+            """
+                [ {
+                    "number": "o_100"
+                } ]
+            """).run();
+    }
+
+    @Test
     void filter() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
