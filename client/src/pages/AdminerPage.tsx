@@ -1,60 +1,36 @@
 import { useEffect, useReducer, useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Spinner } from '@nextui-org/react';
 import { getStateFromURLParams, getURLParamsFromState } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { KindMenu } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
-import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
-import { View } from '@/types/adminer/View';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
+export async function adminerLoader(): Promise<Datasource[]> {
+    const response = await api.datasources.getAllDatasources({});
+
+    if (!response.status)
+        throw new Error('Failed to load datasources');
+
+    return response.data;
+}
+
 export function AdminerPage() {
+    const allDatasources = useLoaderData() as Datasource[];
     const [ searchParams, setSearchParams ] = useSearchParams();
-    const [ state, dispatch ] = useReducer(reducer, {
-        form: { limit: 50, filters: [] },
-        active: { limit: 50, filters: [] },
-        view: View.table,
-    });
+    const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
-    const [ allDatasources, setAllDatasources ] = useState<Datasource[]>();
 
-    useMemo(() => {
-        const stateFromParams = getStateFromURLParams(searchParams);
-
-        if (stateFromParams.active !== state.active || stateFromParams.datasourceId !== state.datasourceId || stateFromParams.kindName !== state.kindName || stateFromParams.view !== state.view)
-            dispatch({ type: 'initialize', state: stateFromParams });
-    }, [ searchParams ]);
-
-    useMemo(() => {
+    useEffect(() => {
         const params = getURLParamsFromState(state);
 
         if (params !== searchParams)
             setSearchParams(params);
     }, [ state ]);
-
-    useEffect(() => {
-        (async () => {
-            try {
-                while (true) {
-                    const response = await api.datasources.getAllDatasources({});
-
-                    if (response.status && response.data){
-                        setAllDatasources(response.data);
-                        return;
-                    }
-
-                    await new Promise((resolve) => setTimeout(resolve, 100));
-                }
-            }
-            catch {
-                console.error('Failed to load datasources data');
-            }
-        })();
-    }, []);
 
     useMemo(() => {
         setDatasource(allDatasources?.find((source) => source.id === state.datasourceId));
@@ -84,17 +60,9 @@ export function AdminerPage() {
                 )}
             </div>
 
-            {datasource && state.kindName && (
+            {datasource && state.kindName && typeof state.kindName === 'string' &&(
                 <div className='mt-5'>
-                    <div className='mt-5'>
-                        <FilterForm state={state} dispatch={dispatch}/>
-                    </div>
-
-                    {typeof state.kindName === 'string' && (
-                        <div className='mt-5'>
-                            <DatabaseView state={state}/>
-                        </div>
-                    )}
+                    <DatabaseView state={state} dispatch={dispatch}/>
                 </div>
             )}
         </div>

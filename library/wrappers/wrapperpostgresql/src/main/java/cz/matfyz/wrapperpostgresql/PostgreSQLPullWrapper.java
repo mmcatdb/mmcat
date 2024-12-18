@@ -6,6 +6,8 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -24,13 +26,16 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
@@ -144,110 +149,117 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    private JSONObject getResultObject(ResultSet countResultSet, JSONArray resultData) throws JSONException, SQLException {
-        int rowCount = 0;
-
-        if (countResultSet.next()) {
-            rowCount = countResultSet.getInt(1);
-        }
-
-        JSONObject metadata = new JSONObject();
-        metadata.put("rowCount", rowCount);
-
-        JSONObject result = new JSONObject();
-        result.put("metadata", metadata);
-        result.put("data", resultData);
-
-        return result;
-    }
-
-    @Override public JSONObject getKindNames(String limit, String offset) {
+    @Override public KindNameResponse getKindNames(String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
             final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(query);
-            JSONArray resultData = new JSONArray();
+            List<String> data = new ArrayList<>();
 
             while (resultSet.next()) {
                 String kindName = resultSet.getString(1);
-                resultData.put(kindName);
+                data.add(kindName);
             }
 
-            String countQuery = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public';";
-            ResultSet countResultSet = stmt.executeQuery(countQuery);
-
-            return getResultObject(countResultSet, resultData);
+            return new KindNameResponse(data);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);
 		}
     }
 
-    @Override public JSONObject getKind(String kindName, String limit, String offset) {
-        return getQuery("FROM \"" + kindName + "\"", limit, offset);
+    private Set<String> getColumnNames(Statement stmt, String kindName) throws SQLException {
+        Set<String> columns = new HashSet<>();
+
+        String query = String.format("""
+            SELECT
+                column_name
+            FROM
+                information_schema.columns
+            WHERE
+                table_schema = 'public'
+                AND table_name = '%s'
+            ORDER BY
+                ordinal_position;
+
+            """, kindName);
+        ResultSet resultSet = stmt.executeQuery(query);
+
+        while (resultSet.next()) {
+            String column = resultSet.getString(1);
+            columns.add(column);
+        }
+
+        return columns;
     }
 
     private String createWhereClause(List<AdminerFilter> filters) {
         StringBuilder whereClause = new StringBuilder();
 
-        if (filters != null && !filters.isEmpty()) {
-            for (int i = 0; i < filters.size(); i++) {
-                AdminerFilter filter = filters.get(i);
+        if (filters == null || filters.isEmpty()) {
+            return "";
+        }
 
-                if (i == 0) {
-                    whereClause.append("WHERE ");
-                } else {
-                    whereClause.append("AND ");
-                }
+        for (int i = 0; i < filters.size(); i++) {
+            AdminerFilter filter = filters.get(i);
 
-                whereClause.append(filter.columnName())
-                           .append(" ")
-                           .append(filter.operator())
-                           .append(" '")
-                           .append(filter.columnValue())
-                           .append("' ");
+            if (i == 0) {
+                whereClause.append("WHERE ");
+            } else {
+                whereClause.append("AND ");
             }
+
+            whereClause.append(filter.columnName())
+                       .append(" ")
+                       .append(filter.operator())
+                       .append(" '")
+                       .append(filter.columnValue())
+                       .append("' ");
         }
 
         return whereClause.toString();
     }
 
-    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filter, String limit, String offset) {
-        String whereClause = createWhereClause(filter);
-        return getQuery("FROM \"" + kindName +  "\" " + whereClause, limit, offset);
-    }
-
-    private JSONObject getQuery(String queryBase, String limit, String offset) {
+    @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            String selectQuery = "SELECT * " + queryBase + " LIMIT " + limit + " OFFSET " + offset + ";";
+            List<Map<String, String>> data = new ArrayList<>();
+
+            String whereClause = createWhereClause(filter);
+            String selectQuery = "SELECT * FROM \"" + kindName +  "\" " + whereClause + " LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(selectQuery);
-            JSONArray resultData = new JSONArray();
 
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
 
             while (resultSet.next()) {
-                JSONObject jsonObject = new JSONObject();
+                Map<String, String> item = new HashMap<>();
 
                 for (int i = 1; i <= columnCount; i++) {
                     String columnName = metaData.getColumnName(i);
-                    Object columnValue = resultSet.getObject(i);
+                    String columnValue = resultSet.getString(i);
 
-                    jsonObject.put(columnName, columnValue);
+                    item.put(columnName, columnValue);
                 }
 
-                resultData.put(jsonObject);
+                data.add(item);
             }
 
-            String countQuery = "SELECT COUNT(*) " + queryBase + ";";
-            ResultSet countResultSet = stmt.executeQuery(countQuery);
+            int itemCount = 0;
+            String countQuery = "SELECT COUNT(*) FROM \"" + kindName +  "\" " + whereClause + ";";
 
-            return getResultObject(countResultSet, resultData);
+            ResultSet countResultSet = stmt.executeQuery(countQuery);
+            if (countResultSet.next()) {
+                itemCount = countResultSet.getInt(1);
+            }
+
+            Set<String> propertyNames = getColumnNames(stmt, kindName);
+
+            return new TableResponse(data, itemCount, propertyNames);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

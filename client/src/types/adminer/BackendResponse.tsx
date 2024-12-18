@@ -1,24 +1,27 @@
-export type BackendResponse = BackendTableResponse | BackendDocumentResponse | BackendGraphResponse;
+export type DataResponse = TableResponse | DocumentResponse | GraphResponse;
 
-export type BackendTableResponse = {
+export type TableResponse = {
     metadata: {
-        rowCount: number;
+        itemCount: number;
+        propertyNames: string[] | undefined;
         [key: string]: unknown;
     };
     data: string[];
 };
 
-type BackendDocumentResponse = {
+export type DocumentResponse = {
     metadata: {
-        rowCount: number;
+        itemCount: number;
+        propertyNames: string[] | undefined;
         [key: string]: unknown;
     };
     data: Record<string, unknown>[];
 };
 
-type BackendGraphResponse = {
+export type GraphResponse = {
     metadata: {
-        rowCount: number;
+        itemCount: number;
+        propertyNames: string[] | undefined;
         [key: string]: unknown;
     };
     data: {

@@ -1,46 +1,26 @@
-import { useCallback, useEffect } from 'react';
-import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
-import { useFetchData } from './useFetchData';
-import type { BackendTableResponse } from '@/types/adminer/BackendResponse';
-import type { FetchKindParams } from '@/types/adminer/FetchParams';
-import { type AdminerReference } from '@/types/adminer/AdminerReference';
-import { api } from '@/api';
+import { useEffect } from 'react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
+import type { TableResponse, GraphResponse } from '@/types/adminer/BackendResponse';
+import type { AdminerReference } from '@/types/adminer/AdminerReference';
 
 type DatabaseTableProps = Readonly<{
-    urlParams: FetchKindParams;
-    setRowCount: (rowCount: number) => void;
+    fetchedData: TableResponse | GraphResponse;
+    setItemCount: (itemCount: number) => void;
     references: AdminerReference | undefined;
 }>;
 
-export function DatabaseTable({ urlParams, setRowCount, references }: DatabaseTableProps ) {
-    const fetchFunction = useCallback(() => {
-        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindId: urlParams.kindId }, urlParams.queryParams);
-    }, [ urlParams ]);
-
-    let { fetchedData, loading, error } = useFetchData(fetchFunction);
-
+export function DatabaseTable({ fetchedData, setItemCount, references }: DatabaseTableProps ) {
     useEffect(() => {
-        const count = fetchedData?.metadata.rowCount;
-        count ? setRowCount(count) : setRowCount(0);
+        const count = fetchedData?.metadata.itemCount;
+        count ? setItemCount(count) : setItemCount(0);
     }, [ fetchedData ]);
 
-    if (loading) {
-        return (
-            <div className='h-10 flex items-center justify-center'>
-                <Spinner />
-            </div>
-        );
-    }
-
-    if (error)
-        return <p>{error}</p>;
-
     if (fetchedData === undefined || fetchedData.data.length === 0)
-        return <p>No data to display.</p>;
+        return <p>No rows to display.</p>;
 
     // If the data are for graph database, we want to display just properties in the table view
     if (fetchedData.data.every((item: any) => 'properties' in item)){
-        const modifiedData = { metadata: fetchedData.metadata, data: [] } as BackendTableResponse;
+        const modifiedData = { metadata: fetchedData.metadata, data: [] } as TableResponse;
 
         for (const element of fetchedData.data)
             modifiedData.data.push(element.properties);

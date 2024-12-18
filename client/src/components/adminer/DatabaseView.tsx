@@ -1,16 +1,15 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Spinner, Pagination } from '@nextui-org/react';
+import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { Operator } from '@/types/adminer/ColumnFilter';
 import { View } from '@/types/adminer/View';
-import type { AdminerState } from '@/types/adminer/Reducer';
-import type { FetchKindParams } from '@/types/adminer/FetchParams';
+import { api } from '@/api';
 import { useFetchReferences } from './useFetchReferences';
-
-type DatabaseViewProps = Readonly<{
-    state: AdminerState;
-}>;
+import { useFetchData } from './useFetchData';
+import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
+import type { FetchKindParams } from '@/types/adminer/FetchParams';
 
 function getUrlParams(state: AdminerState, offset: number) {
     const filterExist = state.active.filters?.some((filter) => {
@@ -32,36 +31,47 @@ function getUrlParams(state: AdminerState, offset: number) {
     return urlParams;
 }
 
-export function DatabaseView({ state }: DatabaseViewProps) {
-    const { references, loading, error } = useFetchReferences(state);
+type DatabaseViewProps = Readonly<{
+    state: AdminerState;
+    dispatch: React.Dispatch<AdminerStateAction>;
+}>;
+
+export function DatabaseView({ state, dispatch }: DatabaseViewProps) {
+    const { references, refLoading, refError } = useFetchReferences(state);
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ offset, setOffset ] = useState<number>(0);
-    const [ rowCount, setRowCount ] = useState<number | undefined>();
+    const [ itemCount, setItemCount ] = useState<number | undefined>();
     const [ totalPages, setTotalPages ] = useState<number>(1);
 
     useEffect(() => {
-        if (rowCount)
-            setTotalPages(Math.ceil(rowCount / state.active.limit));
+        if (itemCount)
+            setTotalPages(Math.ceil(itemCount / state.active.limit));
 
         if (currentPage > totalPages) {
             setCurrentPage(totalPages);
             setOffset(state.active.limit * (totalPages - 1));
         }
-    }, [ rowCount, offset, currentPage, totalPages, state.active.limit ]);
+    }, [ itemCount, offset, currentPage, totalPages, state.active.limit ]);
 
     const urlParams = useMemo(() => {
         return getUrlParams(state, offset);
     }, [ state.active, state.datasourceId, state.kindName, state.view, offset ]);
 
+    const fetchFunction = useCallback(() => {
+        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindId: urlParams.kindId }, urlParams.queryParams);
+    }, [ urlParams ]);
+
+    const { fetchedData, loading, error } = useFetchData(fetchFunction);
+
     useEffect(() => {
-        setRowCount(undefined);
+        setItemCount(undefined);
         setTotalPages(1);
         setCurrentPage(1);
         setOffset(0);
     }, [ state.active, state.datasourceId, state.kindName, state.view ]);
 
-    if (loading) {
+    if (loading || refLoading) {
         return (
             <div className='h-10 flex items-center justify-center'>
                 <Spinner />
@@ -71,16 +81,22 @@ export function DatabaseView({ state }: DatabaseViewProps) {
 
     if (error)
         return <p>{error}</p>;
+    if (refError)
+        return <p>{refError}</p>;
 
     return (
         <div className='mt-5'>
+            <div className='mt-5'>
+                <FilterForm state={state} dispatch={dispatch}/>
+            </div>
+
             {state.view === View.table ? (
-                <DatabaseTable urlParams={urlParams} setRowCount={setRowCount} references={references}/>
+                <DatabaseTable fetchedData={fetchedData} setItemCount={setItemCount} references={references}/>
             ) : (
-                <DatabaseDocument urlParams={urlParams} setRowCount={setRowCount} references={references}/>
+                <DatabaseDocument fetchedData={fetchedData} setItemCount={setItemCount} references={references}/>
             )}
 
-            {rowCount !== undefined && rowCount > 0 && (
+            {itemCount !== undefined && itemCount > 0 && (
                 <div className='mt-5 inline-flex gap-3 items-center'>
                     <Pagination
                         total={totalPages}
@@ -91,7 +107,7 @@ export function DatabaseView({ state }: DatabaseViewProps) {
                         }}
                         color='primary'
                     />
-                    <p>Number of rows: {rowCount}</p>
+                    <p>Number of rows: {itemCount}</p>
                 </div>
             )}
         </div>

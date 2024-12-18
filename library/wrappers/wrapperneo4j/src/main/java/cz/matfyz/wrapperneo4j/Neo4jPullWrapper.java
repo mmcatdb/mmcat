@@ -7,6 +7,9 @@ import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.GraphResponse;
+import cz.matfyz.core.adminer.GraphResponse.GraphElement;
+import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.ForeignKey;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -18,18 +21,20 @@ import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.swing.JList;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
@@ -257,187 +262,88 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
     }
 
-    private JSONObject nodeToJson(Value node) {
-        try {
-            JSONObject json = new JSONObject();
+    private GraphElement getNodeProperties(Value node) {
+        String id = node.asNode().elementId().split(":")[2];
 
-            // Add the element ID
-            json.put("id", node.asNode().elementId().split(":")[2]);
+        Map<String, Object> properties = new HashMap<>();
+        node.asNode().asMap().forEach((key, value) -> {
+            properties.put(key, value);
+        });
 
-            // Add labels
-            JSONArray labelsArray = new JSONArray();
-            for (final var label : node.asNode().labels()) {
-                labelsArray.put(label);
-            }
-            json.put("labels", labelsArray);
-
-            // Add properties
-            JSONObject properties = new JSONObject();
-            node.asNode().asMap().forEach((key, value) -> {
-                try {
-                    properties.put(key, value);
-                } catch (JSONException e) {
-                    throw QueryException.message("Error when getting properties.");
-                }
-            });
-            json.put("properties", properties);
-
-            return json;
+        List<String> labels = new ArrayList<>();
+        for (final var label : node.asNode().labels()) {
+            labels.add(label);
         }
-        catch (JSONException e){
-            throw QueryException.message("Error when getting node data.");
-        }
+        properties.put("labels", labels);
+
+        return new GraphElement(id, properties);
     }
 
-    private JSONObject relationshipToJson(Value relationship) {
-        try {
-            JSONObject json = new JSONObject();
+    private GraphElement getRelationshipProperties(Value relationship) {
+        String id = relationship.asRelationship().elementId().split(":")[2];
 
-            // Add the element ID
-            json.put("id", relationship.asRelationship().elementId().split(":")[2]);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("type", relationship.asRelationship().type());
 
-            // Add type
-            json.put("type", relationship.asRelationship().type());
+        // Add IDs of start and end node
+        properties.put("startNodeId", relationship.asRelationship().startNodeElementId().split(":")[2]);
+        properties.put("endNodeId", relationship.asRelationship().endNodeElementId().split(":")[2]);
 
-            // Add start and end node IDs
-            json.put("startNodeId", relationship.asRelationship().startNodeElementId().split(":")[2]);
-            json.put("endNodeId", relationship.asRelationship().endNodeElementId().split(":")[2]);
+        relationship.asRelationship().asMap().forEach((key, value) -> {
+            properties.put(key, value);
+        });
 
-            // Add properties
-            JSONObject properties = new JSONObject();
-            relationship.asRelationship().asMap().forEach((key, value) -> {
-                try {
-                    properties.put(key, value);
-                } catch (JSONException e) {
-                    throw QueryException.message("Error when getting properties.");
-                }
-            });
-            json.put("properties", properties);
-
-            return json;
-        }
-        catch (JSONException e){
-            throw QueryException.message("Error when getting relation data.");
-        }
-
+        return new GraphElement(id, properties);
     }
 
-    private JSONObject getResultObject(Result countQueryResult, JSONArray resultData) throws JSONException {
-        int recordNumber = countQueryResult.next().get("recordCount").asInt();
-
-        JSONObject metadata = new JSONObject();
-        metadata.put("rowCount", recordNumber);
-
-        JSONObject result = new JSONObject();
-        result.put("metadata", metadata);
-        result.put("data", resultData);
-
-        return result;
-    }
-
-    @Override public JSONObject getKindNames(String limit, String offset) {
+    @Override public KindNameResponse getKindNames(String limit, String offset) {
         try (Session session = provider.getSession()) {
-            JSONArray resultData = new JSONArray();
+            List<String> data = new ArrayList<>();
 
             Result queryResult = session.run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label SKIP " + offset + " LIMIT " + limit + ";");
             while (queryResult.hasNext()) {
                 Record queryRecord = queryResult.next();
-                resultData.put(queryRecord.get("label").asString());
+                data.add(queryRecord.get("label").asString());
             }
 
-            Result countQueryResult = session.run("MATCH (n) UNWIND labels(n) AS label RETURN COUNT(DISTINCT label) AS recordCount;");
-
-            return getResultObject(countQueryResult, resultData);
+            return new KindNameResponse(data);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
         }
     }
 
-    private JSONObject getNodes(String limit, String offset) {
-        try (Session session = provider.getSession()) {
-            JSONArray resultData = new JSONArray();
+    private Set<String> getKeyNames(Session session, String matchClause) {
+        Set<String> keys = new HashSet<>();
 
-            var allNodes = session.executeRead(tx -> {
-                var query = new Query("MATCH (a) RETURN a SKIP " + offset + " LIMIT " + limit + ";");
-
-                return tx.run(query).stream().map(node -> {
-                    return nodeToJson(node.get("a"));
-                }).toList();
-            });
-            allNodes.forEach(resultData::put);
-
-            Result countQueryResult = session.run("MATCH (a) RETURN COUNT(a) AS recordCount;");
-
-            return getResultObject(countQueryResult, resultData);
+        Result queryResult = session.run(String.format("""
+            %s
+            UNWIND keys(a) AS key
+            RETURN DISTINCT key
+            ORDER BY key;
+            """, matchClause));
+        while (queryResult.hasNext()) {
+            Record queryRecord = queryResult.next();
+            keys.add(queryRecord.get("key").asString());
         }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
-        }
+
+        return keys;
     }
 
-    private JSONObject getRelationships(String limit, String offset) {
-        try (Session session = provider.getSession()) {
-            JSONArray resultData = new JSONArray();
-
-            var allNodes = session.executeRead(tx -> {
-                var query = new Query("MATCH ()-[r]->() RETURN r SKIP " + offset + " LIMIT " + limit + ";");
-
-                return tx.run(query).stream().map(node -> {
-                    return relationshipToJson(node.get("r"));
-                }).toList();
-            });
-            allNodes.forEach(resultData::put);
-
-            Result countQueryResult = session.run("MATCH ()-[r]->() RETURN COUNT(r) AS recordCount;");
-
-            return getResultObject(countQueryResult, resultData);
-        }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
-        }
+    private Set<String> getNodeKeyNames(Session session) {
+        return getKeyNames(session, "MATCH (a)");
     }
 
-    private JSONObject getByLabel(String label, String limit, String offset) {
-        try (Session session = provider.getSession()) {
-            JSONArray resultData = new JSONArray();
-
-            var allNodes = session.executeRead(tx -> {
-                var query = new Query("MATCH (a:" + label + ") RETURN a SKIP " + offset + " LIMIT " + limit + ";");
-
-                return tx.run(query).stream().map(node -> {
-                    return nodeToJson(node.get("a"));
-                }).toList();
-            });
-            allNodes.forEach(resultData::put);
-
-            Result countQueryResult = session.run("MATCH (a:" + label + ") RETURN COUNT(a) AS recordCount;");
-
-            return getResultObject(countQueryResult, resultData);
-        }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
-        }
-    }
-
-    @Override public JSONObject getKind(String kindName, String limit, String offset) {
-        if (kindName.equals("nodes")) {
-            return getNodes(limit, offset);
-        }
-
-        if (kindName.equals("relationships") || kindName.equals("unlabeled")) {
-            return getRelationships(limit, offset);
-        }
-
-        return getByLabel(kindName, limit, offset);
+    private Set<String> getRelationshipKeyNames(Session session) {
+        return getKeyNames(session, "MATCH ()-[a]->()");
     }
 
     private String createWhereClause(List<AdminerFilter> filters, String name) {
-        if (filters.isEmpty()) {
-            throw new IllegalArgumentException("Filters cannot be empty");
+        if (filters == null || filters.isEmpty()) {
+            return "";
         }
 
-        StringBuilder whereClause = new StringBuilder();
+        StringBuilder whereClause = new StringBuilder("WHERE ");
 
         for (int i = 0; i < filters.size(); i++) {
             AdminerFilter filter = filters.get(i);
@@ -451,83 +357,53 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return whereClause.toString();
     }
 
-    private JSONObject getNode(List<AdminerFilter> filters, String limit, String offset) {
-    try (Session session = provider.getSession()) {
-        JSONArray resultData = new JSONArray();
-
+    private GraphResponse getNode(Session session, String queryBase, List<AdminerFilter> filters, String limit, String offset) {
         String whereClause = createWhereClause(filters, "a");
-        var allNodes = session.executeRead(tx -> {
-            var query = new Query("MATCH (a) WHERE " + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
+        List<GraphElement> data = session.executeRead(tx -> {
+            var query = new Query(queryBase + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
-            return tx.run(query).stream().map(node -> {
-                return nodeToJson(node.get("a"));
-            }).toList();
+            return tx.run(query).stream()
+                .map(node -> getNodeProperties(node.get("a")))
+                .toList();
         });
-        allNodes.forEach(resultData::put);
 
-        Result countQueryResult = session.run("MATCH (a) WHERE " + whereClause + " RETURN COUNT(a) AS recordCount;");
+        Result countQueryResult = session.run(queryBase + " RETURN COUNT(a) AS recordCount;");
+        int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        return getResultObject(countQueryResult, resultData);
-    } catch (Exception e) {
-        throw PullForestException.innerException(e);
+        Set<String> keys = getNodeKeyNames(session);
+
+        return new GraphResponse(data, itemCount, keys);
     }
-}
 
-private JSONObject getRelationship(List<AdminerFilter> filters, String limit, String offset) {
-    try (Session session = provider.getSession()) {
-        JSONArray resultData = new JSONArray();
-
+    private GraphResponse getRelationship(Session session, List<AdminerFilter> filters, String limit, String offset) {
         String whereClause = createWhereClause(filters, "r");
-        var allNodes = session.executeRead(tx -> {
-            var query = new Query("MATCH ()-[r]->() WHERE " + whereClause + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
+        List<GraphElement> data = session.executeRead(tx -> {
+            var query = new Query("MATCH ()-[r]->() " + whereClause + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
-            return tx.run(query).stream().map(node -> {
-                return relationshipToJson(node.get("r"));
-            }).toList();
+            return tx.run(query).stream()
+                .map(relation -> getRelationshipProperties(relation.get("r")))
+                .toList();
         });
-        allNodes.forEach(resultData::put);
 
-        Result countQueryResult = session.run("MATCH ()-[r]->() WHERE " + whereClause + " RETURN COUNT(r) AS recordCount;");
+        Result countQueryResult = session.run("MATCH ()-[r]->() " + whereClause + " RETURN COUNT(r) AS recordCount;");
+        int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        return getResultObject(countQueryResult, resultData);
-    } catch (Exception e) {
-        throw PullForestException.innerException(e);
+        Set<String> keys = getRelationshipKeyNames(session);
+
+        return new GraphResponse(data, itemCount, keys);
     }
-}
 
-private JSONObject getByLabelAndId(String label, List<AdminerFilter> filters, String limit, String offset) {
-    try (Session session = provider.getSession()) {
-        JSONArray resultData = new JSONArray();
+    @Override public GraphResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
+        try (Session session = provider.getSession()) {
+            if (kindName.equals("relationships") || kindName.equals("unlabeled")) {
+                return getRelationship(session, filters, limit, offset);
+            }
 
-        String whereClause = createWhereClause(filters, "a");
-        var allNodes = session.executeRead(tx -> {
-            var query = new Query("MATCH (a:" + label + ") WHERE " + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
-
-            return tx.run(query).stream().map(node -> {
-                return nodeToJson(node.get("a"));
-            }).toList();
-        });
-        allNodes.forEach(resultData::put);
-
-        Result countQueryResult = session.run("MATCH (a:" + label + ") WHERE " + whereClause + " RETURN COUNT(a) AS recordCount;");
-
-        return getResultObject(countQueryResult, resultData);
-    } catch (Exception e) {
-        throw PullForestException.innerException(e);
-    }
-}
-
-
-    @Override public JSONObject getRows(String kindName, List<AdminerFilter> filters, String limit, String offset) {
-        if (kindName.equals("nodes")) {
-            return getNode(filters, limit, offset);
+            String queryBase = kindName.equals("nodes") ? "MATCH (a) " : "MATCH (a:" + kindName + ") ";
+            return getNode(session, queryBase, filters, limit, offset);
+        } catch (Exception e) {
+            throw PullForestException.innerException(e);
         }
-
-        if (kindName.equals("relationships")) {
-            return getRelationship(filters, limit, offset);
-        }
-
-        return getByLabelAndId(kindName, filters, limit, offset);
     }
 
     @Override public List<ForeignKey> getForeignKeys(String kindName) {

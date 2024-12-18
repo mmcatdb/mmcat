@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { type AdminerState } from '@/types/adminer/Reducer';
-import { type AdminerReference } from '@/types/adminer/AdminerReference';
+import type { AdminerState } from '@/types/adminer/Reducer';
+import type { AdminerReference } from '@/types/adminer/AdminerReference';
 
 export function useFetchReferences( state: AdminerState ) {
     const [ references, setReferences ] = useState<AdminerReference | undefined>();
@@ -16,5 +16,5 @@ export function useFetchReferences( state: AdminerState ) {
         })();
     }, [ state.datasourceId, state.kindName ]);
 
-    return { references, loading, error };
+    return { references, refLoading: loading, refError: error };
 }
