@@ -1,8 +1,8 @@
-export type ColumnFilter = {
+export type PropertyFilter = {
     id: number;
-    columnName: string;
+    propertyName: string;
     operator : Operator;
-    columnValue: string;
+    propertyValue: string;
 };
 
 export enum Operator {

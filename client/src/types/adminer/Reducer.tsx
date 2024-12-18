@@ -1,11 +1,11 @@
-import type { ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import type { PropertyFilter, Operator } from '@/types/adminer/PropertyFilter';
 import type { Datasource } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
 import type { Id } from '@/types/id';
 
 export type KindFilterState = {
     limit: number;
-    filters: ColumnFilter[];
+    filters: PropertyFilter[];
 }
 
 export type AdminerState = {
@@ -33,7 +33,7 @@ type InputAction = AdminerTypedAction<'input', {
     field: 'limit';
     value: number;
 } | {
-    field: 'columnName' | 'columnValue';
+    field: 'propertyName' | 'propertyValue';
     id: number;
     value: string;
 } | {

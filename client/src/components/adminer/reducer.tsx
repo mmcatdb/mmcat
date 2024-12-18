@@ -1,6 +1,6 @@
 import { getNewView } from './Views';
 import { View } from '@/types/adminer/View';
-import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import { type PropertyFilter, Operator } from '@/types/adminer/PropertyFilter';
 import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 
 export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {
@@ -79,11 +79,11 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
         switch (formAction) {
         case 'add_filter': {
             const nextId = state.form.filters ? state.form.filters.length : 0;
-            const newFilter: ColumnFilter = {
+            const newFilter: PropertyFilter = {
                 id: nextId,
-                columnName: '',
+                propertyName: '',
                 operator: Operator.eq,
-                columnValue: '',
+                propertyValue: '',
             };
             return {
                 ...state,
