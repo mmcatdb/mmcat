@@ -1,19 +1,18 @@
-import { type Dispatch, type SetStateAction, useMemo } from 'react';
+import { type Dispatch, useCallback, useMemo, useRef } from 'react';
 import { cn } from './utils';
-import { type Edge, type GraphEngine, type GraphOptions, type GraphValue, isPointInBox, type Node, positionToOffset, type ReactiveGraphState, useGraphEngine } from './useGraphEngine';
+import { computeEdgeStyle, type Edge, type GraphAction, type GraphEngine, type GraphOptions, type GraphValue, isPointInBox, type Node, positionToOffset, type ReactiveGraphState, useGraphEngine } from './useGraphEngine';
 
 type GraphDisplayProps = Readonly<{
-    /** The public value that the graph exposes. Its updates are reflected in the graph display. */
-    value: GraphValue;
-    /** The setter for the public value. Propagates the changes to the parent component. */
-    setValue: Dispatch<SetStateAction<GraphValue>>;
+    dispatch: Dispatch<GraphAction>;
+    /** The public graph that the graph exposes. Its updates are reflected in the graph display. */
+    graph: GraphValue;
     /** User preferences. The graph engine is restarted whenever they change, so make sure they are constant or at least memoized! */
     options?: GraphOptions;
     className?: string;
 }>;
 
-export function GraphDisplay({ value, setValue, options, className }: GraphDisplayProps) {
-    const [ state, engine ] = useGraphEngine(value, setValue, options);
+export function GraphDisplay({ dispatch, graph, options, className }: GraphDisplayProps) {
+    const [ state, engine ] = useGraphEngine(dispatch, graph, options);
 
     return (
         <div
@@ -21,11 +20,11 @@ export function GraphDisplay({ value, setValue, options, className }: GraphDispl
             ref={engine.canvasRef}
             onMouseDown={e => engine.handleCanvasMousedown(e)}
         >
-            {value.nodes.map(node => (
-                <NodeDisplay key={node.id} node={node} value={value} state={state} engine={engine} />
+            {graph.nodes.map(node => (
+                <NodeDisplay key={node.id} node={node} graph={graph} state={state} engine={engine} />
             ))}
-            {value.edges.map(edge => (
-                <EdgeDisplay key={edge.id} edge={edge} nodes={value.nodes} state={state} />
+            {graph.edges.map(edge => (
+                <EdgeDisplay key={edge.id} edge={edge} nodes={graph.nodes} state={state} engine={engine} />
             ))}
             <SelectionBox state={state} />
         </div>
@@ -34,21 +33,23 @@ export function GraphDisplay({ value, setValue, options, className }: GraphDispl
 
 type NodeDisplayProps = Readonly<{
     node: Node;
-    value: GraphValue;
+    graph: GraphValue;
     state: ReactiveGraphState;
     engine: GraphEngine;
 }>;
 
-function NodeDisplay({ node, value, state, engine }: NodeDisplayProps) {
+function NodeDisplay({ node, graph, state, engine }: NodeDisplayProps) {
+    const ref = useNodeRef(engine, node.id);
+
     const isDragging = !!state.drag && 'nodeId' in state.drag && state.drag.nodeId === node.id;
     // We want to highlight the node when it's being dragged or hovered, but not when other dragged node is over it.
     // Also, no selection is allowed when dragging.
     const isHightlightAllowed = (!state.drag || isDragging) && !state.select;
     const isInSelecBox = state.select && isPointInBox(node.position, state.select);
-    const isSelected = !!value.selectedNodes[node.id];
+    const isSelected = !!graph.selectedNodes[node.id];
 
     return (
-        <div className='absolute w-0 h-0 select-none z-10' style={positionToOffset(node.position, state.coordinates)}>
+        <div ref={ref} className='absolute w-0 h-0 select-none z-10' style={positionToOffset(node.position, state.coordinates)}>
             <div
                 className={cn('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white active:bg-cyan-300',
                     isHightlightAllowed && 'hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300',
@@ -68,16 +69,30 @@ function NodeDisplay({ node, value, state, engine }: NodeDisplayProps) {
     );
 }
 
-/** In pixels */
-const EDGE_OFFSET = 20;
+function useNodeRef(engine: GraphEngine, id: string) {
+    const ref = useRef<HTMLElement | null>(null);
+
+    const setNodeRef = useCallback((element: HTMLElement | null) => {
+        if (ref.current !== element)
+            engine.setNodeRef(id, element);
+
+        ref.current = element;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return setNodeRef;
+}
 
 type EdgeDisplayProps = Readonly<{
     edge: Edge;
     nodes: Node[];
     state: ReactiveGraphState;
+    engine: GraphEngine;
 }>;
 
-function EdgeDisplay({ edge, nodes, state }: EdgeDisplayProps) {
+function EdgeDisplay({ edge, nodes, state, engine }: EdgeDisplayProps) {
+    const ref = useEdgeRef(engine, edge.id);
+
     const cache = useMemo(() => {
         const from = nodes.find(node => node.id === edge.from);
         const to = nodes.find(node => node.id === edge.to);
@@ -91,25 +106,25 @@ function EdgeDisplay({ edge, nodes, state }: EdgeDisplayProps) {
         return null;
     }
 
-    const start = positionToOffset(cache.from.position, state.coordinates);
-    const end = positionToOffset(cache.to.position, state.coordinates);
-
-    const center = {
-        left: (start.left + end.left) / 2,
-        top: (start.top + end.top) / 2,
-    };
-    const x = end.left - start.left;
-    const y = end.top - start.top;
-    const angle = Math.atan2(y, x);
-    const width = Math.sqrt(x * x + y * y) - 2 * EDGE_OFFSET;
+    const { left, top, width, transform } = computeEdgeStyle(cache.from, cache.to, state.coordinates);
 
     return (
-        <div className='absolute w-0 h-0 select-none' style={center}>
-            <div className='absolute h-1 bg-slate-700 rounded-full' style={{ width, transform: `translateX(-50%) rotate(${angle}rad)` }}>
-
-            </div>
-        </div>
+        <div ref={ref} className='absolute h-1 bg-slate-700 rounded-full select-none' style={{ left, top, width, transform }} />
     );
+}
+
+function useEdgeRef(engine: GraphEngine, id: string) {
+    const ref = useRef<HTMLElement | null>(null);
+
+    const setEdgeRef = useCallback((element: HTMLElement | null) => {
+        if (ref.current !== element)
+            engine.setEdgeRef(id, element);
+
+        ref.current = element;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return setEdgeRef;
 }
 
 type SelectionBoxProps = Readonly<{

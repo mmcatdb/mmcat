@@ -9,7 +9,6 @@ import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Mapping } from '../mapping';
 import { ComparableSet } from '@/types/utils/ComparableSet';
 import type { DatasourceType, LogicalModel } from '../datasource';
-import { type GraphValue } from '@/components/useGraphEngine';
 
 export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
     schema: SerializedSchema;
@@ -294,21 +293,4 @@ function findObjectFromBaseSignature(rawBase: Signature, context: Context): Sche
         return;
 
     return context.objects.get(rawBase.isBaseDual ? morphism.domKey : morphism.codKey);
-}
-
-export function createInitialGraphValue(category: SchemaCategory): GraphValue {
-    const nodes = category.getObjects().map(object => ({
-        id: '' + object.key.value,
-        label: object.metadata.label,
-        position: { ...object.metadata.position },
-    }));
-
-    const edges = category.getMorphisms().map(morphism => ({
-        id: '' + morphism.signature.baseValue,
-        label: morphism.metadata.label,
-        from: '' + morphism.current?.domKey.value,
-        to: '' + morphism.current?.codKey.value,
-    }));
-
-    return { nodes, edges, selectedNodes: {} };
 }

@@ -45,6 +45,8 @@
         "react-hooks/exhaustive-deps": [ "warn" ],
         "quotes": [ "warn", "single", { "allowTemplateLiterals": true } ],
         "jsx-quotes": [ "warn", "prefer-single" ],
+        "no-warning-comments": [ "warn", { "terms": [ "TODO", "FIXME", "NICE_TO_HAVE" ] } ],
+        "arrow-parens": [ "warn", "as-needed" ],
         "@typescript-eslint/no-confusing-void-expression": [ "error", { "ignoreArrowShorthand": true } ],
         "@typescript-eslint/consistent-type-definitions": [ "warn", "type" ],
         "@typescript-eslint/unbound-method": [ "error", { "ignoreStatic": true } ],

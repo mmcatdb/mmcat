@@ -1,4 +1,5 @@
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
+import { deepClone } from '@/types/utils/common';
+import { type Dispatch, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 
 export type Node = {
     id: string;
@@ -50,10 +51,10 @@ const defaultGraphOptions: FullGraphOptions = {
     initialHeight: 600,
 };
 
-export function useGraphEngine(value: GraphValue, setValue: Dispatch<SetStateAction<GraphValue>>, options: GraphOptions = {}) {
+export function useGraphEngine(dispatch: Dispatch<GraphAction>, value: GraphValue, options?: GraphOptions) {
     const [ state, setState ] = useState<ReactiveGraphState>(() => createInitialGraphState(value, options));
     const canvasRef = useRef<HTMLDivElement>(null);
-    const engine = useMemo(() => new GraphEngine(setValue, state, setState, canvasRef, { ...defaultGraphOptions, ...options }), [ setValue, options ]);
+    const engine = useMemo(() => new GraphEngine(value, dispatch, state, setState, canvasRef, { ...defaultGraphOptions, ...options }), [ options ]);
 
     useEffect(() => {
         return engine.setup();
@@ -61,6 +62,15 @@ export function useGraphEngine(value: GraphValue, setValue: Dispatch<SetStateAct
 
     return [ state, engine ] as const;
 }
+
+export type GraphAction = {
+    type: 'nodeMove';
+    nodeId: string;
+    position: Position;
+} | {
+    type: 'nodeSelect';
+    nodeIds: string[];
+};
 
 /**
  * The internal state of the graph engine that is propagated to the UI.
@@ -71,7 +81,7 @@ export type ReactiveGraphState = {
     select?: SelectState;
 };
 
-function createInitialGraphState(value: GraphValue, options: GraphOptions): ReactiveGraphState {
+function createInitialGraphState(value: GraphValue, options: GraphOptions = {}): ReactiveGraphState {
     const fullOptions = { ...defaultGraphOptions, ...options };
     const coordinates = computeCoordinates(value.nodes, fullOptions.initialWidth, fullOptions.initialHeight);
 
@@ -96,15 +106,25 @@ type SelectState = {
 };
 
 export class GraphEngine {
+    private readonly value: GraphValue;
+    private readonly nodes = new Map<string, Node>();
+    private readonly edgeMap: EdgeMap;
+
     constructor(
-        private readonly setValue: Dispatch<SetStateAction<GraphValue>>,
+        value: GraphValue,
+        private readonly dispatch: Dispatch<GraphAction>,
         /** A local copy of the state. Contains only those properties that should be reactive (i.e., the UI should change when they change). */
         private state: ReactiveGraphState,
         /** Any change to the state should be immediatelly propagated up. */
         private readonly propagateState: Dispatch<ReactiveGraphState>,
         readonly canvasRef: React.RefObject<HTMLDivElement>,
         private readonly options: FullGraphOptions,
-    ) {}
+    ) {
+        console.log('CREATED Graph Engine');
+        this.value = deepClone(value);
+        this.value.nodes.forEach(node => this.nodes.set(node.id, node));
+        this.edgeMap = new EdgeMap(this.value.edges);
+    }
 
     get canvas(): HTMLDivElement {
         return this.canvasRef.current!;
@@ -119,7 +139,7 @@ export class GraphEngine {
     }
 
     /** Returns the abort function */
-    public setup(): () => void {
+    setup(): () => void {
         // The event is throttled because we don't need to update the state that often.
         const mousemove = throttle((e: MouseEvent) => this.handleGlobalMousemove(e));
         document.addEventListener('mousemove', mousemove);
@@ -137,6 +157,66 @@ export class GraphEngine {
         };
     }
 
+    private readonly nodeRefs = new Map<string, HTMLElement>();
+
+    setNodeRef(nodeId: string, ref: HTMLElement | null) {
+        if (!ref) {
+            console.log('DELETE node ref');
+            this.nodeRefs.delete(nodeId);
+        }
+        else {
+            console.log('CREATE node ref');
+            this.nodeRefs.set(nodeId, ref);
+        }
+    }
+
+    private readonly edgeRefs = new Map<string, HTMLElement>();
+
+    setEdgeRef(edgeId: string, ref: HTMLElement | null) {
+        if (!ref) {
+            console.log('DELETE edge ref');
+            this.edgeRefs.delete(edgeId);
+        }
+        else {
+            console.log('CREATE edge ref');
+            this.edgeRefs.set(edgeId, ref);
+        }
+    }
+
+    private propagateNodePosition(node: Node) {
+        const ref = this.nodeRefs.get(node.id);
+        if (!ref) {
+            console.warn(`Node ref ${node.id} not found in propagateNode.`);
+            return;
+        }
+
+        const { left, top } = positionToOffset(node.position, this.state.coordinates);
+        ref.style.left = `${left}px`;
+        ref.style.top = `${top}px`;
+
+        const { from, to } = this.edgeMap.getEdgesForNode(node.id);
+        [ ...from, ...to ].forEach(edge => this.propagateEdgePosition(edge));
+    }
+
+    private propagateEdgePosition(edge: Edge) {
+        const ref = this.edgeRefs.get(edge.id);
+        if (!ref) {
+            console.warn(`Edge ref ${edge.id} not found in propagateEdge.`);
+            return;
+        }
+
+        const { left, top, width, transform } = computeEdgeStyle(
+            this.nodes.get(edge.from)!,
+            this.nodes.get(edge.to)!,
+            this.state.coordinates,
+        );
+
+        ref.style.left = `${left}px`;
+        ref.style.top = `${top}px`;
+        ref.style.width = width;
+        ref.style.transform = transform;
+    }
+
     private handleCanvasWheel(event: WheelEvent) {
         // Prevent default actions like zooming in/out the whole page or scrolling.
         event.preventDefault();
@@ -146,13 +226,14 @@ export class GraphEngine {
         if (event.ctrlKey)
             this.zoom(event);
         else
-            this.move(event, event.shiftKey ? 'left' : 'top');
+            this.move(event, event.shiftKey);
     }
 
-    private move(event: WheelEvent, direction: 'top' | 'left') {
+    private move(event: WheelEvent, switchAxis: boolean) {
         const coordinates = this.state.coordinates;
         const origin = { ...coordinates.origin };
-        origin[direction] -= event.deltaY / 5;
+        origin.top -= (switchAxis ? event.deltaX : event.deltaY) / 5;
+        origin.left -= (switchAxis ? event.deltaY : event.deltaX) / 5;
 
         this.updateState({ coordinates: { ...coordinates, origin } });
     }
@@ -178,7 +259,7 @@ export class GraphEngine {
         mouseDelta: Position;
     };
 
-    public handleCanvasMousedown(event: ReactMouseEvent<HTMLDivElement>) {
+    handleCanvasMousedown(event: ReactMouseEvent<HTMLDivElement>) {
         // We are only interested in clicking on the actual canvas, not the nodes or edges. Also, we ignore the right click.
         if (event.target !== this.canvas)
             return;
@@ -193,37 +274,28 @@ export class GraphEngine {
         }
     }
 
-    public handleNodeMousedown(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
+    handleNodeMousedown(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
         if (actions.drag.node !== event.button)
             return;
 
         event.stopPropagation();
 
-        this.setValue(value => {
-            const mouseOffset = getMouseOffset(event, this.canvas);
-            const initialMousePosition = offsetToPosition(mouseOffset, this.state.coordinates);
+        const mouseOffset = getMouseOffset(event, this.canvas);
+        const initialMousePosition = offsetToPosition(mouseOffset, this.state.coordinates);
 
-            const node = value.nodes.find(node => node.id === nodeId);
-            if (!node) {
-                // This might happen if the node was deleted.
-                console.warn(`Node ${nodeId} not found in moveDragStart.`);
-                return value;
-            }
+        const node = this.nodes.get(nodeId)!;
 
-            const nodePosition = node.position;
-            const mouseDelta = this.options.snapToGrid
-                // When snapping, we want to keep the mouse in the center of the node. However, this might change in the future if we introduce larger notes for which it would be unintuitive.
-                ? { x: 0, y: 0 }
-                : { x: nodePosition.x - initialMousePosition.x, y: nodePosition.y - initialMousePosition.y };
+        const nodePosition = node.position;
+        const mouseDelta = this.options.snapToGrid
+        // When snapping, we want to keep the mouse in the center of the node. However, this might change in the future if we introduce larger notes for which it would be unintuitive.
+            ? { x: 0, y: 0 }
+            : { x: nodePosition.x - initialMousePosition.x, y: nodePosition.y - initialMousePosition.y };
 
-            this.startDragging = {
-                nodeId,
-                initialMousePosition,
-                mouseDelta,
-            };
-
-            return value;
-        });
+        this.startDragging = {
+            nodeId,
+            initialMousePosition,
+            mouseDelta,
+        };
     }
 
     private handleGlobalMousemove(event: MouseEvent) {
@@ -255,10 +327,9 @@ export class GraphEngine {
         this.startDragging = undefined;
         this.updateState({ drag: { type: 'node', nodeId, mouseDelta } });
 
-        this.setValue(value => {
-            const nodes = value.nodes.map(node => node.id !== nodeId ? node : { ...node, position: this.calculateNewNodePosition(mousePosition, mouseDelta) });
-            return { ...value, nodes };
-        });
+        const node = this.nodes.get(nodeId)!;
+        node.position = this.calculateNewNodePosition(mousePosition, mouseDelta);
+        this.propagateNodePosition(node);
     }
 
     /**
@@ -270,10 +341,10 @@ export class GraphEngine {
             const mousePosition = getMousePosition(event, this.canvas, this.state.coordinates);
             const mouseDelta = drag.mouseDelta;
 
-            this.setValue(value => {
-                const nodes = value.nodes.map(node => node.id !== nodeId ? node : { ...node, position: this.calculateNewNodePosition(mousePosition, mouseDelta) });
-                return { ...value, nodes };
-            });
+            const node = this.nodes.get(nodeId)!;
+            node.position = this.calculateNewNodePosition(mousePosition, mouseDelta);
+            this.propagateNodePosition(node);
+
             return;
         }
 
@@ -314,67 +385,64 @@ export class GraphEngine {
     private handleGlobalMouseup(event: MouseEvent) {
         this.startDragging = undefined;
 
-        if (this.state.drag) {
-            if (actions.drag[this.state.drag.type] !== event.button)
+        const { drag, select } = this.state;
+        if (drag) {
+            if (actions.drag[drag.type] !== event.button)
                 return;
 
             event.stopPropagation();
+            if (drag.type === 'node') {
+                const node = this.nodes.get(drag.nodeId)!;
+                this.dispatch({ type: 'nodeMove', nodeId: node.id, position: node.position });
+            }
+
             this.updateState({ drag: undefined });
             return;
         }
 
-        if (this.state.select) {
+        if (select) {
             if (actions.select.canvas !== event.button)
                 return;
 
-            const select = this.state.select;
             event.stopPropagation();
             this.updateState({ select: undefined });
 
-            this.setValue(value => {
-                const selectedNodes: Record<string, Node> = {};
-                value.nodes
-                    .filter(node => {
-                        const isInBox = isPointInBox(node.position, select);
-                        return (event.shiftKey || event.ctrlKey)
-                            // If the special key is pressed, we toggle the selection.
-                            ? (isInBox && !value.selectedNodes[node.id] || !isInBox && value.selectedNodes[node.id])
-                            // Otherwise, we simply select only the nodes in the box.
-                            : isInBox;
-                    })
-                    .forEach(node => selectedNodes[node.id] = node);
+            const selectedNodes: Record<string, Node> = {};
+            this.value.nodes
+                .filter(node => {
+                    const isInBox = isPointInBox(node.position, select);
+                    return (event.shiftKey || event.ctrlKey)
+                    // If the special key is pressed, we toggle the selection.
+                        ? (isInBox && !this.value.selectedNodes[node.id] || !isInBox && this.value.selectedNodes[node.id])
+                    // Otherwise, we simply select only the nodes in the box.
+                        : isInBox;
+                })
+                .forEach(node => selectedNodes[node.id] = node);
 
-                return { ...value, selectedNodes };
-            });
-            this.updateState({ select: undefined });
+            this.value.selectedNodes = selectedNodes;
+            // FIXME propagate to DOM
         }
     }
 
-    public handleNodeClick(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
-        this.setValue(value => {
-            if (value.selectedNodes[nodeId]) {
-                // If the node was selected, we deselect it.
-                const selectedNodes: Record<string, Node> = { ...value.selectedNodes };
-                delete selectedNodes[nodeId];
-                return { ...value, selectedNodes };
-            }
+    handleNodeClick(event: ReactMouseEvent<HTMLDivElement>, nodeId: string) {
+        if (this.value.selectedNodes[nodeId]) {
+            // If the node was selected, we deselect it.
+            const selectedNodes: Record<string, Node> = { ...this.value.selectedNodes };
+            delete selectedNodes[nodeId];
+            this.value.selectedNodes = selectedNodes;
+            // FIXME propagate to DOM
+        }
 
-            // The node wasn't selected.
-            const node = value.nodes.find(node => node.id === nodeId);
-            if (!node) {
-                // Kinda unexpected but probably might happen if the node array changes.
-                console.warn(`Node ${nodeId} not found in handleNodeClick.`);
-                return value;
-            }
+        // The node wasn't selected.
+        const node = this.nodes.get(nodeId)!;
+        const selectedNodes = (event.shiftKey || event.ctrlKey)
+        // If the shift or ctrl key is pressed, we add the node to the selection.
+            ? { ...this.value.selectedNodes, [node.id]: node }
+        // Otherwise, we select only this node.
+            : { [node.id]: node };
 
-            const selectedNodes = (event.shiftKey || event.ctrlKey)
-                // If the shift or ctrl key is pressed, we add the node to the selection.
-                ? { ...value.selectedNodes, [node.id]: node }
-                // Otherwise, we select only this node.
-                : { [node.id]: node };
-
-            return { ...value, selectedNodes };
-        });
+        this.value.selectedNodes = selectedNodes;
+        // FIXME propagate to DOM
     }
 }
 
@@ -390,6 +458,33 @@ const actions = {
         canvas: LEFT_BUTTON,
     },
 };
+
+/** Maps edges by their from- and to- nodes. */
+class EdgeMap {
+    private readonly fromMap = new Map<string, Edge[]>();
+    private readonly toMap = new Map<string, Edge[]>();
+
+    constructor(edges: Edge[]) {
+        edges.forEach(edge => {
+            const fromId = edge.from;
+            const fromEdges = this.fromMap.get(fromId) ?? [];
+            fromEdges.push(edge);
+            this.fromMap.set(fromId, fromEdges);
+
+            const toId = edge.to;
+            const toEdges = this.toMap.get(toId) ?? [];
+            toEdges.push(edge);
+            this.toMap.set(toId, toEdges);
+        });
+    }
+
+    getEdgesForNode(nodeId: string): { from: Edge[], to: Edge[] } {
+        return {
+            from: this.fromMap.get(nodeId) ?? [],
+            to: this.toMap.get(nodeId) ?? [],
+        };
+    }
+}
 
 // Math
 
@@ -479,4 +574,25 @@ function throttle<T extends(...args: Parameters<T>) => void>(callback: T): T {
             timeout = undefined;
         }, THROTTLE_DURATION_MS);
     }) as T;
+}
+
+/** In pixels */
+const EDGE_OFFSET = 20;
+
+export function computeEdgeStyle(from: Node, to: Node, coordinates: Coordinates): Offset & { width: string, transform: string } {
+    const start = positionToOffset(from.position, coordinates);
+    const end = positionToOffset(to.position, coordinates);
+
+    const x = end.left - start.left;
+    const y = end.top - start.top;
+    const angle = Math.atan2(y, x);
+    const width = Math.sqrt(x * x + y * y) - 2 * EDGE_OFFSET;
+
+    return {
+        left: (start.left + end.left) / 2,
+        top: (start.top + end.top) / 2,
+        width: `${width}px`,
+        transform: `translateX(-50%) rotate(${angle}rad)`,
+    };
+
 }

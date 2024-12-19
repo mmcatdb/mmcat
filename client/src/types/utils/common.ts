@@ -31,3 +31,25 @@ export function isArrayEqual<TType>(a: TType[], b: TType[], isEqual?: (a: TType,
     const comparator = isEqual ?? ((a, b) => a === b);
     return a.length === b.length && a.every((value, index) => comparator(value, b[index]));
 }
+
+export function deepClone<T extends object & { [Symbol.iterator]?: never }>(o: T): T {
+    const output: T = {} as T;
+    for (const key in o)
+        output[key] = deepCloneValue(o[key]);
+
+    return output;
+}
+
+function deepCloneValue<T>(a: T): T {
+    if (a === null || a === undefined)
+        return a;
+
+    if (typeof a === 'object') {
+        if (Array.isArray(a))
+            return a.map(deepCloneValue) as T;
+
+        return deepClone(a);
+    }
+
+    return a;
+}
