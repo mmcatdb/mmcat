@@ -1,24 +1,29 @@
-import { Input, Select, SelectItem, Button } from '@nextui-org/react';
+import { Input, Select, SelectItem, Button, Autocomplete, AutocompleteItem } from '@nextui-org/react';
 import { IoTrashBin } from 'react-icons/io5';
-import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import { type PropertyFilter, Operator } from '@/types/adminer/PropertyFilter';
 import type { AdminerStateAction } from '@/types/adminer/Reducer';
 
 type ColumnFormProps = Readonly<{
-    filter: ColumnFilter;
+    filter: PropertyFilter;
+    propertyNames: string[] | undefined;
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
+export function ColumnForm({ filter, propertyNames, dispatch }: ColumnFormProps) {
     return (
         <div className='mt-0 mr-5 inline-flex gap-1 items-center'>
-            <Input
+            <Autocomplete
                 className='py-0.5 text-sm'
                 aria-label='Column name'
-                placeholder='Enter column name'
-                value={filter.columnName}
-                onChange={(e) => dispatch({ type: 'input', field: 'columnName', id: filter.id, value: e.target.value })}
+                placeholder='Enter property name'
+                defaultSelectedKey={ filter.propertyName ?? undefined }
+                onSelectionChange={(key) => dispatch({ type: 'input', field: 'propertyName', id: filter.id, value: key ? String(key) : '' })}
                 required
-            />
+            >
+                {(propertyNames ?? []).map((propertyName) => (
+                    <AutocompleteItem key={propertyName}>{propertyName}</AutocompleteItem>
+                ))}
+            </Autocomplete>
 
             <Select
                 className='py-0.5 text-sm'
@@ -38,9 +43,9 @@ export function ColumnForm({ filter, dispatch }: ColumnFormProps) {
             <Input
                 className='py-0.5 text-sm'
                 aria-label='Column value'
-                placeholder='Enter column value'
-                value={filter.columnValue}
-                onChange={(e) => dispatch({ type: 'input', field: 'columnValue', id: filter.id, value: e.target.value })}
+                placeholder='Enter property value'
+                value={filter.propertyValue}
+                onChange={(e) => dispatch({ type: 'input', field: 'propertyValue', id: filter.id, value: e.target.value })}
                 required
             />
 

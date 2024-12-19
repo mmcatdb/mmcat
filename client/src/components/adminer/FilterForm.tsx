@@ -7,14 +7,15 @@ import type { AdminerStateAction, AdminerState } from '@/types/adminer/Reducer';
 type FilterFormProps = Readonly<{
     state: AdminerState;
     dispatch: React.Dispatch<AdminerStateAction>;
+    propertyNames: string[] | undefined;
 }>;
 
-export function FilterForm({ state, dispatch }: FilterFormProps) {
+export function FilterForm({ state, dispatch, propertyNames }: FilterFormProps) {
     return (
         <div>
             <div>
                 {state.form.filters.map((filter) => (
-                    <ColumnForm key={filter.id} filter={filter} dispatch={dispatch}/>
+                    <ColumnForm key={filter.id} filter={filter} propertyNames={propertyNames} dispatch={dispatch}/>
                 ))}
             </div>
 

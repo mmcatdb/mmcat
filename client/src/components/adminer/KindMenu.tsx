@@ -35,7 +35,7 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
                 label='Kind'
                 placeholder='Select kind'
                 className='max-w-xs'
-                defaultSelectedKeys={ kind ? [ kind ] : undefined }
+                selectedKeys={ kind ? [ kind ] : undefined }
             >
                 {fetchedData.data.map((name, index) => (
                     <SelectItem

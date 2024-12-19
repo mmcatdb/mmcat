@@ -26,6 +26,11 @@ export function AdminerPage() {
     const [ datasource, setDatasource ] = useState<Datasource>();
 
     useEffect(() => {
+        if (searchParams.get('reload') === 'true')
+            dispatch({ type:'initialize' });
+    }, [ searchParams ]);
+
+    useEffect(() => {
         const params = getURLParamsFromState(state);
 
         if (params !== searchParams)

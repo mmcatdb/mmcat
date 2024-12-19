@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
-import type { DocumentResponse, GraphResponse } from '@/types/adminer/BackendResponse';
+import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataResponse';
 import type { AdminerReference } from '@/types/adminer/AdminerReference';
 
 type DatabaseDocumentProps = Readonly<{

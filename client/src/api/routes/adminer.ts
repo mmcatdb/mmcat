@@ -1,6 +1,6 @@
 import type { StringLike, QueryParams } from '@/types/api/routes';
 import { GET } from '../routeFunctions';
-import type { TableResponse, DataResponse } from '@/types/adminer/BackendResponse';
+import type { TableResponse, DataResponse } from '@/types/adminer/DataResponse';
 
 const adminer = {
     getKindNames: GET<{ datasourceId: StringLike }, TableResponse>(

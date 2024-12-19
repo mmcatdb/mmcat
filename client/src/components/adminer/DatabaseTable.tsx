@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
-import type { TableResponse, GraphResponse } from '@/types/adminer/BackendResponse';
+import type { TableResponse, GraphResponse } from '@/types/adminer/DataResponse';
 import type { AdminerReference } from '@/types/adminer/AdminerReference';
 
 type DatabaseTableProps = Readonly<{

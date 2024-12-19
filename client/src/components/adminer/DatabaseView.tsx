@@ -3,7 +3,7 @@ import { Spinner, Pagination } from '@nextui-org/react';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
-import { Operator } from '@/types/adminer/ColumnFilter';
+import { Operator } from '@/types/adminer/PropertyFilter';
 import { View } from '@/types/adminer/View';
 import { api } from '@/api';
 import { useFetchReferences } from './useFetchReferences';
@@ -13,7 +13,7 @@ import type { FetchKindParams } from '@/types/adminer/FetchParams';
 
 function getUrlParams(state: AdminerState, offset: number) {
     const filterExist = state.active.filters?.some((filter) => {
-        return filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0;
+        return filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0;
     });
 
     const urlParams: FetchKindParams = { datasourceId: state.datasourceId!, kindId: state.kindName!, queryParams: { limit: state.active.limit, offset: offset } };
@@ -22,7 +22,7 @@ function getUrlParams(state: AdminerState, offset: number) {
         const queryFilters = `${state.active.filters
             .map(
                 (filter) =>
-                    filter.columnName.length > 0 && filter.operator && filter.columnValue.length > 0 ? `(${filter.columnName},${Operator[filter.operator as unknown as keyof typeof Operator]},${filter.columnValue})` : '',
+                    filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0 ? `(${filter.propertyName},${Operator[filter.operator as unknown as keyof typeof Operator]},${filter.propertyValue})` : '',
             )
             .join('')}`;
         urlParams.queryParams.filters = queryFilters;
@@ -87,7 +87,7 @@ export function DatabaseView({ state, dispatch }: DatabaseViewProps) {
     return (
         <div className='mt-5'>
             <div className='mt-5'>
-                <FilterForm state={state} dispatch={dispatch}/>
+                <FilterForm state={state} dispatch={dispatch} propertyNames={fetchedData?.metadata.propertyNames}/>
             </div>
 
             {state.view === View.table ? (

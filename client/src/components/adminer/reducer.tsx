@@ -1,12 +1,17 @@
 import { getNewView } from './Views';
-import { type ColumnFilter, Operator } from '@/types/adminer/ColumnFilter';
+import { View } from '@/types/adminer/View';
+import { type PropertyFilter, Operator } from '@/types/adminer/PropertyFilter';
 import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 
 export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {
     switch (action.type) {
     case 'initialize': {
         return {
-            ...action.state,
+            form: { limit: 50, filters: [] },
+            active: { limit: 50, filters: [] },
+            view: View.table,
+            datasourceId: undefined,
+            kindName: undefined,
         };
     }
     case 'datasource': {
@@ -74,11 +79,11 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
         switch (formAction) {
         case 'add_filter': {
             const nextId = state.form.filters ? state.form.filters.length : 0;
-            const newFilter: ColumnFilter = {
+            const newFilter: PropertyFilter = {
                 id: nextId,
-                columnName: '',
+                propertyName: '',
                 operator: Operator.eq,
-                columnValue: '',
+                propertyValue: '',
             };
             return {
                 ...state,
