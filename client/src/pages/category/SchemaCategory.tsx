@@ -5,12 +5,11 @@ import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { Portal, portals } from '@/components/common';
 import { logicalModelsFromServer } from '@/types/datasource';
-import { GraphDisplay } from '@/components/GraphDisplay';
-import { type GraphValue } from '@/components/useGraphEngine';
+import { EditorGraphDisplay } from '@/components/EditorGraphDisplay';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 import { Key } from '@/types/identifiers';
-import { createInitialState, type EditCategoryDispatch, editCategoryReducer } from '@/components/schema-categories/editCategoryReducer';
+import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
 
 export function SchemaCategory() {
     const { category, updates } = useLoaderData() as SchemaCategoryLoaderData;
@@ -28,10 +27,10 @@ export function SchemaCategory() {
             </p>
 
             <div className='relative'>
-                <GraphDisplay graph={state.graph} dispatch={dispatch} className='min-h-[600px] w-full' />
-                {Object.keys(state.graph.selectedNodes).length > 0 && (
+                <EditorGraphDisplay state={state} dispatch={dispatch} className='w-full min-h-[600px]' />
+                {state.selectedNodeIds.size > 0 && (
                     <div className='z-20 absolute top-2 right-2'>
-                        <SelectedNodesCard category={category} graph={state.graph} dispatch={dispatch} />
+                        <SelectedNodesCard state={state} dispatch={dispatch} category={category} />
                     </div>
                 )}
             </div>
@@ -80,31 +79,27 @@ function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
 }
 
 type SelectedNodesCardProps = Readonly<{
-    category: SchemaCategoryType;
-    graph: GraphValue;
+    state: EditCategoryState;
     dispatch: EditCategoryDispatch;
+    category: SchemaCategoryType;
 }>;
 
-function SelectedNodesCard({ category, graph, dispatch }: SelectedNodesCardProps) {
+function SelectedNodesCard({ state, dispatch, category }: SelectedNodesCardProps) {
     function unselectNode(nodeId: string) {
-        // dispatch(prev => {
-        //     const selectedNodes = { ...prev.selectedNodes };
-        //     delete selectedNodes[nodeId];
-        //     return { ...prev, selectedNodes };
-        // });
+        dispatch({ type: 'selectNode', nodeId, operation: 'remove' });
     }
 
     return (
         <div className='min-w-[200px] p-3 rounded-lg bg-black'>
             <div className='flex items-center justify-between pb-1'>
                 <h3 className='font-semibold'>Selected objects</h3>
-                {/* <Button isIconOnly variant='light' size='sm' onClick={() => setValue(prev => ({ ...prev, selectedNodes: {} }))}> */}
-                <Button isIconOnly variant='light' size='sm' onClick={console.log}>
+                <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'selectNode', operation: 'clear' })}>
                     <FaXmark />
                 </Button>
             </div>
             <div className='flex flex-col'>
-                {Object.values(graph.selectedNodes).map(node => {
+                {[ ...state.selectedNodeIds.values() ].map(id => {
+                    const node = state.graph.nodes.find(node => node.id === id)!;
                     // TODO this is a hack, we should store the key on the node (or even the object)?
                     const object = category.getObject(Key.createNew(+node.id));
 
