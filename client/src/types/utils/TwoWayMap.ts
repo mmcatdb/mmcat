@@ -52,7 +52,7 @@ export class TwoWayMap<Key, Value> implements Map<Key, Value> {
         return this.map.size;
     }
 
-    entries(): IterableIterator<[Key, Value]> {
+    entries(): MapIterator<[Key, Value]> {
         return this.map.entries();
     }
 
@@ -60,15 +60,15 @@ export class TwoWayMap<Key, Value> implements Map<Key, Value> {
         this.map.forEach(callbackfn);
     }
 
-    keys(): IterableIterator<Key> {
+    keys(): MapIterator<Key> {
         return this.map.keys();
     }
 
-    values(): IterableIterator<Value> {
+    values(): MapIterator<Value> {
         return this.map.values();
     }
 
-    [Symbol.iterator](): IterableIterator<[Key, Value]> {
+    [Symbol.iterator](): MapIterator<[Key, Value]> {
         return this.entries();
     }
 

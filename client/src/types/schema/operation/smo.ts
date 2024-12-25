@@ -1,9 +1,9 @@
 import type { SchemaCategory } from '../SchemaCategory';
 
 export enum SMOType {
-    CreateObject = 'createObject',
-    DeleteObject = 'deleteObject',
-    UpdateObject = 'updateObject',
+    CreateObjex = 'createObject',
+    DeleteObjex = 'deleteObject',
+    UpdateObjex = 'updateObject',
     CreateMorphism = 'createMorphism',
     DeleteMorphism = 'deleteMorphism',
     UpdateMorphism = 'updateMorphism',

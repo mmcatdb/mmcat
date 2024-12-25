@@ -64,7 +64,7 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key,
         return this.map.size;
     }
 
-    entries(): IterableIterator<[Key, Value]> {
+    entries(): MapIterator<[Key, Value]> {
         return injectionIterator(this.map.values(), keyValue => [ keyValue.key, keyValue.value ]);
     }
 
@@ -72,15 +72,15 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key,
         this.map.forEach(keyValue => callbackfn(keyValue.value, keyValue.key, this));
     }
 
-    keys(): IterableIterator<Key> {
+    keys(): MapIterator<Key> {
         return this.reverseMap.values();
     }
 
-    values(): IterableIterator<Value> {
+    values(): MapIterator<Value> {
         return injectionIterator(this.map.values(), keyValue => keyValue.value);
     }
 
-    [Symbol.iterator](): IterableIterator<[Key, Value]> {
+    [Symbol.iterator](): MapIterator<[Key, Value]> {
         return this.entries();
     }
 

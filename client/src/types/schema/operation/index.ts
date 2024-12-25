@@ -1,7 +1,7 @@
 import { SMOType, type SMOFromServer, type SMO } from './smo';
-import { CreateObject, type CreateObjectFromServer } from './createObject';
-import { DeleteObject, type DeleteObjectFromServer } from './deleteObject';
-import { UpdateObject, type UpdateObjectFromServer } from './updateObject';
+import { CreateObjex, type CreateObjexFromServer } from './createObjex';
+import { DeleteObjex, type DeleteObjexFromServer } from './deleteObjex';
+import { UpdateObjex, type UpdateObjexFromServer } from './updateObjex';
 import { CreateMorphism, type CreateMorphismFromServer } from './createMorphism';
 import { DeleteMorphism, type DeleteMorphismFromServer } from './deleteMorphism';
 import { UpdateMorphism, type UpdateMorphismFromServer } from './updateMorphism';
@@ -9,12 +9,12 @@ import { Composite, type CompositeFromServer } from './composite';
 
 export function smoFromServer(input: SMOFromServer): SMO {
     switch (input.type) {
-    case SMOType.CreateObject:
-        return CreateObject.fromServer(input as CreateObjectFromServer);
-    case SMOType.DeleteObject:
-        return DeleteObject.fromServer(input as DeleteObjectFromServer);
-    case SMOType.UpdateObject:
-        return UpdateObject.fromServer(input as UpdateObjectFromServer);
+    case SMOType.CreateObjex:
+        return CreateObjex.fromServer(input as CreateObjexFromServer);
+    case SMOType.DeleteObjex:
+        return DeleteObjex.fromServer(input as DeleteObjexFromServer);
+    case SMOType.UpdateObjex:
+        return UpdateObjex.fromServer(input as UpdateObjexFromServer);
     case SMOType.CreateMorphism:
         return CreateMorphism.fromServer(input as CreateMorphismFromServer);
     case SMOType.DeleteMorphism:
@@ -29,9 +29,9 @@ export function smoFromServer(input: SMOFromServer): SMO {
 export {
     type SMO,
     type SMOFromServer,
-    CreateObject,
-    DeleteObject,
-    UpdateObject,
+    CreateObjex,
+    DeleteObjex,
+    UpdateObjex,
     CreateMorphism,
     DeleteMorphism,
     UpdateMorphism,

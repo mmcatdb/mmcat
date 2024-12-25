@@ -11,7 +11,7 @@ import { FaXmark } from 'react-icons/fa6';
 import { Key } from '@/types/identifiers';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
 
-export function SchemaCategory() {
+export function SchemaCategoryEditor() {
     const { category, updates } = useLoaderData() as SchemaCategoryLoaderData;
     const [ state, dispatch ] = useReducer(editCategoryReducer, category, createInitialState);
 
@@ -101,11 +101,11 @@ function SelectedNodesCard({ state, dispatch, category }: SelectedNodesCardProps
                 {[ ...state.selectedNodeIds.values() ].map(id => {
                     const node = state.graph.nodes.find(node => node.id === id)!;
                     // TODO this is a hack, we should store the key on the node (or even the object)?
-                    const object = category.getObject(Key.createNew(+node.id));
+                    const objex = category.getObjex(Key.createNew(+node.id));
 
                     return (
                         <div key={node.id} className='flex items-center gap-2'>
-                            <span className='text-primary font-semibold'>{object.key.toString()}</span>
+                            <span className='text-primary font-semibold'>{objex.key.toString()}</span>
                             {node.label}
                             <div className='grow' />
                             <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>

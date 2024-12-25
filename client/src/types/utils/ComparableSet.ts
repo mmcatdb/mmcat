@@ -28,7 +28,7 @@ export class ComparableSet<Key, Id> implements Set<Key> {
         return this.map.size;
     }
 
-    entries(): IterableIterator<[Key, Key]> {
+    entries(): SetIterator<[Key, Key]> {
         return injectionIterator(this.map.entries(), ([ , key ]) => [ key, key ]);
     }
 
@@ -36,22 +36,54 @@ export class ComparableSet<Key, Id> implements Set<Key> {
         this.map.forEach(value => callbackfn(value, value, this));
     }
 
-    keys(): IterableIterator<Key> {
+    keys(): SetIterator<Key> {
         return this.map.values();
     }
 
-    values(): IterableIterator<Key> {
+    values(): SetIterator<Key> {
         return this.map.values();
     }
 
-    [Symbol.iterator](): IterableIterator<Key> {
+    [Symbol.iterator](): SetIterator<Key> {
         return this.keys();
     }
 
     [Symbol.toStringTag] = 'ComparableSet';
+
+    union<U>(): Set<Key | U> {
+        throw new Error('Method not implemented.');
+    }
+
+    intersection<U>(): Set<Key & U> {
+        throw new Error('Method not implemented.');
+    }
+
+    difference(): Set<Key> {
+        throw new Error('Method not implemented.');
+    }
+
+    symmetricDifference<U>(): Set<Key | U> {
+        throw new Error('Method not implemented.');
+    }
+
+    isSubsetOf(): boolean {
+        throw new Error('Method not implemented.');
+    }
+
+    isSupersetOf(): boolean {
+        throw new Error('Method not implemented.');
+    }
+
+    isDisjointFrom(): boolean {
+        throw new Error('Method not implemented.');
+    }
 }
 
-export function* injectionIterator<A, B>(iterator: IterableIterator<A>, injection: Injection<A, B>): IterableIterator<B> {
+export function injectionIterator<A, B>(iterator: SetIterator<A>, injection: Injection<A, B>): SetIterator<B>;
+
+export function injectionIterator<A, B>(iterator: MapIterator<A>, injection: Injection<A, B>): MapIterator<B>;
+
+export function* injectionIterator<A, B>(iterator: SetIterator<A> | MapIterator<A>, injection: Injection<A, B>): SetIterator<B> | MapIterator<B> {
     while (true) {
         const nextResult = iterator.next();
         if (nextResult.done)

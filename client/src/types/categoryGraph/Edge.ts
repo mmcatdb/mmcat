@@ -1,8 +1,9 @@
 // import type { Core, EdgeSingular, ElementDefinition } from 'cytoscape';
-import type { MetadataMorphism, SchemaMorphism, VersionedSchemaMorphism } from '../schema';
+import type { MetadataMorphism, SchemaMorphism, Morphism } from '../schema';
 import type { Node } from './Node';
 import type { Signature } from '../identifiers';
 
+/** @deprecated */
 export class DirectedEdge {
     constructor(
         public readonly raw: Edge,
@@ -24,6 +25,7 @@ export class DirectedEdge {
     }
 }
 
+/** @deprecated */
 export class Edge {
     private edge!: EdgeSingular;
 
@@ -43,13 +45,13 @@ export class Edge {
     }
 
     private constructor(
-        readonly morphism: VersionedSchemaMorphism,
+        readonly morphism: Morphism,
         readonly schemaMorphism: SchemaMorphism,
         readonly domainNode: Node,
         readonly codomainNode: Node,
     ) {}
 
-    static create(cytoscape: Core, morphism: VersionedSchemaMorphism, schemaMorphism: SchemaMorphism, dom: Node, cod: Node): Edge {
+    static create(cytoscape: Core, morphism: Morphism, schemaMorphism: SchemaMorphism, dom: Node, cod: Node): Edge {
         const edge = new Edge(morphism, schemaMorphism, dom, cod);
         const definition = createEdgeDefinition(schemaMorphism, edge, schemaMorphism.isNew ? 'new' : '');
         const cytoscapeEdge = cytoscape.add(definition);

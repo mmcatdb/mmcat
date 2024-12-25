@@ -1,5 +1,5 @@
 import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaMorphism, type SchemaMorphismFromServer } from '../SchemaMorphism';
+import { SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CreateMorphismFromServer = SMOFromServer<SMOType.CreateMorphism> & {

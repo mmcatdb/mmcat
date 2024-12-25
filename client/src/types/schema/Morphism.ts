@@ -1,5 +1,4 @@
 import { Key, Signature, type KeyFromServer, type SignatureFromServer } from '../identifiers';
-import type { Graph } from '../categoryGraph';
 import { isArrayEqual } from '@/types/utils/common';
 
 export type SchemaMorphismFromServer = {
@@ -8,11 +7,6 @@ export type SchemaMorphismFromServer = {
     codKey: KeyFromServer;
     min: Min;
     tags?: Tag[];
-};
-
-export type MetadataMorphismFromServer = {
-    signature: SignatureFromServer;
-    label: string;
 };
 
 export enum Cardinality {
@@ -120,6 +114,11 @@ export type MorphismDefinition = {
     tags?: Tag[];
 };
 
+export type MetadataMorphismFromServer = {
+    signature: SignatureFromServer;
+    label: string;
+};
+
 export class MetadataMorphism {
     private constructor(
         readonly label: string,
@@ -151,19 +150,18 @@ export class MetadataMorphism {
     }
 }
 
-export class VersionedSchemaMorphism {
+export class Morphism {
     public readonly originalMetadata: MetadataMorphism;
 
     private constructor(
         readonly signature: Signature,
         private _metadata: MetadataMorphism,
-        private _graph?: Graph,
     ) {
         this.originalMetadata = _metadata;
     }
 
-    static fromServer(input: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer): VersionedSchemaMorphism {
-        const output = new VersionedSchemaMorphism(
+    static fromServer(input: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer): Morphism {
+        const output = new Morphism(
             Signature.fromServer(input.signature),
             MetadataMorphism.fromServer(metadata),
         );
@@ -172,20 +170,11 @@ export class VersionedSchemaMorphism {
         return output;
     }
 
-    static create(signature: Signature, graph: Graph | undefined): VersionedSchemaMorphism {
-        return new VersionedSchemaMorphism(
+    static create(signature: Signature): Morphism {
+        return new Morphism(
             signature,
             MetadataMorphism.createDefault(),
-            graph,
         );
-    }
-
-    set graph(newGraph: Graph | undefined) {
-        this._graph = newGraph;
-        if (!newGraph)
-            return;
-
-        this.updateGraph(newGraph);
     }
 
     private _current?: SchemaMorphism;
@@ -196,8 +185,6 @@ export class VersionedSchemaMorphism {
 
     set current(value: SchemaMorphism | undefined) {
         this._current = value;
-        if (this._graph)
-            this.updateGraph(this._graph);
     }
 
     get metadata(): MetadataMorphism {
@@ -205,16 +192,6 @@ export class VersionedSchemaMorphism {
     }
 
     set metadata(value: MetadataMorphism) {
-        const isUpdateNeeded = this._metadata.label !== value.label;
         this._metadata = value;
-
-        if (isUpdateNeeded && this._graph)
-            this.updateGraph(this._graph);
-    }
-
-    private updateGraph(graph: Graph) {
-        graph.deleteEdge(this.signature);
-        if (this._current)
-            graph.createEdge(this, this._current);
     }
 }

@@ -9,12 +9,12 @@ export enum Type {
 
 export type NonSignaturesType = Type.Value | Type.Generated;
 
-export type ObjectIdsFromServer = {
+export type ObjexIdsFromServer = {
     type: Type;
     signatureIds?: SignatureIdFromServer[];
 };
 
-export class ObjectIds {
+export class ObjexIds {
     readonly type: Type;
     readonly _signatureIds: SignatureId[];
 
@@ -31,23 +31,23 @@ export class ObjectIds {
         return this.type === Type.Signatures;
     }
 
-    static createSignatures(signatureIds: SignatureId[]): ObjectIds {
-        return new ObjectIds(Type.Signatures, signatureIds);
+    static createSignatures(signatureIds: SignatureId[]): ObjexIds {
+        return new ObjexIds(Type.Signatures, signatureIds);
     }
 
-    static createNonSignatures(type: NonSignaturesType): ObjectIds {
-        return new ObjectIds(type);
+    static createNonSignatures(type: NonSignaturesType): ObjexIds {
+        return new ObjexIds(type);
     }
 
-    static createCrossProduct(elements: { signature: Signature, ids: ObjectIds }[]): ObjectIds {
+    static createCrossProduct(elements: { signature: Signature, ids: ObjexIds }[]): ObjexIds {
         let signatureIds = [ new SignatureId([]) ];
         for (const element of elements)
-            signatureIds = ObjectIds.combineCrossProductIds(signatureIds, element.signature, element.ids);
+            signatureIds = ObjexIds.combineCrossProductIds(signatureIds, element.signature, element.ids);
 
-        return ObjectIds.createSignatures(signatureIds);
+        return ObjexIds.createSignatures(signatureIds);
     }
 
-    private static combineCrossProductIds(current: SignatureId[], signature: Signature, ids: ObjectIds): SignatureId[] {
+    private static combineCrossProductIds(current: SignatureId[], signature: Signature, ids: ObjexIds): SignatureId[] {
         const newSignatureIds = ids.isSignatures
             ? ids._signatureIds.map(id => id.signatures)
             : [ [ Signature.empty ] ];
@@ -57,20 +57,20 @@ export class ObjectIds {
         return current.flatMap(currentId => concatenatedSignatureIds.map(signatureId => new SignatureId([ ...currentId.signatures, ...signatureId ])));
     }
 
-    static fromServer(input: ObjectIdsFromServer): ObjectIds {
+    static fromServer(input: ObjexIdsFromServer): ObjexIds {
         const type = input.type;
         const signatureIds = input.signatureIds?.map(SignatureId.fromServer);
-        return new ObjectIds(type, signatureIds);
+        return new ObjexIds(type, signatureIds);
     }
 
-    toServer(): ObjectIdsFromServer {
+    toServer(): ObjexIdsFromServer {
         return {
             type: this.type,
             signatureIds: this.type === Type.Signatures ? this._signatureIds.map(id => id.toServer()) : undefined,
         };
     }
 
-    equals(other: ObjectIds): boolean {
+    equals(other: ObjexIds): boolean {
         if (this === other)
             return true;
 
@@ -100,6 +100,6 @@ export class ObjectIds {
     }
 }
 
-export function idsAreEqual(a: ObjectIds | undefined, b: ObjectIds | undefined) {
+export function idsAreEqual(a: ObjexIds | undefined, b: ObjexIds | undefined) {
     return (!a && !b) || (b && a?.equals(b));
 }

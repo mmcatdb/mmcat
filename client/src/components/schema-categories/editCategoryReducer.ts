@@ -8,10 +8,10 @@ export type EditCategoryState = {
 };
 
 export function createInitialState(category: SchemaCategory): EditCategoryState {
-    const nodes = category.getObjects().map(object => ({
-        id: '' + object.key.value,
-        label: object.metadata.label,
-        position: { ...object.metadata.position },
+    const nodes = category.getObjexes().map(objex => ({
+        id: '' + objex.key.value,
+        label: objex.metadata.label,
+        position: { ...objex.metadata.position },
     }));
 
     const edges = category.getMorphisms().map(morphism => ({

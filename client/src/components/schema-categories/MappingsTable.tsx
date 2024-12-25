@@ -32,7 +32,7 @@ export function MappingsTable({ mappings, loading, error }: MappingsTableProps) 
         );
     }
 
-    if (error) 
+    if (error)
         return <ErrorPage />;
 
     return (
@@ -95,7 +95,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                     {mappings.map((mapping) => (
                         <TableRow
                             key={mapping.id}
-                            className={cn('cursor-pointer', 
+                            className={cn('cursor-pointer',
                                 theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
                         >
                             {[
@@ -110,7 +110,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                 </TableCell>,
                                 <TableCell key='rootObject'>
                                     {/* // TODO - load whole schema category and display the object name that corresponds to this key */}
-                                    {mapping.rootObjectKey.value}
+                                    {mapping.rootObjexKey.value}
                                 </TableCell>,
                                 <TableCell key='primaryKey'>
                                     {mapping.primaryKey.signatures.join(', ')}

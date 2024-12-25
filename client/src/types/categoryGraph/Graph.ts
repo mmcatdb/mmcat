@@ -1,20 +1,17 @@
 // import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular, Position } from 'cytoscape';
-import type { GroupData, SchemaMorphism, SchemaObject, VersionedSchemaMorphism, VersionedSchemaObject } from '../schema';
+import type { GroupData, Position, SchemaMorphism, SchemaObjex, Morphism, Objex } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Id } from '../id';
 
-export type Position = {
-    x: number;
-    y: number;
-};
-
+/** @deprecated */
 export type TemporaryEdge = {
     delete: () => void;
 };
 
+/** @deprecated */
 export class Graph {
     private readonly nodes = new ComparableMap<Key, number, Node>(key => key.value);
     private readonly edges = new ComparableMap<Signature, string, Edge>(signature => signature.value);
@@ -48,27 +45,27 @@ export class Graph {
         this.nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
-    createNode(object: VersionedSchemaObject, schemaObject: SchemaObject, position: Position, groupIds: string[]): Node {
+    createNode(objex: Objex, schemaObjex: SchemaObjex, position: Position, groupIds: string[]): Node {
         const nodeGroups = groupIds.map(groupId => this.highlights.getOrCreateGroup(groupId));
-        const node = Node.create(this.cytoscape, object, schemaObject, position, nodeGroups);
-        this.nodes.set(schemaObject.key, node);
+        const node = Node.create(this.cytoscape, objex, schemaObjex, position, nodeGroups);
+        this.nodes.set(schemaObjex.key, node);
 
         return node;
     }
 
-    deleteNode(object: SchemaObject) {
-        const node = this.nodes.get(object.key);
+    deleteNode(objex: SchemaObjex) {
+        const node = this.nodes.get(objex.key);
         if (!node)
             return;
 
         node.remove();
-        this.nodes.delete(object.key);
+        this.nodes.delete(objex.key);
 
         // Only the newly created nodes can be deleted an those can't be in any datasource so we don't have to remove their datasource placeholders.
         // TODO might not be true anymore.
     }
 
-    createEdge(morphism: VersionedSchemaMorphism, schemaMorphism: SchemaMorphism): Edge {
+    createEdge(morphism: Morphism, schemaMorphism: SchemaMorphism): Edge {
         const dom = this.nodes.get(schemaMorphism.domKey)!;
         const cod = this.nodes.get(schemaMorphism.codKey)!;
 
@@ -96,8 +93,8 @@ export class Graph {
         this.cytoscape.add({
             data: {
                 id,
-                source: node1.schemaObject.key.value,
-                target: node2.schemaObject.key.value,
+                source: node1.schemaObjex.key.value,
+                target: node2.schemaObjex.key.value,
                 label: '',
             },
             classes: 'temporary',
@@ -154,6 +151,7 @@ export class Graph {
     }
 }
 
+/** @deprecated */
 class GraphEventListener {
     private lastSessionId = -1;
 
@@ -189,6 +187,7 @@ type EventHandlerObject = {
     handler: EventHandler;
 };
 
+/** @deprecated */
 export class ListenerSession {
     private lastHandlerId = -1;
 
@@ -262,10 +261,12 @@ type GraphControl = {
     cytoscape: Core;
 };
 
+/** @deprecated */
 export type Group = GroupData & {
     node: NodeSingular;
 };
 
+/** @deprecated */
 export type GraphHighlightState = {
     groupId: string;
     mappingIds?: Id[];
@@ -335,7 +336,7 @@ class GraphHighlights {
         if (!this.state)
             return;
 
-        const mappings = this._groups.get(this.state.groupId)?.mappings.filter(mapping => mapping.root.key.equals(node.schemaObject.key));
+        const mappings = this._groups.get(this.state.groupId)?.mappings.filter(mapping => mapping.root.key.equals(node.schemaObjex.key));
         if (!mappings || mappings.length === 0)
             // The node is not a root of any mapping in the current active group.
             return;
