@@ -1,10 +1,10 @@
 import { type MouseEvent } from 'react';
-import { cn } from './utils';
-import { type GraphOptions } from './graph/graphEngine';
-import { type Edge, type Node } from './graph/graphUtils';
-import { GraphProvider } from './graph/GraphProvider';
-import { useCanvas, useEdge, useNode, useSelectionBox } from './graph/graphHooks';
-import { type EditCategoryDispatch, type EditCategoryState } from './schema-categories/editCategoryReducer';
+import { cn } from '../utils';
+import { type GraphOptions } from '../graph/graphEngine';
+import { type Edge, type Node } from '../graph/graphUtils';
+import { GraphProvider } from '../graph/GraphProvider';
+import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
+import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 
 type EditorGraphDisplayProps = Readonly<{
     state: EditCategoryState;
@@ -14,8 +14,6 @@ type EditorGraphDisplayProps = Readonly<{
 }>;
 
 export function EditorGraphDisplay({ state, dispatch, options, className }: EditorGraphDisplayProps) {
-    console.log('RENDER graph');
-
     return (
         <GraphProvider dispatch={dispatch} graph={state.graph} options={options}>
             <CanvasDisplay className={className}>
@@ -32,13 +30,11 @@ export function EditorGraphDisplay({ state, dispatch, options, className }: Edit
 }
 
 type CanvasDisplayProps = Readonly<{
-    className?: string;
     children: React.ReactNode;
+    className?: string;
 }>;
 
-function CanvasDisplay({ className, children }: CanvasDisplayProps) {
-    console.log('RENDER canvas');
-
+function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     const { setCanvasRef, onMouseDown, isDragging } = useCanvas();
 
     return (
@@ -46,6 +42,7 @@ function CanvasDisplay({ className, children }: CanvasDisplayProps) {
             ref={setCanvasRef}
             className={cn('relative bg-slate-400 overflow-hidden', isDragging ? 'cursor-grabbing' : 'cursor-default', className)}
             onMouseDown={onMouseDown}
+            // onClick={() => dispatch({ type: 'selectNode', operation: 'clear' })}
         >
             {children}
         </div>

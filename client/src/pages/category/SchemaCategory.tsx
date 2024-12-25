@@ -5,7 +5,7 @@ import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { Portal, portals } from '@/components/common';
 import { logicalModelsFromServer } from '@/types/datasource';
-import { EditorGraphDisplay } from '@/components/EditorGraphDisplay';
+import { EditorGraphDisplay } from '@/components/schema-categories/EditorGraphDisplay';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 import { Key } from '@/types/identifiers';

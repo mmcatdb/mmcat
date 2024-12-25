@@ -18,8 +18,6 @@ type FullGraphOptions = {
     gridSize: number;
     /** Over how many relative units we have to drag the node to start the dragging. */
     nodeDraggingThreshold: number | null;
-    /** Over how many relative units we have to drag the mouse to start the selection. */
-    selectionBoxThreshold: number | null;
 };
 
 // TODO Use some global user preferences for this.
@@ -28,10 +26,9 @@ export type GraphOptions = Partial<FullGraphOptions>;
 export const defaultGraphOptions: FullGraphOptions = {
     snapToGrid: false,
     gridSize: 20,
-    // At least some threshold is needed to prevent accidental dragging / selecting.
-    // This should probably be done in pixels, however, everything is in relative units. E.g., if we scroll during selection, the initial point will move with the canvas (but the current won't, so the selection box will change its size).
-    nodeDraggingThreshold: 4,
-    selectionBoxThreshold: 4,
+    // At least some threshold is needed to prevent accidental dragging.
+    // There is no such thing for selection, because we want to start selecting immediately. This allows us to clear selection by clicking on the canvas.
+    nodeDraggingThreshold: 2,
     initialWidth: 1200,
     initialHeight: 600,
 };
@@ -243,9 +240,6 @@ export class GraphEngine {
         this.updateState({ coordinates: { origin, scale } });
     }
 
-    // This is an optimization so that we don't start selecting (and rerendering) immediately after a click.
-    private startSelecting?: Position;
-
     handleCanvasMousedown(event: ReactMouseEvent<HTMLElement>) {
         // We are only interested in clicking on the actual canvas, not the nodes or edges. Also, we ignore the right click.
         if (event.target !== this.canvas)
@@ -257,11 +251,7 @@ export class GraphEngine {
         }
         else if (actionButtons.select.canvas === event.button) {
             const initial = getMousePosition(event, this.canvas, this.state.coordinates);
-
-            if (this.options.selectionBoxThreshold)
-                this.startSelecting = initial;
-            else
-                this.updateState({ select: { initial, current: initial } });
+            this.updateState({ select: { initial, current: initial } });
         }
     }
 
@@ -300,8 +290,6 @@ export class GraphEngine {
             this.moveDragStart(event, this.startDragging);
         else if (this.state.drag)
             this.moveDrag(event, this.state.drag);
-        else if (this.startSelecting)
-            this.moveSelectStart(event, this.startSelecting);
         else if (this.state.select)
             this.moveSelect(event, this.state.select);
     }
@@ -376,25 +364,6 @@ export class GraphEngine {
     }
 
     /**
-     * Handle the first mouse move after the canvas was pressed .
-     */
-    private moveSelectStart(event: MouseEvent, initial: Position) {
-        const mousePosition = getMousePosition(event, this.canvas, this.state.coordinates);
-
-        if (
-            this.options.selectionBoxThreshold !== null &&
-            Math.abs(initial.x - mousePosition.x) < this.options.selectionBoxThreshold &&
-            Math.abs(initial.y - mousePosition.y) < this.options.selectionBoxThreshold
-        )
-            // If there is threshold, we have to wait until it's reached.
-            return;
-
-        // After the threshold is reached, the selection box appears.
-        this.startSelecting = undefined;
-        this.updateState({ select: { initial, current: mousePosition } });
-    }
-
-    /**
      * Handle a mouse move while in the selection state.
      */
     private moveSelect(event: MouseEvent, select: SelectState) {
@@ -405,7 +374,6 @@ export class GraphEngine {
 
     private handleGlobalMouseup(event: MouseEvent) {
         this.startDragging = undefined;
-        this.startSelecting = undefined;
 
         const { drag, select } = this.state;
         if (drag) {
