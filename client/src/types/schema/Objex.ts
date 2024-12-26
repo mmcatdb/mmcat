@@ -1,31 +1,48 @@
 import { idsAreEqual, Key, ObjexIds, SignatureId, type KeyFromServer, type ObjexIdsFromServer, type SignatureIdFromServer } from '../identifiers';
+import { type Category } from './Category';
 import { SchemaCategoryInvalidError } from './Error';
+import { type Morphism } from './Morphism';
 
+/**
+ * An object from the {@link Category}.
+ * It contains references to neighbouring objects and morphisms so all graph algorithms should be implemented here.
+ * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
+ */
 export class Objex {
+    public readonly key: Key;
     public readonly originalMetadata: MetadataObjex;
 
     constructor(
-        readonly key: Key,
+        private readonly category: Category,
         public schema: SchemaObjex,
         public metadata: MetadataObjex,
     ) {
+        this.key = schema.key;
         this.originalMetadata = metadata;
     }
 
-    static fromServer(schema: SchemaObjexFromServer, metadata: MetadataObjexFromServer): Objex {
+    static fromServer(category: Category, schema: SchemaObjexFromServer, metadata: MetadataObjexFromServer): Objex {
         const schemaObjex = SchemaObjex.fromServer(schema);
 
         return new Objex(
-            schemaObjex.key,
+            category,
             schemaObjex,
             MetadataObjex.fromServer(metadata),
         );
+    }
+
+    equals(other: Objex): boolean {
+        return this.key.equals(other.key);
     }
 
     private readonly groupIds = new Set<string>();
 
     addGroup(id: string) {
         this.groupIds.add(id);
+    }
+
+    findNeighbourMorphisms(): Morphism[] {
+        return [ ...this.category.morphisms.values() ].filter(morphism => morphism.from.key.equals(this.key) || morphism.to.key.equals(this.key));
     }
 }
 
@@ -35,6 +52,9 @@ export type SchemaObjexFromServer = {
     superId: SignatureIdFromServer;
 };
 
+/**
+ * An immutable, serializable version of all schema-related data from the {@link Objex}.
+ */
 export class SchemaObjex {
     private constructor(
         readonly key: Key,
@@ -121,6 +141,9 @@ export function isPositionEqual(a: Position, b: Position): boolean {
     return a.x === b.x && a.y === b.y;
 }
 
+/**
+ * An immutable, serializable version of all metadata-related data from the {@link Objex}.
+ */
 export class MetadataObjex {
     private constructor(
         readonly label: string,

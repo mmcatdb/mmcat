@@ -3,29 +3,40 @@ import { isArrayEqual } from '@/types/utils/common';
 import { type Objex } from './Objex';
 import { type Category } from './Category';
 
+/**
+ * A morphism from the {@link Category}.
+ * It contains references to neighbouring objects and morphisms so all graph algorithms should be implemented here.
+ * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
+ */
 export class Morphism {
+    public readonly signature: Signature;
     public readonly originalMetadata: MetadataMorphism;
 
     constructor(
-        readonly signature: Signature,
+        private readonly category: Category,
         public schema: SchemaMorphism,
         public metadata: MetadataMorphism,
         public from: Objex,
         public to: Objex,
     ) {
+        this.signature = schema.signature;
         this.originalMetadata = metadata;
     }
 
-    static fromServer(schema: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer, category: Category): Morphism {
+    static fromServer(category: Category, schema: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer): Morphism {
         const schemaMorphism = SchemaMorphism.fromServer(schema);
 
         return new Morphism(
-            schemaMorphism.signature,
+            category,
             schemaMorphism,
             MetadataMorphism.fromServer(metadata),
             category.getObjex(schemaMorphism.domKey),
             category.getObjex(schemaMorphism.codKey),
         );
+    }
+
+    equals(other: Morphism): boolean {
+        return this.signature.equals(other.signature);
     }
 }
 
@@ -51,6 +62,9 @@ export enum Tag {
     Role = 'role'
 }
 
+/**
+ * An immutable, serializable version of all schema-related data from the {@link Morphism}.
+ */
 export class SchemaMorphism {
     private constructor(
         readonly signature: Signature,
@@ -147,6 +161,9 @@ export type MetadataMorphismFromServer = {
     label: string;
 };
 
+/**
+ * An immutable, serializable version of all metadata-related data from the {@link Morphism}.
+ */
 export class MetadataMorphism {
     constructor(
         readonly label: string | undefined,

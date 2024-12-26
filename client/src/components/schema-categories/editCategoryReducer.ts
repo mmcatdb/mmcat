@@ -19,6 +19,24 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
     };
 }
 
+/** Utility function to make sure we correctly propagate all evocat changes to the reactive state. */
+function propagateEvocat(graph: CategoryGraph | undefined, state: EditCategoryState): EditCategoryState {
+    if (!graph)
+        return state;
+
+    let selectedNodeIds = new Set<string>();
+    // Just few optimizations (no need to search for the nodes if there are none selected, and keep the old state if it didn't change).
+    if (state.selectedNodeIds.size > 0) {
+        graph.nodes
+            .filter(node => state.selectedNodeIds.has(node.id))
+            .forEach(node => selectedNodeIds.add(node.id));
+    }
+    if (state.selectedNodeIds.size === selectedNodeIds.size)
+        selectedNodeIds = state.selectedNodeIds;
+
+    return { ...state, graph, selectedNodeIds };
+}
+
 export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 
 type EditCategoryAction = GraphAction | SelectNodeAction | PhaseAction;
@@ -109,5 +127,5 @@ export type PhaseAction = {
 }
 
 function phase(state: EditCategoryState, action: PhaseAction): EditCategoryState {
-    return { ...state, editor: { ...state.editor, phase: action.phase }, graph: action.graph ?? state.graph };
+    return propagateEvocat(action.graph, { ...state, editor: { ...state.editor, phase: action.phase } });
 }

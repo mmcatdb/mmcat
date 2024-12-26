@@ -33,7 +33,6 @@ export class DeleteObjex implements SMO<SMOType.DeleteObjex> {
     }
 
     down(category: Category): void {
-        const key = this.schema.key;
-        category.objexes.set(key, new Objex(key, this.schema, this.metadata));
+        category.objexes.set(this.schema.key, new Objex(category, this.schema, this.metadata));
     }
 }

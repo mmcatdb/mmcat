@@ -33,7 +33,8 @@ export class DeleteMorphism implements SMO<SMOType.DeleteMorphism> {
     }
 
     down(category: Category): void {
-        const signature = this.schema.signature;
-        category.morphisms.set(signature, new Morphism(signature, this.schema, this.metadata));
+        const from = category.getObjex(this.schema.domKey);
+        const to = category.getObjex(this.schema.codKey);
+        category.morphisms.set(this.schema.signature, new Morphism(category, this.schema, this.metadata, from, to));
     }
 }

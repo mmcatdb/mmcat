@@ -3,7 +3,7 @@ import { Button, Input } from '@nextui-org/react';
 import { EditorPhase, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { cn } from '../utils';
 import { type FormPosition, toFormNumber, toPosition } from '@/types/utils/common';
-import { categoryToGraph } from './categoryGraph';
+import { type CategoryNode, categoryToGraph } from './categoryGraph';
 import { type Evocat } from '@/types/evocat/Evocat';
 
 type StateDispatchProps = Readonly<{
@@ -31,10 +31,27 @@ const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element
     createObject: CreateObject,
 };
 
-function Default({ dispatch }: StateDispatchProps) {
+function Default({ evocat, state, dispatch }: StateDispatchProps) {
+    const singleSelectedNode = state.selectedNodeIds.size === 1
+        ? state.graph.nodes.find(node => state.selectedNodeIds.has(node.id))
+        : undefined;
+
+    function deleteNode(node: CategoryNode) {
+        evocat.deleteObjex(node.schema.key);
+        const graph = categoryToGraph(evocat.category);
+
+        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+    }
+
     return (<>
         <h3>Default</h3>
         <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createObject })}>Create object</Button>
+        {singleSelectedNode && (<>
+            <div>
+                Selected: <span className='font-semibold'>{singleSelectedNode.metadata.label}</span>
+            </div>
+            <Button color='danger' onClick={() => deleteNode(singleSelectedNode)}>Delete</Button>
+        </>)}
     </>);
 }
 

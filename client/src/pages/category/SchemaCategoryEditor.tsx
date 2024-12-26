@@ -10,7 +10,7 @@ import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
-import { PhasedEditor } from '@/components/schema-categories/PhasedEditor';
+import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
 
 export function SchemaCategoryEditor() {
     const loaderData = useLoaderData() as Awaited<ReturnType<typeof evocatLoader>>;
@@ -97,7 +97,7 @@ type SelectedNodesCardProps = Readonly<{
     dispatch: EditCategoryDispatch;
 }>;
 
-function SelectedNodesCard({ evocat, state, dispatch }: SelectedNodesCardProps) {
+function SelectedNodesCard({ state, dispatch }: SelectedNodesCardProps) {
     function unselectNode(nodeId: string) {
         dispatch({ type: 'selectNode', nodeId, operation: 'remove' });
     }
@@ -113,11 +113,10 @@ function SelectedNodesCard({ evocat, state, dispatch }: SelectedNodesCardProps) 
             <div className='flex flex-col'>
                 {[ ...state.selectedNodeIds.values() ].map(id => {
                     const node = state.graph.nodes.find(node => node.id === id)!;
-                    const objex = evocat.category.getObjex(node.schema.key);
 
                     return (
                         <div key={node.id} className='flex items-center gap-2'>
-                            <span className='text-primary font-semibold'>{objex.key.toString()}</span>
+                            <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
                             {node.metadata.label}
                             <div className='grow' />
                             <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>

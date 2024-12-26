@@ -30,9 +30,9 @@ export class Category implements Entity {
         );
 
         const objexMetadata = new Map<KeyFromServer, MetadataObjexFromServer>(
-            input.metadata.objects.map(o => [ o.key, o ]),
+            input.metadata.objects.map(metadata => [ metadata.key, metadata ]),
         );
-        const objexes = input.schema.objects.map(o => Objex.fromServer(o, objexMetadata.get(o.key)!));
+        const objexes = input.schema.objects.map(schema => Objex.fromServer(category, schema, objexMetadata.get(schema.key)!));
         objexes.forEach(objex => {
             if (!objex.schema)
                 return;
@@ -42,9 +42,9 @@ export class Category implements Entity {
         });
 
         const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
-            input.metadata.morphisms.map(m => [ m.signature, m ]),
+            input.metadata.morphisms.map(metadata => [ metadata.signature, metadata ]),
         );
-        const morphisms = input.schema.morphisms.map(m => Morphism.fromServer(m, morphismMetadata.get(m.signature)!, category));
+        const morphisms = input.schema.morphisms.map(schema => Morphism.fromServer(category, schema, morphismMetadata.get(schema.signature)!));
         morphisms.forEach(morphism => {
             if (!morphism.schema)
                 return;

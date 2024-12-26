@@ -5,7 +5,7 @@ import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
 import type { MMO } from './metadata/mmo';
 import { MorphismMetadata } from './metadata/morphismMetadata';
 import { ObjexMetadata } from './metadata/objexMetadata';
-import type { ObjexIds } from '../identifiers';
+import type { Key, ObjexIds, Signature } from '../identifiers';
 
 type UpdateApi = (udpate: SchemaUpdateInit) => Promise<Result<Category>>;
 
@@ -186,10 +186,13 @@ export class Evocat {
         this.addOperation(operation);
     }
 
-    deleteObjex(schemaObjex: SchemaObjex) {
-        // FIXME
-        // const operation = new DeleteObjex(schemaObjex);
-        // this.addOperation(operation);
+    deleteObjex(key: Key) {
+        const objex = this._category.getObjex(key);
+        objex.findNeighbourMorphisms().forEach(morphism => this.deleteMorphism(morphism.signature));
+
+        const { schema, metadata } = objex;
+        const operation = new DeleteObjex(schema, metadata);
+        this.addOperation(operation);
     }
 
     updateObjex(oldSchemaObjex: SchemaObjex, update: {
@@ -217,12 +220,12 @@ export class Evocat {
         this.addOperation(operation);
     }
 
-    deleteMorphism(schemaMorphism: SchemaMorphism) {
+    deleteMorphism(signature: Signature) {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (only if the cardinality changed).
 
-        // FIXME
-        // const operation = new DeleteMorphism(schemaMorphism);
-        // this.addOperation(operation);
+        const { schema, metadata } = this._category.getMorphism(signature);
+        const operation = new DeleteMorphism(schema, metadata);
+        this.addOperation(operation);
     }
 
     updateMorphism(oldSchemaMorphism: SchemaMorphism, update: Partial<MorphismDefinition>) {

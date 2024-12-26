@@ -29,8 +29,7 @@ export class CreateObjex implements SMO<SMOType.CreateObjex> {
     }
 
     up(category: Category): void {
-        const key = this.schema.key;
-        category.objexes.set(key, new Objex(key, this.schema, this.metadata));
+        category.objexes.set(this.schema.key, new Objex(category, this.schema, this.metadata));
     }
 
     down(category: Category): void {
