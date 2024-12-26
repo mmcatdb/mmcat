@@ -32,7 +32,7 @@ const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element
 };
 
 function Default({ evocat, state, dispatch }: StateDispatchProps) {
-    const singleSelectedNode = state.selectedNodeIds.size === 1
+    const singleSelectedNode = (state.selectedNodeIds.size === 1 && state.selectedEdgeIds.size === 0)
         ? state.graph.nodes.find(node => state.selectedNodeIds.has(node.id))
         : undefined;
 

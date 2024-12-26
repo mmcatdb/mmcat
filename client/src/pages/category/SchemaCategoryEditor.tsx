@@ -43,9 +43,9 @@ export function SchemaCategoryEditor() {
 
             <div className='relative'>
                 <EditorGraphDisplay state={state} dispatch={dispatch} className='w-full min-h-[600px]' />
-                {state.selectedNodeIds.size > 0 && (
+                {(state.selectedNodeIds.size > 0 || state.selectedEdgeIds.size > 0) && (
                     <div className='z-20 absolute top-2 right-2'>
-                        <SelectedNodesCard evocat={evocatRef.current} state={state} dispatch={dispatch} />
+                        <SelectionCard evocat={evocatRef.current} state={state} dispatch={dispatch} />
                     </div>
                 )}
             </div>
@@ -91,41 +91,78 @@ function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
     );
 }
 
-type SelectedNodesCardProps = Readonly<{
+type SelectionCardProps = Readonly<{
     evocat: Evocat;
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
 }>;
 
-function SelectedNodesCard({ state, dispatch }: SelectedNodesCardProps) {
+function SelectionCard({ state, dispatch }: SelectionCardProps) {
     function unselectNode(nodeId: string) {
-        dispatch({ type: 'selectNode', nodeId, operation: 'remove' });
+        dispatch({ type: 'select', nodeId, operation: 'remove' });
+    }
+
+    function unselectEdge(edgeId: string) {
+        dispatch({ type: 'select', edgeId, operation: 'remove' });
     }
 
     return (
-        <div className='min-w-[200px] p-3 rounded-lg bg-black'>
-            <div className='flex items-center justify-between pb-1'>
-                <h3 className='font-semibold'>Selected objects</h3>
-                <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'selectNode', operation: 'clear' })}>
-                    <FaXmark />
-                </Button>
-            </div>
-            <div className='flex flex-col'>
-                {[ ...state.selectedNodeIds.values() ].map(id => {
-                    const node = state.graph.nodes.find(node => node.id === id)!;
+        <div className='min-w-[200px] p-3 rounded-lg bg-black space-y-3'>
+            {state.selectedEdgeIds.size > 0 && (
+                <div>
+                    <div className='flex items-center justify-between pb-1'>
+                        <h3 className='font-semibold'>Selected objects</h3>
+                        <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'nodes' })}>
+                            <FaXmark />
+                        </Button>
+                    </div>
 
-                    return (
-                        <div key={node.id} className='flex items-center gap-2'>
-                            <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
-                            {node.metadata.label}
-                            <div className='grow' />
-                            <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>
-                                <FaXmark />
-                            </Button>
-                        </div>
-                    );
-                })}
-            </div>
+                    <div className='flex flex-col'>
+                        {[ ...state.selectedNodeIds.values() ].map(id => {
+                            const node = state.graph.nodes.find(node => node.id === id)!;
+
+                            return (
+                                <div key={node.id} className='flex items-center gap-2'>
+                                    <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
+                                    {node.metadata.label}
+                                    <div className='grow' />
+                                    <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>
+                                        <FaXmark />
+                                    </Button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {state.selectedEdgeIds.size > 0 && (
+                <div>
+                    <div className='flex items-center justify-between pb-1'>
+                        <h3 className='font-semibold'>Selected morphisms</h3>
+                        <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'edges' })}>
+                            <FaXmark />
+                        </Button>
+                    </div>
+
+                    <div className='flex flex-col'>
+                        {[ ...state.selectedEdgeIds.values() ].map(id => {
+                            const edge = state.graph.edges.find(edge => edge.id === id)!;
+
+                            return (
+                                <div key={edge.id} className='flex items-center gap-2'>
+                                    <span className='text-primary font-semibold'>{edge.schema.signature.toString()}</span>
+                                    {edge.metadata.label}
+                                    <div className='grow' />
+                                    <Button isIconOnly variant='light' size='sm' onClick={() => unselectEdge(edge.id)}>
+                                        <FaXmark />
+                                    </Button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

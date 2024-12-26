@@ -90,9 +90,12 @@ export function useEdge(edge: Edge, graph: GraphInput) {
         to: nodes.find(node => node.id === edge.to)!,
     }), [ edge, nodes ]);
 
+    const isHoverAllowed = !state.drag && !state.select;
+
     return {
         setEdgeRef,
         style: computeEdgeStyle(cache.from, cache.to, state.coordinates),
+        isHoverAllowed,
     };
 }
 

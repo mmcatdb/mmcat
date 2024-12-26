@@ -13,11 +13,14 @@ export type Edge = {
 
 /** Maps edges by their from- and to- nodes. */
 export class EdgeMap {
+    private readonly idMap = new Map<string, Edge>();
     private readonly fromMap = new Map<string, Edge[]>();
     private readonly toMap = new Map<string, Edge[]>();
 
     constructor(edges: Edge[]) {
         edges.forEach(edge => {
+            this.idMap.set(edge.id, edge);
+
             const fromId = edge.from;
             const fromEdges = this.fromMap.get(fromId) ?? [];
             fromEdges.push(edge);
@@ -35,6 +38,10 @@ export class EdgeMap {
             from: this.fromMap.get(nodeId) ?? [],
             to: this.toMap.get(nodeId) ?? [],
         };
+    }
+
+    values(): MapIterator<Edge> {
+        return this.idMap.values();
     }
 }
 
@@ -126,6 +133,15 @@ export function isPointInBox(point: Position, boxStart: Position, boxEnd: Positi
         && Math.max(boxStart.x, boxEnd.x) > point.x
         && Math.min(boxStart.y, boxEnd.y) < point.y
         && Math.max(boxStart.y, boxEnd.y) > point.y;
+}
+
+export function isEdgeInBox(from: Position, to: Position, boxStart: Position, boxEnd: Position): boolean {
+    // Let's approximate the edge by its middle point. It ain't much but it's honest work.
+    const middle = {
+        x: (from.x + to.x) / 2,
+        y: (from.y + to.y) / 2,
+    };
+    return isPointInBox(middle, boxStart, boxEnd);
 }
 
 const THROTTLE_DURATION_MS = 20;

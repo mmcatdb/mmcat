@@ -1,5 +1,5 @@
 import { type Dispatch, type MouseEvent as ReactMouseEvent } from 'react';
-import { computeCoordinates, computeEdgeStyle, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getMouseOffset, getMousePosition, type HTMLConnection, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
+import { computeCoordinates, computeEdgeStyle, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
 
 export type GraphInput = {
     nodes: Node[];
@@ -43,6 +43,7 @@ export type GraphAction = {
 } | {
     operation: 'select';
     nodeIds: string[];
+    edgeIds: string[];
     /** A special key like ctrl or shift was held during the event. */
     isSpecialKey: boolean;
 });
@@ -407,9 +408,19 @@ export class GraphEngine {
             const nodeIds = [ ...this.nodeMap.values() ]
                 .filter(node => isPointInBox(node.position, select.initial, select.current))
                 .map(node => node.id);
+
+
+            const edgeIds = [ ...this.edgeMap.values() ]
+                .filter(edge => {
+                    const from = this.nodeMap.get(edge.from)!;
+                    const to = this.nodeMap.get(edge.to)!;
+                    return isEdgeInBox(from.position, to.position, select.initial, select.current);
+                })
+                .map(edge => edge.id);
+
             const isSpecialKey = event.shiftKey || event.ctrlKey;
 
-            this.dispatch({ type: 'graph', operation: 'select', nodeIds, isSpecialKey });
+            this.dispatch({ type: 'graph', operation: 'select', nodeIds, edgeIds, isSpecialKey });
         }
     }
 }

@@ -21,7 +21,7 @@ export function EditorGraphDisplay({ state, dispatch, options, className }: Edit
                     <NodeDisplay key={node.id} node={node} state={state} dispatch={dispatch} />
                 ))}
                 {state.graph.edges.map(edge => (
-                    <EdgeDisplay key={edge.id} edge={edge} state={state} />
+                    <EdgeDisplay key={edge.id} edge={edge} state={state} dispatch={dispatch} />
                 ))}
                 <SelectionBox />
             </CanvasDisplay>
@@ -42,7 +42,6 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
             ref={setCanvasRef}
             className={cn('relative bg-slate-400 overflow-hidden focus:bg-red-300 focus-visible:bg-green-300', isDragging ? 'cursor-grabbing' : 'cursor-default', className)}
             onMouseDown={onMouseDown}
-            // onClick={() => dispatch({ type: 'selectNode', operation: 'clear' })}
         >
             {children}
         </div>
@@ -63,7 +62,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
         const isSpecialKey = event.ctrlKey || event.ctrlKey;
-        dispatch({ type: 'selectNode', nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' });
+        dispatch({ type: 'select', nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' });
     }
 
     return (
@@ -94,16 +93,31 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
 type EdgeDisplayProps = Readonly<{
     edge: CategoryEdge;
     state: EditCategoryState;
+    dispatch: EditCategoryDispatch;
 }>;
 
-function EdgeDisplay({ edge, state }: EdgeDisplayProps) {
-    const { setEdgeRef, style } = useEdge(edge, state.graph);
+function EdgeDisplay({ edge, state, dispatch }: EdgeDisplayProps) {
+    const { setEdgeRef, style, isHoverAllowed } = useEdge(edge, state.graph);
+
+    const isSelected = state.selectedEdgeIds.has(edge.id);
+
+    function onClick(event: MouseEvent<HTMLElement>) {
+        event.stopPropagation();
+        const isSpecialKey = event.ctrlKey || event.ctrlKey;
+        dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
+    }
+
+    // FIXME display multiple edges ...
 
     return (
         <div
             ref={setEdgeRef}
-            className='absolute h-1 bg-slate-700 rounded-full select-none'
+            className={cn('absolute h-1 bg-slate-700 rounded-full select-none',
+                isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300',
+                isSelected && 'bg-cyan-600',
+            )}
             style={style}
+            onClick={onClick}
         />
     );
 }

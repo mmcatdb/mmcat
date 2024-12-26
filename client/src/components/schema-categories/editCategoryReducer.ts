@@ -6,6 +6,7 @@ import { type Evocat } from '@/types/evocat/Evocat';
 export type EditCategoryState = {
     graph: CategoryGraph;
     selectedNodeIds: Set<string>;
+    selectedEdgeIds: Set<string>;
     editor: PhasedEditorState;
 };
 
@@ -15,6 +16,7 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
     return {
         graph,
         selectedNodeIds: new Set(),
+        selectedEdgeIds: new Set(),
         editor: { phase: EditorPhase.default },
     };
 }
@@ -34,18 +36,28 @@ function propagateEvocat(graph: CategoryGraph | undefined, state: EditCategorySt
     if (state.selectedNodeIds.size === selectedNodeIds.size)
         selectedNodeIds = state.selectedNodeIds;
 
-    return { ...state, graph, selectedNodeIds };
+    let selectedEdgeIds = new Set<string>();
+    // The same optimizations as above.
+    if (state.selectedEdgeIds.size > 0) {
+        graph.edges
+            .filter(edge => state.selectedEdgeIds.has(edge.id))
+            .forEach(edge => selectedEdgeIds.add(edge.id));
+    }
+    if (state.selectedEdgeIds.size === selectedEdgeIds.size)
+        selectedEdgeIds = state.selectedEdgeIds;
+
+    return { ...state, graph, selectedNodeIds, selectedEdgeIds };
 }
 
 export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 
-type EditCategoryAction = GraphAction | SelectNodeAction | PhaseAction;
+type EditCategoryAction = GraphAction | SelectAction | PhaseAction;
 
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
     console.log('REDUCE', state.editor.phase, action, state);
     switch (action.type) {
     case 'graph': return graph(state, action);
-    case 'selectNode': return selectNode(state, action);
+    case 'select': return select(state, action);
     case 'phase': return phase(state, action);
     }
 }
@@ -63,48 +75,80 @@ function graph(state: EditCategoryState, action: GraphAction): EditCategoryState
     case 'select': {
         if (!action.isSpecialKey) {
             // The default case - we select exactly the given nodes.
-            return { ...state, selectedNodeIds: new Set(action.nodeIds) };
+            return { ...state, selectedNodeIds: new Set(action.nodeIds), selectedEdgeIds: new Set(action.edgeIds) };
         }
 
-        // The special key is pressed - we toggle the given nodes.
+        // A special key is pressed - we toggle the given nodes and edges.
         const selectedNodeIds = new Set(state.selectedNodeIds);
         action.nodeIds.forEach(nodeId =>
             selectedNodeIds.has(nodeId) ? selectedNodeIds.delete(nodeId) : selectedNodeIds.add(nodeId),
         );
 
-        return { ...state, selectedNodeIds };
+        const selectedEdgeIds = new Set(state.selectedEdgeIds);
+        action.edgeIds.forEach(edgeId =>
+            selectedEdgeIds.has(edgeId) ? selectedEdgeIds.delete(edgeId) : selectedEdgeIds.add(edgeId),
+        );
+
+        return { ...state, selectedNodeIds, selectedEdgeIds };
     }
     }
 }
 
 // Selection
 
-type SelectNodeAction = {
-    type: 'selectNode';
+type SelectAction = {
+    type: 'select';
 } & ({
-    nodeId: string;
     operation: 'set' | 'add' | 'remove' | 'toggle';
+    nodeId: string;
+} | {
+    operation: 'set' | 'add' | 'remove' | 'toggle';
+    edgeId: string;
 } | {
     operation: 'clear';
+    range: 'nodes' | 'edges' | 'all';
 });
 
-function selectNode(state: EditCategoryState, action: SelectNodeAction): EditCategoryState {
-    if (action.operation === 'clear')
-        return { ...state, selectedNodeIds: new Set() };
+function select(state: EditCategoryState, action: SelectAction): EditCategoryState {
+    const operation = action.operation;
+    if (operation === 'clear') {
+        const selectedNodeIds = (action.range === 'nodes' || action.range === 'all') ? new Set<string>() : state.selectedNodeIds;
+        const selectedEdgeIds = (action.range === 'edges' || action.range === 'all') ? new Set<string>() : state.selectedEdgeIds;
+        return { ...state, selectedNodeIds, selectedEdgeIds };
+    }
 
-    const { nodeId, operation } = action;
-    if (operation === 'set')
-        return { ...state, selectedNodeIds: new Set([ nodeId ]) };
+    if (operation === 'set') {
+        return 'nodeId' in action
+            ? { ...state, selectedNodeIds: new Set([ action.nodeId ]), selectedEdgeIds: new Set() }
+            : { ...state, selectedEdgeIds: new Set([ action.edgeId ]), selectedNodeIds: new Set() };
+    }
 
-    const selectedNodeIds = new Set(state.selectedNodeIds);
-    if (operation === 'add')
-        selectedNodeIds.add(nodeId);
-    else if (operation === 'remove')
-        selectedNodeIds.delete(nodeId);
-    else if (operation === 'toggle')
-        selectedNodeIds.has(nodeId) ? selectedNodeIds.delete(nodeId) : selectedNodeIds.add(nodeId);
+    if ('nodeId' in action) {
+        const nodeId = action.nodeId;
+        const selectedNodeIds = new Set(state.selectedNodeIds);
 
-    return { ...state, selectedNodeIds };
+        if (operation === 'add')
+            selectedNodeIds.add(nodeId);
+        else if (operation === 'remove')
+            selectedNodeIds.delete(nodeId);
+        else if (operation === 'toggle')
+            selectedNodeIds.has(nodeId) ? selectedNodeIds.delete(nodeId) : selectedNodeIds.add(nodeId);
+
+        return { ...state, selectedNodeIds };
+    }
+    else {
+        const edgeId = action.edgeId;
+        const selectedEdgeIds = new Set(state.selectedEdgeIds);
+
+        if (operation === 'add')
+            selectedEdgeIds.add(edgeId);
+        else if (operation === 'remove')
+            selectedEdgeIds.delete(edgeId);
+        else if (operation === 'toggle')
+            selectedEdgeIds.has(edgeId) ? selectedEdgeIds.delete(edgeId) : selectedEdgeIds.add(edgeId);
+
+        return { ...state, selectedEdgeIds };
+    }
 }
 
 // Editor phases
