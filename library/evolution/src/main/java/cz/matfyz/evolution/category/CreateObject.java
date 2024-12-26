@@ -1,6 +1,8 @@
-package cz.matfyz.evolution.schema;
+package cz.matfyz.evolution.category;
 
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataObject;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -10,28 +12,29 @@ import cz.matfyz.evolution.exception.DependencyException;
 import java.util.List;
 
 public record CreateObject(
-    SerializedObject object
+    SerializedObject schema,
+    SerializedMetadataObject metadata
 ) implements SMO {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
-    @Override public void up(SchemaCategory schema) {
-        (new SchemaEditor(schema)).getObjects().put(object.key(), object.deserialize());
+    @Override public void up(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
+        (new SchemaEditor(schemaCategory)).getObjects().put(schema.key(), schema.deserialize());
     }
 
-    @Override public void down(SchemaCategory schema) {
-        assertObjectIsSingle(schema, object.deserialize());
+    @Override public void down(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
+        assertObjectIsSingle(schemaCategory, schema.deserialize());
 
-        (new SchemaEditor(schema)).getObjects().remove(object.key());
+        (new SchemaEditor(schemaCategory)).getObjects().remove(schema.key());
     }
 
     /**
      * Check if there aren't any dependent morphisms.
      */
-    static void assertObjectIsSingle(SchemaCategory schema, SchemaObject object) {
-        final List<Signature> signaturesOfDependentMorphisms = schema.allMorphisms().stream()
+    static void assertObjectIsSingle(SchemaCategory schemaCategory, SchemaObject object) {
+        final List<Signature> signaturesOfDependentMorphisms = schemaCategory.allMorphisms().stream()
             .filter(morphism -> morphism.dom().equals(object) || morphism.cod().equals(object))
             .map(SchemaMorphism::signature)
             .toList();

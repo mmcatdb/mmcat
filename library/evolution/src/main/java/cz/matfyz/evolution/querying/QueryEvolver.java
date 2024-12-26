@@ -4,17 +4,17 @@ import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.evolution.category.Composite;
+import cz.matfyz.evolution.category.CreateMorphism;
+import cz.matfyz.evolution.category.CreateObject;
+import cz.matfyz.evolution.category.DeleteMorphism;
+import cz.matfyz.evolution.category.DeleteObject;
+import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
+import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
+import cz.matfyz.evolution.category.UpdateMorphism;
+import cz.matfyz.evolution.category.UpdateObject;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
-import cz.matfyz.evolution.schema.Composite;
-import cz.matfyz.evolution.schema.CreateMorphism;
-import cz.matfyz.evolution.schema.CreateObject;
-import cz.matfyz.evolution.schema.DeleteMorphism;
-import cz.matfyz.evolution.schema.DeleteObject;
-import cz.matfyz.evolution.schema.UpdateMorphism;
-import cz.matfyz.evolution.schema.UpdateObject;
-import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
-import cz.matfyz.evolution.schema.SchemaEvolutionVisitor;
 import cz.matfyz.querying.parsing.Filter.ConditionFilter;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.parsing.Query;
@@ -118,7 +118,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
     }
 
     @Override public Void visit(DeleteMorphism operation) {
-        final Signature signatureToDelete = operation.morphism().signature();
+        final Signature signatureToDelete = operation.schema().signature();
 
         final var whereDeletor = new SubtreeDeletor<Signature>(tree -> tree.edgeFromParent != null && tree.edgeFromParent.contains(signatureToDelete));
         whereTermTrees = whereTermTrees.stream()
@@ -136,13 +136,13 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
             .filter(Objects::nonNull)
             .toList();
 
-        errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete morphism " + operation.morphism().signature(), null));
+        errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete morphism " + operation.schema().signature(), null));
 
         return null;
     }
 
     @Override public Void visit(DeleteObject operation) {
-        final @Nullable Term termToDelete = query.context.getTerm(operation.object().deserialize());
+        final @Nullable Term termToDelete = query.context.getTerm(operation.schema().deserialize());
         if (termToDelete == null)
             return null;
 
@@ -160,7 +160,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
         final boolean isSomethingChanged = !whereDeletor.deleted.isEmpty() || !selectDeletor.deleted.isEmpty();
         if (isSomethingChanged)
-            errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete object " + operation.object().key(), null));
+            errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete object " + operation.schema().key(), null));
 
         return null;
     }

@@ -1,9 +1,10 @@
 import type { Category } from '../Category';
-import { type MetadataObjex, Objex, SchemaObjex, type SchemaObjexFromServer } from '../Objex';
+import { MetadataObjex, type MetadataObjexFromServer, Objex, SchemaObjex, type SchemaObjexFromServer } from '../Objex';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type DeleteObjexFromServer = SMOFromServer<SMOType.DeleteObjex> & {
-    object: SchemaObjexFromServer;
+    schema: SchemaObjexFromServer;
+    metadata: MetadataObjexFromServer;
 };
 
 export class DeleteObjex implements SMO<SMOType.DeleteObjex> {
@@ -16,15 +17,16 @@ export class DeleteObjex implements SMO<SMOType.DeleteObjex> {
 
     static fromServer(input: DeleteObjexFromServer): DeleteObjex {
         return new DeleteObjex(
-            SchemaObjex.fromServer(input.object),
-            null, // FIXME
+            SchemaObjex.fromServer(input.schema),
+            MetadataObjex.fromServer(input.metadata),
         );
     }
 
     toServer(): DeleteObjexFromServer {
         return {
             type: SMOType.DeleteObjex,
-            object: this.schema.toServer(),
+            schema: this.schema.toServer(),
+            metadata: this.metadata.toServer(this.schema.key),
         };
     }
 

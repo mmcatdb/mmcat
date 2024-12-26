@@ -1,5 +1,6 @@
-package cz.matfyz.evolution.schema;
+package cz.matfyz.evolution.category;
 
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
@@ -13,11 +14,11 @@ public record UpdateObject(
         return visitor.visit(this);
     }
 
-    @Override public void up(SchemaCategory schema) {
+    @Override public void up(SchemaCategory schema, MetadataCategory metadataCategory) {
         replaceObject(schema, newObject.deserialize());
     }
 
-    @Override public void down(SchemaCategory schema) {
+    @Override public void down(SchemaCategory schema, MetadataCategory metadataCategory) {
         replaceObject(schema, oldObject.deserialize());
     }
 

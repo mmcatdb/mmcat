@@ -1,9 +1,10 @@
 import type { Category } from '../Category';
-import { type MetadataMorphism, Morphism, SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
+import { MetadataMorphism, type MetadataMorphismFromServer, Morphism, SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CreateMorphismFromServer = SMOFromServer<SMOType.CreateMorphism> & {
-    morphism: SchemaMorphismFromServer;
+    schema: SchemaMorphismFromServer;
+    metadata: MetadataMorphismFromServer;
 };
 
 export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
@@ -16,15 +17,16 @@ export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
 
     static fromServer(input: CreateMorphismFromServer): CreateMorphism {
         return new CreateMorphism(
-            SchemaMorphism.fromServer(input.morphism),
-            null, // FIXME
+            SchemaMorphism.fromServer(input.schema),
+            MetadataMorphism.fromServer(input.metadata),
         );
     }
 
     toServer(): CreateMorphismFromServer {
         return {
             type: SMOType.CreateMorphism,
-            morphism: this.schema.toServer(),
+            schema: this.schema.toServer(),
+            metadata: this.metadata.toServer(this.schema.signature),
         };
     }
 

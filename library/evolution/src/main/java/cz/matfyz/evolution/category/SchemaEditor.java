@@ -1,4 +1,4 @@
-package cz.matfyz.evolution.schema;
+package cz.matfyz.evolution.category;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;

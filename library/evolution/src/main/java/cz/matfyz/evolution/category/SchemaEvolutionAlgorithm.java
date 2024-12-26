@@ -1,5 +1,6 @@
-package cz.matfyz.evolution.schema;
+package cz.matfyz.evolution.category;
 
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
@@ -21,16 +22,16 @@ public class SchemaEvolutionAlgorithm {
         this.operations = operations;
     }
 
-    public SchemaCategory up(SchemaCategory schema) {
+    public SchemaCategory up(SchemaCategory schema, MetadataCategory metadata) {
         for (final var operation : operations)
-            operation.up(schema);
+            operation.up(schema, metadata);
 
         return schema;
     }
 
-    public SchemaCategory down(SchemaCategory schema) {
+    public SchemaCategory down(SchemaCategory schema, MetadataCategory metadata) {
         for (final var operation : operations.reversed())
-            operation.down(schema);
+            operation.down(schema, metadata);
 
         return schema;
     }
@@ -38,7 +39,7 @@ public class SchemaEvolutionAlgorithm {
     /**
      * The provided updates are expected to be sorted from the oldest version to the newest.
      */
-    public static void setToVersion(SchemaCategory schema, List<SchemaEvolutionAlgorithm> allUpdates, Version currentVersion, Version newVersion) {
+    public static void setToVersion(SchemaCategory schema, MetadataCategory metadata, List<SchemaEvolutionAlgorithm> allUpdates, Version currentVersion, Version newVersion) {
         final int comparison = currentVersion.compareTo(newVersion);
 
         if (comparison < 0) {
@@ -51,7 +52,7 @@ public class SchemaEvolutionAlgorithm {
 
             for (int i = firstIndex; i < lastIndex; i++) {
                 final var update = allUpdates.get(i);
-                update.up(schema);
+                update.up(schema, metadata);
             }
         }
         else if (comparison > 0) {
@@ -62,7 +63,7 @@ public class SchemaEvolutionAlgorithm {
 
             for (int i = firstIndex; i > lastIndex; i--) {
                 final var update = allUpdates.get(i);
-                update.down(schema);
+                update.down(schema, metadata);
             }
         }
     }

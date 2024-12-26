@@ -1,9 +1,10 @@
 import type { Category } from '../Category';
-import { type MetadataObjex, Objex, SchemaObjex, type SchemaObjexFromServer } from '../Objex';
+import { MetadataObjex, type MetadataObjexFromServer, Objex, SchemaObjex, type SchemaObjexFromServer } from '../Objex';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CreateObjexFromServer = SMOFromServer<SMOType.CreateObjex> & {
-    object: SchemaObjexFromServer;
+    schema: SchemaObjexFromServer;
+    metadata: MetadataObjexFromServer;
 };
 
 export class CreateObjex implements SMO<SMOType.CreateObjex> {
@@ -16,15 +17,16 @@ export class CreateObjex implements SMO<SMOType.CreateObjex> {
 
     static fromServer(input: CreateObjexFromServer): CreateObjex {
         return new CreateObjex(
-            SchemaObjex.fromServer(input.object),
-            null, // FIXME
+            SchemaObjex.fromServer(input.schema),
+            MetadataObjex.fromServer(input.metadata),
         );
     }
 
     toServer(): CreateObjexFromServer {
         return {
             type: SMOType.CreateObjex,
-            object: this.schema.toServer(),
+            schema: this.schema.toServer(),
+            metadata: this.metadata.toServer(this.schema.key),
         };
     }
 

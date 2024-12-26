@@ -1,5 +1,6 @@
-package cz.matfyz.evolution.schema;
+package cz.matfyz.evolution.category;
 
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.exception.EvolutionException;
 
@@ -18,10 +19,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public interface SMO {
 
-    void up(SchemaCategory schema) throws EvolutionException;
-
-    void down(SchemaCategory schema) throws EvolutionException;
-
     <T> T accept(SchemaEvolutionVisitor<T> visitor) throws EvolutionException;
+
+    void up(SchemaCategory schema, MetadataCategory metadata) throws EvolutionException;
+
+    void down(SchemaCategory schema, MetadataCategory metadata) throws EvolutionException;
 
 }

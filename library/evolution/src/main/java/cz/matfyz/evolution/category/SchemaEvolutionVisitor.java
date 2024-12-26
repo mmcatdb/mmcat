@@ -1,4 +1,4 @@
-package cz.matfyz.evolution.schema;
+package cz.matfyz.evolution.category;
 
 public interface SchemaEvolutionVisitor<T> {
 

@@ -1,5 +1,6 @@
-package cz.matfyz.evolution.schema;
+package cz.matfyz.evolution.category;
 
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 
 import java.util.List;
@@ -13,14 +14,14 @@ public record Composite(
         return visitor.visit(this);
     }
 
-    @Override public void up(SchemaCategory schema) {
+    @Override public void up(SchemaCategory schema, MetadataCategory metadata) {
         for (final var child : children)
-            child.up(schema);
+            child.up(schema, metadata);
     }
 
-    @Override public void down(SchemaCategory schema) {
+    @Override public void down(SchemaCategory schema, MetadataCategory metadata) {
         for (final var child : children.reversed())
-            child.down(schema);
+            child.down(schema, metadata);
     }
 
 }

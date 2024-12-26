@@ -13,15 +13,15 @@ import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
+import cz.matfyz.evolution.category.Composite;
+import cz.matfyz.evolution.category.CreateMorphism;
+import cz.matfyz.evolution.category.CreateObject;
+import cz.matfyz.evolution.category.SMO;
+import cz.matfyz.evolution.category.UpdateMorphism;
+import cz.matfyz.evolution.category.UpdateObject;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MorphismMetadata;
 import cz.matfyz.evolution.metadata.ObjectMetadata;
-import cz.matfyz.evolution.schema.Composite;
-import cz.matfyz.evolution.schema.CreateMorphism;
-import cz.matfyz.evolution.schema.CreateObject;
-import cz.matfyz.evolution.schema.UpdateMorphism;
-import cz.matfyz.evolution.schema.UpdateObject;
-import cz.matfyz.evolution.schema.SMO;
 import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 
@@ -72,7 +72,7 @@ public abstract class SchemaBase {
 
     private void addSchemaOperation(SMO smo) {
         schemaOperations.add(smo);
-        smo.up(newSchema);
+        smo.up(newSchema, newMetadata);
     }
 
     private List<MMO> metadataOperations = new ArrayList<>();
@@ -93,9 +93,10 @@ public abstract class SchemaBase {
             ? ids.generateDefaultSuperId()
             : new SignatureId();
 
-        addSchemaOperation(new CreateObject(new SerializedObject(key, ids, superId)));
-        final var mo = new SerializedMetadataObject(key, builderObject.label(), createPosition(x, y));
-        addMetadataOperation(new ObjectMetadata(mo, null));
+        final var schema = new SerializedObject(key, ids, superId);
+        final var metadata = new SerializedMetadataObject(key, builderObject.label(), createPosition(x, y));
+        addSchemaOperation(new CreateObject(schema, metadata));
+        addMetadataOperation(new ObjectMetadata(metadata, null));
     }
 
     private static Position createPosition(double x, double y) {
@@ -123,9 +124,10 @@ public abstract class SchemaBase {
         final var signature = builderMorphism.signature();
         final var morphism = originalSchema.getMorphism(signature);
 
-        addSchemaOperation(new CreateMorphism(SerializedMorphism.serialize(morphism)));
-        final var mm = new SerializedMetadataMorphism(signature, builderMorphism.label());
-        addMetadataOperation(new MorphismMetadata(mm, null));
+        final var schema = SerializedMorphism.serialize(morphism);
+        final var metadata = new SerializedMetadataMorphism(signature, builderMorphism.label());
+        addSchemaOperation(new CreateMorphism(schema, metadata));
+        addMetadataOperation(new MorphismMetadata(metadata, null));
     }
 
     protected void updateMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {

@@ -64,25 +64,21 @@ export class SchemaObjex {
     ) {}
 
     static fromServer(schema: SchemaObjexFromServer): SchemaObjex {
-        const objex = new SchemaObjex(
+        return new SchemaObjex(
             Key.fromServer(schema.key),
             schema.ids ? ObjexIds.fromServer(schema.ids) : undefined,
             SignatureId.fromServer(schema.superId),
             false,
         );
-
-        return objex;
     }
 
     static createNew(key: Key, def: Omit<ObjexDefinition, 'label' | 'position'>): SchemaObjex {
-        const objex = new SchemaObjex(
+        return new SchemaObjex(
             key,
             def.ids,
             def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             true,
         );
-
-        return objex;
     }
 
     /** If there is nothing to update, undefined will be returned. */
@@ -145,7 +141,7 @@ export function isPositionEqual(a: Position, b: Position): boolean {
  * An immutable, serializable version of all metadata-related data from the {@link Objex}.
  */
 export class MetadataObjex {
-    private constructor(
+    constructor(
         readonly label: string,
         readonly position: Position,
     ) {}
@@ -154,20 +150,6 @@ export class MetadataObjex {
         return new MetadataObjex(
             input.label,
             input.position,
-        );
-    }
-
-    static createDefault(): MetadataObjex {
-        return new MetadataObjex(
-            '',
-            { x: 0, y: 0 },
-        );
-    }
-
-    static create(label: string, position: Position): MetadataObjex {
-        return new MetadataObjex(
-            label,
-            position,
         );
     }
 

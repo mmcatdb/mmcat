@@ -180,7 +180,7 @@ export class Evocat {
     createObjex(def: ObjexDefinition) {
         const key = this._category.createKey();
         const schema = SchemaObjex.createNew(key, def);
-        const metadata = MetadataObjex.create(def.label, def.position);
+        const metadata = new MetadataObjex(def.label, def.position);
         const operation = new CreateObjex(schema, metadata);
 
         this.addOperation(operation);
@@ -208,7 +208,7 @@ export class Evocat {
         // FIXME
         const objex = this._category.getObjex(oldSchemaObjex.key);
         if (update.label && update.label !== objex.metadata.label)
-            objex.metadata = MetadataObjex.create(update.label, objex.metadata.position);
+            objex.metadata = new MetadataObjex(update.label, objex.metadata.position);
     }
 
     createMorphism(def: MorphismDefinition) {

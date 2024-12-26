@@ -20,9 +20,9 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
+import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryEvolutionResult;
-import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditor;
@@ -305,12 +305,14 @@ public class JobExecutorService {
             .map(u -> u.toSchemaAlgorithm(prevVersion)).toList();
             // .map(SchemaUpdate::toEvolution).toList();
 
-        final SchemaCategory prevCategory = wrapper.toSchemaCategory();
-        final SchemaCategory nextCategory = wrapper.toSchemaCategory();
-        SchemaEvolutionAlgorithm.setToVersion(prevCategory, updates, wrapper.version(), prevVersion);
-        SchemaEvolutionAlgorithm.setToVersion(nextCategory, updates, wrapper.version(), nextVersion);
+        final SchemaCategory prevSchema = wrapper.toSchemaCategory();
+        final MetadataCategory prevMetadata = wrapper.toMetadataCategory(prevSchema);
+        final SchemaCategory nextSchema = wrapper.toSchemaCategory();
+        final MetadataCategory nextMetadata = wrapper.toMetadataCategory(nextSchema);
+        SchemaEvolutionAlgorithm.setToVersion(prevSchema, prevMetadata, updates, wrapper.version(), prevVersion);
+        SchemaEvolutionAlgorithm.setToVersion(nextSchema, nextMetadata, updates, wrapper.version(), nextVersion);
 
-        return new QueryEvolver(prevCategory, nextCategory, updates);
+        return new QueryEvolver(prevSchema, nextSchema, updates);
     }
 
     private void rsdToCategoryAlgorithm(Run run, Job job, RSDToCategoryPayload payload) {

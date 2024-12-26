@@ -86,7 +86,7 @@ export class SchemaMorphism {
         );
     }
 
-    static createNew(signature: Signature, def: MorphismDefinition): SchemaMorphism {
+    static createNew(signature: Signature, def: Omit<MorphismDefinition, 'label'>): SchemaMorphism {
         return new SchemaMorphism(
             signature,
             def.domKey,
@@ -152,7 +152,7 @@ export type MorphismDefinition = {
     domKey: Key;
     codKey: Key;
     min: Min;
-    label?: string;
+    label: string;
     tags?: Tag[];
 };
 
@@ -166,7 +166,7 @@ export type MetadataMorphismFromServer = {
  */
 export class MetadataMorphism {
     constructor(
-        readonly label: string | undefined,
+        readonly label: string,
     ) {}
 
     static fromServer(input: MetadataMorphismFromServer): MetadataMorphism {
@@ -175,16 +175,10 @@ export class MetadataMorphism {
         );
     }
 
-    static createDefault(): MetadataMorphism {
-        return new MetadataMorphism(
-            '',
-        );
-    }
-
     toServer(signature: Signature): MetadataMorphismFromServer {
         return {
             signature: signature.toServer(),
-            label: this.label, // FIXME
+            label: this.label,
         };
     }
 }
