@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useReducer, useRef } from 'react';
 import { api } from '@/api';
 import { Category } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
@@ -13,39 +13,49 @@ import { Evocat } from '@/types/evocat/Evocat';
 import { PhasedEditor } from '@/components/schema-categories/PhasedEditor';
 
 export function SchemaCategoryEditor() {
-    const { evocat } = useLoaderData() as EvocatLoaderData;
-    const [ state, dispatch ] = useReducer(editCategoryReducer, evocat, createInitialState);
+    const loaderData = useLoaderData() as Awaited<ReturnType<typeof evocatLoader>>;
+
+    // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
+    const evocatRef = useRef<Evocat>();
+    if (!evocatRef.current) {
+        const updates = loaderData.updates.map(SchemaUpdate.fromServer);
+        const logicalModels = logicalModelsFromServer(loaderData.datasources, loaderData.mappings);
+        const category = Category.fromServer(loaderData.category, logicalModels);
+
+        evocatRef.current = new Evocat(category, updates);
+    }
+
+    const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
+
+    // TODO undo/redo has to be done through some event system, not directly in the reducer.
+    // The reason is that the reducer has to be a pure function, only the event system can handle side effects.
 
     return (
         <div>
-            <SchemaCategoryContext category={evocat.current} />
-            <h1>Schema category {evocat.current.label} overview</h1>
+            <SchemaCategoryContext category={evocatRef.current.category} />
+            <h1>Schema category {evocatRef.current.category.label} overview</h1>
             <p>
                 Some text.
             </p>
             <p>
-                updates: {evocat.updates.length}
+                updates: {evocatRef.current.updates.length}
             </p>
 
             <div className='relative'>
                 <EditorGraphDisplay state={state} dispatch={dispatch} className='w-full min-h-[600px]' />
                 {state.selectedNodeIds.size > 0 && (
                     <div className='z-20 absolute top-2 right-2'>
-                        <SelectedNodesCard state={state} dispatch={dispatch} />
+                        <SelectedNodesCard evocat={evocatRef.current} state={state} dispatch={dispatch} />
                     </div>
                 )}
             </div>
 
-            <PhasedEditor state={state} dispatch={dispatch} className='mt-3 w-80'/>
+            <PhasedEditor evocat={evocatRef.current} state={state} dispatch={dispatch} className='mt-3 w-80'/>
         </div>
     );
 }
 
-type EvocatLoaderData = {
-    evocat: Evocat;
-};
-
-export async function evocatLoader({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<EvocatLoaderData> {
+export async function evocatLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
         throw new Error('Category ID is required');
 
@@ -59,11 +69,12 @@ export async function evocatLoader({ params: { categoryId } }: { params: Params<
     if (!categoryResponse.status || !updatesResponse.status || !datasourcesResponse.status || !mappingsResponse.status)
         throw new Error('Failed to load schema category');
 
-    const updates = updatesResponse.data.map(SchemaUpdate.fromServer);
-    const logicalModels = logicalModelsFromServer(datasourcesResponse.data, mappingsResponse.data);
-    const category = Category.fromServer(categoryResponse.data, logicalModels);
-
-    return { evocat: Evocat.create(category, updates) };
+    return {
+        category: categoryResponse.data,
+        updates: updatesResponse.data,
+        datasources: datasourcesResponse.data,
+        mappings: mappingsResponse.data,
+    };
 }
 
 type SchemaCategoryContextProps = Readonly<{
@@ -81,11 +92,12 @@ function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
 }
 
 type SelectedNodesCardProps = Readonly<{
+    evocat: Evocat;
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
 }>;
 
-function SelectedNodesCard({ state, dispatch }: SelectedNodesCardProps) {
+function SelectedNodesCard({ evocat, state, dispatch }: SelectedNodesCardProps) {
     function unselectNode(nodeId: string) {
         dispatch({ type: 'selectNode', nodeId, operation: 'remove' });
     }
@@ -101,7 +113,7 @@ function SelectedNodesCard({ state, dispatch }: SelectedNodesCardProps) {
             <div className='flex flex-col'>
                 {[ ...state.selectedNodeIds.values() ].map(id => {
                     const node = state.graph.nodes.find(node => node.id === id)!;
-                    const objex = state.evocat.current.getObjex(node.schema.key);
+                    const objex = evocat.category.getObjex(node.schema.key);
 
                     return (
                         <div key={node.id} className='flex items-center gap-2'>

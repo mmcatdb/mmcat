@@ -16,18 +16,14 @@ type UpdateApi = (udpate: SchemaUpdateInit) => Promise<Result<Category>>;
 export class Evocat {
     readonly uncommitedOperations = new SmoContext();
 
-    private constructor(
-        private category: Category,
+    constructor(
+        private _category: Category,
         private readonly _updates: SchemaUpdate[],
     ) {
     }
 
-    static create(_category: Category, updates: SchemaUpdate[]): Evocat {
-        return new Evocat(_category, updates);
-    }
-
-    get current() {
-        return this.category;
+    get category() {
+        return this._category;
     }
 
     get updates() {
@@ -41,12 +37,12 @@ export class Evocat {
         if (!result.status)
             return;
 
-        this.category = result.data;
+        this._category = result.data;
     }
 
     private addOperation(smo: SMO) {
         this.uncommitedOperations.add(smo);
-        smo.up(this.category);
+        smo.up(this._category);
     }
 
     private getUpdateObject(): SchemaUpdateInit {
@@ -54,7 +50,7 @@ export class Evocat {
         const schemaToServer = schemaOperations.map(operation => operation.toServer());
 
         return {
-            prevVersion: this.category.versionId,
+            prevVersion: this._category.versionId,
             schema: schemaToServer,
             metadata: this.getMetadataUpdates(schemaOperations).map(operation => operation.toServer()),
         };
@@ -69,7 +65,7 @@ export class Evocat {
         );
 
         const output: MMO[] = [];
-        this.category.getObjexes().forEach(objex => {
+        this._category.getObjexes().forEach(objex => {
             const metadata = objex.metadata;
             const og = objex.originalMetadata;
 
@@ -96,7 +92,7 @@ export class Evocat {
             schemaOperations.filter((o): o is DeleteMorphism => o instanceof DeleteMorphism).map(o => o.schema.signature.value),
         );
 
-        this.category.getMorphisms().forEach(morphism => {
+        this._category.getMorphisms().forEach(morphism => {
             const metadata = morphism.metadata;
             const og = morphism.originalMetadata;
 
@@ -182,7 +178,7 @@ export class Evocat {
      * Creates a completely new schema object with a key that has never been seen before.
      */
     createObjex(def: ObjexDefinition) {
-        const key = this.category.createKey();
+        const key = this._category.createKey();
         const schema = SchemaObjex.createNew(key, def);
         const metadata = MetadataObjex.create(def.label, def.position);
         const operation = new CreateObjex(schema, metadata);
@@ -207,13 +203,13 @@ export class Evocat {
         }
 
         // FIXME
-        const objex = this.category.getObjex(oldSchemaObjex.key);
+        const objex = this._category.getObjex(oldSchemaObjex.key);
         if (update.label && update.label !== objex.metadata.label)
             objex.metadata = MetadataObjex.create(update.label, objex.metadata.position);
     }
 
     createMorphism(def: MorphismDefinition) {
-        const signature = this.category.createSignature();
+        const signature = this._category.createSignature();
         const schema = SchemaMorphism.createNew(signature, def);
         const metadata = new MetadataMorphism(def.label);
         const operation = new CreateMorphism(schema, metadata);
@@ -237,7 +233,7 @@ export class Evocat {
         }
 
         // FIXME
-        const morphism = this.category.getMorphism(oldSchemaMorphism.signature);
+        const morphism = this._category.getMorphism(oldSchemaMorphism.signature);
         if (update.label && update.label !== morphism.metadata.label)
             morphism.metadata = new MetadataMorphism(update.label);
     }

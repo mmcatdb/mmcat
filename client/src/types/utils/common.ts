@@ -1,4 +1,7 @@
 // This is kosher because this is the one use case in which the {} type actually means something.
+
+import { type Position } from '@/components/graph/graphUtils';
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type EmptyIntersection = {};
 
@@ -52,4 +55,30 @@ function deepCloneValue<T>(a: T): T {
     }
 
     return a;
+}
+
+export function toFormNumber(value: unknown): number | '' | '-' {
+    if (typeof value === 'number')
+        return value;
+
+    if (typeof value === 'string') {
+        if (value === '-')
+            return '-';
+
+        const number = Number.parseFloat(value);
+        if (!Number.isNaN(number) && Number.isFinite(number))
+            return number;
+    }
+
+    return '';
+}
+
+export type FormNumber = number | '' | '-';
+export function toNumber(value: FormNumber): number {
+    return (value === '' || value ==='-') ? 0 : value;
+}
+
+export type FormPosition = { x: FormNumber, y: FormNumber };
+export function toPosition(value: FormPosition): Position {
+    return { x: toNumber(value.x), y: toNumber(value.y) };
 }
