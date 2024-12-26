@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState, type Dispatch } from 'react';
-import { createInitialGraphState, defaultGraphOptions, type GraphAction, GraphEngine, type GraphOptions, type GraphValue, type ReactiveGraphState } from './graphEngine';
+import { type ReactNode, useEffect, useMemo, useState, type Dispatch, useRef } from 'react';
+import { createInitialGraphState, defaultGraphOptions, type GraphAction, GraphEngine, type GraphOptions, type GraphInput, type ReactiveGraphState } from './graphEngine';
 import { graphContext } from './graphHooks';
 
 type GraphProviderProps = Readonly<{
     /** The public graph that the graph exposes. Its updates are reflected in the graph display. */
-    graph: GraphValue;
+    graph: GraphInput;
     /** Event handler for things like position change or select. */
     dispatch: Dispatch<GraphAction>;
     /** User preferences. The graph engine is restarted whenever they change, so make sure they are constant or at least memoized! */
     options?: GraphOptions;
-    children: React.ReactNode;
+    children: ReactNode;
 }>;
 
 export function GraphProvider({ graph, dispatch, options, children }: GraphProviderProps) {
@@ -24,13 +24,19 @@ export function GraphProvider({ graph, dispatch, options, children }: GraphProvi
     );
 }
 
-function useGraphEngine(value: GraphValue, dispatch: Dispatch<GraphAction>, options?: GraphOptions) {
-    const [ state, setState ] = useState<ReactiveGraphState>(() => createInitialGraphState(value, options));
-    const engine = useMemo(() => new GraphEngine(value, dispatch, state, setState, { ...defaultGraphOptions, ...options }), [ options ]);
+function useGraphEngine(graph: GraphInput, dispatch: Dispatch<GraphAction>, options?: GraphOptions) {
+    const [ state, setState ] = useState<ReactiveGraphState>(() => createInitialGraphState(graph, options));
+    const engine = useMemo(() => new GraphEngine(graph, dispatch, state, setState, { ...defaultGraphOptions, ...options }), [ options ]);
 
     useEffect(() => {
         return engine.setup();
     }, [ engine ]);
+
+    const cache = useRef(graph);
+    if (cache.current !== graph) {
+        cache.current = graph;
+        engine.update(graph);
+    }
 
     return { state, engine } as const;
 }

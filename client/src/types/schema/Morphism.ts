@@ -1,5 +1,33 @@
 import { Key, Signature, type KeyFromServer, type SignatureFromServer } from '../identifiers';
 import { isArrayEqual } from '@/types/utils/common';
+import { type Objex } from './Objex';
+import { type Category } from './Category';
+
+export class Morphism {
+    public readonly originalMetadata: MetadataMorphism;
+
+    constructor(
+        readonly signature: Signature,
+        public schema: SchemaMorphism,
+        public metadata: MetadataMorphism,
+        public from: Objex,
+        public to: Objex,
+    ) {
+        this.originalMetadata = metadata;
+    }
+
+    static fromServer(schema: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer, category: Category): Morphism {
+        const schemaMorphism = SchemaMorphism.fromServer(schema);
+
+        return new Morphism(
+            schemaMorphism.signature,
+            schemaMorphism,
+            MetadataMorphism.fromServer(metadata),
+            category.getObjex(schemaMorphism.domKey),
+            category.getObjex(schemaMorphism.codKey),
+        );
+    }
+}
 
 export type SchemaMorphismFromServer = {
     signature: SignatureFromServer;
@@ -120,8 +148,8 @@ export type MetadataMorphismFromServer = {
 };
 
 export class MetadataMorphism {
-    private constructor(
-        readonly label: string,
+    constructor(
+        readonly label: string | undefined,
     ) {}
 
     static fromServer(input: MetadataMorphismFromServer): MetadataMorphism {
@@ -136,62 +164,10 @@ export class MetadataMorphism {
         );
     }
 
-    static create(label: string): MetadataMorphism {
-        return new MetadataMorphism(
-            label,
-        );
-    }
-
     toServer(signature: Signature): MetadataMorphismFromServer {
         return {
             signature: signature.toServer(),
-            label: this.label,
+            label: this.label, // FIXME
         };
-    }
-}
-
-export class Morphism {
-    public readonly originalMetadata: MetadataMorphism;
-
-    private constructor(
-        readonly signature: Signature,
-        private _metadata: MetadataMorphism,
-    ) {
-        this.originalMetadata = _metadata;
-    }
-
-    static fromServer(input: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer): Morphism {
-        const output = new Morphism(
-            Signature.fromServer(input.signature),
-            MetadataMorphism.fromServer(metadata),
-        );
-        output.current = SchemaMorphism.fromServer(input);
-
-        return output;
-    }
-
-    static create(signature: Signature): Morphism {
-        return new Morphism(
-            signature,
-            MetadataMorphism.createDefault(),
-        );
-    }
-
-    private _current?: SchemaMorphism;
-
-    get current(): SchemaMorphism | undefined {
-        return this._current;
-    }
-
-    set current(value: SchemaMorphism | undefined) {
-        this._current = value;
-    }
-
-    get metadata(): MetadataMorphism {
-        return this._metadata;
-    }
-
-    set metadata(value: MetadataMorphism) {
-        this._metadata = value;
     }
 }

@@ -1,6 +1,6 @@
 import { createBrowserRouter, useLoaderData, type Params } from 'react-router-dom';
 import { Home } from '@/pages/Home';
-import { SchemaCategoryEditor, schemaCategoryLoader } from '@/pages/category/SchemaCategoryEditor';
+import { SchemaCategoryEditor, evocatLoader } from '@/pages/category/SchemaCategoryEditor';
 import { About } from '@/pages/About';
 import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
@@ -110,14 +110,14 @@ export const router = createBrowserRouter([
                     {
                         index: true,
                         id: routes.category.index.id,
-                        loader: schemaCategoryLoader,
+                        loader: evocatLoader,
                         Component: SchemaCategoryEditor,
                         // handle: { breadcrumb: 'Overview' },
                     },
                     {
                         id: routes.category.editor.id,
                         path: routes.category.editor.path,
-                        loader: schemaCategoryLoader,
+                        loader: evocatLoader,
                         Component: SchemaCategoryEditor,
                         handle: { breadcrumb: 'Editor' },
                     },

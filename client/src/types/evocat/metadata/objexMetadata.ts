@@ -1,4 +1,4 @@
-import { MetadataObjex, type MetadataObjexFromServer, type SchemaCategory } from '@/types/schema';
+import { MetadataObjex, type MetadataObjexFromServer, type Category } from '@/types/schema';
 import { type MMO, type MMOFromServer, MMOType } from './mmo';
 import { Key } from '@/types/identifiers';
 
@@ -44,11 +44,11 @@ export class ObjexMetadata implements MMO<MMOType.Objex> {
         };
     }
 
-    up(category: SchemaCategory): void {
+    up(category: Category): void {
         // category.getObject(this.key).current = this.newObject;
     }
 
-    down(category: SchemaCategory): void {
+    down(category: Category): void {
         // category.getObject(this.key).current = this.oldObject;
     }
 }

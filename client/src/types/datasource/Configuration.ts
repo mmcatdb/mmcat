@@ -23,7 +23,7 @@ export class DatasourceConfiguration {
     readonly isComplexPropertyAllowed: boolean;
     readonly isSchemaless: boolean;
 
-    public constructor(input: DatasourceConfigurationFromServer) {
+    constructor(input: DatasourceConfigurationFromServer) {
         this.isPropertyToOneAllowed = input.isPropertyToOneAllowed;
         this.isPropertyToManyAllowed = input.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = input.isInliningToOneAllowed;

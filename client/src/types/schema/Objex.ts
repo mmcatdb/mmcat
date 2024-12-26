@@ -4,46 +4,22 @@ import { SchemaCategoryInvalidError } from './Error';
 export class Objex {
     public readonly originalMetadata: MetadataObjex;
 
-    private constructor(
+    constructor(
         readonly key: Key,
-        private _metadata: MetadataObjex,
+        public schema: SchemaObjex,
+        public metadata: MetadataObjex,
     ) {
-        this.originalMetadata = _metadata;
+        this.originalMetadata = metadata;
     }
 
-    static fromServer(input: SchemaObjexFromServer, metadata: MetadataObjexFromServer): Objex {
-        const output = new Objex(
-            Key.fromServer(input.key),
+    static fromServer(schema: SchemaObjexFromServer, metadata: MetadataObjexFromServer): Objex {
+        const schemaObjex = SchemaObjex.fromServer(schema);
+
+        return new Objex(
+            schemaObjex.key,
+            schemaObjex,
             MetadataObjex.fromServer(metadata),
         );
-        output.current = SchemaObjex.fromServer(input);
-
-        return output;
-    }
-
-    static create(key: Key): Objex {
-        return new Objex(
-            key,
-            MetadataObjex.createDefault(),
-        );
-    }
-
-    private _current?: SchemaObjex;
-
-    get current(): SchemaObjex | undefined {
-        return this._current;
-    }
-
-    set current(value: SchemaObjex | undefined) {
-        this._current = value;
-    }
-
-    get metadata(): MetadataObjex {
-        return this._metadata;
-    }
-
-    set metadata(value: MetadataObjex) {
-        this._metadata = value;
     }
 
     private readonly groupIds = new Set<string>();
@@ -78,7 +54,7 @@ export class SchemaObjex {
         return objex;
     }
 
-    static createNew(key: Key, def: Omit<ObjexDefinition, 'label'>): SchemaObjex {
+    static createNew(key: Key, def: Omit<ObjexDefinition, 'label' | 'position'>): SchemaObjex {
         const objex = new SchemaObjex(
             key,
             def.ids,
@@ -126,6 +102,7 @@ export class SchemaObjex {
 
 export type ObjexDefinition = {
     label: string;
+    position: Position;
     ids?: ObjexIds;
 };
 
@@ -139,6 +116,10 @@ export type Position = {
     x: number;
     y: number;
 };
+
+export function isPositionEqual(a: Position, b: Position): boolean {
+    return a.x === b.x && a.y === b.y;
+}
 
 export class MetadataObjex {
     private constructor(

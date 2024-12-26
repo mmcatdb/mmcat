@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
 import { api } from '@/api';
-import { SchemaCategory as SchemaCategoryType } from '@/types/schema';
+import { Category } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { Portal, portals } from '@/components/common';
@@ -8,42 +8,44 @@ import { logicalModelsFromServer } from '@/types/datasource';
 import { EditorGraphDisplay } from '@/components/schema-categories/EditorGraphDisplay';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
-import { Key } from '@/types/identifiers';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
+import { Evocat } from '@/types/evocat/Evocat';
+import { PhasedEditor } from '@/components/schema-categories/PhasedEditor';
 
 export function SchemaCategoryEditor() {
-    const { category, updates } = useLoaderData() as SchemaCategoryLoaderData;
-    const [ state, dispatch ] = useReducer(editCategoryReducer, category, createInitialState);
+    const { evocat } = useLoaderData() as EvocatLoaderData;
+    const [ state, dispatch ] = useReducer(editCategoryReducer, evocat, createInitialState);
 
     return (
         <div>
-            <SchemaCategoryContext category={category} />
-            <h1>Schema category {category.label} overview</h1>
+            <SchemaCategoryContext category={evocat.current} />
+            <h1>Schema category {evocat.current.label} overview</h1>
             <p>
                 Some text.
             </p>
             <p>
-                updates: {updates.length}
+                updates: {evocat.updates.length}
             </p>
 
             <div className='relative'>
                 <EditorGraphDisplay state={state} dispatch={dispatch} className='w-full min-h-[600px]' />
                 {state.selectedNodeIds.size > 0 && (
                     <div className='z-20 absolute top-2 right-2'>
-                        <SelectedNodesCard state={state} dispatch={dispatch} category={category} />
+                        <SelectedNodesCard state={state} dispatch={dispatch} />
                     </div>
                 )}
             </div>
+
+            <PhasedEditor state={state} dispatch={dispatch} className='mt-3 w-80'/>
         </div>
     );
 }
 
-type SchemaCategoryLoaderData = {
-        category: SchemaCategoryType;
-        updates: SchemaUpdate[];
+type EvocatLoaderData = {
+    evocat: Evocat;
 };
 
-export async function schemaCategoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+export async function evocatLoader({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<EvocatLoaderData> {
     if (!categoryId)
         throw new Error('Category ID is required');
 
@@ -59,13 +61,13 @@ export async function schemaCategoryLoader({ params: { categoryId } }: { params:
 
     const updates = updatesResponse.data.map(SchemaUpdate.fromServer);
     const logicalModels = logicalModelsFromServer(datasourcesResponse.data, mappingsResponse.data);
-    const category = SchemaCategoryType.fromServer(categoryResponse.data, logicalModels);
+    const category = Category.fromServer(categoryResponse.data, logicalModels);
 
-    return { category, updates };
+    return { evocat: Evocat.create(category, updates) };
 }
 
 type SchemaCategoryContextProps = Readonly<{
-    category: SchemaCategoryType;
+    category: Category;
 }>;
 
 function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
@@ -81,10 +83,9 @@ function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
 type SelectedNodesCardProps = Readonly<{
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
-    category: SchemaCategoryType;
 }>;
 
-function SelectedNodesCard({ state, dispatch, category }: SelectedNodesCardProps) {
+function SelectedNodesCard({ state, dispatch }: SelectedNodesCardProps) {
     function unselectNode(nodeId: string) {
         dispatch({ type: 'selectNode', nodeId, operation: 'remove' });
     }
@@ -100,13 +101,12 @@ function SelectedNodesCard({ state, dispatch, category }: SelectedNodesCardProps
             <div className='flex flex-col'>
                 {[ ...state.selectedNodeIds.values() ].map(id => {
                     const node = state.graph.nodes.find(node => node.id === id)!;
-                    // TODO this is a hack, we should store the key on the node (or even the object)?
-                    const objex = category.getObjex(Key.createNew(+node.id));
+                    const objex = state.evocat.current.getObjex(node.schema.key);
 
                     return (
                         <div key={node.id} className='flex items-center gap-2'>
                             <span className='text-primary font-semibold'>{objex.key.toString()}</span>
-                            {node.label}
+                            {node.metadata.label}
                             <div className='grow' />
                             <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>
                                 <FaXmark />

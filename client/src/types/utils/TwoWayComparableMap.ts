@@ -7,7 +7,7 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key,
     private readonly map = new Map<KeyId, KeyValue<Key, Value>>();
     private readonly reverseMap = new Map<ValueId, Key>();
 
-    public constructor(
+    constructor(
         private readonly keyToIdFunction: Injection<Key, KeyId>,
         private readonly valueToIdFunction: Injection<Value, ValueId>,
     ) {}

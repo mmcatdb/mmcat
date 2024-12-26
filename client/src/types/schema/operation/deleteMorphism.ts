@@ -1,5 +1,5 @@
-import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
+import type { Category } from '../Category';
+import { type MetadataMorphism, Morphism, SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type DeleteMorphismFromServer = SMOFromServer<SMOType.DeleteMorphism> & {
@@ -9,34 +9,31 @@ export type DeleteMorphismFromServer = SMOFromServer<SMOType.DeleteMorphism> & {
 export class DeleteMorphism implements SMO<SMOType.DeleteMorphism> {
     readonly type = SMOType.DeleteMorphism;
 
-    private constructor(
-        readonly morphism: SchemaMorphism,
+    constructor(
+        readonly schema: SchemaMorphism,
+        readonly metadata: MetadataMorphism,
     ) {}
 
     static fromServer(input: DeleteMorphismFromServer): DeleteMorphism {
         return new DeleteMorphism(
             SchemaMorphism.fromServer(input.morphism),
-        );
-    }
-
-    static create(morphism: SchemaMorphism): DeleteMorphism {
-        return new DeleteMorphism(
-            morphism,
+            null, // FIXME
         );
     }
 
     toServer(): DeleteMorphismFromServer {
         return {
             type: SMOType.DeleteMorphism,
-            morphism: this.morphism.toServer(),
+            morphism: this.schema.toServer(),
         };
     }
 
-    up(category: SchemaCategory): void {
-        category.getMorphism(this.morphism.signature).current = undefined;
+    up(category: Category): void {
+        category.morphisms.delete(this.schema.signature);
     }
 
-    down(category: SchemaCategory): void {
-        category.getMorphism(this.morphism.signature).current = this.morphism;
+    down(category: Category): void {
+        const signature = this.schema.signature;
+        category.morphisms.set(signature, new Morphism(signature, this.schema, this.metadata));
     }
 }

@@ -1,40 +1,37 @@
 import { type Dispatch } from 'react';
-import { type SchemaCategory } from '@/types/schema';
-import { type GraphAction, type GraphValue } from '../graph/graphEngine';
+import { type GraphAction } from '../graph/graphEngine';
+import { type CategoryGraph, categoryToGraph } from './categoryGraph';
+import { type Evocat } from '@/types/evocat/Evocat';
+import { createInitialEditorState, type PhasedEditorAction, phasedEditorReducer, type PhasedEditorState } from './phasedEditorReducer';
 
 export type EditCategoryState = {
-    graph: GraphValue;
+    graph: CategoryGraph;
     selectedNodeIds: Set<string>;
+    evocat: Evocat;
+    editor: PhasedEditorState;
 };
 
-export function createInitialState(category: SchemaCategory): EditCategoryState {
-    const nodes = category.getObjexes().map(objex => ({
-        id: '' + objex.key.value,
-        label: objex.metadata.label,
-        position: { ...objex.metadata.position },
-    }));
-
-    const edges = category.getMorphisms().map(morphism => ({
-        id: '' + morphism.signature.baseValue,
-        label: morphism.metadata.label,
-        from: '' + morphism.current?.domKey.value,
-        to: '' + morphism.current?.codKey.value,
-    }));
+export function createInitialState(evocat: Evocat): EditCategoryState {
+    const graph = categoryToGraph(evocat.current);
 
     return {
-        graph: { nodes, edges },
+        graph,
         selectedNodeIds: new Set(),
+        evocat,
+        editor: createInitialEditorState(),
     };
 }
 
 export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 
-type EditCategoryAction = GraphAction | SelectNodeAction;
+type EditCategoryAction = GraphAction | SelectNodeAction | PhasedEditorAction;
 
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
+    console.log('REDUCE', state.editor.phase, action, state);
     switch (action.type) {
     case 'graph': return graph(state, action);
     case 'selectNode': return selectNode(state, action);
+    default: return phasedEditorReducer(state, action);
     }
 }
 

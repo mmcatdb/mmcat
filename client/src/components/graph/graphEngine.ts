@@ -1,7 +1,7 @@
 import { type Dispatch, type MouseEvent as ReactMouseEvent } from 'react';
 import { computeCoordinates, computeEdgeStyle, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getMouseOffset, getMousePosition, type HTMLConnection, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
 
-export type GraphValue = {
+export type GraphInput = {
     nodes: Node[];
     edges: Edge[];
 };
@@ -54,19 +54,19 @@ export type ReactiveGraphState = {
     select?: SelectState;
 };
 
-export function createInitialGraphState(value: GraphValue, options: GraphOptions = {}): ReactiveGraphState {
+export function createInitialGraphState(graph: GraphInput, options: GraphOptions = {}): ReactiveGraphState {
     const fullOptions = { ...defaultGraphOptions, ...options };
-    const coordinates = computeCoordinates(value.nodes, fullOptions.initialWidth, fullOptions.initialHeight);
+    const coordinates = computeCoordinates(graph.nodes, fullOptions.initialWidth, fullOptions.initialHeight);
 
     return { coordinates };
 }
 
 export class GraphEngine {
-    private readonly nodeMap: Map<string, Node>;
-    private readonly edgeMap: EdgeMap;
+    private nodeMap: Map<string, Node>;
+    private edgeMap: EdgeMap;
 
     constructor(
-        value: GraphValue,
+        input: GraphInput,
         private readonly dispatch: Dispatch<GraphAction>,
         /** A local copy of the state. Contains only those properties that should be reactive (i.e., the UI should change when they change). */
         private state: ReactiveGraphState,
@@ -75,8 +75,9 @@ export class GraphEngine {
         private readonly options: FullGraphOptions,
     ) {
         console.log('CREATE Graph Engine');
-        this.nodeMap = new Map(value.nodes.map(node => [ node.id, { ...node } ]));
-        this.edgeMap = new EdgeMap(value.edges.map(edge => ({ ...edge })));
+
+        this.nodeMap = new Map(input.nodes.map(node => [ node.id, { ...node } ]));
+        this.edgeMap = new EdgeMap(input.edges.map(edge => ({ ...edge })));
     }
 
     /**
@@ -106,6 +107,12 @@ export class GraphEngine {
         };
     }
 
+    update(input: GraphInput) {
+        console.log('UPDATE graph engine');
+
+        this.nodeMap = new Map(input.nodes.map(node => [ node.id, { ...node } ]));
+        this.edgeMap = new EdgeMap(input.edges.map(edge => ({ ...edge })));
+    }
 
     private canvasConnection?: HTMLConnection;
 

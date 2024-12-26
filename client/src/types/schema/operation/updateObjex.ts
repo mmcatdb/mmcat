@@ -1,4 +1,4 @@
-import type { SchemaCategory } from '../SchemaCategory';
+import type { Category } from '../Category';
 import { SchemaObjex, type SchemaObjexFromServer } from '../Objex';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
@@ -40,11 +40,11 @@ export class UpdateObjex implements SMO<SMOType.UpdateObjex> {
         };
     }
 
-    up(category: SchemaCategory): void {
-        category.getObjex(this.newObjex.key).current = this.newObjex;
+    up(category: Category): void {
+        category.getObjex(this.newObjex.key).schema = this.newObjex;
     }
 
-    down(category: SchemaCategory): void {
-        category.getObjex(this.oldObjex.key).current = this.oldObjex;
+    down(category: Category): void {
+        category.getObjex(this.oldObjex.key).schema = this.oldObjex;
     }
 }

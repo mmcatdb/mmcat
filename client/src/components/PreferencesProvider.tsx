@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 import { localStorage } from '@/types/utils/localStorage';
 
 const PREFERENCES_KEY = 'preferences';
@@ -44,7 +44,7 @@ function toStored(preferences: Preferences): StoredPreferences {
 
 export const PreferencesContext = createContext<PreferencesContext | undefined>(undefined);
 
-export function PreferencesProvider({ children }: Readonly<{ children: React.ReactNode }>) {
+export function PreferencesProvider({ children }: Readonly<{ children: ReactNode }>) {
     const [ preferences, setPreferences ] = useState(defaultPreferences);
 
     const setPreferencesWithStorage = useCallback((preferences: Preferences) => {

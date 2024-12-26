@@ -1,4 +1,3 @@
-// import type { Core, EdgeSingular, ElementDefinition } from 'cytoscape';
 import type { MetadataMorphism, SchemaMorphism, Morphism } from '../schema';
 import type { Node } from './Node';
 import type { Signature } from '../identifiers';
@@ -27,8 +26,6 @@ export class DirectedEdge {
 
 /** @deprecated */
 export class Edge {
-    private edge!: EdgeSingular;
-
     // This is important for the pathMarker algorithm.
     private _isTraversible = false;
     private _isTraversibleDual = false;
@@ -51,11 +48,9 @@ export class Edge {
         readonly codomainNode: Node,
     ) {}
 
-    static create(cytoscape: Core, morphism: Morphism, schemaMorphism: SchemaMorphism, dom: Node, cod: Node): Edge {
+    static create(morphism: Morphism, schemaMorphism: SchemaMorphism, dom: Node, cod: Node): Edge {
         const edge = new Edge(morphism, schemaMorphism, dom, cod);
-        const definition = createEdgeDefinition(schemaMorphism, edge, schemaMorphism.isNew ? 'new' : '');
-        const cytoscapeEdge = cytoscape.add(definition);
-        edge.setCytoscapeEdge(cytoscapeEdge);
+        // const definition = createEdgeDefinition(schemaMorphism, edge, schemaMorphism.isNew ? 'new' : '');
 
         dom.addNeighbor(edge, true);
         cod.addNeighbor(edge, false);
@@ -63,12 +58,8 @@ export class Edge {
         return edge;
     }
 
-    private setCytoscapeEdge(edge: EdgeSingular) {
-        this.edge = edge;
-    }
-
     remove() {
-        this.edge.remove();
+        // this.edge.remove();
 
         this.domainNode.removeNeighbor(this.codomainNode);
         this.codomainNode.removeNeighbor(this.domainNode);
@@ -113,17 +104,17 @@ export class Edge {
     }
 }
 
-let lastEdgeId = 0;
+// let lastEdgeId = 0;
 
-function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
-    return {
-        data: {
-            id: 'm' + lastEdgeId++,
-            source: morphism.domKey.value,
-            target: morphism.codKey.value,
-            label: edge.label,
-            schemaData: edge,
-        },
-        classes: classes + ' ' + morphism.tags.join(' '),
-    };
-}
+// function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
+//     return {
+//         data: {
+//             id: 'm' + lastEdgeId++,
+//             source: morphism.domKey.value,
+//             target: morphism.codKey.value,
+//             label: edge.label,
+//             schemaData: edge,
+//         },
+//         classes: classes + ' ' + morphism.tags.join(' '),
+//     };
+// }

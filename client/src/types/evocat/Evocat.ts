@@ -1,5 +1,4 @@
-import { isPositionEqual } from '@/types/categoryGraph';
-import { type SchemaCategory, type ObjexDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism } from '@/types/schema';
+import { type Category, type ObjexDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism, isPositionEqual } from '@/types/schema';
 import type { Result } from '../api/result';
 import { CreateMorphism, CreateObjex, Composite, DeleteMorphism, DeleteObjex, type SMO, UpdateMorphism, UpdateObjex } from '../schema/operation';
 import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
@@ -7,49 +6,47 @@ import type { MMO } from './metadata/mmo';
 import { MorphismMetadata } from './metadata/morphismMetadata';
 import { ObjexMetadata } from './metadata/objexMetadata';
 import type { ObjexIds } from '../identifiers';
-import { type LogicalModel } from '../datasource';
 
-type UpdateFunction = (udpate: SchemaUpdateInit, logicalModels: LogicalModel[]) => Promise<Result<SchemaCategory>>;
+type UpdateApi = (udpate: SchemaUpdateInit) => Promise<Result<Category>>;
 
-export type EvocatApi = {
-    update: UpdateFunction;
-};
-
+/**
+ * This class tracks multiple versions of given {@link Category}.
+ * It can change the current version by applying/undoing SMOs. It also tracks all new SMOs and can commit them to the server.
+ */
 export class Evocat {
     readonly uncommitedOperations = new SmoContext();
 
     private constructor(
-        public schemaCategory: SchemaCategory,
-        private readonly updates: SchemaUpdate[],
-        private readonly logicalModels: LogicalModel[],
-        private readonly api: EvocatApi,
+        private category: Category,
+        private readonly _updates: SchemaUpdate[],
     ) {
     }
 
-    static create(schemaCategory: SchemaCategory, updates: SchemaUpdate[], logicalModels: LogicalModel[], api: EvocatApi): Evocat {
-        const evocat = new Evocat(
-            schemaCategory,
-            updates,
-            logicalModels,
-            api,
-        );
-
-        return evocat;
+    static create(_category: Category, updates: SchemaUpdate[]): Evocat {
+        return new Evocat(_category, updates);
     }
 
-    async update() {
+    get current() {
+        return this.category;
+    }
+
+    get updates() {
+        return this._updates;
+    }
+
+    async update(api: UpdateApi) {
         const updateObject = this.getUpdateObject();
 
-        const result = await this.api.update(updateObject, this.logicalModels);
+        const result = await api(updateObject);
         if (!result.status)
             return;
 
-        this.schemaCategory = result.data;
+        this.category = result.data;
     }
 
     private addOperation(smo: SMO) {
         this.uncommitedOperations.add(smo);
-        smo.up(this.schemaCategory);
+        smo.up(this.category);
     }
 
     private getUpdateObject(): SchemaUpdateInit {
@@ -57,7 +54,7 @@ export class Evocat {
         const schemaToServer = schemaOperations.map(operation => operation.toServer());
 
         return {
-            prevVersion: this.schemaCategory.versionId,
+            prevVersion: this.category.versionId,
             schema: schemaToServer,
             metadata: this.getMetadataUpdates(schemaOperations).map(operation => operation.toServer()),
         };
@@ -65,14 +62,14 @@ export class Evocat {
 
     private getMetadataUpdates(schemaOperations: SMO[]): MMO[] {
         const createdObjexes = new Set(
-            schemaOperations.filter((o): o is CreateObjex => o instanceof CreateObjex).map(o => o.objex.key.value),
+            schemaOperations.filter((o): o is CreateObjex => o instanceof CreateObjex).map(o => o.schema.key.value),
         );
         const deletedObjexes = new Set(
-            schemaOperations.filter((o): o is DeleteObjex => o instanceof DeleteObjex).map(o => o.objex.key.value),
+            schemaOperations.filter((o): o is DeleteObjex => o instanceof DeleteObjex).map(o => o.schema.key.value),
         );
 
         const output: MMO[] = [];
-        this.schemaCategory.getObjexes().forEach(objex => {
+        this.category.getObjexes().forEach(objex => {
             const metadata = objex.metadata;
             const og = objex.originalMetadata;
 
@@ -93,13 +90,13 @@ export class Evocat {
         });
 
         const createdMorphisms = new Set(
-            schemaOperations.filter((o): o is CreateMorphism => o instanceof CreateMorphism).map(o => o.morphism.signature.value),
+            schemaOperations.filter((o): o is CreateMorphism => o instanceof CreateMorphism).map(o => o.schema.signature.value),
         );
         const deletedMorphisms = new Set(
-            schemaOperations.filter((o): o is DeleteMorphism => o instanceof DeleteMorphism).map(o => o.morphism.signature.value),
+            schemaOperations.filter((o): o is DeleteMorphism => o instanceof DeleteMorphism).map(o => o.schema.signature.value),
         );
 
-        this.schemaCategory.getMorphisms().forEach(morphism => {
+        this.category.getMorphisms().forEach(morphism => {
             const metadata = morphism.metadata;
             const og = morphism.originalMetadata;
 
@@ -129,7 +126,7 @@ export class Evocat {
     //         if (!operation)
     //             throw new Error(`Undo error: Operation for version: ${version} not found.`);
 
-    //         operation.down(this.schemaCategory);
+    //         operation.down(this._category);
     //     });
     // }
 
@@ -139,7 +136,7 @@ export class Evocat {
     //         if (!operation)
     //             throw new Error(`Redo error: Operation for version: ${version} not found.`);
 
-    //         operation.up(this.schemaCategory);
+    //         operation.up(this._category);
     //     });
     // }
 
@@ -151,7 +148,7 @@ export class Evocat {
     //         if (!operation)
     //             throw new Error(`Move error: Operation for version: ${version} not found.`);
 
-    //         operation.down(this.schemaCategory);
+    //         operation.down(this._category);
     //     });
 
     //     redo.forEach(version => {
@@ -159,7 +156,7 @@ export class Evocat {
     //         if (!operation)
     //             throw new Error(`Move error: Operation for version: ${version} not found.`);
 
-    //         operation.up(this.schemaCategory);
+    //         operation.up(this._category);
     //     });
     // }
 
@@ -177,73 +174,72 @@ export class Evocat {
         if (!children)
             throw new Error('Composite operation finished before it was started.');
 
-        const operation = Composite.create(name, children);
+        const operation = new Composite(name, children);
         this.addOperation(operation);
     }
 
     /**
      * Creates a completely new schema object with a key that has never been seen before.
      */
-    createObjex(def: ObjexDefinition): SchemaObjex {
-        const objex = this.schemaCategory.createObjex();
-        const schemaObjex = SchemaObjex.createNew(objex.key, def);
-        const operation = CreateObjex.create(schemaObjex);
+    createObjex(def: ObjexDefinition) {
+        const key = this.category.createKey();
+        const schema = SchemaObjex.createNew(key, def);
+        const metadata = MetadataObjex.create(def.label, def.position);
+        const operation = new CreateObjex(schema, metadata);
+
         this.addOperation(operation);
-
-        objex.metadata = MetadataObjex.create(def.label, { x: 0, y: 0 });
-
-        return schemaObjex;
     }
 
     deleteObjex(schemaObjex: SchemaObjex) {
-        const operation = DeleteObjex.create(schemaObjex);
-        this.addOperation(operation);
+        // FIXME
+        // const operation = new DeleteObjex(schemaObjex);
+        // this.addOperation(operation);
     }
 
     updateObjex(oldSchemaObjex: SchemaObjex, update: {
         label?: string;
         ids?: ObjexIds | null;
-    }): SchemaObjex {
+    }) {
         const newSchemaObjex = oldSchemaObjex.update(update);
         if (newSchemaObjex) {
             const operation = UpdateObjex.create(newSchemaObjex, oldSchemaObjex);
             this.addOperation(operation);
         }
 
-        const objex = this.schemaCategory.getObjex(oldSchemaObjex.key);
+        // FIXME
+        const objex = this.category.getObjex(oldSchemaObjex.key);
         if (update.label && update.label !== objex.metadata.label)
             objex.metadata = MetadataObjex.create(update.label, objex.metadata.position);
-
-        return newSchemaObjex ?? oldSchemaObjex;
     }
 
-    createMorphism(def: MorphismDefinition): SchemaMorphism {
-        const morphism = this.schemaCategory.createMorphism();
-        const schemaMorphism = SchemaMorphism.createNew(morphism.signature, def);
-        const operation = CreateMorphism.create(schemaMorphism);
-        this.addOperation(operation);
+    createMorphism(def: MorphismDefinition) {
+        const signature = this.category.createSignature();
+        const schema = SchemaMorphism.createNew(signature, def);
+        const metadata = new MetadataMorphism(def.label);
+        const operation = new CreateMorphism(schema, metadata);
 
-        return schemaMorphism;
+        this.addOperation(operation);
     }
 
     deleteMorphism(schemaMorphism: SchemaMorphism) {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (only if the cardinality changed).
-        const operation = DeleteMorphism.create(schemaMorphism);
-        this.addOperation(operation);
+
+        // FIXME
+        // const operation = new DeleteMorphism(schemaMorphism);
+        // this.addOperation(operation);
     }
 
-    updateMorphism(oldSchemaMorphism: SchemaMorphism, update: Partial<MorphismDefinition>): SchemaMorphism {
+    updateMorphism(oldSchemaMorphism: SchemaMorphism, update: Partial<MorphismDefinition>) {
         const newSchemaMorphism = oldSchemaMorphism.update(update);
         if (newSchemaMorphism) {
             const operation = UpdateMorphism.create(newSchemaMorphism, oldSchemaMorphism);
             this.addOperation(operation);
         }
 
-        const morphism = this.schemaCategory.getMorphism(oldSchemaMorphism.signature);
+        // FIXME
+        const morphism = this.category.getMorphism(oldSchemaMorphism.signature);
         if (update.label && update.label !== morphism.metadata.label)
-            morphism.metadata = MetadataMorphism.create(update.label);
-
-        return newSchemaMorphism ?? oldSchemaMorphism;
+            morphism.metadata = new MetadataMorphism(update.label);
     }
 }
 

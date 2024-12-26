@@ -2,13 +2,11 @@ import { type CSSProperties } from 'react';
 
 export type Node = {
     id: string;
-    label: string;
     position: Position;
 };
 
 export type Edge = {
     id: string;
-    label: string;
     from: string;
     to: string;
 };

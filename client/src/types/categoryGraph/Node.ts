@@ -1,5 +1,4 @@
 import { ComparableMap } from '@/types/utils/ComparableMap';
-// import type { Core, ElementDefinition, NodeSingular, Position } from 'cytoscape';
 // import { groupHighlightColorToClass } from '@/components/category/defaultGraphStyle';
 import type { Key, Signature } from '../identifiers';
 import type { MetadataObjex, Position, SchemaObjex, Objex } from '../schema';
@@ -36,10 +35,6 @@ const defaultSelectionStatus = {
     level: 0,
 };
 
-function getStatusClass(status: SelectionStatus) {
-    return status.type;
-}
-
 export enum PropertyType {
     Simple = 'Simple',
     Complex = 'Complex'
@@ -69,7 +64,6 @@ export class Neighbor {
 
 /** @deprecated */
 export class Node {
-    private node!: NodeSingular;
     private tags = new Set<NodeTag>();
     availablePathData?: MorphismData;
     isFixed = false;
@@ -82,52 +76,32 @@ export class Node {
         readonly highlights: NodeHighlights,
     ) {}
 
-    static create(cytoscape: Core, objex: Objex, schemaObjex: SchemaObjex, position: Position, groups: Group[]): Node {
-        // This object is shared between all placeholder nodes. And its mutated when dragged ... yes, cytoscape is a bit weird.
+    static create(objex: Objex, schemaObjex: SchemaObjex, position: Position, groups: Group[]): Node {
+        // This object is shared between all placeholder nodes. And it's mutated when dragged ... yes, cytoscape is a bit weird.
         const positionObject = { ...position };
 
-        const highlights = new NodeHighlights(cytoscape, groups, schemaObjex.key, positionObject);
+        const highlights = new NodeHighlights(groups, schemaObjex.key, positionObject);
         const node = new Node(objex, schemaObjex, highlights);
-        const classes = (schemaObjex.isNew ? 'new' : '') + ' ' + (!schemaObjex.ids ? 'no-ids' : '');
-        const nodeDefinition = createNodeDefinition(schemaObjex, positionObject, node, classes);
-        const cytoscapeNode = cytoscape.add(nodeDefinition);
-        node.setCytoscapeNode(cytoscapeNode);
+        // const classes = (schemaObjex.isNew ? 'new' : '') + ' ' + (!schemaObjex.ids ? 'no-ids' : '');
 
         return node;
     }
 
-    private setCytoscapeNode(node: NodeSingular) {
-        this.node = node;
-        node.on('drag', () => this.refreshGroupPlaceholders());
-    }
-
     remove() {
         this.highlights.remove();
-        this.node.remove();
+        // this.node.remove();
     }
 
     update(schemaObjex: SchemaObjex) {
         this.schemaObjex = schemaObjex;
-        this.node.data('label', this.label);
-        this.node.toggleClass('no-ids', !this.schemaObjex.ids);
+        // this.node.data('label', this.label);
+        // this.node.toggleClass('no-ids', !this.schemaObjex.ids);
 
-        this.node.position({ ...this.metadata.position });
-
-        if (!this.node.inside()) {
-            this.node.restore();
-            this.highlights.restore();
-        }
+        // this.node.position({ ...this.metadata.position });
     }
 
     get metadata(): MetadataObjex {
         return this.objex.metadata;
-    }
-
-    get cytoscapeIdAndPosition() {
-        return {
-            nodeId: this.node.id(),
-            position: { ...this.node.position() },
-        };
     }
 
     refreshGroupPlaceholders() {
@@ -196,10 +170,10 @@ export class Node {
     }
 
     select(status: SelectionStatus): void {
-        this.node.removeClass(getStatusClass(this._selectionStatus));
+        // this.node.removeClass(getStatusClass(this._selectionStatus));
         this._selectionStatus = status;
-        this.node.addClass(getStatusClass(status));
-        this.node.data('label', this.label);
+        // this.node.addClass(getStatusClass(status));
+        // this.node.data('label', this.label);
     }
 
     selectNext(): void {
@@ -219,21 +193,21 @@ export class Node {
     }
 
     setAvailabilityStatus(status: AvailabilityStatus): void {
-        this.node.removeClass(this._availabilityStatus);
+        // this.node.removeClass(this._availabilityStatus);
         this._availabilityStatus = status;
-        this.node.addClass(status);
+        // this.node.addClass(status);
     }
 
     resetAvailabilityStatus(): void {
         if (this._availabilityStatus !== AvailabilityStatus.Default) {
-            this.node.removeClass(this._availabilityStatus);
+            // this.node.removeClass(this._availabilityStatus);
             this._availabilityStatus = AvailabilityStatus.Default;
         }
     }
 
     becomeRoot(): void {
         this.tags.add(NodeTag.Root);
-        this.node.addClass(NodeTag.Root);
+        // this.node.addClass(NodeTag.Root);
     }
 
     equals(other: Node | null | undefined): boolean {
@@ -246,17 +220,17 @@ export class Node {
     }
 }
 
-function createNodeDefinition(objex: SchemaObjex, position: Position, node: Node, classes?: string): ElementDefinition {
-    return {
-        data: {
-            id: '' + objex.key.value,
-            label: node.label,
-            schemaData: node,
-        },
-        position,
-        ...classes ? { classes } : {},
-    };
-}
+// function createNodeDefinition(objex: SchemaObjex, position: Position, node: Node, classes?: string): ElementDefinition {
+//     return {
+//         data: {
+//             id: '' + objex.key.value,
+//             label: node.label,
+//             schemaData: node,
+//         },
+//         position,
+//         ...classes ? { classes } : {},
+//     };
+// }
 
 type GroupPlaceholder = {
     group: Group;
@@ -268,8 +242,7 @@ type GroupPlaceholder = {
 class NodeHighlights {
     private readonly placeholders = new Map<string, GroupPlaceholder>();
 
-    public constructor(
-        private readonly cytoscape: Core,
+    constructor(
         groups: Group[],
         key: Key,
         position: Position,
@@ -277,7 +250,7 @@ class NodeHighlights {
         groups.forEach(group => {
             this.placeholders.set(group.id, {
                 group,
-                node: this.cytoscape.add(createGroupPlaceholderDefinition(key, position, group.id)),
+                // node: this.cytoscape.add(createGroupPlaceholderDefinition(key, position, group.id)),
                 state: undefined,
             });
         });
@@ -323,17 +296,14 @@ class NodeHighlights {
     }
 }
 
-function createGroupPlaceholderDefinition(key: Key, position: Position, groupId: string): ElementDefinition {
-    return {
-        data: {
-            id: groupId + '_' + key.value,
-            parent: 'group_' + groupId,
-        },
-        position,
-        classes: 'group-placeholder group-placeholder-hidden',
-    };
-}
+// function createGroupPlaceholderDefinition(key: Key, position: Position, groupId: string) {
+//     return {
+//         data: {
+//             id: groupId + '_' + key.value,
+//             parent: 'group_' + groupId,
+//         },
+//         position,
+//         classes: 'group-placeholder group-placeholder-hidden',
+//     };
+// }
 
-export function isPositionEqual(a: Position, b: Position): boolean {
-    return a.x === b.x && a.y === b.y;
-}

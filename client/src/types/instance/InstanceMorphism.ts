@@ -18,12 +18,12 @@ export class InstanceMorphism {
 
     static fromServer(input: InstanceMorphismFromServer, instance: InstanceCategory): InstanceMorphism | undefined {
         const signature = Signature.fromServer(input.signature);
-        const morphism = instance.schema.getMorphism(signature).current;
-        if (!morphism)
+        const schemaMorphism = instance.schema.getMorphism(signature).schema;
+        if (!schemaMorphism)
             return;
 
-        const dom = instance.objexes.get(morphism.domKey);
-        const cod = instance.objexes.get(morphism.codKey);
+        const dom = instance.objexes.get(schemaMorphism.domKey);
+        const cod = instance.objexes.get(schemaMorphism.codKey);
         if (!dom || !cod)
             return;
 
@@ -36,7 +36,7 @@ export class InstanceMorphism {
         });
 
         return new InstanceMorphism(
-            morphism,
+            schemaMorphism,
             dom,
             cod,
             mappings,
@@ -58,7 +58,7 @@ export type MappingRowFromServer = {
 };
 
 export class MappingRow {
-    public constructor(
+    constructor(
         readonly dom: DomainRow,
         readonly cod: DomainRow,
     ) {}

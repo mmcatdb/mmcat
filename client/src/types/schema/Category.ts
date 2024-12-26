@@ -9,6 +9,107 @@ import type { Mapping } from '../mapping';
 import { ComparableSet } from '@/types/utils/ComparableSet';
 import type { DatasourceType, LogicalModel } from '../datasource';
 
+/**
+ * This class represents a schema category in a specific version.
+ * It shouldn't be changed directly, but it can be updated via {@link Evocat}.
+ */
+export class Category implements Entity {
+    private readonly groups: GroupData[] = [];
+
+    private constructor(
+        readonly id: Id,
+        readonly label: string,
+        readonly versionId: VersionId,
+    ) {}
+
+    static fromServer(input: SchemaCategoryFromServer, logicalModels: LogicalModel[]): Category {
+        const category = new Category(
+            input.id,
+            input.label,
+            input.version,
+        );
+
+        const objexMetadata = new Map<KeyFromServer, MetadataObjexFromServer>(
+            input.metadata.objects.map(o => [ o.key, o ]),
+        );
+        const objexes = input.schema.objects.map(o => Objex.fromServer(o, objexMetadata.get(o.key)!));
+        objexes.forEach(objex => {
+            if (!objex.schema)
+                return;
+
+            category.objexes.set(objex.key, objex);
+            category.keyProvider.add(objex.key);
+        });
+
+        const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
+            input.metadata.morphisms.map(m => [ m.signature, m ]),
+        );
+        const morphisms = input.schema.morphisms.map(m => Morphism.fromServer(m, morphismMetadata.get(m.signature)!, category));
+        morphisms.forEach(morphism => {
+            if (!morphism.schema)
+                return;
+
+            category.morphisms.set(morphism.signature, morphism);
+            category.signatureProvider.add(morphism.signature);
+        });
+
+        const groups = createGroups(logicalModels, objexes, morphisms);
+        groups.forEach(group => {
+            group.mappings.forEach(mapping => {
+                mapping.properties.forEach(property => {
+                    property.addGroup(group.id);
+                });
+                mapping.root.addGroup(group.id);
+            });
+            category.groups.push(group);
+        });
+
+        return category;
+    }
+
+    static fromServerWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): Category {
+        return this.fromServer({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata }, []);
+    }
+
+    private keyProvider = new UniqueIdProvider<Key>({
+        function: key => key.value,
+        inversion: value => Key.createNew(value),
+    });
+
+    createKey(): Key {
+        return this.keyProvider.createAndAdd();
+    }
+
+    readonly objexes = new ComparableMap<Key, number, Objex>(key => key.value);
+
+    getObjex(key: Key): Objex {
+        return this.objexes.get(key)!;
+    }
+
+    getObjexes(): Objex[] {
+        return [ ...this.objexes.values() ];
+    }
+
+    private signatureProvider = new UniqueIdProvider<Signature>({
+        function: signature => signature.baseValue ?? 0,
+        inversion: value => Signature.base(value),
+    });
+
+    createSignature(): Signature {
+        return this.signatureProvider.createAndAdd();
+    }
+
+    readonly morphisms = new ComparableMap<Signature, string, Morphism>(signature => signature.value);
+
+    getMorphism(signature: Signature): Morphism {
+        return this.morphisms.get(signature)!;
+    }
+
+    getMorphisms(): Morphism[] {
+        return [ ...this.morphisms.values() ];
+    }
+}
+
 export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
     schema: SerializedSchema;
     metadata: SerializedMetadata;
@@ -23,118 +124,6 @@ export type SerializedMetadata = {
     objects: MetadataObjexFromServer[];
     morphisms: MetadataMorphismFromServer[];
 };
-
-export class SchemaCategory implements Entity {
-    private keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
-    private signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
-
-    private readonly groups: GroupData[];
-
-    private constructor(
-        readonly id: Id,
-        readonly label: string,
-        readonly versionId: VersionId,
-        objexes: Objex[],
-        morphisms: Morphism[],
-        logicalModels: LogicalModel[],
-    ) {
-        objexes.forEach(objex => {
-            if (!objex.current)
-                return;
-
-            this.objexes.set(objex.key, objex);
-            this.keysProvider.add(objex.key);
-        });
-
-        morphisms.forEach(morphism => {
-            if (!morphism.current)
-                return;
-
-            this.morphisms.set(morphism.signature, morphism);
-            this.signatureProvider.add(morphism.signature);
-        });
-
-        this.groups = createGroups(logicalModels, objexes, morphisms);
-        this.groups.forEach(group => {
-            group.mappings.forEach(mapping => {
-                mapping.properties.forEach(property => {
-                    property.addGroup(group.id);
-                });
-                mapping.root.addGroup(group.id);
-            });
-        });
-    }
-
-    static fromServer(input: SchemaCategoryFromServer, logicalModels: LogicalModel[]): SchemaCategory {
-        const objexMetadata = new Map<KeyFromServer, MetadataObjexFromServer>(
-            input.metadata.objects.map(o => [ o.key, o ]),
-        );
-        const objexes = input.schema.objects.map(o => Objex.fromServer(o, objexMetadata.get(o.key)!));
-
-        const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
-            input.metadata.morphisms.map(m => [ m.signature, m ]),
-        );
-        const morphisms = input.schema.morphisms.map(m => Morphism.fromServer(m, morphismMetadata.get(m.signature)!));
-
-        return new SchemaCategory(
-            input.id,
-            input.label,
-            input.version,
-            objexes,
-            morphisms,
-            logicalModels,
-        );
-    }
-
-    static fromServerWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): SchemaCategory {
-        return this.fromServer({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata }, []);
-    }
-
-    private readonly objexes = new ComparableMap<Key, number, Objex>(key => key.value);
-    private readonly morphisms = new ComparableMap<Signature, string, Morphism>(signature => signature.value);
-
-    createObjex(): Objex {
-        const key = this.keysProvider.createAndAdd();
-        return this.getObjex(key);
-    }
-
-    getObjex(key: Key): Objex {
-        let objex = this.objexes.get(key);
-
-        if (!objex) {
-            objex = Objex.create(key);
-            this.objexes.set(key, objex);
-            this.keysProvider.add(key);
-        }
-
-        return objex;
-    }
-
-    getObjexes(): Objex[] {
-        return [ ...this.objexes.values() ];
-    }
-
-    createMorphism(): Morphism {
-        const signature = this.signatureProvider.createAndAdd();
-        return this.getMorphism(signature);
-    }
-
-    getMorphism(signature: Signature): Morphism {
-        let morphism = this.morphisms.get(signature);
-
-        if (!morphism) {
-            morphism = Morphism.create(signature);
-            this.morphisms.set(signature, morphism);
-            this.signatureProvider.add(signature);
-        }
-
-        return morphism;
-    }
-
-    getMorphisms(): Morphism[] {
-        return [ ...this.morphisms.values() ];
-    }
-}
 
 export type SchemaCategoryInfoFromServer = {
     id: Id;
@@ -190,14 +179,12 @@ function createGroups(logicalModels: LogicalModel[], objexes: Objex[], morphisms
     };
 
     objexes
-        .map(objex => objex.current)
-        .filter((o): o is SchemaObjex => !!o)
-        .forEach(objex => context.objexes.set(objex.key, objex));
+        .map(objex => objex.schema)
+        .forEach(schemaObjex => context.objexes.set(schemaObjex.key, schemaObjex));
 
     morphisms
-        .map(morphism => morphism.current)
-        .filter((m): m is SchemaMorphism => !!m)
-        .forEach(morphism => context.morphisms.set(morphism.signature, morphism));
+        .map(morphism => morphism.schema)
+        .forEach(schemaMorphism => context.morphisms.set(schemaMorphism.signature, schemaMorphism));
 
     const typeIndices = new Map<DatasourceType, number>();
 

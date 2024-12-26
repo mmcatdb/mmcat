@@ -5,7 +5,7 @@ export type KeyValue<Key, Value> = { key: Key, value: Value };
 export class ComparableMap<Key, KeyId, Value> implements Map<Key, Value> {
     private readonly map = new Map<KeyId, KeyValue<Key, Value>>();
 
-    public constructor(
+    constructor(
         private readonly keyToIdFunction: Injection<Key, KeyId>,
     ) {}
 

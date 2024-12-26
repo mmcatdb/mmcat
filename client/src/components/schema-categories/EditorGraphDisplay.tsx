@@ -1,10 +1,10 @@
-import { type MouseEvent } from 'react';
+import { type ReactNode, type MouseEvent } from 'react';
 import { cn } from '../utils';
 import { type GraphOptions } from '../graph/graphEngine';
-import { type Edge, type Node } from '../graph/graphUtils';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
+import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 
 type EditorGraphDisplayProps = Readonly<{
     state: EditCategoryState;
@@ -30,7 +30,7 @@ export function EditorGraphDisplay({ state, dispatch, options, className }: Edit
 }
 
 type CanvasDisplayProps = Readonly<{
-    children: React.ReactNode;
+    children: ReactNode;
     className?: string;
 }>;
 
@@ -40,7 +40,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     return (
         <div
             ref={setCanvasRef}
-            className={cn('relative bg-slate-400 overflow-hidden', isDragging ? 'cursor-grabbing' : 'cursor-default', className)}
+            className={cn('relative bg-slate-400 overflow-hidden focus:bg-red-300 focus-visible:bg-green-300', isDragging ? 'cursor-grabbing' : 'cursor-default', className)}
             onMouseDown={onMouseDown}
             // onClick={() => dispatch({ type: 'selectNode', operation: 'clear' })}
         >
@@ -50,7 +50,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
 }
 
 type NodeDisplayProps = Readonly<{
-    node: Node;
+    node: CategoryNode;
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
 }>;
@@ -75,7 +75,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
             <div
                 className={cn('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white active:bg-cyan-300',
                     isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300',
-                    isDragging && 'cursor-grabbing pointer-events-none shadow-[3px_7px_10px_3px_rgba(0,0,0,0.5)]',
+                    isDragging && 'pointer-events-none shadow-[3px_7px_10px_3px_rgba(0,0,0,0.5)]',
                     // isInSelectBox && 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-cyan-300',
                     isSelected && 'bg-cyan-200',
                 )}
@@ -84,7 +84,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
             />
             <div className='w-fit h-0'>
                 <span className='relative -left-1/2 -top-10 font-medium'>
-                    {node.label}
+                    {node.metadata.label}
                 </span>
             </div>
         </div>
@@ -92,7 +92,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
 }
 
 type EdgeDisplayProps = Readonly<{
-    edge: Edge;
+    edge: CategoryEdge;
     state: EditCategoryState;
 }>;
 
@@ -114,7 +114,7 @@ function SelectionBox() {
     return (
         <div
             ref={setSelectionBoxRef}
-            className='absolute border-2 border-slate-700 border-dotted'
+            className='absolute border-2 border-slate-700 border-dotted pointer-events-none'
             style={style}
         />
     );

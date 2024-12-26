@@ -1,5 +1,5 @@
 import { createContext, type MouseEvent, useCallback, useContext, useMemo, useRef } from 'react';
-import { type ReactiveGraphState, type GraphEngine, type GraphValue } from './graphEngine';
+import { type ReactiveGraphState, type GraphEngine, type GraphInput } from './graphEngine';
 import { computeEdgeStyle, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
 
 type GraphContext = {
@@ -30,7 +30,9 @@ export function useCanvas() {
 
     const onMouseDown = useCallback((e: MouseEvent<HTMLElement>) => engine.handleCanvasMousedown(e), [ engine ]);
 
-    const isDragging = state.drag?.type === 'canvas';
+    // Show the grabbing cursor when dragging a canvas *or a node*.
+    // When a node is dragged, it has turned off all pointer events. So we need to show the grabbing cursor on the canvas.
+    const isDragging = !!state.drag;
 
     return {
         setCanvasRef,
@@ -70,7 +72,7 @@ export function useNode(node: Node) {
     };
 }
 
-export function useEdge(edge: Edge, graph: GraphValue) {
+export function useEdge(edge: Edge, graph: GraphInput) {
     const { state, engine } = useGraphContext();
     const ref = useRef<HTMLElement | null>(null);
 

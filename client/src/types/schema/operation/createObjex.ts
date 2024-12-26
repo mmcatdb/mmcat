@@ -1,5 +1,5 @@
-import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaObjex, type SchemaObjexFromServer } from '../Objex';
+import type { Category } from '../Category';
+import { type MetadataObjex, Objex, SchemaObjex, type SchemaObjexFromServer } from '../Objex';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CreateObjexFromServer = SMOFromServer<SMOType.CreateObjex> & {
@@ -9,34 +9,31 @@ export type CreateObjexFromServer = SMOFromServer<SMOType.CreateObjex> & {
 export class CreateObjex implements SMO<SMOType.CreateObjex> {
     readonly type = SMOType.CreateObjex;
 
-    private constructor(
-        readonly objex: SchemaObjex,
+    constructor(
+        readonly schema: SchemaObjex,
+        readonly metadata: MetadataObjex,
     ) {}
 
     static fromServer(input: CreateObjexFromServer): CreateObjex {
         return new CreateObjex(
             SchemaObjex.fromServer(input.object),
-        );
-    }
-
-    static create(objex: SchemaObjex): CreateObjex {
-        return new CreateObjex(
-            objex,
+            null, // FIXME
         );
     }
 
     toServer(): CreateObjexFromServer {
         return {
             type: SMOType.CreateObjex,
-            object: this.objex.toServer(),
+            object: this.schema.toServer(),
         };
     }
 
-    up(category: SchemaCategory): void {
-        category.getObjex(this.objex.key).current = this.objex;
+    up(category: Category): void {
+        const key = this.schema.key;
+        category.objexes.set(key, new Objex(key, this.schema, this.metadata));
     }
 
-    down(category: SchemaCategory): void {
-        category.getObjex(this.objex.key).current = undefined;
+    down(category: Category): void {
+        category.objexes.delete(this.schema.key);
     }
 }

@@ -3,7 +3,7 @@ export type Injection<Key, KeyId> = (key: Key) => KeyId;
 export class ComparableSet<Key, Id> implements Set<Key> {
     private readonly map = new Map<Id, Key>();
 
-    public constructor(
+    constructor(
         private readonly keyToIdFunction: Injection<Key, Id>,
     ) {}
 
