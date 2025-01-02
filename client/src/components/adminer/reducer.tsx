@@ -83,7 +83,7 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
             const newFilter: PropertyFilter = {
                 id: nextId,
                 propertyName: '',
-                operator: Operator.eq,
+                operator: Operator.Equal,
                 propertyValue: '',
             };
             return {
