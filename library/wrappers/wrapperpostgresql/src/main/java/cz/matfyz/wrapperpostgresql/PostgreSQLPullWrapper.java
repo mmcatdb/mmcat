@@ -26,12 +26,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,10 +227,20 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         ops.put("LessOrEqual", "<=");
         ops.put("Greater", ">");
         ops.put("GreaterOrEqual", ">=");
+        ops.put("IsNull", "IS NULL");
+        ops.put("IsNotNull", "IS NOT NULL");
+        ops.put("Like", "LIKE");
+        ops.put("ILike", "ILIKE");
+        ops.put("NotLike", "NOT LIKE");
+        ops.put("MatchRegEx", "~");
+        ops.put("NotMatchRegEx", "!~");
+        ops.put("In", "IN");
+        ops.put("NotIn", "NOT IN");
         return ops;
     }
 
     private final Map<String, String> operators = defineOperators();
+    private final List<String> unaryOperators = Arrays.asList("IS NULL", "IS NOT NULL");
 
     /**
      * Creates a PostgreSQL WHERE clause from a list of filters.
@@ -252,12 +264,26 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 whereClause.append("AND ");
             }
 
+            String operator = operators.get(filter.operator());
+
             whereClause.append(filter.columnName())
-                       .append(" ")
-                       .append(operators.get(filter.operator()))
-                       .append(" '")
-                       .append(filter.columnValue())
-                       .append("' ");
+                .append(" ")
+                .append(operators.get(filter.operator()));
+
+            if (operator.equals("IN") || operator.equals("NOT IN")) {
+                whereClause
+                    .append(" ")
+                    .append(Arrays.stream(filter.columnValue().split(";"))
+                        .map(String::trim)
+                        .map(value -> "'" + value + "'")
+                        .collect(Collectors.joining(", ", "(", ")")))
+                    .append("");
+            } else if (!unaryOperators.contains(operator)) {
+                whereClause
+                    .append(" '")
+                    .append(filter.columnValue())
+                    .append("'");
+            }
         }
 
         return whereClause.toString();
@@ -281,6 +307,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             List<Map<String, String>> data = new ArrayList<>();
 
             String whereClause = createWhereClause(filter);
+
             String selectQuery = "SELECT * FROM \"" + kindName +  "\" " + whereClause + " LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(selectQuery);
 

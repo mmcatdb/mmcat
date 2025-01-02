@@ -24,7 +24,7 @@ function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id
         const queryFilters = `${active.filters
             .map(
                 filter =>
-                    filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0 ? `(${filter.propertyName},${filter.operator},${filter.propertyValue})` : '',
+                    filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0 ? `(${filter.propertyName},${filter.operator},${filter.propertyValue.replace(/,/g, ';')})` : '',
             )
             .join('')}`;
         urlParams.queryParams.filters = queryFilters;

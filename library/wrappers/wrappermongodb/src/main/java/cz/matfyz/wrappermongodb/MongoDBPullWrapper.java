@@ -27,7 +27,9 @@ import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -43,6 +46,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Filters;
 
+import org.apache.hadoop.mapred.InvalidInputException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -305,7 +309,11 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     private static void collectProperties(Document document, Set<String> properties, String prefix) {
         document.forEach((key, value) -> {
             String field = prefix.isEmpty() ? key : prefix + "." + key;
-            properties.add(field);
+
+            if (!field.equals("_id")) {
+                properties.add(field);
+            }
+
             if (value instanceof Document documentValue)
                 collectProperties(documentValue, properties, field);
         });
@@ -321,6 +329,18 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         Set<String> properties = new HashSet<>();
         collection.find().forEach(doc -> collectProperties(doc, properties, ""));
         return properties;
+    }
+
+    /**
+     * Parses a string into a list of strings.
+     *
+     * @param value the input string to parse.
+     * @return a list of strings split by commas.
+     * @throws InvalidParameterException if the input is not properly enclosed.
+     */
+    public static List<String> parseStringToList(String value) {
+        return Arrays.stream(value.split(";"))
+            .map(String::trim).toList();
     }
 
     /**
@@ -357,6 +377,15 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                     break;
                 case "GreaterOrEqual":
                     filterList.add(Filters.gte(columnName, value));
+                    break;
+                case "In":
+                    filterList.add(Filters.in(columnName, parseStringToList((String) value)));
+                    break;
+                case "NotIn":
+                    filterList.add(Filters.nin(columnName, parseStringToList((String) value)));
+                    break;
+                case "MatchRegEx":
+                    filterList.add(Filters.regex(columnName, (String) value));
                     break;
                 default:
                     throw new UnsupportedOperationException("Unsupported operator: " + operator);

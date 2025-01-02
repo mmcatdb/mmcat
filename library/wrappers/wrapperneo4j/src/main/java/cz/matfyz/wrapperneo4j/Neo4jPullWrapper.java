@@ -21,12 +21,14 @@ import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Result;
@@ -390,10 +392,18 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         ops.put("LessOrEqual", "<=");
         ops.put("Greater", ">");
         ops.put("GreaterOrEqual", ">=");
+        ops.put("IsNull", "IS NULL");
+        ops.put("IsNotNull", "IS NOT NULL");
+        ops.put("MatchRegEx", "=~");
+        ops.put("StartsWith", "STARTS WITH");
+        ops.put("EndsWith", "ENDS WITH");
+        ops.put("Contains", "CONTAINS");
+        ops.put("In", "IN");
         return ops;
     }
 
     private final Map<String, String> operators = defineOperators();
+    private final List<String> unaryOperators = Arrays.asList("IS NULL", "IS NOT NULL");
 
     /**
      * Constructs a Cypher WHERE clause based on a list of filters.
@@ -411,10 +421,31 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         for (int i = 0; i < filters.size(); i++) {
             AdminerFilter filter = filters.get(i);
-            if (i == 0) {
-                whereClause.append(name).append(".").append(filter.columnName()).append(" ").append(operators.get(filter.operator())).append(" '").append(filter.columnValue()).append("'");
-            } else {
-                whereClause.append(" AND ").append(name).append(".").append(filter.columnName()).append(" ").append(operators.get(filter.operator())).append(" '").append(filter.columnValue()).append("'");
+            String operator = operators.get(filter.operator());
+
+            if (i != 0) {
+                whereClause.append(" AND ");
+            }
+
+            whereClause.append(name)
+                .append(".")
+                .append(filter.columnName())
+                .append(" ")
+                .append(operator);
+
+            if (operator.equals("IN")) {
+                whereClause
+                    .append(" ")
+                    .append(Arrays.stream(filter.columnValue().split(";"))
+                        .map(String::trim)
+                        .map(value -> "'" + value + "'")
+                        .collect(Collectors.joining(", ", "[", "]")))
+                    .append("");
+            } else if (!unaryOperators.contains(operator)) {
+                whereClause
+                    .append(" '")
+                    .append(filter.columnValue())
+                    .append("'");
             }
         }
 
@@ -433,6 +464,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      */
     private GraphResponse getNode(Session session, String queryBase, List<AdminerFilter> filters, String limit, String offset) {
         String whereClause = createWhereClause(filters, "a");
+
         List<GraphElement> data = session.executeRead(tx -> {
             var query = new Query(queryBase + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 

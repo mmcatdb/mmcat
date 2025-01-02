@@ -1,6 +1,6 @@
 import { getNewView } from './Views';
 import { View } from '@/types/adminer/View';
-import { Operator } from '@/types/adminer/Operators';
+import { Operator, UNARY_OPERATORS } from '@/types/adminer/Operators';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 
@@ -59,11 +59,18 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
             };
         }
         else {
-            const updatedFilters = state.form.filters.map(filter =>
-                filter.id === action.id
-                    ? { ...filter, [field]: value }
-                    : filter,
-            );
+            const updatedFilters = state.form.filters.map(filter => {
+                if (filter.id === action.id) {
+                    const updatedFilter = { ...filter, [field]: value };
+
+                    if (field === 'operator' && UNARY_OPERATORS.includes(value))
+                        updatedFilter.propertyValue = ' ';
+
+
+                    return updatedFilter;
+                }
+                return filter;
+            });
 
             return {
                 ...state,
