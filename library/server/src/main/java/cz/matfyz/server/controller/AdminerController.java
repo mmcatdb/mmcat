@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class AdminerController {
@@ -36,9 +37,9 @@ public class AdminerController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return myWrapper.getKindNames(limit, offset);
+        return pullWrapper.getKindNames(limit, offset);
     }
 
     @GetMapping(value = "/adminer/{db}/{kind}")
@@ -49,9 +50,9 @@ public class AdminerController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return myWrapper.getKind(kind, limit, offset, null);
+        return pullWrapper.getKind(kind, limit, offset, null);
     }
 
     @GetMapping(value = "/adminer/{db}/{kind}", params = {"filters"})
@@ -63,7 +64,6 @@ public class AdminerController {
         }
 
         List<AdminerFilter> filterList = new ArrayList<>();
-
 
         for (int indexOpen = filters.indexOf('(');
             indexOpen >= 0;
@@ -78,9 +78,9 @@ public class AdminerController {
             }
         }
 
-        final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return myWrapper.getKind(kind, limit, offset, filterList);
+        return pullWrapper.getKind(kind, limit, offset, filterList);
     }
 
     @GetMapping(value = "/adminer/{db}/{kind}/foreignkeys")
@@ -91,9 +91,9 @@ public class AdminerController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        final var myWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+        final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return myWrapper.getForeignKeys(kind);
+        return pullWrapper.getForeignKeys(kind);
     }
 
 }

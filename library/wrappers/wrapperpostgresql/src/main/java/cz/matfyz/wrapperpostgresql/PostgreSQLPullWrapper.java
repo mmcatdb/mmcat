@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,6 +150,14 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Retrieves a list of kind names from the database.
+     *
+     * @param limit  The maximum number of results to return.
+     * @param offset The starting position of the result set.
+     * @return A {@link KindNameResponse} containing a list of kind names.
+     * @throws PullForestException if an error occurs during database access.
+     */
     @Override public KindNameResponse getKindNames(String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
@@ -170,6 +179,14 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 		}
     }
 
+    /**
+     * Retrieves all column names for a given kind.
+     *
+     * @param stmt     The {@link Statement} object used to execute the query.
+     * @param kindName The name of the kind whose columns are being retrieved.
+     * @return A {@link Set} of column names for the specified kind.
+     * @throws SQLException if a database access error occurs.
+     */
     private Set<String> getColumnNames(Statement stmt, String kindName) throws SQLException {
         Set<String> columns = new HashSet<>();
 
@@ -195,6 +212,30 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return columns;
     }
 
+    /**
+     * Defines a mapping of comparison operator names to PostgreSQL operators.
+     *
+     * @return A {@link Map} containing operator names as keys and their PostgreSQL equivalents as values.
+     */
+    private Map<String, String> defineOperators() {
+        final var ops = new TreeMap<String, String>();
+        ops.put("Equal", "=");
+        ops.put("NotEqual", "<>");
+        ops.put("Less", "<");
+        ops.put("LessOrEqual", "<=");
+        ops.put("Greater", ">");
+        ops.put("GreaterOrEqual", ">=");
+        return ops;
+    }
+
+    private final Map<String, String> operators = defineOperators();
+
+    /**
+     * Creates a PostgreSQL WHERE clause from a list of filters.
+     *
+     * @param filters The list of {@link AdminerFilter} objects representing filter conditions.
+     * @return A {@link String} containing the WHERE clause, or an empty string if no filters are provided.
+     */
     private String createWhereClause(List<AdminerFilter> filters) {
         StringBuilder whereClause = new StringBuilder();
 
@@ -213,7 +254,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
             whereClause.append(filter.columnName())
                        .append(" ")
-                       .append(filter.operator())
+                       .append(operators.get(filter.operator()))
                        .append(" '")
                        .append(filter.columnValue())
                        .append("' ");
@@ -222,6 +263,16 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return whereClause.toString();
     }
 
+    /**
+     * Retrieves data for a specific kind with optional filtering, pagination, and sorting.
+     *
+     * @param kindName The name of the kind to query.
+     * @param limit    The maximum number of rows to return.
+     * @param offset   The starting position of the result set.
+     * @param filter   A list of {@link AdminerFilter} objects representing filter conditions (optional).
+     * @return A {@link TableResponse} containing the kind data, total row count, and column names.
+     * @throws PullForestException if an error occurs during database access.
+     */
     @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
         try(
             Connection connection = provider.getConnection();
@@ -317,6 +368,16 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return keys;
     }
 
+    /**
+     * Retrieves a list of foreign keys for a specified kind.
+     *
+     * The method fetches both inbound (referenced by other kinds) and outbound
+     * (referencing other kinds) foreign keys associated with the given kind name.
+     *
+     * @param kindName The name of the kind for which foreign keys are being retrieved.
+     * @return A {@link List} of {@link ForeignKey} objects representing the foreign keys of the kind.
+     * @throws PullForestException if an error occurs during database access.
+     */
     @Override public List<ForeignKey> getForeignKeys(String kindName) {
         try(
             Connection connection = provider.getConnection();

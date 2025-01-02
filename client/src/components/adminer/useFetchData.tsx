@@ -5,11 +5,11 @@ type FetchFunction<T> = () => Promise<Result<T>>;
 
 type FetchResult<T> = {
     fetchedData: T;
-    loading: boolean;
+    loading: false;
     error: undefined;
 } | {
     fetchedData: undefined;
-    loading: boolean;
+    loading: true;
     error: string;
 };
 
@@ -33,7 +33,7 @@ export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<
             if (!response.status) {
                 setResult({
                     fetchedData: undefined,
-                    loading: false,
+                    loading: true,
                     error: `Failed to fetch data`,
                 });
                 return;

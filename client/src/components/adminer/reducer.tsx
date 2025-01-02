@@ -1,6 +1,7 @@
 import { getNewView } from './Views';
 import { View } from '@/types/adminer/View';
-import { type PropertyFilter, Operator } from '@/types/adminer/PropertyFilter';
+import { Operator } from '@/types/adminer/Operators';
+import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
 
 export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {

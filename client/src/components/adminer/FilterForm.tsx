@@ -3,19 +3,21 @@ import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 import { ColumnForm } from '@/components/adminer/ColumnForm';
 import type { AdminerStateAction, AdminerState } from '@/types/adminer/Reducer';
+import type { DatasourceType } from '@/types/datasource/Datasource';
 
 type FilterFormProps = Readonly<{
     state: AdminerState;
-    dispatch: React.Dispatch<AdminerStateAction>;
+    datasourceType: DatasourceType;
     propertyNames: string[] | undefined;
+    dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function FilterForm({ state, dispatch, propertyNames }: FilterFormProps) {
+export function FilterForm({ state, datasourceType, propertyNames, dispatch }: FilterFormProps) {
     return (
         <div>
             <div>
-                {state.form.filters.map((filter) => (
-                    <ColumnForm key={filter.id} filter={filter} propertyNames={propertyNames} dispatch={dispatch}/>
+                {state.form.filters.map(filter => (
+                    <ColumnForm key={filter.id} filter={filter} datasourceType={datasourceType} propertyNames={propertyNames} dispatch={dispatch}/>
                 ))}
             </div>
 
@@ -32,7 +34,7 @@ export function FilterForm({ state, dispatch, propertyNames }: FilterFormProps) 
                         min='0'
                         placeholder='Enter limit'
                         value={state.form.limit.toString()}
-                        onChange={(e) => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
+                        onChange={e => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
                         required
                     />
                 </div>

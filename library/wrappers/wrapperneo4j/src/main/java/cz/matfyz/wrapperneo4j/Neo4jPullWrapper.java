@@ -3,7 +3,6 @@ package cz.matfyz.wrapperneo4j;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
-import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
@@ -27,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Result;
@@ -262,6 +262,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
     }
 
+    /**
+     * Extracts the properties of a node.
+     *
+     * @param node The node represented as a {@link Value}.
+     * @return A {@link GraphElement} containing the node's ID and properties.
+     */
     private GraphElement getNodeProperties(Value node) {
         String id = node.asNode().elementId().split(":")[2];
 
@@ -279,6 +285,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return new GraphElement(id, properties);
     }
 
+    /**
+     * Extracts the properties of a relationship.
+     *
+     * @param relationship The relationship represented as a {@link Value}.
+     * @return A {@link GraphElement} containing the relationship's ID and properties.
+     */
     private GraphElement getRelationshipProperties(Value relationship) {
         String id = relationship.asRelationship().elementId().split(":")[2];
 
@@ -296,6 +308,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return new GraphElement(id, properties);
     }
 
+    /**
+     * Retrieves a list of distinct kind names (labels).
+     *
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @return A {@link KindNameResponse} containing the list of kind names.
+     * @throws PullForestException if an error occurs during database access.
+     */
     @Override public KindNameResponse getKindNames(String limit, String offset) {
         try (Session session = provider.getSession()) {
             List<String> data = new ArrayList<>();
@@ -313,6 +333,13 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Retrieves a set of distinct property keys based on a specified match clause.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param matchClause The Cypher match clause to identify nodes or relationships.
+     * @return A {@link Set} of property keys.
+     */
     private Set<String> getKeyNames(Session session, String matchClause) {
         Set<String> keys = new HashSet<>();
 
@@ -330,14 +357,51 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return keys;
     }
 
+    /**
+     * Retrieves a set of distinct property keys for all nodes.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @return A {@link Set} of node property keys.
+     */
     private Set<String> getNodeKeyNames(Session session) {
         return getKeyNames(session, "MATCH (a)");
     }
 
+    /**
+     * Retrieves a set of distinct property keys for all relationships.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @return A {@link Set} of relationship property keys.
+     */
     private Set<String> getRelationshipKeyNames(Session session) {
         return getKeyNames(session, "MATCH ()-[a]->()");
     }
 
+    /**
+     * Defines a mapping of comparison operators to their Cypher equivalents.
+     *
+     * @return A {@link Map} containing operator mappings.
+     */
+    private Map<String, String> defineOperators() {
+        final var ops = new TreeMap<String, String>();
+        ops.put("Equal", "=");
+        ops.put("NotEqual", "<>");
+        ops.put("Less", "<");
+        ops.put("LessOrEqual", "<=");
+        ops.put("Greater", ">");
+        ops.put("GreaterOrEqual", ">=");
+        return ops;
+    }
+
+    private final Map<String, String> operators = defineOperators();
+
+    /**
+     * Constructs a Cypher WHERE clause based on a list of filters.
+     *
+     * @param filters The filters to apply.
+     * @param name The alias for the graph element in the query ('a' for nodes and 'r' for relationships).
+     * @return A Cypher WHERE clause as a {@link String}.
+     */
     private String createWhereClause(List<AdminerFilter> filters, String name) {
         if (filters == null || filters.isEmpty()) {
             return "";
@@ -348,15 +412,25 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         for (int i = 0; i < filters.size(); i++) {
             AdminerFilter filter = filters.get(i);
             if (i == 0) {
-                whereClause.append(name).append(".").append(filter.columnName()).append(" ").append(filter.operator()).append(" '").append(filter.columnValue()).append("'");
+                whereClause.append(name).append(".").append(filter.columnName()).append(" ").append(operators.get(filter.operator())).append(" '").append(filter.columnValue()).append("'");
             } else {
-                whereClause.append(" AND ").append(name).append(".").append(filter.columnName()).append(" ").append(filter.operator()).append(" '").append(filter.columnValue()).append("'");
+                whereClause.append(" AND ").append(name).append(".").append(filter.columnName()).append(" ").append(operators.get(filter.operator())).append(" '").append(filter.columnValue()).append("'");
             }
         }
 
         return whereClause.toString();
     }
 
+    /**
+     * Retrieves node data from the graph based on the specified query, filters, and pagination parameters.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param queryBase The base Cypher query to match nodes.
+     * @param filters The filters to apply.
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @return A {@link GraphResponse} containing the nodes and metadata.
+     */
     private GraphResponse getNode(Session session, String queryBase, List<AdminerFilter> filters, String limit, String offset) {
         String whereClause = createWhereClause(filters, "a");
         List<GraphElement> data = session.executeRead(tx -> {
@@ -375,6 +449,15 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return new GraphResponse(data, itemCount, keys);
     }
 
+    /**
+     * Retrieves relationship data from the graph based on the specified filters and pagination parameters.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param filters The filters to apply.
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @return A {@link GraphResponse} containing the relationships and metadata.
+     */
     private GraphResponse getRelationship(Session session, List<AdminerFilter> filters, String limit, String offset) {
         String whereClause = createWhereClause(filters, "r");
         List<GraphElement> data = session.executeRead(tx -> {
@@ -393,6 +476,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return new GraphResponse(data, itemCount, keys);
     }
 
+    /**
+     * Retrieves data of the specified kind from the graph.
+     *
+     * @param kindName The name of the kind.
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @param filters The filters to apply (optional).
+     * @return A {@link GraphResponse} containing the data and metadata.
+     * @throws PullForestException if an error occurs during query execution.
+     */
     @Override public GraphResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
         try (Session session = provider.getSession()) {
             if (kindName.equals("relationships") || kindName.equals("unlabeled")) {
@@ -406,6 +499,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Unsupported method for fetching foreign keys in Neo4j.
+     *
+     * @param kindName The name of the kind.
+     * @throws UnsupportedOperationException as this operation is not implemented.
+     */
     @Override public List<ForeignKey> getForeignKeys(String kindName) {
         throw new UnsupportedOperationException("Neo4jPullWrapper.getForeignKeys not implemented.");
     }
