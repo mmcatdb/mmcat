@@ -5,7 +5,7 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.DataResponse;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
@@ -45,8 +45,8 @@ public interface AbstractPullWrapper {
      * Retrieves a list of foreign key relationships for the specified kind.
      *
      * @param kindName The name of the kind for which to fetch foreign key relationships.
-     * @return A {@link List} of {@link ForeignKey} objects representing the foreign key relationships.
+     * @return A {@link List} of {@link Reference} objects representing the foreign key relationships.
      */
-    List<ForeignKey> getForeignKeys(String kindName);
+    List<Reference> getReferences(String datasourceId, String kindName);
 
 }

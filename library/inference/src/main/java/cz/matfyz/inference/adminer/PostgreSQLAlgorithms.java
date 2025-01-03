@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import cz.matfyz.abstractwrappers.exception.PullForestException;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 
 public final class PostgreSQLAlgorithms {
     private PostgreSQLAlgorithms() {}
@@ -59,25 +59,25 @@ public final class PostgreSQLAlgorithms {
      * Retrieves foreign key relationships from the database for the specified kind.
      *
      * @param stmt       The {@link Statement} object used to execute the SQL query.
-     * @param keys       A {@link List} of {@link ForeignKey} objects to which the results will be added.
+     * @param keys       A {@link List} of {@link Reference} objects to which the results will be added.
      * @param kindName   The name of the kind for which foreign key relationships are to be retrieved.
      * @param outgoing   A boolean flag indicating the direction of the foreign key relationship:
      *                   <ul>
      *                       <li><code>true</code> for outgoing foreign keys (keys where the kind references other kinds).</li>
      *                       <li><code>false</code> for incoming foreign keys (keys where other kinds reference the kind).</li>
      *                   </ul>
-     * @return           A {@link List} of {@link ForeignKey} objects representing the foreign key relationships for the specified kind.
+     * @return           A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
      * @throws SQLException if an error occurs during database access.
      */
-    private static List<ForeignKey> getForeignKeys(Statement stmt, List<ForeignKey> keys, String kindName, boolean outgoing) throws SQLException {
-        String actualKind = outgoing ? "kcu" : "ccu";
-        String foreignKind = outgoing ? "ccu" : "kcu";
+    private static List<Reference> getReferences(Statement stmt, List<Reference> references, String datasourceId, String kindName, boolean outgoing) throws SQLException {
+        String referencedKind = outgoing ? "kcu" : "ccu";
+        String referencingKind = outgoing ? "ccu" : "kcu";
 
         String query = String.format("""
             SELECT
-                %s.column_name AS column,
-                %s.table_name AS foreign_table,
-                %s.column_name AS foreign_column
+                %s.column_name AS referenced_property,
+                %s.table_name AS referencing_kind,
+                %s.column_name AS referencing_property
             FROM
                 information_schema.key_column_usage kcu
             JOIN
@@ -91,34 +91,35 @@ public final class PostgreSQLAlgorithms {
             WHERE
                 kcu.table_schema = 'public'
                 AND %s.table_name = '%s';
-            """, actualKind, foreignKind, foreignKind, actualKind, kindName);
+            """, referencedKind, referencingKind, referencingKind, referencedKind, kindName);
         ResultSet result = stmt.executeQuery(query);
 
         while (result.next()) {
-            String column = result.getString("column");
-            String foreignTable = result.getString("foreign_table");
-            String foreignColumn = result.getString("foreign_column");
+            String referencedProperty = result.getString("referenced_property");
+            String referencingKindName = result.getString("referencing_kind");
+            String referencingProperty = result.getString("referencing_property");
 
-            ForeignKey foreignKey = new ForeignKey(foreignTable, column, foreignColumn);
-            keys.add(foreignKey);
+            Reference reference = new Reference(datasourceId, kindName, referencedProperty, referencingKindName, referencingProperty);
+            references.add(reference);
         }
 
-        return keys;
+        return references;
     }
 
     /**
-     * Retrieves foreign key relationships for the specified kind.
+     * Retrieves references for the specified kind.
      *
-     * @param stmt       The {@link Statement} object used to execute the SQL query.
-     * @param kindName   The name of the kind for which foreign key relationships are to be retrieved.
-     * @return           A {@link List} of {@link ForeignKey} objects representing the foreign key relationships for the specified kind.
+     * @param stmt         The {@link Statement} object used to execute the SQL query.
+     * @param datasourceId ID of the datasource.
+     * @param kindName     The name of the kind for which foreign key relationships are to be retrieved.
+     * @return             A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
      * @throws PullForestException if an error occurs during database access.
      */
-    public static List<ForeignKey> getForeignKeys(Statement stmt, String kindName) {
+    public static List<Reference> getReferences(Statement stmt, String datasourceId, String kindName) {
         try {
-            List<ForeignKey> foreignKeys = new ArrayList<>();
-            foreignKeys = getForeignKeys(stmt, foreignKeys, kindName, true);
-            foreignKeys = getForeignKeys(stmt, foreignKeys, kindName, false);
+            List<Reference> foreignKeys = new ArrayList<>();
+            foreignKeys = getReferences(stmt, foreignKeys, datasourceId, kindName, true);
+            foreignKeys = getReferences(stmt, foreignKeys, datasourceId, kindName, false);
 
             return foreignKeys;
         }

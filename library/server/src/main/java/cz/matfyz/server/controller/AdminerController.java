@@ -4,7 +4,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.service.WrapperService;
 import cz.matfyz.core.adminer.DataResponse;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.record.AdminerFilter;
 
@@ -82,8 +82,8 @@ public class AdminerController {
         return pullWrapper.getKind(kind, limit, offset, filterList);
     }
 
-    @GetMapping(value = "/adminer/{db}/{kind}/foreignkeys")
-    public List<ForeignKey> getForeignKeys(@PathVariable Id db, @PathVariable String kind) {
+    @GetMapping(value = "/adminer/{db}/{kind}/references")
+    public List<Reference> getReferences(@PathVariable Id db, @PathVariable String kind) {
         final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
@@ -92,7 +92,7 @@ public class AdminerController {
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getForeignKeys(kind);
+        return pullWrapper.getReferences(db.toString(), kind);
     }
 
 }

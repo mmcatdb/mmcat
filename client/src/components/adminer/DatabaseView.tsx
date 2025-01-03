@@ -18,7 +18,7 @@ function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id
         return filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0;
     });
 
-    const urlParams: FetchKindParams = { datasourceId: datasourceId!, kindId: kindName!, queryParams: { limit: active.limit, offset: offset } };
+    const urlParams: FetchKindParams = { datasourceId: datasourceId!, kindName: kindName!, queryParams: { limit: active.limit, offset: offset } };
 
     if (active.filters && filterExist) {
         const queryFilters = `${active.filters
@@ -62,7 +62,7 @@ export function DatabaseView({ state, datasourceType, dispatch }: DatabaseViewPr
     }, [ state.active, state.datasourceId, state.kindName, offset ]);
 
     const fetchFunction = useCallback(() => {
-        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindId: urlParams.kindId }, urlParams.queryParams);
+        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindName: urlParams.kindName }, urlParams.queryParams);
     }, [ urlParams ]);
 
     const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);

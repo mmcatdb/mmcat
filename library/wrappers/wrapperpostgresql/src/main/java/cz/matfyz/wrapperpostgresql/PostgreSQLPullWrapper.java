@@ -8,7 +8,7 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.TableResponse;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
@@ -283,21 +283,19 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Retrieves a list of foreign keys for a specified kind.
+     * Retrieves a list of references for a specified kind.
      *
-     * The method fetches both inbound (referenced by other kinds) and outbound
-     * (referencing other kinds) foreign keys associated with the given kind name.
-     *
-     * @param kindName The name of the kind for which foreign keys are being retrieved.
-     * @return A {@link List} of {@link ForeignKey} objects representing the foreign keys of the kind.
+     * @param datasourceId ID of the datasource.
+     * @param kindName     The name of the kind for which references are being retrieved.
+     * @return A {@link List} of {@link Reference} objects representing the references of the kind.
      * @throws PullForestException if an error occurs during database access.
      */
-    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            return PostgreSQLAlgorithms.getForeignKeys(stmt, kindName);
+            return PostgreSQLAlgorithms.getReferences(stmt, datasourceId, kindName);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

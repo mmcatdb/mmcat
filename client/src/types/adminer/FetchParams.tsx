@@ -6,7 +6,7 @@ type FetchDatasourceParams = {
 
 export type FetchKindParams = {
     datasourceId: string;
-    kindId: string;
+    kindName: string;
     queryParams: {
         filters?: string;
         limit: number;

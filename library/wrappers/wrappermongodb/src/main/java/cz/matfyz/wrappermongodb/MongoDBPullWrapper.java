@@ -7,7 +7,7 @@ import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.adminer.DocumentResponse;
 import cz.matfyz.core.adminer.KindNameResponse;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -371,11 +371,13 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     /**
      * Unsupported method for fetching foreign keys in MongoDB.
      *
-     * @param kindName The name of the kind.
+     * @param datasourceId ID of the datasource.
+     * @param kindName     The name of the kind.
      * @throws UnsupportedOperationException as this operation is not implemented.
      */
-    @Override public List<ForeignKey> getForeignKeys(String kindName) {
-        throw new UnsupportedOperationException("MongoDBPullWrapper.getForeignKeys not implemented.");
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
+        // TODO
+        throw new UnsupportedOperationException("MongoDBPullWrapper.getReferences not implemented.");
     }
 
 }
