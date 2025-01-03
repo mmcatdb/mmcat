@@ -19,6 +19,7 @@ import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.inference.adminer.Neo4jAlgorithms;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -265,52 +266,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Extracts the properties of a node.
-     *
-     * @param node The node represented as a {@link Value}.
-     * @return A {@link GraphElement} containing the node's ID and properties.
-     */
-    private GraphElement getNodeProperties(Value node) {
-        String id = node.asNode().elementId().split(":")[2];
-
-        Map<String, Object> properties = new HashMap<>();
-        node.asNode().asMap().forEach((key, value) -> {
-            properties.put(key, value);
-        });
-
-        List<String> labels = new ArrayList<>();
-        for (final var label : node.asNode().labels()) {
-            labels.add(label);
-        }
-        properties.put("labels", labels);
-
-        return new GraphElement(id, properties);
-    }
-
-    /**
-     * Extracts the properties of a relationship.
-     *
-     * @param relationship The relationship represented as a {@link Value}.
-     * @return A {@link GraphElement} containing the relationship's ID and properties.
-     */
-    private GraphElement getRelationshipProperties(Value relationship) {
-        String id = relationship.asRelationship().elementId().split(":")[2];
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("type", relationship.asRelationship().type());
-
-        // Add IDs of start and end node
-        properties.put("startNodeId", relationship.asRelationship().startNodeElementId().split(":")[2]);
-        properties.put("endNodeId", relationship.asRelationship().endNodeElementId().split(":")[2]);
-
-        relationship.asRelationship().asMap().forEach((key, value) -> {
-            properties.put(key, value);
-        });
-
-        return new GraphElement(id, properties);
-    }
-
-    /**
      * Retrieves a list of distinct kind names (labels).
      *
      * @param limit The maximum number of results to return.
@@ -336,76 +291,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Retrieves a set of distinct property keys based on a specified match clause.
-     *
-     * @param session The Neo4j session to use for the query.
-     * @param matchClause The Cypher match clause to identify nodes or relationships.
-     * @return A {@link Set} of property keys.
-     */
-    private Set<String> getKeyNames(Session session, String matchClause) {
-        Set<String> keys = new HashSet<>();
-
-        Result queryResult = session.run(String.format("""
-            %s
-            UNWIND keys(a) AS key
-            RETURN DISTINCT key
-            ORDER BY key;
-            """, matchClause));
-        while (queryResult.hasNext()) {
-            Record queryRecord = queryResult.next();
-            keys.add(queryRecord.get("key").asString());
-        }
-
-        return keys;
-    }
-
-    /**
-     * Retrieves a set of distinct property keys for all nodes.
-     *
-     * @param session The Neo4j session to use for the query.
-     * @return A {@link Set} of node property keys.
-     */
-    private Set<String> getNodeKeyNames(Session session) {
-        return getKeyNames(session, "MATCH (a)");
-    }
-
-    /**
-     * Retrieves a set of distinct property keys for all relationships.
-     *
-     * @param session The Neo4j session to use for the query.
-     * @return A {@link Set} of relationship property keys.
-     */
-    private Set<String> getRelationshipKeyNames(Session session) {
-        return getKeyNames(session, "MATCH ()-[a]->()");
-    }
-
-    /**
-     * Defines a mapping of comparison operators to their Cypher equivalents.
-     *
-     * @return A {@link Map} containing operator mappings.
-     */
-    private Map<String, String> defineOperators() {
-        final var ops = new TreeMap<String, String>();
-        ops.put("Equal", "=");
-        ops.put("NotEqual", "<>");
-        ops.put("Less", "<");
-        ops.put("LessOrEqual", "<=");
-        ops.put("Greater", ">");
-        ops.put("GreaterOrEqual", ">=");
-        ops.put("IsNull", "IS NULL");
-        ops.put("IsNotNull", "IS NOT NULL");
-        ops.put("MatchRegEx", "=~");
-        ops.put("StartsWith", "STARTS WITH");
-        ops.put("EndsWith", "ENDS WITH");
-        ops.put("Contains", "CONTAINS");
-        ops.put("In", "IN");
-        return ops;
-    }
-
-    private final Map<String, String> operators = defineOperators();
-    private final List<String> unaryOperators = Arrays.asList("IS NULL", "IS NOT NULL");
-
-    /**
      * Constructs a Cypher WHERE clause based on a list of filters.
      *
      * @param filters The filters to apply.
@@ -421,7 +306,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         for (int i = 0; i < filters.size(); i++) {
             AdminerFilter filter = filters.get(i);
-            String operator = operators.get(filter.operator());
+            String operator = Neo4jAlgorithms.OPERATORS.get(filter.operator());
 
             if (i != 0) {
                 whereClause.append(" AND ");
@@ -441,7 +326,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                         .map(value -> "'" + value + "'")
                         .collect(Collectors.joining(", ", "[", "]")))
                     .append("");
-            } else if (!unaryOperators.contains(operator)) {
+            } else if (!Neo4jAlgorithms.UNARY_OPERATORS.contains(operator)) {
                 whereClause
                     .append(" '")
                     .append(filter.columnValue())
@@ -469,16 +354,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             var query = new Query(queryBase + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
-                .map(node -> getNodeProperties(node.get("a")))
+                .map(node -> Neo4jAlgorithms.getNodeProperties(node.get("a")))
                 .toList();
         });
 
         Result countQueryResult = session.run(queryBase + " RETURN COUNT(a) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> keys = getNodeKeyNames(session);
+        Set<String> properties = Neo4jAlgorithms.getNodePropertyNames(session);
 
-        return new GraphResponse(data, itemCount, keys);
+        return new GraphResponse(data, itemCount, properties);
     }
 
     /**
@@ -496,16 +381,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             var query = new Query("MATCH ()-[r]->() " + whereClause + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
-                .map(relation -> getRelationshipProperties(relation.get("r")))
+                .map(relation -> Neo4jAlgorithms.getRelationshipProperties(relation.get("r")))
                 .toList();
         });
 
         Result countQueryResult = session.run("MATCH ()-[r]->() " + whereClause + " RETURN COUNT(r) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> keys = getRelationshipKeyNames(session);
+        Set<String> properties = Neo4jAlgorithms.getRelationshipPropertyNames(session);
 
-        return new GraphResponse(data, itemCount, keys);
+        return new GraphResponse(data, itemCount, properties);
     }
 
     /**

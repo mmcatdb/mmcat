@@ -26,6 +26,7 @@ import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.inference.adminer.MongoDBAlgorithms;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import com.mongodb.client.FindIterable;
@@ -300,50 +302,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Recursively collects all property names from a given document.
-     *
-     * @param document The document to process.
-     * @param properties The set to store property names.
-     * @param prefix The prefix to apply to nested properties.
-     */
-    private static void collectProperties(Document document, Set<String> properties, String prefix) {
-        document.forEach((key, value) -> {
-            String field = prefix.isEmpty() ? key : prefix + "." + key;
-
-            if (!field.equals("_id")) {
-                properties.add(field);
-            }
-
-            if (value instanceof Document documentValue)
-                collectProperties(documentValue, properties, field);
-        });
-    }
-
-    /**
-     * Retrieves a set of all distinct property names in a given collection.
-     *
-     * @param collection The collection to inspect.
-     * @return A {@link Set} containing all property names found in the collection.
-     */
-    private Set<String> getPropertyNames(MongoCollection<Document> collection) {
-        Set<String> properties = new HashSet<>();
-        collection.find().forEach(doc -> collectProperties(doc, properties, ""));
-        return properties;
-    }
-
-    /**
-     * Parses a string into a list of strings.
-     *
-     * @param value the input string to parse.
-     * @return a list of strings split by commas.
-     * @throws InvalidParameterException if the input is not properly enclosed.
-     */
-    public static List<String> parseStringToList(String value) {
-        return Arrays.stream(value.split(";"))
-            .map(String::trim).toList();
-    }
-
-    /**
      * Creates a MongoDB filter based on a list of filters.
      *
      * @param filters The list of filters to apply.
@@ -359,37 +317,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             var columnValue = filter.columnValue();
             var value = "_id".equals(columnName) ? new ObjectId(columnValue) : columnValue;
 
-            switch (operator) {
-                case "Equal":
-                    filterList.add(Filters.eq(columnName, value));
-                    break;
-                case "NotEqual":
-                    filterList.add(Filters.ne(columnName, value));
-                    break;
-                case "Less":
-                    filterList.add(Filters.lt(columnName, value));
-                    break;
-                case "Greater":
-                    filterList.add(Filters.gt(columnName, value));
-                    break;
-                case "LessOrEqual":
-                    filterList.add(Filters.lte(columnName, value));
-                    break;
-                case "GreaterOrEqual":
-                    filterList.add(Filters.gte(columnName, value));
-                    break;
-                case "In":
-                    filterList.add(Filters.in(columnName, parseStringToList((String) value)));
-                    break;
-                case "NotIn":
-                    filterList.add(Filters.nin(columnName, parseStringToList((String) value)));
-                    break;
-                case "MatchRegEx":
-                    filterList.add(Filters.regex(columnName, (String) value));
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported operator: " + operator);
-            }
+            BiFunction<String, Object, Bson> filterFunction = MongoDBAlgorithms.OPERATORS.get(operator);
+            filterList.add(filterFunction.apply(columnName, value));
         }
 
         return Filters.and(filterList);
@@ -436,7 +365,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 itemCount++;
             }
 
-            Set<String> propertyNames = getPropertyNames(collection);
+            Set<String> propertyNames = MongoDBAlgorithms.getPropertyNames(collection);
 
             return new DocumentResponse(data, itemCount, propertyNames);
         }
