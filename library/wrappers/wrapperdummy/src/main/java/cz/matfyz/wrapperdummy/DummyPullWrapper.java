@@ -6,7 +6,7 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.DataResponse;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -166,8 +166,8 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("DummyPullWrapper.getKind not implemented.");
     }
 
-    @Override public List<ForeignKey> getForeignKeys(String kindName) {
-        throw new UnsupportedOperationException("DummyPullWrapper.getForeignKeys not implemented.");
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
+        throw new UnsupportedOperationException("DummyPullWrapper.getReferences not implemented.");
     }
 
 }

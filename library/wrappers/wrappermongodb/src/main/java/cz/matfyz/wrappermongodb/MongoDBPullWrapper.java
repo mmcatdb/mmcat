@@ -7,7 +7,7 @@ import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.adminer.DocumentResponse;
 import cz.matfyz.core.adminer.KindNameResponse;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -25,16 +25,17 @@ import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.inference.adminer.MongoDBAlgorithms;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -45,7 +46,6 @@ import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.json.JSONObject;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -260,6 +260,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Retrieves a list of kind names with support for pagination.
+     *
+     * @param limit The maximum number of results to return.
+     * @param offsetString The number of results to skip.
+     * @return A {@link KindNameResponse} containing the list of collection names.
+     * @throws PullForestException if an error occurs while querying the database.
+     */
     @Override public KindNameResponse getKindNames(String limit, String offsetString) {
         try {
             MongoIterable<String> kindNames = provider.getDatabase().listCollectionNames();
@@ -287,21 +295,13 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 		}
     }
 
-    private static void collectProperties(Document document, Set<String> properties, String prefix) {
-        document.forEach((key, value) -> {
-            String field = prefix.isEmpty() ? key : prefix + "." + key;
-            properties.add(field);
-            if (value instanceof Document documentValue)
-                collectProperties(documentValue, properties, field);
-        });
-    }
-
-    private Set<String> getPropertyNames(MongoCollection<Document> collection) {
-        Set<String> properties = new HashSet<>();
-        collection.find().forEach(doc -> collectProperties(doc, properties, ""));
-        return properties;
-    }
-
+    /**
+     * Creates a MongoDB filter based on a list of filters.
+     *
+     * @param filters The list of filters to apply.
+     * @return A {@link Bson} filter object.
+     * @throws UnsupportedOperationException if an unsupported operator is encountered.
+     */
     private Bson createFilter(List<AdminerFilter> filters) {
         List<Bson> filterList = new ArrayList<>();
 
@@ -311,33 +311,23 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             var columnValue = filter.columnValue();
             var value = "_id".equals(columnName) ? new ObjectId(columnValue) : columnValue;
 
-            switch (operator) {
-                case "=":
-                    filterList.add(Filters.eq(columnName, value));
-                    break;
-                case "<>":
-                    filterList.add(Filters.ne(columnName, value));
-                    break;
-                case "<":
-                    filterList.add(Filters.lt(columnName, value));
-                    break;
-                case ">":
-                    filterList.add(Filters.gt(columnName, value));
-                    break;
-                case "<=":
-                    filterList.add(Filters.lte(columnName, value));
-                    break;
-                case ">=":
-                    filterList.add(Filters.gte(columnName, value));
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported operator: " + operator);
+            BiFunction<String, Object, Bson> filterFunction = MongoDBAlgorithms.OPERATORS.get(operator);
+            filterList.add(filterFunction.apply(columnName, value));
         }
+
+        return Filters.and(filterList);
     }
 
-    return Filters.and(filterList);
-}
-
+    /**
+     * Retrieves documents from a collection based on filters, pagination parameters and kind name.
+     *
+     * @param kindName The name of the kind to query.
+     * @param limit The maximum number of results to return.
+     * @param offsetString The number of results to skip.
+     * @param filters The list of filters to apply (optional).
+     * @return A {@link DocumentResponse} containing the retrieved documents, item count, and property names.
+     * @throws PullForestException if an error occurs while querying the database.
+     */
     @Override public DocumentResponse getKind(String kindName, String limit, String offsetString, @Nullable List<AdminerFilter> filters){
         try {
             List<Map<String, Object>> data = new ArrayList<>();
@@ -369,7 +359,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 itemCount++;
             }
 
-            Set<String> propertyNames = getPropertyNames(collection);
+            Set<String> propertyNames = MongoDBAlgorithms.getPropertyNames(collection);
 
             return new DocumentResponse(data, itemCount, propertyNames);
         }
@@ -378,8 +368,16 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override public List<ForeignKey> getForeignKeys(String kindName) {
-        throw new UnsupportedOperationException("MongoDBPullWrapper.getForeignKeys not implemented.");
+    /**
+     * Unsupported method for fetching foreign keys in MongoDB.
+     *
+     * @param datasourceId ID of the datasource.
+     * @param kindName     The name of the kind.
+     * @throws UnsupportedOperationException as this operation is not implemented.
+     */
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
+        // TODO
+        throw new UnsupportedOperationException("MongoDBPullWrapper.getReferences not implemented.");
     }
 
 }

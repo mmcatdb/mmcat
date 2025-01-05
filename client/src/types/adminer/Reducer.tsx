@@ -1,4 +1,5 @@
-import type { PropertyFilter, Operator } from '@/types/adminer/PropertyFilter';
+import type { Operator } from '@/types/adminer/Operators';
+import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { Datasource } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
 import type { Id } from '@/types/id';

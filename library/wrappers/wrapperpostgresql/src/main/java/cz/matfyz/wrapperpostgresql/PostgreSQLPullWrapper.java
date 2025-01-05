@@ -8,7 +8,7 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.TableResponse;
-import cz.matfyz.core.adminer.ForeignKey;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
@@ -18,6 +18,7 @@ import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.inference.adminer.PostgreSQLAlgorithms;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,11 +27,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,6 +151,14 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    /**
+     * Retrieves a list of kind names from the database.
+     *
+     * @param limit  The maximum number of results to return.
+     * @param offset The starting position of the result set.
+     * @return A {@link KindNameResponse} containing a list of kind names.
+     * @throws PullForestException if an error occurs during database access.
+     */
     @Override public KindNameResponse getKindNames(String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
@@ -170,31 +180,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 		}
     }
 
-    private Set<String> getColumnNames(Statement stmt, String kindName) throws SQLException {
-        Set<String> columns = new HashSet<>();
-
-        String query = String.format("""
-            SELECT
-                column_name
-            FROM
-                information_schema.columns
-            WHERE
-                table_schema = 'public'
-                AND table_name = '%s'
-            ORDER BY
-                ordinal_position;
-
-            """, kindName);
-        ResultSet resultSet = stmt.executeQuery(query);
-
-        while (resultSet.next()) {
-            String column = resultSet.getString(1);
-            columns.add(column);
-        }
-
-        return columns;
-    }
-
+    /**
+     * Creates a PostgreSQL WHERE clause from a list of filters.
+     *
+     * @param filters The list of {@link AdminerFilter} objects representing filter conditions.
+     * @return A {@link String} containing the WHERE clause, or an empty string if no filters are provided.
+     */
     private String createWhereClause(List<AdminerFilter> filters) {
         StringBuilder whereClause = new StringBuilder();
 
@@ -211,17 +202,41 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 whereClause.append("AND ");
             }
 
+            String operator = PostgreSQLAlgorithms.OPERATORS.get(filter.operator());
+
             whereClause.append(filter.columnName())
-                       .append(" ")
-                       .append(filter.operator())
-                       .append(" '")
-                       .append(filter.columnValue())
-                       .append("' ");
+                .append(" ")
+                .append(PostgreSQLAlgorithms.OPERATORS.get(filter.operator()));
+
+            if (operator.equals("IN") || operator.equals("NOT IN")) {
+                whereClause
+                    .append(" ")
+                    .append(Arrays.stream(filter.columnValue().split(";"))
+                        .map(String::trim)
+                        .map(value -> "'" + value + "'")
+                        .collect(Collectors.joining(", ", "(", ")")))
+                    .append("");
+            } else if (!PostgreSQLAlgorithms.UNARY_OPERATORS.contains(operator)) {
+                whereClause
+                    .append(" '")
+                    .append(filter.columnValue())
+                    .append("'");
+            }
         }
 
         return whereClause.toString();
     }
 
+    /**
+     * Retrieves data for a specific kind with optional filtering, pagination, and sorting.
+     *
+     * @param kindName The name of the kind to query.
+     * @param limit    The maximum number of rows to return.
+     * @param offset   The starting position of the result set.
+     * @param filter   A list of {@link AdminerFilter} objects representing filter conditions (optional).
+     * @return A {@link TableResponse} containing the kind data, total row count, and column names.
+     * @throws PullForestException if an error occurs during database access.
+     */
     @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
         try(
             Connection connection = provider.getConnection();
@@ -230,6 +245,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             List<Map<String, String>> data = new ArrayList<>();
 
             String whereClause = createWhereClause(filter);
+
             String selectQuery = "SELECT * FROM \"" + kindName +  "\" " + whereClause + " LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(selectQuery);
 
@@ -257,7 +273,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 itemCount = countResultSet.getInt(1);
             }
 
-            Set<String> propertyNames = getColumnNames(stmt, kindName);
+            Set<String> propertyNames = PostgreSQLAlgorithms.getPropertyNames(stmt, kindName);
 
             return new TableResponse(data, itemCount, propertyNames);
         }
@@ -267,66 +283,19 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Retrieves foreign key relationships from the database for the specified kind.
+     * Retrieves a list of references for a specified kind.
      *
-     * @param stmt       The {@link Statement} object used to execute the SQL query.
-     * @param keys       A {@link List} of {@link ForeignKey} objects to which the results will be added.
-     * @param kindName   The name of the kind for which foreign key relationships are to be retrieved.
-     * @param outgoing   A boolean flag indicating the direction of the foreign key relationship:
-     *                   <ul>
-     *                       <li><code>true</code> for outgoing foreign keys (keys where the kind references other kinds).</li>
-     *                       <li><code>false</code> for incoming foreign keys (keys where other kinds reference the kind).</li>
-     *                   </ul>
-     * @return           A {@link List} of {@link ForeignKey} objects representing the foreign key relationships for the specified kind.
-     * @throws SQLException If an SQL error occurs while executing the query or processing the result set.
+     * @param datasourceId ID of the datasource.
+     * @param kindName     The name of the kind for which references are being retrieved.
+     * @return A {@link List} of {@link Reference} objects representing the references of the kind.
+     * @throws PullForestException if an error occurs during database access.
      */
-    private List<ForeignKey> getForeignKeysFromDatabase(Statement stmt, List<ForeignKey> keys, String kindName, boolean outgoing) throws SQLException {
-        String actualKind = outgoing ? "kcu" : "ccu";
-        String foreignKind = outgoing ? "ccu" : "kcu";
-
-        String query = String.format("""
-                SELECT
-                    %s.column_name AS column,
-                    %s.table_name AS foreign_table,
-                    %s.column_name AS foreign_column
-                FROM
-                    information_schema.key_column_usage kcu
-                JOIN
-                    information_schema.referential_constraints rc
-                    ON kcu.constraint_name = rc.constraint_name
-                    AND kcu.table_schema = rc.constraint_schema
-                JOIN
-                    information_schema.constraint_column_usage ccu
-                    ON rc.unique_constraint_name = ccu.constraint_name
-                    AND rc.unique_constraint_schema = ccu.constraint_schema
-                WHERE
-                    kcu.table_schema = 'public'
-                    AND %s.table_name = '%s';
-                """, actualKind, foreignKind, foreignKind, actualKind, kindName);
-        ResultSet result = stmt.executeQuery(query);
-
-        while (result.next()) {
-            String column = result.getString("column");
-            String foreignTable = result.getString("foreign_table");
-            String foreignColumn = result.getString("foreign_column");
-
-            ForeignKey foreignKey = new ForeignKey(foreignTable, column, foreignColumn);
-            keys.add(foreignKey);
-        }
-
-        return keys;
-    }
-
-    @Override public List<ForeignKey> getForeignKeys(String kindName) {
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            List<ForeignKey> foreignKeys = new ArrayList<>();
-            foreignKeys = getForeignKeysFromDatabase(stmt, foreignKeys, kindName, true);
-            foreignKeys = getForeignKeysFromDatabase(stmt, foreignKeys, kindName, false);
-
-            return foreignKeys;
+            return PostgreSQLAlgorithms.getReferences(stmt, datasourceId, kindName);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

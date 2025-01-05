@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataResponse';
-import type { AdminerReference } from '@/types/adminer/AdminerReference';
+import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
 
 type DatabaseDocumentProps = Readonly<{
     fetchedData: DocumentResponse | GraphResponse;
     setItemCount: (itemCount: number) => void;
-    references: AdminerReference | undefined;
+    references: AdminerReferences | undefined;
 }>;
 
 export function DatabaseDocument({ fetchedData, setItemCount, references }: DatabaseDocumentProps) {

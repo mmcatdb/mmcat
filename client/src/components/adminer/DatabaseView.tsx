@@ -3,26 +3,28 @@ import { Spinner, Pagination } from '@nextui-org/react';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
-import { Operator } from '@/types/adminer/PropertyFilter';
 import { View } from '@/types/adminer/View';
 import { api } from '@/api';
 import { useFetchReferences } from './useFetchReferences';
 import { useFetchData } from './useFetchData';
-import type { AdminerState, AdminerStateAction } from '@/types/adminer/Reducer';
+import type { Id } from '@/types/id';
+import type { AdminerState, AdminerStateAction, KindFilterState } from '@/types/adminer/Reducer';
 import type { FetchKindParams } from '@/types/adminer/FetchParams';
+import type { GraphResponse, DataResponse, TableResponse, DocumentResponse } from '@/types/adminer/DataResponse';
+import type { DatasourceType } from '@/types/datasource/Datasource';
 
-function getUrlParams(state: AdminerState, offset: number) {
-    const filterExist = state.active.filters?.some((filter) => {
+function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id, kindName?: string) {
+    const filterExist = active.filters?.some(filter => {
         return filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0;
     });
 
-    const urlParams: FetchKindParams = { datasourceId: state.datasourceId!, kindId: state.kindName!, queryParams: { limit: state.active.limit, offset: offset } };
+    const urlParams: FetchKindParams = { datasourceId: datasourceId!, kindName: kindName!, queryParams: { limit: active.limit, offset: offset } };
 
-    if (state.active.filters && filterExist) {
-        const queryFilters = `${state.active.filters
+    if (active.filters && filterExist) {
+        const queryFilters = `${active.filters
             .map(
-                (filter) =>
-                    filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0 ? `(${filter.propertyName},${Operator[filter.operator as unknown as keyof typeof Operator]},${filter.propertyValue})` : '',
+                filter =>
+                    filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0 ? `(${filter.propertyName},${filter.operator},${filter.propertyValue.replace(/,/g, ';')})` : '',
             )
             .join('')}`;
         urlParams.queryParams.filters = queryFilters;
@@ -33,16 +35,17 @@ function getUrlParams(state: AdminerState, offset: number) {
 
 type DatabaseViewProps = Readonly<{
     state: AdminerState;
+    datasourceType: DatasourceType;
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function DatabaseView({ state, dispatch }: DatabaseViewProps) {
+export function DatabaseView({ state, datasourceType, dispatch }: DatabaseViewProps) {
     const { references, refLoading, refError } = useFetchReferences(state);
 
     const [ currentPage, setCurrentPage ] = useState(1);
-    const [ offset, setOffset ] = useState<number>(0);
-    const [ itemCount, setItemCount ] = useState<number | undefined>();
-    const [ totalPages, setTotalPages ] = useState<number>(1);
+    const [ offset, setOffset ] = useState(0);
+    const [ itemCount, setItemCount ] = useState<number>();
+    const [ totalPages, setTotalPages ] = useState(1);
 
     useEffect(() => {
         if (itemCount)
@@ -55,14 +58,14 @@ export function DatabaseView({ state, dispatch }: DatabaseViewProps) {
     }, [ itemCount, offset, currentPage, totalPages, state.active.limit ]);
 
     const urlParams = useMemo(() => {
-        return getUrlParams(state, offset);
-    }, [ state.active, state.datasourceId, state.kindName, state.view, offset ]);
+        return getUrlParams(offset, state.active, state.datasourceId, state.kindName);
+    }, [ state.active, state.datasourceId, state.kindName, offset ]);
 
     const fetchFunction = useCallback(() => {
-        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindId: urlParams.kindId }, urlParams.queryParams);
+        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindName: urlParams.kindName }, urlParams.queryParams);
     }, [ urlParams ]);
 
-    const { fetchedData, loading, error } = useFetchData(fetchFunction);
+    const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);
 
     useEffect(() => {
         setItemCount(undefined);
@@ -71,7 +74,7 @@ export function DatabaseView({ state, dispatch }: DatabaseViewProps) {
         setOffset(0);
     }, [ state.active, state.datasourceId, state.kindName, state.view ]);
 
-    if (loading || refLoading) {
+    if (!fetchedData || loading || refLoading) {
         return (
             <div className='h-10 flex items-center justify-center'>
                 <Spinner />
@@ -85,15 +88,15 @@ export function DatabaseView({ state, dispatch }: DatabaseViewProps) {
         return <p>{refError}</p>;
 
     return (
-        <div className='mt-5'>
-            <div className='mt-5'>
-                <FilterForm state={state} dispatch={dispatch} propertyNames={fetchedData?.metadata.propertyNames}/>
+        <div>
+            <div className='mb-5'>
+                <FilterForm state={state} datasourceType={datasourceType} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
             </div>
 
             {state.view === View.table ? (
-                <DatabaseTable fetchedData={fetchedData} setItemCount={setItemCount} references={references}/>
+                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} references={references}/>
             ) : (
-                <DatabaseDocument fetchedData={fetchedData} setItemCount={setItemCount} references={references}/>
+                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} references={references}/>
             )}
 
             {itemCount !== undefined && itemCount > 0 && (
@@ -101,7 +104,7 @@ export function DatabaseView({ state, dispatch }: DatabaseViewProps) {
                     <Pagination
                         total={totalPages}
                         page={currentPage}
-                        onChange={(page) => {
+                        onChange={page => {
                             setCurrentPage(page);
                             setOffset(state.active.limit * (page - 1));
                         }}
