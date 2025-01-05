@@ -82,3 +82,8 @@ export type FormPosition = { x: FormNumber, y: FormNumber };
 export function toPosition(value: FormPosition): Position {
     return { x: toNumber(value.x), y: toNumber(value.y) };
 }
+
+/** Comparison of only ascii-like strings. */
+export function compareStringsAscii(a: string, b: string): number {
+    return a < b ? -1 : (a > b ? 1 : 0);
+}

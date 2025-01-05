@@ -1,5 +1,5 @@
 import { type Dispatch, type MouseEvent as ReactMouseEvent } from 'react';
-import { computeCoordinates, computeEdgeStyle, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
+import { computeCoordinates, computeEdgePath, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getEdgeDegree, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
 
 export type GraphInput = {
     nodes: Node[];
@@ -161,12 +161,12 @@ export class GraphEngine {
         Object.assign(ref.style, computeNodeStyle(node, this.state.coordinates));
 
         const { from, to } = this.edgeMap.getEdgesForNode(node.id);
-        [ ...from, ...to ].forEach(edge => this.propagateEdge(edge));
+        EdgeMap.bundleEdges([ ...from, ...to ]).forEach(bundle => bundle.forEach((edge, index) => this.propagateEdge(edge, index, bundle.length)));
     }
 
-    private readonly edgeRefs = new Map<string, HTMLElement>();
+    private readonly edgeRefs = new Map<string, SVGPathElement>();
 
-    setEdgeRef(edgeId: string, ref: HTMLElement | null) {
+    setEdgeRef(edgeId: string, ref: SVGPathElement | null) {
         if (!ref) {
             console.log('DELETE edge ref');
             this.edgeRefs.delete(edgeId);
@@ -177,7 +177,7 @@ export class GraphEngine {
         }
     }
 
-    private propagateEdge(edge: Edge) {
+    private propagateEdge(edge: Edge, index: number, total: number) {
         const ref = this.edgeRefs.get(edge.id);
         if (!ref) {
             console.warn(`Edge ref ${edge.id} not found in propagateEdge.`);
@@ -187,7 +187,8 @@ export class GraphEngine {
         const from = this.nodeMap.get(edge.from)!;
         const to = this.nodeMap.get(edge.to)!;
 
-        Object.assign(ref.style, computeEdgeStyle(from, to, this.state.coordinates));
+        const path = computeEdgePath(from, to, getEdgeDegree(edge, index, total), this.state.coordinates);
+        ref.setAttribute('d', path);
     }
 
     private selectionBoxRef?: HTMLElement;

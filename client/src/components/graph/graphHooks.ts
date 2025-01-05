@@ -1,6 +1,6 @@
 import { createContext, type MouseEvent, useCallback, useContext, useMemo, useRef } from 'react';
 import { type ReactiveGraphState, type GraphEngine, type GraphInput } from './graphEngine';
-import { computeEdgeStyle, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
+import { computeEdgePath, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
 
 type GraphContext = {
     engine: GraphEngine;
@@ -72,12 +72,12 @@ export function useNode(node: Node) {
     };
 }
 
-export function useEdge(edge: Edge, graph: GraphInput) {
+export function useEdge(edge: Edge, degree: number, graph: GraphInput) {
     const { state, engine } = useGraphContext();
-    const ref = useRef<HTMLElement | null>(null);
+    const ref = useRef<SVGPathElement | null>(null);
 
     const edgeId = edge.id;
-    const setEdgeRef = useCallback((element: HTMLElement | null) => {
+    const setEdgeRef = useCallback((element: SVGPathElement | null) => {
         if (ref.current !== element)
             engine.setEdgeRef(edgeId, element);
 
@@ -94,7 +94,7 @@ export function useEdge(edge: Edge, graph: GraphInput) {
 
     return {
         setEdgeRef,
-        style: computeEdgeStyle(cache.from, cache.to, state.coordinates),
+        path: computeEdgePath(cache.from, cache.to, degree, state.coordinates),
         isHoverAllowed,
     };
 }

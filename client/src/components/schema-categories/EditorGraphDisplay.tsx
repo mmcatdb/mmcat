@@ -1,10 +1,11 @@
-import { type ReactNode, type MouseEvent } from 'react';
+import { type ReactNode, type MouseEvent, useMemo } from 'react';
 import { cn } from '../utils';
 import { type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
+import { EdgeMap, getEdgeDegree } from '../graph/graphUtils';
 
 type EditorGraphDisplayProps = Readonly<{
     state: EditCategoryState;
@@ -14,15 +15,19 @@ type EditorGraphDisplayProps = Readonly<{
 }>;
 
 export function EditorGraphDisplay({ state, dispatch, options, className }: EditorGraphDisplayProps) {
+    const bundledEdges = useMemo(() => EdgeMap.bundleEdges([ ...(new EdgeMap(state.graph.edges)).values() ]), [ state.graph.edges ]);
+
     return (
         <GraphProvider dispatch={dispatch} graph={state.graph} options={options}>
             <CanvasDisplay className={className}>
                 {state.graph.nodes.map(node => (
                     <NodeDisplay key={node.id} node={node} state={state} dispatch={dispatch} />
                 ))}
-                {state.graph.edges.map(edge => (
-                    <EdgeDisplay key={edge.id} edge={edge} state={state} dispatch={dispatch} />
-                ))}
+                <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='absolute w-full h-full pointer-events-none'>
+                    {bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
+                        <EdgeDisplay key={edge.id} edge={edge} degree={getEdgeDegree(edge, index, bundle.length)} state={state} dispatch={dispatch} />
+                    )))}
+                </svg>
                 <SelectionBox />
             </CanvasDisplay>
         </GraphProvider>
@@ -40,7 +45,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     return (
         <div
             ref={setCanvasRef}
-            className={cn('relative bg-slate-400 overflow-hidden focus:bg-red-300 focus-visible:bg-green-300', isDragging ? 'cursor-grabbing' : 'cursor-default', className)}
+            className={cn('relative bg-slate-400 overflow-hidden', isDragging ? 'cursor-grabbing' : 'cursor-default', className)}
             onMouseDown={onMouseDown}
         >
             {children}
@@ -92,32 +97,34 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
 
 type EdgeDisplayProps = Readonly<{
     edge: CategoryEdge;
+    degree: number;
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
 }>;
 
-function EdgeDisplay({ edge, state, dispatch }: EdgeDisplayProps) {
-    const { setEdgeRef, style, isHoverAllowed } = useEdge(edge, state.graph);
+function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
+    const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);
 
     const isSelected = state.selectedEdgeIds.has(edge.id);
 
-    function onClick(event: MouseEvent<HTMLElement>) {
+    function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();
         const isSpecialKey = event.ctrlKey || event.ctrlKey;
         dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
     }
 
-    // FIXME display multiple edges ...
-
     return (
-        <div
+        <path
             ref={setEdgeRef}
-            className={cn('absolute h-1 bg-slate-700 rounded-full select-none',
-                isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300',
-                isSelected && 'bg-cyan-600',
-            )}
-            style={style}
             onClick={onClick}
+            d={path}
+            stroke='currentColor'
+            strokeWidth='4'
+            strokeLinejoin='round'
+            className={cn('text-slate-600',
+                isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 pointer-events-auto path-shadow',
+                isSelected && 'text-cyan-600',
+            )}
         />
     );
 }
