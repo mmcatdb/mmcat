@@ -60,7 +60,12 @@ export function DatabaseTable({ fetchedData, setItemCount, references, datasourc
                                         <TableCell key={column}>
                                             {references && referencedProperties.includes(column) ? (
                                                 getLinkReferences(references, column).map((ref, index) => (
-                                                    <Link key={index} href={getHrefFromReference(ref, item, column, datasources)}>
+                                                    <Link
+                                                        key={index}
+                                                        href={getHrefFromReference(ref, item, column, datasources)}
+                                                        underline='hover'
+                                                        className='mr-2'
+                                                    >
                                                         {formatCellValue(item[column])}
                                                     </Link>
                                                 ))
