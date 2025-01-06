@@ -40,7 +40,7 @@ type DatabaseViewProps = Readonly<{
 }>;
 
 export function DatabaseView({ state, datasourceType, dispatch }: DatabaseViewProps) {
-    const { references, refLoading, refError } = useFetchReferences(state);
+    const { references, referencesLoading } = useFetchReferences(state);
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ offset, setOffset ] = useState(0);
@@ -74,7 +74,7 @@ export function DatabaseView({ state, datasourceType, dispatch }: DatabaseViewPr
         setOffset(0);
     }, [ state.active, state.datasourceId, state.kindName, state.view ]);
 
-    if (!fetchedData || loading || refLoading) {
+    if (!fetchedData || loading || referencesLoading) {
         return (
             <div className='h-10 flex items-center justify-center'>
                 <Spinner />
@@ -84,8 +84,6 @@ export function DatabaseView({ state, datasourceType, dispatch }: DatabaseViewPr
 
     if (error)
         return <p>{error}</p>;
-    if (refError)
-        return <p>{refError}</p>;
 
     return (
         <div>
