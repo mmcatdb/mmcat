@@ -1,7 +1,11 @@
 import { View } from '@/types/adminer/View';
-import type { AdminerState, KindFilterState } from '@/types/adminer/Reducer';
+import { Operator } from '@/types/adminer/Operators';
+import type { Datasource } from '@/types/datasource/Datasource';
+import type { ActiveAdminerState, AdminerState, KindFilterState } from '@/types/adminer/Reducer';
+import type { AdminerReference } from '@/types/adminer/AdminerReferences';
+import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 
-export function getURLParamsFromState(state: AdminerState): URLSearchParams {
+export function getURLParamsFromState(state: AdminerState | ActiveAdminerState): URLSearchParams {
     const params = new URLSearchParams();
 
     params.set('active', JSON.stringify(state.active));
@@ -12,6 +16,29 @@ export function getURLParamsFromState(state: AdminerState): URLSearchParams {
     params.set('view', state.view);
 
     return params;
+}
+
+export function getHrefFromReference(reference: AdminerReference, item: Record<string, unknown>, column: string, datasources: Datasource[]): string {
+    const state: ActiveAdminerState = {
+        active: {
+            limit: 50,
+            filters: [
+                {
+                    id: 0,
+                    propertyName: reference.referencingProperty,
+                    operator: Operator.Equal,
+                    propertyValue: item[column] as string,
+                },
+            ],
+        },
+        datasourceId: reference.datasourceId,
+        kindName: reference.referencingKindName,
+        view: AVAILABLE_VIEWS[datasources.find(source => source.id === reference.datasourceId)!.type][0],
+    };
+
+    const urlParams = getURLParamsFromState(state);
+
+    return `adminer?${urlParams.toString()}`;
 }
 
 export function getStateFromURLParams(params: URLSearchParams): AdminerState {

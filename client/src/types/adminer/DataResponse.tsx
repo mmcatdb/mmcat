@@ -1,12 +1,16 @@
 export type DataResponse = TableResponse | DocumentResponse | GraphResponse;
 
+export type KindNameResponse = {
+    data: string[];
+}
+
 export type TableResponse = {
     metadata: {
         itemCount: number;
         propertyNames: string[] | undefined;
         [key: string]: unknown;
     };
-    data: string[];
+    data: Record<string, string>[];
 };
 
 export type DocumentResponse = {
@@ -24,8 +28,10 @@ export type GraphResponse = {
         propertyNames: string[] | undefined;
         [key: string]: unknown;
     };
-    data: {
-        properties: Record<string, unknown>;
-        [key: string]: unknown;
-    }[];
+    data: GraphResponseData[];
+};
+
+export type GraphResponseData = {
+    properties: Record<string, unknown>;
+    [key: string]: unknown;
 };

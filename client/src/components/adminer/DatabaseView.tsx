@@ -11,7 +11,7 @@ import type { Id } from '@/types/id';
 import type { AdminerState, AdminerStateAction, KindFilterState } from '@/types/adminer/Reducer';
 import type { FetchKindParams } from '@/types/adminer/FetchParams';
 import type { GraphResponse, DataResponse, TableResponse, DocumentResponse } from '@/types/adminer/DataResponse';
-import type { DatasourceType } from '@/types/datasource/Datasource';
+import type { Datasource } from '@/types/datasource/Datasource';
 
 function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id, kindName?: string) {
     const filterExist = active.filters?.some(filter => {
@@ -35,11 +35,11 @@ function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id
 
 type DatabaseViewProps = Readonly<{
     state: AdminerState;
-    datasourceType: DatasourceType;
+    datasources: Datasource[];
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
-export function DatabaseView({ state, datasourceType, dispatch }: DatabaseViewProps) {
+export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps) {
     const { references, referencesLoading } = useFetchReferences(state);
 
     const [ currentPage, setCurrentPage ] = useState(1);
@@ -88,13 +88,13 @@ export function DatabaseView({ state, datasourceType, dispatch }: DatabaseViewPr
     return (
         <div>
             <div className='mb-5'>
-                <FilterForm state={state} datasourceType={datasourceType} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
+                <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
             </div>
 
             {state.view === View.table ? (
-                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} references={references}/>
+                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} references={references} datasources={datasources}/>
             ) : (
-                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} references={references}/>
+                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} references={references} datasources={datasources}/>
             )}
 
             {itemCount !== undefined && itemCount > 0 && (

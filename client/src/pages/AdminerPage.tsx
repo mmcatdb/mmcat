@@ -67,7 +67,7 @@ export function AdminerPage() {
 
             {datasource && state.kindName && typeof state.kindName === 'string' &&(
                 <div className='mt-5'>
-                    <DatabaseView state={state} datasourceType={datasource.type} dispatch={dispatch}/>
+                    <DatabaseView state={state} datasources={allDatasources} dispatch={dispatch}/>
                 </div>
             )}
         </div>

@@ -9,8 +9,11 @@ export type KindFilterState = {
     filters: PropertyFilter[];
 }
 
-export type AdminerState = {
+export type AdminerState = ActiveAdminerState & {
     form: KindFilterState;
+};
+
+export type ActiveAdminerState = {
     active: KindFilterState;
     datasourceId?: Id;
     kindName?: string;

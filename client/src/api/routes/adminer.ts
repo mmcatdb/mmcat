@@ -1,10 +1,10 @@
 import { GET } from '../routeFunctions';
 import type { StringLike, QueryParams } from '@/types/api/routes';
-import type { TableResponse, DataResponse } from '@/types/adminer/DataResponse';
+import type { DataResponse, KindNameResponse } from '@/types/adminer/DataResponse';
 import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
 
 const adminer = {
-    getKindNames: GET<{ datasourceId: StringLike }, TableResponse>(
+    getKindNames: GET<{ datasourceId: StringLike }, KindNameResponse>(
         u => `/adminer/${u.datasourceId}`,
     ),
     getKind: GET<{ datasourceId: StringLike, kindName: StringLike }, DataResponse, QueryParams>(
