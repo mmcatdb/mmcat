@@ -11,7 +11,7 @@ import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/infe
 import type { InferenceJobData } from '@/types/inference/InferenceJobData';
 import type { LayoutType } from '@/types/inference/layoutType';
 import { useSchemaCategoryInfo } from '@/utils/injects';
-import { Key } from '@/types/identifiers';
+import type { Key } from '@/types/identifiers';
 import type { Position } from 'cytoscape';
 import JobPayloadDisplay from './JobPayloadDisplay.vue';
 

@@ -56,8 +56,7 @@ class TempTests {
     private static List<Mapping> defineKinds(DefaultControlWrapperProvider provider, List<TestDatasource<?>> testDatasources) {
         return testDatasources.stream()
             .flatMap(testDatasource -> {
-                final var datasource = new Datasource(testDatasource.type, testDatasource.id);
-                provider.setControlWrapper(datasource, testDatasource.wrapper);
+                provider.setControlWrapper(testDatasource.datasource(), testDatasource.wrapper);
                 return testDatasource.mappings.stream();
             })
             .toList();

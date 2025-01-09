@@ -69,18 +69,17 @@ public abstract class MapMongoRecord {
 
     private static ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        Set<Object> visited = new HashSet<>();
+        RecordSchemaDescription firstElement = null;
 
         for (Object value : t1) {
-            if (value == null) {
-                children.add(process(RecordSchemaDescription.ROOT_SYMBOL, value, true, true));
-            } else if (visited.stream().anyMatch(v -> value.getClass().isInstance(v))) {
-                children.add(process(RecordSchemaDescription.ROOT_SYMBOL, value, true, false));
-            } else {
-                visited.add(value);
-                children.add(process(RecordSchemaDescription.ROOT_SYMBOL, value, true, true));
-            }
+            RecordSchemaDescription currentElement = process(RecordSchemaDescription.ROOT_SYMBOL, value, true, firstElement == null);
 
+            if (firstElement == null) {
+                firstElement = currentElement;
+                children.add(currentElement);
+            } else if (firstElement.compareTo(currentElement) != 0) {
+                children.add(currentElement);
+            }
         }
 
         return children;

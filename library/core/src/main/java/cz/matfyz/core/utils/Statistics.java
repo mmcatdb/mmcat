@@ -102,8 +102,8 @@ public abstract class Statistics {
     }
 
     public enum Interval {
-        MTC_ALGORIGHM,
-        CTM_ALGORIGHM,
+        MTC_ALGORITHM,
+        CTM_ALGORITHM,
         DATABASE_TO_INSTANCE,
         INSTANCE_TO_DATABASE,
         JOIN,

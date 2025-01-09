@@ -1,0 +1,8 @@
+{{ $url := .Get "url" }}
+{{ $label := .Get "label" }}
+
+<div style="text-align: center;">
+    <a href="{{ $url }}" target="_blank" class="btn btn-large">
+        {{ $label }}
+    </a>
+</div>

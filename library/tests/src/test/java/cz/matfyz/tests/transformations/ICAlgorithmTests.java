@@ -16,8 +16,9 @@ class ICAlgorithmTests {
             .primaryMapping(PostgreSQL.order(schema))
             .expected("""
                 [
+                    "clear()",
                     "appendIdentifier(order, [ number ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -29,8 +30,9 @@ class ICAlgorithmTests {
             .primaryMapping(PostgreSQL.item(schema))
             .expected("""
                 [
+                    "clear()",
                     "appendIdentifier(order_item, [ order_number, product_id ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -43,9 +45,10 @@ class ICAlgorithmTests {
             .otherMappings(PostgreSQL.order(schema))
             .expected("""
                 [
+                    "clear()",
                     "appendIdentifier(order_item, [ order_number, product_id ])",
                     "appendReference(order_item, order, [ (order_number, number) ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -58,10 +61,11 @@ class ICAlgorithmTests {
             .otherMappings(PostgreSQL.order(schema), PostgreSQL.product(schema))
             .expected("""
                 [
+                    "clear()",
                     "appendIdentifier(order_item, [ order_number, product_id ])",
                     "appendReference(order_item, product, [ (product_id, id) ])",
                     "appendReference(order_item, order, [ (order_number, number) ])",
-                    "createICStatement()"
+                    "createICStatements()"
                 ]
             """)
             .run();
@@ -84,7 +88,7 @@ class ICAlgorithmTests {
 
     // [
     //     "appendIdentifier(order_v3, [ id ])",
-    //     "createICStatement()"
+    //     "createICStatements()"
     // ]
 
 }

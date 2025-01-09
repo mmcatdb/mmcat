@@ -67,7 +67,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
             final var statements = Stream.of(script.split(";\\s*\n"))
                 .map(String::strip)
                 .filter(s -> !s.isBlank())
-                .map(s -> (AbstractStatement) new StringStatement(s))
+                .map(s -> (AbstractStatement) StringStatement.create(s))
                 .toList();
 
             execute(statements);

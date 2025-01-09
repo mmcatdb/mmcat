@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 /**
@@ -62,8 +64,9 @@ public class InferenceEditorUtils {
     /**
      * Creates and adds a new morphism to the schema and metadata.
      */
-    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, boolean isDual) {
-        Signature signature = getNewSignatureValue(schema);
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, boolean isDual, @Nullable Signature signature) {
+        if (signature == null)
+            signature = getNewSignatureValue(schema);
 
         if (isDual)
             signature = signature.dual();
@@ -80,7 +83,14 @@ public class InferenceEditorUtils {
      * Creates and adds a new morphism to the schema and metadata.
      */
     public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod) {
-        return createAndAddMorphism(schema, metadata, dom, cod, false);
+        return createAndAddMorphism(schema, metadata, dom, cod, false, null);
+    }
+
+    /**
+     * Creates and adds a new morphism to the schema and metadata.
+     */
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, @Nullable Signature signature) {
+        return createAndAddMorphism(schema, metadata, dom, cod, false, signature);
     }
 
     /**
@@ -120,6 +130,30 @@ public class InferenceEditorUtils {
 
         schema.addObject(objectToAdd);
         metadata.setObject(objectToAdd, new MetadataObject(metadataToDelete.label, metadataToDelete.position));
+    }
+
+    /**
+     * Updates metadata by deleting a specified metadata object and adding a new metadata object in its place with changed label.
+     */
+    public static void updateMetadataObjectsLabel(SchemaObject object, MetadataCategory metadata, String newLabel) {
+        MetadataObject metadataToDelete = metadata.getObject(object);
+        metadata.setObject(object, new MetadataObject(newLabel, metadataToDelete.position));
+    }
+
+    /**
+     * Finds Signature for a morphism between specified domain and codomain.
+     */
+    public static Signature findSignatureBetween(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
+            if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
+                return morphism.signature();
+        }
+        throw new NotFoundException("Signature between objects: " + dom + " and " + cod + " has not been found");
+    }
+
+    public static String findLabelFromKey(Key key, MetadataCategory metadata) {
+        MetadataObject metadataObject = metadata.getObject(key);
+        return metadataObject.label;
     }
 
     /**

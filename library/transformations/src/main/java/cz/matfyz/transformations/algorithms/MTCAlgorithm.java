@@ -8,13 +8,11 @@ import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
-import cz.matfyz.core.record.IComplexRecord;
 import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.record.SimpleRecord;
-import cz.matfyz.core.record.SimpleValueRecord;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueIdGenerator;
@@ -32,11 +30,15 @@ public class MTCAlgorithm {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
 
-    private ForestOfRecords forest;
-    private Mapping mapping;
-    private InstanceCategory instance;
+    public static void run(Mapping mapping, InstanceCategory instance, ForestOfRecords forest) {
+        new MTCAlgorithm(mapping, instance, forest).run();
+    }
 
-    public void input(Mapping mapping, InstanceCategory instance, ForestOfRecords forest) {
+    private final ForestOfRecords forest;
+    private final Mapping mapping;
+    private final InstanceCategory instance;
+
+    private MTCAlgorithm(Mapping mapping, InstanceCategory instance, ForestOfRecords forest) {
         this.forest = forest;
         this.mapping = mapping;
         this.instance = instance;
@@ -44,9 +46,13 @@ public class MTCAlgorithm {
 
     private final UniqueIdGenerator idGenerator = UniqueIdGenerator.create();
 
-    public void algorithm() {
+    private void run() {
         LOGGER.debug("Model To Category algorithm");
-        final ComplexProperty rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
+        final ComplexProperty rootAccessPath = mapping.accessPath()
+            // The auxiliary nodes are merged with their parents during the pull forest algorithm.
+            .copyWithoutAuxiliaryNodes()
+            // The dynamic names are replaced by a complex records with name and value properties during the pull forest algorithm.
+            .copyWithoutDynamicNames().path();
 
         // Create references for adding found values to the superId of other rows.
         instance.createReferences();
@@ -57,7 +63,7 @@ public class MTCAlgorithm {
     private void processRootRecord(RootRecord rootRecord, ComplexProperty rootAccessPath) {
         LOGGER.debug("Process a root record:\n{}", rootRecord);
 
-        Deque<StackTriple> masterStack = createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath);
+        final Deque<StackTriple> masterStack = createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath);
 
         // processing of the tree
         while (!masterStack.isEmpty())
@@ -65,15 +71,15 @@ public class MTCAlgorithm {
     }
 
     private Deque<StackTriple> createStackWithObject(SchemaObject object, RootRecord rootRecord, ComplexProperty rootAccessPath) {
-        InstanceObject instanceObject = instance.getObject(object);
+        final InstanceObject instanceObject = instance.getObject(object);
         // If the root object has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root object always is).
-        SuperIdWithValues superId = object.ids().isGenerated()
+        final SuperIdWithValues superId = object.ids().isGenerated()
             ? SuperIdWithValues.fromEmptySignature(idGenerator.next())
             : fetchSuperId(object.superId(), rootRecord);
 
-        Deque<StackTriple> masterStack = new ArrayDeque<>();
+        final Deque<StackTriple> masterStack = new ArrayDeque<>();
 
-        DomainRow row = instanceObject.getOrCreateRow(superId);
+        final DomainRow row = instanceObject.getOrCreateRow(superId);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
 
         return masterStack;
@@ -83,27 +89,20 @@ public class MTCAlgorithm {
     private static SuperIdWithValues fetchSuperId(SignatureId superId, RootRecord rootRecord) {
         final var builder = new SuperIdWithValues.Builder();
 
-        for (Signature signature : superId.signatures()) {
-            /*
-            Object value = rootRecord.values().get(signature).getValue();
-            if (value instanceof String stringValue)
-                builder.add(signature, stringValue);
-            */
-            SimpleRecord<?> simpleRecord = rootRecord.findSimpleRecord(signature);
-            if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
-                builder.add(signature, simpleValueRecord.getValue().toString());
-            // else
-            //     throw InvalidStateException.simpleRecordIsNotValue(simpleRecord);
+        for (final Signature signature : superId.signatures()) {
+            for (final SimpleRecord<?> simpleRecord : rootRecord.findSimpleRecords(signature))
+                builder.add(signature, simpleRecord.getValue().toString());
         }
 
         return builder.build();
     }
 
     private void processTopOfStack(Deque<StackTriple> masterStack) {
-        StackTriple triple = masterStack.pop();
+        final StackTriple triple = masterStack.pop();
+        LOGGER.debug("Process top of stack:\n{}", triple);
         final var superIds = SuperIdsFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
-        InstanceObject childInstance = instance.getObject(triple.parentToChild.to());
+        final InstanceObject childInstance = instance.getObject(triple.parentToChild.to());
 
         for (final var superId : superIds) {
             DomainRow childRow = childInstance.getOrCreateRow(superId.superId());
@@ -115,7 +114,7 @@ public class MTCAlgorithm {
         }
     }
 
-    private DomainRow addRelation(SchemaPath path, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {
+    private DomainRow addRelation(SchemaPath path, DomainRow parentRow, DomainRow childRow, ComplexRecord childRecord) {
         // First, create a domain row with technical id for each object between the domain and the codomain objects on the path of the morphism.
         var currentDomainRow = parentRow;
 
@@ -148,18 +147,18 @@ public class MTCAlgorithm {
         //return merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
     }
 
-    private SuperIdWithValues fetchSuperIdForTechnicalRow(SchemaObject object, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, IComplexRecord parentRecord) {
-        var builder = new SuperIdWithValues.Builder();
+    private SuperIdWithValues fetchSuperIdForTechnicalRow(SchemaObject object, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
+        final var builder = new SuperIdWithValues.Builder();
 
-        for (var signature : object.superId().signatures()) {
+        for (final var signature : object.superId().signatures()) {
             // The value is in either the first row ...
-            var signatureInFirstRow = signature.traverseAlong(pathToParent);
+            final var signatureInFirstRow = signature.traverseAlong(pathToParent);
             if (parentRow.hasSignature(signatureInFirstRow)) {
                 builder.add(signature, parentRow.getValue(signatureInFirstRow));
                 continue;
             }
 
-            var signatureInLastRow = signature.traverseAlong(pathToChild);
+            final var signatureInLastRow = signature.traverseAlong(pathToChild);
             if (childRow.hasSignature(signatureInLastRow))
                 builder.add(signature, childRow.getValue(signatureInLastRow));
 
@@ -171,8 +170,8 @@ public class MTCAlgorithm {
 
     private record Child(Signature signature, AccessPath property) {}
 
-    private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, IComplexRecord complexRecord) {
-        if (!(path instanceof ComplexProperty complexPath))
+    private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, ComplexRecord complexRecord) {
+        if (!(path instanceof final ComplexProperty complexPath))
             return;
 
         for (final Child child : children(complexPath)) {
@@ -193,12 +192,8 @@ public class MTCAlgorithm {
     private static Collection<Child> children(ComplexProperty complexProperty) {
         final List<Child> output = new ArrayList<>();
 
-        for (final AccessPath subpath : complexProperty.subpaths()) {
-            if (subpath.name() instanceof DynamicName dynamicName)
-                output.add(new Child(dynamicName.signature(), ComplexProperty.createEmpty()));
-
+        for (final AccessPath subpath : complexProperty.subpaths())
             output.add(new Child(subpath.signature(), subpath));
-        }
 
         return output;
     }

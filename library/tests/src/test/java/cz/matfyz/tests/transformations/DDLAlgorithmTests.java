@@ -20,10 +20,11 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(order)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)"
+                    "addProperty(number, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -40,14 +41,15 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(address)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexProperty(address, true)",
-                    "addSimpleProperty(address/street, true)",
-                    "addSimpleProperty(address/city, true)",
-                    "addSimpleProperty(address/zip, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(address, complex, required)",
+                    "addProperty(address/street, simple, required)",
+                    "addProperty(address/city, simple, required)",
+                    "addProperty(address/zip, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -64,11 +66,12 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(tag)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addSimpleArrayProperty(tags, false)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(tags[], simple, optional)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -91,15 +94,16 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(orderItem)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexArrayProperty(items, false)",
-                    "addSimpleProperty(items/id, true)",
-                    "addSimpleProperty(items/label, false)",
-                    "addSimpleProperty(items/price, false)",
-                    "addSimpleProperty(items/quantity, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(items[], complex, optional)",
+                    "addProperty(items[]/id, simple, required)",
+                    "addProperty(items[]/label, simple, optional)",
+                    "addProperty(items[]/price, simple, optional)",
+                    "addProperty(items[]/quantity, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -118,12 +122,13 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(contact)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexProperty(contact, false)",
-                    "addSimpleProperty(contact/*, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(contact, complex, required)",
+                    "addProperty(contact/(cellphone|email|skype), simple, optional)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -140,11 +145,13 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(customer)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(customer/number, true)",
-                    "addSimpleProperty(customer/name, true)"
+                    "addProperty(customer, complex, required)",
+                    "addProperty(customer/number, simple, required)",
+                    "addProperty(customer/name, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -161,14 +168,15 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(address)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexProperty(address, true)",
-                    "addSimpleProperty(address/street, true)",
-                    "addSimpleProperty(address/city, true)",
-                    "addSimpleProperty(address/zip, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(address, complex, required)",
+                    "addProperty(address/street, simple, required)",
+                    "addProperty(address/city, simple, required)",
+                    "addProperty(address/zip, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -183,14 +191,15 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(address)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexProperty(address, true)",
-                    "addSimpleProperty(address/street, true)",
-                    "addSimpleProperty(address/city, true)",
-                    "addSimpleProperty(address/zip, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(address, complex, required)",
+                    "addProperty(address/street, simple, required)",
+                    "addProperty(address/city, simple, required)",
+                    "addProperty(address/zip, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -205,15 +214,16 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(orderItem)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexArrayProperty(items, false)",
-                    "addSimpleProperty(items/id, true)",
-                    "addSimpleProperty(items/label, false)",
-                    "addSimpleProperty(items/price, false)",
-                    "addSimpleProperty(items/quantity, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(items[], complex, optional)",
+                    "addProperty(items[]/id, simple, required)",
+                    "addProperty(items[]/label, simple, optional)",
+                    "addProperty(items[]/price, simple, optional)",
+                    "addProperty(items[]/quantity, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -232,14 +242,15 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(note)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexProperty(note, false)",
-                    "addComplexProperty(note/*, true)",
-                    "addSimpleProperty(note/*/subject, true)",
-                    "addSimpleProperty(note/*/content, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(note, complex, required)",
+                    "addProperty(note/(cs-CZ|en-GB|en-US), complex, optional)",
+                    "addProperty(note/(cs-CZ|en-GB|en-US)/subject, simple, required)",
+                    "addProperty(note/(cs-CZ|en-GB|en-US)/content, simple, required)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -262,15 +273,39 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
+                    "clear()",
                     "setKindName(orderItem)",
                     "isSchemaless()",
-                    "createDDLStatement()",
-                    "addSimpleProperty(number, true)",
-                    "addComplexArrayProperty(items, false)",
-                    "addSimpleProperty(items/id, true)",
-                    "addSimpleProperty(items/label, false)",
-                    "addSimpleProperty(items/price, false)",
-                    "addSimpleProperty(items/quantity, true)"
+                    "addProperty(number, simple, required)",
+                    "addProperty(items[], complex, optional)",
+                    "addProperty(items[]/id, simple, required)",
+                    "addProperty(items[]/label, simple, optional)",
+                    "addProperty(items[]/price, simple, optional)",
+                    "addProperty(items[]/quantity, simple, required)",
+                    "createDDLStatement()"
+                ]
+            """)
+            .run();
+    }
+
+    @Test
+    void dynamicNamesTest() {
+        new DDLAlgorithmTestBase(PostgreSQL.dynamic(schema))
+            .instance(builder -> {
+                PostgreSQL.addDynamic(builder, 0);
+                PostgreSQL.addDynamic(builder, 1);
+            })
+            .expected("""
+                [
+                    "clear()",
+                    "setKindName(dynamic)",
+                    "isSchemaless()",
+                    "addProperty(id, simple, required)",
+                    "addProperty(label, simple, required)",
+                    "addProperty((px_a|px_b), simple, optional)",
+                    "addProperty((py_a|py_b), simple, optional)",
+                    "addProperty((catch_all_a|catch_all_b), simple, optional)",
+                    "createDDLStatement()"
                 ]
             """)
             .run();
@@ -294,11 +329,12 @@ class DDLAlgorithmTests {
     // }
 
     // [
+    //     "clear()",
     //     "setKindName(order_v3)",
     //     "isSchemaless()",
-    //     "createDDLStatement()",
-    //     "addSimpleProperty(id, true)",
-    //     "addSimpleProperty(number, true)"
+    //     "addProperty(id, simple, required)",
+    //     "addProperty(number, simple, required)",
+    //     "createDDLStatement()"
     // ]
 
 }

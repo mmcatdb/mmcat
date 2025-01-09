@@ -6,7 +6,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useRoute } from 'vue-router';
 import { tryUseWorkflow } from '@/utils/injects';
-import { type WorkflowData } from '@/types/workflow';
+import type { WorkflowData } from '@/types/workflow';
 
 const props = defineProps<{
     datasource?: Datasource;

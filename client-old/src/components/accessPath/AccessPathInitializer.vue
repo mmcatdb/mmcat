@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, provide, ref, shallowRef } from 'vue';
-import { GraphRootProperty } from '@/types/accessPath/graph';
+import type { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId } from '@/types/identifiers';
-import { type Graph } from '@/types/categoryGraph';
+import type { Graph } from '@/types/categoryGraph';
 import { useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute } from 'vue-router';
@@ -120,7 +120,9 @@ function setToDefault() {
                 v-if="initializeType === 'default'" 
                 class="editor"
             >
-                <h5>Select Mapping initialization:</h5>
+                <h5 style="text-align: center;">
+                    Select Mapping Initialization
+                </h5>
                 <div 
                     class="button-row"
                 >

@@ -166,6 +166,16 @@ public class Signature implements Serializable, Comparable<Signature> {
         return false;
     }
 
+    public Signature longestCommonPrefix(Signature other) {
+        final int maxLength = Math.min(ids.length, other.ids.length);
+        for (int i = 0; i < maxLength; i++) {
+            if (ids[i] != other.ids[i])
+                return createComposite(Arrays.copyOfRange(ids, 0, i));
+        }
+
+        return createComposite(Arrays.copyOfRange(ids, 0, maxLength));
+    }
+
     public Signature dual() {
         int n = ids.length;
         if (n == 0)

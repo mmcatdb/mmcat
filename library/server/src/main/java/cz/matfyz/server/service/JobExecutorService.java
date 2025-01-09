@@ -211,9 +211,6 @@ public class JobExecutorService {
         for (final Mapping mapping : mappings)
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
 
-        System.out.println("instance after");
-        System.out.println(instance);
-
         if (instance != null)
             instanceService.saveCategory(run.sessionId, run.categoryId, instance);
     }
@@ -238,35 +235,29 @@ public class JobExecutorService {
 
         final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
 
-        final var output = new StringBuilder();
-        for (final Mapping mapping : mappings) {
-            final var result = new InstanceToDatabase()
-                .input(
-                    mapping,
-                    mappings,
-                    instance,
-                    control.getDDLWrapper(),
-                    control.getDMLWrapper(),
-                    control.getICWrapper()
-                )
-                .run();
+        final var result = new InstanceToDatabase()
+            .input(
+                mappings,
+                instance,
+                control.getDDLWrapper(),
+                control.getDMLWrapper(),
+                control.getICWrapper()
+            )
+            .run();
 
-            output.append(result.statementsAsString() + "\n");
+        // TODO - find a better way how to execute the changes (currently its too likely to fail)
 
-            // TODO - find a better way how to execute the changes (currently its too likely to fail)
+        // TODO - verzovat databáze - tj. vytvořit vždy novou databázi (v rámci stejného engine)
+        //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
+        //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
 
-            // TODO - verzovat databáze - tj. vytvořit vždy novou databázi (v rámci stejného engine)
-            //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
-            //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
-
-            if (server.executeModels() && control.isWritable()) {
-                LOGGER.info("Start executing models ...");
-                control.execute(result.statements());
-                LOGGER.info("... models executed.");
-            }
+        if (server.executeModels() && control.isWritable()) {
+            LOGGER.info("Start executing models ...");
+            control.execute(result.statements());
+            LOGGER.info("... models executed.");
         }
-        System.out.println(output.toString());
-        job.data = new ModelJobData(output.toString());
+
+        job.data = new ModelJobData(result.statementsAsString());
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {

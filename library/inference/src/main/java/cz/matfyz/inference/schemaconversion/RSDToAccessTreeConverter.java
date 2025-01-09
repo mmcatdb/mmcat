@@ -8,7 +8,6 @@ import cz.matfyz.core.identifiers.Key.KeyGenerator;
 import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Type;
-import cz.matfyz.core.rsd.Char;
 
 /**
  * The {@code RSDToAccessTreeConverter} class is responsible for converting a {@link RecordSchemaDescription}
@@ -19,6 +18,10 @@ public class RSDToAccessTreeConverter {
 
     public static final String INDEX_LABEL = "_index";
     public static final String VALUE_LABEL = "_value";
+
+    public static final String ROOT_NAME = "root";
+
+    public static final String MONGO_IDENTIFIER = "_id";
 
     private AccessTreeNode root;
     private final String kindName;
@@ -36,7 +39,7 @@ public class RSDToAccessTreeConverter {
      * the access tree structure.
      */
     public AccessTreeNode convert(RecordSchemaDescription rsd) {
-        rsd.setName("root");
+        rsd.setName(ROOT_NAME);
         root = new AccessTreeNode(kindName, null, keyGenerator.next(), null, null, null, false);
         buildAccessTree(rsd, root.key, 1, root);
         root.transformArrayNodes();
@@ -44,32 +47,33 @@ public class RSDToAccessTreeConverter {
     }
 
     private void buildAccessTree(RecordSchemaDescription rsdParent, Key keyParent, int i, AccessTreeNode currentNode) {
-        if (!rsdParent.getChildren().isEmpty()) {
-            if (rsdParent.getName().equals("root"))
-                currentNode = root;
+        if (rsdParent.getChildren().isEmpty()) {
+            return;
+        }
 
-            for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
-                boolean isArray = isTypeArray(rsdChild);
-                BaseSignature signature = signatureGenerator.next();
-                Key keyChild = keyGenerator.next();
-                Min min = findMin(rsdParent, rsdChild);
+        if (ROOT_NAME.equals(rsdParent.getName())) {
+            currentNode = root;
+        }
 
-                if (rsdChild.getName().equals(RecordSchemaDescription.ROOT_SYMBOL)) { // Check for mongo identifier
-                    buildAccessTree(rsdChild, keyParent, i++, currentNode);
-                } else if (!rsdChild.getName().equals("_id")) {
-                    String label = "";
-                    AccessTreeNode child = new AccessTreeNode(rsdChild.getName(), signature, keyChild, keyParent, label, min, isArray);
-                    currentNode.addChild(child);
-
-                    // Add _index and _value nodes if parent is array and they are not yet present
-                    if (isArray) {
-                        addChildIfMissing(child, keyChild, INDEX_LABEL);
-                        addChildIfMissing(child, keyChild, VALUE_LABEL);
-                    }
-
-                    buildAccessTree(rsdChild, keyChild, i++, child);
-                }
+        for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
+            if (rsdChild.getName().equals(MONGO_IDENTIFIER)) {
+                continue;
             }
+
+            boolean isArray = isTypeArray(rsdChild);
+            String name = (isTypeArray(rsdParent) && rsdChild.getName().equals(RecordSchemaDescription.ROOT_SYMBOL)) ? VALUE_LABEL : rsdChild.getName();
+            BaseSignature signature = signatureGenerator.next();
+            Key keyChild = keyGenerator.next();
+            String label = "";
+            Min min = findMin(rsdParent, rsdChild);
+
+            AccessTreeNode childNode = new AccessTreeNode(name, signature, keyChild, keyParent, label, min, isArray);
+            currentNode.addChild(childNode);
+
+            if (isArray)
+                addChildIfMissing(childNode, keyChild, INDEX_LABEL);
+
+            buildAccessTree(rsdChild, keyChild, i + 1, childNode);
         }
     }
 

@@ -1,0 +1,17 @@
+_: {
+  address: 0,
+  business_id: 41,
+  categories: 42,
+  city: 43,
+  is_open: 52,
+  latitude: 53,
+  longitude: 54,
+  name: 55,
+  postal_code: 56,
+  review_count: 57,
+  stars: 58,
+  state: 59,
+  Caters: 1.14,
+  GoodForMeal: 1.22,
+  HasTV: 1.25
+} 

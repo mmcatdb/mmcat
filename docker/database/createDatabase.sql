@@ -33,85 +33,67 @@ CREATE TABLE datasource (
 
 INSERT INTO datasource (id, json_value)
 VALUES
-    ('00000000-aabd-4195-9d12-94abf4fceeb0', '{
-        "label": "Czech business registry",
-        "type": "jsonld",
-        "settings": {
-            "url": "https://data.mmcatdb.com/test2.jsonld",
-            "isWritable": false,
-            "isQueryable": false
-        }
-    }'),
-    ('00000001-aabd-4195-ad12-94abf4fceeb0', '{
-        "label": "Yelp business sample",
-        "type": "json",
-        "settings": {
-            "url": "https://data.mmcatdb.com/yelp_business_sample.json",
-            "isWritable": false,
-            "isQueryable": false
-        }
-    }'),
-    -- Files for Bug1
+    -- Files for Yelp_big
     ('00000002-aabd-4195-1d12-94abf4fceeb0', '{
-        "label": "Bug1 Yelp Business",
+        "label": "Yelp_big Business",
         "type": "json",
         "settings": {
-            "url": "https://data.mmcatdb.com/bug1/business.json",
+            "url": "https://data.mmcatdb.com/yelp_big/business.json",
             "isWritable": false,
             "isQueryable": false
         }
     }'),
     ('00000003-aabd-4195-5d12-94abf4fceeb0', '{
-        "label": "Bug1 Yelp User",
+        "label": "Yelp_big User",
         "type": "json",
         "settings": {
-            "url": "https://data.mmcatdb.com/bug1/user.json",
+            "url": "https://data.mmcatdb.com/yelp_big/user.json",
             "isWritable": false,
             "isQueryable": false
         }
     }'),
     ('00000004-aabd-4195-7d12-94abf4fceeb0', '{
-        "label": "Bug1 Yelp Review",
+        "label": "Yelp_big Review",
         "type": "json",
         "settings": {
-            "url": "https://data.mmcatdb.com/bug1/review.json",
+            "url": "https://data.mmcatdb.com/yelp_big/review.json",
             "isWritable": false,
             "isQueryable": false
         }
     }'),
     ('00000005-aabd-4195-bd12-94abf4fceeb0', '{
-        "label": "Bug1 Yelp Tip",
+        "label": "Yelp_big Tip",
         "type": "json",
         "settings": {
-            "url": "https://data.mmcatdb.com/bug1/tip.json",
+            "url": "https://data.mmcatdb.com/yelp_big/tip.json",
             "isWritable": false,
             "isQueryable": false
         }
     }'),
     ('00000006-aabd-4195-3d12-94abf4fceeb0', '{
-        "label": "Bug1 Yelp Checkin",
+        "label": "Yelp_big Checkin",
         "type": "json",
         "settings": {
-            "url": "https://data.mmcatdb.com/bug1/checkin.json",
+            "url": "https://data.mmcatdb.com/yelp_big/checkin.json",
             "isWritable": false,
             "isQueryable": false
         }
     }'),
-    -- Files for Bug2
+    -- Files for Yelp_small
     ('00000007-aabd-4195-4d12-94abf4fceeb0', '{
-        "label": "Bug2 Yelp Business",
+        "label": "Yelp_small Business",
         "type": "json",
         "settings": {
-            "url": "https://data.mmcatdb.com/bug2/business.json",
+            "url": "https://data.mmcatdb.com/yelp_small/business.json",
             "isWritable": false,
             "isQueryable": false
         }
     }'),
     ('00000008-aabd-4195-cd12-94abf4fceeb0', '{
-        "label": "Bug2 Yelp Checkin",
+        "label": "Yelp_small Checkin",
         "type": "json",
         "settings": {
-            "url": "https://data.mmcatdb.com/bug2/checkin.json",
+            "url": "https://data.mmcatdb.com/yelp_small/checkin.json",
             "isWritable": false,
             "isQueryable": false
         }

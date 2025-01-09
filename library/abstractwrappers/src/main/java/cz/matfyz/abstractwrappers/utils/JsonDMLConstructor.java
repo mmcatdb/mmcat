@@ -13,8 +13,8 @@ import org.json.JSONObject;
 
 public class JsonDMLConstructor {
 
-    private JsonObjectNode root = new JsonObjectNode();
-    private Pattern arrayPattern = Pattern.compile("^([a-zA-Z0-9_-]+)\\[([0-9]+)\\]$");
+    private final JsonObjectNode root = new JsonObjectNode();
+    private static final Pattern arrayPattern = Pattern.compile("^([a-zA-Z0-9_-]+)\\[([0-9]+)\\]$");
 
     public String toString() {
         return root.object.toString();

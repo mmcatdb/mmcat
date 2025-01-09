@@ -1,0 +1,18 @@
+_: {
+  event_id: 50,
+  event_label: 51,
+  event_description: 52,
+  event_type: 53,
+  event_year_ah: 55,
+  person_age_at_event: 56,
+  event_year_offset: 57,
+  event_reference_id: 58,
+  event_year_calculation: 59,
+  event_location: 60,
+  event_location_reference_id: 61,
+  person_id: 111.0,
+  event_notes: -62 {
+    _index: 63,
+    _value: 64
+  }
+}

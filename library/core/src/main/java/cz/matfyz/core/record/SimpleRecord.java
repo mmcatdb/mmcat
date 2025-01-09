@@ -1,23 +1,26 @@
 package cz.matfyz.core.record;
 
-import cz.matfyz.core.identifiers.Signature;
+import java.io.Serializable;
 
 /**
  * Simple property cannot have children so it is a leaf node in the record tree.
  * However, it can have value.
  * @param <T> a type of the value of this property.
  */
-public abstract class SimpleRecord<T> extends DataRecord {
+public class SimpleRecord<T> implements Serializable {
 
-    protected final Signature signature;
-
-    SimpleRecord(RecordName name, Signature signature) {
-        super(name);
-        this.signature = signature;
+    public SimpleRecord(T value) {
+        this.value = value;
     }
 
-    public Signature signature() {
-        return signature;
+    private final T value;
+
+    public T getValue() {
+        return value;
+    }
+
+    @Override public String toString() {
+        return "\"" + value + "\"";
     }
 
 }

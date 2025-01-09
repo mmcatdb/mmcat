@@ -88,7 +88,7 @@ class ServerApplicationTests {
                 message = "";
 
                 InstanceCategory instance = null;
-                for (var mappingId : postgresqlMappingIds) {
+                for (final var mappingId : postgresqlMappingIds) {
                     instance = importMapping(instance, mappingId, postgresqlDatasourceId, batch * batchMultiplier);
                 }
 
@@ -116,7 +116,7 @@ class ServerApplicationTests {
 
         message += "#" + mapping.kindName()
             + ", " + Statistics.getInfo(Counter.PULLED_RECORDS)
-            + ", " + Statistics.getInfo(Interval.MTC_ALGORIGHM)
+            + ", " + Statistics.getInfo(Interval.MTC_ALGORITHM)
             + ", " + Statistics.getInfo(Interval.DATABASE_TO_INSTANCE);
 
         Statistics.reset();
@@ -124,6 +124,9 @@ class ServerApplicationTests {
         return newInstance;
     }
 
+    /**
+     * @deprecated This doesn't work as intended anymore. The reason is that now, all mappings are processed at once. Therefore this method does the same thing (export all mappings) for each mapping.
+     */
     private void exportMapping(InstanceCategory instance, Id mappingId, Id datasourceId) throws Exception {
         final var datasourceWrapper = datasourceRepository.find(datasourceId);
         final var mappingWrapper = mappingRepository.find(mappingId);
@@ -137,12 +140,12 @@ class ServerApplicationTests {
         final AbstractICWrapper icWrapper = control.getICWrapper();
 
         final var process = new InstanceToDatabase();
-        process.input(mapping, List.of(mapping), instance, ddlWrapper, dmlWrapper, icWrapper);
+        process.input(List.of(mapping), instance, ddlWrapper, dmlWrapper, icWrapper);
         process.run();
 
         message += "#" + mapping.kindName()
             + ", " + Statistics.getInfo(Counter.CREATED_STATEMENTS)
-            + ", " + Statistics.getInfo(Interval.CTM_ALGORIGHM)
+            + ", " + Statistics.getInfo(Interval.CTM_ALGORITHM)
             + ", " + Statistics.getInfo(Interval.INSTANCE_TO_DATABASE);
 
         Statistics.reset();

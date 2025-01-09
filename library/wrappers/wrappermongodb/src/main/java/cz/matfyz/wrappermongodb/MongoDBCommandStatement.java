@@ -14,8 +14,13 @@ public class MongoDBCommandStatement implements AbstractStatement {
         this.command = command;
     }
 
-    public String getContent() {
+    @Override public String getContent() {
         return this.content;
+    }
+
+    @Override public int getPriority() {
+        // There is no priority for MongoDB commands.
+        return 0;
     }
 
     public BsonDocument getCommand() {

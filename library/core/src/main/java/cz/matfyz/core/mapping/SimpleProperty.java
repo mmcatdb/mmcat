@@ -2,6 +2,7 @@ package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.utils.printable.*;
@@ -9,6 +10,7 @@ import cz.matfyz.core.utils.printable.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -44,6 +46,10 @@ public class SimpleProperty extends AccessPath {
         final SchemaMorphism morphism = schema.getMorphism(signature);
 
         return morphism.dom().key().equals(key) ? this : null;
+    }
+
+    @Override protected SimpleProperty copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames) {
+        return new SimpleProperty(name, signature);
     }
 
     @Override public void printTo(Printer printer) {

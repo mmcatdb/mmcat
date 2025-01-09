@@ -26,11 +26,15 @@ export class Graph {
     }
 
     /// functions for Mapping editor
+
     public getChildrenForNode(node: Node): Node[] {
         const outgoingEdges = [ ...this.edges.values() ].filter(edge => edge.domainNode.equals(node));
         return outgoingEdges.map(edge => edge.codomainNode);
     }
 
+    /**
+     * Finds signature between a node and a parent node, if there is a direct edge.
+     */
     public getSignature(node: Node, parentNode: Node): SequenceSignature {
         const edge = [ ...this.edges.values() ]
             .find(edge =>
@@ -59,12 +63,17 @@ export class Graph {
     public getParentNode(node: Node): Node | undefined {
         const incomingEdges = [ ...this.edges.values() ].filter(edge => edge.codomainNode.equals(node));
 
-        if (incomingEdges.length === 0) {
-            console.warn('No incoming edges found for node:', node);
+        if (incomingEdges.length === 0 )
             return undefined;
-        }
 
-        return incomingEdges[0].domainNode;
+        for (const edge of incomingEdges) {
+            console.log('is dual: ', edge.morphism.signature.isBaseDual);
+            if (!edge.morphism.signature.isBaseDual)
+                return edge.domainNode;
+        }
+        
+        //return incomingEdges[0].domainNode;
+        return undefined;
     }
     ///
 

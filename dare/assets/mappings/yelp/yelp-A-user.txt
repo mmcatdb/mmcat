@@ -1,0 +1,23 @@
+_: {
+  average_stars: 60,
+  compliment_cool: 61,
+  compliment_cute: 62,
+  compliment_funny: 63,
+  compliment_hot: 64,
+  compliment_list: 65,
+  compliment_more: 66,
+  compliment_note: 67,
+  compliment_photos: 68,
+  compliment_plain: 69,
+  compliment_profile: 70,
+  compliment_writer: 71,
+  cool: 72,
+  elite: 73,
+  fans: 74,
+  funny: 76,
+  name: 77,
+  review_count: 78,
+  useful: 79,
+  user_id: 80,
+  yelping_since: 81
+}  

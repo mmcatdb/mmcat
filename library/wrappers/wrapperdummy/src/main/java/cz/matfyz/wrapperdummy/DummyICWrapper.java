@@ -1,13 +1,19 @@
 package cz.matfyz.wrapperdummy;
 
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.core.mapping.IdentifierStructure;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 public class DummyICWrapper implements AbstractICWrapper {
+
+    @Override public void clear() {
+        methods.add("clear()");
+    }
 
     private List<String> methods = new ArrayList<>();
 
@@ -23,15 +29,14 @@ public class DummyICWrapper implements AbstractICWrapper {
         methods.add("appendReference(" + referencingKind + ", " + referencedKind + ", " +  attributePairsToString(attributePairs) + ")");
     }
 
-    @Override public DummyStatement createICRemoveStatement() {
-        methods.add("createICRemoveStatement()");
-        return new DummyStatement("");
+    @Override public Collection<AbstractStatement> createICStatements() {
+        methods.add("createICStatements()");
+        return List.of();
     }
 
-    @Override public DummyStatement createICStatement() {
-        methods.add("createICStatement()");
-
-        return new DummyStatement("");
+    @Override public Collection<AbstractStatement> dropICStatements() {
+        methods.add("dropICStatements()");
+        return List.of();
     }
 
     private String attributePairsToString(Set<AttributePair> pairs) {

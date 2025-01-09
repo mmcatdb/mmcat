@@ -6,33 +6,29 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
-import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.io.InputStream;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.json.JSONObject;
 
 /**
  * A pull wrapper implementation for JSON files that implements the {@link AbstractPullWrapper} interface.
@@ -54,98 +50,86 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      * Pulls a forest of records from a JSON file based on a complex property path and query content.
      */
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) {
-        final var forest = new ForestOfRecords();
-
         try (InputStream inputStream = provider.getInputStream()) {
-            processJsonStream(inputStream, forest, path);
+            return processJsonStream(inputStream, path);
         } catch (IOException e) {
             throw PullForestException.innerException(e);
+        }
+    }
+
+    private Map<DynamicName, DynamicNameReplacement> replacedNames;
+
+    /**
+     * Processes a JSON input stream and populates a {@link ForestOfRecords} with data parsed from the stream.
+     */
+    private ForestOfRecords processJsonStream(InputStream inputStream, ComplexProperty path) throws IOException {
+        final var forest = new ForestOfRecords();
+        final var parser =  new JsonFactory().createParser(inputStream);
+        final var objectMapper = new ObjectMapper();
+
+        replacedNames = path.copyWithoutDynamicNames().replacedNames();
+
+        while (parser.nextToken() != null) {
+            if (parser.currentToken() == JsonToken.START_OBJECT) {
+                final JsonNode jsonNode = objectMapper.readTree(parser);
+                final RootRecord rootRecord = new RootRecord();
+
+                addKeysToRecord(rootRecord, path, jsonNode);
+                forest.addRecord(rootRecord);
+            }
         }
 
         return forest;
     }
 
-    /**
-     * Processes a JSON input stream and populates a {@link ForestOfRecords} with data parsed from the stream.
-     */
-    private void processJsonStream(InputStream inputStream, ForestOfRecords forest, ComplexProperty path) throws IOException {
-        JsonFactory factory = new JsonFactory();
-        JsonParser parser = factory.createParser(inputStream);
-        ObjectMapper objectMapper = new ObjectMapper();
+    private void addKeysToRecord(ComplexRecord record, ComplexProperty path, JsonNode object) {
+        final var iterator = object.fields();
+        while (iterator.hasNext()) {
+            final var entry = iterator.next();
+            final var key = entry.getKey();
+            final var value = entry.getValue();
+            if (value == null || value.isNull())
+                continue;
 
-        while (parser.nextToken() != null) {
-            if (parser.currentToken() == JsonToken.START_OBJECT) {
-                JsonNode jsonNode = objectMapper.readTree(parser);
-                RootRecord rootRecord = new RootRecord();
-                getDataFromJsonNode(rootRecord, jsonNode, path);
-                forest.addRecord(rootRecord);
+            final var subpath = path.findSubpathByName(key);
+            if (subpath == null)
+                continue;
+
+            if (!(subpath.name() instanceof final DynamicName dynamicName)) {
+                addValueToRecord(record, subpath, value);
+                continue;
             }
+
+            // Replace the dynamically named property with an object containing both name and value properties.
+            final var replacement = replacedNames.get(dynamicName);
+            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
+            addValueToRecord(replacer, replacement.value(), value);
         }
     }
 
-    /**
-     * Recursively extracts data from a {@link JsonNode} and populates a {@link ComplexRecord}.
-     */
-    public void getDataFromJsonNode(ComplexRecord parentRecord, JsonNode jsonNode, ComplexProperty path) {
-        for (AccessPath subpath : path.subpaths()) {
-            Name name = subpath.name();
-            if (name instanceof StaticName) {
-                StaticName staticName = (StaticName) name;
-                String fieldName = staticName.getStringName();
-                JsonNode valueNode = jsonNode.get(fieldName);
-
-                if (valueNode != null) {
-                    if (subpath instanceof ComplexProperty complexSubpath) {
-                        if (valueNode.isObject()) {
-                            ComplexRecord childRecord = parentRecord.addComplexRecord(toRecordName(complexSubpath.name(), fieldName), complexSubpath.signature());
-                            getDataFromJsonNode(childRecord, valueNode, complexSubpath);
-                        } else if (valueNode.isArray()) {
-                            handleJsonArray(parentRecord, valueNode, complexSubpath, fieldName);
-                        }
-                    } else if (subpath instanceof SimpleProperty simpleSubpath) {
-                        handleSimpleProperty(parentRecord, valueNode, simpleSubpath, fieldName);
-                    }
-                }
-            }
+    private void addValueToRecord(ComplexRecord parentRecord, AccessPath property, JsonNode value) {
+        if (value.isArray()) {
+            // If it's array, we flatten it.
+            for (final JsonNode arrayItem : value)
+                addValueToRecord(parentRecord, property, arrayItem);
+            return;
         }
-    }
 
-    /**
-     * Handles JSON arrays and populates a {@link ComplexRecord} with array elements.
-     */
-    private void handleJsonArray(ComplexRecord parentRecord, JsonNode arrayNode, ComplexProperty complexSubpath, String fieldName) {
-        for (JsonNode itemNode : arrayNode) {
-            if (itemNode.isObject()) {
-                ComplexRecord childRecord = parentRecord.addComplexRecord(toRecordName(complexSubpath.name(), fieldName), complexSubpath.signature());
-                getDataFromJsonNode(childRecord, itemNode, complexSubpath);
-            }
+        if (property instanceof final SimpleProperty simpleProperty) {
+            // If it's a simple value, we add it to the record.
+            parentRecord.addSimpleRecord(simpleProperty.signature(), value.asText());
+            return;
         }
-    }
 
-    /**
-     * Handles simple properties in the JSON data and populates a {@link ComplexRecord} with the property values.
-     */
-    private void handleSimpleProperty(ComplexRecord parentRecord, JsonNode valueNode, SimpleProperty simpleSubpath, String fieldName) {
-        if (valueNode.isArray()) {
-            final ArrayList<String> values = new ArrayList<>();
-            for (final JsonNode itemNode : valueNode)
-                values.add(itemNode.asText());
+        final var complexProperty = (ComplexProperty) property;
 
-            parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), values);
-        } else {
-            parentRecord.addSimpleValueRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), valueNode.asText());
-        }
-    }
+        // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
+        // We do so by passing the parent record instead of creating a new one.
+        final ComplexRecord childRecord = complexProperty.isAuxiliary()
+            ? parentRecord
+            : parentRecord.addComplexRecord(complexProperty.signature());
 
-    /**
-     * Converts a {@link Name} object to a {@link RecordName} based on its type (static or dynamic).
-     */
-    private RecordName toRecordName(Name name, String valueIfDynamic) {
-        if (name instanceof DynamicName dynamicName)
-            return dynamicName.toRecordName(valueIfDynamic);
-
-        var staticName = (StaticName) name;
-        return staticName.toRecordName();
+        addKeysToRecord(childRecord, complexProperty, value);
     }
 
     /**

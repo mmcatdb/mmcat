@@ -1,5 +1,6 @@
 package cz.matfyz.core.mapping;
 
+import cz.matfyz.core.exception.AccessPathException;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -50,10 +52,6 @@ public class ComplexProperty extends AccessPath {
     /** The property is auxiliary if and only if its signature is empty. */
     public boolean isAuxiliary() {
         return signature.isEmpty();
-    }
-
-    public boolean hasDynamicKeys() {
-        return this.subpaths.size() == 1 && this.subpaths().iterator().next().name instanceof DynamicName;
     }
 
     private final Map<Signature, AccessPath> subpaths;
@@ -202,6 +200,154 @@ public class ComplexProperty extends AccessPath {
         return new ComplexProperty(name, signature, newSubpaths);
     }
 
+    /**
+     * Properties from given synthetic nodes are moved to their parent paths.
+     */
+    public ComplexProperty copyWithoutAuxiliaryNodes() {
+        List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();
+        return new ComplexProperty(name, signature, newSubpaths);
+    }
+
+    private List<AccessPath> getContentWithoutAuxiliaryNodes() {
+        List<AccessPath> newSubpaths = new ArrayList<>();
+        for (AccessPath path : subpaths()) {
+            if (path instanceof SimpleProperty) {
+                newSubpaths.add(path); // Not making a copy because the path is expected to be immutable.
+                continue;
+            }
+
+            final var complexProperty = (ComplexProperty) path;
+            if (complexProperty.isAuxiliary())
+                newSubpaths.addAll(complexProperty.getContentWithoutAuxiliaryNodes());
+            else
+                newSubpaths.add(complexProperty.copyWithoutAuxiliaryNodes());
+        }
+
+        return newSubpaths;
+    }
+
+
+    public record ReplacementResult(
+        ComplexProperty path,
+        Map<DynamicName, DynamicNameReplacement> replacedNames
+    ) {}
+
+    public record DynamicNameReplacement(
+        /** The longest common prefix of both name and value signatures. */
+        Signature prefix,
+        /** The dynamic name's signature without the common prefix. */
+        Signature name,
+        /** The replaced property's original value. It still contains the original dynamic names. Only its name and signature were changed. */
+        AccessPath value,
+        /** The shortest path from the value to the name. It's here mostly for convenience. */
+        Signature valueToName
+    ) {}
+
+    /**
+     * Properties with dynamic names are replaced with new complex properties with name and value.
+     * We also track all replacements so that we can use them to map the old path to the new one.
+     */
+    public ReplacementResult copyWithoutDynamicNames() {
+        final var replacedNames = new TreeMap<DynamicName, DynamicNameReplacement>();
+        final var path = copyForReplacement(name, signature, replacedNames);
+
+        return new ReplacementResult(path, replacedNames);
+    }
+
+    @Override protected ComplexProperty copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames) {
+        final var newSubpaths = replacedNames == null
+            ? subpaths()
+            : subpaths.values().stream().map(subpath -> replaceDynamicName(subpath, replacedNames)).toList();
+
+        return new ComplexProperty(name, signature, newSubpaths);
+    }
+
+    /**
+     * If this property has a dynamic name, the whole property is replaced by a complex property with a name and a value. The value holds the copy of this property.
+     */
+    private static AccessPath replaceDynamicName(AccessPath path, Map<DynamicName, DynamicNameReplacement> replacedNames) {
+        if (!(path.name instanceof final DynamicName dynamicName))
+            return path.copyForReplacement(path.name, path.signature, replacedNames);
+
+        final Signature prefix = path.signature.longestCommonPrefix(dynamicName.signature());
+
+        if (prefix.isEmpty())
+            // This is ilegal and punishable by death.
+            throw AccessPathException.dynamicNameMissingCommonPrefix(dynamicName.signature(), path.signature);
+
+        final var valueSignature = path.signature.cutPrefix(prefix);
+        final var partiallyReplacedValue = path.copyForReplacement(new StaticName("_VALUE"), valueSignature, null);
+        final var fullyReplacedValue = path.copyForReplacement(new StaticName("_VALUE"), valueSignature, replacedNames);
+
+        final var nameSignature = dynamicName.signature().cutPrefix(prefix);
+        final var valueToName = valueSignature.dual().concatenate(nameSignature);
+        replacedNames.put(dynamicName, new DynamicNameReplacement(prefix, nameSignature, partiallyReplacedValue, valueToName));
+
+        return new ComplexProperty(new StaticName("_DYNAMIC"), prefix, List.of(
+            new SimpleProperty(new StaticName("_NAME"), nameSignature),
+            fullyReplacedValue
+        ));
+    }
+
+    /**
+     * Finds a direct subpath with the given name.
+     * First, we search between the statically named ones. If none is found, we try to match the dynamically named ones using their patterns. Lastly, we take the dynamically named one without a pattern. If there isn't any, null is returned.
+     */
+    public @Nullable AccessPath findSubpathByName(String name) {
+        if (nameMatcherCache == null)
+            nameMatcherCache = new NameMatcher(subpaths());
+
+        return nameMatcherCache.match(name);
+    }
+
+    private @Nullable NameMatcher nameMatcherCache;
+
+    private static class NameMatcher {
+        private final Map<String, AccessPath> statics = new TreeMap<>();
+        private final List<Pattern> dynamicPatterns = new ArrayList<>();
+        private final List<AccessPath> dynamicSubpaths = new ArrayList<>();
+        private final @Nullable AccessPath dynamicWithoutPattern;
+
+        public NameMatcher(Collection<AccessPath> subpaths) {
+            @Nullable AccessPath dynamicWithoutPattern = null;
+
+            for (final var subpath : subpaths) {
+                if (subpath.name instanceof final StaticName staticName) {
+                    statics.put(staticName.getStringName(), subpath);
+                    continue;
+                }
+
+                final var dynamicName = (DynamicName) subpath.name;
+                final var pattern = dynamicName.compilePattern();
+                if (pattern == null) {
+                    if (dynamicWithoutPattern != null)
+                        throw new IllegalArgumentException("Only one dynamic subpath without pattern is allowed in a complex property.");
+
+                    dynamicWithoutPattern = subpath;
+                    continue;
+                }
+
+                dynamicPatterns.add(pattern);
+                dynamicSubpaths.add(subpath);
+            }
+
+            this.dynamicWithoutPattern = dynamicWithoutPattern;
+        }
+
+        public @Nullable AccessPath match(String name) {
+            final var staticMatch = statics.get(name);
+            if (staticMatch != null)
+                return staticMatch;
+
+            for (int i = 0; i < dynamicPatterns.size(); i++) {
+                if (dynamicPatterns.get(i).matcher(name).matches())
+                    return dynamicSubpaths.get(i);
+            }
+
+            return dynamicWithoutPattern;
+        }
+    }
+
     @Override public void printTo(Printer printer) {
         printer.append(name).append(": ");
         if (!isAuxiliary())
@@ -218,32 +364,6 @@ public class ComplexProperty extends AccessPath {
 
     @Override public String toString() {
         return Printer.print(this);
-    }
-
-    /**
-     * Properties from given synthetic nodes are moved to their parent paths
-     * @return
-     */
-    public ComplexProperty copyWithoutAuxiliaryNodes() {
-        List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();
-        return new ComplexProperty(name, signature, newSubpaths);
-    }
-
-    private List<AccessPath> getContentWithoutAuxiliaryNodes() {
-        List<AccessPath> newSubpaths = new ArrayList<>();
-        for (AccessPath path : subpaths()) {
-            if (path instanceof SimpleProperty) {
-                newSubpaths.add(path); // Not making a copy because the path is expected to be immutable.
-            }
-            else if (path instanceof ComplexProperty complexProperty) {
-                if (complexProperty.isAuxiliary())
-                    newSubpaths.addAll(complexProperty.getContentWithoutAuxiliaryNodes());
-                else
-                    newSubpaths.add(complexProperty.copyWithoutAuxiliaryNodes());
-            }
-        }
-
-        return newSubpaths;
     }
 
     public static class Serializer extends StdSerializer<ComplexProperty> {

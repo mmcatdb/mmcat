@@ -1,10 +1,10 @@
 package cz.matfyz.tests.example.common;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,18 +20,17 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestDatasource.class);
 
-    private static UniqueSequentialGenerator idGenerator = UniqueSequentialGenerator.create();
+    private final DatasourceType type;
+    private final String identifier;
 
-    public final DatasourceType type;
-    public final String id;
     public final TWrapper wrapper;
     public final List<Mapping> mappings = new ArrayList<>();
     public final SchemaCategory schema;
     private final String setupFileName;
 
-    public TestDatasource(DatasourceType type, TWrapper wrapper, SchemaCategory schema, String setupFileName) {
+    public TestDatasource(DatasourceType type, String identifier, TWrapper wrapper, SchemaCategory schema, String setupFileName) {
         this.type = type;
-        this.id = idGenerator.nextString();
+        this.identifier = identifier;
         this.wrapper = wrapper;
         this.schema = schema;
         this.setupFileName = setupFileName;
@@ -55,6 +55,15 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
             LOGGER.error("Datasource setup error: ", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private @Nullable Datasource datasource;
+
+    public Datasource datasource() {
+        if (datasource == null)
+            datasource = new Datasource(type, identifier);
+
+        return datasource;
     }
 
 }

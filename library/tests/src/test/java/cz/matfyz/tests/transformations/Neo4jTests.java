@@ -107,12 +107,12 @@ class Neo4jTests {
         assertDoesNotThrow(() -> {
             datasource.wrapper.execute(List.of(
                 AbstractStatement.createEmpty(),
-                new StringStatement("CREATE (a:TestOfWrite { test: '1' });")
+                StringStatement.create("CREATE (a:TestOfWrite { test: '1' });")
             ));
         });
 
         List<AbstractStatement> invalidStatements = List.of(
-            new StringStatement("invalid statement")
+            StringStatement.create("invalid statement")
         );
 
         assertThrows(ExecuteException.class, () -> {

@@ -201,7 +201,8 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         if (comparedNames != 0) {
             return comparedNames;
         }
-        return types - o.types;
+        return 0;
+        //return types - o.types;
     }
 
     public String _toString() {

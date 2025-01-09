@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import API from '@/utils/api';
-import { Action, ActionType } from '@/types/action';
+import type { Action } from '@/types/action';
 import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';

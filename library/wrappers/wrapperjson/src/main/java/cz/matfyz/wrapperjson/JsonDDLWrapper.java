@@ -1,6 +1,9 @@
 package cz.matfyz.wrapperjson;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.exception.InvalidPathException;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 /**
  * A Data Definition Language (DDL) wrapper for JSON that implements the {@link AbstractDDLWrapper} interface.
@@ -8,70 +11,28 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
  */
 public class JsonDDLWrapper implements AbstractDDLWrapper {
 
+    @Override public boolean isSchemaless() {
+        return true;
+    }
+
+    @Override public void clear() {
+        kindName = null;
+    }
+
     private String kindName = null;
 
     @Override public void setKindName(String name) {
         kindName = name;
     }
 
-    @Override public boolean isSchemaless() {
-        return true;
-    }
-
-    /**
-     * Attempts to add a simple property to the JSON schema. This operation is not supported
-     * for JSON in this implementation and always returns false.
-     *
-     * @param path the path of the property.
-     * @param required whether the property is required (not used in JSON).
-     * @return false, as this operation is not supported.
-     */
-    @Override public boolean addSimpleProperty(String path, boolean required) {
-        return false;
-    }
-
-    /**
-     * Attempts to add a simple array property to the JSON schema. This operation is not supported
-     * for JSON in this implementation and always returns false.
-     *
-     * @param path the path of the property.
-     * @param required whether the property is required (not used in JSON).
-     * @return false, as this operation is not supported.
-     */
-    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
-      return false;
-    }
-
-    /**
-     * Attempts to add a complex property to the JSON schema. This operation is not supported
-     * for JSON in this implementation and always returns false.
-     *
-     * @param path the path of the property.
-     * @param required whether the property is required (not used in JSON).
-     * @return false, as this operation is not supported.
-     */
-    @Override public boolean addComplexProperty(String path, boolean required) {
-        return false;
-    }
-
-    /**
-     * Attempts to add a complex array property to the JSON schema. This operation is not supported
-     * for JSON in this implementation and always returns false.
-     *
-     * @param path the path of the property.
-     * @param required whether the property is required (not used in JSON).
-     * @return false, as this operation is not supported.
-     */
-    @Override public boolean addComplexArrayProperty(String path, boolean required) {
-       return false;
+    @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {
+        throw InvalidPathException.isSchemaless(DatasourceType.json, path);
     }
 
     /**
      * Creates a DDL statement for the JSON schema.
-     *
-     * @return a {@link JsonCommandStatement} containing the generated DDL statement.
      */
-    @Override public JsonCommandStatement createDDLStatement() {
-        return new JsonCommandStatement("");
+    @Override public AbstractStatement createDDLStatement() {
+        return AbstractStatement.createEmpty();
     }
 }

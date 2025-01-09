@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperdummy;
 
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +11,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class DummyDMLWrapper implements AbstractDMLWrapper {
     //private List<String> methods = new ArrayList<>();
 
-    private final List<DMLTestStructure> structures = new ArrayList<>();
+    @Override public void clear() {
+        //methods.add("clear()");
+        structure = null;
+    }
+
     private DMLTestStructure structure;
+    private final List<DMLTestStructure> structures = new ArrayList<>();
 
     public List<DMLTestStructure> structures() {
         return structures;
@@ -27,14 +33,9 @@ public class DummyDMLWrapper implements AbstractDMLWrapper {
         structure.add("append(" + name + ", " + value + ")");
     }
 
-    @Override public void clear() {
-        //methods.add("clear()");
-        structure = null;
-    }
-
-    @Override public DummyStatement createDMLStatement() {
+    @Override public AbstractStatement createDMLStatement() {
         //methods.add("createDMLStatement()");
         structures.add(structure);
-        return new DummyStatement("");
+        return AbstractStatement.createEmpty();
     }
 }

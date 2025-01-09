@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, shallowRef } from 'vue';
 import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SignatureId, StaticName } from '@/types/identifiers';
@@ -8,9 +8,8 @@ import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
-import { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 
 /**
  * Extracts the graph object from Evocat.
@@ -26,9 +25,16 @@ const props = defineProps<{
 }>();
 
 const accessPath = ref<GraphRootProperty>();
+const nodes = shallowRef<(Node)[]>([]);
 const selectingRootNode = ref<Node>();
-const selectedNodes = ref<Node[]>([]);
+const selectingOriginalRootNode = ref<Node>();
+//const selectedNodes = ref<Node[]>([]);
+const selectedNodes = shallowRef<Node[]>([]);
 const rootConfirmed = ref(false);
+
+const isConfirmButtonDisabled = computed(() => {
+    return !props.selectedDatasource || nodes.value.length < 2;
+});
 
 /**
  * Stores the previous parent property used for path construction.
@@ -45,6 +51,8 @@ let processedNodes = new Set<number>();
  */
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
+const kindName = ref<string | undefined>(undefined);
+
 /**
  * Emits custom events to the parent component.
  */
@@ -54,10 +62,18 @@ const emit = defineEmits([ 'finish', 'cancel' ]);
  * Confirms the selected datasource and root node. It marks the root node as selected and finalizes the root.
  */
 function confirmDatasourceAndRootNode() {
-    if (!props.selectedDatasource || !selectingRootNode.value)
+    if (!props.selectedDatasource || nodes.value.length < 2)
         return;
 
-    selectingRootNode.value.unselect();
+    console.log(nodes.value[0]);
+    console.log(nodes.value[1]);
+
+    selectingOriginalRootNode.value = nodes.value[0];
+    selectingRootNode.value = nodes.value[1];
+
+    nodes.value[0].unselect();
+    nodes.value[1].unselect();
+
     selectingRootNode.value.becomeRoot();
     rootConfirmed.value = true;
 }
@@ -68,8 +84,14 @@ function confirmDatasourceAndRootNode() {
 function confirmSelectedNodes() {
     if (!props.selectedDatasource || !selectingRootNode.value) return;
 
-    const label = selectingRootNode.value.metadata.label.toLowerCase();
-    accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
+    if (selectingOriginalRootNode.value && !selectingRootNode.value.equals(selectingOriginalRootNode.value)) {
+        const trueLabel = selectingOriginalRootNode.value.metadata.label.toLowerCase();
+        accessPath.value = new GraphRootProperty(StaticName.fromString(trueLabel), selectingOriginalRootNode.value);
+        processNode(selectingRootNode.value);
+        kindName.value = selectingRootNode.value.metadata.label;
+    } else {
+        accessPath.value = new GraphRootProperty(StaticName.fromString(selectingRootNode.value.metadata.label.toLowerCase()), selectingRootNode.value);
+    }
     
     if (selectedNodes.value.length !== 0) {
         selectedNodes.value.forEach(node => processNode(node));
@@ -102,18 +124,20 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
     }
 
     const children = filterChildren(node);
-    const parentNode = graph.getParentNode(node);
+    //const children = graph.getChildrenForNode(node);
+    //const parentNode = graph.getParentNode(node);
+    const parentNode = accessPath.value?.node;
 
     if (!parentNode) return;
 
     const signature = graph.getSignature(node, parentNode);
-    const label = node.metadata.label.toLowerCase(); // for normalization?
+    const label = node.metadata.label.toLowerCase();
     let parentProperty = parentNode ? getParentPropertyFromAccessPath(parentNode) ?? previousParentProperty : previousParentProperty;
 
     if (!parentProperty) return;
 
     let subpath: GraphChildProperty;
-    if (children.length === 0) 
+    if (graph.getChildrenForNode(node).length === 0) 
         subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
     else 
         subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
@@ -122,7 +146,7 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
         previousParentProperty = subpath;
         const childSubpaths = children.map(child => createSubpathForNode(child));
         childSubpaths.forEach(childSubpath => {
-            if (childSubpath) 
+            if (childSubpath && subpath instanceof GraphComplexProperty) 
                 subpath.updateOrAddSubpath(childSubpath);            
         });
     }
@@ -160,11 +184,14 @@ function searchSubpathsForNode(property: GraphParentProperty, node: Node): Graph
 
     if (property instanceof GraphComplexProperty) {
         for (const subpath of property.subpaths) {
-            const result = searchSubpathsForNode(subpath, node);
-            if (result) return result;            
+            if (subpath instanceof GraphComplexProperty) {
+                const result = searchSubpathsForNode(subpath, node);
+                if (result) return result;
+            }
         }
     }
 }
+
 
 /**
  * Updates the root property with a new root property and highlights the path.
@@ -191,7 +218,7 @@ function undoAccessPath() {
  * Emits the finish event with the primary key and the access path, signaling the end of the mapping process.
  */
 function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath.value);
+    emit('finish', primaryKey, accessPath.value, kindName.value);
 }
 
 /**
@@ -212,19 +239,25 @@ function cancel() {
                 class="editor"
             >
                 <ValueContainer v-if="!rootConfirmed">
-                    <ValueRow label="Root object:">
-                        <SingleNodeInput
-                            v-model="selectingRootNode"                                
-                            :type="SelectionType.Root"
-                        />
+                    <ValueRow label="Original Root object:">
+                        {{ nodes[0]?.metadata.label }}
                     </ValueRow>
-                </ValueContainer>
+                    <ValueRow label="Root object:">
+                        {{ nodes[1]?.metadata.label }}
+                    </ValueRow>
+                    <NodeInput
+                        v-model="nodes"
+                        :graph="graph"
+                        :count="2"
+                        :type="SelectionType.Selected"                    
+                    />
+                </ValueContainer>    
                 <div
                     v-if="!rootConfirmed"
                     class="button-row"
                 >
                     <button
-                        :disabled="!selectedDatasource || !selectingRootNode || rootConfirmed"
+                        :disabled="isConfirmButtonDisabled"
                         @click="confirmDatasourceAndRootNode"
                     >
                         Confirm

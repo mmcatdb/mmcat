@@ -11,8 +11,8 @@ import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.record.AdminerFilter;
@@ -34,10 +34,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
@@ -73,36 +72,66 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
-        System.out.println("pullForest from postgres");
         try (
             Connection connection = provider.getConnection();
             PreparedStatement statement = prepareStatement(connection, query);
         ) {
-            LOGGER.info("Execute PostgreSQL query:\n{}", statement);
+            LOGGER.debug("Execute PostgreSQL query:\n{}", statement);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                final ForestOfRecords forest = new ForestOfRecords();
-
-                while (resultSet.next()) {
-                    final var rootRecord = new RootRecord();
-
-                    for (final AccessPath subpath : path.subpaths()) {
-                        if (subpath instanceof final SimpleProperty simpleProperty && simpleProperty.name() instanceof StaticName staticName) {
-                            final String name = staticName.getStringName();
-                            final String value = resultSet.getString(name);
-                            rootRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.signature(), value);
-                        }
-                    }
-
-                    forest.addRecord(rootRecord);
-                }
-
-                return forest;
+            try (
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                return innerPullForest(path, resultSet);
             }
         }
         catch (Exception e) {
             throw PullForestException.innerException(e);
         }
+    }
+
+    private ForestOfRecords innerPullForest(ComplexProperty path, ResultSet resultSet) throws SQLException {
+        final ForestOfRecords forest = new ForestOfRecords();
+        final List<Column> columns = createColumns(resultSet, path);
+        final var replacedNames = path.copyWithoutDynamicNames().replacedNames();
+
+        while (resultSet.next()) {
+            final var rootRecord = new RootRecord();
+
+            for (final Column column : columns) {
+                final var value = resultSet.getString(column.index);
+
+                if (!(column.property.name() instanceof final DynamicName dynamicName)) {
+                    rootRecord.addSimpleRecord(column.property.signature(), value);
+                    continue;
+                }
+
+                final var replacement = replacedNames.get(dynamicName);
+                final var replacer = rootRecord.addDynamicReplacer(replacement.prefix(), replacement.name(), column.name);
+                replacer.addSimpleRecord(replacement.value().signature(), value);
+            }
+
+            forest.addRecord(rootRecord);
+        }
+
+        return forest;
+    }
+
+    private record Column(int index, String name, SimpleProperty property) {}
+
+    private List<Column> createColumns(ResultSet resultSet, ComplexProperty path) throws SQLException {
+        final var metadata = resultSet.getMetaData();
+        final int count = metadata.getColumnCount();
+        final List<Column> columns = new ArrayList<>();
+
+        for (int i = 1; i <= count; i++) {
+            final String name = metadata.getColumnName(i);
+            final @Nullable AccessPath property = path.findSubpathByName(name);
+
+            if (property != null)
+                columns.add(new Column(i, name, (SimpleProperty) property));
+        }
+
+        return columns;
     }
 
     public String readTableAsStringForTests(String kindName) throws SQLException {

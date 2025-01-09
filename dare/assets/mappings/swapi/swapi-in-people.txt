@@ -1,0 +1,30 @@
+_: {
+  birth_year: 0,
+  created: 1,
+  edited: 2,
+  eye_color: 3,
+  gender: 7,
+  hair_color: 8,
+  height: 9,
+  homeworld: 10,
+  mass: 11,
+  name: 12,
+  skin_color: 13,
+  url: 20,
+  Array: -21 {
+      _index: 22,
+      vehicles.json: 23
+    },
+  Array: -17 {
+      _index: 18,
+      starships.json: 19
+    },
+  Array: -14 {
+      _index: 15,
+      species.json: 16
+    },
+  Array: -4 {
+      _index: 5,
+      films.json: 6
+    }
+}  

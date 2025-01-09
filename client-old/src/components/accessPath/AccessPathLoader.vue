@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
-import { SignatureId } from '@/types/identifiers';
+import type { SignatureId } from '@/types/identifiers';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat, useSchemaCategoryId } from '@/utils/injects';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
-import { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 
 const categoryId = useSchemaCategoryId();
 
@@ -34,6 +34,7 @@ const selectedDatasource = ref<Datasource>();
 const selectedMapping = ref<Mapping>();
 const mappings = ref<Mapping[]>([]);
 const mappingConfirmed = ref(false);
+const datasourcesWithMappings = ref<Datasource[]>([]);
 
 /**
  * Computed property that determines if the "Confirm" button should be disabled.
@@ -51,6 +52,25 @@ const emit = defineEmits([ 'finish', 'cancel' ]);
 onMounted(async () => {
     await loadMappingsForSelectedDatasource();
 });
+
+onMounted(async () => {
+    await preloadDatasourcesWithMappings();
+});
+
+/**
+ * Preloads datasources that have mappings by fetching from the API.
+ */
+async function preloadDatasourcesWithMappings() {
+    const filteredDatasources: Datasource[] = [];
+
+    for (const datasource of props.datasources) {
+        const result = await API.mappings.getAllMappingsInCategory({}, { categoryId, datasourceId: datasource.id });
+        if (result.status && result.data.length > 0)
+            filteredDatasources.push(datasource);
+    }
+
+    datasourcesWithMappings.value = filteredDatasources;
+}
 
 /**
  * Watches the selected datasource and loads the associated mappings when changed.
@@ -161,8 +181,8 @@ function cancel() {
                         :disabled="mappingConfirmed"
                     >
                         <option 
-                            v-for="datasource in datasources" 
-                            :key="datasource.id" 
+                            v-for="datasource in datasourcesWithMappings" 
+                            :key="datasource.id"
                             :value="datasource"
                         >
                             {{ datasource.label }}

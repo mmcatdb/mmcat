@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ForestOfRecords implements Iterable<RootRecord> {
 
@@ -28,34 +29,20 @@ public class ForestOfRecords implements Iterable<RootRecord> {
         records.add(rootRecord);
     }
 
+    public int size() {
+        return records.size();
+    }
+
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
-        for (RootRecord rootRecord : records)
+        final StringBuilder builder = new StringBuilder();
+        for (final RootRecord rootRecord : records)
             builder.append(rootRecord).append(",\n");
 
         return builder.toString();
     }
 
-    public int size() {
-        return records.size();
+    public String toComparableString() {
+        return records.stream().map(RootRecord::toComparableString).collect(Collectors.joining(",\n"));
     }
 
-    @Override public boolean equals(Object object) {
-        if (object == this)
-            return true;
-
-        if (!(object instanceof ForestOfRecords forestOfRecords))
-            return false;
-
-        if (records.size() != forestOfRecords.size())
-            return false;
-
-        for (final var record1 : records) {
-            final var match = forestOfRecords.records.stream().anyMatch(record2 -> record2.equals(record1));
-            if (!match)
-                return false;
-        }
-
-        return true;
-    }
 }

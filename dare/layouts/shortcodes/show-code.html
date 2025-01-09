@@ -1,0 +1,23 @@
+{{ $id := .Get "id" }}
+{{ $buttonLabel := .Get "label" }}
+{{ $file := .Get "file" }}
+{{ $filePath := printf "assets/mappings/%s.txt" $file }}
+{{ $fileContent := readFile $filePath }}
+
+{{ if $fileContent }}
+<div style="text-align: center;">
+    <a
+        href="javascript:void(0);"
+        class="btn btn-large"
+        onclick="document.getElementById('{{ $id }}').style.display = document.getElementById('{{ $id }}').style.display === 'none' ? 'block' : 'none';"
+    >
+        {{ $buttonLabel }}
+    </a>
+    <br />
+    <div id="{{ $id }}" style="display: none; text-align: left; background-color: #f4f4f4; border: 1px solid #ccc; font-family: monospace; overflow: auto; padding: 1em;">
+        <pre><code>{{ $fileContent | safeHTML }}</code></pre>
+    </div>
+</div>
+{{ else }}
+<p>File "{{ $file }}" not found at "{{ $filePath }}"</p>
+{{ end }}

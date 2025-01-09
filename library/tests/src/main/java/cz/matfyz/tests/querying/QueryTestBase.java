@@ -55,8 +55,6 @@ public class QueryTestBase {
         return this;
     }
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
     public void run() {
         final var provider = new DefaultControlWrapperProvider();
         final var kinds = defineKinds(provider);
@@ -74,11 +72,12 @@ public class QueryTestBase {
     private List<Mapping> defineKinds(DefaultControlWrapperProvider provider) {
         return datasources.stream()
             .flatMap(testDatasource -> {
-                final var datasource = new Datasource(testDatasource.type, testDatasource.id);
-                provider.setControlWrapper(datasource, testDatasource.wrapper);
+                provider.setControlWrapper(testDatasource.datasource(), testDatasource.wrapper);
                 return testDatasource.mappings.stream();
             }).toList();
     }
+
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private JsonNode parseJsonResult(List<String> jsonResults) {
         try {

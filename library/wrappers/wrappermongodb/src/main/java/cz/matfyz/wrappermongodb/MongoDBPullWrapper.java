@@ -11,9 +11,8 @@ import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.querying.queryresult.ResultLeaf;
@@ -23,7 +22,6 @@ import cz.matfyz.core.querying.queryresult.ResultNode;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
-import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.inference.adminer.MongoDBAlgorithms;
 
@@ -34,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.BiFunction;
 
 import com.mongodb.client.FindIterable;
@@ -77,8 +74,11 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         return find.iterator();
     }
 
+    private Map<DynamicName, DynamicNameReplacement> replacedNames;
+
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         final var forest = new ForestOfRecords();
+        replacedNames = path.copyWithoutDynamicNames().replacedNames();
 
         try (
             final var iterator = getDocumentIterator(query);
@@ -86,7 +86,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
                 final var rootRecord = new RootRecord();
-                getDataFromDocument(rootRecord, document, path);
+                addKeysToRecord(rootRecord, path, document);
                 forest.addRecord(rootRecord);
             }
 
@@ -97,91 +97,53 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    private void getDataFromDocument(ComplexRecord parentRecord, Document document, ComplexProperty path) {
-        boolean hasSubpathWithDynamicName = false;
+    private void addKeysToRecord(ComplexRecord record, ComplexProperty path, Document object) {
+        for (final var entry : object.entrySet()) {
+            final var key = entry.getKey();
+            final var value = entry.getValue();
+            if (value == null)
+                continue;
 
-        for (final AccessPath subpath : path.subpaths()) {
-            if (subpath.name() instanceof StaticName staticName)
-                getFieldFromObjectForSubpath(parentRecord, document, staticName.getStringName(), subpath);
-            else
-                hasSubpathWithDynamicName = true;
-        }
+            final var property = path.findSubpathByName(key);
+            if (property == null)
+                continue;
 
-        if (hasSubpathWithDynamicName)
-            getDataFromDynamicFieldsOfObject(parentRecord, document, path);
-    }
+            if (!(property.name() instanceof final DynamicName dynamicName)) {
+                addValueToRecord(record, property, value);
+                continue;
+            }
 
-    private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, Document document, ComplexProperty path) {
-        // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name.
-        AccessPath subpathWithDynamicName = null;
-        final Set<String> otherSubpathNames = new TreeSet<>();
-
-        for (AccessPath subpath : path.subpaths()) {
-            if (subpath.name() instanceof StaticName staticName)
-                otherSubpathNames.add(staticName.getStringName());
-            else
-                subpathWithDynamicName = subpath;
-        }
-
-        // For all keys in the object where the key is not a known static name do ...
-        for (final String key : document.keySet()) {
-            if (!otherSubpathNames.contains(key))
-                getFieldFromObjectForSubpath(parentRecord, document, key, subpathWithDynamicName);
+            // Replace the dynamically named property with an object containing both name and value properties.
+            final var replacement = replacedNames.get(dynamicName);
+            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
+            addValueToRecord(replacer, replacement.value(), value);
         }
     }
 
-    private void getFieldFromObjectForSubpath(ComplexRecord parentRecord, Document document, String key, AccessPath subpath) {
-        final var value = document.get(key);
-        if (value == null)
+    private void addValueToRecord(ComplexRecord parentRecord, AccessPath property, Object value) {
+        if (value instanceof final ArrayList<?> array) {
+            // If it's array, we flatten it.
+            for (int i = 0; i < array.size(); i++)
+                addValueToRecord(parentRecord, property, array.get(i));
             return;
-
-        if (subpath instanceof final ComplexProperty complexSubpath)
-            getFieldFromObjectForComplexSubpath(parentRecord, key, value, complexSubpath);
-        else if (subpath instanceof final SimpleProperty simpleSubpath)
-            getFieldFromObjectForSimpleSubpath(parentRecord, key, value, simpleSubpath);
-    }
-
-    private void getFieldFromObjectForComplexSubpath(ComplexRecord parentRecord, String key, Object value, ComplexProperty complexSubpath) {
-        if (value instanceof final ArrayList<?> childArray) {
-            for (int i = 0; i < childArray.size(); i++)
-                if (childArray.get(i) instanceof Document childDocument)
-                    addComplexValueToRecord(parentRecord, childDocument, key, complexSubpath);
         }
-        else if (value instanceof Document childDocument)
-            addComplexValueToRecord(parentRecord, childDocument, key, complexSubpath);
-    }
 
-    private void getFieldFromObjectForSimpleSubpath(ComplexRecord parentRecord, String key, Object value, SimpleProperty simpleSubpath) {
-        if (value instanceof final ArrayList<?> simpleArray) {
-            final var values = new ArrayList<String>();
-
-            for (int i = 0; i < simpleArray.size(); i++)
-                values.add(simpleArray.get(i).toString());
-
-            parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), key), simpleSubpath.signature(), values);
+        if (property instanceof final SimpleProperty simpleProperty) {
+            // If it's a simple value, we add it to the record.
+            parentRecord.addSimpleRecord(simpleProperty.signature(), value.toString());
+            return;
         }
-        else {
-            final RecordName recordName = toRecordName(simpleSubpath.name(), key);
-            parentRecord.addSimpleValueRecord(recordName, simpleSubpath.signature(), value.toString());
-        }
-    }
 
-    private void addComplexValueToRecord(ComplexRecord parentRecord, Document value, String key, ComplexProperty complexProperty) {
+        final var complexProperty = (ComplexProperty) property;
+        final var object = (Document) value;
+
         // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
         // We do so by passing the parent record instead of creating a new one.
-        if (complexProperty.isAuxiliary())
-            getDataFromDocument(parentRecord, value, complexProperty);
-        else {
-            ComplexRecord childRecord = parentRecord.addComplexRecord(toRecordName(complexProperty.name(), key), complexProperty.signature());
-            getDataFromDocument(childRecord, value, complexProperty);
-        }
-    }
+        final ComplexRecord childRecord = complexProperty.isAuxiliary()
+            ? parentRecord
+            : parentRecord.addComplexRecord(complexProperty.signature());
 
-    private RecordName toRecordName(Name name, String valueIfDynamic) {
-        if (name instanceof DynamicName dynamicName)
-            return dynamicName.toRecordName(valueIfDynamic);
-
-        return ((StaticName) name).toRecordName();
+        addKeysToRecord(childRecord, complexProperty, object);
     }
 
     public String readCollectionAsStringForTests(String kindName) {

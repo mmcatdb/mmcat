@@ -1,0 +1,55 @@
+name: dare-deploy
+
+on:
+  push:
+    branches:
+      - master
+      - dare
+    paths:
+      - 'dare/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: dare-deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: registry.gitlab.com/gitlab-ci-utils/docker-hugo:latest
+    environment: prod
+    defaults:
+      run:
+        working-directory: ./dare
+    steps:
+      - uses: actions/checkout@v4
+      - run: hugo --cleanDestinationDir
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: ./dare/public
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment: prod
+    defaults:
+      run:
+        working-directory: ./dare
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: ./dare/public
+
+      - uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -r --delete
+          path: ./dare/public/.
+          remote_path: /var/www/html/mmcat-dare
+          remote_host: ${{ vars.FTP_HOST }}
+          remote_port: 42222
+          remote_user: ${{ secrets.FTP_USERNAME }}
+          remote_key: ${{ secrets.FTP_SSH_KEY }}
+

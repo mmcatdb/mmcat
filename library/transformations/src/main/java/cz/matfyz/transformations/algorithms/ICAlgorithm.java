@@ -19,33 +19,44 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/**
+ * This algorithm creates integrity constraint statements.
+ * It creates multiple statements because some of them need to be executed before others.
+ * So, all statements for all kinds in a given datasource should be created first and then sorted.
+ */
 public class ICAlgorithm {
 
-    private Mapping mapping;
-    private Map<SchemaObject, Mapping> mappingsByObjects;
-    private AbstractICWrapper wrapper;
+    public static Collection<AbstractStatement> run(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
+        return new ICAlgorithm(mapping, allMappings, wrapper).run();
+    }
 
-    private Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
+    private final Mapping mapping;
+    private final Map<SchemaObject, Mapping> mappingsByObjects;
+    private final AbstractICWrapper wrapper;
 
-    public void input(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
+    private ICAlgorithm(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
         this.mapping = mapping;
         this.wrapper = wrapper;
         this.mappingsByObjects = new TreeMap<>();
         allMappings.forEach(m -> mappingsByObjects.put(m.rootObject(), m));
     }
 
-    public AbstractStatement algorithm() {
-        // Primary key constraint
-        IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
+    private final Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
+
+    private Collection<AbstractStatement> run() {
+        wrapper.clear();
+
+        // Primary key constraint.
+        final IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
         // If there are no signatures, we can't create the primary key.
         if (!identifierStructure.isEmpty())
             wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
 
-        // Reference keys constraints
+        // Reference keys constraints.
         processPath(mapping.accessPath(), mapping, Signature.createEmpty());
         referencesForAllKinds.forEach((referencedKindName, references) -> wrapper.appendReference(mapping.kindName(), referencedKindName, references));
 
-        return wrapper.createICStatement();
+        return wrapper.createICStatements();
     }
 
     /**

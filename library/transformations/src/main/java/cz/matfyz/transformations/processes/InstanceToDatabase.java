@@ -22,22 +22,19 @@ import java.util.List;
 
 public class InstanceToDatabase {
 
-    private Mapping mapping;
-    private Iterable<Mapping> allMappings;
+    private Collection<Mapping> allMappings;
     private InstanceCategory currentInstance;
     private AbstractDDLWrapper ddlWrapper;
     private AbstractDMLWrapper dmlWrapper;
     private AbstractICWrapper icWrapper;
 
     public InstanceToDatabase input(
-        Mapping mapping,
-        Iterable<Mapping> allMappings,
+        Collection<Mapping> allMappings,
         InstanceCategory currentInstance,
         AbstractDDLWrapper ddlWrapper,
         AbstractDMLWrapper dmlWrapper,
         AbstractICWrapper icWrapper
     ) {
-        this.mapping = mapping;
         this.allMappings = allMappings;
         this.currentInstance = currentInstance;
         this.ddlWrapper = ddlWrapper;
@@ -65,49 +62,55 @@ public class InstanceToDatabase {
     }
 
     private InstanceToDatabaseResult innerRun() {
+        if (allMappings.size() == 0)
+            return new InstanceToDatabaseResult("", List.of());
+
         Statistics.start(Interval.INSTANCE_TO_DATABASE);
 
         final InstanceCategory instance = currentInstance != null
             ? currentInstance
-            : new InstanceBuilder(mapping.category()).build();
+            : new InstanceBuilder(allMappings.iterator().next().category()).build();
 
-        final var ddlTform = new DDLAlgorithm();
-        ddlTform.input(mapping, mapping.category(), ddlWrapper);
+        final var ddlStatements = new ArrayList<AbstractStatement>();
+        final var icStatements = new ArrayList<AbstractStatement>();
+        final var dmlStatements = new ArrayList<AbstractStatement>();
 
-        final var icTform = new ICAlgorithm();
-        icTform.input(mapping, allMappings, icWrapper);
+        for (final var mapping : allMappings) {
+            Statistics.start(Interval.CTM_ALGORITHM);
 
-        final var dmlTform = new DMLAlgorithm();
-        dmlTform.input(mapping, instance, dmlWrapper);
+            ddlStatements.add(DDLAlgorithm.run(mapping, instance, ddlWrapper));
+            icStatements.addAll(ICAlgorithm.run(mapping, allMappings, icWrapper));
+            dmlStatements.addAll(DMLAlgorithm.run(mapping, instance, dmlWrapper));
 
-        Statistics.start(Interval.CTM_ALGORIGHM);
-        final var ddlStatement = ddlTform.algorithm();
-        final var icStatement = icTform.algorithm();
-        final var dmlStatements = dmlTform.algorithm();
-        Statistics.end(Interval.CTM_ALGORIGHM);
+            Statistics.end(Interval.CTM_ALGORITHM);
+        }
+
+        final var sortedIcStatements = AbstractStatement.sortByPriority(icStatements);
+
+        // The mappings can be processed in whatever order. However, the final statements must be:
+        //  - All DDL statements.
+        //  - All DML statements.
+        //  - All IC statements.
+        // So that the IC statements can work with tables defined by the DDL statements and there are no FK constraints violations in the DML statements.
+        // Also, there might be several dependency groups of IC statements, so they must be sorted by priority.
+
+        final var statements = new ArrayList<AbstractStatement>();
+        statements.addAll(ddlStatements);
+        statements.addAll(dmlStatements);
+        statements.addAll(sortedIcStatements);
 
         Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());
-
-        final var statementsAsString = statementsToString(ddlStatement, icStatement, dmlStatements, dmlWrapper);
-        final var statements = new ArrayList<AbstractStatement>();
-        statements.add(ddlStatement);
-        statements.add(icStatement);
-        statements.addAll(dmlStatements);
-
         Statistics.end(Interval.INSTANCE_TO_DATABASE);
+
+        final var statementsAsString = statementsToString(statements, dmlWrapper);
 
         return new InstanceToDatabaseResult(statementsAsString, statements);
     }
 
-    private String statementsToString(AbstractStatement ddlStatement, AbstractStatement icStatement, List<AbstractStatement> dmlStatements, AbstractDMLWrapper dmlWrapper) {
+    private String statementsToString(Collection<AbstractStatement> statements, AbstractDMLWrapper dmlWrapper) {
         final var output = new StringBuilder();
-        if (!ddlStatement.getContent().isEmpty())
+        for (final var ddlStatement : statements)
             output.append(ddlStatement.getContent()).append("\n");
-
-        if (!icStatement.getContent().isEmpty())
-            output.append(icStatement.getContent()).append("\n");
-
-        output.append(dmlWrapper.joinStatements(dmlStatements));
 
         return output.toString();
     }

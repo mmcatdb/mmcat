@@ -1,0 +1,77 @@
+_: {
+  created: 49,
+  director: 50,
+  edited: 51,
+  episode_id: 52,
+  opening_crawl: 53,
+  producer: 57,
+  release_date: 58,
+  title: 65,
+  url: 66,
+  Array: -67 {
+      _index: 68,
+      vehicles.json: 69 {
+        name: 70,
+        model: 71
+      }
+    },
+  Array: -62 {
+      _index: 63,
+      starships.json: 64 {
+        name: 72,
+        manufacturer: 73
+      }
+    },
+  Array: -59 {
+      _index: 60,
+      species.json: 61 {
+        name: 74,
+        language: 75,
+        homeworld: 76
+      }
+    },
+  Array:-54 {
+      _index: 55,_: {
+  created: 49,
+  director: 50,
+  edited: 51,
+  episode_id: 52,
+  opening_crawl: 53,
+  producer: 57,
+  release_date: 58,
+  title: 65,
+  url: 66,
+  Array: -67 {
+      _index: 68,
+      vehicles.json: 69
+    },
+  Array: -62 {
+      _index: 63,
+      starships.json: 64
+    },
+  Array: -59 {
+      _index: 60,
+      species.json: 61
+    },
+  Array:-54 {
+      _index: 55,
+      planets.json: 56
+    },
+  Array: -46 {
+      _index: 47,
+      people.json: 48
+    }
+}
+      planets.json: 56 {
+        climate: 77
+      }
+    },
+  Array: -46 {
+      _index: 47,
+      people.json: 48 {
+        name: 78,
+        height: 79,
+        gender: 80
+      }
+    }
+}

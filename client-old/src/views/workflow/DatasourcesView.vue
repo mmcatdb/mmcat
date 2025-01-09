@@ -7,7 +7,7 @@ import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
 import { useWorkflow } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { useFixedRouter } from '@/router/specificRoutes';
-import { type WorkflowData } from '@/types/workflow';
+import type { WorkflowData } from '@/types/workflow';
 
 const workflow = useWorkflow();
 const emit = defineEmits([ 'continue' ]);

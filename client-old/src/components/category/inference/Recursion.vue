@@ -3,7 +3,7 @@ import { onMounted, onUnmounted, ref, shallowRef, computed } from 'vue';
 import { type Graph, Edge, SelectionType, type Node } from '@/types/categoryGraph';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import Warning from './Warning.vue';
+import Message from './Message.vue';
 
 /**
  * Props passed to the component.
@@ -172,7 +172,7 @@ function onEdgeTapHandler(edge: Edge) {
 
 <template>
     <div class="position-relative">
-        <Warning 
+        <Message 
             :show="showWarning"
             :message="warningMessage"
         />
