@@ -6,19 +6,33 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.GraphResponse;
+import cz.matfyz.core.adminer.GraphResponse.GraphElement;
+import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.inference.adminer.Neo4jAlgorithms;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.neo4j.driver.Query;
+import org.neo4j.driver.Result;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
 
@@ -251,6 +265,169 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     @Override public QueryResult executeQuery(QueryStatement statement) {
         // TODO
         throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
+    }
+
+    /**
+     * Retrieves a list of distinct kind names (labels).
+     *
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @return A {@link KindNameResponse} containing the list of kind names.
+     * @throws PullForestException if an error occurs during database access.
+     */
+    @Override public KindNameResponse getKindNames(String limit, String offset) {
+        try (Session session = provider.getSession()) {
+            List<String> data = new ArrayList<>();
+
+            Result queryResult = session.run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label SKIP " + offset + " LIMIT " + limit + ";");
+            while (queryResult.hasNext()) {
+                Record queryRecord = queryResult.next();
+                data.add(queryRecord.get("label").asString());
+            }
+
+            return new KindNameResponse(data);
+        }
+        catch (Exception e){
+            throw PullForestException.innerException(e);
+        }
+    }
+
+    /**
+     * Constructs a Cypher WHERE clause based on a list of filters.
+     *
+     * @param filters The filters to apply.
+     * @param name The alias for the graph element in the query ('a' for nodes and 'r' for relationships).
+     * @return A Cypher WHERE clause as a {@link String}.
+     */
+    private String createWhereClause(List<AdminerFilter> filters, String name) {
+        if (filters == null || filters.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder whereClause = new StringBuilder("WHERE ");
+
+        for (int i = 0; i < filters.size(); i++) {
+            AdminerFilter filter = filters.get(i);
+            String operator = Neo4jAlgorithms.OPERATORS.get(filter.operator());
+
+            if (i != 0) {
+                whereClause.append(" AND ");
+            }
+
+            whereClause.append(name)
+                .append(".")
+                .append(filter.columnName())
+                .append(" ")
+                .append(operator);
+
+            if (operator.equals("IN")) {
+                whereClause
+                    .append(" ")
+                    .append(Arrays.stream(filter.columnValue().split(";"))
+                        .map(String::trim)
+                        .map(value -> "'" + value + "'")
+                        .collect(Collectors.joining(", ", "[", "]")))
+                    .append("");
+            } else if (!Neo4jAlgorithms.UNARY_OPERATORS.contains(operator)) {
+                whereClause
+                    .append(" '")
+                    .append(filter.columnValue())
+                    .append("'");
+            }
+        }
+
+        return whereClause.toString();
+    }
+
+    /**
+     * Retrieves node data from the graph based on the specified query, filters, and pagination parameters.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param queryBase The base Cypher query to match nodes.
+     * @param filters The filters to apply.
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @return A {@link GraphResponse} containing the nodes and metadata.
+     */
+    private GraphResponse getNode(Session session, String queryBase, List<AdminerFilter> filters, String limit, String offset) {
+        String whereClause = createWhereClause(filters, "a");
+
+        List<GraphElement> data = session.executeRead(tx -> {
+            var query = new Query(queryBase + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
+
+            return tx.run(query).stream()
+                .map(node -> Neo4jAlgorithms.getNodeProperties(node.get("a")))
+                .toList();
+        });
+
+        Result countQueryResult = session.run(queryBase + " RETURN COUNT(a) AS recordCount;");
+        int itemCount = countQueryResult.next().get("recordCount").asInt();
+
+        Set<String> properties = Neo4jAlgorithms.getNodePropertyNames(session);
+
+        return new GraphResponse(data, itemCount, properties);
+    }
+
+    /**
+     * Retrieves relationship data from the graph based on the specified filters and pagination parameters.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param filters The filters to apply.
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @return A {@link GraphResponse} containing the relationships and metadata.
+     */
+    private GraphResponse getRelationship(Session session, List<AdminerFilter> filters, String limit, String offset) {
+        String whereClause = createWhereClause(filters, "r");
+        List<GraphElement> data = session.executeRead(tx -> {
+            var query = new Query("MATCH ()-[r]->() " + whereClause + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
+
+            return tx.run(query).stream()
+                .map(relation -> Neo4jAlgorithms.getRelationshipProperties(relation.get("r")))
+                .toList();
+        });
+
+        Result countQueryResult = session.run("MATCH ()-[r]->() " + whereClause + " RETURN COUNT(r) AS recordCount;");
+        int itemCount = countQueryResult.next().get("recordCount").asInt();
+
+        Set<String> properties = Neo4jAlgorithms.getRelationshipPropertyNames(session);
+
+        return new GraphResponse(data, itemCount, properties);
+    }
+
+    /**
+     * Retrieves data of the specified kind from the graph.
+     *
+     * @param kindName The name of the kind.
+     * @param limit The maximum number of results to return.
+     * @param offset The number of results to skip.
+     * @param filters The filters to apply (optional).
+     * @return A {@link GraphResponse} containing the data and metadata.
+     * @throws PullForestException if an error occurs during query execution.
+     */
+    @Override public GraphResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
+        try (Session session = provider.getSession()) {
+            if (kindName.equals("relationships") || kindName.equals("unlabeled")) {
+                return getRelationship(session, filters, limit, offset);
+            }
+
+            String queryBase = kindName.equals("nodes") ? "MATCH (a) " : "MATCH (a:" + kindName + ") ";
+            return getNode(session, queryBase, filters, limit, offset);
+        } catch (Exception e) {
+            throw PullForestException.innerException(e);
+        }
+    }
+
+    /**
+     * Unsupported method for fetching foreign keys in Neo4j.
+     *
+     * @param datasourceId ID of the datasource.
+     * @param kindName     The name of the kind.
+     * @throws UnsupportedOperationException as this operation is not implemented.
+     */
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
+        // TODO
+        throw new UnsupportedOperationException("Neo4jPullWrapper.getReferences not implemented.");
     }
 
 }

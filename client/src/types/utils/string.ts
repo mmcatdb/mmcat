@@ -2,7 +2,7 @@ export class IndentedStringBuilder {
     private intendationString: string;
     private lines: string[] = [];
 
-    public constructor(input?: string | number) {
+    constructor(input?: string | number) {
         this.intendationString = input === undefined ? '' : typeof input === 'string' ? input : IndentedStringBuilder.getTabIntendationString(input);
     }
 

@@ -7,14 +7,19 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.core.adminer.DataResponse;
+import cz.matfyz.core.adminer.Reference;
+import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
+import java.util.List;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -22,6 +27,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A pull wrapper implementation for JSON files that implements the {@link AbstractPullWrapper} interface.
@@ -130,6 +137,18 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      */
     @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
+    }
+
+    @Override public KindNameResponse getKindNames(String limit, String offset) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
+    }
+
+    @Override public DataResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
+    }
+
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getReferences not implemented.");
     }
 
 }

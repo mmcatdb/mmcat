@@ -2,7 +2,7 @@ import type { DatasourceConfiguration } from '../datasource';
 import type { Signature } from '../identifiers';
 import { Cardinality, type Max, type Min } from '../schema';
 import type { Edge } from './Edge';
-import { type Node, AvailabilityStatus, Neighbor } from './Node';
+import { type Node, AvailabilityStatus, type Neighbor } from './Node';
 
 export type MorphismData = {
     signature: Signature;

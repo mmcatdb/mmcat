@@ -1,5 +1,5 @@
-import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaMorphism, type SchemaMorphismFromServer } from '../SchemaMorphism';
+import type { Category } from '../Category';
+import { SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type UpdateMorphismFromServer = SMOFromServer<SMOType.UpdateMorphism> & {
@@ -40,11 +40,11 @@ export class UpdateMorphism implements SMO<SMOType.UpdateMorphism> {
         };
     }
 
-    up(category: SchemaCategory): void {
-        category.getMorphism(this.newMorphism.signature).current = this.newMorphism;
+    up(category: Category): void {
+        category.getMorphism(this.newMorphism.signature).schema = this.newMorphism;
     }
 
-    down(category: SchemaCategory): void {
-        category.getMorphism(this.oldMorphism.signature).current = this.oldMorphism;
+    down(category: Category): void {
+        category.getMorphism(this.oldMorphism.signature).schema = this.oldMorphism;
     }
 }

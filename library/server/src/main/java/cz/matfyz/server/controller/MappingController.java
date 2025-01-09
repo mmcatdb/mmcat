@@ -34,6 +34,11 @@ public class MappingController {
         return repository.find(id);
     }
 
+    @GetMapping("/mappings/all")
+    public List<MappingWrapper> getAllMappings() {
+        return repository.findAll();
+    }
+
     @GetMapping("/mappings")
     public List<MappingWrapper> getAllMappingsInCategory(@RequestParam Id categoryId, @RequestParam Optional<Id> datasourceId) {
         return repository.findAllInCategory(categoryId, datasourceId.orElse(null));

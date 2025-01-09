@@ -19,7 +19,7 @@ export function Tooltip(props: Readonly<Omit<TooltipProps, 'delay' | 'isOpen'>>)
 const LINK_CLASS = 'relative inline-flex items-center tap-highlight-transparent outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 text-medium no-underline hover:opacity-80 active:opacity-disabled transition-opacity';
 const LINK_DISABLED_CLASS = LINK_CLASS + ' opacity-disabled cursor-default pointer-events-none';
 
-export function Link({ color = 'primary', className, isDisabled, ...rest }: Readonly<LinkProps & { isDisabled?: boolean }>) {
+export function CustomLink({ color = 'primary', className, isDisabled, ...rest }: Readonly<LinkProps & { isDisabled?: boolean }>) {
     const baseClass = isDisabled ? LINK_DISABLED_CLASS : LINK_CLASS;
     const disabled = isDisabled ? true : undefined;
 

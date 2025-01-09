@@ -1,4 +1,5 @@
 import actions from './routes/actions';
+import adminer from './routes/adminer';
 import datasources from './routes/datasources';
 import instances from './routes/instances';
 import jobs from './routes/jobs';
@@ -8,6 +9,7 @@ import schemas from './routes/schemas';
 
 const api = {
     actions,
+    adminer,
     datasources,
     instances,
     jobs,
@@ -17,5 +19,3 @@ const api = {
 };
 
 export { api };
-
-export type Resolved<TLoaderData extends Record<string, unknown>, TKey extends keyof TLoaderData> = TLoaderData[TKey] extends Promise<infer TResolved> ? TResolved : never;

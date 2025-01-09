@@ -54,6 +54,26 @@ public class MappingRepository {
         }, "Mapping", id);
     }
 
+    public List<MappingWrapper> findAll() {
+        return db.getMultiple((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    id,
+                    version,
+                    last_valid,
+                    category_id,
+                    datasource_id,
+                    json_value
+                FROM mapping
+                ORDER BY mapping.id;
+                """);
+            final var resultSet = statement.executeQuery();
+
+            while (resultSet.next())
+                output.add(fromResultSet(resultSet));
+        });
+    }
+
     public List<MappingWrapper> findAllInCategory(Id categoryId) {
         return findAllInCategory(categoryId, null);
     }

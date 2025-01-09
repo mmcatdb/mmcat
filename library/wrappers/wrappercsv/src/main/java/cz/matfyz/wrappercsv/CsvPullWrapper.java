@@ -9,13 +9,16 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.adminer.DataResponse;
+import cz.matfyz.core.adminer.Reference;
+import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
-import cz.matfyz.core.mapping.StaticName;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -23,6 +26,9 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.record.AdminerFilter;
 
 /**
  * A pull wrapper implementation for CSV files that implements the {@link AbstractPullWrapper} interface.
@@ -134,4 +140,17 @@ public class CsvPullWrapper implements AbstractPullWrapper {
     @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
+
+    @Override public KindNameResponse getKindNames(String limit, String offset) {
+        throw new UnsupportedOperationException("CsvPullWrapper.getKindNames not implemented.");
+    }
+
+    @Override public DataResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
+        throw new UnsupportedOperationException("CsvPullWrapper.getKind not implemented.");
+    }
+
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
+        throw new UnsupportedOperationException("CsvPullWrapper.getReferences not implemented.");
+    }
+
 }

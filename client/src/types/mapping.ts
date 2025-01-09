@@ -20,7 +20,7 @@ export class Mapping implements Entity {
         public readonly kindName: string,
         public readonly categoryId: Id,
         public readonly datasourceId: Id,
-        public readonly rootObjectKey: Key,
+        public readonly rootObjexKey: Key,
         public readonly primaryKey: SignatureId,
         public readonly accessPath: RootProperty,
         public readonly version: VersionId,

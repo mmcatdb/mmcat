@@ -1,10 +1,10 @@
 package cz.matfyz.server.entity.evolution;
 
 import cz.matfyz.evolution.Version;
+import cz.matfyz.evolution.category.SMO;
+import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MetadataEvolutionAlgorithm;
-import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
-import cz.matfyz.evolution.schema.SMO;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.utils.Utils;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
