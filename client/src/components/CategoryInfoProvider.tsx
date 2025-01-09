@@ -1,5 +1,5 @@
 import { type SchemaCategoryInfo } from '@/types/schema';
-import { createContext, useContext, useState } from 'react';
+import { createContext, type ReactNode, useContext, useState } from 'react';
 
 type CategoryInfoContext = {
     category: SchemaCategoryInfo;
@@ -9,13 +9,11 @@ type CategoryInfoContext = {
 export const CategoryInfoContext = createContext<CategoryInfoContext | undefined>(undefined);
 
 type CategoryInfoProviderProps = Readonly<{
-    children: React.ReactNode;
+    children: ReactNode;
     category: SchemaCategoryInfo;
 }>;
 
 export function CategoryInfoProvider({ children, category: inputCategory }: CategoryInfoProviderProps) {
-    console.log({ inputCategory });
-
     const [ category, setCategory ] = useState(inputCategory);
 
     return (

@@ -1,11 +1,12 @@
 import type { Entity, Id, VersionId } from './id';
 import {  Datasource, type DatasourceFromServer } from './datasource';
+import { MappingInfo, type MappingInfoFromServer } from './mapping';
 
 export type ActionFromServer = {
     id: Id;
     categoryId: Id;
     label: string;
-    payload: JobPayloadFromServer;
+    payloads: JobPayloadFromServer[];
 };
 
 export class Action implements Entity {
@@ -13,7 +14,7 @@ export class Action implements Entity {
         public readonly id: Id,
         public readonly categoryId: Id,
         public readonly label: string,
-        public readonly payload: JobPayload,
+        public readonly payloads: JobPayload[],
     ) {}
 
     static fromServer(input: ActionFromServer): Action {
@@ -21,7 +22,7 @@ export class Action implements Entity {
             input.id,
             input.categoryId,
             input.label,
-            jobPayloadFromServer(input.payload),
+            input.payloads.map(jobPayloadFromServer),
         );
     }
 }
@@ -83,12 +84,18 @@ export function jobPayloadFromServer(input: JobPayloadFromServer): JobPayload {
 }
 
 export type JobPayloadInit = {
-    type: ActionType.ModelToCategory | ActionType.CategoryToModel | ActionType.RSDToCategory;
+    type: ActionType.ModelToCategory | ActionType.CategoryToModel;
     datasourceId: Id;
+    /** If not empty, only the selected mappings from this datasource will be used. */
+    mappingIds: Id[];
+} | {
+    type: ActionType.RSDToCategory;
+    datasourceIds: Id[];
 };
 
 type ModelToCategoryPayloadFromServer = JobPayloadFromServer<ActionType.ModelToCategory> & {
     datasource: DatasourceFromServer;
+    mappings: MappingInfoFromServer[];
 };
 
 class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategory> {
@@ -96,17 +103,20 @@ class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategor
 
     private constructor(
         readonly datasource: Datasource,
+        readonly mappings: MappingInfo[],
     ) {}
 
     static fromServer(input: ModelToCategoryPayloadFromServer): ModelToCategoryPayload {
         return new ModelToCategoryPayload(
             Datasource.fromServer(input.datasource),
+            input.mappings.map(MappingInfo.fromServer),
         );
     }
 }
 
 type CategoryToModelPayloadFromServer = JobPayloadFromServer<ActionType.CategoryToModel> & {
     datasource: DatasourceFromServer;
+    mappings: MappingInfoFromServer[];
 };
 
 class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToModel> {
@@ -114,11 +124,13 @@ class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToMode
 
     private constructor(
         readonly datasource: Datasource,
+        readonly mappings: MappingInfo[],
     ) {}
 
     static fromServer(input: CategoryToModelPayloadFromServer): CategoryToModelPayload {
         return new CategoryToModelPayload(
             Datasource.fromServer(input.datasource),
+            input.mappings.map(MappingInfo.fromServer),
         );
     }
 }

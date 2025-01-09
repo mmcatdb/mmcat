@@ -1,5 +1,4 @@
-import axios from 'axios';
-import type { AxiosResponse } from 'axios/index';
+import axios, { type AxiosResponse } from 'axios';
 import type { Result } from '@/types/api/result';
 import type { PullResult } from '@/types/api/routes';
 

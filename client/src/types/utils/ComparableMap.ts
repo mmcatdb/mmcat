@@ -5,7 +5,7 @@ export type KeyValue<Key, Value> = { key: Key, value: Value };
 export class ComparableMap<Key, KeyId, Value> implements Map<Key, Value> {
     private readonly map = new Map<KeyId, KeyValue<Key, Value>>();
 
-    public constructor(
+    constructor(
         private readonly keyToIdFunction: Injection<Key, KeyId>,
     ) {}
 
@@ -34,7 +34,7 @@ export class ComparableMap<Key, KeyId, Value> implements Map<Key, Value> {
         return this.map.size;
     }
 
-    entries(): IterableIterator<[Key, Value]> {
+    entries(): MapIterator<[Key, Value]> {
         return injectionIterator(this.map.entries(), ([ , keyValue ]) => [ keyValue.key, keyValue.value ]);
     }
 
@@ -46,15 +46,15 @@ export class ComparableMap<Key, KeyId, Value> implements Map<Key, Value> {
         this.map.forEach(keyValue => callbackfn(keyValue.value, keyValue.key, this));
     }
 
-    keys(): IterableIterator<Key> {
-        return injectionIterator(this.map.values(), (keyValue) => keyValue.key);
+    keys(): MapIterator<Key> {
+        return injectionIterator(this.map.values(), keyValue => keyValue.key);
     }
 
-    values(): IterableIterator<Value> {
-        return injectionIterator(this.map.values(), (keyValue) => keyValue.value);
+    values(): MapIterator<Value> {
+        return injectionIterator(this.map.values(), keyValue => keyValue.value);
     }
 
-    [Symbol.iterator](): IterableIterator<[Key, Value]> {
+    [Symbol.iterator](): MapIterator<[Key, Value]> {
         return this.entries();
     }
 

@@ -1,7 +1,7 @@
 import { Signature, type SignatureFromServer } from '../identifiers';
 import type { SchemaMorphism } from '../schema';
 import type { InstanceCategory } from './InstanceCategory';
-import type { DomainRow, InstanceObject } from './InstanceObject';
+import type { DomainRow, InstanceObjex } from './InstanceObjex';
 
 export type InstanceMorphismFromServer = {
     signature: SignatureFromServer;
@@ -11,19 +11,19 @@ export type InstanceMorphismFromServer = {
 export class InstanceMorphism {
     private constructor(
         readonly schema: SchemaMorphism,
-        readonly dom: InstanceObject,
-        readonly cod: InstanceObject,
+        readonly dom: InstanceObjex,
+        readonly cod: InstanceObjex,
         readonly mappings: MappingRow[],
     ) {}
 
     static fromServer(input: InstanceMorphismFromServer, instance: InstanceCategory): InstanceMorphism | undefined {
         const signature = Signature.fromServer(input.signature);
-        const morphism = instance.schema.getMorphism(signature).current;
-        if (!morphism)
+        const schemaMorphism = instance.schema.getMorphism(signature).schema;
+        if (!schemaMorphism)
             return;
 
-        const dom = instance.objects.get(morphism.domKey);
-        const cod = instance.objects.get(morphism.codKey);
+        const dom = instance.objexes.get(schemaMorphism.domKey);
+        const cod = instance.objexes.get(schemaMorphism.codKey);
         if (!dom || !cod)
             return;
 
@@ -36,7 +36,7 @@ export class InstanceMorphism {
         });
 
         return new InstanceMorphism(
-            morphism,
+            schemaMorphism,
             dom,
             cod,
             mappings,
@@ -58,7 +58,7 @@ export type MappingRowFromServer = {
 };
 
 export class MappingRow {
-    public constructor(
+    constructor(
         readonly dom: DomainRow,
         readonly cod: DomainRow,
     ) {}

@@ -38,6 +38,10 @@ export type Settings = {
     authenticationDatabase?: string;
     username?: string;
     password?: string;
+    /** For csv. Needs to be one character. */
+    separator?: string;
+    /** For csv. */
+    hasHeader?: boolean;
     isWritable?: boolean;
     isQueryable?: boolean;
 };
@@ -95,6 +99,9 @@ export const DATASOURCE_TYPES: { type: DatasourceType, label: string }[] = [
 ];
 
 export function validateSettings(settings: Settings, type: DatasourceType): boolean {
+    if (type === DatasourceType.csv && settings.separator?.length !== 1)
+        return false;
+    
     if (isFile(type))
         return !!settings.url;
 

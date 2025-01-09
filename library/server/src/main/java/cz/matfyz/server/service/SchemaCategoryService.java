@@ -5,11 +5,11 @@ import cz.matfyz.core.metadata.MetadataSerializer;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.evolution.Version;
+import cz.matfyz.evolution.category.SMO;
+import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
 import cz.matfyz.evolution.exception.VersionException;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MetadataEvolutionAlgorithm;
-import cz.matfyz.evolution.schema.SMO;
-import cz.matfyz.evolution.schema.SchemaEvolutionAlgorithm;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.evolution.SchemaEvolution;
@@ -84,10 +84,10 @@ public class SchemaCategoryService {
 
         final SchemaEvolutionAlgorithm schemaAlgorithm = evolution.toSchemaAlgorithm(evolutionInit.prevVersion());
         final SchemaCategory schema = wrapper.toSchemaCategory();
-        schemaAlgorithm.up(schema);
-
         final MetadataEvolutionAlgorithm metadataAlgorithm = evolution.toMetadataAlgorithm(evolutionInit.prevVersion());
         final MetadataCategory metadata = wrapper.toMetadataCategory(schema);
+        schemaAlgorithm.up(schema, metadata);
+
         metadataAlgorithm.up(metadata);
 
         wrapper.updateVersion(newVersion, wrapper.systemVersion);

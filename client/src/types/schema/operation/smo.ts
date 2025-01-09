@@ -1,9 +1,9 @@
-import type { SchemaCategory } from '../SchemaCategory';
+import type { Category } from '../Category';
 
 export enum SMOType {
-    CreateObject = 'createObject',
-    DeleteObject = 'deleteObject',
-    UpdateObject = 'updateObject',
+    CreateObjex = 'createObject',
+    DeleteObjex = 'deleteObject',
+    UpdateObjex = 'updateObject',
     CreateMorphism = 'createMorphism',
     DeleteMorphism = 'deleteMorphism',
     UpdateMorphism = 'updateMorphism',
@@ -17,6 +17,6 @@ export type SMOFromServer<T extends SMOType = SMOType> = {
 export type SMO<T extends SMOType = SMOType> = {
     readonly type: T;
     toServer(): SMOFromServer<T>;
-    up(category: SchemaCategory): void;
-    down(category: SchemaCategory): void;
+    up(category: Category): void;
+    down(category: Category): void;
 }

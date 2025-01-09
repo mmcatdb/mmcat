@@ -1,3 +1,3 @@
-export * from './SchemaCategory';
-export * from './SchemaMorphism';
-export * from './SchemaObject';
+export * from './Category';
+export * from './Morphism';
+export * from './Objex';

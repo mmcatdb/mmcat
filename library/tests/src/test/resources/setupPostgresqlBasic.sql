@@ -29,7 +29,9 @@ CREATE TABLE "order_item" (
     "order_number" TEXT,
     "product_id" TEXT,
     "quantity" TEXT,
-    PRIMARY KEY ("order_number", "product_id")
+    PRIMARY KEY ("order_number", "product_id"),
+    CONSTRAINT fk_order FOREIGN KEY ("order_number") REFERENCES "order" ("number") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_product FOREIGN KEY ("product_id") REFERENCES "product" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 INSERT INTO "order_item" ("order_number", "product_id", "quantity")

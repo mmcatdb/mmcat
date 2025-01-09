@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 import { localStorage } from '@/types/utils/localStorage';
 
 const PREFERENCES_KEY = 'preferences';
@@ -8,6 +8,7 @@ export type Theme = 'dark' | 'light';
 type Preferences = {
     theme: Theme;
     isCollapsed: boolean;
+    showTableIDs: boolean;
 };
 
 type PreferencesContext = {
@@ -18,6 +19,7 @@ type PreferencesContext = {
 type StoredPreferences = {
     theme: Theme;
     isCollapsed: boolean;
+    showTableIDs: boolean;
 };
 
 function fromStored(): Preferences {
@@ -26,6 +28,7 @@ function fromStored(): Preferences {
     return {
         theme: stored.theme ?? 'dark',
         isCollapsed: stored.isCollapsed ?? false,
+        showTableIDs: stored.showTableIDs ?? false,
     };
 }
 
@@ -35,12 +38,13 @@ function toStored(preferences: Preferences): StoredPreferences {
     return {
         theme: preferences.theme,
         isCollapsed: preferences.isCollapsed,
+        showTableIDs: preferences.showTableIDs,
     };
 }
 
 export const PreferencesContext = createContext<PreferencesContext | undefined>(undefined);
 
-export function PreferencesProvider({ children }: Readonly<{ children: React.ReactNode }>) {
+export function PreferencesProvider({ children }: Readonly<{ children: ReactNode }>) {
     const [ preferences, setPreferences ] = useState(defaultPreferences);
 
     const setPreferencesWithStorage = useCallback((preferences: Preferences) => {

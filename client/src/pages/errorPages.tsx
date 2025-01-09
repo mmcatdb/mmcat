@@ -1,6 +1,6 @@
 import { useRouteError } from 'react-router-dom';
-import { CommonPage } from '@/components/CommonPage';
 import { usePreferences } from '@/components/PreferencesProvider';
+import { Button, Spinner } from '@nextui-org/react';
 import clsx from 'clsx';
 
 export function ErrorPage() {
@@ -8,18 +8,38 @@ export function ErrorPage() {
     console.error(error);
 
     return (
-        <CommonPage>
-            <h1>404</h1>
+        <div>
+            <h1 className='heading-main'>404</h1>
             <p>
                 The page you are looking for does not exist.
             </p>
-        </CommonPage>
+        </div>
     );
 }
 
 export function LoadingPage() {
     return (
-        <LoadingComponent className='w-screen h-screen text-foreground bg-background' />
+        <div className='flex items-center justify-center pt-10'>
+            <Spinner />
+        </div>
+    );
+}
+
+type ReloadPageProps = {
+    onReload: () => void;
+    title?: string;
+    message?: string;
+};
+
+export function ReloadPage({ onReload, title = 'Error', message = 'Failed to load resource.' }: ReloadPageProps) {
+    return (
+        <div className='p-6'>
+            <h1 className='text-xl font-semibold'>{title}</h1>
+            <p className='text-pink-600 my-5'>{message}</p>
+            <Button onPress={onReload} color='primary'>
+                Reload
+            </Button>
+        </div>
     );
 }
 
@@ -27,7 +47,7 @@ type LoadingComponentProps = Readonly<{
     className?: string;
 }>;
 
-export function LoadingComponent({ className }: LoadingComponentProps) {
+function LoadingComponent({ className }: LoadingComponentProps) {
     const { theme } = usePreferences().preferences;
 
     return (

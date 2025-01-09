@@ -1,5 +1,5 @@
 import { smoFromServer } from '.';
-import type { SchemaCategory } from '../SchemaCategory';
+import type { Category } from '../Category';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CompositeFromServer = SMOFromServer<SMOType.Composite> & {
@@ -10,7 +10,7 @@ export type CompositeFromServer = SMOFromServer<SMOType.Composite> & {
 export class Composite implements SMO<SMOType.Composite> {
     readonly type = SMOType.Composite;
 
-    private constructor(
+    constructor(
         readonly name: string,
         readonly children: SMO[],
     ) {}
@@ -22,13 +22,6 @@ export class Composite implements SMO<SMOType.Composite> {
         );
     }
 
-    static create(name: string, children: SMO[]): Composite {
-        return new Composite(
-            name,
-            children,
-        );
-    }
-
     toServer(): CompositeFromServer {
         return {
             type: SMOType.Composite,
@@ -37,11 +30,11 @@ export class Composite implements SMO<SMOType.Composite> {
         };
     }
 
-    up(category: SchemaCategory): void {
+    up(category: Category): void {
         this.children.forEach(child => child.up(category));
     }
 
-    down(category: SchemaCategory): void {
+    down(category: Category): void {
         [ ...this.children ].reverse().forEach(child => child.down(category));
     }
 }
