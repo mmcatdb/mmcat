@@ -116,13 +116,31 @@ export type PatternObject = {
     children: Record<SignatureFromServer, PatternObject>;
 };
 
-type JoinCandidate = TODO;
-
 export type JoinNode = TypedNode<QueryNodeType.Join, {
     fromChild: QueryNode;
     toChild: QueryNode;
     candidate: JoinCandidate;
 }>;
+
+export type JoinCandidate = {
+    type: JoinType;
+    fromKind: string;
+    toKind: string;
+    joinProperties: JoinCondition[];
+    recursion: number;
+    isOptional: boolean;
+}
+
+enum JoinType {
+    IdRef = 'IdRef',
+    Value = 'Value',
+}
+
+type JoinCondition = {
+    from: SignatureFromServer;
+    to: SignatureFromServer;
+};
+
 
 export type FilterNode = TypedNode<QueryNodeType.Filter, {
     child: QueryNode;

@@ -121,7 +121,7 @@ public interface AbstractQueryWrapper {
      */
     void addProjection(Property property, QueryStructure structure, boolean isOptional);
 
-    public record JoinCondition(Signature from, Signature to) {}
+    public record JoinCondition(Signature from, Signature to) implements Serializable {}
 
     /**
      * Adds a join (or graph traversal).

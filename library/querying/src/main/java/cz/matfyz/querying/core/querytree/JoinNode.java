@@ -1,6 +1,7 @@
 package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.querying.core.JoinCandidate;
+import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
 
 public class JoinNode extends QueryNode {
 
@@ -24,7 +25,7 @@ public class JoinNode extends QueryNode {
     public record SerializedJoinNode(
         SerializedQueryNode fromChild,
         SerializedQueryNode toChild,
-        String candidate
+        SerializedJoinCandidate candidate
     ) implements SerializedQueryNode{
 
         @Override public String getType() { return "join"; }

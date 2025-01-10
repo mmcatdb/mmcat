@@ -66,7 +66,7 @@ public class QueryDescriptor implements QueryVisitor<SerializedQueryNode> {
 
         return new SerializedPatternNode(
             serializedKinds,
-            node.joinCandidates.stream().map(candidate -> "TODO join candidate").toList(),
+            node.joinCandidates.stream().map(candidate -> candidate.serialize()).toList(),
             "TODO root term"
         );
     }
@@ -82,7 +82,7 @@ public class QueryDescriptor implements QueryVisitor<SerializedQueryNode> {
         return new SerializedJoinNode(
             node.fromChild.accept(this),
             node.toChild.accept(this),
-            "TODO"
+            node.candidate.serialize()
         );
     }
 

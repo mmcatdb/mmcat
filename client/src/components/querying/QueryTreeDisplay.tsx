@@ -1,7 +1,8 @@
 import { type Datasource } from '@/types/datasource';
-import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, type PatternNode, QueryNodeType, type UnionNode, type QueryNode, type PatternObject } from '@/types/query';
+import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, type PatternNode, QueryNodeType, type UnionNode, type QueryNode, type PatternObject, type JoinCandidate } from '@/types/query';
 import { capitalize, cn } from '../utils';
 import { Fragment } from 'react/jsx-runtime';
+import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
 
 type QueryTreeDisplayProps = Readonly<{
     tree: QueryNode;
@@ -76,6 +77,12 @@ function PatternNodeDisplay({ node }: NodeDisplayProps<PatternNode>) {
                     </div>
                 ))}
             </div>
+
+            <div className='divide-y'>
+                {node.joinCandidates.map((candidate, index) => (
+                    <JoinCandidateDisplay key={index} candidate={candidate} />
+                ))}
+            </div>
         </div>
     );
 }
@@ -107,7 +114,7 @@ function JoinNodeDisplay({ node, datasources }: NodeDisplayProps<JoinNode>) {
             <div className='px-2 pb-1 border'>
                 {title(node)}
 
-                {node.candidate}
+                <JoinCandidateDisplay candidate={node.candidate} />
             </div>
 
             <div className='w-full h-[2px] bg-gray-700' />
@@ -117,6 +124,27 @@ function JoinNodeDisplay({ node, datasources }: NodeDisplayProps<JoinNode>) {
 
                 {nodeDisplay(node.toChild, datasources)}
             </div>
+        </div>
+    );
+}
+
+function JoinCandidateDisplay({ candidate }: Readonly<{ candidate: JoinCandidate }>) {
+    return (
+        <div className='spyce-y-2 font-mono'>
+            <div className='flex gap-2 leading-5'>
+                <span className='font-semibold text-gray-500'>{candidate.fromKind}</span>
+                <ArrowLongRightIcon className='size-5' />
+                <span className='font-semibold text-gray-500'>{candidate.toKind}</span>
+                <span className='font-sans'>{`(${candidate.type})`}</span>
+            </div>
+
+            {candidate.joinProperties.map(({ from, to }, index) => (
+                <div key={index} className='flex gap-2 leading-5 font-semibold'>
+                    {from}
+                    <ArrowLongRightIcon className='size-5' />
+                    {to}
+                </div>
+            ))}
         </div>
     );
 }

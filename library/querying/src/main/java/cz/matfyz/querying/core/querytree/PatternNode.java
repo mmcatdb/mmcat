@@ -2,6 +2,7 @@ package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.JoinCandidate;
+import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject.SerializedPatternObject;
 import cz.matfyz.querying.parsing.Term;
@@ -37,7 +38,7 @@ public class PatternNode extends QueryNode {
 
     public record SerializedPatternNode(
         Map<String, SerializedPatternObject> kinds,
-        List<String> joinCandidates,
+        List<SerializedJoinCandidate> joinCandidates,
         String rootTerm
     ) implements SerializedQueryNode{
 

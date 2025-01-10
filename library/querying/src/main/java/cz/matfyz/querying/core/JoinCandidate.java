@@ -26,4 +26,24 @@ public record JoinCandidate(
         return recursion > 0;
     }
 
+    public SerializedJoinCandidate serialize() {
+        return new SerializedJoinCandidate(
+            type,
+            from.kind.kindName(),
+            to.kind.kindName(),
+            joinProperties,
+            recursion,
+            isOptional
+        );
+    }
+
+    public record SerializedJoinCandidate(
+        JoinType type,
+        String fromKind,
+        String toKind,
+        List<JoinCondition> joinProperties,
+        int recursion,
+        boolean isOptional
+    ) {}
+
 }
