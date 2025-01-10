@@ -14,11 +14,16 @@ import cz.matfyz.querying.parsing.QueryParser;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Given a MMQL `queryString`, execute this query against the given `schemaCategory`.
  * Returns an instance category with the results of the query.
  */
 public class QueryToInstance {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryToInstance.class);
 
     private final ControlWrapperProvider provider;
     private final SchemaCategory schema;
@@ -40,6 +45,7 @@ public class QueryToInstance {
             throw e;
         }
         catch (Exception e) {
+            LOGGER.error("execute", e);
             throw new OtherException(e);
         }
     }
@@ -62,6 +68,7 @@ public class QueryToInstance {
             throw e;
         }
         catch (Exception e) {
+            LOGGER.error("describe", e);
             throw new OtherException(e);
         }
     }

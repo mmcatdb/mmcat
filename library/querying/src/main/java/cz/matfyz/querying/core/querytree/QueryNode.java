@@ -1,5 +1,7 @@
 package cz.matfyz.querying.core.querytree;
 
+import java.io.Serializable;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class QueryNode {
@@ -12,5 +14,12 @@ public abstract class QueryNode {
     }
 
     public abstract <T> T accept(QueryVisitor<T> visitor);
+
+    public interface SerializedQueryNode extends Serializable {
+
+        /** Will be automatically serialized as `type`. */
+        String getType();
+
+    }
 
 }

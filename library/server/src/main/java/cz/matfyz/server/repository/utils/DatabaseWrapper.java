@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class DatabaseWrapper {
 
-    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
 
     @Autowired

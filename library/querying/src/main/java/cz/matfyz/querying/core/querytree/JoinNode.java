@@ -21,4 +21,14 @@ public class JoinNode extends QueryNode {
         return visitor.visit(this);
     }
 
+    public record SerializedJoinNode(
+        SerializedQueryNode fromChild,
+        SerializedQueryNode toChild,
+        String candidate
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "join"; }
+
+    }
+
 }

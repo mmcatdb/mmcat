@@ -7,7 +7,6 @@ import cz.matfyz.querying.parsing.Filter;
 import cz.matfyz.querying.parsing.Term.Variable;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
-import cz.matfyz.wrapperpostgresql.PostgreSQLQueryWrapper;
 
 import java.util.List;
 

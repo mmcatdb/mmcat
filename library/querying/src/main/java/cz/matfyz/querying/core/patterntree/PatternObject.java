@@ -119,4 +119,17 @@ public class PatternObject implements Comparable<PatternObject>, Printable {
         return schemaObject.compareTo(other.schemaObject);
     }
 
+    public record SerializedPatternObject(
+        int objexKey,
+        String term,
+        Map<BaseSignature, SerializedPatternObject> children
+    ) {};
+
+    public SerializedPatternObject serialize() {
+        final var map = new TreeMap<BaseSignature, SerializedPatternObject>();
+        children.entrySet().forEach(entry -> map.put(entry.getKey(), entry.getValue().serialize()));
+
+        return new SerializedPatternObject(schemaObject.key().getValue(), term.toString(), map);
+    }
+
 }

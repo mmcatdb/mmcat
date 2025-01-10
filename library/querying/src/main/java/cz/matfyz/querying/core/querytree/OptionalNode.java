@@ -17,4 +17,13 @@ public class OptionalNode extends QueryNode {
         return visitor.visit(this);
     }
 
+    public record SerializedOptionalNode(
+        SerializedQueryNode primaryChild,
+        SerializedQueryNode optionalChild
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "optional"; }
+
+    }
+
 }

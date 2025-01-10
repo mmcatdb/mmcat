@@ -5,6 +5,7 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.core.utils.printable.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 // TODO add to json conversion for FE.
-public class QueryStructure implements Tree<QueryStructure>, Printable {
+public class QueryStructure implements Tree<QueryStructure>, Printable, Serializable {
 
     public final String name;
     public final boolean isArray;
@@ -26,11 +27,9 @@ public class QueryStructure implements Tree<QueryStructure>, Printable {
 
     /** If null, this is the root of the tree. */
     @JsonIgnore
-    @Nullable
-    private QueryStructure parent;
+    @Nullable private QueryStructure parent;
     /** If null, this is the root of the tree. */
-    @Nullable
-    public Signature signatureFromParent;
+    @Nullable public Signature signatureFromParent;
 
     public QueryStructure(String name, boolean isArray, SchemaObject schemaObject) {
         this.name = name;
@@ -74,11 +73,11 @@ public class QueryStructure implements Tree<QueryStructure>, Printable {
         return path.reversed();
     }
 
-    @Nullable
-    public QueryStructure parent() {
+    public @Nullable QueryStructure parent() {
         return parent;
     }
 
+    @JsonIgnore
     public boolean isLeaf() {
         return children.isEmpty();
     }

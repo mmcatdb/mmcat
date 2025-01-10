@@ -22,4 +22,13 @@ public class DatasourceNode extends QueryNode {
         return visitor.visit(this);
     }
 
+    public record SerializedDatasourceNode(
+        SerializedQueryNode child,
+        String datasourceIdentifier
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "datasource"; }
+
+    }
+
 }

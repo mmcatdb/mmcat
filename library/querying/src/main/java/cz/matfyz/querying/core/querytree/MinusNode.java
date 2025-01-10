@@ -17,4 +17,13 @@ public class MinusNode extends QueryNode {
         return visitor.visit(this);
     }
 
+    public record SerializedMinusNode(
+        SerializedQueryNode primaryChild,
+        SerializedQueryNode minusChild
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "minus"; }
+
+    }
+
 }

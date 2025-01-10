@@ -16,4 +16,12 @@ public class UnionNode extends QueryNode {
         return visitor.visit(this);
     }
 
+    public record SerializedUnionNode(
+        List<SerializedQueryNode> children
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "union"; }
+
+    }
+
 }

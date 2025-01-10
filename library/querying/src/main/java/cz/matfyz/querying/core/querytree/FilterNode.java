@@ -18,4 +18,13 @@ public class FilterNode extends QueryNode {
         return visitor.visit(this);
     }
 
+    public record SerializedFilterNode(
+        SerializedQueryNode child,
+        String filter
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "filter"; }
+
+    }
+
 }

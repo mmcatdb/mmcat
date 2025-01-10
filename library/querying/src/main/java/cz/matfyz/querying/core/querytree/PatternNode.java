@@ -3,9 +3,11 @@ package cz.matfyz.querying.core.querytree;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
+import cz.matfyz.querying.core.patterntree.PatternObject.SerializedPatternObject;
 import cz.matfyz.querying.parsing.Term;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,6 +33,16 @@ public class PatternNode extends QueryNode {
 
     @Override public <T> T accept(QueryVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    public record SerializedPatternNode(
+        Map<String, SerializedPatternObject> kinds,
+        List<String> joinCandidates,
+        String rootTerm
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "pattern"; }
+
     }
 
 }
