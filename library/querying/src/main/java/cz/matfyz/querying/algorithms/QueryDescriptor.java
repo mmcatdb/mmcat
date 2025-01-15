@@ -16,8 +16,6 @@ import cz.matfyz.querying.core.querytree.MinusNode;
 import cz.matfyz.querying.core.querytree.MinusNode.SerializedMinusNode;
 import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.OptionalNode.SerializedOptionalNode;
-import cz.matfyz.querying.core.querytree.PatternNode;
-import cz.matfyz.querying.core.querytree.PatternNode.SerializedPatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryNode.SerializedQueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
@@ -54,21 +52,16 @@ public class QueryDescriptor implements QueryVisitor<SerializedQueryNode> {
         final QueryStatement query = QueryTranslator.run(context, node);
         parts.add(new QueryPartDescription(node.datasource.identifier, query.structure(), query.content().toString()));
 
-        final var child = node.child.accept(this);
-
-        return new SerializedDatasourceNode(child, node.datasource.identifier);
-    }
-
-    public SerializedPatternNode visit(PatternNode node) {
         final var serializedKinds = new TreeMap<String, SerializedPatternObject>();
         for (final var kindPattern : node.kinds)
             serializedKinds.put(kindPattern.kind.kindName(), kindPattern.root.serialize());
 
-        return new SerializedPatternNode(
+        return new SerializedDatasourceNode(
+            node.datasource.identifier,
             serializedKinds,
             node.joinCandidates.stream().map(candidate -> candidate.serialize()).toList(),
-            "TODO root term"
-        );
+            List.of("TODO filters"),
+            "TODO root term");
     }
 
     public SerializedFilterNode visit(FilterNode node) {

@@ -1,8 +1,6 @@
 package cz.matfyz.tests.querying;
 
 import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.core.querytree.FilterNode;
-import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.parsing.Filter;
 import cz.matfyz.querying.parsing.Term.Variable;
 import cz.matfyz.tests.example.basic.Datasources;
@@ -299,16 +297,14 @@ class QueryTests {
                 final var onlyPattern = plan.stream().findFirst().get();
 
                 return new DatasourceNode(
-                    new FilterNode(
-                        new PatternNode(
-                            plan,
-                            schema,
-                            List.of(),
-                            onlyPattern.root.term
-                        ),
+                    datasource,
+                    plan,
+                    schema,
+                    List.of(),
+                    List.of(
                         new Filter.ValueFilter((Variable)onlyPattern.root.children().stream().findFirst().get().term, List.of("o_100"))
                     ),
-                    datasource
+                    onlyPattern.root.term
                 );
             },
             """
@@ -337,16 +333,14 @@ class QueryTests {
                 final var onlyPattern = plan.stream().findFirst().get();
 
                 return new DatasourceNode(
-                    new FilterNode(
-                        new PatternNode(
-                            plan,
-                            schema,
-                            List.of(),
-                            onlyPattern.root.term
-                        ),
+                    datasource,
+                    plan,
+                    schema,
+                    List.of(),
+                    List.of(
                         new Filter.ValueFilter((Variable)onlyPattern.root.children().stream().findFirst().get().term, List.of("o_100"))
                     ),
-                    datasource
+                    onlyPattern.root.term
                 );
             },
             """

@@ -16,7 +16,6 @@ import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
-import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.exception.JoiningException;
 import cz.matfyz.querying.parsing.Term;
@@ -58,10 +57,9 @@ public class PlanJoiner {
         if (allPatterns.size() == 1) {
             // If there is only one pattern, there is nothing to join.
             final var onlyPattern = allPatterns.stream().findFirst().get(); // NOSONAR
-            final var patternNode = new PatternNode(allPatterns, context.getSchema(), List.of(), onlyPattern.root.term);
             final var datasource = onlyPattern.kind.datasource();
 
-            return new DatasourceNode(patternNode, datasource);
+            return new DatasourceNode(datasource, allPatterns, context.getSchema(), List.of(), onlyPattern.root.term);
         }
 
         // TODO there might be some joining needed for OPTIONAL joins?
@@ -347,10 +345,8 @@ public class PlanJoiner {
             // TODO schema
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
-            final var patternNode = new PatternNode(queryPart.patterns, schema, queryPart.joinCandidates, queryPart.rootTerm);
             final var datasource = queryPart.patterns.stream().findFirst().get().kind.datasource();
-
-            return new DatasourceNode(patternNode, datasource);
+            return new DatasourceNode(datasource, queryPart.patterns, schema, queryPart.joinCandidates, queryPart.rootTerm);
         }
     }
 

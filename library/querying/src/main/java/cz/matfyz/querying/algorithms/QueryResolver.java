@@ -17,7 +17,6 @@ import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.MinusNode;
 import cz.matfyz.querying.core.querytree.OptionalNode;
-import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
@@ -50,10 +49,6 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
         final var pullWrapper = context.getProvider().getControlWrapper(node.datasource).getPullWrapper();
 
         return pullWrapper.executeQuery(query);
-    }
-
-    public QueryResult visit(PatternNode node) {
-        throw QueryTreeException.unsupportedOutsideDatasource(node);
     }
 
     public QueryResult visit(FilterNode node) {

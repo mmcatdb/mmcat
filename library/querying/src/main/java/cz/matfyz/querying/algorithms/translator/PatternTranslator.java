@@ -13,7 +13,7 @@ import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject;
-import cz.matfyz.querying.core.querytree.PatternNode;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.parsing.Term;
 import cz.matfyz.querying.parsing.Term.StringValue;
 
@@ -29,8 +29,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 class PatternTranslator {
 
-    public static void run(QueryContext context, PatternNode pattern, AbstractQueryWrapper wrapper) {
-        new PatternTranslator(context, wrapper).run(pattern);
+    public static void run(QueryContext context, DatasourceNode node, AbstractQueryWrapper wrapper) {
+        new PatternTranslator(context, wrapper).run(node);
     }
 
     private final QueryContext context;
@@ -43,11 +43,11 @@ class PatternTranslator {
 
     private WrapperContext wrapperContext;
 
-    private void run(PatternNode pattern) {
-        wrapperContext = new WrapperContext(context, pattern.rootTerm);
+    private void run(DatasourceNode node) {
+        wrapperContext = new WrapperContext(context, node.rootTerm);
 
-        pattern.kinds.forEach(this::processKind);
-        pattern.joinCandidates.forEach(this::processJoinCandidate);
+        node.kinds.forEach(this::processKind);
+        node.joinCandidates.forEach(this::processJoinCandidate);
 
         wrapper.setContext(wrapperContext);
     }
