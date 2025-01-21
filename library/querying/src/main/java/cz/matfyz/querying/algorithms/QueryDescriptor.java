@@ -1,7 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.querying.algorithms.translator.QueryTranslator;
+import cz.matfyz.querying.algorithms.translator.DatasourceQueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.core.QueryDescription.QueryPartDescription;
@@ -49,7 +49,7 @@ public class QueryDescriptor implements QueryVisitor<SerializedQueryNode> {
     }
 
     public SerializedDatasourceNode visit(DatasourceNode node) {
-        final QueryStatement query = QueryTranslator.run(context, node);
+        final QueryStatement query = DatasourceQueryTranslator.run(context, node);
         parts.add(new QueryPartDescription(node.datasource.identifier, query.structure(), query.content().toString()));
 
         final var serializedKinds = new TreeMap<String, SerializedPatternObject>();
