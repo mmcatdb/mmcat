@@ -9,12 +9,14 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.QueryStructure;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.mongodb.client.model.Aggregates;
+import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.conversions.Bson;
@@ -42,6 +44,8 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         return output;
     }
 
+    private final Map<ComparisonOperator, String> comparisonOperators2 = defineComparisonOperators();
+
     @Override protected Map<AggregationOperator, String> defineAggregationOperators() {
         // TODO fix
         return new TreeMap<>();
@@ -52,9 +56,40 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         final Mapping mapping = projections.getFirst().property().mapping;
         final String collectionName = mapping.kindName();
         final Bson projection = createProjections();
-        final var pipeline = List.of(
-            Aggregates.project(projection)
-        );
+        final var pipeline = new ArrayList<Bson>();
+
+        for (var filter : filters) {
+            if (filter instanceof BinaryFilter) {
+                throw new UnsupportedOperationException("Mongo does not support filters comparing two variables.");
+            }
+
+            // TODO: see how properties are translated to paths in bson documents
+            var unaryFilter = (UnaryFilter)filter;
+            var filterDoc = new BsonDocument();
+            var filterCondition = new BsonDocument();
+            var constants = unaryFilter.constant().values();
+            if (constants.size() == 1) {
+                var mongoOp = comparisonOperators2.get(unaryFilter.operator());
+                filterCondition.put(mongoOp, new BsonString(constants.getFirst()));
+            } else {
+                String mongoOp = switch (unaryFilter.operator()) {
+                    case ComparisonOperator.Equal -> "$in";
+                    case ComparisonOperator.NotEqual -> "$nin";
+                    default -> throw new UnsupportedOperationException("Only equality and non-equality operators are supported for array constant filters.");
+                };
+
+                var bsonConstants = new BsonArray(constants.size());
+                for (var c : constants) bsonConstants.add(new BsonString(c));
+                filterCondition.put(mongoOp, bsonConstants);
+            }
+
+            var propertyPath = getPropertyName(unaryFilter.property());
+            filterDoc.put(propertyPath, filterCondition);
+
+            pipeline.add(Aggregates.match(filterDoc));
+        }
+
+        pipeline.add(Aggregates.project(projection));
 
         final var content = new MongoDBQuery(collectionName, pipeline);
 
@@ -67,6 +102,19 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
             Projector.createProjection(context, output, projection);
 
         return output;
+    }
+
+    private static String getPropertyName(Property property) {
+        // TODO: refactor
+
+        return property.mapping.accessPath().getPropertyPath(property.path).stream().map(accPath -> {
+            final var name = accPath.name();
+            if (!(name instanceof StaticName staticName))
+                throw new UnsupportedOperationException("Only static names are supported.");
+
+            return staticName.getStringName();
+        }).collect(Collectors.joining("."));
+
     }
 
     // This class is a little more complicated than it seems. The problem is that we have to match the query structure of the projection to the access path of the property. The matching points are the array query structures.
