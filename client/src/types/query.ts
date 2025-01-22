@@ -99,13 +99,10 @@ type TypedNode<TType extends QueryNodeType, TData extends object> = {
 type TODO = any;
 
 export type DatasourceNode = TypedNode<QueryNodeType.Datasource, {
-    child: QueryNode;
     datasourceIdentifier: string;
-}>;
-
-export type PatternNode = TypedNode<QueryNodeType.Datasource, {
     kinds: Record<string, PatternObject>;
     joinCandidates: JoinCandidate[];
+    filtters: TODO[];
     rootTerm: TODO;
 }>;
 

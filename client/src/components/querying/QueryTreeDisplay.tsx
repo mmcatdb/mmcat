@@ -1,5 +1,5 @@
 import { type Datasource } from '@/types/datasource';
-import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, type PatternNode, QueryNodeType, type UnionNode, type QueryNode, type PatternObject, type JoinCandidate } from '@/types/query';
+import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, QueryNodeType, type UnionNode, type QueryNode, type PatternObject, type JoinCandidate } from '@/types/query';
 import { capitalize, cn } from '../utils';
 import { Fragment } from 'react/jsx-runtime';
 import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
@@ -19,7 +19,6 @@ export function QueryTreeDisplay({ tree, datasources }: QueryTreeDisplayProps) {
 
 const displays = {
     [QueryNodeType.Datasource]: DatasourceNodeDisplay,
-    [QueryNodeType.Pattern]: PatternNodeDisplay,
     [QueryNodeType.Join]: JoinNodeDisplay,
     [QueryNodeType.Filter]: FilterNodeDisplay,
     [QueryNodeType.Minus]: MinusNodeDisplay,
@@ -43,8 +42,8 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
     const datasource = datasources.find(ds => ds.id === node.datasourceIdentifier);
 
     return (
-        <div className='flex flex-col items-center gap-2'>
-            <div className='px-2 pb-1 border'>
+        <div className='flex flex-col items-center'>
+            <div className='px-2 pt-1 border'>
                 {title(node)}
 
                 {datasource ? (
@@ -53,35 +52,26 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
                     </div>
                 ) : (
                     <div className='text-red-500'>
-                        Datasource not found<br/>
+                    Datasource not found<br/>
                         {node.datasourceIdentifier}
                     </div>
                 )}
-            </div>
 
-            {nodeDisplay(node.child, datasources)}
-        </div>
-    );
-}
 
-function PatternNodeDisplay({ node }: NodeDisplayProps<PatternNode>) {
-    return (
-        <div className='px-2 pb-1 border'>
-            {title(node)}
+                <div className='divide-y'>
+                    {Object.entries(node.kinds).map(([ key, patternObject ]) => (
+                        <div key={key} className='py-2 font-mono'>
+                            <div className='font-semibold text-gray-500'>{key}</div>
+                            <PatternObjectDisplay pattern={patternObject} />
+                        </div>
+                    ))}
+                </div>
 
-            <div className='divide-y'>
-                {Object.entries(node.kinds).map(([ key, patternObject ]) => (
-                    <div key={key} className='p-2 font-mono'>
-                        <div className='font-semibold text-gray-500'>{key}</div>
-                        <PatternObjectDisplay pattern={patternObject} />
-                    </div>
-                ))}
-            </div>
-
-            <div className='divide-y'>
-                {node.joinCandidates.map((candidate, index) => (
-                    <JoinCandidateDisplay key={index} candidate={candidate} />
-                ))}
+                <div className='divide-y'>
+                    {node.joinCandidates.map((candidate, index) => (
+                        <JoinCandidateDisplay key={index} candidate={candidate} />
+                    ))}
+                </div>
             </div>
         </div>
     );
