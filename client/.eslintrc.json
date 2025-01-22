@@ -50,7 +50,7 @@
         "@typescript-eslint/no-confusing-void-expression": [ "error", { "ignoreArrowShorthand": true } ],
         "@typescript-eslint/consistent-type-definitions": [ "warn", "type" ],
         "@typescript-eslint/unbound-method": [ "error", { "ignoreStatic": true } ],
-        "@typescript-eslint/no-unused-vars": [ "error", { "destructuredArrayIgnorePattern": "^_" } ],
+        "@typescript-eslint/no-unused-vars": [ "error", {} ],
         "@typescript-eslint/restrict-template-expressions": "off",
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/no-floating-promises": [ "warn", { "ignoreVoid": true, "ignoreIIFE": true } ],

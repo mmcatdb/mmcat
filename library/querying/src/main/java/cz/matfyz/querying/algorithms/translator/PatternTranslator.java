@@ -29,6 +29,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 class PatternTranslator {
 
+    /**
+     * Translates the `PatternNode` to query for a specific database (determined by the `AbstractQueryWrapper`).
+     * Nothing is returned, all output is stored in the wrapper itself.
+     */
     public static void run(QueryContext context, DatasourceNode node, AbstractQueryWrapper wrapper) {
         new PatternTranslator(context, wrapper).run(node);
     }

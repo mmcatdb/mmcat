@@ -83,7 +83,6 @@ type QueryStructure = {
 
 export enum QueryNodeType {
     Datasource = 'datasource',
-    Pattern = 'pattern',
     Join = 'join',
     Filter = 'filter',
     Minus = 'minus',
@@ -91,7 +90,7 @@ export enum QueryNodeType {
     Union = 'union',
 }
 
-export type QueryNode = DatasourceNode | PatternNode | JoinNode | FilterNode | MinusNode | OptionalNode | UnionNode;
+export type QueryNode = DatasourceNode | JoinNode | FilterNode | MinusNode | OptionalNode | UnionNode;
 
 type TypedNode<TType extends QueryNodeType, TData extends object> = {
     type: TType;
