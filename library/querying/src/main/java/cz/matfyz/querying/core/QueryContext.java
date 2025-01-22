@@ -1,13 +1,10 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
-import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.querying.parsing.Term;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,44 +17,22 @@ public class QueryContext {
 
     // Extracting
 
-    public record SchemaObjectContext(SchemaObject object, ArrayList<Mapping> mappings, ArrayList<Signature> signatures) { }
-
-    private final Map<Term, SchemaObjectContext> termToObject = new TreeMap<>();
+    private final Map<Term, SchemaObject> termToObject = new TreeMap<>();
     private final Map<SchemaObject, Term> objectToTerm = new TreeMap<>();
 
     public QueryContext addTerm(Term term, SchemaObject object) {
-        termToObject.put(term, new SchemaObjectContext(object, new ArrayList<>(), new ArrayList<>()));
+        termToObject.put(term, object);
         objectToTerm.put(object, term);
 
         return this;
     }
 
-    public QueryContext addOrUpdateTerm(Term term, SchemaObject object, Mapping kind, Signature signature) {
-        var existing = termToObject.get(term);
-
-        if(existing == null) {
-            existing = new SchemaObjectContext(object, new ArrayList<>(), new ArrayList<>());
-
-            termToObject.put(term, existing);
-            objectToTerm.put(object, term);
-        }
-
-        existing.mappings.add(kind);
-        existing.signatures.add(signature);
-
-        return this;
-    }
-
     public SchemaObject getObject(Term term) {
-        return termToObject.get(term).object;
+        return termToObject.get(term);
     }
 
     public Term getTerm(SchemaObject object) {
         return objectToTerm.get(object);
-    }
-
-    public SchemaObjectContext getContext(Term term) {
-        return termToObject.get(term);
     }
 
     // Schema category

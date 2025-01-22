@@ -5,6 +5,8 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.PropertyWithAggregation;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.QueryStructure;
@@ -14,8 +16,13 @@ import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.parsing.Filter;
+import cz.matfyz.querying.parsing.Filter.ConditionFilter;
+import cz.matfyz.querying.parsing.Filter.ValueFilter;
 import cz.matfyz.querying.parsing.Term;
+import cz.matfyz.querying.parsing.Term.Aggregation;
 import cz.matfyz.querying.parsing.Term.StringValue;
+import cz.matfyz.querying.parsing.Term.Variable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -27,34 +34,88 @@ import java.util.TreeSet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-class PatternTranslator {
+/*
+ * This class translates the query part of a specific DatasourceNode.
+ */
+public class DatasourceQueryTranslator {
 
-    /**
-     * Translates the `PatternNode` to query for a specific database (determined by the `AbstractQueryWrapper`).
-     * Nothing is returned, all output is stored in the wrapper itself.
-     */
-    public static void run(QueryContext context, DatasourceNode node, AbstractQueryWrapper wrapper) {
-        new PatternTranslator(context, wrapper).run(node);
+    public static QueryStatement run(QueryContext context, DatasourceNode datasourceNode) {
+        return new DatasourceQueryTranslator(context, datasourceNode).run();
     }
 
     private final QueryContext context;
-    private final AbstractQueryWrapper wrapper;
+    private final DatasourceNode datasourceNode;
+    private AbstractQueryWrapper wrapper;
+    private DatasourceContext wrapperContext;
 
-    private PatternTranslator(QueryContext context, AbstractQueryWrapper wrapper) {
+
+    public DatasourceQueryTranslator(QueryContext context, DatasourceNode datasourceNode) {
         this.context = context;
-        this.wrapper = wrapper;
+        this.datasourceNode = datasourceNode;
     }
 
-    private WrapperContext wrapperContext;
+    private QueryStatement run() {
+        this.wrapper = context.getProvider().getControlWrapper(datasourceNode.datasource).getQueryWrapper();
 
-    private void run(DatasourceNode node) {
-        wrapperContext = new WrapperContext(context, node.rootTerm);
+        wrapperContext = new DatasourceContext(context, datasourceNode.rootTerm);
 
-        node.kinds.forEach(this::processKind);
-        node.joinCandidates.forEach(this::processJoinCandidate);
+        datasourceNode.kinds.forEach(this::processKind);
+        datasourceNode.joinCandidates.forEach(this::processJoinCandidate);
 
         wrapper.setContext(wrapperContext);
+
+        for (final Filter filter : datasourceNode.filters) {
+            processFilter(filter);
+        }
+
+        return this.wrapper.createDSLStatement();
     }
+
+    public void processFilter(Filter filter) {
+        if (filter instanceof ConditionFilter conditionFilter) {
+            final var left = createProperty(conditionFilter.lhs());
+            final var right = createProperty(conditionFilter.rhs());
+            wrapper.addFilter(left, right, conditionFilter.operator());
+        }
+        else if (filter instanceof ValueFilter valueFilter) {
+            final var property = createProperty(valueFilter.variable());
+            wrapper.addFilter(property, new Constant(valueFilter.allowedValues()), ComparisonOperator.Equal);
+        }
+    }
+
+    private Property createProperty(Term term) {
+        if (term instanceof Variable variable) {
+            /*
+            // TODO: is the retyping to Variable needed? This can be applied to any term (at least type-wise).
+            final var ctx = context.getContext(variable);
+            final var mappings = ctx.mappings();
+            final var signatures = ctx.signatures();
+
+            if (signatures.size() != 1) {
+                throw new UnsupportedOperationException("Cannot choose between multiple possible signatures.");
+            }
+
+            return new Property(mappings.get(0), signatures.get(0), null);
+            */
+            return wrapperContext.getProperty(variable);
+        }
+
+        if (term instanceof Aggregation aggregation) {
+            final var property = createProperty(aggregation.variable());
+            final var root = findAggregationRoot(property.mapping, property.path);
+
+            return new PropertyWithAggregation(property.mapping, property.path, null, root, aggregation.operator());
+        }
+
+        throw new UnsupportedOperationException("Can't create property from term: " + term.getClass().getSimpleName() + ".");
+    }
+
+    private Signature findAggregationRoot(Mapping kind, Signature path) {
+        // TODO
+        throw new UnsupportedOperationException("DatasourceQueryTranslator.findAggregationRoot not implemented.");
+    }
+
+    // PATTERN TRANSLATOR STUFF FROM HERE (TODO: remove)
 
     private record StackItem(
         PatternObject object,
@@ -120,23 +181,25 @@ class PatternTranslator {
         }
     }
 
-    private static class WrapperContext implements AbstractWrapperContext {
+    private static class DatasourceContext implements AbstractWrapperContext {
 
         private final QueryContext context;
         private QueryStructure rootStructure;
 
-        WrapperContext(QueryContext context, Term rootTerm) {
+        DatasourceContext(QueryContext context, Term rootTerm) {
             this.context = context;
             rootStructure = new QueryStructure(rootTerm.getIdentifier(), true, context.getObject(rootTerm));
         }
 
         private final Map<Property, Term> propertyToTerm = new TreeMap<>();
+        private final Map<Term, Property> termToProperty = new TreeMap<>();
         private final Map<Property, QueryStructure> propertyToStructure = new TreeMap<>();
         private final Map<QueryStructure, Property> structureToProperty = new TreeMap<>();
 
         Property createProperty(Mapping kind, StackItem item) {
             final var property = new Property(kind, item.pathFromParent, item.preservedParent);
             propertyToTerm.put(property, item.object.term);
+            termToProperty.put(item.object.term, property);
 
             return property;
         }
@@ -173,6 +236,9 @@ class PatternTranslator {
             return structureToProperty.get(structure);
         }
 
+        public Property getProperty(Term term) {
+            return termToProperty.get(term);
+        }
     }
 
 

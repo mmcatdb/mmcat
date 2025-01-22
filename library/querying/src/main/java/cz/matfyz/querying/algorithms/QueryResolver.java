@@ -9,7 +9,7 @@ import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.algorithms.queryresult.QueryStructureMerger;
-import cz.matfyz.querying.algorithms.translator.QueryTranslator;
+import cz.matfyz.querying.algorithms.translator.DatasourceQueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
@@ -20,7 +20,6 @@ import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
-import cz.matfyz.querying.exception.QueryTreeException;
 import cz.matfyz.querying.parsing.Filter.ConditionFilter;
 import cz.matfyz.querying.parsing.Filter.ValueFilter;
 
@@ -45,7 +44,7 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(DatasourceNode node) {
-        final QueryStatement query = QueryTranslator.run(context, node);
+        final QueryStatement query = DatasourceQueryTranslator.run(context, node);
         final var pullWrapper = context.getProvider().getControlWrapper(node.datasource).getPullWrapper();
 
         return pullWrapper.executeQuery(query);
