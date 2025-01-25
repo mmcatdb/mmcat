@@ -94,6 +94,10 @@ public interface AbstractQueryWrapper {
                 : schemaObject.compareTo(other.schemaObject);
         }
 
+        @Override public boolean equals(Object other) {
+            return (other instanceof Property otp) && compareTo(otp) == 0;
+        }
+
         public Signature findFullPath() {
             if (parent == null)
                 return path;

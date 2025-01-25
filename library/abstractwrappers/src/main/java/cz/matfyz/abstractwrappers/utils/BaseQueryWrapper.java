@@ -22,6 +22,10 @@ public abstract class BaseQueryWrapper {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseQueryWrapper.class);
 
+    /**
+     * Maps {@code ComparisonOperator}s to their string representation in the target DSL.
+     * @seealso {@link #getComparisonOperatorValue(ComparisonOperator)}
+     */
     protected abstract Map<ComparisonOperator, String> defineComparisonOperators();
 
     private final Map<ComparisonOperator, String> comparisonOperators = defineComparisonOperators();
@@ -34,6 +38,10 @@ public abstract class BaseQueryWrapper {
         return value;
     }
 
+    /**
+     * Maps {@code AggregationOperator}s to their string representation in the target DSL.
+     * @seealso {@link #getAggregationOperatorValue(AggregationOperator)}
+     */
     protected abstract Map<AggregationOperator, String> defineAggregationOperators();
 
     private final Map<AggregationOperator, String> aggregationOperators = defineAggregationOperators();
