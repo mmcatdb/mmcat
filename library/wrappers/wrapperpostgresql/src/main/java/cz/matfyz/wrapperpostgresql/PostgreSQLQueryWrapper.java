@@ -182,7 +182,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             .append(getPropertyName(filter.property2()));
     }
 
-    private String escapeName(String name) {
+    private static String escapeName(String name) {
         return "\"" + name + "\"";
     }
 
