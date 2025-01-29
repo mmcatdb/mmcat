@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying.planner;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.core.datasource.Datasource;

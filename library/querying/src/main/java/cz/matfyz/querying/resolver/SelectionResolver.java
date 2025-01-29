@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying.resolver;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
@@ -8,8 +8,6 @@ import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils;
-import cz.matfyz.querying.algorithms.queryresult.ResultStructureMerger;
-import cz.matfyz.querying.algorithms.translator.DatasourceQueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
@@ -20,19 +18,21 @@ import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
+import cz.matfyz.querying.planner.QueryPlan;
+import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger;
 
 import java.util.List;
 
-public class QueryResolver implements QueryVisitor<QueryResult> {
+public class SelectionResolver implements QueryVisitor<QueryResult> {
 
-    public static QueryResult run(QueryContext context, QueryNode rootNode) {
-        return new QueryResolver(context, rootNode).run();
+    public static QueryResult run(QueryPlan plan) {
+        return new SelectionResolver(plan.context, plan.root).run();
     }
 
     private final QueryContext context;
     private final QueryNode rootNode;
 
-    private QueryResolver(QueryContext context, QueryNode rootNode) {
+    private SelectionResolver(QueryContext context, QueryNode rootNode) {
         this.context = context;
         this.rootNode = rootNode;
     }
@@ -42,14 +42,14 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(DatasourceNode node) {
-        final QueryStatement query = DatasourceQueryTranslator.run(context, node);
+        final QueryStatement query = DatasourceTranslator.run(context, node);
         final var pullWrapper = context.getProvider().getControlWrapper(node.datasource).getPullWrapper();
 
         return pullWrapper.executeQuery(query);
     }
 
     public QueryResult visit(FilterNode node) {
-        throw new UnsupportedOperationException("QueryResolver.visit(FilterNode) not implemented.");
+        throw new UnsupportedOperationException("SelectionResolver.visit(FilterNode) not implemented.");
     }
 
     public QueryResult visit(JoinNode node) {
@@ -119,15 +119,15 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(MinusNode node) {
-        throw new UnsupportedOperationException("QueryResolver.visit(MinusNode) not implemented.");
+        throw new UnsupportedOperationException("SelectionResolver.visit(MinusNode) not implemented.");
     }
 
     public QueryResult visit(OptionalNode node) {
-        throw new UnsupportedOperationException("QueryResolver.visit(OptionalNode) not implemented.");
+        throw new UnsupportedOperationException("SelectionResolver.visit(OptionalNode) not implemented.");
     }
 
     public QueryResult visit(UnionNode node) {
-        throw new UnsupportedOperationException("QueryResolver.visit(UnionNode) not implemented.");
+        throw new UnsupportedOperationException("SelectionResolver.visit(UnionNode) not implemented.");
     }
 
 }

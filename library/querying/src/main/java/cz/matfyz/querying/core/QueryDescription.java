@@ -6,9 +6,14 @@ import cz.matfyz.querying.core.querytree.QueryNode.SerializedQueryNode;
 import java.util.List;
 
 public record QueryDescription(
-    List<QueryPartDescription> parts,
-    SerializedQueryNode tree
+    QueryPlanDescription planned,
+    QueryPlanDescription optimized
 ) {
+
+    public record QueryPlanDescription(
+        List<QueryPartDescription> parts,
+        SerializedQueryNode tree
+    ) {}
 
     public record QueryPartDescription(
         String datasourceIdentifier,

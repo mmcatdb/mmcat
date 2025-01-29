@@ -2,7 +2,7 @@ package cz.matfyz.tests.querying;
 
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.querying.algorithms.queryresult.TformingResultStructure;
+import cz.matfyz.querying.resolver.queryresult.TformingResultStructure;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

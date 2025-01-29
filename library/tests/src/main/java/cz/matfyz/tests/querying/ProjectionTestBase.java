@@ -9,8 +9,8 @@ import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.MapResult;
 import cz.matfyz.core.querying.ResultNode;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.querying.algorithms.queryresult.*;
-import cz.matfyz.querying.algorithms.queryresult.TformStep.TformRoot;
+import cz.matfyz.querying.resolver.queryresult.*;
+import cz.matfyz.querying.resolver.queryresult.TformStep.TformRoot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

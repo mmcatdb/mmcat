@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying.planner;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.mapping.Mapping;
@@ -18,12 +18,12 @@ import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This class builds the query tree from given clause.
+ * This class builds a query plan from given clause.
  */
-public class QueryTreeBuilder {
+public class QueryPlanner {
 
-    public static QueryNode run(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
-        return new QueryTreeBuilder(context, originalSchema, allKinds, rootClause).run();
+    public static QueryPlan run(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
+        return new QueryPlanner(context, originalSchema, allKinds, rootClause).run();
     }
 
     private final QueryContext context;
@@ -31,21 +31,22 @@ public class QueryTreeBuilder {
     private final List<Mapping> allKinds;
     private final SelectionClause rootClause;
 
-    private QueryTreeBuilder(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
+    private QueryPlanner(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
         this.context = context;
         this.originalSchema = originalSchema;
         this.allKinds = allKinds;
         this.rootClause = rootClause;
     }
 
-    private QueryNode run() {
-        return processClause(rootClause, null);
+    private QueryPlan run() {
+        final var rootNode = processClause(rootClause, null);
+        return new QueryPlan(rootNode, context);
     }
 
     private QueryNode processClause(SelectionClause clause, @Nullable QueryNode childNode) {
         // TODO The QueryContext should be immutable. It should be created for each clause instead of updating the schema category in the same context.
         final var extractedPatterns = SchemaExtractor.run(context, originalSchema, allKinds, clause);
-        final List<Set<PatternForKind>> plans = QueryPlanner.run(extractedPatterns);
+        final List<Set<PatternForKind>> plans = PlanDrafter.run(extractedPatterns);
         if (plans.isEmpty())
             throw PlanningException.noPlans();
 

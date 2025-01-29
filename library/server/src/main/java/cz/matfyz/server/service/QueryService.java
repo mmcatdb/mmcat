@@ -7,7 +7,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
-import cz.matfyz.querying.algorithms.QueryToInstance;
+import cz.matfyz.querying.QueryToInstance;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.server.controller.QueryController.QueryInit;
 import cz.matfyz.server.entity.Id;

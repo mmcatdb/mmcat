@@ -7,7 +7,7 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvid
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.algorithms.QueryToInstance;
+import cz.matfyz.querying.QueryToInstance;
 import cz.matfyz.tests.example.common.TestDatasource;
 
 import java.util.ArrayList;

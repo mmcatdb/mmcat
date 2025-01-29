@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying.planner;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
@@ -68,7 +68,7 @@ public class SchemaExtractor {
         context.setSchema(newSchema);
 
         final var patterns = createPatternsForKinds();
-        // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the QueryPlanner shouldn't be able to create any plan.
+        // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the KindPlanner shouldn't be able to create any plan.
 
         return patterns;
     }

@@ -1,4 +1,4 @@
-package cz.matfyz.transformations.processes;
+package cz.matfyz.transformations;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;

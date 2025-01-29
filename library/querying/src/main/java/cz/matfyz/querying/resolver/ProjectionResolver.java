@@ -1,27 +1,27 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying.resolver;
 
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.querying.algorithms.queryresult.ResultStructureTformer;
-import cz.matfyz.querying.algorithms.queryresult.TformContext;
-import cz.matfyz.querying.algorithms.queryresult.TformingResultStructure;
-import cz.matfyz.querying.algorithms.queryresult.TformStep.TformRoot;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.normalizer.ExpressionTree;
 import cz.matfyz.querying.normalizer.NormalizedQuery.ProjectionClause;
+import cz.matfyz.querying.resolver.queryresult.ResultStructureTformer;
+import cz.matfyz.querying.resolver.queryresult.TformContext;
+import cz.matfyz.querying.resolver.queryresult.TformingResultStructure;
+import cz.matfyz.querying.resolver.queryresult.TformStep.TformRoot;
 
-public class QueryProjector {
+public class ProjectionResolver {
 
     public static QueryResult run(QueryContext context, ProjectionClause clause, QueryResult selection) {
-        return new QueryProjector(context, clause, selection).run();
+        return new ProjectionResolver(context, clause, selection).run();
     }
 
     private final QueryContext context;
     private final ProjectionClause clause;
     private final QueryResult selection;
 
-    private QueryProjector(QueryContext context, ProjectionClause clause, QueryResult selection) {
+    private ProjectionResolver(QueryContext context, ProjectionClause clause, QueryResult selection) {
         this.context = context;
         this.clause = clause;
         this.selection = selection;

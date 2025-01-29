@@ -1,11 +1,10 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying.resolver;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.core.querying.Expression.FunctionExpression;
-import cz.matfyz.querying.algorithms.translator.DatasourceQueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
-import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.core.QueryDescription.QueryPartDescription;
+import cz.matfyz.querying.core.QueryDescription.QueryPlanDescription;
 import cz.matfyz.querying.core.patterntree.PatternObject.SerializedPatternObject;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.DatasourceNode.SerializedDatasourceNode;
@@ -22,15 +21,16 @@ import cz.matfyz.querying.core.querytree.QueryNode.SerializedQueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.core.querytree.UnionNode.SerializedUnionNode;
+import cz.matfyz.querying.planner.QueryPlan;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-public class QueryDescriptor implements QueryVisitor<SerializedQueryNode> {
+public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
 
-    public static QueryDescription run(QueryContext context, QueryNode rootNode) {
-        return new QueryDescriptor(context, rootNode).run();
+    public static QueryPlanDescription run(QueryPlan plan) {
+        return new QueryPlanDescriptor(plan.context, plan.root).run();
     }
 
     private final QueryContext context;
@@ -38,19 +38,19 @@ public class QueryDescriptor implements QueryVisitor<SerializedQueryNode> {
 
     private final List<QueryPartDescription> parts = new ArrayList<>();
 
-    private QueryDescriptor(QueryContext context, QueryNode rootNode) {
+    private QueryPlanDescriptor(QueryContext context, QueryNode rootNode) {
         this.context = context;
         this.rootNode = rootNode;
     }
 
-    private QueryDescription run() {
+    private QueryPlanDescription run() {
         final SerializedQueryNode serialized = rootNode.accept(this);
 
-        return new QueryDescription(parts, serialized);
+        return new QueryPlanDescription(parts, serialized);
     }
 
     public SerializedDatasourceNode visit(DatasourceNode node) {
-        final QueryStatement query = DatasourceQueryTranslator.run(context, node);
+        final QueryStatement query = DatasourceTranslator.run(context, node);
         parts.add(new QueryPartDescription(node.datasource.identifier, query.structure(), query.content().toString()));
 
         final var serializedKinds = new TreeMap<String, SerializedPatternObject>();

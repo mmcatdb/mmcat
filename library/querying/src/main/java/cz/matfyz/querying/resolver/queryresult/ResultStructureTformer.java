@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms.queryresult;
+package cz.matfyz.querying.resolver.queryresult;
 
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.LeafResult;
@@ -6,7 +6,7 @@ import cz.matfyz.core.querying.MapResult;
 import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.core.utils.GraphUtils.TreePath;
-import cz.matfyz.querying.algorithms.queryresult.TformStep.*;
+import cz.matfyz.querying.resolver.queryresult.TformStep.*;
 
 import java.util.ArrayList;
 import java.util.List;

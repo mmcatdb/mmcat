@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying.planner;
 
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.MorphismColoring;
@@ -15,28 +15,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is responsible for creating query plans for a given pattern. The pattern is represented by the extracted schema category.
+ * This class is responsible for proposing query plans for a given pattern. A pattern is represented by an extracted schema category.
  */
-public class QueryPlanner {
+public class PlanDrafter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryPlanner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlanDrafter.class);
 
     /**
      * @param allPatterns All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
      * @return
      */
     public static List<Set<PatternForKind>> run(List<PatternForKind> allPatterns) {
-        return new QueryPlanner(allPatterns).run();
+        return new PlanDrafter(allPatterns).run();
     }
 
     private final List<PatternForKind> allPatterns;
 
-    private QueryPlanner(List<PatternForKind> allPatterns) {
+    private PlanDrafter(List<PatternForKind> allPatterns) {
         this.allPatterns = allPatterns;
     }
 
     private List<Set<PatternForKind>> run() {
-        createQueryPlans();
+        createPlanDrafts();
 
         return plans;
     }
@@ -68,7 +68,7 @@ public class QueryPlanner {
     private List<Set<PatternForKind>> plans = new ArrayList<>();
     private Deque<StackItem> stack = new ArrayDeque<>();
 
-    private void createQueryPlans() {
+    private void createPlanDrafts() {
         final MorphismColoring initialColoring = MorphismColoring.create(allPatterns);
         final List<PatternForKind> initialSortedKinds = initialColoring.sortPatterns(allPatterns);
 

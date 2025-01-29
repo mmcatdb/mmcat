@@ -9,7 +9,7 @@ import java.util.TreeMap;
 /**
  * This class represents part of a query pattern that is mapped to a particular kind.
  * It's also mapped to a schema category.
- * Because each kind has a mappings which is a tree, this class also contains a root of a tree.
+ * Because each kind has a mapping which is a tree, this class also contains a root of a tree.
  */
 public class PatternForKind implements Comparable<PatternForKind> {
 

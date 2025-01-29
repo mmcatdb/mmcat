@@ -62,6 +62,11 @@ export type QueryEvolutionError = {
 };
 
 export type QueryDescription = {
+    planned: QueryPlanDescription;
+    optimized: QueryPlanDescription;
+};
+
+export type QueryPlanDescription = {
     parts: QueryPartDescription[];
     tree: QueryNode;
 };

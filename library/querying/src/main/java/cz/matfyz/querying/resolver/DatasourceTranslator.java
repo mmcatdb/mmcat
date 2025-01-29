@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms.translator;
+package cz.matfyz.querying.resolver;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
@@ -30,10 +30,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /*
  * This class translates the query part of a specific DatasourceNode.
  */
-public class DatasourceQueryTranslator {
+public class DatasourceTranslator {
 
     public static QueryStatement run(QueryContext context, DatasourceNode datasourceNode) {
-        return new DatasourceQueryTranslator(context, datasourceNode).run();
+        return new DatasourceTranslator(context, datasourceNode).run();
     }
 
     private final QueryContext context;
@@ -41,7 +41,7 @@ public class DatasourceQueryTranslator {
     private AbstractQueryWrapper wrapper;
     private DatasourceContext wrapperContext;
 
-    public DatasourceQueryTranslator(QueryContext context, DatasourceNode datasourceNode) {
+    public DatasourceTranslator(QueryContext context, DatasourceNode datasourceNode) {
         this.context = context;
         this.datasourceNode = datasourceNode;
     }
@@ -117,7 +117,7 @@ public class DatasourceQueryTranslator {
 
     private Signature findAggregationRoot(Mapping kind, Signature path) {
         // TODO
-        throw new UnsupportedOperationException("DatasourceQueryTranslator.findAggregationRoot not implemented.");
+        throw new UnsupportedOperationException("DatasourceTranslator.findAggregationRoot not implemented.");
     }
 
     // PATTERN TRANSLATOR STUFF FROM HERE (TODO: remove)

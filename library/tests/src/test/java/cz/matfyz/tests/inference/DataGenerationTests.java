@@ -17,7 +17,7 @@ import cz.matfyz.inference.edit.algorithms.PrimaryKeyMerge;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.tests.example.common.SparkProvider;
-import cz.matfyz.transformations.processes.DatabaseToInstance;
+import cz.matfyz.transformations.DatabaseToInstance;
 import cz.matfyz.wrapperjson.JsonControlWrapper;
 import cz.matfyz.wrapperjson.JsonProvider;
 import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;

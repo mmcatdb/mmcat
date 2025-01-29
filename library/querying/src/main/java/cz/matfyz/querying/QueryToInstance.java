@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms;
+package cz.matfyz.querying;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.core.exception.NamedException;
@@ -8,11 +8,16 @@ import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryDescription;
-import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
+import cz.matfyz.querying.planner.QueryPlan;
+import cz.matfyz.querying.planner.QueryPlanner;
+import cz.matfyz.querying.resolver.QueryPlanDescriptor;
+import cz.matfyz.querying.resolver.ProjectionResolver;
+import cz.matfyz.querying.resolver.SelectionResolver;
 
 import java.util.List;
 
@@ -57,11 +62,14 @@ public class QueryToInstance {
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
 
         normalized.context.setProvider(provider);
-        final QueryNode queryTree = QueryTreeBuilder.run(normalized.context, schema, kinds, normalized.selection);
-        final QueryResult selection = QueryResolver.run(normalized.context, queryTree);
-        final QueryResult projection = QueryProjector.run(normalized.context, normalized.projection, selection);
 
-        return projection.data;
+        final QueryPlan planned = QueryPlanner.run(normalized.context, schema, kinds, normalized.selection);
+        final QueryPlan optimized = QueryOptimizer.run(planned);
+
+        final QueryResult selected = SelectionResolver.run(optimized);
+        final QueryResult projected = ProjectionResolver.run(normalized.context, normalized.projection, selected);
+
+        return projected.data;
     }
 
     public QueryDescription describe() {
@@ -82,9 +90,14 @@ public class QueryToInstance {
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
 
         normalized.context.setProvider(provider);
-        final QueryNode queryTree = QueryTreeBuilder.run(normalized.context, schema, kinds, normalized.selection);
 
-        return QueryDescriptor.run(normalized.context, queryTree);
+        final QueryPlan planned = QueryPlanner.run(normalized.context, schema, kinds, normalized.selection);
+        final var plannedDescription = QueryPlanDescriptor.run(planned);
+
+        final QueryPlan optimized = QueryOptimizer.run(planned);
+        final var optimizedDescription = QueryPlanDescriptor.run(optimized);
+
+        return new QueryDescription(plannedDescription, optimizedDescription);
     }
 
 }

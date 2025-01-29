@@ -1,11 +1,11 @@
-package cz.matfyz.querying.algorithms.queryresult;
+package cz.matfyz.querying.resolver.queryresult;
 
 import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.MapResult;
 import cz.matfyz.core.querying.ResultNode;
 import cz.matfyz.core.utils.printable.*;
-import cz.matfyz.querying.algorithms.queryresult.TformContext.RemoverContext;
+import cz.matfyz.querying.resolver.queryresult.TformContext.RemoverContext;
 
 import java.util.ArrayList;
 import java.util.List;

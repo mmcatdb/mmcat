@@ -1,4 +1,4 @@
-package cz.matfyz.querying.algorithms.queryresult;
+package cz.matfyz.querying.resolver.queryresult;
 
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.ResultStructure;

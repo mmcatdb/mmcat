@@ -66,15 +66,27 @@ export function QueryingPage() {
                 </div>
             )}
 
-            {description && (
-                <QueryTreeDisplay datasources={datasources} tree={description.tree} />
-            )}
+            {description && (<>
+                <h3>Optimized plan</h3>
 
-            {description && (
+                <QueryTreeDisplay datasources={datasources} tree={description.optimized.tree} />
+
+                <h3>Original plan</h3>
+
+                <QueryTreeDisplay datasources={datasources} tree={description.planned.tree} />
+
+                <h3>Optimized parts</h3>
+
                 <div className='p-4 border whitespace-pre-wrap font-mono'>
-                    {JSON.stringify(description.parts, undefined, 4)}
+                    {JSON.stringify(description.optimized.parts, undefined, 4)}
                 </div>
-            )}
+
+                <h3>Original parts</h3>
+
+                <div className='p-4 border whitespace-pre-wrap font-mono'>
+                    {JSON.stringify(description.planned.parts, undefined, 4)}
+                </div>
+            </>)}
         </div>
     );
 }

@@ -5,13 +5,14 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.MapResult;
 import cz.matfyz.core.querying.ResultNode;
-import cz.matfyz.querying.algorithms.QueryResolver;
-import cz.matfyz.querying.algorithms.QueryTreeBuilder;
-import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
+import cz.matfyz.querying.planner.QueryPlan;
+import cz.matfyz.querying.planner.QueryPlanner;
+import cz.matfyz.querying.resolver.SelectionResolver;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
 
@@ -40,8 +41,11 @@ class TempTests {
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
 
         normalized.context.setProvider(provider);
-        final QueryNode queryTree = QueryTreeBuilder.run(normalized.context, datasources.schema, kinds, normalized.selection);
-        final var output = QueryResolver.run(normalized.context, queryTree);
+
+        final QueryPlan planned = QueryPlanner.run(normalized.context, datasources.schema, kinds, normalized.selection);
+        final QueryPlan optimized = QueryOptimizer.run(planned);
+
+        final var output = SelectionResolver.run(optimized);
 
         LOGGER.info("OK");
         LOGGER.info("\n" + output.data);
