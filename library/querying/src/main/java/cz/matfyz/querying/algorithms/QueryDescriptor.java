@@ -1,6 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
+import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.querying.algorithms.translator.DatasourceQueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription;
@@ -60,14 +61,14 @@ public class QueryDescriptor implements QueryVisitor<SerializedQueryNode> {
             node.datasource.identifier,
             serializedKinds,
             node.joinCandidates.stream().map(candidate -> candidate.serialize()).toList(),
-            List.of("TODO filters"),
+            node.filters.stream().map(FunctionExpression::toString).toList(),
             "TODO root term");
     }
 
     public SerializedFilterNode visit(FilterNode node) {
         return new SerializedFilterNode(
             node.child.accept(this),
-            "TODO filter"
+            node.filter.toString()
         );
     }
 

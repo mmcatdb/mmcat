@@ -1,6 +1,9 @@
 package cz.matfyz.querying.algorithms.queryresult;
 
-import cz.matfyz.core.querying.queryresult.*;
+import cz.matfyz.core.querying.LeafResult;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.MapResult;
+import cz.matfyz.core.querying.ResultNode;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.algorithms.queryresult.TformContext.RemoverContext;
 
@@ -11,7 +14,7 @@ import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This class represents one basic step in transforming a query result (ResultNode) to another one (with different QueryStructure).
+ * This class represents one basic step in transforming a query result (ResultNode) to another one (with different ResultStructure).
  * It can be either a traverse (to a parent, a map or a list), a creation of a leaf, a creation of a map or a list, or a write to a map or a list.
  * The steps usually have children which are also traversed. Some steps spawn multiple new "branches" which are traversed one by one. Therefore, the whole transformation can be obtained by simply appliing the first step to the root node.
  *
@@ -95,7 +98,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void apply(TformContext context) {
-            final var currentMap = (ResultMap) context.inputs.peek();
+            final var currentMap = (MapResult) context.inputs.peek();
             context.inputs.push(currentMap.children().get(key));
             applyChildren(context);
             context.inputs.pop();
@@ -112,7 +115,7 @@ public abstract class TformStep implements Printable {
         private List<Integer> removed = new ArrayList<>();
 
         @Override public void apply(TformContext context) {
-            final var currentList = (ResultList) context.inputs.peek();
+            final var currentList = (ListResult) context.inputs.peek();
             final var children = currentList.children();
 
             context.removers.push(this);
@@ -139,8 +142,8 @@ public abstract class TformStep implements Printable {
 
     static class CreateLeaf extends TformStep {
         @Override public void apply(TformContext context) {
-            final var inputLeaf = (ResultLeaf) context.inputs.peek();
-            final var outputLeaf = new ResultLeaf(inputLeaf.value);
+            final var inputLeaf = (LeafResult) context.inputs.peek();
+            final var outputLeaf = new LeafResult(inputLeaf.value);
             context.outputs.push(outputLeaf);
         }
 
@@ -156,7 +159,7 @@ public abstract class TformStep implements Printable {
     //           -> ... the same with other keys ...
     static class CreateMap extends TformStep {
         @Override public void apply(TformContext context) {
-            final var builder = new ResultMap.Builder();
+            final var builder = new MapResult.Builder();
             context.builders.push(builder);
             applyChildren(context);
             context.builders.pop();
@@ -179,7 +182,7 @@ public abstract class TformStep implements Printable {
         @Override public void apply(TformContext context) {
             applyChildren(context);
             final ResultNode outputNode = context.outputs.pop();
-            final var builder = (ResultMap.Builder) context.builders.peek();
+            final var builder = (MapResult.Builder) context.builders.peek();
             builder.put(key, outputNode);
         }
 
@@ -193,7 +196,7 @@ public abstract class TformStep implements Printable {
     // CreateList -> TraverseList -> ... possible other traverses ... -> WriteToList -> ... children that creates the new list items.
     static class CreateList<T extends ResultNode> extends TformStep {
         @Override public void apply(TformContext context) {
-            final var builder = new ResultList.Builder<T>();
+            final var builder = new ListResult.Builder<T>();
             context.builders.push(builder);
             applyChildren(context);
             context.builders.pop();
@@ -210,7 +213,7 @@ public abstract class TformStep implements Printable {
         @Override public void apply(TformContext context) {
             applyChildren(context);
             final var outputNode = (T) context.outputs.pop();
-            final var builder = (ResultList.Builder<T>) context.builders.peek();
+            final var builder = (ListResult.Builder<T>) context.builders.peek();
             builder.add(outputNode);
         }
 
@@ -234,7 +237,7 @@ public abstract class TformStep implements Printable {
 
         @Override public void apply(TformContext context) {
             final var thisNode = (T) context.inputs.peek();
-            final var identifierLeaf = (ResultLeaf) traversePath(thisNode, pathToIdentifier);
+            final var identifierLeaf = (LeafResult) traversePath(thisNode, pathToIdentifier);
 
             index.put(identifierLeaf.value, thisNode);
         }
@@ -267,33 +270,33 @@ public abstract class TformStep implements Printable {
      *  - self: merge the whole source map (from index) to the target map (from input).
      */
     static class MergeToMap extends TformStep {
-        private final Map<String, ResultMap> index;
+        private final Map<String, MapResult> index;
         private final List<String> pathToIdentifier;
 
         private @Nullable List<String> keys = null;
         private @Nullable String selfKey = null;
 
-        private MergeToMap(Map<String, ResultMap> index, List<String> pathToIdentifier) {
+        private MergeToMap(Map<String, MapResult> index, List<String> pathToIdentifier) {
             this.index = index;
             this.pathToIdentifier = pathToIdentifier;
         }
 
-        public static MergeToMap keys(Map<String, ResultMap> index, List<String> pathToIdentifier, List<String> keys) {
+        public static MergeToMap keys(Map<String, MapResult> index, List<String> pathToIdentifier, List<String> keys) {
             final var output = new MergeToMap(index, pathToIdentifier);
             output.keys = keys;
             return output;
         }
 
-        public static MergeToMap self(Map<String, ResultMap> index, List<String> pathToIdentifier, String selfKey) {
+        public static MergeToMap self(Map<String, MapResult> index, List<String> pathToIdentifier, String selfKey) {
             final var output = new MergeToMap(index, pathToIdentifier);
             output.selfKey = selfKey;
             return output;
         }
 
         @Override public void apply(TformContext context) {
-            final var targetMap = (ResultMap) context.inputs.peek();
-            final var identifierLeaf = (ResultLeaf) traversePath(targetMap, pathToIdentifier);
-            final var sourceMap = (ResultMap) index.get(identifierLeaf.value);
+            final var targetMap = (MapResult) context.inputs.peek();
+            final var identifierLeaf = (LeafResult) traversePath(targetMap, pathToIdentifier);
+            final var sourceMap = (MapResult) index.get(identifierLeaf.value);
 
             if (sourceMap == null) {
                 context.removers.peek().getRemoved();
@@ -346,7 +349,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void apply(TformContext context) {
-            final var currentMap = (ResultMap) context.inputs.peek();
+            final var currentMap = (MapResult) context.inputs.peek();
             currentMap.children().remove(key);
         }
 
@@ -361,7 +364,7 @@ public abstract class TformStep implements Printable {
     private static ResultNode traversePath(ResultNode input, List<String> path) {
         ResultNode current = input;
         for (String key : path)
-            current = ((ResultMap) current).children().get(key);
+            current = ((MapResult) current).children().get(key);
 
         return current;
     }

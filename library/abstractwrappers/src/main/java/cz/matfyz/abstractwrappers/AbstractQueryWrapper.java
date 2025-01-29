@@ -3,7 +3,9 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.QueryStructure;
+import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Expression.Constant;
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.io.Serializable;
@@ -42,23 +44,6 @@ public interface AbstractQueryWrapper {
      * Determines whether the aggregation functions are supported.
      */
     boolean isAggregationSupported();
-
-    enum ComparisonOperator {
-        Equal,
-        NotEqual,
-        Less,
-        LessOrEqual,
-        Greater,
-        GreaterOrEqual,
-    }
-
-    enum AggregationOperator {
-        Count,
-        Sum,
-        Min,
-        Max,
-        Average,
-    }
 
     /**
      * A queryable property. It's defined by the mapping and a path from its root.
@@ -105,21 +90,19 @@ public interface AbstractQueryWrapper {
 
     class PropertyWithAggregation extends Property {
         public final Signature aggregationRoot;
-        public final AggregationOperator aggregationOperator;
+        public final Operator operator;
 
-        public PropertyWithAggregation(Mapping mapping, Signature path, @Nullable Property parent, Signature aggregationRoot, AggregationOperator aggregationOperator) {
+        public PropertyWithAggregation(Mapping mapping, Signature path, @Nullable Property parent, Signature aggregationRoot, Operator operator) {
             super(mapping, path, parent);
             this.aggregationRoot = aggregationRoot;
-            this.aggregationOperator = aggregationOperator;
+            this.operator = operator;
         }
     }
-
-    record Constant(List<String> values) {}
 
     /**
      * Adds a projection to attribute which can eventually be optional (isOptional).
      */
-    void addProjection(Property property, QueryStructure structure, boolean isOptional);
+    void addProjection(Property property, ResultStructure structure, boolean isOptional);
 
     public record JoinCondition(Signature from, Signature to) implements Serializable {}
 
@@ -134,36 +117,43 @@ public interface AbstractQueryWrapper {
     void addJoin(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional);
 
     /**
+     * Adds a filtering between one variables or aggregation and one constant. E.g.:
+     * FILTER(?price > 42),
+     * FILTER(SUM(?price) > 69).
+     */
+    void addFilter(Property property, Constant constant, Operator operator);
+
+    /**
      * Adds a filtering between two variables or aggregations. E.g.:
      * FILTER(?price > ?minimalPrice),
      * FILTER(SUM(?price) > ?minimalTotal),
      * FILTER(?minimalTotal < SUM(?price)),
      * FILTER(SUM(?price1) < SUM(?price2)).
      */
-    void addFilter(Property left, Property right, ComparisonOperator operator);
+    void addFilter(Property property1, Property property2, Operator operator);
 
     /**
-     * Adds a filtering between one variables or aggregation and one constant. E.g.:
-     * FILTER(?price > 42),
-     * FILTER(SUM(?price) > 69).
+     * Adds a filtering between one variable or aggregation and a set of constants. E.g.:
+     * FILTER(?price IN (42, 69)),
+     * FILTER(SUM(?price) NOT IN (69, 42)).
      */
-    void addFilter(Property left, Constant right, ComparisonOperator operator);
+    void addFilter(Property property, List<Constant> set, Operator operator);
 
     public interface AbstractWrapperContext {
 
-        QueryStructure rootStructure();
+        ResultStructure rootStructure();
 
         /** Finds a property for given structure except for the root structure (which has no corresponding property). */
-        Property getProperty(QueryStructure structure);
+        Property getProperty(ResultStructure structure);
 
     }
 
     /**
-     * Enables advanced mapping between the query structure and the access path.
+     * Enables advanced mapping between the result structure and the access path.
      */
     void setContext(AbstractWrapperContext structure);
 
-    record QueryStatement(QueryContent content, QueryStructure structure) {}
+    record QueryStatement(QueryContent content, ResultStructure structure) {}
 
     /**
      * Builds a DSL statement based on the information obtained by calling the wrapper methods.

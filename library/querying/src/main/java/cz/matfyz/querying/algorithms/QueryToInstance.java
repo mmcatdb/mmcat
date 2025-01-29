@@ -4,13 +4,15 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.queryresult.QueryResult;
-import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.core.querytree.QueryNode;
-import cz.matfyz.querying.parsing.Query;
-import cz.matfyz.querying.parsing.QueryParser;
+import cz.matfyz.querying.normalizer.NormalizedQuery;
+import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.parser.ParsedQuery;
+import cz.matfyz.querying.parser.QueryParser;
 
 import java.util.List;
 
@@ -37,7 +39,7 @@ public class QueryToInstance {
         this.kinds = kinds;
     }
 
-    public ResultList execute() {
+    public ListResult execute() {
         try {
             return innerExecute();
         }
@@ -50,12 +52,14 @@ public class QueryToInstance {
         }
     }
 
-    private ResultList innerExecute() {
-        final Query query = QueryParser.parse(queryString);
-        query.context.setProvider(provider);
-        final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
-        final QueryResult selection = QueryResolver.run(query.context, queryTree);
-        final QueryResult projection = QueryProjector.run(query.context, query.select, selection);
+    private ListResult innerExecute() {
+        final ParsedQuery parsed = QueryParser.parse(queryString);
+        final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
+
+        normalized.context.setProvider(provider);
+        final QueryNode queryTree = QueryTreeBuilder.run(normalized.context, schema, kinds, normalized.selection);
+        final QueryResult selection = QueryResolver.run(normalized.context, queryTree);
+        final QueryResult projection = QueryProjector.run(normalized.context, normalized.projection, selection);
 
         return projection.data;
     }
@@ -74,11 +78,13 @@ public class QueryToInstance {
     }
 
     private QueryDescription innerDescribe() {
-        final Query query = QueryParser.parse(queryString);
-        query.context.setProvider(provider);
-        final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
+        final ParsedQuery parsed = QueryParser.parse(queryString);
+        final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
 
-        return QueryDescriptor.run(query.context, queryTree);
+        normalized.context.setProvider(provider);
+        final QueryNode queryTree = QueryTreeBuilder.run(normalized.context, schema, kinds, normalized.selection);
+
+        return QueryDescriptor.run(normalized.context, queryTree);
     }
 
 }

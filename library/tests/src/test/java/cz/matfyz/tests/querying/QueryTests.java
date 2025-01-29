@@ -1,8 +1,9 @@
 package cz.matfyz.tests.querying;
 
+import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Expression.Constant;
+import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.parsing.Filter;
-import cz.matfyz.querying.parsing.Term.Variable;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 
@@ -302,9 +303,9 @@ class QueryTests {
                     schema,
                     List.of(),
                     List.of(
-                        new Filter.ValueFilter((Variable)onlyPattern.root.children().stream().findFirst().get().term, List.of("o_100"))
+                        new FunctionExpression(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
-                    onlyPattern.root.term
+                    onlyPattern.root.variable
                 );
             },
             """
@@ -338,9 +339,9 @@ class QueryTests {
                     schema,
                     List.of(),
                     List.of(
-                        new Filter.ValueFilter((Variable)onlyPattern.root.children().stream().findFirst().get().term, List.of("o_100"))
+                        new FunctionExpression(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
-                    onlyPattern.root.term
+                    onlyPattern.root.variable
                 );
             },
             """

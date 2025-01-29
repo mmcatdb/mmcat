@@ -13,17 +13,19 @@ import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.queryresult.QueryResult;
-import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.querytree.QueryNode;
+import cz.matfyz.querying.normalizer.NormalizedQuery;
+import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.parser.ParsedQuery;
+import cz.matfyz.querying.parser.QueryParser;
 import cz.matfyz.querying.algorithms.QueryPlanner;
 import cz.matfyz.querying.algorithms.QueryProjector;
 import cz.matfyz.querying.algorithms.QueryResolver;
 import cz.matfyz.querying.algorithms.SchemaExtractor;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
-import cz.matfyz.querying.parsing.Query;
-import cz.matfyz.querying.parsing.QueryParser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -57,7 +59,7 @@ public class QueryCustomTreeTest<TWrapper extends AbstractControlWrapper> {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private ResultList doQuery() {
+    private ListResult doQuery() {
         // ! from QueryTestBase ctor and builder
         final var schema = datasources.schema;
 
@@ -69,11 +71,12 @@ public class QueryCustomTreeTest<TWrapper extends AbstractControlWrapper> {
 
         // ! from QueryToInstance.innerExecute() (onward from here...)
 
-        final Query query = QueryParser.parse(queryString);
-        query.context.setProvider(provider);
+        final ParsedQuery parsed = QueryParser.parse(queryString);
+        final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
+        normalized.context.setProvider(provider);
 
         // from QueryTreeBuilder.run()
-        final var extracted = SchemaExtractor.run(query.context, schema, kinds, query.where);
+        final var extracted = SchemaExtractor.run(normalized.context, schema, kinds, normalized.selection);
         final List<Set<PatternForKind>> plans = QueryPlanner.run(extracted);
 
         final var plan = plans.get(0);
@@ -81,14 +84,14 @@ public class QueryCustomTreeTest<TWrapper extends AbstractControlWrapper> {
         final var queryTree = queryTreeBuilder.build(schema, datasource, plan);
 
         // ! the rest is left unchanged
-        final QueryResult selection = QueryResolver.run(query.context, queryTree);
-        final QueryResult projection = QueryProjector.run(query.context, query.select, selection);
+        final QueryResult selection = QueryResolver.run(normalized.context, queryTree);
+        final QueryResult projection = QueryProjector.run(normalized.context, normalized.projection, selection);
 
         return projection.data;
     }
 
     public void run() {
-        final ResultList result = doQuery();
+        final ListResult result = doQuery();
         final var jsonResults = result.toJsonArray();
 
         final JsonNode jsonResult = parseJsonResult(jsonResults);

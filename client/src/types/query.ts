@@ -68,16 +68,16 @@ export type QueryDescription = {
 
 type QueryPartDescription = {
     datasource: DatasourceFromServer;
-    structure: QueryStructure;
+    structure: ResultStructure;
     content: string;
 };
 
-type QueryStructure = {
+type ResultStructure = {
     name: string;
     isArray: boolean;
-    children: Map<string, QueryStructure>;
+    children: Map<string, ResultStructure>;
     /** If null, this is the root of the tree. */
-    parent: QueryStructure | null;
+    parent: ResultStructure | null;
     signatureFromParent: SignatureFromServer | null;
 };
 
@@ -102,8 +102,8 @@ export type DatasourceNode = TypedNode<QueryNodeType.Datasource, {
     datasourceIdentifier: string;
     kinds: Record<string, PatternObject>;
     joinCandidates: JoinCandidate[];
-    filtters: TODO[];
-    rootTerm: TODO;
+    filters: Filter[];
+    rootVariable: TODO;
 }>;
 
 export type PatternObject = {
@@ -140,8 +140,11 @@ type JoinCondition = {
 
 export type FilterNode = TypedNode<QueryNodeType.Filter, {
     child: QueryNode;
-    filter: TODO;
+    filter: Filter;
 }>;
+
+// TODO
+type Filter = string;
 
 export type MinusNode = TypedNode<QueryNodeType.Minus, {
     primaryChild: QueryNode;

@@ -4,7 +4,7 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.querying.algorithms.QueryToInstance;
@@ -50,7 +50,7 @@ public class QueryService {
     @Autowired
     private SchemaCategoryRepository categoryRepository;
 
-    public ResultList executeQuery(Id categoryId, String queryString) {
+    public ListResult executeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
         final var datasources = getDatasources(categoryWrapper.id(), category);

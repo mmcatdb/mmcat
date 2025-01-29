@@ -1,16 +1,17 @@
 package cz.matfyz.tests.querying;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
-import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.queryresult.ResultList;
-import cz.matfyz.core.querying.queryresult.ResultMap;
-import cz.matfyz.core.querying.queryresult.ResultNode;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.MapResult;
+import cz.matfyz.core.querying.ResultNode;
 import cz.matfyz.querying.algorithms.QueryResolver;
 import cz.matfyz.querying.algorithms.QueryTreeBuilder;
 import cz.matfyz.querying.core.querytree.QueryNode;
-import cz.matfyz.querying.parsing.Query;
-import cz.matfyz.querying.parsing.QueryParser;
+import cz.matfyz.querying.normalizer.NormalizedQuery;
+import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.parser.ParsedQuery;
+import cz.matfyz.querying.parser.QueryParser;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
 
@@ -35,10 +36,12 @@ class TempTests {
 
     @Test
     void test() {
-        final Query query = QueryParser.parse(queryString);
-        query.context.setProvider(provider);
-        final QueryNode queryTree = QueryTreeBuilder.run(query.context, datasources.schema, kinds, query.where);
-        final var output = QueryResolver.run(query.context, queryTree);
+        final ParsedQuery parsed = QueryParser.parse(queryString);
+        final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
+
+        normalized.context.setProvider(provider);
+        final QueryNode queryTree = QueryTreeBuilder.run(normalized.context, datasources.schema, kinds, normalized.selection);
+        final var output = QueryResolver.run(normalized.context, queryTree);
 
         LOGGER.info("OK");
         LOGGER.info("\n" + output.data);
@@ -66,7 +69,7 @@ class TempTests {
 
     @Test
     void resultToStringTest() {
-        final var builder = new ResultList.TableBuilder();
+        final var builder = new ListResult.TableBuilder();
 
         builder.addColumns(List.of("colum1", "column2", "column3"));
         builder.addRow(List.of("a1", "a2", "a3"));
@@ -75,9 +78,9 @@ class TempTests {
 
         final var rootMap = new TreeMap<String, ResultNode>();
         rootMap.put("x", builder.build());
-        final var root = new ResultMap(rootMap);
+        final var root = new MapResult(rootMap);
 
-        final var rootArray = new ResultList(List.of(root));
+        final var rootArray = new ListResult(List.of(root));
 
         LOGGER.info("\n" + rootArray.toString());
 

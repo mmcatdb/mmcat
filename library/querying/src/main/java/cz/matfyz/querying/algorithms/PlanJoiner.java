@@ -5,6 +5,7 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils;
@@ -18,8 +19,7 @@ import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.exception.JoiningException;
-import cz.matfyz.querying.parsing.Term;
-import cz.matfyz.querying.parsing.TermTree;
+import cz.matfyz.querying.normalizer.VariableTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +36,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class PlanJoiner {
 
-    public static QueryNode run(QueryContext context, Set<PatternForKind> allPatterns, TermTree<BaseSignature> termTree) {
+    public static QueryNode run(QueryContext context, Set<PatternForKind> allPatterns, VariableTree termTree) {
         return new PlanJoiner(context, allPatterns, termTree).run();
     }
 
     private final QueryContext context;
     private final Set<PatternForKind> allPatterns;
-    private final TermTree<BaseSignature> termTree;
+    private final VariableTree termTree;
 
-    private PlanJoiner(QueryContext context, Set<PatternForKind> allPatterns, TermTree<BaseSignature> termTree) {
+    private PlanJoiner(QueryContext context, Set<PatternForKind> allPatterns, VariableTree termTree) {
         this.allPatterns = allPatterns;
         this.context = context;
         this.termTree = termTree;
@@ -59,7 +59,7 @@ public class PlanJoiner {
             final var onlyPattern = allPatterns.stream().findFirst().get(); // NOSONAR
             final var datasource = onlyPattern.kind.datasource();
 
-            return new DatasourceNode(datasource, allPatterns, context.getSchema(), List.of(), onlyPattern.root.term);
+            return new DatasourceNode(datasource, allPatterns, context.getSchema(), List.of(), List.of(), onlyPattern.root.variable);
         }
 
         // TODO there might be some joining needed for OPTIONAL joins?
@@ -236,7 +236,7 @@ public class PlanJoiner {
         allPatterns.stream()
             .filter(k -> !coveredPatterns.contains(k))
             .forEach(k -> {
-                final var part = new QueryPart(Set.of(k), List.of(), k.root.term);
+                final var part = new QueryPart(Set.of(k), List.of(), k.root.variable);
                 output.add(part);
             });
 
@@ -244,7 +244,7 @@ public class PlanJoiner {
     }
 
     /** A query part is a part of query that can be executed at once in a single datasource. */
-    private record QueryPart(Set<PatternForKind> patterns, List<JoinCandidate> joinCandidates, Term rootTerm) {}
+    private record QueryPart(Set<PatternForKind> patterns, List<JoinCandidate> joinCandidates, Variable rootVariable) {}
 
     /** Merges patterns from a single datasource to a minimal number of query parts. */
     private List<QueryPart> mergeSameDatasourceCandidates(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
@@ -267,7 +267,7 @@ public class PlanJoiner {
         // Also, all candidates will join different parts so we add them to the `between parts` category.
         candidatesBetweenParts.addAll(candidates);
 
-        return patterns.stream().map(pattern -> new QueryPart(Set.of(pattern), List.of(), pattern.root.term)).toList();
+        return patterns.stream().map(pattern -> new QueryPart(Set.of(pattern), List.of(), pattern.root.variable)).toList();
     }
 
     private QueryPart createQueryPart(Component<PatternForKind, JoinCandidate> component) {
@@ -282,15 +282,15 @@ public class PlanJoiner {
         // We only have to consider root terms of all patterns.
         // Of course, the root term has to be original. Therefore, we have to continue through it's parentes until we find such.
         final var rootTermTrees = patterns.stream()
-            .map(k -> k.root.term)
-            .map(term -> GraphUtils.findBFS(termTree, t -> t.term.equals(term)))
+            .map(k -> k.root.variable)
+            .map(variable -> GraphUtils.findBFS(termTree, t -> t.variable.equals(variable)))
             .toList();
 
         var partRoot = GraphUtils.findSubroot(termTree, rootTermTrees);
-        while (!partRoot.term.isOriginal())
+        while (!partRoot.variable.isOriginal())
             partRoot = partRoot.parent();
 
-        return new QueryPart(patterns, joinCandidates, partRoot.term);
+        return new QueryPart(patterns, joinCandidates, partRoot.variable);
     }
 
     private interface JoinTreeNode {
@@ -346,7 +346,7 @@ public class PlanJoiner {
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
             final var datasource = queryPart.patterns.stream().findFirst().get().kind.datasource();
-            return new DatasourceNode(datasource, queryPart.patterns, schema, queryPart.joinCandidates, queryPart.rootTerm);
+            return new DatasourceNode(datasource, queryPart.patterns, schema, queryPart.joinCandidates, List.of(), queryPart.rootVariable);
         }
     }
 

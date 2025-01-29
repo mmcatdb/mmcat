@@ -4,11 +4,11 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.querying.QueryStructure;
-import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.querying.QueryResult;
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils;
-import cz.matfyz.querying.algorithms.queryresult.QueryStructureMerger;
+import cz.matfyz.querying.algorithms.queryresult.ResultStructureMerger;
 import cz.matfyz.querying.algorithms.translator.DatasourceQueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
@@ -20,8 +20,6 @@ import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
-import cz.matfyz.querying.parsing.Filter.ConditionFilter;
-import cz.matfyz.querying.parsing.Filter.ValueFilter;
 
 import java.util.List;
 
@@ -51,15 +49,6 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(FilterNode node) {
-        if (node.filter instanceof ConditionFilter conditionFilter) {
-            // TODO
-            throw new UnsupportedOperationException("QueryResolver.visit(ConditionFilter) not implemented.");
-        }
-        else if (node.filter instanceof ValueFilter valueFilter) {
-            // TODO
-            throw new UnsupportedOperationException("QueryResolver.visit(ValueFilter) not implemented.");
-        }
-
         throw new UnsupportedOperationException("QueryResolver.visit(FilterNode) not implemented.");
     }
 
@@ -75,15 +64,15 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
         // Let's assume that the idRoot is the same as idProperty, i.e., the structure with the id is in the root of the result.
         // TODO Relax this assumption. Probably after we use graph instead of a tree, because we would have to somewhat reorganize the result first.
         // Maybe we can do that simply by turning the parent --> child to child --> array --> parent. Or even just child --> parent if the cardinality is OK?
-        final QueryStructure idRoot = idResult.structure;
-        final QueryStructure refRoot = refResult.structure;
+        final ResultStructure idRoot = idResult.structure;
+        final ResultStructure refRoot = refResult.structure;
 
-        final QueryStructure idMatch = findStructure(idRoot, condition.from());
-        final QueryStructure refMatch = findStructure(refRoot, condition.to());
+        final ResultStructure idMatch = findStructure(idRoot, condition.from());
+        final ResultStructure refMatch = findStructure(refRoot, condition.to());
 
-        final QueryStructure refProperty = findParent(idRoot, refRoot, refMatch);
+        final ResultStructure refProperty = findParent(idRoot, refRoot, refMatch);
 
-        final var tform = QueryStructureMerger.run(idRoot, refRoot, refProperty, idMatch, refMatch);
+        final var tform = ResultStructureMerger.run(idRoot, refRoot, refProperty, idMatch, refMatch);
 
 
         System.out.println("source:\n" + tform.sourceTform());
@@ -103,21 +92,21 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
         return tform.apply(idResult.data, refResult.data);
     }
 
-    private QueryStructure findStructure(QueryStructure parent, Signature signature) {
+    private ResultStructure findStructure(ResultStructure parent, Signature signature) {
         // TODO This might not work generally when the same schema object is used multiple times in the query. But it should work for now.
         final SchemaObject schemaObject = context.getSchema().getEdge(signature.getLast()).to();
-        final QueryStructure output = GraphUtils.findDFS(parent, s -> s.isLeaf() && s.schemaObject.equals(schemaObject));
+        final ResultStructure output = GraphUtils.findDFS(parent, s -> s.isLeaf() && s.schemaObject.equals(schemaObject));
         if (output == null)
             // TODO this should not happen
-            throw QueryException.message("QueryStructure not found for signature " + signature);
+            throw QueryException.message("ResultStructure not found for signature " + signature);
 
         return output;
     }
 
     /** Finds the closest parent of the child structure on the path from the pathStart to the pathEnd (both inclusive). */
-    private QueryStructure findParent(QueryStructure child, QueryStructure pathStart, QueryStructure pathEnd) {
-        final List<QueryStructure> endToStart = GraphUtils.findPath(pathStart, pathEnd).rootToTarget().reversed();
-        QueryStructure current = pathEnd;
+    private ResultStructure findParent(ResultStructure child, ResultStructure pathStart, ResultStructure pathEnd) {
+        final List<ResultStructure> endToStart = GraphUtils.findPath(pathStart, pathEnd).rootToTarget().reversed();
+        ResultStructure current = pathEnd;
 
         while (!current.equals(pathStart)) {
             if (current.schemaObject.equals(child.schemaObject))

@@ -51,6 +51,10 @@ export function QueryingPage() {
                     Join Example
                 </Button>
 
+                <Button color='default' onPress={() => setQuery(exampleFilter)}>
+                    Filter Example
+                </Button>
+
                 <Button color='primary' onPress={describe}>
                     Describe
                 </Button>
@@ -116,3 +120,12 @@ WHERE {
 }`;
 
 
+const exampleFilter =
+`SELECT {
+    ?order number ?number .
+}
+WHERE {
+    ?order 1 ?number .
+
+    FILTER(?number = "o_100")
+}`;

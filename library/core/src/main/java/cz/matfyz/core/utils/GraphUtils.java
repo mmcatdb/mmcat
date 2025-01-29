@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -237,6 +238,14 @@ public abstract class GraphUtils {
 
     }
 
+    public interface TreeBuilder<P, T extends Tree<T>> {
+
+        T createRoot(P payload);
+
+        T createChild(T parent, P payload);
+
+    }
+
     @Nullable
     public static <T extends Tree<T>, P extends Comparable<P>, E extends Edge<P>> T treeFromEdges(Collection<E> edges, TreeBuilder<P, T> builder) {
         final var map = new TreeMap<P, EditableTree<P>>();
@@ -295,14 +304,19 @@ public abstract class GraphUtils {
 
     }
 
-    public interface TreeBuilder<P, T extends Tree<T>> {
+    /** Call callback recursively on each children of the tree. */
+    public static <T extends Tree<T>> void forEachDFS(T tree, Consumer<T> callback) {
+        Deque<T> stack = new ArrayDeque<>();
+        stack.push(tree);
 
-        T createRoot(P payload);
-
-        T createChild(T parent, P payload);
-
+        while (!stack.isEmpty()) {
+            final var current = stack.pop();
+            callback.accept(current);
+            current.children().forEach(stack::push);
+        }
     }
 
+    /** Doesn't need to be a tree. However, each node needs to explicitly return all children that should be processed next. */
     public static <T> void forEachDFS(T tree, Function<T, Collection<T>> callback) {
         Deque<T> stack = new ArrayDeque<>();
         stack.push(tree);

@@ -2,9 +2,7 @@ package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
-
-import java.util.Map;
-import java.util.TreeMap;
+import cz.matfyz.core.querying.Expression.Operator;
 
 public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
 
@@ -17,19 +15,22 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
-    @Override protected Map<ComparisonOperator, String> defineComparisonOperators() {
-        final var output = new TreeMap<ComparisonOperator, String>();
-        output.put(ComparisonOperator.Equal, "=");
-        output.put(ComparisonOperator.NotEqual, "<>");
-        output.put(ComparisonOperator.Less, "<");
-        output.put(ComparisonOperator.LessOrEqual, "<=");
-        output.put(ComparisonOperator.Greater, ">");
-        output.put(ComparisonOperator.GreaterOrEqual, ">=");
-        return output;
-    }
+    private static final Operators operators = new Operators();
 
-    @Override protected Map<AggregationOperator, String> defineAggregationOperators() {
-        throw new UnsupportedOperationException("Neo4jQueryWrapper.defineAggregationOperators not implemented.");
+    static {
+
+        operators.define(Operator.Equal, "=");
+        operators.define(Operator.NotEqual, "<>");
+        operators.define(Operator.Less, "<");
+        operators.define(Operator.LessOrEqual, "<=");
+        operators.define(Operator.Greater, ">");
+        operators.define(Operator.GreaterOrEqual, ">=");
+
+        // TODO Aggragation operators.
+
+        operators.define(Operator.In, "IN");
+        operators.define(Operator.NotIn, "NOT IN");
+
     }
 
     @Override public QueryStatement createDSLStatement() {

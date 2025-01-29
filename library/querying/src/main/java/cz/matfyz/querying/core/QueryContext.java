@@ -1,9 +1,9 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.parsing.Term;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -16,24 +16,27 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class QueryContext {
 
     // Extracting
+    // There is exactly one schema object for each term. However, there might be multiple terms for each object.
 
-    private final Map<Term, SchemaObject> termToObject = new TreeMap<>();
-    private final Map<SchemaObject, Term> objectToTerm = new TreeMap<>();
+    private final Map<Variable, SchemaObject> termToObject = new TreeMap<>();
+    // private final Map<SchemaObject, List<Term>> objectToTerms = new TreeMap<>();
 
-    public QueryContext addTerm(Term term, SchemaObject object) {
+    public QueryContext addTerm(Variable term, SchemaObject object) {
+        // FIXME
+
         termToObject.put(term, object);
-        objectToTerm.put(object, term);
+        // objectToTerms.computeIfAbsent(object, k -> new ArrayList<>()).add(term);
 
         return this;
     }
 
-    public SchemaObject getObject(Term term) {
+    public SchemaObject getObjexForVariable(Variable term) {
         return termToObject.get(term);
     }
 
-    public Term getTerm(SchemaObject object) {
-        return objectToTerm.get(object);
-    }
+    // public List<Term> getTermsForObject(SchemaObject object) {
+    //     return objectToTerms.get(object);
+    // }
 
     // Schema category
 

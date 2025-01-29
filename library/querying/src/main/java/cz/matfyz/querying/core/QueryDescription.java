@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.core.querying.QueryStructure;
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.querying.core.querytree.QueryNode.SerializedQueryNode;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public record QueryDescription(
 
     public record QueryPartDescription(
         String datasourceIdentifier,
-        QueryStructure structure,
+        ResultStructure structure,
         String content
     ) {}
 

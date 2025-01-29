@@ -1,7 +1,7 @@
 package cz.matfyz.querying.algorithms.queryresult;
 
-import cz.matfyz.core.querying.queryresult.ResultNode;
-import cz.matfyz.core.querying.queryresult.ResultNode.NodeBuilder;
+import cz.matfyz.core.querying.ResultNode;
+import cz.matfyz.core.querying.ResultNode.NodeBuilder;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

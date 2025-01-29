@@ -10,7 +10,7 @@ import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.exception.PlanningException;
-import cz.matfyz.querying.parsing.WhereClause;
+import cz.matfyz.querying.normalizer.NormalizedQuery.SelectionClause;
 
 import java.util.List;
 import java.util.Set;
@@ -22,16 +22,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class QueryTreeBuilder {
 
-    public static QueryNode run(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, WhereClause rootClause) {
+    public static QueryNode run(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
         return new QueryTreeBuilder(context, originalSchema, allKinds, rootClause).run();
     }
 
     private final QueryContext context;
     private final SchemaCategory originalSchema;
     private final List<Mapping> allKinds;
-    private final WhereClause rootClause;
+    private final SelectionClause rootClause;
 
-    private QueryTreeBuilder(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, WhereClause rootClause) {
+    private QueryTreeBuilder(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
         this.context = context;
         this.originalSchema = originalSchema;
         this.allKinds = allKinds;
@@ -42,7 +42,7 @@ public class QueryTreeBuilder {
         return processClause(rootClause, null);
     }
 
-    private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
+    private QueryNode processClause(SelectionClause clause, @Nullable QueryNode childNode) {
         // TODO The QueryContext should be immutable. It should be created for each clause instead of updating the schema category in the same context.
         final var extractedPatterns = SchemaExtractor.run(context, originalSchema, allKinds, clause);
         final List<Set<PatternForKind>> plans = QueryPlanner.run(extractedPatterns);
@@ -52,20 +52,17 @@ public class QueryTreeBuilder {
         // TODO better selection?
         final Set<PatternForKind> selectedPlan = plans.get(0);
 
-        QueryNode currentNode = PlanJoiner.run(context, selectedPlan, clause.termTree);
+        QueryNode currentNode = PlanJoiner.run(context, selectedPlan, clause.variables());
 
-        for (final var filter : clause.conditionFilters)
+        for (final var filter : clause.filters())
             currentNode = new FilterNode(currentNode, filter);
-
-        for (final var values : clause.valueFilters)
-            currentNode = new FilterNode(currentNode, values);
 
         // TODO we are not dealing with the nested clauses now.
         // Probably, each clause should have its own context.
-        // for (final var nestedClause : clause.nestedClauses)
+        // for (final var nestedClause : clause.nestedClauses())
         //     currentNode = processClause(nestedClause, currentNode);
 
-        return switch (clause.type) {
+        return switch (clause.type()) {
             case Where -> currentNode;
             case Minus -> new MinusNode(childNode, currentNode);
             case Optional -> new OptionalNode(childNode, currentNode);

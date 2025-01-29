@@ -52,7 +52,7 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
                     </div>
                 ) : (
                     <div className='text-red-500'>
-                    Datasource not found<br/>
+                        Datasource not found<br/>
                         {node.datasourceIdentifier}
                     </div>
                 )}
@@ -70,6 +70,12 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
                 <div className='divide-y'>
                     {node.joinCandidates.map((candidate, index) => (
                         <JoinCandidateDisplay key={index} candidate={candidate} />
+                    ))}
+
+                    {node.filters.map((filter, index) => (
+                        <div key={index}>
+                            {filter}
+                        </div>
                     ))}
                 </div>
             </div>
@@ -140,19 +146,17 @@ function JoinCandidateDisplay({ candidate }: Readonly<{ candidate: JoinCandidate
 }
 
 function FilterNodeDisplay({ node, datasources }: NodeDisplayProps<FilterNode>) {
-    return (
-        <div>
+    return (<>
+        <div className='mb-4 flex flex-col items-center'>
             <div className='px-2 p-1 border'>
                 {title(node)}
-            </div>
 
-            <div className='whitespace-pre-wrap font-mono bg-gray-800'>
-                {JSON.stringify(node, undefined, 4)}
+                {node.filter}
             </div>
-
-            {nodeDisplay(node.child, datasources)}
         </div>
-    );
+
+        {nodeDisplay(node.child, datasources)}
+    </>);
 }
 
 function MinusNodeDisplay({ node, datasources }: NodeDisplayProps<MinusNode>) {

@@ -2,31 +2,24 @@ package cz.matfyz.querying.algorithms.translator;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.PropertyWithAggregation;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.QueryStructure;
+import cz.matfyz.core.querying.Expression;
+import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.core.querying.Variable;
+import cz.matfyz.core.querying.Expression.Constant;
+import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.parsing.Filter;
-import cz.matfyz.querying.parsing.Filter.ConditionFilter;
-import cz.matfyz.querying.parsing.Filter.ValueFilter;
-import cz.matfyz.querying.parsing.Term;
-import cz.matfyz.querying.parsing.Term.Aggregation;
-import cz.matfyz.querying.parsing.Term.StringValue;
-import cz.matfyz.querying.parsing.Term.Variable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -48,7 +41,6 @@ public class DatasourceQueryTranslator {
     private AbstractQueryWrapper wrapper;
     private DatasourceContext wrapperContext;
 
-
     public DatasourceQueryTranslator(QueryContext context, DatasourceNode datasourceNode) {
         this.context = context;
         this.datasourceNode = datasourceNode;
@@ -57,34 +49,45 @@ public class DatasourceQueryTranslator {
     private QueryStatement run() {
         this.wrapper = context.getProvider().getControlWrapper(datasourceNode.datasource).getQueryWrapper();
 
-        wrapperContext = new DatasourceContext(context, datasourceNode.rootTerm);
+        wrapperContext = new DatasourceContext(context, datasourceNode.rootVariable);
 
         datasourceNode.kinds.forEach(this::processKind);
         datasourceNode.joinCandidates.forEach(this::processJoinCandidate);
 
         wrapper.setContext(wrapperContext);
 
-        for (final Filter filter : datasourceNode.filters) {
+        for (final FunctionExpression filter : datasourceNode.filters)
             processFilter(filter);
-        }
 
         return this.wrapper.createDSLStatement();
     }
 
-    public void processFilter(Filter filter) {
-        if (filter instanceof ConditionFilter conditionFilter) {
-            final var left = createProperty(conditionFilter.lhs());
-            final var right = createProperty(conditionFilter.rhs());
-            wrapper.addFilter(left, right, conditionFilter.operator());
+    private void processFilter(FunctionExpression filter) {
+        final var operator = filter.operator();
+
+        if (operator.isComparison()) {
+            final var left = createProperty(filter.arguments().get(0));
+            final var rhs = filter.arguments().get(1);
+
+            if (rhs instanceof Constant constant)
+                wrapper.addFilter(left, constant, operator);
+            else
+                wrapper.addFilter(left, createProperty(rhs), operator);
+            return;
         }
-        else if (filter instanceof ValueFilter valueFilter) {
-            final var property = createProperty(valueFilter.variable());
-            wrapper.addFilter(property, new Constant(valueFilter.allowedValues()), ComparisonOperator.Equal);
+
+        if (operator.isSet()) {
+            final var property = createProperty(filter.arguments().get(0));
+            final var values = filter.arguments().stream().skip(1).map(expression -> (Constant) expression).toList();
+            wrapper.addFilter(property, values, operator);
+            return;
         }
+
+        throw new UnsupportedOperationException("Unsupported filter operator: " + operator + ".");
     }
 
-    private Property createProperty(Term term) {
-        if (term instanceof Variable variable) {
+    private Property createProperty(Expression expression) {
+        if (expression instanceof Variable variable) {
             /*
             // TODO: is the retyping to Variable needed? This can be applied to any term (at least type-wise).
             final var ctx = context.getContext(variable);
@@ -100,14 +103,16 @@ public class DatasourceQueryTranslator {
             return wrapperContext.getProperty(variable);
         }
 
-        if (term instanceof Aggregation aggregation) {
-            final var property = createProperty(aggregation.variable());
-            final var root = findAggregationRoot(property.mapping, property.path);
+        if (expression instanceof FunctionExpression functionExpression) {
+            // FIXME expressions (with possible aggregations)
+            // final var aggregation = term.asFunctionExpression();
+            // final var property = createProperty(aggregation.variable());
+            // final var root = findAggregationRoot(property.mapping, property.path);
 
-            return new PropertyWithAggregation(property.mapping, property.path, null, root, aggregation.operator());
+            // return new PropertyWithAggregation(property.mapping, property.path, null, root, aggregation.operator());
         }
 
-        throw new UnsupportedOperationException("Can't create property from term: " + term.getClass().getSimpleName() + ".");
+        throw new UnsupportedOperationException("Can't create property from term: " + expression.getClass().getSimpleName() + ".");
     }
 
     private Signature findAggregationRoot(Mapping kind, Signature path) {
@@ -145,16 +150,11 @@ public class DatasourceQueryTranslator {
             return;
         }
 
-        final Term term = item.object.term;
         final var objectProperty = wrapperContext.createProperty(pattern.kind, item);
 
-        if (term instanceof StringValue constantObject)
-            wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value())), ComparisonOperator.Equal);
-        else {
-            // TODO isOptional is not supported yet.
-            final var structure = wrapperContext.findOrCreateStructure(objectProperty);
-            wrapper.addProjection(objectProperty, structure, false);
-        }
+        // TODO isOptional is not supported yet.
+        final var structure = wrapperContext.findOrCreateStructure(objectProperty);
+        wrapper.addProjection(objectProperty, structure, false);
     }
 
     private void processInnerItem(StackItem item) {
@@ -184,27 +184,27 @@ public class DatasourceQueryTranslator {
     private static class DatasourceContext implements AbstractWrapperContext {
 
         private final QueryContext context;
-        private QueryStructure rootStructure;
+        private ResultStructure rootStructure;
 
-        DatasourceContext(QueryContext context, Term rootTerm) {
+        DatasourceContext(QueryContext context, Variable rootVariable) {
             this.context = context;
-            rootStructure = new QueryStructure(rootTerm.getIdentifier(), true, context.getObject(rootTerm));
+            rootStructure = new ResultStructure(rootVariable.name(), true, context.getObjexForVariable(rootVariable));
         }
 
-        private final Map<Property, Term> propertyToTerm = new TreeMap<>();
-        private final Map<Term, Property> termToProperty = new TreeMap<>();
-        private final Map<Property, QueryStructure> propertyToStructure = new TreeMap<>();
-        private final Map<QueryStructure, Property> structureToProperty = new TreeMap<>();
+        private final Map<Property, Variable> propertyToVariable = new TreeMap<>();
+        private final Map<Variable, Property> variableToProperty = new TreeMap<>();
+        private final Map<Property, ResultStructure> propertyToStructure = new TreeMap<>();
+        private final Map<ResultStructure, Property> structureToProperty = new TreeMap<>();
 
         Property createProperty(Mapping kind, StackItem item) {
             final var property = new Property(kind, item.pathFromParent, item.preservedParent);
-            propertyToTerm.put(property, item.object.term);
-            termToProperty.put(item.object.term, property);
+            propertyToVariable.put(property, item.object.variable);
+            variableToProperty.put(item.object.variable, property);
 
             return property;
         }
 
-        QueryStructure findOrCreateStructure(@Nullable Property property) {
+        ResultStructure findOrCreateStructure(@Nullable Property property) {
             if (property == null)
                 return rootStructure;
 
@@ -216,8 +216,8 @@ public class DatasourceQueryTranslator {
                 return found;
 
             final var isArray = property.path.hasDual();
-            final Term term = propertyToTerm.get(property);
-            final var structure = new QueryStructure(term.getIdentifier(), isArray, context.getObject(term));
+            final Variable variable = propertyToVariable.get(property);
+            final var structure = new ResultStructure(variable.name(), isArray, context.getObjexForVariable(variable));
 
             propertyToStructure.put(property, structure);
             structureToProperty.put(structure, property);
@@ -228,16 +228,16 @@ public class DatasourceQueryTranslator {
             return structure;
         }
 
-        @Override public QueryStructure rootStructure() {
+        @Override public ResultStructure rootStructure() {
             return rootStructure;
         }
 
-        @Override public Property getProperty(QueryStructure structure) {
+        @Override public Property getProperty(ResultStructure structure) {
             return structureToProperty.get(structure);
         }
 
-        public Property getProperty(Term term) {
-            return termToProperty.get(term);
+        private Property getProperty(Variable variable) {
+            return variableToProperty.get(variable);
         }
     }
 
@@ -256,7 +256,7 @@ public class DatasourceQueryTranslator {
             final var lastChildOfArray = object.isChildOfArray() ? object : stackObject.lastChildOfArray;
 
             // All original objects are added.
-            if (object.term.isOriginal())
+            if (object.variable.isOriginal())
                 output.add(object);
 
             // If the object has multiple children, the last child of array has to be preserved (if it isn't null ofc).

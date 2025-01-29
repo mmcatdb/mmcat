@@ -2,10 +2,10 @@ package cz.matfyz.querying.core.patterntree;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
-import cz.matfyz.querying.parsing.Term;
 import cz.matfyz.querying.exception.GeneralException;
 
 import java.util.Collection;
@@ -22,23 +22,23 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class PatternObject implements Comparable<PatternObject>, Printable {
 
     public final SchemaObject schemaObject;
-    public final Term term;
+    public final Variable variable;
     /** If this property is null, the PatternObject is the root of the pattern tree. */
     private final @Nullable EdgeData edgeFromParent;
 
     private final Map<BaseSignature, PatternObject> children = new TreeMap<>();
 
-    private PatternObject(SchemaObject schemaObject, Term term, @Nullable EdgeData edgeFromParent) {
+    private PatternObject(SchemaObject schemaObject, Variable variable, @Nullable EdgeData edgeFromParent) {
         this.schemaObject = schemaObject;
-        this.term = term;
+        this.variable = variable;
         this.edgeFromParent = edgeFromParent;
     }
 
-    public static PatternObject createRoot(SchemaObject schemaObject, Term term) {
-        return new PatternObject(schemaObject, term, null);
+    public static PatternObject createRoot(SchemaObject schemaObject, Variable variable) {
+        return new PatternObject(schemaObject, variable, null);
     }
 
-    public PatternObject getOrCreateChild(SchemaEdge schemaEdge, Term term) {
+    public PatternObject getOrCreateChild(SchemaEdge schemaEdge, Variable variable) {
         if (!(schemaEdge.signature() instanceof BaseSignature baseSignature))
             throw GeneralException.message("Non-base signature " + schemaEdge.signature() + " in pattern tree.");
 
@@ -47,7 +47,7 @@ public class PatternObject implements Comparable<PatternObject>, Printable {
             return currentChild;
 
         final var edgeToChild = new EdgeData(schemaEdge, this);
-        final var child = new PatternObject(schemaEdge.to(), term, edgeToChild);
+        final var child = new PatternObject(schemaEdge.to(), variable, edgeToChild);
         children.put(baseSignature, child);
 
         return child;
@@ -70,7 +70,7 @@ public class PatternObject implements Comparable<PatternObject>, Printable {
 
     @Nullable
     public BaseSignature signatureFromParent() {
-        // The signature must be base because it comes from the WhereTriple.
+        // The signature must be base because it comes from the SelectionTriple.
         return edgeFromParent != null
             ? (BaseSignature) edgeFromParent.schemaEdge.signature()
             : null;
@@ -92,7 +92,7 @@ public class PatternObject implements Comparable<PatternObject>, Printable {
     ) {}
 
     @Override public void printTo(Printer printer) {
-        printer.append("(").append(term).append(")");
+        printer.append("(").append(variable).append(")");
         if (children.size() == 0)
             return;
 
@@ -129,7 +129,7 @@ public class PatternObject implements Comparable<PatternObject>, Printable {
         final var map = new TreeMap<BaseSignature, SerializedPatternObject>();
         children.entrySet().forEach(entry -> map.put(entry.getKey(), entry.getValue().serialize()));
 
-        return new SerializedPatternObject(schemaObject.key().getValue(), term.toString(), map);
+        return new SerializedPatternObject(schemaObject.key().getValue(), variable.toString(), map);
     }
 
 }

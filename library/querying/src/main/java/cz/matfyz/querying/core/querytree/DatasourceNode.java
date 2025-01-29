@@ -1,14 +1,13 @@
 package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.querying.Variable;
+import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternObject.SerializedPatternObject;
-import cz.matfyz.querying.core.querytree.FilterNode.SerializedFilterNode;
-import cz.matfyz.querying.parsing.Filter;
-import cz.matfyz.querying.parsing.Term;
 
 import java.util.List;
 import java.util.Map;
@@ -25,39 +24,24 @@ public class DatasourceNode extends QueryNode {
     public final Set<PatternForKind> kinds;
     public final SchemaCategory schema;
     public final List<JoinCandidate> joinCandidates;
-    public final List<Filter> filters;
-    /** The root term of this pattern. When this node is translated to query, this term will be the root of the query structure. */
-    public final Term rootTerm;
+    public final List<FunctionExpression> filters;
+    /** The root term of this pattern. When this node is translated to query, this term will be the root of the result structure. */
+    public final Variable rootVariable;
 
     public DatasourceNode(
         Datasource datasource,
         Set<PatternForKind> kinds,
         SchemaCategory schema,
         List<JoinCandidate> joinCandidates,
-        Term rootTerm
-    ) {
-        this.datasource = datasource;
-        this.kinds = kinds;
-        this.schema = schema;
-        this.joinCandidates = joinCandidates;
-        this.filters = List.of();
-        this.rootTerm = rootTerm;
-    }
-
-    public DatasourceNode(
-        Datasource datasource,
-        Set<PatternForKind> kinds,
-        SchemaCategory schema,
-        List<JoinCandidate> joinCandidates,
-        List<Filter> filters,
-        Term rootTerm
+        List<FunctionExpression> filters,
+        Variable rootVariable
     ) {
         this.datasource = datasource;
         this.kinds = kinds;
         this.schema = schema;
         this.joinCandidates = joinCandidates;
         this.filters = filters;
-        this.rootTerm = rootTerm;
+        this.rootVariable = rootVariable;
     }
 
     @Override public <T> T accept(QueryVisitor<T> visitor) {
@@ -69,7 +53,7 @@ public class DatasourceNode extends QueryNode {
         Map<String, SerializedPatternObject> kinds,
         List<SerializedJoinCandidate> joinCandidates,
         List<String> filters,
-        String rootTerm
+        String rootVariable
     ) implements SerializedQueryNode{
 
         @Override public String getType() { return "datasource"; }

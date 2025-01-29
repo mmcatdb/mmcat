@@ -13,8 +13,8 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.querying.queryresult.QueryResult;
-import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
@@ -161,7 +161,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             LOGGER.info("Execute PostgreSQL query:\n{}", statement);
 
             try (ResultSet resultSet = statement.executeQuery()) {
-                final var builder = new ResultList.TableBuilder();
+                final var builder = new ListResult.TableBuilder();
                 builder.addColumns(columns);
 
                 while (resultSet.next()) {

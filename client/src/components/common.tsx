@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useLayoutEffect, useState } from 'react';
 import { Tooltip as NextuiTooltip, type TooltipProps } from '@nextui-org/react';
 import clsx from 'clsx';
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
@@ -36,7 +36,7 @@ type PortalProps = {
 export function Portal({ children, to }: PortalProps) {
     const [ target, setTarget ] = useState(document.getElementById(to));
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setTarget(document.getElementById(to));
     }, [ to ]);
 

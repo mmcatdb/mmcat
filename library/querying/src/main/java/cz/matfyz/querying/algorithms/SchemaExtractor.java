@@ -2,21 +2,21 @@ package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
+import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternObject;
+import cz.matfyz.querying.normalizer.NormalizedQuery.SelectionClause;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
-import cz.matfyz.querying.parsing.Term;
-import cz.matfyz.querying.parsing.WhereClause;
-import cz.matfyz.querying.parsing.WhereClause.WhereTriple;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -27,35 +27,46 @@ import java.util.TreeMap;
  */
 public class SchemaExtractor {
 
-    public static List<PatternForKind> run(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
+    public static List<PatternForKind> run(QueryContext context, SchemaCategory schema, List<Mapping> kinds, SelectionClause clause) {
         return new SchemaExtractor(context, schema, kinds, clause).run();
     }
 
     private final QueryContext context;
     private final SchemaCategory schema;
     private final List<Mapping> kinds;
-    private final WhereClause clause;
+    private final SelectionClause clause;
 
-    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Mapping> kinds, WhereClause clause) {
+    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Mapping> kinds, SelectionClause clause) {
         this.context = context;
         this.schema = schema;
         this.kinds = kinds;
         this.clause = clause;
     }
 
-    private List<WhereTriple> triples;
-    /**
-     * List of all morphisms that appear directly in the pattern.
-     * They already contain only base signatures without duals.
-     */
-    private List<SchemaMorphism> patternMorphisms;
+    private Map<Key, Variable> keyToVariable = new TreeMap<>();
 
     private List<PatternForKind> run() {
-        triples = clause.termTree.toTriples(WhereClause::createTriple);
-        patternMorphisms = triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
+        /** List of all morphisms that appear directly in the pattern. They already contain only base signatures without duals. */
+        final List<SchemaMorphism> patternMorphisms = new ArrayList<>();
 
-        createNewCategory();
-        updateContext();
+        GraphUtils.forEachDFS(clause.variables(), tree -> {
+            if (tree.edgeFromParent == null)
+                // Root - just skip it.
+                return;
+
+            final var edge = schema.getEdge(tree.edgeFromParent);
+            patternMorphisms.add(edge.morphism());
+
+            context.addTerm(tree.parent().variable, edge.from());
+            context.addTerm(tree.variable, edge.to());
+
+            keyToVariable.put(edge.from().key(), tree.parent().variable);
+            keyToVariable.put(edge.to().key(), tree.variable);
+        });
+
+        createNewCategory(patternMorphisms);
+        context.setSchema(newSchema);
+
         final var patterns = createPatternsForKinds();
         // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the QueryPlanner shouldn't be able to create any plan.
 
@@ -66,7 +77,7 @@ public class SchemaExtractor {
     private SchemaCategory newSchema;
     private Queue<SchemaMorphism> morphismQueue;
 
-    private void createNewCategory() {
+    private void createNewCategory(List<SchemaMorphism> patternMorphisms) {
         newSchema = new SchemaCategory();
         morphismQueue = new ArrayDeque<>(patternMorphisms);
 
@@ -97,30 +108,15 @@ public class SchemaExtractor {
             .forEach(base -> morphismQueue.add(schema.getMorphism(base)));
     }
 
-    private Map<BaseSignature, WhereTriple> signatureToTriple = new TreeMap<>();
-    private Map<Key, Term> keyToTerm = new TreeMap<>();
-
-    private void updateContext() {
-        context.setSchema(newSchema);
-
-        triples.forEach(triple -> {
-            final var morphism = newSchema.getMorphism(triple.signature);
-            signatureToTriple.put(triple.signature, triple);
-
-            context.addTerm(triple.subject, morphism.dom());
-            context.addTerm(triple.object, morphism.cod());
-
-            keyToTerm.put(morphism.dom().key(), triple.subject);
-            keyToTerm.put(morphism.cod().key(), triple.object);
-        });
-    }
-
     private List<PatternForKind> createPatternsForKinds() {
         return kinds.stream()
             .filter(kind -> newSchema.hasObject(kind.rootObject().key()))
             .map(kind -> {
                 final var rootObject = kind.rootObject();
-                final var rootNode = PatternObject.createRoot(rootObject, keyToTerm.get(rootObject.key()));
+                // TODO really?
+                // The root has to be variable.
+                final var rootVariable = keyToVariable.get(rootObject.key());
+                final var rootNode = PatternObject.createRoot(rootObject, rootVariable);
                 processComplexProperty(rootNode, kind.accessPath());
 
                 return new PatternForKind(kind, rootNode);
@@ -140,9 +136,9 @@ public class SchemaExtractor {
                         return;
 
                     final SchemaEdge edge = schema.getEdge(baseSignature);
-                    final Term childTerm = getOrCreateCodTermForEdge(edge);
+                    final Variable childVariable = getOrCreateCodVariableForEdge(edge);
 
-                    currentNode = currentNode.getOrCreateChild(edge, childTerm);
+                    currentNode = currentNode.getOrCreateChild(edge, childVariable);
                 }
                 // If the subpath is an auxiliary property, the signature split leads to an empty list. Therefore, it's automatically skipped and we continue with its children.
 
@@ -152,18 +148,19 @@ public class SchemaExtractor {
     }
 
     /**
-     * Gets the term for the codomain object of the edge. If it's missing, a new variable is created.
+     * Gets the variable for the codomain object of the edge. If it's missing, a new one is created.
      * The only valid reason for it to be missing is that the object was added during the extraction because it's an identifier of some other object.
-     * The created variable is a variable only - no triple is created for it.
+     * The created variable is a variable only - it isn't added to the variable tree.
+     * TODO This last line is sus. Investigate.
      */
-    private Term getOrCreateCodTermForEdge(SchemaEdge edge) {
-        final Term foundTerm = keyToTerm.get(edge.to().key());
-        if (foundTerm != null)
-            return foundTerm;
+    private Variable getOrCreateCodVariableForEdge(SchemaEdge edge) {
+        final Variable foundVariable = keyToVariable.get(edge.to().key());
+        if (foundVariable != null)
+            return foundVariable;
 
-        final var newVariable = clause.termBuilder.generatedVariable();
+        final var newVariable = clause.variableScope().createGenerated();
         context.addTerm(newVariable, edge.to());
-        keyToTerm.put(edge.to().key(), newVariable);
+        keyToVariable.put(edge.to().key(), newVariable);
 
         return newVariable;
     }
