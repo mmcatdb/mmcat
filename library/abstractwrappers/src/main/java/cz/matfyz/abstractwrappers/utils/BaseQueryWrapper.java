@@ -76,6 +76,9 @@ public abstract class BaseQueryWrapper {
         this.context = context;
     }
 
+    /**
+     * Maps {@link Operator} to its string representation in the target DSL.
+     */
     public static class Operators {
 
         private final Map<Operator, String> operatorToString = new TreeMap<Operator, String>();

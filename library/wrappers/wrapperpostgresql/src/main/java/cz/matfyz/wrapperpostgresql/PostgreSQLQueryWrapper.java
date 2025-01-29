@@ -183,7 +183,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         builder.append(")");
     }
 
-    private String escapeName(String name) {
+    private static String escapeName(String name) {
         return "\"" + name + "\"";
     }
 

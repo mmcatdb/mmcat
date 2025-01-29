@@ -72,6 +72,28 @@ class QueryTests {
     }
 
     @Test
+    void basicNeo4J() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
     void nestedMongoDB() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.mongoDB())

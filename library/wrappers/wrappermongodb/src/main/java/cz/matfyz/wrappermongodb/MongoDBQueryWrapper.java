@@ -56,10 +56,10 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         final String collectionName = mapping.kindName();
         final var pipeline = new ArrayList<Bson>();
 
-        final var filterDoc = new BsonDocument();
+        final var filtersDocument = new BsonDocument();
         for (final var filter : filters)
-            addFilter(filterDoc, filter);
-        pipeline.add(Aggregates.match(filterDoc));
+            addFilter(filtersDocument, filter);
+        pipeline.add(Aggregates.match(filtersDocument));
 
         final Bson projection = createProjections();
         pipeline.add(Aggregates.project(projection));
@@ -69,7 +69,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         return new QueryStatement(content, context.rootStructure());
     }
 
-    private void addFilter(BsonDocument filterDocument, Filter filter) {
+    private void addFilter(BsonDocument filtersDocument, Filter filter) {
         if (filter instanceof BinaryFilter)
             throw new UnsupportedOperationException("Mongo does not support filters comparing two variables.");
 
@@ -98,10 +98,8 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
             throw new UnsupportedOperationException("Mongo does not support filter type \"" + filter.getClass().getSimpleName() + "\".");
         }
 
-
-        // TODO: see how properties are translated to paths in bson documents
         final var propertyPath = getPropertyName(property);
-        filterDocument.put(propertyPath, filterCondition);
+        filtersDocument.put(propertyPath, filterCondition);
     }
 
     private Bson createProjections() {
@@ -113,8 +111,6 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     }
 
     private static String getPropertyName(Property property) {
-        // TODO: refactor
-
         return property.mapping.accessPath().getPropertyPath(property.path).stream().map(accPath -> {
             final var name = accPath.name();
             if (!(name instanceof StaticName staticName))
@@ -122,7 +118,6 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
 
             return staticName.getStringName();
         }).collect(Collectors.joining("."));
-
     }
 
     // This class is a little more complicated than it seems. The problem is that we have to match the result structure of the projection to the access path of the property. The matching points are the array result structures.
