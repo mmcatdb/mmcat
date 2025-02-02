@@ -18,7 +18,7 @@ import java.util.TreeMap;
  * Creates a transformation that merges a query result corresponding to the source structure to a query result corresponding to the target structure on a position specified by the targetProperty.
  * The structures are matched by the properties of sourceMatch (from the root of the sourceRoot) and targetMatch (from the targetProperty).
  * The sourceMatch property is recursively deleted.
- * There must be at most a N:1 cardinality between the sourceMatch and the sourceRoot (resp. targetMatch and targetProperty).
+ * There must be at most an n:1 cardinality between the sourceMatch and the sourceRoot (resp. targetMatch and targetProperty).
  */
 public class ResultStructureMerger {
 

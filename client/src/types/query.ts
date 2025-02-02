@@ -127,7 +127,7 @@ export type JoinCandidate = {
     type: JoinType;
     fromKind: string;
     toKind: string;
-    joinProperties: JoinCondition[];
+    condition: JoinCondition;
     recursion: number;
     isOptional: boolean;
 }

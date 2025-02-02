@@ -188,7 +188,7 @@ public class DatasourceTranslator {
 
         DatasourceContext(QueryContext context, Variable rootVariable) {
             this.context = context;
-            rootStructure = new ResultStructure(rootVariable.name(), true, context.getObjexForVariable(rootVariable));
+            rootStructure = new ResultStructure(rootVariable.name(), true, rootVariable);
         }
 
         private final Map<Property, Variable> propertyToVariable = new TreeMap<>();
@@ -217,7 +217,7 @@ public class DatasourceTranslator {
 
             final var isArray = property.path.hasDual();
             final Variable variable = propertyToVariable.get(property);
-            final var structure = new ResultStructure(variable.name(), isArray, context.getObjexForVariable(variable));
+            final var structure = new ResultStructure(variable.name(), isArray, variable);
 
             propertyToStructure.put(property, structure);
             structureToProperty.put(structure, property);
@@ -278,7 +278,7 @@ public class DatasourceTranslator {
         // final Property from = createProperty(null);
         // // TODO
         // final Property to = createProperty(null);
-        wrapper.addJoin(candidate.from().kind, candidate.to().kind, candidate.joinProperties(), candidate.recursion(), candidate.isOptional());
+        wrapper.addJoin(candidate.from().kind, candidate.to().kind, candidate.condition(), candidate.recursion(), candidate.isOptional());
     }
 
 }

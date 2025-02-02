@@ -109,19 +109,16 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
             joinedKinds.add(newKind);
 
-            final String conditions = join.conditions().stream().map(condition -> {
-                // TODO there shouldn't be a null for the schema object key ...
-                final String fromProjection = getPropertyName(new Property(join.from(), condition.from(), null));
-                final String toProjection = getPropertyName(new Property(join.to(), condition.to(), null));
-                return fromProjection + " = " + toProjection;
-            })
-                .collect(Collectors.joining(" AND "));
+            // TODO there shouldn't be a null for the schema object key ...
+            final String fromProjection = getPropertyName(new Property(join.from(), join.condition().from(), null));
+            final String toProjection = getPropertyName(new Property(join.to(), join.condition().to(), null));
+            final String condition = fromProjection + " = " + toProjection;
 
             builder
                 .append(" JOIN ")
                 .append(escapeName(newKind.kindName()))
                 .append(" ON (")
-                .append(conditions)
+                .append(condition)
                 .append(")\n");
         }
     }

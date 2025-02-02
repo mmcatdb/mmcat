@@ -114,11 +114,11 @@ public interface AbstractQueryWrapper {
      * Adds a join (or graph traversal).
      * @param from Mapping from which we are joining.
      * @param to Mapping to which we are joining.
-     * @param conditions List of paths from both mappings to the joining properties.
+     * @param condition Contains paths from both mappings to the joining properties.
      * @param repetition If not 1, the join will be recursive.
      * @param isOptional If true, the join will be optional.
      */
-    void addJoin(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional);
+    void addJoin(Mapping from, Mapping to, JoinCondition condition, int repetition, boolean isOptional);
 
     /**
      * Adds a filtering between one variables or aggregation and one constant. E.g.:

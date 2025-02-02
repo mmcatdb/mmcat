@@ -1,12 +1,13 @@
 package cz.matfyz.core.querying;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Something that can be evaluated to a value.
  * Variable, Constant, or FunctionExpression.
  */
-public interface Expression {
+public interface Expression extends Serializable {
 
     public record Constant(
         String value

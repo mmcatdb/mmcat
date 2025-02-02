@@ -38,12 +38,12 @@ public abstract class BaseQueryWrapper {
 
     // Joins
 
-    protected record Join(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional) {}
+    protected record Join(Mapping from, Mapping to, JoinCondition condition, int repetition, boolean isOptional) {}
 
     protected List<Join> joins = new ArrayList<>();
 
-    public void addJoin(Mapping from, Mapping to, List<JoinCondition> conditions, int repetition, boolean isOptional) {
-        joins.add(new Join(from, to, conditions, repetition, isOptional));
+    public void addJoin(Mapping from, Mapping to, JoinCondition condition, int repetition, boolean isOptional) {
+        joins.add(new Join(from, to, condition, repetition, isOptional));
     }
 
     // Filters

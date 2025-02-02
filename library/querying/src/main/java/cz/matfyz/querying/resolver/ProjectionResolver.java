@@ -41,7 +41,7 @@ public class ProjectionResolver {
 
     private TformingResultStructure computeProjectionStructure() {
         final Variable rootVariable = clause.properties().asVariable();
-        final var projectionStructure = new TformingResultStructure(rootVariable.name(), rootVariable.name(), context.getObjexForVariable(rootVariable));
+        final var projectionStructure = new TformingResultStructure(rootVariable.name(), rootVariable.name(), rootVariable);
         addChildrenToStructure(clause.properties(), projectionStructure);
 
         return projectionStructure;
@@ -52,13 +52,13 @@ public class ProjectionResolver {
             // We don't know (yet) if the structure is supposed to be an array. We will figure it out later during the transformation.
             // Like we can find out now, but that would require doing the whole tree search again.
             if (child.expression instanceof final Variable variable) {
-                final var childStructure = new TformingResultStructure(variable.name(), child.edgeFromParent, context.getObjexForVariable(variable));
+                final var childStructure = new TformingResultStructure(variable.name(), child.edgeFromParent, variable);
                 parentStructure.children.add(childStructure);
                 addChildrenToStructure(child, childStructure);
             }
 
             // TODO Aggregation and string values - this would require extending transformations since they don't yet support these.
-            // new TformingResultStructure(child.expression.identifier(), child.edgeFromParent, context.getObjexForVariable(child.expression))
+            // new TformingResultStructure(child.expression.identifier(), child.edgeFromParent, child.expression)
         }
     }
 

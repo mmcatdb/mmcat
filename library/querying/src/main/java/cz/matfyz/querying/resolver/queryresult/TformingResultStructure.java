@@ -2,7 +2,7 @@ package cz.matfyz.querying.resolver.queryresult;
 
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.querying.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,21 +16,20 @@ public class TformingResultStructure {
 
     public final String inputName;
     public final String outputName;
-    public final SchemaObject schemaObject;
+    public final Variable variable;
     public final List<TformingResultStructure> children = new ArrayList<>();
     /** This is supposed to be determined later during the transformation. */
     private boolean isArray = false;
-    @Nullable
-    private Signature signatureFromParent = null;
+    private @Nullable Signature signatureFromParent = null;
 
     public boolean isArray() {
         return isArray;
     }
 
-    public TformingResultStructure(String inputName, String outputName, SchemaObject schemaObject) {
+    public TformingResultStructure(String inputName, String outputName, Variable variable) {
         this.inputName = inputName;
         this.outputName = outputName;
-        this.schemaObject = schemaObject;
+        this.variable = variable;
     }
 
     public void setPathInfo(boolean isArray, Signature signatureFromParent) {
@@ -39,8 +38,8 @@ public class TformingResultStructure {
     }
 
     public ResultStructure toResultStructure() {
-        final var output = new ResultStructure(outputName, isArray, schemaObject);
-        children.forEach(child -> output.addChild(child.toResultStructure(), signatureFromParent));
+        final var output = new ResultStructure(outputName, isArray, variable);
+        children.forEach(child -> output.addChild(child.toResultStructure(), child.signatureFromParent));
 
         return output;
     }

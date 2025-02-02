@@ -90,12 +90,13 @@ public class PlanJoiner {
             // The set of all objects that have two or more colors.
             final var patterns = coloring.getColors(object).stream().toArray(PatternForKind[]::new);
             // We try each pair of colors.
-            for (int i = 0; i < patterns.length; i++)
+            for (int i = 0; i < patterns.length; i++) {
                 for (int j = i + 1; j < patterns.length; j++) {
                     final var candidate = tryCreateCandidate(object, patterns[i], patterns[j], coloring);
                     if (candidate != null)
-                        output.add(candidate);
+                    output.add(candidate);
                 }
+            }
         }
 
         return output;
@@ -121,7 +122,7 @@ public class PlanJoiner {
         final var condition = new JoinCondition(signature1, signature2);
 
         // TODO recursion, isOptional
-        return new JoinCandidate(JoinType.Value, pattern1, pattern2, List.of(condition), 0, false);
+        return new JoinCandidate(JoinType.Value, pattern1, pattern2, condition, 0, false);
     }
 
     /**
@@ -151,7 +152,7 @@ public class PlanJoiner {
 
         // The idObject is in fact an identifier of the root of the idPattern. We also know that both idPattern and refPattern contains the object. Therefore we can create the join candidate.
         // TODO recursion, isOptional
-        return new JoinCandidate(JoinType.IdRef, idPattern, refPattern, List.of(condition), 0, false);
+        return new JoinCandidate(JoinType.IdRef, idPattern, refPattern, condition, 0, false);
     }
 
     @Nullable
@@ -163,7 +164,10 @@ public class PlanJoiner {
     }
 
     /** A pair of datasources. Both can be the same datasource! */
-    private record DatasourcePair(Datasource first, Datasource second) implements Comparable<DatasourcePair> {
+    private record DatasourcePair(
+        Datasource first,
+        Datasource second
+    ) implements Comparable<DatasourcePair> {
         public static DatasourcePair create(JoinCandidate candidate) {
             final var a = candidate.from().kind.datasource();
             final var b = candidate.to().kind.datasource();
@@ -183,7 +187,10 @@ public class PlanJoiner {
     }
 
     /** All candidates that have the same datasource pair. */
-    private record JoinGroup(DatasourcePair datasources, List<JoinCandidate> candidates) {}
+    private record JoinGroup(
+        DatasourcePair datasources,
+        List<JoinCandidate> candidates
+    ) {}
 
     /** Groups the join candidates by their datasource pair. */
     private List<JoinGroup> groupJoinCandidates(List<JoinCandidate> candidates) {
@@ -244,7 +251,11 @@ public class PlanJoiner {
     }
 
     /** A query part is a part of query that can be executed at once in a single datasource. */
-    private record QueryPart(Set<PatternForKind> patterns, List<JoinCandidate> joinCandidates, Variable rootVariable) {}
+    private record QueryPart(
+        Set<PatternForKind> patterns,
+        List<JoinCandidate> joinCandidates,
+        Variable rootVariable
+    ) {}
 
     /** Merges patterns from a single datasource to a minimal number of query parts. */
     private List<QueryPart> mergeSameDatasourceCandidates(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
@@ -314,7 +325,12 @@ public class PlanJoiner {
 
     // }
 
-    private record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<PatternForKind> patterns) implements JoinTreeNode {
+    private record JoinTreeInner(
+        JoinTreeNode from,
+        JoinTreeNode to,
+        JoinCandidate candidate,
+        Set<PatternForKind> patterns
+    ) implements JoinTreeNode {
         public JoinNode toQueryNode(SchemaCategory schema) {
             // First, we try to move operations and filters down the tree.
             // final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
@@ -336,7 +352,9 @@ public class PlanJoiner {
         }
     }
 
-    private record JoinTreeLeaf(QueryPart queryPart) implements JoinTreeNode {
+    private record JoinTreeLeaf(
+        QueryPart queryPart
+    ) implements JoinTreeNode {
         public Set<PatternForKind> patterns() {
             return queryPart.patterns;
         }

@@ -1,7 +1,6 @@
 package cz.matfyz.core.querying;
 
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.core.utils.printable.*;
 
@@ -20,10 +19,10 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
 
     public final String name;
     public final boolean isArray;
-    /** Each result structure node corresponds to a schema object. Multiple structures might correspond to the same object. */
-    @JsonIgnore
-    public final SchemaObject schemaObject;
+    /** Each result structure node corresponds to a variable. */
+    public final Variable variable;
     private final Map<String, ResultStructure> children = new TreeMap<>();
+    private final Map<Signature, ResultStructure> childrenBySignature = new TreeMap<>();
 
     /** If null, this is the root of the tree. */
     @JsonIgnore
@@ -31,10 +30,10 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
     /** If null, this is the root of the tree. */
     @Nullable public Signature signatureFromParent;
 
-    public ResultStructure(String name, boolean isArray, SchemaObject schemaObject) {
+    public ResultStructure(String name, boolean isArray, Variable variable) {
         this.name = name;
         this.isArray = isArray;
-        this.schemaObject = schemaObject;
+        this.variable = variable;
     }
 
     /**
@@ -42,6 +41,7 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
      */
     public ResultStructure addChild(ResultStructure child, Signature signature) {
         this.children.put(child.name, child);
+        this.childrenBySignature.put(signature, child);
         child.parent = this;
         child.signatureFromParent = signature;
 
@@ -52,8 +52,30 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
         return children.get(name);
     }
 
+    // TODO Not very efficient and also nullable. We could probably do better (if we had some guarantees about the structure and the signature).
+    public @Nullable ResultStructure tryFindDescendantBySignature(Signature path) {
+        final var bases = path.toBases();
+
+        Signature current = Signature.createEmpty();
+        for (int i = 0; i < bases.size(); i++) {
+            current = current.concatenate(bases.get(i));
+            final var child = childrenBySignature.get(current);
+            if (child == null)
+                continue;
+
+            if (i == bases.size() - 1)
+                return child;
+
+            return child.tryFindDescendantBySignature(path.cutPrefix(current));
+        }
+
+        return null;
+    }
+
     public ResultStructure removeChild(String name) {
-        return children.remove(name);
+        final var output = children.remove(name);
+        childrenBySignature.remove(output.signatureFromParent);
+        return output;
     }
 
     /**
@@ -91,7 +113,7 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
      * @param isArray Whether the new structure should be an array.
      */
     public ResultStructure copy(boolean isArray) {
-        final var clone = new ResultStructure(name, isArray, schemaObject);
+        final var clone = new ResultStructure(name, isArray, variable);
         clone.parent = parent;
         clone.signatureFromParent = signatureFromParent;
 

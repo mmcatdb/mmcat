@@ -6,7 +6,6 @@ import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
@@ -56,7 +55,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         if (node.candidate.type() == JoinType.Value)
             throw new UnsupportedOperationException("Joining by value is not implemented.");
 
-        final JoinCondition condition = node.candidate.joinProperties().getFirst();
+        final JoinCondition condition = node.candidate.condition();
 
         final var idResult = node.fromChild.accept(this);
         final var refResult = node.toChild.accept(this);
@@ -74,33 +73,16 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
 
         final var tform = ResultStructureMerger.run(idRoot, refRoot, refProperty, idMatch, refMatch);
 
-
-        System.out.println("source:\n" + tform.sourceTform());
-        System.out.println("target:\n" + tform.targetTform());
-
-        System.out.println("\n");
-
-        System.out.println("source:\n" + idRoot);
-        System.out.println("target:\n" + refRoot);
-
-
-
-
-
-
-
         return tform.apply(idResult.data, refResult.data);
     }
 
-    private ResultStructure findStructure(ResultStructure parent, Signature signature) {
-        // TODO This might not work generally when the same schema object is used multiple times in the query. But it should work for now.
-        final SchemaObject schemaObject = context.getSchema().getEdge(signature.getLast()).to();
-        final ResultStructure output = GraphUtils.findDFS(parent, s -> s.isLeaf() && s.schemaObject.equals(schemaObject));
-        if (output == null)
+    private ResultStructure findStructure(ResultStructure root, Signature signature) {
+        final var child = root.tryFindDescendantBySignature(signature);
+        if (child == null)
             // TODO this should not happen
             throw QueryException.message("ResultStructure not found for signature " + signature);
 
-        return output;
+        return child;
     }
 
     /** Finds the closest parent of the child structure on the path from the pathStart to the pathEnd (both inclusive). */
@@ -109,9 +91,9 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         ResultStructure current = pathEnd;
 
         while (!current.equals(pathStart)) {
-            if (current.schemaObject.equals(child.schemaObject))
+            if (current.variable.equals(child.variable))
                 return current.parent();
-            if (context.getSchema().morphismContainsObject(current.signatureFromParent, child.schemaObject.key()))
+            if (context.getSchema().morphismContainsObject(current.signatureFromParent, context.getObjexForVariable(child.variable).key()))
                 return current.parent();
         }
 

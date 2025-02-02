@@ -16,26 +16,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class QueryContext {
 
     // Extracting
-    // There is exactly one schema object for each term. However, there might be multiple terms for each object.
+    // There is exactly one schema object for each variable. However, there might be multiple variables for each object.
 
-    private final Map<Variable, SchemaObject> termToObject = new TreeMap<>();
-    // private final Map<SchemaObject, List<Term>> objectToTerms = new TreeMap<>();
+    private final Map<Variable, SchemaObject> variableToObjex = new TreeMap<>();
+    // private final Map<SchemaObject, List<Variable>> objexToVariables = new TreeMap<>();
 
-    public QueryContext addTerm(Variable term, SchemaObject object) {
+    public QueryContext addVariable(Variable variable, SchemaObject objex) {
         // FIXME
 
-        termToObject.put(term, object);
-        // objectToTerms.computeIfAbsent(object, k -> new ArrayList<>()).add(term);
+        variableToObjex.put(variable, objex);
+        // objexToVariables.computeIfAbsent(objex, k -> new ArrayList<>()).add(variable);
 
         return this;
     }
 
-    public SchemaObject getObjexForVariable(Variable term) {
-        return termToObject.get(term);
+    public SchemaObject getObjexForVariable(Variable variable) {
+        return variableToObjex.get(variable);
     }
 
-    // public List<Term> getTermsForObject(SchemaObject object) {
-    //     return objectToTerms.get(object);
+    // public List<Variable> getVariablesForObjex(SchemaObject objex) {
+    //     return objexToVariables.get(objex);
     // }
 
     // Schema category

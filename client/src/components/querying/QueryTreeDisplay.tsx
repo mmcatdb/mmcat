@@ -134,13 +134,11 @@ function JoinCandidateDisplay({ candidate }: Readonly<{ candidate: JoinCandidate
                 <span className='font-sans'>{`(${candidate.type})`}</span>
             </div>
 
-            {candidate.joinProperties.map(({ from, to }, index) => (
-                <div key={index} className='flex gap-2 leading-5 font-semibold'>
-                    {from}
-                    <ArrowLongRightIcon className='size-5' />
-                    {to}
-                </div>
-            ))}
+            <div className='flex gap-2 leading-5 font-semibold'>
+                {candidate.condition.from}
+                <ArrowLongRightIcon className='size-5' />
+                {candidate.condition.to}
+            </div>
         </div>
     );
 }
