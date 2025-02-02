@@ -9,7 +9,7 @@
     {{ $caption = .Get "caption" }}
 {{ end }}
 
-<div style="text-align: center;">
+<p style="text-align: center;">
     <img
         src="{{ $src }}"
         alt="{{ $alt }}"
@@ -19,8 +19,8 @@
     />
     {{ if isset .Params "caption" }}
         <br />
-        <span style="font-style: italic;">
+        <span style="font-style: italic; display: block; margin-top: 0.5rem;">
             {{ $caption }}
         </span>
     {{ end }}
-</div>
+</p>
