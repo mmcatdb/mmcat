@@ -7,7 +7,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
-import cz.matfyz.querying.core.patterntree.PatternObject.SerializedPatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree.SerializedPatternTree;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class DatasourceNode extends QueryNode {
 
     public record SerializedDatasourceNode(
         String datasourceIdentifier,
-        Map<String, SerializedPatternObject> kinds,
+        Map<String, SerializedPatternTree> kinds,
         List<SerializedJoinCandidate> joinCandidates,
         List<String> filters,
         String rootVariable

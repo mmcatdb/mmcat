@@ -11,7 +11,7 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.QueryContext;
-import cz.matfyz.querying.core.patterntree.PatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree;
 import cz.matfyz.querying.normalizer.NormalizedQuery.SelectionClause;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
@@ -116,14 +116,14 @@ public class SchemaExtractor {
                 // TODO really?
                 // The root has to be variable.
                 final var rootVariable = keyToVariable.get(rootObject.key());
-                final var rootNode = PatternObject.createRoot(rootObject, rootVariable);
+                final var rootNode = PatternTree.createRoot(rootObject, rootVariable);
                 processComplexProperty(rootNode, kind.accessPath());
 
                 return new PatternForKind(kind, rootNode);
             }).toList();
     }
 
-    private void processComplexProperty(PatternObject node, ComplexProperty path) {
+    private void processComplexProperty(PatternTree node, ComplexProperty path) {
         path.subpaths().stream()
             .forEach(subpath -> {
                 // TODO - is this going to work? Because it might not be possible to browse a database with composed signatures only.

@@ -105,16 +105,16 @@ type TODO = any;
 
 export type DatasourceNode = TypedNode<QueryNodeType.Datasource, {
     datasourceIdentifier: string;
-    kinds: Record<string, PatternObject>;
+    kinds: Record<string, PatternTree>;
     joinCandidates: JoinCandidate[];
     filters: Filter[];
     rootVariable: TODO;
 }>;
 
-export type PatternObject = {
+export type PatternTree = {
     objexKey: number;
     term: string;
-    children: Record<SignatureFromServer, PatternObject>;
+    children: Record<SignatureFromServer, PatternTree>;
 };
 
 export type JoinNode = TypedNode<QueryNodeType.Join, {

@@ -15,7 +15,7 @@ import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
-import cz.matfyz.querying.core.patterntree.PatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 
 import java.util.ArrayDeque;
@@ -123,7 +123,7 @@ public class DatasourceTranslator {
     // PATTERN TRANSLATOR STUFF FROM HERE (TODO: remove)
 
     private record StackItem(
-        PatternObject object,
+        PatternTree object,
         /** The closest parent property that has to be preserved in the property tree. */
         @Nullable Property preservedParent,
         /** Path from the `parent` to the currently processed `object`. If the parent is null, the path is from the root of the kind instead. */
@@ -131,7 +131,7 @@ public class DatasourceTranslator {
     ) {}
 
     private PatternForKind pattern;
-    private Set<PatternObject> preservedObjects;
+    private Set<PatternTree> preservedObjects;
     private Deque<StackItem> stack;
 
     private void processKind(PatternForKind kind) {
@@ -246,9 +246,9 @@ public class DatasourceTranslator {
      * Finds all nodes that should be preserved in the property tree. Root is ommited because it's always preserved. The leaves as well. So only the child nodes of array edges with multiple preserved leaves are preserved.
      * Also finds all nodes specified as variables by the user - these should be preserved by default.
      */
-    private Set<PatternObject> findPreservedObjects(PatternObject root) {
+    private Set<PatternTree> findPreservedObjects(PatternTree root) {
         // We start in the root. Whenever we find an object with multiple children, we add the last child of an array edge to the output.
-        final Set<PatternObject> output = new TreeSet<>();
+        final Set<PatternTree> output = new TreeSet<>();
         final var rootObject = new PreservedStackObject(root, null);
 
         GraphUtils.forEachDFS(rootObject, stackObject -> {
@@ -271,7 +271,7 @@ public class DatasourceTranslator {
         return output;
     }
 
-    private record PreservedStackObject(PatternObject object, @Nullable PatternObject lastChildOfArray) {}
+    private record PreservedStackObject(PatternTree object, @Nullable PatternTree lastChildOfArray) {}
 
     private void processJoinCandidate(JoinCandidate candidate) {
         // // TODO

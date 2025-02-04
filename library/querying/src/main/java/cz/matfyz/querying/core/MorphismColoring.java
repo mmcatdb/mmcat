@@ -3,7 +3,7 @@ package cz.matfyz.querying.core;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
-import cz.matfyz.querying.core.patterntree.PatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +33,7 @@ public class MorphismColoring implements Printable {
         return coloring;
     }
 
-    private void colorMorphisms(PatternForKind pattern, PatternObject object) {
+    private void colorMorphisms(PatternForKind pattern, PatternTree object) {
         for (final var child : object.children()) {
             morphismToColors
                 .computeIfAbsent(child.signatureFromParent(), x -> new TreeSet<>())
@@ -57,13 +57,13 @@ public class MorphismColoring implements Printable {
      * Finds the lowest number of colors assigned to any of the morphisms (with at least one color) in the mapping.
      * If all morphisms have zero colors, 0 is returned.
      */
-    private int computePatternCost(PatternObject object) {
+    private int computePatternCost(PatternTree object) {
         final int min = computePatternCostRecursive(object);
 
         return min == Integer.MAX_VALUE ? 0 : min;
     }
 
-    private int computePatternCostRecursive(PatternObject object) {
+    private int computePatternCostRecursive(PatternTree object) {
         int min = Integer.MAX_VALUE;
         if (object.signatureFromParent() != null) {
             final var objectColors = morphismToColors.get(object.signatureFromParent());

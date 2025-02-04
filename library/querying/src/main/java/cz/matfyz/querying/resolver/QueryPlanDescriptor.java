@@ -5,7 +5,7 @@ import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription.QueryPartDescription;
 import cz.matfyz.querying.core.QueryDescription.QueryPlanDescription;
-import cz.matfyz.querying.core.patterntree.PatternObject.SerializedPatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree.SerializedPatternTree;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.DatasourceNode.SerializedDatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
@@ -53,7 +53,7 @@ public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
         final QueryStatement query = DatasourceTranslator.run(context, node);
         parts.add(new QueryPartDescription(node.datasource.identifier, query.structure(), query.content().toString()));
 
-        final var serializedKinds = new TreeMap<String, SerializedPatternObject>();
+        final var serializedKinds = new TreeMap<String, SerializedPatternTree>();
         for (final var kindPattern : node.kinds)
             serializedKinds.put(kindPattern.kind.kindName(), kindPattern.root.serialize());
 

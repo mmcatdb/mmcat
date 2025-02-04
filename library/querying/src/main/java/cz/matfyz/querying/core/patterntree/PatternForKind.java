@@ -14,28 +14,28 @@ import java.util.TreeMap;
 public class PatternForKind implements Comparable<PatternForKind> {
 
     public final Mapping kind;
-    public final PatternObject root;
+    public final PatternTree root;
 
-    private final Map<SchemaObject, PatternObject> schemaObjectToPatternObject = new TreeMap<>();
+    private final Map<SchemaObject, PatternTree> schemaObjectToPatternTree = new TreeMap<>();
 
-    public PatternForKind(Mapping kind, PatternObject root) {
+    public PatternForKind(Mapping kind, PatternTree root) {
         this.kind = kind;
         this.root = root;
 
         addObject(this.root);
     }
 
-    private void addObject(PatternObject patternObject) {
-        schemaObjectToPatternObject.put(patternObject.schemaObject, patternObject);
-        patternObject.children().forEach(this::addObject);
+    private void addObject(PatternTree patternTree) {
+        schemaObjectToPatternTree.put(patternTree.schemaObject, patternTree);
+        patternTree.children().forEach(this::addObject);
     }
 
     @Override public int compareTo(PatternForKind other) {
         return this.kind.compareTo(other.kind);
     }
 
-    public PatternObject getPatternObject(SchemaObject object) {
-        return schemaObjectToPatternObject.get(object);
+    public PatternTree getPatternTree(SchemaObject object) {
+        return schemaObjectToPatternTree.get(object);
     }
 
     @Override public String toString() {

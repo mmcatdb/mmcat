@@ -19,26 +19,30 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * On one hand, the PT is a "subset" of AP (access path), meaning that nodes from QP (query pattern) that aren't part of AP are not included.
  * On the other hand, it can contain more nodes. More specifically, AP can contain composite signatures while PT can't. Therefore, each edge from AP with a composite signature is mapped to multiple edges in PT.
  */
-public class PatternObject implements Comparable<PatternObject>, Printable {
+public class PatternTree implements Comparable<PatternTree>, Printable {
+
+    public final Variable variable;
 
     public final SchemaObject schemaObject;
-    public final Variable variable;
-    /** If this property is null, the PatternObject is the root of the pattern tree. */
-    private final @Nullable EdgeData edgeFromParent;
+    /** This property is null if and only if this object is the root. */
+    private final @Nullable PatternTree parent;
+    /** This property is null if and only if this object is the root. */
+    private final @Nullable SchemaEdge edgeFromParent;
 
-    private final Map<BaseSignature, PatternObject> children = new TreeMap<>();
+    private final Map<BaseSignature, PatternTree> children = new TreeMap<>();
 
-    private PatternObject(SchemaObject schemaObject, Variable variable, @Nullable EdgeData edgeFromParent) {
+    private PatternTree(SchemaObject schemaObject, Variable variable, @Nullable PatternTree parent, @Nullable SchemaEdge edgeFromParent) {
         this.schemaObject = schemaObject;
         this.variable = variable;
+        this.parent = parent;
         this.edgeFromParent = edgeFromParent;
     }
 
-    public static PatternObject createRoot(SchemaObject schemaObject, Variable variable) {
-        return new PatternObject(schemaObject, variable, null);
+    public static PatternTree createRoot(SchemaObject schemaObject, Variable variable) {
+        return new PatternTree(schemaObject, variable, null, null);
     }
 
-    public PatternObject getOrCreateChild(SchemaEdge schemaEdge, Variable variable) {
+    public PatternTree getOrCreateChild(SchemaEdge schemaEdge, Variable variable) {
         if (!(schemaEdge.signature() instanceof BaseSignature baseSignature))
             throw GeneralException.message("Non-base signature " + schemaEdge.signature() + " in pattern tree.");
 
@@ -46,50 +50,38 @@ public class PatternObject implements Comparable<PatternObject>, Printable {
         if (currentChild != null)
             return currentChild;
 
-        final var edgeToChild = new EdgeData(schemaEdge, this);
-        final var child = new PatternObject(schemaEdge.to(), variable, edgeToChild);
+        final var child = new PatternTree(schemaEdge.to(), variable, this, schemaEdge);
         children.put(baseSignature, child);
 
         return child;
     }
 
-    public Collection<PatternObject> children() {
+    public Collection<PatternTree> children() {
         return children.values();
-    }
-
-    public @Nullable PatternObject parent() {
-        return edgeFromParent != null
-            ? edgeFromParent.from
-            : null;
     }
 
     public boolean isChildOfArray() {
         return edgeFromParent != null
-            && edgeFromParent.schemaEdge.isArray();
+            && edgeFromParent.isArray();
     }
 
     @Nullable
     public BaseSignature signatureFromParent() {
         // The signature must be base because it comes from the SelectionTriple.
         return edgeFromParent != null
-            ? (BaseSignature) edgeFromParent.schemaEdge.signature()
+            ? (BaseSignature) edgeFromParent.signature()
             : null;
     }
 
     public Signature computePathFromRoot() {
         return edgeFromParent != null
-            ? edgeFromParent.from.computePathFromRoot().concatenate(edgeFromParent.schemaEdge.signature())
+            ? parent.computePathFromRoot().concatenate(edgeFromParent.signature())
             : Signature.createEmpty();
     }
 
     public boolean isTerminal() {
         return children.isEmpty();
     }
-
-    private record EdgeData(
-        SchemaEdge schemaEdge,
-        PatternObject from
-    ) {}
 
     @Override public void printTo(Printer printer) {
         printer.append("(").append(variable).append(")");
@@ -115,21 +107,21 @@ public class PatternObject implements Comparable<PatternObject>, Printable {
         return Printer.print(this);
     }
 
-    @Override public int compareTo(PatternObject other) {
+    @Override public int compareTo(PatternTree other) {
         return schemaObject.compareTo(other.schemaObject);
     }
 
-    public record SerializedPatternObject(
+    public record SerializedPatternTree(
         int objexKey,
         String term,
-        Map<BaseSignature, SerializedPatternObject> children
+        Map<BaseSignature, SerializedPatternTree> children
     ) {};
 
-    public SerializedPatternObject serialize() {
-        final var map = new TreeMap<BaseSignature, SerializedPatternObject>();
+    public SerializedPatternTree serialize() {
+        final var map = new TreeMap<BaseSignature, SerializedPatternTree>();
         children.entrySet().forEach(entry -> map.put(entry.getKey(), entry.getValue().serialize()));
 
-        return new SerializedPatternObject(schemaObject.key().getValue(), variable.toString(), map);
+        return new SerializedPatternTree(schemaObject.key().getValue(), variable.toString(), map);
     }
 
 }

@@ -1,5 +1,5 @@
 import { type Datasource } from '@/types/datasource';
-import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, QueryNodeType, type UnionNode, type QueryNode, type PatternObject, type JoinCandidate } from '@/types/query';
+import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, QueryNodeType, type UnionNode, type QueryNode, type PatternTree, type JoinCandidate } from '@/types/query';
 import { capitalize, cn } from '../utils';
 import { Fragment } from 'react/jsx-runtime';
 import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
@@ -59,10 +59,10 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
 
 
                 <div className='divide-y'>
-                    {Object.entries(node.kinds).map(([ key, patternObject ]) => (
+                    {Object.entries(node.kinds).map(([ key, patternTree ]) => (
                         <div key={key} className='py-2 font-mono'>
                             <div className='font-semibold text-gray-500'>{key}</div>
-                            <PatternObjectDisplay pattern={patternObject} />
+                            <PatternTreeDisplay pattern={patternTree} />
                         </div>
                     ))}
                 </div>
@@ -83,7 +83,7 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
     );
 }
 
-function PatternObjectDisplay({ pattern }: { pattern: PatternObject }) {
+function PatternTreeDisplay({ pattern }: { pattern: PatternTree }) {
     const children = Object.entries(pattern.children);
 
     return (
@@ -96,7 +96,7 @@ function PatternObjectDisplay({ pattern }: { pattern: PatternObject }) {
             {children.length > 0 && (
                 <div className='pl-8'>
                     {children.map(([ key, child ]) => (
-                        <PatternObjectDisplay key={key} pattern={child} />
+                        <PatternTreeDisplay key={key} pattern={child} />
                     ))}
                 </div>
             )}

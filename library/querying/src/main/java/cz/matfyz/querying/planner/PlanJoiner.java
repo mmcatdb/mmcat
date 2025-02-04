@@ -157,9 +157,9 @@ public class PlanJoiner {
 
     @Nullable
     private Signature findPathFromRoot(PatternForKind pattern, SchemaObject object) {
-        final var patternObject = pattern.getPatternObject(object);
-        return patternObject != null
-            ? patternObject.computePathFromRoot()
+        final var patternTree = pattern.getPatternTree(object);
+        return patternTree != null
+            ? patternTree.computePathFromRoot()
             : null;
     }
 
