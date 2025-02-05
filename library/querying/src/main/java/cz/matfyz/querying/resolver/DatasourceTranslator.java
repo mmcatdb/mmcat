@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.ResultStructure;
@@ -24,13 +25,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * This class translates the query part of a specific DatasourceNode.
  */
 public class DatasourceTranslator {
+
+    @SuppressWarnings({ "java:s1068", "unused" })
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceTranslator.class);
 
     public static QueryStatement run(QueryContext context, DatasourceNode datasourceNode) {
         return new DatasourceTranslator(context, datasourceNode).run();
@@ -137,6 +144,15 @@ public class DatasourceTranslator {
     private void processKind(PatternForKind kind) {
         this.pattern = kind;
         preservedObjects = findPreservedObjects(kind.root);
+        // TODO This is just a temporary fix.
+        final Set<Signature> availablePaths = new TreeSet<>();
+        availablePaths.add(Signature.createEmpty());
+        addAllSubpathSignatures(availablePaths, kind.kind.accessPath(), Signature.createEmpty());
+
+        preservedObjects = preservedObjects.stream()
+            .filter(object -> availablePaths.contains(object.computePathFromRoot()))
+            .collect(Collectors.toSet());
+
         stack = new ArrayDeque<>();
 
         stack.push(new StackItem(kind.root, null, Signature.createEmpty()));
@@ -144,7 +160,19 @@ public class DatasourceTranslator {
             processStackItem(stack.pop());
     }
 
+    // TODO This is just a temporary fix.
+    private static void addAllSubpathSignatures(Set<Signature> output, ComplexProperty accessPath, Signature current) {
+        accessPath.subpaths().forEach(subpath -> {
+            final var next = current.concatenate(subpath.signature());
+            output.add(next);
+
+            if (subpath instanceof ComplexProperty complexSubpath)
+                addAllSubpathSignatures(output, complexSubpath, next);
+        });
+    }
+
     private void processStackItem(StackItem item) {
+        LOGGER.debug("processStackItem:\n{}", item);
         if (!item.object.isTerminal()) {
             processInnerItem(item);
             return;
@@ -155,6 +183,7 @@ public class DatasourceTranslator {
         // TODO isOptional is not supported yet.
         final var structure = wrapperContext.findOrCreateStructure(objectProperty);
         wrapper.addProjection(objectProperty, structure, false);
+        LOGGER.debug("addProjection:\n{}\n{}", objectProperty, structure);
     }
 
     private void processInnerItem(StackItem item) {
@@ -170,6 +199,9 @@ public class DatasourceTranslator {
             preservedParent = item.preservedParent;
             pathFromParent = item.pathFromParent;
         }
+
+        LOGGER.debug("preservedParent:\n{}", preservedParent);
+        LOGGER.debug("pathFromParent:\n{}", pathFromParent);
 
         for (final var child : item.object.children()) {
             final var childItem = new StackItem(
@@ -243,10 +275,10 @@ public class DatasourceTranslator {
 
 
     /**
-     * Finds all nodes that should be preserved in the property tree. Root is ommited because it's always preserved. The leaves as well. So only the child nodes of array edges with multiple preserved leaves are preserved.
+     * Finds all nodes that should be preserved in the property tree. Root is ommited because it's always preserved. The leaves as well. So only the child nodes of array edges with multiple preserved leaves are explicitly preserved.
      * Also finds all nodes specified as variables by the user - these should be preserved by default.
      */
-    private Set<PatternTree> findPreservedObjects(PatternTree root) {
+    private static Set<PatternTree> findPreservedObjects(PatternTree root) {
         // We start in the root. Whenever we find an object with multiple children, we add the last child of an array edge to the output.
         final Set<PatternTree> output = new TreeSet<>();
         final var rootObject = new PreservedStackObject(root, null);

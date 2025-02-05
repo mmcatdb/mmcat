@@ -14,6 +14,8 @@ import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+// TODO This should probably be reworked. It doesn't really make sense to break down composite signatures into base signatures, because the if an object isn't covered by a mapping, but it's in a middle of a composite morphism, it can't be extracted from the database. It needs to be filtered down the line, anyway.
+
 /**
  * This class represents a node in the PT (pattern tree) of a specific kind.
  * On one hand, the PT is a "subset" of AP (access path), meaning that nodes from QP (query pattern) that aren't part of AP are not included.
@@ -94,7 +96,7 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
 
         children.entrySet().forEach(child -> {
             printer.append(child.getKey()).append(": ");
-            printer.append(child);
+            printer.append(child.getValue());
             printer.append(",").nextLine();
         });
 

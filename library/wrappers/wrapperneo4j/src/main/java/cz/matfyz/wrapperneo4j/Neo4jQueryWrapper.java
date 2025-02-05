@@ -33,7 +33,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         operators.define(Operator.Greater, ">");
         operators.define(Operator.GreaterOrEqual, ">=");
 
-        // TODO Aggragation operators.
+        // TODO Aggregation operators.
 
         operators.define(Operator.In, "IN");
         operators.define(Operator.NotIn, "NOT IN");
@@ -119,8 +119,6 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     private String getPropertyNameWithoutAggregation(Property property) {
         return mappingVarName(property.mapping) + "." + getRawAttributeName(property);
     }
-
-
 
     private String getRawAttributeName(Property property) {
         // Unlike fully relational DBs, Neo4j properties may also contain arrays of primitive types, but for now lets simplify

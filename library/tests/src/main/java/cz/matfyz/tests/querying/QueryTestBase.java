@@ -102,4 +102,19 @@ public class QueryTestBase {
         }
     }
 
+    public void describe() {
+        final var provider = new DefaultControlWrapperProvider();
+        final var kinds = defineKinds(provider);
+        final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds);
+
+        final var description = queryToInstance.describe();
+
+        try {
+            LOGGER.info("\n{}", mapper.writeValueAsString(description));
+        }
+        catch (Exception e) {
+            fail(e);
+        }
+    }
+
 }

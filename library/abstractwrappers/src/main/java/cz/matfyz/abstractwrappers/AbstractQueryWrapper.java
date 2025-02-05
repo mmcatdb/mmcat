@@ -51,6 +51,7 @@ public interface AbstractQueryWrapper {
      *  - Otherwise, the path is relative to the parent property.
      */
     class Property implements Comparable<Property>, Serializable {
+
         public final Mapping mapping;
         public final @Nullable Property parent;
         public final Signature path;
@@ -88,6 +89,10 @@ public interface AbstractQueryWrapper {
                 return path;
 
             return parent.findFullPath().concatenate(path);
+        }
+
+        @Override public String toString() {
+            return "{ " + mapping + ": " + path + " (" + findFullPath() + ") }";
         }
 
     }

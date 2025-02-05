@@ -138,18 +138,20 @@ public abstract class Schema {
 
     // Ids
 
-    private static final SchemaBuilder ids = builder
-        .ids(order, orderToNumber)
-        .ids(customer, customerToName)
-        .ids(friend, friendToCustomerA, friendToCustomerB)
-        .ids(item, itemToNumber, itemToId)
-        .ids(product, productToId)
-        .ids(contact, contactToNumber, contactToType)
-        .ids(note, noteToNumber, noteToLocale)
-        .ids(dynamic, dynamicToId)
-        .ids(prefix, prefixToId, prefixToType)
-        .ids(prefiy, prefiyToId, prefiyToType)
-        .ids(catchAll, catchAllToId, catchAllToType);
+    static {
+        builder
+            .ids(order, orderToNumber)
+            .ids(customer, customerToName)
+            .ids(friend, friendToCustomerA, friendToCustomerB)
+            .ids(item, itemToNumber, itemToId)
+            .ids(product, productToId)
+            .ids(contact, contactToNumber, contactToType)
+            .ids(note, noteToNumber, noteToLocale)
+            .ids(dynamic, dynamicToId)
+            .ids(prefix, prefixToId, prefixToType)
+            .ids(prefiy, prefiyToId, prefiyToType)
+            .ids(catchAll, catchAllToId, catchAllToType);
+    }
 
     /**
      * Create new full schema category.
