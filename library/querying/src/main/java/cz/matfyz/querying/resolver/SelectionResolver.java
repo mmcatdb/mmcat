@@ -1,11 +1,10 @@
 package cz.matfyz.querying.resolver;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
@@ -55,8 +54,6 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         if (node.candidate.type() == JoinType.Value)
             throw new UnsupportedOperationException("Joining by value is not implemented.");
 
-        final JoinCondition condition = node.candidate.condition();
-
         final var idResult = node.fromChild.accept(this);
         final var refResult = node.toChild.accept(this);
 
@@ -66,8 +63,8 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         final ResultStructure idRoot = idResult.structure;
         final ResultStructure refRoot = refResult.structure;
 
-        final ResultStructure idMatch = findStructure(idRoot, condition.from());
-        final ResultStructure refMatch = findStructure(refRoot, condition.to());
+        final ResultStructure idMatch = findStructure(idRoot, node.candidate.variable());
+        final ResultStructure refMatch = findStructure(refRoot, node.candidate.variable());
 
         final ResultStructure refProperty = findParent(idRoot, refRoot, refMatch);
 
@@ -76,11 +73,11 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         return tform.apply(idResult.data, refResult.data);
     }
 
-    private ResultStructure findStructure(ResultStructure root, Signature signature) {
-        final var child = root.tryFindDescendantBySignature(signature);
+    private ResultStructure findStructure(ResultStructure root, Variable variable) {
+        final var child = GraphUtils.findDFS(root, (node) -> node.variable.equals(variable));
         if (child == null)
             // TODO this should not happen
-            throw QueryException.message("ResultStructure not found for signature " + signature);
+            throw QueryException.message("ResultStructure not found for variable " + variable);
 
         return child;
     }

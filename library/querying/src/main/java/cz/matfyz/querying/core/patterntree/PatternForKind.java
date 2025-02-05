@@ -1,6 +1,7 @@
 package cz.matfyz.querying.core.patterntree;
 
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.Map;
@@ -16,6 +17,7 @@ public class PatternForKind implements Comparable<PatternForKind> {
     public final Mapping kind;
     public final PatternTree root;
 
+    private final Map<Variable, PatternTree> variableToPatternTree = new TreeMap<>();
     private final Map<SchemaObject, PatternTree> schemaObjectToPatternTree = new TreeMap<>();
 
     public PatternForKind(Mapping kind, PatternTree root) {
@@ -26,12 +28,17 @@ public class PatternForKind implements Comparable<PatternForKind> {
     }
 
     private void addObject(PatternTree patternTree) {
+        variableToPatternTree.put(patternTree.variable, patternTree);
         schemaObjectToPatternTree.put(patternTree.schemaObject, patternTree);
         patternTree.children().forEach(this::addObject);
     }
 
     @Override public int compareTo(PatternForKind other) {
         return this.kind.compareTo(other.kind);
+    }
+
+    public PatternTree getPatternTree(Variable variable) {
+        return variableToPatternTree.get(variable);
     }
 
     public PatternTree getPatternTree(SchemaObject object) {

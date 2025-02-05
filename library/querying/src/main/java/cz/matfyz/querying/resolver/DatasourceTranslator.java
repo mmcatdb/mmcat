@@ -306,11 +306,10 @@ public class DatasourceTranslator {
     private record PreservedStackObject(PatternTree object, @Nullable PatternTree lastChildOfArray) {}
 
     private void processJoinCandidate(JoinCandidate candidate) {
-        // // TODO
-        // final Property from = createProperty(null);
-        // // TODO
-        // final Property to = createProperty(null);
-        wrapper.addJoin(candidate.from().kind, candidate.to().kind, candidate.condition(), candidate.recursion(), candidate.isOptional());
+        final var fromPath = candidate.from().getPatternTree(candidate.variable()).computePathFromRoot();
+        final var toPath = candidate.to().getPatternTree(candidate.variable()).computePathFromRoot();
+
+        wrapper.addJoin(candidate.from().kind, candidate.to().kind, fromPath, toPath, candidate.recursion(), candidate.isOptional());
     }
 
 }

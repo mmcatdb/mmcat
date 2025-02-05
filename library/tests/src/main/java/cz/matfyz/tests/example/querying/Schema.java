@@ -31,24 +31,27 @@ public class Schema {
 
     static {
         // Keys
-        for (final String label : kindLabels) {
-            kind.add(builder.object(label));
-            id.add(builder.object(label + "-id"));
-            value.add(builder.object(label + "-value"));
+        for (int i = 0; i < kindLabels.length; i++) {
+            final String label = kindLabels[i];
+            int key = (i + 1) * 10;
+            kind.add(builder.object(label, key++));
+            id.add(builder.object(label + "-id", key++));
+            value.add(builder.object(label + "-value", key++));
         }
 
         // Signatures
         for (int i = 0; i < kindLabels.length; i++) {
+            int signature = (i + 1) * 10;
             final BuilderObject _kind = kind.get(i);
-            final BuilderMorphism _kind_id = builder.morphism(_kind, id.get(i));
+            final BuilderMorphism _kind_id = builder.morphism(_kind, id.get(i), signature++);
             kind_id.add(_kind_id);
-            kind_value.add(builder.morphism(_kind, value.get(i)));
+            kind_value.add(builder.morphism(_kind, value.get(i), signature++));
 
             // Ids
             builder.ids(_kind, _kind_id);
 
             if (i != kindLabels.length - 1)
-                kind_nextKind.add(builder.morphism(_kind, kind.get(i + 1)));
+                kind_nextKind.add(builder.morphism(_kind, kind.get(i + 1), signature++));
         }
 
         for (int i = 0; i < kindLabels.length - 1; i++)

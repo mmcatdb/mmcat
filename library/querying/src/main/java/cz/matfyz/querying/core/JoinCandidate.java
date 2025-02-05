@@ -1,6 +1,7 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.utils.GraphUtils.Edge;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
@@ -10,7 +11,7 @@ public record JoinCandidate(
     PatternForKind from,
     /** The kind with the reference (if we join as IdRef). */
     PatternForKind to,
-    JoinCondition condition,
+    Variable variable,
     int recursion, // Some DBs allow to recursively join the same kind.
     boolean isOptional
 ) implements Edge<PatternForKind> {
@@ -29,7 +30,9 @@ public record JoinCandidate(
             type,
             from.kind.kindName(),
             to.kind.kindName(),
-            condition,
+            variable.name(),
+            from.getPatternTree(variable).computePathFromRoot(),
+            to.getPatternTree(variable).computePathFromRoot(),
             recursion,
             isOptional
         );
@@ -39,7 +42,9 @@ public record JoinCandidate(
         JoinType type,
         String fromKind,
         String toKind,
-        JoinCondition condition,
+        String variable,
+        Signature fromPath,
+        Signature toPath,
         int recursion,
         boolean isOptional
     ) {}

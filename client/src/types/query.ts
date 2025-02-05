@@ -127,7 +127,9 @@ export type JoinCandidate = {
     type: JoinType;
     fromKind: string;
     toKind: string;
-    condition: JoinCondition;
+    variable: TODO;
+    fromPath: SignatureFromServer;
+    toPath: SignatureFromServer;
     recursion: number;
     isOptional: boolean;
 }
@@ -136,12 +138,6 @@ enum JoinType {
     IdRef = 'IdRef',
     Value = 'Value',
 }
-
-type JoinCondition = {
-    from: SignatureFromServer;
-    to: SignatureFromServer;
-};
-
 
 export type FilterNode = TypedNode<QueryNodeType.Filter, {
     child: QueryNode;

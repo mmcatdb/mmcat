@@ -36,11 +36,11 @@ class ComplexQueryTests {
                         f_value ?f_value .
                 }
                 WHERE {
-                    ?e 13 ?e_id ;
-                        14 ?e_value ;
-                        15 ?f .
-                    ?f 16 ?f_id ;
-                        17 ?f_value .
+                    ?e 50 ?e_id ;
+                        51 ?e_value ;
+                        52 ?f .
+                    ?f 60 ?f_id ;
+                        61 ?f_value .
                 }
             """)
             .expected("""
@@ -84,14 +84,14 @@ class ComplexQueryTests {
                         f_value ?f_value .
                 }
                 WHERE {
-                    ?d 10 ?d_id ;
-                        11 ?d_value ;
-                        12 ?e .
-                    ?e 13 ?e_id ;
-                        14 ?e_value ;
-                        15 ?f .
-                    ?f 16 ?f_id ;
-                        17 ?f_value .
+                    ?d 40 ?d_id ;
+                        41 ?d_value ;
+                        42 ?e .
+                    ?e 50 ?e_id ;
+                        51 ?e_value ;
+                        52 ?f .
+                    ?f 60 ?f_id ;
+                        61 ?f_value .
                 }
             """)
             .expected("""
@@ -155,23 +155,23 @@ class ComplexQueryTests {
                         f_value ?f_value .
                 }
                 WHERE {
-                    ?a 1 ?a_id ;
-                        2 ?a_value ;
-                        3 ?b .
-                    ?b 4 ?b_id ;
-                        5 ?b_value ;
-                        6 ?c .
-                    ?c 7 ?c_id ;
-                        8 ?c_value ;
-                        9 ?d .
-                    ?d 10 ?d_id ;
-                        11 ?d_value ;
-                        12 ?e .
-                    ?e 13 ?e_id ;
-                        14 ?e_value ;
-                        15 ?f .
-                    ?f 16 ?f_id ;
-                        17 ?f_value .
+                    ?a 10 ?a_id ;
+                        11 ?a_value ;
+                        12 ?b .
+                    ?b 20 ?b_id ;
+                        21 ?b_value ;
+                        22 ?c .
+                    ?c 30 ?c_id ;
+                        31 ?c_value ;
+                        32 ?d .
+                    ?d 40 ?d_id ;
+                        41 ?d_value ;
+                        42 ?e .
+                    ?e 50 ?e_id ;
+                        51 ?e_value ;
+                        52 ?f .
+                    ?f 60 ?f_id ;
+                        61 ?f_value .
                 }
             """)
             .expected("""

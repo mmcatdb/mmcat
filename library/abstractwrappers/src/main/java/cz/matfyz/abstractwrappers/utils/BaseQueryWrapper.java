@@ -1,9 +1,9 @@
 package cz.matfyz.abstractwrappers.utils;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.exception.QueryException;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.Expression.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
@@ -38,12 +38,12 @@ public abstract class BaseQueryWrapper {
 
     // Joins
 
-    protected record Join(Mapping from, Mapping to, JoinCondition condition, int repetition, boolean isOptional) {}
+    protected record Join(Mapping from, Mapping to, Signature fromPath, Signature toPath, int repetition, boolean isOptional) {}
 
     protected List<Join> joins = new ArrayList<>();
 
-    public void addJoin(Mapping from, Mapping to, JoinCondition condition, int repetition, boolean isOptional) {
-        joins.add(new Join(from, to, condition, repetition, isOptional));
+    public void addJoin(Mapping from, Mapping to, Signature fromPath, Signature toPath, int repetition, boolean isOptional) {
+        joins.add(new Join(from, to, fromPath, toPath, repetition, isOptional));
     }
 
     // Filters

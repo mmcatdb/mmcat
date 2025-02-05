@@ -1,9 +1,7 @@
 package cz.matfyz.querying.planner;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.BaseSignature;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -15,6 +13,7 @@ import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
+import cz.matfyz.querying.core.patterntree.PatternTree;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -28,8 +27,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * This class is responsible for joining multiple kinds from the same pattern plan. The kinds might be from different datasources.
@@ -102,6 +99,9 @@ public class PlanJoiner {
         return output;
     }
 
+    // TODO This should be done by a signature, not an objex. The reason is that an objex might correspond to multiple properties of the same mapping.
+    // Or, maibe we can do it via a variable? Because that one has to be unique.
+
     private JoinCandidate tryCreateCandidate(SchemaObject object, PatternForKind pattern1, PatternForKind pattern2, ObjectColoring coloring) {
         final var candidate1 = tryCreateIdRefCandidate(object, pattern1, pattern2, coloring);
         if (candidate1 != null)
@@ -111,18 +111,20 @@ public class PlanJoiner {
         if (candidate2 != null)
             return candidate2;
 
-        final Signature signature1 = findPathFromRoot(pattern1, object);
-        if (signature1 == null)
+        final PatternTree patternTree1 = pattern1.getPatternTree(object);
+        if (patternTree1 == null)
             return null;
 
-        final Signature signature2 = findPathFromRoot(pattern2, object);
-        if (signature2 == null)
+        final PatternTree patternTree2 = pattern2.getPatternTree(object);
+        if (patternTree2 == null)
             return null;
 
-        final var condition = new JoinCondition(signature1, signature2);
+        // TODO We should probably base the whole search on variables to avoid this.
+        if (!patternTree1.variable.equals(patternTree2.variable))
+            throw new IllegalStateException("Different variables for join candidate. This should not happen!");
 
         // TODO recursion, isOptional
-        return new JoinCandidate(JoinType.Value, pattern1, pattern2, condition, 0, false);
+        return new JoinCandidate(JoinType.Value, pattern1, pattern2, patternTree1.variable, 0, false);
     }
 
     /**
@@ -144,23 +146,13 @@ public class PlanJoiner {
         if (!idObject.equals(rootIdObject))
             return null;
 
-        final Signature toSignature = findPathFromRoot(refPattern, idObject);
-        if (toSignature == null)
+        final PatternTree toPatternTree = refPattern.getPatternTree(idObject);
+        if (toPatternTree == null)
             return null;
-
-        final var condition = new JoinCondition(fromSignature, toSignature);
 
         // The idObject is in fact an identifier of the root of the idPattern. We also know that both idPattern and refPattern contains the object. Therefore we can create the join candidate.
         // TODO recursion, isOptional
-        return new JoinCandidate(JoinType.IdRef, idPattern, refPattern, condition, 0, false);
-    }
-
-    @Nullable
-    private Signature findPathFromRoot(PatternForKind pattern, SchemaObject object) {
-        final var patternTree = pattern.getPatternTree(object);
-        return patternTree != null
-            ? patternTree.computePathFromRoot()
-            : null;
+        return new JoinCandidate(JoinType.IdRef, idPattern, refPattern, toPatternTree.variable, 0, false);
     }
 
     /** A pair of datasources. Both can be the same datasource! */

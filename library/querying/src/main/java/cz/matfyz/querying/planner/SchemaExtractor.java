@@ -115,7 +115,7 @@ public class SchemaExtractor {
                 final var rootObject = kind.rootObject();
                 // TODO really?
                 // The root has to be variable.
-                final var rootVariable = keyToVariable.get(rootObject.key());
+                final var rootVariable = getOrCreateVariableForObjex(rootObject);
                 final var rootNode = PatternTree.createRoot(rootObject, rootVariable);
                 processComplexProperty(rootNode, kind.accessPath());
 
@@ -127,16 +127,13 @@ public class SchemaExtractor {
         path.subpaths().stream()
             .forEach(subpath -> {
                 // TODO - is this going to work? Because it might not be possible to browse a database with composed signatures only.
-                // if (!(subpath.signature() instanceof BaseSignature baseSignature))
-                //     return;
-
                 var currentNode = node;
                 for (final BaseSignature baseSignature : subpath.signature().toBases()) {
                     if (!newSchema.hasEdge(baseSignature))
                         return;
 
                     final SchemaEdge edge = schema.getEdge(baseSignature);
-                    final Variable childVariable = getOrCreateCodVariableForEdge(edge);
+                    final Variable childVariable = getOrCreateVariableForObjex(edge.to());
 
                     currentNode = currentNode.getOrCreateChild(edge, childVariable);
                 }
@@ -148,19 +145,19 @@ public class SchemaExtractor {
     }
 
     /**
-     * Gets the variable for the codomain object of the edge. If it's missing, a new one is created.
-     * The only valid reason for it to be missing is that the object was added during the extraction because it's an identifier of some other object.
+     * Gets an variable for an objex. If it's missing, a new one is created.
+     * The only valid reason for it to be missing is that the objex was added during the extraction because it's an identifier of some other objex.
      * The created variable is a variable only - it isn't added to the variable tree.
      * TODO This last line is sus. Investigate.
      */
-    private Variable getOrCreateCodVariableForEdge(SchemaEdge edge) {
-        final Variable foundVariable = keyToVariable.get(edge.to().key());
+    private Variable getOrCreateVariableForObjex(SchemaObject objex) {
+        final Variable foundVariable = keyToVariable.get(objex.key());
         if (foundVariable != null)
             return foundVariable;
 
         final var newVariable = clause.variableScope().createGenerated();
-        context.addVariable(newVariable, edge.to());
-        keyToVariable.put(edge.to().key(), newVariable);
+        context.addVariable(newVariable, objex);
+        keyToVariable.put(objex.key(), newVariable);
 
         return newVariable;
     }

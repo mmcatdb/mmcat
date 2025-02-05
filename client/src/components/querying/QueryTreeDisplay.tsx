@@ -135,9 +135,9 @@ function JoinCandidateDisplay({ candidate }: Readonly<{ candidate: JoinCandidate
             </div>
 
             <div className='flex gap-2 leading-5 font-semibold'>
-                {candidate.condition.from}
+                {candidate.fromPath}
                 <ArrowLongRightIcon className='size-5' />
-                {candidate.condition.to}
+                {candidate.toPath}
             </div>
         </div>
     );

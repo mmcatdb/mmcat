@@ -113,8 +113,6 @@ public interface AbstractQueryWrapper {
      */
     void addProjection(Property property, ResultStructure structure, boolean isOptional);
 
-    public record JoinCondition(Signature from, Signature to) implements Serializable {}
-
     /**
      * Adds a join (or graph traversal).
      * @param from Mapping from which we are joining.
@@ -123,7 +121,7 @@ public interface AbstractQueryWrapper {
      * @param repetition If not 1, the join will be recursive.
      * @param isOptional If true, the join will be optional.
      */
-    void addJoin(Mapping from, Mapping to, JoinCondition condition, int repetition, boolean isOptional);
+    void addJoin(Mapping from, Mapping to, Signature fromPath, Signature toPath, int repetition, boolean isOptional);
 
     /**
      * Adds a filtering between one variables or aggregation and one constant. E.g.:
