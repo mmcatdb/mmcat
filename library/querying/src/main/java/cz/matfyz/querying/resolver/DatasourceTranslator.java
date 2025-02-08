@@ -95,18 +95,7 @@ public class DatasourceTranslator {
 
     private Property createProperty(Expression expression) {
         if (expression instanceof Variable variable) {
-            /*
-            // TODO: is the retyping to Variable needed? This can be applied to any term (at least type-wise).
-            final var ctx = context.getContext(variable);
-            final var mappings = ctx.mappings();
-            final var signatures = ctx.signatures();
 
-            if (signatures.size() != 1) {
-                throw new UnsupportedOperationException("Cannot choose between multiple possible signatures.");
-            }
-
-            return new Property(mappings.get(0), signatures.get(0), null);
-            */
             return wrapperContext.getProperty(variable);
         }
 
