@@ -1,7 +1,7 @@
 package cz.matfyz.querying.normalizer;
 
-import cz.matfyz.core.querying.Expression.FunctionExpression;
-import cz.matfyz.core.querying.Variable.VariableScope;
+import cz.matfyz.core.querying.Computation;
+import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.parser.WhereClause.ClauseType;
 
@@ -25,9 +25,9 @@ public class NormalizedQuery {
 
     public record SelectionClause(
         ClauseType type,
-        VariableScope variableScope,
+        ExpressionScope scope,
         VariableTree variables,
-        List<FunctionExpression> filters,
+        List<Computation> filters,
         List<SelectionClause> nestedClauses
     ) {}
 

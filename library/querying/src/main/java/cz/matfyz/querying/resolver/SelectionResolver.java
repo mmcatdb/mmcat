@@ -47,6 +47,8 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(FilterNode node) {
+        final var childResult = node.child.accept(this);
+
         throw new UnsupportedOperationException("SelectionResolver.visit(FilterNode) not implemented.");
     }
 

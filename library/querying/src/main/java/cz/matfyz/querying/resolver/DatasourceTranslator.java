@@ -10,8 +10,8 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.querying.Variable;
+import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryContext;
@@ -63,18 +63,18 @@ public class DatasourceTranslator {
 
         wrapper.setContext(wrapperContext);
 
-        for (final FunctionExpression filter : datasourceNode.filters)
+        for (final Computation filter : datasourceNode.filters)
             processFilter(filter);
 
         return this.wrapper.createDSLStatement();
     }
 
-    private void processFilter(FunctionExpression filter) {
-        final var operator = filter.operator();
+    private void processFilter(Computation filter) {
+        final var operator = filter.operator;
 
         if (operator.isComparison()) {
-            final var left = createProperty(filter.arguments().get(0));
-            final var rhs = filter.arguments().get(1);
+            final var left = createProperty(filter.arguments.get(0));
+            final var rhs = filter.arguments.get(1);
 
             if (rhs instanceof Constant constant)
                 wrapper.addFilter(left, constant, operator);
@@ -84,8 +84,8 @@ public class DatasourceTranslator {
         }
 
         if (operator.isSet()) {
-            final var property = createProperty(filter.arguments().get(0));
-            final var values = filter.arguments().stream().skip(1).map(expression -> (Constant) expression).toList();
+            final var property = createProperty(filter.arguments.get(0));
+            final var values = filter.arguments.stream().skip(1).map(expression -> (Constant) expression).toList();
             wrapper.addFilter(property, values, operator);
             return;
         }
@@ -99,9 +99,9 @@ public class DatasourceTranslator {
             return wrapperContext.getProperty(variable);
         }
 
-        if (expression instanceof FunctionExpression functionExpression) {
+        if (expression instanceof Computation computation) {
             // FIXME expressions (with possible aggregations)
-            // final var aggregation = term.asFunctionExpression();
+            // final var aggregation = term.asComputation();
             // final var property = createProperty(aggregation.variable());
             // final var root = findAggregationRoot(property.mapping, property.path);
 

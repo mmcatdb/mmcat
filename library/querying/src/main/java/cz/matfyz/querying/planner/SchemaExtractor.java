@@ -155,7 +155,7 @@ public class SchemaExtractor {
         if (foundVariable != null)
             return foundVariable;
 
-        final var newVariable = clause.variableScope().createGenerated();
+        final var newVariable = clause.scope().variable.createGenerated();
         context.addVariable(newVariable, objex);
         keyToVariable.put(objex.key(), newVariable);
 

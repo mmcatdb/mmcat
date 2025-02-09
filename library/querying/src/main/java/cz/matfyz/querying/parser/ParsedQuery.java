@@ -1,17 +1,17 @@
 package cz.matfyz.querying.parser;
 
-import cz.matfyz.core.querying.Variable.VariableScope;
+import cz.matfyz.core.querying.Expression.ExpressionScope;
 
 public class ParsedQuery implements ParserNode {
 
     public final SelectClause select;
     public final WhereClause where;
-    public final VariableScope variableScope;
+    public final ExpressionScope scope;
 
-    public ParsedQuery(SelectClause select, WhereClause where, VariableScope variableScope) {
+    public ParsedQuery(SelectClause select, WhereClause where, ExpressionScope scope) {
         this.select = select;
         this.where = where;
-        this.variableScope = variableScope;
+        this.scope = scope;
     }
 
 }

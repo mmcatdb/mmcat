@@ -1,7 +1,7 @@
 package cz.matfyz.querying.parser;
 
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.querying.exception.ParsingException;
 

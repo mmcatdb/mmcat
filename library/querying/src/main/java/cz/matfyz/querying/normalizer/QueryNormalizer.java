@@ -1,11 +1,11 @@
 package cz.matfyz.querying.normalizer;
 
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.querying.Computation;
+import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression;
-import cz.matfyz.core.querying.Expression.Operator;
-import cz.matfyz.core.querying.Expression.FunctionExpression;
+import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.querying.Variable.VariableScope;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.normalizer.NormalizedQuery.ProjectionClause;
 import cz.matfyz.querying.normalizer.NormalizedQuery.SelectionClause;
@@ -28,10 +28,10 @@ public class QueryNormalizer {
         return new QueryNormalizer().run(parsed);
     }
 
-    private VariableScope variableScope;
+    private ExpressionScope scope;
 
     private NormalizedQuery run(ParsedQuery parsed) {
-        variableScope = new VariableScope();
+        scope = parsed.scope;
 
         final var projection = normalizeProjectionClause(parsed.select);
         final var selection = normalizeSelectionClause(parsed.where);
@@ -63,7 +63,7 @@ public class QueryNormalizer {
 
     // Selection
 
-    private List<FunctionExpression> filters;
+    private List<Computation> filters;
 
     private SelectionClause normalizeSelectionClause(WhereClause whereClause) {
         filters = new ArrayList<>();
@@ -84,7 +84,7 @@ public class QueryNormalizer {
 
         return new SelectionClause(
             whereClause.type,
-            variableScope,
+            scope,
             variables,
             filters,
             nestedClauses
@@ -102,15 +102,16 @@ public class QueryNormalizer {
 
         // First n-1 variables are newly generated. Then there is the original variable / filter.
         for (int i = 0; i < bases.size() - 1; i++)
-            current = current.getOrCreateChild(variableScope.createGenerated(), bases.get(i));
+            current = current.getOrCreateChild(scope.variable.createGenerated(), bases.get(i));
 
         final var lastBase = bases.get(bases.size() - 1);
 
         // The original term is a string value - we transform it to a new variable and filter.
         if (termTree.term.isConstant()) {
-            final var variable = variableScope.createGenerated();
+            final var variable = scope.variable.createGenerated();
             current.getOrCreateChild(variable, lastBase);
-            filters.add(new FunctionExpression(Operator.Equal, variable, termTree.term.asConstant()));
+            final var computation = scope.computation.create(Operator.Equal, variable, termTree.term.asConstant());
+            filters.add(computation);
 
             // Also, this has to be a leaf, so we don't continue with children.
             return;
@@ -129,7 +130,7 @@ public class QueryNormalizer {
             final var lhs = doSwitch ? filter.rhs() : filter.lhs();
             final var rhs = doSwitch ? filter.lhs() : filter.rhs();
 
-            filters.add(new FunctionExpression(
+            filters.add(scope.computation.create(
                 filter.operator(),
                 lhs.asExpression(),
                 rhs.asExpression()
@@ -140,7 +141,7 @@ public class QueryNormalizer {
             final List<Expression> arguments = new ArrayList<>();
             arguments.add(filter.variable());
             arguments.addAll(filter.allowedValues());
-            filters.add(new FunctionExpression(Operator.In, arguments));
+            filters.add(scope.computation.create(Operator.In, arguments));
         });
     }
 

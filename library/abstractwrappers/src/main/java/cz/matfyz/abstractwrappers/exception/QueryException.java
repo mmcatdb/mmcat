@@ -1,7 +1,7 @@
 package cz.matfyz.abstractwrappers.exception;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
-import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Computation.Operator;
 
 import java.io.Serializable;
 

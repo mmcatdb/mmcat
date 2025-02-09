@@ -7,7 +7,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.StaticName;
-import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.ResultStructure;
 
 import java.util.ArrayList;

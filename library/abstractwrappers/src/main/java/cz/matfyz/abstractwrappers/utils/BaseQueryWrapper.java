@@ -5,7 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.ResultStructure;
 

@@ -2,8 +2,8 @@ package cz.matfyz.querying.parser;
 
 import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.Variable;
+import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.querying.exception.ParsingException;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -52,21 +52,21 @@ public class Term implements ParserNode, Comparable<Term> {
         throw ParsingException.wrongNode(Variable.class, this);
     }
 
-    public Term(FunctionExpression functionExpression) {
-        this.functionExpression = functionExpression;
+    public Term(Computation computation) {
+        this.computation = computation;
     }
 
-    private @Nullable FunctionExpression functionExpression;
+    private @Nullable Computation computation;
 
-    public boolean isFunctionExpression() {
-        return functionExpression != null;
+    public boolean isComputation() {
+        return computation != null;
     }
 
-    public FunctionExpression asFunctionExpression() {
-        if (functionExpression != null)
-            return functionExpression;
+    public Computation asComputation() {
+        if (computation != null)
+            return computation;
 
-        throw ParsingException.wrongNode(FunctionExpression.class, this);
+        throw ParsingException.wrongNode(Computation.class, this);
     }
 
     // Common expression
@@ -78,7 +78,7 @@ public class Term implements ParserNode, Comparable<Term> {
         if (isVariable())
             return variable;
 
-        return functionExpression;
+        return computation;
     }
 
     // TODO Is it really necessary for the term to be comparable? Does it even make sense to compare expressions?
@@ -90,7 +90,7 @@ public class Term implements ParserNode, Comparable<Term> {
         if (variable != null)
             return "v_" + variable.name();
 
-        return "a_" + functionExpression.toString();
+        return "a_" + computation.toString();
     }
 
     public boolean equals(Term other) {

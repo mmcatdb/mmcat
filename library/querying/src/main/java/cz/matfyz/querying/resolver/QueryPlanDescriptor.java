@@ -1,7 +1,7 @@
 package cz.matfyz.querying.resolver;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.core.querying.Expression.FunctionExpression;
+import cz.matfyz.core.querying.Computation;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription.QueryPartDescription;
 import cz.matfyz.querying.core.QueryDescription.QueryPlanDescription;
@@ -61,7 +61,7 @@ public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
             node.datasource.identifier,
             serializedKinds,
             node.joinCandidates.stream().map(candidate -> candidate.serialize()).toList(),
-            node.filters.stream().map(FunctionExpression::toString).toList(),
+            node.filters.stream().map(Computation::toString).toList(),
             "TODO root term");
     }
 

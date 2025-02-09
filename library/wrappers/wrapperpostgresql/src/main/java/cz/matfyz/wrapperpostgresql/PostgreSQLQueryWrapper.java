@@ -7,7 +7,7 @@ import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
-import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Computation.Operator;
 
 import java.util.TreeSet;
 import java.util.stream.Collectors;

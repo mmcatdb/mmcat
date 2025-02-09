@@ -1,8 +1,8 @@
 package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.querying.Expression.FunctionExpression;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
@@ -24,7 +24,7 @@ public class DatasourceNode extends QueryNode {
     public final Set<PatternForKind> kinds;
     public final SchemaCategory schema;
     public final List<JoinCandidate> joinCandidates;
-    public final List<FunctionExpression> filters;
+    public final List<Computation> filters;
     /** The root term of this pattern. When this node is translated to query, this term will be the root of the result structure. */
     public final Variable rootVariable;
 
@@ -33,7 +33,7 @@ public class DatasourceNode extends QueryNode {
         Set<PatternForKind> kinds,
         SchemaCategory schema,
         List<JoinCandidate> joinCandidates,
-        List<FunctionExpression> filters,
+        List<Computation> filters,
         Variable rootVariable
     ) {
         this.datasource = datasource;

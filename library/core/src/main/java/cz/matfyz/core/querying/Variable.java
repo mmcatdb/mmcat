@@ -30,6 +30,8 @@ public record Variable(
      */
     public static class VariableScope {
 
+        VariableScope() {}
+
         private Map<String, Variable> nameToVariable = new TreeMap<>();
 
         public Variable createOriginal(String name) {

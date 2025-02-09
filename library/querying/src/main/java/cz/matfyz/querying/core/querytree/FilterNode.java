@@ -1,13 +1,13 @@
 package cz.matfyz.querying.core.querytree;
 
-import cz.matfyz.core.querying.Expression.FunctionExpression;
+import cz.matfyz.core.querying.Computation;
 
 public class FilterNode extends QueryNode {
 
     public final QueryNode child;
-    public final FunctionExpression filter;
+    public final Computation filter;
 
-    public FilterNode(QueryNode child, FunctionExpression filter) {
+    public FilterNode(QueryNode child, Computation filter) {
         this.child = child;
         this.filter = filter;
 

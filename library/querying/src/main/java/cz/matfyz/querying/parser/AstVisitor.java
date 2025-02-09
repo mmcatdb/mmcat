@@ -2,10 +2,9 @@ package cz.matfyz.querying.parser;
 
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper.Operators;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.FunctionExpression;
-import cz.matfyz.core.querying.Variable.VariableScope;
+import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ParsingException;
 import cz.matfyz.querying.parser.Filter.ConditionFilter;
@@ -32,15 +31,15 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         return nextResult == null ? aggregate : nextResult;
     }
 
-    private VariableScope variableScope;
+    private ExpressionScope scope;
 
     @Override public ParsedQuery visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
-        variableScope = new VariableScope();
+        scope = new ExpressionScope();
 
         final SelectClause selectClause = visitSelectClause(ctx.selectClause());
         final WhereClause whereClause = visitWhereClause(ctx.whereClause());
 
-        return new ParsedQuery(selectClause, whereClause, variableScope);
+        return new ParsedQuery(selectClause, whereClause, scope);
     }
 
     @Override public SelectClause visitSelectClause(QuerycatParser.SelectClauseContext ctx) {
@@ -204,7 +203,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         final var variableNameNode = ctx.VAR1() != null ? ctx.VAR1() : ctx.VAR2();
         final var variableName = variableNameNode.getSymbol().getText().substring(1);
 
-        return new Term(variableScope.createOriginal(variableName));
+        return new Term(scope.variable.createOriginal(variableName));
     }
 
     public Term visitAggregation(QuerycatParser.AggregationTermContext ctx) {
@@ -219,7 +218,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
             operator = Operator.CountDistinct;
         }
 
-        final var expression = new FunctionExpression(operator, List.of(variableTerm.asVariable()));
+        final var expression = scope.computation.create(operator, variableTerm.asVariable());
         return new Term(expression);
     }
 

@@ -1,8 +1,9 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.querying.Computation;
+import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.FunctionExpression;
+import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
@@ -20,6 +21,7 @@ class QueryTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
     private static final Datasources datasources = new Datasources();
+    private static final ExpressionScope scope = new ExpressionScope();
 
     @BeforeAll
     static void setup() {
@@ -325,7 +327,7 @@ class QueryTests {
                     schema,
                     List.of(),
                     List.of(
-                        new FunctionExpression(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
                     onlyPattern.root.variable
                 );
@@ -361,7 +363,7 @@ class QueryTests {
                     schema,
                     List.of(),
                     List.of(
-                        new FunctionExpression(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
                     onlyPattern.root.variable
                 );
@@ -397,7 +399,7 @@ class QueryTests {
                     schema,
                     List.of(),
                     List.of(
-                        new FunctionExpression(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
                     onlyPattern.root.variable
                 );
