@@ -5,6 +5,8 @@ import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.querying.Expression.Operator;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
@@ -43,33 +45,114 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     @Override public QueryStatement createDSLStatement() {
         StringBuilder sb = new StringBuilder();
 
-        addMatches(sb);
+        addKindMatches(sb);
+        addJoinMatches(sb);
         addWhere(sb);
         addWithReturn(sb);
 
         return new QueryStatement(new StringQuery(sb.toString()), context.rootStructure());
     }
 
-    private void addMatches(StringBuilder sb) {
-        if (joins.isEmpty()) {
-            if (projections.isEmpty())
-                throw QueryException.message("No tables are selected in MATCH clause.");
+    private void addKindMatches(StringBuilder sb) {
+        for (final var projection : projections) {
+            final var mapping = projection.property().mapping;
 
-            final var onlyMapping = projections.getFirst().property().mapping;
-            // TODO: how to figure out whether a kind is for a node or edge?
-            sb.append("MATCH ").append(nodeName(onlyMapping)).append("\n");
-            // sb.append("MATCH ").append(edgeName(onlyMapping)).append("\n");
-            return;
+            String name = isRelationship(mapping) ? edgeName(mapping) : nodeName(mapping);
+            sb.append("MATCH ").append(name).append("\n");
         }
+    }
 
-        throw new UnsupportedOperationException("Joins are not implemented for Neo4J yet.");
+    /**
+     * Adds matches specifying the way that kinds matched in {@link #addKindMatches(Stringbuilder)} should be joined.
+     * For Neo4J, the from/to paths don't mostly matter (except for determining relationship direction using _from / _to) since only possible joins are node-relationship, which Neo4J handles independently of user-provided kind identifiers.
+     */
+    private void addJoinMatches(StringBuilder sb) {
+        for (final var join : joins) {
+
+            Mapping relationship;
+            Mapping node;
+            Signature relationshipPath;
+
+            if (isRelationship(join.from()) && !isRelationship(join.to())) {
+                relationship = join.from();
+                node = join.to();
+                relationshipPath = join.fromPath();
+            } else if (!isRelationship(join.from()) && isRelationship(join.to())) {
+                relationship = join.to();
+                node = join.from();
+                relationshipPath = join.toPath();
+            } else throw new UnsupportedOperationException("Graph join must be between node and edge.");
+
+            boolean directionIsTowardsNode = relationship.accessPath()
+                .getDirectSubpath(relationshipPath.getFirst())
+                .name().toString().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
+
+            sb.append("MATCH (")
+                .append(mappingVarName(node))
+                .append(directionIsTowardsNode ? ")<-[" : ")-[")
+                .append(mappingVarName(relationship))
+                .append(directionIsTowardsNode ? "]-()" : "]->()")
+                .append("\n");
+        }
     }
 
     private void addWhere(StringBuilder sb) {
         if (filters.isEmpty())
             return;
 
-        throw new UnsupportedOperationException("Filters are not implemented for Neo4J yet.");
+        sb.append("WHERE\n  ");
+
+        boolean first = true;
+        for (final var f : filters) {
+            if (first) first = false;
+            else sb.append(" AND\n  ");
+
+            if (f instanceof UnaryFilter uf) {
+                addFilter(uf, sb);
+            } else if (f instanceof BinaryFilter bf) {
+                addFilter(bf, sb);
+            } else if (f instanceof SetFilter sf) {
+                addFilter(sf, sb);
+            } else {
+                throw new UnsupportedOperationException("Unknown filter");
+            }
+
+        }
+
+        sb.append('\n');
+    }
+
+    private void addFilter(UnaryFilter filter, StringBuilder sb) {
+        sb
+            .append(getPropertyName(filter.property()))
+            .append(" ")
+            .append(operators.stringify(filter.operator()))
+            // TODO Some sanitization should be done here.
+            .append(" '")
+            .append(filter.constant().value())
+            .append("'");
+    }
+
+    private void addFilter(BinaryFilter filter, StringBuilder sb) {
+        sb
+            .append(getPropertyName(filter.property1()))
+            .append(operators.stringify(filter.operator()))
+            .append(getPropertyName(filter.property2()));
+    }
+
+    private void addFilter(SetFilter filter, StringBuilder sb) {
+        sb.append(getPropertyName(filter.property()));
+
+        final var values = filter.set();
+        sb
+            .append(" ")
+            .append(operators.stringify(filter.operator()))
+            .append(" [")
+            .append(values.get(0));
+
+        values.stream().skip(1).forEach(value -> sb.append(", ").append(value));
+
+        sb.append("]");
     }
 
     private void addWithReturn(StringBuilder sb) {
@@ -90,23 +173,45 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         );
     }
 
+
+    private static boolean isRelationship(Mapping mapping) {
+        final boolean hasFrom = hasSubpathByPrefix(mapping.accessPath(), Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
+        final boolean hasTo = hasSubpathByPrefix(mapping.accessPath(), Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
+        return hasFrom && hasTo;
+    }
+
+    private static boolean hasSubpathByPrefix(ComplexProperty path, String namePrefix) {
+        for (final var subpath : path.subpaths()) {
+            if (
+                (subpath.name() instanceof final StaticName staticName)
+                && staticName.getStringName().startsWith(namePrefix)
+            ) return true;
+        }
+        return false;
+    }
+
+    private static String escapeName(String name) {
+        return '`' + name + '`';
+    }
+
+
     private static String mappingVarName(Mapping mapping) {
-        return "_v_" + mapping.kindName();
+        return escapeName("VAR_" + mapping.kindName());
     }
 
     private String nodeName(Mapping mapping) {
-        return "(" + mappingVarName(mapping) + ":" + mapping.kindName() + ")";
+        return "(" + mappingVarName(mapping) + ":" + escapeName(mapping.kindName()) + ")";
     }
 
     private String edgeName(Mapping mapping) {
-        return "()-[" + mappingVarName(mapping) + ":" + mapping.kindName() + "]-()";
+        return "()-[" + mappingVarName(mapping) + ":" + escapeName(mapping.kindName()) + "]-()";
     }
 
     private String getProjectionSrc(Projection projection) {
         return getPropertyName(projection.property());
     }
     private String getProjectionDst(Projection projection) {
-        return projection.structure().name;
+        return escapeName(projection.structure().name);
     }
 
     private String getPropertyName(Property property) {
@@ -120,9 +225,11 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         return mappingVarName(property.mapping) + "." + getRawAttributeName(property);
     }
 
+
+
     private String getRawAttributeName(Property property) {
-        // Unlike fully relational DBs, Neo4j properties may also contain arrays of primitive types, but for now lets simplify
-        // TODO: later solve this for arrays too (although that depends on how they can be queried)
+        // Neo4j properties may also contain arrays of primitive types
+        // TODO: solve this for arrays too (although that depends on how they can be queried)
         final var subpath = property.mapping.accessPath().getDirectSubpath(property.path);
         if (
             subpath == null ||
@@ -131,7 +238,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         )
             throw QueryException.propertyNotFoundInMapping(property);
 
-        return staticName.getStringName();
+        return escapeName(staticName.getStringName());
     }
 
 }

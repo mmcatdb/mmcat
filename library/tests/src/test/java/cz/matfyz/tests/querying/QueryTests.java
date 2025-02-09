@@ -374,6 +374,42 @@ class QueryTests {
     }
 
     @Test
+    void filterNeo4J() {
+        new QueryCustomTreeTest<>(
+            datasources,
+            datasources.neo4j(),
+            """
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = \"o_100\")
+                }
+            """,
+            (schema, datasource, plan) -> {
+                final var onlyPattern = plan.stream().findFirst().get();
+
+                return new DatasourceNode(
+                    datasource,
+                    plan,
+                    schema,
+                    List.of(),
+                    List.of(
+                        new FunctionExpression(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                    ),
+                    onlyPattern.root.variable
+                );
+            },
+            """
+                [ {
+                    "number": "o_100"
+                } ]
+            """).run();
+    }
+
+    @Test
     void filter() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
