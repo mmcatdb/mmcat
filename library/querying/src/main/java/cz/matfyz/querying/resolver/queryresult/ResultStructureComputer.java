@@ -64,10 +64,10 @@ public class ResultStructureComputer {
     }
 
     private ComputationTForm run(Computation computation, boolean isFilter) {
-        final var referenceNode = findReferenceNodeForComparison(computation);
+        var referenceNode = findReferenceNodeForComparison(computation);
         if (referenceNode == null)
-            // TODO There might be various reasons why the reference node isn't found. Some of them are valid, some of them not. We should distinguish them.
-            throw new RuntimeException("Can't find reference node for filter: " + computation);
+            // This corresponds to a constant filter, e.g., FILTER(1 = 1). In this case, we will filter the root.
+            referenceNode = outputStructure;
 
         if (!referenceNode.hasComputation(computation)) {
             // The computation is not yet resolved, so we have to do it first.

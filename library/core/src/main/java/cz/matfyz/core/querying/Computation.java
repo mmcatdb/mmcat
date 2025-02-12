@@ -121,6 +121,7 @@ public class Computation implements Expression, Comparable<Computation> {
         Comparison,
         Aggregation,
         Set,
+        // TODO This is not yet implemented in the grammar (or like, anywhere).
         String;
     }
 

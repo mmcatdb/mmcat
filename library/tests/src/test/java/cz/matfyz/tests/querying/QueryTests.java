@@ -506,6 +506,70 @@ class QueryTests {
     }
 
     @Test
+    void contradictionFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number != ?number)
+                }
+            """)
+            .expected("""
+                []
+            """)
+            .run();
+    }
+
+    @Test
+    void constantTautologyFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER("1" = "1")
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void constantContradictionFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER("1" = "2")
+                }
+            """)
+            .expected("""
+                []
+            """)
+            .run();
+    }
+
+    @Test
     void computationFilter() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
