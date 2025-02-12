@@ -24,7 +24,7 @@ limitOffsetClauses: (
 orderClause: 'ORDER' 'BY' orderCondition+;
 
 orderCondition: (( 'ASC' | 'DESC') brackettedExpression)
-    | ( constraint | var_);
+    | ( constraint | variable);
 
 limitClause: 'LIMIT' INTEGER;
 
@@ -32,7 +32,7 @@ offsetClause: 'OFFSET' INTEGER;
 
 groupGraphPattern:
     '{' (subSelect | (triplesBlock? (
-        (graphPatternNotTriples | filter_) '.'? triplesBlock?
+        (graphPatternNotTriples | filter) '.'? triplesBlock?
     )*)) '}';
 
 triplesBlock: triplesSameSubject ( '.' triplesBlock?)?;
@@ -49,27 +49,27 @@ groupOrUnionGraphPattern:
 
 inlineData: 'VALUES' dataBlock;
 
-dataBlock: var_ '{' dataBlockValue* '}';
+dataBlock: variable '{' dataBlockValue* '}';
 
 dataBlockValue: numericLiteral
     | booleanLiteral
-    | string_;
+    | string;
 
-filter_: 'FILTER' constraint;
+filter: 'FILTER' constraint;
 
 constraint: brackettedExpression;
 
 selectTriples: triplesSameSubject ( '.' selectTriples?)?;
 
-triplesSameSubject: varOrTerm propertyListNotEmpty;
+triplesSameSubject: term propertyListNotEmpty;
 
 propertyListNotEmpty: verb objectList ( ';' ( verb objectList)?)*;
 
 propertyList: propertyListNotEmpty?;
 
-objectList: object_ ( ',' object_)*;
+objectList: object ( ',' object)*;
 
-object_: graphNode;
+object: graphNode;
 
 verb: schemaMorphismOrPath;
 
@@ -91,26 +91,26 @@ primaryMorphism: SCHEMA_MORPHISM;
 
 dualMorphism: '-' primaryMorphism;
 
-graphNode: varOrTerm ( 'AS' var_)?;
+graphNode: term ( 'AS' variable)?;
 
-varOrTerm: var_ | constantTerm | aggregationTerm;
+term: variable | constant | aggregation;
 
-var_: VAR1 | VAR2;
+variable: VARIABLE;
 
-constantTerm:
+constant:
     numericLiteral
     | booleanLiteral
-    | string_
+    | string
     | blankNode
     | NIL;
 
-aggregationTerm:
-    aggregationFunc '(' (distinctModifier)? var_ ')';
+aggregation:
+    aggregationFunction '(' (distinctModifier)? variable ')';
 
 distinctModifier:
     'DISTINCT';
 
-aggregationFunc:
+aggregationFunction:
     'COUNT'
     | 'SUM'
     | 'AVG'
@@ -142,8 +142,8 @@ primaryExpression:
     brackettedExpression
     | numericLiteral
     | booleanLiteral
-    | string_
-    | varOrTerm;
+    | string
+    | term;
 
 brackettedExpression: '(' expression ')';
 
@@ -166,9 +166,7 @@ numericLiteralNegative:
 
 booleanLiteral: 'true' | 'false';
 
-string_:
-    STRING_LITERAL1
-    | STRING_LITERAL2;
+string: STRING_LITERAL_SINGLE | STRING_LITERAL_DOUBLE;
 
 blankNode: BLANK_NODE_LABEL | ANON;
 
@@ -180,9 +178,7 @@ SCHEMA_IDENTIFIER: (PN_CHARS)+;
 
 BLANK_NODE_LABEL: '_:' PN_LOCAL;
 
-VAR1: '?' VARNAME;
-
-VAR2: '$' VARNAME;
+VARIABLE: '?' VARNAME;
 
 INTEGER: DIGIT+;
 
@@ -207,27 +203,15 @@ DOUBLE_NEGATIVE: '-' DOUBLE;
 
 EXPONENT: ('e' | 'E') ('+' | '-')? DIGIT+;
 
-STRING_LITERAL1:
-    '\'' (
-        ~('\u0027' | '\u005C' | '\u000A' | '\u000D') | ECHAR
-    )* '\'';
+// \u0027 - single quote: '
+// \u0022 - double quote: "
+// \u005C - backslash: \
+// \u000A - linefeed: \n
+// \u000D - carriage return: \r
 
-STRING_LITERAL2:
-    '"' (
-        ~('\u0022' | '\u005C' | '\u000A' | '\u000D') | ECHAR
-    )* '"';
-
-STRING_LITERAL_LONG1:
-    '\'\'\'' (
-        ( '\'' | '\'\'')? (~('\'' | '\\') | ECHAR)
-    )* '\'\'\'';
-
-STRING_LITERAL_LONG2:
-    '"""' (
-        ( '"' | '""')? ( ~('\'' | '\\') | ECHAR)
-    )* '"""';
-
-ECHAR: '\\' ('t' | 'b' | 'n' | 'r' | 'f' | '"' | '\'');
+STRING_LITERAL_SINGLE: '\'' (~['\\\n\r] | ESCAPE_CHAR)* '\'';
+STRING_LITERAL_DOUBLE: '"' (~["\\\n\r] | ESCAPE_CHAR)* '"';
+ESCAPE_CHAR: '\\' ['"tbnrf\\];
 
 NIL: '(' WS* ')';
 

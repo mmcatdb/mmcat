@@ -96,38 +96,22 @@ public abstract class TformStep implements Printable {
         }
     }
 
-    /**
-     * Traverses a map from the input via a specific key. The result is then pushed to the input.
-     * As an optimization, the key can be a list of keys. However, in that case, only the last result is pushed to the input. So be very careful with that as the {@link TraverseParent} step won't work as expected!
-     */
     static class TraverseMap extends TformStep {
-        private final List<String> keys;
+        private final String key;
 
         TraverseMap(String key) {
-            this.keys = List.of(key);
-        }
-
-        /** Just an optimization. Don't use {@link TraverseParent} steps after this unless you know what you are doing! */
-        TraverseMap(List<String> keys) {
-            this.keys = keys;
+            this.key = key;
         }
 
         @Override public void apply(TformContext context) {
-            var current = context.inputs.peek();
-            for (final var key : keys)
-                current = ((MapResult) current).children().get(key);
-
-            context.inputs.push(current);
+            final var currentMap = (MapResult) context.inputs.peek();
+            context.inputs.push(currentMap.children().get(key));
             applyChildren(context);
             context.inputs.pop();
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("map.traverse(");
-            for (final var key : keys)
-                printer.append(key).append(".");
-            printer.remove().append(")");
-
+            printer.append("map.traverse(").append(key).append(")");
             printChildren(printer);
         }
     }
@@ -454,7 +438,7 @@ public abstract class TformStep implements Printable {
     /** Traverses a continuous path of maps. They have to exist and they have to be maps! */
     private static ResultNode traversePath(ResultNode input, List<String> path) {
         ResultNode current = input;
-        for (String key : path)
+        for (final String key : path)
             current = ((MapResult) current).children().get(key);
 
         return current;
@@ -494,16 +478,23 @@ public abstract class TformStep implements Printable {
      * Takes a leaf from the input. If it's value isn't "true", it gets removed.
      * Must be run inside a remover context.
      */
-    static class FilterLeaf extends TformStep {
+    static class FilterNode extends TformStep {
+        private final List<String> pathToValue;
+
+        FilterNode(List<String> pathToValue) {
+            this.pathToValue = pathToValue;
+        }
+
         @Override public void apply(TformContext context) {
-            final var valueNode = (LeafResult) context.inputs.peek();
-            if (!valueNode.value.equals("true"))
+            final var thisNode = context.inputs.peek();
+            final var valueLeaf = (LeafResult) traversePath(thisNode, pathToValue);
+            if (!valueLeaf.value.equals("true"))
                 context.removers.peek().getRemoved();
         }
 
         @Override public void printTo(Printer printer) {
             printer
-                .append("leaf.filter")
+                .append("node.filter")
                 .nextLine();
         }
 

@@ -17,8 +17,7 @@ import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.TermTree;
-import cz.matfyz.querying.parser.Filter.ConditionFilter;
-import cz.matfyz.querying.parser.Filter.ValueFilter;
+import cz.matfyz.querying.parser.Filter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +57,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
     private ParsedQuery query;
     private List<TermTree<String>> selectTermTrees;
     private List<TermTree<Signature>> whereTermTrees;
-    private List<ConditionFilter> conditionFilters;
-    private List<ValueFilter> valueFilters;
+    private List<Filter> filters;
 
     private List<QueryEvolutionError> errors = new ArrayList<>();
 
@@ -77,8 +75,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
         selectTermTrees = new ArrayList<>(query.select.termTrees);
         whereTermTrees = new ArrayList<>(query.where.termTrees);
-        conditionFilters = new ArrayList<>(query.where.conditionFilters);
-        valueFilters = new ArrayList<>(query.where.valueFilters);
+        filters = new ArrayList<>(query.where.filters);
 
         for (final var update : updates) {
             LOGGER.info("Executing update from: " + update.getPrevVersion());
@@ -95,8 +92,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
                 List.of(),
                 new Term.Builder(),
                 whereTermTrees,
-                conditionFilters,
-                valueFilters
+                filters,
             ),
             new QueryContext()
         );

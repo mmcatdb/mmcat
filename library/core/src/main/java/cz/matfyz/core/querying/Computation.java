@@ -120,7 +120,8 @@ public class Computation implements Expression, Comparable<Computation> {
     public enum OP {
         Comparison,
         Aggregation,
-        Set;
+        Set,
+        String;
     }
 
     public enum Operator {
@@ -140,7 +141,9 @@ public class Computation implements Expression, Comparable<Computation> {
         Average         (OP.Aggregation),
 
         In              (OP.Set),
-        NotIn           (OP.Set);
+        NotIn           (OP.Set),
+
+        Concatenate     (OP.String);
 
         private OP type;
 
@@ -167,6 +170,10 @@ public class Computation implements Expression, Comparable<Computation> {
          */
         public boolean isSet() {
             return type == OP.Set;
+        }
+
+        public boolean isString() {
+            return type == OP.String;
         }
 
     }

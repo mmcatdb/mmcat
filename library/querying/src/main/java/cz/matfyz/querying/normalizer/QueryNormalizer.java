@@ -3,14 +3,12 @@ package cz.matfyz.querying.normalizer;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Computation.Operator;
-import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.normalizer.NormalizedQuery.ProjectionClause;
 import cz.matfyz.querying.normalizer.NormalizedQuery.SelectionClause;
-import cz.matfyz.querying.parser.Filter.ConditionFilter;
-import cz.matfyz.querying.parser.Filter.ValueFilter;
+import cz.matfyz.querying.parser.Filter;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.SelectClause;
 import cz.matfyz.querying.parser.TermTree;
@@ -78,7 +76,7 @@ public class QueryNormalizer {
         for (final var child : termTree.children)
             addSelectionChildren(variables, child);
 
-        addExplicitFilters(whereClause.conditionFilters, whereClause.valueFilters);
+        addExplicitFilters(whereClause.filters);
 
         final var nestedClauses = whereClause.nestedClauses.stream().map(this::normalizeSelectionClause).toList();
 
@@ -124,25 +122,8 @@ public class QueryNormalizer {
             addSelectionChildren(current, child);
     }
 
-    private void addExplicitFilters(List<ConditionFilter> conditionFilters, List<ValueFilter> valueFilters) {
-        conditionFilters.forEach(filter -> {
-            final var doSwitch = filter.lhs().isConstant();
-            final var lhs = doSwitch ? filter.rhs() : filter.lhs();
-            final var rhs = doSwitch ? filter.lhs() : filter.rhs();
-
-            filters.add(scope.computation.create(
-                filter.operator(),
-                lhs.asExpression(),
-                rhs.asExpression()
-            ));
-        });
-
-        valueFilters.forEach(filter -> {
-            final List<Expression> arguments = new ArrayList<>();
-            arguments.add(filter.variable());
-            arguments.addAll(filter.allowedValues());
-            filters.add(scope.computation.create(Operator.In, arguments));
-        });
+    private void addExplicitFilters(List<Filter> parsedFilters) {
+        parsedFilters.forEach(filter -> filters.add(filter.computation()));
     }
 
 }

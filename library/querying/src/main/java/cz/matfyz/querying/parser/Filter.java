@@ -1,59 +1,52 @@
 package cz.matfyz.querying.parser;
 
-import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Computation.Operator;
-import cz.matfyz.core.querying.Variable;
-import cz.matfyz.querying.exception.ParsingException;
+import cz.matfyz.core.querying.Computation;
 
-import java.util.List;
-import java.util.stream.Collectors;
+public record Filter(
+    Computation computation
+) implements ParserNode {
 
-// TODO This might be unified with Expression somehow?
-// However, we have to make sure the expression keeps all original information. Because both "?id = 1" and "1 = ?id" will be translated to (=, ?id, 1).
-
-public interface Filter extends ParserNode {
-
-    @Override default Filter asFilter() {
+    @Override public Filter asFilter() {
         return this;
     }
 
-    default ConditionFilter asConditionFilter() {
-        throw ParsingException.wrongNode(ConditionFilter.class, this);
-    }
+    // default ConditionFilter asConditionFilter() {
+    //     throw ParsingException.wrongNode(ConditionFilter.class, this);
+    // }
 
-    default ValueFilter asValueFilter() {
-        throw ParsingException.wrongNode(ValueFilter.class, this);
-    }
+    // default ValueFilter asValueFilter() {
+    //     throw ParsingException.wrongNode(ValueFilter.class, this);
+    // }
 
-    public record ConditionFilter(
-        Term lhs,
-        Operator operator,
-        Term rhs
-    ) implements Filter {
+    // public record ConditionFilter(
+    //     Term lhs,
+    //     Operator operator,
+    //     Term rhs
+    // ) implements Filter {
 
-        @Override public ConditionFilter asConditionFilter() {
-            return this;
-        }
+    //     @Override public ConditionFilter asConditionFilter() {
+    //         return this;
+    //     }
 
-        @Override public String toString() {
-            return lhs + " " + operator + " " + rhs;
-        }
+    //     @Override public String toString() {
+    //         return lhs + " " + operator + " " + rhs;
+    //     }
 
-    }
+    // }
 
-    public record ValueFilter(
-        Variable variable,
-        List<Constant> allowedValues
-    ) implements Filter {
+    // public record ValueFilter(
+    //     Variable variable,
+    //     List<Constant> allowedValues
+    // ) implements Filter {
 
-        @Override public ValueFilter asValueFilter() {
-            return this;
-        }
+    //     @Override public ValueFilter asValueFilter() {
+    //         return this;
+    //     }
 
-        @Override public String toString() {
-            return variable + " IN (`" + allowedValues.stream().map(constant -> constant.value()).collect(Collectors.joining("`, `")) + "`)";
-        }
+    //     @Override public String toString() {
+    //         return variable + " IN (`" + allowedValues.stream().map(constant -> constant.value()).collect(Collectors.joining("`, `")) + "`)";
+    //     }
 
-    }
+    // }
 
 }

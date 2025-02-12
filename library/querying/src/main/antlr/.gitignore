@@ -1,0 +1,3 @@
+# Because why would somebody think that auto-generating all antlr files on each .g4 file save is not the worst idea ever?
+# At least provide a way to disable this "feature".
+.antlr

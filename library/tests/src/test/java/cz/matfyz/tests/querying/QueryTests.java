@@ -315,7 +315,7 @@ class QueryTests {
                 WHERE {
                     ?order 1 ?number .
 
-                    FILTER(?number = \"o_100\")
+                    FILTER(?number = "o_100")
                 }
             """,
             (schema, datasource, plan) -> {
@@ -351,7 +351,7 @@ class QueryTests {
                 WHERE {
                     ?order 1 ?number .
 
-                    FILTER(?number = \"o_100\")
+                    FILTER(?number = "o_100")
                 }
             """,
             (schema, datasource, plan) -> {
@@ -387,7 +387,7 @@ class QueryTests {
                 WHERE {
                     ?order 1 ?number .
 
-                    FILTER(?number = \"o_100\")
+                    FILTER(?number = "o_100")
                 }
             """,
             (schema, datasource, plan) -> {
@@ -422,12 +422,37 @@ class QueryTests {
                 WHERE {
                     ?order 1 ?number .
 
-                    FILTER(?number = \"o_100\")
+                    FILTER(?number = "o_100")
                 }
             """)
             .expected("""
                 [ {
                     "number": "o_100"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void stringEscaping() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number != "x\\\\x\\nx'x\\'\\"x")
+                    FILTER(?number != 'x\\\\x\\nx"x\\'\\"x')
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
                 } ]
             """)
             .run();
@@ -444,13 +469,59 @@ class QueryTests {
                 WHERE {
                     ?order 1 ?number .
 
-                    FILTER(?number != \"o_200\")
-                    FILTER(?number != \"o_300\")
+                    FILTER(?number != "o_200")
+                    FILTER(?number != "o_300")
                 }
             """)
             .expected("""
                 [ {
                     "number": "o_100"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void tautologyFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = ?number)
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void computationFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER("true" != (?number = "o_100"))
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_200"
                 } ]
             """)
             .run();

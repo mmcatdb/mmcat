@@ -3,12 +3,11 @@ package cz.matfyz.querying.parser;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper.Operators;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.Computation.Operator;
+import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ParsingException;
-import cz.matfyz.querying.parser.Filter.ConditionFilter;
-import cz.matfyz.querying.parser.Filter.ValueFilter;
 import cz.matfyz.querying.parser.WhereClause.ClauseType;
 import cz.matfyz.querying.parser.antlr4generated.QuerycatBaseVisitor;
 import cz.matfyz.querying.parser.antlr4generated.QuerycatParser;
@@ -16,6 +15,7 @@ import cz.matfyz.querying.parser.antlr4generated.QuerycatParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,29 +61,24 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
             ClauseType.Where,
             List.of(),
             pattern.termTrees,
-            pattern.condigionFilters,
-            pattern.valueFilters
+            pattern.filters
         );
     }
 
     private record GroupGraphPattern(
         List<TermTree<Signature>> termTrees,
-        List<ConditionFilter> condigionFilters,
-        List<ValueFilter> valueFilters
+        List<Filter> filters
     ) implements ParserNode {}
 
     @Override public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
         final List<TermTree<Signature>> termTrees = ctx.triplesBlock().stream()
             .flatMap(tb -> visitTriplesBlock(tb).triples.stream())
             .toList();
-        final List<ConditionFilter> conditionFilters = ctx.filter_().stream()
-            .map(f -> visit(f).asFilter().asConditionFilter())
-            .toList();
-        final List<ValueFilter> valueFilters = ctx.graphPatternNotTriples().stream()
-            .map(v -> visit(v).asFilter().asValueFilter())
+        final List<Filter> filters = ctx.filter().stream()
+            .map(f -> visit(f).asFilter())
             .toList();
 
-        return new GroupGraphPattern(termTrees, conditionFilters, valueFilters);
+        return new GroupGraphPattern(termTrees, filters);
     }
 
     private record WhereTermTrees(List<TermTree<Signature>> triples) implements ParserNode {}
@@ -152,11 +147,11 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     @Override public TermTree<String> visitTriplesSameSubject(QuerycatParser.TriplesSameSubjectContext ctx) {
-        final var variableNode = ctx.varOrTerm().var_();
+        final var variableNode = ctx.term().variable();
         if (variableNode == null)
-            throw GeneralException.message("Variable expected in term " + ctx.varOrTerm().start);
+            throw GeneralException.message("Variable expected in term " + ctx.term().start);
 
-        final Term subject = visitVar_(variableNode);
+        final Term subject = visitVariable(variableNode);
         final TermTree<String> output = TermTree.createRoot(subject);
 
         final PropertyList propertyList = visitPropertyListNotEmpty(ctx.propertyListNotEmpty());
@@ -195,20 +190,19 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     @Override public Term visitObjectList(QuerycatParser.ObjectListContext ctx) {
         // TODO There is always exactly one object in the list - fix it in the parser.
-        final var firstObject = ctx.object_().getFirst();
-        return visitObject_(firstObject).asTerm();
+        final var firstObject = ctx.object().getFirst();
+        return visitObject(firstObject).asTerm();
     }
 
-    @Override public Term visitVar_(QuerycatParser.Var_Context ctx) {
-        final var variableNameNode = ctx.VAR1() != null ? ctx.VAR1() : ctx.VAR2();
-        final var variableName = variableNameNode.getSymbol().getText().substring(1);
-
-        return new Term(scope.variable.createOriginal(variableName));
+    @Override public Term visitVariable(QuerycatParser.VariableContext ctx) {
+        // The first character is always the question mark.
+        final var name = ctx.VARIABLE().getText().substring(1);
+        return new Term(scope.variable.createOriginal(name));
     }
 
-    public Term visitAggregation(QuerycatParser.AggregationTermContext ctx) {
-        final Term variableTerm = visitVar_(ctx.var_());
-        var operator = operators.parse(ctx.aggregationFunc().getText());
+    public Term visitAggregation(QuerycatParser.AggregationContext ctx) {
+        final Term variableTerm = visitVariable(ctx.variable());
+        var operator = operators.parse(ctx.aggregationFunction().getText());
         final var isDistinct = ctx.distinctModifier() != null;
 
         if (isDistinct) {
@@ -222,36 +216,80 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new Term(expression);
     }
 
-    @Override public Term visitString_(QuerycatParser.String_Context ctx) {
-        // This regexp removes all " and ' characters from both the start and the end of the visited string.
-        final String value = ctx.getText().replaceAll("(^[\"']+)|([\"']+$)", "");
-        return new Term(new Constant(value));
+    // Both ' and " can be escaped by a backslash (i.e., \' and \" will work in both types of string).
+    // However, unescaped ' is allowed only in the " strings and vice versa.
+    private static final Pattern ESCAPE_PATTERN = Pattern.compile("\\\\([\'\"tbnrf\\\\])");
+
+    @Override public Term visitString(QuerycatParser.StringContext ctx) {
+        final String text = ctx.getText();
+        // Remove ' or " from the beginning and end of the string.
+        final String inner = text.substring(1, text.length() - 1);
+
+        final var matcher = ESCAPE_PATTERN.matcher(inner);
+        final var builder = new StringBuilder();
+
+        int lastEnd = 0;
+
+        while (matcher.find()) {
+            builder.append(inner, lastEnd, matcher.start());
+
+            switch (matcher.group().charAt(1)) {
+                case '\'': builder.append('\''); break;
+                case '\"': builder.append('\"'); break;
+                case 't': builder.append('\t'); break;
+                case 'b': builder.append('\b'); break;
+                case 'n': builder.append('\n'); break;
+                case 'r': builder.append('\r'); break;
+                case 'f': builder.append('\f'); break;
+                case '\\': builder.append('\\'); break;
+                default: throw GeneralException.message("Unknown escape sequence");
+            }
+
+            lastEnd = matcher.end();
+        }
+
+        builder.append(inner, lastEnd, inner.length());
+
+        return new Term(new Constant(builder.toString()));
+    }
+
+    @Override public ParserNode visitFilter(QuerycatParser.FilterContext ctx) {
+        final var computation = visit(ctx.constraint()).asTerm().asComputation();
+        return new Filter(computation);
     }
 
     @Override public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {
         final var children = ctx.children;
 
         if (children.size() == 1)
+            // TODO This shouldn't be possible, right?
+            // Well, it might as well be a variable, like in FILTER(?a). But we don't support that yet.
             return visit(children.get(0));
 
         if (children.size() == 3) {
-            final var lhs = visit(children.get(0)).asTerm();
-            final var rhs = visit(children.get(2)).asTerm();
+            final var lhs = visit(children.get(0));
             final var operator = operators.parse(children.get(1).getText());
+            final var rhs = visit(children.get(2));
+            final var lhsExpression = lhs.asTerm().asExpression();
+            final var rhsExpression = rhs.asTerm().asExpression();
 
-            return new ConditionFilter(lhs, operator, rhs);
+            return new Term(scope.computation.create(operator, lhsExpression, rhsExpression));
         }
 
         throw GeneralException.message("You done goofed");
     }
 
-    @Override public ValueFilter visitDataBlock(QuerycatParser.DataBlockContext ctx) {
-        final Term variableTerm = visitVar_(ctx.var_());
-        final var allowedValues = ctx.dataBlockValue().stream()
-            .map(v -> visit(v).asTerm().asConstant())
-            .toList();
+    @Override public Term visitDataBlock(QuerycatParser.DataBlockContext ctx) {
+        final List<Expression> arguments = new ArrayList<>();
 
-        return new ValueFilter(variableTerm.asVariable(), allowedValues);
+        final Term variableTerm = visitVariable(ctx.variable());
+        arguments.add(variableTerm.asVariable());
+
+        ctx.dataBlockValue().stream()
+            .map(v -> visit(v).asTerm().asConstant())
+            .forEach(arguments::add);;
+
+        return new Term(scope.computation.create(Operator.In, arguments));
     }
 
     private static final Operators operators = new Operators();

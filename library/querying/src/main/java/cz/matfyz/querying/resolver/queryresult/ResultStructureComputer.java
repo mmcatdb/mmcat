@@ -220,7 +220,7 @@ public class ResultStructureComputer {
         final TformStep resolver = current.addChild(new ResolveComputation(computation));
 
         final List<Expression> arguments = computation.operator.isAggregation()
-            // Only the first argument of aggregations represent real values. The second is only to change the default reference node.
+            // Only the first argument of aggregations represent real values. The second is here just to change the default reference node.
             ? computation.arguments.subList(0, 1)
             : computation.arguments;
 
@@ -283,19 +283,19 @@ public class ResultStructureComputer {
         }
 
         // Now we are at the filtered node. The last step is TraverseList, which puts each list children to the input (one by one).
-        // This is probably an overkill, because we know that the reference must be either the filtered or one of its descendants. Moreover, there must be a 1:1 path from the reference to the filtered.
-        // So we should be able to use the same approach as when merging, which consists of directly traversing to the reference via a list of map keys. But that would require us to remove the last TraverseList step and replace it by a new FilterList step.
-        // TODO Do this.
+        // We know that the reference must be either the filtered or one of its descendants. Moreover, there must be a 1:1 path from the reference to the filtered. So we can traverse multiple maps at once.
+        final List<String> keysToValue = new ArrayList<>();
         if (reference != filtered) {
             final var filteredToReference = GraphUtils.findDirectPath(filtered, reference);
-            current = ResultStructureTformer.addDirectPathSteps(current, filteredToReference);
+            filteredToReference.stream().map(structure -> structure.name)
+                .forEach(keysToValue::add);
         }
 
         // The last step of the path is the actual reference value.
-        current = current.addChild(new TraverseMap(computation.identifier()));
+        keysToValue.add(computation.identifier());
 
         // The TraverseList it's also a remover, so we can use the filter step to remove the filtered node from the input.
-        current = current.addChild(new FilterLeaf());
+        current.addChild(new FilterNode(keysToValue));
 
         return output;
     }
