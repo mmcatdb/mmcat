@@ -96,22 +96,38 @@ public abstract class TformStep implements Printable {
         }
     }
 
+    /**
+     * Traverses a map from the input via a specific key. The result is then pushed to the input.
+     * As an optimization, the key can be a list of keys. However, in that case, only the last result is pushed to the input. So be very careful with that as the {@link TraverseParent} step won't work as expected!
+     */
     static class TraverseMap extends TformStep {
-        private final String key;
+        private final List<String> keys;
 
         TraverseMap(String key) {
-            this.key = key;
+            this.keys = List.of(key);
+        }
+
+        /** Just an optimization. Don't use {@link TraverseParent} steps after this unless you know what you are doing! */
+        TraverseMap(List<String> keys) {
+            this.keys = keys;
         }
 
         @Override public void apply(TformContext context) {
-            final var currentMap = (MapResult) context.inputs.peek();
-            context.inputs.push(currentMap.children().get(key));
+            var current = context.inputs.peek();
+            for (final var key : keys)
+                current = ((MapResult) current).children().get(key);
+
+            context.inputs.push(current);
             applyChildren(context);
             context.inputs.pop();
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("map.traverse(").append(key).append(")");
+            printer.append("map.traverse(");
+            for (final var key : keys)
+                printer.append(key).append(".");
+            printer.remove().append(")");
+
             printChildren(printer);
         }
     }

@@ -57,9 +57,9 @@ public class ResultStructureMerger {
     }
 
     private MergeTform run(ResultStructure targetProperty, ResultStructure sourceMatch, ResultStructure targetMatch) {
-        final var rootToTarget = GraphUtils.findPath(targetRoot, targetProperty);
-        final var sourceToMatch = GraphUtils.findPath(sourceRoot, sourceMatch).rootToTarget();
-        final var targetToMatch = GraphUtils.findPath(targetProperty, targetMatch).rootToTarget();
+        final var rootToTarget = GraphUtils.findDirectPath(targetRoot, targetProperty);
+        final var sourceToMatch = GraphUtils.findDirectPath(sourceRoot, sourceMatch);
+        final var targetToMatch = GraphUtils.findDirectPath(targetProperty, targetMatch);
 
         final var sourceTform = new TformRoot();
         TformStep current = sourceTform;
@@ -74,7 +74,7 @@ public class ResultStructureMerger {
         final var targetTform = new TformRoot();
         current = targetTform;
         current = current.addChild(new TraverseList());
-        current = ResultStructureTformer.addPathSteps(current, rootToTarget);
+        current = ResultStructureTformer.addDirectPathSteps(current, rootToTarget);
 
         // We merge the source from the index to the target ...
         final List<String> targetToMatchKeys = fromRootPathToKeys(targetToMatch);
@@ -91,22 +91,21 @@ public class ResultStructureMerger {
         return new MergeTform(sourceTform, targetTform, newStructure);
     }
 
-    // We ignore the sourceToRoot path because we are always traversing from the root. We also skip the first element because it's the root.
+    // We ignore the sourceToRoot path because we are always traversing from the root.
     private List<String> fromRootPathToKeys(List<ResultStructure> path) {
         return path.stream()
-            .skip(1)
             .map(node -> node.name)
             .toList();
     }
 
-    /** Returns the path of keys which should traversed from the target property. The last key in the list should be then deleted. */
+    /** Returns the path of keys which should traversed from the target property. The last key in the list should be deleted. */
     private List<String> findDeleteKeys(List<ResultStructure> targetToMatch) {
         // We just need to find the longest subtree that can be deleted. We need it's name and the path to it.
         String keyToDelete = targetToMatch.get(targetToMatch.size() - 1).name;
 
         // We traverse the path from the back until we find a node with more than one child. That one can't be deleted. The previous ones should be.
         // The last in the list is the target identifier itself, so we ignore it.
-        for (int i = targetToMatch.size() - 2; i > 0; i--) {
+        for (int i = targetToMatch.size() - 2; i >= 0; i--) {
             final var map = targetToMatch.get(i);
             if (map.children().size() > 1)
                 break;
@@ -117,8 +116,7 @@ public class ResultStructureMerger {
 
         final List<String> output = new ArrayList<>();
 
-        // We skip the first element because we are already there - no need to traverse into it.
-        for (int i = 1; i < targetToMatch.size(); i++) {
+        for (int i = 0; i < targetToMatch.size(); i++) {
             final var map = targetToMatch.get(i);
             if (map.name.equals(keyToDelete))
                 break;
@@ -156,7 +154,7 @@ public class ResultStructureMerger {
     }
 
     private Signature fromRootPathToSignature(List<ResultStructure> path) {
-        final var signatures = path.stream().skip(1).map(node -> node.signatureFromParent).toList();
+        final var signatures = path.stream().map(node -> node.signatureFromParent).toList();
         return Signature.concatenate(signatures);
     }
 

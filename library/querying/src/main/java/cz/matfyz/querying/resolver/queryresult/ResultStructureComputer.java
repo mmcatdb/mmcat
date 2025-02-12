@@ -167,29 +167,29 @@ public class ResultStructureComputer {
 
         @Nullable ResultStructure output = null;
 
-        for (int i = 0; i < path.sourceToRoot().size() - 1; i++) {
-            final var parent = path.sourceToRoot().get(i + 1);
+        for (final var structure : path.sourceToRoot()) {
+            final var isParentArray = structure.parent().isArray;
 
             if (output == null) {
                 // Reference node not found yet - we try to move as far as possible against the edge direction.
-                if (parent.isArray)
+                if (isParentArray)
                     // We can't move any further, so we have to stop here. However, we continue the algorithm to make sure that both paths are valid.
-                    output = path.sourceToRoot().get(i);
+                    output = structure;
             }
             else {
-                if (!parent.isArray)
+                if (!isParentArray)
                     // Reference node is found, so we have to move with the edge direction. But we can't, so that's an error.
                     throw new RuntimeException("No reference node found for comparison: " + computation);
             }
         }
 
-        for (int i = 0; i < path.rootToTarget().size() - 1; i++) {
-            final var parent = path.sourceToRoot().get(i);
+        for (final var structure : path.rootToTarget()) {
+            final var parent = structure.parent();
 
             if (output == null) {
                 // We still need to go against the edge direction, but now the isArray flag is inverted.
                 if (!parent.isArray)
-                    output = path.sourceToRoot().get(i);
+                    output = parent;
             }
             else {
                 if (parent.isArray)
@@ -230,38 +230,38 @@ public class ResultStructureComputer {
         return output;
     }
 
-    private void resolveArgument(TformStep parent, ResultStructure reference, Expression argument) {
-        TformStep current = parent.addChild(new WriteToList<LeafResult>());
+    private void resolveArgument(TformStep parent, ResultStructure computationReference, Expression argument) {
+        // All arguments will be written to a list. The list will be then used as an input for the computation.
+        final TformStep current = parent.addChild(new WriteToList<LeafResult>());
 
         if (argument instanceof Constant constant)
             current.addChild(new CreateLeaf(constant.value()));
         else if (argument instanceof Variable variable)
-            resolveVariableArgument(current, reference, variable);
+            resolveVariableArgument(current, computationReference, variable);
         else
-            resolveComputationArgument(current, reference, (Computation) argument);
+            resolveComputationArgument(current, computationReference, (Computation) argument);
     }
 
-    private void resolveVariableArgument(TformStep current, ResultStructure reference, Variable argument) {
+    private void resolveVariableArgument(TformStep current, ResultStructure computationReference, Variable argument) {
         // We can't use the reference node here because the reference node for a variable is its parent. So we need to traverse from the parent to the variable and this is just easier.
         final ResultStructure variableNode = outputStructure.tryFindDescendantByVariable(argument);
-
-        if (variableNode != reference) {
-            final var path = GraphUtils.findPath(reference, variableNode);
+        if (variableNode != computationReference) {
+            final var path = GraphUtils.findPath(computationReference, variableNode);
             current = ResultStructureTformer.addPathSteps(current, path);
         }
 
         current.addChild(new AddToOutput<LeafResult>());
     }
 
-    private void resolveComputationArgument(TformStep current, ResultStructure reference, Computation argument) {
+    private void resolveComputationArgument(TformStep current, ResultStructure computationReference, Computation argument) {
         // If the argument already exists, nothing is done.
         // We need to use this weird input-output structure passing here, because we need the inner algorithm to modify the same structure as we are using.
         final var childTform = new ResultStructureComputer(outputStructure).run(argument, false);
         outputTforms.addAll(childTform.tforms);
 
         final var argumentReference = findReferenceNode(argument);
-        if (argumentReference != reference) {
-            final var path = GraphUtils.findPath(reference, argumentReference);
+        if (argumentReference != computationReference) {
+            final var path = GraphUtils.findPath(computationReference, argumentReference);
             current = ResultStructureTformer.addPathSteps(current, path);
         }
 
@@ -278,17 +278,17 @@ public class ResultStructureComputer {
 
         if (filtered != outputStructure) {
             // We are not filtering the root, so we have to traverse to the filtered node first.
-            final var rootToFiltered = GraphUtils.findPath(outputStructure, filtered);
-            current = ResultStructureTformer.addPathSteps(current, rootToFiltered);
+            final var rootToFiltered = GraphUtils.findDirectPath(outputStructure, filtered);
+            current = ResultStructureTformer.addDirectPathSteps(current, rootToFiltered);
         }
 
         // Now we are at the filtered node. The last step is TraverseList, which puts each list children to the input (one by one).
-        // This is probably an overkill, because we know that the reference must be either the filtered or its descendant. Moreover, there must be a 1:1 path from the reference to the filtered.
+        // This is probably an overkill, because we know that the reference must be either the filtered or one of its descendants. Moreover, there must be a 1:1 path from the reference to the filtered.
         // So we should be able to use the same approach as when merging, which consists of directly traversing to the reference via a list of map keys. But that would require us to remove the last TraverseList step and replace it by a new FilterList step.
         // TODO Do this.
         if (reference != filtered) {
-            final var filteredToReference = GraphUtils.findPath(filtered, reference);
-            current = ResultStructureTformer.addPathSteps(current, filteredToReference);
+            final var filteredToReference = GraphUtils.findDirectPath(filtered, reference);
+            current = ResultStructureTformer.addDirectPathSteps(current, filteredToReference);
         }
 
         // The last step of the path is the actual reference value.

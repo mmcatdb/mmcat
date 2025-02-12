@@ -113,57 +113,68 @@ public abstract class GraphUtils {
     }
 
     public record TreePath<T extends Tree<T>>(
-        // Source is the first element, root is the last.
+        /** Source is the first element, root is not included. If the source is the root, the path is empty. */
         List<T> sourceToRoot,
-        // Root is the first element, target is the last.
+        /** Root is not included, target is the last element. If the target is the root, the path is empty. */
         List<T> rootToTarget
     ) {}
 
+    /** Finds a path from the source to the common root and then back to the target. */
     public static <T extends Tree<T>> TreePath<T> findPath(T source, T target) {
-        return new TreePathFinder<T>().findPath(source, target);
-    }
+        if (source.equals(target))
+            return new TreePath<>(List.of(), List.of());
 
-    private static class TreePathFinder<T extends Tree<T>> {
+        final var sourceToRoot = computePathToRoot(source);
+        final var targetToRoot = computePathToRoot(target);
 
-        public TreePath<T> findPath(T source, T target) {
-            if (source.equals(target))
-                return new TreePath<>(List.of(source), List.of(target));
+        int sourceIndex = sourceToRoot.size() - 1;
+        int targetIndex = targetToRoot.size() - 1;
 
-            final var sourceToRoot = computePathToRoot(source);
-            final var targetToRoot = computePathToRoot(target);
-
-            while (
-                sourceToRoot.size() >= 2 &&
-                targetToRoot.size() >= 2 &&
-                sourceToRoot.get(sourceToRoot.size() - 2).equals(targetToRoot.get(targetToRoot.size() - 2))
-            ) {
-                sourceToRoot.remove(sourceToRoot.size() - 1);
-                targetToRoot.remove(targetToRoot.size() - 1);
-            }
-
-            final var rootToTarget = new ArrayList<T>();
-            for (int i = targetToRoot.size() - 1; i >= 0; i--)
-                rootToTarget.add(targetToRoot.get(i));
-
-            return new TreePath<>(sourceToRoot, rootToTarget);
+        while (
+            sourceIndex >= 0 &&
+            targetIndex >= 0 &&
+            sourceToRoot.get(sourceIndex).equals(targetToRoot.get(targetIndex))
+        ) {
+            sourceIndex--;
+            targetIndex--;
         }
 
-        private List<T> computePathToRoot(T node) {
-            final var output = new ArrayList<T>();
-            T current = node;
+        final var sourceToRootTrimmed = sourceToRoot.subList(0, sourceIndex + 1);
+        final var targetToRootTrimmed = targetToRoot.subList(0, targetIndex + 1);
 
-            while (current != null) {
-                output.add(current);
-                current = current.parent();
-            }
-
-            return output;
-        }
-
+        return new TreePath<>(sourceToRootTrimmed, targetToRootTrimmed.reversed());
     }
 
-    @Nullable
-    public static <T extends TopDownTree<T>> T findDFS(T tree, Predicate<T> predicate) {
+    private static <T extends Tree<T>> List<T> computePathToRoot(T node) {
+        final var output = new ArrayList<T>();
+        T current = node;
+
+        while (current != null) {
+            output.add(current);
+            current = current.parent();
+        }
+
+        return output;
+    }
+
+    /**
+     * Finds a path from the source to the target. The target must be a direct descendant of the source!
+     * @return The source is not included, the target is the last element. If the source is the target, the path is empty.
+     */
+    public static <T extends Tree<T>> List<T> findDirectPath(T source, T target) {
+        final List<T> targetToSource = new ArrayList<>();
+
+        T current = target;
+
+        while (current != source) {
+            targetToSource.add(current);
+            current = current.parent();
+        }
+
+        return targetToSource.reversed();
+    }
+
+    public static <T extends TopDownTree<T>> @Nullable T findDFS(T tree, Predicate<T> predicate) {
         Deque<T> stack = new ArrayDeque<>();
         stack.push(tree);
 
@@ -179,8 +190,7 @@ public abstract class GraphUtils {
         return null;
     }
 
-    @Nullable
-    public static <T extends TopDownTree<T>> T findBFS(T tree, Predicate<T> predicate) {
+    public static <T extends TopDownTree<T>> @Nullable T findBFS(T tree, Predicate<T> predicate) {
         Queue<T> queue = new ArrayDeque<>();
         queue.add(tree);
 
@@ -246,8 +256,7 @@ public abstract class GraphUtils {
 
     }
 
-    @Nullable
-    public static <T extends Tree<T>, P extends Comparable<P>, E extends Edge<P>> T treeFromEdges(Collection<E> edges, TreeBuilder<P, T> builder) {
+    public static <T extends Tree<T>, P extends Comparable<P>, E extends Edge<P>> @Nullable T treeFromEdges(Collection<E> edges, TreeBuilder<P, T> builder) {
         final var map = new TreeMap<P, EditableTree<P>>();
 
         for (final var edge : edges) {
@@ -278,8 +287,7 @@ public abstract class GraphUtils {
 
     private static class EditableTree<P extends Comparable<P>> implements Tree<EditableTree<P>> {
 
-        @Nullable
-        public EditableTree<P> parent;
+        public @Nullable EditableTree<P> parent;
 
         public List<EditableTree<P>> children = new ArrayList<>();
 
@@ -293,8 +301,7 @@ public abstract class GraphUtils {
             return payload.compareTo(other.payload);
         }
 
-        @Override @Nullable
-        public EditableTree<P> parent() {
+        @Override public @Nullable EditableTree<P> parent() {
             return parent;
         }
 

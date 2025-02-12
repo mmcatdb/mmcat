@@ -52,19 +52,24 @@ public class ResultStructureTformer {
     }
 
     /**
-     * Both source and target have to be in the selection structure.
+     * Add steps to traverse from the source to the target. They have to share a common root.
      */
     public static TformStep addPathSteps(TformStep current, TreePath<ResultStructure> path) {
-        // We ignore the last element because we don't want to travel from it.
-        for (int i = 0; i < path.sourceToRoot().size() - 1; i++) {
-            current = current.addChild(new TraverseParent());
-            if (path.sourceToRoot().get(i).isArray)
+        // We ignore the common root because we don't want to traverse from it. Well it's automatically ignored by the path finding algorithm.
+        for (final var structure : path.sourceToRoot()) {
+            if (structure.isArray)
                 current = current.addChild(new TraverseParent());
+            current = current.addChild(new TraverseParent());
         }
 
-        // For each element, we travel to it. Therefore we skip the root element - we are already there, no need to travel.
-        for (int i = 1; i < path.rootToTarget().size(); i++) {
-            final var structure = path.rootToTarget().get(i);
+        return addDirectPathSteps(current, path.rootToTarget());
+    }
+
+    /**
+     * Adds steps to traverse from the source to one of its descendants.
+     */
+    public static TformStep addDirectPathSteps(TformStep current, List<ResultStructure> path) {
+        for (final var structure : path) {
             current = current.addChild(new TraverseMap(structure.name));
             if (structure.isArray)
                 current = current.addChild(new TraverseList());
@@ -74,8 +79,8 @@ public class ResultStructureTformer {
     }
 
     public static boolean isPathArray(TreePath<ResultStructure> path) {
-        for (int i = 1; i < path.rootToTarget().size(); i++)
-            if (path.rootToTarget().get(i).isArray)
+        for (final var structure : path.rootToTarget())
+            if (structure.isArray)
                 return true;
 
         return false;
@@ -83,15 +88,12 @@ public class ResultStructureTformer {
 
     public static Signature computePathSignature(TreePath<ResultStructure> path) {
         final List<Signature> outputList = new ArrayList<>();
-        final List<ResultStructure> toRoot = path.sourceToRoot();
-        // We skip the last element (i.e., the root) because we are not traveling above it. Then we take the dual because we are traveling up.
-        for (int i = 0; i < toRoot.size() - 1; i++)
-            outputList.add(toRoot.get(i).signatureFromParent.dual());
+        // We don't need the root because we are not traversing above it. Then we take the dual because we are traversing up.
+        for (final var structure : path.sourceToRoot())
+            outputList.add(structure.signatureFromParent.dual());
 
-        // For the same reason, we skip the first element here.
-        final List<ResultStructure> toTarget = path.rootToTarget();
-        for (int i = 1; i < toTarget.size(); i++)
-            outputList.add(toTarget.get(i).signatureFromParent);
+        for (final var structure : path.rootToTarget())
+            outputList.add(structure.signatureFromParent);
 
         return Signature.concatenate(outputList);
     }
