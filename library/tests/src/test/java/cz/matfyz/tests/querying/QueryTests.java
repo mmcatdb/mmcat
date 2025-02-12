@@ -837,4 +837,26 @@ class QueryTests {
 
     // TODO - something breaks when one kind is in multiple mappings. The planning algorithm can't deal with it. Don't know why. Test it.
 
+    @Test
+    void filterConcatenation() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = CONCAT("o", "_", "100"))
+                    # FILTER(CONCAT(?number, "-xyz") = CONCAT(CONCAT("o", "_", "100"), "-xyz"))
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                } ]
+            """)
+            .run();
+    }
 }

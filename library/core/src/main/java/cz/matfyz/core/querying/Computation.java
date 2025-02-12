@@ -42,7 +42,7 @@ public class Computation implements Expression, Comparable<Computation> {
         if (arguments.size() == 1)
             return List.of(arguments.get(0).toString());
 
-        var output = arguments.stream().map(Object::toString);
+        var output = arguments.stream().map(expression -> expression instanceof Computation computation ? computation.identifier : expression.toString());
         if (isSortable())
             output = output.sorted();
 
@@ -59,6 +59,8 @@ public class Computation implements Expression, Comparable<Computation> {
         if (operator.isComparison())
             // This might need some adjustment as we add more operators.
             return operator == Operator.Equal || operator == Operator.NotEqual;
+        if (operator.isString())
+            return false;
 
         throw new RuntimeException("Unknown operator type: " + operator);
     }
@@ -184,13 +186,12 @@ public class Computation implements Expression, Comparable<Computation> {
      * E.g., an aggregation might have two arguments, a property and a reference node. However, in that case, this function would expect only a list of the actual values.
      */
     public String resolve(List<String> values) {
-        if (operator.isComparison())
-            return resolveComparison(values) ? "true" : "false";
-
-        if (operator.isAggregation())
-            return String.valueOf(resolveAggregation(values));
-
-        return resolveSet(values) ? "true" : "false";
+        return switch (operator.type) {
+            case OP.Comparison -> resolveComparison(values) ? "true" : "false";
+            case OP.Aggregation -> String.valueOf(resolveAggregation(values));
+            case OP.Set -> resolveSet(values) ? "true" : "false";
+            case OP.String -> resolveString(values);
+        };
     }
 
     private boolean resolveComparison(List<String> values) {
@@ -239,6 +240,13 @@ public class Computation implements Expression, Comparable<Computation> {
                 return operator == Operator.In;
 
         return operator != Operator.In;
+    }
+
+    private String resolveString(List<String> values) {
+        return switch (operator) {
+            case Operator.Concatenate -> String.join("", values);
+            default -> throw new RuntimeException("Unknown operator: " + operator);
+        };
     }
 
 }

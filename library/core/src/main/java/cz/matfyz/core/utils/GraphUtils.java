@@ -121,6 +121,8 @@ public abstract class GraphUtils {
 
     /** Finds a path from the source to the common root and then back to the target. */
     public static <T extends Tree<T>> TreePath<T> findPath(T source, T target) {
+        assert target != null;
+
         if (source.equals(target))
             return new TreePath<>(List.of(), List.of());
 
@@ -146,6 +148,8 @@ public abstract class GraphUtils {
     }
 
     private static <T extends Tree<T>> List<T> computePathToRoot(T node) {
+        assert node != null;
+
         final var output = new ArrayList<T>();
         T current = node;
 
@@ -162,6 +166,8 @@ public abstract class GraphUtils {
      * @return The source is not included, the target is the last element. If the source is the target, the path is empty.
      */
     public static <T extends Tree<T>> List<T> findDirectPath(T source, T target) {
+        assert target != null;
+
         final List<T> targetToSource = new ArrayList<>();
 
         T current = target;
@@ -175,6 +181,8 @@ public abstract class GraphUtils {
     }
 
     public static <T extends TopDownTree<T>> @Nullable T findDFS(T tree, Predicate<T> predicate) {
+        assert tree != null;
+
         Deque<T> stack = new ArrayDeque<>();
         stack.push(tree);
 
@@ -191,6 +199,8 @@ public abstract class GraphUtils {
     }
 
     public static <T extends TopDownTree<T>> @Nullable T findBFS(T tree, Predicate<T> predicate) {
+        assert tree != null;
+
         Queue<T> queue = new ArrayDeque<>();
         queue.add(tree);
 
@@ -207,6 +217,8 @@ public abstract class GraphUtils {
     }
 
     public static <T extends Tree<T>> T findSubroot(T root, Collection<T> nodes) {
+        assert root != null;
+
         return new TreeSubrootFinder<T>(root).findSubroot(nodes);
     }
 
@@ -313,6 +325,8 @@ public abstract class GraphUtils {
 
     /** Call callback recursively on each children of the tree. */
     public static <T extends Tree<T>> void forEachDFS(T tree, Consumer<T> callback) {
+        assert tree != null;
+
         Deque<T> stack = new ArrayDeque<>();
         stack.push(tree);
 
@@ -325,6 +339,8 @@ public abstract class GraphUtils {
 
     /** Doesn't need to be a tree. However, each node needs to explicitly return all children that should be processed next. */
     public static <T> void forEachDFS(T tree, Function<T, Collection<T>> callback) {
+        assert tree != null;
+
         Deque<T> stack = new ArrayDeque<>();
         stack.push(tree);
 

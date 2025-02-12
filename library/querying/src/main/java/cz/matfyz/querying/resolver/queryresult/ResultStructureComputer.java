@@ -13,6 +13,8 @@ import cz.matfyz.querying.resolver.queryresult.TformStep.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -64,9 +66,10 @@ public class ResultStructureComputer {
     }
 
     private ComputationTForm run(Computation computation, boolean isFilter) {
-        var referenceNode = findReferenceNodeForComparison(computation);
+        var referenceNode = findReferenceNodeForArguments(computation.arguments);
         if (referenceNode == null)
             // This corresponds to a constant filter, e.g., FILTER(1 = 1). In this case, we will filter the root.
+            // FIXME Replace constant expressions by constants.
             referenceNode = outputStructure;
 
         if (!referenceNode.hasComputation(computation)) {
@@ -94,23 +97,17 @@ public class ResultStructureComputer {
             // Constants don't have reference nodes - they can be used anywhere.
             return null;
 
-        if (expression instanceof Variable variable) {
-            // For variables, the reference node is always their parent.
-            // Now, you might be thinking: "But what if the variable is the root? Gotcha! I see you didn't pay attention to the documentation!". Because the root variable can't be a leaf, so it isn't a simple value, so it can't be used in a computation. Checkmate.
-            final ResultStructure node = outputStructure.tryFindDescendantByVariable(variable);
-            if (node == null)
-                throw new RuntimeException("Variable \"" + variable + "\" not found in result structure");
-
-            return node.parent();
-        }
+        if (expression instanceof Variable variable)
+            return findReferenceNodeForVariable(variable);
 
         // Now it's starting to get interesting - different operators behave differently.
         final var computation = (Computation) expression;
         final var operator = computation.operator;
 
-        if (operator.isSet())
-            // Right now, we only support constant sets. So, this is the same case as for constants.
-            return null;
+        if (operator.isSet()) {
+            final var variable = (Variable) computation.arguments.get(0);
+            return findReferenceNodeForVariable(variable);
+        }
 
         // There are three rules:
         //  1. The reference node of an expression is as low in the tree as possible.
@@ -120,7 +117,23 @@ public class ResultStructureComputer {
         if (operator.isAggregation())
             return findReferenceNodeForAggregation(computation);
 
-        return findReferenceNodeForComparison(computation);
+        if (operator.isComparison() || operator.isString())
+            return findReferenceNodeForArguments(computation.arguments);
+
+        throw new RuntimeException("Unknown operator type: " + operator);
+    }
+
+    private ResultStructure findReferenceNodeForVariable(Variable variable) {
+        // For variables, the reference node is always their parent.
+        final ResultStructure node = outputStructure.tryFindDescendantByVariable(variable);
+        if (node == null)
+            throw new RuntimeException("Variable \"" + variable + "\" not found in result structure");
+
+        // Now, you might be thinking: "But what if the variable is the root? Gotcha! I see you didn't pay attention to the documentation!". Because the root variable can't be a leaf, so it isn't a simple value, so it can't be used in a computation. Checkmate.
+        if (node.parent() == null)
+            throw new RuntimeException("Root variable can't be used in a computation: " + variable);
+
+        return node.parent();
     }
 
     private ResultStructure findReferenceNodeForAggregation(Computation computation) {
@@ -132,7 +145,11 @@ public class ResultStructureComputer {
         }
 
         // If there is no second argument, we start with the reference node of the first argument and then work our way up.
-        ResultStructure output = findReferenceNode(computation.arguments.get(0));
+        final var argument = computation.arguments.get(0);
+        ResultStructure output = argument instanceof Variable variable
+            // Variables are special, because their reference nodes are their parents, however we can use the parent for aggregation as well.
+            ? outputStructure.tryFindDescendantByVariable(variable)
+            : findReferenceNode(argument);
         if (output == null || output.parent() == null)
             throw new RuntimeException("Aggregation without a reference node: " + computation);
 
@@ -147,23 +164,46 @@ public class ResultStructureComputer {
         return output;
     }
 
-    private @Nullable ResultStructure findReferenceNodeForComparison(Computation computation) {
-        // We start by finding the reference nodes of both arguments.
-        final var lhs = findReferenceNode(computation.arguments.get(0));
-        final var rhs = findReferenceNode(computation.arguments.get(1));
+    private @Nullable ResultStructure findReferenceNodeForArguments(List<Expression> arguments) {
+        // We start by finding the reference nodes of all arguments.
+        Set<ResultStructure> references = new TreeSet<>();
+        for (final var agument : arguments) {
+            final var reference = findReferenceNode(agument);
+            if (reference != null)
+                references.add(reference);
+        }
 
-        if (lhs == rhs)
-            // If both are null, a null is returned. In most cases, this wouldn't make sense. However, filters like FILTER(1 = 1) might be useful sometimes.
-            return lhs;
-        if (lhs == null)
-            return rhs;
-        if (rhs == null)
-            return lhs;
+        if (references.isEmpty())
+            // There are no reference nodes, so we can't find a common one.
+            // In most cases, this wouldn't make sense. However, filters like FILTER(1 = 1) might be useful sometimes.
+            return null;
 
-        // Both nodes are different and not null. The reference node will be on the path from one to the other.
-        // All edges are oriented - from parent to child (by default), or the other way around (for arrays). The path from reference node to both lhs and rhs can't go against the edge direction (2nd rule).
+        if (references.size() == 1)
+            // There is only one reference node, so it's the common one.
+            return references.iterator().next();
+
+        // There are multiple different argument reference nodes.
+        // All edges are oriented - from parent to child (by default), or the other way around (for arrays). The path from the common reference node to any of the argument references can't go against the edge direction (2nd rule).
         // Therefore, there must be at most one viable reference node! (Just draw the arrows and you'll see.)
-        final var path = GraphUtils.findPath(lhs, rhs);
+
+        final var iterator = references.iterator();
+        ResultStructure ans = iterator.next();
+
+        while (iterator.hasNext()) {
+            final var next = iterator.next();
+            // After the first iteration, there are a 1:1 paths from ans to both nodes that were compared (if ans isn't null ofc).
+            // After the second iteration, there will be a 1:1 paths from the new ans to both original ans and the new node. However, if we have a -> b and b -> c, then a -> c, so there will be 1:1 paths from the new ans to all previously compared nodes. By induction, ans will be the common reference node.
+            ans = tryFindCommonReferenceNodeForPair(ans, next);
+            if (ans == null)
+                // There is no common reference node. That's obviously an error.
+                throw new RuntimeException("No reference node found for arguments: " + arguments);
+        }
+
+        return ans;
+    }
+
+    private @Nullable ResultStructure tryFindCommonReferenceNodeForPair(ResultStructure a, ResultStructure b) {
+        final var path = GraphUtils.findPath(a, b);
 
         @Nullable ResultStructure output = null;
 
@@ -178,8 +218,8 @@ public class ResultStructureComputer {
             }
             else {
                 if (!isParentArray)
-                    // Reference node is found, so we have to move with the edge direction. But we can't, so that's an error.
-                    throw new RuntimeException("No reference node found for comparison: " + computation);
+                    // Reference node is found, so we have to move with the edge direction. But we can't, so there is none.
+                    return null;
             }
         }
 
@@ -194,16 +234,18 @@ public class ResultStructureComputer {
             else {
                 if (parent.isArray)
                     // Again, the same but inverted.
-                    throw new RuntimeException("No reference node found for comparison: " + computation);
+                    return null;
             }
         }
 
         if (output == null)
             // We tried so hard and got so far, but in the end, it doesn't even matter.
-            output = rhs;
+            output = b;
 
         return output;
     }
+
+    // Computations
 
     private TformRoot createComputationTform(Computation computation, ResultStructure reference) {
         final var output = new TformRoot();
@@ -259,7 +301,12 @@ public class ResultStructureComputer {
         final var childTform = new ResultStructureComputer(outputStructure).run(argument, false);
         outputTforms.addAll(childTform.tforms);
 
-        final var argumentReference = findReferenceNode(argument);
+        var argumentReference = findReferenceNode(argument);
+        if (argumentReference == null)
+            // The argument is a constant expression, so it's reference node is the root.
+            // FIXME Replace constant expressions by constants.
+            argumentReference = outputStructure;
+
         if (argumentReference != computationReference) {
             final var path = GraphUtils.findPath(computationReference, argumentReference);
             current = ResultStructureTformer.addPathSteps(current, path);
@@ -268,6 +315,8 @@ public class ResultStructureComputer {
         current = current.addChild(new TraverseMap(argument.identifier()));
         current.addChild(new AddToOutput<LeafResult>());
     }
+
+    // Filtering
 
     private TformRoot createFilterTform(Computation computation, ResultStructure reference) {
         final ResultStructure filtered = findFilteredNode(reference);

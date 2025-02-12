@@ -113,18 +113,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterOrderClause(QuerycatParser.OrderClauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -144,6 +132,18 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOrderCondition(QuerycatParser.OrderConditionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -257,18 +257,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDataBlockValue(QuerycatParser.DataBlockValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDataBlockValue(QuerycatParser.DataBlockValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterFilter(QuerycatParser.FilterContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -324,18 +312,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterPropertyList(QuerycatParser.PropertyListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitPropertyList(QuerycatParser.PropertyListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -533,6 +509,30 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterComputation(QuerycatParser.ComputationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComputation(QuerycatParser.ComputationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTermList(QuerycatParser.TermListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTermList(QuerycatParser.TermListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAggregation(QuerycatParser.AggregationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -552,6 +552,18 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDistinctModifier(QuerycatParser.DistinctModifierContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -732,18 +744,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitString(QuerycatParser.StringContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBlankNode(QuerycatParser.BlankNodeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBlankNode(QuerycatParser.BlankNodeContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

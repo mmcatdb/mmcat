@@ -493,9 +493,10 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer
-                .append("node.filter")
-                .nextLine();
+            printer.append("node.filter(");
+            for (final var key : pathToValue)
+                printer.append(key).append(".");
+            printer.remove().append(")").nextLine();
         }
 
         @Override protected boolean isChildrenSupported() {

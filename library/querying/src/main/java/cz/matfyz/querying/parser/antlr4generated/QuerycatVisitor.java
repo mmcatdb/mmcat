@@ -59,12 +59,6 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSolutionModifier(QuerycatParser.SolutionModifierContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#limitOffsetClauses}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#orderClause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -76,6 +70,12 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitOrderCondition(QuerycatParser.OrderConditionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#limitOffsetClauses}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#limitClause}.
 	 * @param ctx the parse tree
@@ -131,12 +131,6 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDataBlock(QuerycatParser.DataBlockContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#dataBlockValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDataBlockValue(QuerycatParser.DataBlockValueContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#filter}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -166,12 +160,6 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#propertyList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPropertyList(QuerycatParser.PropertyListContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#objectList}.
 	 * @param ctx the parse tree
@@ -269,6 +257,18 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstant(QuerycatParser.ConstantContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#computation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComputation(QuerycatParser.ComputationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#termList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTermList(QuerycatParser.TermListContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#aggregation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -280,6 +280,12 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDistinctModifier(QuerycatParser.DistinctModifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#referenceArgument}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#aggregationFunction}.
 	 * @param ctx the parse tree
@@ -370,10 +376,4 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitString(QuerycatParser.StringContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#blankNode}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBlankNode(QuerycatParser.BlankNodeContext ctx);
 }

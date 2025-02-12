@@ -4,6 +4,7 @@ import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper.Operators;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.exception.GeneralException;
@@ -200,20 +201,38 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new Term(scope.variable.createOriginal(name));
     }
 
-    public Term visitAggregation(QuerycatParser.AggregationContext ctx) {
-        final Term variableTerm = visitVariable(ctx.variable());
-        var operator = operators.parse(ctx.aggregationFunction().getText());
-        final var isDistinct = ctx.distinctModifier() != null;
+    @Override public Term visitComputation(QuerycatParser.ComputationContext ctx) {
+        if (ctx.aggregation() != null)
+            return visitAggregation(ctx.aggregation());
 
-        if (isDistinct) {
+        final var arguments = ctx.termList().term().stream()
+            .map(term -> visit(term).asTerm().asExpression())
+            .toList();
+
+        return new Term(scope.computation.create(Operator.Concatenate, arguments));
+    }
+
+    @Override public Term visitAggregation(QuerycatParser.AggregationContext ctx) {
+        final List<Expression> arguments = new ArrayList<>();
+
+        final Term expressionTerm = visit(ctx.expression()).asTerm();
+        arguments.add(expressionTerm.asExpression());
+
+        if (ctx.referenceArgument() != null) {
+            final Variable referenceVariable = visitVariable(ctx.referenceArgument().variable()).asVariable();
+            arguments.add(referenceVariable);
+        }
+
+        var operator = operators.parse(ctx.aggregationFunction().getText());
+        if (ctx.distinctModifier() != null) {
             if (operator != Operator.Count)
                 throw GeneralException.message("DISTINCT modifier can only be used with COUNT aggregation");
 
             operator = Operator.CountDistinct;
         }
 
-        final var expression = scope.computation.create(operator, variableTerm.asVariable());
-        return new Term(expression);
+        final var computation = scope.computation.create(operator, arguments);
+        return new Term(computation);
     }
 
     // Both ' and " can be escaped by a backslash (i.e., \' and \" will work in both types of string).
@@ -285,9 +304,9 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         final Term variableTerm = visitVariable(ctx.variable());
         arguments.add(variableTerm.asVariable());
 
-        ctx.dataBlockValue().stream()
-            .map(v -> visit(v).asTerm().asConstant())
-            .forEach(arguments::add);;
+        ctx.constant().stream()
+            .map(c -> visit(c).asTerm().asConstant())
+            .forEach(arguments::add);
 
         return new Term(scope.computation.create(Operator.In, arguments));
     }

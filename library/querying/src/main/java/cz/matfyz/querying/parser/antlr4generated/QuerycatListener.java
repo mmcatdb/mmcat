@@ -88,16 +88,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitSolutionModifier(QuerycatParser.SolutionModifierContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#limitOffsetClauses}.
-	 * @param ctx the parse tree
-	 */
-	void enterLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#limitOffsetClauses}.
-	 * @param ctx the parse tree
-	 */
-	void exitLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#orderClause}.
 	 * @param ctx the parse tree
 	 */
@@ -117,6 +107,16 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOrderCondition(QuerycatParser.OrderConditionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#limitOffsetClauses}.
+	 * @param ctx the parse tree
+	 */
+	void enterLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#limitOffsetClauses}.
+	 * @param ctx the parse tree
+	 */
+	void exitLimitOffsetClauses(QuerycatParser.LimitOffsetClausesContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#limitClause}.
 	 * @param ctx the parse tree
@@ -208,16 +208,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitDataBlock(QuerycatParser.DataBlockContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#dataBlockValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterDataBlockValue(QuerycatParser.DataBlockValueContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#dataBlockValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitDataBlockValue(QuerycatParser.DataBlockValueContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#filter}.
 	 * @param ctx the parse tree
 	 */
@@ -267,16 +257,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#propertyList}.
-	 * @param ctx the parse tree
-	 */
-	void enterPropertyList(QuerycatParser.PropertyListContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#propertyList}.
-	 * @param ctx the parse tree
-	 */
-	void exitPropertyList(QuerycatParser.PropertyListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#objectList}.
 	 * @param ctx the parse tree
@@ -438,6 +418,26 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitConstant(QuerycatParser.ConstantContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#computation}.
+	 * @param ctx the parse tree
+	 */
+	void enterComputation(QuerycatParser.ComputationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#computation}.
+	 * @param ctx the parse tree
+	 */
+	void exitComputation(QuerycatParser.ComputationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#termList}.
+	 * @param ctx the parse tree
+	 */
+	void enterTermList(QuerycatParser.TermListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#termList}.
+	 * @param ctx the parse tree
+	 */
+	void exitTermList(QuerycatParser.TermListContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#aggregation}.
 	 * @param ctx the parse tree
 	 */
@@ -457,6 +457,16 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDistinctModifier(QuerycatParser.DistinctModifierContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#referenceArgument}.
+	 * @param ctx the parse tree
+	 */
+	void enterReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#referenceArgument}.
+	 * @param ctx the parse tree
+	 */
+	void exitReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#aggregationFunction}.
 	 * @param ctx the parse tree
@@ -607,14 +617,4 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitString(QuerycatParser.StringContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#blankNode}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlankNode(QuerycatParser.BlankNodeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#blankNode}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlankNode(QuerycatParser.BlankNodeContext ctx);
 }
