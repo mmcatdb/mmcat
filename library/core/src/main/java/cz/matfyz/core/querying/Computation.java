@@ -3,6 +3,7 @@ package cz.matfyz.core.querying;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.DoubleStream;
 
 public class Computation implements Expression, Comparable<Computation> {
 
@@ -168,6 +169,68 @@ public class Computation implements Expression, Comparable<Computation> {
             return type == OP.Set;
         }
 
+    }
+
+    /**
+     * The values might have a different semantics than the arguments of the computation!
+     * E.g., an aggregation might have two arguments, a property and a reference node. However, in that case, this function would expect only a list of the actual values.
+     */
+    public String resolve(List<String> values) {
+        if (operator.isComparison())
+            return resolveComparison(values) ? "true" : "false";
+
+        if (operator.isAggregation())
+            return String.valueOf(resolveAggregation(values));
+
+        return resolveSet(values) ? "true" : "false";
+    }
+
+    private boolean resolveComparison(List<String> values) {
+        final String a = values.get(0);
+        final String b = values.get(1);
+
+        if (operator == Operator.Equal)
+            return a.equals(b);
+        if (operator == Operator.NotEqual)
+            return !a.equals(b);
+
+        final double x = Double.parseDouble(a);
+        final double y = Double.parseDouble(b);
+
+        return switch (operator) {
+            case Operator.Less -> x < y;
+            // TODO Maybe we should add some epsilon here?
+            case Operator.LessOrEqual -> x <= y;
+            case Operator.Greater -> x > y;
+            case Operator.GreaterOrEqual -> x >= y;
+            default -> throw new RuntimeException("Unknown operator: " + operator);
+        };
+    }
+
+    private double resolveAggregation(List<String> values) {
+        if (operator == Operator.Count)
+            return values.size();
+
+        final DoubleStream numbers = values.stream().mapToDouble(Double::parseDouble);
+
+        return switch (operator) {
+            case Operator.CountDistinct -> numbers.distinct().count();
+            case Operator.Sum -> numbers.sum();
+            case Operator.Min -> numbers.min().orElse(Double.NaN);
+            case Operator.Max -> numbers.max().orElse(Double.NaN);
+            case Operator.Average -> numbers.average().orElse(Double.NaN);
+            default -> throw new RuntimeException("Unknown operator: " + operator);
+        };
+    }
+
+    private boolean resolveSet(List<String> values) {
+        final var value = values.get(0);
+
+        for (int i = 1; i < values.size(); i++)
+            if (values.get(i).equals(value))
+                return operator == Operator.In;
+
+        return operator != Operator.In;
     }
 
 }

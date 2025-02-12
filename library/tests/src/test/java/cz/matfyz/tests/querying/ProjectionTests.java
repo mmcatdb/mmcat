@@ -27,10 +27,10 @@ class ProjectionTests {
             )
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                output.add
             """)
             .data("""
             [ "aaa", "bbb" ]
@@ -55,13 +55,13 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(B)
-                T.map(B)
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(B)
+                map.traverse(B)
+                output.add
             """)
             .data("""
             [ { "B": "aaa" }, { "B": "bbb" } ]
@@ -86,13 +86,13 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(D)
-                T.map(B)
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(D)
+                map.traverse(B)
+                output.add
             """)
             .data("""
             [ { "B": "aaa" }, { "B": "bbb" } ]
@@ -125,25 +125,25 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(F[])
-                C.list
-                T.map(B[])
-                T.list
-                W.list
-                C.map
-                W.map(G[])
-                C.list
-                T.map(C[])
-                T.list
-                W.list
-                C.map
-                W.map(H)
-                T.map(D)
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(F[])
+                list.create
+                map.traverse(B[])
+                list.traverse
+                list.write
+                map.create
+                map.write(G[])
+                list.create
+                map.traverse(C[])
+                list.traverse
+                list.write
+                map.create
+                map.write(H)
+                map.traverse(D)
+                output.add
             """)
             .data("""
             [ {
@@ -199,26 +199,26 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                T.map(B[])
-                T.list
-                T.map(C)
-                W.list
-                C.map:
-                --- W.map(D)
-                    T.up
-                    T.up
-                    T.up
-                    T.map(D)
-                    C.leaf
+                list.create
+                list.traverse
+                map.traverse(B[])
+                list.traverse
+                map.traverse(C)
+                list.write
+                map.create:
+                --- map.write(D)
+                    parent.traverse
+                    parent.traverse
+                    parent.traverse
+                    map.traverse(D)
+                    output.add
 
-                --- W.map(E)
-                    T.up
-                    T.up
-                    T.up
-                    T.map(E)
-                    C.leaf
+                --- map.write(E)
+                    parent.traverse
+                    parent.traverse
+                    parent.traverse
+                    map.traverse(E)
+                    output.add
             """)
             .data("""
             [ {
@@ -267,19 +267,19 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                T.map(C)
-                W.list
-                C.map
-                W.map(F[])
-                C.list
-                T.up
-                T.map(D[])
-                T.list
-                T.map(F)
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                map.traverse(C)
+                list.write
+                map.create
+                map.write(F[])
+                list.create
+                parent.traverse
+                map.traverse(D[])
+                list.traverse
+                map.traverse(F)
+                list.write
+                output.add
             """)
             .data("""
             [ {
@@ -320,23 +320,23 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(B[])
-                C.list
-                T.map(B[])
-                T.list
-                W.list
-                C.map
-                W.map(D[])
-                C.list
-                T.map(C[])
-                T.list
-                T.map(D)
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(B[])
+                list.create
+                map.traverse(B[])
+                list.traverse
+                list.write
+                map.create
+                map.write(D[])
+                list.create
+                map.traverse(C[])
+                list.traverse
+                map.traverse(D)
+                list.write
+                output.add
             """)
             .data("""
             [ {
@@ -389,19 +389,19 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(D[])
-                C.list
-                T.map(B[])
-                T.list
-                T.map(C[])
-                T.list
-                T.map(D)
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(D[])
+                list.create
+                map.traverse(B[])
+                list.traverse
+                map.traverse(C[])
+                list.traverse
+                map.traverse(D)
+                list.write
+                output.add
             """)
             .data("""
             [ {

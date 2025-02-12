@@ -104,7 +104,7 @@ public class ResultStructureTformer {
     // The list of lists is not supported.
     private void addChildTforms(TformStep current, TformingResultStructure childStructure) {
         if (childStructure.children.isEmpty())
-            current.addChild(new CreateLeaf());
+            current.addChild(new AddToOutput<LeafResult>());
         else
             createMap(current, childStructure);
     }

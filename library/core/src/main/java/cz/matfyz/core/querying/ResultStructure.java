@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -72,6 +74,20 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
         return null;
     }
 
+    // TODO Not very efficient and also nullable. We could probably do better (if we had some guarantees about the structure and the variable).
+    public @Nullable ResultStructure tryFindDescendantByVariable(Variable variable) {
+        if (this.variable.equals(variable))
+            return this;
+
+        for (final var child : children.values()) {
+            final var output = child.tryFindDescendantByVariable(variable);
+            if (output != null)
+                return output;
+        }
+
+        return null;
+    }
+
     public ResultStructure removeChild(String name) {
         final var output = children.remove(name);
         childrenBySignature.remove(output.signatureFromParent);
@@ -108,6 +124,17 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
         return this.children.values();
     }
 
+    /** All computations whose reference node is this object. */
+    private final Set<Computation> computations = new TreeSet<>();
+
+    public boolean hasComputation(Computation computation) {
+        return computations.contains(computation);
+    }
+
+    public boolean addComputation(Computation computation) {
+        return computations.add(computation);
+    }
+
     /**
      * The ability to change the array-ness is important because the new structure might be used in a different way than the original one. E.g., a root of one structure is inserted as a subtree to another structure.
      * @param isArray Whether the new structure should be an array.
@@ -118,6 +145,8 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
         clone.signatureFromParent = signatureFromParent;
 
         children.values().forEach(child -> clone.addChild(child.copy(), child.signatureFromParent));
+
+        computations.forEach(clone.computations::add);
 
         return clone;
     }

@@ -1,5 +1,6 @@
 package cz.matfyz.querying.resolver.queryresult;
 
+import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.MapResult;
@@ -30,9 +31,15 @@ public abstract class TformStep implements Printable {
      * @return The child step
      */
     public TformStep addChild(TformStep child) {
-        children.add(child);
+        if (!isChildrenSupported())
+            throw new UnsupportedOperationException("This step doesn't support children.");
 
+        children.add(child);
         return child;
+    }
+
+    protected boolean isChildrenSupported() {
+        return true;
     }
 
     public abstract void apply(TformContext context);
@@ -60,8 +67,7 @@ public abstract class TformStep implements Printable {
         printer.append(":").down().nextLine();
         for (final var child : children)
             printer.append("--- ").append(child).nextLine();
-        printer.remove();
-        printer.up();
+        printer.remove().up();
     }
 
     // Steps
@@ -85,7 +91,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("T.up");
+            printer.append("parent.traverse");
             printChildren(printer);
         }
     }
@@ -105,7 +111,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("T.map(").append(key).append(")");
+            printer.append("map.traverse(").append(key).append(")");
             printChildren(printer);
         }
     }
@@ -135,21 +141,52 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("T.list");
+            printer.append("list.traverse");
             printChildren(printer);
         }
     }
 
-    static class CreateLeaf extends TformStep {
+    /**
+     * Peeks the input and writes it directly to the output, thus effectively copying the last value.
+     * However, it isn't a copy so be careful with steps that directly modify the results.
+     * Except for the leaves ofc, since they are immutable.
+     */
+    static class AddToOutput<T extends ResultNode> extends TformStep {
         @Override public void apply(TformContext context) {
-            final var inputLeaf = (LeafResult) context.inputs.peek();
-            final var outputLeaf = new LeafResult(inputLeaf.value);
-            context.outputs.push(outputLeaf);
+            final var inputNode = (T) context.inputs.peek();
+            context.outputs.push(inputNode);
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("C.leaf");
-            printChildren(printer);
+            printer
+                .append("output.add")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
+        }
+    }
+
+    static class CreateLeaf extends TformStep {
+        private final String value;
+
+        CreateLeaf(String value) {
+            this.value = value;
+        }
+
+        @Override public void apply(TformContext context) {
+            context.outputs.push(new LeafResult(value));
+        }
+
+        @Override public void printTo(Printer printer) {
+            printer
+                .append("leaf.create(").append(value).append(")")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
         }
     }
 
@@ -167,7 +204,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("C.map");
+            printer.append("map.create");
             printChildren(printer);
         }
     }
@@ -187,7 +224,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("W.map(").append(key).append(")");
+            printer.append("map.write(").append(key).append(")");
             printChildren(printer);
         }
     }
@@ -204,7 +241,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("C.list");
+            printer.append("list.create");
             printChildren(printer);
         }
     }
@@ -218,7 +255,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("W.list");
+            printer.append("list.write");
             printChildren(printer);
         }
     }
@@ -243,7 +280,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("W.index(");
+            printer.append("index.write(");
 
             for (int i = 0; i < pathToIdentifier.size(); i++)
                 printer.append(pathToIdentifier.get(i)).append(".");
@@ -253,7 +290,13 @@ public abstract class TformStep implements Printable {
             else
                 printer.remove();
 
-            printer.append(")");
+            printer
+                .append(")")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
         }
     }
 
@@ -313,7 +356,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("M.map(");
+            printer.append("map.merge(");
 
             for (int i = 0; i < pathToIdentifier.size(); i++)
                 printer.append(pathToIdentifier.get(i)).append(".");
@@ -336,11 +379,37 @@ public abstract class TformStep implements Printable {
                 printer.remove().append(" ]");
             }
 
-            printer.append(")");
+            printer
+                .append(")")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
         }
     }
 
-    // Note - this can be used to remove the whole subtree. Also, with in combination with a traversal, we can remove any subtree from the result tree.
+    static class AddToMap extends TformStep {
+        private final String key;
+
+        AddToMap(String key) {
+            this.key = key;
+        }
+
+        @Override public void apply(TformContext context) {
+            applyChildren(context);
+            final ResultNode outputNode = context.outputs.pop();
+            final var currentMap = (MapResult) context.inputs.peek();
+            currentMap.children().put(key, outputNode);
+        }
+
+        @Override public void printTo(Printer printer) {
+            printer.append("map.add(").append(key).append(")");
+            printChildren(printer);
+        }
+    }
+
+    // Note - this can be used to remove the whole subtree. Also, in combination with a traversal, we can remove any subtree from the result tree.
     static class RemoveFromMap extends TformStep {
         private final String key;
 
@@ -354,7 +423,13 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("M.remove(").append(key).append(")");
+            printer
+                .append("map.remove(").append(key).append(")")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
         }
     }
 
@@ -367,6 +442,58 @@ public abstract class TformStep implements Printable {
             current = ((MapResult) current).children().get(key);
 
         return current;
+    }
+
+    /** All argumets of the computation are expected to be resolved already. Their values should be provided in the child steps. */
+    static class ResolveComputation extends TformStep {
+        private final Computation computation;
+
+        ResolveComputation(Computation computation) {
+            this.computation = computation;
+        }
+
+        @Override public void apply(TformContext context) {
+            // Collect all arguments with values that we need for the computation.
+            final var argumentsBuilder = new ListResult.Builder<LeafResult>();
+            context.builders.push(argumentsBuilder);
+            applyChildren(context);
+            context.builders.pop();
+
+            final List<String> arguments = argumentsBuilder.build().children().stream()
+                .map(leaf -> ((LeafResult) leaf).value)
+                .toList();
+
+            final String result = computation.resolve(arguments);
+
+            context.outputs.push(new LeafResult(result));
+        }
+
+        @Override public void printTo(Printer printer) {
+            printer.append("computation.resolve(").append(computation.identifier()).append(": ").append(computation).append(")");
+            printChildren(printer);
+        }
+    }
+
+    /**
+     * Takes a leaf from the input. If it's value isn't "true", it gets removed.
+     * Must be run inside a remover context.
+     */
+    static class FilterLeaf extends TformStep {
+        @Override public void apply(TformContext context) {
+            final var valueNode = (LeafResult) context.inputs.peek();
+            if (!valueNode.value.equals("true"))
+                context.removers.peek().getRemoved();
+        }
+
+        @Override public void printTo(Printer printer) {
+            printer
+                .append("leaf.filter")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
+        }
     }
 
 }

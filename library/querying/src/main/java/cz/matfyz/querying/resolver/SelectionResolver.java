@@ -17,11 +17,17 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.planner.QueryPlan;
+import cz.matfyz.querying.resolver.queryresult.ResultStructureComputer;
 import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SelectionResolver implements QueryVisitor<QueryResult> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelectionResolver.class);
 
     public static QueryResult run(QueryPlan plan) {
         return new SelectionResolver(plan.context, plan.root).run();
@@ -49,7 +55,10 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     public QueryResult visit(FilterNode node) {
         final var childResult = node.child.accept(this);
 
-        throw new UnsupportedOperationException("SelectionResolver.visit(FilterNode) not implemented.");
+        final var tform = ResultStructureComputer.run(childResult.structure, node.filter, true);
+        LOGGER.debug("Filter transformation:\n{}", tform);
+
+        return tform.apply(childResult.data);
     }
 
     public QueryResult visit(JoinNode node) {
