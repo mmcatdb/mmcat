@@ -9,7 +9,7 @@ import { DatasourcesPage, DatasourcesPageOverview } from '@/pages/DatasourcesPag
 import { datasourceDetailLoader, type DatasourceDetailLoaderData, DatasourceDetailPage, DatasourceInCategoryDetailPage } from '@/pages/DatasourceDetailPage';
 import { adminerLoader, AdminerPage } from '@/pages/AdminerPage';
 import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
-import { QueryingPage } from '@/pages/QueryingPage';
+import { QueryingPage } from '@/pages/category/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
 import { Mapping } from '@/types/mapping';
 import { api } from '@/api';

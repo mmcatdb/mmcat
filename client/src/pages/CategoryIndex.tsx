@@ -41,9 +41,9 @@ function CategoryIndexInner() {
 
     return (
         <div>
-            <h1 className='text-xl'>
+            {/* <h1 className='text-xl'>
                 {category.label}, sv.{category.systemVersionId}
-            </h1>
+            </h1> */}
             <Outlet />
         </div>
     );
