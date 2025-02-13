@@ -47,6 +47,18 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSolutionModifier(QuerycatParser.SolutionModifierContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#groupClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGroupClause(QuerycatParser.GroupClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#havingClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHavingClause(QuerycatParser.HavingClauseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#orderClause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -268,12 +280,6 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDistinctModifier(QuerycatParser.DistinctModifierContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#referenceArgument}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#aggregationFunction}.
 	 * @param ctx the parse tree

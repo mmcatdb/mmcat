@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 @JsonSerialize(using = LeafResult.Serializer.class)
-public class LeafResult implements ResultNode {
+public class LeafResult extends ResultNode {
 
     public final String value;
 

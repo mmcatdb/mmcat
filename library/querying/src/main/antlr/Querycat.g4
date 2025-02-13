@@ -7,8 +7,12 @@ subSelect: selectQuery;
 selectClause: 'SELECT' '{' selectTriples? '}';
 // The og sparql grammar allows omiting the WHERE keyword, but that ain't happening here.
 whereClause: 'WHERE' graphPattern;
-solutionModifier: orderClause? limitOffsetClauses?;
 
+solutionModifier: groupClause? havingClause? orderClause? limitOffsetClauses?;
+
+// Let's allow only variables for now. We can add all expressions later by simply finding their reference node.
+groupClause: 'GROUP' 'BY' variable+;
+havingClause: 'HAVING' constraint+;
 orderClause: 'ORDER' 'BY' orderCondition+;
 orderCondition
     : (('ASC' | 'DESC') brackettedExpression)
@@ -29,6 +33,7 @@ nonTriples
 unionGraphPattern: graphPattern (('UNION' | 'MINUS') graphPattern)*;
 optionalGraphPattern: 'OPTIONAL' graphPattern;
 filter: 'FILTER' constraint;
+// This is heavily misleading. Some expressions (e.g., aggregations) can appear only in the HAVING clause, while others can be both in FILTER and HAVING.
 constraint: brackettedExpression;
 inlineValues: 'VALUES' variable '{' constant* '}';
 
@@ -67,9 +72,8 @@ computation
     ;
 termList: term (',' term)*;
 
-aggregation: aggregationFunction '(' (distinctModifier)? expression referenceArgument? ')';
+aggregation: aggregationFunction '(' distinctModifier? expression ')';
 distinctModifier: 'DISTINCT';
-referenceArgument: ',' variable;
 aggregationFunction
     : 'COUNT'
     | 'SUM'

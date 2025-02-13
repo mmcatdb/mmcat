@@ -464,8 +464,7 @@ public abstract class TformStep implements Printable {
                 .toList();
 
             final String result = computation.resolve(arguments);
-
-            context.outputs.push(new LeafResult(result));
+            context.inputs.peek().setComputedValue(computation, result);
         }
 
         @Override public void printTo(Printer printer) {
@@ -475,20 +474,56 @@ public abstract class TformStep implements Printable {
     }
 
     /**
-     * Takes a leaf from the input. If it's value isn't "true", it gets removed.
-     * Must be run inside a remover context.
+     * Peeks the input, finds a computation result here and writes it directly to the output (as a new {@link LeafResult}).
      */
-    static class FilterNode extends TformStep {
-        private final List<String> pathToValue;
+    static class RecallComputation extends TformStep {
+        private final Computation computation;
 
-        FilterNode(List<String> pathToValue) {
-            this.pathToValue = pathToValue;
+        RecallComputation(Computation computation) {
+            this.computation = computation;
         }
 
         @Override public void apply(TformContext context) {
-            final var thisNode = context.inputs.peek();
-            final var valueLeaf = (LeafResult) traversePath(thisNode, pathToValue);
-            if (!valueLeaf.value.equals("true"))
+            final var inputNode = context.inputs.peek();
+            final String value = inputNode.getComputedValue(computation);
+            context.outputs.push(new LeafResult(value));
+        }
+
+        @Override public void printTo(Printer printer) {
+            printer
+                .append("computation.recall(").append(computation.identifier()).append(")")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
+        }
+    }
+
+    /**
+     * Takes a node from the input, then finds a second node according to the specified path. If its value isn't "true", the first node is removed.
+     * If the computation is specified, the second node can be any {@link ResultNode}. The value is taken from its computationResults.
+     * Otherwise, the second node must be a {@link LeafResult} and its value is used directly.
+     * Must be run inside a remover context.
+     * Both nodes might be the same picture (just ask the corporate to tell the difference).
+     */
+    static class FilterNode extends TformStep {
+        private final List<String> pathToValue;
+        private final @Nullable Computation computation;
+
+        FilterNode(List<String> pathToValue, @Nullable Computation computation) {
+            this.pathToValue = pathToValue;
+            this.computation = computation;
+        }
+
+        @Override public void apply(TformContext context) {
+            final var filteredNode = context.inputs.peek();
+            final var valueNode = traversePath(filteredNode, pathToValue);
+            final String value = computation != null
+                ? valueNode.getComputedValue(computation)
+                : ((LeafResult) valueNode).value;
+
+            if (!value.equals("true"))
                 context.removers.peek().getRemoved();
         }
 

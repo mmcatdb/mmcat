@@ -4,7 +4,6 @@ import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper.Operators;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression;
-import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.exception.GeneralException;
@@ -230,15 +229,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     @Override public Term visitAggregation(QuerycatParser.AggregationContext ctx) {
-        final List<Expression> arguments = new ArrayList<>();
-
         final Term expressionTerm = visit(ctx.expression()).asTerm();
-        arguments.add(expressionTerm.asExpression());
-
-        if (ctx.referenceArgument() != null) {
-            final Variable referenceVariable = visitVariable(ctx.referenceArgument().variable()).asVariable();
-            arguments.add(referenceVariable);
-        }
 
         var operator = operators.parse(ctx.aggregationFunction().getText());
         if (ctx.distinctModifier() != null) {
@@ -248,7 +239,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
             operator = Operator.CountDistinct;
         }
 
-        final var computation = scope.computation.create(operator, arguments);
+        final var computation = scope.computation.create(operator, expressionTerm.asExpression());
         return new Term(computation);
     }
 

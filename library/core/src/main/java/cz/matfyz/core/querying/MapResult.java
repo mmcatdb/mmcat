@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 @JsonSerialize(using = MapResult.Serializer.class)
-public class MapResult implements ResultNode {
+public class MapResult extends ResultNode {
 
     private final Map<String, ResultNode> children;
 

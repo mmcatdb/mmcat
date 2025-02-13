@@ -68,6 +68,26 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitSolutionModifier(QuerycatParser.SolutionModifierContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#groupClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterGroupClause(QuerycatParser.GroupClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#groupClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitGroupClause(QuerycatParser.GroupClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#havingClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterHavingClause(QuerycatParser.HavingClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#havingClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitHavingClause(QuerycatParser.HavingClauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#orderClause}.
 	 * @param ctx the parse tree
 	 */
@@ -437,16 +457,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDistinctModifier(QuerycatParser.DistinctModifierContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#referenceArgument}.
-	 * @param ctx the parse tree
-	 */
-	void enterReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#referenceArgument}.
-	 * @param ctx the parse tree
-	 */
-	void exitReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#aggregationFunction}.
 	 * @param ctx the parse tree

@@ -3,20 +3,37 @@ package cz.matfyz.core.querying;
 import cz.matfyz.core.utils.printable.*;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public interface ResultNode extends Printable {
+public abstract class ResultNode implements Printable {
 
-    interface NodeBuilder {
+    /**
+     * The values of the computations that were computed during the query execution are stored here.
+     * Yes, it would be better to create a separate {@link LeafResult}-s for them instead ... but that just isn't possible ... because of reasons.
+     * TLDR, it wouldn't work with aggregations.
+     */
+    private Map<Computation, String> computedValues = new TreeMap<>();
+
+    public String getComputedValue(Computation computation) {
+        return computedValues.get(computation);
+    }
+
+    public void setComputedValue(Computation computation, String value) {
+        computedValues.put(computation, value);
+    }
+
+    public interface NodeBuilder {
 
         ResultNode build();
 
     }
 
-    class JsonBuilder {
+    public static class JsonBuilder {
 
         private JsonBuilder() {}
 

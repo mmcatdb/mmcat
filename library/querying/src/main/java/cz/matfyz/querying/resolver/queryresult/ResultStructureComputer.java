@@ -13,7 +13,9 @@ import cz.matfyz.querying.resolver.queryresult.TformStep.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -37,9 +39,11 @@ public class ResultStructureComputer {
     private final ResultStructure outputStructure;
     /** Includes all computations that needs to be evaluated first. Then there is the final computation (if needed) and filter (also if needed). */
     private final List<TformRoot> outputTforms = new ArrayList<>();
+    private final ReferenceNodeFinder referenceNodeFinder;
 
     private ResultStructureComputer(ResultStructure inputStructure) {
         this.outputStructure = inputStructure.copy();
+        referenceNodeFinder = new ReferenceNodeFinder(outputStructure);
     }
 
     public record ComputationTForm(List<TformRoot> tforms, ResultStructure outputStructure) {
@@ -66,7 +70,7 @@ public class ResultStructureComputer {
     }
 
     private ComputationTForm run(Computation computation, boolean isFilter) {
-        var referenceNode = findReferenceNodeForArguments(computation.arguments);
+        var referenceNode = referenceNodeFinder.find(computation);
         if (referenceNode == null)
             // This corresponds to a constant filter, e.g., FILTER(1 = 1). In this case, we will filter the root.
             // FIXME Replace constant expressions by constants.
@@ -88,163 +92,6 @@ public class ResultStructureComputer {
         return new ComputationTForm(outputTforms, outputStructure);
     }
 
-    /**
-     * Finds the reference node (in the ResultStructure) to this expression.
-     * Returns null if there is none (e.g., for a constant).
-     */
-    private @Nullable ResultStructure findReferenceNode(Expression expression) {
-        if (expression instanceof Constant)
-            // Constants don't have reference nodes - they can be used anywhere.
-            return null;
-
-        if (expression instanceof Variable variable)
-            return findReferenceNodeForVariable(variable);
-
-        // Now it's starting to get interesting - different operators behave differently.
-        final var computation = (Computation) expression;
-        final var operator = computation.operator;
-
-        if (operator.isSet()) {
-            final var variable = (Variable) computation.arguments.get(0);
-            return findReferenceNodeForVariable(variable);
-        }
-
-        // There are three rules:
-        //  1. The reference node of an expression is as low in the tree as possible.
-        //  2. If it isn't an aggregation, there must be a 1:1 path from the reference node to each argument of its expression.
-        //  3. A reference node of an aggregation has to have a 1:n path to its first argument.
-
-        if (operator.isAggregation())
-            return findReferenceNodeForAggregation(computation);
-
-        if (operator.isComparison() || operator.isString())
-            return findReferenceNodeForArguments(computation.arguments);
-
-        throw new RuntimeException("Unknown operator type: " + operator);
-    }
-
-    private ResultStructure findReferenceNodeForVariable(Variable variable) {
-        // For variables, the reference node is always their parent.
-        final ResultStructure node = outputStructure.tryFindDescendantByVariable(variable);
-        if (node == null)
-            throw new RuntimeException("Variable \"" + variable + "\" not found in result structure");
-
-        // Now, you might be thinking: "But what if the variable is the root? Gotcha! I see you didn't pay attention to the documentation!". Because the root variable can't be a leaf, so it isn't a simple value, so it can't be used in a computation. Checkmate.
-        if (node.parent() == null)
-            throw new RuntimeException("Root variable can't be used in a computation: " + variable);
-
-        return node.parent();
-    }
-
-    private ResultStructure findReferenceNodeForAggregation(Computation computation) {
-        // An aggregation might specify a second argument (a variable) which should be used as a reference node.
-        if (computation.arguments.size() > 1) {
-            // TODO Check the 3rd rule.
-            final var variable = (Variable) computation.arguments.get(1);
-            return findReferenceNode(variable);
-        }
-
-        // If there is no second argument, we start with the reference node of the first argument and then work our way up.
-        final var argument = computation.arguments.get(0);
-        ResultStructure output = argument instanceof Variable variable
-            // Variables are special, because their reference nodes are their parents, however we can use the parent for aggregation as well.
-            ? outputStructure.tryFindDescendantByVariable(variable)
-            : findReferenceNode(argument);
-        if (output == null || output.parent() == null)
-            throw new RuntimeException("Aggregation without a reference node: " + computation);
-
-        output = output.parent();
-
-        while (!output.isArray) {
-            output = output.parent();
-            if (output == null)
-                throw new RuntimeException("Aggregation without a reference node: " + computation);
-        }
-
-        return output;
-    }
-
-    private @Nullable ResultStructure findReferenceNodeForArguments(List<Expression> arguments) {
-        // We start by finding the reference nodes of all arguments.
-        Set<ResultStructure> references = new TreeSet<>();
-        for (final var agument : arguments) {
-            final var reference = findReferenceNode(agument);
-            if (reference != null)
-                references.add(reference);
-        }
-
-        if (references.isEmpty())
-            // There are no reference nodes, so we can't find a common one.
-            // In most cases, this wouldn't make sense. However, filters like FILTER(1 = 1) might be useful sometimes.
-            return null;
-
-        if (references.size() == 1)
-            // There is only one reference node, so it's the common one.
-            return references.iterator().next();
-
-        // There are multiple different argument reference nodes.
-        // All edges are oriented - from parent to child (by default), or the other way around (for arrays). The path from the common reference node to any of the argument references can't go against the edge direction (2nd rule).
-        // Therefore, there must be at most one viable reference node! (Just draw the arrows and you'll see.)
-
-        final var iterator = references.iterator();
-        ResultStructure ans = iterator.next();
-
-        while (iterator.hasNext()) {
-            final var next = iterator.next();
-            // After the first iteration, there are a 1:1 paths from ans to both nodes that were compared (if ans isn't null ofc).
-            // After the second iteration, there will be a 1:1 paths from the new ans to both original ans and the new node. However, if we have a -> b and b -> c, then a -> c, so there will be 1:1 paths from the new ans to all previously compared nodes. By induction, ans will be the common reference node.
-            ans = tryFindCommonReferenceNodeForPair(ans, next);
-            if (ans == null)
-                // There is no common reference node. That's obviously an error.
-                throw new RuntimeException("No reference node found for arguments: " + arguments);
-        }
-
-        return ans;
-    }
-
-    private @Nullable ResultStructure tryFindCommonReferenceNodeForPair(ResultStructure a, ResultStructure b) {
-        final var path = GraphUtils.findPath(a, b);
-
-        @Nullable ResultStructure output = null;
-
-        for (final var structure : path.sourceToRoot()) {
-            final var isParentArray = structure.parent().isArray;
-
-            if (output == null) {
-                // Reference node not found yet - we try to move as far as possible against the edge direction.
-                if (isParentArray)
-                    // We can't move any further, so we have to stop here. However, we continue the algorithm to make sure that both paths are valid.
-                    output = structure;
-            }
-            else {
-                if (!isParentArray)
-                    // Reference node is found, so we have to move with the edge direction. But we can't, so there is none.
-                    return null;
-            }
-        }
-
-        for (final var structure : path.rootToTarget()) {
-            final var parent = structure.parent();
-
-            if (output == null) {
-                // We still need to go against the edge direction, but now the isArray flag is inverted.
-                if (!parent.isArray)
-                    output = parent;
-            }
-            else {
-                if (parent.isArray)
-                    // Again, the same but inverted.
-                    return null;
-            }
-        }
-
-        if (output == null)
-            // We tried so hard and got so far, but in the end, it doesn't even matter.
-            output = b;
-
-        return output;
-    }
-
     // Computations
 
     private TformRoot createComputationTform(Computation computation, ResultStructure reference) {
@@ -258,7 +105,6 @@ public class ResultStructureComputer {
             current = ResultStructureTformer.addPathSteps(current, rootToReference);
         }
 
-        current = current.addChild(new AddToMap(computation.identifier()));
         final TformStep resolver = current.addChild(new ResolveComputation(computation));
 
         final List<Expression> arguments = computation.operator.isAggregation()
@@ -301,7 +147,7 @@ public class ResultStructureComputer {
         final var childTform = new ResultStructureComputer(outputStructure).run(argument, false);
         outputTforms.addAll(childTform.tforms);
 
-        var argumentReference = findReferenceNode(argument);
+        var argumentReference = referenceNodeFinder.find(argument);
         if (argumentReference == null)
             // The argument is a constant expression, so it's reference node is the root.
             // FIXME Replace constant expressions by constants.
@@ -312,8 +158,7 @@ public class ResultStructureComputer {
             current = ResultStructureTformer.addPathSteps(current, path);
         }
 
-        current = current.addChild(new TraverseMap(argument.identifier()));
-        current.addChild(new AddToOutput<LeafResult>());
+        current.addChild(new RecallComputation(argument));
     }
 
     // Filtering
@@ -340,11 +185,8 @@ public class ResultStructureComputer {
                 .forEach(keysToValue::add);
         }
 
-        // The last step of the path is the actual reference value.
-        keysToValue.add(computation.identifier());
-
         // The TraverseList it's also a remover, so we can use the filter step to remove the filtered node from the input.
-        current.addChild(new FilterNode(keysToValue));
+        current.addChild(new FilterNode(keysToValue, computation));
 
         return output;
     }
@@ -359,6 +201,143 @@ public class ResultStructureComputer {
             output = output.parent();
 
         return output;
+    }
+
+    /**
+     * Finds the reference node (in the ResultStructure) to this expression.
+     * Returns null if there is none (e.g., for a constant).
+     */
+    static class ReferenceNodeFinder {
+
+        private final ResultStructure root;
+        // Why java has to be like this? Why we can't reimplement the Comparable interface for multiple subclasses? My disappointment is immeasurable and my day is ruined.
+        private final Map<Computation, @Nullable ResultStructure> cache = new TreeMap<>();
+
+        public ReferenceNodeFinder(ResultStructure root) {
+            this.root = root;
+        }
+
+        public @Nullable ResultStructure find(Expression expression) {
+            if (expression instanceof Constant)
+                // Constants don't have reference nodes - they can be used anywhere.
+                return null;
+
+            if (expression instanceof Variable variable)
+                return findReferenceNodeForVariable(variable);
+
+            // Now it's starting to get interesting - different operators behave differently.
+            final var computation = (Computation) expression;
+            final var operator = computation.operator;
+
+            if (operator.isAggregation())
+                // The reference node of an aggregation is the whole querry (which doesn't make much sense), or one of the arguments of the GROUP BY clause. In either case, it's not handled here.
+                throw new UnsupportedOperationException("Reference nodes of aggregations are handled separately.");
+
+            // We have to do the double check here because the cache might contain null values (which are valid).
+            if (cache.containsKey(computation))
+                return cache.get(computation);
+
+            final var output = findReferenceNodeForArguments(computation.arguments);
+            cache.put(computation, output);
+            return output;
+        }
+
+        private ResultStructure findReferenceNodeForVariable(Variable variable) {
+            // For variables, the reference node is always their corresponding node.
+            final ResultStructure node = root.tryFindDescendantByVariable(variable);
+            if (node == null)
+                throw new RuntimeException("Variable \"" + variable + "\" not found in result structure");
+
+            return node;
+        }
+
+        private @Nullable ResultStructure findReferenceNodeForArguments(List<Expression> arguments) {
+            // There is only one rule: there must be a 1:1 (or n:1) path from the reference node to each argument of its expression.
+            // However, in order to make the reference node unambiguous, we want it to be as close to the arguments as possible.
+            //  - If the expression uses only one variable, it is the reference node.
+            //  - If it uses multiple variables, it is the one closest to them (it should be easy to see there is always only one such node).
+            //  - If none variables are used (e.g., `FILTER(1 > 0)`, for whatever reason), it's null.
+
+            // We start by finding the reference nodes of all arguments.
+            Set<ResultStructure> references = new TreeSet<>();
+            for (final var agument : arguments) {
+                final var reference = find(agument);
+                if (reference != null)
+                    references.add(reference);
+            }
+
+            if (references.isEmpty())
+                // There are no reference nodes, so we can't find a common one.
+                // In most cases, this wouldn't make sense. However, filters like FILTER(1 = 1) might be useful sometimes.
+                return null;
+
+            if (references.size() == 1)
+                // There is only one reference node, so it's the common one.
+                return references.iterator().next();
+
+            // There are multiple different argument reference nodes.
+            // All edges are oriented - from parent to child (by default), or the other way around (for arrays). The path from the common reference node to any of the argument references can't go against the edge direction (2nd rule).
+            // Therefore, there must be at most one viable reference node! (Just draw the arrows and you'll see.)
+
+            final var iterator = references.iterator();
+            ResultStructure ans = iterator.next();
+
+            while (iterator.hasNext()) {
+                final var next = iterator.next();
+                // After the first iteration, there are a 1:1 paths from ans to both nodes that were compared (if ans isn't null ofc).
+                // After the second iteration, there will be a 1:1 paths from the new ans to both original ans and the new node. However, if we have a -> b and b -> c, then a -> c, so there will be 1:1 paths from the new ans to all previously compared nodes. By induction, ans will be the common reference node.
+                ans = tryFindCommonReferenceNodeForPair(ans, next);
+                if (ans == null)
+                    // There is no common reference node. That's obviously an error.
+                    throw new RuntimeException("No reference node found for arguments: " + arguments);
+            }
+
+            return ans;
+        }
+
+        private static @Nullable ResultStructure tryFindCommonReferenceNodeForPair(ResultStructure a, ResultStructure b) {
+            final var path = GraphUtils.findPath(a, b);
+
+            @Nullable ResultStructure output = null;
+
+            for (final var structure : path.sourceToRoot()) {
+                final var isParentArray = structure.parent().isArray;
+
+                if (output == null) {
+                    // Reference node not found yet - we try to move as far as possible against the edge direction.
+                    if (isParentArray)
+                        // We can't move any further, so we have to stop here. However, we continue the algorithm to make sure that both paths are valid.
+                        output = structure;
+                }
+                else {
+                    if (!isParentArray)
+                        // Reference node is found, so we have to move with the edge direction. But we can't, so there is none.
+                        return null;
+                }
+            }
+
+            for (final var structure : path.rootToTarget()) {
+                final var parent = structure.parent();
+
+                if (output == null) {
+                    // We still need to go against the edge direction, but now the isArray flag is inverted.
+                    if (!parent.isArray)
+                        output = parent;
+                }
+                else {
+                    if (parent.isArray)
+                        // Again, the same but inverted.
+                        return null;
+                }
+            }
+
+            if (output == null)
+                // We tried so hard and got so far, but in the end, it doesn't even matter.
+                output = b;
+
+            return output;
+        }
+
     }
 
 }

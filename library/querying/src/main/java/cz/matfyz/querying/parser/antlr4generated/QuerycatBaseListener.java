@@ -89,6 +89,30 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGroupClause(QuerycatParser.GroupClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGroupClause(QuerycatParser.GroupClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterHavingClause(QuerycatParser.HavingClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHavingClause(QuerycatParser.HavingClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterOrderClause(QuerycatParser.OrderClauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -528,18 +552,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDistinctModifier(QuerycatParser.DistinctModifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitReferenceArgument(QuerycatParser.ReferenceArgumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

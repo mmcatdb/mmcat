@@ -54,7 +54,7 @@ public class Computation implements Expression, Comparable<Computation> {
             // Sets are always sortable.
             return true;
         if (operator.isAggregation())
-            // Aggregations have two arguments (property and root), the second one is optional. The order is obviously important.
+            // Aggregations have one argument, so there is no need to order them.
             return false;
         if (operator.isComparison())
             // This might need some adjustment as we add more operators.
