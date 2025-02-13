@@ -35,18 +35,6 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelectClause(QuerycatParser.SelectClauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#selectGraphPattern}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelectGraphPattern(QuerycatParser.SelectGraphPatternContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#fromClause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFromClause(QuerycatParser.FromClauseContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#whereClause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -89,47 +77,35 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOffsetClause(QuerycatParser.OffsetClauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#groupGraphPattern}.
+	 * Visit a parse tree produced by {@link QuerycatParser#graphPattern}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx);
+	T visitGraphPattern(QuerycatParser.GraphPatternContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#triplesBlock}.
+	 * Visit a parse tree produced by {@link QuerycatParser#graphPatternInner}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTriplesBlock(QuerycatParser.TriplesBlockContext ctx);
+	T visitGraphPatternInner(QuerycatParser.GraphPatternInnerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#graphPatternNotTriples}.
+	 * Visit a parse tree produced by {@link QuerycatParser#nonTriples}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGraphPatternNotTriples(QuerycatParser.GraphPatternNotTriplesContext ctx);
+	T visitNonTriples(QuerycatParser.NonTriplesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#unionGraphPattern}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUnionGraphPattern(QuerycatParser.UnionGraphPatternContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#optionalGraphPattern}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitOptionalGraphPattern(QuerycatParser.OptionalGraphPatternContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#groupOrUnionGraphPattern}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGroupOrUnionGraphPattern(QuerycatParser.GroupOrUnionGraphPatternContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#inlineData}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInlineData(QuerycatParser.InlineDataContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#dataBlock}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDataBlock(QuerycatParser.DataBlockContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#filter}.
 	 * @param ctx the parse tree
@@ -143,11 +119,23 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstraint(QuerycatParser.ConstraintContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#inlineValues}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInlineValues(QuerycatParser.InlineValuesContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#selectTriples}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSelectTriples(QuerycatParser.SelectTriplesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link QuerycatParser#triplesBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTriplesBlock(QuerycatParser.TriplesBlockContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#triplesSameSubject}.
 	 * @param ctx the parse tree

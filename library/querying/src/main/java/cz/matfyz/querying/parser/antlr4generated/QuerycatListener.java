@@ -48,26 +48,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitSelectClause(QuerycatParser.SelectClauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#selectGraphPattern}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelectGraphPattern(QuerycatParser.SelectGraphPatternContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#selectGraphPattern}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelectGraphPattern(QuerycatParser.SelectGraphPatternContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#fromClause}.
-	 * @param ctx the parse tree
-	 */
-	void enterFromClause(QuerycatParser.FromClauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#fromClause}.
-	 * @param ctx the parse tree
-	 */
-	void exitFromClause(QuerycatParser.FromClauseContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#whereClause}.
 	 * @param ctx the parse tree
 	 */
@@ -138,35 +118,45 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitOffsetClause(QuerycatParser.OffsetClauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#groupGraphPattern}.
+	 * Enter a parse tree produced by {@link QuerycatParser#graphPattern}.
 	 * @param ctx the parse tree
 	 */
-	void enterGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx);
+	void enterGraphPattern(QuerycatParser.GraphPatternContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#groupGraphPattern}.
+	 * Exit a parse tree produced by {@link QuerycatParser#graphPattern}.
 	 * @param ctx the parse tree
 	 */
-	void exitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx);
+	void exitGraphPattern(QuerycatParser.GraphPatternContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#triplesBlock}.
+	 * Enter a parse tree produced by {@link QuerycatParser#graphPatternInner}.
 	 * @param ctx the parse tree
 	 */
-	void enterTriplesBlock(QuerycatParser.TriplesBlockContext ctx);
+	void enterGraphPatternInner(QuerycatParser.GraphPatternInnerContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#triplesBlock}.
+	 * Exit a parse tree produced by {@link QuerycatParser#graphPatternInner}.
 	 * @param ctx the parse tree
 	 */
-	void exitTriplesBlock(QuerycatParser.TriplesBlockContext ctx);
+	void exitGraphPatternInner(QuerycatParser.GraphPatternInnerContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#graphPatternNotTriples}.
+	 * Enter a parse tree produced by {@link QuerycatParser#nonTriples}.
 	 * @param ctx the parse tree
 	 */
-	void enterGraphPatternNotTriples(QuerycatParser.GraphPatternNotTriplesContext ctx);
+	void enterNonTriples(QuerycatParser.NonTriplesContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#graphPatternNotTriples}.
+	 * Exit a parse tree produced by {@link QuerycatParser#nonTriples}.
 	 * @param ctx the parse tree
 	 */
-	void exitGraphPatternNotTriples(QuerycatParser.GraphPatternNotTriplesContext ctx);
+	void exitNonTriples(QuerycatParser.NonTriplesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#unionGraphPattern}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnionGraphPattern(QuerycatParser.UnionGraphPatternContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#unionGraphPattern}.
+	 * @param ctx the parse tree
+	 */
+	void exitUnionGraphPattern(QuerycatParser.UnionGraphPatternContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#optionalGraphPattern}.
 	 * @param ctx the parse tree
@@ -177,36 +167,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOptionalGraphPattern(QuerycatParser.OptionalGraphPatternContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#groupOrUnionGraphPattern}.
-	 * @param ctx the parse tree
-	 */
-	void enterGroupOrUnionGraphPattern(QuerycatParser.GroupOrUnionGraphPatternContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#groupOrUnionGraphPattern}.
-	 * @param ctx the parse tree
-	 */
-	void exitGroupOrUnionGraphPattern(QuerycatParser.GroupOrUnionGraphPatternContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#inlineData}.
-	 * @param ctx the parse tree
-	 */
-	void enterInlineData(QuerycatParser.InlineDataContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#inlineData}.
-	 * @param ctx the parse tree
-	 */
-	void exitInlineData(QuerycatParser.InlineDataContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#dataBlock}.
-	 * @param ctx the parse tree
-	 */
-	void enterDataBlock(QuerycatParser.DataBlockContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#dataBlock}.
-	 * @param ctx the parse tree
-	 */
-	void exitDataBlock(QuerycatParser.DataBlockContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#filter}.
 	 * @param ctx the parse tree
@@ -228,6 +188,16 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitConstraint(QuerycatParser.ConstraintContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#inlineValues}.
+	 * @param ctx the parse tree
+	 */
+	void enterInlineValues(QuerycatParser.InlineValuesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#inlineValues}.
+	 * @param ctx the parse tree
+	 */
+	void exitInlineValues(QuerycatParser.InlineValuesContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#selectTriples}.
 	 * @param ctx the parse tree
 	 */
@@ -237,6 +207,16 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectTriples(QuerycatParser.SelectTriplesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QuerycatParser#triplesBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterTriplesBlock(QuerycatParser.TriplesBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QuerycatParser#triplesBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitTriplesBlock(QuerycatParser.TriplesBlockContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#triplesSameSubject}.
 	 * @param ctx the parse tree

@@ -1,15 +1,12 @@
 grammar Querycat;
 
 query: selectQuery EOF;
-selectQuery: selectClause fromClause? whereClause solutionModifier;
+selectQuery: selectClause whereClause solutionModifier;
 subSelect: selectQuery;
 
-selectClause: 'SELECT' selectGraphPattern;
-selectGraphPattern: '{' selectTriples? '}';
-
-fromClause: 'FROM' SCHEMA_IDENTIFIER;
-whereClause: 'WHERE'? groupGraphPattern;
-
+selectClause: 'SELECT' '{' selectTriples? '}';
+// The og sparql grammar allows omiting the WHERE keyword, but that ain't happening here.
+whereClause: 'WHERE' graphPattern;
 solutionModifier: orderClause? limitOffsetClauses?;
 
 orderClause: 'ORDER' 'BY' orderCondition+;
@@ -17,32 +14,26 @@ orderCondition
     : (('ASC' | 'DESC') brackettedExpression)
     | (constraint | variable)
     ;
-
 limitOffsetClauses: (limitClause offsetClause?) | (offsetClause limitClause?);
 limitClause: 'LIMIT' INTEGER;
 offsetClause: 'OFFSET' INTEGER;
 
-groupGraphPattern:
-    '{' (subSelect | (triplesBlock? (
-        (graphPatternNotTriples | filter) '.'? triplesBlock?
-    )*)) '}';
-
-triplesBlock: triplesSameSubject ('.' triplesBlock?)?;
-
-graphPatternNotTriples
-    : optionalGraphPattern
-    | groupOrUnionGraphPattern
-    | inlineData
+graphPattern: '{' (subSelect | graphPatternInner) '}';
+graphPatternInner: triplesBlock? (nonTriples triplesBlock?)*;
+nonTriples
+    : unionGraphPattern
+    | optionalGraphPattern
+    | filter
+    | inlineValues
     ;
-optionalGraphPattern: 'OPTIONAL' groupGraphPattern;
-groupOrUnionGraphPattern: groupGraphPattern (('UNION' | 'MINUS') groupGraphPattern)*;
-inlineData: 'VALUES' dataBlock;
-dataBlock: variable '{' constant* '}';
-
+unionGraphPattern: graphPattern (('UNION' | 'MINUS') graphPattern)*;
+optionalGraphPattern: 'OPTIONAL' graphPattern;
 filter: 'FILTER' constraint;
 constraint: brackettedExpression;
+inlineValues: 'VALUES' variable '{' constant* '}';
 
 selectTriples: triplesSameSubject ('.' selectTriples?)?;
+triplesBlock: triplesSameSubject ('.' triplesBlock?)?;
 triplesSameSubject: term propertyListNotEmpty;
 propertyListNotEmpty: verb objectList (';' (verb objectList)?)*;
 
@@ -87,6 +78,8 @@ aggregationFunction
     | 'MAX'
     ;
 
+// The and operator is evaluated first, then or, then the comparison operators.
+// The reason is that and is like multiplication while or is like addition.
 expression: conditionalOrExpression;
 conditionalOrExpression: conditionalAndExpression ('||' conditionalAndExpression)*;
 conditionalAndExpression: valueLogical ('&&' valueLogical)*;
@@ -114,7 +107,6 @@ string: STRING_LITERAL_SINGLE | STRING_LITERAL_DOUBLE;
 // LEXER RULES
 
 SCHEMA_MORPHISM: (PN_CHARS)+;
-SCHEMA_IDENTIFIER: (PN_CHARS)+;
 VARIABLE: '?' VARNAME;
 INTEGER: DIGIT+;
 DECIMAL: DIGIT* '.' DIGIT+;

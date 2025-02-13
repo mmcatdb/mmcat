@@ -65,30 +65,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelectGraphPattern(QuerycatParser.SelectGraphPatternContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelectGraphPattern(QuerycatParser.SelectGraphPatternContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFromClause(QuerycatParser.FromClauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFromClause(QuerycatParser.FromClauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterWhereClause(QuerycatParser.WhereClauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -173,37 +149,49 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) { }
+	@Override public void enterGraphPattern(QuerycatParser.GraphPatternContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) { }
+	@Override public void exitGraphPattern(QuerycatParser.GraphPatternContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTriplesBlock(QuerycatParser.TriplesBlockContext ctx) { }
+	@Override public void enterGraphPatternInner(QuerycatParser.GraphPatternInnerContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTriplesBlock(QuerycatParser.TriplesBlockContext ctx) { }
+	@Override public void exitGraphPatternInner(QuerycatParser.GraphPatternInnerContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGraphPatternNotTriples(QuerycatParser.GraphPatternNotTriplesContext ctx) { }
+	@Override public void enterNonTriples(QuerycatParser.NonTriplesContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGraphPatternNotTriples(QuerycatParser.GraphPatternNotTriplesContext ctx) { }
+	@Override public void exitNonTriples(QuerycatParser.NonTriplesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterUnionGraphPattern(QuerycatParser.UnionGraphPatternContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUnionGraphPattern(QuerycatParser.UnionGraphPatternContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -216,42 +204,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOptionalGraphPattern(QuerycatParser.OptionalGraphPatternContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterGroupOrUnionGraphPattern(QuerycatParser.GroupOrUnionGraphPatternContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGroupOrUnionGraphPattern(QuerycatParser.GroupOrUnionGraphPatternContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterInlineData(QuerycatParser.InlineDataContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInlineData(QuerycatParser.InlineDataContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterDataBlock(QuerycatParser.DataBlockContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDataBlock(QuerycatParser.DataBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -281,6 +233,18 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInlineValues(QuerycatParser.InlineValuesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInlineValues(QuerycatParser.InlineValuesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterSelectTriples(QuerycatParser.SelectTriplesContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -288,6 +252,18 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelectTriples(QuerycatParser.SelectTriplesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTriplesBlock(QuerycatParser.TriplesBlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTriplesBlock(QuerycatParser.TriplesBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

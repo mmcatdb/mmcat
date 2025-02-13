@@ -44,7 +44,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     @Override public SelectClause visitSelectClause(QuerycatParser.SelectClauseContext ctx) {
-        final var graphTriples = ctx.selectGraphPattern().selectTriples();
+        final var graphTriples = ctx.selectTriples();
         final List<TermTree<String>> triples = graphTriples == null
             ? List.of()
             : visitSelectTriples(graphTriples).triples;
@@ -52,12 +52,33 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new SelectClause(triples);
     }
 
+    private record SelectTriplesList(List<TermTree<String>> triples) implements ParserNode {}
+
+    @Override public SelectTriplesList visitSelectTriples(QuerycatParser.SelectTriplesContext ctx) {
+        final TermTree<String> sameSubjectTriples = visitTriplesSameSubject(ctx.triplesSameSubject());
+
+        final var moreTriplesNode = ctx.selectTriples();
+        final List<TermTree<String>> moreTriples = moreTriplesNode == null
+            ? List.of()
+            : visitSelectTriples(moreTriplesNode).triples;
+
+        final var allTriples = Stream.concat(
+            Stream.of(sameSubjectTriples),
+            moreTriples.stream()
+        ).toList();
+
+        return new SelectTriplesList(allTriples);
+    }
+
     @Override public WhereClause visitWhereClause(QuerycatParser.WhereClauseContext ctx) {
         // TODO if the pattern is null (or empty? - basically just nested UNION), use the first group's pattern instead.
         // The antlr file probably needs an update tho ...
-        final var pattern = visitGroupGraphPattern(ctx.groupGraphPattern());
 
-        // TODO nested clauses
+        if (ctx.graphPattern().subSelect() != null)
+            throw GeneralException.message("Subqueries are not supported yet");
+
+        final var pattern = visitGraphPatternInner(ctx.graphPattern().graphPatternInner());
+
         return new WhereClause(
             ClauseType.Where,
             List.of(),
@@ -66,20 +87,34 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         );
     }
 
-    private record GroupGraphPattern(
+    private record GraphPatternInner(
         List<TermTree<Signature>> termTrees,
         List<Filter> filters
     ) implements ParserNode {}
 
-    @Override public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
+    @Override public GraphPatternInner visitGraphPatternInner(QuerycatParser.GraphPatternInnerContext ctx) {
         final List<TermTree<Signature>> termTrees = ctx.triplesBlock().stream()
             .flatMap(tb -> visitTriplesBlock(tb).triples.stream())
             .toList();
-        final List<Filter> filters = ctx.filter().stream()
+
+        final List<Filter> filters = ctx.nonTriples().stream()
             .map(f -> visit(f).asFilter())
             .toList();
 
-        return new GroupGraphPattern(termTrees, filters);
+        return new GraphPatternInner(termTrees, filters);
+    }
+
+    @Override public ParserNode visitNonTriples(QuerycatParser.NonTriplesContext ctx) {
+        if (ctx.filter() != null)
+            return visitFilter(ctx.filter());
+
+        // TODO
+        throw GeneralException.message("Other non triples are not supported yet");
+    }
+
+    @Override public ParserNode visitFilter(QuerycatParser.FilterContext ctx) {
+        final var computation = visit(ctx.constraint()).asTerm().asComputation();
+        return new Filter(computation);
     }
 
     private record WhereTermTrees(List<TermTree<Signature>> triples) implements ParserNode {}
@@ -127,24 +162,6 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         catch (NumberFormatException e) {
             throw ParsingException.signature(edge);
         }
-    }
-
-    private record SelectTriplesList(List<TermTree<String>> triples) implements ParserNode {}
-
-    @Override public SelectTriplesList visitSelectTriples(QuerycatParser.SelectTriplesContext ctx) {
-        final TermTree<String> sameSubjectTriples = visitTriplesSameSubject(ctx.triplesSameSubject());
-
-        final var moreTriplesNode = ctx.selectTriples();
-        final List<TermTree<String>> moreTriples = moreTriplesNode == null
-            ? List.of()
-            : visitSelectTriples(moreTriplesNode).triples;
-
-        final var allTriples = Stream.concat(
-            Stream.of(sameSubjectTriples),
-            moreTriples.stream()
-        ).toList();
-
-        return new SelectTriplesList(allTriples);
     }
 
     @Override public TermTree<String> visitTriplesSameSubject(QuerycatParser.TriplesSameSubjectContext ctx) {
@@ -272,11 +289,6 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new Term(new Constant(builder.toString()));
     }
 
-    @Override public ParserNode visitFilter(QuerycatParser.FilterContext ctx) {
-        final var computation = visit(ctx.constraint()).asTerm().asComputation();
-        return new Filter(computation);
-    }
-
     @Override public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {
         final var children = ctx.children;
 
@@ -298,7 +310,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         throw GeneralException.message("You done goofed");
     }
 
-    @Override public Term visitDataBlock(QuerycatParser.DataBlockContext ctx) {
+    @Override public Term visitInlineValues(QuerycatParser.InlineValuesContext ctx) {
         final List<Expression> arguments = new ArrayList<>();
 
         final Term variableTerm = visitVariable(ctx.variable());
