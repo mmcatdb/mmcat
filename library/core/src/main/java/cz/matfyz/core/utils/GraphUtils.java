@@ -124,7 +124,7 @@ public abstract class GraphUtils {
         assert target != null;
 
         if (source.equals(target))
-            return new TreePath<>(List.of(), List.of());
+            return new TreePath<T>(List.of(), List.of());
 
         final var sourceToRoot = computePathToRoot(source);
         final var targetToRoot = computePathToRoot(target);
