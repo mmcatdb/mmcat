@@ -17,6 +17,7 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategory';
 import { ActionDetailPage, actionLoader, type ActionLoaderData, ActionsPage, ActionsPageOverview } from '@/pages/category/ActionsPage';
 import { AddActionPage } from '@/components/schema-categories/AddActionPage';
+import { OverviewCategoryIndex } from '@/pages/category/OverviewPage';
 import { JobDetailPage, JobsPage, RunsPageOverview } from '@/pages/category/JobsPage';
 
 type MappingLoaderData = {
@@ -110,9 +111,7 @@ export const router = createBrowserRouter([
                     {
                         index: true,
                         id: routes.category.index.id,
-                        loader: evocatLoader,
-                        Component: SchemaCategoryEditor,
-                        // handle: { breadcrumb: 'Overview' },
+                        Component: OverviewCategoryIndex,
                     },
                     {
                         id: routes.category.editor.id,
@@ -158,7 +157,6 @@ export const router = createBrowserRouter([
                         id: routes.category.actions.id,
                         path: routes.category.actions.path,
                         Component: ActionsPage,
-                        // TODO: loader
                         handle: { breadcrumb: 'Actions' },
                         children: [
                             {
