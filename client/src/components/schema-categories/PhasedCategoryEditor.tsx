@@ -20,7 +20,7 @@ export function PhasedEditor({ evocat, state, dispatch, className }: PhasedEdito
     const phase = state.editor.phase;
 
     return (
-        <div className={cn('border p-3 flex flex-col gap-3', className)}>
+        <div className={cn('border p-3 flex flex-col gap-3 bg-background', className)}>
             {components[phase]({ evocat, state, dispatch })}
         </div>
     );

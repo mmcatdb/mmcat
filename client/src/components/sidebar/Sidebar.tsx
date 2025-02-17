@@ -103,7 +103,7 @@ function SidebarItemDisplay({
                 key={item.route}
                 to={item.route}
                 className={cn('flex items-center px-3 py-3 mx-2 rounded-md',
-                    isActive ? 'text-blue-600 font-semibold' : '',
+                    isActive ? 'text-blue-500 font-bold' : '',
                     theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100',
                 )}
             >

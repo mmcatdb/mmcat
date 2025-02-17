@@ -92,7 +92,7 @@ function SelectionCard({ state, dispatch }: SelectionCardProps) {
     }
 
     return (
-        <div className='min-w-[200px] p-3 rounded-lg bg-black space-y-3'>
+        <div className='min-w-[200px] p-3 rounded-lg bg-background space-y-3'>
             {state.selectedNodeIds.size > 0 && (
                 <div>
                     <div className='flex items-center justify-between pb-1'>
