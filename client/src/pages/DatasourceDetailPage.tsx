@@ -117,7 +117,7 @@ function DatasourceDetail() {
     }
 
     function handleLabelChange(newLabel: string) {
-        setDatasource((prev) => ({ ...prev, label: newLabel } as Datasource));
+        setDatasource(prev => ({ ...prev, label: newLabel } as Datasource));
     }
 
     function cancelEditing() {
@@ -190,7 +190,7 @@ function DatasourceDetail() {
                     <Input
                         label='Datasource Label'
                         value={datasource.label}
-                        onChange={(e) => handleLabelChange(e.target.value)}
+                        onChange={e => handleLabelChange(e.target.value)}
                         className='mb-5'
                     />
                     <form className='grid grid-cols-1 gap-4'>
@@ -220,7 +220,7 @@ function DatasourceDetail() {
                 <Button 
                     size='sm'
                     variant='bordered'
-                    onPress={() => setisConfigurationShown((prev) => !prev)}
+                    onPress={() => setisConfigurationShown(prev => !prev)}
                     className={cn('border-blue-500',
                         theme === 'dark' ? 'text-blue-400' : 'text-blue-700',
                     )}

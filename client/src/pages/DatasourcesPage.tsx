@@ -12,9 +12,7 @@ import { ErrorPage, LoadingPage } from './errorPages';
 
 export function DatasourcesPage() {
     return (
-        <div>
-            <Outlet />
-        </div>
+        <Outlet />
     );
 }
 
@@ -73,7 +71,7 @@ function useDatasources() {
     }, []);
 
     function addDatasource(newDatasource: Datasource) {
-        setDatasources((prevDatasources) => [ ...prevDatasources, newDatasource ]);
+        setDatasources(prevDatasources => [ ...prevDatasources, newDatasource ]);
     }
 
     async function deleteDatasource(id: string) {
@@ -84,8 +82,8 @@ function useDatasources() {
             return;
         }
 
-        setDatasources((prevDatasources) =>
-            prevDatasources.filter((datasource) => datasource.id !== id),
+        setDatasources(prevDatasources =>
+            prevDatasources.filter(datasource => datasource.id !== id),
         );
     }
 

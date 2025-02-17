@@ -7,9 +7,14 @@ import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 import { cn } from './utils';
+import { useLocation } from 'react-router-dom';
 
 export function RootLayout() {
     const { theme, isCollapsed } = usePreferences().preferences;
+    const location = useLocation(); // Get current route
+
+    // A hack to determine if we are on the editor page, adjust layout accordingly
+    const isEditorPage = location.pathname.includes('/editor');
 
     return (
         <div className={cn('h-screen overflow-hidden text-foreground bg-background', theme)}>
@@ -18,14 +23,20 @@ export function RootLayout() {
                 <div
                     className={cn(
                         'flex flex-col flex-grow transition-all duration-200',
-                        isCollapsed ? 'ml-16' : 'ml-64',
+                        isCollapsed ? 'ml-16' : 'ml-64', theme,
                     )}
                 >
                     <CommonNavbar />
-                    <main className='flex-grow relative overflow-hidden'>
-                        <div className='absolute inset-0 overflow-y-auto'>
-                            <div className='w-full max-w-screen-xl mx-auto p-6'>
+                    <main className='flex-grow relative'>
+                        <div className={cn('absolute inset-0', isEditorPage ? 'overflow-hidden flex-grow h-full' : 'overflow-y-auto')}>
+                            <div
+                                className={cn(
+                                    'relative flex-grow mx-auto',
+                                    isEditorPage ? 'h-full' : 'max-w-screen-xl p-6 overflow-y-auto',
+                                )}
+                            >
                                 <Outlet />
+                                {/* <SchemaCategoryEditor /> */}
                             </div>
                         </div>
                     </main>
@@ -42,7 +53,7 @@ function CommonNavbar() {
         <Navbar
             className={clsx(
                 'z-20 w-full h-12 border-b',
-                theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+                theme === 'dark' ? 'border-zinc-700' : 'border-zinc-300',
             )}
             isBlurred={false}
             maxWidth='full'
@@ -145,7 +156,7 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
         <div className={className}>
             <Switch
                 isSelected={showTableIDs}
-                onChange={(e) => handleChange(e.target.checked)}
+                onChange={e => handleChange(e.target.checked)}
                 size='sm'
             >
                 <p className='text-small'>Show Table IDs</p>

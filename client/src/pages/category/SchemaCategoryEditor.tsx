@@ -27,32 +27,17 @@ export function SchemaCategoryEditor() {
 
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
 
-    // TODO undo/redo has to be done through some event system, not directly in the reducer.
-    // The reason is that the reducer has to be a pure function, only the event system can handle side effects.
+    return (<>
+        <EditorGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
 
-    return (
-        <div>
-            <SchemaCategoryContext category={evocatRef.current.category} />
-            <h1>Schema category {evocatRef.current.category.label} overview</h1>
-            <p>
-                Some text.
-            </p>
-            <p>
-                updates: {evocatRef.current.updates.length}
-            </p>
-
-            <div className='relative'>
-                <EditorGraphDisplay state={state} dispatch={dispatch} className='w-full min-h-[600px]' />
-                {(state.selectedNodeIds.size > 0 || state.selectedEdgeIds.size > 0) && (
-                    <div className='z-20 absolute top-2 right-2'>
-                        <SelectionCard evocat={evocatRef.current} state={state} dispatch={dispatch} />
-                    </div>
-                )}
+        {(state.selectedNodeIds.size > 0 || state.selectedEdgeIds.size > 0) && (
+            <div className='z-20 absolute top-2 right-2'>
+                <SelectionCard evocat={evocatRef.current} state={state} dispatch={dispatch} />
             </div>
-
-            <PhasedEditor evocat={evocatRef.current} state={state} dispatch={dispatch} className='mt-3 w-80'/>
-        </div>
-    );
+        )}
+        
+        <PhasedEditor evocat={evocatRef.current} state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2'/>
+    </>);
 }
 
 export async function evocatLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {

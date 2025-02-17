@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 
 export function QueryingPage() {
-    const { categoryId } = useParams<'categoryId'>();
+    const { categoryId } = useParams<{ categoryId: string }>();
 
     return (
         <div>

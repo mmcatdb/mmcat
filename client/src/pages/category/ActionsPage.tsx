@@ -56,7 +56,7 @@ export function ActionsPageOverview() {
             return;
         }
         
-        setActions((prev) => prev.filter((action) => action.id !== actionId));
+        setActions(prev => prev.filter(action => action.id !== actionId));
         toast.success('Action deleted successfully');
     }
 
@@ -118,7 +118,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     }
 
     async function createRun(actionId: string) {
-        setLoadingMap((prev) => ({ ...prev, [actionId]: true }));
+        setLoadingMap(prev => ({ ...prev, [actionId]: true }));
 
         const response = await api.jobs.createRun({ actionId });
 
@@ -130,7 +130,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
             console.log('New Run:', response.data);
         }
 
-        setLoadingMap((prev) => ({ ...prev, [actionId]: false }));
+        setLoadingMap(prev => ({ ...prev, [actionId]: false }));
     }
 
     const navigate = useNavigate();
@@ -184,7 +184,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                     ]}
                 </TableHeader>
                 <TableBody emptyContent={'No mappings to display.'}>
-                    {sortedActions.map((action) => (
+                    {sortedActions.map(action => (
                         <TableRow
                             key={action.id}
                             className={cn('cursor-pointer',
@@ -397,7 +397,7 @@ function renderDatasourceElement({ payload, categoryId }: renderDatasourceElemen
     if (payload.type === ActionType.RSDToCategory) {
         return (
             <div className='space-y-1'>
-                {payload.datasources?.map((ds) => (
+                {payload.datasources?.map(ds => (
                     <Link
                         key={ds.id}
                         to={`/category/${categoryId}/datasources/${ds.id}`}
@@ -418,7 +418,7 @@ function renderMappings(payload : JobPayload) {
         payload.type === ActionType.ModelToCategory ||
         payload.type === ActionType.CategoryToModel
     ) 
-        return payload.mappings?.map((m) => m.kindName).join(', ') || 'N/A';
+        return payload.mappings?.map(m => m.kindName).join(', ') || 'N/A';
     
     return 'N/A';
 }

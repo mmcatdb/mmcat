@@ -36,11 +36,11 @@ export function RunsPageOverview() {
 
         setError(false);
 
-        const jobsFromServer = response.data.map((job) => Job.fromServer(job, category));
+        const jobsFromServer = response.data.map(job => Job.fromServer(job, category));
         const grouped = groupJobsByRunId(jobsFromServer);
 
         // Compare states and update if needed
-        setGroupedJobs((prev) => {
+        setGroupedJobs(prev => {
             const hasChanges = detectChanges(prev, grouped);
             return hasChanges ? grouped : prev;
         });
@@ -89,7 +89,7 @@ export function RunsPageOverview() {
     const classNameTR = cn('px-4 py-2 text-left border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300');
 
     return (
-        <div className='p-4'>
+        <>
             <h1 className='text-2xl font-bold mb-4'>Jobs in Runs</h1>
             <table className={cn('table-auto w-full border-collapse border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300')}>
                 <thead>
@@ -113,7 +113,7 @@ export function RunsPageOverview() {
                     )}
                 </tbody>
             </table>
-        </div>
+        </>
     );
 }
 
@@ -139,7 +139,7 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
             <td className={classNameTD}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
             <td className={classNameTD}>
                 <div className='flex items-center gap-2'>
-                    {newestJobs.map((job) => (
+                    {newestJobs.map(job => (
                         <Tooltip
                             key={job.id}
                             content={
@@ -193,12 +193,12 @@ export function JobDetailPage() {
     const navigate = useNavigate();
 
     async function fetchJobDetails() {
-        setJobStatus((prev) => ({ ...prev, error: false }));
+        setJobStatus(prev => ({ ...prev, error: false }));
         const response = await api.jobs.getJob({ id: jobId });
-        setJobStatus((prev) => ({ ...prev, loading: false }));
+        setJobStatus(prev => ({ ...prev, loading: false }));
 
         if (!response.status) {
-            setJobStatus((prev) => ({ ...prev, error: true }));
+            setJobStatus(prev => ({ ...prev, error: true }));
             return;
         }
 
@@ -206,7 +206,7 @@ export function JobDetailPage() {
         setJob(fetchedJob);
 
         if ([ JobState.Finished, JobState.Failed ].includes(fetchedJob.state)) 
-            setJobStatus((prev) => ({ ...prev, polling: false }));
+            setJobStatus(prev => ({ ...prev, polling: false }));
         
     }
 
@@ -231,14 +231,14 @@ export function JobDetailPage() {
     }, [ jobId, jobStatus.polling ]);
 
     async function handleEnableJob() {
-        setJobStatus((prev) => ({ ...prev, polling: true }));
+        setJobStatus(prev => ({ ...prev, polling: true }));
         const result = await api.jobs.enableJob({ id: job?.id });
         if (result.status) 
             setJob(Job.fromServer(result.data, category));
     }
 
     async function handleDisableJob() {
-        setJobStatus((prev) => ({ ...prev, polling: true }));
+        setJobStatus(prev => ({ ...prev, polling: true }));
         const result = await api.jobs.disableJob({ id: job?.id });
         if (result.status) 
             setJob(Job.fromServer(result.data, category));
@@ -246,7 +246,7 @@ export function JobDetailPage() {
 
     async function handleRestartJob() {
         const result = await api.jobs.createRestartedJob({ id: job?.id });
-        setJobStatus((prev) => ({ ...prev, polling: true }));
+        setJobStatus(prev => ({ ...prev, polling: true }));
         if (result.status) 
             navigate(`/category/${category.id}/jobs/${result.data.id}`);
         

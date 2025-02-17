@@ -46,7 +46,7 @@ export function Sidebar() {
             </div>
 
             <div className='flex flex-col'>
-                {dynamicSidebarItems.map((item) => (
+                {dynamicSidebarItems.map(item => (
                     <SidebarItemDisplay key={item.label} item={item} currentPath={location.pathname} />
 
                 ))}
@@ -87,7 +87,7 @@ function SidebarItemDisplay({
         return (
             <p
                 key={`separator-${item.label}`}
-                className={`font-semibold px-4 py-3 transition-all whitespace-nowrap duration-300 overflow-hidden`}
+                className={`font-semibold px-4 py-3 whitespace-nowrap overflow-hidden`}
             >
                 {isCollapsed ? item.collapsedLabel : item.label}
             </p>

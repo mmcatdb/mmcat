@@ -39,14 +39,12 @@ export function DatasourcesTable({ datasources, loading, error, onDeleteDatasour
     }
 
     return (
-        <div>
-            <DatasourceTable
-                datasources={sortedDatasources}
-                onDeleteDatasource={onDeleteDatasource}
-                sortDescriptor={sortDescriptor}
-                onSortChange={handleSortChange}
-            />
-        </div>
+        <DatasourceTable
+            datasources={sortedDatasources}
+            onDeleteDatasource={onDeleteDatasource}
+            sortDescriptor={sortDescriptor}
+            onSortChange={handleSortChange}
+        />
     );
 }
 
@@ -95,77 +93,75 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
         }
     }
 
-    return (
-        <div>
-            <Table
-                aria-label='Datasource Table'
-                onRowAction={handleRowAction}
-                sortDescriptor={sortDescriptor}
-                onSortChange={onSortChange}
-            >
-                <TableHeader>
-                    {/* Conditional contruct of columns before rendering */}
-                    {[
-                        ...(showTableIDs
-                            ? [
-                                <TableColumn key='id' allowsSorting>
+    return (<>
+        <Table
+            aria-label='Datasource Table'
+            onRowAction={handleRowAction}
+            sortDescriptor={sortDescriptor}
+            onSortChange={onSortChange}
+        >
+            <TableHeader>
+                {/* Conditional contruct of columns before rendering */}
+                {[
+                    ...(showTableIDs
+                        ? [
+                            <TableColumn key='id' allowsSorting>
                                     ID
-                                </TableColumn>,
-                            ]
-                            : []),
-                        <TableColumn key='label' allowsSorting>
+                            </TableColumn>,
+                        ]
+                        : []),
+                    <TableColumn key='label' allowsSorting>
                             Label
-                        </TableColumn>,
-                        <TableColumn key='type' allowsSorting>
+                    </TableColumn>,
+                    <TableColumn key='type' allowsSorting>
                             Type
-                        </TableColumn>,
-                        // <TableColumn key='settings'>Settings</TableColumn>,
-                        <TableColumn key='actions'>Actions</TableColumn>,
-                    ]}
-                </TableHeader>
-                <TableBody emptyContent={'No rows to display.'}>
-                    {datasources.map((datasource) => (
-                        <TableRow
-                            key={datasource.id}
-                            className={cn('cursor-pointer', 
-                                theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
-                        >
-                            {[
-                                ...(showTableIDs
-                                    ? [ <TableCell key='id'>{datasource.id}</TableCell> ]
-                                    : []),
-                                <TableCell key='label'>{datasource.label}</TableCell>,
-                                <TableCell key='type'>{datasource.type}</TableCell>,
-                                // <TableCell key='settings' className='break-all'>
-                                //     {JSON.stringify(datasource.settings, null, 2)}
-                                // </TableCell>,
-                                <TableCell key='actions'>
-                                    <Button
-                                        isIconOnly
-                                        aria-label='Delete'
-                                        color='danger'
-                                        variant='light'
-                                        onPress={() => handleDeleteClick(datasource.id)}
-                                    >
-                                        <TrashIcon className='w-5 h-5' />
-                                    </Button>
-                                </TableCell>,
-                            ]}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableColumn>,
+                    // <TableColumn key='settings'>Settings</TableColumn>,
+                    <TableColumn key='actions'>Actions</TableColumn>,
+                ]}
+            </TableHeader>
+            <TableBody emptyContent={'No rows to display.'}>
+                {datasources.map(datasource => (
+                    <TableRow
+                        key={datasource.id}
+                        className={cn('cursor-pointer', 
+                            theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
+                    >
+                        {[
+                            ...(showTableIDs
+                                ? [ <TableCell key='id'>{datasource.id}</TableCell> ]
+                                : []),
+                            <TableCell key='label'>{datasource.label}</TableCell>,
+                            <TableCell key='type'>{datasource.type}</TableCell>,
+                            // <TableCell key='settings' className='break-all'>
+                            //     {JSON.stringify(datasource.settings, null, 2)}
+                            // </TableCell>,
+                            <TableCell key='actions'>
+                                <Button
+                                    isIconOnly
+                                    aria-label='Delete'
+                                    color='danger'
+                                    variant='light'
+                                    onPress={() => handleDeleteClick(datasource.id)}
+                                >
+                                    <TrashIcon className='w-5 h-5' />
+                                </Button>
+                            </TableCell>,
+                        ]}
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
 
-            <ConfirmationModal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                onConfirm={confirmDelete}
-                title='Confirm Deletion?'
-                message='This will permanently delete the selected datasource.'
-                confirmButtonText='Yes, Delete'
-                cancelButtonText='Cancel'
-                confirmButtonColor='danger'
-            />
-        </div>
-    );
+        <ConfirmationModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            onConfirm={confirmDelete}
+            title='Confirm Deletion?'
+            message='This will permanently delete the selected datasource.'
+            confirmButtonText='Yes, Delete'
+            cancelButtonText='Cancel'
+            confirmButtonColor='danger'
+        />
+    </>);
 }

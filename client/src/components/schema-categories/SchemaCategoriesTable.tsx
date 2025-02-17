@@ -39,14 +39,12 @@ export function SchemaCategoriesTable({ categories, loading, error, onDeleteCate
     }
 
     return (
-        <div>
-            <CategoriesTable
-                categories={sortedCategories}
-                onDeleteCategory={onDeleteCategory}
-                sortDescriptor={sortDescriptor}
-                onSortChange={handleSortChange}
-            />
-        </div>
+        <CategoriesTable
+            categories={sortedCategories}
+            onDeleteCategory={onDeleteCategory}
+            sortDescriptor={sortDescriptor}
+            onSortChange={handleSortChange}
+        />
     );
 }
 
@@ -85,72 +83,70 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
     }
 
 
-    return (
-        <div>
-            <Table 
-                aria-label='Schema Categories Table'
-                onRowAction={handleRowAction}
-                sortDescriptor={sortDescriptor}
-                onSortChange={onSortChange}
-            >
-                <TableHeader>
-                    {[
-                        ...(showTableIDs
-                            ? [
-                                <TableColumn key='id' allowsSorting>
+    return (<>
+        <Table 
+            aria-label='Schema Categories Table'
+            onRowAction={handleRowAction}
+            sortDescriptor={sortDescriptor}
+            onSortChange={onSortChange}
+        >
+            <TableHeader>
+                {[
+                    ...(showTableIDs
+                        ? [
+                            <TableColumn key='id' allowsSorting>
                                     ID
-                                </TableColumn>,
-                            ]
-                            : []),
-                        <TableColumn key='label' allowsSorting>
+                            </TableColumn>,
+                        ]
+                        : []),
+                    <TableColumn key='label' allowsSorting>
                             Label
-                        </TableColumn>,
-                        <TableColumn key='version' allowsSorting>
+                    </TableColumn>,
+                    <TableColumn key='version' allowsSorting>
                             System Version
-                        </TableColumn>,
-                        <TableColumn key='actions'>Actions</TableColumn>,
-                    ]}
-                </TableHeader>
-                <TableBody emptyContent={'No rows to display.'}>
-                    {categories.map((category) => (
-                        <TableRow
-                            key={category.id}
-                            className={cn('cursor-pointer', 
-                                theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
-                        >
-                            {[
-                                ...(showTableIDs
-                                    ? [ <TableCell key='id'>{category.id}</TableCell> ]
-                                    : []),
-                                <TableCell key='label'>{category.label}</TableCell>,
-                                <TableCell key='version'>{category.systemVersionId}</TableCell>,
-                                <TableCell key='actions'>
-                                    <Button
-                                        isIconOnly
-                                        aria-label='Delete'
-                                        color='danger'
-                                        variant='light'
-                                        onPress={() => handleDeleteClick(category.id)}
-                                    >
-                                        <TrashIcon className='w-5 h-5' />
-                                    </Button>
-                                </TableCell>,
-                            ]}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableColumn>,
+                    <TableColumn key='actions'>Actions</TableColumn>,
+                ]}
+            </TableHeader>
+            <TableBody emptyContent={'No rows to display.'}>
+                {categories.map(category => (
+                    <TableRow
+                        key={category.id}
+                        className={cn('cursor-pointer', 
+                            theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
+                    >
+                        {[
+                            ...(showTableIDs
+                                ? [ <TableCell key='id'>{category.id}</TableCell> ]
+                                : []),
+                            <TableCell key='label'>{category.label}</TableCell>,
+                            <TableCell key='version'>{category.systemVersionId}</TableCell>,
+                            <TableCell key='actions'>
+                                <Button
+                                    isIconOnly
+                                    aria-label='Delete'
+                                    color='danger'
+                                    variant='light'
+                                    onPress={() => handleDeleteClick(category.id)}
+                                >
+                                    <TrashIcon className='w-5 h-5' />
+                                </Button>
+                            </TableCell>,
+                        ]}
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
 
-            <ConfirmationModal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                onConfirm={confirmDelete}
-                title='Confirm Deletion?'
-                message='This will permanently delete the selected schema category.'
-                confirmButtonText='Yes, Delete'
-                cancelButtonText='Cancel'
-                confirmButtonColor='danger'
-            />
-        </div>
-    );
+        <ConfirmationModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            onConfirm={confirmDelete}
+            title='Confirm Deletion?'
+            message='This will permanently delete the selected schema category.'
+            confirmButtonText='Yes, Delete'
+            cancelButtonText='Cancel'
+            confirmButtonColor='danger'
+        />
+    </>);
 }

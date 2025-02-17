@@ -5,8 +5,6 @@ import { api } from '@/api';
 import type { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
-import { Button } from '@nextui-org/react';
-import { AddIcon } from '@/components/icons/PlusIcon';
 import { EmptyState } from '@/components/TableCommon';
 import { LoadingPage, ReloadPage } from '../errorPages';
 
@@ -102,13 +100,6 @@ export function DatasourcesInCategoryPage() {
 
             <div className='flex items-center justify-between mt-10'>
                 <h1 className='text-xl'>Other Datasources</h1>
-                <Button 
-                    onPress={() => setModalOpen(true)} 
-                    color='primary' 
-                    startContent={<AddIcon />}
-                >
-                    Add Datasource
-                </Button>
             </div>
 
             <div className='mt-5'>
