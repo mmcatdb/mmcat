@@ -132,10 +132,13 @@ export function getMousePosition(event: { clientX: number, clientY: number }, ca
 }
 
 export function computeCoordinates(nodes: Node[], width: number, height: number): Coordinates {
-    const minX = Math.min(...nodes.map(node => node.position.x));
-    const maxX = Math.max(...nodes.map(node => node.position.x));
-    const minY = Math.min(...nodes.map(node => node.position.y));
-    const maxY = Math.max(...nodes.map(node => node.position.y));
+    const xPositions = nodes.length === 0 ? [ 0 ] : nodes.map(node => node.position.x);
+    const yPositions = nodes.length === 0 ? [ 0 ] : nodes.map(node => node.position.y);
+
+    const minX = Math.min(...xPositions);
+    const maxX = Math.max(...xPositions);
+    const minY = Math.min(...yPositions);
+    const maxY = Math.max(...yPositions);
 
     const scale = Math.min(width / (100 + maxX - minX), height / (100 + maxY - minY));
 
