@@ -1,6 +1,8 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
 import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
+import { cn } from './utils';
+import { usePreferences } from './PreferencesProvider';
 
 // Sorting of specified data
 // using SortDescriptor for NextUI's 2.0 Table onSortChange()
@@ -85,11 +87,12 @@ export function EmptyState({
     message,
     buttonText,
     onButtonClick,
-    className = 'text-center border border-zinc-500 p-6',
     buttonClassName = 'px-4 py-2',
 }: EmptyStateProps) {
+    const { theme } = usePreferences().preferences;
+
     return (
-        <div className={className}>
+        <div className={cn('text-center border p-6 rounded-lg', theme === 'dark' ? 'border-zinc-700' : 'border-zinc-200')}>
             <p className='text-lg mb-4'>{message}</p>
             <Button
                 className={buttonClassName}

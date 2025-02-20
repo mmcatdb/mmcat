@@ -313,7 +313,7 @@ export function JobDetailPage() {
                     <div
                         className={cn(
                             'border rounded-lg p-4',
-                            theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300',
+                            theme === 'dark' ? 'border-zinc-500 bg-zinc-900' : 'border-zinc-300 bg-zinc-50',
                         )}
                     >
                         <p>
@@ -348,7 +348,7 @@ export function JobDetailPage() {
                     ) : (
                         <div className='mt-5 text-red-500'>
                             <span className='font-bold'>Error: {job.error?.name}</span>
-                            <div className={cn('p-4 mt-2 rounded-md text-sm border border-red-500',
+                            <div className={cn('p-4 mt-2 rounded-lg text-sm border border-red-500',
                                 theme === 'dark' ? 'bg-zinc-900 text-zinc-50' : 'bg-zinc-50 text-zinc-700',
                             )}>
                                 {JSON.stringify(job.error?.data)}

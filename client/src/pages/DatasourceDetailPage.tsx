@@ -164,7 +164,7 @@ function DatasourceDetail() {
             {!isEditing ? (
                 // View Mode
                 <>
-                    <pre className={cn('p-4 rounded-md text-sm',
+                    <pre className={cn('p-4 rounded-lg text-sm',
                         theme === 'dark' ? 'bg-zinc-900 text-zinc-50' : 'bg-zinc-50 text-zinc-700',
                     )}>
                         {JSON.stringify(datasource.settings, null, 2)}
