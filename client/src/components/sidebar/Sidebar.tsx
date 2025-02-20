@@ -36,7 +36,7 @@ export function Sidebar() {
     return (
         <div
             className={cn(
-                'fixed border-r h-screen z-10 transition-all duration-300 ease-in-out',
+                'border-r fixed h-screen z-10 transition-all duration-300 ease-in-out',
                 theme === 'dark' ? 'border-zinc-800' : 'border-zinc-200',
                 isCollapsed ? 'w-16' : 'w-64',
             )}

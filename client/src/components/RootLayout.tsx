@@ -22,7 +22,7 @@ export function RootLayout() {
                 <Sidebar />
                 <div
                     className={cn(
-                        'flex flex-col flex-grow transition-all duration-200',
+                        'flex flex-col flex-grow transition-all duration-300',
                         isCollapsed ? 'ml-16' : 'ml-64', theme,
                     )}
                 >
