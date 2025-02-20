@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, matchPath, useParams } from 'react-router-dom';
-import { Button, Tooltip } from '@nextui-org/react';
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from '@nextui-org/react';
 import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
 import { usePreferences } from '../PreferencesProvider';
@@ -28,7 +28,6 @@ type SidebarItem = NormalSidebarItem | SeparatorSidebarItem;
 export function Sidebar() {
     const { categoryId } = useParams<'categoryId'>();
     const { theme, isCollapsed } = usePreferences().preferences;
-    const [ isSettingsOpen, setIsSettingsOpen ] = useState(false);
 
     const dynamicSidebarItems: SidebarItem[] = categoryId
         ? categorySidebarItems(categoryId)
@@ -55,42 +54,50 @@ export function Sidebar() {
             </div>
 
             <div className={cn('absolute bottom-4')}>
-                <SettingsItemDisplay onOpen={() => setIsSettingsOpen(true)} />
+                <SettingsItemDisplay theme={theme} isCollapsed={isCollapsed} />
             </div>
-
-            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </div>
     );
 }
 
-function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-    if (!isOpen) 
-        return null;
+function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapsed: boolean }) {
+    const [ isSettingsOpen, setIsSettingsOpen ] = useState(false);
 
-    return (
-        // Trying to imitate HeroUI modal
-        // TBI: add trapping keyboard or change to modal, overlay all components
-        <div className='fixed inset-0 flex items-center justify-center bg-black/50'>
-            <div className='bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-md p-6 relative'>
-                {/* Trying to imitate HeroUI modal close button */}
-                <button 
-                    onClick={onClose} 
-                    className='absolute top-1 right-1 flex items-center justify-center w-7 h-7 rounded-full 
-                            text-zinc-500 dark:text-zinc-400 dark:hover:text-zinc-300
-                            hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                >
-                    ✕
-                </button>
-
-                <h2 className='text-lg font-bold black pb-6'>Settings</h2>
-                <p className='pb-2'>Customize your application preferences here.</p>
-                <ShowTableIDsSwitch />
-                <div className='flex justify-end pt-2'>
-                    <Button onPress={onClose} color='primary'>Close</Button>
-                </div>
-            </div>
-        </div>
+    const openSettingsButton = (
+        <button
+            onClick={() => setIsSettingsOpen(true)}
+            className={cn(
+                'flex items-center px-3 py-3 mx-2 rounded-md',
+                theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100',
+            )}
+        >
+            <Cog6ToothIcon className='w-6 h-6' />
+            {!isCollapsed && <span className='px-4'>Settings</span>}
+        </button>
     );
+
+    return (<>
+        {isCollapsed ? (
+            <Tooltip content='Settings' placement='right' showArrow>
+                {openSettingsButton}
+            </Tooltip>
+        ) : (
+            openSettingsButton
+        )}
+
+        <Modal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} placement='center'>
+            <ModalContent>
+                <ModalHeader>Settings</ModalHeader>
+                <ModalBody>
+                    <p>Customize your application preferences here.</p>
+                    <ShowTableIDsSwitch />
+                </ModalBody>
+                <ModalFooter>
+                    <Button onPress={() => setIsSettingsOpen(false)} color='primary'>Close</Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
+    </>);
 }
 
 function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
@@ -163,40 +170,6 @@ function SidebarItemDisplay({ item }: {
     default:
         throw new Error(`Unhandled SidebarItem type: ${JSON.stringify(item)}`);
     }
-}
-
-function SettingsItemDisplay({ onOpen }: { onOpen: () => void }) {
-    const { theme, isCollapsed } = usePreferences().preferences;
-
-    const linkContent = (
-        <button
-            onClick={onOpen}
-            className={cn(
-                'flex items-center px-3 py-3 mx-2 rounded-md',
-                theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100',
-            )}
-        >
-            <span className='flex-shrink-0'>
-                <Cog6ToothIcon className=' w-6 h-6' />
-            </span>
-
-            <span
-                className={`whitespace-nowrap  ${
-                    isCollapsed ? 'w-0 opacity-0' : 'pl-4 pr-6 w-auto opacity-100'
-                }`}
-            >
-                Settings
-            </span>
-        </button>
-    );
-
-    return isCollapsed ? (
-        <Tooltip delay={200} closeDelay={0} key={'settings'} placement='right' content={'Settings'} showArrow>
-            {linkContent}
-        </Tooltip>
-    ) : (
-        linkContent
-    );
 }
 
 function generalSidebarItems(): SidebarItem[] {
