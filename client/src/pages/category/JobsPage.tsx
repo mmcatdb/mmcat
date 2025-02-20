@@ -86,17 +86,25 @@ export function RunsPageOverview() {
     if (error) 
         return <ReloadPage onReload={fetchJobs} />;
 
-    const classNameTR = cn('px-4 py-2 text-left border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300');
-
+    const classNameTH = cn(
+        'px-4 py-3 text-left font-semibold bg-zinc-100 dark:bg-zinc-800 border-b-4',
+        theme === 'dark' ? 'border-zinc-900 text-zinc-200' : 'border-zinc-300 text-zinc-700',
+    );
+    
     return (
         <>
             <h1 className='text-2xl font-bold mb-4'>Jobs in Runs</h1>
-            <table className={cn('table-auto w-full border-collapse border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300')}>
+            <table
+                className={cn(
+                    'w-full border-collapse rounded-xl overflow-hidden shadow-sm',
+                    theme === 'dark' ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-300 bg-white',
+                )}
+            >
                 <thead>
                     <tr>
-                        {showTableIDs && <th className={classNameTR}>Run ID</th>}
-                        <th className={classNameTR}>Run Label</th>
-                        <th className={classNameTR}>Jobs</th>
+                        {showTableIDs && <th className={classNameTH}>Run ID</th>}
+                        <th className={classNameTH}>Run Label</th>
+                        <th className={classNameTH}>Jobs</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,7 +114,7 @@ export function RunsPageOverview() {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={3} className='text-center p-4'>
+                            <td colSpan={3} className='text-center p-4 text-zinc-500 dark:text-zinc-400'>
                                 No runs available.
                             </td>
                         </tr>
@@ -115,6 +123,7 @@ export function RunsPageOverview() {
             </table>
         </>
     );
+    
 }
 
 function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
@@ -131,13 +140,11 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
         }, {} as Record<number, Job>),
     );
 
-    const classNameTD = cn('border px-4 py-2', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300');
-
     return (
         <tr className={cn(theme === 'dark' ? 'hover:bg-zinc-800' : 'hover:bg-zinc-100')}>
-            {showTableIDs && <td className={classNameTD}>{runId}</td>}
-            <td className={classNameTD}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
-            <td className={classNameTD}>
+            {showTableIDs && <td className={'px-4 py-2'}>{runId}</td>}
+            <td className={'px-4 py-2'}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
+            <td className={'px-4 py-2'}>
                 <div className='flex items-center gap-2'>
                     {newestJobs.map(job => (
                         <Tooltip
@@ -306,7 +313,7 @@ export function JobDetailPage() {
                     <div
                         className={cn(
                             'border rounded-lg p-4',
-                            theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300',
+                            theme === 'dark' ? 'border-zinc-500 bg-zinc-900' : 'border-zinc-300 bg-zinc-50',
                         )}
                     >
                         <p>
@@ -341,7 +348,7 @@ export function JobDetailPage() {
                     ) : (
                         <div className='mt-5 text-red-500'>
                             <span className='font-bold'>Error: {job.error?.name}</span>
-                            <div className={cn('p-4 mt-2 rounded-md text-sm border border-red-500',
+                            <div className={cn('p-4 mt-2 rounded-lg text-sm border border-red-500',
                                 theme === 'dark' ? 'bg-zinc-900 text-zinc-50' : 'bg-zinc-50 text-zinc-700',
                             )}>
                                 {JSON.stringify(job.error?.data)}

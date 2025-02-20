@@ -52,9 +52,9 @@ export function AddActionPage() {
 
         // Add a new step based on the current type
         if (type === ActionType.ModelToCategory || type === ActionType.CategoryToModel) 
-            setSteps((prevSteps) => [ ...prevSteps, { type, datasourceId: '', mappingIds: [] } ]);
+            setSteps(prevSteps => [ ...prevSteps, { type, datasourceId: '', mappingIds: [] } ]);
         else if (type === ActionType.RSDToCategory) 
-            setSteps((prevSteps) => [ ...prevSteps, { type, datasourceIds: [] } ]);
+            setSteps(prevSteps => [ ...prevSteps, { type, datasourceIds: [] } ]);
     }
 
     function removeStep(index: number) {
@@ -62,7 +62,7 @@ export function AddActionPage() {
             toast.error('At least one step is required.');
             return;
         }
-        setSteps((prevSteps) => prevSteps.filter((_, i) => i !== index));
+        setSteps(prevSteps => prevSteps.filter((_, i) => i !== index));
     }
 
     async function handleSubmit() {
@@ -104,14 +104,14 @@ export function AddActionPage() {
                 <Input
                     label='Label'
                     value={label}
-                    onChange={(e) => setLabel(e.target.value)}
+                    onChange={e => setLabel(e.target.value)}
                     placeholder='Enter action label'
                 />
             </div>
             <div className='mb-4'>
                 <SelectActionType
                     actionType={type}
-                    setActionType={(type) => setType(type)}
+                    setActionType={type => setType(type)}
                 />
             </div>
             <h2 className='text-lg font-semibold mb-2'>Steps</h2>
@@ -123,7 +123,7 @@ export function AddActionPage() {
                         type={type}
                         datasources={datasources}
                         mappings={logicalModels}
-                        updateStep={(updatedStep) => setSteps((prev) => prev.map((s, i) => (i === index ? updatedStep : s)))}
+                        updateStep={updatedStep => setSteps(prev => prev.map((s, i) => (i === index ? updatedStep : s)))}
                         removeStep={() => removeStep(index)}
                         steps={steps}
                     />
@@ -164,12 +164,12 @@ function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) 
             label='Action Type'
             placeholder='Select an Action Type'
             selectedKeys={actionType ? new Set([ actionType ]) : new Set()}
-            onSelectionChange={(e) => {
+            onSelectionChange={e => {
                 const selectedType = Array.from(e as Set<ActionType>)[0];
                 setActionType(selectedType);
             }}
         >
-            {(item) => <SelectItem key={item.value}>{item.label}</SelectItem>}
+            {item => <SelectItem key={item.value}>{item.label}</SelectItem>}
         </Select>
     );
 }
@@ -194,17 +194,17 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
         };
 
         modelToCategoryStep.type = type;
-        const datasourceMappings = mappings.find((m) => m.datasource.id === modelToCategoryStep.datasourceId);
+        const datasourceMappings = mappings.find(m => m.datasource.id === modelToCategoryStep.datasourceId);
 
         return (
-            <div className='mb-4 p-2 border rounded flex justify-between items-center'>
+            <div className='mb-4 p-2 border rounded-lg flex justify-between items-center border-zinc-500'>
                 <Select
                     label='Datasource'
                     selectedKeys={
                         modelToCategoryStep.datasourceId ? new Set([ modelToCategoryStep.datasourceId ]) : new Set()
                     }
                     placeholder='Select a datasource'
-                    onSelectionChange={(e) => {
+                    onSelectionChange={e => {
                         const selectedDatasourceId = Array.from(e as Set<string>)[0];
                         updateStep({
                             ...modelToCategoryStep,
@@ -214,7 +214,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                     }}
                     className='pr-2'
                 >
-                    {datasources.map((ds) => (
+                    {datasources.map(ds => (
                         <SelectItem key={ds.id}>{ds.label}</SelectItem>
                     ))}
                 </Select>
@@ -224,7 +224,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                         selectedKeys={new Set(modelToCategoryStep.mappingIds)}
                         placeholder='Select mappings'
                         selectionMode='multiple'
-                        onSelectionChange={(e) => {
+                        onSelectionChange={e => {
                             const selectedMappingIds = Array.from(e as Set<string>);
                             updateStep({
                                 ...modelToCategoryStep,
@@ -233,7 +233,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                         }}
                         className='pr-2'
                     >
-                        {datasourceMappings.mappings.map((mapping) => (
+                        {datasourceMappings.mappings.map(mapping => (
                             <SelectItem key={mapping.id}>{mapping.kindName}</SelectItem>
                         ))}
                     </Select>
@@ -267,7 +267,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                     label='Datasources'
                     selectedKeys={new Set(rsdToCategoryStep.datasourceIds)}
                     placeholder='Select datasources'
-                    onSelectionChange={(e) => {
+                    onSelectionChange={e => {
                         const selectedDatasourceIds = Array.from(e as Set<string>);
                         updateStep({
                             ...rsdToCategoryStep,
@@ -276,7 +276,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                     }}
                     className='pr-2'
                 >
-                    {datasources.map((ds) => (
+                    {datasources.map(ds => (
                         <SelectItem key={ds.id}>{ds.label}</SelectItem>
                     ))}
                 </Select>
