@@ -20,7 +20,7 @@ export type CategoryEdge = Edge & {
     metadata: MetadataMorphism;
 };
 
-/** Transforms the category to a reactive state that can be rendered by React.  */
+/** Transforms the category to a reactive state that can be rendered by React. */
 export function categoryToGraph(category: Category): CategoryGraph {
     const nodes = category.getObjexes().map(objex => {
         const schema = objex.schema;

@@ -2,6 +2,7 @@ import { Node, NodeSequence } from '@/types/categoryGraph';
 import type { Filter } from '@/types/categoryGraph/PathMarker';
 import type { Signature } from '@/types/identifiers';
 
+/** @deprecated */
 export class SequenceSignature {
     readonly sequence: NodeSequence;
 

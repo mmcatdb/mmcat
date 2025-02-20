@@ -1,33 +1,37 @@
-import { type ReactNode, type MouseEvent, useMemo } from 'react';
+import { type ReactNode, type MouseEvent, useMemo, useCallback } from 'react';
 import { cn } from '../utils';
-import { type GraphOptions } from '../graph/graphEngine';
+import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { EdgeMap, getEdgeDegree } from '../graph/graphUtils';
 
-type EditorGraphDisplayProps = Readonly<{
+type EditCategoryGraphDisplayProps = Readonly<{
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
     options?: GraphOptions;
     className?: string;
 }>;
 
-export function EditorGraphDisplay({ state, dispatch, options, className }: EditorGraphDisplayProps) {
+export function EditCategoryGraphDisplay({ state, dispatch, options, className }: EditCategoryGraphDisplayProps) {
     const bundledEdges = useMemo(() => EdgeMap.bundleEdges([ ...(new EdgeMap(state.graph.edges)).values() ]), [ state.graph.edges ]);
 
+    const graphDispatch = useCallback((event: GraphEvent) => dispatch({ type: 'graph', event }), [ dispatch ]);
+
     return (
-        <GraphProvider dispatch={dispatch} graph={state.graph} options={options}>
+        <GraphProvider dispatch={graphDispatch} graph={state.graph} options={options}>
             <CanvasDisplay className={className}>
                 {state.graph.nodes.map(node => (
                     <NodeDisplay key={node.id} node={node} state={state} dispatch={dispatch} />
                 ))}
+
                 <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='absolute w-full h-full pointer-events-none'>
                     {bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
                         <EdgeDisplay key={edge.id} edge={edge} degree={getEdgeDegree(edge, index, bundle.length)} state={state} dispatch={dispatch} />
                     )))}
                 </svg>
+
                 <SelectionBox />
             </CanvasDisplay>
         </GraphProvider>
@@ -62,7 +66,7 @@ type NodeDisplayProps = Readonly<{
 function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragging } = useNode(node);
 
-    const isSelected = state.selectedNodeIds.has(node.id);
+    const isSelected = state.selection.nodeIds.has(node.id);
 
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
@@ -86,6 +90,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
                 onClick={onClick}
                 onMouseDown={onMouseDown}
             />
+
             <div className='w-fit h-0'>
                 <span className='relative -left-1/2 -top-10 font-medium'>
                     {node.metadata.label}
@@ -105,7 +110,7 @@ type EdgeDisplayProps = Readonly<{
 function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);
 
-    const isSelected = state.selectedEdgeIds.has(edge.id);
+    const isSelected = state.selection.edgeIds.has(edge.id);
 
     function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();

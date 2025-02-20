@@ -4,6 +4,7 @@ import type { RootPropertyFromServer } from '../serverTypes';
 import type { GraphChildProperty } from './compositeTypes';
 import { SequenceSignature } from './SequenceSignature';
 
+/** @deprecated */
 export class GraphRootProperty {
     name: StaticName;
     _subpaths: GraphChildProperty[];

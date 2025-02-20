@@ -1,7 +1,7 @@
 import { type Dispatch, type MouseEvent as ReactMouseEvent } from 'react';
 import { computeCoordinates, computeEdgePath, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getEdgeDegree, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
 
-export type GraphInput = {
+export type Graph = {
     nodes: Node[];
     edges: Edge[];
 };
@@ -34,19 +34,21 @@ export const defaultGraphOptions: FullGraphOptions = {
 };
 
 /** Commont type for all events the graph can emit. */
-export type GraphAction = {
-    type: 'graph';
-} & ({
-    operation: 'move';
+export type GraphEvent = GraphMoveEvent | GraphSelectEvent;
+
+export type GraphMoveEvent = {
+    type: 'move';
     nodeId: string;
     position: Position;
-} | {
-    operation: 'select';
+};
+
+export type GraphSelectEvent = {
+    type: 'select';
     nodeIds: string[];
     edgeIds: string[];
     /** A special key like ctrl or shift was held during the event. */
     isSpecialKey: boolean;
-});
+}
 
 /** The internal state of the graph engine that is propagated to the UI. */
 export type ReactiveGraphState = {
@@ -55,7 +57,7 @@ export type ReactiveGraphState = {
     select?: SelectState;
 };
 
-export function createInitialGraphState(graph: GraphInput, options: GraphOptions = {}): ReactiveGraphState {
+export function createInitialGraphState(graph: Graph, options: GraphOptions = {}): ReactiveGraphState {
     const fullOptions = { ...defaultGraphOptions, ...options };
     const coordinates = computeCoordinates(graph.nodes, fullOptions.initialWidth, fullOptions.initialHeight);
 
@@ -67,8 +69,8 @@ export class GraphEngine {
     private edgeMap: EdgeMap;
 
     constructor(
-        input: GraphInput,
-        private readonly dispatch: Dispatch<GraphAction>,
+        input: Graph,
+        private readonly dispatch: Dispatch<GraphEvent>,
         /** A local copy of the state. Contains only those properties that should be reactive (i.e., the UI should change when they change). */
         private state: ReactiveGraphState,
         /** Any change to the state should be immediatelly propagated up. */
@@ -108,7 +110,7 @@ export class GraphEngine {
         };
     }
 
-    update(input: GraphInput) {
+    update(input: Graph) {
         console.log('UPDATE graph engine');
 
         this.nodeMap = new Map(input.nodes.map(node => [ node.id, { ...node } ]));
@@ -392,7 +394,7 @@ export class GraphEngine {
             event.stopPropagation();
             if (drag.type === 'node') {
                 const node = this.nodeMap.get(drag.nodeId)!;
-                this.dispatch({ type: 'graph', operation: 'move', nodeId: node.id, position: node.position });
+                this.dispatch({ type: 'move', nodeId: node.id, position: node.position });
             }
 
             this.updateState({ drag: undefined });
@@ -421,7 +423,7 @@ export class GraphEngine {
 
             const isSpecialKey = event.shiftKey || event.ctrlKey;
 
-            this.dispatch({ type: 'graph', operation: 'select', nodeIds, edgeIds, isSpecialKey });
+            this.dispatch({ type: 'select', nodeIds, edgeIds, isSpecialKey });
         }
     }
 }

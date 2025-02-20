@@ -15,6 +15,8 @@ export default defineConfig(({ mode }) => {
                 inject: {
                     data: {
                         app_version: process.env.npm_package_version,
+                        head: defineHead(env),
+                        abc: 'aaaaa',
                     },
                 },
             }),
@@ -30,3 +32,15 @@ export default defineConfig(({ mode }) => {
         },
     };
 });
+
+function defineHead(env: Record<string, string>): string {
+    let head = '';
+
+    if (env.NODE_ENV === 'development' && (!env.VITE_REACT_SCAN_OFF || env.VITE_REACT_SCAN_OFF === 'false')) {
+        head += `
+            <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script>
+        `;
+    }
+
+    return head;
+}

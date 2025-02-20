@@ -4,6 +4,7 @@ import type { SimplePropertyFromServer } from '../serverTypes';
 import type { GraphParentProperty } from './compositeTypes';
 import type { SequenceSignature } from './SequenceSignature';
 
+/** @deprecated */
 export class GraphSimpleProperty {
     name: Name;
     _signature: SequenceSignature;

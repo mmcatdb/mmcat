@@ -38,6 +38,7 @@ export type Filter = {
     function: FilterFunction | FilterFunction[];
 };
 
+/** @deprecated */
 export class PathMarker {
     // It's actually important this is a stack and not a queue, because the paths has to be traversed in one go.
     rootNode: Node;

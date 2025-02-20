@@ -1,25 +1,27 @@
-import { useReducer, useRef } from 'react';
+import { useMemo, useReducer, useRef, useState } from 'react';
 import { api } from '@/api';
 import { Category } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { Portal, portals } from '@/components/common';
-import { logicalModelsFromServer } from '@/types/datasource';
-import { EditorGraphDisplay } from '@/components/schema-categories/EditorGraphDisplay';
+import { type LogicalModel, logicalModelsFromServer } from '@/types/datasource';
+import { EditCategoryGraphDisplay } from '@/components/schema-categories/EditCategoryGraphDisplay';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
 import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
+import { onSuccess } from '@/types/api/result';
 
 export function SchemaCategoryEditor() {
     const loaderData = useLoaderData() as Awaited<ReturnType<typeof evocatLoader>>;
+
+    const logicalModels = useMemo(() => logicalModelsFromServer(loaderData.datasources, loaderData.mappings), [ loaderData.datasources, loaderData.mappings ]);
 
     // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
     const evocatRef = useRef<Evocat>();
     if (!evocatRef.current) {
         const updates = loaderData.updates.map(SchemaUpdate.fromServer);
-        const logicalModels = logicalModelsFromServer(loaderData.datasources, loaderData.mappings);
         const category = Category.fromServer(loaderData.category, logicalModels);
 
         evocatRef.current = new Evocat(category, updates);
@@ -28,15 +30,19 @@ export function SchemaCategoryEditor() {
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
 
     return (<>
-        <EditorGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
+        <EditCategoryGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
 
-        {(state.selectedNodeIds.size > 0 || state.selectedEdgeIds.size > 0) && (
+        {(state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) && (
             <div className='z-20 absolute top-2 right-2'>
-                <SelectionCard evocat={evocatRef.current} state={state} dispatch={dispatch} />
+                <SelectionCard state={state} dispatch={dispatch} />
             </div>
         )}
-        
-        <PhasedEditor evocat={evocatRef.current} state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2'/>
+
+        <PhasedEditor state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2' />
+
+        <div className='absolute bottom-2 right-2'>
+            <SaveButton state={state} dispatch={dispatch} logicalModels={logicalModels} />
+        </div>
     </>);
 }
 
@@ -76,13 +82,12 @@ function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
     );
 }
 
-type SelectionCardProps = Readonly<{
-    evocat: Evocat;
+type StateDispatchProps = Readonly<{
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
 }>;
 
-function SelectionCard({ state, dispatch }: SelectionCardProps) {
+function SelectionCard({ state, dispatch }: StateDispatchProps) {
     function unselectNode(nodeId: string) {
         dispatch({ type: 'select', nodeId, operation: 'remove' });
     }
@@ -91,9 +96,11 @@ function SelectionCard({ state, dispatch }: SelectionCardProps) {
         dispatch({ type: 'select', edgeId, operation: 'remove' });
     }
 
+    const { nodeIds, edgeIds } = state.selection;
+
     return (
         <div className='min-w-[200px] p-3 rounded-lg bg-background space-y-3'>
-            {state.selectedNodeIds.size > 0 && (
+            {nodeIds.size > 0 && (
                 <div>
                     <div className='flex items-center justify-between pb-1'>
                         <h3 className='font-semibold'>Selected objects</h3>
@@ -103,7 +110,7 @@ function SelectionCard({ state, dispatch }: SelectionCardProps) {
                     </div>
 
                     <div className='flex flex-col'>
-                        {[ ...state.selectedNodeIds.values() ].map(id => {
+                        {[ ...nodeIds.values() ].map(id => {
                             const node = state.graph.nodes.find(node => node.id === id)!;
 
                             return (
@@ -121,7 +128,7 @@ function SelectionCard({ state, dispatch }: SelectionCardProps) {
                 </div>
             )}
 
-            {state.selectedEdgeIds.size > 0 && (
+            {edgeIds.size > 0 && (
                 <div>
                     <div className='flex items-center justify-between pb-1'>
                         <h3 className='font-semibold'>Selected morphisms</h3>
@@ -131,7 +138,7 @@ function SelectionCard({ state, dispatch }: SelectionCardProps) {
                     </div>
 
                     <div className='flex flex-col'>
-                        {[ ...state.selectedEdgeIds.values() ].map(id => {
+                        {[ ...edgeIds.values() ].map(id => {
                             const edge = state.graph.edges.find(edge => edge.id === id)!;
 
                             return (
@@ -149,5 +156,26 @@ function SelectionCard({ state, dispatch }: SelectionCardProps) {
                 </div>
             )}
         </div>
+    );
+}
+
+function SaveButton({ state, logicalModels }: StateDispatchProps & { logicalModels: LogicalModel[] }) {
+    const [ isFetching, setIsFetching ] = useState(false);
+
+    async function save() {
+        setIsFetching(true);
+
+        await state.evocat.update(async edit => {
+            const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
+            return onSuccess(response, fromServer => Category.fromServer(fromServer, logicalModels));
+        });
+
+        setIsFetching(false);
+    }
+
+    return (
+        <Button color='primary' onClick={save} isLoading={isFetching}>
+            Save
+        </Button>
     );
 }

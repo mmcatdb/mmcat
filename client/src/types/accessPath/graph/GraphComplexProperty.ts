@@ -4,6 +4,7 @@ import type { Node } from '@/types/categoryGraph';
 import type { SequenceSignature } from './SequenceSignature';
 import type { ComplexPropertyFromServer } from '../serverTypes';
 
+/** @deprecated */
 export class GraphComplexProperty {
     name: Name;
     _signature: SequenceSignature;

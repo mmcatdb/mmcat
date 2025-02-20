@@ -1,5 +1,5 @@
 import { createContext, type MouseEvent, useCallback, useContext, useMemo, useRef } from 'react';
-import { type ReactiveGraphState, type GraphEngine, type GraphInput } from './graphEngine';
+import { type ReactiveGraphState, type GraphEngine, type Graph } from './graphEngine';
 import { computeEdgePath, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
 
 type GraphContext = {
@@ -72,7 +72,7 @@ export function useNode(node: Node) {
     };
 }
 
-export function useEdge(edge: Edge, degree: number, graph: GraphInput) {
+export function useEdge(edge: Edge, degree: number, graph: Graph) {
     const { state, engine } = useGraphContext();
     const ref = useRef<SVGPathElement | null>(null);
 

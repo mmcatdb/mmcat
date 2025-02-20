@@ -1,4 +1,4 @@
-import { type Category, type ObjexDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism, isPositionEqual } from '@/types/schema';
+import { type Category, type ObjexDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism, isPositionEqual, type Position } from '@/types/schema';
 import type { Result } from '../api/result';
 import { CreateMorphism, CreateObjex, Composite, DeleteMorphism, DeleteObjex, type SMO, UpdateMorphism, UpdateObjex } from '../schema/operation';
 import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
@@ -195,20 +195,27 @@ export class Evocat {
         this.addOperation(operation);
     }
 
-    updateObjex(oldSchemaObjex: SchemaObjex, update: {
+    updateObjex(key: Key, update: {
         label?: string;
         ids?: ObjexIds | null;
+        position?: Position;
     }) {
-        const newSchemaObjex = oldSchemaObjex.update(update);
-        if (newSchemaObjex) {
-            const operation = UpdateObjex.create(newSchemaObjex, oldSchemaObjex);
+        const objex = this._category.getObjex(key);
+        const { schema, metadata } = objex;
+
+        const newSchema = schema.update(update);
+        if (newSchema) {
+            const operation = UpdateObjex.create(newSchema, schema);
             this.addOperation(operation);
         }
 
-        // FIXME
-        const objex = this._category.getObjex(oldSchemaObjex.key);
-        if (update.label && update.label !== objex.metadata.label)
-            objex.metadata = new MetadataObjex(update.label, objex.metadata.position);
+        const newLabel = update.label ?? metadata.label;
+        const newPosition = update.position ?? metadata.position;
+        const doUpdateMetadata = (newLabel !== metadata.label) || !isPositionEqual(newPosition, metadata.position);
+        if (doUpdateMetadata)
+            objex.metadata = new MetadataObjex(newLabel, newPosition);
+
+        // TODO Something here? Or is this enough?
     }
 
     createMorphism(def: MorphismDefinition) {

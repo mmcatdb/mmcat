@@ -10,6 +10,7 @@ const defaultConfig: Config = {
     selectNodes: true,
 };
 
+/** @deprecated */
 export class NodeSequence {
     _nodes: Node[];
     _edges: DirectedEdge[];

@@ -4,10 +4,8 @@ import { EditorPhase, type EditCategoryDispatch, type EditCategoryState } from '
 import { cn } from '../utils';
 import { type FormPosition, toFormNumber, toPosition } from '@/types/utils/common';
 import { type CategoryNode, categoryToGraph } from './categoryGraph';
-import { type Evocat } from '@/types/evocat/Evocat';
 
 type StateDispatchProps = Readonly<{
-    evocat: Evocat;
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
 }>;
@@ -16,52 +14,53 @@ type PhasedEditorProps = StateDispatchProps & Readonly<{
     className?: string;
 }>;
 
-export function PhasedEditor({ evocat, state, dispatch, className }: PhasedEditorProps) {
-    const phase = state.editor.phase;
-
+export function PhasedEditor({ state, dispatch, className }: PhasedEditorProps) {
     return (
         <div className={cn('border p-3 flex flex-col gap-3 bg-background', className)}>
-            {components[phase]({ evocat, state, dispatch })}
+            {components[state.phase]({ state, dispatch })}
         </div>
     );
 }
 
 const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element> = {
-    default: Default,
-    createObject: CreateObject,
+    [EditorPhase.default]: DefaultDisplay,
+    [EditorPhase.createObjex]: CreateObjexDisplay,
 };
 
-function Default({ evocat, state, dispatch }: StateDispatchProps) {
-    const singleSelectedNode = (state.selectedNodeIds.size === 1 && state.selectedEdgeIds.size === 0)
-        ? state.graph.nodes.find(node => state.selectedNodeIds.has(node.id))
+function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
+    const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
+        ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
         : undefined;
 
-    function deleteNode(node: CategoryNode) {
-        evocat.deleteObjex(node.schema.key);
-        const graph = categoryToGraph(evocat.category);
+    function deleteObjex(node: CategoryNode) {
+        state.evocat.deleteObjex(node.schema.key);
+        const graph = categoryToGraph(state.evocat.category);
 
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
 
     return (<>
         <h3>Default</h3>
-        <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createObject })}>Create object</Button>
+
+        <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createObjex })}>Create object</Button>
+
         {singleSelectedNode && (<>
             <div>
                 Selected: <span className='font-semibold'>{singleSelectedNode.metadata.label}</span>
             </div>
-            <Button color='danger' onClick={() => deleteNode(singleSelectedNode)}>Delete</Button>
+
+            <Button color='danger' onClick={() => deleteObjex(singleSelectedNode)}>Delete</Button>
         </>)}
     </>);
 }
 
-function CreateObject({ evocat, dispatch }: StateDispatchProps) {
+function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const [ label, setLabel ] = useState('');
     const [ position, setPosition ] = useState<FormPosition>({ x: 0, y: 0 });
 
-    function finish() {
-        evocat.createObjex({ label, position: toPosition(position) });
-        const graph = categoryToGraph(evocat.category);
+    function createObjex() {
+        state.evocat.createObjex({ label, position: toPosition(position) });
+        const graph = categoryToGraph(state.evocat.category);
 
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
@@ -96,7 +95,7 @@ function CreateObject({ evocat, dispatch }: StateDispatchProps) {
                 Cancel
             </Button>
 
-            <Button color='primary' onClick={finish} disabled={label === ''}>
+            <Button color='primary' onClick={createObjex} disabled={label === ''}>
                 Finish
             </Button>
         </div>

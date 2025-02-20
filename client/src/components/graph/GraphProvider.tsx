@@ -1,12 +1,12 @@
 import { type ReactNode, useEffect, useMemo, useState, type Dispatch, useRef } from 'react';
-import { createInitialGraphState, defaultGraphOptions, type GraphAction, GraphEngine, type GraphOptions, type GraphInput, type ReactiveGraphState } from './graphEngine';
+import { createInitialGraphState, defaultGraphOptions, GraphEngine, type GraphOptions, type Graph, type ReactiveGraphState, type GraphEvent } from './graphEngine';
 import { graphContext } from './graphHooks';
 
 type GraphProviderProps = Readonly<{
     /** The public graph that the graph exposes. Its updates are reflected in the graph display. */
-    graph: GraphInput;
+    graph: Graph;
     /** Event handler for things like position change or select. */
-    dispatch: Dispatch<GraphAction>;
+    dispatch: Dispatch<GraphEvent>;
     /** User preferences. The graph engine is restarted whenever they change, so make sure they are constant or at least memoized! */
     options?: GraphOptions;
     children: ReactNode;
@@ -24,7 +24,7 @@ export function GraphProvider({ graph, dispatch, options, children }: GraphProvi
     );
 }
 
-function useGraphEngine(graph: GraphInput, dispatch: Dispatch<GraphAction>, options?: GraphOptions) {
+function useGraphEngine(graph: Graph, dispatch: Dispatch<GraphEvent>, options?: GraphOptions) {
     const [ state, setState ] = useState<ReactiveGraphState>(() => createInitialGraphState(graph, options));
     const engine = useMemo(() => new GraphEngine(graph, dispatch, state, setState, { ...defaultGraphOptions, ...options }), [ options ]);
 
