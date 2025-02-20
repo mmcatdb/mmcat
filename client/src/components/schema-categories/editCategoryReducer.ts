@@ -93,7 +93,7 @@ export type PhaseAction = {
     graph?: CategoryGraph;
 }
 
-function phase(state: EditCategoryState, { graph, phase }: PhaseAction): EditCategoryState {
+function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCategoryState {
     if (!graph)
         return { ...state, phase };
 

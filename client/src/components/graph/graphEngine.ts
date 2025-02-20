@@ -33,7 +33,7 @@ export const defaultGraphOptions: FullGraphOptions = {
     initialHeight: 600,
 };
 
-/** Commont type for all events the graph can emit. */
+/** Common type for all events the graph can emit. */
 export type GraphEvent = GraphMoveEvent | GraphSelectEvent;
 
 export type GraphMoveEvent = {

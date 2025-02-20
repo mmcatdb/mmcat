@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import clsx from 'clsx';
 import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
-import { usePreferences, type Theme } from './PreferencesProvider';
+import { usePreferences } from './PreferencesProvider';
 import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
@@ -10,31 +10,27 @@ import { cn } from './utils';
 import { useLocation } from 'react-router-dom';
 
 export function RootLayout() {
-    const { theme, isCollapsed } = usePreferences().preferences;
+    const { isCollapsed } = usePreferences().preferences;
     const location = useLocation(); // Get current route
 
     // A hack to determine if we are on the editor page, adjust layout accordingly
     const isEditorPage = location.pathname.includes('/editor');
 
     return (
-        <div className={cn('h-screen overflow-hidden text-foreground bg-background', theme)}>
+        <div className={cn('h-screen overflow-hidden text-foreground bg-background')}>
             <div className='flex h-full'>
                 <Sidebar />
-                <div
-                    className={cn(
-                        'flex flex-col flex-grow transition-all duration-200',
-                        isCollapsed ? 'ml-16' : 'ml-64', theme,
-                    )}
-                >
+                <div className={cn(
+                    'flex flex-col flex-grow transition-all duration-200',
+                    isCollapsed ? 'ml-16' : 'ml-64',
+                )}>
                     <CommonNavbar />
                     <main className='flex-grow relative'>
                         <div className={cn('absolute inset-0', isEditorPage ? 'overflow-hidden flex-grow h-full' : 'overflow-y-auto')}>
-                            <div
-                                className={cn(
-                                    'relative flex-grow mx-auto',
-                                    isEditorPage ? 'h-full' : 'max-w-screen-xl p-6 overflow-y-auto',
-                                )}
-                            >
+                            <div className={cn(
+                                'relative flex-grow mx-auto',
+                                isEditorPage ? 'h-full' : 'max-w-screen-xl p-6 overflow-y-auto',
+                            )}>
                                 <Outlet />
                                 {/* <SchemaCategoryEditor /> */}
                             </div>
@@ -114,7 +110,7 @@ type ThemeToggleProps = Readonly<{
 export function ThemeToggle({ className }: ThemeToggleProps) {
     const { preferences, setPreferences } = usePreferences();
     const { theme } = preferences;
-    const nextValue = toggleTheme(theme);
+    const nextValue = theme === 'dark' ? 'light' : 'dark';
     const label = `Switch to ${nextValue} theme`;
 
     return (
@@ -134,10 +130,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
             </Button>
         </Tooltip>
     );
-}
-
-function toggleTheme(theme: Theme) {
-    return theme === 'dark' ? 'light' : 'dark';
 }
 
 type ShowTableIDsSwitchProps = {

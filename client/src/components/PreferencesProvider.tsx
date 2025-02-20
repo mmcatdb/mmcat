@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { localStorage } from '@/types/utils/localStorage';
 
 const PREFERENCES_KEY = 'preferences';
@@ -51,6 +51,13 @@ export function PreferencesProvider({ children }: Readonly<{ children: ReactNode
         localStorage.set(PREFERENCES_KEY, toStored(preferences));
         setPreferences(preferences);
     }, []);
+
+    const isDark = preferences.theme === 'dark';
+
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', isDark);
+        document.documentElement.classList.toggle('light', !isDark);
+    }, [ isDark ]);
 
     return (
         <PreferencesContext.Provider value={{ preferences, setPreferences: setPreferencesWithStorage }}>
