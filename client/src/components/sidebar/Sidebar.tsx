@@ -1,11 +1,13 @@
-import { Link, matchPath, useLocation, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, matchPath, useParams } from 'react-router-dom';
+import { Button, Tooltip } from '@nextui-org/react';
 import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
-import { ShowTableIDsSwitch } from '../RootLayout';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/CollapseContextToggle';
-import { Tooltip } from '@nextui-org/react';
 import { cn } from '@/components/utils';
+import { ShowTableIDsSwitch } from '../RootLayout';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 type NormalSidebarItem = {
     type: 'normal';
@@ -24,9 +26,9 @@ type SeparatorSidebarItem = {
 type SidebarItem = NormalSidebarItem | SeparatorSidebarItem;
 
 export function Sidebar() {
-    const location = useLocation();
     const { categoryId } = useParams<'categoryId'>();
     const { theme, isCollapsed } = usePreferences().preferences;
+    const [ isSettingsOpen, setIsSettingsOpen ] = useState(false);
 
     const dynamicSidebarItems: SidebarItem[] = categoryId
         ? categorySidebarItems(categoryId)
@@ -34,7 +36,8 @@ export function Sidebar() {
 
     return (
         <div
-            className={cn('fixed border-r h-screen z-10 transition-all duration-300 ease-in-out',
+            className={cn(
+                'fixed border-r h-screen z-10 transition-all duration-300 ease-in-out',
                 theme === 'dark' ? 'border-zinc-800' : 'border-zinc-200',
                 isCollapsed ? 'w-16' : 'w-64',
             )}
@@ -47,17 +50,46 @@ export function Sidebar() {
 
             <div className='flex flex-col'>
                 {dynamicSidebarItems.map(item => (
-                    <SidebarItemDisplay key={item.label} item={item} currentPath={location.pathname} />
-
+                    <SidebarItemDisplay key={item.label} item={item} />
                 ))}
             </div>
 
-            <div className='absolute bottom-5 left-3 w-full'>
+            <div className={cn('absolute bottom-4')}>
+                <SettingsItemDisplay onOpen={() => setIsSettingsOpen(true)} />
+            </div>
+
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+        </div>
+    );
+}
+
+function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+    if (!isOpen) 
+        return null;
+
+    return (
+        // Trying to imitate HeroUI modal
+        // TBI: add trapping keyboard or change to modal, overlay all components
+        <div className='fixed inset-0 flex items-center justify-center bg-black/50'>
+            <div className='bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-md p-6 relative'>
+                {/* Trying to imitate HeroUI modal close button */}
+                <button 
+                    onClick={onClose} 
+                    className='absolute top-1 right-1 flex items-center justify-center w-7 h-7 rounded-full 
+                            text-zinc-500 dark:text-zinc-400 dark:hover:text-zinc-300
+                            hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                >
+                    ✕
+                </button>
+
+                <h2 className='text-lg font-bold black pb-6'>Settings</h2>
+                <p className='pb-2'>Customize your application preferences here.</p>
                 <ShowTableIDsSwitch />
+                <div className='flex justify-end pt-2'>
+                    <Button onPress={onClose} color='primary'>Close</Button>
+                </div>
             </div>
         </div>
-
-
     );
 }
 
@@ -73,12 +105,8 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
     );
 }
 
-function SidebarItemDisplay({
-    item,
-    currentPath,
-}: {
+function SidebarItemDisplay({ item }: {
     item : SidebarItem;
-    currentPath: string;
 }) {
     const { theme, isCollapsed } = usePreferences().preferences;
 
@@ -94,8 +122,12 @@ function SidebarItemDisplay({
         );
 
     case 'normal': {
-        const isMatched = item.match?.some(path => matchPath(path, currentPath));
-        const isActive = item.route === currentPath || isMatched;
+        // Get clean pathname without query params
+        const currentPathWithoutQuery = new URL(window.location.href).pathname;
+        const itemRouteWithoutQuery = new URL(item.route, window.location.origin).pathname;
+
+        const isMatched = item.match?.some(path => matchPath(path, currentPathWithoutQuery));
+        const isActive = currentPathWithoutQuery === itemRouteWithoutQuery || isMatched;
         const icon = sidebarIconMap[item.iconName];
 
         const linkContent = (
@@ -133,36 +165,68 @@ function SidebarItemDisplay({
     }
 }
 
-function generalSidebarItems(): SidebarItem[] {
-    return (
-        [
-            {
-                type: 'normal',
-                label: 'Schema categories',
-                route: routes.categories,
-                iconName: 'heart',
-            },
-            {
-                type: 'normal',
-                label: 'About',
-                route: routes.about,
-                iconName: 'lightBulb',
-            },
-            {
-                type: 'normal',
-                label: 'Datasources',
-                route: routes.datasources,
-                iconName: 'circleStack',
-                match: [ '/datasources/:id' ],
-            },
-            {
-                type: 'normal',
-                label: 'Adminer',
-                route: `${routes.adminer}?reload=true`,
-                iconName: 'codeBracketSquare',
-            },
-        ]
+function SettingsItemDisplay({ onOpen }: { onOpen: () => void }) {
+    const { theme, isCollapsed } = usePreferences().preferences;
+
+    const linkContent = (
+        <button
+            onClick={onOpen}
+            className={cn(
+                'flex items-center px-3 py-3 mx-2 rounded-md',
+                theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100',
+            )}
+        >
+            <span className='flex-shrink-0'>
+                <Cog6ToothIcon className=' w-6 h-6' />
+            </span>
+
+            <span
+                className={`whitespace-nowrap  ${
+                    isCollapsed ? 'w-0 opacity-0' : 'pl-4 pr-6 w-auto opacity-100'
+                }`}
+            >
+                Settings
+            </span>
+        </button>
     );
+
+    return isCollapsed ? (
+        <Tooltip delay={200} closeDelay={0} key={'settings'} placement='right' content={'Settings'} showArrow>
+            {linkContent}
+        </Tooltip>
+    ) : (
+        linkContent
+    );
+}
+
+function generalSidebarItems(): SidebarItem[] {
+    return [
+        {
+            type: 'normal',
+            label: 'Schema categories',
+            route: routes.categories,
+            iconName: 'heart',
+        },
+        {
+            type: 'normal',
+            label: 'About',
+            route: routes.about,
+            iconName: 'lightBulb',
+        },
+        {
+            type: 'normal',
+            label: 'Datasources',
+            route: routes.datasources,
+            iconName: 'circleStack',
+            match: [ '/datasources/:id' ],
+        },
+        {
+            type: 'normal',
+            label: 'Adminer',
+            route: `${routes.adminer}?reload=true`,
+            iconName: 'codeBracketSquare',
+        },
+    ];
 }
 
 function categorySidebarItems(categoryId: string): SidebarItem[] {
