@@ -47,7 +47,7 @@ export function Home() {
             }
 
             const newCategory = SchemaCategoryInfo.fromServer(response.data);
-            setCategories((categories) =>
+            setCategories(categories =>
                 categories ? [ ...categories, newCategory ] : [ newCategory ],
             );
 
@@ -106,7 +106,7 @@ export function Home() {
             <AddSchemaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={(label) => handleCreateSchema(label, false)}
+                onSubmit={label => handleCreateSchema(label, false)}
                 isSubmitting={isCreatingSchema}
             />
         </div>
@@ -151,7 +151,7 @@ export function AddSchemaModal({
                         label='Schema Label'
                         placeholder='Enter schema label'
                         value={label}
-                        onChange={(e) => setLabel(e.target.value)}
+                        onChange={e => setLabel(e.target.value)}
                         fullWidth
                     />
                 </ModalBody>
