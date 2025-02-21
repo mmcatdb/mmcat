@@ -57,7 +57,7 @@ export function SchemaCategoriesPage() {
             }
 
             const newCategory = SchemaCategoryInfo.fromServer(response.data);
-            setSchemaCategories((categories) =>
+            setSchemaCategories(categories =>
                 categories ? [ ...categories, newCategory ] : [ newCategory ],
             );
 
@@ -77,9 +77,9 @@ export function SchemaCategoriesPage() {
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <h1>Schema Categories</h1>
+                <h1 className='text-xl font-semibold'>Schema Categories</h1>
                 <div className='flex'>
-                    {EXAMPLE_SCHEMAS.map((example) => (
+                    {EXAMPLE_SCHEMAS.map(example => (
                         <Button
                             key={example}
                             onPress={() => handleCreateSchema(example, true)}
@@ -114,7 +114,7 @@ export function SchemaCategoriesPage() {
             <AddSchemaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={(label) => handleCreateSchema(label, false)}
+                onSubmit={label => handleCreateSchema(label, false)}
                 isSubmitting={isCreatingSchema}
             />
         </div>

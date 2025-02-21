@@ -80,7 +80,7 @@ export function DatasourcesInCategoryPage() {
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <h1 className='text-xl'>Datasources in {category.label} (with mapping)</h1>
+                <h1 className='text-xl font-bold'>Datasources in {category.label} (with mapping)</h1>
             </div>
 
             <div className='mt-5'>
@@ -99,7 +99,7 @@ export function DatasourcesInCategoryPage() {
             </div>
 
             <div className='flex items-center justify-between mt-10'>
-                <h1 className='text-xl'>Other Datasources</h1>
+                <h1 className='text-xl font-bold'>Other Datasources</h1>
             </div>
 
             <div className='mt-5'>

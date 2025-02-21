@@ -93,7 +93,7 @@ export function RunsPageOverview() {
     
     return (
         <>
-            <h1 className='text-2xl font-bold mb-4'>Jobs in Runs</h1>
+            <h1 className='text-xl font-bold mb-8'>Jobs in Runs</h1>
             <table
                 className={cn(
                     'w-full border-collapse rounded-xl overflow-hidden shadow-sm',

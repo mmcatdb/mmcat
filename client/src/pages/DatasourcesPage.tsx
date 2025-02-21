@@ -122,7 +122,7 @@ function DatasourcesPageOverviewUI({
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <h1>Datasources</h1>
+                <h1 className='text-xl font-semibold'>Datasources</h1>
                 <Button 
                     onPress={onOpenModal}
                     color='primary' 
