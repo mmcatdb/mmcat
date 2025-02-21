@@ -149,8 +149,8 @@ export class SchemaMorphism {
 }
 
 export type MorphismDefinition = {
-    domKey: Key;
-    codKey: Key;
+    domKey: Key;   // domain (source) object
+    codKey: Key;   // codomain (target) object
     min: Min;
     label: string;
     tags?: Tag[];

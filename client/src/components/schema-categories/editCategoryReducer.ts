@@ -72,9 +72,21 @@ type SelectAction = {
 } & UserSelectAction;
 
 function select(state: EditCategoryState, action: SelectAction): EditCategoryState {
+    const newSelection = updateSelectionFromUserAction(state.selection, action);
+
+    // If we are in morphism creation phase, prevent selecting more than 2 nodes, just proceed
+    if (state.phase === EditorPhase.createMorphism && newSelection.nodeIds.size > 2) 
+        return state;
+
+    // Automatically proceed when exactly two nodes are selected
+    const newPhase = (state.phase === EditorPhase.createMorphism && newSelection.nodeIds.size === 2)
+        ? EditorPhase.createMorphism
+        : state.phase;
+
     return {
         ...state,
-        selection: updateSelectionFromUserAction(state.selection, action),
+        selection: newSelection,
+        phase: newPhase,
     };
 }
 
@@ -82,7 +94,8 @@ function select(state: EditCategoryState, action: SelectAction): EditCategorySta
 
 export enum EditorPhase {
     default = 'default',
-    createObjex = 'createObjex',
+    createObjex = 'createObjex',   // Enter create schema object phase
+    createMorphism = 'createMorphism',   // Enter create morphism phase
 }
 
 export type PhaseAction = {
