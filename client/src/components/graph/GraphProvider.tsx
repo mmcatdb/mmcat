@@ -25,7 +25,7 @@ export function GraphProvider({ graph, dispatch, options, children }: GraphProvi
 }
 
 function useGraphEngine(graph: Graph, dispatch: Dispatch<GraphEvent>, options?: GraphOptions) {
-    const [ state, setState ] = useState<ReactiveGraphState>(() => createInitialGraphState(graph, options));
+    const [ state, setState ] = useState<ReactiveGraphState>(() => createInitialGraphState(graph));
     const engine = useMemo(() => new GraphEngine(graph, dispatch, state, setState, { ...defaultGraphOptions, ...options }), [ options ]);
 
     useEffect(() => {
