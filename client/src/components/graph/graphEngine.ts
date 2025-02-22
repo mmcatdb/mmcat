@@ -54,7 +54,8 @@ export type ReactiveGraphState = {
 export function createInitialGraphState(graph: Graph): ReactiveGraphState {
     return {
         // These values really don't matter, because they will be recomputed after the first render.
-        coordinates: computeCoordinates(graph.nodes, 0, 0),
+        // We just want to select something that won't break the svg path computations.
+        coordinates: computeCoordinates(graph.nodes, 1000, 1000),
     };
 }
 

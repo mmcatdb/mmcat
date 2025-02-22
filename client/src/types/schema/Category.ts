@@ -1,5 +1,5 @@
 import { UniqueIdProvider } from '@/types/utils/UniqueIdProvider';
-import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
+import { ComplexProperty, type ParentProperty } from '@/types/accessPath';
 import type { Entity, Id, VersionId } from '../id';
 import { DynamicName, Key, type KeyFromServer, Signature, type SignatureFromServer } from '../identifiers';
 import { type MetadataMorphismFromServer, type SchemaMorphism, type SchemaMorphismFromServer, Morphism } from './Morphism';

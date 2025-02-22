@@ -10,19 +10,18 @@ public interface Printer {
 
     Printer append(Printable printable);
 
-    Printer append(String str);
+    Printer append(String string);
 
-    Printer append(int i);
+    Printer append(int integer);
 
-    Printer append(Object obj);
+    Printer append(Object object);
 
     Printer remove();
 
-    Printer remove(int i);
+    Printer remove(int index);
 
     /**
      * Utility method for providing a default printer.
-     * @return
      */
     static Printer create() {
         return new LineStringBuilder(0);

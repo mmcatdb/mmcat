@@ -1,5 +1,4 @@
-import { RootProperty } from '@/types/accessPath/basic';
-import type { RootPropertyFromServer } from './accessPath/serverTypes';
+import { RootProperty, type RootPropertyFromServer } from '@/types/accessPath';
 import type { Entity, Id, VersionId } from './id';
 import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from './identifiers';
 
