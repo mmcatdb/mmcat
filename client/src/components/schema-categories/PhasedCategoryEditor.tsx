@@ -35,9 +35,12 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
         ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
         : undefined;
 
-    const twoSelectedNodes = (state.selection.nodeIds.size === 2 && state.selection.edgeIds.size === 0)
-        ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
+    const singleSelectedMorphism = (state.selection.edgeIds.size === 1 && state.selection.nodeIds.size === 0)
+        ? state.graph.edges.find(edge => state.selection.edgeIds.has(edge.id))
         : undefined;
+
+    const selectedNodes = Array.from(state.selection.nodeIds);
+    const isValidSelection = selectedNodes.length === 2;
 
     function deleteObjex(node: CategoryNode) {
         state.evocat.deleteObjex(node.schema.key);
@@ -45,25 +48,52 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
+    
+    function deleteSelectedMorphism() {
+        if (state.selection.edgeIds.size !== 1) 
+            return; // just one morphism selected check
+    
+        const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
+        const selectedMorphism = state.graph.edges.find(edge => edge.id === selectedEdgeId);
+    
+        if (!selectedMorphism) 
+            return;
+    
+        state.evocat.deleteMorphism(selectedMorphism.schema.signature); // morphisms are identified by their signature
+        const graph = categoryToGraph(state.evocat.category);
+    
+        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+    }
+    
 
     return (<>
         <h3>Default</h3>
 
-        <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createObjex })}>Create object</Button>
+        <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createObjex })}>
+            Create object
+        </Button>
 
-        {twoSelectedNodes && (
-            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createMorphism })}
-            >
-                Create Morphism
-            </Button>
-        )}
+        <Button
+            onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createMorphism })}
+            isDisabled={!isValidSelection}
+        >
+            Create Morphism
+        </Button>
 
         {singleSelectedNode && (<>
             <div>
                 Selected: <span className='font-semibold'>{singleSelectedNode.metadata.label}</span>
             </div>
 
-            <Button color='danger' onClick={() => deleteObjex(singleSelectedNode)}>Delete</Button>
+            <Button color='danger' onClick={() => deleteObjex(singleSelectedNode)}>Delete Object</Button>
+        </>)}
+
+        {singleSelectedMorphism && (<>
+            <div>
+                Selected: <span className='font-semibold'>{singleSelectedMorphism.metadata.label.length >= 1 ? singleSelectedMorphism.metadata.label : singleSelectedMorphism.id}</span>
+            </div>
+
+            <Button color='danger' onClick={deleteSelectedMorphism}>Delete Morphism</Button>
         </>)}
     </>);
 }
@@ -121,10 +151,13 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
 
     // Extract selected nodes (should be exactly 2)
     const selectedNodes = Array.from(state.selection.nodeIds);
-    const isValidSelection = selectedNodes.length === 2;  // only two nodes can be selected for morphism creation
+    const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
+
+    const domainNode = state.graph.nodes.find(node => node.id === selectedNodes[0]);
+    const codomainNode = state.graph.nodes.find(node => node.id === selectedNodes[1]);
 
     function createMorphism() {
-        if (!isValidSelection) 
+        if (!isValidSelection || !label) 
             return;
 
         const domKey = Key.createNew(Number(selectedNodes[0]));
@@ -142,17 +175,18 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
 
+    function cancelMorphismCreation() {
+        dispatch({ type: 'select', operation: 'clear', range: 'all' });
+        dispatch({ type: 'phase', phase: EditorPhase.default });
+    }
+
     return (
         <>
             <h3>Create Morphism</h3>
 
             <div>
-                <p>Selected Nodes:</p>
-                <ul>
-                    {selectedNodes.map(nodeId => (
-                        <li key={nodeId}>Node ID: {nodeId}</li>
-                    ))}
-                </ul>
+                <p>Domain object: <span className='font-semibold'>{domainNode?.metadata.label ?? 'Select a node'}</span></p>
+                <p>Codomain object: <span className='font-semibold'>{codomainNode?.metadata.label ?? 'Select a second node'}</span></p>
             </div>
 
             <Input
@@ -162,7 +196,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             />
 
             <div className='grid grid-cols-2 gap-2'>
-                <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.default })}>
+                <Button onClick={cancelMorphismCreation}>
                     Cancel
                 </Button>
 

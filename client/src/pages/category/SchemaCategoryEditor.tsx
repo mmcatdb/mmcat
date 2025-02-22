@@ -12,6 +12,7 @@ import { createInitialState, type EditCategoryDispatch, editCategoryReducer, typ
 import { Evocat } from '@/types/evocat/Evocat';
 import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
 import { onSuccess } from '@/types/api/result';
+import { useDeleteHandlers } from '@/components/schema-categories/useDeleteHandlers';
 
 export function SchemaCategoryEditor() {
     const loaderData = useLoaderData() as Awaited<ReturnType<typeof evocatLoader>>;
@@ -28,6 +29,8 @@ export function SchemaCategoryEditor() {
     }
 
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
+
+    useDeleteHandlers(state, dispatch);
 
     return (<>
         <EditCategoryGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
