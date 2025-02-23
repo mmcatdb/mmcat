@@ -1,6 +1,6 @@
 import { print, type Printable, type Printer } from '@/types/utils/string';
 import { type NameFromServer, nameFromServer, Signature, type SignatureFromServer, type Name } from '@/types/identifiers';
-import type { ParentProperty } from './compositeTypes';
+import { type ParentProperty } from './ComplexProperty';
 
 export type SimplePropertyFromServer = {
     name: NameFromServer;

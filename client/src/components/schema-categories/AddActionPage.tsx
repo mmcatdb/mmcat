@@ -7,8 +7,8 @@ import { api } from '@/api';
 import { ErrorPage } from '@/pages/errorPages';
 import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES } from '@/types/action';
 import { Datasource } from '@/types/datasource';
-import { logicalModelsFromServer } from '@/types/datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { type LogicalModel, logicalModelsFromServer } from '@/types/mapping';
 
 export function AddActionPage() {
     const [ label, setLabel ] = useState('');
@@ -22,7 +22,7 @@ export function AddActionPage() {
     ]);
 
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
-    const [ logicalModels, setLogicalModels ] = useState<ReturnType<typeof logicalModelsFromServer>>([]);
+    const [ logicalModels, setLogicalModels ] = useState<LogicalModel[]>([]);
 
     useEffect(() => {
         async function fetchDatasourcesAndMappings() {
@@ -51,9 +51,9 @@ export function AddActionPage() {
         }
 
         // Add a new step based on the current type
-        if (type === ActionType.ModelToCategory || type === ActionType.CategoryToModel) 
+        if (type === ActionType.ModelToCategory || type === ActionType.CategoryToModel)
             setSteps(prevSteps => [ ...prevSteps, { type, datasourceId: '', mappingIds: [] } ]);
-        else if (type === ActionType.RSDToCategory) 
+        else if (type === ActionType.RSDToCategory)
             setSteps(prevSteps => [ ...prevSteps, { type, datasourceIds: [] } ]);
     }
 
@@ -94,7 +94,7 @@ export function AddActionPage() {
     }
 
     // TODO: resource not found
-    if (error) 
+    if (error)
         return <ErrorPage />;
 
     return (
@@ -122,7 +122,7 @@ export function AddActionPage() {
                         step={step}
                         type={type}
                         datasources={datasources}
-                        mappings={logicalModels}
+                        logicalModels={logicalModels}
                         updateStep={updatedStep => setSteps(prev => prev.map((s, i) => (i === index ? updatedStep : s)))}
                         removeStep={() => removeStep(index)}
                         steps={steps}
@@ -178,13 +178,13 @@ type StepFormProps = {
     step: JobPayloadInit;
     type: ActionType | '';
     datasources: Datasource[];
-    mappings: ReturnType<typeof logicalModelsFromServer>;
+    logicalModels: LogicalModel[];
     updateStep: (step: JobPayloadInit) => void;
     removeStep: () => void;
     steps: JobPayloadInit[];
 };
 
-function StepForm({ step, type, datasources, mappings, updateStep, removeStep, steps }: StepFormProps) {
+function StepForm({ step, type, datasources, logicalModels, updateStep, removeStep, steps }: StepFormProps) {
     if (type === ActionType.ModelToCategory || type === ActionType.CategoryToModel) {
         // narrowing ActionType
         const modelToCategoryStep = step as {
@@ -194,7 +194,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
         };
 
         modelToCategoryStep.type = type;
-        const datasourceMappings = mappings.find(m => m.datasource.id === modelToCategoryStep.datasourceId);
+        const logicalModel = logicalModels.find(m => m.datasource.id === modelToCategoryStep.datasourceId);
 
         return (
             <div className='mb-4 p-2 border rounded-lg flex justify-between items-center border-zinc-500'>
@@ -218,7 +218,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                         <SelectItem key={ds.id}>{ds.label}</SelectItem>
                     ))}
                 </Select>
-                {datasourceMappings && (
+                {logicalModel && (
                     <Select
                         label='Mappings'
                         selectedKeys={new Set(modelToCategoryStep.mappingIds)}
@@ -233,7 +233,7 @@ function StepForm({ step, type, datasources, mappings, updateStep, removeStep, s
                         }}
                         className='pr-2'
                     >
-                        {datasourceMappings.mappings.map(mapping => (
+                        {logicalModel.mappings.map(mapping => (
                             <SelectItem key={mapping.id}>{mapping.kindName}</SelectItem>
                         ))}
                     </Select>

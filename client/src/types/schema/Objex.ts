@@ -35,12 +35,6 @@ export class Objex {
         return this.key.equals(other.key);
     }
 
-    private readonly groupIds = new Set<string>();
-
-    addGroup(id: string) {
-        this.groupIds.add(id);
-    }
-
     findNeighbourMorphisms(): Morphism[] {
         return [ ...this.category.morphisms.values() ].filter(morphism => morphism.from.key.equals(this.key) || morphism.to.key.equals(this.key));
     }

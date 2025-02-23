@@ -1,5 +1,4 @@
 import type { Entity, Id } from '../id';
-import { Mapping, type MappingFromServer } from '../mapping';
 import { DatasourceConfiguration, type DatasourceConfigurationFromServer } from './Configuration';
 
 export type DatasourceFromServer = {
@@ -101,7 +100,7 @@ export const DATASOURCE_TYPES: { type: DatasourceType, label: string }[] = [
 export function validateSettings(settings: Settings, type: DatasourceType): boolean {
     if (type === DatasourceType.csv && settings.separator?.length !== 1)
         return false;
-    
+
     if (isFile(type))
         return !!settings.url;
 
@@ -112,19 +111,4 @@ export function validateSettings(settings: Settings, type: DatasourceType): bool
         return false;
 
     return true;
-}
-
-export type LogicalModel = {
-    datasource: Datasource;
-    mappings: Mapping[];
-};
-
-export function logicalModelsFromServer(datasources: DatasourceFromServer[], mappings: MappingFromServer[]): LogicalModel[] {
-    const allDatasources = datasources.map(Datasource.fromServer);
-    const allMappings = mappings.map(Mapping.fromServer);
-
-    return allDatasources.map(datasource => ({
-        datasource,
-        mappings: allMappings.filter(mapping => mapping.datasourceId === datasource.id),
-    }));
 }

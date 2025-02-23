@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { Home } from '@/pages/Home';
-import { CategoryEditorPage, evocatLoader } from '@/pages/category/CategoryEditorPage';
+import { CategoryEditorPage } from '@/pages/category/CategoryEditorPage';
 import { About } from '@/pages/About';
 import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
@@ -82,7 +82,7 @@ export const router = createBrowserRouter([
                     {
                         id: routes.category.editor.id,
                         path: routes.category.editor.path,
-                        loader: evocatLoader,
+                        loader: CategoryEditorPage.loader,
                         Component: CategoryEditorPage,
                         handle: { breadcrumb: 'Editor' },
                     },

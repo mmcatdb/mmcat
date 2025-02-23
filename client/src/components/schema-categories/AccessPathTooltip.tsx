@@ -1,5 +1,5 @@
 import { Tooltip } from '@nextui-org/react';
-import type { RootProperty } from '@/types/accessPath';
+import type { RootProperty } from '@/types/mapping';
 
 export function AccessPathTooltip({ accessPath }: { accessPath: RootProperty }) {
     return (

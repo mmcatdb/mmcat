@@ -1,5 +1,4 @@
-import type { Category } from '../Category';
-import { SchemaObjex, type SchemaObjexFromServer } from '../Objex';
+import { type Category, SchemaObjex, type SchemaObjexFromServer } from '@/types/schema';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type UpdateObjexFromServer = SMOFromServer<SMOType.UpdateObjex> & {
