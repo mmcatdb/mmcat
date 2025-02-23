@@ -3,7 +3,6 @@ import { api } from '@/api';
 import { Category } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
-import { Portal, portals } from '@/components/common';
 import { type LogicalModel, logicalModelsFromServer } from '@/types/datasource';
 import { EditCategoryGraphDisplay } from '@/components/schema-categories/EditCategoryGraphDisplay';
 import { Button } from '@nextui-org/react';
@@ -14,7 +13,7 @@ import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEdito
 import { onSuccess } from '@/types/api/result';
 import { useDeleteHandlers } from '@/components/schema-categories/useDeleteHandlers';
 
-export function SchemaCategoryEditor() {
+export function CategoryEditorPage() {
     const loaderData = useLoaderData() as Awaited<ReturnType<typeof evocatLoader>>;
 
     const logicalModels = useMemo(() => logicalModelsFromServer(loaderData.datasources, loaderData.mappings), [ loaderData.datasources, loaderData.mappings ]);
@@ -69,20 +68,6 @@ export async function evocatLoader({ params: { categoryId } }: { params: Params<
         datasources: datasourcesResponse.data,
         mappings: mappingsResponse.data,
     };
-}
-
-type SchemaCategoryContextProps = Readonly<{
-    category: Category;
-}>;
-
-function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
-    return (
-        <Portal to={portals.context}>
-            <div className='p-2'>
-                Context for: {category.label}
-            </div>
-        </Portal>
-    );
 }
 
 type StateDispatchProps = Readonly<{

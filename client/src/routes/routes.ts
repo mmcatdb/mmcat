@@ -35,8 +35,10 @@ export const routes = {
         index: categoryIndex,
         editor: categoryIndex.child('/editor', 'editor'),
         datasources: categoryIndex.child('/datasources', 'datasources'),
+        mapping: categoryIndex.child<'categoryId' | 'mappingId'>('/mappings/:mappingId', 'mappings'),
         querying: categoryIndex.child('/querying', 'querying'),
         actions: categoryIndex.child('/actions', 'actions'),
         jobs: categoryIndex.child('/jobs', 'jobs'),
+        job: categoryIndex.child<'categoryId' | 'jobId'>('/jobs/:jobId', 'job'),
     },
 } as const;

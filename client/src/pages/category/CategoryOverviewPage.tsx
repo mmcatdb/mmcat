@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 
-export function OverviewCategoryIndex() {
+export function CategoryOverviewPage() {
     const [ stats ] = useState({
         totalObjects: 0,
         totalMappings: 0,

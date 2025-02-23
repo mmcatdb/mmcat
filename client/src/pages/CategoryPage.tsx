@@ -4,8 +4,8 @@ import { SchemaCategoryInfo } from '@/types/schema';
 import { CategoryInfoProvider } from '@/components/CategoryInfoProvider';
 import { SessionSelect } from '@/components/SessionSelect';
 
-export function CategoryIndex() {
-    const { category } = useLoaderData() as CategoryIndexLoaderData;
+export function CategoryPage() {
+    const { category } = useLoaderData() as CategoryLoaderData;
 
     return (
         <CategoryInfoProvider category={category}>
@@ -13,16 +13,18 @@ export function CategoryIndex() {
                 <SessionSelect />
             </div>
 
-            <CategoryIndexInner />
+            <Outlet />
         </CategoryInfoProvider>
     );
 }
 
-export type CategoryIndexLoaderData = {
+CategoryPage.loader = categoryLoader;
+
+export type CategoryLoaderData = {
     category: SchemaCategoryInfo;
 };
 
-export async function categoryIndexLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+async function categoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
         throw new Error('Category ID is required');
 
@@ -34,10 +36,4 @@ export async function categoryIndexLoader({ params: { categoryId } }: { params: 
             return SchemaCategoryInfo.fromServer(response.data);
         }),
     };
-}
-
-function CategoryIndexInner() {
-    return (
-        <Outlet />
-    );
 }

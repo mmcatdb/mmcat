@@ -8,8 +8,8 @@ export type RootPropertyFromServer = ComplexPropertyFromServer & { name: StaticN
 
 export class RootProperty implements Printable {
     private constructor(
-        public readonly name: StaticName,
-        private readonly subpaths: ChildProperty[],
+        readonly name: StaticName,
+        readonly subpaths: ChildProperty[],
     ) {}
 
     readonly isAuxiliary = true;

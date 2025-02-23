@@ -6,17 +6,14 @@ import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
-import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 import { cn } from '@/components/utils';
 
 type SchemaCategoriesTableProps = {
     categories: SchemaCategoryInfo[];
-    loading: boolean;
-    error: boolean;
     onDeleteCategory: (id: string) => void;
 };
 
-export function SchemaCategoriesTable({ categories, loading, error, onDeleteCategory }: SchemaCategoriesTableProps) {
+export function SchemaCategoriesTable({ categories, onDeleteCategory }: SchemaCategoriesTableProps) {
     const { sortedData: sortedCategories, sortDescriptor, setSortDescriptor } = useSortableData(categories, {
         column: 'label',
         direction: 'ascending',
@@ -25,18 +22,6 @@ export function SchemaCategoriesTable({ categories, loading, error, onDeleteCate
     const handleSortChange = (newSortDescriptor: SortDescriptor) => {
         setSortDescriptor(newSortDescriptor);
     };
-
-    if (loading) {
-        return (
-            <LoadingPage />
-        );
-    }
-
-    if (error) {
-        return (
-            <ErrorPage />
-        );
-    }
 
     return (
         <CategoriesTable
@@ -84,7 +69,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
 
 
     return (<>
-        <Table 
+        <Table
             aria-label='Schema Categories Table'
             onRowAction={handleRowAction}
             sortDescriptor={sortDescriptor}
@@ -112,7 +97,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                 {categories.map(category => (
                     <TableRow
                         key={category.id}
-                        className={cn('cursor-pointer', 
+                        className={cn('cursor-pointer',
                             theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
                     >
                         {[

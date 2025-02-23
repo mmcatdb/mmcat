@@ -6,17 +6,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
-import { ErrorPage, LoadingPage } from '@/pages/errorPages';
 import { cn } from '@/components/utils';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
-    loading: boolean;
-    error: boolean;
-    onDeleteDatasource: (id: string) => void;
+    deleteDatasource: (id: string) => void;
 };
 
-export function DatasourcesTable({ datasources, loading, error, onDeleteDatasource }: DatasourcesTableProps) {
+export function DatasourcesTable({ datasources, deleteDatasource }: DatasourcesTableProps) {
     const { sortedData: sortedDatasources, sortDescriptor, setSortDescriptor } = useSortableData(datasources, {
         column: 'label',
         direction: 'ascending',
@@ -26,22 +23,10 @@ export function DatasourcesTable({ datasources, loading, error, onDeleteDatasour
         setSortDescriptor(newSortDescriptor);
     }
 
-    if (loading) {
-        return (
-            <LoadingPage />
-        );
-    }
-
-    if (error) {
-        return (
-            <ErrorPage />
-        );
-    }
-
     return (
         <DatasourceTable
             datasources={sortedDatasources}
-            onDeleteDatasource={onDeleteDatasource}
+            deleteDatasource={deleteDatasource}
             sortDescriptor={sortDescriptor}
             onSortChange={handleSortChange}
         />
@@ -50,12 +35,12 @@ export function DatasourcesTable({ datasources, loading, error, onDeleteDatasour
 
 type DatasourceTableProps = {
   datasources: Datasource[];
-  onDeleteDatasource: (id: string) => void;
+  deleteDatasource: (id: string) => void;
   sortDescriptor: SortDescriptor;
   onSortChange: (sortDescriptor: SortDescriptor) => void;
 };
 
-function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSortChange }: DatasourceTableProps) {
+function DatasourceTable({ datasources, deleteDatasource, sortDescriptor, onSortChange }: DatasourceTableProps) {
     const { theme, showTableIDs } = usePreferences().preferences;
     const { categoryId } = useParams();
 
@@ -70,7 +55,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
 
     function confirmDelete() {
         if (selectedDatasourceId)
-            onDeleteDatasource(selectedDatasourceId);
+            deleteDatasource(selectedDatasourceId);
 
         setModalOpen(false);
     }
@@ -124,7 +109,7 @@ function DatasourceTable({ datasources, onDeleteDatasource, sortDescriptor, onSo
                 {datasources.map(datasource => (
                     <TableRow
                         key={datasource.id}
-                        className={cn('cursor-pointer', 
+                        className={cn('cursor-pointer',
                             theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
                     >
                         {[
