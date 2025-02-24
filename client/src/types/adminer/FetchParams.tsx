@@ -8,7 +8,7 @@ export type FetchKindParams = {
     datasourceId: string;
     kindName: string;
     queryParams: {
-        filters?: string;
+        filters?: string[];
         limit: number;
         offset: number;
     };

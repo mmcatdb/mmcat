@@ -1,7 +1,9 @@
 package cz.matfyz.core.record;
 
+//TODO
+
 public record AdminerFilter(
-    String columnName,
+    String propertyName,
     String operator,
-    String columnValue
+    String propertyValue
 ) {}

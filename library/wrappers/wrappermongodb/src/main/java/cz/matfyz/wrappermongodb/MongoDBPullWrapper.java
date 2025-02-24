@@ -268,9 +268,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         List<Bson> filterList = new ArrayList<>();
 
         for (AdminerFilter filter : filters) {
-            var columnName = filter.columnName();
+            var columnName = filter.propertyName();
             var operator = filter.operator();
-            var columnValue = filter.columnValue();
+            var columnValue = filter.propertyValue();
             var value = "_id".equals(columnName) ? new ObjectId(columnValue) : columnValue;
 
             BiFunction<String, Object, Bson> filterFunction = MongoDBAlgorithms.OPERATORS.get(operator);

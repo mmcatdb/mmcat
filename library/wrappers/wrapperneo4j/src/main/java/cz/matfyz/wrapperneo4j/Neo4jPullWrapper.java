@@ -316,14 +316,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             whereClause.append(name)
                 .append(".")
-                .append(filter.columnName())
+                .append(filter.propertyName())
                 .append(" ")
                 .append(operator);
 
             if (operator.equals("IN")) {
                 whereClause
                     .append(" ")
-                    .append(Arrays.stream(filter.columnValue().split(";"))
+                    .append(Arrays.stream(filter.propertyValue().split(";"))
                         .map(String::trim)
                         .map(value -> "'" + value + "'")
                         .collect(Collectors.joining(", ", "[", "]")))
@@ -331,7 +331,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             } else if (!Neo4jAlgorithms.UNARY_OPERATORS.contains(operator)) {
                 whereClause
                     .append(" '")
-                    .append(filter.columnValue())
+                    .append(filter.propertyValue())
                     .append("'");
             }
         }

@@ -21,13 +21,8 @@ function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id
     const urlParams: FetchKindParams = { datasourceId: datasourceId!, kindName: kindName!, queryParams: { limit: active.limit, offset: offset } };
 
     if (active.filters && filterExist) {
-        const queryFilters = `${active.filters
-            .map(
-                filter =>
-                    filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0 ? `(${filter.propertyName},${filter.operator},${filter.propertyValue.replace(/,/g, ';')})` : '',
-            )
-            .join('')}`;
-        urlParams.queryParams.filters = queryFilters;
+        const filters = active.filters.map(filter => JSON.stringify({ propertyName: filter.propertyName, operator: filter.operator, propertyValue: filter.propertyValue }));
+        urlParams.queryParams.filters = filters;
     }
 
     return urlParams;

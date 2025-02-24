@@ -233,14 +233,14 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
             String operator = PostgreSQLAlgorithms.OPERATORS.get(filter.operator());
 
-            whereClause.append(filter.columnName())
+            whereClause.append(filter.propertyName())
                 .append(" ")
                 .append(PostgreSQLAlgorithms.OPERATORS.get(filter.operator()));
 
             if (operator.equals("IN") || operator.equals("NOT IN")) {
                 whereClause
                     .append(" ")
-                    .append(Arrays.stream(filter.columnValue().split(";"))
+                    .append(Arrays.stream(filter.propertyValue().split(";"))
                         .map(String::trim)
                         .map(value -> "'" + value + "'")
                         .collect(Collectors.joining(", ", "(", ")")))
@@ -248,7 +248,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             } else if (!PostgreSQLAlgorithms.UNARY_OPERATORS.contains(operator)) {
                 whereClause
                     .append(" '")
-                    .append(filter.columnValue())
+                    .append(filter.propertyValue())
                     .append("'");
             }
         }

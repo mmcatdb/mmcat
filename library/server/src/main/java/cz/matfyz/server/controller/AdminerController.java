@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,8 +58,10 @@ public class AdminerController {
         return pullWrapper.getKind(kind, limit, offset, null);
     }
 
+    private static final ObjectReader filterReader = new ObjectMapper().readerFor(AdminerFilter.class);
+
     @GetMapping(value = "/adminer/{db}/{kind}", params = {"filters"})
-    public DataResponse getRows(@PathVariable Id db, @PathVariable String kind, @RequestParam String filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
+    public DataResponse getRows(@PathVariable Id db, @PathVariable String kind, @RequestParam String[] filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
@@ -64,17 +70,19 @@ public class AdminerController {
 
         List<AdminerFilter> filterList = new ArrayList<>();
 
-        for (int indexOpen = filters.indexOf('(');
-            indexOpen >= 0;
-            indexOpen = filters.indexOf('(', indexOpen + 1)) {
-            int indexClose = filters.indexOf(')', indexOpen + 1);
-
-            String filter = filters.substring(indexOpen + 1, indexClose);
-            String[] filterParams = filter.split(",");
-
-            if (filterParams.length == 3) {
-                filterList.add(new AdminerFilter(filterParams[0], filterParams[1], filterParams[2]));
+        try {
+            if (filters.length == 3 && filters[0].contains("{") && !filters[0].contains("}")){
+                final var filter = filters[0] + ", " + filters[1] + ", " + filters[2];
+                final AdminerFilter parsed = filterReader.readValue(filter);
+                filterList.add(new AdminerFilter(parsed.propertyName(), parsed.operator(), parsed.propertyValue()));
+            } else {
+                for (final var filter : filters) {
+                    final AdminerFilter parsed = filterReader.readValue(filter);
+                    filterList.add(new AdminerFilter(parsed.propertyName(), parsed.operator(), parsed.propertyValue()));
+                }
             }
+        } catch (JsonProcessingException e) {
+            System.out.println("Filters cannot be parsed.");
         }
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
