@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import { EditorPhase, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { cn } from '../utils';
-import { type FormPosition, toFormNumber, toPosition } from '@/types/utils/common';
+import { toPosition } from '@/types/utils/common';
 import { type CategoryNode, categoryToGraph } from './categoryGraph';
 import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers/Key';
@@ -100,13 +100,23 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
 function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const [ label, setLabel ] = useState('');
-    const [ position, setPosition ] = useState<FormPosition>({ x: 0, y: 0 });
+    const position = { x: 0, y: 0 };
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (inputRef.current) 
+            inputRef.current.focus();
+    }, []);
 
     function createObjex() {
         state.evocat.createObjex({ label, position: toPosition(position) });
         const graph = categoryToGraph(state.evocat.category);
-
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+    }
+
+    function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Enter') 
+            createObjex();
     }
 
     return (<>
@@ -116,23 +126,9 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
             label='Label'
             value={label}
             onChange={e => setLabel(e.target.value)}
+            onKeyDown={handleKeyDown}
+            ref={inputRef}
         />
-
-        <div className='grid grid-cols-2 gap-2'>
-            <Input
-                label='Position x'
-                type='number'
-                value={'' + position.x}
-                onChange={e => setPosition({ ...position, x: toFormNumber(e.target.value) })}
-            />
-
-            <Input
-                label='Position y'
-                type='number'
-                value={'' + position.y}
-                onChange={e => setPosition({ ...position, y: toFormNumber(e.target.value) })}
-            />
-        </div>
 
         <div className='grid grid-cols-2 gap-2'>
             <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.default })}>
@@ -180,19 +176,25 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         dispatch({ type: 'phase', phase: EditorPhase.default });
     }
 
+    function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Enter') 
+            createMorphism();
+    }
+
     return (
         <>
             <h3>Create Morphism</h3>
 
             <div>
                 <p>Domain object: <span className='font-semibold'>{domainNode?.metadata.label ?? 'Select a node'}</span></p>
-                <p>Codomain object: <span className='font-semibold'>{codomainNode?.metadata.label ?? 'Select a second node'}</span></p>
+                <p>Codomain object: <span className='font-semibold'>{codomainNode?.metadata.label ?? 'Hold Ctrl and Select a second node'}</span></p>
             </div>
 
             <Input
                 label='Label'
                 value={label}
                 onChange={e => setLabel(e.target.value)}
+                onKeyDown={handleKeyDown}
             />
 
             <div className='grid grid-cols-2 gap-2'>

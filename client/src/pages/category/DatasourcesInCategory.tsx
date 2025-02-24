@@ -7,6 +7,8 @@ import { toast } from 'react-toastify';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { EmptyState } from '@/components/TableCommon';
 import { LoadingPage, ReloadPage } from '../errorPages';
+import { cn } from '@nextui-org/react';
+import { usePreferences } from '@/components/PreferencesProvider';
 
 export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
@@ -15,6 +17,8 @@ export function DatasourcesInCategoryPage() {
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<boolean>(false);
     const [ isModalOpen, setModalOpen ] = useState(false);
+
+    const { theme } = usePreferences().preferences;
 
     async function fetchDatasources() {
         // TODO: no fetch, data via loader
@@ -92,7 +96,7 @@ export function DatasourcesInCategoryPage() {
                         onDeleteDatasource={handleDeleteDatasource}
                     />
                 ) : (
-                    <div className = 'text-center border border-zinc-500 p-6'>
+                    <div className={cn('text-center border p-6 rounded-lg', theme === 'dark' ? 'border-zinc-700' : 'border-zinc-200')}>
                         There is no datasources with mappings available. You can add mapping via Other Datasources.
                     </div>
                 )}
