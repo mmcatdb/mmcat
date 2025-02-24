@@ -28,6 +28,8 @@ const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element
     [EditorPhase.default]: DefaultDisplay,
     [EditorPhase.createObjex]: CreateObjexDisplay,
     [EditorPhase.createMorphism]: CreateMorphismDisplay,
+    [EditorPhase.cancelObjexCreation]: DefaultDisplay,
+    [EditorPhase.cancelMorphismCreation]: DefaultDisplay,
 };
 
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
@@ -40,7 +42,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
         : undefined;
 
     const selectedNodes = Array.from(state.selection.nodeIds);
-    const isValidSelection = selectedNodes.length === 2;
+    const isValidSelection = selectedNodes.length <= 2;
 
     function deleteObjex(node: CategoryNode) {
         state.evocat.deleteObjex(node.schema.key);
@@ -130,7 +132,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         />
 
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.default })}>
+            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.cancelObjexCreation })}>
                 Cancel
             </Button>
 
@@ -161,18 +163,13 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         state.evocat.createMorphism({
             domKey, // Source object
             codKey, // Target object
-            min: Cardinality.One, // TODO: add button for selecting cardinality
+            min: Cardinality.One,
             label,
         });
 
         const graph = categoryToGraph(state.evocat.category);
 
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
-    }
-
-    function cancelMorphismCreation() {
-        dispatch({ type: 'select', operation: 'clear', range: 'all' });
-        dispatch({ type: 'phase', phase: EditorPhase.default });
     }
 
     function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -197,7 +194,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             />
 
             <div className='grid grid-cols-2 gap-2'>
-                <Button onClick={cancelMorphismCreation}>
+                <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.cancelMorphismCreation })}>
                     Cancel
                 </Button>
 

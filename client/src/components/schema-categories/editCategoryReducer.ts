@@ -96,6 +96,8 @@ export enum EditorPhase {
     default = 'default',
     createObjex = 'createObjex',   // Enter create schema object phase
     createMorphism = 'createMorphism',   // Enter create morphism phase
+    cancelObjexCreation = 'cancelObjexCreation',  // Cancel schema object creation
+    cancelMorphismCreation = 'cancelMorphismCreation',
 }
 
 export type PhaseAction = {
@@ -107,13 +109,63 @@ export type PhaseAction = {
 }
 
 function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCategoryState {
-    if (!graph)
-        return { ...state, phase };
+    const updatedGraph = graph ?? state.graph;
+
+    // creating object/morphism or canceling object/morphism
+    if (phase === EditorPhase.default) {
+        if (state.phase === EditorPhase.cancelObjexCreation || state.phase === EditorPhase.cancelMorphismCreation) 
+            return handleCancelPhase(state, updatedGraph);
+        
+        if (state.phase === EditorPhase.createObjex) 
+            return handleObjectCreation(state);
+        
+        if (state.phase === EditorPhase.createMorphism) 
+            return handleMorphismCreation(state);
+    }
+
+    // default case
+    return {
+        ...state,
+        graph: updatedGraph,
+        selection: updateSelectionFromGraph(state.selection, updatedGraph),
+        phase,
+    };
+}
+
+// Handle canceling object or morphism
+function handleCancelPhase(state: EditCategoryState, updatedGraph: CategoryGraph): EditCategoryState {
+    return {
+        ...state,
+        graph: state.phase === EditorPhase.cancelMorphismCreation ? categoryToGraph(state.evocat.category) : updatedGraph,
+        selection: state.phase === EditorPhase.cancelMorphismCreation ? createDefaultGraphSelection() : state.selection,
+        phase: EditorPhase.default,
+    };
+}
+
+// Select newly created object, deselect all others
+function handleObjectCreation(state: EditCategoryState): EditCategoryState {
+    const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
 
     return {
         ...state,
-        graph,
-        selection: updateSelectionFromGraph(state.selection, graph),
-        phase,
+        graph: categoryToGraph(state.evocat.category),
+        selection: latestObjex
+            ? { nodeIds: new Set([ latestObjex.schema.key.toString() ]), edgeIds: new Set() }
+            : createDefaultGraphSelection(),
+        phase: EditorPhase.default,
+    };
+}
+
+// Handle new morphism selection (after creating morphism, select it)
+function handleMorphismCreation(state: EditCategoryState): EditCategoryState {
+    const latestMorphism = Array.from(state.evocat.category.morphisms.values()).pop();
+
+    return {
+        ...state,
+        graph: categoryToGraph(state.evocat.category),
+        selection: latestMorphism
+            ? { nodeIds: new Set(), edgeIds: new Set([ latestMorphism.schema.signature.toString() ]) }
+            : createDefaultGraphSelection(),
+        phase: EditorPhase.default,
     };
 }
