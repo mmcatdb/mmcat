@@ -1,10 +1,8 @@
-import { useMemo, useReducer, useRef, useState } from 'react';
+import { useReducer, useRef, useState } from 'react';
 import { api } from '@/api';
 import { Category } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
-import { Portal, portals } from '@/components/common';
-import { type LogicalModel, logicalModelsFromServer } from '@/types/datasource';
 import { EditCategoryGraphDisplay } from '@/components/schema-categories/EditCategoryGraphDisplay';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
@@ -14,16 +12,17 @@ import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEdito
 import { onSuccess } from '@/types/api/result';
 import { useDeleteHandlers } from '@/components/schema-categories/useDeleteHandlers';
 
-export function SchemaCategoryEditor() {
-    const loaderData = useLoaderData() as Awaited<ReturnType<typeof evocatLoader>>;
+export function CategoryEditorPage() {
+    const loaderData = useLoaderData() as Awaited<ReturnType<typeof categoryEditorLoader>>;
 
-    const logicalModels = useMemo(() => logicalModelsFromServer(loaderData.datasources, loaderData.mappings), [ loaderData.datasources, loaderData.mappings ]);
+    // TODO Use this to display logical models.
+    // const logicalModels = useMemo(() => logicalModelsFromServer(loaderData.datasources, loaderData.mappings), [ loaderData.datasources, loaderData.mappings ]);
 
     // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
     const evocatRef = useRef<Evocat>();
     if (!evocatRef.current) {
         const updates = loaderData.updates.map(SchemaUpdate.fromServer);
-        const category = Category.fromServer(loaderData.category, logicalModels);
+        const category = Category.fromServer(loaderData.category);
 
         evocatRef.current = new Evocat(category, updates);
     }
@@ -44,12 +43,14 @@ export function SchemaCategoryEditor() {
         <PhasedEditor state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2' />
 
         <div className='absolute bottom-2 right-2'>
-            <SaveButton state={state} dispatch={dispatch} logicalModels={logicalModels} />
+            <SaveButton state={state} dispatch={dispatch} />
         </div>
     </>);
 }
 
-export async function evocatLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+CategoryEditorPage.loader = categoryEditorLoader;
+
+async function categoryEditorLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
         throw new Error('Category ID is required');
 
@@ -69,20 +70,6 @@ export async function evocatLoader({ params: { categoryId } }: { params: Params<
         datasources: datasourcesResponse.data,
         mappings: mappingsResponse.data,
     };
-}
-
-type SchemaCategoryContextProps = Readonly<{
-    category: Category;
-}>;
-
-function SchemaCategoryContext({ category }: SchemaCategoryContextProps) {
-    return (
-        <Portal to={portals.context}>
-            <div className='p-2'>
-                Context for: {category.label}
-            </div>
-        </Portal>
-    );
 }
 
 type StateDispatchProps = Readonly<{
@@ -162,7 +149,7 @@ function SelectionCard({ state, dispatch }: StateDispatchProps) {
     );
 }
 
-function SaveButton({ state, logicalModels }: StateDispatchProps & { logicalModels: LogicalModel[] }) {
+function SaveButton({ state }: StateDispatchProps) {
     const [ isFetching, setIsFetching ] = useState(false);
 
     async function save() {
@@ -170,7 +157,7 @@ function SaveButton({ state, logicalModels }: StateDispatchProps & { logicalMode
 
         await state.evocat.update(async edit => {
             const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
-            return onSuccess(response, fromServer => Category.fromServer(fromServer, logicalModels));
+            return onSuccess(response, fromServer => Category.fromServer(fromServer));
         });
 
         setIsFetching(false);

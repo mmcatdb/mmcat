@@ -129,7 +129,7 @@ export class NodeSequence {
     }
 
     toSignature(): Signature {
-        let output = Signature.empty;
+        let output = Signature.empty();
         this._edges.forEach(edge => output = output.concatenate(edge.signature));
 
         return output;

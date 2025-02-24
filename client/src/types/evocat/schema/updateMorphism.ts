@@ -1,5 +1,4 @@
-import type { Category } from '../Category';
-import { SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
+import { type Category, SchemaMorphism, type SchemaMorphismFromServer } from '@/types/schema';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type UpdateMorphismFromServer = SMOFromServer<SMOType.UpdateMorphism> & {

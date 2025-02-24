@@ -1,6 +1,6 @@
 import { type Category, type ObjexDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism, isPositionEqual, type Position } from '@/types/schema';
 import type { Result } from '../api/result';
-import { CreateMorphism, CreateObjex, Composite, DeleteMorphism, DeleteObjex, type SMO, UpdateMorphism, UpdateObjex } from '../schema/operation';
+import { CreateMorphism, CreateObjex, Composite, DeleteMorphism, DeleteObjex, type SMO, UpdateMorphism, UpdateObjex } from './schema';
 import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
 import type { MMO } from './metadata/mmo';
 import { MorphismMetadata } from './metadata/morphismMetadata';

@@ -10,17 +10,8 @@ import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
-export async function adminerLoader(): Promise<Datasource[]> {
-    const response = await api.datasources.getAllDatasources({});
-
-    if (!response.status)
-        throw new Error('Failed to load datasources');
-
-    return response.data;
-}
-
 export function AdminerPage() {
-    const allDatasources = useLoaderData() as Datasource[];
+    const { datasources: allDatasources } = useLoaderData() as AdminerLoaderData;
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
@@ -72,4 +63,21 @@ export function AdminerPage() {
             )}
         </div>
     );
+}
+
+AdminerPage.loader = adminerLoader;
+
+type AdminerLoaderData = {
+    datasources: Datasource[];
+};
+
+async function adminerLoader(): Promise<AdminerLoaderData> {
+    const response = await api.datasources.getAllDatasources({});
+
+    if (!response.status)
+        throw new Error('Failed to load datasources');
+
+    return {
+        datasources: response.data,
+    };
 }

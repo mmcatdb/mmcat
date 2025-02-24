@@ -48,23 +48,22 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
-    
+
     function deleteSelectedMorphism() {
-        if (state.selection.edgeIds.size !== 1) 
+        if (state.selection.edgeIds.size !== 1)
             return; // just one morphism selected check
-    
+
         const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
         const selectedMorphism = state.graph.edges.find(edge => edge.id === selectedEdgeId);
-    
-        if (!selectedMorphism) 
+
+        if (!selectedMorphism)
             return;
-    
+
         state.evocat.deleteMorphism(selectedMorphism.schema.signature); // morphisms are identified by their signature
         const graph = categoryToGraph(state.evocat.category);
-    
+
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
-    
 
     return (<>
         <h3>Default</h3>
@@ -153,21 +152,21 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const codomainNode = state.graph.nodes.find(node => node.id === selectedNodes[1]);
 
     function createMorphism() {
-        if (!isValidSelection || !label) 
+        if (!isValidSelection || !label)
             return;
 
         const domKey = Key.createNew(Number(selectedNodes[0]));
         const codKey = Key.createNew(Number(selectedNodes[1]));
-    
+
         state.evocat.createMorphism({
             domKey, // Source object
             codKey, // Target object
             min: Cardinality.One, // TODO: add button for selecting cardinality
             label,
         });
-    
+
         const graph = categoryToGraph(state.evocat.category);
-    
+
         dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
 

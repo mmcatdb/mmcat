@@ -1,5 +1,5 @@
 import { smoFromServer } from '.';
-import type { Category } from '../Category';
+import type { Category } from '@/types/schema';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CompositeFromServer = SMOFromServer<SMOType.Composite> & {

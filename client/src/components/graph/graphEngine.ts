@@ -8,10 +8,6 @@ export type Graph = {
 
 /** User preferences. */
 type FullGraphOptions = {
-    /** In px. Used for determining the initial coordinates. */
-    initialWidth: number;
-    /** In px. Used for determining the initial coordinates. */
-    initialHeight: number;
     /** If true, the nodes can be moved to only discrete coordinates. */
     snapToGrid: boolean;
     /** All positions will be rounded to multiples of this size. In the relative units. */
@@ -29,8 +25,6 @@ export const defaultGraphOptions: FullGraphOptions = {
     // At least some threshold is needed to prevent accidental dragging.
     // There is no such thing for selection, because we want to start selecting immediately. This allows us to clear selection by clicking on the canvas.
     nodeDraggingThreshold: 2,
-    initialWidth: 1200,
-    initialHeight: 600,
 };
 
 /** Common type for all events the graph can emit. */
@@ -57,11 +51,12 @@ export type ReactiveGraphState = {
     select?: SelectState;
 };
 
-export function createInitialGraphState(graph: Graph, options: GraphOptions = {}): ReactiveGraphState {
-    const fullOptions = { ...defaultGraphOptions, ...options };
-    const coordinates = computeCoordinates(graph.nodes, fullOptions.initialWidth, fullOptions.initialHeight);
-
-    return { coordinates };
+export function createInitialGraphState(graph: Graph): ReactiveGraphState {
+    return {
+        // These values really don't matter, because they will be recomputed after the first render.
+        // We just want to select something that won't break the svg path computations.
+        coordinates: computeCoordinates(graph.nodes, 1000, 1000),
+    };
 }
 
 export class GraphEngine {
@@ -118,6 +113,7 @@ export class GraphEngine {
     }
 
     private canvasConnection?: HTMLConnection;
+    private isCanvasMeasured = false;
 
     get canvas(): HTMLElement {
         return this.canvasConnection!.ref;
@@ -137,6 +133,12 @@ export class GraphEngine {
 
             const cleanup = () => ref.removeEventListener('wheel', wheel);
             this.canvasConnection = { ref, cleanup };
+
+            if (!this.isCanvasMeasured) {
+                this.isCanvasMeasured = true;
+                const { width, height } = ref.getBoundingClientRect();
+                this.updateState({ coordinates: computeCoordinates([ ...this.nodeMap.values() ], width, height) });
+            }
         }
     }
 

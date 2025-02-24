@@ -1,6 +1,6 @@
 import type { Entity, Id, VersionId } from '../id';
-import { type SMO, smoFromServer, type SMOFromServer } from './operation';
 import type { MMOFromServer } from '../evocat/metadata/mmo';
+import { type SMO, type SMOFromServer, smoFromServer } from '../evocat/schema';
 
 export type SchemaUpdateFromServer = {
     id: Id;

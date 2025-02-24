@@ -1,9 +1,11 @@
-import type { GroupData, Position, SchemaMorphism, SchemaObjex, Morphism, Objex } from '../schema';
+import type { Position, SchemaMorphism, SchemaObjex, Morphism, Objex } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Id } from '../id';
+
+type GroupData = any;
 
 /** @deprecated */
 export type TemporaryEdge = {

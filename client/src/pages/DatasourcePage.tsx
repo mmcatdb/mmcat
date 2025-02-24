@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { type Params, useLoaderData, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type Settings } from '@/types/datasource';
-import { ErrorPage, LoadingPage } from '@/pages/errorPages';
-import { Button, Input, Spinner } from '@nextui-org/react';
+import { Button, Input } from '@nextui-org/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/schema-categories/MappingsTable';
 import { toast } from 'react-toastify';
@@ -12,60 +11,31 @@ import { DatasourceSpecificFields } from '@/components/datasources/DatasourceMod
 import { usePreferences } from '@/components/PreferencesProvider';
 import { cn } from '@/components/utils';
 
-export function DatasourceDetailPage() {
-    return <DatasourceDetail />;
+export function DatasourcePage() {
+    return <DatasourceDisplay />;
 }
 
-export type DatasourceDetailLoaderData = {
+DatasourcePage.loader = datasourceLoader;
+
+export type DatasourceLoaderData = {
     datasource: Datasource;
 };
 
-export async function datasourceDetailLoader({ params: { id } }: { params: Params<'id'> }): Promise<DatasourceDetailLoaderData> {
-    if (!id) 
+async function datasourceLoader({ params: { id } }: { params: Params<'id'> }): Promise<DatasourceLoaderData> {
+    if (!id)
         throw new Error('Datasource ID is required');
 
     const response = await api.datasources.getDatasource({ id });
-    if (!response.status) 
+    if (!response.status)
         throw new Error('Failed to load datasource info');
-    
 
     return {
         datasource: Datasource.fromServer(response.data),
     };
 }
 
-export function DatasourceInCategoryDetailPage() {
-    const { categoryId, id } = useParams<{ categoryId: string, id: string }>();
-    const [ mappings, setMappings ] = useState<Mapping[]>([]);
-    const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<string>();
-
-    useEffect(() => {
-        if (!categoryId || !id) 
-            return;
-
-        const fetchMappings = async () => {
-            setLoading(true);
-            const response = await api.mappings.getAllMappingsInCategory({}, {
-                categoryId,
-                datasourceId: id,
-            });
-            setLoading(false);
-
-            if (response.status)
-                setMappings(response.data.map(Mapping.fromServer));
-            else 
-                setError('Failed to load data');
-        };
-
-        fetchMappings();
-    }, [ categoryId, id ]);
-
-    if (!categoryId || !id || error) 
-        return <ErrorPage />;
-
-    if (loading)
-        return <LoadingPage />;
+export function DatasourceInCategoryPage() {
+    const { mappings } = useLoaderData() as DatasourceInCategoryLoaderData;
 
     function handleAddMapping() {
         toast.error('Add mapping functionality not implemented yet');
@@ -73,19 +43,14 @@ export function DatasourceInCategoryDetailPage() {
 
     return (
         <div>
-            <DatasourceDetail />
+            <DatasourceDisplay />
+
             <div className='mt-6'>
                 <p className='text-xl pb-6'>Mappings Table</p>
-                {loading ? (
-                    <Spinner />
-                ) : mappings.length > 0 ? (
-                    <MappingsTable
-                        mappings={mappings}
-                        loading={loading}
-                        error={error}
-                    />
+                {mappings.length > 0 ? (
+                    <MappingsTable mappings={mappings} />
                 ) : (
-                    <EmptyState 
+                    <EmptyState
                         message='This datasource does not have a mapping yet.'
                         buttonText='+ Add Mapping'
                         onButtonClick={handleAddMapping}
@@ -96,9 +61,32 @@ export function DatasourceInCategoryDetailPage() {
     );
 }
 
-function DatasourceDetail() {
-    const { datasource: initialDatasource } = useLoaderData() as DatasourceDetailLoaderData;
-    const { theme } = usePreferences().preferences;
+DatasourceInCategoryPage.loader = datasourceInCategoryLoader;
+
+export type DatasourceInCategoryLoaderData = {
+    datasource: Datasource;
+    mappings: Mapping[];
+};
+
+async function datasourceInCategoryLoader({ params: { categoryId, id } }: { params: Params<'categoryId' | 'id'> }): Promise<DatasourceInCategoryLoaderData> {
+    if (!categoryId || !id)
+        throw new Error('Datasource ID is required');
+
+    const [ datasourceResponse, mappingsResponse ] = await Promise.all([
+        api.datasources.getDatasource({ id }),
+        api.mappings.getAllMappingsInCategory({}, { categoryId: categoryId, datasourceId: id }),
+    ]);
+    if (!datasourceResponse.status || !mappingsResponse.status)
+        throw new Error('Failed to load datasource or mappings');
+
+    return {
+        datasource: Datasource.fromServer(datasourceResponse.data),
+        mappings: mappingsResponse.data.map(Mapping.fromServer),
+    };
+}
+
+function DatasourceDisplay() {
+    const { datasource: initialDatasource } = useLoaderData() as DatasourceLoaderData | DatasourceInCategoryLoaderData;
 
     const [ datasource, setDatasource ] = useState<Datasource>(initialDatasource);
     const [ formValues, setFormValues ] = useState<Settings>(initialDatasource.settings);
@@ -110,7 +98,7 @@ function DatasourceDetail() {
     const location = useLocation();
 
     function handleInputChange(field: keyof Settings, value: unknown) {
-        if (!formValues) 
+        if (!formValues)
             return;
 
         setFormValues({ ...formValues, [field]: value });
@@ -130,7 +118,7 @@ function DatasourceDetail() {
     }
 
     async function handleSaveChanges() {
-        if (!formValues) 
+        if (!formValues)
             return;
 
         setIsSaving(true);
@@ -141,18 +129,19 @@ function DatasourceDetail() {
         setIsSaving(false);
         setIsEditing(false);
 
-
         if (updatedDatasource.status) {
             setDatasource(updatedDatasource.data);
             toast.success('Datasource updated successfully!');
             // navigate only if label has changed
-            if (datasource.label !== initialDatasource.label) 
+            if (datasource.label !== initialDatasource.label)
                 navigate(location.pathname);
         }
         else {
             toast.error('Something went wrong when updating datsource');
         }
     }
+
+    const { theme } = usePreferences().preferences;
 
     return (
         <div className='mt-5'>
@@ -217,7 +206,7 @@ function DatasourceDetail() {
             )}
 
             <div className='pt-5'>
-                <Button 
+                <Button
                     size='sm'
                     variant='bordered'
                     onPress={() => setisConfigurationShown(prev => !prev)}
