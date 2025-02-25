@@ -67,36 +67,36 @@ public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
 
     public SerializedFilterNode visit(FilterNode node) {
         return new SerializedFilterNode(
-            node.child.accept(this),
+            node.child().accept(this),
             node.filter.toString()
         );
     }
 
     public SerializedJoinNode visit(JoinNode node) {
         return new SerializedJoinNode(
-            node.fromChild.accept(this),
-            node.toChild.accept(this),
+            node.fromChild().accept(this),
+            node.toChild().accept(this),
             node.candidate.serialize()
         );
     }
 
     public SerializedMinusNode visit(MinusNode node) {
         return new SerializedMinusNode(
-            node.primaryChild.accept(this),
-            node.minusChild.accept(this)
+            node.primaryChild().accept(this),
+            node.minusChild().accept(this)
         );
     }
 
     public SerializedOptionalNode visit(OptionalNode node) {
         return new SerializedOptionalNode(
-            node.primaryChild.accept(this),
-            node.optionalChild.accept(this)
+            node.primaryChild().accept(this),
+            node.optionalChild().accept(this)
         );
     }
 
     public SerializedUnionNode visit(UnionNode node) {
         return new SerializedUnionNode(
-            node.children.stream().map(child -> child.accept(this)).toList()
+            node.children().stream().map(child -> child.accept(this)).toList()
         );
     }
 

@@ -5,7 +5,7 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 
 public class QueryPlan {
 
-    public final QueryNode root;
+    public QueryNode root;
     public final QueryContext context;
 
     public QueryPlan(QueryNode root, QueryContext context) {

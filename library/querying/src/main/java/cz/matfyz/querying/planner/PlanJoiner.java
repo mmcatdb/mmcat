@@ -56,7 +56,7 @@ public class PlanJoiner {
             final var onlyPattern = allPatterns.stream().findFirst().get(); // NOSONAR
             final var datasource = onlyPattern.kind.datasource();
 
-            return new DatasourceNode(datasource, allPatterns, context.getSchema(), List.of(), List.of(), onlyPattern.root.variable);
+            return new DatasourceNode(datasource, allPatterns, context.getSchema(), List.of(), new ArrayList<>(), onlyPattern.root.variable);
         }
 
         // TODO there might be some joining needed for OPTIONAL joins?
@@ -356,7 +356,7 @@ public class PlanJoiner {
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
             final var datasource = queryPart.patterns.stream().findFirst().get().kind.datasource();
-            return new DatasourceNode(datasource, queryPart.patterns, schema, queryPart.joinCandidates, List.of(), queryPart.rootVariable);
+            return new DatasourceNode(datasource, queryPart.patterns, schema, queryPart.joinCandidates, new ArrayList<>(), queryPart.rootVariable);
         }
     }
 

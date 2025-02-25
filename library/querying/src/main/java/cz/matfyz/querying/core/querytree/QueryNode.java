@@ -1,15 +1,24 @@
 package cz.matfyz.querying.core.querytree;
 
+import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.core.utils.GraphUtils.TopDownTree;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public abstract class QueryNode {
+public abstract class QueryNode implements TopDownTree<QueryNode> {
+
+    private ArrayList<QueryNode> children = new ArrayList<>();
 
     @Nullable
     private QueryNode parent = null;
 
-    void setParent(QueryNode parent) {
+    @Nullable
+    public ResultStructure structure = null;
+
+    public void setParent(@Nullable QueryNode parent) {
         this.parent = parent;
     }
 
@@ -21,5 +30,9 @@ public abstract class QueryNode {
         String getType();
 
     }
+
+    public ArrayList<QueryNode> children() { return children; }
+
+    @Nullable public QueryNode parent() { return parent; }
 
 }

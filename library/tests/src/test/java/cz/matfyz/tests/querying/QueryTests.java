@@ -8,6 +8,7 @@ import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -321,14 +322,15 @@ class QueryTests {
             (schema, datasource, plan) -> {
                 final var onlyPattern = plan.stream().findFirst().get();
 
+                final var filters = new ArrayList<Computation>();
+                filters.add(scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100")));
+
                 return new DatasourceNode(
                     datasource,
                     plan,
                     schema,
                     List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
+                    filters,
                     onlyPattern.root.variable
                 );
             },
@@ -357,14 +359,15 @@ class QueryTests {
             (schema, datasource, plan) -> {
                 final var onlyPattern = plan.stream().findFirst().get();
 
+                final var filters = new ArrayList<Computation>();
+                filters.add(scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100")));
+
                 return new DatasourceNode(
                     datasource,
                     plan,
                     schema,
                     List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
+                    filters,
                     onlyPattern.root.variable
                 );
             },
@@ -393,14 +396,15 @@ class QueryTests {
             (schema, datasource, plan) -> {
                 final var onlyPattern = plan.stream().findFirst().get();
 
+                final var filters = new ArrayList<Computation>();
+                filters.add(scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100")));
+
                 return new DatasourceNode(
                     datasource,
                     plan,
                     schema,
                     List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
+                    filters,
                     onlyPattern.root.variable
                 );
             },

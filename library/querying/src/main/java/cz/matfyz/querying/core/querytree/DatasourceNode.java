@@ -9,6 +9,7 @@ import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.patterntree.PatternTree.SerializedPatternTree;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class DatasourceNode extends QueryNode {
         Set<PatternForKind> kinds,
         SchemaCategory schema,
         List<JoinCandidate> joinCandidates,
-        List<Computation> filters,
+        ArrayList<Computation> filters,
         Variable rootVariable
     ) {
         this.datasource = datasource;
@@ -59,4 +60,5 @@ public class DatasourceNode extends QueryNode {
         @Override public String getType() { return "datasource"; }
 
     }
+
 }

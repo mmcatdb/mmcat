@@ -324,7 +324,7 @@ public abstract class GraphUtils {
     }
 
     /** Call callback recursively on each children of the tree. */
-    public static <T extends Tree<T>> void forEachDFS(T tree, Consumer<T> callback) {
+    public static <T extends TopDownTree<T>> void forEachDFS(T tree, Consumer<T> callback) {
         assert tree != null;
 
         Deque<T> stack = new ArrayDeque<>();

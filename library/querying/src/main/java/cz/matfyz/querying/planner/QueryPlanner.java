@@ -67,7 +67,7 @@ public class QueryPlanner {
             case Where -> currentNode;
             case Minus -> new MinusNode(childNode, currentNode);
             case Optional -> new OptionalNode(childNode, currentNode);
-            case Union -> new UnionNode(List.of(childNode, currentNode));
+            case Union -> new UnionNode(childNode, currentNode);
         };
     }
 
