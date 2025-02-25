@@ -60,6 +60,11 @@ public class AdminerController {
 
     private static final ObjectReader filterReader = new ObjectMapper().readerFor(AdminerFilter.class);
 
+    private void addFilterToList(String filter, List<AdminerFilter> list) throws JsonProcessingException {
+        final AdminerFilter parsed = filterReader.readValue(filter);
+        list.add(new AdminerFilter(parsed.propertyName(), parsed.operator(), parsed.propertyValue()));
+    }
+
     @GetMapping(value = "/adminer/{db}/{kind}", params = {"filters"})
     public DataResponse getRows(@PathVariable Id db, @PathVariable String kind, @RequestParam String[] filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceRepository.find(db);
@@ -71,18 +76,16 @@ public class AdminerController {
         List<AdminerFilter> filterList = new ArrayList<>();
 
         try {
-            if (filters.length == 3 && filters[0].contains("{") && !filters[0].contains("}")){
-                final var filter = filters[0] + ", " + filters[1] + ", " + filters[2];
-                final AdminerFilter parsed = filterReader.readValue(filter);
-                filterList.add(new AdminerFilter(parsed.propertyName(), parsed.operator(), parsed.propertyValue()));
+            if (filters[0].contains("{") && !filters[0].contains("}")){
+                final var filter = String.join(", ", filters);
+                addFilterToList(filter, filterList);
             } else {
                 for (final var filter : filters) {
-                    final AdminerFilter parsed = filterReader.readValue(filter);
-                    filterList.add(new AdminerFilter(parsed.propertyName(), parsed.operator(), parsed.propertyValue()));
+                    addFilterToList(filter, filterList);
                 }
             }
         } catch (JsonProcessingException e) {
-            System.out.println("Filters cannot be parsed.");
+            throw new IllegalArgumentException("Invalid filter format.");
         }
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();

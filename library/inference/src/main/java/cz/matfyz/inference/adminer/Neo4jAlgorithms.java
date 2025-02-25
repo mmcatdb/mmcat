@@ -16,8 +16,14 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.Record;
 
-public final class Neo4jAlgorithms {
+public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
+    private static final Neo4jAlgorithms INSTANCE = new Neo4jAlgorithms();
+
     private Neo4jAlgorithms() {}
+
+    public static Neo4jAlgorithms getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Extracts the properties of a node.
@@ -131,10 +137,24 @@ public final class Neo4jAlgorithms {
     /**
      * A map of operator names to Neo4j operators.
      */
-    public static final Map<String, String> OPERATORS = defineOperators();
+    private static final Map<String, String> OPERATORS = defineOperators();
 
     /**
      * A list of Neo4j unary operators.
      */
-    public static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
+    private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
+
+    /**
+     * Returns a map of operator names to Neo4j operators.
+     */
+    public Map<String, String> getOperators() {
+        return OPERATORS;
+    }
+
+    /**
+     * Returns a list of Neo4j unary operators.
+     */
+    public List<String> getUnaryOperators() {
+        return UNARY_OPERATORS;
+    }
 }

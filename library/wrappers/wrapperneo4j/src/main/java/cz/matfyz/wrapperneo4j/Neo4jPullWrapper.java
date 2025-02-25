@@ -19,13 +19,12 @@ import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.inference.adminer.AdminerAlgorithms;
 import cz.matfyz.inference.adminer.Neo4jAlgorithms;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import java.util.Map;
 
@@ -293,53 +292,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Constructs a Cypher WHERE clause based on a list of filters.
-     *
-     * @param filters The filters to apply.
-     * @param name The alias for the graph element in the query ('a' for nodes and 'r' for relationships).
-     * @return A Cypher WHERE clause as a {@link String}.
-     */
-    private String createWhereClause(List<AdminerFilter> filters, String name) {
-        if (filters == null || filters.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder whereClause = new StringBuilder("WHERE ");
-
-        for (int i = 0; i < filters.size(); i++) {
-            AdminerFilter filter = filters.get(i);
-            String operator = Neo4jAlgorithms.OPERATORS.get(filter.operator());
-
-            if (i != 0) {
-                whereClause.append(" AND ");
-            }
-
-            whereClause.append(name)
-                .append(".")
-                .append(filter.propertyName())
-                .append(" ")
-                .append(operator);
-
-            if (operator.equals("IN")) {
-                whereClause
-                    .append(" ")
-                    .append(Arrays.stream(filter.propertyValue().split(";"))
-                        .map(String::trim)
-                        .map(value -> "'" + value + "'")
-                        .collect(Collectors.joining(", ", "[", "]")))
-                    .append("");
-            } else if (!Neo4jAlgorithms.UNARY_OPERATORS.contains(operator)) {
-                whereClause
-                    .append(" '")
-                    .append(filter.propertyValue())
-                    .append("'");
-            }
-        }
-
-        return whereClause.toString();
-    }
-
-    /**
      * Retrieves node data from the graph based on the specified query, filters, and pagination parameters.
      *
      * @param session The Neo4j session to use for the query.
@@ -350,7 +302,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @return A {@link GraphResponse} containing the nodes and metadata.
      */
     private GraphResponse getNode(Session session, String queryBase, List<AdminerFilter> filters, String limit, String offset) {
-        String whereClause = createWhereClause(filters, "a");
+        String whereClause = AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, "a");
 
         List<GraphElement> data = session.executeRead(tx -> {
             var query = new Query(queryBase + whereClause + " RETURN a SKIP " + offset + " LIMIT " + limit + ";");
@@ -378,7 +330,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @return A {@link GraphResponse} containing the relationships and metadata.
      */
     private GraphResponse getRelationship(Session session, List<AdminerFilter> filters, String limit, String offset) {
-        String whereClause = createWhereClause(filters, "r");
+        String whereClause = AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, "r");
         List<GraphElement> data = session.executeRead(tx -> {
             var query = new Query("MATCH ()-[r]->() " + whereClause + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 

@@ -18,6 +18,7 @@ import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.inference.adminer.AdminerAlgorithms;
 import cz.matfyz.inference.adminer.PostgreSQLAlgorithms;
 
 import java.sql.Connection;
@@ -27,12 +28,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -210,53 +209,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Creates a PostgreSQL WHERE clause from a list of filters.
-     *
-     * @param filters The list of {@link AdminerFilter} objects representing filter conditions.
-     * @return A {@link String} containing the WHERE clause, or an empty string if no filters are provided.
-     */
-    private String createWhereClause(List<AdminerFilter> filters) {
-        StringBuilder whereClause = new StringBuilder();
-
-        if (filters == null || filters.isEmpty()) {
-            return "";
-        }
-
-        for (int i = 0; i < filters.size(); i++) {
-            AdminerFilter filter = filters.get(i);
-
-            if (i == 0) {
-                whereClause.append("WHERE ");
-            } else {
-                whereClause.append("AND ");
-            }
-
-            String operator = PostgreSQLAlgorithms.OPERATORS.get(filter.operator());
-
-            whereClause.append(filter.propertyName())
-                .append(" ")
-                .append(PostgreSQLAlgorithms.OPERATORS.get(filter.operator()));
-
-            if (operator.equals("IN") || operator.equals("NOT IN")) {
-                whereClause
-                    .append(" ")
-                    .append(Arrays.stream(filter.propertyValue().split(";"))
-                        .map(String::trim)
-                        .map(value -> "'" + value + "'")
-                        .collect(Collectors.joining(", ", "(", ")")))
-                    .append("");
-            } else if (!PostgreSQLAlgorithms.UNARY_OPERATORS.contains(operator)) {
-                whereClause
-                    .append(" '")
-                    .append(filter.propertyValue())
-                    .append("'");
-            }
-        }
-
-        return whereClause.toString();
-    }
-
-    /**
      * Retrieves data for a specific kind with optional filtering, pagination, and sorting.
      *
      * @param kindName The name of the kind to query.
@@ -273,7 +225,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         ){
             List<Map<String, String>> data = new ArrayList<>();
 
-            String whereClause = createWhereClause(filter);
+            String whereClause = AdminerAlgorithms.createWhereClause(PostgreSQLAlgorithms.getInstance(), filter, null);
 
             String selectQuery = "SELECT * FROM \"" + kindName +  "\" " + whereClause + " LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(selectQuery);

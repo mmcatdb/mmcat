@@ -14,8 +14,14 @@ import java.util.TreeMap;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.core.adminer.Reference;
 
-public final class PostgreSQLAlgorithms {
+public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
+    private static final PostgreSQLAlgorithms INSTANCE = new PostgreSQLAlgorithms();
+
     private PostgreSQLAlgorithms() {}
+
+    public static PostgreSQLAlgorithms getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Retrieves all property names for a given kind.
@@ -160,10 +166,24 @@ public final class PostgreSQLAlgorithms {
     /**
      * A map of operator names to PostgreSQL operators.
      */
-    public static final Map<String, String> OPERATORS = defineOperators();
+    private static final Map<String, String> OPERATORS = defineOperators();
 
     /**
      * A list of PostgreSQL unary operators.
      */
-    public static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
+    private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
+
+    /**
+     * Returns a map of operator names to PostgreSQL operators.
+     */
+    public Map<String, String> getOperators() {
+        return OPERATORS;
+    }
+
+    /**
+     * Returns a list of PostgreSQL unary operators.
+     */
+    public List<String> getUnaryOperators() {
+        return UNARY_OPERATORS;
+    }
 }
