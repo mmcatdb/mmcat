@@ -9,7 +9,7 @@ export function CategoryPage() {
 
     return (
         <CategoryInfoProvider category={category}>
-            <div className='z-20 fixed top-0 left-0 right-0 h-0 flex justify-center'>
+            <div className='z-20 fixed bottom-12 left-0 right-0 h-0 flex justify-center'>
                 <SessionSelect />
             </div>
 

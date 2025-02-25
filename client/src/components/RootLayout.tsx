@@ -48,7 +48,7 @@ function CommonNavbar() {
     return (
         <Navbar
             className={clsx(
-                'z-20 w-full h-12 border-b',
+                'z-20 w-full h-10 border-b',
                 theme === 'dark' ? 'border-zinc-700' : 'border-zinc-300',
             )}
             isBlurred={false}

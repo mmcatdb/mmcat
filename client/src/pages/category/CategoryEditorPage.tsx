@@ -11,6 +11,13 @@ import { Evocat } from '@/types/evocat/Evocat';
 import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
 import { onSuccess } from '@/types/api/result';
 import { useDeleteHandlers } from '@/components/schema-categories/useDeleteHandlers';
+import { cn } from '@/components/utils';
+import { TbLayoutSidebar, TbLayoutSidebarFilled, TbLayoutSidebarRight, TbLayoutSidebarRightFilled } from 'react-icons/tb';
+
+type EditorSidebarState = {
+    left: boolean;
+    right: boolean;
+};
 
 export function CategoryEditorPage() {
     const loaderData = useLoaderData() as Awaited<ReturnType<typeof categoryEditorLoader>>;
@@ -28,24 +35,68 @@ export function CategoryEditorPage() {
     }
 
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
-
     useDeleteHandlers(state, dispatch);
 
-    return (<>
-        <EditCategoryGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
+    const [ sidebarState, setSidebarState ] = useState<EditorSidebarState>({
+        left: true,
+        right: true,
+    });
+    
+    const toggleSidebar = (side: keyof EditorSidebarState) => {
+        setSidebarState(prev => ({
+            ...prev,
+            [side]: !prev[side], // toggle the specified sidebar
+        }));
+    };
 
-        {(state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) && (
-            <div className='z-20 absolute top-2 right-2'>
-                <SelectionCard state={state} dispatch={dispatch} />
+    return (
+        <div className='flex flex-col h-screen'>
+            {/* Navbar */}
+            <div className='h-8 flex items-center justify-between px-4 shadow-md bg-zinc-200'>
+                <div className='flex items-center gap-3'>
+                    <Button isIconOnly variant='light' onClick={() => toggleSidebar('left')}>
+                        {sidebarState.left ? <TbLayoutSidebarFilled /> : <TbLayoutSidebar />}
+                    </Button>
+                </div>
+
+                {/* Save and Delete Actions */}
+                <div className='flex items-center gap-2'>
+                    <SaveButton state={state} dispatch={dispatch} />
+                    {/* <Button color='danger' startContent={<FaTrash />} onClick={() => dispatch({ type: 'deleteCategory' })}>
+                        Delete
+                    </Button> */}
+                    <Button isIconOnly variant='light' onClick={() => toggleSidebar('right')}>
+                        {sidebarState.right ? <TbLayoutSidebarRightFilled /> : <TbLayoutSidebarRight />}
+                    </Button>
+                </div>
             </div>
-        )}
 
-        <PhasedEditor state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2' />
+            <div className='flex flex-grow'>
+                {/* Left Sidebar (Phased Editor) */}
+                <aside className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-gray-100`)}>
+                    {sidebarState.left && <PhasedEditor state={state} dispatch={dispatch} />}
+                </aside>
 
-        <div className='absolute bottom-2 right-2'>
-            <SaveButton state={state} dispatch={dispatch} />
+                {/* Main Canvas */}
+                <main className='flex-grow relative'>
+                    <EditCategoryGraphDisplay state={state} dispatch={dispatch} className='w-full h-full' />
+
+                    {/* Floating Selection Card */}
+                    {/* {(state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) && (
+                        <div className='absolute top-2 right-2 z-20'>
+                            <SelectionCard state={state} dispatch={dispatch} />
+                        </div>
+                    )} */}
+                </main>
+
+                {/* Right Sidebar (Info about selected object) */}
+                <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-gray-100`}>
+                    {sidebarState.right && <SelectionCard state={state} dispatch={dispatch} />}
+                </aside>
+            </div>
         </div>
-    </>);
+    );
+
 }
 
 CategoryEditorPage.loader = categoryEditorLoader;
@@ -164,7 +215,7 @@ function SaveButton({ state }: StateDispatchProps) {
     }
 
     return (
-        <Button color='primary' onClick={save} isLoading={isFetching}>
+        <Button color='default' onClick={save} isLoading={isFetching} size='sm'>
             Save
         </Button>
     );
