@@ -69,7 +69,20 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
         setOffset(0);
     }, [ state.active, state.datasourceId, state.kindName, state.view ]);
 
-    if (!fetchedData || loading || referencesLoading) {
+    if (error === `Failed to fetch data`) {
+        return (
+            <div>
+                <div className='mb-5'>
+                    <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={undefined} dispatch={dispatch}/>
+                </div>
+
+                <p>{error}</p>
+            </div>
+
+        );
+    }
+
+    if (loading || referencesLoading) {
         return (
             <div className='h-10 flex items-center justify-center'>
                 <Spinner />
