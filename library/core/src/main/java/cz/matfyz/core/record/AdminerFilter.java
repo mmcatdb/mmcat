@@ -1,7 +1,8 @@
 package cz.matfyz.core.record;
 
-//TODO
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record AdminerFilter(
     String propertyName,
     String operator,
