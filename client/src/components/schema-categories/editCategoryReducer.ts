@@ -74,9 +74,16 @@ type SelectAction = {
 function select(state: EditCategoryState, action: SelectAction): EditCategoryState {
     const newSelection = updateSelectionFromUserAction(state.selection, action);
 
-    // If we are in morphism creation phase, prevent selecting more than 2 nodes, just proceed
-    if (state.phase === EditorPhase.createMorphism && newSelection.nodeIds.size > 2) 
-        return state;
+    // If we are in morphism creation phase, prevent selecting more than 2 nodes, just proceed and prevent selecting morphisms
+    if (state.phase === EditorPhase.createMorphism) {
+        // Prevent selecting more than 2 nodes
+        const selectedNodeIds = Array.from(newSelection.nodeIds);
+        if (selectedNodeIds.length > 2) 
+            return state;
+
+        if (newSelection.edgeIds.size > 0) 
+            return state;
+    }
 
     // Automatically proceed when exactly two nodes are selected
     const newPhase = (state.phase === EditorPhase.createMorphism && newSelection.nodeIds.size === 2)

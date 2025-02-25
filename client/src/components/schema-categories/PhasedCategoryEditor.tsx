@@ -42,7 +42,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
         : undefined;
 
     const selectedNodes = Array.from(state.selection.nodeIds);
-    const isValidSelection = selectedNodes.length <= 2;
+    const isValidSelection = selectedNodes.length <= 2 && state.selection.edgeIds.size === 0;
 
     function deleteObjex(node: CategoryNode) {
         state.evocat.deleteObjex(node.schema.key);
@@ -145,6 +145,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
 
 export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const [ label, setLabel ] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // Extract selected nodes (should be exactly 2)
     const selectedNodes = Array.from(state.selection.nodeIds);
@@ -152,6 +153,13 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
 
     const domainNode = state.graph.nodes.find(node => node.id === selectedNodes[0]);
     const codomainNode = state.graph.nodes.find(node => node.id === selectedNodes[1]);
+
+    // focus on input when both domain and codomain are selected
+    useEffect(() => {
+        if (isValidSelection && inputRef.current) 
+            inputRef.current.focus();
+        
+    }, [ isValidSelection ]);
 
     function createMorphism() {
         if (!isValidSelection || !label)
@@ -177,31 +185,30 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             createMorphism();
     }
 
-    return (
-        <>
-            <h3>Create Morphism</h3>
+    return (<>
+        <h3>Create Morphism</h3>
 
-            <div>
-                <p>Domain object: <span className='font-semibold'>{domainNode?.metadata.label ?? 'Select a node'}</span></p>
-                <p>Codomain object: <span className='font-semibold'>{codomainNode?.metadata.label ?? 'Hold Ctrl and Select a second node'}</span></p>
-            </div>
+        <div>
+            <p>Domain object: <span className='font-semibold'>{domainNode?.metadata.label ?? 'Select a node'}</span></p>
+            <p>Codomain object: <span className='font-semibold text-rose-600'>{codomainNode?.metadata.label ?? 'Hold Ctrl and Select a second node'}</span></p>
+        </div>
 
-            <Input
-                label='Label'
-                value={label}
-                onChange={e => setLabel(e.target.value)}
-                onKeyDown={handleKeyDown}
-            />
+        <Input
+            label='Label'
+            value={label}
+            onChange={e => setLabel(e.target.value)}
+            onKeyDown={handleKeyDown}
+            ref={inputRef}
+        />
 
-            <div className='grid grid-cols-2 gap-2'>
-                <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.cancelMorphismCreation })}>
+        <div className='grid grid-cols-2 gap-2'>
+            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.cancelMorphismCreation })}>
                     Cancel
-                </Button>
+            </Button>
 
-                <Button color='primary' onClick={createMorphism} isDisabled={!isValidSelection || label === ''}>
+            <Button color='primary' onClick={createMorphism} isDisabled={!isValidSelection || label === ''}>
                     Finish
-                </Button>
-            </div>
-        </>
-    );
+            </Button>
+        </div>
+    </>);
 }
