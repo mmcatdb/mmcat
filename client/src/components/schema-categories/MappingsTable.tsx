@@ -6,7 +6,7 @@ import type { Mapping } from '@/types/mapping';
 import { useCategoryInfo } from '../CategoryInfoProvider';
 import { AccessPathTooltip } from './AccessPathTooltip';
 import { cn } from '@/components/utils';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 
 type MappingsTableProps = {
@@ -40,13 +40,19 @@ type MappingsTableContentProps = {
 
 function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: MappingsTableContentProps) {
     const { theme, showTableIDs } = usePreferences().preferences;
+    const navigate = useNavigate();
     const { category } = useCategoryInfo();
+
+    const handleRowAction = (mappingId: React.Key) => {
+        navigate(routes.category.mapping.resolve({ categoryId: category.id, mappingId }));
+    };
 
     return (
         <Table
             aria-label='Mappings Table'
             sortDescriptor={sortDescriptor}
             onSortChange={onSortChange}
+            onRowAction={(key: React.Key) => handleRowAction(key)}
             removeWrapper
             isCompact
         >
@@ -87,9 +93,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                 ? [ <TableCell key='id'>{mapping.id}</TableCell> ]
                                 : []),
                             <TableCell key='kindName'>
-                                <Link to={routes.category.mapping.resolve({ categoryId: category.id, mappingId: mapping.id })}>
-                                    {mapping.kindName}
-                                </Link>
+                                {mapping.kindName}
                             </TableCell>,
                             <TableCell key='version'>
                                 <span className={Number(category.systemVersionId) > Number(mapping.version) ? 'text-red-500' : ''}>

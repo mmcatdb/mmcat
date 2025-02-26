@@ -6,7 +6,7 @@ import { BsWindowSidebar } from 'react-icons/bs';
 export function CollapseContextToggle() {
     const { preferences, setPreferences } = usePreferences();
     const { isCollapsed } = preferences;
-    const label = isCollapsed ? 'Expand context' : 'Collapse context';
+    const label = 'Toggle Primary Side Bar';
 
     return (
         <Tooltip content={label}>

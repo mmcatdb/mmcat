@@ -58,6 +58,7 @@ export function JobsPage() {
 
     return (<>
         <h1 className='text-xl font-bold mb-8'>Jobs in Runs</h1>
+        {/* no NextUI (HeroUI) table, because of grouping functionality */}
         <table
             className={cn(
                 'w-full border-collapse rounded-xl overflow-hidden shadow-sm',
