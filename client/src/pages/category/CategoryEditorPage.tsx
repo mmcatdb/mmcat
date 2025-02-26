@@ -8,7 +8,7 @@ import { Button } from '@nextui-org/react';
 import { FaSpinner, FaTrash, FaXmark } from 'react-icons/fa6';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
-import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
+import { deleteObjex, deleteSelectedMorphism, PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
 import { onSuccess } from '@/types/api/result';
 import { useDeleteHandlers } from '@/components/schema-categories/useDeleteHandlers';
 import { cn } from '@/components/utils';
@@ -83,7 +83,17 @@ export function CategoryEditorPage() {
                     {/* Delete Button */}
                     <FaTrash
                         className='cursor-pointer text-rose-500 hover:text-rose-600'
-                        onClick={() => {}}
+                        onClick={() => {
+                            const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
+                                ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
+                                : undefined;
+                    
+                            if (singleSelectedNode) 
+                                deleteObjex(state, dispatch, singleSelectedNode);
+                            else 
+                                deleteSelectedMorphism(state, dispatch);
+                            
+                        }}
                         title='Delete (Delete)'
                         size={16}
                     />
@@ -256,10 +266,8 @@ function SaveButton({ state }: StateDispatchProps) {
         try {
             await state.evocat.update(async edit => {
                 const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
-
                 if (!response.status) 
                     throw new Error(typeof response.error === 'string' ? response.error : 'Failed to save changes');
-
                 return onSuccess(response, fromServer => Category.fromServer(fromServer));
             });
             setHasUnsavedChanges(false);

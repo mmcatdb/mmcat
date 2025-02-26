@@ -32,6 +32,29 @@ const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element
     [EditorPhase.cancelMorphismCreation]: DefaultDisplay,
 };
 
+export function deleteObjex(state: EditCategoryState, dispatch: EditCategoryDispatch, node: CategoryNode) {
+    state.evocat.deleteObjex(node.schema.key);
+    const graph = categoryToGraph(state.evocat.category);
+
+    dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+}
+
+export function deleteSelectedMorphism(state: EditCategoryState, dispatch: EditCategoryDispatch) {
+    if (state.selection.edgeIds.size !== 1) 
+        return;
+
+    const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
+    const selectedMorphism = state.graph.edges.find(edge => edge.id === selectedEdgeId);
+
+    if (!selectedMorphism) 
+        return;
+
+    state.evocat.deleteMorphism(selectedMorphism.schema.signature);
+    const graph = categoryToGraph(state.evocat.category);
+
+    dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+}
+
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
         ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
@@ -43,29 +66,6 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
     const selectedNodes = Array.from(state.selection.nodeIds);
     const isValidSelection = selectedNodes.length <= 2 && state.selection.edgeIds.size === 0;
-
-    function deleteObjex(node: CategoryNode) {
-        state.evocat.deleteObjex(node.schema.key);
-        const graph = categoryToGraph(state.evocat.category);
-
-        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
-    }
-
-    function deleteSelectedMorphism() {
-        if (state.selection.edgeIds.size !== 1)
-            return; // just one morphism selected check
-
-        const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
-        const selectedMorphism = state.graph.edges.find(edge => edge.id === selectedEdgeId);
-
-        if (!selectedMorphism)
-            return;
-
-        state.evocat.deleteMorphism(selectedMorphism.schema.signature); // morphisms are identified by their signature
-        const graph = categoryToGraph(state.evocat.category);
-
-        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
-    }
 
     return (<>
         <h3>Default</h3>
@@ -86,7 +86,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
                 Selected: <span className='font-semibold'>{singleSelectedNode.metadata.label}</span>
             </div>
 
-            <Button color='danger' onClick={() => deleteObjex(singleSelectedNode)}>Delete Object</Button>
+            <Button color='danger' onClick={() => deleteObjex(state, dispatch, singleSelectedNode)}>Delete Object</Button>
         </>)}
 
         {singleSelectedMorphism && (<>
@@ -94,7 +94,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
                 Selected: <span className='font-semibold'>{singleSelectedMorphism.metadata.label.length >= 1 ? singleSelectedMorphism.metadata.label : singleSelectedMorphism.id}</span>
             </div>
 
-            <Button color='danger' onClick={deleteSelectedMorphism}>Delete Morphism</Button>
+            <Button color='danger' onClick={() => deleteSelectedMorphism(state, dispatch)}>Delete Morphism</Button>
         </>)}
     </>);
 }
