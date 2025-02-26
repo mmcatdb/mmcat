@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Link } from '@nextui-org/react';
+import { Link } from 'react-router-dom';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
+import { routes } from '@/routes/routes';
 import { getHrefFromReference } from '@/components/adminer/URLParamsState';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { TableResponse, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
@@ -33,8 +35,13 @@ export function DatabaseTable({ fetchedData, setItemCount, references, datasourc
     if (fetchedData.data.every((item: Record<string, string> | GraphResponseData) => 'properties' in item)){
         const modifiedData = { metadata: fetchedData.metadata, data: [] } as TableResponse;
 
-        for (const element of fetchedData.data)
-            modifiedData.data.push(element.properties as Record<string, string>);
+        for (const element of fetchedData.data) {
+            const { properties, ...rest } = element;
+            modifiedData.data.push({
+                ...rest,
+                ...(properties as Record<string, string>),
+            } as Record<string, string>);
+        }
 
         fetchedData = modifiedData;
     }
@@ -62,9 +69,8 @@ export function DatabaseTable({ fetchedData, setItemCount, references, datasourc
                                                 getLinkReferences(references, column).map((ref, index) => (
                                                     <Link
                                                         key={index}
-                                                        href={getHrefFromReference(ref, item, column, datasources)}
-                                                        underline='hover'
-                                                        className='mr-2'
+                                                        to={{ pathname:routes.adminer, search: getHrefFromReference(ref, item, column, datasources) }}
+                                                        className='mr-2 hover:underline text-blue-500'
                                                     >
                                                         {formatCellValue(item[column])}
                                                     </Link>

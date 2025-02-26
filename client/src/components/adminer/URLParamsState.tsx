@@ -38,7 +38,7 @@ export function getHrefFromReference(reference: AdminerReference, item: Record<s
 
     const urlParams = getURLParamsFromState(state);
 
-    return `adminer?${urlParams.toString()}`;
+    return urlParams.toString();
 }
 
 export function getStateFromURLParams(params: URLSearchParams): AdminerState {

@@ -27,7 +27,8 @@ export type AdminerStateAction =
 | InputAction
 | FormAction
 | SubmitAction
-| InitializeAction;
+| InitializeAction
+| UpdateAction;
 
 type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
   ? { type: T }
@@ -60,3 +61,4 @@ type KindAction = AdminerTypedAction<'kind', { newKind: string }>;
 type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
 type InitializeAction = AdminerTypedAction<'initialize'>;
+type UpdateAction = AdminerTypedAction<'update', {newState: AdminerState }>;

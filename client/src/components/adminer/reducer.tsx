@@ -15,6 +15,9 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
             kindName: undefined,
         };
     }
+    case 'update': {
+        return action.newState;
+    }
     case 'datasource': {
         return {
             form: { limit: 50, filters: [] },

@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState, useMemo } from 'react';
+import { useEffect, useReducer, useState, useMemo, useRef } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Spinner } from '@nextui-org/react';
 import { getStateFromURLParams, getURLParamsFromState } from '@/components/adminer/URLParamsState';
@@ -24,17 +24,28 @@ export function AdminerPage() {
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
+    const stateRef = useRef(state);
+    const searchParamsRef = useRef(searchParams);
 
+    // Sync state with URL search parameters
     useEffect(() => {
-        if (searchParams.get('reload') === 'true')
+        if (searchParams.get('reload') === 'true') {
             dispatch({ type:'initialize' });
+            searchParamsRef.current = searchParams;
+        }
+
+        if (searchParamsRef.current != searchParams) {
+            dispatch({ type:'update', newState: getStateFromURLParams(searchParams) });
+            searchParamsRef.current = searchParams;
+        }
     }, [ searchParams ]);
 
+    // Update URL search parameters whenever state changes
     useEffect(() => {
-        const params = getURLParamsFromState(state);
-
-        if (params !== searchParams)
-            setSearchParams(params);
+        if (stateRef.current != state) {
+            setSearchParams(getURLParamsFromState(state));
+            stateRef.current = state;
+        }
     }, [ state ]);
 
     useMemo(() => {
