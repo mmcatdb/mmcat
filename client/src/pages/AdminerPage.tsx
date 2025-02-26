@@ -42,11 +42,11 @@ export function AdminerPage() {
 
     // Update URL search parameters whenever state changes
     useEffect(() => {
-        if (stateRef.current != state) {
+        if (stateRef.current != state && searchParamsRef.current == searchParams) {
             setSearchParams(getURLParamsFromState(state));
             stateRef.current = state;
         }
-    }, [ state ]);
+    }, [ state, searchParams ]);
 
     useMemo(() => {
         setDatasource(allDatasources?.find(source => source.id === state.datasourceId));
