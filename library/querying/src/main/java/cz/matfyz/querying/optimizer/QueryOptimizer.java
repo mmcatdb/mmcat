@@ -4,6 +4,7 @@ import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.utils.GraphUtils;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
@@ -78,12 +79,11 @@ public class QueryOptimizer {
 
         final var parentBak = filterNode.parent();
 
-        final boolean deepened = filterNode.child().accept(new FilterDeepener(filterNode));
+        final boolean deepened = filterNode.child().accept(new FilterDeepener(filterNode, original.context));
         if (deepened) {
+            replaceParentsChild(parentBak, filterNode, filterNode.parent());
             if (parentBak == null) {
                 original.root = filterNode.parent();
-            } else {
-                replaceParentsChild(parentBak, filterNode, filterNode.parent());
             }
         }
 
@@ -93,10 +93,12 @@ public class QueryOptimizer {
 
     static class FilterDeepener implements QueryVisitor<Boolean> {
 
+        final QueryContext context;
         final FilterNode filterNode;
         final Set<Variable> filterVariables;
 
-        private FilterDeepener(FilterNode filterNode) {
+        private FilterDeepener(FilterNode filterNode, QueryContext context) {
+            this.context = context;
             this.filterNode = filterNode;
             this.filterVariables = extractVariables(filterNode.filter);
         }
@@ -128,7 +130,10 @@ public class QueryOptimizer {
 
         @Override
         public Boolean visit(DatasourceNode childNode) {
-            // TODO: Need to check whether filters are supported, but that is only available through wrappers and not datasources; for now we assume YES
+            // TODO: Check filterNotIndexable
+
+            final boolean canFilter = context.getProvider().getControlWrapper(childNode.datasource).getQueryWrapper().isFilteringSupported();
+            if (!canFilter) return false;
 
             childNode.filters.add(filterNode.filter);
             // To enforce post-deepening invariants (no other reason), we need to assign the DatasourceNode as a parent to the filter
