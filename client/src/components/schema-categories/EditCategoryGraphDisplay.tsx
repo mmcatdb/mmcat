@@ -92,7 +92,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
             />
 
             <div className='w-fit h-0'>
-                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none'>
+                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block'>
                     {node.metadata.label}
                 </span>
             </div>

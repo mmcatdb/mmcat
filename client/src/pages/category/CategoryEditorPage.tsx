@@ -96,7 +96,6 @@ export function CategoryEditorPage() {
             </div>
         </div>
     );
-
 }
 
 CategoryEditorPage.loader = categoryEditorLoader;
@@ -140,62 +139,64 @@ function SelectionCard({ state, dispatch }: StateDispatchProps) {
     const { nodeIds, edgeIds } = state.selection;
 
     return (
-        <div className='min-w-[200px] p-3 rounded-lg bg-background space-y-3'>
-            {nodeIds.size > 0 && (
-                <div>
-                    <div className='flex items-center justify-between pb-1'>
-                        <h3 className='font-semibold'>Selected objects</h3>
-                        <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'nodes' })}>
-                            <FaXmark />
-                        </Button>
+        <div className='min-w-[200px] pl-3 rounded-lg bg-background '>
+            <div className='max-h-[600px] overflow-y-auto'>
+                {nodeIds.size > 0 && (
+                    <div>
+                        <div className='flex items-center justify-between pb-1'>
+                            <h3 className='font-semibold'>Selected objects</h3>
+                            <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'nodes' })}>
+                                <FaXmark />
+                            </Button>
+                        </div>
+
+                        <div className='flex flex-col'>
+                            {[ ...nodeIds.values() ].map(id => {
+                                const node = state.graph.nodes.find(node => node.id === id)!;
+
+                                return (
+                                    <div key={node.id} className='flex items-center gap-2'>
+                                        <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
+                                        {node.metadata.label}
+                                        <div className='grow' />
+                                        <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>
+                                            <FaXmark />
+                                        </Button>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
+                )}
 
-                    <div className='flex flex-col'>
-                        {[ ...nodeIds.values() ].map(id => {
-                            const node = state.graph.nodes.find(node => node.id === id)!;
+                {edgeIds.size > 0 && (
+                    <div>
+                        <div className='flex items-center justify-between pb-1'>
+                            <h3 className='font-semibold'>Selected morphisms</h3>
+                            <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'edges' })}>
+                                <FaXmark />
+                            </Button>
+                        </div>
 
-                            return (
-                                <div key={node.id} className='flex items-center gap-2'>
-                                    <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
-                                    {node.metadata.label}
-                                    <div className='grow' />
-                                    <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>
-                                        <FaXmark />
-                                    </Button>
-                                </div>
-                            );
-                        })}
+                        <div className='flex flex-col'>
+                            {[ ...edgeIds.values() ].map(id => {
+                                const edge = state.graph.edges.find(edge => edge.id === id)!;
+
+                                return (
+                                    <div key={edge.id} className='flex items-center gap-2'>
+                                        <span className='text-primary font-semibold'>{edge.schema.signature.toString()}</span>
+                                        {edge.metadata.label}
+                                        <div className='grow' />
+                                        <Button isIconOnly variant='light' size='sm' onClick={() => unselectEdge(edge.id)}>
+                                            <FaXmark />
+                                        </Button>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
-            )}
-
-            {edgeIds.size > 0 && (
-                <div>
-                    <div className='flex items-center justify-between pb-1'>
-                        <h3 className='font-semibold'>Selected morphisms</h3>
-                        <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'edges' })}>
-                            <FaXmark />
-                        </Button>
-                    </div>
-
-                    <div className='flex flex-col'>
-                        {[ ...edgeIds.values() ].map(id => {
-                            const edge = state.graph.edges.find(edge => edge.id === id)!;
-
-                            return (
-                                <div key={edge.id} className='flex items-center gap-2'>
-                                    <span className='text-primary font-semibold'>{edge.schema.signature.toString()}</span>
-                                    {edge.metadata.label}
-                                    <div className='grow' />
-                                    <Button isIconOnly variant='light' size='sm' onClick={() => unselectEdge(edge.id)}>
-                                        <FaXmark />
-                                    </Button>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }
