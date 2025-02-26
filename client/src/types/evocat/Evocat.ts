@@ -277,4 +277,8 @@ class SmoContext {
 
         return smo;
     }
+
+    hasUnsavedChanges() {
+        return this.levels.some(level => level.length > 0);
+    }
 }

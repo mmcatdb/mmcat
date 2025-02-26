@@ -1,18 +1,20 @@
-import { useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { api } from '@/api';
-import { Category } from '@/types/schema';
+import { Category, isPositionEqual } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { EditCategoryGraphDisplay } from '@/components/schema-categories/EditCategoryGraphDisplay';
 import { Button } from '@nextui-org/react';
-import { FaXmark } from 'react-icons/fa6';
+import { FaSpinner, FaTrash, FaXmark } from 'react-icons/fa6';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
 import { PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
 import { onSuccess } from '@/types/api/result';
 import { useDeleteHandlers } from '@/components/schema-categories/useDeleteHandlers';
 import { cn } from '@/components/utils';
-import { TbLayoutSidebar, TbLayoutSidebarFilled, TbLayoutSidebarRight, TbLayoutSidebarRightFilled } from 'react-icons/tb';
+import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
+import { FaSave } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 type EditorSidebarState = {
     left: boolean;
@@ -49,30 +51,63 @@ export function CategoryEditorPage() {
         }));
     };
 
+    // Ctrl+S to save
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault(); // Stop browser save dialog
+                document.getElementById('save-button')?.click(); // Trigger save
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     return (
         <div className='flex flex-col h-screen'>
             {/* Navbar */}
-            <div className='h-8 flex items-center justify-between px-4 shadow-md bg-zinc-200'>
+            <div className='h-8 flex items-center justify-between px-4 shadow-md bg-zinc-200 border-b border-zinc-300'>
                 <div className='flex items-center gap-3'>
-                    <Button isIconOnly variant='light' onClick={() => toggleSidebar('left')}>
-                        {sidebarState.left ? <TbLayoutSidebarFilled /> : <TbLayoutSidebar />}
-                    </Button>
+                    {/* Left Sidebar Toggle */}
+                    <TbLayoutSidebarFilled
+                        className='cursor-pointer text-zinc-500 hover:text-zinc-600'
+                        onClick={() => toggleSidebar('left')}
+                        title='Toggle Main Editor Sidebar'
+                        size={18}
+                    />
+
+                    {/* Divider */}
+                    <div className='w-px bg-zinc-400 h-5 mx-2'></div>
+
+                    {/* Delete Button */}
+                    <FaTrash
+                        className='cursor-pointer text-rose-500 hover:text-rose-600'
+                        onClick={() => {}}
+                        title='Delete (Delete)'
+                        size={16}
+                    />
                 </div>
 
-                {/* Save and Delete Actions */}
+                {/* Save and Right Sidebar Toggle */}
                 <div className='flex items-center gap-2'>
                     <SaveButton state={state} dispatch={dispatch} />
-                    {/* <Button color='danger' startContent={<FaTrash />} onClick={() => dispatch({ type: 'deleteCategory' })}>
-                        Delete
-                    </Button> */}
-                    <Button isIconOnly variant='light' onClick={() => toggleSidebar('right')}>
-                        {sidebarState.right ? <TbLayoutSidebarRightFilled /> : <TbLayoutSidebarRight />}
-                    </Button>
+
+                    {/* Divider */}
+                    <div className='w-px bg-zinc-400 h-5 mx-2'></div>
+
+                    {/* Right Sidebar Toggle */}
+                    <TbLayoutSidebarRightFilled
+                        className='cursor-pointer text-zinc-500 hover:text-zinc-600'
+                        onClick={() => toggleSidebar('right')}
+                        title='Toggle Info Sidebar'
+                        size={18}
+                    />
                 </div>
             </div>
 
             <div className='flex flex-grow'>
-                {/* Left Sidebar (Phased Editor) */}
+                {/* Left Sidebar */}
                 <aside className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-gray-100`)}>
                     {sidebarState.left && <PhasedEditor state={state} dispatch={dispatch} />}
                 </aside>
@@ -80,16 +115,9 @@ export function CategoryEditorPage() {
                 {/* Main Canvas */}
                 <main className='flex-grow relative'>
                     <EditCategoryGraphDisplay state={state} dispatch={dispatch} className='w-full h-full' />
-
-                    {/* Floating Selection Card */}
-                    {/* {(state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) && (
-                        <div className='absolute top-2 right-2 z-20'>
-                            <SelectionCard state={state} dispatch={dispatch} />
-                        </div>
-                    )} */}
                 </main>
 
-                {/* Right Sidebar (Info about selected object) */}
+                {/* Right Sidebar */}
                 <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-gray-100`}>
                     {sidebarState.right && <SelectionCard state={state} dispatch={dispatch} />}
                 </aside>
@@ -140,7 +168,7 @@ function SelectionCard({ state, dispatch }: StateDispatchProps) {
 
     return (
         <div className='min-w-[200px] pl-3 rounded-lg bg-background '>
-            <div className='max-h-[600px] overflow-y-auto'>
+            <div className='max-h-[900px] overflow-y-auto'>
                 {nodeIds.size > 0 && (
                     <div>
                         <div className='flex items-center justify-between pb-1'>
@@ -203,21 +231,76 @@ function SelectionCard({ state, dispatch }: StateDispatchProps) {
 
 function SaveButton({ state }: StateDispatchProps) {
     const [ isFetching, setIsFetching ] = useState(false);
+    const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
+
+    useEffect(() => {
+        const checkForChanges = () => {
+            setHasUnsavedChanges(detectUnsavedChanges(state));
+        };
+
+        // Check changes initially and every time the component updates
+        checkForChanges();
+
+        // Set an interval to check periodically (every 1s)
+        const interval = setInterval(checkForChanges, 1000);
+
+        return () => clearInterval(interval);
+    }, [ state ]);
 
     async function save() {
+        if (isFetching) 
+            return;
+
         setIsFetching(true);
 
-        await state.evocat.update(async edit => {
-            const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
-            return onSuccess(response, fromServer => Category.fromServer(fromServer));
-        });
+        try {
+            await state.evocat.update(async edit => {
+                const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
 
-        setIsFetching(false);
+                if (!response.status) 
+                    throw new Error(typeof response.error === 'string' ? response.error : 'Failed to save changes');
+
+                return onSuccess(response, fromServer => Category.fromServer(fromServer));
+            });
+            setHasUnsavedChanges(false);
+        }
+        catch (err) {
+            toast.error('Failed to save changes', { autoClose: 5000 });
+            console.error('Save Error: Failed to save changes');
+        }
+        finally {
+            setIsFetching(false);
+        }
     }
 
     return (
-        <Button color='default' onClick={save} isLoading={isFetching} size='sm'>
-            Save
-        </Button>
+        <div
+            id='save-button' // id for triggering via Ctrl+S
+            className='flex items-center gap-1 text-gray-600 hover:text-gray-800 cursor-pointer relative'
+            onClick={save}
+            title='Save Changes (Ctrl+S)'
+        >
+            {isFetching ? (
+                <FaSpinner className='animate-spin' size={18} />
+            ) : (
+                <FaSave size={18} />
+            )}
+            {hasUnsavedChanges && !isFetching && (
+                <span className='text-red-500 text-sm absolute -top-2 right-0'>*</span>
+            )}
+        </div>
     );
+}
+
+// Function to detect unsaved changes: node movement, schema updates
+function detectUnsavedChanges(state: StateDispatchProps['state']) {
+    const evocat = state.evocat;
+
+    const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();
+
+    const hasMovedNodes = evocat.category.getObjexes().some(objex => {
+        return !isPositionEqual(objex.metadata.position, objex.originalMetadata.position);
+    });
+
+    return hasSchemaChanges || hasMovedNodes;
 }
