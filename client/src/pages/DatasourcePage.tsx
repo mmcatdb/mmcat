@@ -4,7 +4,7 @@ import { api } from '@/api';
 import { Datasource, type Settings } from '@/types/datasource';
 import { Button, Input } from '@nextui-org/react';
 import { Mapping } from '@/types/mapping';
-import { MappingsTable } from '@/components/schema-categories/MappingsTable';
+import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { DatasourceSpecificFields } from '@/components/datasources/DatasourceModal';

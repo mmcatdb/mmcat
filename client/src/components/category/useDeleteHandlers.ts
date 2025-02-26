@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
-import { type EditCategoryState, EditorPhase, type EditCategoryDispatch } from '@/components/schema-categories/editCategoryReducer';
-import { type CategoryNode, type CategoryEdge, categoryToGraph } from '@/components/schema-categories/categoryGraph';
+import { type EditCategoryState, EditorPhase, type EditCategoryDispatch } from '@/components/category/editCategoryReducer';
+import { type CategoryNode, type CategoryEdge, categoryToGraph } from '@/components/category/categoryGraph';
 
 export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCategoryDispatch) {
     const deleteObjex = useCallback((node: CategoryNode) => {
@@ -26,9 +26,9 @@ export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCatego
                     ? state.graph.edges.find(edge => state.selection.edgeIds.has(edge.id))
                     : undefined;
 
-                if (singleSelectedNode) 
+                if (singleSelectedNode)
                     deleteObjex(singleSelectedNode);
-                else if (singleSelectedMorphism) 
+                else if (singleSelectedMorphism)
                     deleteSelectedMorphism(singleSelectedMorphism);
             }
         }

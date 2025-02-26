@@ -3,26 +3,17 @@ import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Key, Signature } from '../identifiers';
 import type { MetadataObjex, Position, SchemaObjex, Objex } from '../schema';
 import { DirectedEdge, type Edge } from './Edge';
-import { PathMarker, type MorphismData, type Filter } from './PathMarker';
 import type { Group } from './Graph';
+import { Availability } from './PathMarker';
 
 export enum NodeTag {
     Root = 'tag-root'
 }
 
-export enum AvailabilityStatus {
-    Default = 'availability-default',
-    Available = 'availability-available',
-    CertainlyAvailable = 'availability-certainly-available',
-    Ambiguous = 'availability-ambiguous',
-    Removable = 'availability-removable',
-    NotAvailable = 'availability-not-available'
-}
-
-export enum SelectionType {
-    Default = 'selection-default',
-    Root = 'selection-root',
-    Selected = 'selection-selected'
+enum SelectionType {
+    Default = 'default',
+    Root = 'root',
+    Selected = 'selected'
 }
 
 export type SelectionStatus = {
@@ -87,45 +78,12 @@ export class Node {
         return node;
     }
 
-    remove() {
-        this.highlights.remove();
-        // this.node.remove();
-    }
-
-    update(schemaObjex: SchemaObjex) {
-        this.schemaObjex = schemaObjex;
-        // this.node.data('label', this.label);
-        // this.node.toggleClass('no-ids', !this.schemaObjex.ids);
-
-        // this.node.position({ ...this.metadata.position });
-    }
-
     get metadata(): MetadataObjex {
         return this.objex.metadata;
     }
 
     refreshGroupPlaceholders() {
         this.highlights.refresh();
-    }
-
-    addNeighbor(edge: Edge, direction: boolean): void {
-        const thisNode = direction ? edge.domainNode : edge.codomainNode;
-        if (!thisNode.equals(this))
-            throw new Error(`Cannot add edge with signature: ${edge.schemaMorphism.signature} and direction: ${direction} to node with key: ${this.objex.key}`);
-
-        const node = direction ? edge.codomainNode : edge.domainNode;
-
-        const edgeSignature = edge.schemaMorphism.signature;
-        const signature = direction ? edgeSignature : edgeSignature.dual();
-
-        const neighbor = new Neighbor(edge, node, signature);
-        this._neighbors.set(signature, neighbor);
-    }
-
-    removeNeighbor(node: Node): void {
-        [ ...this._neighbors.values() ]
-            .filter(neighbor => neighbor.node.equals(node))
-            .forEach(neighbor => this._neighbors.delete(neighbor.signature));
     }
 
     getNeighborNode(signature: Signature): Node | undefined {
@@ -154,10 +112,10 @@ export class Node {
         return this.schemaObjex.ids.isSignatures ? PropertyType.Complex : null;
     }
 
-    private _availabilityStatus = AvailabilityStatus.Default;
+    private _availabilityStatus = Availability.Default;
     private _selectionStatus = defaultSelectionStatus;
 
-    get availabilityStatus(): AvailabilityStatus {
+    get availabilityStatus(): Availability {
         return this._availabilityStatus;
     }
 
@@ -192,16 +150,16 @@ export class Node {
         this.select({ type: newType, level: newLevel });
     }
 
-    setAvailabilityStatus(status: AvailabilityStatus): void {
+    setAvailabilityStatus(status: Availability): void {
         // this.node.removeClass(this._availabilityStatus);
         this._availabilityStatus = status;
         // this.node.addClass(status);
     }
 
     resetAvailabilityStatus(): void {
-        if (this._availabilityStatus !== AvailabilityStatus.Default) {
+        if (this._availabilityStatus !== Availability.Default) {
             // this.node.removeClass(this._availabilityStatus);
-            this._availabilityStatus = AvailabilityStatus.Default;
+            this._availabilityStatus = Availability.Default;
         }
     }
 
@@ -214,23 +172,11 @@ export class Node {
         return !!other && this.schemaObjex.equals(other.schemaObjex);
     }
 
-    markAvailablePaths(filter: Filter): void {
+    markAvailablePaths(filter: PathFilter): void {
         const pathMarker = new PathMarker(this, filter);
         pathMarker.markPathsFromRootNode();
     }
 }
-
-// function createNodeDefinition(objex: SchemaObjex, position: Position, node: Node, classes?: string): ElementDefinition {
-//     return {
-//         data: {
-//             id: '' + objex.key.value,
-//             label: node.label,
-//             schemaData: node,
-//         },
-//         position,
-//         ...classes ? { classes } : {},
-//     };
-// }
 
 type GroupPlaceholder = {
     group: Group;
@@ -295,15 +241,3 @@ class NodeHighlights {
         });
     }
 }
-
-// function createGroupPlaceholderDefinition(key: Key, position: Position, groupId: string) {
-//     return {
-//         data: {
-//             id: groupId + '_' + key.value,
-//             parent: 'group_' + groupId,
-//         },
-//         position,
-//         classes: 'group-placeholder group-placeholder-hidden',
-//     };
-// }
-

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SchemaCategoriesTable } from '@/components/schema-categories/SchemaCategoriesTable';
+import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTable';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';

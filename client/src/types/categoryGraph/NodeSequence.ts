@@ -1,6 +1,7 @@
 import { Signature } from '../identifiers';
 import type { DirectedEdge, Edge } from './Edge';
-import { AvailabilityStatus, type Node } from './Node';
+import { type Node } from './Node';
+import { Availability } from './PathMarker';
 
 type Config = {
     selectNodes: boolean;
@@ -42,11 +43,7 @@ export class NodeSequence {
     get lengthOfMorphisms(): number {
         return this._edges.length;
     }
-    /*
-    get allNodes(): Node[] {
-        return this.nodes;
-    }
-    */
+
     addSignature(signature: Signature): void {
         signature.toBases().forEach(baseSignature => this.addBaseSignature(baseSignature));
     }
@@ -80,17 +77,7 @@ export class NodeSequence {
     }
 
     tryAddNode(node: Node): boolean {
-        /*
-        const morphism = this.lastNode.neighbors.get(node);
-
-        if (!morphism || this.nodes.find(o => o === node))
-            return false;
-
-        this.nodes.push(node);
-        this.morphisms.push(morphism);
-        */
-
-        if (node.availabilityStatus !== AvailabilityStatus.Available && node.availabilityStatus !== AvailabilityStatus.CertainlyAvailable)
+        if (node.availabilityStatus !== Availability.Available && node.availabilityStatus !== Availability.CertainlyAvailable)
             return false;
 
         if (!node.availablePathData)

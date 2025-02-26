@@ -1,21 +1,21 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { api } from '@/api';
 import { Category, isPositionEqual } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
-import { EditCategoryGraphDisplay } from '@/components/schema-categories/EditCategoryGraphDisplay';
-import { Button } from '@nextui-org/react';
-import { FaSpinner, FaTrash, FaXmark } from 'react-icons/fa6';
-import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/schema-categories/editCategoryReducer';
+import { EditCategoryGraphDisplay } from '@/components/category/EditCategoryGraphDisplay';
+import { FaSpinner, FaTrash } from 'react-icons/fa6';
+import { createInitialState, editCategoryReducer, type EditCategoryState } from '@/components/category/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
-import { deleteObjex, deleteSelectedMorphism, PhasedEditor } from '@/components/schema-categories/PhasedCategoryEditor';
+import { deleteObjex, deleteSelectedMorphism, PhasedEditor } from '@/components/category/PhasedCategoryEditor';
 import { onSuccess } from '@/types/api/result';
-import { useDeleteHandlers } from '@/components/schema-categories/useDeleteHandlers';
 import { cn } from '@/components/utils';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
 import { FaSave } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { truncateText } from '@/components/common';
+import { type UserSelectAction } from '@/components/graph/graphSelection';
+import { SelectionCard } from '@/components/category/SelectionCard';
+import { useDeleteHandlers } from '@/components/category/useDeleteHandlers';
 
 type EditorSidebarState = {
     left: boolean;
@@ -40,11 +40,13 @@ export function CategoryEditorPage() {
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
     useDeleteHandlers(state, dispatch);
 
+    const userSelectionDispatch = useCallback((action: UserSelectAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
+
     const [ sidebarState, setSidebarState ] = useState<EditorSidebarState>({
         left: true,
         right: true,
     });
-    
+
     const toggleSidebar = (side: keyof EditorSidebarState) => {
         setSidebarState(prev => ({
             ...prev,
@@ -88,12 +90,12 @@ export function CategoryEditorPage() {
                             const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
                                 ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
                                 : undefined;
-                    
-                            if (singleSelectedNode) 
+
+                            if (singleSelectedNode)
                                 deleteObjex(state, dispatch, singleSelectedNode);
-                            else 
+                            else
                                 deleteSelectedMorphism(state, dispatch);
-                            
+
                         }}
                         title='Delete (Delete)'
                         size={16}
@@ -102,7 +104,7 @@ export function CategoryEditorPage() {
                     {/* Divider */}
                     <div className='w-px bg-default-400 h-5 mx-2'></div>
 
-                    <SaveButton state={state} dispatch={dispatch} />
+                    <SaveButton state={state} />
 
                     {/* Divider */}
                     <div className='w-px bg-default-400 h-5 mx-2'></div>
@@ -130,7 +132,7 @@ export function CategoryEditorPage() {
 
                 {/* Right Sidebar */}
                 <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
-                    {sidebarState.right && <SelectionCard state={state} dispatch={dispatch} />}
+                    {sidebarState.right && <SelectionCard state={state} dispatch={userSelectionDispatch} />}
                 </aside>
             </div>
         </div>
@@ -161,86 +163,7 @@ async function categoryEditorLoader({ params: { categoryId } }: { params: Params
     };
 }
 
-type StateDispatchProps = Readonly<{
-    state: EditCategoryState;
-    dispatch: EditCategoryDispatch;
-}>;
-
-function SelectionCard({ state, dispatch }: StateDispatchProps) {
-    function unselectNode(nodeId: string) {
-        dispatch({ type: 'select', nodeId, operation: 'remove' });
-    }
-
-    function unselectEdge(edgeId: string) {
-        dispatch({ type: 'select', edgeId, operation: 'remove' });
-    }
-
-    const { nodeIds, edgeIds } = state.selection;
-
-    return (
-        <div className='min-w-[200px] pl-3 rounded-lg'>
-            <div className='max-h-[900px] overflow-y-auto'>
-                {nodeIds.size > 0 && (
-                    <div>
-                        <div className='flex items-center justify-between pb-1'>
-                            <h3 className='font-semibold'>Selected objects</h3>
-                            <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'nodes' })}>
-                                <FaXmark />
-                            </Button>
-                        </div>
-
-                        <div className='flex flex-col'>
-                            {[ ...nodeIds.values() ].map(id => {
-                                const node = state.graph.nodes.find(node => node.id === id)!;
-
-                                return (
-                                    <div key={node.id} className='flex items-center gap-2'>
-                                        <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
-                                        {truncateText(node.metadata.label, 23)}
-                                        <div className='grow' />
-                                        <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>
-                                            <FaXmark />
-                                        </Button>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                {edgeIds.size > 0 && (
-                    <div>
-                        <div className='flex items-center justify-between pb-1'>
-                            <h3 className='font-semibold'>Selected morphisms</h3>
-                            <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'edges' })}>
-                                <FaXmark />
-                            </Button>
-                        </div>
-
-                        <div className='flex flex-col'>
-                            {[ ...edgeIds.values() ].map(id => {
-                                const edge = state.graph.edges.find(edge => edge.id === id)!;
-
-                                return (
-                                    <div key={edge.id} className='flex items-center gap-2'>
-                                        <span className='text-primary font-semibold'>{edge.schema.signature.toString()}</span>
-                                        {edge.metadata.label}
-                                        <div className='grow' />
-                                        <Button isIconOnly variant='light' size='sm' onClick={() => unselectEdge(edge.id)}>
-                                            <FaXmark />
-                                        </Button>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function SaveButton({ state }: StateDispatchProps) {
+function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
     const [ isFetching, setIsFetching ] = useState(false);
     const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
 
@@ -259,7 +182,7 @@ function SaveButton({ state }: StateDispatchProps) {
     }, [ state ]);
 
     async function save() {
-        if (isFetching) 
+        if (isFetching)
             return;
 
         setIsFetching(true);
@@ -267,7 +190,7 @@ function SaveButton({ state }: StateDispatchProps) {
         try {
             await state.evocat.update(async edit => {
                 const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
-                if (!response.status) 
+                if (!response.status)
                     throw new Error(typeof response.error === 'string' ? response.error : 'Failed to save changes');
                 return onSuccess(response, fromServer => Category.fromServer(fromServer));
             });
@@ -302,7 +225,7 @@ function SaveButton({ state }: StateDispatchProps) {
 }
 
 // Function to detect unsaved changes: node movement, schema updates
-function detectUnsavedChanges(state: StateDispatchProps['state']) {
+function detectUnsavedChanges(state: EditCategoryState) {
     const evocat = state.evocat;
 
     const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();

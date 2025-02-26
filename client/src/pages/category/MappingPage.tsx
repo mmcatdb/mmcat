@@ -1,21 +1,29 @@
 import { api } from '@/api';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { MappingEditor } from '@/components/mapping/MappingEditor';
 import { Mapping } from '@/types/mapping';
+import { Category } from '@/types/schema';
 import { type Params, useLoaderData } from 'react-router-dom';
 
 export function MappingPage() {
-    const { mapping } = useLoaderData() as MappingLoaderData;
-    const { category } = useCategoryInfo();
+    const { category, mapping } = useLoaderData() as MappingLoaderData;
+    // const { category } = useCategoryInfo();
 
     return (
-        <div className='p-4 bg-slate-500'>
+        <div>
             <h1>Mapping {mapping.kindName}</h1>
-            <p>
+
+            <div className='mt-4 p-4 bg-slate-500'>
+                <p>
                 Some text.
-            </p>
-            <p>
+                </p>
+                <p>
                 category 1: {category.label}
-            </p>
+                </p>
+            </div>
+
+            <div className='mt-4'>
+                <MappingEditor category={category} mapping={mapping} />
+            </div>
         </div>
     );
 }
@@ -23,19 +31,23 @@ export function MappingPage() {
 MappingPage.loader = mappingLoader;
 
 export type MappingLoaderData = {
+    category: Category;
     mapping: Mapping;
 };
 
-async function mappingLoader({ params: { mappingId } }: { params: Params<'mappingId'> }) {
-    if (!mappingId)
+async function mappingLoader({ params: { categoryId, mappingId } }: { params: Params<'categoryId' | 'mappingId'> }) {
+    if (!categoryId || !mappingId)
         throw new Error('Mapping ID is required');
 
-    return {
-        mapping: await api.mappings.getMapping({ id: mappingId }).then(response => {
-            if (!response.status)
-                throw new Error('Failed to load mapping');
+    const [ categoryResponse, mappingResponse ] = await Promise.all([
+        api.schemas.getCategory({ id: categoryId }),
+        api.mappings.getMapping({ id: mappingId }),
+    ]);
+    if (!categoryResponse.status || !mappingResponse.status)
+        throw new Error('Failed to load mapping');
 
-            return Mapping.fromServer(response.data);
-        }),
+    return {
+        category: Category.fromServer(categoryResponse.data),
+        mapping: Mapping.fromServer(mappingResponse.data),
     };
 }

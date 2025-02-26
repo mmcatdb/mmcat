@@ -27,7 +27,7 @@ export function categoryToGraph(category: Category): CategoryGraph {
         const metadata = objex.metadata;
 
         return {
-            id: '' + schema.key.value,
+            id: schema.key.toString(),
             position: metadata.position,
             schema,
             metadata,
@@ -39,9 +39,9 @@ export function categoryToGraph(category: Category): CategoryGraph {
         const metadata = morphism.metadata;
 
         return {
-            id: '' + schema.signature.baseValue,
-            from: '' + schema.domKey.value,
-            to: '' + schema.codKey.value,
+            id: schema.signature.toString(),
+            from: schema.domKey.toString(),
+            to: schema.codKey.toString(),
             schema,
             metadata,
         } satisfies CategoryEdge;

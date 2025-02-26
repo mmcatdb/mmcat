@@ -48,23 +48,6 @@ export class Edge {
         readonly codomainNode: Node,
     ) {}
 
-    static create(morphism: Morphism, schemaMorphism: SchemaMorphism, dom: Node, cod: Node): Edge {
-        const edge = new Edge(morphism, schemaMorphism, dom, cod);
-        // const definition = createEdgeDefinition(schemaMorphism, edge, schemaMorphism.isNew ? 'new' : '');
-
-        dom.addNeighbor(edge, true);
-        cod.addNeighbor(edge, false);
-
-        return edge;
-    }
-
-    remove() {
-        // this.edge.remove();
-
-        this.domainNode.removeNeighbor(this.codomainNode);
-        this.codomainNode.removeNeighbor(this.domainNode);
-    }
-
     get metadata(): MetadataMorphism {
         return this.morphism.metadata;
     }
@@ -103,18 +86,3 @@ export class Edge {
         );
     }
 }
-
-// let lastEdgeId = 0;
-
-// function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
-//     return {
-//         data: {
-//             id: 'm' + lastEdgeId++,
-//             source: morphism.domKey.value,
-//             target: morphism.codKey.value,
-//             label: edge.label,
-//             schemaData: edge,
-//         },
-//         classes: classes + ' ' + morphism.tags.join(' '),
-//     };
-// }

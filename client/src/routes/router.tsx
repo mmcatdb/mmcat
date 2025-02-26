@@ -13,7 +13,7 @@ import { QueryingPage } from '@/pages/category/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategoryPage';
 import { ActionsPage } from '@/pages/category/ActionsPage';
-import { AddActionPage } from '@/components/schema-categories/AddActionPage';
+import { AddActionPage } from '@/pages/category/AddActionPage';
 import { CategoryOverviewPage } from '@/pages/category/CategoryOverviewPage';
 import { JobsPage } from '@/pages/category/JobsPage';
 import { JobPage } from '@/pages/category/JobPage';
