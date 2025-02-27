@@ -19,17 +19,36 @@ public class File extends Entity {
 
     public @Nullable Id jobId;
     public @Nullable Id datasourceId;
+    public final String name;
     public final String filename;
     public final Date createdAt;
     public final FileType type;
 
-    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, String filename, Date createdAt, FileType type) {
+    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, String name, String filename, Date createdAt, FileType type) {
         super(id);
         this.jobId = jobId;
         this.datasourceId = datasourceId;
+        this.name = name;
         this.filename = filename;
         this.createdAt = createdAt;
         this.type = type;
+    }
+
+    public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, String name, FileType type, String contents) {
+        return new File(
+            Id.createNew(),
+            jobId,
+            datasourceId,
+            name,
+            createFilename(name),
+            new Date(),
+            type
+        );
+    }
+
+    private static String createFilename(String name) {
+
+        return name;
     }
 
 
