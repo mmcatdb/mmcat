@@ -2,7 +2,6 @@ package cz.matfyz.querying.planner;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.utils.GraphUtils;
@@ -17,31 +16,26 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.resolver.DatasourceTranslator;
-import cz.matfyz.querying.resolver.SelectionResolver;
-import cz.matfyz.querying.resolver.queryresult.ResultStructureComputer;
 import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Assigns ResultStructures to the nodes of a chosen QueryPlan.
+ * Creates and assigns ResultStructures to the nodes of a QueryPlan.
  * The ResultStructure doesn't actually need to be returned, it's mostly just for convenience.
  */
-public class ResultStructureAssigner implements QueryVisitor<ResultStructure> {
+public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
 
     // private static final Logger LOGGER = LoggerFactory.getLogger(SelectionResolver.class);
 
     public static void run(QueryPlan plan) {
-        new ResultStructureAssigner(plan.context, plan.root).run();
+        new ResultStructureResolver(plan.context, plan.root).run();
     }
 
     private final QueryContext context;
     private final QueryNode rootNode;
 
-    private ResultStructureAssigner(QueryContext context, QueryNode rootNode) {
+    private ResultStructureResolver(QueryContext context, QueryNode rootNode) {
         this.context = context;
         this.rootNode = rootNode;
     }

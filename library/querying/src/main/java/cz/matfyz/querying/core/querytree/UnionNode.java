@@ -8,7 +8,7 @@ public class UnionNode extends QueryNode {
 
         for (final var c : children) {
             c.setParent(this);
-            children().add(c);
+            this.children.add(c);
         };
     }
 

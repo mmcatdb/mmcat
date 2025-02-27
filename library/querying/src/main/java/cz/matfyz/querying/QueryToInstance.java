@@ -15,7 +15,7 @@ import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
 import cz.matfyz.querying.planner.QueryPlan;
 import cz.matfyz.querying.planner.QueryPlanner;
-import cz.matfyz.querying.planner.ResultStructureAssigner;
+import cz.matfyz.querying.planner.ResultStructureResolver;
 import cz.matfyz.querying.resolver.QueryPlanDescriptor;
 import cz.matfyz.querying.resolver.ProjectionResolver;
 import cz.matfyz.querying.resolver.SelectionResolver;
@@ -65,7 +65,7 @@ public class QueryToInstance {
         normalized.context.setProvider(provider);
 
         final QueryPlan planned = QueryPlanner.run(normalized.context, schema, kinds, normalized.selection);
-        ResultStructureAssigner.run(planned);
+        ResultStructureResolver.run(planned);
 
         final QueryPlan optimized = QueryOptimizer.run(planned);
 

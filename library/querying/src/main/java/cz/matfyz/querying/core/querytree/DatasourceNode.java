@@ -25,7 +25,7 @@ public class DatasourceNode extends QueryNode {
     public final Set<PatternForKind> kinds;
     public final SchemaCategory schema;
     public final List<JoinCandidate> joinCandidates;
-    public final List<Computation> filters;
+    public final ArrayList<Computation> filters;
     /** The root term of this pattern. When this node is translated to query, this term will be the root of the result structure. */
     public final Variable rootVariable;
 
@@ -34,14 +34,14 @@ public class DatasourceNode extends QueryNode {
         Set<PatternForKind> kinds,
         SchemaCategory schema,
         List<JoinCandidate> joinCandidates,
-        ArrayList<Computation> filters,
+        List<Computation> filters,
         Variable rootVariable
     ) {
         this.datasource = datasource;
         this.kinds = kinds;
         this.schema = schema;
         this.joinCandidates = joinCandidates;
-        this.filters = filters;
+        this.filters = new ArrayList<Computation>(filters);
         this.rootVariable = rootVariable;
     }
 
