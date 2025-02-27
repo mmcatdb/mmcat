@@ -4,16 +4,21 @@ import { type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
 import { type Mapping } from '@/types/mapping';
+import { computePathsFromObjex, type PathGraph } from '@/types/schema/PathMarker';
+import { Key } from '@/types/identifiers';
 
 export type EditMappingState = {
+    category: Category;
     graph: CategoryGraph;
     selection: GraphSelection;
     mapping: Mapping;
     // phase: EditorPhase;
+    paths?: PathGraph;
 };
 
 export function createInitialState({ category, mapping }: { category: Category, mapping: Mapping }): EditMappingState {
     return {
+        category,
         graph: categoryToGraph(category),
         selection: createDefaultGraphSelection(),
         mapping,
@@ -76,10 +81,21 @@ type SelectAction = {
 } & UserSelectAction;
 
 function select(state: EditMappingState, action: SelectAction): EditMappingState {
-    return {
+    const newState: EditMappingState = {
         ...state,
         selection: updateSelectionFromUserAction(state.selection, action),
+        paths: undefined,
     };
+
+    if (newState.selection.nodeIds.size === 1) {
+        const selectedId = newState.selection.nodeIds.values().next().value;
+        const objex = state.category.getObjex(Key.createNew(Number(selectedId)));
+        newState.paths = computePathsFromObjex(objex);
+    }
+
+    console.log('PATHS', newState.paths);
+
+    return newState;
 }
 
 // TODO This

@@ -15,8 +15,8 @@ export class DirectedEdge {
         return !this.signature.isBaseDual;
     }
 
-    get isTraversible(): boolean {
-        return this.raw.isTraversible(this.direction);
+    get isTraversable(): boolean {
+        return this.raw.isTraversable(this.direction);
     }
 
     equals(other: DirectedEdge | null | undefined): boolean {
@@ -27,18 +27,18 @@ export class DirectedEdge {
 /** @deprecated */
 export class Edge {
     // This is important for the pathMarker algorithm.
-    private _isTraversible = false;
-    private _isTraversibleDual = false;
+    private _isTraversable = false;
+    private _isTraversableDual = false;
 
-    isTraversible(direction: boolean): boolean {
-        return direction ? this._isTraversible : this._isTraversibleDual;
+    isTraversable(direction: boolean): boolean {
+        return direction ? this._isTraversable : this._isTraversableDual;
     }
 
-    setTraversible(direction: boolean, value: boolean): void {
+    setTraversable(direction: boolean, value: boolean): void {
         if (direction)
-            this._isTraversible = value;
+            this._isTraversable = value;
         else
-            this._isTraversibleDual = value;
+            this._isTraversableDual = value;
     }
 
     private constructor(

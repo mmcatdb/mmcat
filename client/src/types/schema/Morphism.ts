@@ -5,7 +5,7 @@ import { type Category } from './Category';
 
 /**
  * A morphism from the {@link Category}.
- * It contains references to neighbouring objects and morphisms so all graph algorithms should be implemented here.
+ * It contains references to neighboring objects and morphisms so all graph algorithms should be implemented here.
  * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
  */
 export class Morphism {

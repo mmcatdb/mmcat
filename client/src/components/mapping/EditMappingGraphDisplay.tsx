@@ -6,6 +6,7 @@ import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHook
 import { type EditMappingDispatch, type EditMappingState } from './editMappingReducer';
 import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
 import { EdgeMap, getEdgeDegree } from '../graph/graphUtils';
+import { PathCount } from '@/types/schema/PathMarker';
 
 type EditMappingGraphDisplayProps = Readonly<{
     state: EditMappingState;
@@ -67,6 +68,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragging } = useNode(node);
 
     const isSelected = state.selection.nodeIds.has(node.id);
+    const pathNode = state.paths?.nodes.get(node.id);
 
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
@@ -86,6 +88,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
                     isDragging && 'pointer-events-none shadow-[3px_7px_10px_3px_rgba(0,0,0,0.5)]',
                     // isInSelectBox && 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-cyan-300',
                     isSelected && 'bg-cyan-200',
+                    pathNode && availabilityClasses[pathNode.pathCount],
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}
@@ -100,6 +103,12 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     );
 }
 
+const availabilityClasses: Record<PathCount, string | undefined> = {
+    [PathCount.None]: undefined,
+    [PathCount.One]: 'bg-green-500',
+    [PathCount.Many]: 'bg-orange-500',
+};
+
 type EdgeDisplayProps = Readonly<{
     edge: CategoryEdge;
     degree: number;
@@ -111,6 +120,7 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);
 
     const isSelected = state.selection.edgeIds.has(edge.id);
+    const traversableNodeId = getTraversableNodeId(state, edge);
 
     function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();
@@ -129,9 +139,28 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
             className={cn('text-slate-600',
                 isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 pointer-events-auto path-shadow',
                 isSelected && 'text-cyan-600',
+                traversableNodeId && 'text-green-700',
             )}
         />
     );
+}
+
+/** Returns the node that will be selected if we decide to traverse along this edge. Or undefined if there isn't any. */
+function getTraversableNodeId(state: EditMappingState, edge: CategoryEdge): string | undefined {
+    const pathEdge = state.paths?.edges.get(edge.id);
+    if (pathEdge?.traversableDirection === undefined)
+        return undefined;
+
+    const fromPathNode = state.paths?.nodes.get(pathEdge.traversableDirection ? edge.from : edge.to);
+    if (!fromPathNode || fromPathNode.pathCount !== PathCount.One)
+        return undefined;
+
+    const toNodeId = pathEdge.traversableDirection ? edge.to : edge.from;
+    const toPathNode = state.paths?.nodes.get(toNodeId);
+    if (!toPathNode || toPathNode.pathCount === PathCount.None)
+        return undefined;
+
+    return toNodeId;
 }
 
 function SelectionBox() {

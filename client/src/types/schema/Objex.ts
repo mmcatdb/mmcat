@@ -5,7 +5,7 @@ import { type Morphism } from './Morphism';
 
 /**
  * An object from the {@link Category}.
- * It contains references to neighbouring objects and morphisms so all graph algorithms should be implemented here.
+ * It contains references to neighboring objects and morphisms so all graph algorithms should be implemented here.
  * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
  */
 export class Objex {
@@ -35,8 +35,8 @@ export class Objex {
         return this.key.equals(other.key);
     }
 
-    // TODO This should be probably optimized by keeping a list of neighbours.
-    findNeighbourMorphisms(): Morphism[] {
+    // TODO This should be probably optimized by keeping a list of neighbors.
+    findNeighborMorphisms(): Morphism[] {
         return [ ...this.category.morphisms.values() ].filter(morphism => morphism.from.key.equals(this.key) || morphism.to.key.equals(this.key));
     }
 }

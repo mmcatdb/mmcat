@@ -4,7 +4,7 @@ import type { Key, Signature } from '../identifiers';
 import type { MetadataObjex, Position, SchemaObjex, Objex } from '../schema';
 import { DirectedEdge, type Edge } from './Edge';
 import type { Group } from './Graph';
-import { Availability } from './PathMarker';
+import { PathCount } from '../schema/PathMarker';
 
 export enum NodeTag {
     Root = 'tag-root'
@@ -90,7 +90,7 @@ export class Node {
         if (signature.isEmpty)
             return this;
 
-        const split = signature.getFirstBase();
+        const split = signature.tryGetFirstBase();
         if (!split)
             return undefined;
 
@@ -112,10 +112,10 @@ export class Node {
         return this.schemaObjex.ids.isSignatures ? PropertyType.Complex : null;
     }
 
-    private _availabilityStatus = Availability.Default;
+    private _availabilityStatus = PathCount.None;
     private _selectionStatus = defaultSelectionStatus;
 
-    get availabilityStatus(): Availability {
+    get availabilityStatus(): PathCount {
         return this._availabilityStatus;
     }
 
@@ -150,16 +150,16 @@ export class Node {
         this.select({ type: newType, level: newLevel });
     }
 
-    setAvailabilityStatus(status: Availability): void {
+    setAvailabilityStatus(status: PathCount): void {
         // this.node.removeClass(this._availabilityStatus);
         this._availabilityStatus = status;
         // this.node.addClass(status);
     }
 
     resetAvailabilityStatus(): void {
-        if (this._availabilityStatus !== Availability.Default) {
+        if (this._availabilityStatus !== PathCount.None) {
             // this.node.removeClass(this._availabilityStatus);
-            this._availabilityStatus = Availability.Default;
+            this._availabilityStatus = PathCount.None;
         }
     }
 

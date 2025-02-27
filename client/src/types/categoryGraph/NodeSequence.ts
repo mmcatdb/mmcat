@@ -1,7 +1,7 @@
 import { Signature } from '../identifiers';
 import type { DirectedEdge, Edge } from './Edge';
 import { type Node } from './Node';
-import { Availability } from './PathMarker';
+import { PathCount } from '../schema/PathMarker';
 
 type Config = {
     selectNodes: boolean;
@@ -77,7 +77,7 @@ export class NodeSequence {
     }
 
     tryAddNode(node: Node): boolean {
-        if (node.availabilityStatus !== Availability.Available && node.availabilityStatus !== Availability.CertainlyAvailable)
+        if (node.availabilityStatus !== PathCount.One)
             return false;
 
         if (!node.availablePathData)
@@ -107,7 +107,7 @@ export class NodeSequence {
         if (!edge.getSourceNode(direction).equals(this.lastNode))
             return false;
 
-        if (!edge.isTraversible(direction))
+        if (!edge.isTraversable(direction))
             return false;
 
         // The edge wasn't filtered out during the pathMarker algorithm so we can add it.

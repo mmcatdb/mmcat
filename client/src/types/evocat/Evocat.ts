@@ -188,7 +188,7 @@ export class Evocat {
 
     deleteObjex(key: Key) {
         const objex = this._category.getObjex(key);
-        objex.findNeighbourMorphisms().forEach(morphism => this.deleteMorphism(morphism.signature));
+        objex.findNeighborMorphisms().forEach(morphism => this.deleteMorphism(morphism.signature));
 
         const { schema, metadata } = objex;
         const operation = new DeleteObjex(schema, metadata);

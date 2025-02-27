@@ -17,7 +17,7 @@ export function MappingEditor({ category, mapping }: MappingEditorProps) {
     const userSelectionDispatch = useCallback((action: UserSelectAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
 
     return (
-        <div className='relative h-[800px] flex'>
+        <div className='relative h-[700px] flex'>
             <EditMappingGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
 
             {(state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) && (

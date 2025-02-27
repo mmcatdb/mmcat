@@ -59,7 +59,7 @@ export class PathMarker {
         // The edges around the root node are clickable so we have to check if they are valid.
         // First we mark all as invalid.
         if (!previousSegment)
-            neighbors.forEach(neighbor => neighbor.edge.setTraversible(neighbor.direction, false));
+            neighbors.forEach(neighbor => neighbor.edge.setTraversable(neighbor.direction, false));
 
         if (previousSegment)
             neighbors = filterBackwardPaths(neighbors, previousSegment.fullMorphism);
@@ -69,7 +69,7 @@ export class PathMarker {
 
         // Then we validate those that survive the filters.
         if (!previousSegment)
-            neighbors.forEach(neighbor => neighbor.edge.setTraversible(neighbor.direction, true));
+            neighbors.forEach(neighbor => neighbor.edge.setTraversable(neighbor.direction, true));
 
         // We have to check that we are not going back to the same node.
         // It's permitted, but the user has to specifically require it.

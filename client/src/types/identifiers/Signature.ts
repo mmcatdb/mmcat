@@ -99,7 +99,7 @@ export class Signature {
         return this.ids.map(id => new Signature(id));
     }
 
-    getFirstBase(): { first: Signature, rest: Signature } | undefined {
+    tryGetFirstBase(): { first: Signature, rest: Signature } | undefined {
         return this.type === SignatureType.Base || this.type === SignatureType.Composite
             ? {
                 first: Signature.base(this.ids[0]),
@@ -108,7 +108,7 @@ export class Signature {
             : undefined;
     }
 
-    getLastBase(): { rest: Signature, last: Signature} | undefined {
+    tryGetLastBase(): { rest: Signature, last: Signature} | undefined {
         return this.type === SignatureType.Base || this.type === SignatureType.Composite
             ? {
                 rest: Signature.fromIds(this.ids.slice(0, -1)),
