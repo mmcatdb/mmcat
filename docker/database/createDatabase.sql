@@ -188,3 +188,13 @@ CREATE TABLE workflow (
     job_id UUID REFERENCES job,
     json_value JSONB NOT NULL
 );
+
+-- File
+
+CREATE TABLE file (
+    id UUID PRIMARY KEY,
+    job_id UUID REFERENCES job,
+    datasource_id UUID REFERENCES datasource,
+    label VARCHAR(255) NOT NULL,
+    file_type VARCHAR(255) NOT NULL,
+);

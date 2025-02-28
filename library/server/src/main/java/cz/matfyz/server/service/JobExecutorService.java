@@ -40,6 +40,7 @@ import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
+import cz.matfyz.server.entity.file.File.FileType;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
@@ -49,6 +50,7 @@ import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.global.Configuration.ServerProperties;
 import cz.matfyz.server.global.Configuration.SparkProperties;
+import cz.matfyz.server.global.Configuration.UploadsProperties;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.InstanceCategoryRepository;
@@ -112,10 +114,16 @@ public class JobExecutorService {
     private SparkProperties spark;
 
     @Autowired
+    private UploadsProperties uploads;
+
+    @Autowired
     private QueryRepository queryRepository;
 
     @Autowired
     private DatasourceRepository datasourceRepository;
+
+    @Autowired
+    private FileService fileService;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is an opportunity for optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require synchronization on the instance level in the transformation algorithms.
@@ -257,7 +265,11 @@ public class JobExecutorService {
             LOGGER.info("... models executed.");
         }
 
-        job.data = new ModelJobData(result.statementsAsString());
+        final var resultString = result.statementsAsString();
+
+        fileService.create(job.id(), datasourceWrapper.id(), "null", datasource.type, resultString);
+
+        job.data = new ModelJobData(resultString);
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {
