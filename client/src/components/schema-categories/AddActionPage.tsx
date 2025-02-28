@@ -197,7 +197,7 @@ function StepForm({ step, type, datasources, logicalModels, updateStep, removeSt
         const logicalModel = logicalModels.find(m => m.datasource.id === modelToCategoryStep.datasourceId);
 
         return (
-            <div className='mb-4 p-2 border rounded-lg flex justify-between items-center border-zinc-500'>
+            <div className='mb-4 p-2 border rounded-lg flex justify-between items-center border-default-300'>
                 <Select
                     label='Datasource'
                     selectedKeys={

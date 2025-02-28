@@ -67,18 +67,18 @@ export function CategoryEditorPage() {
     return (
         <div className='flex flex-col h-screen'>
             {/* Navbar */}
-            <div className='h-8 flex items-center justify-between px-4 shadow-md bg-zinc-200 border-b border-zinc-300'>
+            <div className='h-8 flex items-center justify-between px-4 shadow-md bg-default-100 border-b border-default-200'>
                 <div className='flex items-center gap-3'>
                     {/* Left Sidebar Toggle */}
                     <TbLayoutSidebarFilled
-                        className='cursor-pointer text-zinc-500 hover:text-zinc-600'
+                        className='cursor-pointer text-default-600 hover:text-default-700'
                         onClick={() => toggleSidebar('left')}
                         title='Toggle Main Editor Sidebar'
                         size={18}
                     />
 
                     {/* Divider */}
-                    <div className='w-px bg-zinc-400 h-5 mx-2'></div>
+                    <div className='w-px bg-default-400 h-5 mx-2'></div>
 
                     {/* Delete Button */}
                     <FaTrash
@@ -104,11 +104,11 @@ export function CategoryEditorPage() {
                     <SaveButton state={state} dispatch={dispatch} />
 
                     {/* Divider */}
-                    <div className='w-px bg-zinc-400 h-5 mx-2'></div>
+                    <div className='w-px bg-default-400 h-5 mx-2'></div>
 
                     {/* Right Sidebar Toggle */}
                     <TbLayoutSidebarRightFilled
-                        className='cursor-pointer text-zinc-500 hover:text-zinc-600'
+                        className='cursor-pointer text-default-600 hover:text-default-700'
                         onClick={() => toggleSidebar('right')}
                         title='Toggle Info Sidebar'
                         size={18}
@@ -118,7 +118,7 @@ export function CategoryEditorPage() {
 
             <div className='flex flex-grow'>
                 {/* Left Sidebar */}
-                <aside className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-gray-100`)}>
+                <aside className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-100`)}>
                     {sidebarState.left && <PhasedEditor state={state} dispatch={dispatch} />}
                 </aside>
 
@@ -128,7 +128,7 @@ export function CategoryEditorPage() {
                 </main>
 
                 {/* Right Sidebar */}
-                <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-gray-100`}>
+                <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-100`}>
                     {sidebarState.right && <SelectionCard state={state} dispatch={dispatch} />}
                 </aside>
             </div>
@@ -284,7 +284,7 @@ function SaveButton({ state }: StateDispatchProps) {
     return (
         <div
             id='save-button' // id for triggering via Ctrl+S
-            className='flex items-center gap-1 text-gray-600 hover:text-gray-800 cursor-pointer relative'
+            className='flex items-center gap-1 text-default-600 hover:text-default-800 cursor-pointer relative'
             onClick={save}
             title='Save Changes (Ctrl+S)'
         >
@@ -294,7 +294,7 @@ function SaveButton({ state }: StateDispatchProps) {
                 <FaSave size={18} />
             )}
             {hasUnsavedChanges && !isFetching && (
-                <span className='text-red-500 text-sm absolute -top-2 right-0'>*</span>
+                <span className='text-danger-500 text-sm absolute -top-2 right-0'>*</span>
             )}
         </div>
     );

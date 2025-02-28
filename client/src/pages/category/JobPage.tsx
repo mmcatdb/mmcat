@@ -89,17 +89,12 @@ export function JobPage() {
         }
     }
 
-    const { theme } = usePreferences().preferences;
-
     return (
         <div className='p-4'>
             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
 
             <div
-                className={cn(
-                    'border rounded-lg p-4',
-                    theme === 'dark' ? 'border-zinc-500 bg-zinc-900' : 'border-zinc-300 bg-zinc-50',
-                )}
+                className='border rounded-lg p-4 border-default-300 bg-default-50'
             >
                 <p>
                     <strong>ID:</strong> {job.id}
@@ -129,11 +124,9 @@ export function JobPage() {
             {renderJobStateButton('mt-5')}
 
             {job.error && (
-                <div className='mt-5 text-red-500'>
+                <div className='mt-5 text-danger-400'>
                     <span className='font-bold'>Error: {job.error?.name}</span>
-                    <div className={cn('p-4 mt-2 rounded-lg text-sm border border-red-500',
-                        theme === 'dark' ? 'bg-zinc-900 text-zinc-50' : 'bg-zinc-50 text-zinc-700',
-                    )}>
+                    <div className='p-4 mt-2 rounded-lg text-sm border border-danger-400 bg-default-50 text-default-900'>
                         {JSON.stringify(job.error?.data)}
                     </div>
                 </div>

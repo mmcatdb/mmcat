@@ -42,6 +42,7 @@ export function DatasourcesInCategoryPage() {
                 <Button
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
+                    variant='bordered'
                     startContent={<AddIcon />}
                 >
                     Add Datasource
@@ -55,7 +56,7 @@ export function DatasourcesInCategoryPage() {
                         deleteDatasource={deleteDatasource}
                     />
                 ) : (
-                    <div className = 'text-center border border-zinc-500 p-6'>
+                    <div className = 'text-center border border-default-300 p-6 rounded-lg'>
                         There is no datasources with mappings available. You can add mapping via Other Datasources.
                     </div>
                 )}

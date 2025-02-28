@@ -63,12 +63,12 @@ export const sidebarIconMap: Record<string, IconSet> = {
 const jobStatusIconStyle = 'w-8 h-8';
 
 const jobStateStyles: Record<JobState, { color: string, bg: string }> = {
-    Disabled: { color: 'text-zinc-400', bg: 'bg-zinc-400' },
-    Ready: { color: 'text-blue-400', bg: 'bg-blue-400' },
-    Running: { color: 'text-blue-500', bg: 'bg-blue-500' },
-    Waiting: { color: 'text-yellow-500', bg: 'bg-yellow-500' },
-    Finished: { color: 'text-green-500', bg: 'bg-green-500' },
-    Failed: { color: 'text-red-500', bg: 'bg-red-500' },
+    Disabled: { color: 'text-default-400', bg: 'bg-default-400' },
+    Ready: { color: 'text-primary-400', bg: 'bg-primary-400' },
+    Running: { color: 'text-primary-500', bg: 'bg-primary-500' },
+    Waiting: { color: 'text-warning-500', bg: 'bg-yellow-500' },
+    Finished: { color: 'text-success-500', bg: 'bg-success-500' },
+    Failed: { color: 'text-danger-400', bg: 'bg-danger-400' },
 };
 
 export function getJobStateTextStyle(state: JobState): string {
@@ -96,6 +96,6 @@ export function getJobStatusIcon(state: string): JSX.Element {
     case 'Failed':
         return <XCircleIcon className={`${iconColor} ${jobStatusIconStyle}`} />;
     default:
-        return <QuestionMarkCircleIcon className={`text-zinc-200 ${jobStatusIconStyle}`} />;
+        return <QuestionMarkCircleIcon className={`text-default-200 ${jobStatusIconStyle}`} />;
     }
 }

@@ -36,8 +36,7 @@ export function Sidebar() {
     return (
         <div
             className={cn(
-                'border-r fixed h-screen z-10 transition-all duration-300 ease-in-out',
-                theme === 'dark' ? 'border-zinc-800' : 'border-zinc-200',
+                'border-r fixed h-screen z-10 transition-all duration-300 ease-in-out border-default-200',
                 isCollapsed ? 'w-16' : 'w-64',
             )}
         >
@@ -141,9 +140,9 @@ function SidebarItemDisplay({ item }: {
             <Link
                 key={item.route}
                 to={item.route}
-                className={cn('flex items-center px-3 py-3 mx-2 rounded-md',
-                    isActive ? 'text-blue-500 font-bold' : '',
-                    theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100',
+                className={cn('flex items-center px-3 py-3 mx-2 rounded-md hover:bg-default-100',
+                    isActive ? 'text-primary-500 font-bold' : '',
+                    theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100', // needs to be defined via 'theme ===' not via default colors (HeroUI does not have good contrast in dark mode or light mode)
                 )}
             >
                 <span className='flex-shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>

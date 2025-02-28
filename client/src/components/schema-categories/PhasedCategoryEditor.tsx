@@ -18,7 +18,7 @@ type PhasedEditorProps = StateDispatchProps & Readonly<{
 
 export function PhasedEditor({ state, dispatch, className }: PhasedEditorProps) {
     return (
-        <div className={cn('border p-3 flex flex-col gap-3 bg-background', className)}>
+        <div className={cn('p-3 flex flex-col gap-3 bg-default-100', className)}>
             {components[state.phase]({ state, dispatch })}
         </div>
     );

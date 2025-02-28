@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import clsx from 'clsx';
 import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences } from './PreferencesProvider';
@@ -43,14 +42,9 @@ export function RootLayout() {
 }
 
 function CommonNavbar() {
-    const { theme } = usePreferences().preferences;
-
     return (
         <Navbar
-            className={clsx(
-                'z-20 w-full h-10 border-b',
-                theme === 'dark' ? 'border-zinc-700' : 'border-zinc-300',
-            )}
+            className='z-20 w-full h-10 border-b border-default-200'
             isBlurred={false}
             maxWidth='full'
         >

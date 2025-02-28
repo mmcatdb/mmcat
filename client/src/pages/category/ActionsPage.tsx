@@ -9,7 +9,6 @@ import { AddIcon } from '@/components/icons/PlusIcon';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { cn } from '@/components/utils';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
@@ -83,7 +82,7 @@ type ActionsTableProps = {
 };
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
-    const { theme, showTableIDs } = usePreferences().preferences;
+    const { showTableIDs } = usePreferences().preferences;
     const { sortedData: sortedActions, sortDescriptor, setSortDescriptor } = useSortableData(actions, {
         column: 'label',
         direction: 'ascending',
@@ -166,9 +165,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                 {sortedActions.map(action => (
                     <TableRow
                         key={action.id}
-                        className={cn('cursor-pointer',
-                            theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200',
-                        )}
+                        className='cursor-pointer hover:bg-default-100 focus:bg-default-700'
                     >
                         {[
                             ...(showTableIDs

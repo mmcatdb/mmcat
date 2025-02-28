@@ -13,7 +13,7 @@ import { cn } from '@/components/utils';
 const REFRESH_INTERVAL = 3000;
 
 export function JobsPage() {
-    const { theme, showTableIDs } = usePreferences().preferences;
+    const { showTableIDs } = usePreferences().preferences;
     const { category } = useCategoryInfo();
     const [ groupedJobs, setGroupedJobs ] = useState<Record<string, Job[]>>();
     const [ error, setError ] = useState(false);
@@ -52,8 +52,7 @@ export function JobsPage() {
         return <ReloadPage onReload={fetchJobs} />;
 
     const classNameTH = cn(
-        'px-4 py-3 text-left font-semibold bg-zinc-100 dark:bg-zinc-800 border-b-4',
-        theme === 'dark' ? 'border-zinc-900 text-zinc-200' : 'border-zinc-300 text-zinc-700',
+        'px-4 py-3 text-left font-semibold bg-default-100 border-b border-default-300 text-default-800',
     );
 
     return (<>
@@ -61,8 +60,7 @@ export function JobsPage() {
         {/* no NextUI (HeroUI) table, because of grouping functionality */}
         <table
             className={cn(
-                'w-full border-collapse rounded-xl overflow-hidden shadow-sm',
-                theme === 'dark' ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-300 bg-white',
+                'w-full border-collapse rounded-xl overflow-hidden shadow-sm  bg-default-50',
             )}
         >
             <thead>
@@ -79,7 +77,7 @@ export function JobsPage() {
                     ))
                 ) : (
                     <tr>
-                        <td colSpan={3} className='text-center p-4 text-zinc-500 dark:text-zinc-400'>
+                        <td colSpan={3} className='text-center p-4 text-default-500'>
                             No runs available.
                         </td>
                     </tr>
@@ -118,7 +116,7 @@ function groupJobsByRunId(jobs: Job[]) {
 
 function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
     const navigate = useNavigate();
-    const { theme, showTableIDs } = usePreferences().preferences;
+    const { showTableIDs } = usePreferences().preferences;
 
     // Keep only the most recent job per index
     const newestJobs = Object.values(
@@ -131,7 +129,7 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
     );
 
     return (
-        <tr className={cn(theme === 'dark' ? 'hover:bg-zinc-800' : 'hover:bg-zinc-100')}>
+        <tr className='hover:bg-default-100'>
             {showTableIDs && <td className={'px-4 py-2'}>{runId}</td>}
             <td className={'px-4 py-2'}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
             <td className={'px-4 py-2'}>

@@ -8,8 +8,6 @@ import { MappingsTable } from '@/components/schema-categories/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { DatasourceSpecificFields } from '@/components/datasources/DatasourceModal';
-import { usePreferences } from '@/components/PreferencesProvider';
-import { cn } from '@/components/utils';
 
 export function DatasourcePage() {
     return <DatasourceDisplay />;
@@ -141,21 +139,17 @@ function DatasourceDisplay() {
         }
     }
 
-    const { theme } = usePreferences().preferences;
-
     return (
         <div className='mt-5'>
-            <h1 className={cn('text-2xl font-bold my-5', theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800')}>
+            <h1 className='text-2xl font-bold my-5 text-default-800'>
                 {initialDatasource.label}
             </h1>
-            <p className={cn('mb-5', theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800')}>Type: {datasource.type}</p>
+            <p className='mb-5 text-default-800'>Type: {datasource.type}</p>
 
             {!isEditing ? (
                 // View Mode
                 <>
-                    <pre className={cn('p-4 rounded-lg text-sm',
-                        theme === 'dark' ? 'bg-zinc-900 text-zinc-50' : 'bg-zinc-50 text-zinc-700',
-                    )}>
+                    <pre className='p-4 rounded-lg text-sm bg-default-50 text-default-800'>
                         {JSON.stringify(datasource.settings, null, 2)}
                     </pre>
                     <Button
@@ -168,12 +162,8 @@ function DatasourceDisplay() {
                 </>
             ) : (
                 // Edit Mode
-                <div className={cn('p-6 rounded-lg border border-blue-200',
-                    theme === 'dark' ? 'bg-zinc-900' : 'bg-zinc-50',
-                )}>
-                    <h2 className={cn('text-xl font-semibold mb-4',
-                        theme === 'dark' ? 'text-blue-500' : 'text-blue-600',
-                    )}>
+                <div className='p-6 rounded-lg border border-blue-200 bg-default-50'>
+                    <h2 className='text-xl font-semibold mb-4 text-primary-500'>
                         Edit Datasource
                     </h2>
                     <Input
@@ -197,7 +187,7 @@ function DatasourceDisplay() {
                             >
                                 Save
                             </Button>
-                            <Button color='danger' variant='light' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
+                            <Button color='danger' variant='bordered' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>
                         </div>
@@ -210,16 +200,12 @@ function DatasourceDisplay() {
                     size='sm'
                     variant='bordered'
                     onPress={() => setisConfigurationShown(prev => !prev)}
-                    className={cn('border-blue-500',
-                        theme === 'dark' ? 'text-blue-400' : 'text-blue-700',
-                    )}
+                    className='border-primary-500 text-primary-600'
                 >
                     {isConfigurationShown ? 'Hide Configuration' : 'Show Configuration'}
                 </Button>
                 {isConfigurationShown && (
-                    <pre className={cn('mt-4 p-4 rounded-md text-sm',
-                        theme === 'dark' ? 'bg-zinc-900 text-zinc-50' : 'bg-zinc-50 text-zinc-700',
-                    )}>
+                    <pre className='mt-4 p-4 rounded-md text-sm bg-default-50 text-default-600'>
                         {JSON.stringify(datasource?.configuration, null, 2)}
                     </pre>
                 )}

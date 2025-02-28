@@ -6,7 +6,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
-import { cn } from '@/components/utils';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
@@ -41,7 +40,7 @@ type DatasourceTableProps = {
 };
 
 function DatasourceTable({ datasources, deleteDatasource, sortDescriptor, onSortChange }: DatasourceTableProps) {
-    const { theme, showTableIDs } = usePreferences().preferences;
+    const { showTableIDs } = usePreferences().preferences;
     const { categoryId } = useParams();
 
     const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
@@ -109,8 +108,7 @@ function DatasourceTable({ datasources, deleteDatasource, sortDescriptor, onSort
                 {datasources.map(datasource => (
                     <TableRow
                         key={datasource.id}
-                        className={cn('cursor-pointer',
-                            theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
+                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
                             ...(showTableIDs

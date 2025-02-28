@@ -5,7 +5,6 @@ import { type SortDescriptor } from '@react-types/shared';
 import type { Mapping } from '@/types/mapping';
 import { useCategoryInfo } from '../CategoryInfoProvider';
 import { AccessPathTooltip } from './AccessPathTooltip';
-import { cn } from '@/components/utils';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 
@@ -39,12 +38,12 @@ type MappingsTableContentProps = {
 };
 
 function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: MappingsTableContentProps) {
-    const { theme, showTableIDs } = usePreferences().preferences;
+    const { showTableIDs } = usePreferences().preferences;
     const navigate = useNavigate();
     const { category } = useCategoryInfo();
 
     const handleRowAction = (mappingId: React.Key) => {
-        navigate(routes.category.mapping.resolve({ categoryId: category.id, mappingId }));
+        navigate(routes.category.mapping.resolve({ categoryId: category.id, mappingId: String(mappingId) }));
     };
 
     return (
@@ -86,7 +85,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                 {mappings.map(mapping => (
                     <TableRow
                         key={mapping.id}
-                        className={cn('cursor-pointer', theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
+                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
                             ...(showTableIDs
@@ -96,7 +95,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                 {mapping.kindName}
                             </TableCell>,
                             <TableCell key='version'>
-                                <span className={Number(category.systemVersionId) > Number(mapping.version) ? 'text-red-500' : ''}>
+                                <span className={Number(category.systemVersionId) > Number(mapping.version) ? 'text-danger-500' : ''}>
                                     {mapping.version}
                                 </span>
                             </TableCell>,

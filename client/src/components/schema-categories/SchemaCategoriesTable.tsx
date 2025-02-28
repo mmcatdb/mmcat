@@ -6,7 +6,6 @@ import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
-import { cn } from '@/components/utils';
 
 type SchemaCategoriesTableProps = {
     categories: SchemaCategoryInfo[];
@@ -41,7 +40,7 @@ type CategoriesTableProps = {
 };
 
 function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortChange }: CategoriesTableProps) {
-    const { theme, showTableIDs } = usePreferences().preferences;
+    const { showTableIDs } = usePreferences().preferences;
     const navigate = useNavigate();
     const [ selectedCategoryId, setSelectedCategoryId ] = useState<string>();
     const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
@@ -97,8 +96,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                 {categories.map(category => (
                     <TableRow
                         key={category.id}
-                        className={cn('cursor-pointer',
-                            theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200')}
+                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
                             ...(showTableIDs
