@@ -5,7 +5,6 @@ import { type Params, useLoaderData, useNavigate, useRevalidator } from 'react-r
 import { Button } from '@nextui-org/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { getJobStateTextStyle } from '@/components/icons/Icons';
-import { usePreferences } from '@/components/PreferencesProvider';
 import { cn } from '@/components/utils';
 import { routes } from '@/routes/routes';
 

@@ -42,48 +42,48 @@ export function CategoriesPage() {
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
     }, []);
 
-    return (
-        <div>
-            <div className='flex items-center justify-between'>
-                <h1 className='text-xl font-semibold'>Schema Categories</h1>
-                <div className='flex'>
-                    {EXAMPLE_SCHEMAS.map(example => (
-                        <Button
-                            key={example}
-                            onPress={() => createSchema(example, true)}
-                            isLoading={isFetching}
-                            color='primary'
-                            variant='bordered'
-                        >
-                            + Add {example} Schema
-                        </Button>
-                    ))}
+    return (<>
+        <div className='flex items-center justify-between'>
+            <h1 className='text-xl font-semibold'>Schema Categories</h1>
+            <div className='flex'>
+                {EXAMPLE_SCHEMAS.map(example => (
                     <Button
-                        key={'newSchema'}
-                        onPress={() => setIsModalOpen(true)}
+                        key={example}
+                        onPress={() => createSchema(example, true)}
                         isLoading={isFetching}
                         color='primary'
-                        className='ml-2'
+                        variant='bordered'
+                        title='Add an example (pre-made) schema category'
                     >
-                        + Add schema
+                            + Add {example} Schema
                     </Button>
-                </div>
+                ))}
+                <Button
+                    key={'newSchema'}
+                    onPress={() => setIsModalOpen(true)}
+                    isLoading={isFetching}
+                    color='primary'
+                    className='ml-2'
+                    title='Add an empty schema category'
+                >
+                        + Add schema
+                </Button>
             </div>
-            <div className='mt-5'>
-                <SchemaCategoriesTable
-                    categories={categories}
-                    onDeleteCategory={handleDeleteCategory}
-                />
-            </div>
-
-            <AddSchemaModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSubmit={label => createSchema(label, false)}
-                isSubmitting={isFetching}
+        </div>
+        <div className='mt-5'>
+            <SchemaCategoriesTable
+                categories={categories}
+                onDeleteCategory={handleDeleteCategory}
             />
         </div>
-    );
+
+        <AddSchemaModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={label => createSchema(label, false)}
+            isSubmitting={isFetching}
+        />
+    </>);
 }
 
 CategoriesPage.loader = categoriesLoader;

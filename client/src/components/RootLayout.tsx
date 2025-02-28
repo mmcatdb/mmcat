@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences } from './PreferencesProvider';
-import { Tooltip } from './common';
+import { Tooltip, truncateText } from './common';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 import { cn } from './utils';
@@ -70,9 +70,6 @@ type BreadcrumbMatch<TData> = UIMatch<TData, { breadcrumb: string | ((data: TDat
 
 function Breadcrumbs() {
     const matches = useMatches();
-
-    const truncateText = (text: string, maxLength: number) =>
-        text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
 
     const breadcrumbs: BreadcrumbData[] = useMemo(() => {
         return matches.

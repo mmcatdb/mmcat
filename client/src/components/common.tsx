@@ -46,3 +46,8 @@ export function Portal({ children, to }: PortalProps) {
 export const portals = {
     context: 'context-portal',
 };
+
+// Truncate function to truncate a one line string to a certain length and add an ellipsis at the end.
+
+export const truncateText = (text: string, maxLength: number) =>
+    text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;

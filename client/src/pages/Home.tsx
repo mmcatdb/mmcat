@@ -66,7 +66,7 @@ export function Home() {
             </p>
             <br />
             <p>
-                Detailed instructions on how to use this tool can be found <a href={DOCUMENTATION_URL} className='underline text-blue-600 hover:text-blue-800 visited:text-purple-600'>here</a>.
+                Detailed instructions on how to use this tool can be found <a href={DOCUMENTATION_URL} className='underline text-default-600 hover:text-default-800 visited:text-secondary-600'>here</a>.
             </p>
             <h2 className='mt-3'>Current schema categories</h2>
             {categories ? (<>
@@ -79,23 +79,28 @@ export function Home() {
                         </div>
                     ))}
                 </div>
-                <h2 className='mt-3'>Add example schema category</h2>
+                <h2 className='mt-3'>Add an example schema category</h2>
                 <div className='flex'>
                     {EXAMPLE_SCHEMAS.map(example => (
                         <Button 
                             key={example} 
                             onPress={() => handleCreateSchema(example, true)}
                             isLoading={isCreatingExampleSchema}
+                            color='primary'
+                            variant='bordered'
+                            title='Add an example (pre-made) schema category'
                         >
-                            {example}
+                            + Add {example} Schema
                         </Button>
                     ))}
                 </div>
-                <h2 className='mt-3'>Add empty schema category</h2>
+                <h2 className='mt-3'>Add an empty schema category</h2>
                 <Button
                     key={'newSchema'} 
                     onPress={() => setIsModalOpen(true)}
                     isLoading={isCreatingSchema}
+                    color='primary'
+                    title='Add an empty schema category'
                 >
                         + Add schema
                 </Button>

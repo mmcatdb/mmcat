@@ -15,6 +15,7 @@ import { cn } from '@/components/utils';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
 import { FaSave } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { truncateText } from '@/components/common';
 
 type EditorSidebarState = {
     left: boolean;
@@ -76,13 +77,13 @@ export function CategoryEditorPage() {
                         title='Toggle Main Editor Sidebar'
                         size={18}
                     />
+                </div>
 
-                    {/* Divider */}
-                    <div className='w-px bg-default-400 h-5 mx-2'></div>
-
+                {/* Save and Right Sidebar Toggle */}
+                <div className='flex items-center gap-2'>
                     {/* Delete Button */}
                     <FaTrash
-                        className='cursor-pointer text-rose-500 hover:text-rose-600'
+                        className='cursor-pointer text-danger-400 hover:text-danger-500'
                         onClick={() => {
                             const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
                                 ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
@@ -97,10 +98,10 @@ export function CategoryEditorPage() {
                         title='Delete (Delete)'
                         size={16}
                     />
-                </div>
 
-                {/* Save and Right Sidebar Toggle */}
-                <div className='flex items-center gap-2'>
+                    {/* Divider */}
+                    <div className='w-px bg-default-400 h-5 mx-2'></div>
+
                     <SaveButton state={state} dispatch={dispatch} />
 
                     {/* Divider */}
@@ -118,7 +119,7 @@ export function CategoryEditorPage() {
 
             <div className='flex flex-grow'>
                 {/* Left Sidebar */}
-                <aside className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-100`)}>
+                <aside className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
                     {sidebarState.left && <PhasedEditor state={state} dispatch={dispatch} />}
                 </aside>
 
@@ -128,7 +129,7 @@ export function CategoryEditorPage() {
                 </main>
 
                 {/* Right Sidebar */}
-                <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-100`}>
+                <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
                     {sidebarState.right && <SelectionCard state={state} dispatch={dispatch} />}
                 </aside>
             </div>
@@ -177,7 +178,7 @@ function SelectionCard({ state, dispatch }: StateDispatchProps) {
     const { nodeIds, edgeIds } = state.selection;
 
     return (
-        <div className='min-w-[200px] pl-3 rounded-lg bg-background '>
+        <div className='min-w-[200px] pl-3 rounded-lg'>
             <div className='max-h-[900px] overflow-y-auto'>
                 {nodeIds.size > 0 && (
                     <div>
@@ -195,7 +196,7 @@ function SelectionCard({ state, dispatch }: StateDispatchProps) {
                                 return (
                                     <div key={node.id} className='flex items-center gap-2'>
                                         <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
-                                        {node.metadata.label}
+                                        {truncateText(node.metadata.label, 23)}
                                         <div className='grow' />
                                         <Button isIconOnly variant='light' size='sm' onClick={() => unselectNode(node.id)}>
                                             <FaXmark />
