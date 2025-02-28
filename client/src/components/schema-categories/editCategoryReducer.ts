@@ -23,7 +23,7 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
 
 export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 
-type EditCategoryAction = GraphAction | SelectAction | PhaseAction;
+type EditCategoryAction = GraphAction | SelectAction | PhaseAction | CancelCreationAction;
 
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
     console.log('REDUCE', state.phase, action, state);
@@ -32,6 +32,7 @@ export function editCategoryReducer(state: EditCategoryState, action: EditCatego
     case 'graph': return graph(state, action);
     case 'select': return select(state, action);
     case 'phase': return phase(state, action);
+    case 'cancelCreation': return cancelCreation(state);
     }
 }
 
@@ -103,8 +104,6 @@ export enum EditorPhase {
     default = 'default',
     createObjex = 'createObjex',   // Enter create schema object phase
     createMorphism = 'createMorphism',   // Enter create morphism phase
-    cancelObjexCreation = 'cancelObjexCreation',  // Cancel schema object creation
-    cancelMorphismCreation = 'cancelMorphismCreation',
 }
 
 export type PhaseAction = {
@@ -118,19 +117,15 @@ export type PhaseAction = {
 function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCategoryState {
     const updatedGraph = graph ?? state.graph;
 
-    // creating object/morphism or canceling object/morphism
     if (phase === EditorPhase.default) {
-        if (state.phase === EditorPhase.cancelObjexCreation || state.phase === EditorPhase.cancelMorphismCreation) 
-            return handleCancelPhase(state, updatedGraph);
-        
         if (state.phase === EditorPhase.createObjex) 
             return handleObjectCreation(state);
         
+
         if (state.phase === EditorPhase.createMorphism) 
             return handleMorphismCreation(state);
     }
 
-    // default case
     return {
         ...state,
         graph: updatedGraph,
@@ -139,17 +134,6 @@ function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCat
     };
 }
 
-// Handle canceling object or morphism
-function handleCancelPhase(state: EditCategoryState, updatedGraph: CategoryGraph): EditCategoryState {
-    return {
-        ...state,
-        graph: state.phase === EditorPhase.cancelMorphismCreation ? categoryToGraph(state.evocat.category) : updatedGraph,
-        selection: state.phase === EditorPhase.cancelMorphismCreation ? createDefaultGraphSelection() : state.selection,
-        phase: EditorPhase.default,
-    };
-}
-
-// Select newly created object, deselect all others
 function handleObjectCreation(state: EditCategoryState): EditCategoryState {
     const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
 
@@ -163,7 +147,6 @@ function handleObjectCreation(state: EditCategoryState): EditCategoryState {
     };
 }
 
-// Handle new morphism selection (after creating morphism, select it)
 function handleMorphismCreation(state: EditCategoryState): EditCategoryState {
     const latestMorphism = Array.from(state.evocat.category.morphisms.values()).pop();
 
@@ -173,6 +156,21 @@ function handleMorphismCreation(state: EditCategoryState): EditCategoryState {
         selection: latestMorphism
             ? { nodeIds: new Set(), edgeIds: new Set([ latestMorphism.schema.signature.toString() ]) }
             : createDefaultGraphSelection(),
+        phase: EditorPhase.default,
+    };
+}
+
+// Cancel creation
+
+type CancelCreationAction = {
+    type: 'cancelCreation';
+};
+
+function cancelCreation(state: EditCategoryState): EditCategoryState {
+    return {
+        ...state,
+        graph: categoryToGraph(state.evocat.category),
+        selection: createDefaultGraphSelection(),
         phase: EditorPhase.default,
     };
 }

@@ -55,7 +55,7 @@ export function CategoriesPage() {
                         variant='bordered'
                         title='Add an example (pre-made) schema category'
                     >
-                            + Add {example} Schema
+                        + Add {example} Schema
                     </Button>
                 ))}
                 <Button
@@ -66,7 +66,7 @@ export function CategoriesPage() {
                     className='ml-2'
                     title='Add an empty schema category'
                 >
-                        + Add schema
+                    + Add schema
                 </Button>
             </div>
         </div>

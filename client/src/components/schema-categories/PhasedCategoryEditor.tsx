@@ -28,8 +28,6 @@ const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element
     [EditorPhase.default]: DefaultDisplay,
     [EditorPhase.createObjex]: CreateObjexDisplay,
     [EditorPhase.createMorphism]: CreateMorphismDisplay,
-    [EditorPhase.cancelObjexCreation]: DefaultDisplay,
-    [EditorPhase.cancelMorphismCreation]: DefaultDisplay,
 };
 
 export function deleteObjex(state: EditCategoryState, dispatch: EditCategoryDispatch, node: CategoryNode) {
@@ -80,22 +78,6 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
         >
             Create Morphism
         </Button>
-
-        {singleSelectedNode && (<>
-            <div>
-                Selected: <span className='font-semibold'>{singleSelectedNode.metadata.label}</span>
-            </div>
-
-            <Button color='danger' onClick={() => deleteObjex(state, dispatch, singleSelectedNode)}>Delete Object</Button>
-        </>)}
-
-        {singleSelectedMorphism && (<>
-            <div>
-                Selected: <span className='font-semibold'>{singleSelectedMorphism.metadata.label.length >= 1 ? singleSelectedMorphism.metadata.label : singleSelectedMorphism.id}</span>
-            </div>
-
-            <Button color='danger' onClick={() => deleteSelectedMorphism(state, dispatch)}>Delete Morphism</Button>
-        </>)}
     </>);
 }
 
@@ -132,7 +114,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         />
 
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.cancelObjexCreation })}>
+            <Button onClick={() => dispatch({ type: 'cancelCreation' })}>
                 Cancel
             </Button>
 
@@ -202,8 +184,8 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         />
 
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.cancelMorphismCreation })}>
-                    Cancel
+            <Button onClick={() => dispatch({ type: 'cancelCreation' })}>
+                Cancel
             </Button>
 
             <Button color='primary' onClick={createMorphism} isDisabled={!isValidSelection || label === ''}>
