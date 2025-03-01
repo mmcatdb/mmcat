@@ -95,6 +95,7 @@ public class QueryToInstance {
         normalized.context.setProvider(provider);
 
         final QueryPlan planned = QueryPlanner.run(normalized.context, schema, kinds, normalized.selection);
+        ResultStructureResolver.run(planned);
         final var plannedDescription = QueryPlanDescriptor.run(planned);
 
         final QueryPlan optimized = QueryOptimizer.run(planned);

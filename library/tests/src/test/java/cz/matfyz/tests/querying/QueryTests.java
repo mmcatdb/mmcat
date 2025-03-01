@@ -4,6 +4,7 @@ import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.core.querytree.JoinNode.SerializedJoinNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 
@@ -26,12 +27,11 @@ class QueryTests {
     static void setup() {
         datasources.postgreSQL().setup();
         datasources.mongoDB().setup();
+        datasources.neo4j().setup();
     }
 
     @Test
     void basicPostgreSQL() {
-        // TODO: (create a new test?) use QueryToInstance.describe to verify the filter is inside DataSourceNode
-        // TODO: create an another test class OptimizerTests which tests the shape of the queries
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
             .query("""
@@ -781,6 +781,10 @@ class QueryTests {
                         12/8/9 ?street .
                 }
             """)
+            .restrictQueryTree(queryPlan -> {
+                System.out.println("Yo");
+                return queryPlan.tree() instanceof SerializedJoinNode;
+            })
             .expected("""
                 [ {
                     "quantity": "1",
