@@ -1,5 +1,5 @@
 import { type CategoryGraph } from './categoryGraph';
-import { type UserSelectAction, type GraphSelection } from '../graph/graphSelection';
+import { type FreeSelectionAction, type FreeSelection } from '../graph/graphSelection';
 import { type Dispatch } from 'react';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
@@ -8,9 +8,9 @@ import { truncateText } from '../common';
 type SelectionCardProps = Readonly<{
     state: {
         graph: CategoryGraph;
-        selection: GraphSelection;
+        selection: FreeSelection;
     };
-    dispatch: Dispatch<UserSelectAction>;
+    dispatch: Dispatch<FreeSelectionAction>;
 }>;
 
 export function SelectionCard({ state, dispatch }: SelectionCardProps) {
@@ -53,7 +53,7 @@ export function SelectionCard({ state, dispatch }: SelectionCardProps) {
     );
 }
 
-function renderNode(nodeId: string, graph: CategoryGraph, dispatch: Dispatch<UserSelectAction>) {
+function renderNode(nodeId: string, graph: CategoryGraph, dispatch: Dispatch<FreeSelectionAction>) {
     const node = graph.nodes.find(node => node.id === nodeId)!;
 
     return (
@@ -68,7 +68,7 @@ function renderNode(nodeId: string, graph: CategoryGraph, dispatch: Dispatch<Use
     );
 }
 
-function renderEdge(edgeId: string, graph: CategoryGraph, dispatch: Dispatch<UserSelectAction>) {
+function renderEdge(edgeId: string, graph: CategoryGraph, dispatch: Dispatch<FreeSelectionAction>) {
     const edge = graph.edges.find(edge => edge.id === edgeId)!;
 
     return (

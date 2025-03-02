@@ -1,10 +1,10 @@
 import { type Edge, type Node } from './graphUtils';
 
 /**
- * Represents a sequence of nodes selected by the user.
+ * Represents a sequence of nodes selected by the user that forms a continuous path.
  * There are edges between them (because there might be multiple paths, so we want to prevent any ambiguity).
  */
-export class GraphPath<N extends Node, E extends Edge> {
+export class PathSelection<N extends Node, E extends Edge> {
     private constructor(
         readonly nodes: N[],
         /** There are always n-1 edges for n nodes. */
@@ -15,7 +15,7 @@ export class GraphPath<N extends Node, E extends Edge> {
      * Insert nodes (with edges between) into the path.
      * No two nodes (and edges) can be next to each other. Both first and last items must be nodes.
      */
-    static create<N extends Node, E extends Edge>(...items: (N | E)[]): GraphPath<N, E> {
+    static create<N extends Node, E extends Edge>(...items: (N | E)[]): PathSelection<N, E> {
         const nodes: N[] = [];
         const edges: E[] = [];
 
@@ -44,12 +44,12 @@ export class GraphPath<N extends Node, E extends Edge> {
         if (!wasNode && edges.length > 0)
             throw new Error('Edges might be only between nodes.');
 
-        return new GraphPath(nodes, edges);
+        return new PathSelection(nodes, edges);
     }
 
     /** Returns a new path with the added node and edge. */
-    add(node: N, edge: E): GraphPath<N, E> {
-        return new GraphPath([ ...this.nodes, node ], [ ...this.edges, edge ]);
+    add(node: N, edge: E): PathSelection<N, E> {
+        return new PathSelection([ ...this.nodes, node ], [ ...this.edges, edge ]);
     }
 
     /** Updates the path with the added node and edge. */
@@ -58,12 +58,12 @@ export class GraphPath<N extends Node, E extends Edge> {
         this.edges.push(edge);
     }
 
-    clone(): GraphPath<N, E> {
-        return new GraphPath([ ...this.nodes ], [ ...this.edges ]);
+    clone(): PathSelection<N, E> {
+        return new PathSelection([ ...this.nodes ], [ ...this.edges ]);
     }
 
-    remove(): GraphPath<N, E> {
-        return new GraphPath(this.nodes.slice(0, -1), this.edges.slice(0, -1));
+    remove(): PathSelection<N, E> {
+        return new PathSelection(this.nodes.slice(0, -1), this.edges.slice(0, -1));
     }
 
     get isEmpty(): boolean {

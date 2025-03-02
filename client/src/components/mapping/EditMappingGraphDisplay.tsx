@@ -79,7 +79,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
             return;
         }
 
-        if (!pathNode || pathNode.objex.equals(state.path!.graph.source)) {
+        if (!pathNode || pathNode.id === state.path!.graph.sourceNodeId) {
             dispatch({ type: 'path', node });
             return;
         }

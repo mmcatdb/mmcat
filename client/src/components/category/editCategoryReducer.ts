@@ -1,5 +1,5 @@
 import { type Dispatch } from 'react';
-import { type GraphSelection, type UserSelectAction, createDefaultGraphSelection, updateSelectionFromGraph, updateSelectionFromGraphEvent, updateSelectionFromUserAction } from '../graph/graphSelection';
+import { FreeSelection, type FreeSelectionAction } from '../graph/graphSelection';
 import { type CategoryGraph, categoryToGraph } from './categoryGraph';
 import { type Evocat } from '@/types/evocat/Evocat';
 import { type GraphEvent } from '../graph/graphEngine';
@@ -8,7 +8,7 @@ export type EditCategoryState = {
     /** Immutable. */
     evocat: Evocat;
     graph: CategoryGraph;
-    selection: GraphSelection;
+    selection: FreeSelection;
     phase: EditorPhase;
 };
 
@@ -16,7 +16,7 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
     return {
         evocat,
         graph: categoryToGraph(evocat.category),
-        selection: createDefaultGraphSelection(),
+        selection: FreeSelection.create(),
         phase: EditorPhase.default,
     };
 }
@@ -60,7 +60,7 @@ function graph(state: EditCategoryState, { event }: GraphAction): EditCategorySt
     case 'select': {
         return {
             ...state,
-            selection: updateSelectionFromGraphEvent(state.selection, event),
+            selection: state.selection.updateFromGraphEvent(event),
         };
     }
     }
@@ -70,10 +70,10 @@ function graph(state: EditCategoryState, { event }: GraphAction): EditCategorySt
 
 type SelectAction = {
     type: 'select';
-} & UserSelectAction;
+} & FreeSelectionAction;
 
 function select(state: EditCategoryState, action: SelectAction): EditCategoryState {
-    const newSelection = updateSelectionFromUserAction(state.selection, action);
+    const newSelection = state.selection.updateFromAction(action);
 
     // If we are in morphism creation phase, prevent selecting more than 2 nodes, just proceed and prevent selecting morphisms
     if (state.phase === EditorPhase.createMorphism) {
@@ -129,7 +129,7 @@ function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCat
     return {
         ...state,
         graph: updatedGraph,
-        selection: updateSelectionFromGraph(state.selection, updatedGraph),
+        selection: state.selection.updateFromGraph(updatedGraph),
         phase,
     };
 }
@@ -141,8 +141,8 @@ function handleObjectCreation(state: EditCategoryState): EditCategoryState {
         ...state,
         graph: categoryToGraph(state.evocat.category),
         selection: latestObjex
-            ? { nodeIds: new Set([ latestObjex.schema.key.toString() ]), edgeIds: new Set() }
-            : createDefaultGraphSelection(),
+            ? FreeSelection.create([ latestObjex.schema.key.toString() ], [])
+            : FreeSelection.create(),
         phase: EditorPhase.default,
     };
 }
@@ -154,8 +154,8 @@ function handleMorphismCreation(state: EditCategoryState): EditCategoryState {
         ...state,
         graph: categoryToGraph(state.evocat.category),
         selection: latestMorphism
-            ? { nodeIds: new Set(), edgeIds: new Set([ latestMorphism.schema.signature.toString() ]) }
-            : createDefaultGraphSelection(),
+            ? FreeSelection.create([], [ latestMorphism.schema.signature.toString() ])
+            : FreeSelection.create(),
         phase: EditorPhase.default,
     };
 }
@@ -170,7 +170,7 @@ function cancelCreation(state: EditCategoryState): EditCategoryState {
     return {
         ...state,
         graph: categoryToGraph(state.evocat.category),
-        selection: createDefaultGraphSelection(),
+        selection: FreeSelection.create(),
         phase: EditorPhase.default,
     };
 }

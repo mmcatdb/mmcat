@@ -2,7 +2,7 @@ import { EditMappingGraphDisplay } from './EditMappingGraphDisplay';
 import { createInitialState, type EditMappingDispatch, editMappingReducer, type EditMappingState } from './editMappingReducer';
 import { type Category } from '@/types/schema';
 import { useCallback, useReducer } from 'react';
-import { type UserSelectAction } from '../graph/graphSelection';
+import { type FreeSelectionAction } from '../graph/graphSelection';
 import { SelectionCard } from '../category/SelectionCard';
 import { type Mapping } from '@/types/mapping';
 
@@ -14,7 +14,7 @@ type MappingEditorProps = Readonly<{
 export function MappingEditor({ category, mapping }: MappingEditorProps) {
     const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
 
-    const userSelectionDispatch = useCallback((action: UserSelectAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
+    const userSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
 
     return (
         <div className='relative h-[700px] flex'>

@@ -7,14 +7,13 @@ import { Cardinality, type Objex, type Max, type Min, type Morphism } from '.';
  * Contains information about paths from a selected objex.
  */
 export type PathGraph = {
-    source: Objex;
+    sourceNodeId: string;
     nodes: Map<string, PathNode>;
     edges: Map<string, PathEdge>;
 };
 
 export type PathNode = {
     id: string;
-    objex: Objex;
     pathCount: PathCount;
     /** If defined, there is a path from the source objex to this one. It might be ambiguous (in that case, only one of them is listed here). */
     pathSegmentTo?: PathSegment;
@@ -25,7 +24,6 @@ export type PathNode = {
 function createPathNode(objex: Objex): PathNode {
     return {
         id: objex.key.toString(),
-        objex,
         pathCount: PathCount.None,
         dependentNodes: [],
     };
@@ -55,7 +53,8 @@ function extendPath(path: Path, second: Path): Path {
 
 export type PathEdge = {
     id: string;
-    morphism: Morphism;
+    from: string;
+    to: string;
 
     /**
      * If defined, this is a direction of at least one traversable path that uses this edge. However, there might be multiple paths.
@@ -67,7 +66,8 @@ export type PathEdge = {
 function createPathEdge(morphism: Morphism): PathEdge {
     return {
         id: morphism.signature.toString(),
-        morphism,
+        from: morphism.from.key.toString(),
+        to: morphism.to.key.toString(),
     };
 }
 
@@ -91,7 +91,7 @@ export function computePathsFromObjex(source: Objex, filterFunction?: FilterFunc
     marker.markPathsFromSourceObjex();
 
     return {
-        source,
+        sourceNodeId: source.key.toString(),
         nodes: marker.nodes,
         edges: marker.edges,
     };
@@ -158,22 +158,6 @@ class PathMarker {
             dependentSegments: [],
         };
     }
-
-    // A comment to the previous system:
-    //
-    // In general, it isn't possible mark all nodes perfectly. The rules are:
-    // - a) A node is ambiguous if there are multiple valid paths to it.
-    // - b) The validity of the path can be found only after we know the whole path.
-    // - c) We don't want to consider paths with loops (or, in general, paths that contain the node more than once).
-    // The problem is that:
-    // - a) and b) means that we might need to evaluate all possible paths to check if multiple of them are valid.
-    // - One possible outcome is that there are multiple paths but none of them are valid.
-    // - However, it may happen that if we consider loops, we will find paths that will be valid.
-    // - So the nodes should be accessible but still ambiguous.
-    //
-    // Nevertheless, the process of selecting signature is continuous. It should be possible to select a node because even if path to it isn't valid the node might actually be in the middle of the path, not at the end of it, because the process isn't over yet.
-    //
-    // So yes, the Composite filters are indeed an unsufficient solution.
 
     markPathsFromSourceObjex(): void {
         this.getNode(this.sourceObjex).pathCount = PathCount.One;

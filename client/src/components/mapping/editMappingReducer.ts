@@ -1,16 +1,16 @@
 import { type Dispatch } from 'react';
-import { type GraphSelection, type UserSelectAction, createDefaultGraphSelection, updateSelectionFromGraphEvent, updateSelectionFromUserAction } from '../graph/graphSelection';
+import { FreeSelection, type FreeSelectionAction } from '../graph/graphSelection';
 import { type CategoryEdge, type CategoryGraph, type CategoryNode, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
 import { type Mapping } from '@/types/mapping';
 import { computePathsFromObjex, type PathEdge, type PathNode, type PathGraph } from '@/types/schema/PathMarker';
-import { GraphPath } from '../graph/graphPath';
+import { PathSelection } from '../graph/PathSelection';
 
 export type EditMappingState = {
     category: Category;
     graph: CategoryGraph;
-    selection: GraphSelection;
+    selection: FreeSelection;
     mapping: Mapping;
     // phase: EditorPhase;
     path?: PathState;
@@ -21,7 +21,7 @@ export function createInitialState({ category, mapping }: { category: Category, 
     return {
         category,
         graph: categoryToGraph(category),
-        selection: createDefaultGraphSelection(),
+        selection: FreeSelection.create(),
         mapping,
         // phase: EditorPhase.default,
         isPathInput: true,
@@ -71,7 +71,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
     case 'select': {
         const newState = {
             ...state,
-            selection: updateSelectionFromGraphEvent(state.selection, event),
+            selection: state.selection.updateFromGraphEvent(event),
         };
 
         // If the canvas was clicked, we clear the path selection.
@@ -87,12 +87,12 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
 
 type SelectAction = {
     type: 'select';
-} & UserSelectAction;
+} & FreeSelectionAction;
 
 function select(state: EditMappingState, action: SelectAction): EditMappingState {
     const newState: EditMappingState = {
         ...state,
-        selection: updateSelectionFromUserAction(state.selection, action),
+        selection: state.selection.updateFromAction(action),
         path: undefined,
     };
 
@@ -101,7 +101,7 @@ function select(state: EditMappingState, action: SelectAction): EditMappingState
 
 type PathState = {
     graph: PathGraph;
-    selection: GraphPath<CategoryNode, CategoryEdge>;
+    selection: PathSelection<CategoryNode, CategoryEdge>;
 };
 
 type PathAction = {
@@ -132,12 +132,12 @@ function path(state: EditMappingState, action: PathAction): EditMappingState {
     };
 }
 
-function pathSelection(state: EditMappingState, action: PathAction): GraphPath<CategoryNode, CategoryEdge> {
+function pathSelection(state: EditMappingState, action: PathAction): PathSelection<CategoryNode, CategoryEdge> {
     const path = state.path;
 
     if ('node' in action) {
         if (!path)
-            return GraphPath.create<CategoryNode, CategoryEdge>(action.node);
+            return PathSelection.create<CategoryNode, CategoryEdge>(action.node);
 
         if (path.selection.lastNode.id !== action.node.id)
             throw new Error('Invalid node.');
@@ -157,21 +157,21 @@ function pathSelection(state: EditMappingState, action: PathAction): GraphPath<C
     const output = path.selection.clone();
 
     const pathEdge = action.pathEdge;
-    const fromObjex = pathEdge.traversableDirection ? pathEdge.morphism.from : pathEdge.morphism.to;
-    const fromPathNode = path.graph.nodes.get(fromObjex.key.toString());
+    const fromNodeId = pathEdge.traversableDirection ? pathEdge.from : pathEdge.to;
+    const fromPathNode = path.graph.nodes.get(fromNodeId);
 
     addPathToNode(fromPathNode!, output, state.graph, path.graph);
 
-    const toObjex = pathEdge.traversableDirection ? pathEdge.morphism.to : pathEdge.morphism.from;
-    const toNode = state.graph.nodes.find(node => node.id === toObjex.key.toString());
-    const edge = state.graph.edges.find(edge => edge.id === pathEdge.morphism.signature.toString());
+    const toNodeId = pathEdge.traversableDirection ? pathEdge.to : pathEdge.from;
+    const toNode = state.graph.nodes.find(node => node.id === toNodeId);
+    const edge = state.graph.edges.find(edge => edge.id === pathEdge.id);
 
     output.addMutable(toNode!, edge!);
 
     return output;
 }
 
-function addPathToNode(pathNode: PathNode, selection: GraphPath<CategoryNode, CategoryEdge>, graph: CategoryGraph, pathGraph: PathGraph): void {
+function addPathToNode(pathNode: PathNode, selection: PathSelection<CategoryNode, CategoryEdge>, graph: CategoryGraph, pathGraph: PathGraph): void {
     const nodes: PathNode[] = [];
     const edges: PathEdge[] = [];
 
@@ -215,7 +215,7 @@ function addPathToNode(pathNode: PathNode, selection: GraphPath<CategoryNode, Ca
 //     return {
 //         ...state,
 //         graph,
-//         selection: updateSelectionFromGraph(state.selection, graph),
+//         selection: state.selection.updateFromGraph(graph),
 //         phase,
 //     };
 // }

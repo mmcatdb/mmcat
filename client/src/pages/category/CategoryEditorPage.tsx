@@ -13,7 +13,7 @@ import { cn } from '@/components/utils';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
 import { FaSave } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { type UserSelectAction } from '@/components/graph/graphSelection';
+import { type FreeSelectionAction } from '@/components/graph/graphSelection';
 import { SelectionCard } from '@/components/category/SelectionCard';
 import { useDeleteHandlers } from '@/components/category/useDeleteHandlers';
 
@@ -40,7 +40,7 @@ export function CategoryEditorPage() {
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
     useDeleteHandlers(state, dispatch);
 
-    const userSelectionDispatch = useCallback((action: UserSelectAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
+    const userSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
 
     const [ sidebarState, setSidebarState ] = useState<EditorSidebarState>({
         left: true,
