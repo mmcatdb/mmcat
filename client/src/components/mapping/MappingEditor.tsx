@@ -36,6 +36,8 @@ export function MappingEditor({ category, mapping }: MappingEditorProps) {
                 <SaveButton state={state} dispatch={dispatch} />
             </div> */}
 
+            <PathCard state={state} dispatch={dispatch} />
+
         </div>
     );
 }
@@ -45,7 +47,7 @@ type StateDispatchProps = Readonly<{
     dispatch: EditMappingDispatch;
 }>;
 
-function AccessPathCard({ state, dispatch }: StateDispatchProps) {
+function AccessPathCard({ state }: StateDispatchProps) {
     return (
         <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-black'>
             <h3 className='text-white'>Access path</h3>
@@ -53,6 +55,21 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
             <pre className='mt-3'>
                 {state.mapping.accessPath.toString()}
             </pre>
+        </div>
+    );
+}
+
+function PathCard({ state }: StateDispatchProps) {
+    if (!state.path)
+        return null;
+
+    return (
+        <div className='absolute top-2 left-2 z-20 p-3 flex gap-3 bg-black'>
+            {state.path.selection.nodes.map((node, index) => (
+                <div key={index}>
+                    {node.metadata.label}
+                </div>
+            ))}
         </div>
     );
 }

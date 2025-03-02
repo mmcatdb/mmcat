@@ -68,12 +68,26 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragging } = useNode(node);
 
     const isSelected = state.selection.nodeIds.has(node.id);
-    const pathNode = state.paths?.nodes.get(node.id);
+    const pathNode = state.path?.graph.nodes.get(node.id);
 
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
-        const isSpecialKey = event.ctrlKey || event.ctrlKey;
-        dispatch({ type: 'select', nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' });
+
+        if (!state.isPathInput) {
+            const isSpecialKey = event.ctrlKey || event.ctrlKey;
+            dispatch({ type: 'select', nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' });
+            return;
+        }
+
+        if (!pathNode || pathNode.objex.equals(state.path!.graph.source)) {
+            dispatch({ type: 'path', node });
+            return;
+        }
+
+        if (pathNode.pathCount !== PathCount.One)
+            return;
+
+        dispatch({ type: 'path', pathNode });
     }
 
     return (
@@ -120,12 +134,22 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);
 
     const isSelected = state.selection.edgeIds.has(edge.id);
-    const traversableNodeId = getTraversableNodeId(state, edge);
+    const traversableId = getTraversableNodeId(state, edge);
+    const pathEdge = state.path?.graph.edges.get(edge.id);
 
     function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();
-        const isSpecialKey = event.ctrlKey || event.ctrlKey;
-        dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
+
+        if (!state.isPathInput) {
+            const isSpecialKey = event.ctrlKey || event.ctrlKey;
+            dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
+            return;
+        }
+
+        if (!pathEdge || !traversableId)
+            return;
+
+        dispatch({ type: 'path', pathEdge });
     }
 
     return (
@@ -139,24 +163,31 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
             className={cn('text-slate-600',
                 isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 pointer-events-auto path-shadow',
                 isSelected && 'text-cyan-600',
-                traversableNodeId && 'text-green-700',
+                traversableId && 'text-green-700',
             )}
         />
     );
 }
 
-/** Returns the node that will be selected if we decide to traverse along this edge. Or undefined if there isn't any. */
+/**
+ * Returns the node that will be selected if we decide to traverse along this edge. Or undefined if there isn't such.
+ */
 function getTraversableNodeId(state: EditMappingState, edge: CategoryEdge): string | undefined {
-    const pathEdge = state.paths?.edges.get(edge.id);
+    if (!state.path)
+        return undefined;
+
+    const { nodes, edges } = state.path.graph;
+
+    const pathEdge = edges.get(edge.id);
     if (pathEdge?.traversableDirection === undefined)
         return undefined;
 
-    const fromPathNode = state.paths?.nodes.get(pathEdge.traversableDirection ? edge.from : edge.to);
+    const fromPathNode = nodes.get(pathEdge.traversableDirection ? edge.from : edge.to);
     if (!fromPathNode || fromPathNode.pathCount !== PathCount.One)
         return undefined;
 
     const toNodeId = pathEdge.traversableDirection ? edge.to : edge.from;
-    const toPathNode = state.paths?.nodes.get(toNodeId);
+    const toPathNode = nodes.get(toNodeId);
     if (!toPathNode || toPathNode.pathCount === PathCount.None)
         return undefined;
 

@@ -1,5 +1,5 @@
 import { type Edge, type Node } from '../graph/graphUtils';
-import { SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex, type SchemaMorphism } from '@/types/schema';
+import { type SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex, type SchemaMorphism } from '@/types/schema';
 
 /**
  * A plain object that can be displayed by the graph library.
@@ -48,76 +48,4 @@ export function categoryToGraph(category: Category): CategoryGraph {
     });
 
     return { nodes, edges };
-}
-
-/**
- * Represents a sequence of nodes selected by the user.
- * There are morphisms between them (because there might be multiple paths, so we want to prevent any ambiguity).
- */
-export class CategoryPath {
-    private constructor(
-        readonly nodes: CategoryNode[],
-        /** There are always n-1 edges for n nodes. */
-        readonly edges: CategoryEdge[],
-    ) {}
-
-    /**
-     * Insert nodes (with edges between) into the path.
-     * No two nodes (and edges) can be next to each other. Both first and last items must be nodes.
-     */
-    static create(...items: (CategoryNode | CategoryEdge)[]): CategoryPath {
-        const nodes: CategoryNode[] = [];
-        const edges: CategoryEdge[] = [];
-
-        let wasNode = false;
-
-        for (const item of items) {
-            const isNode = item.schema instanceof SchemaObjex;
-
-            if (isNode) {
-                if (wasNode)
-                    throw new Error('Nodes must be separated by edges.');
-
-                nodes.push(item as CategoryNode);
-            }
-            else {
-                if (!wasNode)
-                    throw new Error('Edges must be between nodes.');
-
-                edges.push(item as CategoryEdge);
-            }
-
-            wasNode = isNode;
-        }
-
-        // Check if the last item is a node. However, empty path is allowed.
-        if (!wasNode && edges.length > 0)
-            throw new Error('Edges might be only between nodes.');
-
-        return new CategoryPath(nodes, edges);
-    }
-
-    /** Returns a new path with the added node and edge. */
-    add(node: CategoryNode, edge: CategoryEdge): CategoryPath {
-        return new CategoryPath([ ...this.nodes, node ], [ ...this.edges, edge ]);
-    }
-
-    /** Updates the path with the added node and edge. */
-    addMutable(node: CategoryNode, edge: CategoryEdge) {
-        this.nodes.push(node);
-        this.edges.push(edge);
-    }
-
-    get isEmpty(): boolean {
-        return this.nodes.length === 0;
-    }
-
-    get firstNode(): CategoryNode {
-        return this.nodes[0];
-    }
-
-    get lastNode(): CategoryNode {
-        return this.nodes[this.nodes.length - 1];
-    }
-
 }

@@ -12,7 +12,7 @@ export type PathGraph = {
     edges: Map<string, PathEdge>;
 };
 
-type PathNode = {
+export type PathNode = {
     id: string;
     objex: Objex;
     pathCount: PathCount;
@@ -53,7 +53,7 @@ function extendPath(path: Path, second: Path): Path {
     };
 }
 
-type PathEdge = {
+export type PathEdge = {
     id: string;
     morphism: Morphism;
 
