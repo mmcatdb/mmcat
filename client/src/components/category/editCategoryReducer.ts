@@ -79,10 +79,10 @@ function select(state: EditCategoryState, action: SelectAction): EditCategorySta
     if (state.phase === EditorPhase.createMorphism) {
         // Prevent selecting more than 2 nodes
         const selectedNodeIds = Array.from(newSelection.nodeIds);
-        if (selectedNodeIds.length > 2) 
+        if (selectedNodeIds.length > 2)
             return state;
 
-        if (newSelection.edgeIds.size > 0) 
+        if (newSelection.edgeIds.size > 0)
             return state;
     }
 
@@ -118,11 +118,11 @@ function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCat
     const updatedGraph = graph ?? state.graph;
 
     if (phase === EditorPhase.default) {
-        if (state.phase === EditorPhase.createObjex) 
+        if (state.phase === EditorPhase.createObjex)
             return handleObjectCreation(state);
-        
 
-        if (state.phase === EditorPhase.createMorphism) 
+
+        if (state.phase === EditorPhase.createMorphism)
             return handleMorphismCreation(state);
     }
 

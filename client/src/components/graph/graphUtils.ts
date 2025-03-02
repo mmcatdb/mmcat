@@ -196,13 +196,9 @@ export function computeNodeStyle(node: Node, coordinates: Coordinates): CSSPrope
 }
 
 /** How far from the node center is the edge start/end. In pixels. */
-const EDGE_OFFSET = 20;
+const EDGE_OFFSET = 30;
 /** The minimal distance between middle points of edges between the two same nodes. In pixels. */
 const EDGE_DELTA = 60;
-/** The tangent of the angle between the two arrow sides. */
-const EDGE_ARROW_TAN = Math.tan(40 / 2 * Math.PI / 180);
-/** The lengths of the two arrow sides. In pixels. */
-const EDGE_ARROW_LENGTH = 16;
 
 export function computeEdgePath(from: Node, to: Node, degree: number, coordinates: Coordinates): string {
     const start = positionToOffset(from.position, coordinates);
@@ -287,37 +283,7 @@ function computeEdgeCurvedPath(A: Offset, B: Offset, delta: number): string {
 
     // This works quite nicely, however, the distance from the curve to the node depends on the distance of the nodes. We can fix this by solving the above mentioned quartic equation, or by some numerical method.
     // For now, this is fine.
-    const arcPath = `M ${C_L} ${C_T} Q ${P_L} ${P_T} ${D_L} ${D_T}`;
-
-    // In order to find the arrowheads, we create two linear functions that cross the curve at the point (x, y).
-    // The first will have smaller tangent, the second will have greater tangent.
-
-    // The parabola derivative at x is:
-    const tan_0 = 2 * x * y_0 / x_0**2;
-
-    // The derivative of the first function is just a sum of tangents:
-    const tan_1 = (tan_0 + EDGE_ARROW_TAN) / (1 - tan_0 * EDGE_ARROW_TAN);
-
-    // Now we compute the end of the first arrowhead, (x_1, y_1), which is EDGE_ARROW_LENGTH distance from (x, y) along the tangent. Then we transform it to the left-top coordinates.
-    const x_1 = x - EDGE_ARROW_LENGTH / Math.sqrt(1 + tan_1**2);
-    const y_1 = y + tan_1 * (x_1 - x);
-
-    const S1_L = O_L + K * x_1 - Q * y_1;
-    const S1_T = O_T + Q * x_1 + K * y_1;
-
-    // The second arrowhead is basically the same story.
-    const tan_2 = (tan_0 - EDGE_ARROW_TAN) / (1 + tan_0 * EDGE_ARROW_TAN);
-
-    const x_2 = x - EDGE_ARROW_LENGTH / Math.sqrt(1 + tan_2**2);
-    const y_2 = y + tan_2 * (x_2 - x);
-
-    const S2_L = O_L + K * x_2 - Q * y_2;
-    const S2_T = O_T + Q * x_2 + K * y_2;
-
-    // Let's draw a cute triangle for better artistic impression.
-    const arrowPath = `L ${S1_L} ${S1_T} L ${S2_L} ${S2_T} L ${D_L} ${D_T}`;
-
-    return arcPath + ' ' + arrowPath;
+    return `M ${round(C_L)} ${round(C_T)} Q ${round(P_L)} ${round(P_T)} ${round(D_L)} ${round(D_T)}`;
 }
 
 /**
@@ -342,21 +308,11 @@ function computeEdgeStraightPath(A: Offset, B: Offset): string {
     const D_L = O_L + Kx;
     const D_T = O_T + Qx;
 
-    const arcPath = `M ${O_L - Kx} ${O_T - Qx} L ${D_L} ${D_T}`;
+    return `M ${round(O_L - Kx)} ${round(O_T - Qx)} L ${round(D_L)} ${round(D_T)}`;
+}
 
-    // Arrowheads. We have: tan_1 = -tan_2 = EDGE_ARROW_TAN, x_2 = x_1, y_2 = -y_1.
-    const x_1 = x - EDGE_ARROW_LENGTH / Math.sqrt(1 + EDGE_ARROW_TAN**2);
-    const y_1 = EDGE_ARROW_TAN * (x_1 - x);
-
-    const S1_L = O_L + K * x_1 - Q * y_1;
-    const S1_T = O_T + Q * x_1 + K * y_1;
-
-    const S2_L = O_L + K * x_1 + Q * y_1;
-    const S2_T = O_T + Q * x_1 - K * y_1;
-
-    const arrowPath = `L ${S1_L} ${S1_T} L ${S2_L} ${S2_T} L ${D_L} ${D_T}`;
-
-    return arcPath + ' ' + arrowPath;
+function round(value: number): string {
+    return value.toFixed(2);
 }
 
 export function computeSelectionBoxStyle(select: SelectState | undefined, coordinates: Coordinates): CSSProperties {

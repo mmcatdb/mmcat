@@ -28,6 +28,12 @@ export function EditCategoryGraphDisplay({ state, dispatch, options, className }
                 ))}
 
                 <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='absolute w-full h-full pointer-events-none'>
+                    <defs>
+                        <marker id='arrow' viewBox='0 0 12 12' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'>
+                            <path d='M 0 1 L 10 5 L 0 9 z' fill='currentColor' className='text-slate-900' />
+                        </marker>
+                    </defs>
+
                     {bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
                         <EdgeDisplay key={edge.id} edge={edge} degree={getEdgeDegree(edge, index, bundle.length)} state={state} dispatch={dispatch} />
                     )))}
@@ -131,6 +137,7 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
                 isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 pointer-events-auto path-shadow',
                 isSelected && 'text-cyan-600',
             )}
+            markerEnd='url(#arrow)'
         />
     );
 }
