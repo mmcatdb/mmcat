@@ -3,7 +3,7 @@ import { Button, Input } from '@nextui-org/react';
 import { EditorPhase, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { cn } from '../utils';
 import { toPosition } from '@/types/utils/common';
-import { type CategoryNode, categoryToGraph } from './categoryGraph';
+import { categoryToGraph } from './categoryGraph';
 import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers/Key';
 
@@ -31,29 +31,6 @@ const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element
     [EditorPhase.createObjex]: CreateObjexDisplay,
     [EditorPhase.createMorphism]: CreateMorphismDisplay,
 };
-
-export function deleteObjex(state: EditCategoryState, dispatch: EditCategoryDispatch, node: CategoryNode) {
-    state.evocat.deleteObjex(node.schema.key);
-    const graph = categoryToGraph(state.evocat.category);
-
-    dispatch({ type: 'phase', phase: EditorPhase.default, graph });
-}
-
-export function deleteSelectedMorphism(state: EditCategoryState, dispatch: EditCategoryDispatch) {
-    if (state.selection.edgeIds.size !== 1)
-        return;
-
-    const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
-    const selectedMorphism = state.graph.edges.get(selectedEdgeId);
-
-    if (!selectedMorphism)
-        return;
-
-    state.evocat.deleteMorphism(selectedMorphism.schema.signature);
-    const graph = categoryToGraph(state.evocat.category);
-
-    dispatch({ type: 'phase', phase: EditorPhase.default, graph });
-}
 
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     const isValidSelection = state.selection.nodeIds.size <= 2 && state.selection.edgeIds.size === 0;
@@ -123,7 +100,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Extract selected nodes (should be exactly 2)
-    const selectedNodes = Array.from(state.selection.nodeIds);
+    const selectedNodes = Array.from(state.selection.nodeIds as Set<string>);
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
 
     const domainNode = state.graph.nodes.get(selectedNodes[0]);

@@ -5,9 +5,9 @@ import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { EditCategoryGraphDisplay } from '@/components/category/EditCategoryGraphDisplay';
 import { FaSpinner, FaTrash } from 'react-icons/fa6';
-import { createInitialState, editCategoryReducer, type EditCategoryState } from '@/components/category/editCategoryReducer';
+import { createInitialState, type EditCategoryDispatch, editCategoryReducer, EditorPhase, type EditCategoryState } from '@/components/category/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
-import { deleteObjex, deleteSelectedMorphism, PhasedEditor } from '@/components/category/PhasedCategoryEditor';
+import { PhasedEditor } from '@/components/category/PhasedCategoryEditor';
 import { onSuccess } from '@/types/api/result';
 import { cn } from '@/components/utils';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
@@ -16,6 +16,8 @@ import { toast } from 'react-toastify';
 import { type FreeSelectionAction } from '@/components/graph/graphSelection';
 import { SelectionCard } from '@/components/category/SelectionCard';
 import { useDeleteHandlers } from '@/components/category/useDeleteHandlers';
+import { type Signature } from '@/types/identifiers';
+import { categoryToGraph } from '@/components/category/categoryGraph';
 
 type EditorSidebarState = {
     left: boolean;
@@ -85,17 +87,12 @@ export function CategoryEditorPage() {
                 <div className='flex items-center gap-2'>
                     {/* Delete Button */}
                     <FaTrash
-                        className='cursor-pointer text-danger-400 hover:text-danger-500'
+                        className={`text-danger-400 ${state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0 
+                            ? 'opacity-50 cursor-auto' 
+                            : 'cursor-pointer hover:text-danger-500'}`}
                         onClick={() => {
-                            const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
-                                ? state.graph.nodes.get(state.selection.nodeIds.values().next().value)
-                                : undefined;
-
-                            if (singleSelectedNode)
-                                deleteObjex(state, dispatch, singleSelectedNode);
-                            else
-                                deleteSelectedMorphism(state, dispatch);
-
+                            if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) 
+                                deleteSelectedElements(state, dispatch);
                         }}
                         title='Delete (Delete)'
                         size={16}
@@ -222,6 +219,26 @@ function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
             )}
         </div>
     );
+}
+
+function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategoryDispatch) {
+    // Delete all selected morphisms
+    for (const edgeId of state.selection.edgeIds) {
+        const morphism = state.graph.edges.get(edgeId);
+        if (morphism) 
+            state.evocat.deleteMorphism(morphism.schema.signature as Signature);
+    }
+        
+    // Delete all selected nodes
+    for (const nodeId of state.selection.nodeIds) {
+        const node = state.graph.nodes.get(nodeId as string);
+        if (node) 
+            state.evocat.deleteObjex(node.schema.key);
+    }
+    
+    // Update the graph state
+    const graph = categoryToGraph(state.evocat.category);
+    dispatch({ type: 'phase', phase: EditorPhase.default, graph });
 }
 
 // Function to detect unsaved changes: node movement, schema updates

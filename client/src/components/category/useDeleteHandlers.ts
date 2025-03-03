@@ -1,41 +1,44 @@
 import { useEffect, useCallback } from 'react';
 import { type EditCategoryState, EditorPhase, type EditCategoryDispatch } from '@/components/category/editCategoryReducer';
-import { type CategoryNode, type CategoryEdge, categoryToGraph } from '@/components/category/categoryGraph';
+import { categoryToGraph } from '@/components/category/categoryGraph';
+import { type Signature } from '@/types/identifiers';
 
 export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCategoryDispatch) {
-    const deleteObjex = useCallback((node: CategoryNode) => {
-        state.evocat.deleteObjex(node.schema.key);
-        const graph = categoryToGraph(state.evocat.category);
-        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
-    }, [ state, dispatch ]);
+    const deleteSelectedElements = useCallback(() => {
+        let updated = false;
 
-    const deleteSelectedMorphism = useCallback((morphism: CategoryEdge) => {
-        state.evocat.deleteMorphism(morphism.schema.signature);
-        const graph = categoryToGraph(state.evocat.category);
-        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+        state.selection.edgeIds.forEach(edgeId => {
+            const edge = state.graph.edges.get(edgeId);
+            if (edge) {
+                state.evocat.deleteMorphism(edge.schema.signature as Signature);
+                updated = true;
+            }
+        });
+
+        state.selection.nodeIds.forEach(nodeId => {
+            const node = state.graph.nodes.get(nodeId);
+            if (node) {
+                state.evocat.deleteObjex(node.schema.key);
+                updated = true;
+            }
+        });
+
+        // If something was deleted, update the graph state
+        if (updated) {
+            const graph = categoryToGraph(state.evocat.category);
+            dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+        }
     }, [ state, dispatch ]);
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
-            if (event.key === 'Delete') {
-                const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
-                    ? state.graph.nodes.get(state.selection.nodeIds.values().next().value!)
-                    : undefined;
-
-                const singleSelectedMorphism = (state.selection.edgeIds.size === 1 && state.selection.nodeIds.size === 0)
-                    ? state.graph.edges.get(state.selection.edgeIds.values().next().value!)
-                    : undefined;
-
-                if (singleSelectedNode)
-                    deleteObjex(singleSelectedNode);
-                else if (singleSelectedMorphism)
-                    deleteSelectedMorphism(singleSelectedMorphism);
-            }
+            if (event.key === 'Delete') 
+                deleteSelectedElements();
         }
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [ state.selection, deleteObjex, deleteSelectedMorphism ]);
+    }, [ deleteSelectedElements ]);
 
-    return { deleteObjex, deleteSelectedMorphism };
+    return { deleteSelectedElements };
 }

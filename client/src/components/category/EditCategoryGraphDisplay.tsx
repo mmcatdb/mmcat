@@ -31,7 +31,7 @@ export function EditCategoryGraphDisplay({ state, dispatch, options, className }
                         </marker>
                     </defs>
 
-                    {state.graph.edges.bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
+                    {state.graph.edges.bundledEdges.flatMap((bundle: CategoryEdge[]) => bundle.map((edge: CategoryEdge, index: number) => (
                         <EdgeDisplay key={edge.id} edge={edge} degree={getEdgeDegree(edge, index, bundle.length)} state={state} dispatch={dispatch} />
                     )))}
                 </svg>
