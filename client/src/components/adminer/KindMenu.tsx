@@ -12,6 +12,8 @@ type KindMenuProps = Readonly<{
     dispatch: React.Dispatch<AdminerStateAction>;
 }>;
 
+type KindLabelValues = {label: string, value: string }[];
+
 export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMenuProps) {
     const fetchFunction = useCallback(() => {
         return api.adminer.getKindNames({ datasourceId });
@@ -29,31 +31,33 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
     if (error)
         return <p>{error}</p>;
 
+    const selectItems: KindLabelValues = [];
+    if (fetchedData && fetchedData.data.length > 0) {
+        fetchedData.data.forEach(name => (
+            selectItems.push({ label: name, value: name })
+        ));
+
+        if (showUnlabeled)
+            selectItems.push({ label: 'Unlabeled', value: 'unlabeled' });
+    }
+
     return (
         fetchedData && fetchedData.data.length > 0 ? (
             <Select
+                items={selectItems}
                 label='Kind'
                 placeholder='Select kind'
                 className='max-w-xs'
                 selectedKeys={ kind ? [ kind ] : undefined }
             >
-                {fetchedData.data.map((name, index) => (
+                {item => (
                     <SelectItem
-                        key={name}
-                        onPress={() => dispatch({ type: 'kind', newKind: name })}
+                        key={item.value}
+                        onPress={() => dispatch({ type: 'kind', newKind: item.value })}
                     >
-                        {name}
+                        {item.label}
                     </SelectItem>
-                ))}
-
-                {showUnlabeled && (<SelectItem
-                    key='unlabeled'
-                    onPress={() => dispatch({ type: 'kind', newKind: 'unlabeled' })}
-                >
-                    Unlabeled
-                </SelectItem>
                 )}
-
             </Select>
         ) : (
             <span>No kinds to display.</span>
