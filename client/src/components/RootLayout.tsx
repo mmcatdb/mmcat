@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences } from './PreferencesProvider';
-import { Tooltip, truncateText } from './common';
+import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 import { cn } from './utils';
@@ -84,9 +84,9 @@ function Breadcrumbs() {
         <NextUIBreadcrumbs separator='/'>
             {breadcrumbs.map((crumb, index) => (
                 <BreadcrumbItem key={crumb.path} isCurrent={index === breadcrumbs.length - 1}>
-                    <Link to={crumb.path} className='text-danger-500' title={crumb.label}>
+                    <Link to={crumb.path} className='text-danger-500 truncate max-w-[150px]' title={crumb.label}>
                         {/* Truncate the crumb.label to a specific size, because the length of dynamic breadcrumbs is not limited (e.g. Label of datasource) */}
-                        {truncateText(crumb.label, 23)}
+                        {crumb.label}
                     </Link>
                 </BreadcrumbItem>
             ))}

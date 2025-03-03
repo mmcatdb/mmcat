@@ -6,7 +6,6 @@ import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHook
 import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { getEdgeDegree } from '../graph/graphUtils';
-import { truncateText } from '@/components/common';
 
 type EditCategoryGraphDisplayProps = Readonly<{
     state: EditCategoryState;
@@ -97,8 +96,8 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
             />
 
             <div className='w-fit h-0'>
-                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block'>
-                    {truncateText(node.metadata.label, 30)}
+                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]'>
+                    {node.metadata.label}
                 </span>
             </div>
         </div>

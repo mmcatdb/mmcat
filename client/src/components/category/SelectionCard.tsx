@@ -3,7 +3,6 @@ import { type FreeSelectionAction, type FreeSelection } from '../graph/graphSele
 import { type Dispatch } from 'react';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
-import { truncateText } from '../common';
 
 type SelectionCardProps = Readonly<{
     state: {
@@ -59,7 +58,9 @@ function renderNode(nodeId: string, graph: CategoryGraph, dispatch: Dispatch<Fre
     return (
         <div key={node.id} className='flex items-center gap-2'>
             <span className='text-primary font-semibold'>{node.schema.key.toString()}</span>
-            {truncateText(node.metadata.label, 23)}
+            <span className='truncate block'>
+                {node.metadata.label}
+            </span>
             <div className='grow' />
             <Button isIconOnly variant='light' size='sm' onClick={() => dispatch({ nodeId, operation: 'remove' })}>
                 <FaXmark />

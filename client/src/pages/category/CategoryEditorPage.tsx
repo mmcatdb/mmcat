@@ -88,7 +88,7 @@ export function CategoryEditorPage() {
                         className='cursor-pointer text-danger-400 hover:text-danger-500'
                         onClick={() => {
                             const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
-                                ? state.graph.nodes.get(state.selection.nodeIds.values().next().value!)
+                                ? state.graph.nodes.get(state.selection.nodeIds.values().next().value)
                                 : undefined;
 
                             if (singleSelectedNode)
@@ -121,19 +121,19 @@ export function CategoryEditorPage() {
 
             <div className='flex flex-grow'>
                 {/* Left Sidebar */}
-                <aside className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
+                <div className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
                     {sidebarState.left && <PhasedEditor state={state} dispatch={dispatch} />}
-                </aside>
+                </div>
 
                 {/* Main Canvas */}
-                <main className='flex-grow relative'>
+                <div className='flex-grow relative'>
                     <EditCategoryGraphDisplay state={state} dispatch={dispatch} className='w-full h-full' />
-                </main>
+                </div>
 
                 {/* Right Sidebar */}
-                <aside className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
+                <div className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
                     {sidebarState.right && <SelectionCard state={state} dispatch={userSelectionDispatch} />}
-                </aside>
+                </div>
             </div>
         </div>
     );
