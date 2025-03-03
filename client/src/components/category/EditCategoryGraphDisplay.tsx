@@ -28,7 +28,7 @@ export function EditCategoryGraphDisplay({ state, dispatch, options, className }
                 <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='absolute w-full h-full pointer-events-none'>
                     <defs>
                         <marker id='arrow' viewBox='0 0 12 12' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'>
-                            <path d='M 0 1 L 10 5 L 0 9 z' fill='currentColor' className='text-slate-900' />
+                            <path d='M 0 1 L 10 5 L 0 9 z' stroke='context-stroke' fill='context-stroke' pointerEvents='auto' />
                         </marker>
                     </defs>
 
@@ -114,7 +114,6 @@ type EdgeDisplayProps = Readonly<{
 
 function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);
-
     const isSelected = state.selection.edgeIds.has(edge.id);
 
     function onClick(event: MouseEvent<SVGElement>) {
@@ -128,12 +127,11 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
             ref={setEdgeRef}
             onClick={onClick}
             d={path}
-            stroke='currentColor'
+            stroke={isSelected ? 'rgb(8, 145, 178)' : 'rgb(71, 85, 105)'}
             strokeWidth='4'
-            strokeLinejoin='round'
-            className={cn('text-slate-600',
-                isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 pointer-events-auto path-shadow',
-                isSelected && 'text-cyan-600',
+            className={cn(
+                isHoverAllowed &&
+                    'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 pointer-events-auto path-shadow',
             )}
             markerEnd='url(#arrow)'
         />
