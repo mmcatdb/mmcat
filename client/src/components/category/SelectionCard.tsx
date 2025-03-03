@@ -54,7 +54,7 @@ export function SelectionCard({ state, dispatch }: SelectionCardProps) {
 }
 
 function renderNode(nodeId: string, graph: CategoryGraph, dispatch: Dispatch<FreeSelectionAction>) {
-    const node = graph.nodes.find(node => node.id === nodeId)!;
+    const node = graph.nodes.get(nodeId)!;
 
     return (
         <div key={node.id} className='flex items-center gap-2'>
@@ -69,7 +69,7 @@ function renderNode(nodeId: string, graph: CategoryGraph, dispatch: Dispatch<Fre
 }
 
 function renderEdge(edgeId: string, graph: CategoryGraph, dispatch: Dispatch<FreeSelectionAction>) {
-    const edge = graph.edges.find(edge => edge.id === edgeId)!;
+    const edge = graph.edges.get(edgeId)!;
 
     return (
         <div key={edge.id} className='flex items-center gap-2'>

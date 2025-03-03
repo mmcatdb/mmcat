@@ -19,11 +19,11 @@ export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCatego
         function handleKeyDown(event: KeyboardEvent) {
             if (event.key === 'Delete') {
                 const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
-                    ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
+                    ? state.graph.nodes.get(state.selection.nodeIds.values().next().value!)
                     : undefined;
 
                 const singleSelectedMorphism = (state.selection.edgeIds.size === 1 && state.selection.nodeIds.size === 0)
-                    ? state.graph.edges.find(edge => state.selection.edgeIds.has(edge.id))
+                    ? state.graph.edges.get(state.selection.edgeIds.values().next().value!)
                     : undefined;
 
                 if (singleSelectedNode)

@@ -65,9 +65,9 @@ function PathCard({ state }: StateDispatchProps) {
 
     return (
         <div className='absolute top-2 left-2 z-20 p-3 flex gap-3 bg-black'>
-            {state.path.selection.nodes.map((node, index) => (
+            {state.path.selection.nodeIds.map((nodeIds, index) => (
                 <div key={index}>
-                    {node.metadata.label}
+                    {state.graph.nodes.get(nodeIds)!.metadata.label}
                 </div>
             ))}
         </div>

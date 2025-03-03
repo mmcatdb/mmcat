@@ -46,7 +46,7 @@ type GraphAction = {
 function graph(state: EditCategoryState, { event }: GraphAction): EditCategoryState {
     switch (event.type) {
     case 'move': {
-        const node = state.graph.nodes.find(node => node.id === event.nodeId);
+        const node = state.graph.nodes.get(event.nodeId);
         if (!node)
             return state;
 

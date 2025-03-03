@@ -86,8 +86,8 @@ export function useEdge(edge: Edge, degree: number, graph: Graph) {
 
     const nodes = graph.nodes;
     const cache = useMemo(() => ({
-        from: nodes.find(node => node.id === edge.from)!,
-        to: nodes.find(node => node.id === edge.to)!,
+        from: nodes.get(edge.from)!,
+        to: nodes.get(edge.to)!,
     }), [ edge, nodes ]);
 
     const isHoverAllowed = !state.drag && !state.select;

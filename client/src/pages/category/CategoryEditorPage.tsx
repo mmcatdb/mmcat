@@ -88,7 +88,7 @@ export function CategoryEditorPage() {
                         className='cursor-pointer text-danger-400 hover:text-danger-500'
                         onClick={() => {
                             const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
-                                ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
+                                ? state.graph.nodes.get(state.selection.nodeIds.values().next().value!)
                                 : undefined;
 
                             if (singleSelectedNode)

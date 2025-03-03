@@ -100,18 +100,24 @@ export class FreeSelection {
 
         // Just few optimizations (no need to search for the nodes if there are none selected, and keep the old state if it didn't change).
         if (this.nodeIds.size > 0) {
-            const filtered = graph.nodes.filter(node => this.nodeIds.has(node.id));
+            const filtered = this.nodeIds.values()
+                .filter(nodeId => graph.nodes.has(nodeId))
+                .toArray();
+
             if (filtered.length !== nodeIds.size)
-                nodeIds = new Set(filtered.map(node => node.id));
+                nodeIds = new Set(filtered);
         }
 
         let edgeIds = this.edgeIds;
 
         // The same optimizations as above.
         if (this.edgeIds.size > 0) {
-            const filtered = graph.edges.filter(edge => this.edgeIds.has(edge.id));
+            const filtered = this.edgeIds.values()
+                .filter(edgeId => !!graph.edges.get(edgeId))
+                .toArray();
+
             if (filtered.length !== edgeIds.size)
-                edgeIds = new Set(filtered.map(edge => edge.id));
+                edgeIds = new Set(filtered);
         }
 
         if (nodeIds === this.nodeIds && edgeIds === this.edgeIds)

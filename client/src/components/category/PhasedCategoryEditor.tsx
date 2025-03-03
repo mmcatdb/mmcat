@@ -17,9 +17,11 @@ type PhasedEditorProps = StateDispatchProps & Readonly<{
 }>;
 
 export function PhasedEditor({ state, dispatch, className }: PhasedEditorProps) {
+    const Component = components[state.phase];
+
     return (
         <div className={cn('p-3 flex flex-col gap-3', className)}>
-            {components[state.phase]({ state, dispatch })}
+            <Component state={state} dispatch={dispatch} />
         </div>
     );
 }
@@ -38,13 +40,13 @@ export function deleteObjex(state: EditCategoryState, dispatch: EditCategoryDisp
 }
 
 export function deleteSelectedMorphism(state: EditCategoryState, dispatch: EditCategoryDispatch) {
-    if (state.selection.edgeIds.size !== 1) 
+    if (state.selection.edgeIds.size !== 1)
         return;
 
     const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
-    const selectedMorphism = state.graph.edges.find(edge => edge.id === selectedEdgeId);
+    const selectedMorphism = state.graph.edges.get(selectedEdgeId);
 
-    if (!selectedMorphism) 
+    if (!selectedMorphism)
         return;
 
     state.evocat.deleteMorphism(selectedMorphism.schema.signature);
@@ -54,16 +56,7 @@ export function deleteSelectedMorphism(state: EditCategoryState, dispatch: EditC
 }
 
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
-    const singleSelectedNode = (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
-        ? state.graph.nodes.find(node => state.selection.nodeIds.has(node.id))
-        : undefined;
-
-    const singleSelectedMorphism = (state.selection.edgeIds.size === 1 && state.selection.nodeIds.size === 0)
-        ? state.graph.edges.find(edge => state.selection.edgeIds.has(edge.id))
-        : undefined;
-
-    const selectedNodes = Array.from(state.selection.nodeIds);
-    const isValidSelection = selectedNodes.length <= 2 && state.selection.edgeIds.size === 0;
+    const isValidSelection = state.selection.nodeIds.size <= 2 && state.selection.edgeIds.size === 0;
 
     return (<>
         <h3>Default</h3>
@@ -87,7 +80,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (inputRef.current) 
+        if (inputRef.current)
             inputRef.current.focus();
     }, []);
 
@@ -98,7 +91,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     }
 
     function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-        if (event.key === 'Enter') 
+        if (event.key === 'Enter')
             createObjex();
     }
 
@@ -133,14 +126,14 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const selectedNodes = Array.from(state.selection.nodeIds);
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
 
-    const domainNode = state.graph.nodes.find(node => node.id === selectedNodes[0]);
-    const codomainNode = state.graph.nodes.find(node => node.id === selectedNodes[1]);
+    const domainNode = state.graph.nodes.get(selectedNodes[0]);
+    const codomainNode = state.graph.nodes.get(selectedNodes[1]);
 
     // focus on input when both domain and codomain are selected
     useEffect(() => {
-        if (isValidSelection && inputRef.current) 
+        if (isValidSelection && inputRef.current)
             inputRef.current.focus();
-        
+
     }, [ isValidSelection ]);
 
     function createMorphism() {
@@ -163,7 +156,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     }
 
     function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-        if (event.key === 'Enter') 
+        if (event.key === 'Enter')
             createMorphism();
     }
 

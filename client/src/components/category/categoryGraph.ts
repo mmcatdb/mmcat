@@ -1,4 +1,4 @@
-import { type Edge, type Node } from '../graph/graphUtils';
+import { EdgeMap, type Edge, type Node } from '../graph/graphUtils';
 import { type SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex, type SchemaMorphism } from '@/types/schema';
 
 /**
@@ -6,8 +6,8 @@ import { type SchemaObjex, type Category, type MetadataMorphism, type MetadataOb
  * All its objects are immutable so they are safe to use in React.
  */
 export type CategoryGraph = {
-    nodes: CategoryNode[];
-    edges: CategoryEdge[];
+    nodes: Map<string, CategoryNode>;
+    edges: EdgeMap<CategoryEdge>;
 };
 
 export type CategoryNode = Node & {
@@ -28,7 +28,7 @@ export function categoryToGraph(category: Category): CategoryGraph {
 
         return {
             id: schema.key.toString(),
-            position: metadata.position,
+            ...metadata.position,
             schema,
             metadata,
         } satisfies CategoryNode;
@@ -47,5 +47,8 @@ export function categoryToGraph(category: Category): CategoryGraph {
         } satisfies CategoryEdge;
     });
 
-    return { nodes, edges };
+    return {
+        nodes: new Map(nodes.map(node => [ node.id, node ])),
+        edges: new EdgeMap(edges),
+    };
 }

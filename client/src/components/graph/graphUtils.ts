@@ -3,7 +3,10 @@ import { type CSSProperties } from 'react';
 
 export type Node = {
     id: string;
-    position: Position;
+    /** Mutable. Will be changed by the engine. */
+    x: number;
+    /** Mutable. Will be changed by the engine. */
+    y: number;
 };
 
 export type Edge = {
@@ -34,6 +37,10 @@ export class EdgeMap<TEdge extends Edge = Edge> {
         });
     }
 
+    get(id: string): TEdge | undefined {
+        return this.idMap.get(id);
+    }
+
     getEdgesForNode(nodeId: string): { from: TEdge[], to: TEdge[] } {
         return {
             from: this.fromMap.get(nodeId) ?? [],
@@ -55,6 +62,15 @@ export class EdgeMap<TEdge extends Edge = Edge> {
         });
 
         return [ ...bundles.values() ].map(bundle => bundle.sort((a, b) => compareStringsAscii(a.id, b.id)));
+    }
+
+    private bundledEdgesCache: TEdge[][] | undefined = undefined;
+
+    get bundledEdges(): TEdge[][] {
+        if (!this.bundledEdgesCache)
+            this.bundledEdgesCache = EdgeMap.bundleEdges(this.idMap.values().toArray());
+
+        return this.bundledEdgesCache;
     }
 
     values(): MapIterator<TEdge> {
@@ -132,8 +148,8 @@ export function getMousePosition(event: { clientX: number, clientY: number }, ca
 }
 
 export function computeCoordinates(nodes: Node[], width: number, height: number): Coordinates {
-    const xPositions = nodes.length === 0 ? [ 0 ] : nodes.map(node => node.position.x);
-    const yPositions = nodes.length === 0 ? [ 0 ] : nodes.map(node => node.position.y);
+    const xPositions = nodes.length === 0 ? [ 0 ] : nodes.map(node => node.x);
+    const yPositions = nodes.length === 0 ? [ 0 ] : nodes.map(node => node.y);
 
     const minX = Math.min(...xPositions);
     const maxX = Math.max(...xPositions);
@@ -187,7 +203,7 @@ export function throttle<T extends(...args: Parameters<T>) => void>(callback: T)
 }
 
 export function computeNodeStyle(node: Node, coordinates: Coordinates): CSSProperties {
-    const offset = positionToOffset(node.position, coordinates);
+    const offset = positionToOffset(node, coordinates);
 
     return {
         left: `${offset.left}px`,
@@ -201,8 +217,8 @@ const EDGE_OFFSET = 30;
 const EDGE_DELTA = 60;
 
 export function computeEdgePath(from: Node, to: Node, degree: number, coordinates: Coordinates): string {
-    const start = positionToOffset(from.position, coordinates);
-    const end = positionToOffset(to.position, coordinates);
+    const start = positionToOffset(from, coordinates);
+    const end = positionToOffset(to, coordinates);
 
     return degree === 0
         ? computeEdgeStraightPath(start, end)

@@ -73,7 +73,6 @@ function createPathEdge(morphism: Morphism): PathEdge {
 
 /** Corresponds to a specific edge in the graph. There might be multiple segments for the same edge. */
 type PathSegment = {
-    id: string;
     edge: PathEdge;
     from: Objex;
     to: Objex;
@@ -144,7 +143,6 @@ class PathMarker {
         };
 
         return {
-            id: morphism.signature.toString(),
             from,
             to: isSameDirection ? morphism.to : morphism.from,
             edge: this.getEdge(morphism),

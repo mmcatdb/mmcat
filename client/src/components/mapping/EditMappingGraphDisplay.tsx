@@ -1,11 +1,11 @@
-import { type ReactNode, type MouseEvent, useMemo, useCallback } from 'react';
+import { type ReactNode, type MouseEvent, useCallback } from 'react';
 import { cn } from '../utils';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { type EditMappingDispatch, type EditMappingState } from './editMappingReducer';
 import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
-import { EdgeMap, getEdgeDegree } from '../graph/graphUtils';
+import { getEdgeDegree } from '../graph/graphUtils';
 import { PathCount } from '@/types/schema/PathMarker';
 
 type EditMappingGraphDisplayProps = Readonly<{
@@ -16,19 +16,17 @@ type EditMappingGraphDisplayProps = Readonly<{
 }>;
 
 export function EditMappingGraphDisplay({ state, dispatch, options, className }: EditMappingGraphDisplayProps) {
-    const bundledEdges = useMemo(() => EdgeMap.bundleEdges([ ...(new EdgeMap(state.graph.edges)).values() ]), [ state.graph.edges ]);
-
     const graphDispatch = useCallback((event: GraphEvent) => dispatch({ type: 'graph', event }), [ dispatch ]);
 
     return (
         <GraphProvider dispatch={graphDispatch} graph={state.graph} options={options}>
             <CanvasDisplay className={className}>
-                {state.graph.nodes.map(node => (
+                {state.graph.nodes.values().toArray().map(node => (
                     <NodeDisplay key={node.id} node={node} state={state} dispatch={dispatch} />
                 ))}
 
                 <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='absolute w-full h-full pointer-events-none'>
-                    {bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
+                    {state.graph.edges.bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
                         <EdgeDisplay key={edge.id} edge={edge} degree={getEdgeDegree(edge, index, bundle.length)} state={state} dispatch={dispatch} />
                     )))}
                 </svg>

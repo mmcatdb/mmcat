@@ -8,3 +8,5 @@ export enum SelectionType {
 }
 
 export * from './FreeSelection';
+export * from './SequenceSelection';
+export * from './PathSelection';
