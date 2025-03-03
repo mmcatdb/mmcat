@@ -2,9 +2,7 @@ services:
     adminer:
         container_name: "mmcat-adminer"
         restart: always
-        build:
-            context: .
-            dockerfile: docker/adminer/Dockerfile
+        image: adminer:latest
         ports:
             - ${ADMINER_PORT}:8080
 
