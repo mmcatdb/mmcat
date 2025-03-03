@@ -7,17 +7,13 @@ import cz.matfyz.server.global.Configuration.UploadsProperties;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
+import java.nio.file.StandardOpenOption;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents a generic file object that can store various fileTypes of data.
- * However, primarily intended to hold the outputs of jobs.
+ * However, primarily intended to hold the outputs of  CtM jobs.
  */
 public class File extends Entity {
 
@@ -27,106 +23,70 @@ public class File extends Entity {
 
     public @Nullable Id jobId;
     public @Nullable Id datasourceId;
-    public final String label;
+    public @Nullable Id categoryId;
     public final String filename;
-    public final Date createdAt;
     public final FileType fileType;
-    public final String contents;
 
-    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, String label, String filename, Date createdAt, FileType fileType, String contents) {
+    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId,  FileType fileType) {
         super(id);
         this.jobId = jobId;
         this.datasourceId = datasourceId;
-        this.label = label;
-        this.filename = filename;
-        this.createdAt = createdAt;
+        this.categoryId = categoryId;
+        this.filename = id.toString();
         this.fileType = fileType;
-        this.contents = contents;
     }
 
-    public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, String label, FileType fileType, String contents, UploadsProperties uploads) {
+    public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, FileType fileType, String contents, UploadsProperties uploads) {
         Id newId = Id.createNew();
 
         File newFile = new File(
             newId,
             jobId,
             datasourceId,
-            label,
-            createfilename(label, newId),
-            new Date(),
-            fileType,
-            contents
+            categoryId,
+            fileType
         );
 
-        newFile.saveToFile();
+        newFile.saveToFile(contents, uploads);
         return newFile;
     }
 
-    private static String createfilename(String label, Id id) {
-        return label + "_" + id;
-    }
-
-    private record JsonValue(
-        @Nullable Id jobId,
-        @Nullable Id datasourceId,
-        Date createdAt,
-        FileType fileType,
-        String contents
-    ) {}
-
-    private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
-    private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
-
     /**
-     * Saves the file object as a JSON file (in the uploads folder)
+     * Saves the file object as a plain text file (in the uploads folder).
      */
-    public void saveToFile() {
+    public void saveToFile(String contents, UploadsProperties uploads) {
         try {
-            Files.write(Paths.get(getFilePath()), toJsonValue().getBytes());
+            Files.writeString(Paths.get(getFilePath(uploads)), contents, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save file: " + getFilePath(), e);
+            throw new RuntimeException("Failed to save file: " + getFilePath(uploads), e);
         }
     }
 
     /**
      * Reads a JSON file and reconstructs the object
     */
-    public File loadFromFile(String filename) {
+    /*
+    public File loadFromFile(String filename, UploadsProperties uploads) {
         try {
-            String jsonValue = Files.readString(Paths.get(getFilePath()));
+            String jsonValue = Files.readString(Paths.get(getFilePath(uploads)));
             return fromJsonValue(jsonValue);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load file: " + filename, e);
         }
+    }*/
+
+    private String getFilePath(UploadsProperties uploads) {
+        return uploads.folder() + "/" + filename + ".txt";
     }
 
-    private String getFilePath() {
-        return "uploads" + "/" + filename + ".json";
-    }
-
-    public String toJsonValue() throws JsonProcessingException {
-        return jsonValueWriter.writeValueAsString(new JsonValue(
+    public static File fromDatabase(Id id, Id jobId, Id datasourceId, Id categoryId, String fileTypeString) {
+        return new File(
+            id,
             jobId,
             datasourceId,
-            createdAt,
-            fileType,
-            contents
-        ));
-    }
-
-    public static File fromJsonValue(String jsonValue) throws JsonProcessingException {
-        JsonValue json = jsonValueReader.readValue(jsonValue);
-        return new File(
-            Id.createNew(), //TODO
-            json.jobId,
-            json.datasourceId,
-            "", //TODO
-            "", //TODO
-            json.createdAt,
-            json.fileType,
-            json.contents
+            categoryId,
+            FileType.valueOf(fileTypeString)
         );
     }
-
 
 }

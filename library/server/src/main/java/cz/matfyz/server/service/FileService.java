@@ -21,8 +21,8 @@ public class FileService {
     @Autowired
     private UploadsProperties uploads;
 
-    public File create(@Nullable Id jobId, @Nullable Id datasourceId, String label, DatasourceType datasourceType, String contents) {
-        final var file = File.createnew(jobId, datasourceId, label, getFileType(datasourceType), contents, uploads);
+    public File create(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, DatasourceType datasourceType, String contents) {
+        final var file = File.createnew(jobId, datasourceId, categoryId, getFileType(datasourceType), contents, uploads);
         repository.save(file);
 
         return file;

@@ -15,6 +15,8 @@ DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS datasource;
 DROP TABLE IF EXISTS schema_category;
 
+DROP TABLE IF EXISTS "file";
+
 -- Schema
 
 CREATE TABLE schema_category (
@@ -191,10 +193,10 @@ CREATE TABLE workflow (
 
 -- File
 
-CREATE TABLE file (
+CREATE TABLE "file" (
     id UUID PRIMARY KEY,
     job_id UUID REFERENCES job,
     datasource_id UUID REFERENCES datasource,
-    label VARCHAR(255) NOT NULL,
-    file_type VARCHAR(255) NOT NULL,
+    category_id UUID REFERENCES schema_category,
+    file_type VARCHAR(255) NOT NULL
 );

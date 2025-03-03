@@ -40,7 +40,6 @@ import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
-import cz.matfyz.server.entity.file.File.FileType;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
@@ -50,7 +49,6 @@ import cz.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.global.Configuration.ServerProperties;
 import cz.matfyz.server.global.Configuration.SparkProperties;
-import cz.matfyz.server.global.Configuration.UploadsProperties;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.InstanceCategoryRepository;
@@ -112,9 +110,6 @@ public class JobExecutorService {
 
     @Autowired
     private SparkProperties spark;
-
-    @Autowired
-    private UploadsProperties uploads;
 
     @Autowired
     private QueryRepository queryRepository;
@@ -267,7 +262,7 @@ public class JobExecutorService {
 
         final var resultString = result.statementsAsString();
 
-        fileService.create(job.id(), datasourceWrapper.id(), "null", datasource.type, resultString);
+        fileService.create(job.id(), datasourceWrapper.id(), run.categoryId ,datasource.type, resultString);
 
         job.data = new ModelJobData(resultString);
     }
