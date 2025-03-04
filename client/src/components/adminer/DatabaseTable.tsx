@@ -5,7 +5,7 @@ import { routes } from '@/routes/routes';
 import { getHrefFromReference } from '@/components/adminer/URLParamsState';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { TableResponse, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
-import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
+import type { AdminerReference, AdminerReferences } from '@/types/adminer/AdminerReferences';
 
 function formatCellValue(value: unknown): string {
     return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
@@ -59,36 +59,64 @@ export function DatabaseTable({ fetchedData, setItemCount, references, datasourc
                             <TableColumn key={column}>{column}</TableColumn>
                         ))}
                     </TableHeader>
-                    <TableBody emptyContent={'No rows to display.'}>
-                        {fetchedData.data.map((item, index) => (
-                            <TableRow key={index}>
-                                {item && typeof item === 'object' && !Array.isArray(item)
-                                    ? columns.map(column => (
-                                        <TableCell key={column}>
-                                            {references && referencedProperties.includes(column) ? (
-                                                getLinkReferences(references, column).map((ref, index) => (
-                                                    <Link
-                                                        key={index}
-                                                        to={{ pathname:routes.adminer, search: getHrefFromReference(ref, item, column, datasources) }}
-                                                        className='mr-2 hover:underline text-blue-500'
-                                                    >
-                                                        {formatCellValue(item[column])}
-                                                    </Link>
-                                                ))
-                                            ) : (
-                                                formatCellValue(item[column])
-                                            )}
-                                        </TableCell>
-                                    ))
-                                    : <TableCell>
-                                        {formatCellValue(item)}
-                                    </TableCell>}
-                            </TableRow>
-                        ))}
-                    </TableBody>
+                    {TableBodyComponent({ fetchedData: fetchedData, columns: columns, references: references, referencedProperties: referencedProperties, datasources: datasources })}
                 </Table>
             )
             }
         </div>
+    );
+}
+
+type TableBodyComponentProps = Readonly<{
+    fetchedData: TableResponse | GraphResponse;
+    columns: string[];
+    references: AdminerReferences | undefined;
+    referencedProperties: string[];
+    datasources: Datasource[];
+}>;
+
+function TableBodyComponent({ fetchedData, columns, references, referencedProperties, datasources }: TableBodyComponentProps ) {
+    return (
+        <TableBody emptyContent={'No rows to display.'}>
+            {fetchedData.data.map((item, index) => (
+                <TableRow key={index}>
+                    {item && typeof item === 'object' && !Array.isArray(item)
+                        ? columns.map(column => (
+                            <TableCell key={column}>
+                                {references && referencedProperties.includes(column) ? (
+                                    getLinkReferences(references, column).map((ref, index) => (
+                                        <LinkComponent key={index} index={index} reference={ref} data={item} column={column} datasources={datasources} />
+                                    ))
+                                ) : (
+                                    formatCellValue(item[column])
+                                )}
+                            </TableCell>
+                        ))
+                        : <TableCell>
+                            {formatCellValue(item)}
+                        </TableCell>}
+                </TableRow>
+            ))}
+        </TableBody>
+    );
+}
+
+type LinkComponentProps = Readonly<{
+    index: number;
+    reference: AdminerReference;
+    data: Record<string, string> | GraphResponseData;
+    column: string;
+    datasources: Datasource[];
+}>;
+
+function LinkComponent({ index, reference, data, column, datasources }: LinkComponentProps ) {
+    return (
+        <Link
+            key={index}
+            to={{ pathname:routes.adminer, search: getHrefFromReference(reference, data, column, datasources) }}
+            className='mr-2 hover:underline text-blue-500'
+        >
+            {formatCellValue(data[column])}
+        </Link>
     );
 }
