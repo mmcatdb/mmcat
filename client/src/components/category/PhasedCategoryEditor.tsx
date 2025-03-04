@@ -3,9 +3,9 @@ import { Button, Input } from '@nextui-org/react';
 import { EditorPhase, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { cn } from '../utils';
 import { toPosition } from '@/types/utils/common';
+import { categoryToGraph } from './categoryGraph';
 import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers/Key';
-import { categoryToGraph } from './categoryGraph';
 
 type StateDispatchProps = Readonly<{
     state: EditCategoryState;
@@ -64,7 +64,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     function createObjex() {
         state.evocat.createObjex({ label, position: toPosition(position) });
         const graph = categoryToGraph(state.evocat.category);
-        dispatch({ type: 'createObjex', graph });
+        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
 
     function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -129,7 +129,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
 
         const graph = categoryToGraph(state.evocat.category);
 
-        dispatch({ type: 'createMorphism', graph });
+        dispatch({ type: 'phase', phase: EditorPhase.default, graph });
     }
 
     function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -159,7 +159,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             </Button>
 
             <Button color='primary' onClick={createMorphism} isDisabled={!isValidSelection || label === ''}>
-                Finish
+                    Finish
             </Button>
         </div>
     </>);
