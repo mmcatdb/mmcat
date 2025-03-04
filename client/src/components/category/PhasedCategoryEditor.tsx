@@ -100,7 +100,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Extract selected nodes (should be exactly 2)
-    const selectedNodes = Array.from(state.selection.nodeIds as Set<string>);
+    const selectedNodes = Array.from(state.selection.nodeIds);
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
 
     const domainNode = state.graph.nodes.get(selectedNodes[0]);

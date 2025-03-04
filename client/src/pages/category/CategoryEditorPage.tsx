@@ -93,7 +93,7 @@ export function CategoryEditorPage() {
                             if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
                                 deleteSelectedElements(state, dispatch);
                         }}
-                        title='Delete (Delete)'
+                        title='Delete selected elements (Delete)'
                         size={16}
                     />
 
