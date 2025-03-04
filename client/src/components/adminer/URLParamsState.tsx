@@ -31,9 +31,9 @@ export function getHrefFromReference(reference: AdminerReference, item: Record<s
                 },
             ],
         },
-        datasourceId: reference.datasourceId,
+        datasourceId: reference.referencedDatasourceId,
         kindName: reference.referencingKindName,
-        view: AVAILABLE_VIEWS[datasources.find(source => source.id === reference.datasourceId)!.type][0],
+        view: AVAILABLE_VIEWS[datasources.find(source => source.id === reference.referencedDatasourceId)!.type][0],
     };
 
     const urlParams = getURLParamsFromState(state);
