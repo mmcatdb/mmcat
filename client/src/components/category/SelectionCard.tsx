@@ -5,15 +5,13 @@ import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 
 type SelectionCardProps = Readonly<{
-    state: {
+    selection: FreeSelection;
         graph: CategoryGraph;
-        selection: FreeSelection;
-    };
     dispatch: Dispatch<FreeSelectionAction>;
 }>;
 
-export function SelectionCard({ state, dispatch }: SelectionCardProps) {
-    const { nodeIds, edgeIds } = state.selection;
+export function SelectionCard({ selection, graph, dispatch }: SelectionCardProps) {
+    const { nodeIds, edgeIds } = selection;
 
     return (
         <div className='min-w-[200px] pl-3 rounded-lg'>
@@ -28,7 +26,7 @@ export function SelectionCard({ state, dispatch }: SelectionCardProps) {
                         </div>
 
                         <div className='flex flex-col'>
-                            {[ ...nodeIds.values() ].map(id => renderNode(id, state.graph, dispatch))}
+                            {[ ...nodeIds.values() ].map(id => renderNode(id, graph, dispatch))}
                         </div>
                     </div>
                 )}
@@ -43,7 +41,7 @@ export function SelectionCard({ state, dispatch }: SelectionCardProps) {
                         </div>
 
                         <div className='flex flex-col'>
-                            {[ ...edgeIds.values() ].map(id => renderEdge(id, state.graph, dispatch))}
+                            {[ ...edgeIds.values() ].map(id => renderEdge(id, graph, dispatch))}
                         </div>
                     </div>
                 )}

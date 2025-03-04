@@ -2,9 +2,10 @@ import { EditMappingGraphDisplay } from './EditMappingGraphDisplay';
 import { createInitialState, type EditMappingDispatch, editMappingReducer, type EditMappingState } from './editMappingReducer';
 import { type Category } from '@/types/schema';
 import { useCallback, useReducer } from 'react';
-import { type FreeSelectionAction } from '../graph/graphSelection';
+import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
 import { SelectionCard } from '../category/SelectionCard';
 import { type Mapping } from '@/types/mapping';
+import { Select, SelectItem, type SharedSelection } from '@nextui-org/react';
 
 type MappingEditorProps = Readonly<{
     category: Category;
@@ -14,15 +15,19 @@ type MappingEditorProps = Readonly<{
 export function MappingEditor({ category, mapping }: MappingEditorProps) {
     const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
 
-    const userSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
+    const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
+
+    const selectSelectionType = useCallback((keys: SharedSelection) => {
+        dispatch({ type: 'selection-type', selectionType: (keys as Set<SelectionType>).values().next().value! });
+    }, []);
 
     return (
         <div className='relative h-[700px] flex'>
             <EditMappingGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
 
-            {(state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) && (
-                <div className='z-20 absolute top-2 right-2'>
-                    <SelectionCard state={state} dispatch={userSelectionDispatch} />
+            {state.selection instanceof FreeSelection && !state.selection.isEmpty && (
+                <div className='z-20 absolute top-2 right-2 bg-black'>
+                    <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />
                 </div>
             )}
 
@@ -38,9 +43,33 @@ export function MappingEditor({ category, mapping }: MappingEditorProps) {
 
             <PathCard state={state} dispatch={dispatch} />
 
+            <div className='absolute bottom-2 right-2 z-20 p-3 bg-black'>
+                {/* Just a temporary setter for testing. */}
+                <Select
+                    label='Selection type'
+                    defaultSelectedKeys={[ state.selectionType ]}
+                    onSelectionChange={selectSelectionType}
+                    disallowEmptySelection
+                    size='sm'
+                    className='w-[200px]'
+                >
+                    {selectionTypes.map(type => (
+                        <SelectItem key={type}>
+                            {type}
+                        </SelectItem>
+                    ))}
+                </Select>
+            </div>
         </div>
     );
 }
+
+const selectionTypes = [
+    SelectionType.None,
+    SelectionType.Free,
+    SelectionType.Sequence,
+    SelectionType.Path,
+];
 
 type StateDispatchProps = Readonly<{
     state: EditMappingState;
@@ -60,12 +89,14 @@ function AccessPathCard({ state }: StateDispatchProps) {
 }
 
 function PathCard({ state }: StateDispatchProps) {
-    if (!state.path)
+    const { selection } = state;
+
+    if (!(selection instanceof PathSelection) || selection.isEmpty)
         return null;
 
     return (
         <div className='absolute top-2 left-2 z-20 p-3 flex gap-3 bg-black'>
-            {state.path.selection.nodeIds.map((nodeIds, index) => (
+            {selection.nodeIds.map((nodeIds, index) => (
                 <div key={index}>
                     {state.graph.nodes.get(nodeIds)!.metadata.label}
                 </div>

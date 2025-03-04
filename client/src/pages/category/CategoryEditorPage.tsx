@@ -16,7 +16,6 @@ import { toast } from 'react-toastify';
 import { type FreeSelectionAction } from '@/components/graph/graphSelection';
 import { SelectionCard } from '@/components/category/SelectionCard';
 import { useDeleteHandlers } from '@/components/category/useDeleteHandlers';
-import { type Signature } from '@/types/identifiers';
 import { categoryToGraph } from '@/components/category/categoryGraph';
 
 type EditorSidebarState = {
@@ -42,7 +41,7 @@ export function CategoryEditorPage() {
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
     useDeleteHandlers(state, dispatch);
 
-    const userSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
+    const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
 
     const [ sidebarState, setSidebarState ] = useState<EditorSidebarState>({
         left: true,
@@ -87,11 +86,11 @@ export function CategoryEditorPage() {
                 <div className='flex items-center gap-2'>
                     {/* Delete Button */}
                     <FaTrash
-                        className={`text-danger-400 ${state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0 
-                            ? 'opacity-50 cursor-auto' 
+                        className={`text-danger-400 ${state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
+                            ? 'opacity-50 cursor-auto'
                             : 'cursor-pointer hover:text-danger-500'}`}
                         onClick={() => {
-                            if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0) 
+                            if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
                                 deleteSelectedElements(state, dispatch);
                         }}
                         title='Delete (Delete)'
@@ -129,7 +128,7 @@ export function CategoryEditorPage() {
 
                 {/* Right Sidebar */}
                 <div className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
-                    {sidebarState.right && <SelectionCard state={state} dispatch={userSelectionDispatch} />}
+                    {sidebarState.right && <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />}
                 </div>
             </div>
         </div>
@@ -225,17 +224,17 @@ function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategory
     // Delete all selected morphisms
     for (const edgeId of state.selection.edgeIds) {
         const morphism = state.graph.edges.get(edgeId);
-        if (morphism) 
-            state.evocat.deleteMorphism(morphism.schema.signature as Signature);
+        if (morphism)
+            state.evocat.deleteMorphism(morphism.schema.signature);
     }
-        
+
     // Delete all selected nodes
     for (const nodeId of state.selection.nodeIds) {
-        const node = state.graph.nodes.get(nodeId as string);
-        if (node) 
+        const node = state.graph.nodes.get(nodeId);
+        if (node)
             state.evocat.deleteObjex(node.schema.key);
     }
-    
+
     // Update the graph state
     const graph = categoryToGraph(state.evocat.category);
     dispatch({ type: 'phase', phase: EditorPhase.default, graph });

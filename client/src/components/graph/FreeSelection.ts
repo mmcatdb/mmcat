@@ -1,4 +1,5 @@
 import { type GraphSelectEvent, type Graph } from './graphEngine';
+import { type GraphSelection } from './graphSelection';
 
 export type FreeSelectionAction = {
     operation: 'set' | 'add' | 'remove' | 'toggle';
@@ -14,7 +15,7 @@ export type FreeSelectionAction = {
 /**
  * Represents a selection of nodes and edges in the graph. The order doesn't matter.
  */
-export class FreeSelection {
+export class FreeSelection implements GraphSelection {
     private constructor(
         readonly nodeIds: Set<string>,
         readonly edgeIds: Set<string>,
@@ -22,6 +23,10 @@ export class FreeSelection {
 
     static create(nodeIds: string[] = [], edgeIds: string[] = []): FreeSelection {
         return new FreeSelection(new Set(nodeIds), new Set(edgeIds));
+    }
+
+    get isEmpty(): boolean {
+        return this.nodeIds.size === 0 && this.edgeIds.size === 0;
     }
 
     /**

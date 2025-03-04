@@ -85,10 +85,9 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
             className={cn('absolute w-0 h-0 select-none z-10', isDragging && 'z-20')}
         >
             <div
-                className={cn('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white active:bg-cyan-300',
-                    isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300',
+                className={cn('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white',
+                    isHoverAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 active:bg-cyan-300',
                     isDragging && 'pointer-events-none shadow-[3px_7px_10px_3px_rgba(0,0,0,0.5)]',
-                    // isInSelectBox && 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-cyan-300',
                     isSelected && 'bg-cyan-200',
                 )}
                 onClick={onClick}
@@ -129,8 +128,7 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
             stroke={isSelected ? 'rgb(8, 145, 178)' : 'rgb(71, 85, 105)'}
             strokeWidth='4'
             className={cn(
-                isHoverAllowed &&
-                    'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 pointer-events-auto path-shadow',
+                isHoverAllowed && 'cursor-pointer pointer-events-auto path-shadow',
             )}
             markerEnd='url(#arrow)'
         />

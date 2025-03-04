@@ -76,6 +76,7 @@ type PathSegment = {
     edge: PathEdge;
     from: Objex;
     to: Objex;
+    fromNode: PathNode;
 
     markTraversable(): void;
 
@@ -144,6 +145,7 @@ class PathMarker {
 
         return {
             from,
+            fromNode: this.getNode(from),
             to: isSameDirection ? morphism.to : morphism.from,
             edge: this.getEdge(morphism),
 
@@ -262,14 +264,14 @@ class PathMarker {
         let current = contactNode;
         while (current.pathSegmentTo) {
             visitedNodes.add(current.id);
-            current = this.getNode(current.pathSegmentTo.from);
+            current = current.pathSegmentTo.fromNode;
         }
 
         // The source node is the common node until proven otherwise.
         let commonNode = this.getNode(this.sourceObjex);
 
         // We go back along the other path and we look for the first common node. We also need to find the first node after the common one.
-        current = this.getNode(newSegment.from);
+        current = newSegment.fromNode;
         while (current.pathSegmentTo) {
             if (visitedNodes.has(current.id)) {
                 commonNode = current;
@@ -277,13 +279,13 @@ class PathMarker {
             }
 
             secondPathStart = current;
-            current = this.getNode(current.pathSegmentTo.from);
+            current = current.pathSegmentTo.fromNode;
         }
 
         current = contactNode;
         while (current !== commonNode) {
             firstPathStart = current;
-            current = this.getNode(current.pathSegmentTo!.from);
+            current = current.pathSegmentTo!.fromNode;
         }
 
         // Now we go back along the first path and find the first node after the common one.
@@ -310,4 +312,32 @@ export function createDefaultFilter(configuration: DatasourceConfiguration): Fil
     return (segment: PathSegment) => segment.prevSegment
         ? (segment.fullPath.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed)
         : (segment.fullPath.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed);
+}
+
+export function computePathToNode(pathNode: PathNode): { nodeIds: string[], edgeIds: string[] } {
+    const nodeIdsReversed: string[] = [];
+    const edgeIdsReversed: string[] = [];
+
+    let current = pathNode;
+
+    while (current.pathSegmentTo) {
+        nodeIdsReversed.push(current.id);
+        edgeIdsReversed.push(current.pathSegmentTo.edge.id);
+        current = current.pathSegmentTo.fromNode;
+    }
+
+    return { nodeIds: nodeIdsReversed.reverse(), edgeIds: edgeIdsReversed.reverse() };
+}
+
+export function computePathWithEdge(pathEdge: PathEdge, graph: PathGraph): { nodeIds: string[], edgeIds: string[] } {
+    const fromNodeId = pathEdge.traversableDirection ? pathEdge.from : pathEdge.to;
+    const fromNode = graph.nodes.get(fromNodeId)!;
+
+    const { nodeIds, edgeIds } = computePathToNode(fromNode);
+
+    const toNodeId = pathEdge.traversableDirection ? pathEdge.to : pathEdge.from;
+    nodeIds.push(toNodeId);
+    edgeIds.push(pathEdge.id);
+
+    return { nodeIds, edgeIds };
 }
