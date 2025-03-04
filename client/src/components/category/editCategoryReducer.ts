@@ -23,7 +23,7 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
 
 export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 
-type EditCategoryAction = GraphAction | SelectAction | PhaseAction | CancelCreationAction;
+type EditCategoryAction = GraphAction | SelectAction | CancelCreationAction | CreateObjexAction | CreateMorphismAction | PhaseAction;
 
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
     console.log('REDUCE', state.phase, action, state);
@@ -33,6 +33,8 @@ export function editCategoryReducer(state: EditCategoryState, action: EditCatego
     case 'select': return select(state, action);
     case 'phase': return phase(state, action);
     case 'cancelCreation': return cancelCreation(state);
+    case 'createObjex': return afterObjexCreation(state, action);
+    case 'createMorphism': return afterMorphismCreation(state, action);
     }
 }
 
@@ -110,53 +112,18 @@ export type PhaseAction = {
     type: 'phase';
     /** The phase we want to switch to. */
     phase: EditorPhase;
-    /** If defined, the graph state should be updated by this value. */
+    /** The graph state should be updated by this value. */
     graph?: CategoryGraph;
 }
 
 function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCategoryState {
     const updatedGraph = graph ?? state.graph;
 
-    if (phase === EditorPhase.default) {
-        if (state.phase === EditorPhase.createObjex)
-            return handleObjectCreation(state);
-
-
-        if (state.phase === EditorPhase.createMorphism)
-            return handleMorphismCreation(state);
-    }
-
     return {
         ...state,
         graph: updatedGraph,
         selection: state.selection.updateFromGraph(updatedGraph),
         phase,
-    };
-}
-
-function handleObjectCreation(state: EditCategoryState): EditCategoryState {
-    const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
-
-    return {
-        ...state,
-        graph: categoryToGraph(state.evocat.category),
-        selection: latestObjex
-            ? FreeSelection.create([ latestObjex.schema.key.toString() ], [])
-            : FreeSelection.create(),
-        phase: EditorPhase.default,
-    };
-}
-
-function handleMorphismCreation(state: EditCategoryState): EditCategoryState {
-    const latestMorphism = Array.from(state.evocat.category.morphisms.values()).pop();
-
-    return {
-        ...state,
-        graph: categoryToGraph(state.evocat.category),
-        selection: latestMorphism
-            ? FreeSelection.create([], [ latestMorphism.schema.signature.toString() ])
-            : FreeSelection.create(),
-        phase: EditorPhase.default,
     };
 }
 
@@ -171,6 +138,46 @@ function cancelCreation(state: EditCategoryState): EditCategoryState {
         ...state,
         graph: categoryToGraph(state.evocat.category),
         selection: FreeSelection.create(),
+        phase: EditorPhase.default,
+    };
+}
+
+// Operations on schema object (objex)
+
+type CreateObjexAction = {
+    type: 'createObjex';
+    graph: CategoryGraph; // Already processed graph
+};
+
+function afterObjexCreation(state: EditCategoryState, { graph }: CreateObjexAction): EditCategoryState {
+    const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
+
+    return {
+        ...state,
+        graph,
+        selection: latestObjex
+            ? FreeSelection.create([ latestObjex.schema.key.toString() ], [])
+            : FreeSelection.create(),
+        phase: EditorPhase.default,
+    };
+}
+
+// Operations on morphism
+
+type CreateMorphismAction = {
+    type: 'createMorphism';
+    graph: CategoryGraph;
+};
+
+function afterMorphismCreation(state: EditCategoryState, { graph }: CreateMorphismAction): EditCategoryState {
+    const latestMorphism = Array.from(state.evocat.category.morphisms.values()).pop();
+
+    return {
+        ...state,
+        graph,
+        selection: latestMorphism
+            ? FreeSelection.create([], [ latestMorphism.schema.signature.toString() ])
+            : FreeSelection.create(),
         phase: EditorPhase.default,
     };
 }
