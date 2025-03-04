@@ -100,9 +100,9 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
             </div>
 
             {state.view === View.table ? (
-                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} references={references} datasources={datasources}/>
+                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} references={references} kind={state.kindName!} datasourceId={state.datasourceId!} datasources={datasources}/>
             ) : (
-                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} references={references} datasources={datasources}/>
+                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} references={references} kind={state.kindName!} datasourceId={state.datasourceId!}  datasources={datasources}/>
             )}
 
             {itemCount !== undefined && itemCount > 0 && (

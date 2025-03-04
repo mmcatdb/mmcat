@@ -1,0 +1,38 @@
+import { Link } from 'react-router-dom';
+import { routes } from '@/routes/routes';
+import { getHrefFromReference } from '@/components/adminer/URLParamsState';
+import type { Datasource } from '@/types/datasource/Datasource';
+import type { GraphResponseData } from '@/types/adminer/DataResponse';
+import type { KindReference } from '@/types/adminer/AdminerReferences';
+import type { Id } from '@/types/id';
+
+type LinkComponentProps = Readonly<{
+    index: number;
+    reference: KindReference;
+    data: Record<string, string> | GraphResponseData;
+    propertyName: string;
+    kind: string;
+    datasourceId: Id;
+    datasources: Datasource[];
+}>;
+
+export function LinkComponent({ index, reference, data, propertyName, kind, datasourceId, datasources }: LinkComponentProps ) {
+    let linkText = '';
+    if (datasourceId !== reference.datasourceId)
+        linkText += `${reference.datasourceId}/`;
+    if (kind !== reference.kindName)
+        linkText += `${reference.kindName}:`;
+    linkText += `${reference.property}`;
+
+    return (
+        <div>
+            <Link
+                key={index}
+                to={{ pathname:routes.adminer, search: getHrefFromReference(reference, data, propertyName, datasources) }}
+                className='mr-2 hover:underline text-blue-500'
+            >
+                {linkText}
+            </Link>
+        </div>
+    );
+}

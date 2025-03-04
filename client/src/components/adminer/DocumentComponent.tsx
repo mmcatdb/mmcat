@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import { Button } from '@nextui-org/react';
+import type { Datasource } from '@/types/datasource/Datasource';
+import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
+import type { Id } from '@/types/id';
 
 type DocumentComponentProps = Readonly<{
     value: unknown;
     depth: number;
+    references: AdminerReferences | undefined;
+    kind: string;
+    datasourceId: Id;
+    datasources: Datasource[];
 }>;
 
-export function DocumentComponent({ value, depth }: DocumentComponentProps) {
+export function DocumentComponent({ value, depth, references, kind, datasourceId, datasources }: DocumentComponentProps) {
     const [ isOpen, setIsOpen ] = useState(true);
 
     if (!isOpen) {
@@ -31,7 +38,7 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
                 {len === 1 ? (
                     <span className='mx-3'>
                         <strong className='mr-3'>{Object.keys(value)[0]}:</strong>
-                        <DocumentComponent value={Object.values(value)[0] as unknown} depth={depth + 1} />
+                        <DocumentComponent value={Object.values(value)[0] as unknown} references={references} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
                     </span>
                 ) : (
                     <ul>
@@ -40,7 +47,7 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
                             .map(([ key, val ]) => (
                                 <li className='ps-8' key={key}>
                                     <strong className='mr-3'>{key}:</strong>
-                                    <DocumentComponent value={val as unknown} depth={depth + 1} />
+                                    <DocumentComponent value={val as unknown} references={references} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
                                 </li>
                             ))}
                     </ul>
@@ -68,12 +75,14 @@ export function DocumentComponent({ value, depth }: DocumentComponentProps) {
                 {/* If length is 1, just render a single line, otherwise render the entire list */}
                 {len === 1 ? (
                     <span className='mx-3'>
-                        <DocumentComponent value={value[0] as unknown} depth={depth + 1} />
+                        <DocumentComponent value={value[0] as unknown} references={references} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
                     </span>
                 ) : (
                     <ul>
                         {value.map((item, index) => (
-                            <li className='ps-8' key={index}><DocumentComponent value={item as unknown} depth={depth + 1} /></li>
+                            <li className='ps-8' key={index}>
+                                <DocumentComponent value={item as unknown} references={references} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
+                            </li>
                         ))}
                     </ul>
                 )}
