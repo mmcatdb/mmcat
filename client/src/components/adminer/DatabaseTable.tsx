@@ -3,7 +3,7 @@ import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from 
 import { LinkComponent } from '@/components/adminer/LinkComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { TableResponse, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
-import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
+import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
 function formatCellValue(value: unknown): string {
@@ -13,13 +13,13 @@ function formatCellValue(value: unknown): string {
 type DatabaseTableProps = Readonly<{
     fetchedData: TableResponse | GraphResponse;
     setItemCount: (itemCount: number) => void;
-    references: AdminerReferences | undefined;
+    kindReferences: KindReference[];
     kind: string;
     datasourceId: Id;
     datasources: Datasource[];
 }>;
 
-export function DatabaseTable({ fetchedData, setItemCount, references, kind, datasourceId, datasources }: DatabaseTableProps ) {
+export function DatabaseTable({ fetchedData, setItemCount, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
     useEffect(() => {
         const count = fetchedData?.metadata.itemCount;
         count ? setItemCount(count) : setItemCount(0);
@@ -46,28 +46,6 @@ export function DatabaseTable({ fetchedData, setItemCount, references, kind, dat
     const keys: string[] = typeof fetchedData.data[0] === 'object' ? Object.keys(fetchedData.data[0]) : [ 'Value' ];
     const propertyNames: string[] = fetchedData.data.length > 0 ? keys : [];
 
-    const outgoingReferences: KindReference[] = references
-        ? Object.values(references)
-            .filter(ref => ref.referencingDatasourceId === datasourceId && ref.referencingKindName === kind)
-            .map(ref => ({
-                referencingProperty: ref.referencingProperty,
-                datasourceId: ref.referencedDatasourceId,
-                kindName: ref.referencedKindName,
-                property: ref.referencedProperty,
-            }))
-        : [];
-    const incomingReferences: KindReference[] = references
-        ? Object.values(references)
-            .filter(ref => ref.referencedDatasourceId === datasourceId && ref.referencedKindName === kind)
-            .map(ref => ({
-                referencingProperty: ref.referencedProperty,
-                datasourceId: ref.referencingDatasourceId,
-                kindName: ref.referencingKindName,
-                property: ref.referencingProperty,
-            }))
-        : [];
-    const linkReferences: KindReference[] = [ ...incomingReferences, ...outgoingReferences ];
-
     return (
         <div>
             {fetchedData && (
@@ -77,7 +55,7 @@ export function DatabaseTable({ fetchedData, setItemCount, references, kind, dat
                             <TableColumn key={propertyName}>{propertyName}</TableColumn>
                         ))}
                     </TableHeader>
-                    {TableBodyComponent({ fetchedData: fetchedData, propertyNames: propertyNames, references: linkReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
+                    {TableBodyComponent({ fetchedData: fetchedData, propertyNames: propertyNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
                 </Table>
             )
             }

@@ -11,6 +11,7 @@ import type { Id } from '@/types/id';
 import type { AdminerState, AdminerStateAction, KindFilterState } from '@/types/adminer/Reducer';
 import type { FetchKindParams } from '@/types/adminer/FetchParams';
 import type { GraphResponse, DataResponse, TableResponse, DocumentResponse } from '@/types/adminer/DataResponse';
+import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 import type { Datasource } from '@/types/datasource/Datasource';
 
 function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id, kindName?: string) {
@@ -26,6 +27,31 @@ function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id
     }
 
     return urlParams;
+}
+
+function getKindReferences(references: AdminerReferences, datasourceId: Id, kind: string) {
+    const outgoingReferences: KindReference[] = references
+        ? Object.values(references)
+            .filter(ref => ref.referencingDatasourceId === datasourceId && ref.referencingKindName === kind)
+            .map(ref => ({
+                referencingProperty: ref.referencingProperty,
+                datasourceId: ref.referencedDatasourceId,
+                kindName: ref.referencedKindName,
+                property: ref.referencedProperty,
+            }))
+        : [];
+    const incomingReferences: KindReference[] = references
+        ? Object.values(references)
+            .filter(ref => ref.referencedDatasourceId === datasourceId && ref.referencedKindName === kind)
+            .map(ref => ({
+                referencingProperty: ref.referencedProperty,
+                datasourceId: ref.referencingDatasourceId,
+                kindName: ref.referencingKindName,
+                property: ref.referencingProperty,
+            }))
+        : [];
+
+    return [ ...incomingReferences, ...outgoingReferences ];
 }
 
 type DatabaseViewProps = Readonly<{
@@ -93,6 +119,8 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
     if (error)
         return <p>{error}</p>;
 
+    const kindReferences: KindReference[] = getKindReferences(references, state.datasourceId!, state.kindName!);
+
     return (
         <div>
             <div className='mb-5'>
@@ -100,9 +128,9 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
             </div>
 
             {state.view === View.table ? (
-                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} references={references} kind={state.kindName!} datasourceId={state.datasourceId!} datasources={datasources}/>
+                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!} datasources={datasources}/>
             ) : (
-                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} references={references} kind={state.kindName!} datasourceId={state.datasourceId!}  datasources={datasources}/>
+                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!}  datasources={datasources}/>
             )}
 
             {itemCount !== undefined && itemCount > 0 && (
