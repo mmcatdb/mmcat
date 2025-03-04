@@ -5,6 +5,9 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.file.File;
 import cz.matfyz.server.entity.file.File.FileType;
 import cz.matfyz.server.repository.FileRepository;
+
+import java.util.List;
+
 import cz.matfyz.server.global.Configuration.UploadsProperties;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +24,22 @@ public class FileService {
     @Autowired
     private UploadsProperties uploads;
 
-    public File create(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, DatasourceType datasourceType, String contents) {
-        final var file = File.createnew(jobId, datasourceId, categoryId, getFileType(datasourceType), contents, uploads);
+    public File create(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, DatasourceType datasourceType, String contents) {
+        final var file = File.createnew(jobId, datasourceId, categoryId, label, getFileType(datasourceType), contents, uploads);
         repository.save(file);
 
         return file;
     }
-
     private FileType getFileType(DatasourceType datasourceType) {
-        FileType fileType = switch (datasourceType) {
+        return switch (datasourceType) {
             case mongodb, postgresql, neo4j -> FileType.DML;
-            default -> FileType.DATA_FILE;
+            case csv -> FileType.CSV;
+            default -> FileType.JSON;
         };
-
-        return fileType;
     }
+
+    public List<File> findAllInCategory(Id categoryId) {
+        return repository.findAllInCategory(categoryId);
+    }
+
 }

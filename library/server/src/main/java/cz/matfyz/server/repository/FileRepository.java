@@ -20,14 +20,14 @@ public class FileRepository {
     public void save(File file) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO "file" (id, job_id, datasource_id, category_id, file_type)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO "file" (id, job_id, datasource_id, category_id, json_value)
+                VALUES (?, ?, ?, ?, ?::jsonb)
                 """);
             setId(statement, 1, file.id());
             setId(statement, 2, file.jobId);
             setId(statement, 3, file.datasourceId);
             setId(statement, 4, file.categoryId);
-            statement.setString(5, file.fileType.toString());
+            statement.setString(5, file.toJsonValue());
             executeChecked(statement);
         });
     }
@@ -47,8 +47,8 @@ public class FileRepository {
                 final Id id = getId(resultSet, "id");
                 final Id jobId = getId(resultSet, "job_id");
                 final Id datasourceId = getId(resultSet, "datasource_id");
-                final String fileTypeString = resultSet.getString(5);
-                output.add(File.fromDatabase(id, jobId, datasourceId, categoryId, fileTypeString));
+                final String jsonValue = resultSet.getString("json_value");
+                output.add(File.fromJsonValue(id, jobId, datasourceId, categoryId, jsonValue));
             }
         });
     }

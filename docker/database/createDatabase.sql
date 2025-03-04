@@ -198,5 +198,5 @@ CREATE TABLE "file" (
     job_id UUID REFERENCES job,
     datasource_id UUID REFERENCES datasource,
     category_id UUID REFERENCES schema_category,
-    file_type VARCHAR(255) NOT NULL
+    json_value JSONB NOT NULL
 );

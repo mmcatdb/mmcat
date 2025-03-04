@@ -8,35 +8,44 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Date;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents a generic file object that can store various fileTypes of data.
- * However, primarily intended to hold the outputs of  CtM jobs.
+ * However, primarily intended to hold the outputs of CtM jobs.
  */
 public class File extends Entity {
 
     public enum FileType {
-        DML, DATA_FILE;
+        DML, CSV, JSON;
     }
 
     public @Nullable Id jobId;
     public @Nullable Id datasourceId;
     public @Nullable Id categoryId;
     public final String filename;
+    public final String label;
     public final FileType fileType;
+    public final Date createdAt;
 
-    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId,  FileType fileType) {
+    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, FileType fileType, Date createdAt) {
         super(id);
         this.jobId = jobId;
         this.datasourceId = datasourceId;
         this.categoryId = categoryId;
+        this.label = label;
         this.filename = id.toString();
         this.fileType = fileType;
+        this.createdAt = createdAt;
     }
 
-    public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, FileType fileType, String contents, UploadsProperties uploads) {
+    public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, FileType fileType, String contents, UploadsProperties uploads) {
         Id newId = Id.createNew();
 
         File newFile = new File(
@@ -44,7 +53,9 @@ public class File extends Entity {
             jobId,
             datasourceId,
             categoryId,
-            fileType
+            label,
+            fileType,
+            new Date()
         );
 
         newFile.saveToFile(contents, uploads);
@@ -52,9 +63,24 @@ public class File extends Entity {
     }
 
     /**
-     * Saves the file object as a plain text file (in the uploads folder).
+     * Get the file path based on the file type
      */
-    public void saveToFile(String contents, UploadsProperties uploads) {
+    private String getFilePath(UploadsProperties uploads) {
+        return uploads.folder() + "/" + filename + getFileExtension();
+    }
+
+    private String getFileExtension() {
+        return switch (fileType) {
+            case JSON -> ".json";
+            case CSV -> ".csv";
+            case DML -> ".txt"; // DML stored as .txt
+        };
+    }
+
+    /**
+     * Saves the file object in different formats based on file type.
+     */
+    private void saveToFile(String contents, UploadsProperties uploads) {
         try {
             Files.writeString(Paths.get(getFilePath(uploads)), contents, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
@@ -62,31 +88,30 @@ public class File extends Entity {
         }
     }
 
-    /**
-     * Reads a JSON file and reconstructs the object
-    */
-    /*
-    public File loadFromFile(String filename, UploadsProperties uploads) {
-        try {
-            String jsonValue = Files.readString(Paths.get(getFilePath(uploads)));
-            return fromJsonValue(jsonValue);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load file: " + filename, e);
-        }
-    }*/
+    private record JsonValue(
+        String label,
+        FileType fileType,
+        Date createdAt
+    ) {}
 
-    private String getFilePath(UploadsProperties uploads) {
-        return uploads.folder() + "/" + filename + ".txt";
-    }
+    private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
+    private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static File fromDatabase(Id id, Id jobId, Id datasourceId, Id categoryId, String fileTypeString) {
+    public static File fromJsonValue(Id id, Id jobId, Id datasourceId, Id categoryId, String jsonValue) throws JsonProcessingException {
+        final JsonValue json = jsonValueReader.readValue(jsonValue);
         return new File(
             id,
             jobId,
             datasourceId,
             categoryId,
-            FileType.valueOf(fileTypeString)
+            json.label,
+            json.fileType,
+            json.createdAt
         );
+    }
+
+    public String toJsonValue() throws JsonProcessingException {
+        return jsonValueWriter.writeValueAsString(new JsonValue(label, fileType, createdAt));
     }
 
 }
