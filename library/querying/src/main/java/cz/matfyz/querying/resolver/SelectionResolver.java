@@ -72,12 +72,16 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         // Let's assume that the idRoot is the same as idProperty, i.e., the structure with the id is in the root of the result.
         // TODO Relax this assumption. Probably after we use graph instead of a tree, because we would have to somewhat reorganize the result first.
         // Maybe we can do that simply by turning the parent --> child to child --> array --> parent. Or even just child --> parent if the cardinality is OK?
+
+        // refRoot, idRoot : structures of the complete results returned from children (their "roots")
         final ResultStructure idRoot = idResult.structure;
         final ResultStructure refRoot = refResult.structure;
 
+        // refMatch, idMatch : an element of the structures which must be equal (e.g. some id) for a join to occur
         final ResultStructure idMatch = findStructure(idRoot, node.candidate.variable());
         final ResultStructure refMatch = findStructure(refRoot, node.candidate.variable());
 
+        // refProperty, idProperty : what SchemaObject will the two results be joined through (it is inferred automatically)
         final ResultStructure refProperty = findParent(idRoot, refRoot, refMatch);
 
         final var tform = ResultStructureMerger.run(idRoot, refRoot, refProperty, idMatch, refMatch);
@@ -97,16 +101,18 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     /** Finds the closest parent of the child structure on the path from the pathStart to the pathEnd (both inclusive). */
     private ResultStructure findParent(ResultStructure child, ResultStructure pathStart, ResultStructure pathEnd) {
         final List<ResultStructure> endToStart = GraphUtils.findPath(pathStart, pathEnd).rootToTarget().reversed();
-        ResultStructure current = pathEnd;
+        // endToStart.remove(endToStart.size() - 1); // apparently root is not included
 
-        while (!current.equals(pathStart)) {
-            if (current.variable.equals(child.variable))
+        for (final var current : endToStart) {
+            if (current.variable.equals(child.variable) ||
+                context.getSchema().morphismContainsObject(current.signatureFromParent, context.getObjexForVariable(child.variable).key())
+            ) {
                 return current.parent();
-            if (context.getSchema().morphismContainsObject(current.signatureFromParent, context.getObjexForVariable(child.variable).key()))
-                return current.parent();
+            }
         }
 
-        return current;
+        // return current;
+        throw QueryException.message("Could not find a common SchemaObject in a join");
     }
 
     public QueryResult visit(MinusNode node) {

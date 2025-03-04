@@ -104,8 +104,9 @@ class FilterDeepener implements QueryVisitor<Boolean> {
 
     private void replaceParentsChild(@Nullable QueryNode parent, QueryNode originalChild, QueryNode replacementChild) {
         if (parent != null) {
-            if (!parent.replaceChild(originalChild, replacementChild));
-            throw QueryException.message("Algorithm error: inconsistent query tree structure");
+            if (!parent.replaceChild(originalChild, replacementChild)) {
+                throw QueryException.message("Inconsistent query tree structure");
+            }
         } else {
             replacementChild.setParent(null);
             queryPlan.root = replacementChild;

@@ -101,16 +101,18 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
     /** Finds the closest parent of the child structure on the path from the pathStart to the pathEnd (both inclusive). */
     private ResultStructure findParent(ResultStructure child, ResultStructure pathStart, ResultStructure pathEnd) {
         final List<ResultStructure> endToStart = GraphUtils.findPath(pathStart, pathEnd).rootToTarget().reversed();
-        ResultStructure current = pathEnd;
+        // endToStart.remove(endToStart.size() - 1); // apparently root is not included
 
-        while (!current.equals(pathStart)) {
-            if (current.variable.equals(child.variable))
+        for (final var current : endToStart) {
+            if (current.variable.equals(child.variable) ||
+                context.getSchema().morphismContainsObject(current.signatureFromParent, context.getObjexForVariable(child.variable).key())
+            ) {
                 return current.parent();
-            if (context.getSchema().morphismContainsObject(current.signatureFromParent, context.getObjexForVariable(child.variable).key()))
-                return current.parent();
+            }
         }
 
-        return current;
+        // return current;
+        throw QueryException.message("Could not find a common SchemaObject in a join");
     }
 
     public ResultStructure visit(MinusNode node) {
