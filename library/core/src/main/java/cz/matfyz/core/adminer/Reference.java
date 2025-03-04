@@ -5,22 +5,22 @@ package cz.matfyz.core.adminer;
  * It encapsulates information about the referencing and referenced kind and property and the ID of datasource.
  */
 public class Reference {
-    private String datasourceId;
+    private String referencedDatasourceId;
     private String referencedKindName;
     private String referencedProperty;
     private String referencingKindName;
     private String referencingProperty;
 
     public Reference(String datasourceId, String referencedKindName, String referencedProperty, String referencingKindName, String referencingProperty) {
-        this.datasourceId = datasourceId;
+        this.referencedDatasourceId = datasourceId;
         this.referencedKindName = referencedKindName;
         this.referencedProperty = referencedProperty;
         this.referencingKindName = referencingKindName;
         this.referencingProperty = referencingProperty;
     }
 
-    public String getDatasourceId() {
-        return datasourceId;
+    public String getReferencedDatasourceId() {
+        return referencedDatasourceId;
     }
 
     public String getReferencedKindName() {
@@ -49,7 +49,7 @@ public class Reference {
                 "referencingKindName": "%s",
                 "referencingProperty": "%s"
             }
-            """, datasourceId, referencedKindName, referencedProperty, referencingKindName, referencingProperty);
+            """, referencedDatasourceId, referencedKindName, referencedProperty, referencingKindName, referencingProperty);
     }
 }
 
