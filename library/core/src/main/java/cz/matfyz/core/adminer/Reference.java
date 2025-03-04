@@ -8,13 +8,15 @@ public class Reference {
     private String referencedDatasourceId;
     private String referencedKindName;
     private String referencedProperty;
+    private String referencingDatasourceId;
     private String referencingKindName;
     private String referencingProperty;
 
-    public Reference(String datasourceId, String referencedKindName, String referencedProperty, String referencingKindName, String referencingProperty) {
-        this.referencedDatasourceId = datasourceId;
+    public Reference(String referencedDatasourceId, String referencedKindName, String referencedProperty, String referencingDatasourceId, String referencingKindName, String referencingProperty) {
+        this.referencedDatasourceId = referencedDatasourceId;
         this.referencedKindName = referencedKindName;
         this.referencedProperty = referencedProperty;
+        this.referencingDatasourceId = referencingDatasourceId;
         this.referencingKindName = referencingKindName;
         this.referencingProperty = referencingProperty;
     }
@@ -31,6 +33,10 @@ public class Reference {
         return referencedProperty;
     }
 
+    public String getReferencingDatasourceId() {
+        return referencingDatasourceId;
+    }
+
     public String getReferencingKindName() {
         return referencingKindName;
     }
@@ -43,13 +49,14 @@ public class Reference {
     public String toString() {
         return String.format("""
             {
-                "datasourceId": "%s",
+                "referencedDatasourceId": "%s",
                 "referencedKindName": "%s",
                 "referencedProperty": "%s",
+                "referencingDatasourceId": "%s",
                 "referencingKindName": "%s",
                 "referencingProperty": "%s"
             }
-            """, referencedDatasourceId, referencedKindName, referencedProperty, referencingKindName, referencingProperty);
+            """, referencedDatasourceId, referencedKindName, referencedProperty, referencingDatasourceId, referencingKindName, referencingProperty);
     }
 }
 

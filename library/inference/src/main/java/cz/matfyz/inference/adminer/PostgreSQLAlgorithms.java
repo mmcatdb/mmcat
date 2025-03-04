@@ -64,15 +64,16 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
     /**
      * Retrieves foreign key relationships from the database for the specified kind.
      *
-     * @param stmt       The {@link Statement} object used to execute the SQL query.
-     * @param keys       A {@link List} of {@link Reference} objects to which the results will be added.
-     * @param kindName   The name of the kind for which foreign key relationships are to be retrieved.
-     * @param outgoing   A boolean flag indicating the direction of the foreign key relationship:
+     * @param stmt          The {@link Statement} object used to execute the SQL query.
+     * @param references    The list of references to which the foreign keys will be added.
+     * @param datasourceId  The identifier of the data source.
+     * @param kindName      The name of the kind for which foreign keys are retrieved.
+     * @param outgoing      A boolean flag indicating the direction of the foreign key relationship:
      *                   <ul>
      *                       <li><code>true</code> for outgoing foreign keys (keys where the kind references other kinds).</li>
      *                       <li><code>false</code> for incoming foreign keys (keys where other kinds reference the kind).</li>
      *                   </ul>
-     * @return           A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
+     * @return A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
      * @throws SQLException if an error occurs during database access.
      */
     private static List<Reference> getReferences(Statement stmt, List<Reference> references, String datasourceId, String kindName, boolean outgoing) throws SQLException {
@@ -105,7 +106,7 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
             String referencingKindName = result.getString("referencing_kind");
             String referencingProperty = result.getString("referencing_property");
 
-            Reference reference = new Reference(datasourceId, kindName, referencedProperty, referencingKindName, referencingProperty);
+            Reference reference = new Reference(datasourceId, kindName, referencedProperty, datasourceId, referencingKindName, referencingProperty);
             references.add(reference);
         }
 

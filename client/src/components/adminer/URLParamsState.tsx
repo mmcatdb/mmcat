@@ -2,7 +2,7 @@ import { View } from '@/types/adminer/View';
 import { Operator } from '@/types/adminer/Operators';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { ActiveAdminerState, AdminerState, KindFilterState } from '@/types/adminer/Reducer';
-import type { AdminerReference } from '@/types/adminer/AdminerReferences';
+import type { KindReference } from '@/types/adminer/AdminerReferences';
 import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 
 export function getURLParamsFromState(state: AdminerState | ActiveAdminerState): URLSearchParams {
@@ -18,22 +18,22 @@ export function getURLParamsFromState(state: AdminerState | ActiveAdminerState):
     return params;
 }
 
-export function getHrefFromReference(reference: AdminerReference, item: Record<string, unknown>, column: string, datasources: Datasource[]): string {
+export function getHrefFromReference(reference: KindReference, item: Record<string, unknown>, propertyName: string, datasources: Datasource[]): string {
     const state: ActiveAdminerState = {
         active: {
             limit: 50,
             filters: [
                 {
                     id: 0,
-                    propertyName: reference.referencingProperty,
+                    propertyName: reference.property,
                     operator: Operator.Equal,
-                    propertyValue: item[column] as string,
+                    propertyValue: item[propertyName] as string,
                 },
             ],
         },
-        datasourceId: reference.referencedDatasourceId,
-        kindName: reference.referencingKindName,
-        view: AVAILABLE_VIEWS[datasources.find(source => source.id === reference.referencedDatasourceId)!.type][0],
+        datasourceId: reference.datasourceId,
+        kindName: reference.kindName,
+        view: AVAILABLE_VIEWS[datasources.find(source => source.id === reference.datasourceId)!.type][0],
     };
 
     const urlParams = getURLParamsFromState(state);
