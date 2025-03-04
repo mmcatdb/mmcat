@@ -81,11 +81,14 @@ function TableBodyComponent({ fetchedData, propertyNames, references, kind, data
                         ? propertyNames.map(propertyName => (
                             <TableCell key={propertyName}>
                                 {formatCellValue(item[propertyName])}
-                                {(references.length > 0 && references.some(ref => ref.referencingProperty === propertyName)) && (
-                                    references.filter(ref => ref.referencingProperty === propertyName).map((ref, index) => (
-                                        <LinkComponent key={index} index={index} reference={ref} data={item} propertyName={propertyName} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                                    ))
-                                )}
+                                {references.length > 0
+                                    && references.some(ref => ref.referencingProperty === propertyName)
+                                    && (references
+                                        .filter(ref => ref.referencingProperty === propertyName)
+                                        .map((ref, index) => (
+                                            <LinkComponent key={index} index={index} reference={ref} data={item} propertyName={propertyName} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                                        ))
+                                    )}
                             </TableCell>
                         ))
                         : <TableCell>
