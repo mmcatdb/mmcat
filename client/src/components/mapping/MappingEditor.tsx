@@ -33,7 +33,7 @@ export function MappingEditor({ category, mapping }: MappingEditorProps) {
 
             {/* TODO */}
 
-            {/* <PhasedEditor state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2' /> */}
+            {/* <LeftPanelEditor state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2' /> */}
 
             <AccessPathCard state={state} dispatch={dispatch} />
 

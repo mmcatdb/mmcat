@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { api } from '@/api';
 import { Category, isPositionEqual } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
@@ -7,14 +7,14 @@ import { EditCategoryGraphDisplay } from '@/components/category/EditCategoryGrap
 import { FaSpinner, FaTrash } from 'react-icons/fa6';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/category/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
-import { PhasedEditor } from '@/components/category/PhasedCategoryEditor';
+import { LeftPanelCategoryEditor } from '@/components/category/LeftPanelCategoryEditor';
+import { RightPanelCategoryEditor } from '@/components/category/RightPanelCategoryEditor';
 import { onSuccess } from '@/types/api/result';
 import { cn } from '@/components/utils';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
 import { FaSave } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { type FreeSelectionAction } from '@/components/graph/graphSelection';
-import { SelectionCard } from '@/components/category/SelectionCard';
+// import { SelectionCard } from '@/components/category/SelectionCard';
 import { useDeleteHandlers } from '@/components/category/useDeleteHandlers';
 import { categoryToGraph } from '@/components/category/categoryGraph';
 
@@ -40,8 +40,6 @@ export function CategoryEditorPage() {
 
     const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
     useDeleteHandlers(state, dispatch);
-
-    const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
 
     const [ sidebarState, setSidebarState ] = useState<EditorSidebarState>({
         left: true,
@@ -109,7 +107,7 @@ export function CategoryEditorPage() {
                     <TbLayoutSidebarRightFilled
                         className='cursor-pointer text-default-600 hover:text-default-700'
                         onClick={() => toggleSidebar('right')}
-                        title='Toggle Info Sidebar'
+                        title='Toggle Edit Sidebar'
                         size={18}
                     />
                 </div>
@@ -118,7 +116,7 @@ export function CategoryEditorPage() {
             <div className='flex flex-grow'>
                 {/* Left Sidebar */}
                 <div className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
-                    {sidebarState.left && <PhasedEditor state={state} dispatch={dispatch} />}
+                    {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
                 </div>
 
                 {/* Main Canvas */}
@@ -128,7 +126,7 @@ export function CategoryEditorPage() {
 
                 {/* Right Sidebar */}
                 <div className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
-                    {sidebarState.right && <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />}
+                    {sidebarState.right && <RightPanelCategoryEditor state={state} dispatch={dispatch} />}
                 </div>
             </div>
         </div>
@@ -250,5 +248,9 @@ function detectUnsavedChanges(state: EditCategoryState) {
         return !isPositionEqual(objex.metadata.position, objex.originalMetadata.position);
     });
 
-    return hasSchemaChanges || hasMovedNodes;
+    const hasRenamedNodes = evocat.category.getObjexes().some(objex => {
+        return objex.metadata.label !== objex.originalMetadata.label;
+    });
+
+    return hasSchemaChanges || hasMovedNodes || hasRenamedNodes;
 }

@@ -12,11 +12,11 @@ type StateDispatchProps = Readonly<{
     dispatch: EditCategoryDispatch;
 }>;
 
-type PhasedEditorProps = StateDispatchProps & Readonly<{
+type LeftPanelEditorProps = StateDispatchProps & Readonly<{
     className?: string;
 }>;
 
-export function PhasedEditor({ state, dispatch, className }: PhasedEditorProps) {
+export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPanelEditorProps) {
     const Component = components[state.leftPanelMode];
 
     return (

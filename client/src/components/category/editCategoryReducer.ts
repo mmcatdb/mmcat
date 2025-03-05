@@ -10,7 +10,7 @@ export type EditCategoryState = {
     graph: CategoryGraph;
     selection: FreeSelection;
     leftPanelMode: LeftPanelMode;
-    // rightPanelMode: RightPanelMode;
+    rightPanelMode: RightPanelMode;
 };
 
 export function createInitialState(evocat: Evocat): EditCategoryState {
@@ -19,12 +19,13 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
         graph: categoryToGraph(evocat.category),
         selection: FreeSelection.create(),
         leftPanelMode: LeftPanelMode.default,
+        rightPanelMode: RightPanelMode.default,
     };
 }
 
 export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 
-type EditCategoryAction = GraphAction | SelectAction | CreateObjexAction | CreateMorphismAction | DeleteElementsAction | LeftPanelAction;
+type EditCategoryAction = GraphAction | SelectAction | LeftPanelAction | RightPanelAction | CreateObjexAction | CreateMorphismAction | DeleteElementsAction;
 
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
     console.log('REDUCE', state.leftPanelMode, action, state);
@@ -32,7 +33,8 @@ export function editCategoryReducer(state: EditCategoryState, action: EditCatego
     switch (action.type) {
     case 'graph': return graph(state, action);
     case 'select': return select(state, action);
-    case 'leftPanelMode': return setLeftPanel(state, action);  // old phase panel, can be deleted in future
+    case 'leftPanelMode': return setLeftPanel(state, action);
+    case 'rightPanelMode': return setRightPanel(state, action);
     case 'createObjex': return afterObjexCreation(state, action);
     case 'createMorphism': return afterMorphismCreation(state, action);
     case 'deleteElements': return afterElementsDeletion(state, action);
@@ -102,7 +104,8 @@ function select(state: EditCategoryState, action: SelectAction): EditCategorySta
 }
 
 // Editor modes
-// Left panel and right panel actions
+// Left panel
+// This left (right) panel can be deleted and replaced
 
 export enum LeftPanelMode {
     default = 'default',
@@ -126,6 +129,32 @@ function setLeftPanel(state: EditCategoryState, { mode: leftPanelMode, graph }: 
         graph: updatedGraph,
         selection: state.selection.updateFromGraph(updatedGraph),
         leftPanelMode,
+    };
+}
+
+// Right panel
+
+export enum RightPanelMode {
+    default = 'default',
+    updateObjex = 'updateObjex',   // Enter update schema object mode
+    updateMorphism = 'updateMorphism',   // Enter update morphism mode
+}
+
+export type RightPanelAction = {
+    type: 'rightPanelMode';
+    /** The mode we want to switch to. */
+    mode?: RightPanelMode;
+    /** The graph state should be updated by this value. */
+    graph?: CategoryGraph;
+}
+
+function setRightPanel(state: EditCategoryState, { graph }: RightPanelAction): EditCategoryState {
+    const updatedGraph = graph ?? state.graph;
+
+    return {
+        ...state,
+        graph: updatedGraph,
+        selection: state.selection.updateFromGraph(updatedGraph),
     };
 }
 
