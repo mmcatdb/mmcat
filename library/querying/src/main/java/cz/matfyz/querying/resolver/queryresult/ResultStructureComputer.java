@@ -30,7 +30,7 @@ public class ResultStructureComputer {
     // However, it's better to always have a valid operation (that is sometimes a no-op) than to mix null and non-null values.
     // E.g., we might want to add something like logging later, which would be inpossible for nulls.
 
-    public static ComputationTForm run(ResultStructure inputStructure, Computation computation, boolean isFilter) {
+    public static ComputationTform run(ResultStructure inputStructure, Computation computation, boolean isFilter) {
         final var outputStructure = inputStructure.copy();
         return new ResultStructureComputer(outputStructure).run(computation, isFilter);
     }
@@ -46,7 +46,7 @@ public class ResultStructureComputer {
         referenceNodeFinder = new ReferenceNodeFinder(outputStructure);
     }
 
-    public record ComputationTForm(List<TformRoot> tforms, ResultStructure outputStructure) {
+    public record ComputationTform(List<TformRoot> tforms, ResultStructure outputStructure) {
 
         public QueryResult apply(ListResult input) {
             // Nothing changes here, we just apply the tforms.
@@ -69,7 +69,7 @@ public class ResultStructureComputer {
 
     }
 
-    private ComputationTForm run(Computation computation, boolean isFilter) {
+    private ComputationTform run(Computation computation, boolean isFilter) {
         var referenceNode = referenceNodeFinder.find(computation);
         if (referenceNode == null)
             // This corresponds to a constant filter, e.g., FILTER(1 = 1). In this case, we will filter the root.
@@ -89,7 +89,7 @@ public class ResultStructureComputer {
             outputTforms.add(tform);
         }
 
-        return new ComputationTForm(outputTforms, outputStructure);
+        return new ComputationTform(outputTforms, outputStructure);
     }
 
     // Computations

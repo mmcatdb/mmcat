@@ -144,19 +144,30 @@ class FilterDeepener implements QueryVisitor<Boolean> {
     @Override
     public Boolean visit(JoinNode childNode) {
         // checks if one of the children contains all filter vars, if yes deepen only to that child;
-        // if both children contain all filter vars... I guess we can use both, but that probably means the filter is mentally challenged anyway
+        // if both children contain all filter vars, then without knowing how the results will be merged, we should propagate to both children
 
-        if (structureCoversVariables(childNode.fromChild().structure, filterVariables)) {
+        final boolean coveredByFrom = structureCoversVariables(childNode.fromChild().structure, filterVariables);
+        final boolean coveredByTo = structureCoversVariables(childNode.toChild().structure, filterVariables);
+
+        if (coveredByFrom) {
             replaceParentsChild(filterNode, childNode, childNode.fromChild());
             replaceParentsChild(childNode, childNode.fromChild(), filterNode);
-            return true;
-        } else if (structureCoversVariables(childNode.toChild().structure, filterVariables)) {
-            replaceParentsChild(filterNode, childNode, childNode.toChild());
-            replaceParentsChild(childNode, childNode.toChild(), filterNode);
-            return true;
         }
 
-        return false;
+        if (coveredByTo) {
+            final FilterNode filterNode2;
+            if (coveredByFrom) {
+                filterNode2 = new FilterNode(childNode, filterNode.filter);
+                filtersToProcess.add(filterNode2);
+            } else {
+                filterNode2 = filterNode;
+            }
+
+            replaceParentsChild(filterNode2, childNode, childNode.toChild());
+            replaceParentsChild(childNode, childNode.toChild(), filterNode2);
+        }
+
+        return coveredByFrom || coveredByTo;
     }
 
     @Override
@@ -167,7 +178,7 @@ class FilterDeepener implements QueryVisitor<Boolean> {
 
     @Override
     public Boolean visit(OptionalNode childNode) {
-        // TODO: I'm not actually sure here
+        // TODO: Probably same as JoinNode?
         return false;
     }
 

@@ -5,6 +5,7 @@ import cz.matfyz.querying.core.querytree.DatasourceNode.SerializedDatasourceNode
 import cz.matfyz.querying.core.querytree.FilterNode.SerializedFilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode.SerializedJoinNode;
 import cz.matfyz.tests.example.basic.Datasources;
+import cz.matfyz.tests.example.basic.MongoDB;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,10 @@ public class OptimizationTests {
     void filterDeepening_goodJoin() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
-            .addDatasource(datasources.mongoDB())
+            .addDatasource(
+                datasources.createNewMongoDB()
+                    .addMapping(MongoDB.customer(datasources.schema))
+            )
             .query("""
                 SELECT {
                     ?orderItem
@@ -72,16 +76,9 @@ public class OptimizationTests {
                         12/3/4 ?customerName ;
                         14 ?quantity .
 
-                    FILTER(?orderNumber = "o_100")
+                    FILTER(?customerName = "Alice")
                 }
             """)
-            /* idk
-            .expected("""
-                [ {
-                    "number": "o_100"
-                } ]
-            """)
-            */
             .restrictQueryTree(description -> {
                 return
                     (description.tree() instanceof SerializedJoinNode joinNode) &&
@@ -96,7 +93,10 @@ public class OptimizationTests {
     void filterDeepening_badJoin() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
-            .addDatasource(datasources.mongoDB())
+            .addDatasource(
+                datasources.createNewMongoDB()
+                    .addMapping(MongoDB.customer(datasources.schema))
+            )
             .query("""
                 SELECT {
                     ?orderItem
@@ -111,18 +111,10 @@ public class OptimizationTests {
                         12/3/4 ?customerName ;
                         14 ?quantity .
 
-                    // if filter splitting is implemented this will not suffice, but can be circumvented with OR
-                    FILTER(?customerName = "Alice")
-                    FILTER(?quantity >= "2")
+                    FILTER(?customerName != ?quantity)
+                    // FILTER(?customerName = "Alice" || ?quantity >= "2") // TODO: fix the bug which prevents this condition from being parsed
                 }
             """)
-            /* idk
-            .expected("""
-                [ {
-                    "number": "o_100"
-                } ]
-            """)
-            */
             .restrictQueryTree(description -> {
                 return
                     (description.tree() instanceof SerializedFilterNode filterNode) &&
