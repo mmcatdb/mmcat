@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Input } from '@nextui-org/react';
-import { EditorPhase, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
+import { LeftPanelMode, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { cn } from '../utils';
 import { toPosition } from '@/types/utils/common';
 import { Cardinality } from '@/types/schema/Morphism';
@@ -17,7 +17,7 @@ type PhasedEditorProps = StateDispatchProps & Readonly<{
 }>;
 
 export function PhasedEditor({ state, dispatch, className }: PhasedEditorProps) {
-    const Component = components[state.phase];
+    const Component = components[state.leftPanelMode];
 
     return (
         <div className={cn('p-3 flex flex-col gap-3', className)}>
@@ -26,10 +26,10 @@ export function PhasedEditor({ state, dispatch, className }: PhasedEditorProps) 
     );
 }
 
-const components: Record<EditorPhase, (props: StateDispatchProps) => JSX.Element> = {
-    [EditorPhase.default]: DefaultDisplay,
-    [EditorPhase.createObjex]: CreateObjexDisplay,
-    [EditorPhase.createMorphism]: CreateMorphismDisplay,
+const components: Record<LeftPanelMode, (props: StateDispatchProps) => JSX.Element> = {
+    [LeftPanelMode.default]: DefaultDisplay,
+    [LeftPanelMode.createObjex]: CreateObjexDisplay,
+    [LeftPanelMode.createMorphism]: CreateMorphismDisplay,
 };
 
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
@@ -38,12 +38,12 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     return (<>
         <h3>Default</h3>
 
-        <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createObjex })}>
+        <Button onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}>
             Create object
         </Button>
 
         <Button
-            onClick={() => dispatch({ type: 'phase', phase: EditorPhase.createMorphism })}
+            onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
             isDisabled={!isValidSelection}
         >
             Create Morphism
@@ -84,7 +84,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         />
 
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.default })}>
+            <Button onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.default })}>
                 Cancel
             </Button>
 
@@ -154,7 +154,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         />
 
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={() => dispatch({ type: 'phase', phase: EditorPhase.default })}>
+            <Button onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.default })}>
                 Cancel
             </Button>
 

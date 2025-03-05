@@ -9,7 +9,8 @@ export type EditCategoryState = {
     evocat: Evocat;
     graph: CategoryGraph;
     selection: FreeSelection;
-    phase: EditorPhase;
+    leftPanelMode: LeftPanelMode;
+    // rightPanelMode: RightPanelMode;
 };
 
 export function createInitialState(evocat: Evocat): EditCategoryState {
@@ -17,24 +18,24 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
         evocat,
         graph: categoryToGraph(evocat.category),
         selection: FreeSelection.create(),
-        phase: EditorPhase.default,
+        leftPanelMode: LeftPanelMode.default,
     };
 }
 
 export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 
-type EditCategoryAction = GraphAction | SelectAction | CreateObjexAction | CreateMorphismAction | PhaseAction;
+type EditCategoryAction = GraphAction | SelectAction | CreateObjexAction | CreateMorphismAction | DeleteElementsAction | LeftPanelAction;
 
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
-    console.log('REDUCE', state.phase, action, state);
+    console.log('REDUCE', state.leftPanelMode, action, state);
 
     switch (action.type) {
     case 'graph': return graph(state, action);
     case 'select': return select(state, action);
-    case 'phase': return phase(state, action);
-    // case 'cancelCreation': return cancelCreation(state);
+    case 'leftPanelMode': return setLeftPanel(state, action);  // old phase panel, can be deleted in future
     case 'createObjex': return afterObjexCreation(state, action);
     case 'createMorphism': return afterMorphismCreation(state, action);
+    case 'deleteElements': return afterElementsDeletion(state, action);
     }
 }
 
@@ -77,8 +78,8 @@ type SelectAction = {
 function select(state: EditCategoryState, action: SelectAction): EditCategoryState {
     const newSelection = state.selection.updateFromAction(action);
 
-    // If we are in morphism creation phase, prevent selecting more than 2 nodes, just proceed and prevent selecting morphisms
-    if (state.phase === EditorPhase.createMorphism) {
+    // If we are in morphism creation mode, prevent selecting more than 2 nodes, just proceed and prevent selecting morphisms
+    if (state.leftPanelMode === LeftPanelMode.createMorphism) {
         // Prevent selecting more than 2 nodes
         const selectedNodeIds = Array.from(newSelection.nodeIds);
         if (selectedNodeIds.length > 2)
@@ -89,58 +90,44 @@ function select(state: EditCategoryState, action: SelectAction): EditCategorySta
     }
 
     // Automatically proceed when exactly two nodes are selected
-    const newPhase = (state.phase === EditorPhase.createMorphism && newSelection.nodeIds.size === 2)
-        ? EditorPhase.createMorphism
-        : state.phase;
+    const newMode = (state.leftPanelMode === LeftPanelMode.createMorphism && newSelection.nodeIds.size === 2)
+        ? LeftPanelMode.createMorphism
+        : state.leftPanelMode;
 
     return {
         ...state,
         selection: newSelection,
-        phase: newPhase,
+        leftPanelMode: newMode,
     };
 }
 
-// Editor phases
+// Editor modes
+// Left panel and right panel actions
 
-export enum EditorPhase {
+export enum LeftPanelMode {
     default = 'default',
-    createObjex = 'createObjex',   // Enter create schema object phase
-    createMorphism = 'createMorphism',   // Enter create morphism phase
+    createObjex = 'createObjex',   // Enter create schema object mode
+    createMorphism = 'createMorphism',   // Enter create morphism mode
 }
 
-export type PhaseAction = {
-    type: 'phase';
-    /** The phase we want to switch to. */
-    phase: EditorPhase;
+export type LeftPanelAction = {
+    type: 'leftPanelMode';
+    /** The mode we want to switch to. */
+    mode: LeftPanelMode;
     /** The graph state should be updated by this value. */
     graph?: CategoryGraph;
 }
 
-function phase(state: EditCategoryState, { phase, graph }: PhaseAction): EditCategoryState {
+function setLeftPanel(state: EditCategoryState, { mode: leftPanelMode, graph }: LeftPanelAction): EditCategoryState {
     const updatedGraph = graph ?? state.graph;
 
     return {
         ...state,
         graph: updatedGraph,
         selection: state.selection.updateFromGraph(updatedGraph),
-        phase,
+        leftPanelMode,
     };
 }
-
-// Cancel creation
-
-// type CancelCreationAction = {
-//     type: 'cancelCreation';
-// };
-
-// function cancelCreation(state: EditCategoryState): EditCategoryState {
-//     return {
-//         ...state,
-//         graph: categoryToGraph(state.evocat.category),
-//         selection: FreeSelection.create(),
-//         phase: EditorPhase.default,
-//     };
-// }
 
 // Operations on schema object (objex)
 
@@ -158,7 +145,7 @@ function afterObjexCreation(state: EditCategoryState, { graph }: CreateObjexActi
         selection: latestObjex
             ? FreeSelection.create([ latestObjex.schema.key.toString() ], [])
             : FreeSelection.create(),
-        phase: EditorPhase.default,
+        leftPanelMode: LeftPanelMode.default,
     };
 }
 
@@ -178,6 +165,21 @@ function afterMorphismCreation(state: EditCategoryState, { graph }: CreateMorphi
         selection: latestMorphism
             ? FreeSelection.create([], [ latestMorphism.schema.signature.toString() ])
             : FreeSelection.create(),
-        phase: EditorPhase.default,
+        leftPanelMode: LeftPanelMode.default,
+    };
+}
+
+// Handle selection after deleting selected schema object(s) and morphism(s)
+
+type DeleteElementsAction = {
+    type: 'deleteElements';
+    graph: CategoryGraph;
+};
+
+function afterElementsDeletion(state: EditCategoryState, { graph }: DeleteElementsAction): EditCategoryState {
+    return {
+        ...state,
+        graph: graph,
+        selection: state.selection.updateFromGraph(graph),
     };
 }

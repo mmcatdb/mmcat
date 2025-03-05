@@ -5,7 +5,7 @@ import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { EditCategoryGraphDisplay } from '@/components/category/EditCategoryGraphDisplay';
 import { FaSpinner, FaTrash } from 'react-icons/fa6';
-import { createInitialState, type EditCategoryDispatch, editCategoryReducer, EditorPhase, type EditCategoryState } from '@/components/category/editCategoryReducer';
+import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/category/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
 import { PhasedEditor } from '@/components/category/PhasedCategoryEditor';
 import { onSuccess } from '@/types/api/result';
@@ -237,7 +237,7 @@ function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategory
 
     // Update the graph state
     const graph = categoryToGraph(state.evocat.category);
-    dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+    dispatch({ type: 'deleteElements', graph });
 }
 
 // Function to detect unsaved changes: node movement, schema updates

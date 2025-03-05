@@ -1,7 +1,6 @@
 import { useEffect, useCallback } from 'react';
-import { type EditCategoryState, EditorPhase, type EditCategoryDispatch } from '@/components/category/editCategoryReducer';
+import { type EditCategoryState, type EditCategoryDispatch } from '@/components/category/editCategoryReducer';
 import { categoryToGraph } from '@/components/category/categoryGraph';
-import { type Signature } from '@/types/identifiers';
 
 export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCategoryDispatch) {
     const deleteSelectedElements = useCallback(() => {
@@ -10,7 +9,7 @@ export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCatego
         state.selection.edgeIds.forEach(edgeId => {
             const edge = state.graph.edges.get(edgeId);
             if (edge) {
-                state.evocat.deleteMorphism(edge.schema.signature as Signature);
+                state.evocat.deleteMorphism(edge.schema.signature);
                 updated = true;
             }
         });
@@ -26,7 +25,7 @@ export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCatego
         // If something was deleted, update the graph state
         if (updated) {
             const graph = categoryToGraph(state.evocat.category);
-            dispatch({ type: 'phase', phase: EditorPhase.default, graph });
+            dispatch({ type: 'deleteElements', graph });
         }
     }, [ state, dispatch ]);
 
