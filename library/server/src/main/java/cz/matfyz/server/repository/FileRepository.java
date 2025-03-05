@@ -52,4 +52,24 @@ public class FileRepository {
             }
         });
     }
+
+    public File find(Id id) {
+        return db.get((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT *
+                FROM "file"
+                WHERE file.id = ?;
+                """);
+            setId(statement, 1, id);
+            final var resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                final Id jobId = getId(resultSet, "job_id");
+                final Id datasourceId = getId(resultSet, "datasource_id");
+                final Id categoryId = getId(resultSet, "category_id");
+                final String jsonValue = resultSet.getString("json_value");
+                output.set(File.fromJsonValue(id, jobId, datasourceId, categoryId, jsonValue));
+            }
+        });
+    }
 }

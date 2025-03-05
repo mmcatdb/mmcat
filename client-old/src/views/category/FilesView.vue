@@ -33,7 +33,6 @@ async function fetchFiles() {
             >
                 <FileDisplay
                     :file="file"
-                    @update-file="updateFile"
                 />
             </div>
         </div>

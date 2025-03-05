@@ -6,6 +6,9 @@ const files = {
     getAllFilesInCategory: GET<{ categoryId: StringLike }, FileFromServer[]>(
         u => `/schema-categories/${u.categoryId}/files`,
     ),
+    downloadFile: GET<{ id: StringLike }, Response>(
+        u => `/files/${u.id}`, 
+    ),
 };
 
 export default files;

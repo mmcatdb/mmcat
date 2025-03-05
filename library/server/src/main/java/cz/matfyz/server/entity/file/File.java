@@ -58,18 +58,18 @@ public class File extends Entity {
             new Date()
         );
 
-        newFile.saveToFile(contents, uploads);
+        saveToFile(newFile, contents, uploads);
         return newFile;
     }
 
     /**
      * Get the file path based on the file type
      */
-    private String getFilePath(UploadsProperties uploads) {
-        return uploads.folder() + "/" + filename + getFileExtension();
+    public static String getFilePath(File file, UploadsProperties uploads) {
+        return uploads.folder() + "/" + file.filename + getFileExtension(file.fileType);
     }
 
-    private String getFileExtension() {
+    private static String getFileExtension(FileType fileType) {
         return switch (fileType) {
             case JSON -> ".json";
             case CSV -> ".csv";
@@ -80,11 +80,11 @@ public class File extends Entity {
     /**
      * Saves the file object in different formats based on file type.
      */
-    private void saveToFile(String contents, UploadsProperties uploads) {
+    private static void saveToFile(File file, String contents, UploadsProperties uploads) {
         try {
-            Files.writeString(Paths.get(getFilePath(uploads)), contents, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.writeString(Paths.get(getFilePath(file, uploads)), contents, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save file: " + getFilePath(uploads), e);
+            throw new RuntimeException("Failed to save file: " + getFilePath(file, uploads), e);
         }
     }
 

@@ -11,31 +11,9 @@ type FileDisplayProps = {
 
 const props = defineProps<FileDisplayProps>();
 
-function stringify(value: unknown): string | undefined {
-    if (value === undefined || value === null)
-        return undefined;
-
-    if (typeof value === 'object')
-        return JSON.stringify(value, null, 4);
-
-    return '' + value;
-}
-
-const emit = defineEmits<{
-    (e: 'updateFile', file: File): void;
-}>();
-
 const fetching = ref(false);
 
 const info = useSchemaCategoryInfo();
-/*
-async function restartJob() {
-    fetching.value = true;
-    const result = await API.jobs.createRestartedJob({ id: props.job.id });
-    fetching.value = false;
-    if (result.status)
-        emit('updateJob', Job.fromServer(result.data, info.value));
-}*/
 
 const fileTypeText = computed(() => {
     switch (props.file.fileType) {
@@ -49,6 +27,53 @@ const fileTypeText = computed(() => {
             return "Unknown File Type";
     }
 });
+
+async function downloadFile(file: File) {
+    fetching.value = true;
+
+    const response = await API.files.downloadFile({ id: file.id });
+    // For some reason, even though I am sending a ResponseEntity with custom headers from the server,
+    // I receive an Object with fields: status and data.
+    const fileContent = response.data;
+    const { extension, mimeType } = getFileType(file.fileType);
+    const blob = new Blob([fileContent], { type: mimeType});
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${file.id}.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    fetching.value = false;
+}
+
+function getFileType(fileType: string) {
+    const fileTypes = {
+        JSON: { extension: "json", mimeType: "application/json" },
+        CSV: { extension: "csv", mimeType: "text/csv" },
+        DML: { extension: "txt", mimeType: "text/plain" }
+    };
+
+    return fileTypes[fileType] || { extension: "txt", mimeType: "text/plain" };
+}
+
+// TODO
+async function executeDML(file: File) {
+    /*
+    try {
+        fetching.value = true;
+        const response = await API.files.executeDML({ id: file.id }); // Adjust API endpoint accordingly
+        if (!response.status) throw new Error("Execution failed");
+
+        console.log("DML executed successfully");
+    } catch (error) {
+        console.error("Error executing DML:", error);
+    } finally {
+        fetching.value = false;
+    }*/
+}
+//TODO above
 
 </script>
 
@@ -73,13 +98,21 @@ const fileTypeText = computed(() => {
                     </div>
                 </FixedRouterLink>
             </div>
-            <div class="d-flex ms-auto align-self-center">
+            <div class="d-flex ms-auto align-self-center gap-1">
                 <button
                     :disabled="fetching"
                     class="info"
-                    @click="restartJob"
+                    @click="downloadFile(file)"
                 >
-                    Restart
+                    Download
+                </button>
+                <button
+                    v-if="file.fileType === 'DML'"
+                    :disabled="fetching"
+                    class="info"
+                    @click="executeDML(file)"
+                >
+                    Execute
                 </button>
             </div>
         </div>
