@@ -138,11 +138,26 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     }
 
     return (<>
-        <h3>Create Morphism</h3>
+        <h3 className='text-lg font-semibold py-2'>Create Morphism</h3>
 
         <div>
-            <p>Domain object: <span className='font-semibold'>{domainNode?.metadata.label ?? 'Select a node'}</span></p>
-            <p>Codomain object: <span className='font-semibold text-rose-600'>{codomainNode?.metadata.label ?? 'Hold Ctrl and Select a second node'}</span></p>
+            <p className='pb-2'>
+                Domain object: <span className={cn(
+                    'font-semibold',
+                    !domainNode ? 'font-bold text-danger-500' : '',
+                )}>
+                    {domainNode?.metadata.label ?? ' Select a node'}
+                </span>
+            </p>
+
+            <p className='pb-2'>
+                Codomain object: <span className={cn(
+                    'font-semibold',
+                    domainNode && !codomainNode ? 'font-bold text-danger-500' : '',
+                )}>
+                    {codomainNode?.metadata.label ?? ' Hold Ctrl and Select a second node'}
+                </span>
+            </p>
         </div>
 
         <Input
