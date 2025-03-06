@@ -262,7 +262,7 @@ public class JobExecutorService {
 
         final var resultString = result.statementsAsString();
 
-        fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, job.label, datasource.type, resultString);
+        fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, datasource.type, resultString);
 
         job.data = new ModelJobData(resultString);
     }

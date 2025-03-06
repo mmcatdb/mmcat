@@ -14,6 +14,7 @@ import cz.matfyz.server.repository.FileRepository;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class FileController {
         return files;
     }
 
-    @GetMapping("/files/{id}")
+    @GetMapping("/files/{id}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable Id id) {
         final File file = repository.find(id);
 
@@ -52,6 +53,12 @@ public class FileController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @PostMapping("/files/{id}/execute")
+    public void executeDML(@PathVariable Id id) {
+        final File file = repository.find(id);
+        service.executeDML(file);
     }
 
 }

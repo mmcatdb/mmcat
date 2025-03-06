@@ -28,19 +28,19 @@ const fileTypeText = computed(() => {
     }
 });
 
-async function downloadFile(file: File) {
+async function downloadFile() {
     fetching.value = true;
 
-    const response = await API.files.downloadFile({ id: file.id });
+    const result = await API.files.downloadFile({ id: props.file.id });
     // For some reason, even though I am sending a ResponseEntity with custom headers from the server,
     // I receive an Object with fields: status and data.
-    const fileContent = response.data;
-    const { extension, mimeType } = getFileType(file.fileType);
+    const fileContent = result.data;
+    const { extension, mimeType } = getFileType(props.file.fileType);
     const blob = new Blob([fileContent], { type: mimeType});
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${file.id}.${extension}`;
+    link.download = `${props.file.id}.${extension}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -58,22 +58,11 @@ function getFileType(fileType: string) {
     return fileTypes[fileType] || { extension: "txt", mimeType: "text/plain" };
 }
 
-// TODO
-async function executeDML(file: File) {
-    /*
-    try {
-        fetching.value = true;
-        const response = await API.files.executeDML({ id: file.id }); // Adjust API endpoint accordingly
-        if (!response.status) throw new Error("Execution failed");
-
-        console.log("DML executed successfully");
-    } catch (error) {
-        console.error("Error executing DML:", error);
-    } finally {
-        fetching.value = false;
-    }*/
+async function executeDML() {
+    fetching.value = true;
+    const result = await API.files.executeDML({ id: props.file.id });
+    fetching.value = false;
 }
-//TODO above
 
 </script>
 
@@ -102,7 +91,7 @@ async function executeDML(file: File) {
                 <button
                     :disabled="fetching"
                     class="info"
-                    @click="downloadFile(file)"
+                    @click="downloadFile"
                 >
                     Download
                 </button>
@@ -110,7 +99,7 @@ async function executeDML(file: File) {
                     v-if="file.fileType === 'DML'"
                     :disabled="fetching"
                     class="info"
-                    @click="executeDML(file)"
+                    @click="executeDML"
                 >
                     Execute
                 </button>
