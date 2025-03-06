@@ -9,6 +9,7 @@ const links = [
     { name: 'instanceCategory', label: 'Instance Category' },
     { name: 'query', label: 'Querying' },
     { name: 'savedQueries', label: 'Saved Queries' },
+    { name: 'files', label: 'Outputs' },
 ];
 </script>
 

@@ -6,6 +6,7 @@ import mappings from './routes/mappings';
 import queries from './routes/queries';
 import schemas from './routes/schemas';
 import workflows from './routes/workflows';
+import files from './routes/files';
 
 const API = {
     actions,
@@ -16,6 +17,7 @@ const API = {
     queries,
     schemas,
     workflows,
+    files,
 };
 
 export default API;

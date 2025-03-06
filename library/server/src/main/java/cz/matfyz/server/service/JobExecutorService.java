@@ -117,6 +117,9 @@ public class JobExecutorService {
     @Autowired
     private DatasourceRepository datasourceRepository;
 
+    @Autowired
+    private FileService fileService;
+
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is an opportunity for optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require synchronization on the instance level in the transformation algorithms.
 
@@ -257,7 +260,11 @@ public class JobExecutorService {
             LOGGER.info("... models executed.");
         }
 
-        job.data = new ModelJobData(result.statementsAsString());
+        final var resultString = result.statementsAsString();
+
+        fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, datasource.type, resultString);
+
+        job.data = new ModelJobData(resultString);
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {
