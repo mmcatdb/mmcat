@@ -18,12 +18,13 @@ export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
 
     return (
         <Select
+            items={availableViews.entries()}
             label='View'
             placeholder='Select datasource'
             className='max-w-xs'
-            defaultSelectedKeys={[ view ]}
+            selectedKeys={[ view ]}
         >
-            {availableViews.map((view) => (
+            {availableViews.map(view => (
                 <SelectItem
                     key={view}
                     onPress={() => dispatch({ type:'view', newView: view })}
