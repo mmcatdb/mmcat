@@ -1,14 +1,10 @@
 import { useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
-import { ReferenceComponent } from '@/components/adminer/ReferenceComponent';
+import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { TableResponse, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
-
-function formatCellValue(value: unknown): string {
-    return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-}
 
 type DatabaseTableProps = Readonly<{
     fetchedData: TableResponse | GraphResponse;
@@ -80,15 +76,11 @@ function TableBodyComponent({ fetchedData, propertyNames, references, kind, data
                     {item && typeof item === 'object' && !Array.isArray(item)
                         ? propertyNames.map(propertyName => (
                             <TableCell key={propertyName}>
-                                {formatCellValue(item[propertyName])}
-                                {(references.length > 0
-                                    && references.some(ref => ref.referencingProperty === propertyName)) && (
-                                    <ReferenceComponent references={references} data={item} propertyName={propertyName} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                                )}
+                                <DocumentComponent valueKey={propertyName} value={item[propertyName]} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={0}/>
                             </TableCell>
                         ))
                         : <TableCell>
-                            {formatCellValue(item)}
+                            <DocumentComponent valueKey={null} value={item} kindReferences={[]} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={0}/>
                         </TableCell>}
                 </TableRow>
             ))}

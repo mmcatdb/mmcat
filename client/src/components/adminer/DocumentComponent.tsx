@@ -105,7 +105,7 @@ export function DocumentComponent({ valueKey, value, depth, kindReferences, kind
     return (
         <span>
             {String(value)}
-            <div className='ps-8'>
+            <div className='ps-4'>
                 {valueKey !== null
                     && kindReferences.length > 0
                     && kindReferences.some(ref => ref.referencingProperty === valueKey)
