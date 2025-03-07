@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Button } from '@nextui-org/react';
 import { LinkComponent } from '@/components/adminer/LinkComponent';
 import { getHrefFromReference } from '@/components/adminer/URLParamsState';
 import type { Datasource } from '@/types/datasource/Datasource';
@@ -15,6 +17,7 @@ type ReferenceComponentProps = Readonly<{
 }>;
 
 export function ReferenceComponent({ references, data, propertyName, kind, datasourceId, datasources }: ReferenceComponentProps ) {
+    const [ visible, setVisible ] = useState(false);
     const links = new Map<string, KindReference>();
 
     references
@@ -27,7 +30,14 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
 
     return (
         <div>
-            {Array.from(links.entries()).map(([ link, ref ]) => (
+            <Button
+                className='my-1 h-5'
+                variant='ghost'
+                onPress={() => setVisible(!visible)}>
+                {visible ? 'Hide references' : 'Show references'}
+            </Button>
+
+            {visible && Array.from(links.entries()).map(([ link, ref ]) => (
                 <LinkComponent
                     key={link}
                     index={link}
