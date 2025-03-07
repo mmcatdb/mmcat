@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Input } from '@nextui-org/react';
-import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
+import { Button, Input, Radio, RadioGroup } from '@nextui-org/react';
+import { RightPanelMode, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { cn } from '../utils';
 import { type FormPosition, toFormNumber, toNumber, toPosition } from '@/types/utils/common';
 import { categoryToGraph } from './categoryGraph';
 import { type FreeSelectionAction } from '../graph/FreeSelection';
 import { SelectionCard } from './SelectionCard';
+import { Cardinality, type Min } from '@/types/schema';
 
 type StateDispatchProps = Readonly<{
     state: EditCategoryState;
@@ -18,6 +19,8 @@ type RightPanelEditorProps = StateDispatchProps & Readonly<{
 
 export function RightPanelCategoryEditor({ state, dispatch, className }: RightPanelEditorProps) {
     const Component = getRightPanelComponent(state);
+    // const Component = components[state.rightPanelMode];
+
     return (
         <div className={cn('p-2 flex flex-col gap-3', className)}>
             <Component state={state} dispatch={dispatch} />
@@ -25,13 +28,19 @@ export function RightPanelCategoryEditor({ state, dispatch, className }: RightPa
     );
 }
 
+const components: Record<RightPanelMode, (props: StateDispatchProps) => JSX.Element> = {
+    [RightPanelMode.default]: DefaultDisplay,
+    [RightPanelMode.updateObjex]: UpdateObjexDisplay,
+    [RightPanelMode.updateMorphism]: UpdateMorphismDisplay,
+};
+
 // Dynamic selection of display component
 function getRightPanelComponent(state: EditCategoryState) {
     if (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0) 
-        return UpdateObjexDisplay; // One node selected -> update object
+        return UpdateObjexDisplay; // One node selected -> update object  // TODO: fix this to some phase
     
     if (state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 1) 
-        return UpdateMorphismDisplay; // One edge selected -> update morphism
+        return UpdateMorphismDisplay; // One edge selected -> update morphism  // TODO: fix this to some phase
     
     return DefaultDisplay;
 }
@@ -58,29 +67,28 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     );
 }
 
-// **Object Update Screen**
+// Schema Object Edit Screen
 function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const selectedNodeId = Array.from(state.selection.nodeIds)[0];
     const selectedNode = state.graph.nodes.get(selectedNodeId);
 
-    const [ label, setLabel ] = useState(selectedNode.metadata.label);
+    const [ label, setLabel ] = useState(selectedNode!.metadata.label);
     const [ position, setPosition ] = useState<FormPosition>({ x: 0, y: 0 });
     
-    function updateObjex() {
-        state.evocat.updateObjex(selectedNode.schema.key, {
+    function handleApply() {
+        state.evocat.updateObjex(selectedNode!.schema.key, {
             label,
             position: toPosition(position),
         });
 
         const graph = categoryToGraph(state.evocat.category);
-        dispatch({ type: 'rightPanelMode', graph });  // TODO: replace with some other dispatch
+        dispatch({ type: 'rightPanelMode', mode: RightPanelMode.updateObjex, graph });
     }
 
-    // **Effect to update state when selection changes**
     useEffect(() => {
         setLabel(selectedNode.metadata.label);
         setPosition({ x: selectedNode.x, y: selectedNode.y });
-    }, [ selectedNodeId, state.graph.nodes ]); // Re-run effect when selectedNodeId changes
+    }, [  selectedNodeId, state.graph.nodes ]); // Re-run effect when different object selected, or position changes
 
     return (
         <div className='p-3 flex flex-col gap-3'>
@@ -117,7 +125,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
                     Cancel
                 </Button>
 
-                <Button color='primary' onClick={updateObjex} isDisabled={!label}>
+                <Button color='primary' onClick={handleApply} isDisabled={!label}>
                     Apply
                 </Button>
             </div>
@@ -125,11 +133,60 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     );
 }
 
-// **Morphism Update Screen**
+// Morphism Edit Screen
 export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
+    const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
+    const selectedMorphism = state.graph.edges.get(selectedEdgeId);
+    
+    // set initial state for cardinality based on the selected morphism
+    const [ minCardinality, setMinCardinality ] = useState<Min>(selectedMorphism?.schema.min ?? Cardinality.Zero);
+
+    // const [ domUnlocked, setDomUnlocked ] = useState(false);
+    // const [ codUnlocked, setCodUnlocked ] = useState(false);
+
+    useEffect(() => {
+        if (selectedMorphism) 
+            setMinCardinality(selectedMorphism.schema.min);
+        
+    }, [ selectedMorphism ]);
+
+    function handleCardinalityChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setMinCardinality(event.target.value as Min);
+    }
+
+    function handleApply() {
+        state.evocat.updateMorphism(selectedMorphism!.schema, { min: minCardinality });
+        const graph = categoryToGraph(state.evocat.category);
+        dispatch({ type: 'rightPanelMode', mode: RightPanelMode.updateMorphism, graph });
+    }
+
     return (
-        <>
-            <h3 className='text-lg font-semibold py-2'>Update Morphism</h3>
-        </>
+        <div className='p-3 flex flex-col gap-3'>
+            <h3 className='text-lg font-semibold'>Update Morphism</h3>
+            <p>
+                <strong>Signature:</strong> {selectedMorphism!.schema.signature.toString()}
+            </p>
+            <div>
+                <p>Cardinality:</p>
+                <RadioGroup
+                    value={minCardinality}
+                    onChange={handleCardinalityChange}
+                    orientation='horizontal'
+                >
+                    <Radio value={Cardinality.Zero}>0</Radio>
+                    <Radio value={Cardinality.One}>1</Radio>
+                </RadioGroup>
+            </div>
+            <div className='grid grid-cols-2 gap-2'>
+                <Button
+                    onClick={() => dispatch({ type: 'select', operation: 'clear', range: 'all' })}
+                >
+                    Cancel
+                </Button>
+                <Button onClick={handleApply} color='primary'>
+                    Apply
+                </Button>
+            </div>
+        </div>
     );
 }

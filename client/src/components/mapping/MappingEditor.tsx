@@ -26,7 +26,7 @@ export function MappingEditor({ category, mapping }: MappingEditorProps) {
             <EditMappingGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
 
             {state.selection instanceof FreeSelection && !state.selection.isEmpty && (
-                <div className='z-20 absolute top-2 right-2 bg-black'>
+                <div className='z-20 absolute top-2 right-2 bg-background'>
                     <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />
                 </div>
             )}
@@ -43,7 +43,7 @@ export function MappingEditor({ category, mapping }: MappingEditorProps) {
 
             <PathCard state={state} dispatch={dispatch} />
 
-            <div className='absolute bottom-2 right-2 z-20 p-3 bg-black'>
+            <div className='absolute bottom-2 right-2 z-20 p-3 bg-background'>
                 {/* Just a temporary setter for testing. */}
                 <Select
                     label='Selection type'
@@ -78,8 +78,8 @@ type StateDispatchProps = Readonly<{
 
 function AccessPathCard({ state }: StateDispatchProps) {
     return (
-        <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-black'>
-            <h3 className='text-white'>Access path</h3>
+        <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-background'>
+            <h3>Access path</h3>
 
             <pre className='mt-3'>
                 {state.mapping.accessPath.toString()}
@@ -95,7 +95,7 @@ function PathCard({ state }: StateDispatchProps) {
         return null;
 
     return (
-        <div className='absolute top-2 left-2 z-20 p-3 flex gap-3 bg-black'>
+        <div className='absolute top-2 left-2 z-20 p-3 flex gap-3 bg-background'>
             {selection.nodeIds.map((nodeIds, index) => (
                 <div key={index}>
                     {state.graph.nodes.get(nodeIds)!.metadata.label}

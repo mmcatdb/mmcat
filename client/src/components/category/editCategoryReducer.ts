@@ -105,7 +105,6 @@ function select(state: EditCategoryState, action: SelectAction): EditCategorySta
 
 // Editor modes
 // Left panel
-// This left (right) panel can be deleted and replaced
 
 export enum LeftPanelMode {
     default = 'default',
@@ -143,18 +142,19 @@ export enum RightPanelMode {
 export type RightPanelAction = {
     type: 'rightPanelMode';
     /** The mode we want to switch to. */
-    mode?: RightPanelMode;
+    mode: RightPanelMode;
     /** The graph state should be updated by this value. */
     graph?: CategoryGraph;
 }
 
-function setRightPanel(state: EditCategoryState, { graph }: RightPanelAction): EditCategoryState {
+function setRightPanel(state: EditCategoryState, { mode: rightPanelMode, graph }: RightPanelAction): EditCategoryState {
     const updatedGraph = graph ?? state.graph;
 
     return {
         ...state,
         graph: updatedGraph,
         selection: state.selection.updateFromGraph(updatedGraph),
+        rightPanelMode,
     };
 }
 
