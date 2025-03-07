@@ -371,15 +371,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Unsupported method for fetching foreign keys in Neo4j.
+     * Retrieves a list of references for a specified kind.
      *
      * @param datasourceId ID of the datasource.
      * @param kindName     The name of the kind.
-     * @throws UnsupportedOperationException as this operation is not implemented.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
-        // TODO
-        throw new UnsupportedOperationException("Neo4jPullWrapper.getReferences not implemented.");
+        // No foreign keys can be fetched right from Neo4j
+        return new ArrayList<>();
     }
 
 }

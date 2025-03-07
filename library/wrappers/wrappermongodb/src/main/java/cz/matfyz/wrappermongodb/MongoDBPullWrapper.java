@@ -331,15 +331,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Unsupported method for fetching foreign keys in MongoDB.
+     * Retrieves a list of references for a specified kind.
      *
      * @param datasourceId ID of the datasource.
      * @param kindName     The name of the kind.
-     * @throws UnsupportedOperationException as this operation is not implemented.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
-        // TODO
-        throw new UnsupportedOperationException("MongoDBPullWrapper.getReferences not implemented.");
+        // No foreign keys can be fetched right from MongoDB
+        return new ArrayList<>();
     }
 
 }
