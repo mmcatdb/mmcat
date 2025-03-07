@@ -1,22 +1,17 @@
 import { Link } from 'react-router-dom';
 import { routes } from '@/routes/routes';
-import { getHrefFromReference } from '@/components/adminer/URLParamsState';
-import type { Datasource } from '@/types/datasource/Datasource';
-import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
 type LinkComponentProps = Readonly<{
-    index: number;
+    index: string;
     reference: KindReference;
-    data: Record<string, string> | GraphResponseData;
-    propertyName: string;
     kind: string;
     datasourceId: Id;
-    datasources: Datasource[];
+    link: string;
 }>;
 
-export function LinkComponent({ index, reference, data, propertyName, kind, datasourceId, datasources }: LinkComponentProps ) {
+export function LinkComponent({ index, reference, kind, datasourceId, link }: LinkComponentProps ) {
     let linkText = '';
     if (datasourceId !== reference.datasourceId)
         linkText += `${reference.datasourceId}/`;
@@ -28,7 +23,7 @@ export function LinkComponent({ index, reference, data, propertyName, kind, data
         <div>
             <Link
                 key={index}
-                to={{ pathname:routes.adminer, search: getHrefFromReference(reference, data, propertyName, datasources) }}
+                to={{ pathname:routes.adminer, search: link }}
                 className='mr-2 hover:underline text-blue-500'
             >
                 {linkText}

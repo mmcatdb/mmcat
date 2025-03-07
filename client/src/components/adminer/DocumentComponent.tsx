@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@nextui-org/react';
-import { LinkComponent } from '@/components/adminer/LinkComponent';
+import { ReferenceComponent } from '@/components/adminer/ReferenceComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
@@ -109,11 +109,7 @@ export function DocumentComponent({ valueKey, value, depth, kindReferences, kind
                 {valueKey !== null
                     && kindReferences.length > 0
                     && kindReferences.some(ref => ref.referencingProperty === valueKey)
-                    && ( kindReferences
-                        .filter(ref => ref.referencingProperty === valueKey)
-                        .map((ref, index) => (
-                            <LinkComponent key={index} index={index} reference={ref} data={({ propertyName: value as string })} propertyName={'propertyName'} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                        ))
+                    && (<ReferenceComponent references={kindReferences} data={({ [valueKey as string]: value as string })} propertyName={valueKey as string} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                     )}
             </div>
         </span>

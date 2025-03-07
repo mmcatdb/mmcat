@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
-import { LinkComponent } from '@/components/adminer/LinkComponent';
+import { ReferenceComponent } from '@/components/adminer/ReferenceComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { TableResponse, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
@@ -81,14 +81,10 @@ function TableBodyComponent({ fetchedData, propertyNames, references, kind, data
                         ? propertyNames.map(propertyName => (
                             <TableCell key={propertyName}>
                                 {formatCellValue(item[propertyName])}
-                                {references.length > 0
-                                    && references.some(ref => ref.referencingProperty === propertyName)
-                                    && (references
-                                        .filter(ref => ref.referencingProperty === propertyName)
-                                        .map((ref, index) => (
-                                            <LinkComponent key={index} index={index} reference={ref} data={item} propertyName={propertyName} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                                        ))
-                                    )}
+                                {(references.length > 0
+                                    && references.some(ref => ref.referencingProperty === propertyName)) && (
+                                    <ReferenceComponent references={references} data={item} propertyName={propertyName} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                                )}
                             </TableCell>
                         ))
                         : <TableCell>
