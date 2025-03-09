@@ -101,16 +101,14 @@ db.contact.insertMany([ {
 } ]);
 
 db.customer.insertMany([ {
-    number: "o_100",
     customer: {
         name: "Alice",
-        number: "c_100",
+        number: "o_100",
     },
 }, {
-    number: "o_200",
     customer: {
         name: "Bob",
-        number: "c_200",
+        number: "o_200",
     },
 } ]);
 

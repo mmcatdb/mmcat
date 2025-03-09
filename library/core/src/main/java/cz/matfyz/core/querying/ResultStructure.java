@@ -1,6 +1,7 @@
 package cz.matfyz.core.querying;
 
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.core.utils.printable.*;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,17 +22,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class ResultStructure implements Tree<ResultStructure>, Printable, Serializable {
 
     public final String name;
+    /** This doesn't depend only on the signature. E.g., a filter or redundancy might cause an array to become a 1:1 relationship. */
     public final boolean isArray;
     /** Each result structure node corresponds to a variable. */
     public final Variable variable;
-    private final Map<String, ResultStructure> children = new TreeMap<>();
-    private final Map<Signature, ResultStructure> childrenBySignature = new TreeMap<>();
+    private final Map<Signature, ResultStructure> children = new TreeMap<>();
 
     /** If null, this is the root of the tree. */
     @JsonIgnore
     @Nullable private ResultStructure parent;
     /** If null, this is the root of the tree. */
-    @Nullable public Signature signatureFromParent;
+    @Nullable private Signature signatureFromParent;
 
     public ResultStructure(String name, boolean isArray, Variable variable) {
         this.name = name;
@@ -38,64 +40,72 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
         this.variable = variable;
     }
 
+    public @Nullable Signature getSignatureFromParent() {
+        return signatureFromParent;
+    }
+
     /**
      * Adds the child and returns it back.
      */
     public ResultStructure addChild(ResultStructure child, Signature signature) {
-        this.children.put(child.name, child);
-        this.childrenBySignature.put(signature, child);
+        this.children.put(signature, child);
         child.parent = this;
         child.signatureFromParent = signature;
 
         return child;
     }
 
-    public ResultStructure getChild(String name) {
-        return children.get(name);
+    /**
+     * Removes the child and returns it back. Throws an exception if the child is not found.
+     */
+    public ResultStructure removeChild(Signature signature) {
+        final var child = children.get(signature);
+        if (child == null)
+            throw new RuntimeException("Child not found for signature " + signature);
+
+        children.remove(signature);
+        child.parent = null;
+        child.signatureFromParent = null;
+
+        return child;
     }
 
-    // TODO Not very efficient and also nullable. We could probably do better (if we had some guarantees about the structure and the signature).
-    public @Nullable ResultStructure tryFindDescendantBySignature(Signature path) {
-        final var bases = path.toBases();
-
-        Signature current = Signature.createEmpty();
-        for (int i = 0; i < bases.size(); i++) {
-            current = current.concatenate(bases.get(i));
-            final var child = childrenBySignature.get(current);
-            if (child == null)
-                continue;
-
-            if (i == bases.size() - 1)
-                return child;
-
-            return child.tryFindDescendantBySignature(path.cutPrefix(current));
-        }
-
-        return null;
+    public @Nullable ResultStructure getChild(Signature signature) {
+        return children.get(signature);
     }
 
-    // TODO Not very efficient and also nullable. We could probably do better (if we had some guarantees about the structure and the variable).
+    // TODO Not very efficient. We could probably do better (if we had some guarantees about the structure and the variable).
     public @Nullable ResultStructure tryFindDescendantByVariable(Variable variable) {
-        if (this.variable.equals(variable))
-            return this;
-
-        for (final var child : children.values()) {
-            final var output = child.tryFindDescendantByVariable(variable);
-            if (output != null)
-                return output;
-        }
-
-        return null;
+        return GraphUtils.findDFS(this, node -> node.variable.equals(variable));
     }
 
-    public ResultStructure removeChild(String name) {
-        final var output = children.remove(name);
-        childrenBySignature.remove(output.signatureFromParent);
+    public ResultStructure findDescendantByVariable(Variable variable) {
+        final var output = tryFindDescendantByVariable(variable);
+        if (output == null)
+            throw new RuntimeException("ResultStructure not found for variable " + variable);
+
         return output;
     }
 
+    /** Traverses given signature as far as possible. Returns the last result structure. */
+    public ResultStructure traverseSignature(Signature path) {
+        ResultStructure current = this;
+        Signature currentSignature = Signature.createEmpty();
+
+        for (final var base : path.toBases()) {
+            currentSignature = currentSignature.concatenate(base);
+            final var found = current.getChild(currentSignature);
+            if (found != null) {
+                current = found;
+                currentSignature = Signature.createEmpty();
+            }
+        }
+
+        return current;
+    }
+
     /**
-     * Returns the path from the root (not included) of the structure tree all the way to this instance (also not included).
+     * Returns the path from the root (excluded) of the structure tree all the way to this instance (also excluded).
      */
     public List<ResultStructure> getPathFromRoot() {
         final List<ResultStructure> path = new ArrayList<>();
@@ -111,6 +121,18 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
         return path.reversed();
     }
 
+    /** Returns the signature from the root to this structure. */
+    public Signature getSignatureFromRoot() {
+        if (this.signatureFromParent == null)
+            return Signature.createEmpty();
+
+        return Signature.concatenate(
+            getPathFromRoot().stream().map(ResultStructure::getSignatureFromParent),
+            // The path from root excludes this node so we have to add its signature manually.
+            Stream.of(this.signatureFromParent)
+        );
+    }
+
     public @Nullable ResultStructure parent() {
         return parent;
     }
@@ -122,6 +144,10 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
 
     @Override public Collection<ResultStructure> children() {
         return this.children.values();
+    }
+
+    public Collection<Signature> childSignatures() {
+        return this.children.keySet();
     }
 
     /** All computations whose reference node is this object. */
@@ -136,13 +162,12 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
     }
 
     /**
+     * Creates a deep copy of the structure. The result will be a root of a new tree, i.e., the parent and the signatureFromParent will be null.
      * The ability to change the array-ness is important because the new structure might be used in a different way than the original one. E.g., a root of one structure is inserted as a subtree to another structure.
      * @param isArray Whether the new structure should be an array.
      */
     public ResultStructure copy(boolean isArray) {
         final var clone = new ResultStructure(name, isArray, variable);
-        clone.parent = parent;
-        clone.signatureFromParent = signatureFromParent;
 
         children.values().forEach(child -> clone.addChild(child.copy(), child.signatureFromParent));
 
@@ -169,6 +194,7 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
             .nextLine();
 
         children.values().forEach(child -> {
+            printer.append(child.signatureFromParent).append(": ");
             child.printTo(printer);
             printer.nextLine();
         });

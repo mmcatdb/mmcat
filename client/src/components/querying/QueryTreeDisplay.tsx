@@ -83,20 +83,25 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
     );
 }
 
-function PatternTreeDisplay({ pattern }: { pattern: PatternTree }) {
+function PatternTreeDisplay({ pattern, signature }: { pattern: PatternTree, signature?: string }) {
     const children = Object.entries(pattern.children);
 
     return (
         <div>
             <div>
-                <span className='mr-2 font-semibold'>{pattern.objexKey}:</span>
-                {pattern.term}
+                {signature && (
+                    <span className='mr-2 font-semibold'>{signature}:</span>
+                )}
+                <span className='mr-2'>
+                    {pattern.term}
+                </span>
+                (<span className='italic'>{pattern.objexKey}</span>)
             </div>
 
             {children.length > 0 && (
                 <div className='pl-8'>
-                    {children.map(([ key, child ]) => (
-                        <PatternTreeDisplay key={key} pattern={child} />
+                    {children.map(([ signature, child ]) => (
+                        <PatternTreeDisplay key={signature} pattern={child} signature={signature} />
                     ))}
                 </div>
             )}

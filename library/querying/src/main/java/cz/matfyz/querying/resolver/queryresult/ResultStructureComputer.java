@@ -138,7 +138,7 @@ public class ResultStructureComputer {
             current = ResultStructureTformer.addPathSteps(current, path);
         }
 
-        current.addChild(new AddToOutput<LeafResult>());
+        current.addChild(new AddToOutput());
     }
 
     private void resolveComputationArgument(TformStep current, ResultStructure computationReference, Computation argument) {

@@ -78,26 +78,6 @@ public class ResultStructureTformer {
         return current;
     }
 
-    public static boolean isPathArray(TreePath<ResultStructure> path) {
-        for (final var structure : path.rootToTarget())
-            if (structure.isArray)
-                return true;
-
-        return false;
-    }
-
-    public static Signature computePathSignature(TreePath<ResultStructure> path) {
-        final List<Signature> outputList = new ArrayList<>();
-        // We don't need the root because we are not traversing above it. Then we take the dual because we are traversing up.
-        for (final var structure : path.sourceToRoot())
-            outputList.add(structure.signatureFromParent.dual());
-
-        for (final var structure : path.rootToTarget())
-            outputList.add(structure.signatureFromParent);
-
-        return Signature.concatenate(outputList);
-    }
-
     // Let A, B, ... be a ResultStructure, the [] symbol mens it has isArray = true and the -> symbol means its children. Then:
     //  - A[] -> B? : CreateList<MapResult>, then CreateMap
     //  - A   -> B? : CreateMap
@@ -106,7 +86,7 @@ public class ResultStructureTformer {
     // The list of lists is not supported.
     private void addChildTforms(TformStep current, TformingResultStructure childStructure) {
         if (childStructure.children.isEmpty())
-            current.addChild(new AddToOutput<LeafResult>());
+            current.addChild(new AddToOutput());
         else
             createMap(current, childStructure);
     }
@@ -130,6 +110,26 @@ public class ResultStructureTformer {
 
             addChildTforms(current, childStructure);
         });
+    }
+
+    public static boolean isPathArray(TreePath<ResultStructure> path) {
+        for (final var structure : path.rootToTarget())
+            if (structure.isArray)
+                return true;
+
+        return false;
+    }
+
+    public static Signature computePathSignature(TreePath<ResultStructure> path) {
+        final List<Signature> outputList = new ArrayList<>();
+        // We don't need the root because we are not traversing above it. Then we take the dual because we are traversing up.
+        for (final var structure : path.sourceToRoot())
+            outputList.add(structure.getSignatureFromParent().dual());
+
+        for (final var structure : path.rootToTarget())
+            outputList.add(structure.getSignatureFromParent());
+
+        return Signature.concatenate(outputList);
     }
 
     private static TformStep createListIfNeeded(TformStep parentStep, TformingResultStructure structure) {

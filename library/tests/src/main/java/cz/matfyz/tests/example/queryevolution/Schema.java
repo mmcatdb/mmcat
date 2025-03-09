@@ -86,6 +86,7 @@ public class Schema {
     // Ids
 
     static {
+
         builder
             .ids(customer, customerToCustomerId)
             .ids(knows, knowsToCustomerA, knowsToCustomerB)
@@ -93,6 +94,7 @@ public class Schema {
             .ids(order, orderToOrderId, orderToProductId)
             .ids(item, itemToOrderId, itemToProductId)
             .ids(ordered, orderedToOrderId, orderedToCustomerId);
+
     }
 
     /**

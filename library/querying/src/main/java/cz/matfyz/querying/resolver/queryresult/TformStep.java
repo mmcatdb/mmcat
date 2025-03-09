@@ -33,9 +33,24 @@ public abstract class TformStep implements Printable {
     public TformStep addChild(TformStep child) {
         if (!isChildrenSupported())
             throw new UnsupportedOperationException("This step doesn't support children.");
+        if (child instanceof TformRoot)
+            throw new UnsupportedOperationException("Root step can't be nested.");
 
         children.add(child);
         return child;
+    }
+
+    /**
+     * Root is sometimes used as a placeholder or a collection of other steps.
+     * This helps us to remove all unnecessary root steps (except for the first one).
+     */
+    public void addChildOrRoot(TformStep child) {
+        if (!isChildrenSupported())
+            throw new UnsupportedOperationException("This step doesn't support children.");
+        if (child instanceof TformRoot)
+            children.addAll(child.children);
+
+        children.add(child);
     }
 
     protected boolean isChildrenSupported() {
@@ -68,6 +83,14 @@ public abstract class TformStep implements Printable {
         for (final var child : children)
             printer.append("--- ").append(child).nextLine();
         printer.remove().up();
+    }
+
+    protected boolean useIndexed = false;
+
+    /** Use the indexed inputs instead of the default ones. Doesn't work for all steps tho. */
+    public TformStep indexed() {
+        useIndexed = true;
+        return this;
     }
 
     // Steps
@@ -104,14 +127,20 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void apply(TformContext context) {
-            final var currentMap = (MapResult) context.inputs.peek();
-            context.inputs.push(currentMap.children().get(key));
+            final var stack = useIndexed ? context.indexed : context.inputs;
+
+            final var currentMap = (MapResult) stack.peek();
+            stack.push(currentMap.children().get(key));
             applyChildren(context);
-            context.inputs.pop();
+            stack.pop();
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("map.traverse(").append(key).append(")");
+            printer
+                .append(useIndexed ? "map.traverseIndexed" : "map.traverse")
+                .append("(")
+                .append(key)
+                .append(")");
             printChildren(printer);
         }
     }
@@ -121,15 +150,17 @@ public abstract class TformStep implements Printable {
         private List<Integer> removed = new ArrayList<>();
 
         @Override public void apply(TformContext context) {
-            final var currentList = (ListResult) context.inputs.peek();
+            final var stack = useIndexed ? context.indexed : context.inputs;
+
+            final var currentList = (ListResult) stack.peek();
             final var children = currentList.children();
 
             context.removers.push(this);
 
             for (i = 0; i < children.size(); i++) {
-                context.inputs.push(children.get(i));
+                stack.push(children.get(i));
                 applyChildren(context);
-                context.inputs.pop();
+                stack.pop();
             }
 
             context.removers.pop();
@@ -141,7 +172,7 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void printTo(Printer printer) {
-            printer.append("list.traverse");
+            printer.append(useIndexed ? "list.traverseIndexed" : "list.traverse");
             printChildren(printer);
         }
     }
@@ -151,15 +182,17 @@ public abstract class TformStep implements Printable {
      * However, it isn't a copy so be careful with steps that directly modify the results.
      * Except for the leaves ofc, since they are immutable.
      */
-    static class AddToOutput<T extends ResultNode> extends TformStep {
+    static class AddToOutput extends TformStep {
         @Override public void apply(TformContext context) {
-            final var inputNode = (T) context.inputs.peek();
+            final var stack = useIndexed ? context.indexed : context.inputs;
+
+            final var inputNode = stack.peek();
             context.outputs.push(inputNode);
         }
 
         @Override public void printTo(Printer printer) {
             printer
-                .append("output.add")
+                .append(useIndexed ? "output.addIndexed" : "output.add")
                 .nextLine();
         }
 
@@ -260,10 +293,14 @@ public abstract class TformStep implements Printable {
         }
     }
 
-    // This step can be divided to smaller steps (traversing + writing to index), but why if it's gona always be used this way?
-    // The path to the identifier must be 1:1 so we always travel through maps. There is no need for any other kind of traversal.
-    // An exception might be if we wanted to travel the parent. But that's not the case now.
+    /**
+     * Peeks node from input and writes it to the index using the identifier as a key.
+     * The path to the identifier must be 1:1 so we always travel through maps. There is no need for any other kind of traversal.
+     */
     static class WriteToIndex<T extends ResultNode> extends TformStep {
+        // This step can be divided to smaller steps (traversing + writing to index), but why if it's gona always be used this way?
+        // An exception to the traversal rule might be if we wanted to travel the parent. But that's not possible right now.
+
         private final Map<String, T> index;
         private final List<String> pathToIdentifier;
 
@@ -300,6 +337,50 @@ public abstract class TformStep implements Printable {
         }
     }
 
+    /**
+     * Retrieves a node from the index and puts it on the indexed stack. The path to the identifier is read from the current input.
+     * If a value isn't found in the index, the input node is removed.
+     */
+    static class TraverseIndex extends TformStep {
+        private final Map<String, MapResult> index;
+        private final List<String> pathToIdentifier;
+
+        TraverseIndex(Map<String, MapResult> index, List<String> pathToIdentifier) {
+            this.index = index;
+            this.pathToIdentifier = pathToIdentifier;
+        }
+
+        @Override public void apply(TformContext context) {
+            final var targetMap = (MapResult) context.inputs.peek();
+            final var identifierLeaf = (LeafResult) traversePath(targetMap, pathToIdentifier);
+            final var indexedMap = (MapResult) index.get(identifierLeaf.value);
+
+            if (indexedMap == null) {
+                context.removers.peek().getRemoved();
+                return;
+            }
+
+            context.indexed.push(indexedMap);
+            applyChildren(context);
+            context.indexed.pop();
+        }
+
+        @Override public void printTo(Printer printer) {
+            printer.append("index.traverse(");
+
+            for (int i = 0; i < pathToIdentifier.size(); i++)
+                printer.append(pathToIdentifier.get(i)).append(".");
+
+            if (pathToIdentifier.isEmpty())
+                printer.append("#empty");
+            else
+                printer.remove();
+
+            printer.append(")");
+            printChildren(printer);
+        }
+    }
+
     // This function can be probably divided to two - reading from index and writing to map. Then it can be even more generalized - we can write one key at a time, therefore we don't have to use the list.
     // However, there is a problem with complexity. Currently, it isn't clear which arguments are input and which output. E.g., the writeToMap takes output and writes it into the builder. However, in merging, we might want to:
     //  - read a node from the index and write it to the input map,
@@ -307,11 +388,6 @@ public abstract class TformStep implements Printable {
     // This gets out of hands very quickly. The previous transformation steps work because they all behave in a similar way (create structure - traverse children - write to builder). But this isn't the case here. Maybe we should create only specific functions - like this one, so that we can ensure that output of one is the input of the next one. Or use more "linear" approach - i.e., a list of steps instead of a deeply nested structure.
     // However, we are still probably going to switch to some other structure soon, so ...
 
-    /**
-     * There are two modes:
-     *  - keys: merge all keys from the source map (from index) to the target map (from input).
-     *  - self: merge the whole source map (from index) to the target map (from input).
-     */
     static class MergeToMap extends TformStep {
         private final Map<String, MapResult> index;
         private final List<String> pathToIdentifier;
@@ -324,12 +400,18 @@ public abstract class TformStep implements Printable {
             this.pathToIdentifier = pathToIdentifier;
         }
 
+        /**
+         * Merges all keys from the source map (from index) to the target map (from input).
+         */
         public static MergeToMap keys(Map<String, MapResult> index, List<String> pathToIdentifier, List<String> keys) {
             final var output = new MergeToMap(index, pathToIdentifier);
             output.keys = keys;
             return output;
         }
 
+        /**
+         * Merges the whole source map (from index) to the target map (from input).
+         */
         public static MergeToMap self(Map<String, MapResult> index, List<String> pathToIdentifier, String selfKey) {
             final var output = new MergeToMap(index, pathToIdentifier);
             output.selfKey = selfKey;
@@ -389,6 +471,9 @@ public abstract class TformStep implements Printable {
         }
     }
 
+    /**
+     * Consumes output and adds it to a map from the input (under the specified key).
+     */
     static class AddToMap extends TformStep {
         private final String key;
 

@@ -1,10 +1,7 @@
 package cz.matfyz.querying.planner;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
@@ -18,15 +15,11 @@ import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.resolver.DatasourceTranslator;
 import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger;
 
-import java.util.List;
-
 /**
  * Creates and assigns ResultStructures to the nodes of a QueryPlan.
  * The ResultStructure doesn't actually need to be returned, it's mostly just for convenience.
  */
 public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
-
-    // private static final Logger LOGGER = LoggerFactory.getLogger(SelectionResolver.class);
 
     public static void run(QueryPlan plan) {
         new ResultStructureResolver(plan.context, plan.root).run();
@@ -74,45 +67,11 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
         final var idStructure = node.fromChild().accept(this);
         final var refStructure = node.toChild().accept(this);
 
-        final ResultStructure idRoot = idStructure;
-        final ResultStructure refRoot = refStructure;
-
-        final ResultStructure idMatch = findStructure(idRoot, node.candidate.variable());
-        final ResultStructure refMatch = findStructure(refRoot, node.candidate.variable());
-
-        final ResultStructure refProperty = findParent(idRoot, refRoot, refMatch);
-
-        final var tform = ResultStructureMerger.run(idRoot, refRoot, refProperty, idMatch, refMatch);
+        final var tform = ResultStructureMerger.run(context, idStructure, refStructure, node.candidate.variable());
         // return tform.apply(idStructure.data, refStructure.data);
 
         node.structure = tform.newStructure();
         return node.structure;
-    }
-
-    private ResultStructure findStructure(ResultStructure root, Variable variable) {
-        final var child = GraphUtils.findDFS(root, (node) -> node.variable.equals(variable));
-        if (child == null)
-            // TODO this should not happen
-            throw QueryException.message("ResultStructure not found for variable " + variable);
-
-        return child;
-    }
-
-    /** Finds the closest parent of the child structure on the path from the pathStart to the pathEnd (both inclusive). */
-    private ResultStructure findParent(ResultStructure child, ResultStructure pathStart, ResultStructure pathEnd) {
-        final List<ResultStructure> endToStart = GraphUtils.findPath(pathStart, pathEnd).rootToTarget().reversed();
-        // endToStart.remove(endToStart.size() - 1); // apparently root is not included
-
-        for (final var current : endToStart) {
-            if (current.variable.equals(child.variable) ||
-                context.getSchema().morphismContainsObject(current.signatureFromParent, context.getObjexForVariable(child.variable).key())
-            ) {
-                return current.parent();
-            }
-        }
-
-        // return current;
-        throw QueryException.message("Could not find a common SchemaObject in a join");
     }
 
     public ResultStructure visit(MinusNode node) {

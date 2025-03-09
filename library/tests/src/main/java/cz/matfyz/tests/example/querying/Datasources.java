@@ -4,6 +4,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.DatasourceProvider;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.tests.example.common.TestMapping;
+import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 
 import java.util.ArrayList;
@@ -21,24 +22,44 @@ public class Datasources {
     private List<TestDatasource<PostgreSQLControlWrapper>> postgreSQLs;
 
     public List<TestDatasource<PostgreSQLControlWrapper>> postgreSQLs() {
-        if (postgreSQLs == null)
+        if (postgreSQLs == null) {
             postgreSQLs = createNewPostgreSQLs();
+
+            final List<TestMapping> mappings = PostgreSQL.mappings(schema);
+            for (int i = 0; i < postgreSQLs.size(); i++)
+                postgreSQLs.get(i).addMapping(mappings.get(i));
+        }
 
         return postgreSQLs;
     }
 
     public List<TestDatasource<PostgreSQLControlWrapper>> createNewPostgreSQLs() {
         final List<TestDatasource<PostgreSQLControlWrapper>> output = new ArrayList<>();
-        final List<TestMapping> mappings = PostgreSQL.mappings(schema);
 
         for (int i = 0; i < Schema.kindLabels.length; i++) {
             final var provider = datasourceProviders.get(i);
             final var testDatasource = provider.createPostgreSQL(PostgreSQL.datasources.get(i).identifier, schema, "setupPostgresqlQuerying/" + Schema.kindLabels[i] + ".sql");
-            testDatasource.addMapping(mappings.get(i));
             output.add(testDatasource);
         }
 
         return output;
+    }
+
+    private static final DatasourceProvider datasourceProvider = new DatasourceProvider("tests");
+
+    private TestDatasource<MongoDBControlWrapper> mongoDB;
+
+    public TestDatasource<MongoDBControlWrapper> mongoDB() {
+        if (mongoDB == null)
+            mongoDB = createNewMongoDB()
+                .addMapping(MongoDB.x(schema))
+                .addMapping(MongoDB.y(schema));
+
+        return mongoDB;
+    }
+
+    public TestDatasource<MongoDBControlWrapper> createNewMongoDB() {
+        return datasourceProvider.createMongoDB(MongoDB.datasource.identifier, schema, "setupMongodbQuerying.js");
     }
 
 }

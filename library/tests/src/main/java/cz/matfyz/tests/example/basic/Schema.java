@@ -139,6 +139,7 @@ public abstract class Schema {
     // Ids
 
     static {
+
         builder
             .ids(order, orderToNumber)
             .ids(customer, customerToName)
@@ -151,6 +152,7 @@ public abstract class Schema {
             .ids(prefix, prefixToId, prefixToType)
             .ids(prefiy, prefiyToId, prefiyToType)
             .ids(catchAll, catchAllToId, catchAllToType);
+
     }
 
     /**

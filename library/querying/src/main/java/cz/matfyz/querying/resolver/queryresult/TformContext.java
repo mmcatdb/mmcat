@@ -14,6 +14,11 @@ public class TformContext {
     public final Deque<ResultNode> inputs = new ArrayDeque<>();
 
     /**
+     * Basically a second inputs for traversing nodes loaded from an index.
+     */
+    public final Deque<ResultNode> indexed = new ArrayDeque<>();
+
+    /**
      * Outputs of steps.
      */
     public final Deque<ResultNode> outputs = new ArrayDeque<>();

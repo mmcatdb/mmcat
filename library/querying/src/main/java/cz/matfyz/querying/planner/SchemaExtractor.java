@@ -57,9 +57,6 @@ public class SchemaExtractor {
             final var edge = schema.getEdge(tree.edgeFromParent);
             patternMorphisms.add(edge.morphism());
 
-            context.addVariable(tree.parent().variable, edge.from());
-            context.addVariable(tree.variable, edge.to());
-
             keyToVariable.put(edge.from().key(), tree.parent().variable);
             keyToVariable.put(edge.to().key(), tree.variable);
         });
@@ -156,7 +153,6 @@ public class SchemaExtractor {
             return foundVariable;
 
         final var newVariable = clause.scope().variable.createGenerated();
-        context.addVariable(newVariable, objex);
         keyToVariable.put(objex.key(), newVariable);
 
         return newVariable;

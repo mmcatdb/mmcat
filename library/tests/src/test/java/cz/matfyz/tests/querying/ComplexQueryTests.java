@@ -17,6 +17,7 @@ class ComplexQueryTests {
     @BeforeAll
     static void setup() {
         datasources.postgreSQLs().stream().forEach(datasource -> datasource.setup());
+        datasources.mongoDB().setup();
     }
 
     @Test
@@ -220,6 +221,76 @@ class ComplexQueryTests {
                                 }
                             }
                         }
+                    }
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void nestedMergeJoin() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.mongoDB())
+            .query("""
+                SELECT {
+                    ?z0 x0 ?x0 ; y0 ?y0 ; x1 ?x1 ; y1 ?y1 ; z1 ?z1 ; z3 ?z3 .
+                    ?x1 x2 ?x2 ; x3 ?x3 .
+                    ?y1 y2 ?y2 ; y3 ?y3 .
+                    ?z1 x4 ?x4 ; y4 ?y4 ; z2 ?z2 .
+                    ?z3 x5 ?x5 ; y5 ?y5 ; x6 ?x6 ; y6 ?y6 .
+                }
+                WHERE {
+                    ?z0 110 ?x0 ; 120 ?y0 ; 111 ?x1 ; 121 ?y1 ; 101 ?z1 ; 103 ?z3 .
+                    ?x1 -112 ?x2 ; 113 ?x3 .
+                    ?y1 -122 ?y2 ; 123 ?y3 .
+                    ?z1 114 ?x4 ; 124 ?y4 ; 102 ?z2 .
+                    ?z3 115 ?x5 ; 125 ?y5 ; -116 ?x6 ; -126 ?y6 .
+                }
+            """)
+            .expected("""
+                [ {
+                    "x0": "x0-a",
+                    "y0": "y0-a",
+                    "x1": {
+                        "x2": [ "x2-a-0", "x2-a-1" ],
+                        "x3": "x3-a"
+                    },
+                    "y1": {
+                        "y2": [ "y2-a-0", "y2-a-1" ],
+                        "y3": "y3-a"
+                    },
+                    "z1": {
+                        "x4": "x4-a",
+                        "y4": "y4-a",
+                        "z2": "z2-a"
+                    },
+                    "z3": {
+                        "x5": "x5-a",
+                        "y5": "y5-a",
+                        "x6": [ "x6-a-0", "x6-a-1" ],
+                        "y6": [ "y6-a-0", "y6-a-1" ]
+                    }
+                }, {
+                    "x0": "x0-b",
+                    "y0": "y0-b",
+                    "x1": {
+                        "x2": [ "x2-b-0", "x2-b-1" ],
+                        "x3": "x3-b"
+                    },
+                    "y1": {
+                        "y2": [ "y2-b-0", "y2-b-1" ],
+                        "y3": "y3-b"
+                    },
+                    "z1": {
+                        "x4": "x4-b",
+                        "y4": "y4-b",
+                        "z2": "z2-b"
+                    },
+                    "z3": {
+                        "x5": "x5-b",
+                        "y5": "y5-b",
+                        "x6": [ "x6-b-0", "x6-b-1" ],
+                        "y6": [ "y6-b-0", "y6-b-1" ]
                     }
                 } ]
             """)

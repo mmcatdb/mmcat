@@ -781,10 +781,6 @@ class QueryTests {
                         12/8/9 ?street .
                 }
             """)
-            .restrictQueryTree(queryPlan -> {
-                System.out.println("Yo");
-                return queryPlan.tree() instanceof SerializedJoinNode;
-            })
             .expected("""
                 [ {
                     "quantity": "1",
@@ -798,6 +794,40 @@ class QueryTests {
                 }, {
                     "quantity": "3",
                     "street": "Malostranské nám. 2/25"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void mergeJoin() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .addDatasource(
+                datasources.createNewMongoDB()
+                    .addMapping(MongoDB.tag(datasources.schema))
+                    .addMapping(MongoDB.customer(datasources.schema))
+            )
+            .query("""
+                SELECT {
+                    ?order
+                        name ?customerName ;
+                        tags ?tag .
+
+                }
+                WHERE {
+                    ?order
+                        3/4 ?customerName ;
+                        -2 ?tag .
+                }
+            """)
+            .expected("""
+                [ {
+                    "name": "Alice",
+                    "tags": [ "123", "456", "789" ]
+                }, {
+                    "name": "Bob",
+                    "tags": [ "123", "String456", "String789" ]
                 } ]
             """)
             .run();

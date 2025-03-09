@@ -1,12 +1,8 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
-import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
-
-import java.util.Map;
-import java.util.TreeMap;
+import cz.matfyz.querying.normalizer.VariableTree;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -15,23 +11,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class QueryContext {
 
-    // Extracting
-    // There is exactly one schema object for each variable. However, there might be multiple variables for each object.
+    public final VariableTree variables;
 
-    private final Map<Variable, SchemaObject> variableToObjex = new TreeMap<>();
-    // private final Map<SchemaObject, List<Variable>> objexToVariables = new TreeMap<>();
-
-    public QueryContext addVariable(Variable variable, SchemaObject objex) {
-        // FIXME
-
-        variableToObjex.put(variable, objex);
-        // objexToVariables.computeIfAbsent(objex, k -> new ArrayList<>()).add(variable);
-
-        return this;
-    }
-
-    public SchemaObject getObjexForVariable(Variable variable) {
-        return variableToObjex.get(variable);
+    public QueryContext(VariableTree variables) {
+        this.variables = variables;
     }
 
     // public List<Variable> getVariablesForObjex(SchemaObject objex) {

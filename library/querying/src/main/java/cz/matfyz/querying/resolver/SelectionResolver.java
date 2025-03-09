@@ -1,11 +1,8 @@
 package cz.matfyz.querying.resolver;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
@@ -19,8 +16,6 @@ import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.planner.QueryPlan;
 import cz.matfyz.querying.resolver.queryresult.ResultStructureComputer;
 import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger;
-
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,42 +72,9 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         final ResultStructure idRoot = idResult.structure;
         final ResultStructure refRoot = refResult.structure;
 
-        // refMatch, idMatch : an element of the structures which must be equal (e.g. some id) for a join to occur
-        final ResultStructure idMatch = findStructure(idRoot, node.candidate.variable());
-        final ResultStructure refMatch = findStructure(refRoot, node.candidate.variable());
-
-        // refProperty, idProperty : what SchemaObject will the two results be joined through (it is inferred automatically)
-        final ResultStructure refProperty = findParent(idRoot, refRoot, refMatch);
-
-        final var tform = ResultStructureMerger.run(idRoot, refRoot, refProperty, idMatch, refMatch);
+        final var tform = ResultStructureMerger.run(context, idRoot, refRoot, node.candidate.variable());
 
         return tform.apply(idResult.data, refResult.data);
-    }
-
-    private ResultStructure findStructure(ResultStructure root, Variable variable) {
-        final var child = GraphUtils.findDFS(root, (node) -> node.variable.equals(variable));
-        if (child == null)
-            // TODO this should not happen
-            throw QueryException.message("ResultStructure not found for variable " + variable);
-
-        return child;
-    }
-
-    /** Finds the closest parent of the child structure on the path from the pathStart to the pathEnd (both inclusive). */
-    private ResultStructure findParent(ResultStructure child, ResultStructure pathStart, ResultStructure pathEnd) {
-        final List<ResultStructure> endToStart = GraphUtils.findPath(pathStart, pathEnd).rootToTarget().reversed();
-        // endToStart.remove(endToStart.size() - 1); // apparently root is not included
-
-        for (final var current : endToStart) {
-            if (current.variable.equals(child.variable) ||
-                context.getSchema().morphismContainsObject(current.signatureFromParent, context.getObjexForVariable(child.variable).key())
-            ) {
-                return current.parent();
-            }
-        }
-
-        // return current;
-        throw QueryException.message("Could not find a common SchemaObject in a join");
     }
 
     public QueryResult visit(MinusNode node) {

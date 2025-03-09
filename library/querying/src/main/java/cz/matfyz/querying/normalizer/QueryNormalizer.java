@@ -35,7 +35,7 @@ public class QueryNormalizer {
         final var selection = normalizeSelectionClause(parsed.where);
 
         // FIXME QueryContext.
-        final var context = new QueryContext();
+        final var context = new QueryContext(selection.variables());
         return new NormalizedQuery(projection, selection, context);
     }
 
