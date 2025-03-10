@@ -2,6 +2,7 @@ package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
+import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger.MergeTform;
 
 public class JoinNode extends QueryNode {
 
@@ -10,6 +11,8 @@ public class JoinNode extends QueryNode {
     public QueryNode toChild() { return children.get(1); }
     public QueryNode setToChild(QueryNode node) { return children.set(1, node); }
     public final JoinCandidate candidate;
+
+    public MergeTform tform;
 
     public JoinNode(QueryNode fromChild, QueryNode toChild, JoinCandidate candidate) {
         children.add(fromChild);

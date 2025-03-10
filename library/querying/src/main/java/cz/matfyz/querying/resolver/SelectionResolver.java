@@ -20,7 +20,7 @@ import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO: deduplicate code from ResultStructureAssigner
+// TODO: Maybe replace QueryResult for ListResult?
 public class SelectionResolver implements QueryVisitor<QueryResult> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SelectionResolver.class);
@@ -50,11 +50,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
 
     public QueryResult visit(FilterNode node) {
         final var childResult = node.child().accept(this);
-
-        final var tform = ResultStructureComputer.run(childResult.structure, node.filter, true);
-        LOGGER.debug("Filter transformation:\n{}", tform);
-
-        return tform.apply(childResult.data);
+        return node.tform.apply(childResult.data);
     }
 
     public QueryResult visit(JoinNode node) {
@@ -64,17 +60,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         final var idResult = node.fromChild().accept(this);
         final var refResult = node.toChild().accept(this);
 
-        // Let's assume that the idRoot is the same as idProperty, i.e., the structure with the id is in the root of the result.
-        // TODO Relax this assumption. Probably after we use graph instead of a tree, because we would have to somewhat reorganize the result first.
-        // Maybe we can do that simply by turning the parent --> child to child --> array --> parent. Or even just child --> parent if the cardinality is OK?
-
-        // refRoot, idRoot : structures of the complete results returned from children (their "roots")
-        final ResultStructure idRoot = idResult.structure;
-        final ResultStructure refRoot = refResult.structure;
-
-        final var tform = ResultStructureMerger.run(context, idRoot, refRoot, node.candidate.variable());
-
-        return tform.apply(idResult.data, refResult.data);
+        return node.tform.apply(idResult.data, refResult.data);
     }
 
     public QueryResult visit(MinusNode node) {

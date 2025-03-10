@@ -1,12 +1,15 @@
 package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.core.querying.Computation;
+import cz.matfyz.querying.resolver.queryresult.ResultStructureComputer.ComputationTform;
 
 public class FilterNode extends QueryNode {
 
     public QueryNode child() { return children.get(0); }
     public QueryNode setChild(QueryNode node) { return children.set(0, node); }
     public final Computation filter;
+
+    public ComputationTform tform;
 
     public FilterNode(QueryNode child, Computation filter) {
         this.children.add(child);

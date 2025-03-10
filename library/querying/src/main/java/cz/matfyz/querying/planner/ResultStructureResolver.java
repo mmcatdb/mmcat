@@ -13,13 +13,20 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.resolver.DatasourceTranslator;
+import cz.matfyz.querying.resolver.SelectionResolver;
+import cz.matfyz.querying.resolver.queryresult.ResultStructureComputer;
 import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates and assigns ResultStructures to the nodes of a QueryPlan.
  * The ResultStructure doesn't actually need to be returned, it's mostly just for convenience.
  */
 public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelectionResolver.class);
 
     public static void run(QueryPlan plan) {
         new ResultStructureResolver(plan.context, plan.root).run();
@@ -38,25 +45,26 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
     }
 
     public ResultStructure visit(DatasourceNode node) {
-        // TODO: or just use its context.rootStructure()
+        // TODO: We might be able to just use...
+        //   return context.rootStructure();
+        // If rootStructure changes during DataSourceTranslator.run(),
+        // then maybe try to split the translation so that it doesn't need to be run twice.
+
         final QueryStatement query = DatasourceTranslator.run(context, node);
         node.structure = query.structure();
 
-        // final var pullWrapper = context.getProvider().getControlWrapper(node.datasource).getPullWrapper();
-
-        // pullWrapper.executeQuery(query);
         return node.structure;
     }
 
     public ResultStructure visit(FilterNode node) {
         final var childStructure = node.child().accept(this);
 
-        // final var tform = ResultStructureComputer.run(childStructure, node.filter, true);
-        // LOGGER.debug("Filter transformation:\n{}", tform);
+        final var tform = ResultStructureComputer.run(childStructure, node.filter, true);
+        LOGGER.debug("Filter transformation:\n{}", tform);
 
-        // tform.apply(childStructure.data);
+        node.tform = tform;
+        node.structure = tform.outputStructure();
 
-        node.structure = childStructure.copy();
         return node.structure;
     }
 
@@ -64,13 +72,21 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
         if (node.candidate.type() == JoinType.Value)
             throw new UnsupportedOperationException("Joining by value is not implemented.");
 
-        final var idStructure = node.fromChild().accept(this);
-        final var refStructure = node.toChild().accept(this);
+        // Let's assume that the idRoot is the same as idProperty, i.e., the structure with the id is in the root of the result.
+        // TODO Relax this assumption. Probably after we use graph instead of a tree, because we would have to somewhat reorganize the result first.
+        // Maybe we can do that simply by turning the parent --> child to child --> array --> parent. Or even just child --> parent if the cardinality is OK?
 
-        final var tform = ResultStructureMerger.run(context, idStructure, refStructure, node.candidate.variable());
+        // refRoot, idRoot : structures of the complete results returned from children (their "roots")
+        final var idRoot = node.fromChild().accept(this);
+        final var refRoot = node.toChild().accept(this);
+
+        final var tform = ResultStructureMerger.run(context, idRoot, refRoot, node.candidate.variable());
+
+        node.tform = tform;
+        node.structure = tform.newStructure();
+
         // return tform.apply(idStructure.data, refStructure.data);
 
-        node.structure = tform.newStructure();
         return node.structure;
     }
 
