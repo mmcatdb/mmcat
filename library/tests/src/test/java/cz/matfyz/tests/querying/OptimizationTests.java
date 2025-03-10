@@ -111,8 +111,8 @@ public class OptimizationTests {
                         12/3/4 ?customerName ;
                         14 ?quantity .
 
+                    # FILTER(?customerName = "Alice" || ?quantity >= "2") // TODO: fix the bug which prevents this condition from being parsed
                     FILTER(?customerName != ?quantity)
-                    // FILTER(?customerName = "Alice" || ?quantity >= "2") // TODO: fix the bug which prevents this condition from being parsed
                 }
             """)
             .restrictQueryTree(description -> {
