@@ -26,7 +26,7 @@ export function DatabaseDocument({ fetchedData, setItemCount, kindReferences, ki
             <div>
                 {fetchedData.data.map((value, index) =>
                     <div key={index}>
-                        <DocumentComponent valueKey={null} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={0}/>
+                        <DocumentComponent valueKey={null} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
 
                         {(index != fetchedData.data.length - 1) && <Divider className='my-4'/> }
                     </div>,
@@ -38,7 +38,7 @@ export function DatabaseDocument({ fetchedData, setItemCount, kindReferences, ki
     return (
         <div>
             {fetchedData && fetchedData.data.length > 0 ? (
-                <DocumentComponent valueKey={null} value={fetchedData.data} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={0}/>
+                <DocumentComponent valueKey={null} value={fetchedData.data} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
             ) : (
                 <span>No rows to display.</span>
             )}

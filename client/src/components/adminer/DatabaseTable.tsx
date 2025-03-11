@@ -76,11 +76,11 @@ function TableBodyComponent({ fetchedData, propertyNames, references, kind, data
                     {item && typeof item === 'object' && !Array.isArray(item)
                         ? propertyNames.map(propertyName => (
                             <TableCell key={propertyName}>
-                                <DocumentComponent valueKey={propertyName} value={item[propertyName]} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={0}/>
+                                <DocumentComponent valueKey={propertyName} value={item[propertyName]} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
                             </TableCell>
                         ))
                         : <TableCell>
-                            <DocumentComponent valueKey={null} value={item} kindReferences={[]} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={0}/>
+                            <DocumentComponent valueKey={null} value={item} kindReferences={[]} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
                         </TableCell>}
                 </TableRow>
             ))}

@@ -8,14 +8,13 @@ import type { Id } from '@/types/id';
 type DocumentComponentProps = Readonly<{
     valueKey: unknown;
     value: unknown;
-    depth: number;
     kindReferences: KindReference[];
     kind: string;
     datasourceId: Id;
     datasources: Datasource[];
 }>;
 
-export function DocumentComponent({ valueKey, value, depth, kindReferences, kind, datasourceId, datasources }: DocumentComponentProps) {
+export function DocumentComponent({ valueKey, value, kindReferences, kind, datasourceId, datasources }: DocumentComponentProps) {
     const [ isOpen, setIsOpen ] = useState(true);
 
     if (!isOpen) {
@@ -40,7 +39,7 @@ export function DocumentComponent({ valueKey, value, depth, kindReferences, kind
                 {len === 1 ? (
                     <span className='mx-3'>
                         <strong className='mr-3'>{Object.keys(value)[0]}:</strong>
-                        <DocumentComponent valueKey={Object.keys(value)[0]} value={Object.values(value)[0] as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
+                        <DocumentComponent valueKey={Object.keys(value)[0]} value={Object.values(value)[0] as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                     </span>
                 ) : (
                     <ul>
@@ -49,7 +48,7 @@ export function DocumentComponent({ valueKey, value, depth, kindReferences, kind
                             .map(([ key, val ]) => (
                                 <li className='ps-8' key={key}>
                                     <strong className='mr-3'>{key}:</strong>
-                                    <DocumentComponent valueKey={key} value={val as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
+                                    <DocumentComponent valueKey={key} value={val as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                                 </li>
                             ))}
                     </ul>
@@ -77,13 +76,13 @@ export function DocumentComponent({ valueKey, value, depth, kindReferences, kind
                 {/* If length is 1, just render a single line, otherwise render the entire list */}
                 {len === 1 ? (
                     <span className='mx-3'>
-                        <DocumentComponent valueKey={null} value={value[0] as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
+                        <DocumentComponent valueKey={null} value={value[0] as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                     </span>
                 ) : (
                     <ul>
                         {value.map((item, index) => (
                             <li className='ps-8' key={index}>
-                                <DocumentComponent valueKey={null} value={item as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={depth + 1} />
+                                <DocumentComponent valueKey={null} value={item as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                             </li>
                         ))}
                     </ul>
