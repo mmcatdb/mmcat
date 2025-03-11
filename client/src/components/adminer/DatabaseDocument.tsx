@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Divider } from '@nextui-org/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataResponse';
@@ -19,6 +20,20 @@ export function DatabaseDocument({ fetchedData, setItemCount, kindReferences, ki
         const count = fetchedData?.metadata.itemCount;
         count ? setItemCount(count) : setItemCount(0);
     }, [ fetchedData ]);
+
+    if (fetchedData && fetchedData.data.length > 1) {
+        return (
+            <div>
+                {fetchedData.data.map((value, index) =>
+                    <div key={index}>
+                        <DocumentComponent valueKey={null} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} depth={0}/>
+
+                        {(index != fetchedData.data.length - 1) && <Divider className='my-4'/> }
+                    </div>,
+                )}
+            </div>
+        );
+    }
 
     return (
         <div>
