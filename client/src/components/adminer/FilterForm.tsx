@@ -21,14 +21,14 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 ))}
             </div>
 
-            <div className='mt-5 inline-flex gap-3 items-center'>
+            <div className='mt-5 flex flex-wrap gap-3 items-center'>
                 <div className='flex items-center gap-2'>
                     <label htmlFor='limit'>
                         Limit:
                     </label>
                     <Input
                         id='limit'
-                        className='text-sm max-h-10'
+                        className='text-sm max-h-10 w-min min-w-24'
                         aria-label='Limit'
                         type='number'
                         min='0'

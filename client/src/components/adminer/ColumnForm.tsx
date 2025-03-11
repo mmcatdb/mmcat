@@ -15,9 +15,9 @@ type ColumnFormProps = Readonly<{
 export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: ColumnFormProps) {
     const operators = OPERATOR_MAPPING[datasourceType];
     return (
-        <div className='mt-0 mr-5 inline-flex gap-1 items-center'>
+        <div className='mt-0 mr-5 flex flex-wrap gap-1 items-center'>
             <Autocomplete
-                className='py-0.5 text-sm'
+                className='py-0.5 text-sm w-min min-w-56'
                 aria-label='Column name'
                 placeholder='Enter property name'
                 defaultSelectedKey={ filter.propertyName ?? undefined }
@@ -30,7 +30,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
             </Autocomplete>
 
             <Select
-                className='py-0.5 text-sm'
+                className='py-0.5 text-sm w-min min-w-36'
                 aria-label='Operator'
                 placeholder='Select an operator'
                 defaultSelectedKeys={ [ filter.operator ] }
@@ -45,7 +45,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
             </Select>
 
             <Input
-                className='py-0.5 text-sm'
+                className='py-0.5 text-sm w-min min-w-56'
                 aria-label='Column value'
                 placeholder='Enter property value'
                 value={filter.propertyValue}
@@ -54,7 +54,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
             />
 
             <Button
-                className='py-0.5 text-sm'
+                className='py-0.5 text-sm min-w-4'
                 type='submit'
                 color='danger'
                 variant='ghost'
