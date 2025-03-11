@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import cz.matfyz.core.adminer.GraphResponse.GraphElement;
+import cz.matfyz.core.adminer.GraphResponse.GraphNode;
+import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
 
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
@@ -43,7 +45,7 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
         }
         properties.put("labels", labels);
 
-        return new GraphElement(id, properties);
+        return new GraphNode(id, properties);
     }
 
     /**
@@ -60,7 +62,10 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
 
         relationship.asRelationship().asMap().forEach(properties::put);
 
-        return new GraphElement(id, properties);
+        String startNodeId = relationship.asRelationship().startNodeElementId().split(":")[2];
+        String endNodeId = relationship.asRelationship().endNodeElementId().split(":")[2];
+
+        return new GraphRelationship(id, properties, startNodeId, endNodeId);
     }
 
     /**

@@ -19,5 +19,12 @@ public class GraphResponse extends DataResponse {
         return data;
     }
 
-    public record GraphElement (String id , Map<String, Object> properties) {}
+    public interface GraphElement {
+        String id();
+        Map<String, Object> properties();
+    }
+
+    public record GraphNode(String id, Map<String, Object> properties) implements GraphElement {}
+
+    public record GraphRelationship(String id, Map<String, Object> properties, String startNodeId, String endNodeId) implements GraphElement {}
 }
