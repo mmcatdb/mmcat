@@ -25,14 +25,19 @@ export function DatabaseTable({ fetchedData, setItemCount, kindReferences, kind,
         return <p>No rows to display.</p>;
 
     // If the data are for graph database, we want to display just properties in the table view
-    if (fetchedData.data.every((item: Record<string, string> | GraphResponseData) => 'properties' in item)){
+    if (fetchedData.data.every((item: Record<string, string> | GraphResponseData) => 'properties' in item)) {
         const modifiedData = { metadata: fetchedData.metadata, data: [] } as TableResponse;
 
         for (const element of fetchedData.data) {
             const { properties, ...rest } = element;
+
+            const prefixedProperties = Object.fromEntries(
+                Object.entries(properties as Record<string, string>).map(([ key, value ]) => [ `properties.${key}`, value ]),
+            );
+
             modifiedData.data.push({
                 ...rest,
-                ...(properties as Record<string, string>),
+                ...prefixedProperties,
             } as Record<string, string>);
         }
 
