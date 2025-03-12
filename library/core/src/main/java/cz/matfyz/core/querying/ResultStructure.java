@@ -22,7 +22,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class ResultStructure implements Tree<ResultStructure>, Printable, Serializable {
 
     public final String name;
-    /** This doesn't depend only on the signature. E.g., a filter or redundancy might cause an array to become a 1:1 relationship. */
+    /**
+     * If true, there is an array between this node and its parent (if there is no parent, then there is just the array).
+     * This doesn't depend only on the signature. E.g., a filter or redundancy might cause an array to become a 1:1 relationship.
+     * A path is an array only from parent to child, not the other way around - there is always at most one parent for a child.
+     */
     public final boolean isArray;
     /** Each result structure node corresponds to a variable. */
     public final Variable variable;

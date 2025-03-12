@@ -197,7 +197,7 @@ public class ResultStructureComputer {
         // However, if User has Order, and there is n:1 path from Order to User, we can't filter User by Order.
         // So, we go as far up as possible, until we find a node that has a 1:n path to the reference node (or the root).
         ResultStructure output = reference;
-        while (output.parent() != null && !output.parent().isArray)
+        while (output.parent() != null && !output.isArray)
             output = output.parent();
 
         return output;
@@ -255,7 +255,7 @@ public class ResultStructureComputer {
             // There is only one rule: there must be a 1:1 (or n:1) path from the reference node to each argument of its expression.
             // However, in order to make the reference node unambiguous, we want it to be as close to the arguments as possible.
             //  - If the expression uses only one variable, it is the reference node.
-            //  - If it uses multiple variables, it is the one closest to them (it should be easy to see there is always only one such node).
+            //  - If it uses multiple variables, it is the one closest to them (see comments below what exactly that means).
             //  - If none variables are used (e.g., `FILTER(1 > 0)`, for whatever reason), it's null.
 
             // We start by finding the reference nodes of all arguments.
@@ -276,8 +276,12 @@ public class ResultStructureComputer {
                 return references.iterator().next();
 
             // There are multiple different argument reference nodes.
-            // All edges are oriented - from parent to child (by default), or the other way around (for arrays). The path from the common reference node to any of the argument references can't go against the edge direction (2nd rule).
-            // Therefore, there must be at most one viable reference node! (Just draw the arrows and you'll see.)
+            // Some edges are oriented - if the child is array, there is 1:n path from the parent to the child, so we can't go this way from the reference node to it's aguments (2nd rule).
+            // However, each child has only one parent, so we can always go from child to parent.
+            // In order for the reference node to be the closest one, we will take only those that are on the path from one argument to another.
+            // This ensures that if there are multiple viable reference nodes, there must be a 1:1 path between each other. (Just draw the arrows and you'll see.)
+            // If there are still mutliple options, we will choose the one that is highest in the tree.
+            // It should be easy to prove that there is only one such node (if there is any), and that it doesn't depend on the order of the arguments.
 
             final var iterator = references.iterator();
             ResultStructure ans = iterator.next();
@@ -298,44 +302,36 @@ public class ResultStructureComputer {
         private static @Nullable ResultStructure tryFindCommonReferenceNodeForPair(ResultStructure a, ResultStructure b) {
             final var path = GraphUtils.findPath(a, b);
 
-            @Nullable ResultStructure output = null;
-
+            // We should start at `a` and got to the common root. We have to stop at the first array we find, because we can always go against the array from the child to the parent, but not the other way around.
+            @Nullable ResultStructure aBottomArray = null;
             for (final var structure : path.sourceToRoot()) {
-                final var isParentArray = structure.parent().isArray;
-
-                if (output == null) {
-                    // Reference node not found yet - we try to move as far as possible against the edge direction.
-                    if (isParentArray)
-                        // We can't move any further, so we have to stop here. However, we continue the algorithm to make sure that both paths are valid.
-                        output = structure;
-                }
-                else {
-                    if (!isParentArray)
-                        // Reference node is found, so we have to move with the edge direction. But we can't, so there is none.
-                        return null;
+                if (structure.isArray) {
+                    aBottomArray = structure;
+                    break;
                 }
             }
 
+            // Now we do the same thing, but on the other path. But the path is reversed, so we don't stop at the first array.
+            @Nullable ResultStructure bBottomArray = null;
             for (final var structure : path.rootToTarget()) {
-                final var parent = structure.parent();
-
-                if (output == null) {
-                    // We still need to go against the edge direction, but now the isArray flag is inverted.
-                    if (!parent.isArray)
-                        output = parent;
-                }
-                else {
-                    if (parent.isArray)
-                        // Again, the same but inverted.
-                        return null;
-                }
+                if (structure.isArray)
+                    bBottomArray = structure;
             }
 
-            if (output == null)
-                // We tried so hard and got so far, but in the end, it doesn't even matter.
-                output = b;
+            if (aBottomArray == null) {
+                if (bBottomArray != null)
+                    return bBottomArray;
 
-            return output;
+                // All nodes can be the reference node, so we choose the highest one - the common root.
+                final var aTop = path.sourceToRoot().size() == 0 ? a : path.sourceToRoot().getLast();
+                return aTop.parent();
+            }
+
+            if (bBottomArray == null)
+                return aBottomArray;
+
+            // We tried so hard and got so far, but in the end, it doesn't even matter.
+            return null;
         }
 
     }
