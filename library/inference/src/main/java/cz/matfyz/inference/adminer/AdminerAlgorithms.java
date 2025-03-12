@@ -82,21 +82,17 @@ public class AdminerAlgorithms {
      * Constructs a WHERE clause based on a list of filters.
      *
      * @param filters The filters to apply.
-     * @param unlabeled True if the query matches just unlabeled nodes.
-     * @param name The alias assigned to the graph element in the query.
+     * @param alias The alias assigned to the graph element in the query.
      *             For graph databases: 'n' for nodes, 'r' for relationships.
      *             For non-graph databases: {@code null}.
      * @return A WHERE clause as a {@link String}.
      */
-    public static String createWhereClause(AdminerAlgorithmsInterface algorithms, List<AdminerFilter> filters, boolean unlabeled, String name) {
+    public static String createWhereClause(AdminerAlgorithmsInterface algorithms, List<AdminerFilter> filters, String alias) {
         if ((filters == null || filters.isEmpty())) {
-            if (unlabeled) {
-                return "WHERE size(labels(n)) = 0";
-            }
             return "";
         }
 
-        StringBuilder whereClause = new StringBuilder("WHERE ");
+        StringBuilder whereClause = new StringBuilder();
 
         for (int i = 0; i < filters.size(); i++) {
             AdminerFilter filter = filters.get(i);
@@ -108,15 +104,11 @@ public class AdminerAlgorithms {
 
             Double doubleValue = AdminerAlgorithms.parseNumeric(filter.propertyValue());
 
-            appendPropertyName(whereClause, name, filter.propertyName(), doubleValue, algorithms);
+            appendPropertyName(whereClause, alias, filter.propertyName(), doubleValue, algorithms);
 
             appendOperator(whereClause, operator);
 
             appendPropertyValue(whereClause, filter.propertyValue(), operator, doubleValue, algorithms);
-        }
-
-        if (unlabeled) {
-            whereClause.append(" AND size(labels(n)) = 0");
         }
 
         return whereClause.toString();

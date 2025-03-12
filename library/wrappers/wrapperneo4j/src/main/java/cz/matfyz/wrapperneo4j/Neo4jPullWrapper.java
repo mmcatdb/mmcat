@@ -266,6 +266,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
     }
 
+    private final String WHERE = "WHERE ";
+
     /**
      * Retrieves a list of distinct kind names (labels and relationship types).
      *
@@ -310,10 +312,20 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      */
     private GraphResponse getNode(Session session, String kindName, List<AdminerFilter> filters, boolean unlabeled, String limit, String offset) {
         String queryBase = unlabeled ? "MATCH (n) " : "MATCH (n:" + kindName + ") ";
-        String whereClause = AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, unlabeled, "n");
+
+        StringBuilder whereClause = new StringBuilder(AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, "n"));
+
+        if (!whereClause.isEmpty()) {
+            whereClause.insert(0, WHERE);
+        }
+
+        if (kindName == null) {
+            whereClause.append(whereClause.isEmpty() ? WHERE : " AND ");
+            whereClause.append("size(labels(n)) = 0");
+        }
 
         List<GraphElement> data = session.executeRead(tx -> {
-            var query = new Query(queryBase + whereClause + " RETURN n SKIP " + offset + " LIMIT " + limit + ";");
+            var query = new Query(queryBase + whereClause.toString() + " RETURN n SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
                 .map(node -> Neo4jAlgorithms.getNodeProperties(node.get("n")))
@@ -323,7 +335,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         Result countQueryResult = session.run(queryBase + " RETURN COUNT(n) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> properties = Neo4jAlgorithms.getNodePropertyNames(session);
+        Set<String> properties = Neo4jAlgorithms.getNodePropertyNames(session, kindName);
 
         return new GraphResponse(data, itemCount, properties);
     }
@@ -332,15 +344,26 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * Retrieves relationship data from the graph based on the specified filters and pagination parameters.
      *
      * @param session The Neo4j session to use for the query.
+     * @param kindName The name of the kind.
      * @param filters The filters to apply.
      * @param limit The maximum number of results to return.
      * @param offset The number of results to skip.
      * @return A {@link GraphResponse} containing the relationships and metadata.
      */
-    private GraphResponse getRelationship(Session session, List<AdminerFilter> filters, String limit, String offset) {
-        String whereClause = AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, false, "r");
+    private GraphResponse getRelationship(Session session, String kindName, List<AdminerFilter> filters, String limit, String offset) {
+        StringBuilder whereClause = new StringBuilder(AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, "r"));
+
+        if (!whereClause.isEmpty()) {
+            whereClause.insert(0, WHERE);
+        }
+
+        if (kindName != null) {
+            whereClause.append(whereClause.isEmpty() ? WHERE : " AND ");
+            whereClause.append("type(r) = '" + kindName + "'");
+        }
+
         List<GraphElement> data = session.executeRead(tx -> {
-            var query = new Query("MATCH ()-[r]->() " + whereClause + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
+            var query = new Query("MATCH ()-[r]->() " + whereClause.toString() + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
                 .map(relation -> Neo4jAlgorithms.getRelationshipProperties(relation.get("r")))
@@ -350,7 +373,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         Result countQueryResult = session.run("MATCH ()-[r]->() " + whereClause + " RETURN COUNT(r) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> properties = Neo4jAlgorithms.getRelationshipPropertyNames(session);
+        Set<String> properties = Neo4jAlgorithms.getRelationshipPropertyNames(session, kindName);
 
         return new GraphResponse(data, itemCount, properties);
     }
@@ -367,11 +390,11 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      */
     @Override public GraphResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
         try (Session session = provider.getSession()) {
-            if (kindName.equals(kindName.toUpperCase())) {
-                return getRelationship(session, filters, limit, offset);
-            }
-
             boolean unlabeled = kindName.equals("unlabeled");
+
+            if (kindName.equals(kindName.toUpperCase())) {
+                return getRelationship(session, unlabeled ? null:kindName, filters, limit, offset);
+            }
 
             return getNode(session, kindName, filters, unlabeled, limit, offset);
         } catch (Exception e) {

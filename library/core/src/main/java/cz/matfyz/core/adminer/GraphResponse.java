@@ -20,11 +20,11 @@ public class GraphResponse extends DataResponse {
     }
 
     public interface GraphElement {
-        String id();
+        String elementId();
         Map<String, Object> properties();
     }
 
-    public record GraphNode(String id, Map<String, Object> properties) implements GraphElement {}
+    public record GraphNode(String elementId, Map<String, Object> properties) implements GraphElement {}
 
-    public record GraphRelationship(String id, Map<String, Object> properties, String startNodeId, String endNodeId) implements GraphElement {}
+    public record GraphRelationship(String elementId, Map<String, Object> properties, String startNodeId, String endNodeId) implements GraphElement {}
 }

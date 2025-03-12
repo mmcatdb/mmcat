@@ -225,7 +225,11 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         ){
             List<Map<String, String>> data = new ArrayList<>();
 
-            String whereClause = AdminerAlgorithms.createWhereClause(PostgreSQLAlgorithms.getInstance(), filter, false, null);
+            String whereClause = AdminerAlgorithms.createWhereClause(PostgreSQLAlgorithms.getInstance(), filter, null);
+
+            if (!whereClause.isEmpty()) {
+                whereClause = "WHERE " + whereClause;
+            }
 
             String selectQuery = "SELECT * FROM \"" + kindName +  "\" " + whereClause + " LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(selectQuery);

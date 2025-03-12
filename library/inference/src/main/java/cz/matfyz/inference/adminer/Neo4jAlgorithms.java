@@ -72,10 +72,23 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      * Retrieves a set of distinct property names based on a specified match clause.
      *
      * @param session The Neo4j session to use for the query.
-     * @param matchClause The Cypher match clause to identify nodes or relationships.
+     * @param kindName The name of the kind.
+     * @param forNode If {@code true}, retrieves properties for nodes; if {@code false}, retrieves properties for relationships.
      * @return A {@link Set} of property names.
      */
-    private static Set<String> getPropertyNames(Session session, String matchClause) {
+    private static Set<String> getPropertyNames(Session session, String kindName, boolean forNode) {
+        StringBuilder matchClause = new StringBuilder("MATCH ");
+
+        if (forNode) {
+            matchClause.append(kindName != null ? "(a: " + kindName + ")" : "(a)");
+        } else {
+            matchClause.append("()-[a]-()");
+
+            if (kindName != null) {
+                matchClause.append(" WHERE type(a) = '" + kindName + "'");
+            }
+        }
+
         Set<String> properties = new HashSet<>();
 
         Result queryResult = session.run(String.format("""
@@ -83,10 +96,16 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
             UNWIND keys(a) AS key
             RETURN DISTINCT key
             ORDER BY key;
-            """, matchClause));
+            """, matchClause.toString()));
         while (queryResult.hasNext()) {
             Record queryRecord = queryResult.next();
-            properties.add(queryRecord.get("key").asString());
+            properties.add("properties." + queryRecord.get("key").asString());
+        }
+        properties.add("elementId");
+
+        if (!forNode) {
+            properties.add("startNodeId");
+            properties.add("endNodeId");
         }
 
         return properties;
@@ -96,20 +115,22 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      * Retrieves a set of distinct property names for all nodes.
      *
      * @param session The Neo4j session to use for the query.
+     * @param kindName The name of the kind.
      * @return A {@link Set} of node property names (keys).
      */
-    public static Set<String> getNodePropertyNames(Session session) {
-        return getPropertyNames(session, "MATCH (a)");
+    public static Set<String> getNodePropertyNames(Session session, String kindName) {
+        return getPropertyNames(session, kindName, true);
     }
 
     /**
      * Retrieves a set of distinct property names for all relationships.
      *
      * @param session The Neo4j session to use for the query.
+     * @param kindName The name of the kind.
      * @return A {@link Set} of relationship property names (keys).
      */
-    public static Set<String> getRelationshipPropertyNames(Session session) {
-        return getPropertyNames(session, "MATCH ()-[a]->()");
+    public static Set<String> getRelationshipPropertyNames(Session session, String kindName) {
+        return getPropertyNames(session, kindName, false);
     }
 
     /**
