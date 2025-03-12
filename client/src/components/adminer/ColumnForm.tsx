@@ -3,7 +3,7 @@ import { IoTrashBin } from 'react-icons/io5';
 import { OPERATOR_MAPPING, type Operator } from '@/types/adminer/Operators';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { AdminerStateAction } from '@/types/adminer/Reducer';
-import { type DatasourceType } from '@/types/datasource';
+import type { DatasourceType } from '@/types/datasource';
 
 type ColumnFormProps = Readonly<{
     filter: PropertyFilter;
