@@ -5,14 +5,13 @@ import { api } from '@/api';
 import { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
-import { Button } from '@nextui-org/react';
+import { Button, Card } from '@nextui-org/react';
 import { AddIcon } from '@/components/icons/PlusIcon';
 import { useLoaderData } from 'react-router-dom';
 
 export function DatasourcesPage() {
     const data = useLoaderData() as DatasourcesLoaderData;
     const [ datasources, setDatasources ] = useState(data.datasources);
-
     const [ isModalOpen, setIsModalOpen ] = useState(false);
 
     function onDatasourceCreated(newDatasource: Datasource) {
@@ -31,9 +30,10 @@ export function DatasourcesPage() {
     }
 
     return (
-        <div>
+        <div className='p-8 space-y-8'>
+            {/* Header Section */}
             <div className='flex items-center justify-between'>
-                <h1 className='text-xl font-semibold'>Datasources</h1>
+                <h1 className='text-2xl font-bold'>Datasources</h1>
                 <Button
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
@@ -43,20 +43,16 @@ export function DatasourcesPage() {
                 </Button>
             </div>
 
-            <div className='mt-5'>
-                {datasources.length > 0 ? (
-                    <DatasourcesTable
-                        datasources={datasources}
-                        deleteDatasource={deleteDatasource}
-                    />
-                ) : (
-                    <EmptyState
-                        message='No datasources available.'
-                        buttonText='+ Add Datasource'
-                        onButtonClick={() => setIsModalOpen(true)}
-                    />
-                )}
-            </div>
+            {/* Table Section */}
+            {datasources.length > 0 ? (
+                <DatasourcesTable datasources={datasources} deleteDatasource={deleteDatasource} />
+            ) : (
+                <EmptyState
+                    message='No datasources available.'
+                    buttonText='+ Add Datasource'
+                    onButtonClick={() => setIsModalOpen(true)}
+                />
+            )}
 
             <DatasourceModal
                 isOpen={isModalOpen}

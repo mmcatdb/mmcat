@@ -21,6 +21,18 @@ import { CheckCircleIcon, QuestionMarkCircleIcon,
     StopCircleIcon,
 } from '@heroicons/react/24/outline';
 import { type JobState } from '@/types/job';
+import { MdBolt, MdDashboard, MdOutlineDashboard, MdWorkOutline } from 'react-icons/md';
+import {
+    MdOutlineBolt,
+    MdWork,
+} from 'react-icons/md';
+import {
+    HiOutlinePencilSquare,
+    HiPencilSquare,
+    HiMiniMagnifyingGlass,
+} from 'react-icons/hi2';
+import { HiDatabase, HiOutlineDatabase } from 'react-icons/hi';
+import { BiCategory, BiSolidCategory } from 'react-icons/bi';
 
 type IconSet = {
     outline: JSX.Element;
@@ -58,6 +70,34 @@ export const sidebarIconMap: Record<string, IconSet> = {
         outline: <PlayCircleIconOutline className={sidebarIconStyle} />,
         solid: <PlayCircleIconSolid className={sidebarIconStyle} />,
     },
+    shcemacategory: {
+        outline: <BiCategory className={sidebarIconStyle} />,
+        solid: <BiSolidCategory className={sidebarIconStyle} />,
+    },
+    overview: {
+        outline: <MdOutlineDashboard className={sidebarIconStyle} />,
+        solid: <MdDashboard className={sidebarIconStyle} />,
+    },
+    editor: {
+        outline: <HiOutlinePencilSquare className={sidebarIconStyle} />,
+        solid: <HiPencilSquare className={sidebarIconStyle} />,
+    },
+    datasources: {
+        outline: <HiOutlineDatabase className={sidebarIconStyle} />,
+        solid: <HiDatabase className={sidebarIconStyle} />,
+    },
+    actions: {
+        outline: <MdOutlineBolt className={sidebarIconStyle} />,
+        solid: <MdBolt className={sidebarIconStyle} />,
+    },
+    jobs: {
+        outline: <MdWorkOutline className={sidebarIconStyle} />,
+        solid: <MdWork className={sidebarIconStyle} />,
+    },
+    querying: {
+        outline: <HiMiniMagnifyingGlass className={sidebarIconStyle} />,
+        solid: <HiMiniMagnifyingGlass className={sidebarIconStyle} />,
+    },
 };
 
 const jobStatusIconStyle = 'w-8 h-8';
@@ -67,7 +107,7 @@ const jobStateStyles: Record<JobState, { color: string, bg: string }> = {
     Ready: { color: 'text-primary-400', bg: 'bg-primary-400' },
     Running: { color: 'text-primary-500', bg: 'bg-primary-500' },
     Waiting: { color: 'text-warning-500', bg: 'bg-yellow-500' },
-    Finished: { color: 'text-success-500', bg: 'bg-success-500' },
+    Finished: { color: 'text-success-500', bg: 'bg-success-400' },
     Failed: { color: 'text-danger-400', bg: 'bg-danger-400' },
 };
 

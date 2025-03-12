@@ -167,7 +167,7 @@ export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
                 <strong>Signature:</strong> {selectedMorphism!.schema.signature.toString()}
             </p>
             <div>
-                <p>Cardinality:</p>
+                <p>Minimum Cardinality:</p>
                 <RadioGroup
                     value={minCardinality}
                     onChange={handleCardinalityChange}

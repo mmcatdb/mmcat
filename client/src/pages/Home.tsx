@@ -3,27 +3,26 @@ import { CustomLink } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Card } from '@nextui-org/react';
 import { toast } from 'react-toastify';
+import { BookOpenIcon } from '@heroicons/react/24/solid';
+import { FaDatabase, FaPlus } from 'react-icons/fa';
 
-const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
-
-const EXAMPLE_SCHEMAS = [
-    'basic',
-] as const;
+const DOCUMENTATION_URL = 'https://mmcatdb.com/getting-started/quick-start/';
+const EXAMPLE_SCHEMAS = [ 'basic' ] as const;
 
 export function Home() {
-    const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>();
+    // const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>([]);
     const [ isCreatingSchema, setIsCreatingSchema ] = useState(false);
     const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
     const [ isModalOpen, setIsModalOpen ] = useState(false);
+    // const [ showAllCategories, setShowAllCategories ] = useState(false);
 
     async function fetchCategories() {
         const result = await api.schemas.getAllCategoryInfos({});
         if (!result.status)
             return;
-
-        setCategories(result.data.map(SchemaCategoryInfo.fromServer));
+        // setCategories(result.data.map(SchemaCategoryInfo.fromServer));
     }
 
     useEffect(() => {
@@ -31,82 +30,157 @@ export function Home() {
         void fetchCategories();
     }, []);
 
-    const handleCreateSchema = useCallback(
-        async (name: string, isExample = false) => {
-            isExample ? setIsCreatingExampleSchema(true) : setIsCreatingSchema(true);
+    const handleCreateSchema = useCallback(async (name: string, isExample = false) => {
+        isExample ? setIsCreatingExampleSchema(true) : setIsCreatingSchema(true);
 
-            const response = isExample
-                ? await api.schemas.createExampleCategory({ name })
-                : await api.schemas.createNewCategory({}, { label: name });
+        const response = isExample
+            ? await api.schemas.createExampleCategory({ name })
+            : await api.schemas.createNewCategory({}, { label: name });
 
-            isExample ? setIsCreatingExampleSchema(false) : setIsCreatingSchema(false);
+        isExample ? setIsCreatingExampleSchema(false) : setIsCreatingSchema(false);
 
-            if (!response.status) {
-                toast.error('Error creating schema category.');
-                return; 
-            }
+        if (!response.status) {
+            toast.error('Error creating schema category.');
+            return; 
+        }
 
-            const newCategory = SchemaCategoryInfo.fromServer(response.data);
-            setCategories(categories =>
-                categories ? [ ...categories, newCategory ] : [ newCategory ],
-            );
+        const newCategory = SchemaCategoryInfo.fromServer(response.data);
+        // setCategories(categories =>
+        //     categories ? [ ...categories, newCategory ] : [ newCategory ],
+        // );
 
-            toast.success(
-                `${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`,
-            );
-        },
-        [],
-    );
+        toast.success(
+            `${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`,
+        );
+    }, []);
 
     return (
-        <div>
-            <h1 className='heading-main'>MM-cat</h1>
-            <p>
-                A multi-model data modeling framework based on category theory.
-            </p>
-            <br />
-            <p>
-                Detailed instructions on how to use this tool can be found <a href={DOCUMENTATION_URL} className='underline text-default-600 hover:text-default-800 visited:text-secondary-600'>here</a>.
-            </p>
-            <h2 className='mt-3'>Current schema categories</h2>
-            {categories ? (<>
-                <div className='flex flex-col'>
-                    {categories.map(category => (
-                        <div key={category.id}>
-                            <CustomLink to={routes.category.index.resolve({ categoryId: category.id })}>
-                                {category.label}
-                            </CustomLink>
-                        </div>
-                    ))}
+        <div className='p-8 space-y-12'>
+            {/* Main Section */}
+            <div className='space-y-6'>
+                <h1 className='text-4xl font-bold text-primary-500'>MM-cat</h1>
+                <p className='text-default-700 text-lg'>
+                    <span className='font-semibold'>A multi-model data modeling framework</span> powered by category theory.  
+                    <span className='font-semibold'> Model, transform, and explore</span> multi-model data, without worrying about database-specific limitations.
+                </p>
+                <div className='flex gap-4'>
+                    <Button
+                        as='a'
+                        href={DOCUMENTATION_URL}
+                        // variant='filled'
+                        color='primary'
+                        target='_blank'
+                        startContent={<BookOpenIcon className='w-6 h-6' />}
+                    >
+                        Read Documentation
+                    </Button>
+                    {/* <Button
+                        as='a'
+                        href={routes.category.index.resolve({ categoryId: 'basic' })}
+                        variant='ghost'
+                        color='secondary'
+                        startContent={<PlayIcon className='w-6 h-6' />}
+                    >
+                        Explore Example Schema
+                    </Button> */}
                 </div>
-                <h2 className='mt-3'>Add an example schema category</h2>
-                <div className='flex'>
+            </div>
+
+            {/* Getting Started */}
+            <div className='space-y-6'>
+                <h2 className='text-2xl font-semibold '>Getting Started</h2>
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
+                    <Card className='p-6 shadow-medium hover:shadow-large transition'>
+                        <FaDatabase className='w-12 h-12 mx-auto text-primary-500' />
+                        <h3 className='mt-4 font-semibold text-lg'>1. Connect to a Data Source</h3>
+                        <p className='text-default-600'>Link your existing databases or files to start modeling.</p>
+                        <Button as={CustomLink} to={routes.datasources} variant='ghost' color='default'>
+                            Connect Data
+                        </Button>
+                    </Card>
+
+                    <Card className='p-6 shadow-medium hover:shadow-large transition'>
+                        <FaPlus className='w-12 h-12 mx-auto text-secondary-500' />
+                        <h3 className='mt-4 font-semibold text-lg'>2. Create a Schema Category</h3>
+                        <p className='text-default-600'>Start a new project to model your data.</p>
+                        <Button onPress={() => handleCreateSchema('new-schema')} variant='ghost' color='default'>
+                            + Schema Category
+                        </Button>
+                    </Card>
+
+                    <Card className='p-6 shadow-medium hover:shadow-large transition'>
+                        <BookOpenIcon className='w-12 h-12 mx-auto text-green-500' />
+                        <h3 className='mt-4 font-semibold text-lg'>3. Define Objects & Relations</h3>
+                        <p className='text-default-600'>Use the Schema Category Editor to define objects and relations.</p>
+                        <Button as={CustomLink} to={routes.categories} variant='ghost' color='default'>
+                            Select Schema
+                        </Button>
+                    </Card>
+                </div>
+            </div>
+
+            {/* Schema Categories Section */}
+            <div className='space-y-6'>
+                <h2 className='text-2xl font-semibold'>Add a Schema Category</h2>
+                <p className='text-default-700'>
+                    A <span className='font-semibold'>Schema Category</span> is a high-level model of your data, defining objects (data types) and relationships without worrying about database structure. It helps you focus on meaning, not storage.
+                </p>
+                <p className='text-default-600 font-semibold'>Start from scratch or explore a basic example:</p>
+                <div className='flex flex-wrap gap-3'>
+                    <Button
+                        onPress={() => setIsModalOpen(true)}
+                        isLoading={isCreatingSchema}
+                        color='primary'
+                        variant='ghost'
+                        title='Add an empty schema category'
+                    >
+                        + Add Empty Schema
+                    </Button>
                     {EXAMPLE_SCHEMAS.map(example => (
                         <Button 
                             key={example} 
                             onPress={() => handleCreateSchema(example, true)}
                             isLoading={isCreatingExampleSchema}
-                            color='primary'
-                            variant='bordered'
+                            color='secondary'
+                            variant='ghost'
                             title='Add an example (pre-made) schema category'
                         >
                             + Add {example} Schema
                         </Button>
                     ))}
                 </div>
-                <h2 className='mt-3'>Add an empty schema category</h2>
-                <Button
-                    key={'newSchema'} 
-                    onPress={() => setIsModalOpen(true)}
-                    isLoading={isCreatingSchema}
-                    color='primary'
-                    title='Add an empty schema category'
-                >
-                        + Add schema
-                </Button>
-            </>) : (
-                <p>Loading...</p>
-            )}
+            </div>
+
+            {/* Current Schema Categories */}
+            {/* <div className='space-y-6'>
+                <h2 className='text-2xl font-semibold'>Explore existing Schema Categories</h2>
+                {categories.length > 0 ? (
+                    <>
+                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                            {(showAllCategories ? categories : categories.slice(0, 4)).map(category => (
+                                <Card key={category.id} isPressable className='p-4 shadow-medium hover:shadow-large transition'>
+                                    <CustomLink to={routes.category.index.resolve({ categoryId: category.id })}>
+                                        <CardBody>
+                                            {category.label}
+                                        </CardBody>
+                                    </CustomLink>
+                                </Card>
+                            ))}
+                        </div>
+                        {categories.length > 4 && (
+                            <Button
+                                variant='ghost'
+                                className='text-primary-500'
+                                onPress={() => setShowAllCategories(!showAllCategories)}
+                            >
+                                {showAllCategories ? 'See Less' : 'See More'}
+                            </Button>
+                        )}
+                    </>
+                ) : (
+                    <p className='text-default-500'>Loading...</p>
+                )}
+            </div> */}
 
             <AddSchemaModal
                 isOpen={isModalOpen}
@@ -125,12 +199,7 @@ type AddSchemaModalProps = {
     isSubmitting: boolean;
 };
 
-export function AddSchemaModal({
-    isOpen,
-    onClose,
-    onSubmit,
-    isSubmitting,
-}: AddSchemaModalProps) {
+export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddSchemaModalProps) {
     const [ label, setLabel ] = useState('');
 
     const handleSubmit = () => {
@@ -150,7 +219,7 @@ export function AddSchemaModal({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} isDismissable={false}>
             <ModalContent>
-                <ModalHeader>Add New Schema</ModalHeader>
+                <ModalHeader className='text-lg font-semibold'>Add New Schema</ModalHeader>
                 <ModalBody>
                     <Input
                         label='Schema Label'

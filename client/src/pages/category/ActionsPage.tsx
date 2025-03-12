@@ -165,7 +165,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                 {sortedActions.map(action => (
                     <TableRow
                         key={action.id}
-                        className='cursor-pointer hover:bg-default-100 focus:bg-default-700'
+                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
                             ...(showTableIDs

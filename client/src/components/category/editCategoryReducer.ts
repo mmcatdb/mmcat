@@ -91,15 +91,9 @@ function select(state: EditCategoryState, action: SelectAction): EditCategorySta
             return state;
     }
 
-    // Automatically proceed when exactly two nodes are selected
-    const newMode = (state.leftPanelMode === LeftPanelMode.createMorphism && newSelection.nodeIds.size === 2)
-        ? LeftPanelMode.createMorphism
-        : state.leftPanelMode;
-
     return {
         ...state,
         selection: newSelection,
-        leftPanelMode: newMode,
     };
 }
 

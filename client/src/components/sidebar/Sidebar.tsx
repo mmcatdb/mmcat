@@ -103,7 +103,7 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
     return (
         <Link to={routes.home.path} className='flex items-center mb-6'>
             <h1
-                className='text-xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden'
+                className='text-2xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden'
             >
                 {isCollapsed ? 'MM' : 'MM-cat'}
             </h1>
@@ -177,19 +177,13 @@ function generalSidebarItems(): SidebarItem[] {
             type: 'normal',
             label: 'Schema categories',
             route: routes.categories,
-            iconName: 'heart',
-        },
-        {
-            type: 'normal',
-            label: 'About',
-            route: routes.about,
-            iconName: 'lightBulb',
+            iconName: 'shcemacategory',
         },
         {
             type: 'normal',
             label: 'Datasources',
             route: routes.datasources,
-            iconName: 'circleStack',
+            iconName: 'datasources',
             match: [ '/datasources/:id' ],
         },
         {
@@ -212,19 +206,19 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
             type: 'normal',
             label: 'Overview',
             route: routes.category.index.resolve({ categoryId }),
-            iconName: 'documentText',
+            iconName: 'overview',
         },
         {
             type: 'normal',
             label: 'Editor',
             route: routes.category.editor.resolve({ categoryId }),
-            iconName: 'documentText',
+            iconName: 'editor',
         },
         {
             type: 'normal',
             label: 'Datasources',
             route: routes.category.datasources.resolve({ categoryId }),
-            iconName: 'circleStack',
+            iconName: 'datasources',
             match: [ routes.category.datasources.resolve({ categoryId }) + '/:id' ],
         },
         {
@@ -248,7 +242,7 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
             type: 'normal',
             label: 'Querying',
             route: routes.category.querying.resolve({ categoryId }),
-            iconName: 'documentText',
+            iconName: 'querying',
         },
     ];
 }

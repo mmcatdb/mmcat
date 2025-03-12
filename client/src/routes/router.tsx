@@ -1,7 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { Home } from '@/pages/Home';
 import { CategoryEditorPage } from '@/pages/category/CategoryEditorPage';
-import { About } from '@/pages/About';
 import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
 import { CategoryPage, type CategoryLoaderData } from '@/pages/CategoryPage';
@@ -37,11 +36,6 @@ export const router = createBrowserRouter([
                 loader: CategoriesPage.loader,
                 Component: CategoriesPage,
                 handle: { breadcrumb: 'Schema Categories' },
-            },
-            {
-                path: routes.about,
-                Component: About,
-                handle: { breadcrumb: 'About' },
             },
             {
                 path: routes.datasources,

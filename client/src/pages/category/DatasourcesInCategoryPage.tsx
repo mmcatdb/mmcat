@@ -38,15 +38,6 @@ export function DatasourcesInCategoryPage() {
         <div>
             <div className='flex items-center justify-between'>
                 <h1 className='text-xl font-bold'>Datasources in {category.label} (with mapping)</h1>
-
-                <Button
-                    onPress={() => setIsModalOpen(true)}
-                    color='primary'
-                    variant='bordered'
-                    startContent={<AddIcon />}
-                >
-                    Add Datasource
-                </Button>
             </div>
 
             <div className='mt-5'>
@@ -56,8 +47,21 @@ export function DatasourcesInCategoryPage() {
                         deleteDatasource={deleteDatasource}
                     />
                 ) : (
-                    <div className = 'text-center border border-default-300 p-6 rounded-lg'>
-                        There is no datasources with mappings available. You can add mapping via Other Datasources.
+                    // <div className = 'text-center border border-default-300 p-6 rounded-lg'>
+                    //     There is no datasources with mappings available. Add mapping via Other Datasources ➔ Select Datasource ➔ Click on '+ Add mapping'.
+                    // </div>
+                    <div className='text-center border border-default-300 p-6 rounded-lg'>
+                        <p className='text-lg font-semibold text-default-900'>
+                            No Datasources with Mappings Available
+                        </p>
+                        <p className='text-default-500 mt-2'>
+                            To add a mapping, follow these steps:
+                        </p>
+                        <ul className='list-disc list-inside text-default-500 mt-3 text-sm'>
+                            <li><strong>Check:</strong> <em>Other Datasources Table</em></li>
+                            <li><strong>Navigate to:</strong> Your desired datasource</li>
+                            <li><strong>Click:</strong> <span className='text-primary-500 font-medium'>"+ Add Mapping"</span></li>
+                        </ul>
                     </div>
                 )}
             </div>

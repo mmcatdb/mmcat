@@ -59,7 +59,7 @@ export function ActionPage() {
             <div className='flex space-x-4'>
                 <Button
                     color='primary'
-                    variant='bordered'
+                    variant='solid'
                     isDisabled={isCreatingRun}
                     onPress={() => handleCreateRun(action.id)}
                 >

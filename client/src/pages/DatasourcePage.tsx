@@ -135,7 +135,7 @@ function DatasourceDisplay() {
                 navigate(location.pathname);
         }
         else {
-            toast.error('Something went wrong when updating datsource');
+            toast.error('Something went wrong when updating datasource');
         }
     }
 
@@ -180,14 +180,14 @@ function DatasourceDisplay() {
                         />
                         <div className='flex gap-2 mt-6'>
                             <Button
-                                color='success'
+                                color='primary'
                                 onClick={handleSaveChanges}
                                 isLoading={isSaving}
                                 className='px-6'
                             >
                                 Save
                             </Button>
-                            <Button color='danger' variant='bordered' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
+                            <Button color='primary' variant='ghost' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>
                         </div>
@@ -198,9 +198,8 @@ function DatasourceDisplay() {
             <div className='pt-5'>
                 <Button
                     size='sm'
-                    variant='bordered'
+                    variant='solid'
                     onPress={() => setisConfigurationShown(prev => !prev)}
-                    className='border-primary-500 text-primary-600'
                 >
                     {isConfigurationShown ? 'Hide Configuration' : 'Show Configuration'}
                 </Button>
