@@ -27,13 +27,41 @@ public class AdminerAlgorithms {
         }
     }
 
-    private static void appendPropertyName(StringBuilder whereClause, String name, String propertyName, Double doubleValue, AdminerAlgorithmsInterface algorithms) {
+    private static void appendIdPropertyName(StringBuilder whereClause, String alias, boolean startNodeId, boolean endNodeId) {
+        whereClause.append("id(");
+
+        if (startNodeId) {
+            whereClause.append("startNode(");
+        } else if (endNodeId) {
+            whereClause.append("endNode(");
+        }
+
+        whereClause
+            .append(alias);
+
+        if (startNodeId || endNodeId)
+            whereClause.append(")");
+
+        whereClause
+            .append(") ");
+    }
+
+    private static void appendPropertyName(StringBuilder whereClause, String alias, String propertyName, Double doubleValue, AdminerAlgorithmsInterface algorithms) {
+        boolean startNodeId = propertyName.equals("startNodeId");
+        boolean endNodeId = propertyName.equals("endNodeId");
+
+        if (algorithms instanceof Neo4jAlgorithms && (propertyName.equals("elementId") || startNodeId || endNodeId)) {
+            appendIdPropertyName(whereClause, alias, startNodeId, endNodeId);
+
+            return;
+        }
+
         if (doubleValue != null && algorithms instanceof Neo4jAlgorithms) {
             whereClause.append("toFloat(");
         }
 
-        if (name != null) {
-            whereClause.append(name)
+        if (alias != null) {
+            whereClause.append(alias)
                 .append(".");
         }
         whereClause.append(propertyName);
@@ -103,8 +131,13 @@ public class AdminerAlgorithms {
             }
 
             Double doubleValue = AdminerAlgorithms.parseNumeric(filter.propertyValue());
+            String propertyName = filter.propertyName();
 
-            appendPropertyName(whereClause, alias, filter.propertyName(), doubleValue, algorithms);
+            if (algorithms instanceof Neo4jAlgorithms && propertyName.startsWith("properties.")) {
+                propertyName = propertyName.substring(11); // Remove prefix 'properties.'
+            }
+
+            appendPropertyName(whereClause, alias, propertyName, doubleValue, algorithms);
 
             appendOperator(whereClause, operator);
 
