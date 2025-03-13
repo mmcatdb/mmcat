@@ -18,6 +18,8 @@ const info = useSchemaCategoryInfo();
 const editing = ref(false);
 const editedLabel = ref(props.file.label);
 
+const showDetails = ref(false);
+
 async function saveLabel() {
     if (editedLabel.value.trim() === props.file.label) {
         editing.value = false;
@@ -25,7 +27,6 @@ async function saveLabel() {
     }
 
     const result = await API.files.updateFileLabel({ id: props.file.id }, { label: editedLabel.value.trim()})
-
     editing.value = false;
 }
 
@@ -68,10 +69,10 @@ async function executeDML() {
 </script>
 
 <template>
-    <div class="border border-primary px-3 py-2">
+    <div class="border border-primary px-3 py-2 position-relative">
         <div class="d-flex gap-4 align-items-end">
             <div>
-                <div>
+                <div class="d-flex align-items-center gap-2">
                     <strong v-if="!editing" @click="editing = true" class="editable">
                         {{ file.label }}
                     </strong>
@@ -102,6 +103,13 @@ async function executeDML() {
                 <button
                     :disabled="fetching"
                     class="info"
+                    @click="showDetails = !showDetails"
+                >
+                    Details
+                </button>
+                <button
+                    :disabled="fetching"
+                    class="info"
                     @click="downloadFile"
                 >
                     Download
@@ -116,15 +124,74 @@ async function executeDML() {
                 </button>
             </div>
         </div>
+        <!-- Sliding Details Panel -->
+        <transition name="slide">
+            <div v-if="showDetails" class="details-panel">
+                <hr class="separator" />
+                <p><strong>Name:</strong> {{ file.label }}</p>
+                <p><strong>Id:</strong> {{ file.id }}</p>
+                <p><strong>Date of creation:</strong> {{ file.createdAt.toLocaleString() }}</p>
+                <p><strong>File Type:</strong> {{ file.fileType }}</p>
+                <p><strong>Description:</strong> {{ file.description }}</p>
+                <button class="close-btn" @click="showDetails = false">Close</button>
+            </div>
+        </transition>
     </div>
 </template>
+
 
 <style scoped>
 .editable {
     cursor: pointer;
     border-bottom: 1px dashed #007bff;
+    transition: color 0.2s;
 }
+
 .editable:hover {
     color: #007bff;
 }
+
+.details-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    z-index: 10;
+}
+
+.separator {
+    border: none;
+    height: 1px;
+    background: #ccc;
+    margin: 10px 0;
+}
+
+.slide-enter-active, .slide-leave-active {
+    transition: transform 0.3s ease-in-out, opacity 0.3s;
+}
+
+.slide-enter-from, .slide-leave-to {
+    transform: translateY(-20px);
+    opacity: 0;
+}
+
+.close-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    float: right;
+}
+
+.close-btn:hover {
+    background: #c82333;
+}
+
 </style>
