@@ -64,10 +64,12 @@ public class FileController {
         service.executeDML(file);
     }
 
-    @PutMapping("files/{id}/update-label")
-    public File updateFileLabel(@PathVariable Id id, @RequestBody Map<String, String> body) {
-        final String newLabel = body.get("label").trim();
-        return service.updateFileLabel(id, newLabel);
+    @PutMapping("files/{id}/update")
+    public File updateFile(@PathVariable Id id, @RequestBody Map<String, Object> body) {
+        final String value = ((String) body.get("value")).trim();
+        final boolean isLabel = (boolean) body.get("isLabel");
+
+        return service.updateFile(id, value, isLabel);
     }
 
 }

@@ -12,8 +12,8 @@ const files = {
     executeDML: POST<{ id: StringLike }, void>(
         u => `/files/${u.id}/execute`,
     ),
-    updateFileLabel: PUT<{ id: StringLike }, FileFromServer, { label: string }>(
-        u => `/files/${u.id}/update-label`,
+    updateFile: PUT<{ id: StringLike }, FileFromServer, { value: string, isLabel: boolean }>(
+        u => `/files/${u.id}/update`,
     ),
 };
 

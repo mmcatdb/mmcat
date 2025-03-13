@@ -15,19 +15,32 @@ const fetching = ref(false);
 
 const info = useSchemaCategoryInfo();
 
-const editing = ref(false);
+const editingLabel = ref(false);
 const editedLabel = ref(props.file.label);
+
+const editingDescription = ref(false);
+const editedDescription = ref(props.file.description);
 
 const showDetails = ref(false);
 
 async function saveLabel() {
     if (editedLabel.value.trim() === props.file.label) {
-        editing.value = false;
+        editingLabel.value = false;
         return;
     }
 
-    const result = await API.files.updateFileLabel({ id: props.file.id }, { label: editedLabel.value.trim()})
-    editing.value = false;
+    const result = await API.files.updateFile({ id: props.file.id }, { value: editedLabel.value.trim(), isLabel: true })
+    editingLabel.value = false;
+}
+
+async function saveDescription() {
+    if (editedDescription.value.trim() === props.file.description) {
+        editingDescription.value = false;
+        return;
+    }
+
+    const result = await API.files.updateFile({ id: props.file.id }, { value: editedDescription.value.trim(), isLabel: false })
+    editingDescription.value = false;
 }
 
 async function downloadFile() {
@@ -124,7 +137,6 @@ async function executeDML() {
                 </button>
             </div>
         </div>
-        <!-- Sliding Details Panel -->
         <transition name="slide">
             <div v-if="showDetails" class="details-panel">
                 <hr class="separator" />
@@ -132,13 +144,27 @@ async function executeDML() {
                 <p><strong>Id:</strong> {{ file.id }}</p>
                 <p><strong>Date of creation:</strong> {{ file.createdAt.toLocaleString() }}</p>
                 <p><strong>File Type:</strong> {{ file.fileType }}</p>
-                <p><strong>Description:</strong> {{ file.description }}</p>
+                <p>
+                    <strong>Description:</strong>
+                    <span v-if="!editingDescription" @click="editingDescription = true" class="editable">
+                        {{ file.description || "Click to add a description" }}
+                    </span>
+                    <textarea
+                        v-else
+                        v-model="editedDescription"
+                        @blur="saveDescription"
+                        @keyup.enter="saveDescription"
+                        class="form-control form-control-sm"
+                        rows="2"
+                        autofocus
+                    ></textarea>
+                </p>
+
                 <button class="close-btn" @click="showDetails = false">Close</button>
             </div>
         </transition>
     </div>
 </template>
-
 
 <style scoped>
 .editable {

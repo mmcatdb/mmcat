@@ -102,8 +102,11 @@ public class File extends Entity {
         }
     }
 
-    public void updateLabel(String newLabel) {
-        this.label = newLabel;
+    public void updateFile(String newValue, boolean isLabel) {
+        if (isLabel)
+            this.label = newValue;
+        else
+            this.description = newValue;
     }
 
     private record JsonValue(
