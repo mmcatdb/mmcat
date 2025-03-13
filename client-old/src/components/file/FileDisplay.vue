@@ -51,16 +51,33 @@ async function downloadFile() {
     // I receive an Object with fields: status and data.
     const fileContent = result.data;
     const { extension, mimeType } = getFileType(props.file.fileType);
-    const blob = new Blob([fileContent], { type: mimeType});
+    triggerDownload(fileContent, `${props.file.id}.${extension}`, mimeType);
+
+    fetching.value = false;
+}
+
+async function downloadMetadata() {
+    const metadata = {
+        name: props.file.label,
+        id: props.file.id,
+        dateCreated: props.file.createdAt.toLocaleString(),
+        type: props.file.fileType,
+        description: props.file.description,
+    };
+
+    const jsonString = JSON.stringify(metadata, null, 2);
+    triggerDownload(jsonString, `${props.file.id}.metadata.json`, "application/json");
+}
+
+function triggerDownload(content: string | Blob, filename: string, mimeType: string) {
+    const blob = new Blob([content], { type: mimeType });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${props.file.id}.${extension}`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    fetching.value = false;
 }
 
 function getFileType(fileType: string) {
@@ -86,7 +103,7 @@ async function executeDML() {
         <div class="d-flex gap-4 align-items-end">
             <div>
                 <div class="d-flex align-items-center gap-2">
-                    <strong v-if="!editing" @click="editing = true" class="editable">
+                    <strong v-if="!editingLabel" @click="editingLabel = true" class="editable">
                         {{ file.label }}
                     </strong>
                     <input
@@ -143,9 +160,9 @@ async function executeDML() {
                 <p><strong>Name:</strong> {{ file.label }}</p>
                 <p><strong>Id:</strong> {{ file.id }}</p>
                 <p><strong>Date of creation:</strong> {{ file.createdAt.toLocaleString() }}</p>
-                <p><strong>File Type:</strong> {{ file.fileType }}</p>
+                <p><strong>Type:</strong> {{ file.fileType }}</p>
                 <p>
-                    <strong>Description:</strong>
+                    <strong>Description: </strong>
                     <span v-if="!editingDescription" @click="editingDescription = true" class="editable">
                         {{ file.description || "Click to add a description" }}
                     </span>
@@ -159,8 +176,9 @@ async function executeDML() {
                         autofocus
                     ></textarea>
                 </p>
-
-                <button class="close-btn" @click="showDetails = false">Close</button>
+                <div class="details-footer">
+                    <button @click="downloadMetadata">Download Details</button>
+                </div>
             </div>
         </transition>
     </div>
@@ -206,18 +224,10 @@ async function executeDML() {
     opacity: 0;
 }
 
-.close-btn {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    float: right;
-}
-
-.close-btn:hover {
-    background: #c82333;
+.details-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
 }
 
 </style>
