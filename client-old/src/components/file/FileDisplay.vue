@@ -15,18 +15,19 @@ const fetching = ref(false);
 
 const info = useSchemaCategoryInfo();
 
-const fileTypeText = computed(() => {
-    switch (props.file.fileType) {
-        case "JSON":
-            return "JSON File";
-        case "CSV":
-            return "CSV File";
-        case "DML":
-            return "DML Commands";
-        default:
-            return "Unknown File Type";
+const editing = ref(false);
+const editedLabel = ref(props.file.label);
+
+async function saveLabel() {
+    if (editedLabel.value.trim() === props.file.label) {
+        editing.value = false;
+        return;
     }
-});
+
+    const result = await API.files.updateFileLabel({ id: props.file.id }, { label: editedLabel.value.trim()})
+
+    editing.value = false;
+}
 
 async function downloadFile() {
     fetching.value = true;
@@ -71,7 +72,17 @@ async function executeDML() {
         <div class="d-flex gap-4 align-items-end">
             <div>
                 <div>
-                    <strong>{{ fileTypeText }}</strong>
+                    <strong v-if="!editing" @click="editing = true" class="editable">
+                        {{ file.label }}
+                    </strong>
+                    <input
+                        v-else
+                        v-model="editedLabel"
+                        @blur="saveLabel"
+                        @keyup.enter="saveLabel"
+                        class="form-control form-control-sm"
+                        autofocus
+                    />
                 </div>
                 <div class="text-secondary small">
                     {{ file.id }}
@@ -83,7 +94,7 @@ async function executeDML() {
                 </div>
                 <FixedRouterLink :to="{ name: 'job', params: { id: file.jobId } }">
                     <div class="fs-6">
-                        <span class="fw-bold">{{ file.label }}</span>
+                        <span class="fw-bold">{{ file.jobLabel }}</span>
                     </div>
                 </FixedRouterLink>
             </div>
@@ -107,3 +118,13 @@ async function executeDML() {
         </div>
     </div>
 </template>
+
+<style scoped>
+.editable {
+    cursor: pointer;
+    border-bottom: 1px dashed #007bff;
+}
+.editable:hover {
+    color: #007bff;
+}
+</style>

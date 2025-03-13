@@ -1,5 +1,5 @@
 import type { StringLike } from '@/types/api/routes';
-import { GET, POST } from '../routeFunctions';
+import { GET, POST, PUT } from '../routeFunctions';
 import type { FileFromServer } from '@/types/file';
 
 const files = {
@@ -11,6 +11,9 @@ const files = {
     ),
     executeDML: POST<{ id: StringLike }, void>(
         u => `/files/${u.id}/execute`,
+    ),
+    updateFileLabel: PUT<{ id: StringLike }, FileFromServer, { label: string }>(
+        u => `/files/${u.id}/update-label`,
     ),
 };
 

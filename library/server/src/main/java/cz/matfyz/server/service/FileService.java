@@ -67,4 +67,11 @@ public class FileService {
         LOGGER.info("... models executed.");
     }
 
+    public File updateFileLabel(Id id, String newLabel) {
+        final File file = repository.find(id);
+        file.updateLabel(newLabel);
+        repository.save(file);
+        return file;
+    }
+
 }

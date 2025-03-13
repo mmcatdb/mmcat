@@ -29,17 +29,21 @@ public class File extends Entity {
     public @Nullable Id jobId;
     public @Nullable Id datasourceId;
     public @Nullable Id categoryId;
-    public final String filename;
-    public final String label;
+    public String label;
+    public @Nullable String description;
+    public final String filename; // filename under which the file is stored = the file's id
+    public final String jobLabel;
     public final FileType fileType;
     public final Date createdAt;
 
-    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, FileType fileType, Date createdAt) {
+    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, @Nullable String description, String jobLabel, FileType fileType, Date createdAt) {
         super(id);
         this.jobId = jobId;
         this.datasourceId = datasourceId;
         this.categoryId = categoryId;
         this.label = label;
+        this.description = description;
+        this.jobLabel = jobLabel;
         this.filename = id.toString();
         this.fileType = fileType;
         this.createdAt = createdAt;
@@ -53,6 +57,8 @@ public class File extends Entity {
             jobId,
             datasourceId,
             categoryId,
+            getInitialLabel(fileType),
+            null,
             label,
             fileType,
             new Date()
@@ -60,6 +66,14 @@ public class File extends Entity {
 
         saveToFile(newFile, contents, uploads);
         return newFile;
+    }
+
+    private static String getInitialLabel(FileType fileType) {
+        return switch (fileType) {
+            case JSON -> "JSON File";
+            case CSV -> "CSV File";
+            default -> "DML Commands";
+        };
     }
 
     /**
@@ -88,8 +102,14 @@ public class File extends Entity {
         }
     }
 
+    public void updateLabel(String newLabel) {
+        this.label = newLabel;
+    }
+
     private record JsonValue(
         String label,
+        String description,
+        String jobLabel,
         FileType fileType,
         Date createdAt
     ) {}
@@ -105,13 +125,15 @@ public class File extends Entity {
             datasourceId,
             categoryId,
             json.label,
+            json.description,
+            json.jobLabel,
             json.fileType,
             json.createdAt
         );
     }
 
     public String toJsonValue() throws JsonProcessingException {
-        return jsonValueWriter.writeValueAsString(new JsonValue(label, fileType, createdAt));
+        return jsonValueWriter.writeValueAsString(new JsonValue(label, description, jobLabel, fileType, createdAt));
     }
 
 }

@@ -22,6 +22,8 @@ public class FileRepository {
             final var statement = connection.prepareStatement("""
                 INSERT INTO "file" (id, job_id, datasource_id, category_id, json_value)
                 VALUES (?, ?, ?, ?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    json_value = EXCLUDED.json_value;
                 """);
             setId(statement, 1, file.id());
             setId(statement, 2, file.jobId);
@@ -72,4 +74,5 @@ public class FileRepository {
             }
         });
     }
+
 }
