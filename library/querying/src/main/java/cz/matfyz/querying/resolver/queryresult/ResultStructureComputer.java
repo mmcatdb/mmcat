@@ -278,7 +278,7 @@ public class ResultStructureComputer {
             // There are multiple different argument reference nodes.
             // Some edges are oriented - if the child is array, there is 1:n path from the parent to the child, so we can't go this way from the reference node to it's aguments (2nd rule).
             // However, each child has only one parent, so we can always go from child to parent.
-            // In order for the reference node to be the closest one, we will take only those that are on the path from one argument to another.
+            // In order for the reference node to be the closest one, we will consider only those that are on the path from one argument to another.
             // This ensures that if there are multiple viable reference nodes, there must be a 1:1 path between each other. (Just draw the arrows and you'll see.)
             // If there are still mutliple options, we will choose the one that is highest in the tree.
             // It should be easy to prove that there is only one such node (if there is any), and that it doesn't depend on the order of the arguments.
