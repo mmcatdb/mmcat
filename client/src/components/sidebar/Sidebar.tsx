@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link, matchPath, useParams } from 'react-router-dom';
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from '@nextui-org/react';
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@nextui-org/react';
 import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/CollapseContextToggle';
 import { cn } from '@/components/utils';
-import { ShowTableIDsSwitch } from '../RootLayout';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 type NormalSidebarItem = {
@@ -97,6 +96,31 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
             </ModalContent>
         </Modal>
     </>);
+}
+
+type ShowTableIDsSwitchProps = {
+    className?: string;
+};
+
+export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
+    const { preferences, setPreferences } = usePreferences();
+    const { showTableIDs } = preferences;
+
+    const handleChange = (isChecked: boolean) => {
+        setPreferences({ ...preferences, showTableIDs: isChecked });
+    };
+
+    return (
+        <div className={className}>
+            <Switch
+                isSelected={showTableIDs}
+                onChange={e => handleChange(e.target.checked)}
+                size='sm'
+            >
+                <p className='text-small'>Show Table IDs</p>
+            </Switch>
+        </div>
+    );
 }
 
 function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {

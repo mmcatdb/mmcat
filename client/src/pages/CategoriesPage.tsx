@@ -3,10 +3,12 @@ import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTab
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, Input, Table, TableBody, TableColumn, TableHeader } from '@nextui-org/react';
+import { Button, cn, Input } from '@nextui-org/react';
 import { AddSchemaModal } from './Home';
 import { useLoaderData } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
+import { usePreferences } from '@/components/PreferencesProvider';
+import { GoDotFill } from 'react-icons/go';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -54,10 +56,7 @@ export function CategoriesPage() {
                 <h1 className='text-2xl font-bold'>Schema Categories</h1>
             </div>
 
-            <p className='text-default-600'>
-                Schema categories help you organize and structure your data models. 
-                Create a new schema to start modeling your data or explore an example schema.
-            </p>
+            <SchemaCategoryInfoBanner className='mb-6' />
 
             {/* Action Bar (Search + Buttons) */}
             <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-sm'>
@@ -92,7 +91,7 @@ export function CategoriesPage() {
                             color='secondary'
                             title='Add an example (pre-made) schema category'
                         >
-                            + Add {example} Schema
+                            + Add Example Schema
                         </Button>
                     ))}
                     <Button
@@ -148,4 +147,59 @@ async function categoriesLoader(): Promise<CategoriesLoaderData> {
     return {
         categories: response.data.map(SchemaCategoryInfo.fromServer),
     };
+}
+
+type SchemaCategoryInfoBannerProps = {
+    className?: string;
+};
+
+export function SchemaCategoryInfoBanner({ className }: SchemaCategoryInfoBannerProps) {
+    const { preferences, setPreferences } = usePreferences();
+    const [ isVisible, setIsVisible ] = useState(!preferences.dismissedSchemaCategoryGuide);
+
+    function handleClose() {
+        setIsVisible(false);
+        setPreferences({ ...preferences, dismissedSchemaCategoryGuide: true });
+    }
+
+    if (!isVisible) 
+        return null;
+
+    return (
+        <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300', className)}>
+            <button 
+                onClick={handleClose} 
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
+
+            <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
+            <p className='text-sm'>
+                A <strong>Schema Category</strong> represents the structure of your data at a high level.  
+                It is a <em>project</em>, grouping everything related to a specific conceptual schema.  
+                Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
+            </p>
+
+            <ul className='mt-3 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Conceptual Schema:</strong> Defines the data model without focusing on storage details.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Instance Category:</strong> Holds concrete data based on the schema.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Logical Model:</strong> Defines how data is stored in tables, documents, or other structures.
+                </li>
+            </ul>
+
+            <p className='text-sm mt-3'>
+                Each Schema Category serves as a <em>workspace</em> where you define how data is structured and processed.
+                Start by creating a <em>Graph</em> in editor, then create <em>Mappings</em> and execute <em>Jobs</em> to transform data.
+            </p>
+        </div>
+    );
 }

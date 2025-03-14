@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Switch, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react';
+import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences } from './PreferencesProvider';
 import { Tooltip } from './common';
@@ -14,7 +14,7 @@ export function RootLayout() {
     const { isCollapsed } = usePreferences().preferences;
     const location = useLocation(); // Get current route
 
-    // A hack to determine if we are on the editor page, adjust layout accordingly
+    // A workaround to detect if we are on the editor page and adjust the layout accordingly.
     const isEditorPage = location.pathname.includes('/editor');
 
     return (
@@ -178,30 +178,5 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
                 )}
             </Button>
         </Tooltip>
-    );
-}
-
-type ShowTableIDsSwitchProps = {
-    className?: string;
-};
-
-export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
-    const { preferences, setPreferences } = usePreferences();
-    const { showTableIDs } = preferences;
-
-    const handleChange = (isChecked: boolean) => {
-        setPreferences({ ...preferences, showTableIDs: isChecked });
-    };
-
-    return (
-        <div className={className}>
-            <Switch
-                isSelected={showTableIDs}
-                onChange={e => handleChange(e.target.checked)}
-                size='sm'
-            >
-                <p className='text-small'>Show Table IDs</p>
-            </Switch>
-        </div>
     );
 }

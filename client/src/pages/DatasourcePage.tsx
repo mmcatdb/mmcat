@@ -8,9 +8,15 @@ import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { DatasourceSpecificFields } from '@/components/datasources/DatasourceModal';
+import { cn } from '@/components/utils';
+import { HiXMark } from 'react-icons/hi2';
+import { GoDotFill } from 'react-icons/go';
 
 export function DatasourcePage() {
-    return <DatasourceDisplay />;
+    return (<>
+        <DatasourceDetailInfoBanner className='mb-6' />
+        <DatasourceDisplay />
+    </>);
 }
 
 DatasourcePage.loader = datasourceLoader;
@@ -209,6 +215,50 @@ function DatasourceDisplay() {
                     </pre>
                 )}
             </div>
+        </div>
+    );
+}
+
+type DatasourceDetailInfoBannerProps = {
+    className?: string;
+};
+
+export function DatasourceDetailInfoBanner({ className }: DatasourceDetailInfoBannerProps) {
+    // const { preferences, setPreferences } = usePreferences();
+    // const [ isVisible, setIsVisible ] = useState(!preferences.dismissedDatasourceDetailGuide);
+
+    // function handleClose() {
+    //     setIsVisible(false);
+    //     setPreferences({ ...preferences, dismissedDatasourceDetailGuide: true });
+    // }
+
+    // if (!isVisible) 
+    //     return null;
+
+    return (
+        <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300', className)}>
+            <button 
+                // onClick={handleClose} 
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
+
+            <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
+            <ul className='mt-2 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Edit:</strong> You can update connection details, but the type cannot be changed.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Password:</strong> If left empty, the existing password remains unchanged.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Delete:</strong> A Data Source can be removed if it’s not in use.
+                </li>
+            </ul>
         </div>
     );
 }

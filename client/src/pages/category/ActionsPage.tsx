@@ -9,6 +9,10 @@ import { AddIcon } from '@/components/icons/PlusIcon';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { HiXMark } from 'react-icons/hi2';
+import { GoDotFill } from 'react-icons/go';
+import { cn } from '@/components/utils';
+import { useBannerState } from '@/types/utils/useBannerState';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
@@ -41,6 +45,8 @@ export function ActionsPage() {
                     Add Action
                 </Button>
             </div>
+
+            <ActionInfoBanner className='mb-6' />
 
             <div>
                 {actions.length > 0 ? (
@@ -210,4 +216,52 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
             />
         )}
     </>);
+}
+
+type ActionInfoBannerProps = {
+    className?: string;
+};
+
+export function ActionInfoBanner({ className }: ActionInfoBannerProps) {
+    const { isVisible, dismissBanner } = useBannerState('actions-page');
+
+    if (!isVisible) 
+        return null;
+
+    return (
+        <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300', className)}>
+            <button 
+                onClick={dismissBanner} 
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
+
+            <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
+            <p className='text-sm'>
+                An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
+                Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
+                For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
+            </p>
+
+            <ul className='mt-3 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Action:</strong> Spawns jobs (e.g., exporting data to PostgreSQL).
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Job:</strong> A single execution of a transformation algorithm.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Run:</strong> A collection of multiple Job executions (similar to a CI/CD pipeline).
+                </li>
+            </ul>
+
+            <p className='text-sm mt-3'>
+                Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
+            </p>
+        </div>
+    );
 }

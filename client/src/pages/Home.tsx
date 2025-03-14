@@ -145,7 +145,7 @@ export function Home() {
                             variant='ghost'
                             title='Add an example (pre-made) schema category'
                         >
-                            + Add {example} Schema
+                            + Add Example Schema
                         </Button>
                     ))}
                 </div>
