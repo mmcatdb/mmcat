@@ -10,6 +10,7 @@ import cz.matfyz.server.repository.FileRepository;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 
 import cz.matfyz.server.global.Configuration.UploadsProperties;
@@ -49,7 +50,7 @@ public class FileService {
         return repository.findAllInCategory(categoryId);
     }
 
-    public void executeDML(File file) {
+    public File executeDML(File file) {
         final DatasourceWrapper datasourceWrapper = datasourceRepository.find(file.datasourceId);
         final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
         final Path filePath = Paths.get(File.getFilePath(file, uploads));
@@ -57,6 +58,10 @@ public class FileService {
         LOGGER.info("Start executing models ...");
         control.execute(filePath);
         LOGGER.info("... models executed.");
+
+        file.addExecutionDate(new Date());
+        repository.save(file);
+        return file;
     }
 
     public File updateFile(Id id, String newValue, boolean isLabel) {

@@ -23,6 +23,8 @@ const editedDescription = ref(props.file.description);
 
 const showDetails = ref(false);
 
+const showExecutionPrompt = ref(false);
+
 async function saveLabel() {
     if (editedLabel.value.trim() === props.file.label) {
         editingLabel.value = false;
@@ -92,6 +94,11 @@ function getFileType(fileType: string) {
 }
 
 async function executeDML() {
+    if (props.file.executedAt?.length) {
+        showExecutionPrompt.value = true;
+        return;
+    }
+
     fetching.value = true;
     const result = await API.files.executeDML({ id: props.file.id });
     fetching.value = false;
@@ -186,6 +193,23 @@ async function executeDML() {
                 </div>
             </div>
         </transition>
+        <transition name="fade">
+            <div v-if="showExecutionPrompt" class="execution-prompt">
+                <p>This file has been executed before. What would you like to do?</p>
+                <p>
+                    <strong>Options:</strong>
+                    <ul>
+                        <li><b>Overwrite Data:</b> Delete the existing dataset and replace it with the new execution.</li>
+                        <li><b>Create New Workspace:</b> Execute commands in a fresh workspace without affecting existing data.</li>
+                    </ul>
+                </p>
+                <div class="d-flex ms-auto align-self-center gap-1">
+                    <button @click="executeOption('overwrite')" class="info">Overwrite Data</button>
+                    <button @click="executeOption('newWorkspace')" class="info">Create New Workspace</button>
+                    <button @click="showExecutionPrompt = false" class="cancel">Cancel</button>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -233,6 +257,21 @@ async function executeDML() {
     display: flex;
     justify-content: flex-end;
     margin-top: 10px;
+}
+
+.execution-prompt {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgb(255, 255, 255);
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    z-index: 1000;
+    width: 350px;
+    text-align: center;
 }
 
 </style>

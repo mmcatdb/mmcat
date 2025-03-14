@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -67,7 +68,7 @@ public class File extends Entity {
             jobLabel,
             fileType,
             new Date(),
-            executed ? List.of(new Date()) : null
+            executed ? new ArrayList<>(List.of(new Date())) : null
         );
 
         saveToFile(newFile, contents, uploads);
@@ -121,6 +122,12 @@ public class File extends Entity {
             this.label = newValue;
         else
             this.description = newValue;
+    }
+
+    public void addExecutionDate(Date executionDate) {
+        if (this.executedAt == null)
+            this.executedAt = new ArrayList<>();
+        this.executedAt.add(executionDate);
     }
 
     private record JsonValue(
