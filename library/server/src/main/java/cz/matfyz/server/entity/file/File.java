@@ -1,5 +1,6 @@
 package cz.matfyz.server.entity.file;
 
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.global.Configuration.UploadsProperties;
@@ -9,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,8 +37,9 @@ public class File extends Entity {
     public final String jobLabel;
     public final FileType fileType;
     public final Date createdAt;
+    public @Nullable List<Date> executedAt;
 
-    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, @Nullable String description, String jobLabel, FileType fileType, Date createdAt) {
+    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, @Nullable String description, String jobLabel, FileType fileType, Date createdAt, @Nullable List<Date> executedAt) {
         super(id);
         this.jobId = jobId;
         this.datasourceId = datasourceId;
@@ -47,10 +50,12 @@ public class File extends Entity {
         this.filename = id.toString();
         this.fileType = fileType;
         this.createdAt = createdAt;
+        this.executedAt = executedAt;
     }
 
-    public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, FileType fileType, String contents, UploadsProperties uploads) {
+    public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String jobLabel, boolean executed, DatasourceType datasourceType, String contents, UploadsProperties uploads) {
         Id newId = Id.createNew();
+        FileType fileType = getFileType(datasourceType);
 
         File newFile = new File(
             newId,
@@ -59,13 +64,22 @@ public class File extends Entity {
             categoryId,
             getInitialLabel(fileType),
             null,
-            label,
+            jobLabel,
             fileType,
-            new Date()
+            new Date(),
+            executed ? List.of(new Date()) : null
         );
 
         saveToFile(newFile, contents, uploads);
         return newFile;
+    }
+
+    private static FileType getFileType(DatasourceType datasourceType) {
+        return switch (datasourceType) {
+            case mongodb, postgresql, neo4j -> FileType.DML;
+            case csv -> FileType.CSV;
+            default -> FileType.JSON;
+        };
     }
 
     private static String getInitialLabel(FileType fileType) {
@@ -114,7 +128,8 @@ public class File extends Entity {
         String description,
         String jobLabel,
         FileType fileType,
-        Date createdAt
+        Date createdAt,
+        List<Date> executedAt
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
@@ -131,12 +146,13 @@ public class File extends Entity {
             json.description,
             json.jobLabel,
             json.fileType,
-            json.createdAt
+            json.createdAt,
+            json.executedAt
         );
     }
 
     public String toJsonValue() throws JsonProcessingException {
-        return jsonValueWriter.writeValueAsString(new JsonValue(label, description, jobLabel, fileType, createdAt));
+        return jsonValueWriter.writeValueAsString(new JsonValue(label, description, jobLabel, fileType, createdAt, executedAt));
     }
 
 }

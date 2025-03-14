@@ -5,7 +5,6 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.file.File;
-import cz.matfyz.server.entity.file.File.FileType;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.FileRepository;
 
@@ -39,18 +38,11 @@ public class FileService {
     @Autowired
     private DatasourceRepository datasourceRepository;
 
-    public File create(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, DatasourceType datasourceType, String contents) {
-        final var file = File.createnew(jobId, datasourceId, categoryId, label, getFileType(datasourceType), contents, uploads);
+    public File create(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String jobLabel, boolean executed, DatasourceType datasourceType, String contents) {
+        final var file = File.createnew(jobId, datasourceId, categoryId, jobLabel, executed, datasourceType, contents, uploads);
         repository.save(file);
 
         return file;
-    }
-    private FileType getFileType(DatasourceType datasourceType) {
-        return switch (datasourceType) {
-            case mongodb, postgresql, neo4j -> FileType.DML;
-            case csv -> FileType.CSV;
-            default -> FileType.JSON;
-        };
     }
 
     public List<File> findAllInCategory(Id categoryId) {

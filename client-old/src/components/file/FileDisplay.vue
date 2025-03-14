@@ -60,8 +60,9 @@ async function downloadMetadata() {
     const metadata = {
         name: props.file.label,
         id: props.file.id,
-        dateCreated: props.file.createdAt.toLocaleString(),
         type: props.file.fileType,
+        dateCreated: props.file.createdAt.toLocaleString(),
+        datesExecuted: props.file.executedAt?.map(date => date.toLocaleString()) || [],
         description: props.file.description,
     };
 
@@ -159,8 +160,12 @@ async function executeDML() {
                 <hr class="separator" />
                 <p><strong>Name:</strong> {{ file.label }}</p>
                 <p><strong>Id:</strong> {{ file.id }}</p>
-                <p><strong>Date of creation:</strong> {{ file.createdAt.toLocaleString() }}</p>
                 <p><strong>Type:</strong> {{ file.fileType }}</p>
+                <p><strong>Date of creation:</strong> {{ file.createdAt.toLocaleString() }}</p>
+                <p v-if="file.fileType === 'DML'">
+                    <strong>Dates of executions:</strong> 
+                    {{ file.executedAt?.length ? file.executedAt.map(date => date.toLocaleString()).join(', ') : 'No executions' }}
+                </p>
                 <p>
                     <strong>Description: </strong>
                     <span v-if="!editingDescription" @click="editingDescription = true" class="editable">

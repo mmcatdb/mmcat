@@ -254,15 +254,18 @@ public class JobExecutorService {
         //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
         //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
 
+        Boolean executed = false;
+
         if (server.executeModels() && control.isWritable()) {
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
             LOGGER.info("... models executed.");
+            executed = true;
         }
 
         final var resultString = result.statementsAsString();
 
-        fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, datasource.type, resultString);
+        fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, executed, datasource.type, resultString);
 
         job.data = new ModelJobData(resultString);
     }

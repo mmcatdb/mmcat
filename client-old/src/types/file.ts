@@ -10,6 +10,7 @@ export type FileFromServer = {
     jobLabel: string;
     fileType: string; //TODO
     createdAt: string;
+    executedAt?: string[];
 };
 
 export class File implements Entity {
@@ -23,6 +24,7 @@ export class File implements Entity {
         public readonly jobLabel: string,
         public readonly fileType: string, //TODO (should this be an enum here?)
         public readonly createdAt: Date,
+        public readonly executedAt: Date[] | undefined,
     ) {}
 
     static fromServer(input: FileFromServer): File {
@@ -36,6 +38,7 @@ export class File implements Entity {
             input.jobLabel,
             input.fileType,
             new Date(input.createdAt),
+            input.executedAt ? input.executedAt.map(dateString => new Date(dateString)) : undefined,
         );
     }
 }
