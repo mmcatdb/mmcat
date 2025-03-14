@@ -3,7 +3,7 @@ import { CustomLink } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Card } from '@nextui-org/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Card, CardBody } from '@nextui-org/react';
 import { toast } from 'react-toastify';
 import { BookOpenIcon } from '@heroicons/react/24/solid';
 import { FaDatabase, FaPlus } from 'react-icons/fa';
@@ -12,17 +12,17 @@ const DOCUMENTATION_URL = 'https://mmcatdb.com/getting-started/quick-start/';
 const EXAMPLE_SCHEMAS = [ 'basic' ] as const;
 
 export function Home() {
-    // const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>([]);
+    const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>([]);
     const [ isCreatingSchema, setIsCreatingSchema ] = useState(false);
     const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
     const [ isModalOpen, setIsModalOpen ] = useState(false);
-    // const [ showAllCategories, setShowAllCategories ] = useState(false);
+    const [ showAllCategories, setShowAllCategories ] = useState(false);
 
     async function fetchCategories() {
         const result = await api.schemas.getAllCategoryInfos({});
         if (!result.status)
             return;
-        // setCategories(result.data.map(SchemaCategoryInfo.fromServer));
+        setCategories(result.data.map(SchemaCategoryInfo.fromServer));
     }
 
     useEffect(() => {
@@ -74,15 +74,6 @@ export function Home() {
                     >
                         Read Documentation
                     </Button>
-                    {/* <Button
-                        as='a'
-                        href={routes.category.index.resolve({ categoryId: 'basic' })}
-                        variant='ghost'
-                        color='secondary'
-                        startContent={<PlayIcon className='w-6 h-6' />}
-                    >
-                        Explore Example Schema
-                    </Button> */}
                 </div>
             </div>
 
@@ -152,7 +143,7 @@ export function Home() {
             </div>
 
             {/* Current Schema Categories */}
-            {/* <div className='space-y-6'>
+            <div className='space-y-6'>
                 <h2 className='text-2xl font-semibold'>Explore existing Schema Categories</h2>
                 {categories.length > 0 ? (
                     <>
@@ -180,7 +171,7 @@ export function Home() {
                 ) : (
                     <p className='text-default-500'>Loading...</p>
                 )}
-            </div> */}
+            </div>
 
             <AddSchemaModal
                 isOpen={isModalOpen}

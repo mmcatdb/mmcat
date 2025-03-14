@@ -10,6 +10,8 @@ import { usePreferences } from '@/components/PreferencesProvider';
 import { cn } from '@/components/utils';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
+import { useBannerState } from '@/types/utils/useBannerState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 /** In ms. */
 const REFRESH_INTERVAL = 3000;
@@ -19,6 +21,7 @@ export function JobsPage() {
     const { category } = useCategoryInfo();
     const [ groupedJobs, setGroupedJobs ] = useState<Record<string, Job[]>>();
     const [ error, setError ] = useState(false);
+    const { isVisible, dismissBanner, restoreBanner } = useBannerState('jobs-page');
 
     // FIXME: Use loader instead.
     async function fetchJobs() {
@@ -58,8 +61,20 @@ export function JobsPage() {
     );
 
     return (<>
-        <h1 className='text-xl font-bold mb-8'>Jobs in Runs</h1>
-        <JobInfoBanner className='mb-8' />
+        <div className='flex items-center gap-2 mb-4'>
+            <h1 className='text-xl font-semibold'>Jobs in Runs</h1>
+            <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                <button
+                    onClick={isVisible ? dismissBanner : restoreBanner}
+                    className='text-primary-500 hover:text-primary-700 transition'
+                >
+                    <IoInformationCircleOutline className='w-6 h-6' />
+                </button>
+            </Tooltip>
+        </div>
+
+        {isVisible && <JobInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+
         {/* no NextUI (HeroUI) table here, because of grouping functionality */}
         <table
             className={cn(
@@ -174,72 +189,65 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
 
 type JobInfoBannerProps = {
     className?: string;
+    dismissBanner: () => void;
 };
 
-export function JobInfoBanner({ className }: JobInfoBannerProps) {
-    // const { preferences, setPreferences } = usePreferences();
-    // const [ isVisible, setIsVisible ] = useState(!preferences.dismissedJobsGuide);
+export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) {
     const navigate = useNavigate();
     const { categoryId } = useParams();
 
-    // function handleClose() {
-    //     setIsVisible(false);
-    //     setPreferences({ ...preferences, dismissedJobsGuide: true });
-    // }
-
-    // if (!isVisible) 
-    //     return null;
-
     return (
-        <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300', className)}>
-            <button 
-                // onClick={handleClose} 
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
+        <div className={cn('relative', className)}>
+            <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
+                <button 
+                    onClick={dismissBanner}
+                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+                >
+                    <HiXMark className='w-5 h-5' />
+                </button>
 
-            <h2 className='text-lg font-semibold mb-2'>Understanding Jobs & Runs</h2>
-            <p className='text-sm'>
+                <h2 className='text-lg font-semibold mb-2'>Understanding Jobs & Runs</h2>
+                <p className='text-sm'>
                 A <strong>Job</strong> is a single execution of a transformation algorithm, while a <strong>Run</strong> is a group of related Jobs processed together.
-            </p>
+                </p>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Job:</strong> Executes a transformation (e.g., importing/exporting data).
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Run:</strong> A batch of Jobs executed sequentially.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Status:</strong> Jobs can be <Chip size='sm'>Ready</Chip><Chip size='sm'>Running</Chip><Chip size='sm'>Finished</Chip><Chip size='sm'>Failed</Chip> or <Chip size='sm'>Disabled</Chip>.
-                </li>
-            </ul>
+                <ul className='mt-3 text-sm space-y-2'>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Job:</strong> Executes a transformation (e.g., importing/exporting data).
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Run:</strong> A batch of Jobs executed sequentially.
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Status:</strong> Jobs can be <Chip size='sm'>Ready</Chip><Chip size='sm'>Running</Chip><Chip size='sm'>Finished</Chip><Chip size='sm'>Failed</Chip> or <Chip size='sm'>Disabled</Chip>.
+                    </li>
+                </ul>
 
-            <p className='text-sm mt-3'>
+                <p className='text-sm mt-3'>
                 Jobs run in order, and Runs help organize batch processing. Inspired by GitLab pipelines.
-            </p>
+                </p>
 
-            {/* Hint Section */}
-            <h3 className='font-semibold mb-1 mt-4'>Next Steps</h3>
-            <ul className='space-y-1 text-sm'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span><strong>Manage Jobs:</strong> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.</span>
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span><strong>Create a New Run & Jobs:</strong> Go to the <button
-                        onClick={() => navigate(`/category/${categoryId}/actions`)}
-                        className='text-primary-500 hover:underline'
-                    >
+                {/* Hint Section */}
+                <h3 className='font-semibold mb-1 mt-4'>Next Steps</h3>
+                <ul className='space-y-1 text-sm'>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <span><strong>Manage Jobs:</strong> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.</span>
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <span><strong>Create a New Run & Jobs:</strong> Go to the <button
+                            onClick={() => navigate(`/category/${categoryId}/actions`)}
+                            className='text-primary-500 hover:underline'
+                        >
                             Actions page
-                    </button>.</span>
-                </li>
-            </ul>
+                        </button>.</span>
+                    </li>
+                </ul>
+            </div>
         </div>
     );
 }

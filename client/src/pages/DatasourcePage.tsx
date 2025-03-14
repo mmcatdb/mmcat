@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type Settings } from '@/types/datasource';
-import { Button, Input } from '@nextui-org/react';
+import { Button, Input, Tooltip } from '@nextui-org/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
@@ -11,10 +11,11 @@ import { DatasourceSpecificFields } from '@/components/datasources/DatasourceMod
 import { cn } from '@/components/utils';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
+import { useBannerState } from '@/types/utils/useBannerState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 export function DatasourcePage() {
     return (<>
-        <DatasourceDetailInfoBanner className='mb-6' />
         <DatasourceDisplay />
     </>);
 }
@@ -97,6 +98,7 @@ function DatasourceDisplay() {
     const [ isConfigurationShown, setisConfigurationShown ] = useState(false);
     const [ isEditing, setIsEditing ] = useState(false);
     const [ isSaving, setIsSaving ] = useState(false);
+    const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasource-detail-page');
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -147,9 +149,20 @@ function DatasourceDisplay() {
 
     return (
         <div className='mt-5'>
-            <h1 className='text-2xl font-bold my-5 text-default-800'>
-                {initialDatasource.label}
-            </h1>
+            <div className='flex items-center gap-2 mb-4'>
+                <h1 className='text-2xl font-bold  text-default-800'>{initialDatasource.label}</h1>
+                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                    <button
+                        onClick={isVisible ? dismissBanner : restoreBanner}
+                        className='text-primary-500 hover:text-primary-700 transition'
+                    >
+                        <IoInformationCircleOutline className='w-6 h-6' />
+                    </button>
+                </Tooltip>
+            </div>
+
+            {isVisible && <DatasourceDetailInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+
             <p className='mb-5 text-default-800'>Type: {datasource.type}</p>
 
             {!isEditing ? (
@@ -221,44 +234,36 @@ function DatasourceDisplay() {
 
 type DatasourceDetailInfoBannerProps = {
     className?: string;
+    dismissBanner: () => void;
 };
 
-export function DatasourceDetailInfoBanner({ className }: DatasourceDetailInfoBannerProps) {
-    // const { preferences, setPreferences } = usePreferences();
-    // const [ isVisible, setIsVisible ] = useState(!preferences.dismissedDatasourceDetailGuide);
-
-    // function handleClose() {
-    //     setIsVisible(false);
-    //     setPreferences({ ...preferences, dismissedDatasourceDetailGuide: true });
-    // }
-
-    // if (!isVisible) 
-    //     return null;
-
+export function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
     return (
-        <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300', className)}>
-            <button 
-                // onClick={handleClose} 
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
+        <div className={cn('relative', className)}>
+            <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
+                <button 
+                    onClick={dismissBanner} 
+                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+                >
+                    <HiXMark className='w-5 h-5' />
+                </button>
 
-            <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
-            <ul className='mt-2 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Edit:</strong> You can update connection details, but the type cannot be changed.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Password:</strong> If left empty, the existing password remains unchanged.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Delete:</strong> A Data Source can be removed if it’s not in use.
-                </li>
-            </ul>
+                <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
+                <ul className='mt-2 text-sm space-y-2'>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Edit:</strong> You can update connection details, but the type cannot be changed.
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Password:</strong> If edit password field left empty, the existing password remains unchanged.
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Delete:</strong> A Data Source can be removed if it’s not in use.
+                    </li>
+                </ul>
+            </div>
         </div>
     );
 }

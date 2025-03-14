@@ -3,12 +3,13 @@ import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTab
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, cn, Input } from '@nextui-org/react';
+import { Button, cn, Input, Tooltip } from '@nextui-org/react';
 import { AddSchemaModal } from './Home';
 import { useLoaderData } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
-import { usePreferences } from '@/components/PreferencesProvider';
 import { GoDotFill } from 'react-icons/go';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { useBannerState } from '@/types/utils/useBannerState';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -20,6 +21,7 @@ export function CategoriesPage() {
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ isFetching, setIsFetching ] = useState(false);
     const [ searchTerm, setSearchTerm ] = useState('');
+    const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
 
     function handleDeleteCategory() {
         toast.error('Not handled yet. TODO this.');
@@ -50,16 +52,24 @@ export function CategoriesPage() {
     );
 
     return (
-        <div className='p-8 space-y-6'>
+        <div className='p-8'>
             {/* Header Section */}
-            <div className='flex justify-between items-center'>
-                <h1 className='text-2xl font-bold'>Schema Categories</h1>
+            <div className='flex items-center gap-2 mb-4'>
+                <h1 className='text-2xl font-semibold'>Schema Categories</h1>
+                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                    <button
+                        onClick={isVisible ? dismissBanner : restoreBanner}
+                        className='text-primary-500 hover:text-primary-700 transition'
+                    >
+                        <IoInformationCircleOutline className='w-6 h-6' />
+                    </button>
+                </Tooltip>
             </div>
 
-            <SchemaCategoryInfoBanner className='mb-6' />
+            {isVisible && <SchemaCategoryInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
             {/* Action Bar (Search + Buttons) */}
-            <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-sm'>
+            <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-sm mb-4'>
                 {/* Search Input */}
                 <Input
                     type='text'
@@ -151,55 +161,47 @@ async function categoriesLoader(): Promise<CategoriesLoaderData> {
 
 type SchemaCategoryInfoBannerProps = {
     className?: string;
+    dismissBanner: () => void;
 };
 
-export function SchemaCategoryInfoBanner({ className }: SchemaCategoryInfoBannerProps) {
-    const { preferences, setPreferences } = usePreferences();
-    const [ isVisible, setIsVisible ] = useState(!preferences.dismissedSchemaCategoryGuide);
-
-    function handleClose() {
-        setIsVisible(false);
-        setPreferences({ ...preferences, dismissedSchemaCategoryGuide: true });
-    }
-
-    if (!isVisible) 
-        return null;
-
+export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCategoryInfoBannerProps) {
     return (
-        <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300', className)}>
-            <button 
-                onClick={handleClose} 
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
+        <div className={cn('relative', className)}>
+            <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
+                <button 
+                    onClick={dismissBanner}
+                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+                >
+                    <HiXMark className='w-5 h-5' />
+                </button>
 
-            <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
-            <p className='text-sm'>
+                <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
+                <p className='text-sm'>
                 A <strong>Schema Category</strong> represents the structure of your data at a high level.  
                 It is a <em>project</em>, grouping everything related to a specific conceptual schema.  
                 Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
-            </p>
+                </p>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Conceptual Schema:</strong> Defines the data model without focusing on storage details.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Instance Category:</strong> Holds concrete data based on the schema.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Logical Model:</strong> Defines how data is stored in tables, documents, or other structures.
-                </li>
-            </ul>
+                <ul className='mt-3 text-sm space-y-2'>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Conceptual Schema:</strong> Defines the data model without focusing on storage details.
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Instance Category:</strong> Holds concrete data based on the schema.
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Logical Model:</strong> Defines how data is stored in tables, documents, or other structures.
+                    </li>
+                </ul>
 
-            <p className='text-sm mt-3'>
+                <p className='text-sm mt-3'>
                 Each Schema Category serves as a <em>workspace</em> where you define how data is structured and processed.
                 Start by creating a <em>Graph</em> in editor, then create <em>Mappings</em> and execute <em>Jobs</em> to transform data.
-            </p>
+                </p>
+            </div>
         </div>
     );
 }

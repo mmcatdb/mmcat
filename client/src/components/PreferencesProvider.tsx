@@ -9,8 +9,6 @@ type Preferences = {
     theme: Theme;
     isCollapsed: boolean;
     showTableIDs: boolean;
-    // dismissedActionsGuide: boolean;
-    // dismissedSchemaCategoryGuide: boolean;
 };
 
 type PreferencesContext = {
@@ -22,8 +20,6 @@ type StoredPreferences = {
     theme: Theme;
     isCollapsed: boolean;
     showTableIDs: boolean;
-    // dismissedActionsGuide: boolean;
-    // dismissedSchemaCategoryGuide: boolean;
 };
 
 function fromStored(): Preferences {
@@ -33,8 +29,6 @@ function fromStored(): Preferences {
         theme: stored.theme ?? 'dark',
         isCollapsed: stored.isCollapsed ?? false,
         showTableIDs: stored.showTableIDs ?? false,
-        // dismissedActionsGuide: stored.dismissedActionsGuide ?? false,
-        // dismissedSchemaCategoryGuide: stored.dismissedSchemaCategoryGuide ?? false,
     };
 }
 
@@ -45,8 +39,6 @@ function toStored(preferences: Preferences): StoredPreferences {
         theme: preferences.theme,
         isCollapsed: preferences.isCollapsed,
         showTableIDs: preferences.showTableIDs,
-        // dismissedActionsGuide: preferences.dismissedActionsGuide,
-        // dismissedSchemaCategoryGuide: preferences.dismissedSchemaCategoryGuide,
     };
 }
 

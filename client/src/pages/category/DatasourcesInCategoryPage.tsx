@@ -9,15 +9,18 @@ import { EmptyState } from '@/components/TableCommon';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
 import { RiMapPin2Line } from 'react-icons/ri';
-import { Chip } from '@nextui-org/react';
+import { Chip, Tooltip } from '@nextui-org/react';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { cn } from '@/components/utils';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { useBannerState } from '@/types/utils/useBannerState';
 
 export function DatasourcesInCategoryPage() {
     const data = useLoaderData() as DatasourcesInCategoryLoaderData;
     const [ datasourcesIn, setDatasourcesIn ] = useState<Datasource[]>(data.datasourcesIn);
     const [ datasourcesNotIn, setDatasourcesNotIn ] = useState<Datasource[]>(data.datasourcesNotIn);
+    const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasources-in-category-page');
 
     const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
@@ -40,9 +43,19 @@ export function DatasourcesInCategoryPage() {
 
     return (
         <div>
-            <h1 className='text-xl font-bold mb-4'>Datasources in {category.label} (with mapping)</h1>
+            <div className='flex items-center gap-2 mb-4'>
+                <h1 className='text-xl font-semibold'>Datasources in {category.label} (with mapping)</h1>
+                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                    <button
+                        onClick={isVisible ? dismissBanner : restoreBanner}
+                        className='text-primary-500 hover:text-primary-700 transition'
+                    >
+                        <IoInformationCircleOutline className='w-6 h-6' />
+                    </button>
+                </Tooltip>
+            </div>
 
-            <MappingInfoBanner className='mb-6' />
+            {isVisible && <MappingInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
             <div className='mt-5'>
                 {datasourcesIn.length > 0 ? (
@@ -139,59 +152,51 @@ async function datasourcesInCategoryLoader({ params: { categoryId } }: { params:
 
 type MappingInfoBannerProps = {
     className?: string;
+    dismissBanner: () => void;
 };
 
-export function MappingInfoBanner({ className }: MappingInfoBannerProps) {
-    // const { preferences, setPreferences } = usePreferences();
-    // const [ isVisible, setIsVisible ] = useState(!preferences.dismissedMappingGuide);
-
-    // function handleClose() {
-    //     setIsVisible(false);
-    //     setPreferences({ ...preferences, dismissedMappingGuide: true });
-    // }
-
-    // if (!isVisible) 
-    //     return null;
-
+export function MappingInfoBanner({ className, dismissBanner }: MappingInfoBannerProps) {
     return (
-        <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300', className)}>
-            <button 
-                // onClick={handleClose} 
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
+        <div className={cn('relative', className)}>
+            <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
+                <button 
+                    onClick={dismissBanner} 
+                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+                >
+                    <HiXMark className='w-5 h-5' />
+                </button>
 
-            <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>
+                <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>
 
-            <p className='text-sm'>
+                <p className='text-sm'>
                 Before creating a <strong>Mapping</strong>, you need to connect a <strong>Data Source</strong>.  
                 A Data Source represents where your data is stored, such as a database, or file.  
-            </p>
+                </p>
 
-            <p className='text-sm mt-2'>
+                <p className='text-sm mt-2'>
                 Once a Data Source is connected, you can create a <em>Mapping</em> on a <em>Schema Category</em>, linking the source to the <em>Conceptual Schema</em>.  
                 A <strong>Mapping</strong> defines how data is structured and stored, using a <em>JSON-like access path</em> to describe relationships between objects.
-            </p>
+                </p>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Mapping:</strong> Defines how conceptual schema elements relate to database structures.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Access Path:</strong> A tree structure that maps schema objects to database tables, or properties.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Data Source:</strong> The data source where mapped data is stored, defined by connection details.
-                </li>
-            </ul>
+                <ul className='mt-3 text-sm space-y-2'>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Mapping:</strong> Defines how conceptual schema elements relate to database structures.
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Access Path:</strong> A tree structure that maps schema objects to database tables, or properties.
+                    </li>
+                    <li className='flex items-center gap-2'>
+                        <GoDotFill className='text-primary-500' />
+                        <strong>Data Source:</strong> The data source where mapped data is stored, defined by connection details.
+                    </li>
+                </ul>
 
-            <p className='text-sm mt-3'>
+                <p className='text-sm mt-3'>
                 Mappings ensure data is correctly structured and accessible for transformations. Choose an appropriate <em>data source</em> to connect to the Conceptual Schema.
-            </p>
+                </p>
+            </div>
         </div>
     );
 }
