@@ -14,6 +14,7 @@ import { GoDotFill } from 'react-icons/go';
 import { cn } from '@/components/utils';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { routes } from '@/routes/routes';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
@@ -136,7 +137,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
 
     function handleRowAction(key: React.Key) {
         if (category.id) {
-            navigate(`/category/${category.id}/actions/${key}`, {
+            navigate(routes.category.actions.resolve({ categoryId: category.id }) + `/${key}`, {
                 state: { sortDescriptor },
             });
         }

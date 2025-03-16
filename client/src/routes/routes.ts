@@ -23,7 +23,7 @@ class ParametrizedRoute<TParam extends string = never, TQuery extends string = n
     }
 }
 
-const categoryIndex = new ParametrizedRoute<'categoryId'>('/category/:categoryId', 'category');
+const categoryIndex = new ParametrizedRoute<'categoryId'>('/schema-categories/:categoryId', 'category');
 
 export const routes = {
     home: new ParametrizedRoute('/', 'home'),
@@ -35,7 +35,8 @@ export const routes = {
         index: categoryIndex,
         editor: categoryIndex.child('/editor', 'editor'),
         datasources: categoryIndex.child('/datasources', 'datasources'),
-        mapping: categoryIndex.child<'categoryId' | 'mappingId'>('/mappings/:mappingId', 'mappings'),
+        // mapping: categoryIndex.child<'categoryId' | 'mappingId'>('/mappings/:mappingId', 'mappings'),
+        mapping: categoryIndex.child<'categoryId' | 'datasourceId' | 'mappingId'>('datasources/:datasourceId/mappings/:mappingId', 'mapping'),
         querying: categoryIndex.child('/querying', 'querying'),
         actions: categoryIndex.child('/actions', 'actions'),
         jobs: categoryIndex.child('/jobs', 'jobs'),

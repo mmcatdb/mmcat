@@ -7,7 +7,7 @@ import { CategoryPage, type CategoryLoaderData } from '@/pages/CategoryPage';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
 import { type DatasourceLoaderData, DatasourcePage, DatasourceInCategoryPage } from '@/pages/DatasourcePage';
 import { AdminerPage } from '@/pages/AdminerPage';
-import { CategoriesPage } from '@/pages/CategoriesPage';
+import { CategoriesPage, SchemaCategoriesPage } from '@/pages/CategoriesPage';
 import { QueryingPage } from '@/pages/category/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategoryPage';
@@ -30,12 +30,6 @@ export const router = createBrowserRouter([
                 // path: routes.home.path,
                 index: true,
                 Component: Home,
-            },
-            {
-                path: routes.categories,
-                loader: CategoriesPage.loader,
-                Component: CategoriesPage,
-                handle: { breadcrumb: 'Schema Categories' },
             },
             {
                 path: routes.datasources,
@@ -63,93 +57,115 @@ export const router = createBrowserRouter([
                 handle: { breadcrumb: 'Adminer' },
             },
             {
-                path: routes.category.index.path,
-                loader: CategoryPage.loader,
-                Component: CategoryPage,
-                handle: { breadcrumb: (data: CategoryLoaderData) => data.category.label },
+                path: routes.categories,
+                Component: SchemaCategoriesPage,
+                handle: { breadcrumb: 'Schema Categories' },
                 children: [
                     {
                         index: true,
-                        id: routes.category.index.id,
-                        Component: CategoryOverviewPage,
+                        Component: CategoriesPage,
+                        loader: CategoriesPage.loader,
                     },
                     {
-                        id: routes.category.editor.id,
-                        path: routes.category.editor.path,
-                        loader: CategoryEditorPage.loader,
-                        Component: CategoryEditorPage,
-                        handle: { breadcrumb: 'Editor' },
-                    },
-                    {
-                        id: routes.category.querying.id,
-                        path: routes.category.querying.path,
-                        Component: QueryingPage,
-                        handle: { breadcrumb: 'Querying' },
-                    },
-                    {
-                        id: routes.category.datasources.id,
-                        path: routes.category.datasources.path,
-                        handle: { breadcrumb: 'Datasources' },
+                        path: ':categoryId',
+                        loader: CategoryPage.loader,
+                        Component: CategoryPage,
+                        handle: { 
+                            breadcrumb: (data: CategoryLoaderData) => data.category.label, 
+                        },
                         children: [
                             {
                                 index: true,
-                                loader: DatasourcesInCategoryPage.loader,
-                                Component: DatasourcesInCategoryPage,
+                                id: routes.category.index.id,
+                                Component: CategoryOverviewPage,
                             },
                             {
-                                path: ':id',
-                                loader: DatasourceInCategoryPage.loader,
-                                Component: DatasourceInCategoryPage,
-                                handle: { breadcrumb: (data: DatasourceLoaderData) => data.datasource.label },
-                            },
-                        ],
-                    },
-                    {
-                        id: routes.category.mapping.id,
-                        path: routes.category.mapping.path,
-                        loader: MappingPage.loader,
-                        Component: MappingPage,
-                        handle: { breadcrumb: (data: MappingLoaderData) => data.mapping.kindName },
-                    },
-                    {
-                        id: routes.category.actions.id,
-                        path: routes.category.actions.path,
-                        handle: { breadcrumb: 'Actions' },
-                        children: [
-                            {
-                                index: true,
-                                loader: ActionsPage.loader,
-                                Component: ActionsPage,
+                                id: routes.category.editor.id,
+                                path: routes.category.editor.path,
+                                loader: CategoryEditorPage.loader,
+                                Component: CategoryEditorPage,
+                                handle: { breadcrumb: 'Editor' },
                             },
                             {
-                                id: 'add-action',
-                                path: 'add',
-                                Component: AddActionPage,
-                                handle: { breadcrumb: 'Add' },
+                                id: routes.category.querying.id,
+                                path: routes.category.querying.path,
+                                Component: QueryingPage,
+                                handle: { breadcrumb: 'Querying' },
                             },
                             {
-                                id: 'action',
-                                path: ':actionId',
-                                loader: ActionPage.loader,
-                                Component: ActionPage,
-                                handle: { breadcrumb: (data: ActionLoaderData) => data.action.label },
+                                id: routes.category.datasources.id,
+                                path: routes.category.datasources.path,
+                                handle: { breadcrumb: 'Datasources' },
+                                children: [
+                                    {
+                                        index: true,
+                                        loader: DatasourcesInCategoryPage.loader,
+                                        Component: DatasourcesInCategoryPage,
+                                    },
+                                    {
+                                        path: ':datasourceId',
+                                        loader: DatasourceInCategoryPage.loader,
+                                        Component: DatasourceInCategoryPage,
+                                        handle: { 
+                                            breadcrumb: (data: DatasourceLoaderData) => data.datasource.label,
+                                        },
+                                        // children: [
+                                        //     {
+                                        //         id: routes.category.mapping.id,
+                                        //         path: routes.category.mapping.path, // `mappings/:mappingId`
+                                        //         loader: MappingPage.loader,
+                                        //         Component: MappingPage,
+                                        //         handle: { 
+                                        //             breadcrumb: (data: MappingLoaderData) => data.mapping.kindName,
+                                        //         },
+                                        //     },
+                                        // ],
+                                    },
+                                ],
                             },
-                        ],
-                    },
-                    {
-                        id: routes.category.jobs.id,
-                        path: routes.category.jobs.path,
-                        handle: { breadcrumb: 'Jobs' },
-                        children: [
                             {
-                                index: true,
-                                Component: JobsPage,
+                                id: routes.category.actions.id,
+                                path: routes.category.actions.path,
+                                handle: { breadcrumb: 'Actions' },
+                                children: [
+                                    {
+                                        index: true,
+                                        loader: ActionsPage.loader,
+                                        Component: ActionsPage,
+                                    },
+                                    {
+                                        id: 'add-action',
+                                        path: 'add',
+                                        Component: AddActionPage,
+                                        handle: { breadcrumb: 'Add' },
+                                    },
+                                    {
+                                        id: 'action',
+                                        path: ':actionId',
+                                        loader: ActionPage.loader,
+                                        Component: ActionPage,
+                                        handle: { 
+                                            breadcrumb: (data: ActionLoaderData) => data.action.label,
+                                        },
+                                    },
+                                ],
                             },
                             {
-                                path: ':jobId',
-                                loader: JobPage.loader,
-                                Component: JobPage,
-                                handle: { breadcrumb: 'Job Details' },
+                                id: routes.category.jobs.id,
+                                path: routes.category.jobs.path,
+                                handle: { breadcrumb: 'Jobs' },
+                                children: [
+                                    {
+                                        index: true,
+                                        Component: JobsPage,
+                                    },
+                                    {
+                                        path: ':jobId',
+                                        loader: JobPage.loader,
+                                        Component: JobPage,
+                                        handle: { breadcrumb: 'Job Details' },
+                                    },
+                                ],
                             },
                         ],
                     },

@@ -6,6 +6,7 @@ import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
+import { routes } from '@/routes/routes';
 
 type SchemaCategoriesTableProps = {
     categories: SchemaCategoryInfo[];
@@ -46,7 +47,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
     const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
 
     function handleRowAction(key: React.Key) {
-        navigate(`/category/${key}`, {});
+        navigate(routes.categories + `/${key}`);
     }
 
     function handleDeleteClick(id: string) {

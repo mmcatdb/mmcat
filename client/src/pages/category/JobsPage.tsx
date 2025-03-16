@@ -12,6 +12,7 @@ import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { routes } from '@/routes/routes';
 
 /** In ms. */
 const REFRESH_INTERVAL = 3000;
@@ -240,7 +241,8 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
                     <li className='flex items-center gap-2'>
                         <GoDotFill className='text-primary-500' />
                         <span><strong>Create a New Run & Jobs:</strong> Go to the <button
-                            onClick={() => navigate(`/category/${categoryId}/actions`)}
+                            onClick={() => navigate(routes.category.jobs.resolve({ categoryId: categoryId!,
+                            }))}
                             className='text-primary-500 hover:underline'
                         >
                             Actions page

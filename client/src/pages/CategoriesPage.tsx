@@ -5,7 +5,7 @@ import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
 import { Button, cn, Input, Tooltip } from '@nextui-org/react';
 import { AddSchemaModal } from './Home';
-import { useLoaderData } from 'react-router-dom';
+import { Outlet, useLoaderData } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
@@ -14,6 +14,12 @@ import { useBannerState } from '@/types/utils/useBannerState';
 const EXAMPLE_SCHEMAS = [
     'basic',
 ] as const;
+
+export function SchemaCategoriesPage() {
+    return (
+        <Outlet />
+    );
+}
 
 export function CategoriesPage() {
     const { categories: loadedCategories } = useLoaderData() as CategoriesLoaderData;
