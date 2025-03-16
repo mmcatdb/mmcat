@@ -133,7 +133,6 @@ export function CategoriesPage() {
                     )
                 ) : (
                     <div className='text-center border p-6 rounded-lg border-default-200'>
-                        <span className='text-4xl'>🐱</span>
                         <p className='mt-2 text-default-500'>No categories available. Create one to get started!</p>
                     </div>
                 )}

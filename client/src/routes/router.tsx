@@ -103,7 +103,7 @@ export const router = createBrowserRouter([
                                         Component: DatasourcesInCategoryPage,
                                     },
                                     {
-                                        path: ':datasourceId',
+                                        path: ':id',
                                         loader: DatasourceInCategoryPage.loader,
                                         Component: DatasourceInCategoryPage,
                                         handle: { 

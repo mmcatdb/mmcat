@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
+import { routes } from '@/routes/routes';
 
 type DatasourcesTableProps = {
     datasources: Datasource[];
@@ -66,7 +67,7 @@ function DatasourceTable({ datasources, deleteDatasource, sortDescriptor, onSort
 
     function handleRowAction(key: React.Key) {
         if (categoryId) {
-            navigate(`/category/${categoryId}/datasources/${key}`, {
+            navigate(routes.category.datasources.resolve({ categoryId }) + `/${key}`, {
                 state: { sortDescriptor },
             });
         }

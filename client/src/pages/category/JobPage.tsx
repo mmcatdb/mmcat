@@ -95,16 +95,16 @@ export function JobPage() {
             <div
                 className='border rounded-lg p-4 border-default-300 bg-default-50'
             >
-                <p>
+                <p className='mb-1'>
                     <strong>ID:</strong> {job.id}
                 </p>
-                <p>
+                <p className='mb-1'>
                     <strong>Run ID:</strong> {job.runId}
                 </p>
-                <p>
+                <p className='mb-1'>
                     <strong>Index:</strong> {job.index}
                 </p>
-                <p className='my-2'>
+                <p className='mb-1'>
                     <strong>State:</strong>
                     <span
                         className={cn(

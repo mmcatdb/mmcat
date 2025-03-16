@@ -66,7 +66,7 @@ export function DatasourcesInCategoryPage() {
                 ) : (
                     <div className='text-center border border-default-300 p-6 rounded-lg bg-default-100'>
                         <p className='text-lg font-semibold text-default-900'>
-                            No Datasources with Mappings Found 😿
+                            No Datasources with Mappings Found
                         </p>
                         <p className='text-default-500 mt-2'>
                             To add a mapping, follow these quick steps:
