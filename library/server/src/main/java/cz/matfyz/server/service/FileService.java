@@ -1,6 +1,8 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
@@ -10,8 +12,10 @@ import cz.matfyz.server.repository.FileRepository;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import cz.matfyz.server.global.Configuration.UploadsProperties;
 
@@ -50,10 +54,20 @@ public class FileService {
         return repository.findAllInCategory(categoryId);
     }
 
-    public File executeDML(File file) {
+    public File executeDML(File file, String mode, String newDBName) {
         final DatasourceWrapper datasourceWrapper = datasourceRepository.find(file.datasourceId);
         final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
         final Path filePath = Paths.get(File.getFilePath(file, uploads));
+
+        if (mode.equals("delete_and_execute")) {
+            final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
+            final Collection<AbstractStatement> deleteStatements = ddlWrapper.createDDLDeleteStatements(file.readExecutionCommands(uploads));
+            control.execute(deleteStatements);
+        } else if (mode.equals("create_new_and_execute")) {
+            // 1. probably make new connection
+            // 2. execute over new control wrapper, so not the following one
+            System.out.println("create new first");
+        }
 
         LOGGER.info("Start executing models ...");
         control.execute(filePath);

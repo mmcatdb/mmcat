@@ -130,6 +130,19 @@ public class File extends Entity {
         this.executedAt.add(executionDate);
     }
 
+    public List<String> readExecutionCommands(UploadsProperties uploads) {
+        String filePath = getFilePath(this, uploads);
+
+        try {
+            String fileContents = Files.readString(Paths.get(filePath));
+            fileContents = fileContents.replaceAll("\\s+", " ").trim();
+            return List.of(fileContents.split("(?<=;)(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)"));
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read execution file: " + filePath, e);
+        }
+    }
+
     private record JsonValue(
         String label,
         String description,

@@ -1,12 +1,18 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
@@ -57,4 +63,33 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         String name,
         String command
     ) {}
+
+    @Override
+    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+        Collection<AbstractStatement> deleteStatements = new ArrayList<>();
+        Set<String> tableNames = extractCreatedTables(executionCommands);
+
+        for (String tableName: tableNames)
+            deleteStatements.add(createDDLDeleteStatement(tableName));
+
+        return deleteStatements;
+    }
+
+    private Set<String> extractCreatedTables(List<String> executionCommands) {
+        Set<String> tableNames = new HashSet<>();
+        for (String command : executionCommands) {
+            Matcher matcher = Pattern.compile("CREATE TABLE\\s+\"([^\"]+)\"").matcher(command);
+            if (matcher.find())
+                tableNames.add(matcher.group(1));
+        }
+        return tableNames;
+    }
+
+    private StringStatement createDDLDeleteStatement(String tableName) {
+        final String content = String.format("""
+            DROP TABLE \"%s\" ;
+            """, tableName);
+        return StringStatement.create(content);
+    }
+
 }

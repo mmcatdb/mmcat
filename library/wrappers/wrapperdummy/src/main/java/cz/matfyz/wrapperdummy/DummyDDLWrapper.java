@@ -4,6 +4,7 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class DummyDDLWrapper implements AbstractDDLWrapper {
@@ -36,6 +37,11 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
     @Override public AbstractStatement createDDLStatement() {
         methods.add("createDDLStatement()");
         return AbstractStatement.createEmpty();
+    }
+
+    @Override
+    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+        throw new UnsupportedOperationException("Unimplemented method 'createDDLDeleteStatements'");
     }
 
 }

@@ -59,20 +59,13 @@ public class FileController {
     }
 
     @PostMapping("/files/{id}/execute")
-    public void executeDML(@PathVariable Id id, @RequestBody Map<String, String> body) {
+    public File executeDML(@PathVariable Id id, @RequestBody Map<String, String> body) {
         final File file = repository.find(id);
 
-        String mode = body.get("mode");
-        String newDBName = body.get("newDBName");
+        final String mode = body.get("mode");
+        final String newDBName = body.get("newDBName");
 
-        if (mode.equals("delete_and_execute"))
-            //service.deleteDB(file);
-            System.out.println("deleting first");
-        else if (mode.equals("create_new_and_execute"))
-            //service.createNewDB(filen newDBName.trim());
-            System.out.println("creating new first");
-
-        //service.executeDML(file);
+        return service.executeDML(file, mode, newDBName);
     }
 
     @PutMapping("files/{id}/update")

@@ -1,8 +1,18 @@
 package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bson.BsonDocument;
 import org.bson.BsonString;
@@ -29,6 +39,31 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
 
     @Override public MongoDBCommandStatement createDDLStatement() {
         return new MongoDBCommandStatement("db.createCollection(" + kindName + ");", new BsonDocument("create", new BsonString(kindName)));
+    }
+
+    @Override
+    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+        Collection<AbstractStatement> deleteStatements = new ArrayList<>();
+        Set<String> tableNames = extractCreatedTables(executionCommands);
+
+        for (String tableName: tableNames)
+            deleteStatements.add(createDDLDeleteStatement(tableName));
+
+        return deleteStatements;
+    }
+
+    private Set<String> extractCreatedTables(List<String> executionCommands) {
+        Set<String> collectionNames = new HashSet<>();
+        for (String command : executionCommands) {
+            Matcher matcher = Pattern.compile("db\\.createCollection\\(\"([^\"]+)\"").matcher(command);
+            if (matcher.find())
+                collectionNames.add(matcher.group(1));
+        }
+        return collectionNames;
+    }
+
+    private MongoDBCommandStatement createDDLDeleteStatement(String tableName) {
+        return new MongoDBCommandStatement("db." + tableName + ".drop();", new BsonDocument("delete", new BsonString(tableName)));
     }
 
 }
