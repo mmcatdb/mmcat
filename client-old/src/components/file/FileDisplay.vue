@@ -194,20 +194,25 @@ async function executeDML() {
             </div>
         </transition>
         <transition name="fade">
+            <div v-if="showExecutionPrompt" class="overlay"></div>
+        </transition>
+        <transition name="fade">
             <div v-if="showExecutionPrompt" class="execution-prompt">
+                <h3>Execution Options</h3>
                 <p>This file has been executed before. What would you like to do?</p>
-                <p>
-                    <strong>Options:</strong>
-                    <ul>
-                        <li><b>Overwrite Data:</b> Delete the existing dataset and replace it with the new execution.</li>
-                        <li><b>Create New Workspace:</b> Execute commands in a fresh workspace without affecting existing data.</li>
-                    </ul>
-                </p>
-                <div class="d-flex ms-auto align-self-center gap-1">
-                    <button @click="executeOption('overwrite')" class="info">Overwrite Data</button>
-                    <button @click="executeOption('newWorkspace')" class="info">Create New Workspace</button>
-                    <button @click="showExecutionPrompt = false" class="cancel">Cancel</button>
+                <div class="options">
+                    <div class="option">
+                        <h4>Overwrite Data</h4>
+                        <p>Delete the existing dataset and replace it with the new execution.</p>
+                        <button @click="executeOption('overwrite')" class="info">Overwrite</button>
+                    </div>
+                    <div class="option">
+                        <h4>Create New Database</h4>
+                        <p>Execute commands in a new database without affecting existing data.</p>
+                        <button @click="executeOption('newWorkspace')" class="info">New Database</button>
+                    </div>
                 </div>
+                <button @click="showExecutionPrompt = false">Cancel</button>
             </div>
         </transition>
     </div>
@@ -259,19 +264,59 @@ async function executeDML() {
     margin-top: 10px;
 }
 
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
 .execution-prompt {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgb(255, 255, 255);
-    padding: 20px;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    width: 350px;
+    width: 400px;
     text-align: center;
+}
+
+.execution-prompt h3 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.option {
+    padding: 10px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    text-align: left;
+    border-left: 5px solid #007bff;
+}
+
+.option h4 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.option p {
+    font-size: 0.9rem;
+    color: #555;
 }
 
 </style>
