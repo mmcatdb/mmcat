@@ -24,7 +24,7 @@ public class GraphResponse extends DataResponse {
         Map<String, Object> properties();
     }
 
-    public record GraphNode(String elementId, Map<String, Object> properties) implements GraphElement {}
+    public record GraphNode(String elementId, Map<String, Object> properties, List<String> labels) implements GraphElement {}
 
     public record GraphRelationship(String elementId, Map<String, Object> properties, String startNodeId, String endNodeId) implements GraphElement {}
 }

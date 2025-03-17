@@ -31,13 +31,15 @@ export function DatabaseTable({ fetchedData, setItemCount, kindReferences, kind,
         for (const element of fetchedData.data) {
             const { properties, ...rest } = element;
 
-            const prefixedProperties = Object.fromEntries(
-                Object.entries(properties as Record<string, string>).map(([ key, value ]) => [ `properties.${key}`, value ]),
+
+            const prefixed = Object.fromEntries(
+                Object.entries(rest as Record<string, string>).map(([ key, value ]) => [ `#${key}`, value ]),
             );
 
+
             modifiedData.data.push({
-                ...rest,
-                ...prefixedProperties,
+                ...(properties as Record<string, string>),
+                ...prefixed,
             } as Record<string, string>);
         }
 

@@ -32,6 +32,14 @@ export type GraphResponse = {
 };
 
 export type GraphResponseData = {
+    elementId: string;
     properties: Record<string, unknown>;
+    lables: string[];
+    [key: string]: unknown;
+} | {
+    elementId: string;
+    properties: Record<string, unknown>;
+    startNodeId: string;
+    endNodeId: string;
     [key: string]: unknown;
 };

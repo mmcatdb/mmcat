@@ -34,7 +34,7 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      * @return A {@link GraphElement} containing the node's ID and properties.
      */
     public static GraphElement getNodeProperties(Value node) {
-        String id = node.asNode().elementId().split(":")[2];
+        String id = node.asNode().elementId();
 
         Map<String, Object> properties = new HashMap<>();
         node.asNode().asMap().forEach(properties::put);
@@ -43,9 +43,8 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
         for (final var label : node.asNode().labels()) {
             labels.add(label);
         }
-        properties.put("labels", labels);
 
-        return new GraphNode(id, properties);
+        return new GraphNode(id, properties, labels);
     }
 
     /**
@@ -55,15 +54,13 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      * @return A {@link GraphElement} containing the relationship's ID and properties.
      */
     public static GraphElement getRelationshipProperties(Value relationship) {
-        String id = relationship.asRelationship().elementId().split(":")[2];
+        String id = relationship.asRelationship().elementId();
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put("type", relationship.asRelationship().type());
-
         relationship.asRelationship().asMap().forEach(properties::put);
 
-        String startNodeId = relationship.asRelationship().startNodeElementId().split(":")[2];
-        String endNodeId = relationship.asRelationship().endNodeElementId().split(":")[2];
+        String startNodeId = relationship.asRelationship().startNodeElementId();
+        String endNodeId = relationship.asRelationship().endNodeElementId();
 
         return new GraphRelationship(id, properties, startNodeId, endNodeId);
     }
@@ -99,13 +96,15 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
             """, matchClause.toString()));
         while (queryResult.hasNext()) {
             Record queryRecord = queryResult.next();
-            properties.add("properties." + queryRecord.get("key").asString());
+            properties.add(queryRecord.get("key").asString());
         }
-        properties.add("elementId");
+        properties.add("#elementId");
 
-        if (!forNode) {
-            properties.add("startNodeId");
-            properties.add("endNodeId");
+        if (forNode) {
+            properties.add("#labels");
+        } else {
+            properties.add("#startNodeId");
+            properties.add("#endNodeId");
         }
 
         return properties;
