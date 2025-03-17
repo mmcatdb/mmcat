@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
@@ -13,6 +14,19 @@ type FilterFormProps = Readonly<{
 }>;
 
 export function FilterForm({ state, datasourceType, propertyNames, dispatch }: FilterFormProps) {
+    useEffect(() => {
+        const handleKeyPress = (e: KeyboardEvent) => {
+            if (e.key === 'Enter')
+                dispatch({ type: 'submit' });
+
+        };
+
+        document.addEventListener('keydown', handleKeyPress);
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress);
+        };
+    });
+
     return (
         <div>
             <div>
