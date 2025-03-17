@@ -25,6 +25,8 @@ const showDetails = ref(false);
 
 const showExecutionPrompt = ref(false);
 
+const newDatabaseName = ref("");
+
 async function saveLabel() {
     if (editedLabel.value.trim() === props.file.label) {
         editingLabel.value = false;
@@ -93,15 +95,15 @@ function getFileType(fileType: string) {
     return fileTypes[fileType] || { extension: "txt", mimeType: "text/plain" };
 }
 
-async function executeDML() {
-    if (props.file.executedAt?.length) {
+async function executeDML(mode: string = "execute", newDBName?: string) {
+    if (props.file.executedAt?.length && !showExecutionPrompt.value) {
         showExecutionPrompt.value = true;
         return;
     }
 
     fetching.value = true;
-    const result = await API.files.executeDML({ id: props.file.id });
-    fetching.value = false;
+    const result = await API.files.executeDML({ id: props.file.id }, { mode: mode, newDBName: newDBName });
+    fetching.value = false;    
 }
 
 </script>
@@ -204,15 +206,26 @@ async function executeDML() {
                     <div class="option">
                         <h4>Overwrite Data</h4>
                         <p>Delete the existing dataset and replace it with the new execution.</p>
-                        <button @click="executeOption('overwrite')" class="info">Overwrite</button>
+                        <button @click="executeDML('delete_and_execute')" class="info">Overwrite</button>
                     </div>
                     <div class="option">
                         <h4>Create New Database</h4>
                         <p>Execute commands in a new database without affecting existing data.</p>
-                        <button @click="executeOption('newWorkspace')" class="info">New Database</button>
+                        <input 
+                            v-model="newDatabaseName" 
+                            placeholder="Enter new database name" 
+                            class="form-control"
+                        />
+                        <button 
+                            @click="executeDML('create_new_and_execute', newDatabaseName)" 
+                            class="info mt-2"
+                            :disabled="!newDatabaseName.trim()"
+                        >
+                            New Database
+                        </button>
                     </div>
                 </div>
-                <button @click="showExecutionPrompt = false">Cancel</button>
+                <button @click="showExecutionPrompt = false" class="cancel">Cancel</button>
             </div>
         </transition>
     </div>
@@ -317,6 +330,11 @@ async function executeDML() {
 .option p {
     font-size: 0.9rem;
     color: #555;
+}
+
+.option input {
+    width: 100%;
+    margin-bottom: 10px;
 }
 
 </style>

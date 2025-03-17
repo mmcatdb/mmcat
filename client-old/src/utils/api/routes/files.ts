@@ -9,7 +9,7 @@ const files = {
     downloadFile: GET<{ id: StringLike }, Response>(
         u => `/files/${u.id}/download`, 
     ),
-    executeDML: POST<{ id: StringLike }, FileFromServer>(
+    executeDML: POST<{ id: StringLike }, FileFromServer, { mode: string, newDBName?: string }>(
         u => `/files/${u.id}/execute`,
     ),
     updateFile: PUT<{ id: StringLike }, FileFromServer, { value: string, isLabel: boolean }>(
