@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.file.File;
 import cz.matfyz.server.repository.DatasourceRepository;
@@ -16,6 +17,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import cz.matfyz.server.global.Configuration.UploadsProperties;
 
@@ -60,7 +63,16 @@ public class FileService {
         final Path filePath = Paths.get(File.getFilePath(file, uploads));
 
         if (mode.equals("create_new_and_execute")) {
-            System.out.println();
+            // This approach is ok for MongoDB, PostgreSQL and Neo4j, since their settings all have the "database" field (will it be ok on other dbs?)
+            // The "database" field gets overwritten
+            ObjectNode newSettings = datasourceWrapper.settings.put("database", newDBName);
+            DatasourceInit newDataSourceInit = new DatasourceInit(datasourceWrapper.label, datasourceWrapper.type, newSettings);
+            final DatasourceWrapper newDatasourceWrapper = DatasourceWrapper.createNew(newDataSourceInit);
+            //datasourceRepository.save(newDatasourceWrapper); // Do I want to save it?
+            final AbstractControlWrapper newControl = wrapperService.getControlWrapper(newDatasourceWrapper);
+            LOGGER.info("Start executing models ...");
+            newControl.execute(filePath);
+            LOGGER.info("... models executed.");
         } else {
             if (mode.equals("delete_and_execute")) {
                 final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
