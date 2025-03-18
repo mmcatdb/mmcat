@@ -6,6 +6,7 @@ import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { KindMenu } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
+import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
 import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
 import { type Datasource, DatasourceType } from '@/types/datasource';
@@ -72,6 +73,8 @@ export function AdminerPage() {
                         {state.kindName !== undefined && (
                             <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
                         )}
+
+                        <LinkLengthSwitch/>
                     </>
                 )}
             </div>

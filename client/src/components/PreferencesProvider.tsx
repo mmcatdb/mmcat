@@ -9,6 +9,7 @@ type Preferences = {
     theme: Theme;
     isCollapsed: boolean;
     showTableIDs: boolean;
+    adminerShortLinks: boolean;
 };
 
 type PreferencesContext = {
@@ -20,6 +21,7 @@ type StoredPreferences = {
     theme: Theme;
     isCollapsed: boolean;
     showTableIDs: boolean;
+    adminerShortLinks: boolean;
 };
 
 function fromStored(): Preferences {
@@ -29,6 +31,7 @@ function fromStored(): Preferences {
         theme: stored.theme ?? 'dark',
         isCollapsed: stored.isCollapsed ?? false,
         showTableIDs: stored.showTableIDs ?? false,
+        adminerShortLinks: stored.adminerShortLinks ?? false,
     };
 }
 
@@ -39,6 +42,7 @@ function toStored(preferences: Preferences): StoredPreferences {
         theme: preferences.theme,
         isCollapsed: preferences.isCollapsed,
         showTableIDs: preferences.showTableIDs,
+        adminerShortLinks: preferences.adminerShortLinks,
     };
 }
 

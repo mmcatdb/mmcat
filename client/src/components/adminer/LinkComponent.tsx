@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { routes } from '@/routes/routes';
+import { usePreferences } from '@/components/PreferencesProvider';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 import type { Datasource } from '@/types/datasource/Datasource';
 
-const NAME_LENGTH = 3;
+const NAME_LENGTH = 2;
 
 type LinkComponentProps = Readonly<{
     index: string;
@@ -31,7 +32,7 @@ function createLinkText(reference: KindReference, datasourceId: Id, datasources:
 }
 
 export function LinkComponent({ index, reference, kind, datasourceId, datasources, link }: LinkComponentProps ) {
-    const shortLink = true;
+    const { preferences } = usePreferences();
 
     return (
         <div>
@@ -40,7 +41,7 @@ export function LinkComponent({ index, reference, kind, datasourceId, datasource
                 to={{ pathname:routes.adminer, search: link }}
                 className='mr-2 hover:underline text-blue-500'
             >
-                {createLinkText(reference, datasourceId, datasources, kind, shortLink)}
+                {createLinkText(reference, datasourceId, datasources, kind, preferences.adminerShortLinks)}
             </Link>
         </div>
     );
