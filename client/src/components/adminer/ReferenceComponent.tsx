@@ -44,6 +44,7 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
                     reference={ref}
                     kind={kind}
                     datasourceId={datasourceId}
+                    datasources={datasources}
                     link={link}
                 />
             ))}

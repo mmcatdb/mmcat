@@ -2,22 +2,36 @@ import { Link } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
+import type { Datasource } from '@/types/datasource/Datasource';
+
+const NAME_LENGTH = 3;
 
 type LinkComponentProps = Readonly<{
     index: string;
     reference: KindReference;
     kind: string;
     datasourceId: Id;
+    datasources: Datasource[];
     link: string;
 }>;
 
-export function LinkComponent({ index, reference, kind, datasourceId, link }: LinkComponentProps ) {
+function createLinkText(reference: KindReference, datasourceId: Id, datasources: Datasource[], kind: string, short: boolean) {
+    const datasourceLabel: string = datasources.find(source => source.id === reference.datasourceId)!.label;
+    const kindName = reference.kindName;
+    const property = reference.property;
+
     let linkText = '';
     if (datasourceId !== reference.datasourceId)
-        linkText += `${reference.datasourceId}/`;
+        linkText += `${short ? datasourceLabel.substring(0, NAME_LENGTH) : datasourceLabel}/`;
     if (kind !== reference.kindName)
-        linkText += `${reference.kindName}:`;
-    linkText += `${reference.property}`;
+        linkText += `${short ? kindName.substring(0, NAME_LENGTH) : kindName}:`;
+    linkText += `${short ? property.substring(0, NAME_LENGTH) : property}`;
+
+    return linkText;
+}
+
+export function LinkComponent({ index, reference, kind, datasourceId, datasources, link }: LinkComponentProps ) {
+    const shortLink = true;
 
     return (
         <div>
@@ -26,7 +40,7 @@ export function LinkComponent({ index, reference, kind, datasourceId, link }: Li
                 to={{ pathname:routes.adminer, search: link }}
                 className='mr-2 hover:underline text-blue-500'
             >
-                {linkText}
+                {createLinkText(reference, datasourceId, datasources, kind, shortLink)}
             </Link>
         </div>
     );
