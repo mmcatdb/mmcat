@@ -34,7 +34,7 @@ type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
   ? { type: T }
   : { type: T } & P;
 
-type InputAction = AdminerTypedAction<'input', {
+export type InputAction = AdminerTypedAction<'input', {
     field: 'limit';
     value: number;
 } | {
@@ -47,7 +47,7 @@ type InputAction = AdminerTypedAction<'input', {
     value: Operator;
 }>;
 
-type FormAction = AdminerTypedAction<'form', {
+export type FormAction = AdminerTypedAction<'form', {
     action: 'add_filter';
 } | {
     action: 'delete_filter';
