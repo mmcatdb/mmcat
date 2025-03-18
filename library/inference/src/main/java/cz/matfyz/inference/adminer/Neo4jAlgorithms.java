@@ -170,6 +170,16 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
     private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
 
     /**
+     * A list of Neo4j operators used with string values.
+     */
+    private static final List<String> STRING_OPERATORS = Arrays.asList("=~", "STARTS WITH", "ENDS WITH", "CONTAINS");
+
+    /**
+     * A list of Neo4j quantifiers.
+     */
+    private static final List<String> QUANTIFIERS = Arrays.asList("ANY", "ALL", "NONE", "SINGLE");
+
+    /**
      * Returns a map of operator names to Neo4j operators.
      */
     public Map<String, String> getOperators() {
@@ -181,5 +191,19 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      */
     public List<String> getUnaryOperators() {
         return UNARY_OPERATORS;
+    }
+
+    /**
+     * Returns a list of Neo4j operators used with string values.
+     */
+    public List<String> getStringOperators() {
+        return STRING_OPERATORS;
+    }
+
+    /**
+     * Returns a list of Neo4j quantifiers.
+     */
+    public static List<String> getQuantifiers() {
+        return QUANTIFIERS;
     }
 }

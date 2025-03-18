@@ -18,10 +18,11 @@ export enum Operator {
     NotIn = 'NotIn',
     StartsWith = 'StartsWith',
     EndsWith = 'EndsWith',
-    Contains = 'Contains'
+    Contains = 'Contains',
+    Size = 'Size'
 }
 
-type OperatorLabels = Partial<Record<Operator, string>>;
+export type OperatorLabels = Partial<Record<Operator, string>>;
 
 const COMMON_OPERATORS: OperatorLabels = {
     [Operator.Equal]: '=',
@@ -61,10 +62,30 @@ const NEO4J_OPERATOR: OperatorLabels = {
     [Operator.MatchRegEx]: '=~',
 };
 
-export const OPERATOR_MAPPING: Partial<Record<DatasourceType, OperatorLabels>> = {
-    [DatasourceType.postgresql]: POSTGRESQL_OPERATOR,
-    [DatasourceType.mongodb]: MONGODB_OPERATOR,
-    [DatasourceType.neo4j]: NEO4J_OPERATOR,
+const LABEL_QUANTIFIERS = [ 'ANY', 'ALL', 'NONE', 'SINGLE' ];
+
+const NEO4J_LABEL_OPERATOR: OperatorLabels = Object.fromEntries(
+    Object.entries(COMMON_OPERATORS).map(([ key, value ]) =>
+        [ `${Operator.Size},${key}`, `SIZE, ${value}` ],
+    ).concat(Object.entries(NEO4J_OPERATOR).flatMap(([ key, value ]) =>
+        LABEL_QUANTIFIERS.map(quantifier => [ `${quantifier},${key}`, `${quantifier}, ${value}` ]),
+    )),
+) as OperatorLabels;
+
+export const getNeo4jOperators = (propertyName: string): OperatorLabels =>
+    propertyName === '#labels' ? NEO4J_LABEL_OPERATOR : NEO4J_OPERATOR;
+
+export const OPERATOR_MAPPING: Partial<Record<DatasourceType, (propertyName: string) => OperatorLabels>> = {
+    [DatasourceType.postgresql]: () => POSTGRESQL_OPERATOR,
+    [DatasourceType.mongodb]: () => MONGODB_OPERATOR,
+    [DatasourceType.neo4j]: getNeo4jOperators,
 };
 
-export const UNARY_OPERATORS: Operator[] = [ Operator.IsNull, Operator.IsNotNull ];
+const BASIC_UNARY_OPERATORS: Operator[] = [ Operator.IsNull, Operator.IsNotNull ];
+
+export const UNARY_OPERATORS: string[] = [
+    ...BASIC_UNARY_OPERATORS,
+    ...BASIC_UNARY_OPERATORS.flatMap(operator =>
+        LABEL_QUANTIFIERS.map(quantifier => `${quantifier},${operator}`),
+    ),
+];

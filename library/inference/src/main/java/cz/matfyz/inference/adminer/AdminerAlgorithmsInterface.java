@@ -17,4 +17,11 @@ public interface AdminerAlgorithmsInterface {
      * @return A list of unary operator names supported by the database.
      */
     List<String> getUnaryOperators();
+
+    /**
+     * Returns a list of operators used with string values.
+     *
+     * @return A list of operator names used with string values supported by the database.
+     */
+    List<String> getStringOperators();
 }

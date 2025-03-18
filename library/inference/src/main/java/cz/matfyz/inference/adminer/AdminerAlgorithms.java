@@ -1,5 +1,6 @@
 package cz.matfyz.inference.adminer;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import cz.matfyz.core.record.AdminerFilter;
@@ -27,8 +28,52 @@ public class AdminerAlgorithms {
         }
     }
 
-    private static void appendIdPropertyName(StringBuilder whereClause, String alias, boolean startNodeId, boolean endNodeId) {
-        whereClause.append("id(");
+    private static void appendLabelsWhereClause(StringBuilder whereClause, String alias, String operator, String propertyValue, Double doubleValue, AdminerAlgorithmsInterface algorithms) {
+        String[] operatorParts = operator.split(",");
+
+        if (operatorParts.length != 2) {
+            throw new InvalidParameterException();
+        }
+
+        String specification = operatorParts[0].strip();
+        operator = operatorParts[1].strip();
+
+        boolean isQuantifier = Neo4jAlgorithms.getQuantifiers().contains(specification);
+
+        whereClause
+            .append(specification)
+            .append("(");
+
+        if (isQuantifier){
+            whereClause.append("label IN ");
+        }
+
+        whereClause
+            .append("labels(")
+            .append(alias)
+            .append(")");
+
+        if (isQuantifier){
+            whereClause.append(" WHERE label ");
+        } else {
+            whereClause.append(")");
+        }
+
+        operator = algorithms.getOperators().get(operator);
+
+        appendOperator(whereClause, operator);
+        appendPropertyValue(whereClause, propertyValue, operator, doubleValue, algorithms);
+
+        if (isQuantifier) {
+            whereClause.append(")");
+        }
+    }
+
+    private static void appendIdPropertyName(StringBuilder whereClause, String alias, String propertyName) {
+        boolean startNodeId = propertyName.equals("startNodeId");
+        boolean endNodeId = propertyName.equals("endNodeId");
+
+        whereClause.append("elementId(");
 
         if (startNodeId) {
             whereClause.append("startNode(");
@@ -47,11 +92,9 @@ public class AdminerAlgorithms {
     }
 
     private static void appendPropertyName(StringBuilder whereClause, String alias, String propertyName, Double doubleValue, AdminerAlgorithmsInterface algorithms) {
-        boolean startNodeId = propertyName.equals("startNodeId");
-        boolean endNodeId = propertyName.equals("endNodeId");
-
-        if (algorithms instanceof Neo4jAlgorithms && (propertyName.equals("elementId") || startNodeId || endNodeId)) {
-            appendIdPropertyName(whereClause, alias, startNodeId, endNodeId);
+        if (algorithms instanceof Neo4jAlgorithms && propertyName.startsWith("#")) {
+            propertyName = propertyName.substring(1); // Remove '#' prefix
+            appendIdPropertyName(whereClause, alias, propertyName);
 
             return;
         }
@@ -94,7 +137,7 @@ public class AdminerAlgorithms {
                 .append(propertyValue)
                 .append(")");
         } else if (!algorithms.getUnaryOperators().contains(operator)) {
-            if (doubleValue != null) {
+            if (doubleValue != null && !algorithms.getStringOperators().contains(operator)) {
                 whereClause
                     .append(doubleValue);
             } else {
@@ -124,21 +167,22 @@ public class AdminerAlgorithms {
 
         for (int i = 0; i < filters.size(); i++) {
             AdminerFilter filter = filters.get(i);
-            String operator = algorithms.getOperators().get(filter.operator());
+            String propertyName = filter.propertyName();
 
             if (i != 0) {
                 whereClause.append(" AND ");
             }
 
             Double doubleValue = AdminerAlgorithms.parseNumeric(filter.propertyValue());
-            String propertyName = filter.propertyName();
 
-            if (algorithms instanceof Neo4jAlgorithms && propertyName.startsWith("properties.")) {
-                propertyName = propertyName.substring(11); // Remove prefix 'properties.'
+            if (algorithms instanceof Neo4jAlgorithms && propertyName.equals("#labels")) {
+                appendLabelsWhereClause(whereClause, alias, filter.operator(), filter.propertyValue(), doubleValue, algorithms);
+                continue;
             }
 
             appendPropertyName(whereClause, alias, propertyName, doubleValue, algorithms);
 
+            String operator = algorithms.getOperators().get(filter.operator());
             appendOperator(whereClause, operator);
 
             appendPropertyValue(whereClause, filter.propertyValue(), operator, doubleValue, algorithms);
