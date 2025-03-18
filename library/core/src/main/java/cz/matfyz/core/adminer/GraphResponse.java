@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represents a graph response.
  */
@@ -24,7 +26,16 @@ public class GraphResponse extends DataResponse {
         Map<String, Object> properties();
     }
 
-    public record GraphNode(String elementId, Map<String, Object> properties, List<String> labels) implements GraphElement {}
+    public record GraphNode(
+        @JsonProperty("#elementId") String elementId,
+        @JsonProperty("properties") Map<String, Object> properties,
+        @JsonProperty("#labels") List<String> labels
+    ) implements GraphElement {}
 
-    public record GraphRelationship(String elementId, Map<String, Object> properties, String startNodeId, String endNodeId) implements GraphElement {}
+    public record GraphRelationship(
+        @JsonProperty("#elementId")  String elementId,
+        @JsonProperty("properties") Map<String, Object> properties,
+        @JsonProperty("#startNodeId") String startNodeId,
+        @JsonProperty("#endNodeId") String endNodeId
+    ) implements GraphElement {}
 }

@@ -32,14 +32,14 @@ export type GraphResponse = {
 };
 
 export type GraphResponseData = {
-    elementId: string;
+    '#elementId': string;
     properties: Record<string, unknown>;
-    lables: string[];
+    '#lables': string[];
     [key: string]: unknown;
 } | {
-    elementId: string;
+    '#elementId': string;
     properties: Record<string, unknown>;
-    startNodeId: string;
-    endNodeId: string;
+    '#startNodeId': string;
+    '#endNodeId': string;
     [key: string]: unknown;
 };
