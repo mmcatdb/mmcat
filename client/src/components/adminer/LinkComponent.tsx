@@ -35,14 +35,12 @@ export function LinkComponent({ index, reference, kind, datasourceId, datasource
     const { preferences } = usePreferences();
 
     return (
-        <div>
-            <Link
-                key={index}
-                to={{ pathname:routes.adminer, search: link }}
-                className='mr-2 hover:underline text-blue-500'
-            >
-                {createLinkText(reference, datasourceId, datasources, kind, preferences.adminerShortLinks)}
-            </Link>
-        </div>
+        <Link
+            key={index}
+            to={{ pathname:routes.adminer, search: link }}
+            className='mr-2 hover:underline text-blue-500'
+        >
+            {createLinkText(reference, datasourceId, datasources, kind, preferences.adminerShortLinks)}
+        </Link>
     );
 }
