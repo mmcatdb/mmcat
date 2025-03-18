@@ -95,7 +95,7 @@ function getFileType(fileType: string) {
     return fileTypes[fileType] || { extension: "txt", mimeType: "text/plain" };
 }
 
-async function executeDML(mode: string = "execute", newDBName?: string) {
+async function executeDML(mode: string, newDBName?: string) {
     if (props.file.executedAt?.length && !showExecutionPrompt.value) {
         showExecutionPrompt.value = true;
         return;
@@ -103,6 +103,7 @@ async function executeDML(mode: string = "execute", newDBName?: string) {
 
     fetching.value = true;
     const result = await API.files.executeDML({ id: props.file.id }, { mode: mode, newDBName: newDBName });
+    showExecutionPrompt.value = false;
     fetching.value = false;    
 }
 
@@ -158,7 +159,7 @@ async function executeDML(mode: string = "execute", newDBName?: string) {
                     v-if="file.fileType === 'DML'"
                     :disabled="fetching"
                     class="info"
-                    @click="executeDML"
+                    @click="executeDML('execute')"
                 >
                     Execute
                 </button>

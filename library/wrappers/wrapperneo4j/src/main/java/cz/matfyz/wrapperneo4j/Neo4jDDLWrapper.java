@@ -8,6 +8,7 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +42,10 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
     @Override
     public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
         Collection<AbstractStatement> deleteStatements = new ArrayList<>();
-        Set<String> tableNames = extractCreatedTables(executionCommands);
+        List<String> tableNames = extractCreatedTables(executionCommands);
+
+        // To avoid errors with references among tables.
+        Collections.reverse(tableNames);
 
         for (String tableName: tableNames)
             deleteStatements.add(createDDLDeleteStatement(tableName));
@@ -49,8 +53,8 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
         return deleteStatements;
     }
 
-    private Set<String> extractCreatedTables(List<String> executionCommands) {
-        Set<String> labels = new HashSet<>();
+    private List<String> extractCreatedTables(List<String> executionCommands) {
+        List<String> labels = new ArrayList<>();
         for (String command : executionCommands) {
             Matcher matcher = Pattern.compile("CREATE CONSTRAINT ON \\((\\w+):([^)]+)\\)").matcher(command);
             if (matcher.find())

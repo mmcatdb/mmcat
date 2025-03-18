@@ -59,19 +59,21 @@ public class FileService {
         final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
         final Path filePath = Paths.get(File.getFilePath(file, uploads));
 
-        if (mode.equals("delete_and_execute")) {
-            final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
-            final Collection<AbstractStatement> deleteStatements = ddlWrapper.createDDLDeleteStatements(file.readExecutionCommands(uploads));
-            control.execute(deleteStatements);
-        } else if (mode.equals("create_new_and_execute")) {
-            // 1. probably make new connection
-            // 2. execute over new control wrapper, so not the following one
-            System.out.println("create new first");
-        }
+        if (mode.equals("create_new_and_execute")) {
+            System.out.println();
+        } else {
+            if (mode.equals("delete_and_execute")) {
+                final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
+                final Collection<AbstractStatement> deleteStatements = ddlWrapper.createDDLDeleteStatements(file.readExecutionCommands(uploads));
 
-        LOGGER.info("Start executing models ...");
-        control.execute(filePath);
-        LOGGER.info("... models executed.");
+                LOGGER.info("Start executing delete statements ...");
+                control.execute(deleteStatements);
+                LOGGER.info("... delete statements executed.");
+            }
+            LOGGER.info("Start executing models ...");
+            control.execute(filePath);
+            LOGGER.info("... models executed.");
+        }
 
         file.addExecutionDate(new Date());
         repository.save(file);
