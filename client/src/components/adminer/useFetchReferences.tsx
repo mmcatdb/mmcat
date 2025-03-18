@@ -5,9 +5,9 @@ import type { StaticNameFromServer } from '@/types/identifiers/Name';
 import type { SignatureIdFromServer } from '@/types/identifiers/SignatureId';
 import type { AdminerState } from '@/types/adminer/Reducer';
 import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
-import type { ChildPropertyFromServer, RootPropertyFromServer, SimplePropertyFromServer } from '@/types/accessPath/serverTypes';
+import type { ChildPropertyFromServer, ComplexPropertyFromServer, RootPropertyFromServer, SimplePropertyFromServer } from '@/types/accessPath/serverTypes';
 import type { SchemaCategoryFromServer } from '@/types/schema';
-import type { MappingFromServer } from '@/types/mapping';
+import type { MappingFromServer, MappingInit } from '@/types/mapping';
 import type { Id } from '@/types/id';
 
 function getLastBase(signature: string): string {
@@ -36,8 +36,8 @@ function getPropertiesFromAccessPath(
 function addReferences(
     references: AdminerReferences,
     primaryKeys: SignatureIdFromServer,
-    targetMapping: MappingFromServer,
-    sourceMapping: MappingFromServer,
+    targetMapping: MappingInit,
+    sourceMapping: MappingInit,
     targetProperties: SimplePropertyFromServer[],
     sourceProperties: SimplePropertyFromServer[],
     primaryKeyInTarget: boolean,
@@ -67,8 +67,8 @@ function addReferences(
 
 function addMappingReferences(
     references: AdminerReferences,
-    mapping: MappingFromServer,
-    kindMapping: MappingFromServer,
+    mapping: MappingInit,
+    kindMapping: MappingInit,
     kindProperties: Set<SimplePropertyFromServer>,
 ): AdminerReferences {
     const mappingPathProperties = getPropertiesFromAccessPath(mapping.accessPath, new Set<SimplePropertyFromServer>());
@@ -100,8 +100,84 @@ async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryFrom
     return schemaCategoryResponse.data;
 }
 
+function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
+    return mappings.flatMap((mapping: MappingFromServer) => {
+        let fromSubpath: ComplexPropertyFromServer | null = null;
+        let toSubpath: ComplexPropertyFromServer | null = null;
+        const otherSubpaths: ChildPropertyFromServer[] = [];
+
+        for (const subpath of mapping.accessPath.subpaths) {
+            if (subpath.name && (subpath.name as StaticNameFromServer).type === 'STATIC') {
+                const nameValue = (subpath.name as StaticNameFromServer).value;
+                if (nameValue.startsWith('_from.'))
+                    fromSubpath = subpath as ComplexPropertyFromServer;
+                else if (nameValue.startsWith('_to.'))
+                    toSubpath = subpath as ComplexPropertyFromServer;
+                else
+                    otherSubpaths.push(subpath);
+            }
+            else {
+                otherSubpaths.push(subpath);
+            }
+        }
+
+        const newMappings: MappingInit[] = [];
+
+        if (fromSubpath) {
+            newMappings.push({
+                categoryId: mapping.categoryId,
+                datasourceId: mapping.datasourceId,
+                rootObjectKey: mapping.rootObjectKey,
+                primaryKey: mapping.primaryKey,
+                kindName: (fromSubpath.name as StaticNameFromServer).value.replace(/^_from\./, ''),
+                accessPath: {
+                    name: { type: 'ANONYMOUS', value: '' },
+                    signature: fromSubpath.signature,
+                    subpaths: fromSubpath.subpaths || [],
+                },
+            });
+        }
+
+        if (toSubpath) {
+            newMappings.push({
+                categoryId: mapping.categoryId,
+                datasourceId: mapping.datasourceId,
+                rootObjectKey: mapping.rootObjectKey,
+                primaryKey: mapping.primaryKey,
+                kindName: (toSubpath.name as StaticNameFromServer).value.replace(/^_to\./, ''),
+                accessPath: {
+                    name: { type: 'ANONYMOUS', value: '' },
+                    signature: toSubpath.signature,
+                    subpaths: toSubpath.subpaths || [],
+                },
+            });
+        }
+
+        if (fromSubpath != null || toSubpath != null) {
+            newMappings.push({
+                categoryId: mapping.categoryId,
+                datasourceId: mapping.datasourceId,
+                rootObjectKey: mapping.rootObjectKey,
+                primaryKey: mapping.primaryKey,
+                kindName: mapping.kindName,
+                accessPath: {
+                    name: mapping.accessPath.name,
+                    signature: mapping.accessPath.signature,
+                    subpaths: otherSubpaths,
+                },
+            });
+        }
+        else {
+            newMappings.push(mapping);
+        }
+
+        return newMappings;
+    });
+}
+
 async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): Promise<AdminerReferences> {
-    const mappings = await getAllMappings();
+    const allMappings = await getAllMappings();
+    const mappings: MappingInit[] = extractAllKindMappings(allMappings);
 
     const kindMappings = mappings.filter(mapping =>
         mapping.kindName === kindName &&
@@ -110,19 +186,18 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
     if (kindMappings.length === 0)
         return [];
 
-    const kindMapping = kindMappings[0];
-
-    const schemaCategory = await getSchemaCategory(kindMapping.categoryId);
-
-    const schemaCategoryMappings = mappings.filter(mapping =>
-        mapping.categoryId === schemaCategory.id );
-
-    const mappingPathProperties = getPropertiesFromAccessPath(kindMapping.accessPath, new Set<SimplePropertyFromServer>());
-
     const references: AdminerReferences = [];
+    for (const kindMapping of kindMappings) {
+        const schemaCategory = await getSchemaCategory(kindMapping.categoryId);
 
-    for (const mapping of schemaCategoryMappings)
-        addMappingReferences(references, mapping, kindMapping, mappingPathProperties);
+        const schemaCategoryMappings = mappings.filter(mapping =>
+            mapping.categoryId === schemaCategory.id );
+
+        const mappingPathProperties = getPropertiesFromAccessPath(kindMapping.accessPath, new Set<SimplePropertyFromServer>());
+
+        for (const mapping of schemaCategoryMappings)
+            addMappingReferences(references, mapping, kindMapping, mappingPathProperties);
+    }
 
     return references;
 }
