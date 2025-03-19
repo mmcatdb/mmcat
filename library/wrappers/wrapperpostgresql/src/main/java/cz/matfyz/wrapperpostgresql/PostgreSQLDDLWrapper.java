@@ -9,9 +9,7 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,6 +91,15 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         final String content = String.format("""
             DROP TABLE \"%s\" ;
             """, tableName);
+        return StringStatement.create(content);
+    }
+
+    @Override
+    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+        // TODO: this aint right
+        final String content = String.format("""
+                CREATE DATABASE \"%s\" OWNER \"%s\";
+                """, owner, newDBName, owner);
         return StringStatement.create(content);
     }
 

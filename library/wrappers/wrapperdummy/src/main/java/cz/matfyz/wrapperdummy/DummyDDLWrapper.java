@@ -44,4 +44,9 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'createDDLDeleteStatements'");
     }
 
+    @Override
+    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+        throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
+    }
+
 }

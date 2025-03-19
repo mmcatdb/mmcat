@@ -33,6 +33,8 @@ public interface AbstractDDLWrapper {
 
     Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands);
 
+    AbstractStatement createCreationStatement(String newDBName, String owner);
+
     /**
      * Immutable - all methods just create a new path.
      */

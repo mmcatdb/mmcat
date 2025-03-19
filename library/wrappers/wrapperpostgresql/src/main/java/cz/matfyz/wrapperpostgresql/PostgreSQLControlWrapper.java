@@ -6,6 +6,7 @@ import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,6 +36,9 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
+        // check if it needs to be executed as admin - the statements contain "CREATE TABLE..."
+        boolean executeAsAdmin = statements.stream().anyMatch(this::isCreateDatabaseStatement);
+        // TODO: continue the logic
         try (
             Connection connection = provider.getConnection();
         ) {
@@ -51,6 +55,11 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
         catch (Exception e) {
             throw new ExecuteException(e, statements);
         }
+    }
+
+    private boolean isCreateDatabaseStatement(AbstractStatement statement) {
+        String sql = statement.getContent().trim().toUpperCase();
+        return sql.startsWith("CREATE DATABASE ");
     }
 
     @Override public void execute(Path path) {

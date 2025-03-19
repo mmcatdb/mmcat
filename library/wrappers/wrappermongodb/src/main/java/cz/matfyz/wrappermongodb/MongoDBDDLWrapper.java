@@ -9,9 +9,7 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,6 +66,12 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
 
     private MongoDBCommandStatement createDDLDeleteStatement(String tableName) {
         return new MongoDBCommandStatement("db." + tableName + ".drop();", new BsonDocument("delete", new BsonString(tableName)));
+    }
+
+    @Override
+    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
     }
 
 }

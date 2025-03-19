@@ -9,9 +9,7 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +63,12 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
 
     private StringStatement createDDLDeleteStatement(String tableName) {
         return StringStatement.create("a");
+    }
+
+    @Override
+    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
     }
 
 }
