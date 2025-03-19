@@ -36,12 +36,9 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
-        // check if it needs to be executed as admin - the statements contain "CREATE TABLE..."
-        boolean executeAsAdmin = statements.stream().anyMatch(this::isCreateDatabaseStatement);
-        // TODO: continue the logic
-        try (
-            Connection connection = provider.getConnection();
-        ) {
+        try (Connection connection = statements.stream().anyMatch(this::isCreateDatabaseStatement)
+                ? provider.getAdminConnection()
+                : provider.getConnection()) {
             // TODO transactions?
             for (final var statement : statements) {
                 try (

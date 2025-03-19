@@ -96,10 +96,9 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
     @Override
     public AbstractStatement createCreationStatement(String newDBName, String owner) {
-        // TODO: this aint right
         final String content = String.format("""
                 CREATE DATABASE \"%s\" OWNER \"%s\";
-                """, owner, newDBName, owner);
+                """, newDBName, owner);
         return StringStatement.create(content);
     }
 

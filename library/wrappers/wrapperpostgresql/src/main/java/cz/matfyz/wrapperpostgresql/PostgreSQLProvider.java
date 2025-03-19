@@ -29,6 +29,28 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
         }
     }
 
+    //TODO:
+    public Connection getAdminConnection() {
+        System.out.println("my postgres pswd: " + System.getenv("POSTGRES_PASSWORD"));
+        try {
+            String adminConnectionString = new StringBuilder()
+                .append("jdbc:postgresql://")
+                .append(settings.host())
+                .append(":")
+                .append(settings.port())
+                .append("/postgres")
+                .append("?user=postgres")
+                .append("&password=")
+                .append(System.getenv("POSTGRESQL_SUPERUSER_PASSWORD"))
+                //.append("secretpswd")
+                .toString();
+            return DriverManager.getConnection(adminConnectionString);
+        }
+        catch (SQLException e) {
+            throw new OtherException(e);
+        }
+    }
+
     public boolean isStillValid(Object settings) {
         // We always create a new connection so we don't need to cache anything.
         return false;
