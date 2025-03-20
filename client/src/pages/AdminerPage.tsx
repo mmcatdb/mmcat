@@ -1,6 +1,8 @@
+import clsx from 'clsx';
 import { useEffect, useReducer, useState, useMemo, useRef } from 'react';
-import { useLoaderData, useSearchParams } from 'react-router-dom';
-import { Spinner } from '@nextui-org/react';
+import { Outlet, useLoaderData, useNavigate, useSearchParams } from 'react-router-dom';
+import { Button, Spinner } from '@nextui-org/react';
+import { usePreferences } from '@/components/PreferencesProvider';
 import { getStateFromURLParams, getURLParamsFromState } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { KindMenu } from '@/components/adminer/KindMenu';
@@ -21,6 +23,16 @@ export async function adminerLoader(): Promise<Datasource[]> {
 }
 
 export function AdminerPage() {
+    return (
+        <div>
+            <Outlet />
+        </div>
+    );
+}
+
+export function AdminerPageOverview() {
+    const navigate = useNavigate();
+    const { theme } = usePreferences().preferences;
     const allDatasources = useLoaderData() as Datasource[];
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
@@ -55,32 +67,45 @@ export function AdminerPage() {
 
     return (
         <div>
-            <div className='mt-5 flex flex-wrap gap-3 items-center'>
-
+            <div className={clsx(
+                'flex items-center z-20 w-full h-12 border-b px-0',
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+            )}>
                 {allDatasources ? (
                     <DatasourceMenu dispatch={dispatch} datasourceId={state.datasourceId} datasources={allDatasources}/>
                 ) : (
-                    <div className='h-10 flex items-center justify-center'>
+                    <div className='h-8 flex items-center justify-center'>
                         <Spinner />
                     </div>
                 )}
 
                 {datasource &&
-                (
-                    <>
-                        <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
+                    (
+                        <>
+                            <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
-                        {state.kindName !== undefined && (
-                            <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
-                        )}
+                            {state.kindName !== undefined && (
+                                <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
+                            )}
 
-                        <LinkLengthSwitch/>
-                    </>
-                )}
+                            <LinkLengthSwitch/>
+
+                            <Button
+                                className='flex items-center ml-auto min-w-28 h-8'
+                                size='sm'
+                                aria-label='Custom query'
+                                type='submit'
+                                color='primary'
+                                onPress={() => navigate(`/adminer/query?datasourceId=${datasource.id}`)}
+                            >
+                                CUSTOM QUERY
+                            </Button>
+                        </>
+                    )}
             </div>
 
             {datasource && state.kindName && typeof state.kindName === 'string' &&(
-                <div className='mt-5'>
+                <div className='m-2'>
                     <DatabaseView state={state} datasources={allDatasources} dispatch={dispatch}/>
                 </div>
             )}

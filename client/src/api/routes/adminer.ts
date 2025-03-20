@@ -13,6 +13,9 @@ const adminer = {
     getReferences: GET<{ datasourceId: StringLike, kindName: StringLike }, AdminerReferences>(
         u => `/adminer/${u.datasourceId}/${u.kindName}/references`,
     ),
+    getQueryResult: GET<{ datasourceId: StringLike}, DataResponse, QueryParams>(
+        u => `/adminer/${u.datasourceId}/query`,
+    ),
 };
 
 export default adminer;
