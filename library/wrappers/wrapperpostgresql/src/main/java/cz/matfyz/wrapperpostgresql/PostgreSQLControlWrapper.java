@@ -6,7 +6,6 @@ import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,6 +34,8 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
         this.provider = provider;
     }
 
+    // First check if the statements require admin (postgres) privileges
+    // then obtain appropriate connection
     @Override public void execute(Collection<AbstractStatement> statements) {
         try (Connection connection = statements.stream().anyMatch(this::isCreateDatabaseStatement)
                 ? provider.getAdminConnection()

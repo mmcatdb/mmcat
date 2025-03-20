@@ -29,22 +29,10 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
         }
     }
 
-    //TODO:
     public Connection getAdminConnection() {
-        System.out.println("my postgres pswd: " + System.getenv("POSTGRES_PASSWORD"));
+        System.out.println("postgres pswd in provider: " + System.getenv("POSTGRESQL_SUPERUSER_PASSWORD"));
         try {
-            String adminConnectionString = new StringBuilder()
-                .append("jdbc:postgresql://")
-                .append(settings.host())
-                .append(":")
-                .append(settings.port())
-                .append("/postgres")
-                .append("?user=postgres")
-                .append("&password=")
-                .append(System.getenv("POSTGRESQL_SUPERUSER_PASSWORD"))
-                //.append("secretpswd")
-                .toString();
-            return DriverManager.getConnection(adminConnectionString);
+            return DriverManager.getConnection(settings.createAdminConnectionString());
         }
         catch (SQLException e) {
             throw new OtherException(e);
@@ -83,6 +71,19 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
                 .append(username)
                 .append("&password=")
                 .append(password)
+                .toString();
+        }
+
+        String createAdminConnectionString() {
+            return new StringBuilder()
+                .append("jdbc:postgresql://")
+                .append(host)
+                .append(":")
+                .append(port)
+                .append("/postgres")
+                .append("?user=postgres")
+                .append("&password=")
+                .append(System.getenv("POSTGRESQL_SUPERUSER_PASSWORD")) // TODO: Does this work always?
                 .toString();
         }
 
