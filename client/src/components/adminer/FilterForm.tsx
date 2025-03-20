@@ -35,7 +35,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 ))}
             </div>
 
-            <div className='mt-5 flex flex-wrap gap-3 items-center'>
+            <div className='mt-2 flex flex-wrap gap-3 items-center'>
                 <div className='flex items-center gap-2'>
                     <label htmlFor='limit'>
                         Limit:
@@ -60,6 +60,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
 
                 <Button
                     className='items-center gap-1 min-w-40'
+                    size='sm'
                     aria-label='Delete filters'
                     type='submit'
                     color='danger'
@@ -73,6 +74,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
 
                 <Button
                     className='items-center gap-1 min-w-40'
+                    size='sm'
                     aria-label='Add filter'
                     type='submit'
                     color='success'
@@ -84,6 +86,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
 
                 <Button
                     className='items-center gap-1 min-w-40'
+                    size='sm'
                     aria-label='Submit filters'
                     type='submit'
                     color='primary'

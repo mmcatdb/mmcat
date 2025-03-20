@@ -21,6 +21,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
         <div className='mt-0 mr-5 flex flex-wrap gap-1 items-center'>
             <Autocomplete
                 className='py-0.5 text-sm w-min min-w-56'
+                size='sm'
                 aria-label='Column name'
                 placeholder='Enter property name'
                 defaultSelectedKey={ filter.propertyName ?? undefined }
@@ -34,6 +35,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
 
             <Select
                 className='py-0.5 text-sm w-min min-w-36'
+                size='sm'
                 aria-label='Operator'
                 placeholder='Select an operator'
                 defaultSelectedKeys={ [ filter.operator ] }
@@ -50,6 +52,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
             {!UNARY_OPERATORS.includes(filter.operator) && (
                 <Input
                     className='py-0.5 text-sm w-min min-w-56'
+                    size='sm'
                     aria-label='Column value'
                     placeholder='Enter property value'
                     value={filter.propertyValue}
@@ -60,6 +63,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
 
             <Button
                 className='py-0.5 text-sm min-w-4'
+                size='sm'
                 aria-label='Delete filter'
                 type='submit'
                 color='danger'

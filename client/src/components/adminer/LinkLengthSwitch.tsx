@@ -11,6 +11,8 @@ export function LinkLengthSwitch() {
 
     return (
         <Switch
+            className='mx-2'
+            aria-label='Short names'
             isSelected={adminerShortRefs}
             onChange={e => handleChange(e.target.checked)}
             size='sm'
