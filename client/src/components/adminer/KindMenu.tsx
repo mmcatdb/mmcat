@@ -46,6 +46,11 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
             <Select
                 items={selectItems}
                 label='Kind'
+                labelPlacement='outside-left'
+                classNames={
+                    { label:'sr-only' }
+                }
+                size='sm'
                 placeholder='Select kind'
                 className='max-w-xs'
                 selectedKeys={ kind ? [ kind ] : undefined }

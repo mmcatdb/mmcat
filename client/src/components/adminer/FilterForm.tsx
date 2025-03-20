@@ -43,9 +43,14 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                     <Input
                         id='limit'
                         className='text-sm max-h-10 w-min min-w-24'
-                        aria-label='Limit'
                         type='number'
                         min='0'
+                        label='Limit'
+                        labelPlacement='outside-left'
+                        classNames={
+                            { label:'sr-only' }
+                        }
+                        size='sm'
                         placeholder='Enter limit'
                         value={state.form.limit.toString()}
                         onChange={e => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
@@ -55,6 +60,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
 
                 <Button
                     className='items-center gap-1 min-w-40'
+                    aria-label='Delete filters'
                     type='submit'
                     color='danger'
                     variant='ghost'
@@ -67,6 +73,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
 
                 <Button
                     className='items-center gap-1 min-w-40'
+                    aria-label='Add filter'
                     type='submit'
                     color='success'
                     variant='ghost'
@@ -77,6 +84,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
 
                 <Button
                     className='items-center gap-1 min-w-40'
+                    aria-label='Submit filters'
                     type='submit'
                     color='primary'
                     onPress={() => dispatch({ type: 'submit' })}

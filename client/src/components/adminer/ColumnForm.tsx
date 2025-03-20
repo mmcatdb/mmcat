@@ -60,6 +60,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
 
             <Button
                 className='py-0.5 text-sm min-w-4'
+                aria-label='Delete filter'
                 type='submit'
                 color='danger'
                 variant='ghost'

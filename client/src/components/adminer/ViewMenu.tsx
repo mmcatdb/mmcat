@@ -20,6 +20,11 @@ export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
         <Select
             items={availableViews.entries()}
             label='View'
+            labelPlacement='outside-left'
+            classNames={
+                { label:'sr-only' }
+            }
+            size='sm'
             placeholder='Select datasource'
             className='max-w-xs'
             selectedKeys={[ view ]}

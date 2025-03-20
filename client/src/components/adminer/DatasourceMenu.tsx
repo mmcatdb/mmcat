@@ -22,6 +22,11 @@ export function DatasourceMenu({ dispatch, datasourceId, datasources }: Datasour
             <Select
                 items={sources}
                 label='Datasource'
+                labelPlacement='outside-left'
+                classNames={
+                    { label:'sr-only' }
+                }
+                size='sm'
                 placeholder='Select datasource'
                 className='max-w-xs'
                 selectedKeys={ datasourceId ? [ datasourceId ] : [] }
