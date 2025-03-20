@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
+import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.DocumentResponse;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.Reference;
@@ -37,6 +38,7 @@ import java.util.function.BiFunction;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Filters;
 
@@ -339,6 +341,48 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         // No foreign keys can be fetched right from MongoDB
         return new ArrayList<>();
+    }
+
+    /**
+     * Retrieves the result of the given query.
+     *
+     * @param query the custom query.
+     * @return a {@link DataResponse} containing the data result of custom query.
+     */
+    @Override public DataResponse getQueryResult(String query) {
+        try {
+            List<Map<String, Object>> data = new ArrayList<>();
+            MongoDatabase database = provider.getDatabase();
+
+            Document parsedQuery = Document.parse(query);
+            String collectionName = parsedQuery.getString("collection");
+            Document bsonQuery = parsedQuery.get("query", Document.class);
+
+            MongoCollection<Document> collection = database.getCollection(collectionName);
+            FindIterable<Document> documents = collection.find(bsonQuery);
+
+            int itemCount = 0;
+
+            for (Document document : documents) {
+                Map<String, Object> item = new HashMap<>();
+
+                document.forEach((key, value) -> {
+                    if (value instanceof String stringValue) {
+                        item.put(key, stringValue.replace("\"", ""));
+                    } else {
+                        item.put(key, value);
+                    }
+                });
+
+                data.add(item);
+                itemCount++;
+            }
+
+            return new DocumentResponse(data, itemCount, null);
+        }
+        catch (Exception e){
+            throw PullForestException.innerException(e);
+        }
     }
 
 }

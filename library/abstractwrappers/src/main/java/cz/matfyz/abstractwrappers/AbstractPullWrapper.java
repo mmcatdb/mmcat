@@ -49,4 +49,12 @@ public interface AbstractPullWrapper {
      */
     List<Reference> getReferences(String datasourceId, String kindName);
 
+    /**
+     * Retrieves the result of the given query.
+     *
+     * @param query the custom query.
+     * @return a {@link DataResponse} containing the data result of custom query.
+     */
+    DataResponse getQueryResult(String query);
+
 }

@@ -5,6 +5,7 @@ import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.service.WrapperService;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
+import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.record.AdminerFilter;
 
@@ -95,6 +96,19 @@ public class AdminerController {
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
         return pullWrapper.getReferences(db.toString(), kind);
+    }
+
+    @GetMapping(value = "/adminer/{db}/query")
+    public DataResponse getQueryResult(@PathVariable Id db, @RequestParam(required = true) String query) {
+        final var datasource = datasourceRepository.find(db);
+
+        if (datasource == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
+
+        return pullWrapper.getQueryResult(query);
     }
 
 }

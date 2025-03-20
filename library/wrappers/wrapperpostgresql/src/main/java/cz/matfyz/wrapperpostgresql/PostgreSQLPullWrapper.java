@@ -6,6 +6,8 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.DataResponse;
+import cz.matfyz.core.adminer.DocumentResponse;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.Reference;
@@ -281,6 +283,46 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             Statement stmt = connection.createStatement();
         ){
             return PostgreSQLAlgorithms.getReferences(stmt, datasourceId, kindName);
+        }
+        catch (Exception e) {
+			throw PullForestException.innerException(e);
+		}
+    }
+
+    /**
+     * Retrieves the result of the given query.
+     *
+     * @param query the custom query.
+     * @return a {@link DataResponse} containing the data result of custom query.
+     */
+    @Override public DataResponse getQueryResult(String query) {
+        try(
+            Connection connection = provider.getConnection();
+            Statement stmt = connection.createStatement();
+        ){
+            List<Map<String, String>> data = new ArrayList<>();
+
+            ResultSet resultSet = stmt.executeQuery(query);
+
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+            int itemCount = 0;
+
+            while (resultSet.next()) {
+                Map<String, String> item = new HashMap<>();
+
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnName(i);
+                    String columnValue = resultSet.getString(i);
+
+                    item.put(columnName, columnValue);
+                }
+
+                data.add(item);
+                itemCount++;
+            }
+
+            return new TableResponse(data, itemCount, null);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

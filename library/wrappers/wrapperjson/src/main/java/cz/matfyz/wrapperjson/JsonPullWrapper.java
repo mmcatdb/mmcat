@@ -151,4 +151,8 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("JsonPullWrapper.getReferences not implemented.");
     }
 
+    @Override public DataResponse getQueryResult(String query){
+        throw new UnsupportedOperationException("JsonPullWrapper.getQueryResult not implemented.");
+    }
+
 }

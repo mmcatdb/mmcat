@@ -16,6 +16,7 @@ import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.types.TypeSystem;
 import org.neo4j.driver.Record;
 
 public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
@@ -63,6 +64,24 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
         String endNodeId = relationship.asRelationship().endNodeElementId();
 
         return new GraphRelationship(id, properties, startNodeId, endNodeId);
+    }
+
+    /**
+     * Converts a Neo4j {@link Value} to a {@link GraphElement}, which can be either a {@link GraphNode} or a {@link GraphRelationship}.
+     *
+     * @param value The Neo4j {@link Value} to be converted.
+     * @return A {@link GraphElement}, which is either a {@link GraphNode} if the value represents a node,
+     *         or a {@link GraphRelationship} if the value represents a relationship.
+     * @throws IllegalArgumentException if the value is neither a node nor a relationship.
+     */
+    public static GraphElement getGraphElementProperties(Value value) {
+        if (value.hasType(TypeSystem.getDefault().NODE())) {
+            return Neo4jAlgorithms.getNodeProperties(value);
+        } else if (value.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
+            return Neo4jAlgorithms.getRelationshipProperties(value);
+        } else {
+            throw new IllegalArgumentException("Unexpected value type: " + value.type());
+        }
     }
 
     /**
