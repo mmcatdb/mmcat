@@ -48,6 +48,7 @@ function updateInnerValue() {
     <input
         v-model="staticValue"
         :disabled="disabled"
+        style="height: 24px;"
         @input="updateInnerValue"
     />
 </template>

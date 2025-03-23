@@ -85,7 +85,7 @@ async function createMapping(primaryKey: SignatureId, accessPath: GraphRootPrope
         categoryId,
         datasourceId: selectedDatasource.value.id,
         rootObjectKey: accessPath.node.schemaObjex.key.toServer(),
-        primaryKey: new SignatureId(selectedDatasource.value.configuration.isSchemaless ? [] : primaryKey.signatures).toServer(),
+        primaryKey: new SignatureId(primaryKey.signatures).toServer(),
         kindName: newKindName,
         accessPath: accessPath.toServer(),
     });

@@ -175,10 +175,14 @@ function cancel() {
                 v-if="props.datasources.length && !mappingConfirmed"
                 class="editor"
             >
-                <ValueRow label="Datasource:">
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 8px;">
+                    <div>
+                        Datasource:
+                    </div>
                     <select 
                         v-model="selectedDatasource"
                         :disabled="mappingConfirmed"
+                        style="width: 200px;"
                     >
                         <option 
                             v-for="datasource in datasourcesWithMappings" 
@@ -188,11 +192,14 @@ function cancel() {
                             {{ datasource.label }}
                         </option>
                     </select>
-                </ValueRow>
-                <ValueRow label="Kind:">
+
+                    <div>
+                        Kind:
+                    </div>
                     <select 
                         v-model="selectedMapping"
                         :disabled="mappingConfirmed"
+                        style="width: 200px;"
                     >
                         <option 
                             v-for="mapping in mappings" 
@@ -202,7 +209,8 @@ function cancel() {
                             {{ mapping.kindName }}
                         </option>
                     </select>
-                </ValueRow>         
+                </div>
+
                 <div class="button-row">
                     <button
                         :disabled="isConfirmDisabled"

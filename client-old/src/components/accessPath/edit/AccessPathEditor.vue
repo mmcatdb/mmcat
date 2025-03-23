@@ -11,6 +11,8 @@ import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 import EditProperty from './EditProperty.vue';
 import AddProperty from './AddProperty.vue';
+import StaticNameInput from '../input/StaticNameInput.vue';
+import PrimaryKeyInput from '../input/PrimaryKeyInput.vue';
 
 /**
  * Enum for the different states of node selection.
@@ -292,6 +294,10 @@ function deleteRequested(nodes: Node[]) {
     emit('update:rootProperty', localRootProperty.value);
 }
 
+function cancelSelection() {
+    selectedNodes.value = [];
+}
+
 /**
  * Sets the selected node as the root property and updates the root access path.
  */
@@ -403,17 +409,55 @@ const showSelectedNodes = computed(() => {
                     <h2 class="custom-text">
                         Select valid nodes to edit
                     </h2>
+
+                    <div style="display: grid; grid-template-columns: auto auto; gap: 0px 8px;">
+                        <div>
+                            Datasource:
+                        </div>
+                        <div>
+                            {{ datasource.label }}
+                        </div>
+
+                        <div>
+                            Root object:
+                        </div>
+                        <div>
+                            {{ rootProperty.node.label }}
+                        </div>
+
+                        <div>
+                            Kind name:
+                        </div>
+                        <div>
+                            <StaticNameInput v-model="rootProperty.name" />
+                        </div>
+
+                        <template v-if="rootProperty.node.schemaObjex.ids">
+                            <div>
+                                Primary key:
+                            </div>
+                            <div>
+                                <PrimaryKeyInput
+                                    v-model="primaryKey"
+                                    :ids="rootProperty.node.schemaObjex.ids"
+                                />
+                            </div>
+                        </template>
+                    </div>
+
                     <div class="button-row">
                         <button
                             @click="finishMapping"
                         >
                             Finish mapping
                         </button>
+                        <!-- 
+                        Don't want to accidentally cancel the mapping process ...
                         <button
                             @click="cancel"
                         >
                             Cancel
-                        </button>
+                        </button> -->
                     </div>
                 </template>
                 <template v-if="state.type === State.OneNode">
@@ -433,6 +477,9 @@ const showSelectedNodes = computed(() => {
                         <button @click="setRootRequested(state.node)">
                             Set Root
                         </button>
+                        <button @click="cancelSelection">
+                            Cancel
+                        </button>
                     </div>
                 </template>
                 <template v-if="state.type === State.TwoNodes">
@@ -446,12 +493,18 @@ const showSelectedNodes = computed(() => {
                         <button @click="deleteRequested(state.nodes)">
                             Delete
                         </button>
+                        <button @click="cancelSelection">
+                            Cancel
+                        </button>
                     </div>
                 </template>
                 <template v-if="state.type === State.MultipleNodes">
                     <div class="options">
                         <button @click="deleteRequested(state.nodes)">
                             Delete
+                        </button>
+                        <button @click="cancelSelection">
+                            Cancel
                         </button>
                     </div>
                 </template>
