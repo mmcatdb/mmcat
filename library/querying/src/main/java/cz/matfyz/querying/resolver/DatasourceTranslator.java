@@ -116,8 +116,6 @@ public class DatasourceTranslator {
         throw new UnsupportedOperationException("DatasourceTranslator.findAggregationRoot not implemented.");
     }
 
-    // PATTERN TRANSLATOR STUFF FROM HERE (TODO: remove)
-
     private record StackItem(
         PatternTree object,
         /** The closest parent property that has to be preserved in the property tree. */

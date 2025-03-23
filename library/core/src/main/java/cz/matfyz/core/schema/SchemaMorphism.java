@@ -8,6 +8,7 @@ import java.util.Set;
 
 public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
+    /** Enum for limiting a morphism cardinality from the bottom. */
     public enum Min {
         ZERO,
         ONE;
@@ -17,6 +18,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         }
     }
 
+    /** Enum for specifying a morphism type (which were defined in the paper). */
     public enum Tag {
         isa,
         role,

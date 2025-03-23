@@ -45,10 +45,8 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
     }
 
     public ResultStructure visit(DatasourceNode node) {
-        // TODO: We might be able to just use...
-        //   return context.rootStructure();
-        // If rootStructure changes during DataSourceTranslator.run(),
-        // then maybe try to split the translation so that it doesn't need to be run twice.
+        // TODO: Possibly split the translation so it doesn't need to be run twice;
+        // We *cannot* just save the query because it may still change, e.g. as filters are deepened
 
         final QueryStatement query = DatasourceTranslator.run(context, node);
         node.structure = query.structure();

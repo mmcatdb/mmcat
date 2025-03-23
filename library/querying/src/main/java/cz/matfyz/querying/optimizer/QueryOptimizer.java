@@ -19,7 +19,7 @@ public class QueryOptimizer {
         FilterDeepener.run(queryPlan);
 
         // TODO Other optimization techniques:
-        // - Split filters to further deepen them
+        // - Split filters to further deepen them (WARNING: reference nodes and filtered nodes may change, some checks are required)
         // - Merge consecutive filters to reduce filter passes
         // - Possibly merge filters into joins directly below them? (requires a concept of theta-join)
 
