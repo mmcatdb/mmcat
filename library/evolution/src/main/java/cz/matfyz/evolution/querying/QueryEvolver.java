@@ -6,13 +6,13 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.category.Composite;
 import cz.matfyz.evolution.category.CreateMorphism;
-import cz.matfyz.evolution.category.CreateObject;
+import cz.matfyz.evolution.category.CreateObjex;
 import cz.matfyz.evolution.category.DeleteMorphism;
-import cz.matfyz.evolution.category.DeleteObject;
+import cz.matfyz.evolution.category.DeleteObjex;
 import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
 import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
 import cz.matfyz.evolution.category.UpdateMorphism;
-import cz.matfyz.evolution.category.UpdateObject;
+import cz.matfyz.evolution.category.UpdateObjex;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.querying.parsing.Filter.ConditionFilter;
@@ -112,7 +112,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return null;
     }
 
-    @Override public Void visit(CreateObject operation) {
+    @Override public Void visit(CreateObjex operation) {
         /* This function is intentionally empty. */
         return null;
     }
@@ -141,7 +141,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return null;
     }
 
-    @Override public Void visit(DeleteObject operation) {
+    @Override public Void visit(DeleteObjex operation) {
         final @Nullable Term termToDelete = query.context.getTerm(operation.schema().deserialize());
         if (termToDelete == null)
             return null;
@@ -217,7 +217,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return null;
     }
 
-    @Override public Void visit(UpdateObject operation) {
+    @Override public Void visit(UpdateObjex operation) {
         errors.add(new QueryEvolutionError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }

@@ -1,7 +1,7 @@
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Core, ElementDefinition, NodeSingular, Position } from 'cytoscape';
 import type { Key, Signature } from '../identifiers';
-import type { MetadataObject, SchemaObject, VersionedSchemaObject } from '../schema';
+import type { MetadataObjex, SchemaObjex, VersionedSchemaObjex } from '../schema';
 import { DirectedEdge, type Edge } from './Edge';
 import { PathMarker, type MorphismData, type Filter } from './PathMarker';
 import { groupHighlightColorToClass } from '@/components/category/defaultGraphStyle';
@@ -75,19 +75,19 @@ export class Node {
     private _neighbors = new ComparableMap<Signature, string, Neighbor>(signature => signature.value);
 
     private constructor(
-        readonly object: VersionedSchemaObject,
-        public schemaObject: SchemaObject,
+        readonly object: VersionedSchemaObjex,
+        public schemaObjex: SchemaObjex,
         readonly highlights: NodeHighlights,
     ) {}
 
-    static create(cytoscape: Core, object: VersionedSchemaObject, schemaObject: SchemaObject, position: Position, groups: Group[]): Node {
+    static create(cytoscape: Core, object: VersionedSchemaObjex, schemaObjex: SchemaObjex, position: Position, groups: Group[]): Node {
         // This object is shared between all placeholder nodes. And its mutated when dragged ... yes, cytoscape is a bit weird.
         const positionObject = { ...position };
 
-        const highlights = new NodeHighlights(cytoscape, groups, schemaObject.key, positionObject);
-        const node = new Node(object, schemaObject, highlights);
-        const classes = (schemaObject.isNew ? 'new' : '') + ' ' + (!schemaObject.ids ? 'no-ids' : '');
-        const nodeDefinition = createNodeDefinition(schemaObject, positionObject, node, classes);
+        const highlights = new NodeHighlights(cytoscape, groups, schemaObjex.key, positionObject);
+        const node = new Node(object, schemaObjex, highlights);
+        const classes = (schemaObjex.isNew ? 'new' : '') + ' ' + (!schemaObjex.ids ? 'no-ids' : '');
+        const nodeDefinition = createNodeDefinition(schemaObjex, positionObject, node, classes);
         const cytoscapeNode = cytoscape.add(nodeDefinition);
         node.setCytoscapeNode(cytoscapeNode);
 
@@ -104,10 +104,10 @@ export class Node {
         this.node.remove();
     }
 
-    update(schemaObject: SchemaObject) {
-        this.schemaObject = schemaObject;
+    update(schemaObjex: SchemaObjex) {
+        this.schemaObjex = schemaObjex;
         this.node.data('label', this.label);
-        this.node.toggleClass('no-ids', !this.schemaObject.ids);
+        this.node.toggleClass('no-ids', !this.schemaObjex.ids);
 
         this.node.position({ ...this.metadata.position });
 
@@ -117,7 +117,7 @@ export class Node {
         }
     }
 
-    get metadata(): MetadataObject {
+    get metadata(): MetadataObjex {
         return this.object.metadata;
     }
 
@@ -172,10 +172,10 @@ export class Node {
     }
 
     get determinedPropertyType(): PropertyType | null {
-        if (!this.schemaObject.ids)
+        if (!this.schemaObjex.ids)
             return null;
 
-        return this.schemaObject.ids.isSignatures ? PropertyType.Complex : null;
+        return this.schemaObjex.ids.isSignatures ? PropertyType.Complex : null;
     }
 
     private _availabilityStatus = AvailabilityStatus.Default;
@@ -242,7 +242,7 @@ export class Node {
     }
 
     equals(other: Node | null | undefined): boolean {
-        return !!other && this.schemaObject.equals(other.schemaObject);
+        return !!other && this.schemaObjex.equals(other.schemaObjex);
     }
 
     markAvailablePaths(filter: Filter): void {
@@ -261,7 +261,7 @@ export class Node {
     ///
 }
 
-function createNodeDefinition(object: SchemaObject, position: Position, node: Node, classes?: string): ElementDefinition {
+function createNodeDefinition(object: SchemaObjex, position: Position, node: Node, classes?: string): ElementDefinition {
     return {
         data: {
             id: '' + object.key.value,

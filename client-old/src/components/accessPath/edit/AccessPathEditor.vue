@@ -169,7 +169,7 @@ function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     return SignatureIdFactory.createEmpty();
 }
 
-const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
+const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObjex.ids));
 
 /**
  * Requests to insert a node into the graph and update the root property.
@@ -311,7 +311,7 @@ function setRootRequested(node: Node) {
     if (newSubpaths) 
         newRoot.updateOrAddSubpath(newSubpaths);
 
-    const ids = node.schemaObject?.ids;
+    const ids = node.schemaObjex?.ids;
     primaryKey.value = getInitialPrimaryKey(ids);
 
     node.unselect();

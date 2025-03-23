@@ -1,4 +1,4 @@
-import { MetadataMorphism, type MetadataMorphismFromServer, SchemaCategory } from '@/types/schema';
+import { MetadataMorphism, type MetadataMorphismFromServer, Category } from '@/types/schema';
 import { type MMO, type MMOFromServer, MMOType } from './mmo';
 import { Signature } from '@/types/identifiers';
 
@@ -44,11 +44,11 @@ export class MorphismMetadata implements MMO<MMOType.Morphism> {
         };
     }
 
-    up(category: SchemaCategory): void {
+    up(category: Category): void {
         // category.getMorphism(this.signature).current = this.newMorphism;
     }
 
-    down(category: SchemaCategory): void {
+    down(category: Category): void {
         // category.getMorphism(this.signature).current = this.oldMorphism;
     }
 }

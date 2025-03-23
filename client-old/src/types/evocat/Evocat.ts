@@ -1,7 +1,7 @@
 import { isPositionEqual, type Graph, type ListenerSession } from '@/types/categoryGraph';
-import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism, MetadataObject, MetadataMorphism } from '@/types/schema';
+import { type Category, type ObjectDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism } from '@/types/schema';
 import type { Result } from '../api/result';
-import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, UpdateMorphism, UpdateObject } from '../schema/operation';
+import { CreateMorphism, CreateObjex, Composite, DeleteMorphism, DeleteObjex, type SMO, UpdateMorphism, UpdateObjex } from '../schema/operation';
 import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
 import type { MMO } from './metadata/mmo';
 import { MorphismMetadata } from './metadata/morphismMetadata';
@@ -9,7 +9,7 @@ import { ObjectMetadata } from './metadata/objectMetadata';
 import type { ObjectIds } from '../identifiers';
 import type { LogicalModel } from '../datasource';
 
-type UpdateFunction = (udpate: SchemaUpdateInit, logicalModels: LogicalModel[]) => Promise<Result<SchemaCategory>>;
+type UpdateFunction = (udpate: SchemaUpdateInit, logicalModels: LogicalModel[]) => Promise<Result<Category>>;
 
 export type EvocatApi = {
     update: UpdateFunction;
@@ -19,14 +19,14 @@ export class Evocat {
     readonly uncommitedOperations = new SmoContext();
 
     private constructor(
-        public schemaCategory: SchemaCategory,
+        public schemaCategory: Category,
         private readonly updates: SchemaUpdate[],
         private readonly logicalModels: LogicalModel[],
         private readonly api: EvocatApi,
     ) {
     }
 
-    static create(schemaCategory: SchemaCategory, updates: SchemaUpdate[], logicalModels: LogicalModel[], api: EvocatApi): Evocat {
+    static create(schemaCategory: Category, updates: SchemaUpdate[], logicalModels: LogicalModel[], api: EvocatApi): Evocat {
         const evocat = new Evocat(
             schemaCategory,
             updates,
@@ -61,7 +61,7 @@ export class Evocat {
         this.graphListener = this.schemaCategory.graph?.listen();
         this.graphListener?.onNode('dragfreeon', node => {
             const newPosition = { ...node.cytoscapeIdAndPosition.position };
-            node.object.metadata = MetadataObject.create(node.object.metadata.label, newPosition);
+            node.object.metadata = new MetadataObjex(node.object.metadata.label, newPosition);
         });
     }
 
@@ -83,10 +83,10 @@ export class Evocat {
 
     private getMetadataUpdates(schemaOperations: SMO[]): MMO[] {
         const createdObjects = new Set(
-            schemaOperations.filter((o): o is CreateObject => o instanceof CreateObject).map(o => o.object.key.value),
+            schemaOperations.filter((o): o is CreateObjex => o instanceof CreateObjex).map(o => o.schema.key.value),
         );
         const deletedObjects = new Set(
-            schemaOperations.filter((o): o is DeleteObject => o instanceof DeleteObject).map(o => o.object.key.value),
+            schemaOperations.filter((o): o is DeleteObjex => o instanceof DeleteObjex).map(o => o.schema.key.value),
         );
 
         const output: MMO[] = [];
@@ -111,10 +111,10 @@ export class Evocat {
         });
 
         const createdMorphisms = new Set(
-            schemaOperations.filter((o): o is CreateMorphism => o instanceof CreateMorphism).map(o => o.morphism.signature.value),
+            schemaOperations.filter((o): o is CreateMorphism => o instanceof CreateMorphism).map(o => o.schema.signature.value),
         );
         const deletedMorphisms = new Set(
-            schemaOperations.filter((o): o is DeleteMorphism => o instanceof DeleteMorphism).map(o => o.morphism.signature.value),
+            schemaOperations.filter((o): o is DeleteMorphism => o instanceof DeleteMorphism).map(o => o.schema.signature.value),
         );
 
         this.schemaCategory.getMorphisms().forEach(morphism => {
@@ -194,50 +194,52 @@ export class Evocat {
         if (!children)
             throw new Error('Composite operation finished before it was started.');
 
-        const operation = Composite.create(name, children);
+        const operation = new Composite(name, children);
         this.addOperation(operation);
     }
 
     /**
      * Creates a completely new schema object with a key that has never been seen before.
      */
-    createObject(def: ObjectDefinition): SchemaObject {
-        const versionedObject = this.schemaCategory.createObject();
-        const object = SchemaObject.createNew(versionedObject.key, def);
-        const operation = CreateObject.create(object);
+    createObjex(def: ObjectDefinition): SchemaObjex {
+        const versionedObject = this.schemaCategory.createObjex();
+        versionedObject.metadata = new MetadataObjex(def.label, { x: 0, y: 0 });
+        const object = SchemaObjex.createNew(versionedObject.key, def);
+        const operation = new CreateObjex(object, versionedObject.metadata);
         this.addOperation(operation);
 
-        versionedObject.metadata = MetadataObject.create(def.label, { x: 0, y: 0 });
 
         return object;
     }
 
-    deleteObject(object: SchemaObject) {
-        const operation = DeleteObject.create(object);
+    deleteObjex(object: SchemaObjex) {
+        const metadata = this.schemaCategory.getObject(object.key).metadata;
+        const operation = new DeleteObjex(object, metadata);
         this.addOperation(operation);
     }
 
-    updateObject(oldObject: SchemaObject, update: {
+    updateObjex(oldObject: SchemaObjex, update: {
         label?: string;
         ids?: ObjectIds | null;
-    }): SchemaObject {
+    }): SchemaObjex {
         const newObject = oldObject.update(update);
         if (newObject) {
-            const operation = UpdateObject.create(newObject, oldObject);
+            const operation = UpdateObjex.create(newObject, oldObject);
             this.addOperation(operation);
         }
 
         const versionedObject = this.schemaCategory.getObject(oldObject.key);
         if (update.label && update.label !== versionedObject.metadata.label)
-            versionedObject.metadata = MetadataObject.create(update.label, versionedObject.metadata.position);
+            versionedObject.metadata = new MetadataObjex(update.label, versionedObject.metadata.position);
 
         return newObject ?? oldObject;
     }
 
     createMorphism(def: MorphismDefinition): SchemaMorphism {
         const versionedMorphism = this.schemaCategory.createMorphism();
+        versionedMorphism.metadata = new MetadataMorphism(def.label ?? '');
         const morphism = SchemaMorphism.createNew(versionedMorphism.signature, def);
-        const operation = CreateMorphism.create(morphism);
+        const operation = new CreateMorphism(morphism, versionedMorphism.metadata);
         this.addOperation(operation);
 
         return morphism;
@@ -245,7 +247,8 @@ export class Evocat {
 
     deleteMorphism(morphism: SchemaMorphism) {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (only if the cardinality changed).
-        const operation = DeleteMorphism.create(morphism);
+        const metadata = this.schemaCategory.getMorphism(morphism.signature).metadata;
+        const operation = new DeleteMorphism(morphism, metadata);
         this.addOperation(operation);
     }
 
@@ -258,7 +261,7 @@ export class Evocat {
 
         const versionedMorphism = this.schemaCategory.getMorphism(oldMorphism.signature);
         if (update.label && update.label !== versionedMorphism.metadata.label)
-            versionedMorphism.metadata = MetadataMorphism.create(update.label);
+            versionedMorphism.metadata = new MetadataMorphism(update.label);
 
         return newMorphism ?? oldMorphism;
     }
@@ -291,22 +294,5 @@ class SmoContext {
         this.levels = [ [] ];
 
         return smo;
-    }
-}
-
-type UserAction = SMO | MMO;
-
-/**
- * Action is anything that can be undone or redone.
- * E.g., SMOs, position changes, etc.
- */
-class ActionContext {
-    private actions: UserAction[] = [];
-    private current = 0;
-
-    undo() {
-    }
-
-    redo() {
     }
 }

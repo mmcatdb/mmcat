@@ -3,7 +3,7 @@ import { shallowRef, watch, ref } from 'vue';
 import type { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
-import type { SchemaCategory } from '@/types/schema';
+import type { Category } from '@/types/schema';
 import EditorForInferenceSchemaCategory from './EditorForInferenceSchemaCategory.vue';
 import LayoutSelector from './LayoutSelector.vue';
 import type { LayoutType } from '@/types/inference/layoutType';
@@ -16,7 +16,7 @@ type InferenceJobDisplayProps = {
     /** The current inference job. */
     job: Job;
     /** The schema category used in the job. */
-    schemaCategory: SchemaCategory;
+    schemaCategory: Category;
     /** List of inference edits. */
     inferenceEdits: InferenceEdit[];
     /** The current layout type. */
@@ -90,8 +90,8 @@ function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
         edit = new ReferenceMergeInferenceEdit(payload, true);
     }
     else {
-        const referenceKey = payload[0].schemaObject.key;
-        const referredKey = payload[1].schemaObject.key;
+        const referenceKey = payload[0].schemaObjex.key;
+        const referredKey = payload[1].schemaObjex.key;
 
         edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey, true);
     }
@@ -109,8 +109,8 @@ function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
         edit = new PrimaryKeyMergeInferenceEdit(payload, true);
     }
     else {
-        const primaryKey = payload[0].schemaObject.key;
-        const primaryKeyIdentified = payload[1].schemaObject.key;
+        const primaryKey = payload[0].schemaObjex.key;
+        const primaryKeyIdentified = payload[1].schemaObjex.key;
 
         edit = new PrimaryKeyMergeInferenceEdit(primaryKey, primaryKeyIdentified, true);
     }
@@ -122,7 +122,7 @@ function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
  * Emits the 'update-edit' event with the new cluster edit.
  */
 function createClusterEdit(nodes: Node[]) {
-    const clusterKeys = nodes.map(node => node.schemaObject.key);
+    const clusterKeys = nodes.map(node => node.schemaObjex.key);
 
     const edit = new ClusterInferenceEdit(clusterKeys, true);
     confirmOrRevert(edit);

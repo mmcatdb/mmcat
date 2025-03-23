@@ -23,13 +23,13 @@ function save() {
         if (!node.value)
             return;
 
-        const object = evocat.createObject({
+        const object = evocat.createObjex({
             label: label.value,
             ids: ObjectIds.createNonSignatures(Type.Value),
         });
 
         evocat.createMorphism({
-            domKey: node.value.schemaObject.key,
+            domKey: node.value.schemaObjex.key,
             codKey: object.key,
             min: min.value,
         });

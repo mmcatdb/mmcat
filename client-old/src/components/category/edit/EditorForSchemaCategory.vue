@@ -4,7 +4,7 @@ import { onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import AddComplexStructure from './AddComplexStructure.vue';
-import UpdateObject from './UpdateObject.vue';
+import UpdateObjex from './UpdateObjex.vue';
 import UpdateMorphism from './UpdateMorphism.vue';
 import Divider from '@/components/layout/Divider.vue';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
@@ -18,7 +18,7 @@ enum State {
     AddObject,
     AddMorphism,
     AddComplexStructure,
-    UpdateObject,
+    UpdateObjex,
     UpdateMorphism,
     EditGroup,
 }
@@ -30,13 +30,13 @@ type StateValue =
     GenericStateValue<State.AddObject, unknown> |
     GenericStateValue<State.AddMorphism, unknown> |
     GenericStateValue<State.AddComplexStructure, unknown> |
-    GenericStateValue<State.UpdateObject, { node: Node }> |
+    GenericStateValue<State.UpdateObjex, { node: Node }> |
     GenericStateValue<State.UpdateMorphism, { edge: Edge }> |
     GenericStateValue<State.EditGroup, { nodes: Node[] }>;
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
-const editedObject = ref<InstanceType<typeof UpdateObject>>();
+const editedObject = ref<InstanceType<typeof UpdateObjex>>();
 const editedMorphism = ref<InstanceType<typeof UpdateMorphism>>();
 
 const listener = graph.listen();
@@ -64,7 +64,7 @@ function addComplexStructureClicked() {
 }
 
 function setStateToDefault() {
-    if (state.value.type === State.UpdateObject)
+    if (state.value.type === State.UpdateObjex)
         state.value.node.unselect();
 
     if (state.value.type === State.UpdateMorphism)
@@ -86,7 +86,7 @@ function onNodeTapHandler(node: Node) {
                 node.unselect();
 
                 if (state.value.nodes.length === 1) {
-                    state.value = { type: State.UpdateObject, node: state.value.nodes[0] };
+                    state.value = { type: State.UpdateObjex, node: state.value.nodes[0] };
                     return;
                 }
             }
@@ -100,15 +100,15 @@ function onNodeTapHandler(node: Node) {
             // Disband the group and then proceed in the same way as if the node was clicked.
             state.value.nodes.forEach(n => n.unselect());
             node.select({ type: SelectionType.Root, level: 0 });
-            state.value = { type: State.UpdateObject, node };
+            state.value = { type: State.UpdateObjex, node };
             return;
         }
     }
 
-    if (state.value.type !== State.Default && state.value.type !== State.UpdateObject)
+    if (state.value.type !== State.Default && state.value.type !== State.UpdateObjex)
         return;
 
-    if (state.value.type === State.UpdateObject) {
+    if (state.value.type === State.UpdateObjex) {
         if (editedObject.value?.changed) {
             return;
         }
@@ -129,11 +129,11 @@ function onNodeTapHandler(node: Node) {
     }
 
     node.select({ type: SelectionType.Root, level: 0 });
-    state.value = { type: State.UpdateObject, node };
+    state.value = { type: State.UpdateObjex, node };
 }
 
 function onEdgeTapHandler(edge: Edge) {
-    if (state.value.type === State.UpdateObject) {
+    if (state.value.type === State.UpdateObjex) {
         if (editedObject.value?.changed)
             return;
 
@@ -159,7 +159,7 @@ function onEdgeTapHandler(edge: Edge) {
 }
 
 function onCanvasTapHandler() {
-    if (state.value.type === State.UpdateObject) {
+    if (state.value.type === State.UpdateObjex) {
         if (editedObject.value?.changed)
             return;
         setStateToDefault();
@@ -228,10 +228,10 @@ async function save() {
                 @cancel="setStateToDefault"
             />
         </template>
-        <template v-else-if="state.type === State.UpdateObject">
-            <UpdateObject
+        <template v-else-if="state.type === State.UpdateObjex">
+            <UpdateObjex
                 ref="editedObject"
-                :key="state.node.schemaObject.key.value"
+                :key="state.node.schemaObjex.key.value"
                 :node="state.node"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"

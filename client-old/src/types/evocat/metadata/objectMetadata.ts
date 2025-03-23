@@ -1,10 +1,10 @@
-import { MetadataObject, type MetadataObjectFromServer, SchemaCategory } from '@/types/schema';
+import { MetadataObjex, type MetadataObjexFromServer, Category } from '@/types/schema';
 import { type MMO, type MMOFromServer, MMOType } from './mmo';
 import { Key } from '@/types/identifiers';
 
 export type ObjectMetadataFromServer = MMOFromServer<MMOType.Object> & {
-    newObject?: MetadataObjectFromServer;
-    oldObject?: MetadataObjectFromServer;
+    newObject?: MetadataObjexFromServer;
+    oldObject?: MetadataObjexFromServer;
 };
 
 export class ObjectMetadata implements MMO<MMOType.Object> {
@@ -12,8 +12,8 @@ export class ObjectMetadata implements MMO<MMOType.Object> {
 
     private constructor(
         readonly key: Key,
-        readonly newObject?: MetadataObject,
-        readonly oldObject?: MetadataObject,
+        readonly newObject?: MetadataObjex,
+        readonly oldObject?: MetadataObjex,
     ) {}
 
     static fromServer(input: ObjectMetadataFromServer): ObjectMetadata {
@@ -23,12 +23,12 @@ export class ObjectMetadata implements MMO<MMOType.Object> {
 
         return new ObjectMetadata(
             Key.fromServer(keyFromServer),
-            input.newObject && MetadataObject.fromServer(input.newObject),
-            input.oldObject && MetadataObject.fromServer(input.oldObject),
+            input.newObject && MetadataObjex.fromServer(input.newObject),
+            input.oldObject && MetadataObjex.fromServer(input.oldObject),
         );
     }
 
-    static create(key: Key, newObject?: MetadataObject, oldObject?: MetadataObject): ObjectMetadata {
+    static create(key: Key, newObject?: MetadataObjex, oldObject?: MetadataObjex): ObjectMetadata {
         return new ObjectMetadata(
             key,
             newObject,
@@ -44,11 +44,11 @@ export class ObjectMetadata implements MMO<MMOType.Object> {
         };
     }
 
-    up(category: SchemaCategory): void {
+    up(category: Category): void {
         // category.getObject(this.key).current = this.newObject;
     }
 
-    down(category: SchemaCategory): void {
+    down(category: Category): void {
         // category.getObject(this.key).current = this.oldObject;
     }
 }

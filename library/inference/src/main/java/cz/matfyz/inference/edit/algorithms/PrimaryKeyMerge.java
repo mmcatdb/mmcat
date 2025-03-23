@@ -112,7 +112,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         if (primaryKeyRoot.equals(data.primaryKeyIdentified)) { // update PK identification for the PK's parent
             final SchemaObject updatedPkRootObject = updateSchemaObjectIds(pkRootObject, primaryKeySignature);
 
-            InferenceEditorUtils.updateObjects(newSchema, newMetadata, pkRootObject, updatedPkRootObject);
+            InferenceEditorUtils.updateObjexs(newSchema, newMetadata, pkRootObject, updatedPkRootObject);
         } else {
             final SchemaObject pkIdentifiedObject = newSchema.getObject(data.primaryKeyIdentified);
 

@@ -1,5 +1,5 @@
 import type { JobDataType } from '../job';
-import { SchemaCategory, type SchemaCategoryInfo, type SerializedSchema, type SerializedMetadata } from '../schema';
+import { Category, type SchemaCategoryInfo, type SerializedSchema, type SerializedMetadata } from '../schema';
 import { Candidates, type SerializedCandidates } from './candidates';
 import type { InferenceEdit, SerializedInferenceEdit } from './inferenceEdit';
 import { createInferenceEditFromServer } from './inferenceEdit';
@@ -33,8 +33,8 @@ export type InferenceJobDataFromServer = {
 export class InferenceJobData {
     constructor(
         public edits: InferenceEdit[],
-        public inferenceSchema: SchemaCategory,
-        public finalSchema: SchemaCategory,
+        public inferenceSchema: Category,
+        public finalSchema: Category,
         public layoutType: LayoutType,
         public candidates: Candidates,
     ) {}
@@ -45,8 +45,8 @@ export class InferenceJobData {
     static fromServer(input: InferenceJobDataFromServer, info: SchemaCategoryInfo): InferenceJobData {
         return new InferenceJobData(
             input.edits.map(createInferenceEditFromServer),
-            SchemaCategory.fromServerWithInfo(info, input.inferenceSchema, input.inferenceMetadata),
-            SchemaCategory.fromServerWithInfo(info, input.finalSchema, input.finalMetadata),
+            Category.fromServerWithInfo(info, input.inferenceSchema, input.inferenceMetadata),
+            Category.fromServerWithInfo(info, input.finalSchema, input.finalMetadata),
             input.layoutType,
             Candidates.fromServer(input.candidates),
         );

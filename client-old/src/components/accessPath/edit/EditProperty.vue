@@ -59,7 +59,7 @@ function cancel() {
     emit('cancel');
 }
 
-const isSelfIdentifier = computed(() => signature.value.isEmpty && !lastNode.value.schemaObject.idsChecked.isSignatures);
+const isSelfIdentifier = computed(() => signature.value.isEmpty && !lastNode.value.schemaObjex.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
@@ -149,8 +149,8 @@ function isAuxiliaryClicked() {
             </ValueRow>
             <ValueRow label="Ids:">
                 <ObjectIdsDisplay
-                    v-if="lastNode.schemaObject.ids"
-                    :ids="lastNode.schemaObject.ids"
+                    v-if="lastNode.schemaObjex.ids"
+                    :ids="lastNode.schemaObjex.ids"
                     disabled
                     class="object-ids-display"
                 />

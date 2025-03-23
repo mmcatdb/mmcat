@@ -7,7 +7,7 @@ import InferenceEdits from './InferenceEdits.vue';
 import type { InferenceEdit } from '@/types/inference/inferenceEdit';
 import type { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
-import type { SchemaCategory } from '@/types/schema';
+import type { Category } from '@/types/schema';
 import Divider from '@/components/layout/Divider.vue';
 import type { Key } from '@/types/identifiers';
 import type { Position } from 'cytoscape';
@@ -19,7 +19,7 @@ const props = defineProps<{
     /** The graph instance used in the component. */
     graph: Graph;
     /** The schema category. */
-    schemaCategory: SchemaCategory;
+    schemaCategory: Category;
     /** Array of inference edits. */
     inferenceEdits: InferenceEdit[];
     /** The candidates for merging. */

@@ -50,7 +50,7 @@ function cancel() {
 
 // TODO this should probably also change thanks to the auxiliary - EMPTY signature thing.
 // However, it's not that trivial. Currently, because of removing of auxiliary nodes before MTC, a complex property with dynamic name can't be auxiliary.
-const isSelfIdentifier = computed(() => signature.value.isEmpty && signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
+const isSelfIdentifier = computed(() => signature.value.isEmpty && signature.value.sequence.lastNode.schemaObjex.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
@@ -80,7 +80,7 @@ const isNextButtonDisabled = computed(() => {
 
 function confirmSignature() {
     const node = signature.value.sequence.lastNode;
-    const staticNameString = (!signature.value.isEmpty || node.schemaObject.idsChecked.isSignatures) ? node.metadata.label.toLowerCase() : 'id';
+    const staticNameString = (!signature.value.isEmpty || node.schemaObjex.idsChecked.isSignatures) ? node.metadata.label.toLowerCase() : 'id';
     name.value = StaticName.fromString(staticNameString);
     const newType = determinePropertyType(node);
 

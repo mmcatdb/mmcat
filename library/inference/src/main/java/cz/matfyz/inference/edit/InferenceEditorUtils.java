@@ -115,16 +115,16 @@ public class InferenceEditorUtils {
             schema.removeMorphism(morphism);
         }
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
-        editor.deleteObjects(keysToDelete);
+        editor.deleteObjexs(keysToDelete);
     }
 
     /**
      * Updates the schema category by deleting a specified schema object and adding a new schema object in its place.
      * This method also updates the associated metadata for the new object based on the metadata of the deleted object.
      */
-    public static void updateObjects(SchemaCategory schema, MetadataCategory metadata, SchemaObject objectToDelete, SchemaObject objectToAdd) {
+    public static void updateObjexs(SchemaCategory schema, MetadataCategory metadata, SchemaObject objectToDelete, SchemaObject objectToAdd) {
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
-        editor.deleteObject(objectToDelete.key());
+        editor.deleteObjex(objectToDelete.key());
 
         MetadataObject metadataToDelete = metadata.getObject(objectToDelete);
 
@@ -271,7 +271,7 @@ public class InferenceEditorUtils {
         /**
          * Deletes an object from the schema by its key.
          */
-        public void deleteObject(Key key) {
+        public void deleteObjex(Key key) {
             final var objects = getObjects(schema);
             if (!objects.containsKey(key))
                 throw new NotFoundException("SchemaObject with key " + key + " does not exist");
@@ -282,9 +282,9 @@ public class InferenceEditorUtils {
         /**
          * Deletes multiple objects from the schema by their keys.
          */
-        public void deleteObjects(Set<Key> keys) {
+        public void deleteObjexs(Set<Key> keys) {
             for (Key key : keys) {
-                deleteObject(key);
+                deleteObjex(key);
             }
         }
     }

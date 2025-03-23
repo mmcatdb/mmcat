@@ -44,7 +44,7 @@ function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     return SignatureIdFactory.createEmpty();
 }
 
-const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
+const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObjex.ids));
 
 function editPropertyClicked(property: GraphChildProperty) {
     state.value = {
@@ -85,12 +85,12 @@ function finishMapping() {
                             <StaticNameInput v-model="rootProperty.name" />
                         </ValueRow>
                         <ValueRow
-                            v-if="rootProperty.node.schemaObject.ids"
+                            v-if="rootProperty.node.schemaObjex.ids"
                             label="Primary key:"
                         >
                             <PrimaryKeyInput
                                 v-model="primaryKey"
-                                :ids="rootProperty.node.schemaObject.ids"
+                                :ids="rootProperty.node.schemaObjex.ids"
                             />
                         </ValueRow>
                     </ValueContainer>

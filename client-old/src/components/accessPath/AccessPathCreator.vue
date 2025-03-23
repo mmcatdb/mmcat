@@ -105,11 +105,11 @@ function confirmSelectedNodes() {
  * Processes a single node by creating its subpath and adding it to the access path.
  */
 function processNode(node: Node) {
-    if (!processedNodes.has(node.schemaObject.key.value)) {
+    if (!processedNodes.has(node.schemaObjex.key.value)) {
         const subpath = createSubpathForNode(node);
         if (subpath) {
             accessPath.value?.updateOrAddSubpath(subpath);        
-            processedNodes.add(node.schemaObject.key.value);
+            processedNodes.add(node.schemaObjex.key.value);
         }
     }
 }
@@ -151,7 +151,7 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
         });
     }
 
-    processedNodes.add(node.schemaObject.key.value);
+    processedNodes.add(node.schemaObjex.key.value);
     return subpath;
 }
 
@@ -163,7 +163,7 @@ function filterChildren(node: Node): Node[] {
         const allChildren = graph.getChildrenForNode(node);
         return allChildren.filter(child => 
             selectedNodes.value.some(selectedNode => selectedNode.equals(child)) &&
-            !processedNodes.has(child.schemaObject.key.value),
+            !processedNodes.has(child.schemaObjex.key.value),
         );
     }
     return [];
