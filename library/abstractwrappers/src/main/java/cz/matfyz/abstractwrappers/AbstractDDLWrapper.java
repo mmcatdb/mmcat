@@ -4,6 +4,7 @@ import cz.matfyz.core.mapping.StaticName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +31,9 @@ public interface AbstractDDLWrapper {
 
     AbstractStatement createDDLStatement();
 
+    Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands);
+
+    AbstractStatement createCreationStatement(String newDBName, String owner);
 
     /**
      * Immutable - all methods just create a new path.
