@@ -28,8 +28,7 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 
 const type = ref(PropertyType.Simple);
 const signature = shallowRef(SequenceSignature.empty(props.parentProperty.node));
-const isAuxiliary = ref(false);
-const name = shallowRef<Name>(StaticName.fromString(''));
+const name = shallowRef<Name>(new StaticName(''));
 const state = ref(State.SelectSignature);
 const filter = ref(createDefaultFilter(props.datasource.configuration));
 const typeIsDetermined = ref(false);
@@ -53,19 +52,13 @@ function cancel() {
 const isSelfIdentifier = computed(() => signature.value.isEmpty && signature.value.sequence.lastNode.schemaObjex.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
-    if (isAuxiliary.value)
-        return signature.value.isEmpty;
-
-    if (signature.value.isEmpty)
-        return false;
-
     if (!props.datasource.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
     return true;
 });
 
-const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value || name.value.isAnonymous);
+const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value);
 
 const isNextButtonDisabled = computed(() => {
     switch (state.value) {
@@ -81,7 +74,7 @@ const isNextButtonDisabled = computed(() => {
 function confirmSignature() {
     const node = signature.value.sequence.lastNode;
     const staticNameString = (!signature.value.isEmpty || node.schemaObjex.idsChecked.isSignatures) ? node.metadata.label.toLowerCase() : 'id';
-    name.value = StaticName.fromString(staticNameString);
+    name.value = new StaticName(staticNameString);
     const newType = determinePropertyType(node);
 
     if (newType !== null) {
@@ -99,7 +92,7 @@ function determinePropertyType(node: Node): PropertyType | null {
     if (!props.datasource.configuration.isComplexPropertyAllowed)
         return PropertyType.Simple;
 
-    if (isAuxiliary.value)
+    if (signature.value.isEmpty)
         return PropertyType.Complex;
 
     if (isSelfIdentifier.value)
@@ -135,10 +128,6 @@ function backButton() {
     if (state.value === State.SelectType && typeIsDetermined.value)
         state.value--;
 }
-
-function isAuxiliaryClicked() {
-    signature.value = SequenceSignature.empty(props.parentProperty.node);
-}
 </script>
 
 <template>
@@ -146,18 +135,7 @@ function isAuxiliaryClicked() {
         <h2>Add property</h2>
         <ValueContainer>
             <ValueRow
-                v-if="state >= State.SelectSignature && datasource.configuration.isGroupingAllowed"
-                label="Is auxiliary:"
-            >
-                <input
-                    v-model="isAuxiliary"
-                    :disabled="state > State.SelectSignature"
-                    type="checkbox"
-                    @input="isAuxiliaryClicked"
-                />
-            </ValueRow>
-            <ValueRow
-                v-if="state >= State.SelectSignature && !isAuxiliary"
+                v-if="state >= State.SelectSignature"
                 label="Signature:"
             >
                 <SignatureDisplay :signature="signature" />
@@ -187,7 +165,7 @@ function isAuxiliaryClicked() {
             </ValueRow>
         </ValueContainer>
         <SignatureInput
-            v-if="state === State.SelectSignature && !isAuxiliary"
+            v-if="state === State.SelectSignature"
             v-model="signature"
             :filter="filter"
         />

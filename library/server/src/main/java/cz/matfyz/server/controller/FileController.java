@@ -1,6 +1,7 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.service.FileService;
+import cz.matfyz.server.service.FileService.FileEdit;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.file.File;
 
@@ -50,9 +51,9 @@ public class FileController {
             final Path filePath = Paths.get(File.getFilePath(file, uploads));
             final Resource resource = new UrlResource(filePath.toUri());
 
-            return  ResponseEntity.ok() // TODO: Unfortunatelly, these settings are never used.
-                    .header("fileType", file.fileType.toString())
-                    .body(resource);
+            return ResponseEntity.ok() // TODO: Unfortunatelly, these settings are never used.
+                .header("fileType", file.fileType.toString())
+                .body(resource);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -69,11 +70,8 @@ public class FileController {
     }
 
     @PutMapping("files/{id}/update")
-    public File updateFile(@PathVariable Id id, @RequestBody Map<String, Object> body) {
-        final String value = ((String) body.get("value")).trim();
-        final boolean isLabel = (boolean) body.get("isLabel");
-
-        return service.updateFile(id, value, isLabel);
+    public File updateFile(@PathVariable Id id, @RequestBody FileEdit edit) {
+        return service.updateFile(id, edit);
     }
 
 }

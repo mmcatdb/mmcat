@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty, SequenceSignature } from '@/types/accessPath/graph';
+import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty } from '@/types/accessPath/graph';
 import { PropertyType, createDefaultFilter, type Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { ref, computed, shallowRef } from 'vue';
@@ -29,7 +29,6 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 
 const type = ref(propertyToType(props.property));
 const signature = shallowRef(props.property.signature.copy());
-const isAuxiliary = ref('isAuxiliary' in props.property && props.property.isAuxiliary);
 const name = shallowRef<Name>(props.property.name.copy());
 const state = ref(State.SelectSignature);
 const filter = ref(createDefaultFilter(props.datasource.configuration));
@@ -37,7 +36,7 @@ const typeIsDetermined = ref(false);
 
 const typeChanged = computed(() => type.value !== propertyToType(props.property));
 const nameChanged = computed(() => !props.property.name.equals(name.value));
-const signatureChanged = computed(() => !props.property.signature.equals(signature.value) || ('isAuxiliary' in props.property && props.property.isAuxiliary !== isAuxiliary.value));
+const signatureChanged = computed(() => !props.property.signature.equals(signature.value));
 const lastNode = computed(() => signature.value.sequence.lastNode);
 
 function propertyToType(property: GraphChildProperty): PropertyType {
@@ -62,19 +61,13 @@ function cancel() {
 const isSelfIdentifier = computed(() => signature.value.isEmpty && !lastNode.value.schemaObjex.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
-    if (isAuxiliary.value)
-        return signature.value.isEmpty;
-
-    if (signature.value.isEmpty)
-        return false;
-
     if (!props.datasource.configuration.isComplexPropertyAllowed && lastNode.value.determinedPropertyType === PropertyType.Complex)
         return false;
 
     return true;
 });
 
-const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value || name.value.isAnonymous);
+const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value);
 
 function confirmSignature() {
     const node = lastNode.value;
@@ -95,7 +88,7 @@ function determinePropertyType(node: Node): PropertyType | null {
     if (!props.datasource.configuration.isComplexPropertyAllowed)
         return PropertyType.Simple;
 
-    if (isAuxiliary.value)
+    if (signature.value.isEmpty)
         return PropertyType.Complex;
 
     if (isSelfIdentifier.value)
@@ -134,10 +127,6 @@ function backButton() {
     if (state.value === State.SelectType && typeIsDetermined.value)
         state.value--;
 }
-
-function isAuxiliaryClicked() {
-    signature.value = SequenceSignature.empty(props.property.node);
-}
 </script>
 
 <template>
@@ -156,18 +145,7 @@ function isAuxiliaryClicked() {
                 />
             </ValueRow>
             <ValueRow
-                v-if="state >= State.SelectSignature && datasource.configuration.isGroupingAllowed"
-                label="Is auxiliary:"
-            >
-                <input
-                    v-model="isAuxiliary"
-                    :disabled="state > State.SelectSignature"
-                    type="checkbox"
-                    @input="isAuxiliaryClicked"
-                />
-            </ValueRow>
-            <ValueRow
-                v-if="state >= State.SelectSignature && !isAuxiliary"
+                v-if="state >= State.SelectSignature"
                 label="Signature:"
             >
                 <SignatureDisplay :signature="signature" />
@@ -197,7 +175,7 @@ function isAuxiliaryClicked() {
             </ValueRow>
         </ValueContainer>
         <SignatureInput
-            v-if="state === State.SelectSignature && !isAuxiliary"
+            v-if="state === State.SelectSignature"
             v-model="signature"
             :filter="filter"
         />

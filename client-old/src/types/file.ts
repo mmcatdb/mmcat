@@ -6,7 +6,7 @@ export type FileFromServer = {
     datasourceId?: Id;
     categoryId?: Id;
     label: string;
-    description?: string;
+    description: string;
     jobLabel: string;
     fileType: string; //TODO
     createdAt: string;
@@ -20,7 +20,7 @@ export class File implements Entity {
         public readonly datasourceId: Id | undefined,
         public readonly categoryId: Id | undefined,
         public readonly label: string,
-        public readonly description: string | undefined,
+        public readonly description: string,
         public readonly jobLabel: string,
         public readonly fileType: string, //TODO (should this be an enum here?)
         public readonly createdAt: Date,
@@ -42,3 +42,8 @@ export class File implements Entity {
         );
     }
 }
+
+export type FileEdit = {
+    label?: string;
+    description?: string;
+};

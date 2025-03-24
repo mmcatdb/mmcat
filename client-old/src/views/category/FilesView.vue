@@ -15,7 +15,7 @@ async function fetchFiles() {
     if (!result.status)
         return false;
 
-    files.value = result.data.map(file => File.fromServer(file, info.value)).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    files.value = result.data.map(file => File.fromServer(file)).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     return true;
 }
 </script>

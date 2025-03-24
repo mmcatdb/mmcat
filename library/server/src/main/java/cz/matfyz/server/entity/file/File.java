@@ -33,14 +33,14 @@ public class File extends Entity {
     public @Nullable Id datasourceId;
     public @Nullable Id categoryId;
     public String label;
-    public @Nullable String description;
+    public String description;
     public final String filename; // filename under which the file is stored = the file's id
     public final String jobLabel;
     public final FileType fileType;
     public final Date createdAt;
     public @Nullable List<Date> executedAt;
 
-    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, @Nullable String description, String jobLabel, FileType fileType, Date createdAt, @Nullable List<Date> executedAt) {
+    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, String description, String jobLabel, FileType fileType, Date createdAt, @Nullable List<Date> executedAt) {
         super(id);
         this.jobId = jobId;
         this.datasourceId = datasourceId;
@@ -115,13 +115,6 @@ public class File extends Entity {
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file: " + getFilePath(file, uploads), e);
         }
-    }
-
-    public void updateFile(String newValue, boolean isLabel) {
-        if (isLabel)
-            this.label = newValue;
-        else
-            this.description = newValue;
     }
 
     public void addExecutionDate(Date executionDate) {

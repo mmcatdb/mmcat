@@ -1,7 +1,5 @@
 package cz.matfyz.abstractwrappers;
 
-import cz.matfyz.core.mapping.StaticName;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +10,7 @@ import java.util.stream.Collectors;
 public interface AbstractDDLWrapper {
 
     String PATH_SEPARATOR = "/";
-    String EMPTY_NAME = StaticName.createAnonymous().getStringName();
+    String EMPTY_NAME = "";
     String INDENTATION = "    ";
 
     boolean isSchemaless();

@@ -1,37 +1,37 @@
 export class IndentedStringBuilder {
-    private intendationString: string;
+    private indentationString: string;
     private lines: string[] = [];
 
     constructor(input?: string | number) {
-        this.intendationString = input === undefined ? '' : typeof input === 'string' ? input : IndentedStringBuilder.getTabIntendationString(input);
+        this.indentationString = input === undefined ? '' : typeof input === 'string' ? input : IndentedStringBuilder.getTabIndentationString(input);
     }
 
-    public static getTabIntendationString(depth: number): string {
+    public static getTabIndentationString(depth: number): string {
         return [ ...Array<undefined>(depth) ].map(() => '    ').join();
     }
 
-    public appendIntended(string: string): this {
+    public appendIndented(string: string): this {
         return this.append(string, true);
     }
 
-    public append(string: string, intended = false): this {
+    public append(string: string, indented = false): this {
         if (string === '')
             return this;
 
         if (this.lines.length === 0)
-            this.lines.push(intended ? this.intendationString : '');
+            this.lines.push(indented ? this.indentationString : '');
 
         this.lines[this.lines.length - 1] += string;
 
         return this;
     }
 
-    public appendIntendedLine(line = ''): this {
+    public appendIndentedLine(line = ''): this {
         return this.appendLine(line, true);
     }
 
-    public appendLine(line = '', intended = false): this {
-        this.lines.push((intended ? this.intendationString : '') + line);
+    public appendLine(line = '', indented = false): this {
+        this.lines.push((indented ? this.indentationString : '') + line);
 
         return this;
     }

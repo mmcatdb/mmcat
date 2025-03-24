@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.SpecialName;
 import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.StaticName;
 
@@ -45,8 +46,8 @@ class JsonTests {
 
     @Test
     void name() {
-        final var anonymous1 = StaticName.createAnonymous();
-        fullTest(anonymous1);
+        final var special1 = new SpecialName("root");
+        fullTest(special1);
 
         final var static1 = new StaticName("Static name");
         fullTest(static1);

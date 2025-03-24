@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import API from '@/utils/api';
-import { File} from '@/types/file';
+import type { File } from '@/types/file';
 import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
 import { useSchemaCategoryInfo } from '@/utils/injects';
 
@@ -25,25 +25,27 @@ const showDetails = ref(false);
 
 const showExecutionPrompt = ref(false);
 
-const newDatabaseName = ref("");
+const newDatabaseName = ref('');
 
 async function saveLabel() {
-    if (editedLabel.value.trim() === props.file.label) {
+    const newLabel = editedLabel.value.trim();
+    if (newLabel === props.file.label) {
         editingLabel.value = false;
         return;
     }
 
-    const result = await API.files.updateFile({ id: props.file.id }, { value: editedLabel.value.trim(), isLabel: true })
+    const result = await API.files.updateFile({ id: props.file.id }, { label: newLabel });
     editingLabel.value = false;
 }
 
 async function saveDescription() {
-    if (editedDescription.value.trim() === props.file.description) {
+    const newDescription = editedDescription.value.trim();
+    if (newDescription === props.file.description) {
         editingDescription.value = false;
         return;
     }
 
-    const result = await API.files.updateFile({ id: props.file.id }, { value: editedDescription.value.trim(), isLabel: false })
+    const result = await API.files.updateFile({ id: props.file.id }, { description: newDescription });
     editingDescription.value = false;
 }
 
@@ -53,6 +55,9 @@ async function downloadFile() {
     const result = await API.files.downloadFile({ id: props.file.id });
     // For some reason, even though I am sending a ResponseEntity with custom headers from the server,
     // I receive an Object with fields: status and data.
+    if (!result.status) 
+        throw new Error('Download failed');
+
     const fileContent = result.data;
     const { extension, mimeType } = getFileType(props.file.fileType);
     triggerDownload(fileContent, `${props.file.id}.${extension}`, mimeType);
@@ -71,13 +76,13 @@ async function downloadMetadata() {
     };
 
     const jsonString = JSON.stringify(metadata, null, 2);
-    triggerDownload(jsonString, `${props.file.id}.metadata.json`, "application/json");
+    triggerDownload(jsonString, `${props.file.id}.metadata.json`, 'application/json');
 }
 
 function triggerDownload(content: string | Blob, filename: string, mimeType: string) {
-    const blob = new Blob([content], { type: mimeType });
+    const blob = new Blob([ content ], { type: mimeType });
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
     link.download = filename;
     document.body.appendChild(link);
@@ -85,14 +90,15 @@ function triggerDownload(content: string | Blob, filename: string, mimeType: str
     document.body.removeChild(link);
 }
 
-function getFileType(fileType: string) {
-    const fileTypes = {
-        JSON: { extension: "json", mimeType: "application/json" },
-        CSV: { extension: "csv", mimeType: "text/csv" },
-        DML: { extension: "txt", mimeType: "text/plain" }
-    };
+const fileTypes: Record<string, { extension: string, mimeType: string }> = {
+    JSON: { extension: 'json', mimeType: 'application/json' },
+    CSV: { extension: 'csv', mimeType: 'text/csv' },
+    DML: { extension: 'txt', mimeType: 'text/plain' },
+};
 
-    return fileTypes[fileType] || { extension: "txt", mimeType: "text/plain" };
+function getFileType(fileType: string) {
+
+    return fileTypes[fileType] ?? { extension: 'txt', mimeType: 'text/plain' };
 }
 
 async function executeDML(mode: string, newDBName?: string) {
@@ -114,16 +120,20 @@ async function executeDML(mode: string, newDBName?: string) {
         <div class="d-flex gap-4 align-items-end">
             <div>
                 <div class="d-flex align-items-center gap-2">
-                    <strong v-if="!editingLabel" @click="editingLabel = true" class="editable">
+                    <strong
+                        v-if="!editingLabel"
+                        class="editable"
+                        @click="editingLabel = true"
+                    >
                         {{ file.label }}
                     </strong>
                     <input
                         v-else
                         v-model="editedLabel"
-                        @blur="saveLabel"
-                        @keyup.enter="saveLabel"
                         class="form-control form-control-sm"
                         autofocus
+                        @blur="saveLabel"
+                        @keyup.enter="saveLabel"
                     />
                 </div>
                 <div class="text-secondary small">
@@ -166,7 +176,10 @@ async function executeDML(mode: string, newDBName?: string) {
             </div>
         </div>
         <transition name="slide">
-            <div v-if="showDetails" class="details-panel">
+            <div
+                v-if="showDetails"
+                class="details-panel"
+            >
                 <hr class="separator" />
                 <p><strong>Name:</strong> {{ file.label }}</p>
                 <p><strong>Id:</strong> {{ file.id }}</p>
@@ -178,36 +191,53 @@ async function executeDML(mode: string, newDBName?: string) {
                 </p>
                 <p>
                     <strong>Description: </strong>
-                    <span v-if="!editingDescription" @click="editingDescription = true" class="editable">
+                    <span
+                        v-if="!editingDescription"
+                        class="editable"
+                        @click="editingDescription = true"
+                    >
                         {{ file.description || "Click to add a description" }}
                     </span>
                     <textarea
                         v-else
                         v-model="editedDescription"
-                        @blur="saveDescription"
-                        @keyup.enter="saveDescription"
                         class="form-control form-control-sm"
                         rows="2"
                         autofocus
-                    ></textarea>
+                        @blur="saveDescription"
+                        @keyup.enter="saveDescription"
+                    />
                 </p>
                 <div class="details-footer">
-                    <button @click="downloadMetadata">Download Details</button>
+                    <button @click="downloadMetadata">
+                        Download Details
+                    </button>
                 </div>
             </div>
         </transition>
         <transition name="fade">
-            <div v-if="showExecutionPrompt" class="overlay"></div>
+            <div
+                v-if="showExecutionPrompt"
+                class="overlay"
+            />
         </transition>
         <transition name="fade">
-            <div v-if="showExecutionPrompt" class="execution-prompt">
+            <div
+                v-if="showExecutionPrompt"
+                class="execution-prompt"
+            >
                 <h3>Execution Options</h3>
                 <p>This file has been executed before. What would you like to do?</p>
                 <div class="options">
                     <div class="option">
                         <h4>Overwrite Data</h4>
                         <p>Delete the existing dataset and replace it with the new execution.</p>
-                        <button @click="executeDML('delete_and_execute')" class="info">Overwrite</button>
+                        <button
+                            class="info"
+                            @click="executeDML('delete_and_execute')"
+                        >
+                            Overwrite
+                        </button>
                     </div>
                     <div class="option">
                         <h4>Create New Database</h4>
@@ -218,15 +248,20 @@ async function executeDML(mode: string, newDBName?: string) {
                             class="form-control"
                         />
                         <button 
-                            @click="executeDML('create_new_and_execute', newDatabaseName)" 
-                            class="info mt-2"
+                            class="info mt-2" 
                             :disabled="!newDatabaseName.trim()"
+                            @click="executeDML('create_new_and_execute', newDatabaseName)"
                         >
                             New Database
                         </button>
                     </div>
                 </div>
-                <button @click="showExecutionPrompt = false" class="cancel">Cancel</button>
+                <button
+                    class="cancel"
+                    @click="showExecutionPrompt = false"
+                >
+                    Cancel
+                </button>
             </div>
         </transition>
     </div>

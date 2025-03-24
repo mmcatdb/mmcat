@@ -2,7 +2,7 @@
 import { computed, ref, shallowRef } from 'vue';
 import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
-import { SignatureId, StaticName } from '@/types/identifiers';
+import { SignatureId, SpecialName, StaticName } from '@/types/identifiers';
 import { type Node, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat } from '@/utils/injects';
@@ -66,7 +66,9 @@ function confirmRootNode() {
 function confirmSelectedNodes() {
     const rootNode = selectedRootNode.value!;
 
-    accessPath.value = new GraphRootProperty(StaticName.fromString(rootNode.metadata.label.toLowerCase()), rootNode);
+    // FIXME StaticName.fromString(rootNode.metadata.label.toLowerCase()
+
+    accessPath.value = new GraphRootProperty(new SpecialName('root'), rootNode);
     
     selectedNodes.value.forEach(node => processNode(node));
     processedNodes.clear();
@@ -111,9 +113,9 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
 
     let subpath: GraphChildProperty;
     if (graph.getChildrenForNode(node).length === 0) 
-        subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
+        subpath = new GraphSimpleProperty(new StaticName(label), signature, parentProperty);
     else 
-        subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
+        subpath = new GraphComplexProperty(new StaticName(label), signature, parentProperty, []);
 
     if (subpath instanceof GraphComplexProperty) {
         previousParentProperty = subpath;

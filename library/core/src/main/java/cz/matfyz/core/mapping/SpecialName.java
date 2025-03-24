@@ -13,51 +13,48 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * A normal string name.
+ * A name with a special meaning in the given datasource. E.g., the root of the complex property tree, or nodes in a Neo4j relationship.
  */
-@JsonSerialize(using = StaticName.Serializer.class)
-@JsonDeserialize(using = StaticName.Deserializer.class)
-public class StaticName extends Name {
+@JsonSerialize(using = SpecialName.Serializer.class)
+@JsonDeserialize(using = SpecialName.Deserializer.class)
+public class SpecialName extends Name {
 
-    private final String value;
+    private final String type;
 
-    public StaticName(String value) {
-        this.value = value;
-    }
-
-    public String getStringName() {
-        return value;
+    public SpecialName(String type) {
+        super();
+        this.type = type;
     }
 
     @Override public String toString() {
-        return value;
+        return "<" + type + ">";
     }
 
     @Override public boolean equals(Object object) {
-        return object instanceof StaticName name && value.equals(name.value);
+        return object instanceof SpecialName name && type.equals(name.type);
     }
 
     /** @deprecated Maybe */
-    public static class Serializer extends StdSerializer<StaticName> {
+    public static class Serializer extends StdSerializer<SpecialName> {
 
         public Serializer() {
             this(null);
         }
 
-        public Serializer(Class<StaticName> t) {
+        public Serializer(Class<SpecialName> t) {
             super(t);
         }
 
-        @Override public void serialize(StaticName name, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(SpecialName name, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
-            generator.writeStringField("value", name.value);
+            generator.writeStringField("type", name.type);
             generator.writeEndObject();
         }
 
     }
 
     /** @deprecated */
-    public static class Deserializer extends StdDeserializer<StaticName> {
+    public static class Deserializer extends StdDeserializer<SpecialName> {
 
         public Deserializer() {
             this(null);
@@ -67,12 +64,12 @@ public class StaticName extends Name {
             super(vc);
         }
 
-        @Override public StaticName deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public SpecialName deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            final String value = node.get("value").asText();
+            final String type = node.get("type").asText();
 
-            return new StaticName(value);
+            return new SpecialName(type);
         }
     }
 

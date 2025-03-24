@@ -19,6 +19,9 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Name that is mapped to a key (in an object) or to an index (in an array).
+ */
 @JsonSerialize(using = DynamicName.Serializer.class)
 @JsonDeserialize(using = DynamicName.Deserializer.class)
 public class DynamicName extends Name implements Comparable<DynamicName> {
@@ -77,6 +80,7 @@ public class DynamicName extends Name implements Comparable<DynamicName> {
         return comparable - dynamicName.comparable;
     }
 
+    /** @deprecated Maybe */
     public static class Serializer extends StdSerializer<DynamicName> {
 
         public Serializer() {
@@ -95,6 +99,7 @@ public class DynamicName extends Name implements Comparable<DynamicName> {
 
     }
 
+    /** @deprecated */
     public static class Deserializer extends StdDeserializer<DynamicName> {
 
         public Deserializer() {

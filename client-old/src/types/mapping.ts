@@ -1,5 +1,5 @@
 import { RootProperty } from '@/types/accessPath/basic';
-import type { RootPropertyFromServer } from './accessPath/serverTypes';
+import type { ComplexPropertyFromServer } from './accessPath/serverTypes';
 import type { Entity, Id, VersionId } from './id';
 import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from './identifiers';
 
@@ -10,7 +10,7 @@ export type MappingFromServer = {
     rootObjectKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
-    accessPath: RootPropertyFromServer;
+    accessPath: ComplexPropertyFromServer;
     version: VersionId;
 };
 
@@ -46,7 +46,7 @@ export type MappingInit = {
     rootObjectKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
-    accessPath: RootPropertyFromServer;
+    accessPath: ComplexPropertyFromServer;
 };
 
 export type MappingInfoFromServer = {

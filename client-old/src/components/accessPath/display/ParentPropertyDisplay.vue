@@ -66,11 +66,13 @@ function emitComplexClick(): void {
                 @mouseenter="highlighted = true;"
                 @mouseleave="highlighted = false"
             >
-                {{ property.name }}:
-                <SignatureDisplay
-                    v-if="!property.isAuxiliary"
-                    :signature="property.signature"
-                />
+                <template v-if="!isRoot">
+                    {{ property.name }}:
+                    <SignatureDisplay
+                        v-if="!property.isAuxiliary"
+                        :signature="property.signature"
+                    />
+                </template>
                 {
             </span>
         </div>

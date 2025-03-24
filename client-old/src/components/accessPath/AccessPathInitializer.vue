@@ -75,18 +75,16 @@ onMounted(async () => {
  * @param accessPath - The root property of the access path.
  * @param kindName - The name of the kind being created (optional).
  */
-async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty, kindName: string | undefined) {
-    if (!selectedDatasource.value || !graph.value || !accessPath)
+async function createMapping(primaryKey: SignatureId, accessPath: GraphRootProperty, kindName: string) {
+    if (!selectedDatasource.value || !graph.value)
         return;
-
-    const newKindName = kindName !== undefined ? kindName : accessPath.name.toString();
 
     const result = await API.mappings.createMapping({}, {
         categoryId,
         datasourceId: selectedDatasource.value.id,
         rootObjectKey: accessPath.node.schemaObjex.key.toServer(),
         primaryKey: new SignatureId(primaryKey.signatures).toServer(),
-        kindName: newKindName,
+        kindName,
         accessPath: accessPath.toServer(),
     });
     if (result.status) {

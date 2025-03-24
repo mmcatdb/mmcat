@@ -122,9 +122,17 @@ public class FileService {
         repository.save(file);
     }
 
-    public File updateFile(Id id, String newValue, boolean isLabel) {
+    /** Like PATCH (if null, the value shouldn't be edited). */
+    public record FileEdit(@Nullable String label, @Nullable String description) {}
+
+    public File updateFile(Id id, FileEdit edit) {
         final File file = repository.find(id);
-        file.updateFile(newValue, isLabel);
+
+        if (edit.label != null)
+            file.label = edit.label;
+        if (edit.description != null)
+            file.description = edit.description;
+
         repository.save(file);
         return file;
     }
