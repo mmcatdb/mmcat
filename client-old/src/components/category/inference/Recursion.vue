@@ -176,7 +176,16 @@ function onEdgeTapHandler(edge: Edge) {
             :show="showWarning"
             :message="warningMessage"
         />
-        <h2>Find Recursion</h2>
+        <h3 class="recursion-title">
+            Find Recursion
+            <span class="tooltip-container">
+                <span class="question-mark">?</span>
+                <span class="tooltip-text">
+                Define a recursive pattern in the graph by selecting nodes and edges that form the recursion structure.<br>
+                This pattern will be used to detect and represent recursive relationships in the data.
+                </span>
+            </span> 
+        </h3>
         <ValueContainer>
             <ValueRow label="Recursive pattern:"> 
                 {{ selectedNodeLabels }}
@@ -203,3 +212,57 @@ function onEdgeTapHandler(edge: Edge) {
         </div>
     </div>
 </template>
+
+<style>
+.recursion-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.question-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  border-radius: 50%;
+  background-color: #999;
+  color: white;
+  font-weight: bold;
+  cursor: default;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
+

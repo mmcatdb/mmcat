@@ -70,7 +70,18 @@ function setMergeType(type: 'reference' | 'primaryKey') {
 
 <template>
     <div class="merge">
-        <h2>Merge Objects</h2>
+    <h3 class="merge-title">
+            Merge Objects
+            <span class="tooltip-container">
+                <span class="question-mark">?</span>
+                <span class="tooltip-text">
+                Choose how you want to merge objects in the graph: by reference or by primary key.<br>
+                For manual <strong>reference merging</strong>, first select the referencing object, then the referenced object.<br>
+                For manual <strong>primary key merging</strong>, first select the object with the primary key, then the object identified by it.<br>
+                Alternatively, you can select from precomputed merge candidates in both modes.
+                </span>
+            </span> 
+        </h3>
         <div class="merge-type button-row">
             <button
                 :disabled="mergeType === 'reference'"
@@ -104,3 +115,56 @@ function setMergeType(type: 'reference' | 'primaryKey') {
         />
     </div>
 </template>
+
+<style>
+.merge-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.question-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  border-radius: 50%;
+  background-color: #999;
+  color: white;
+  font-weight: bold;
+  cursor: default;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
