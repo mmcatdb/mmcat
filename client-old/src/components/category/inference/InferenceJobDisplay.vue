@@ -175,10 +175,6 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
-function savePositions(map: Map<Key, Position>) {
-    emit('save-positions', map);
-}
-
 /**
  * Handles signatures view when graph updated
  */
@@ -188,6 +184,21 @@ function handleShowSignaturesUpdate(newState: boolean) {
         graph.value.toggleEdgeLabels(newState);
 }
 
+const updatedPositionsMap = ref(new Map<Key, Position>());
+
+function updatePosition(key: Key, newPosition: Position) {
+    updatedPositionsMap.value.set(key, newPosition);
+}
+
+/**
+ * Emits the 'save-positions' even when positions are saved.
+ */
+function savePositions() {
+    if (updatedPositionsMap.value.size > 0) {
+        emit('save-positions', updatedPositionsMap.value);
+        updatedPositionsMap.value.clear();
+    }
+}
 </script>
 
 <template>
@@ -200,11 +211,10 @@ function handleShowSignaturesUpdate(newState: boolean) {
                 @graph-created="graphCreated"
                 @update-show-signatures="handleShowSignaturesUpdate"
             />
-            <div v-if="graph">
-                <LayoutSelector
-                    :layout-type="props.layoutType"
-                    @change-layout="changeLayout"
-                />
+            <div
+                v-if="graph"
+                class="w-100 d-flex flex-column gap-2"
+            >
                 <EditorForInferenceSchemaCategory 
                     :graph="graph" 
                     :schema-category="props.schemaCategory" 
@@ -216,9 +226,26 @@ function handleShowSignaturesUpdate(newState: boolean) {
                     @confirm-recursion="createRecursionEdit"
                     @cancel-edit="cancelEdit"   
                     @revert-edit="confirmOrRevert"    
-                    @save-positions="savePositions"     
+                    @update-position="updatePosition"
                 />
-                <slot name="below-editor" />
+
+                <div class="flex-grow-1" />
+
+                <LayoutSelector
+                    :layout-type="props.layoutType"
+                    @change-layout="changeLayout"
+                />
+
+                <div class="w-100 py-2 d-flex gap-2">
+                    <slot name="button-row" />
+
+                    <button
+                        :disabled="!updatedPositionsMap.size"
+                        @click="savePositions"
+                    >
+                        Save Positions
+                    </button>
+                </div>
             </div>
         </div>
     </div>

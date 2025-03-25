@@ -6,6 +6,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 import Message from './Message.vue';
+import Divider from '@/components/layout/Divider.vue';
 
 /**
  * Props passed to the component.
@@ -132,27 +133,34 @@ function splitName(name: string) {
             :show="showMessage"
             :message="messageText"
         />
-        <div class="input-type">
-            <label class="radio-label">
+        <div class="mb-2 d-flex gap-4">
+            <label class="d-flex align-items-center cursor-pointer">
                 <input
                     v-model="inputType"
                     type="radio"
                     value="manual"
-                /> Manual
+                />
+                Manual
             </label>
-            <label class="radio-label">
+            <label class="d-flex align-items-center cursor-pointer">
                 <input
                     v-model="inputType"
                     type="radio"
                     value="candidate"
-                /> Candidate
+                />
+                Candidate
             </label>
         </div>
+
+        <p>
+            First select the object with the primary key, then the object identified by it.
+        </p>
+
         <ValueContainer v-if="inputType === 'manual'">
             <ValueRow label="Primary Key object:"> 
                 {{ nodes[0]?.metadata.label }}
             </ValueRow>
-            <ValueRow label="Primary Key identified object:"> 
+            <ValueRow label="Identified object:"> 
                 {{ nodes[1]?.metadata.label }}
             </ValueRow>
             <NodeInput
@@ -162,8 +170,13 @@ function splitName(name: string) {
                 :type="SelectionType.Selected"
             />
         </ValueContainer>
+
         <div v-else>
             <div v-if="props.candidates.pkCandidates.length > 0">
+                <p>
+                    Select from the discovered candidates:
+                </p>
+
                 <button
                     v-for="(candidate, index) in props.candidates.pkCandidates"
                     :key="'pk-' + index"
@@ -187,6 +200,7 @@ function splitName(name: string) {
                 No candidates available
             </p>
         </div>
+
         <div class="button-row">
             <button
                 v-if="inputType === 'manual'"
@@ -211,11 +225,6 @@ function splitName(name: string) {
 </template>
 
 <style scoped>
-.radio-label {
-    margin-right: 20px;
-    cursor: pointer;
-} 
-
 .candidate-button {
     display: flex;
     justify-content: space-between;

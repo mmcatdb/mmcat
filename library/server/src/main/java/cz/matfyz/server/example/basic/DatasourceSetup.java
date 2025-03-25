@@ -4,6 +4,7 @@ import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.example.common.DatasourceSettings;
 import cz.matfyz.server.global.Configuration.SetupProperties;
+import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.service.DatasourceService;
 
 import java.util.ArrayList;
@@ -16,12 +17,14 @@ import org.springframework.stereotype.Component;
 class DatasourceSetup {
 
     private final DatasourceSettings settings;
-    private final DatasourceService datasourceService;
+    private final DatasourceService service;
+    private final DatasourceRepository repository;
 
     @Autowired
-    DatasourceSetup(SetupProperties properties, DatasourceService datasourceService) {
+    DatasourceSetup(SetupProperties properties, DatasourceService service, DatasourceRepository repository) {
         this.settings = new DatasourceSettings(properties, properties.basicDatabase());
-        this.datasourceService = datasourceService;
+        this.service = service;
+        this.repository = repository;
     }
 
     List<DatasourceWrapper> createDatasources() {
@@ -31,7 +34,11 @@ class DatasourceSetup {
         inits.add(settings.createMongoDB("MongoDB - Basic"));
         inits.add(settings.createNeo4j("Neo4j - Basic"));
 
-        return inits.stream().map(datasourceService::create).toList();
+        final List<DatasourceWrapper> existingDatasources = repository.findAll();
+
+        return inits.stream()
+            .filter(init -> existingDatasources.stream().noneMatch(datasource -> datasource.isEqualToInit(init)))
+            .map(service::create).toList();
     }
 
 }

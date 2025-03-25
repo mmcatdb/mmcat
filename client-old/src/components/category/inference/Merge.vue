@@ -58,45 +58,49 @@ function cancel() {
 function cancelEdit() {
     emit('cancel-edit');
 }
-
-/**
- * Sets the current merge type to either 'reference' or 'primaryKey'.
- */
-function setMergeType(type: 'reference' | 'primaryKey') {
-    mergeType.value = type;
-}
-
 </script>
 
 <template>
-    <div class="merge">
-    <h3 class="merge-title">
+    <div>
+        <h3>
             Merge Objects
-            <span class="tooltip-container">
-                <span class="question-mark">?</span>
-                <span class="tooltip-text">
-                Choose how you want to merge objects in the graph: by reference or by primary key.<br>
-                For manual <strong>reference merging</strong>, first select the referencing object, then the referenced object.<br>
-                For manual <strong>primary key merging</strong>, first select the object with the primary key, then the object identified by it.<br>
-                Alternatively, you can select from precomputed merge candidates in both modes.
-                </span>
-            </span> 
         </h3>
-        <div class="merge-type button-row">
-            <button
-                :disabled="mergeType === 'reference'"
-                @click="setMergeType('reference')"
-            >
+
+        <div class="mb-2 d-flex gap-4">
+            <label class="d-flex align-items-center cursor-pointer">
+                <input
+                    v-model="mergeType"
+                    type="radio"
+                    value="reference"
+                />
                 Reference
-            </button>
-            <button
-                :disabled="mergeType === 'primaryKey'"
-                @click="setMergeType('primaryKey')"
-            >
+            </label>
+            <label class="d-flex align-items-center cursor-pointer">
+                <input
+                    v-model="mergeType"
+                    type="radio"
+                    value="primaryKey"
+                />
                 Primary Key
-            </button>
+            </label>
         </div>
-        <Divider />
+
+        <p
+            v-if="mergeType === 'reference'"
+            style="max-width: 300;"
+        >
+            <!-- FIXME -->
+            Objects will be merged by ... (reference)
+        </p>
+        <p
+            v-else-if="mergeType === 'primaryKey'"
+            style="max-width: 300;"
+        >
+            Objects will be merged by ... (primaryKey)
+        </p>
+
+        <Divider class="my-3" />
+        
         <ReferenceMerge
             v-if="mergeType === 'reference'"
             :graph="props.graph"
@@ -115,56 +119,3 @@ function setMergeType(type: 'reference' | 'primaryKey') {
         />
     </div>
 </template>
-
-<style>
-.merge-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.tooltip-container {
-  position: relative;
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-.question-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  font-size: 11px;
-  border-radius: 50%;
-  background-color: #999;
-  color: white;
-  font-weight: bold;
-  cursor: default;
-}
-
-.tooltip-text {
-  visibility: hidden;
-  opacity: 0;
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: 220px;
-  padding: 6px 8px;
-  font-size: 12px;
-  background-color: #333;
-  color: #fff;
-  text-align: left;
-  border-radius: 6px;
-  z-index: 1;
-  pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.tooltip-container:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-</style>
