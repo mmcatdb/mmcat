@@ -125,7 +125,7 @@ function splitName(name: string) {
         <h3>
             Merge Objects
         </h3>
-        <p style="max-width: 300;">
+        <p>
             Define relationships in the schema by identifying objects as <strong>references</strong>.
         </p>
 
