@@ -49,9 +49,9 @@ export type SerializedInferenceEdit = {
     /** The candidate for the edit (if applicable). */
     candidate?: SerializedPrimaryKeyCandidate | SerializedReferenceCandidate;
     /** The reference key (if applicable). */
-    referenceKey?: KeyFromServer;
+    referencingKey?: KeyFromServer;
     /** The referred key (if applicable). */
-    referredKey?: KeyFromServer;
+    referencedKey?: KeyFromServer;
     /** The cluster keys involved (if applicable). */
     clusterKeys?: KeyFromServer[];
     /** The recursion pattern (if applicable). */
@@ -117,8 +117,8 @@ export class PrimaryKeyMergeInferenceEdit {
  */
 export class ReferenceMergeInferenceEdit {
     readonly type: string = 'Reference';
-    readonly referenceKey?: Key;
-    readonly referredKey?: Key;
+    readonly referencingKey?: Key;
+    readonly referencedKey?: Key;
     readonly candidate?: ReferenceCandidate;
     public isActive: boolean;
     public id: number | null;
@@ -126,20 +126,20 @@ export class ReferenceMergeInferenceEdit {
     /**
      * Constructs a `ReferenceMergeInferenceEdit` from either keys or a candidate.
      * @param referenceOrCandidate - The reference key or candidate involved in the edit.
-     * @param referredKeyOrIsActive - The referred key or whether the edit is active.
+     * @param referencedKeyOrIsActive - The referred key or whether the edit is active.
      * @param isActiveOrId - Whether the edit is active or the edit ID.
      * @param id - The ID of the edit.
      */
-    constructor(referenceOrCandidate: Key | ReferenceCandidate, referredKeyOrIsActive: Key | boolean, isActiveOrId?: boolean | number | null, id?: number | null) {
-        if (referenceOrCandidate instanceof Key && referredKeyOrIsActive instanceof Key) {
-            this.referenceKey = referenceOrCandidate;
-            this.referredKey = referredKeyOrIsActive;
+    constructor(referenceOrCandidate: Key | ReferenceCandidate, referencedKeyOrIsActive: Key | boolean, isActiveOrId?: boolean | number | null, id?: number | null) {
+        if (referenceOrCandidate instanceof Key && referencedKeyOrIsActive instanceof Key) {
+            this.referencingKey = referenceOrCandidate;
+            this.referencedKey = referencedKeyOrIsActive;
             this.isActive = isActiveOrId as boolean;
             this.id = id ?? null;
         }
         else if (referenceOrCandidate instanceof ReferenceCandidate) {
             this.candidate = referenceOrCandidate;
-            this.isActive = referredKeyOrIsActive as boolean;
+            this.isActive = referencedKeyOrIsActive as boolean;
             this.id = isActiveOrId as number ?? null;
         }
         else {
@@ -151,10 +151,10 @@ export class ReferenceMergeInferenceEdit {
      * Creates a `ReferenceMergeInferenceEdit` instance from serialized server data.
      */
     static fromServer(data: SerializedInferenceEdit): ReferenceMergeInferenceEdit {
-        if (data.referenceKey != null && data.referredKey != null) {
+        if (data.referencingKey != null && data.referencedKey != null) {
             return new ReferenceMergeInferenceEdit(
-                Key.fromServer(data.referenceKey),
-                Key.fromServer(data.referredKey),
+                Key.fromServer(data.referencingKey),
+                Key.fromServer(data.referencedKey),
                 data.isActive,
                 data.id,
             );

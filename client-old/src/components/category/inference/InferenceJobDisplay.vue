@@ -90,10 +90,10 @@ function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
         edit = new ReferenceMergeInferenceEdit(payload, true);
     }
     else {
-        const referenceKey = payload[0].schemaObjex.key;
-        const referredKey = payload[1].schemaObjex.key;
+        const referencingKey = payload[0].schemaObjex.key;
+        const referencedKey = payload[1].schemaObjex.key;
 
-        edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey, true);
+        edit = new ReferenceMergeInferenceEdit(referencingKey, referencedKey, true);
     }
     confirmOrRevert(edit);
 }

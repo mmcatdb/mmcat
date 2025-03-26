@@ -115,14 +115,14 @@ public class InferenceEditorUtils {
             schema.removeMorphism(morphism);
         }
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
-        editor.deleteObjexs(keysToDelete);
+        editor.deleteObjexes(keysToDelete);
     }
 
     /**
      * Updates the schema category by deleting a specified schema object and adding a new schema object in its place.
      * This method also updates the associated metadata for the new object based on the metadata of the deleted object.
      */
-    public static void updateObjexs(SchemaCategory schema, MetadataCategory metadata, SchemaObject objectToDelete, SchemaObject objectToAdd) {
+    public static void updateObjexes(SchemaCategory schema, MetadataCategory metadata, SchemaObject objectToDelete, SchemaObject objectToAdd) {
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
         editor.deleteObjex(objectToDelete.key());
 
@@ -144,7 +144,7 @@ public class InferenceEditorUtils {
      * Finds Signature for a morphism between specified domain and codomain.
      */
     public static Signature findSignatureBetween(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
+        for (final SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
                 return morphism.signature();
         }
@@ -152,22 +152,7 @@ public class InferenceEditorUtils {
     }
 
     public static String findLabelFromKey(Key key, MetadataCategory metadata) {
-        MetadataObject metadataObject = metadata.getObject(key);
-        return metadataObject.label;
-    }
-
-    /**
-     * Creates a new mapping by merging the specified mappings into a new mapping structure.
-     */
-    public static Mapping createNewMapping(SchemaCategory schema, Mapping mapping, List<Mapping> mappingsToMerge, ComplexProperty accessPath) {
-        final Collection<Signature> primaryKey = new HashSet<>();
-        primaryKey.addAll(mapping.primaryKey());
-
-        for (final Mapping mappingToMerge : mappingsToMerge)
-            if (mappingToMerge.primaryKey() != null)
-                primaryKey.addAll(mappingToMerge.primaryKey());
-
-        return mapping.withSchema(schema, accessPath, primaryKey);
+        return metadata.getObject(key).label;
     }
 
     /**
@@ -181,12 +166,12 @@ public class InferenceEditorUtils {
      * Updates the list of mappings by removing the specified mappings to delete and adding the specified mappings to keep.
      */
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, List<Mapping> mappingsToKeep) {
-        List<Mapping> updatedMappings = new ArrayList<>();
-        for (Mapping mapping : mappings)
+        final List<Mapping> updatedMappings = new ArrayList<>();
+        for (final Mapping mapping : mappings)
             if (!mappingsToDelete.contains(mapping))
                 updatedMappings.add(mapping);
 
-        for (Mapping mapping : mappingsToKeep)
+        for (final Mapping mapping : mappingsToKeep)
             updatedMappings.add(mapping);
 
         return updatedMappings;
@@ -282,7 +267,7 @@ public class InferenceEditorUtils {
         /**
          * Deletes multiple objects from the schema by their keys.
          */
-        public void deleteObjexs(Set<Key> keys) {
+        public void deleteObjexes(Set<Key> keys) {
             for (Key key : keys) {
                 deleteObjex(key);
             }
