@@ -126,8 +126,7 @@ function splitName(name: string) {
             Merge Objects
         </h3>
         <p style="max-width: 300;">
-            <!-- FIXME -->
-            Objects will be merged by ... (reference)
+            Define relationships in the schema by identifying objects as <strong>references</strong>.
         </p>
 
         <Divider class="my-3" />
