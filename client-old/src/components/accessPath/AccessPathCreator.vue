@@ -44,8 +44,6 @@ let processedNodes = new Set<number>();
  */
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
-const kindName = ref<string | undefined>(undefined);
-
 /**
  * Emits custom events to the parent component.
  */
@@ -190,13 +188,6 @@ function undoAccessPath() {
 }
 
 /**
- * Emits the finish event with the primary key and the access path, signaling the end of the mapping process.
- */
-function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath.value, kindName.value);
-}
-
-/**
  * Cancels the current operation, resets the access path, and emits the cancel event.
  */
 function cancel() {
@@ -286,7 +277,7 @@ console.log(nodes.value);
                 v-else
                 :datasource="selectedDatasource"
                 :root-property="accessPath"
-                @finish="createMapping"
+                @finish="(...args) => emit('finish', ...args)"
                 @update:rootProperty="updateRootProperty"
                 @cancel="cancel"
             />
