@@ -137,7 +137,7 @@ function splitName(name: string) {
             Add primary key
         </h3>
         <p style="max-width: 300;">
-            Objects will be merged by ... (primaryKey)
+            Define a relationship between objects by marking an object as a <strong>Primary Key</strong>. This designates it as the unique identifier for the given entity.
         </p>
 
         <Divider class="my-3" />
