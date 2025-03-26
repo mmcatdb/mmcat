@@ -133,6 +133,14 @@ function splitName(name: string) {
             :show="showMessage"
             :message="messageText"
         />
+        <h3>
+            Add primary key
+        </h3>
+        <p style="max-width: 300;">
+            Objects will be merged by ... (primaryKey)
+        </p>
+
+        <Divider class="my-3" />
         <div class="mb-2 d-flex gap-4">
             <label class="d-flex align-items-center cursor-pointer">
                 <input

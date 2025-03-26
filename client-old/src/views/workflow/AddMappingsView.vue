@@ -112,7 +112,7 @@ function createMapping() {
     <ResourceLoader :loading-function="fetchData" />
     <Teleport to="#app-left-bar-content">
         <button
-            class="mt-4 order-2"
+            class="mt-4 order-2 primary"
             :disabled="!mappings?.output.length"
             @click="emit('continue')"
         >

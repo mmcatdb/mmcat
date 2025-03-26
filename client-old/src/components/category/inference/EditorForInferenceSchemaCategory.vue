@@ -11,6 +11,7 @@ import type { Category } from '@/types/schema';
 import Divider from '@/components/layout/Divider.vue';
 import type { Key } from '@/types/identifiers';
 import type { Position } from 'cytoscape';
+import PrimaryKey from './PrimaryKey.vue';
 
 /**
  * Props passed to the component.
@@ -31,8 +32,8 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', payload: Node[] | ReferenceCandidate): void;
-    (e: 'confirm-primary-key-merge', nodes: Node[] | PrimaryKeyCandidate): void;
+    (e: 'confirm-merge', payload: Node[] | ReferenceCandidate): void;
+    (e: 'confirm-primary-key', nodes: Node[] | PrimaryKeyCandidate): void;
     (e: 'confirm-cluster', nodes: Node[]): void;
     (e: 'confirm-recursion', payload: { nodes: Node[], edges: Edge[] }): void;
     (e: 'revert-edit', edit: InferenceEdit): void;
@@ -45,6 +46,7 @@ const emit = defineEmits<{
 enum State {
     Default,
     Merge,
+    PrimaryKey,
     Cluster,
     Recursion,
     Edits,
@@ -61,6 +63,7 @@ type GenericStateValue<State, Value> = { type: State } & Value;
 type StateValue = 
     GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.Merge, unknown> |
+    GenericStateValue<State.PrimaryKey, unknown> |
     GenericStateValue<State.Cluster, unknown> |
     GenericStateValue<State.Recursion, unknown> |
     GenericStateValue<State.Edits, unknown>;
@@ -71,34 +74,6 @@ type StateValue =
 const state = shallowRef<StateValue>({ type: State.Default });
 
 /**
- * Sets the state to 'Edits' when the user clicks the edits button.
- */
-function editsClicked() {
-    state.value = { type: State.Edits };
-}
-
-/**
- * Sets the state to 'Merge' when the user clicks the merge button.
- */
-function mergeClicked() {
-    state.value = { type: State.Merge };
-}
-
-/**
- * Sets the state to 'Cluster' when the user clicks the cluster button.
- */
-function clusterClicked() {
-    state.value = { type: State.Cluster };
-}
-
-/**
- * Sets the state to 'Recursion' when the user clicks the recursion button.
- */
-function recursionClicked() {
-    state.value = { type: State.Recursion };
-}
-
-/**
  * Resets the state to 'Default'.
  */
 function setStateToDefault() {
@@ -106,17 +81,17 @@ function setStateToDefault() {
 }
 
 /**
- * Emits the 'confirm-reference-merge' event when a reference merge is confirmed.
+ * Emits the 'confirm-merge' event when a reference merge is confirmed.
  */
 function confirmReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
-    emit('confirm-reference-merge', payload);
+    emit('confirm-merge', payload);
 }
 
 /**
- * Emits the 'confirm-primary-key-merge' event when a primary key merge is confirmed.
+ * Emits the 'confirm-primary-key' event when a primary key merge is confirmed.
  */
 function confirmPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
-    emit('confirm-primary-key-merge', payload);
+    emit('confirm-primary-key', payload);
 }
 
 /**
@@ -167,55 +142,61 @@ onMounted(() => {
                 Actions
             </h3>
         
-            <button @click="mergeClicked">
+            <button @click="state = { type: State.Merge }">
                 Merge
             </button>
-            <button @click="clusterClicked">
+            <button @click="state = { type: State.PrimaryKey }">
+                Primary key
+            </button>
+            <button @click="state = { type: State.Cluster }">
                 Cluster
             </button>
-            <button @click="recursionClicked">
+            <button @click="state = { type: State.Recursion }">
                 Recursion
             </button>
            
             <Divider />
             
-            <button @click="editsClicked">
+            <button @click="state = { type: State.Edits }">
                 Edits
             </button>
         </div>
-        <template v-else-if="state.type === State.Merge">
-            <Merge
-                :graph="props.graph"
-                :candidates="props.candidates"
-                @confirm-reference-merge="confirmReferenceMergeEdit"
-                @confirm-primary-key-merge="confirmPrimaryKeyMergeEdit"
-                @cancel="setStateToDefault"
-                @cancel-edit="cancelEdit"
-            />
-        </template>
-        <template v-else-if="state.type === State.Cluster">
-            <Cluster
-                :graph="props.graph"
-                @confirm="confirmClusterEdit"
-                @cancel="setStateToDefault"
-                @cancel-edit="cancelEdit"
-            />
-        </template>
-        <template v-else-if="state.type === State.Recursion">
-            <Recursion
-                :graph="props.graph"
-                @confirm="confirmRecursionEdit"
-                @cancel="setStateToDefault"
-                @cancel-edit="cancelEdit"
-            />
-        </template>
-        <template v-else-if="state.type === State.Edits">
-            <InferenceEdits
-                :inference-edits="props.inferenceEdits"
-                @cancel="setStateToDefault"
-                @revert-edit="revertEdit"
-            />
-        </template>
+        <Merge
+            v-else-if="state.type === State.Merge"
+            :graph="props.graph"
+            :candidates="props.candidates"
+            @confirm-merge="confirmReferenceMergeEdit"
+            @cancel="setStateToDefault"
+            @cancel-edit="cancelEdit"
+        />
+        <PrimaryKey
+            v-else-if="state.type === State.PrimaryKey"
+            :graph="props.graph"
+            :candidates="props.candidates"
+            @confirm="confirmPrimaryKeyMergeEdit"
+            @cancel="setStateToDefault"
+            @cancel-edit="cancelEdit"
+        />
+        <Cluster
+            v-else-if="state.type === State.Cluster"
+            :graph="props.graph"
+            @confirm="confirmClusterEdit"
+            @cancel="setStateToDefault"
+            @cancel-edit="cancelEdit"
+        />
+        <Recursion
+            v-else-if="state.type === State.Recursion"
+            :graph="props.graph"
+            @confirm="confirmRecursionEdit"
+            @cancel="setStateToDefault"
+            @cancel-edit="cancelEdit"
+        />
+        <InferenceEdits
+            v-else-if="state.type === State.Edits"
+            :inference-edits="props.inferenceEdits"
+            @cancel="setStateToDefault"
+            @revert-edit="revertEdit"
+        />
     </div>
 </template>
 

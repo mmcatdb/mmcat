@@ -83,7 +83,7 @@ function changeLayout(newLayoutType: LayoutType) {
  * Creates a reference merge edit from the provided payload.
  * Emits the 'update-edit' event with the new edit.
  */
-function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
+function createMergeEdit(payload: Node[] | ReferenceCandidate) {
     let edit;
 
     if (payload instanceof ReferenceCandidate) {
@@ -102,7 +102,7 @@ function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
  * Creates a primary key merge edit from the provided payload.
  * Emits the 'update-edit' event with the new edit.
  */
-function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
+function createPrimaryKeyEdit(payload: Node[] | PrimaryKeyCandidate) {
     let edit;
 
     if (payload instanceof PrimaryKeyCandidate) {
@@ -220,8 +220,8 @@ function savePositions() {
                     :schema-category="props.schemaCategory" 
                     :inference-edits="props.inferenceEdits"
                     :candidates="props.candidates"
-                    @confirm-reference-merge="createReferenceMergeEdit"    
-                    @confirm-primary-key-merge="createPrimaryKeyMergeEdit"
+                    @confirm-merge="createMergeEdit"    
+                    @confirm-primary-key="createPrimaryKeyEdit"
                     @confirm-cluster="createClusterEdit"
                     @confirm-recursion="createRecursionEdit"
                     @cancel-edit="cancelEdit"   

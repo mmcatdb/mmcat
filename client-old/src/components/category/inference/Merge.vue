@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Graph, Node } from '@/types/categoryGraph';
+import { ref, shallowRef, computed } from 'vue';
+import { type Graph, SelectionType, type Node } from '@/types/categoryGraph';
+import type { Candidates, ReferenceCandidate } from '@/types/inference/candidates';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
+import NodeInput from '@/components/input/NodeInput.vue';
 import Divider from '@/components/layout/Divider.vue';
-import type { Candidates, ReferenceCandidate,  PrimaryKeyCandidate } from '@/types/inference/candidates';
-import ReferenceMerge from '@/components/category/inference/ReferenceMerge.vue';
-import PrimaryKeyMerge from '@/components/category/inference/PrimaryKeyMerge.vue';
+
+// FIXME At some places we use "merge" while on others it's "reference". We should unify this.
 
 /**
  * Props passed to the component.
  */
 const props = defineProps<{
-    /** The graph object used for merging operations. */
+    /** The graph object used for selecting nodes. */
     graph: Graph;
-    /** Candidates for merging, either by reference or primary key. */
+    /** The candidates available for reference merging. */
     candidates: Candidates;
 }>();
 
@@ -20,102 +23,268 @@ const props = defineProps<{
  * Emits custom events to the parent component.
  */
 const emit = defineEmits<{
+    (e: 'confirm', payload: Node[] | ReferenceCandidate): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', payload: Node[] | ReferenceCandidate): void;
-    (e: 'confirm-primary-key-merge', nodes: Node[] | PrimaryKeyCandidate): void;
 }>();
 
 /**
- * Tracks the current merge type (either 'reference' or 'primaryKey').
+ * Reactive reference for tracking whether the user is inputting nodes manually or selecting a candidate.
  */
-const mergeType = ref<'reference' | 'primaryKey'>('reference');
+const inputType = ref<'manual' | 'candidate'>('manual');
 
 /**
- * Confirms the reference merge and emits the 'confirm-reference-merge' event.
+ * Reactive reference for storing selected nodes.
  */
-function confirmReference(payload: Node[] | ReferenceCandidate ) {
-    emit('confirm-reference-merge', payload);
+const nodes = shallowRef<(Node)[]>([]);
+
+/**
+ * Reactive reference for tracking whether the confirm button has been clicked.
+ */
+const confirmClicked = ref(false);
+
+/**
+ * Reactive reference for tracking clicked reference candidates.
+ */
+const clickedCandidates = ref<ReferenceCandidate[]>([]);
+
+/**
+ * Reactive reference for tracking the index of the clicked candidate.
+ */
+const clickedIndex = ref<number | undefined>(undefined);
+
+/**
+ * Computed property to check if two nodes have been selected.
+ */
+const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
+
+/**
+ * Computed property to check if no nodes are selected.
+ */
+const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
+
+/**
+ * Confirms the selected reference candidate and emits the 'confirm' event.
+ */
+function confirmCandidate(candidate: ReferenceCandidate, index: number) {
+    if (!clickedCandidates.value.includes(candidate)) 
+        clickedCandidates.value.push(candidate);
+
+    confirmClicked.value = true;
+    clickedIndex.value = index;
+    emit('confirm', candidate);
 }
 
 /**
- * Confirms the primary key merge and emits the 'confirm-primary-key-merge' event.
+ * Confirms the selected nodes and emits the 'confirm' event.
  */
-function confirmPrimaryKey(payload: Node[] | PrimaryKeyCandidate) {
-    emit('confirm-primary-key-merge', payload);
+function confirmNodes() {
+    confirmClicked.value = true;
+    emit('confirm', nodes.value as Node[]);
 }
 
 /**
- * Cancels the current operation by emitting the 'cancel' event.
+ * Cancels the current operation and goes back to the editor without making changes.
+ * Emits the 'cancel' event.
  */
-function cancel() {
+function save() {
     emit('cancel');
 }
 
 /**
- * Cancels the current edit by emitting the 'cancel-edit' event.
+ * Cancels the current selection or edit.
+ * If no nodes are selected and the confirm button has not been clicked, it goes back to the editor.
+ * Otherwise, it unselects nodes and resets the edit state, emitting the 'cancel-edit' event.
  */
-function cancelEdit() {
-    emit('cancel-edit');
+function cancel() {
+    if (noNodesSelected.value && !confirmClicked.value) { // go back to editor
+        emit('cancel');
+    }
+    
+    nodes.value = [];  // Unselect selected nodes.
+
+    if (confirmClicked.value) {
+        emit('cancel-edit');
+        confirmClicked.value = false;
+        clickedIndex.value = undefined;  // Optionally reset clicked index.
+    }
 }
+
+/**
+ * Splits the hierarchical name of a candidate into two parts.
+ */
+function splitName(name: string) {
+    const [ partA, partB ] = name.split('/');
+    return { partA, partB };
+}
+
 </script>
 
 <template>
-    <div>
+    <div class="referenceMerge">
         <h3>
             Merge Objects
         </h3>
-
-        <div class="mb-2 d-flex gap-4">
-            <label class="d-flex align-items-center cursor-pointer">
-                <input
-                    v-model="mergeType"
-                    type="radio"
-                    value="reference"
-                />
-                Reference
-            </label>
-            <label class="d-flex align-items-center cursor-pointer">
-                <input
-                    v-model="mergeType"
-                    type="radio"
-                    value="primaryKey"
-                />
-                Primary Key
-            </label>
-        </div>
-
-        <p
-            v-if="mergeType === 'reference'"
-            style="max-width: 300;"
-        >
+        <p style="max-width: 300;">
             <!-- FIXME -->
             Objects will be merged by ... (reference)
-        </p>
-        <p
-            v-else-if="mergeType === 'primaryKey'"
-            style="max-width: 300;"
-        >
-            Objects will be merged by ... (primaryKey)
         </p>
 
         <Divider class="my-3" />
         
-        <ReferenceMerge
-            v-if="mergeType === 'reference'"
-            :graph="props.graph"
-            :candidates="props.candidates"
-            @confirm="confirmReference"
-            @cancel="cancel"
-            @cancel-edit="cancelEdit"
-        />
-        <PrimaryKeyMerge
-            v-else-if="mergeType === 'primaryKey'"
-            :graph="props.graph"
-            :candidates="props.candidates"
-            @confirm="confirmPrimaryKey"
-            @cancel="cancel"
-            @cancel-edit="cancelEdit"
-        />
+        <div class="mb-2 d-flex gap-4">
+            <label class="d-flex align-items-center cursor-pointer">
+                <input
+                    v-model="inputType"
+                    type="radio"
+                    value="manual"
+                />
+                Manual
+            </label>
+            <label class="d-flex align-items-center cursor-pointer">
+                <input
+                    v-model="inputType"
+                    type="radio"
+                    value="candidate"
+                />
+                Candidate
+            </label>
+        </div>
+
+        <p>
+            First select the referencing object, then the referenced object.
+        </p>
+
+        <ValueContainer v-if="inputType === 'manual'">
+            <ValueRow label="Referencing object:"> 
+                {{ nodes[0]?.metadata.label }}
+            </ValueRow>
+            <ValueRow label="Referenced object:"> 
+                {{ nodes[1]?.metadata.label }}
+            </ValueRow>
+            <NodeInput
+                v-model="nodes"
+                :graph="props.graph"
+                :count="2"
+                :type="SelectionType.Selected"
+            />
+        </ValueContainer>
+
+        <div v-else>
+            <div v-if="props.candidates.refCandidates.length > 0">
+                <p>
+                    Select from the discovered candidates:
+                </p>
+
+                <button
+                    v-for="(candidate, index) in props.candidates.refCandidates"
+                    :key="'ref-' + index"
+                    class="candidate-button"
+                    :disabled="clickedIndex !== undefined && clickedIndex !== index"
+                    :class="{ 'clicked': clickedCandidates.includes(candidate) }"
+                    @click="confirmCandidate(candidate, index)"
+                >
+                    <div class="candidate-content">
+                        <div class="candidate-side">
+                            <div>{{ splitName(candidate.referencing).partA }}</div>
+                            <div>{{ splitName(candidate.referencing).partB }}</div>
+                        </div>
+                        <div class="candidate-middle">
+                            REF
+                        </div>
+                        <div class="candidate-side">
+                            <div>{{ splitName(candidate.referred).partA }}</div>
+                            <div>{{ splitName(candidate.referred).partB }}</div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            <p v-else>
+                No candidates available
+            </p>
+        </div>
+        
+        <div class="button-row">
+            <button
+                v-if="inputType === 'manual'"
+                :disabled="!nodesSelected || confirmClicked"
+                @click="confirmNodes"
+            >
+                Confirm
+            </button>
+            <button
+                :disabled="!confirmClicked"
+                @click="save"
+            >
+                Save
+            </button>
+            <button
+                @click="cancel"
+            >
+                Cancel
+            </button>
+        </div>
     </div>
 </template>
+
+<style scoped>
+
+.candidate-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: left;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.candidate-button.clicked {
+    background-color: #d3e2ff;
+    border-color: #007bff;
+}
+
+.candidate-button:hover:not(.clicked) {
+    background-color: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .candidate-button {
+        background-color: #2a2a2a; /* Dark background */
+        border-color: #444; /* Dark border */
+        color: #f5f5f5; /* Light text color for readability */
+    }
+
+    .candidate-button.clicked {
+        background-color: #3b5998; /* Slightly highlighted dark color */
+        border-color: #2d4373;
+    }
+
+    .candidate-button:hover:not(.clicked) {
+        background-color: #444; /* Hover color for dark mode */
+    }
+}
+
+.candidate-content {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.candidate-side {
+    display: flex;
+    flex-direction: column;
+    margin-right: 10px;
+    text-align: center;
+}
+
+.candidate-middle {
+    font-weight: bold;
+    margin: 0 10px;
+}
+</style>
