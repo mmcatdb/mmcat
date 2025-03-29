@@ -1,15 +1,15 @@
 package cz.matfyz.tests.benchmark;
 
-import cz.matfyz.core.querying.Computation.Operator;
-import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.ExpressionScope;
-import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.core.querytree.JoinNode.SerializedJoinNode;
+import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.tests.example.benchmarkyelp.Datasources;
-import cz.matfyz.tests.example.benchmarkyelp.MongoDB;
-import cz.matfyz.wrappermongodb.MongoDBPullWrapper;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +29,33 @@ class BenchmarkTests {
     @BeforeAll
     static void setup() {
         // datasources.mongoDB().setup();
+        setupMongoDB();
+    }
+
+    static void setupMongoDB() {
+        // I just need to run it in bash rather than mongosh
+        Path path = null;
+        try {
+            final var url = ClassLoader.getSystemResource("setupBenchmarkYelp.sh");
+            path = Paths.get(url.toURI()).toAbsolutePath();
+
+            Runtime runtime = Runtime.getRuntime();
+            Process process = runtime.exec(new String[] { path.toString() });
+            process.waitFor();
+
+            BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
+        }
+        catch (URISyntaxException e) {
+            LOGGER.error("Datasource setup error: ", e);
+            throw new RuntimeException(e);
+        }
+        catch (InterruptedException e) {
+            throw new ExecuteException(e, path);
+        }
+        catch (IOException e) {
+            throw new ExecuteException(e, path);
+        }
     }
 
     @Test

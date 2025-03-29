@@ -70,11 +70,6 @@ public abstract class Schema {
     public static final BuilderMorphism reviewToFunny =     builder.morphism(review, reviewFunny);
     public static final BuilderMorphism reviewToCool =      builder.morphism(review, reviewCool);
 
-    /** TODO: maybe create helper script for installation (ask Alzbeta), perhaps one that installs (downloads) docker into data/ directory (its in gitignore) and installs it into Mongo
-     * then mention the script somewhere, maybe in library/querying/README??
-     */
-    /** TODO: modify entrypoint.sh to see which databases are created ... maybe? */
-
     // Ids
 
     static {

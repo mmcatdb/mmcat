@@ -24,7 +24,7 @@ public class Datasources {
     }
 
     public TestDatasource<MongoDBControlWrapper> createNewMongoDB() {
-        return datasourceProvider.createMongoDB(MongoDB.datasource.identifier, schema, "checkExistence.js");
+        return datasourceProvider.createMongoDB(MongoDB.datasource.identifier, schema, null);
     }
 
 }
