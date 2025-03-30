@@ -9,9 +9,9 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 
 import java.util.ArrayDeque;
@@ -94,8 +94,8 @@ public class DMLAlgorithm {
         for (final AccessPath subpath : path.subpaths()) {
             if (subpath instanceof ComplexProperty complexSubpath && complexSubpath.isAuxiliary()) {
                 // Auxiliary properties can't have dynamic names.
-                final var staticName = (StaticName) complexSubpath.name();
-                final String newPrefix = DMLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                final var stringName = (StringName) complexSubpath.name();
+                final String newPrefix = DMLAlgorithm.concatenatePaths(prefix, stringName.value);
                 output.addAll(collectNameValuePairs(complexSubpath, row, newPrefix));
                 continue;
             }
@@ -115,11 +115,11 @@ public class DMLAlgorithm {
             }
 
             // Now we know it's a normal property with a static name. It might be an array tho.
-            final var staticName = (StaticName) subpath.name();
+            final var stringName = (StringName) subpath.name();
 
             int index = 0;
             for (final DomainRow objectRow : row.traverseThrough(schemaPath)) {
-                final var suffix = staticName.getStringName() + (schemaPath.isArray() ? "[" + index + "]" : "");
+                final var suffix = stringName.value + (schemaPath.isArray() ? "[" + index + "]" : "");
                 final String name = DMLAlgorithm.concatenatePaths(prefix, suffix);
                 output.add(createNameValuePair(subpath, objectRow, name));
                 index++;
@@ -127,7 +127,7 @@ public class DMLAlgorithm {
 
             // If it's an array but there aren't any items in it, we return a simple pair with 'null' value.
             if (schemaPath.isArray() && index == 0) {
-                final String name = DMLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                final String name = DMLAlgorithm.concatenatePaths(prefix, stringName.value);
                 output.add(new NameValuePair(name, null));
             }
 

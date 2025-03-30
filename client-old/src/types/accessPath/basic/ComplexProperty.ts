@@ -26,7 +26,7 @@ export class ComplexProperty {
     toString(level = 0): string {
         const builder = new IndentedStringBuilder(level);
 
-        builder.appendIntendedLine(this.name + ': ');
+        builder.appendIndentedLine(this.name + ': ');
         if (!this.isAuxiliary)
             builder.append(this.signature + ' ');
         builder.append('{\n');
@@ -34,7 +34,7 @@ export class ComplexProperty {
         const subpathsAsString = this.subpaths.map(path => path.toString(level + 1)).join(',\n');
         builder.append(subpathsAsString);
 
-        builder.appendIntendedLine('}');
+        builder.appendIndentedLine('}');
 
         return builder.toString();
     }

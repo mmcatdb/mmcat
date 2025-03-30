@@ -66,7 +66,7 @@ function selectGenerated() {
 
 <template>
     <template v-if="state === State.SelectType">
-        <h2>{{ node.schemaObject.ids ? 'Add Id' : 'Create Id' }}</h2>
+        <h2>{{ node.schemaObjex.ids ? 'Add Id' : 'Create Id' }}</h2>
         <div class="button-row">
             <button @click="selectSimple">
                 Simple
@@ -74,7 +74,7 @@ function selectGenerated() {
             <button @click="selectComplex">
                 Complex
             </button>
-            <template v-if="!node.schemaObject.ids">
+            <template v-if="!node.schemaObjex.ids">
                 <button @click="selectValue">
                     Value
                 </button>

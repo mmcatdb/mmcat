@@ -35,31 +35,31 @@ onUnmounted(() => {
 function save() {
     evocat.compositeOperation('addSet', () => {
         const [ node1, node2 ] = nodes.value;
-        if (!node1 || !node2 || !node1.schemaObject.ids || !node2.schemaObject.ids)
+        if (!node1 || !node2 || !node1.schemaObjex.ids || !node2.schemaObjex.ids)
             return;
 
-        const setObject = evocat.createObject({
+        const setObject = evocat.createObjex({
             label: setLabel.value,
         });
 
         const setToNode1 = evocat.createMorphism({
             domKey: setObject.key,
-            codKey: node1.schemaObject.key,
+            codKey: node1.schemaObjex.key,
             min: Cardinality.One,
             label: '#role',
         });
 
         const setToNode2 = evocat.createMorphism({
             domKey: setObject.key,
-            codKey: node2.schemaObject.key,
+            codKey: node2.schemaObjex.key,
             min: Cardinality.One,
             label: '#role',
         });
 
-        evocat.updateObject(setObject, {
+        evocat.updateObjex(setObject, {
             ids: ObjectIds.createCrossProduct([
-                { signature: setToNode1.signature, ids: node1.schemaObject.ids },
-                { signature: setToNode2.signature, ids: node2.schemaObject.ids },
+                { signature: setToNode1.signature, ids: node1.schemaObjex.ids },
+                { signature: setToNode2.signature, ids: node2.schemaObjex.ids },
             ]),
         });
     });

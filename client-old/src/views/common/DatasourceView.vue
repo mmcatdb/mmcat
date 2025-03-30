@@ -8,7 +8,7 @@ import { computed, shallowRef } from 'vue';
 import { useRoute } from 'vue-router';
 import { useFixedRouter } from '@/router/specificRoutes';
 import { Mapping } from '@/types/mapping';
-import { tryUseSchemaCategoryId } from '@/utils/injects';
+import { tryUseSchemaCategoryId, tryUseWorkflow } from '@/utils/injects';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 
 const route = useRoute();
@@ -73,6 +73,17 @@ function createMapping() {
 }
 
 const isForFile = computed(() => datasource.value?.type && isFile(datasource.value.type));
+
+const workflow = tryUseWorkflow()?.value;
+
+function isMappingsVisible() {
+    if (isEditing.value)
+        return false;
+    if (!workflow)
+        return true;
+    
+    return [ 'addMappings', 'finish' ].includes(workflow.data.step);
+}   
 </script>
 
 <template>
@@ -102,10 +113,12 @@ const isForFile = computed(() => datasource.value?.type && isFile(datasource.val
                 <DatasourceDisplay
                     v-else
                     :datasource="datasource"
+                    :scondary-button="'Back'"
                     @edit="isEditing = true"
+                    @on-secondary-click="router.push({ name: 'datasources' })"
                 />
             </div>
-            <template v-if="mappings">
+            <template v-if="mappings && isMappingsVisible()">
                 <h2 class="mt-3">
                     {{ isForFile ? 'Mapping' : 'Mappings' }}
                 </h2>
@@ -115,12 +128,6 @@ const isForFile = computed(() => datasource.value?.type && isFile(datasource.val
                         @click="createMapping"
                     >
                         Create new
-                    </button>
-                    <button
-                        v-if="!isEditing"
-                        @click="router.push({ name: 'datasources' })"
-                    >
-                        Back
                     </button>
                 </div>
                 <div class="mt-3 d-flex flex-wrap gap-3">

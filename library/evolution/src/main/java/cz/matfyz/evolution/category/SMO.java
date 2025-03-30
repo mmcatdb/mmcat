@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = CreateObject.class, name = "createObject"),
-    @JsonSubTypes.Type(value = DeleteObject.class, name = "deleteObject"),
-    @JsonSubTypes.Type(value = UpdateObject.class, name = "updateObject"),
+    @JsonSubTypes.Type(value = CreateObjex.class, name = "createObjex"),
+    @JsonSubTypes.Type(value = DeleteObjex.class, name = "deleteObjex"),
+    @JsonSubTypes.Type(value = UpdateObjex.class, name = "updateObjex"),
     @JsonSubTypes.Type(value = CreateMorphism.class, name = "createMorphism"),
     @JsonSubTypes.Type(value = DeleteMorphism.class, name = "deleteMorphism"),
     @JsonSubTypes.Type(value = UpdateMorphism.class, name = "updateMorphism"),

@@ -1,87 +1,100 @@
 import { Signature, type SignatureFromServer } from './Signature';
 
-export type NameFromServer = StaticNameFromServer | DynamicNameFromServer;
+export type NameFromServer = StringNameFromServer | TypedNameFromServer | DynamicNameFromServer;
 
 export function nameFromServer(input: NameFromServer): Name {
-    return 'signature' in input
-        ? DynamicName.fromServer(input)
-        : StaticName.fromServer(input);
+    if ('value' in input)
+        return StringName.fromServer(input);
+    if (!('signature' in input))
+        return TypedName.fromServer(input);
+    return DynamicName.fromServer(input);
 }
 
-export type Name = StaticName | DynamicName;
+export type Name = StringName | TypedName;
 
-enum StaticNameType {
-    Static = 'STATIC',
-    Anonymous = 'ANONYMOUS',
-}
-
-export type StaticNameFromServer = {
+type StringNameFromServer = {
     value: string;
-    type: StaticNameType;
 };
 
-export class StaticName {
-    private constructor(
+export class StringName {
+    constructor(
         readonly value: string,
-        readonly isAnonymous: boolean,
     ) {}
 
-    private static anonymousInstance = new StaticName('', true);
-
-    static anonymous(): StaticName {
-        return this.anonymousInstance;
+    static fromServer(input: StringNameFromServer): StringName {
+        return new StringName(input.value);
     }
 
-    static fromString(value: string): StaticName {
-        return new StaticName(value, false);
-    }
-
-    static fromServer(input: StaticNameFromServer): StaticName {
-        if (input.type === StaticNameType.Anonymous)
-            return StaticName.anonymous();
-
-        return new StaticName(input.value, false);
-    }
-
-    toServer(): StaticNameFromServer {
+    toServer(): StringNameFromServer {
         return {
             value: this.value,
-            type: this.isAnonymous ? StaticNameType.Anonymous : StaticNameType.Static,
         };
     }
 
     equals(other: Name | undefined): boolean {
-        return other instanceof StaticName
-            && other.isAnonymous === this.isAnonymous
-            && other.value === this.value;
+        return other instanceof StringName && other.value === this.value;
     }
 
     toString(): string {
-        return this.isAnonymous ? '_' : this.value;
+        return this.value;
     }
-
 }
 
-export type DynamicNameFromServer = {
-    signature: SignatureFromServer;
+type TypedNameFromServer = {
+    type: string;
 };
 
-export class DynamicName {
-    private constructor(
-        readonly signature: Signature,
+export class TypedName {
+    constructor(
+        readonly type: string,
     ) {}
 
-    static fromSignature(signature: Signature) {
-        return new DynamicName(signature);
+    static fromServer(input: TypedNameFromServer): TypedName {
+        return new TypedName(input.type);
+    }
+
+    toServer(): TypedNameFromServer {
+        return {
+            type: this.type,
+        };
+    }
+
+    equals(other: Name): boolean {
+        return other instanceof TypedName && this.type === other.type && !(other instanceof DynamicName);
+    }
+
+    toString(): string {
+        return `<${this.type}>`;
+    }
+}
+
+type DynamicNameFromServer = TypedNameFromServer & {
+    signature: SignatureFromServer;
+    pattern?: string;
+};
+
+export class DynamicName extends TypedName {
+    constructor(
+        type: string,
+        readonly signature: Signature,
+        readonly pattern?: string,
+    ) {
+        super(type);
     }
 
     static fromServer(input: DynamicNameFromServer): DynamicName {
-        return new DynamicName(Signature.fromServer(input.signature));
+        return new DynamicName(
+            input.type,
+            Signature.fromServer(input.signature),
+            input.pattern,
+        );
     }
 
     toServer(): DynamicNameFromServer {
         return {
+            type: this.type,
             signature: this.signature.toServer(),
+            pattern: this.pattern,
         };
     }
 
@@ -90,7 +103,8 @@ export class DynamicName {
     }
 
     toString(): string {
-        return `<${this.signature.toString()}>`;
+        const patternString = this.pattern == null ? '' : ` (${this.pattern})`;
+        return `<${this.type}${patternString}: ${this.signature.toString()}>`;
     }
 
 }

@@ -1,14 +1,14 @@
 import { print, type Printable, type Printer } from '@/types/utils/string';
-import { Signature, StaticName, type StaticNameFromServer } from '@/types/identifiers';
+import { type Name, nameFromServer, type NameFromServer, Signature } from '@/types/identifiers';
 import { subpathFromFromServer, type ChildProperty, type ComplexPropertyFromServer } from './ComplexProperty';
 
 // TODO Candice be unified with the ComplexProperty?
 
-export type RootPropertyFromServer = ComplexPropertyFromServer & { name: StaticNameFromServer };
+export type RootPropertyFromServer = ComplexPropertyFromServer & { name: NameFromServer };
 
 export class RootProperty implements Printable {
     private constructor(
-        readonly name: StaticName,
+        readonly name: Name,
         readonly subpaths: ChildProperty[],
     ) {}
 
@@ -18,7 +18,7 @@ export class RootProperty implements Printable {
     static fromServer(input: RootPropertyFromServer): RootProperty {
         const subpaths: ChildProperty[] = [];
         const property = new RootProperty(
-            StaticName.fromServer(input.name),
+            nameFromServer(input.name),
             subpaths,
         );
 

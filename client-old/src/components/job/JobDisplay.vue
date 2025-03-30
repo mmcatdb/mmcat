@@ -175,16 +175,14 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                     @change-layout="(newLayoutType) => updateJobResult(null, null, newLayoutType, null)"
                     @save-positions="(map) => updateJobResult(null, false, null, map)"
                 >
-                    <template #below-editor>
-                        <div class="d-flex justify-content-center mt-2">
-                            <button 
-                                :disabled="fetching"
-                                class="primary"
-                                @click="() => updateJobResult(null, true, null, null)"
-                            >
-                                Save and Finish
-                            </button>
-                        </div>
+                    <template #button-row>
+                        <button 
+                            :disabled="fetching"
+                            class="primary"
+                            @click="() => updateJobResult(null, true, null, null)"
+                        >
+                            Save and Finish
+                        </button>
                     </template>
                 </InferenceJobDisplay>
             </template>

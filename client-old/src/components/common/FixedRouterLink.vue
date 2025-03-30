@@ -3,7 +3,6 @@ import { fixRouterName, type ViewType } from '@/router/specificRoutes';
 import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router';
 
 function compareRoutes(to: RouteLocationRaw, route: RouteLocationNormalizedLoaded): boolean {
-    console.log('compare', to, route);
     if (typeof to === 'string')
         return to === route.fullPath;
     else if ('path' in to)

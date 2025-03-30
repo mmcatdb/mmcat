@@ -2,7 +2,6 @@ export type Printable = {
     printTo(printer: Printer): void;
 }
 
-
 export type Printer = {
     down(): Printer;
     up(): Printer;

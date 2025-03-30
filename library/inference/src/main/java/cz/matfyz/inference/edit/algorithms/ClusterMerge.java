@@ -5,10 +5,11 @@ import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -455,14 +456,14 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         if (original instanceof SimpleProperty) {
             Signature dynamicNameSignature = this.newClusterSignature.concatenate(this.newTypeSignature);
             Signature valueSignature = this.newClusterSignature.concatenate(this.newValueSignature);
-            return new SimpleProperty(new DynamicName(dynamicNameSignature, newClusterName + "*"), valueSignature);
+            return new SimpleProperty(new DynamicName(TypedName.KEY, dynamicNameSignature, newClusterName + "*"), valueSignature);
         }
 
         final var newSubpaths = transformSubpaths(((ComplexProperty) original).subpaths());
 
         if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
             return new ComplexProperty(
-                new DynamicName(newClusterSignature, newClusterName + "*"),
+                new DynamicName(TypedName.KEY, newClusterSignature, newClusterName + "*"),
                 newClusterSignature,
                 newSubpaths
             );

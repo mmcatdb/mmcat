@@ -62,8 +62,8 @@ function save() {
 
     const old = props.edge.schemaMorphism;
     const update = {
-        dom: node1.schemaObject,
-        cod: node2.schemaObject,
+        dom: node1.schemaObjex,
+        cod: node2.schemaObjex,
         min: min.value,
         label: label.value.trim(),
         tags: old.tags,

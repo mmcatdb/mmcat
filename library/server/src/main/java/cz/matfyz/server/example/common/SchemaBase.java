@@ -15,10 +15,10 @@ import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
 import cz.matfyz.evolution.category.Composite;
 import cz.matfyz.evolution.category.CreateMorphism;
-import cz.matfyz.evolution.category.CreateObject;
+import cz.matfyz.evolution.category.CreateObjex;
 import cz.matfyz.evolution.category.SMO;
 import cz.matfyz.evolution.category.UpdateMorphism;
-import cz.matfyz.evolution.category.UpdateObject;
+import cz.matfyz.evolution.category.UpdateObjex;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MorphismMetadata;
 import cz.matfyz.evolution.metadata.ObjectMetadata;
@@ -95,7 +95,7 @@ public abstract class SchemaBase {
 
         final var schema = new SerializedObject(key, ids, superId);
         final var metadata = new SerializedMetadataObject(key, builderObject.label(), createPosition(x, y));
-        addSchemaOperation(new CreateObject(schema, metadata));
+        addSchemaOperation(new CreateObjex(schema, metadata));
         addMetadataOperation(new ObjectMetadata(metadata, null));
     }
 
@@ -109,7 +109,7 @@ public abstract class SchemaBase {
         final var newObject = new SerializedObject(key, object.ids(), object.superId());
         final var oldObject = getOldObject(key);
 
-        addSchemaOperation(new UpdateObject(newObject, oldObject));
+        addSchemaOperation(new UpdateObjex(newObject, oldObject));
     }
 
     protected void editIds(BuilderObject builderObject, ObjectIds ids) {
@@ -117,7 +117,7 @@ public abstract class SchemaBase {
         final var newObject = new SerializedObject(key, ids, ids.generateDefaultSuperId());
         final var oldObject = getOldObject(key);
 
-        addSchemaOperation(new UpdateObject(newObject, oldObject));
+        addSchemaOperation(new UpdateObjex(newObject, oldObject));
     }
 
     protected void addMorphism(BuilderMorphism builderMorphism) {

@@ -4,23 +4,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public record PrimaryKeyCandidate(
     String type,
-    @JsonIgnore Object property,
+    @JsonIgnore PropertyHeuristics property,
     String hierarchicalName,
-    boolean selected
+    boolean isSelected
 ) {
     public PrimaryKeyCandidate(
-        Object property,
+        PropertyHeuristics property,
         String hierarchicalName,
-        boolean selected
+        boolean isSelected
     ) {
-        this("primary", property, hierarchicalName, selected);
+        this("primary", property, hierarchicalName, isSelected);
     }
 
     @Override public String toString() {
         return "PrimaryKeyCandidate{" +
                 "type=" + type +
                 ", hierarchicalName=" + hierarchicalName +
-                ", selected=" + selected +
+                ", isSelected=" + isSelected +
                 '}';
     }
 }

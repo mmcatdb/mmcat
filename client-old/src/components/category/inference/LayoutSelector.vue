@@ -45,15 +45,13 @@ function changeLayout(layoutType: LayoutType) {
 </script>
 
 <template>
-    <div class="editor">
-        <div class="center-button">
-            <button @click="toggleOptions">
-                {{ showOptions ? 'Hide Layout' : 'Layout' }}
-            </button>
-        </div>
+    <div
+        class="editor w-fit"
+        style="min-width: 200px;"
+    >
         <div
             v-if="showOptions"
-            class="options"
+            class="pb-3 d-flex flex-column"
         >
             <label>
                 <input
@@ -96,24 +94,12 @@ function changeLayout(layoutType: LayoutType) {
                 ISOM Layout
             </label>
         </div>
+
+        <button
+            class="w-100"
+            @click="toggleOptions"
+        >
+            {{ showOptions ? 'Hide Layout' : 'Layout' }}
+        </button>
     </div>
 </template>
-
-<style scoped>
-.editor {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.center-button {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
-.options {
-    display: flex;
-    flex-direction: column;
-}
-</style>

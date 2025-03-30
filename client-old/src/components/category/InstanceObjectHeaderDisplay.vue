@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { MetadataObject, SchemaObject } from '@/types/schema';
+import type { MetadataObjex, SchemaObjex } from '@/types/schema';
 import type { Signature } from '@/types/identifiers/Signature';
 
 export type Column = {
     signature: Signature;
-    schemaObject: SchemaObject | undefined;
-    metadata: MetadataObject | undefined;
+    schemaObjex: SchemaObjex | undefined;
+    metadata: MetadataObjex | undefined;
     isClickable: boolean;
 };
 
@@ -18,7 +18,7 @@ const emit = defineEmits([ 'object:click' ]);
 
 function columnClicked(column: Column) {
     if (column.isClickable)
-        emit('object:click', column.schemaObject);
+        emit('object:click', column.schemaObjex);
 }
 </script>
 

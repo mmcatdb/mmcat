@@ -2,15 +2,16 @@
 import { GraphComplexProperty, GraphSimpleProperty, GraphRootProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
 import { SelectionType, type Node, type Edge } from '@/types/categoryGraph';
-import { shallowRef, ref, watch, computed, onMounted, onUnmounted, Static } from 'vue';
+import { shallowRef, ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { Datasource } from '@/types/datasource';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ObjectIds, SignatureId, SignatureIdFactory, StaticName } from '@/types/identifiers';
+import { ObjectIds, SignatureId, SignatureIdFactory, SpecialName, StaticName } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 import EditProperty from './EditProperty.vue';
 import AddProperty from './AddProperty.vue';
+import PrimaryKeyInput from '../input/PrimaryKeyInput.vue';
 
 /**
  * Enum for the different states of node selection.
@@ -27,7 +28,7 @@ enum State {
     TwoNodes, 
     MultipleNodes,
     AddProperty,
-    EditProperty
+    EditProperty,
 }
 
 /**
@@ -169,7 +170,7 @@ function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     return SignatureIdFactory.createEmpty();
 }
 
-const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
+const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObjex.ids));
 
 /**
  * Requests to insert a node into the graph and update the root property.
@@ -198,9 +199,9 @@ function insert(node: Node): boolean {
 
     let subpath: GraphChildProperty;
     if (children.length === 0)
-        subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
+        subpath = new GraphSimpleProperty(new StaticName(label), signature, parentProperty);
     else 
-        subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
+        subpath = new GraphComplexProperty(new StaticName(label), signature, parentProperty, []);
 
     parentProperty.updateOrAddSubpath(subpath);
     return true;
@@ -292,12 +293,19 @@ function deleteRequested(nodes: Node[]) {
     emit('update:rootProperty', localRootProperty.value);
 }
 
+function cancelSelection() {
+    selectedNodes.value = [];
+}
+
 /**
  * Sets the selected node as the root property and updates the root access path.
  */
 function setRootRequested(node: Node) {
     const label = node.metadata.label.toLowerCase();
-    const newRoot = new GraphRootProperty(StaticName.fromString(label), node);
+
+    // FIXME StaticName.fromString(label)
+
+    const newRoot = new GraphRootProperty(new SpecialName('root'), node);
 
     if (!isNodeInAccessPath(node)) {
         if (!insert(node)) {
@@ -311,7 +319,7 @@ function setRootRequested(node: Node) {
     if (newSubpaths) 
         newRoot.updateOrAddSubpath(newSubpaths);
 
-    const ids = node.schemaObject?.ids;
+    const ids = node.schemaObjex?.ids;
     primaryKey.value = getInitialPrimaryKey(ids);
 
     node.unselect();
@@ -321,6 +329,7 @@ function setRootRequested(node: Node) {
 }
 
 function editPropertyClicked(property: GraphChildProperty) {
+    supressStateUpdate.value = true;
     state.value = {
         type: State.EditProperty,
         property,
@@ -341,11 +350,13 @@ function setStateToDefault() {
     emit('update:rootProperty', props.rootProperty);
 }
 
+const kindName = shallowRef('');
+
 /**
  * Finishes the mapping process by emitting the finish event with the primary key and root property.
  */
 function finishMapping() {
-    emit('finish', primaryKey.value, props.rootProperty);
+    emit('finish', primaryKey.value, props.rootProperty, kindName.value);
 }
 
 /**
@@ -403,17 +414,58 @@ const showSelectedNodes = computed(() => {
                     <h2 class="custom-text">
                         Select valid nodes to edit
                     </h2>
+
+                    <div style="display: grid; grid-template-columns: auto auto; gap: 0px 8px;">
+                        <div>
+                            Datasource:
+                        </div>
+                        <div>
+                            {{ datasource.label }}
+                        </div>
+
+                        <div>
+                            Root object:
+                        </div>
+                        <div>
+                            {{ rootProperty.node.label }}
+                        </div>
+
+                        <div>
+                            Kind name:
+                        </div>
+                        <div>
+                            <input
+                                v-model="kindName"
+                                style="height: 24px;"
+                            />
+                        </div>
+
+                        <template v-if="rootProperty.node.schemaObjex.ids">
+                            <div>
+                                Primary key:
+                            </div>
+                            <div>
+                                <PrimaryKeyInput
+                                    v-model="primaryKey"
+                                    :ids="rootProperty.node.schemaObjex.ids"
+                                />
+                            </div>
+                        </template>
+                    </div>
+
                     <div class="button-row">
                         <button
                             @click="finishMapping"
                         >
                             Finish mapping
                         </button>
+                        <!-- 
+                        Don't want to accidentally cancel the mapping process ...
                         <button
                             @click="cancel"
                         >
                             Cancel
-                        </button>
+                        </button> -->
                     </div>
                 </template>
                 <template v-if="state.type === State.OneNode">
@@ -433,6 +485,9 @@ const showSelectedNodes = computed(() => {
                         <button @click="setRootRequested(state.node)">
                             Set Root
                         </button>
+                        <button @click="cancelSelection">
+                            Cancel
+                        </button>
                     </div>
                 </template>
                 <template v-if="state.type === State.TwoNodes">
@@ -446,12 +501,18 @@ const showSelectedNodes = computed(() => {
                         <button @click="deleteRequested(state.nodes)">
                             Delete
                         </button>
+                        <button @click="cancelSelection">
+                            Cancel
+                        </button>
                     </div>
                 </template>
                 <template v-if="state.type === State.MultipleNodes">
                     <div class="options">
                         <button @click="deleteRequested(state.nodes)">
                             Delete
+                        </button>
+                        <button @click="cancelSelection">
+                            Cancel
                         </button>
                     </div>
                 </template>

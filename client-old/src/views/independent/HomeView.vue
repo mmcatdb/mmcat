@@ -96,7 +96,7 @@ async function confirmNewWorkflow() {
     <div class="d-flex">
         <div class="w-50">
             <h2 class="mt-3">
-                Current schema categories
+                Active schema categories
             </h2>
             <div
                 v-if="availableCategories"
@@ -153,7 +153,7 @@ async function confirmNewWorkflow() {
         </div>
         <div class="w-50">
             <h2 class="mt-3">
-                Current workflows
+                Active workflows
             </h2>
             <div
                 v-if="availableWorkflows"
