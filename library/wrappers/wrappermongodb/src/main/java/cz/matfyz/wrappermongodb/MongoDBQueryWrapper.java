@@ -6,7 +6,7 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.querying.QueryStructure;
 
 import java.util.List;
@@ -177,10 +177,10 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         private String getNameInMongo() {
             final String output = emptyLastPathBuffer().stream()
                 .map(accessPath -> {
-                    if (!(accessPath.name() instanceof StaticName staticName))
+                    if (!(accessPath.name() instanceof StringName stringName))
                         throw new UnsupportedOperationException("Only static names are supported.");
 
-                    return staticName.getStringName();
+                    return stringName.value;
                 })
                 .collect(Collectors.joining("."));
 

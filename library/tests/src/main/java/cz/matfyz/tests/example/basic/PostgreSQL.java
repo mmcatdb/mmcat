@@ -95,7 +95,7 @@ public abstract class PostgreSQL {
                 b.simple("label", Schema.dynamicToLabel),
                 b.simple(Schema.dynamicToPrefixType, "px_*", Schema.dynamicToPrefixValue),
                 b.simple(Schema.dynamicToPrefiyType, "py_*", Schema.dynamicToPrefiyValue),
-                b.simple(Schema.dynamicToCatchAllType, Schema.dynamicToCatchAllValue)
+                b.simple(Schema.dynamicToCatchAllType, true, Schema.dynamicToCatchAllValue)
             )
         );
     }

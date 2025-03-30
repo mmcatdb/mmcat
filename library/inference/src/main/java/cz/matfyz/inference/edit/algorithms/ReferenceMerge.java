@@ -6,7 +6,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -227,11 +227,11 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         final List<AccessPath> accessPaths = new ArrayList<>(adjustedComplexProperty.subpaths());
         accessPaths.add(createNewReferenceProperty());
 
-        return new ComplexProperty(new StaticName(label), complexProperty.signature(), accessPaths);
+        return new ComplexProperty(new StringName(label), complexProperty.signature(), accessPaths);
     }
 
     private SimpleProperty createNewReferenceProperty() {
-        return new SimpleProperty(new StaticName(InferenceEditorUtils.findLabelFromKey(data.referencedKey, newMetadata)), this.referenceSignature);
+        return new SimpleProperty(new StringName(InferenceEditorUtils.findLabelFromKey(data.referencedKey, newMetadata)), this.referenceSignature);
     }
 
     private ComplexProperty adjustComplexProperty(ComplexProperty complexProperty, ComplexProperty referenceComplexProperty) {

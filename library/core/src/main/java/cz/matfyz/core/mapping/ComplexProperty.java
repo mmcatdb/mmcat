@@ -3,6 +3,8 @@ package cz.matfyz.core.mapping;
 import cz.matfyz.core.exception.AccessPathException;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.utils.printable.*;
@@ -264,22 +266,22 @@ public class ComplexProperty extends AccessPath {
         if (!(path.name instanceof final DynamicName dynamicName))
             return path.copyForReplacement(path.name, path.signature, replacedNames);
 
-        final Signature prefix = path.signature.longestCommonPrefix(dynamicName.signature());
+        final Signature prefix = path.signature.longestCommonPrefix(dynamicName.signature);
 
         if (prefix.isEmpty())
             // This is ilegal and punishable by death.
-            throw AccessPathException.dynamicNameMissingCommonPrefix(dynamicName.signature(), path.signature);
+            throw AccessPathException.dynamicNameMissingCommonPrefix(dynamicName.signature, path.signature);
 
         final var valueSignature = path.signature.cutPrefix(prefix);
-        final var partiallyReplacedValue = path.copyForReplacement(new StaticName("_VALUE"), valueSignature, null);
-        final var fullyReplacedValue = path.copyForReplacement(new StaticName("_VALUE"), valueSignature, replacedNames);
+        final var partiallyReplacedValue = path.copyForReplacement(new StringName("_VALUE"), valueSignature, null);
+        final var fullyReplacedValue = path.copyForReplacement(new StringName("_VALUE"), valueSignature, replacedNames);
 
-        final var nameSignature = dynamicName.signature().cutPrefix(prefix);
+        final var nameSignature = dynamicName.signature.cutPrefix(prefix);
         final var valueToName = valueSignature.dual().concatenate(nameSignature);
         replacedNames.put(dynamicName, new DynamicNameReplacement(prefix, nameSignature, partiallyReplacedValue, valueToName));
 
-        return new ComplexProperty(new StaticName("_DYNAMIC"), prefix, List.of(
-            new SimpleProperty(new StaticName("_NAME"), nameSignature),
+        return new ComplexProperty(new StringName("_DYNAMIC"), prefix, List.of(
+            new SimpleProperty(new StringName("_NAME"), nameSignature),
             fullyReplacedValue
         ));
     }
@@ -307,13 +309,13 @@ public class ComplexProperty extends AccessPath {
             @Nullable AccessPath dynamicWithoutPattern = null;
 
             for (final var subpath : subpaths) {
-                if (subpath.name instanceof final StaticName staticName) {
-                    statics.put(staticName.getStringName(), subpath);
+                if (subpath.name instanceof final StringName stringName) {
+                    statics.put(stringName.value, subpath);
                     continue;
                 }
 
                 final var dynamicName = (DynamicName) subpath.name;
-                final var pattern = dynamicName.compilePattern();
+                final var pattern = dynamicName.compiledPattern();
                 if (pattern == null) {
                     if (dynamicWithoutPattern != null)
                         throw new IllegalArgumentException("Only one dynamic subpath without pattern is allowed in a complex property.");

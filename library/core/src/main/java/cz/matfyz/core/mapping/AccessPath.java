@@ -3,6 +3,7 @@ package cz.matfyz.core.mapping;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.printable.*;
 

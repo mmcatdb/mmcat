@@ -12,8 +12,8 @@ import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
@@ -100,8 +100,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     private static @Nullable ComplexProperty findSubpathByPrefix(ComplexProperty path, String namePrefix) {
         for (final var subpath : path.subpaths()) {
             if (
-                (subpath.name() instanceof final StaticName staticName)
-                && staticName.getStringName().startsWith(namePrefix)
+                (subpath.name() instanceof final StringName stringName)
+                && stringName.value.startsWith(namePrefix)
                 && subpath instanceof final ComplexProperty complexSubpath
             )
                 return complexSubpath;
