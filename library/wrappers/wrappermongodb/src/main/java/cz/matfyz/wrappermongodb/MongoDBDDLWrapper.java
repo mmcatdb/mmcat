@@ -2,7 +2,6 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
-import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
@@ -65,7 +64,7 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
     }
 
     private MongoDBCommandStatement createDDLDeleteStatement(String tableName) {
-        return new MongoDBCommandStatement("db." + tableName + ".drop();", new BsonDocument("delete", new BsonString(tableName)));
+        return new MongoDBCommandStatement("db." + tableName + ".drop();", new BsonDocument("drop", new BsonString(tableName)));
     }
 
     @Override
