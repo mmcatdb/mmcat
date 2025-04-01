@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -352,16 +353,13 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     @Override public DataResponse getQueryResult(String query) {
         try {
             List<Map<String, Object>> data = new ArrayList<>();
-            MongoDatabase database = provider.getDatabase();
+            int itemCount = 0;
 
             Document parsedQuery = Document.parse(query);
-            String collectionName = parsedQuery.getString("collection");
-            Document bsonQuery = parsedQuery.get("query", Document.class);
+            Document result = provider.getDatabase().runCommand(parsedQuery);
 
-            MongoCollection<Document> collection = database.getCollection(collectionName);
-            FindIterable<Document> documents = collection.find(bsonQuery);
-
-            int itemCount = 0;
+            Document cursor = (Document) result.get("cursor");
+            List<Document> documents = (List<Document>) cursor.get("firstBatch");
 
             for (Document document : documents) {
                 Map<String, Object> item = new HashMap<>();
