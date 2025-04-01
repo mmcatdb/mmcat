@@ -43,3 +43,7 @@ export type GraphResponseData = {
     '#endNodeId': string;
     [key: string]: unknown;
 };
+
+export type ErrorResponse = {
+    message: string;
+};

@@ -2,17 +2,23 @@ import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, Textarea } from '@nextui-org/react';
 import { api } from '@/api';
+import { DatabaseTable } from '@/components/adminer/DatabaseTable';
+import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
+import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
 import type { Id } from '@/types/id';
-import type { Datasource } from '@/types/datasource/Datasource';
-import type { DataResponse } from '@/types/adminer/DataResponse';
+import type { DataResponse, DocumentResponse, ErrorResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
 
-async function handleOnPress(datasourceId: Id, query: string, setQueryResult: (queryResult: DataResponse) => void) {
+async function handleOnPress(datasourceId: Id, query: string, setQueryResult: (queryResult: DataResponse|ErrorResponse) => void) {
     const queryResult = await api.adminer.getQueryResult({ datasourceId: datasourceId }, { query: query });
 
-    if (queryResult.status)
+    if (queryResult.status) {
         setQueryResult(queryResult.data);
-    else
-        throw new Error(`Failed to fetch query result`);
+    }
+    else {
+        setQueryResult({ message: queryResult.error?.data
+            ? String(queryResult.error.data)
+            : `Failed to fetch query result` });
+    }
 }
 
 export function AdminerCustomQueryPage() {
@@ -20,7 +26,7 @@ export function AdminerCustomQueryPage() {
     const [ searchParams ] = useSearchParams();
     const [ query, setQuery ] = useState('');
     const [ datasource, setDatasource ] = useState<Datasource>();
-    const [ queryResult, setQueryResult ] = useState<DataResponse>();
+    const [ queryResult, setQueryResult ] = useState<DataResponse | ErrorResponse>();
 
     useEffect(() => {
         const datasourceId = searchParams.get('datasourceId');
@@ -47,6 +53,12 @@ export function AdminerCustomQueryPage() {
                 placeholder='Enter your query'
                 value={query}
                 onChange={e => setQuery(e.target.value)}
+                onKeyDown={async e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        await handleOnPress(datasource.id, query, setQueryResult);
+                    }
+                }}
             />
 
             <Button
@@ -59,6 +71,22 @@ export function AdminerCustomQueryPage() {
             >
                 EXECUTE QUERY
             </Button>
+
+            <div className='mt-5'>
+                {queryResult && 'message' in queryResult && (
+                    <>{queryResult.message}</>
+                )}
+
+                {queryResult && 'data' in queryResult && (
+                    <>
+                        {datasource.type === DatasourceType.postgresql ? (
+                            <DatabaseTable fetchedData={queryResult as TableResponse} kindReferences={[]} kind={''} datasourceId={datasource.id} datasources={allDatasources}/>
+                        ) : (
+                            <DatabaseDocument fetchedData={queryResult as DocumentResponse | GraphResponse} kindReferences={[]} kind={''} datasourceId={datasource.id} datasources={allDatasources}/>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     );
 }
