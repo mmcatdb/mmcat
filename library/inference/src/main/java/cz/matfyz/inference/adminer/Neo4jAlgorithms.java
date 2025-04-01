@@ -1,5 +1,6 @@
 package cz.matfyz.inference.adminer;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -125,7 +126,9 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
         properties.add("#elementId");
 
         if (forNode) {
-            properties.add("#labels");
+            for (String labelFunction: FUNCTIONS.keySet()){
+                properties.add(labelFunction);
+            }
         } else {
             properties.add("#startNodeId");
             properties.add("#endNodeId");
@@ -245,5 +248,45 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      */
     public static List<String> getQuantifiers() {
         return QUANTIFIERS;
+    }
+
+    /**
+     * Defines a mapping of labels with functions to Cypher functions.
+     *
+     * @return A {@link Map} containing functions mappings.
+     */
+    private static Map<String, String> defineFunctions() {
+        final var functions = new TreeMap<String, String>();
+        functions.put("#labels - SIZE", "SIZE");
+        functions.put("#labels - ANY", "ANY");
+        functions.put("#labels - ALL", "ALL");
+        functions.put("#labels - NONE", "NONE");
+        functions.put("#labels - SINGLE", "SINGLE");
+
+        return functions;
+    }
+
+    /**
+     * A map of labels with functions to Cypher functions.
+     *
+     * @return A {@link Map} of labels with functions to Cypher functions.
+     */
+    private static final Map<String, String> FUNCTIONS = defineFunctions();
+
+    /**
+     * Retrieves the Neo4j function associated with the specified property name.
+     *
+     * @param propertyName The name of the property for which the function is retrieved.
+     * @return A {@link String} representing the corresponding Neo4j function name.
+     * @throws InvalidParameterException If no function is mapped to the given property name.
+     */
+    public static String getLabelFunction(String propertyName) {
+        String function = FUNCTIONS.get(propertyName);
+
+        if (function == null) {
+            throw new InvalidParameterException("No function mapped for given property name.");
+        }
+
+        return function;
     }
 }

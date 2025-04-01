@@ -1,6 +1,5 @@
 package cz.matfyz.inference.adminer;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 
 import cz.matfyz.core.record.AdminerFilter;
@@ -28,20 +27,13 @@ public class AdminerAlgorithms {
         }
     }
 
-    private static void appendLabelsWhereClause(StringBuilder whereClause, String alias, String operator, String propertyValue, Double doubleValue, AdminerAlgorithmsInterface algorithms) {
-        String[] operatorParts = operator.split(",");
+    private static void appendLabelsWhereClause(StringBuilder whereClause, String alias, String propertyName, String operator, String propertyValue, Double doubleValue, AdminerAlgorithmsInterface algorithms) {
+        String function = Neo4jAlgorithms.getLabelFunction(propertyName);
 
-        if (operatorParts.length != 2) {
-            throw new InvalidParameterException();
-        }
-
-        String specification = operatorParts[0].strip();
-        operator = operatorParts[1].strip();
-
-        boolean isQuantifier = Neo4jAlgorithms.getQuantifiers().contains(specification);
+        boolean isQuantifier = Neo4jAlgorithms.getQuantifiers().contains(function);
 
         whereClause
-            .append(specification)
+            .append(function)
             .append("(");
 
         if (isQuantifier){
@@ -175,8 +167,8 @@ public class AdminerAlgorithms {
 
             Double doubleValue = AdminerAlgorithms.parseNumeric(filter.propertyValue());
 
-            if (algorithms instanceof Neo4jAlgorithms && propertyName.equals("#labels")) {
-                appendLabelsWhereClause(whereClause, alias, filter.operator(), filter.propertyValue(), doubleValue, algorithms);
+            if (algorithms instanceof Neo4jAlgorithms && propertyName.startsWith("#labels")) {
+                appendLabelsWhereClause(whereClause, alias, propertyName, filter.operator(), filter.propertyValue(), doubleValue, algorithms);
                 continue;
             }
 
