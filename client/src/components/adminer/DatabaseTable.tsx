@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
@@ -8,19 +7,13 @@ import type { Id } from '@/types/id';
 
 type DatabaseTableProps = Readonly<{
     fetchedData: TableResponse | GraphResponse;
-    setItemCount: (itemCount: number) => void;
     kindReferences: KindReference[];
     kind: string;
     datasourceId: Id;
     datasources: Datasource[];
 }>;
 
-export function DatabaseTable({ fetchedData, setItemCount, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
-    useEffect(() => {
-        const count = fetchedData?.metadata.itemCount;
-        count ? setItemCount(count) : setItemCount(0);
-    }, [ fetchedData ]);
-
+export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
     if (fetchedData === undefined || fetchedData.data.length === 0)
         return <p>No rows to display.</p>;
 

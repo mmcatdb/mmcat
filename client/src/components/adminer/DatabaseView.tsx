@@ -95,6 +95,11 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
         setOffset(0);
     }, [ state.active, state.datasourceId, state.kindName, state.view ]);
 
+    useEffect(() => {
+        const count = fetchedData?.metadata.itemCount;
+        count ? setItemCount(count) : setItemCount(0);
+    }, [ fetchedData ]);
+
     if (error === `Failed to fetch data`) {
         return (
             <div>
@@ -128,9 +133,9 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
             </div>
 
             {state.view === View.table ? (
-                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!} datasources={datasources}/>
+                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!} datasources={datasources}/>
             ) : (
-                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!}  datasources={datasources}/>
+                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!}  datasources={datasources}/>
             )}
 
             {itemCount !== undefined && itemCount > 0 && (

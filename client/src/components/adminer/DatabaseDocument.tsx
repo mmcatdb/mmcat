@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Divider } from '@nextui-org/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
@@ -8,19 +7,13 @@ import type { Id } from '@/types/id';
 
 type DatabaseDocumentProps = Readonly<{
     fetchedData: DocumentResponse | GraphResponse;
-    setItemCount: (itemCount: number) => void;
     kindReferences: KindReference[];
     kind: string;
     datasourceId: Id;
     datasources: Datasource[];
 }>;
 
-export function DatabaseDocument({ fetchedData, setItemCount, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
-    useEffect(() => {
-        const count = fetchedData?.metadata.itemCount;
-        count ? setItemCount(count) : setItemCount(0);
-    }, [ fetchedData ]);
-
+export function DatabaseDocument({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
     if (fetchedData && fetchedData.data.length > 1) {
         return (
             <div>
