@@ -297,7 +297,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         try {
             List<Map<String, Object>> data = new ArrayList<>();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
-            FindIterable<Document> documents = filters == null ? collection.find() : collection.find(createFilter(filters));
+            FindIterable<Document> documents = (filters == null || filters.isEmpty()) ? collection.find() : collection.find(createFilter(filters));
 
             int lim = Integer.parseInt(limit);
             int offset = Integer.parseInt(offsetString);
