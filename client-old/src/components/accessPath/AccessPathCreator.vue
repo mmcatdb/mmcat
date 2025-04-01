@@ -195,7 +195,6 @@ function cancel() {
     emit('cancel');
 }
 
-console.log(nodes.value);
 </script>
 
 <template>
