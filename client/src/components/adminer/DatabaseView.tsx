@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Spinner, Pagination } from '@nextui-org/react';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
@@ -7,26 +7,19 @@ import { View } from '@/types/adminer/View';
 import { api } from '@/api';
 import { useFetchReferences } from './useFetchReferences';
 import { useFetchData } from './useFetchData';
+import { getFiltersURLParam } from './URLParamsState';
 import type { Id } from '@/types/id';
+import type { QueryParams } from '@/types/api/routes';
 import type { AdminerState, AdminerStateAction, KindFilterState } from '@/types/adminer/Reducer';
-import type { FetchKindParams } from '@/types/adminer/FetchParams';
 import type { GraphResponse, DataResponse, TableResponse, DocumentResponse } from '@/types/adminer/DataResponse';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 import type { Datasource } from '@/types/datasource/Datasource';
 
-function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id, kindName?: string) {
-    const filterExist = active.filters?.some(filter => {
-        return filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0;
-    });
+function getQueryParams(filterState: KindFilterState): QueryParams {
+    if (filterState.filters.length > 0)
+        return { filters: getFiltersURLParam(filterState), limit: filterState.limit, offset: filterState.offset };
 
-    const urlParams: FetchKindParams = { datasourceId: datasourceId!, kindName: kindName!, queryParams: { limit: active.limit, offset: offset } };
-
-    if (active.filters && filterExist) {
-        const filters = active.filters.map(filter => JSON.stringify({ propertyName: filter.propertyName, operator: filter.operator, propertyValue: filter.propertyValue }));
-        urlParams.queryParams.filters = filters;
-    }
-
-    return urlParams;
+    return { limit: filterState.limit, offset: filterState.offset };
 }
 
 function getKindReferences(references: AdminerReferences, datasourceId: Id, kind: string) {
@@ -69,6 +62,10 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
     const [ totalPages, setTotalPages ] = useState(1);
 
     useEffect(() => {
+        dispatch({ type: 'input', field: 'offset', value: offset });
+    }, [ offset, dispatch ]);
+
+    useEffect(() => {
         if (itemCount)
             setTotalPages(Math.ceil(itemCount / state.active.limit));
 
@@ -78,13 +75,9 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
         }
     }, [ itemCount, offset, currentPage, totalPages, state.active.limit ]);
 
-    const urlParams = useMemo(() => {
-        return getUrlParams(offset, state.active, state.datasourceId, state.kindName);
-    }, [ state.active, state.datasourceId, state.kindName, offset ]);
-
     const fetchFunction = useCallback(() => {
-        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindName: urlParams.kindName }, urlParams.queryParams);
-    }, [ urlParams ]);
+        return api.adminer.getKind({ datasourceId: state.datasourceId!, kindName: state.kindName! }, getQueryParams(state.active));
+    }, [ state.datasourceId, state.kindName, state.active ]);
 
     const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);
 

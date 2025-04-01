@@ -8,8 +8,8 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
     switch (action.type) {
     case 'initialize': {
         return {
-            form: { limit: 50, filters: [] },
-            active: { limit: 50, filters: [] },
+            form: { limit: 50, offset: 0, filters: [] },
+            active: { limit: 50, offset: 0, filters: [] },
             view: View.table,
             datasourceId: undefined,
             kindName: undefined,
@@ -20,8 +20,8 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
     }
     case 'datasource': {
         return {
-            form: { limit: 50, filters: [] },
-            active: { limit: 50, filters: [] },
+            form: { limit: 50, offset: 0, filters: [] },
+            active: { limit: 50, offset: 0, filters: [] },
             datasourceId: action.newDatasource.id,
             view: getNewView(state.view, action.newDatasource.type),
         };
@@ -29,8 +29,8 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
     case 'kind': {
         return {
             ...state,
-            form: { limit: 50, filters: [] },
-            active: { limit: 50, filters: [] },
+            form: { limit: 50, offset: 0, filters: [] },
+            active: { limit: 50, offset: 0, filters: [] },
             kindName: action.newKind,
         };
     }
@@ -45,6 +45,7 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
             ...state,
             active: {
                 limit: state.form.limit,
+                offset: state.form.offset,
                 filters: state.form.filters.map(filter => ({ ...filter })),
             },
         };
@@ -63,16 +64,13 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
 function reducerInput(state: AdminerState, action: InputAction): AdminerState {
     const { field, value } = action;
 
-    if (field === 'limit') {
-        return {
-            ...state,
-            form: {
-                ...state.form,
-                limit: value,
-            },
-        };
-    }
-    else {
+    switch (field) {
+    case 'limit':
+    case 'offset':
+        return { ...state, form: { ...state.form, [field]: action.value } };
+    case 'propertyName':
+    case 'propertyValue':
+    case 'operator': {
         const updatedFilters = state.form.filters.map(filter => {
             if (filter.id === action.id) {
                 const updatedFilter = { ...filter, [field]: value };
@@ -85,14 +83,8 @@ function reducerInput(state: AdminerState, action: InputAction): AdminerState {
             }
             return filter;
         });
-
-        return {
-            ...state,
-            form: {
-                ...state.form,
-                filters: updatedFilters,
-            },
-        };
+        return { ...state, form: { ...state.form, filters: updatedFilters } };
+    }
     }
 }
 
@@ -128,8 +120,8 @@ function reducerForm(state: AdminerState, action: FormAction): AdminerState {
     case 'delete_filters': {
         return {
             ...state,
-            form: { limit: 50, filters: [] },
-            active: { limit: 50, filters: [] },
+            form: { limit: 50, offset: 0, filters: [] },
+            active: { limit: 50, offset: 0, filters: [] },
         };
     }
     default:

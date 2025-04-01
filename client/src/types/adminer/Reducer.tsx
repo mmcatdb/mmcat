@@ -6,6 +6,7 @@ import type { Id } from '@/types/id';
 
 export type KindFilterState = {
     limit: number;
+    offset: number;
     filters: PropertyFilter[];
 }
 
@@ -35,7 +36,7 @@ type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
   : { type: T } & P;
 
 export type InputAction = AdminerTypedAction<'input', {
-    field: 'limit';
+    field: 'limit' | 'offset';
     value: number;
 } | {
     field: 'propertyName' | 'propertyValue';

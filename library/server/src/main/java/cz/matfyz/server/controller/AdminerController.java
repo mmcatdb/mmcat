@@ -46,15 +46,8 @@ public class AdminerController {
         return pullWrapper.getKindNames(limit, offset);
     }
 
-    private static final ObjectReader filterReader = new ObjectMapper().readerFor(AdminerFilter.class);
-
-    private void addFilterToList(String filter, List<AdminerFilter> list) throws JsonProcessingException {
-        final AdminerFilter parsed = filterReader.readValue(filter);
-        list.add(new AdminerFilter(parsed.propertyName(), parsed.operator(), parsed.propertyValue()));
-    }
-
     @GetMapping(value = "/adminer/{db}/{kind}")
-    public DataResponse getKind(@PathVariable Id db, @PathVariable String kind, @RequestParam(required = false, defaultValue = "") String[] filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
+    public DataResponse getKind(@PathVariable Id db, @PathVariable String kind, @RequestParam(required = false, defaultValue = "") String filters, @RequestParam(required = false, defaultValue = "50") String limit, @RequestParam(required = false, defaultValue = "0") String offset) {
         final var datasource = datasourceRepository.find(db);
 
         if (datasource == null) {
@@ -63,18 +56,11 @@ public class AdminerController {
 
         List<AdminerFilter> filterList = new ArrayList<>();
 
-        if (filters.length == 0 || (filters.length == 1 && filters[0].isEmpty())) {
-            filterList = null;
-        } else {
+        if (!filters.isEmpty() && !filters.equals("[]")) {
             try {
-                if (filters[0].contains("{") && !filters[0].contains("}")){
-                    final var filter = String.join(", ", filters);
-                    addFilterToList(filter, filterList);
-                } else {
-                    for (final var filter : filters) {
-                        addFilterToList(filter, filterList);
-                    }
-                }
+                filterList = new ObjectMapper()
+                    .readerForListOf(AdminerFilter.class)
+                    .readValue(filters);
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Invalid filter format.");
             }
