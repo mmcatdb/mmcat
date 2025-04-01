@@ -88,6 +88,8 @@ public final class MongoDBAlgorithms {
 
     /**
      * A map of operator names to MongoDB filter functions.
+     *
+     * @return A {@link Map} of operator names to MongoDB filter functions.
      */
     public static final Map<String, BiFunction<String, Object, Bson>> OPERATORS = defineOperators();
 }

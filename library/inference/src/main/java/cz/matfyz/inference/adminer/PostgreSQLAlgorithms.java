@@ -19,6 +19,11 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
 
     private PostgreSQLAlgorithms() {}
 
+    /**
+     * Retrieves the singleton instance of {@link PostgreSQLAlgorithms}.
+     *
+     * @return The single instance of {@link PostgreSQLAlgorithms}.
+     */
     public static PostgreSQLAlgorithms getInstance() {
         return INSTANCE;
     }
@@ -166,21 +171,29 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
 
     /**
      * A map of operator names to PostgreSQL operators.
+     *
+     * @return A {@link Map} of operator names to PostgreSQL operators.
      */
     private static final Map<String, String> OPERATORS = defineOperators();
 
     /**
      * A list of PostgreSQL unary operators.
+     *
+     * @return A {@link List} of PostgreSQL unary operators.
      */
     private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
 
     /**
      * A list of PostgreSQL operators used with string values.
+     *
+     * @return A {@link List} of PostgreSQL operators used with string values.
      */
     private static final List<String> STRING_OPERATORS = Arrays.asList("LIKE", "ILIKE", "NOT LIKE", "~", "!~");
 
     /**
      * Returns a map of operator names to PostgreSQL operators.
+     *
+     * @return A {@link Map} of operator names to PostgreSQL operators.
      */
     public Map<String, String> getOperators() {
         return OPERATORS;
@@ -188,6 +201,8 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
 
     /**
      * Returns a list of PostgreSQL unary operators.
+     *
+     * @return A {@link List} of PostgreSQL unary operators.
      */
     public List<String> getUnaryOperators() {
         return UNARY_OPERATORS;
@@ -195,6 +210,8 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
 
     /**
      * Returns a list of PostgreSQL operators used with string values.
+     *
+     * @return A {@link List} of PostgreSQL operators used with string values.
      */
     public List<String> getStringOperators() {
         return STRING_OPERATORS;

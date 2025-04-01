@@ -24,6 +24,11 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
 
     private Neo4jAlgorithms() {}
 
+    /**
+     * Retrieves the singleton instance of {@link Neo4jAlgorithms}.
+     *
+     * @return The single instance of {@link Neo4jAlgorithms}.
+     */
     public static Neo4jAlgorithms getInstance() {
         return INSTANCE;
     }
@@ -180,26 +185,36 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
 
     /**
      * A map of operator names to Neo4j operators.
+     *
+     * @return A {@link Map} of operator names to Neo4j operators.
      */
     private static final Map<String, String> OPERATORS = defineOperators();
 
     /**
      * A list of Neo4j unary operators.
+     *
+     * @return A {@link List} of Neo4j unary operators.
      */
     private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
 
     /**
      * A list of Neo4j operators used with string values.
+     *
+     * @return A {@link List} of Neo4j operators used with string values.
      */
     private static final List<String> STRING_OPERATORS = Arrays.asList("=~", "STARTS WITH", "ENDS WITH", "CONTAINS");
 
     /**
      * A list of Neo4j quantifiers.
+     *
+     * @return A {@link List} of Neo4j quantifiers.
      */
     private static final List<String> QUANTIFIERS = Arrays.asList("ANY", "ALL", "NONE", "SINGLE");
 
     /**
      * Returns a map of operator names to Neo4j operators.
+     *
+     * @return A {@link Map} of operator names to Neo4j operators.
      */
     public Map<String, String> getOperators() {
         return OPERATORS;
@@ -207,6 +222,8 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
 
     /**
      * Returns a list of Neo4j unary operators.
+     *
+     * @return A {@link List} of Neo4j unary operators.
      */
     public List<String> getUnaryOperators() {
         return UNARY_OPERATORS;
@@ -214,6 +231,8 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
 
     /**
      * Returns a list of Neo4j operators used with string values.
+     *
+     * @return A {@link List} of Neo4j operators used with string values.
      */
     public List<String> getStringOperators() {
         return STRING_OPERATORS;
@@ -221,6 +240,8 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
 
     /**
      * Returns a list of Neo4j quantifiers.
+     *
+     * @return A {@link List} of Neo4j quantifiers.
      */
     public static List<String> getQuantifiers() {
         return QUANTIFIERS;
