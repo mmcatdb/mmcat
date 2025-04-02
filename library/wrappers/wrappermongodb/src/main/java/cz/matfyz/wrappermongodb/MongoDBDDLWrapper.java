@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 
@@ -67,10 +68,20 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
         return new MongoDBCommandStatement("db." + tableName + ".drop();", new BsonDocument("drop", new BsonString(tableName)));
     }
 
+    // To create a new db in mongo and then insert into it, you need to grant roles on that db to the current user
     @Override
     public AbstractStatement createCreationStatement(String newDBName, String owner) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
+        String command = "use admin; db.grantRolesToUser(\"" + owner + "\", [ { role: \"readWrite\", db: \"" + newDBName + "\" } ]); use " + newDBName + ";";
+
+        BsonDocument commandDoc = new BsonDocument()
+            .append("grantRolesToUser", new BsonString(owner))
+            .append("roles", new BsonArray(List.of(
+                new BsonDocument()
+                    .append("role", new BsonString("readWrite"))
+                    .append("db", new BsonString(newDBName))
+            )));
+
+        return new MongoDBCommandStatement(command, commandDoc);
     }
 
 }
