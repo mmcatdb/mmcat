@@ -10,4 +10,5 @@ application.properties
 .classpath
 .project
 .settings
+/server/uploads/
 .idea

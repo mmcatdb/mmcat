@@ -1,11 +1,13 @@
 package cz.matfyz.wrappercsv;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -52,5 +54,16 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
     @Override public StringStatement createDDLStatement() {
         final String headerLine = String.join(",", properties);
         return StringStatement.create(headerLine);
+    }
+
+    @Override
+    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+        throw new UnsupportedOperationException("Unimplemented method 'createDDLDeleteStatements'");
+    }
+
+    @Override
+    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
     }
 }

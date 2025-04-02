@@ -1,5 +1,7 @@
--- The most simple order table for some tests. --
+DROP TABLE IF EXISTS "order_item";
 DROP TABLE IF EXISTS "order";
+
+-- The most simple order table for some tests. --
 CREATE TABLE "order" (
     "number" TEXT PRIMARY KEY
 );
@@ -24,7 +26,6 @@ VALUES
     ('457', 'The Art of War', '299'),
     ('734', 'Animal Farm', '350');
 
-DROP TABLE IF EXISTS "order_item";
 CREATE TABLE "order_item" (
     "order_number" TEXT,
     "product_id" TEXT,

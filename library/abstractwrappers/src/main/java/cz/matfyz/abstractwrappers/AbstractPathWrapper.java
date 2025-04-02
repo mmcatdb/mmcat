@@ -33,12 +33,6 @@ public interface AbstractPathWrapper {
     boolean isGroupingAllowed();
 
     /**
-     * Properties can be anonymous, meaning they have "no name". This is the case for, e.g., property representing elements in an array.
-     * Note that the root property of an access path can be anonymous regardless of this rule (although it might be worthy to investigate if that makes sense).
-     */
-    boolean isAnonymousNamingAllowed();
-
-    /**
      * References for the IC algorithm can be made.
      * Currently not used.
      */

@@ -12,22 +12,22 @@ import { ObjectIds, idsAreEqual } from '@/types/identifiers/ObjectIds';
 
 const { evocat } = $(useEvocat());
 
-type UpdateObjectProps = {
+type UpdateObjexProps = {
     node: Node;
 };
 
-const props = defineProps<UpdateObjectProps>();
+const props = defineProps<UpdateObjexProps>();
 
 const emit = defineEmits([ 'save', 'cancel', 'update' ]);
 
 const label = shallowRef(props.node.metadata.label);
-const changed = computed(() => label.value !== props.node.metadata.label || !idsAreEqual(objectIds.value, props.node.schemaObject.ids) || addingId.value);
-const isNew = computed(() => props.node.schemaObject.isNew);
+const changed = computed(() => label.value !== props.node.metadata.label || !idsAreEqual(objectIds.value, props.node.schemaObjex.ids) || addingId.value);
+const isNew = computed(() => props.node.schemaObjex.isNew);
 
 defineExpose({ changed });
 
 function save() {
-    evocat.updateObject(props.node.schemaObject, {
+    evocat.updateObjex(props.node.schemaObjex, {
         label: label.value.trim(),
         ids: objectIds.value ?? null,
     });
@@ -37,7 +37,7 @@ function save() {
 function cancel() {
     emit('cancel');
     console.log(props.node.cytoscapeIdAndPosition);
-    console.log(props.node.schemaObject);
+    console.log(props.node.schemaObjex);
 }
 
 function deleteFunction() {
@@ -45,12 +45,12 @@ function deleteFunction() {
         evocat.deleteMorphism(neighbor.edge.schemaMorphism);
     });
 
-    evocat.deleteObject(props.node.schemaObject);
+    evocat.deleteObjex(props.node.schemaObjex);
     emit('save');
 }
 
 const addingId = shallowRef(false);
-const objectIds = shallowRef(props.node.schemaObject.ids);
+const objectIds = shallowRef(props.node.schemaObjex.ids);
 
 watch(objectIds, () => addingId.value = false);
 
@@ -86,7 +86,7 @@ function deleteNonSignatureId() {
                 <!--  :disabled="!isNew"  -->
             </ValueRow>
             <ValueRow label="Key:">
-                {{ node.schemaObject.key.toString() }}
+                {{ node.schemaObjex.key.toString() }}
             </ValueRow>
             <ValueRow label="Ids:">
                 <ObjectIdsDisplay

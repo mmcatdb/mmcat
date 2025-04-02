@@ -23,7 +23,6 @@ public class PostgreSQLPathWrapper implements AbstractPathWrapper {
     @Override public boolean isInliningToOneAllowed() { return true; }
     @Override public boolean isInliningToManyAllowed() { return false; }
     @Override public boolean isGroupingAllowed() { return false; }
-    @Override public boolean isAnonymousNamingAllowed() { return false; }
     @Override public boolean isReferenceAllowed() { return true; }
     @Override public boolean isComplexPropertyAllowed() { return false; }
     @Override public boolean isSchemaless() { return false; }

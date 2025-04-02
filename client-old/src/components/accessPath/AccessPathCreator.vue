@@ -2,7 +2,7 @@
 import { computed, ref, shallowRef } from 'vue';
 import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
-import { SignatureId, StaticName } from '@/types/identifiers';
+import { SignatureId, SpecialName, StaticName } from '@/types/identifiers';
 import { type Node, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat } from '@/utils/injects';
@@ -19,22 +19,15 @@ const { graph } = $(useEvocat());
 /**
  * Props passed to the component.
  */
-const props = defineProps<{
+defineProps<{
     /** The selected datasource. */
     selectedDatasource: Datasource;
 }>();
 
 const accessPath = ref<GraphRootProperty>();
 const nodes = shallowRef<(Node)[]>([]);
-const selectingRootNode = ref<Node>();
-const selectingOriginalRootNode = ref<Node>();
-//const selectedNodes = ref<Node[]>([]);
+const selectedRootNode = ref<Node>();
 const selectedNodes = shallowRef<Node[]>([]);
-const rootConfirmed = ref(false);
-
-const isConfirmButtonDisabled = computed(() => {
-    return !props.selectedDatasource || nodes.value.length < 2;
-});
 
 /**
  * Stores the previous parent property used for path construction.
@@ -51,8 +44,6 @@ let processedNodes = new Set<number>();
  */
 const selectedNodeLabels = computed(() => selectedNodes.value.map(node => node?.metadata.label).join(', '));
 
-const kindName = ref<string | undefined>(undefined);
-
 /**
  * Emits custom events to the parent component.
  */
@@ -61,55 +52,37 @@ const emit = defineEmits([ 'finish', 'cancel' ]);
 /**
  * Confirms the selected datasource and root node. It marks the root node as selected and finalizes the root.
  */
-function confirmDatasourceAndRootNode() {
-    if (!props.selectedDatasource || nodes.value.length < 2)
-        return;
-
-    console.log(nodes.value[0]);
-    console.log(nodes.value[1]);
-
-    selectingOriginalRootNode.value = nodes.value[0];
-    selectingRootNode.value = nodes.value[1];
-
-    nodes.value[0].unselect();
-    nodes.value[1].unselect();
-
-    selectingRootNode.value.becomeRoot();
-    rootConfirmed.value = true;
+function confirmRootNode() {
+    selectedRootNode.value = nodes.value[0];
+    selectedRootNode.value.unselect();
+    selectedRootNode.value.becomeRoot();
 }
 
 /**
  * Confirms the selected nodes and constructs the access path from the root node and the selected nodes.
  */
 function confirmSelectedNodes() {
-    if (!props.selectedDatasource || !selectingRootNode.value) return;
+    const rootNode = selectedRootNode.value!;
 
-    if (selectingOriginalRootNode.value && !selectingRootNode.value.equals(selectingOriginalRootNode.value)) {
-        const trueLabel = selectingOriginalRootNode.value.metadata.label.toLowerCase();
-        accessPath.value = new GraphRootProperty(StaticName.fromString(trueLabel), selectingOriginalRootNode.value);
-        processNode(selectingRootNode.value);
-        kindName.value = selectingRootNode.value.metadata.label;
-    } else {
-        accessPath.value = new GraphRootProperty(StaticName.fromString(selectingRootNode.value.metadata.label.toLowerCase()), selectingRootNode.value);
-    }
+    // FIXME StaticName.fromString(rootNode.metadata.label.toLowerCase()
+
+    accessPath.value = new GraphRootProperty(new SpecialName('root'), rootNode);
     
-    if (selectedNodes.value.length !== 0) {
-        selectedNodes.value.forEach(node => processNode(node));
-        processedNodes.clear();
-    }
+    selectedNodes.value.forEach(node => processNode(node));
+    processedNodes.clear();
 
-    accessPath.value?.highlightPath();
+    accessPath.value!.highlightPath();
 }
 
 /**
  * Processes a single node by creating its subpath and adding it to the access path.
  */
 function processNode(node: Node) {
-    if (!processedNodes.has(node.schemaObject.key.value)) {
+    if (!processedNodes.has(node.schemaObjex.key.value)) {
         const subpath = createSubpathForNode(node);
         if (subpath) {
             accessPath.value?.updateOrAddSubpath(subpath);        
-            processedNodes.add(node.schemaObject.key.value);
+            processedNodes.add(node.schemaObjex.key.value);
         }
     }
 }
@@ -138,9 +111,9 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
 
     let subpath: GraphChildProperty;
     if (graph.getChildrenForNode(node).length === 0) 
-        subpath = new GraphSimpleProperty(StaticName.fromString(label), signature, parentProperty);
+        subpath = new GraphSimpleProperty(new StaticName(label), signature, parentProperty);
     else 
-        subpath = new GraphComplexProperty(StaticName.fromString(label), signature, parentProperty, []);
+        subpath = new GraphComplexProperty(new StaticName(label), signature, parentProperty, []);
 
     if (subpath instanceof GraphComplexProperty) {
         previousParentProperty = subpath;
@@ -151,7 +124,7 @@ function createSubpathForNode(node: Node): GraphChildProperty | undefined {
         });
     }
 
-    processedNodes.add(node.schemaObject.key.value);
+    processedNodes.add(node.schemaObjex.key.value);
     return subpath;
 }
 
@@ -163,7 +136,7 @@ function filterChildren(node: Node): Node[] {
         const allChildren = graph.getChildrenForNode(node);
         return allChildren.filter(child => 
             selectedNodes.value.some(selectedNode => selectedNode.equals(child)) &&
-            !processedNodes.has(child.schemaObject.key.value),
+            !processedNodes.has(child.schemaObjex.key.value),
         );
     }
     return [];
@@ -207,18 +180,11 @@ function updateRootProperty(newRootProperty: GraphRootProperty) {
  * Resets the access path and clears root node status and highlights.
  */
 function undoAccessPath() {
-    rootConfirmed.value = false;
     accessPath.value?.node.removeRoot();
     accessPath.value?.unhighlightPath();
-    selectingRootNode.value?.unhighlight();
-    selectingRootNode.value?.removeRoot();
-}
-
-/**
- * Emits the finish event with the primary key and the access path, signaling the end of the mapping process.
- */
-function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath.value, kindName.value);
+    selectedRootNode.value?.unhighlight();
+    selectedRootNode.value?.removeRoot();
+    selectedRootNode.value = undefined;
 }
 
 /**
@@ -228,7 +194,8 @@ function cancel() {
     undoAccessPath();
     emit('cancel');
 }
- 
+
+console.log(nodes.value);
 </script>
 
 <template>
@@ -238,73 +205,79 @@ function cancel() {
                 v-if="!accessPath || !selectedDatasource"
                 class="editor"
             >
-                <ValueContainer v-if="!rootConfirmed">
-                    <ValueRow label="Original Root object:">
-                        {{ nodes[0]?.metadata.label }}
-                    </ValueRow>
-                    <ValueRow label="Root object:">
-                        {{ nodes[1]?.metadata.label }}
-                    </ValueRow>
-                    <NodeInput
-                        v-model="nodes"
-                        :graph="graph"
-                        :count="2"
-                        :type="SelectionType.Selected"                    
-                    />
-                </ValueContainer>    
-                <div
-                    v-if="!rootConfirmed"
-                    class="button-row"
-                >
-                    <button
-                        :disabled="isConfirmButtonDisabled"
-                        @click="confirmDatasourceAndRootNode"
-                    >
-                        Confirm
-                    </button>
-                    <button
-                        @click="cancel"
-                    >
-                        Cancel
-                    </button>
-                </div>
-                <ValueContainer v-if="rootConfirmed">
-                    <ValueRow label="AccessPath objects:">
-                        <div
-                            class="d-flex flex-wrap"
-                            style="width: 300px"
-                        >
-                            {{ selectedNodeLabels }}
-                            <NodeInput
-                                :graph="graph"
-                                :model-value="selectedNodes"
-                                :type="SelectionType.Selected"
-                                @update:modelValue="selectedNodes = $event"
-                            />
+                <template v-if="!selectedRootNode">
+                    <ValueContainer>
+                        <div>
+                            Root object:
+
+                            <span class="text-bold">
+                                {{ nodes[0]?.metadata.label }}
+                            </span>
                         </div>
-                    </ValueRow>
-                </ValueContainer>
-                <div 
-                    v-if="rootConfirmed" 
-                    class="button-row"
-                >
-                    <button
-                        @click="confirmSelectedNodes"
-                    >
-                        Confirm
-                    </button>
-                    <button
-                        @click="cancel"
-                    >
-                        Cancel
-                    </button>
-                </div>
+                        <NodeInput
+                            v-model="nodes"
+                            :graph="graph"
+                            :count="1"
+                            :type="SelectionType.Selected"                    
+                        />
+                    </ValueContainer>    
+                    <div class="button-row">
+                        <button
+                            :disabled="nodes.length !== 1"
+                            @click="confirmRootNode"
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            @click="cancel"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </template>
+
+                <template v-else>
+                    <ValueContainer>
+                        <ValueRow label="AccessPath objects:">
+                            <div
+                                class="d-flex flex-wrap"
+                                style="width: 300px"
+                            >
+                                {{ selectedNodeLabels }}
+                                <NodeInput
+                                    :graph="graph"
+                                    :model-value="selectedNodes"
+                                    :type="SelectionType.Selected"
+                                    @update:modelValue="selectedNodes = $event"
+                                />
+                            </div>
+                        </ValueRow>
+                    </ValueContainer>
+                    <div class="button-row">
+                        <button
+                            :disabled="selectedNodes.length === 0"
+                            @click="confirmSelectedNodes"
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            @click="confirmSelectedNodes"
+                        >
+                            Skip
+                        </button>
+                        <button
+                            @click="cancel"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </template>
             </div>
             <AccessPathEditor
                 v-else
                 :datasource="selectedDatasource"
                 :root-property="accessPath"
-                @finish="createMapping"
+                @finish="(...args) => emit('finish', ...args)"
                 @update:rootProperty="updateRootProperty"
                 @cancel="cancel"
             />

@@ -5,7 +5,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
 
-public record UpdateObject(
+public record UpdateObjex(
     SerializedObject newObject,
     SerializedObject oldObject
 ) implements SMO {
@@ -27,7 +27,7 @@ public record UpdateObject(
         // Replace the object by its newer version. The equality is determined by its key.
         objects.put(object.key(), object);
 
-        schema.allMorphisms().forEach(morphism -> morphism.updateObject(object));
+        schema.allMorphisms().forEach(morphism -> morphism.updateObjex(object));
     }
 
 }

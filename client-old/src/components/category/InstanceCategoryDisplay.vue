@@ -2,7 +2,7 @@
 import { shallowRef } from 'vue';
 import { Edge, SelectionType, type Node, Graph } from '@/types/categoryGraph';
 import InstanceObjectDisplay from './InstanceObjectDisplay.vue';
-import type { SchemaCategory, SchemaObject } from '@/types/schema';
+import type { Category, SchemaObjex } from '@/types/schema';
 import InstanceMorphismDisplay from './InstanceMorphismDisplay.vue';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from './EvocatDisplay.vue';
@@ -13,7 +13,7 @@ const evocat = shallowRef<Evocat>();
 const instance = shallowRef<InstanceCategory>();
 const error = shallowRef<unknown>();
 
-async function fetchInstance(schema: SchemaCategory) {
+async function fetchInstance(schema: Category) {
     const result = await API.instances.getInstanceCategory({});
     if (!result.status) {
         error.value = result.error;
@@ -54,7 +54,7 @@ function unselect() {
     selected.value = undefined;
 }
 
-function objectClicked(object: SchemaObject) {
+function objectClicked(object: SchemaObjex) {
     const newNode = evocat.value?.graph?.getNode(object.key);
     if (newNode)
         selectNode(newNode);
@@ -67,7 +67,7 @@ function selectNode(node: Node) {
     if (isSameNode)
         return;
 
-    const object = instance.value?.objects.get(node.schemaObject.key);
+    const object = instance.value?.objects.get(node.schemaObjex.key);
     if (!object)
         return;
 
@@ -97,7 +97,7 @@ function selectEdge(edge: Edge) {
         <EvocatDisplay @evocat-created="evocatCreated" />
         <InstanceObjectDisplay
             v-if="selected?.type === 'node'"
-            :key="selected.node.schemaObject.key.value"
+            :key="selected.node.schemaObjex.key.value"
             :node="selected.node"
             :object="selected.object"
             @object:click="objectClicked"

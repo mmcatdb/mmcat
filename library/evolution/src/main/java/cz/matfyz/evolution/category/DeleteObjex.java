@@ -5,7 +5,7 @@ import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataObject;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
 
-public record DeleteObject(
+public record DeleteObjex(
     SerializedObject schema,
     SerializedMetadataObject metadata
 ) implements SMO {
@@ -15,7 +15,7 @@ public record DeleteObject(
     }
 
     @Override public void up(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
-        CreateObject.assertObjectIsSingle(schemaCategory, schema.deserialize());
+        CreateObjex.assertObjectIsSingle(schemaCategory, schema.deserialize());
 
         (new SchemaEditor(schemaCategory)).getObjects().remove(schema.key());
     }

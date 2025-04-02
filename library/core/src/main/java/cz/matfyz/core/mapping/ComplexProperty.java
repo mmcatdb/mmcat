@@ -44,11 +44,6 @@ public class ComplexProperty extends AccessPath {
         subpaths.forEach(subpath -> this.subpaths.put(subpath.signature(), subpath));
     }
 
-    /** A very specific thing for the MTC algorithm. */
-    public static ComplexProperty createEmpty() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createEmpty(), List.of());
-    }
-
     /** The property is auxiliary if and only if its signature is empty. */
     public boolean isAuxiliary() {
         return signature.isEmpty();

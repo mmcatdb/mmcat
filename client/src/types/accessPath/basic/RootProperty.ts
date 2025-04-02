@@ -36,13 +36,13 @@ export class RootProperty {
     toString(level = 0): string {
         const builder = new IndentedStringBuilder(level);
 
-        builder.appendIntendedLine(this.name + ': ');
+        builder.appendIndentedLine(this.name + ': ');
         builder.append('{\n');
 
         const subpathsAsString = this.subpaths.map(path => path.toString(level + 1)).join(',\n');
         builder.append(subpathsAsString);
 
-        builder.appendIntendedLine('}');
+        builder.appendIndentedLine('}');
 
         return builder.toString();
     }

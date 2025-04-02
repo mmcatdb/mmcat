@@ -27,7 +27,7 @@ export class SimpleProperty {
     }
 
     toString(level = 0): string {
-        return (level === 0 ? '' : IndentedStringBuilder.getTabIntendationString(level))
+        return (level === 0 ? '' : IndentedStringBuilder.getTabIndentationString(level))
             + `${this.name}: ${this._signature}`;
     }
 

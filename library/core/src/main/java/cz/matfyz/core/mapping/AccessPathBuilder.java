@@ -46,7 +46,7 @@ public class AccessPathBuilder {
     }
 
     public ComplexProperty root(AccessPath... subpaths) {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createEmpty(), List.of(subpaths));
+        return new ComplexProperty(new SpecialName("root"), Signature.createEmpty(), List.of(subpaths));
     }
 
     // Simple property

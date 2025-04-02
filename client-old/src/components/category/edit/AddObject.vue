@@ -12,7 +12,7 @@ const label = ref('');
 const keyIsValid = ref(true);
 
 function save() {
-    evocat.createObject({ label: label.value });
+    evocat.createObjex({ label: label.value });
     emit('save');
 }
 

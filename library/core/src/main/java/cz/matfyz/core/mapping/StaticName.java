@@ -12,57 +12,32 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+/**
+ * A normal string name.
+ */
 @JsonSerialize(using = StaticName.Serializer.class)
 @JsonDeserialize(using = StaticName.Deserializer.class)
 public class StaticName extends Name {
 
     private final String value;
-    private final Type type;
 
-    public StaticName(String name) {
-        super();
-        this.value = name;
-        this.type = Type.STATIC;
-    }
-
-    // Anonymous name
-    private StaticName() {
-        super();
-        this.value = "";
-        this.type = Type.ANONYMOUS;
-    }
-
-    private static final StaticName anonymous = new StaticName();
-
-    public static StaticName createAnonymous() {
-        return anonymous;
-    }
-
-    public enum Type {
-        STATIC,
-        ANONYMOUS, // Also known as Empty
+    public StaticName(String value) {
+        this.value = value;
     }
 
     public String getStringName() {
-        return switch (type) {
-            case STATIC -> value;
-            case ANONYMOUS -> "";
-        };
+        return value;
     }
 
     @Override public String toString() {
-        return switch (type) {
-            case STATIC -> value;
-            case ANONYMOUS -> "_";
-        };
+        return value;
     }
 
     @Override public boolean equals(Object object) {
-        return object instanceof StaticName staticName
-            && type == staticName.type
-            && value.equals(staticName.value);
+        return object instanceof StaticName name && value.equals(name.value);
     }
 
+    /** @deprecated Maybe */
     public static class Serializer extends StdSerializer<StaticName> {
 
         public Serializer() {
@@ -75,13 +50,13 @@ public class StaticName extends Name {
 
         @Override public void serialize(StaticName name, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
-            generator.writeStringField("type", name.type.name());
             generator.writeStringField("value", name.value);
             generator.writeEndObject();
         }
 
     }
 
+    /** @deprecated */
     public static class Deserializer extends StdDeserializer<StaticName> {
 
         public Deserializer() {
@@ -95,12 +70,10 @@ public class StaticName extends Name {
         @Override public StaticName deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            final Type type = Type.valueOf(node.get("type").asText());
             final String value = node.get("value").asText();
 
-            return type == Type.ANONYMOUS ? StaticName.createAnonymous() : new StaticName(value);
+            return new StaticName(value);
         }
-
     }
 
 }

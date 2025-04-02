@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { InferenceEdit } from '@/types/inference/inferenceEdit';
-import ValueContainer from '@/components/layout/page/ValueContainer.vue';
-import ValueRow from '@/components/layout/page/ValueRow.vue';
 import Divider from '@/components/layout/Divider.vue';
 
 /**
@@ -63,42 +61,48 @@ function getEditName(editType: string): string {
 </script>
 
 <template>
-    <div class="edits">
-        <h2>Edits</h2>
-        <ValueContainer>
-            <ValueRow> 
-                <template v-if="hasEdits">
-                    <div
-                        v-for="(edit, index) in props.inferenceEdits"
-                        :key="index"
-                        class="edit-item"
-                    >
-                        <p>
-                            <strong>{{ getEditName(edit.type) }}</strong>: 
-                            id: {{ edit.id }}, 
-                            active: {{ edit.isActive }}
-                        </p>
-                        <button 
-                            :disabled="!edit.isActive"
-                            @click="revertEdit(edit)"
-                        >
-                            Undo
-                        </button>
-                        <button
-                            :disabled="edit.isActive"
-                            @click="revertEdit(edit)"
-                        >
-                            Redo
-                        </button>
-                        <Divider />
-                        <br />
-                    </div>
-                </template>
-                <template v-else>
-                    <p>No edits available</p>
-                </template>
-            </ValueRow>
-        </ValueContainer>
+    <div>
+        <h3>
+            Edits
+        </h3>
+        <p>
+            View a list of all edits you have applied so far.
+        </p>
+
+        <template v-if="hasEdits">
+            <div
+                v-for="(edit, index) in props.inferenceEdits"
+                :key="index"
+                class="edit-item"
+            >
+                <p>
+                    <strong>{{ getEditName(edit.type) }}</strong>: 
+                    id: {{ edit.id }}, 
+                    active: {{ edit.isActive }}
+                </p>
+                <button 
+                    :disabled="!edit.isActive"
+                    @click="revertEdit(edit)"
+                >
+                    Undo
+                </button>
+                <button
+                    :disabled="edit.isActive"
+                    @click="revertEdit(edit)"
+                >
+                    Redo
+                </button>
+                <Divider />
+                <br />
+            </div>
+        </template>
+        <p
+            v-else
+            class="text-bold"
+        >
+            No edits yet!
+        </p>
+
         <div class="button-row">
             <button
                 @click="cancel"
@@ -108,6 +112,3 @@ function getEditName(editType: string): string {
         </div>
     </div>
 </template>
-
-<style scoped>
-</style>

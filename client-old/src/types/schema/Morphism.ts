@@ -121,7 +121,7 @@ export type MorphismDefinition = {
 };
 
 export class MetadataMorphism {
-    private constructor(
+    constructor(
         readonly label: string,
     ) {}
 
@@ -134,12 +134,6 @@ export class MetadataMorphism {
     static createDefault(): MetadataMorphism {
         return new MetadataMorphism(
             '',
-        );
-    }
-
-    static create(label: string): MetadataMorphism {
-        return new MetadataMorphism(
-            label,
         );
     }
 

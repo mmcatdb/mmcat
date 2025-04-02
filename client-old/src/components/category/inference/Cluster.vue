@@ -90,7 +90,14 @@ function cancel() {
 
 <template>
     <div class="position-relative">
-        <h2>Cluster Objects</h2>
+        <h3>
+            Cluster Objects
+        </h3>
+        <p>
+            Select objects that form a cluster — they should have the same structure and share part of their name.<br />
+            For example, leaf nodes like <code>color_red</code>, <code>color_blue</code>, and <code>color_yellow</code> can form a cluster because they follow the same naming pattern and structure.
+        </p>
+
         <ValueContainer>
             <ValueRow label="Objects forming a cluster:"> 
                 {{ selectedNodeLabels }}

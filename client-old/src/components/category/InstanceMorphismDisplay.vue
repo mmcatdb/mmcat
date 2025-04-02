@@ -23,7 +23,7 @@ function defineColumn(signature: Signature, node: Node): Column {
     const neighbor = node.getNeighborNode(signature);
     return {
         signature,
-        schemaObject: neighbor?.schemaObject,
+        schemaObjex: neighbor?.schemaObjex,
         metadata: neighbor?.metadata,
         isClickable: !signature.equals(Signature.empty),
     };

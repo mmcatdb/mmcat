@@ -10,7 +10,6 @@ import SignatureInput from './SignatureInput.vue';
 enum NameType {
     Static,
     Dynamic,
-    Anonymous
 }
 
 type NameInputProps = {
@@ -29,7 +28,7 @@ const emit = defineEmits([ 'update:modelValue' ]);
 
 const innerValue = shallowRef(props.modelValue);
 const type = ref(getNameType(props.modelValue));
-const staticValue = ref(props.modelValue instanceof StaticName && !props.modelValue.isAnonymous ? props.modelValue : StaticName.fromString(''));
+const staticValue = ref(props.modelValue instanceof StaticName ? props.modelValue : new StaticName(''));
 const dynamicValue = shallowRef(SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode));
 const filter = ref(createDefaultFilter(props.datasource.configuration));
 
@@ -37,7 +36,7 @@ watch(() => props.modelValue, (newValue: Name) => {
     if (!newValue.equals(innerValue.value)) {
         innerValue.value = props.modelValue;
         type.value = getNameType(props.modelValue);
-        staticValue.value = props.modelValue instanceof StaticName && !props.modelValue.isAnonymous ? props.modelValue : StaticName.fromString('');
+        staticValue.value = props.modelValue instanceof StaticName ? props.modelValue : new StaticName('');
         dynamicValue.value = SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode);
     }
 });
@@ -46,7 +45,7 @@ function getNameType(name: Name): NameType {
     if (name instanceof DynamicName)
         return NameType.Dynamic;
 
-    return name.isAnonymous ? NameType.Anonymous : NameType.Static;
+    return NameType.Static;
 }
 
 function updateInnerValue() {
@@ -56,9 +55,6 @@ function updateInnerValue() {
         break;
     case NameType.Dynamic:
         innerValue.value = DynamicName.fromSignature(dynamicValue.value.toSignature());
-        break;
-    case NameType.Anonymous:
-        innerValue.value = StaticName.anonymous;
         break;
     }
 
@@ -106,21 +102,6 @@ function updateInnerValue() {
     <span :class="{ disabled: type !== NameType.Dynamic }">
         {{ dynamicValue }}
     </span>
-    <br />
-    <input
-        id="anonymous"
-        v-model="type"
-        type="radio"
-        :value="NameType.Anonymous"
-        :disabled="disabled || !datasource.configuration.isAnonymousNamingAllowed || isSelfIdentifier"
-        @change="updateInnerValue"
-    />
-    <label
-        for="anonymous"
-        :class="{ value: type === NameType.Anonymous }"
-    >
-        Anonymous
-    </label>
     <br />
     <div v-if="type === NameType.Dynamic">
         <SignatureInput

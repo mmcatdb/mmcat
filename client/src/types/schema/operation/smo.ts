@@ -1,9 +1,9 @@
 import type { Category } from '../Category';
 
 export enum SMOType {
-    CreateObjex = 'createObject',
-    DeleteObjex = 'deleteObject',
-    UpdateObjex = 'updateObject',
+    CreateObjex = 'createObjex',
+    DeleteObjex = 'deleteObjex',
+    UpdateObjex = 'updateObjex',
     CreateMorphism = 'createMorphism',
     DeleteMorphism = 'deleteMorphism',
     UpdateMorphism = 'updateMorphism',

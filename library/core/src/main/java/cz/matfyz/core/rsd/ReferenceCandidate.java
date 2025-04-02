@@ -4,24 +4,24 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public record ReferenceCandidate(
     String type,
-    @JsonIgnore Object subsetType,
-    @JsonIgnore Object referredProperty,
-    @JsonIgnore Object referencingProperty,
+    @JsonIgnore SubsetType subsetType,
+    @JsonIgnore PropertyHeuristics referredProperty,
+    @JsonIgnore PropertyHeuristics referencingProperty,
     String referred,
     String referencing,
-    boolean weak,
-    boolean selected
+    boolean isWeak,
+    boolean isSelected
 ) {
     public ReferenceCandidate(
-        Object subsetType,
-        Object referredProperty,
-        Object referencingProperty,
+        SubsetType subsetType,
+        PropertyHeuristics referredProperty,
+        PropertyHeuristics referencingProperty,
         String referred,
         String referencing,
-        boolean weak,
-        boolean selected
+        boolean isWeak,
+        boolean isSelected
     ) {
-        this("reference", subsetType, referredProperty, referencingProperty, referred, referencing, weak, selected);
+        this("reference", subsetType, referredProperty, referencingProperty, referred, referencing, isWeak, isSelected);
     }
 
     @Override public String toString() {
@@ -29,8 +29,8 @@ public record ReferenceCandidate(
                "type=" + type +
                ", referencing=" + referencing +
                ", referred=" + referred +
-               ", weak=" + weak +
-               ", selected=" + selected +
+               ", isWeak=" + isWeak +
+               ", isSelected=" + isSelected +
                '}';
     }
 }

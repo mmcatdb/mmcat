@@ -1,6 +1,6 @@
 import { ComparableMap } from '@/utils/ComparableMap';
 import { Signature, type KeyFromServer, type SignatureFromServer, Key } from '../identifiers';
-import type { SchemaCategory, SchemaObject } from '../schema';
+import type { Category, SchemaObjex } from '../schema';
 
 export type InstanceObjectFromServer = {
     key: KeyFromServer;
@@ -9,12 +9,12 @@ export type InstanceObjectFromServer = {
 
 export class InstanceObject {
     private constructor(
-        readonly schema: SchemaObject,
+        readonly schema: SchemaObjex,
         readonly rows: DomainRow[],
         readonly idToRow: Map<number, DomainRow>,
     ) {}
 
-    static fromServer(input: InstanceObjectFromServer, schema: SchemaCategory): InstanceObject | undefined {
+    static fromServer(input: InstanceObjectFromServer, schema: Category): InstanceObject | undefined {
         const key = Key.fromServer(input.key);
         const object = schema.getObject(key).current;
         if (!object)
