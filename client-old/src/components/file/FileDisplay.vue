@@ -91,14 +91,19 @@ function triggerDownload(content: string | Blob, filename: string, mimeType: str
 }
 
 const fileTypes: Record<string, { extension: string, mimeType: string }> = {
-    JSON: { extension: 'json', mimeType: 'application/json' },
-    CSV: { extension: 'csv', mimeType: 'text/csv' },
-    DML: { extension: 'txt', mimeType: 'text/plain' },
+  json: { extension: 'json', mimeType: 'application/json' },
+  csv:  { extension: 'csv',  mimeType: 'text/csv' },
 };
 
 function getFileType(fileType: string) {
 
     return fileTypes[fileType] ?? { extension: 'txt', mimeType: 'text/plain' };
+}
+
+const DML_TYPES = ['mongodb', 'postgresql', 'neo4j'];
+
+function isDMLFileType(type: string): boolean {
+  return DML_TYPES.includes(type);
 }
 
 async function executeDML(mode: string, newDBName?: string) {
@@ -166,7 +171,7 @@ async function executeDML(mode: string, newDBName?: string) {
                     Download
                 </button>
                 <button
-                    v-if="file.fileType === 'DML'"
+                    v-if="isDMLFileType(file.fileType)"
                     :disabled="fetching"
                     class="info"
                     @click="executeDML('execute')"
@@ -185,7 +190,7 @@ async function executeDML(mode: string, newDBName?: string) {
                 <p><strong>Id:</strong> {{ file.id }}</p>
                 <p><strong>Type:</strong> {{ file.fileType }}</p>
                 <p><strong>Date of creation:</strong> {{ file.createdAt.toLocaleString() }}</p>
-                <p v-if="file.fileType === 'DML'">
+                <p v-if="isDMLFileType(file.fileType)">
                     <strong>Dates of executions:</strong> 
                     {{ file.executedAt?.length ? file.executedAt.map(date => date.toLocaleString()).join(', ') : 'No executions' }}
                 </p>
