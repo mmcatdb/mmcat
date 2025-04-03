@@ -40,9 +40,10 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
 
     @Override public void execute(Collection<AbstractStatement> statements) {
         try (
-            Session session = provider.getSession();
+            Session session = statements.stream().anyMatch(this::isCreateDatabaseStatement)
+                ? provider.getSystemSession()
+                : provider.getSession();
         ) {
-            // TODO transactions?
             for (final var statement : statements) {
                 if (statement.equals(AbstractStatement.createEmpty()))
                     continue;
@@ -54,6 +55,11 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
         catch (Exception e) {
             throw new ExecuteException(e, statements);
         }
+    }
+
+    private boolean isCreateDatabaseStatement(AbstractStatement statement) {
+        String cypher = statement.getContent().trim().toUpperCase();
+        return cypher.startsWith("CREATE DATABASE");
     }
 
     /**

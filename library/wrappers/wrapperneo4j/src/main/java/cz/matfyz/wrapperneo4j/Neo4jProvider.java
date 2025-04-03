@@ -18,6 +18,8 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
     // This also means that there should be at most one instance of this class so it should be cached somewhere.
     private Driver driver;
 
+    private static final String SYSTEM_NAME = "system";
+
     public Neo4jProvider(Neo4jSettings settings) {
         this.settings = settings;
     }
@@ -28,6 +30,13 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
 
         return driver.session(SessionConfig.forDatabase(settings.database));
     }
+
+    public Session getSystemSession() {
+        if (driver == null)
+            driver = GraphDatabase.driver(settings.createConnectionString(), settings.createAuthToken());
+    
+        return driver.session(SessionConfig.forDatabase(SYSTEM_NAME));
+    }    
 
     public boolean isStillValid(Object settings) {
         if (!(settings instanceof Neo4jSettings neo4jSettings))

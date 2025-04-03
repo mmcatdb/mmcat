@@ -1,4 +1,4 @@
-import { DatasourceType } from './datasource';
+import type { DatasourceType } from './datasource';
 import type { Entity, Id } from './id';
 
 export type FileFromServer = {
