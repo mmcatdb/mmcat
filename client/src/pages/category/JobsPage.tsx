@@ -38,8 +38,9 @@ export function JobsPage() {
         const grouped = groupJobsByRunId(jobsFromServer);
 
         // Compare states and update if needed
-        setGroupedJobs(prev => {
-            const hasChanges = detectChanges(prev ?? {}, grouped);
+        setGroupedJobs(rawPrev => {
+            const prev = rawPrev ?? {};
+            const hasChanges = detectChanges(prev, grouped);
             return hasChanges ? grouped : prev;
         });
     }
@@ -200,7 +201,7 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
     return (
         <div className={cn('relative', className)}>
             <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
-                <button 
+                <button
                     onClick={dismissBanner}
                     className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
                 >

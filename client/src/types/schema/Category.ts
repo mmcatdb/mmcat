@@ -136,3 +136,9 @@ export class SchemaCategoryInfo implements Entity {
 export type SchemaCategoryInit = {
     label: string;
 };
+
+export type SchemaCategoryStats = {
+    objects: number;
+    mappings: number;
+    jobs: number;
+};

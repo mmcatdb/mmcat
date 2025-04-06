@@ -66,8 +66,6 @@ export function SessionSelect() {
         cookies.set(SESSION_COOKIE_NAME, id);
     }, [ sessions ]);
 
-    console.log({ selected });
-
     return (
         <div className='h-12 flex items-center gap-3'>
             <Select

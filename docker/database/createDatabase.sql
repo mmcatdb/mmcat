@@ -25,6 +25,7 @@ CREATE TABLE schema_category (
     last_valid VARCHAR(255) NOT NULL,
     label VARCHAR(255) NOT NULL,
     system_version VARCHAR(255) NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
     json_value JSONB NOT NULL
 );
 
@@ -123,7 +124,7 @@ CREATE TABLE mapping (
     id UUID PRIMARY KEY,
     version VARCHAR(255) NOT NULL,
     last_valid VARCHAR(255) NOT NULL,
-    category_id UUID NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
 );
@@ -134,7 +135,7 @@ CREATE TABLE query (
     id UUID PRIMARY KEY,
     version VARCHAR(255) NOT NULL,
     last_valid VARCHAR(255) NOT NULL,
-    category_id UUID NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     json_value JSONB NOT NULL
 );
 
@@ -142,7 +143,7 @@ CREATE TABLE query (
 
 CREATE TABLE evolution (
     id UUID PRIMARY KEY,
-    category_id UUID NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     version VARCHAR(255) NOT NULL,
     type VARCHAR(255) NOT NULL
 );
@@ -154,13 +155,13 @@ CREATE TABLE category_evolution (
 
 CREATE TABLE mapping_evolution (
     id UUID PRIMARY KEY REFERENCES evolution ON DELETE CASCADE,
-    mapping_id UUID NOT NULL REFERENCES mapping,
+    mapping_id UUID NOT NULL REFERENCES mapping ON DELETE CASCADE,
     json_value JSONB NOT NULL
 );
 
 CREATE TABLE query_evolution (
     id UUID PRIMARY KEY REFERENCES evolution ON DELETE CASCADE,
-    query_id UUID NOT NULL REFERENCES query,
+    query_id UUID NOT NULL REFERENCES query ON DELETE CASCADE,
     json_value JSONB NOT NULL
 );
 
@@ -168,23 +169,23 @@ CREATE TABLE query_evolution (
 
 CREATE TABLE action (
     id UUID PRIMARY KEY,
-    category_id UUID NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     json_value JSONB NOT NULL
 );
 
 CREATE TABLE session (
     id UUID PRIMARY KEY,
-    category_id UUID NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     json_value JSONB NOT NULL,
     instance_data JSONB DEFAULT NULL
 );
 
 CREATE TABLE run (
     id UUID PRIMARY KEY,
-    category_id UUID NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     label VARCHAR(255) NOT NULL,
-    action_id UUID REFERENCES action,
-    session_id UUID REFERENCES session,
+    action_id UUID REFERENCES action ON DELETE CASCADE,
+    session_id UUID REFERENCES session ON DELETE CASCADE,
     -- Whether the run should be considered during execution.
     -- During the execution, the run is marked inactive. Whenever a job is changed, the run is marked active again.
     -- This is a database-only field, it doesn't need to be exposed to the application.
@@ -193,7 +194,7 @@ CREATE TABLE run (
 
 CREATE TABLE job (
     id UUID PRIMARY KEY,
-    run_id UUID NOT NULL REFERENCES run,
+    run_id UUID NOT NULL REFERENCES run ON DELETE CASCADE,
     json_value JSONB NOT NULL
 );
 
@@ -201,9 +202,9 @@ CREATE TABLE job (
 
 CREATE TABLE workflow (
     id UUID PRIMARY KEY,
-    category_id UUID NOT NULL REFERENCES schema_category,
+    category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     label VARCHAR(255) NOT NULL,
-    job_id UUID REFERENCES job,
+    job_id UUID REFERENCES job,#
     json_value JSONB NOT NULL
 );
 
@@ -211,8 +212,8 @@ CREATE TABLE workflow (
 
 CREATE TABLE "file" (
     id UUID PRIMARY KEY,
-    job_id UUID REFERENCES job,
+    job_id UUID REFERENCES job ON DELETE CASCADE,
     datasource_id UUID REFERENCES datasource,
-    category_id UUID REFERENCES schema_category,
+    category_id UUID REFERENCES schema_category ON DELETE CASCADE,
     json_value JSONB NOT NULL
 );

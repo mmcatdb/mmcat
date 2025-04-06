@@ -70,13 +70,14 @@ export const router = createBrowserRouter([
                         path: ':categoryId',
                         loader: CategoryPage.loader,
                         Component: CategoryPage,
-                        handle: { 
-                            breadcrumb: (data: CategoryLoaderData) => data.category.label, 
+                        handle: {
+                            breadcrumb: (data: CategoryLoaderData) => data.category.label,
                         },
                         children: [
                             {
                                 index: true,
                                 id: routes.category.index.id,
+                                loader: CategoryOverviewPage.loader,
                                 Component: CategoryOverviewPage,
                             },
                             {
@@ -106,7 +107,7 @@ export const router = createBrowserRouter([
                                         path: ':id',
                                         loader: DatasourceInCategoryPage.loader,
                                         Component: DatasourceInCategoryPage,
-                                        handle: { 
+                                        handle: {
                                             breadcrumb: (data: DatasourceLoaderData) => data.datasource.label,
                                         },
                                         // children: [
@@ -115,7 +116,7 @@ export const router = createBrowserRouter([
                                         //         path: routes.category.mapping.path, // `mappings/:mappingId`
                                         //         loader: MappingPage.loader,
                                         //         Component: MappingPage,
-                                        //         handle: { 
+                                        //         handle: {
                                         //             breadcrumb: (data: MappingLoaderData) => data.mapping.kindName,
                                         //         },
                                         //     },
@@ -144,7 +145,7 @@ export const router = createBrowserRouter([
                                         path: ':actionId',
                                         loader: ActionPage.loader,
                                         Component: ActionPage,
-                                        handle: { 
+                                        handle: {
                                             breadcrumb: (data: ActionLoaderData) => data.action.label,
                                         },
                                     },

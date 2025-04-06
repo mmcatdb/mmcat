@@ -1,17 +1,12 @@
 import { Card } from '@nextui-org/react';
 import { Button } from '@nextui-org/react';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useLoaderData, type Params } from 'react-router-dom';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { api } from '@/api';
+import { type SchemaCategoryStats } from '@/types/schema';
 
 export function CategoryOverviewPage() {
-    const [ stats ] = useState({
-        totalObjects: 0,
-        totalMappings: 0,
-        activeJobs: 0,
-        recentEdits: [],
-        recentJobs: [],
-    });
+    const { stats } = useLoaderData() as CategoryLoaderData;
 
     const { category } = useCategoryInfo();
 
@@ -19,16 +14,16 @@ export function CategoryOverviewPage() {
         <div className='p-6 space-y-6'>
             {/* Overview Cards */}
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-                <OverviewCard title='Total Objects' value={stats.totalObjects} />
-                <OverviewCard title='Total Mappings' value={stats.totalMappings} />
-                <OverviewCard title='Active Jobs' value={stats.activeJobs} />
+                <OverviewCard title='Total Objects' value={stats.objects} />
+                <OverviewCard title='Total Mappings' value={stats.mappings} />
+                <OverviewCard title='Jobs' value={stats.jobs} />
                 <OverviewCard title='System Version ID' value={category.systemVersionId || 'N/A'} />
             </div>
 
             {/* Recent Activity */}
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                <RecentActivity title='Recent Edits' data={stats.recentEdits} />
-                <RecentActivity title='Recent Jobs' data={stats.recentJobs} />
+                <RecentActivity title='Recent Edits' data={[]} />
+                <RecentActivity title='Recent Jobs' data={[]} />
             </div>
 
             {/* Quick Actions */}
@@ -36,6 +31,23 @@ export function CategoryOverviewPage() {
         </div>
     );
 }
+
+type CategoryLoaderData = {
+    stats: SchemaCategoryStats;
+};
+
+CategoryOverviewPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<CategoryLoaderData> => {
+    if (!categoryId)
+        throw new Error('Category ID is required');
+
+    const response = await api.schemas.getCategoryStats({ id: categoryId });
+    if (!response.status)
+        throw new Error('Failed to load category stats');
+
+    return {
+        stats: response.data,
+    };
+};
 
 function OverviewCard({ title, value }: { title: string, value: number | string }) {
     return (

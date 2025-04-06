@@ -10,6 +10,7 @@ import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
+import { type Id } from '@/types/id';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -29,8 +30,22 @@ export function CategoriesPage() {
     const [ searchTerm, setSearchTerm ] = useState('');
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
 
-    function handleDeleteCategory() {
-        toast.error('Not handled yet. TODO this.');
+    async function handleDeleteCategory(id: Id) {
+        // TODO Open confirmation modal instead.
+
+        const category = categories.find(category => category.id === id);
+        if (!category)
+            return;
+
+        const response = await api.schemas.deleteCategory({ id });
+        if (!response.status) {
+            toast.error(`Error deleting schema category ${category.label}.`);
+            return;
+        }
+
+        setCategories(prev => prev?.filter(category => category.id !== id) ?? []);
+
+        toast.success(`Schema category ${category.label} deleted successfully!`);
     }
 
     const createSchema = useCallback(async (name: string, isExample = false) => {
@@ -48,7 +63,7 @@ export function CategoriesPage() {
         }
 
         const newCategory = SchemaCategoryInfo.fromServer(response.data);
-        setCategories(prev => (prev ? [ ...prev, newCategory ] : [ newCategory ]));
+        setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
     }, []);
@@ -173,7 +188,7 @@ export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCat
     return (
         <div className={cn('relative', className)}>
             <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
-                <button 
+                <button
                     onClick={dismissBanner}
                     className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
                 >
@@ -182,8 +197,8 @@ export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCat
 
                 <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
                 <p className='text-sm'>
-                A <strong>Schema Category</strong> represents the structure of your data at a high level.  
-                It is a <em>project</em>, grouping everything related to a specific conceptual schema.  
+                A <strong>Schema Category</strong> represents the structure of your data at a high level.
+                It is a <em>project</em>, grouping everything related to a specific conceptual schema.
                 Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
                 </p>
 
