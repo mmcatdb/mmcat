@@ -30,23 +30,9 @@ export function CategoriesPage() {
     const [ searchTerm, setSearchTerm ] = useState('');
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
 
-    async function handleDeleteCategory(id: Id) {
-        // TODO Open confirmation modal instead.
-
-        const category = categories.find(category => category.id === id);
-        if (!category)
-            return;
-
-        const response = await api.schemas.deleteCategory({ id });
-        if (!response.status) {
-            toast.error(`Error deleting schema category ${category.label}.`);
-            return;
-        }
-
+    const categoryDeleted = useCallback((id: Id) => {
         setCategories(prev => prev?.filter(category => category.id !== id) ?? []);
-
-        toast.success(`Schema category ${category.label} deleted successfully!`);
-    }
+    }, []);
 
     const createSchema = useCallback(async (name: string, isExample = false) => {
         setIsFetching(true);
@@ -141,7 +127,7 @@ export function CategoriesPage() {
                     filteredCategories.length > 0 ? (
                         <SchemaCategoriesTable
                             categories={filteredCategories}
-                            onDeleteCategory={handleDeleteCategory}
+                            onDeleteCategory={categoryDeleted}
                         />
                     ) : (
                         <p className='text-default-500 text-center'>No matching categories.</p>

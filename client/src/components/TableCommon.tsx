@@ -15,15 +15,15 @@ export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescrip
         if (typeof fieldA === 'string' && typeof fieldB === 'string') {
             const lowerA = fieldA.toLowerCase();
             const lowerB = fieldB.toLowerCase();
-            if (lowerA < lowerB) 
+            if (lowerA < lowerB)
                 return sortDescriptor.direction === 'ascending' ? -1 : 1;
-            if (lowerA > lowerB) 
+            if (lowerA > lowerB)
                 return sortDescriptor.direction === 'ascending' ? 1 : -1;
         }
         else {
-            if (fieldA < fieldB) 
+            if (fieldA < fieldB)
                 return sortDescriptor.direction === 'ascending' ? -1 : 1;
-            if (fieldA > fieldB) 
+            if (fieldA > fieldB)
                 return sortDescriptor.direction === 'ascending' ? 1 : -1;
         }
         return 0;
@@ -36,6 +36,7 @@ type ConfirmationModalProps = {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    isFetching?: boolean;
     title: string;
     message: string;
     confirmButtonText?: string;
@@ -47,6 +48,7 @@ export function ConfirmationModal({
     isOpen,
     onClose,
     onConfirm,
+    isFetching,
     title,
     message,
     confirmButtonText = 'Confirm',
@@ -63,8 +65,8 @@ export function ConfirmationModal({
                     <p>{message}</p>
                 </ModalBody>
                 <ModalFooter>
-                    <Button onPress={onClose}>{cancelButtonText}</Button>
-                    <Button color={confirmButtonColor} onPress={onConfirm}>
+                    <Button onPress={onClose} isDisabled={isFetching}>{cancelButtonText}</Button>
+                    <Button color={confirmButtonColor} onPress={onConfirm} isLoading={isFetching}>
                         {confirmButtonText}
                     </Button>
                 </ModalFooter>

@@ -4,6 +4,7 @@ import { type Position } from '@/components/graph/graphUtils';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type EmptyIntersection = {};
+export type EmptyObject = Record<string, never>;
 
 export async function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));

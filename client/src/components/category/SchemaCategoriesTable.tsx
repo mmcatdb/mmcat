@@ -5,12 +5,16 @@ import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { type SortDescriptor } from '@react-types/shared';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { routes } from '@/routes/routes';
+import { api } from '@/api';
+import { toast } from 'react-toastify';
+import { type Id } from '@/types/id';
+import { useCached } from '../hooks/UseCached';
 
 type SchemaCategoriesTableProps = {
     categories: SchemaCategoryInfo[];
-    onDeleteCategory: (id: string) => void;
+    onDeleteCategory: (id: Id) => void;
 };
 
 export function SchemaCategoriesTable({ categories, onDeleteCategory }: SchemaCategoriesTableProps) {
@@ -35,7 +39,7 @@ export function SchemaCategoriesTable({ categories, onDeleteCategory }: SchemaCa
 
 type CategoriesTableProps = {
   categories: SchemaCategoryInfo[];
-  onDeleteCategory: (id: string) => void;
+  onDeleteCategory: (id: Id) => void;
   sortDescriptor: SortDescriptor;
   onSortChange: (sortDescriptor: SortDescriptor) => void;
 };
@@ -43,30 +47,33 @@ type CategoriesTableProps = {
 function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortChange }: CategoriesTableProps) {
     const { showTableIDs } = usePreferences().preferences;
     const navigate = useNavigate();
-    const [ selectedCategoryId, setSelectedCategoryId ] = useState<string>();
-    const [ isModalOpen, setModalOpen ] = useState<boolean>(false);
 
     function handleRowAction(key: React.Key) {
         navigate(routes.categories + `/${key}`);
     }
 
-    function handleDeleteClick(id: string) {
-        setSelectedCategoryId(id);
-        setModalOpen(true);
+    const [ deletingCategoryId, setDeletingCategoryId ] = useState<Id>();
+    const rawDeletingCategory = useMemo(() => categories.find(c => c.id === deletingCategoryId), [ categories, deletingCategoryId ]);
+    const deletingCategory = useCached(rawDeletingCategory);
+    const [ isDeleting, setIsDeleting ] = useState<boolean>(false);
+
+    async function confirmDelete() {
+        if (!deletingCategory)
+            return;
+
+        setIsDeleting(true);
+        const response = await api.schemas.deleteCategory(deletingCategory);
+        setIsDeleting(false);
+        if (!response.status) {
+            toast.error(`Error deleting schema category ${deletingCategory.label}.`);
+            return;
+        }
+
+        toast.success(`Schema category ${deletingCategory.label} deleted successfully!`);
+        onDeleteCategory(deletingCategory.id);
+
+        setDeletingCategoryId(undefined);
     }
-
-    function closeModal() {
-        setSelectedCategoryId(undefined);
-        setModalOpen(false);
-    }
-
-    function confirmDelete() {
-        if (selectedCategoryId)
-            onDeleteCategory(selectedCategoryId);
-
-        setModalOpen(false);
-    }
-
 
     return (<>
         <Table
@@ -80,15 +87,15 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                     ...(showTableIDs
                         ? [
                             <TableColumn key='id' allowsSorting>
-                                    ID
+                                ID
                             </TableColumn>,
                         ]
                         : []),
                     <TableColumn key='label' allowsSorting>
-                            Label
+                        Label
                     </TableColumn>,
                     <TableColumn key='version' allowsSorting>
-                            System Version
+                        System Version
                     </TableColumn>,
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
@@ -111,7 +118,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                                     aria-label='Delete'
                                     color='danger'
                                     variant='light'
-                                    onPress={() => handleDeleteClick(category.id)}
+                                    onPress={() => setDeletingCategoryId(category.id)}
                                 >
                                     <TrashIcon className='w-5 h-5' />
                                 </Button>
@@ -123,11 +130,12 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
         </Table>
 
         <ConfirmationModal
-            isOpen={isModalOpen}
-            onClose={closeModal}
+            isOpen={!!rawDeletingCategory}
+            onClose={() => setDeletingCategoryId(undefined)}
             onConfirm={confirmDelete}
+            isFetching={isDeleting}
             title='Confirm Deletion?'
-            message='This will permanently delete the selected schema category.'
+            message={`The schema category ${deletingCategory?.label} will be permanently deleted.`}
             confirmButtonText='Yes, Delete'
             cancelButtonText='Cancel'
             confirmButtonColor='danger'

@@ -37,8 +37,12 @@ class DatasourceSetup {
         final List<DatasourceWrapper> existingDatasources = repository.findAll();
 
         return inits.stream()
-            .filter(init -> existingDatasources.stream().noneMatch(datasource -> datasource.isEqualToInit(init)))
-            .map(service::create).toList();
+            .map(init -> {
+                final var existing = existingDatasources.stream().filter(ed -> ed.isEqualToInit(init)).findFirst();
+                return existing.isPresent()
+                    ? existing.get()
+                    : service.create(init);
+            }).toList();
     }
 
 }
