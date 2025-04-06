@@ -10,7 +10,7 @@ import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { toast } from 'react-toastify';
 import { type Id } from '@/types/id';
-import { useCached } from '../hooks/UseCached';
+import { useCached } from '../hooks/useCached';
 
 type SchemaCategoriesTableProps = {
     categories: SchemaCategoryInfo[];
