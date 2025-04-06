@@ -51,7 +51,7 @@ export function ActionsPage() {
                 </div>
 
                 <Button
-                    onPress={() => navigate(`/category/${category.id}/actions/add`)}
+                    onPress={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
                     color='primary'
                     startContent={<AddIcon />}
                 >
@@ -70,7 +70,7 @@ export function ActionsPage() {
                     <EmptyState
                         message='No actions available.'
                         buttonText='+ Add Action'
-                        onButtonClick={() => navigate(`/category/${category.id}/actions/add`)}
+                        onButtonClick={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
                     />
                 )}
             </div>

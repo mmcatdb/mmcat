@@ -15,7 +15,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 
 /** In ms. */
-const REFRESH_INTERVAL = 3000;
+const REFRESH_INTERVAL_MS = 3000;
 
 export function JobsPage() {
     const { showTableIDs } = usePreferences().preferences;
@@ -24,7 +24,6 @@ export function JobsPage() {
     const [ error, setError ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('jobs-page');
 
-    // FIXME: Use loader instead.
     async function fetchJobs() {
         const response = await api.jobs.getAllJobsInCategory({ categoryId: category.id });
         if (!response.status) {
@@ -48,7 +47,7 @@ export function JobsPage() {
     // Polling: jobs fetching periodically
     useEffect(() => {
         void fetchJobs();
-        const intervalId = setInterval(fetchJobs, REFRESH_INTERVAL);
+        const intervalId = setInterval(fetchJobs, REFRESH_INTERVAL_MS);
         return () => clearInterval(intervalId);
     }, []);
 
@@ -242,8 +241,7 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
                     <li className='flex items-center gap-2'>
                         <GoDotFill className='text-primary-500' />
                         <span><strong>Create a New Run & Jobs:</strong> Go to the <button
-                            onClick={() => navigate(routes.category.jobs.resolve({ categoryId: categoryId!,
-                            }))}
+                            onClick={() => categoryId && navigate(routes.category.actions.resolve({ categoryId }))}
                             className='text-primary-500 hover:underline'
                         >
                             Actions page

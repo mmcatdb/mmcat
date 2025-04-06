@@ -5,6 +5,7 @@ import { api } from '@/api';
 import { toast } from 'react-toastify';
 import { ConfirmationModal } from '@/components/TableCommon';
 import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
+import { routes } from '@/routes/routes';
 
 export function ActionPage() {
     const { action } = useLoaderData() as ActionLoaderData;
@@ -155,8 +156,8 @@ function renderDatasourceElement({ payload, categoryId }: renderDatasourceElemen
         if (payload.datasource) {
             return (
                 <Link
-                    to={`/category/${categoryId}/datasources/${payload.datasource.id}`}
-                    className='text-blue-500 hover:underline'
+                    to={routes.categories + `/${categoryId}/datasources/${payload.datasource.id}`}
+                    className='text-primary-500 hover:underline'
                 >
                     {payload.datasource.label}
                 </Link>
@@ -171,8 +172,8 @@ function renderDatasourceElement({ payload, categoryId }: renderDatasourceElemen
                 {payload.datasources?.map(ds => (
                     <Link
                         key={ds.id}
-                        to={`/category/${categoryId}/datasources/${ds.id}`}
-                        className='text-blue-500 hover:underline'
+                        to={routes.categories + `/${categoryId}/datasources/${ds.id}`}
+                        className='text-primary-500 hover:underline'
                     >
                         {ds.label}
                     </Link>

@@ -37,10 +37,10 @@ const components: Record<RightPanelMode, (props: StateDispatchProps) => JSX.Elem
 // Dynamic selection of display component
 function getRightPanelComponent(state: EditCategoryState) {
     if (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0) 
-        return UpdateObjexDisplay; // One node selected -> update object  // TODO: fix this to some phase
+        return UpdateObjexDisplay;
     
     if (state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 1) 
-        return UpdateMorphismDisplay; // One edge selected -> update morphism  // TODO: fix this to some phase
+        return UpdateMorphismDisplay;
     
     return DefaultDisplay;
 }

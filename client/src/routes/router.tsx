@@ -21,7 +21,8 @@ import { type ActionLoaderData, ActionPage } from '@/pages/category/ActionPage';
 
 export const router = createBrowserRouter([
     {
-        path: '/',
+        path: routes.home.path,
+        id: routes.home.id,
         Component: RootLayout,
         ErrorBoundary: ErrorPage,
         children: [
@@ -123,6 +124,15 @@ export const router = createBrowserRouter([
                                         // ],
                                     },
                                 ],
+                            },
+                            {
+                                id: routes.category.mapping.id,
+                                path: routes.category.mapping.path,
+                                loader: MappingPage.loader,
+                                Component: MappingPage,
+                                handle: { 
+                                    breadcrumb: (data: MappingLoaderData) => data.mapping.kindName,
+                                },
                             },
                             {
                                 id: routes.category.actions.id,

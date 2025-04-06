@@ -33,7 +33,6 @@ export function RootLayout() {
                                 isEditorPage ? 'h-full' : 'max-w-5xl p-6 overflow-y-auto',
                             )}>
                                 <Outlet />
-                                {/* <SchemaCategoryEditor /> */}
                             </div>
                         </div>
                     </main>
@@ -88,7 +87,7 @@ function Breadcrumbs() {
                         <Link
                             to={crumb.path}
                             className={cn(`truncate max-w-[160px] ${
-                                isCurrent ? 'font-semibold text-secondary-500' : 'font-medium text-secondary-500'
+                                isCurrent ? 'font-semibold text-secondary-600' : 'font-medium text-secondary-600'
                             }`)}
                             title={crumb.label}
                         >
