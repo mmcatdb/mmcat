@@ -7,6 +7,7 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { getJobStateTextStyle } from '@/components/icons/Icons';
 import { cn } from '@/components/utils';
 import { routes } from '@/routes/routes';
+import { toast } from 'react-toastify';
 
 /** In ms. */
 const REFRESH_INTERVAL = 3000;
@@ -32,22 +33,33 @@ export function JobPage() {
 
     async function handleEnableJob() {
         const result = await api.jobs.enableJob({ id: job?.id });
-        if (result.status)
-            setJob(Job.fromServer(result.data, category));
+        if (!result.status) {
+            toast.error('Error enabling job');
+            return;
+        }
+
+        setJob(Job.fromServer(result.data, category));
     }
 
     async function handleDisableJob() {
         const result = await api.jobs.disableJob({ id: job?.id });
-        if (result.status)
-            setJob(Job.fromServer(result.data, category));
+        if (!result.status) {
+            toast.error('Error disabling job');
+            return;
+        }
+
+        setJob(Job.fromServer(result.data, category));
     }
 
     async function handleRestartJob() {
         const result = await api.jobs.createRestartedJob({ id: job?.id });
-        if (result.status) {
-            const newJob = Job.fromServer(result.data, category);
-            navigate(routes.category.job.resolve({ categoryId: category.id, jobId: newJob.id }));
+        if (!result.status) {
+            toast.error('Error restarting job');
+            return;
         }
+
+        const newJob = Job.fromServer(result.data, category);
+        navigate(routes.category.job.resolve({ categoryId: category.id, jobId: newJob.id }));
     }
 
     function renderJobStateButton(customClassName: string) {
