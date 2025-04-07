@@ -3,7 +3,7 @@ import { cn } from '../utils';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
-import { type EditMappingDispatch, type EditMappingState } from './editMappingReducer';
+import { EditorPhase, type EditMappingDispatch, type EditMappingState } from './editMappingReducer';
 import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
 import { getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
@@ -140,7 +140,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
             />
 
             <div className='w-fit h-0'>
-                <span className='relative -left-1/2 -top-10 font-medium'>
+                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]'>
                     {node.metadata.label}
                 </span>
             </div>
@@ -160,24 +160,23 @@ function isNodeSelected({ selection, selectionType }: EditMappingState, node: Ca
     return selection.lastNodeId === node.id;
 }
 
-function isNodeSelectionAllowed({ selection, selectionType }: EditMappingState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
-    if (selectionType === SelectionType.None)
+function isNodeSelectionAllowed({ selection, selectionType, editorPhase }: EditMappingState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
+    if (selectionType === SelectionType.None) 
         return false;
 
-    if (selection instanceof FreeSelection)
-        return true;
-    if (selection instanceof SequenceSelection)
+    if (selection instanceof FreeSelection && editorPhase === EditorPhase.SelectRoot) 
         return true;
 
-    if (!pathGraph)
-        return true;
+    if (selection instanceof PathSelection && editorPhase === EditorPhase.BuildPath) {
+        if (!pathGraph) 
+            return true;
+        const pathNode = pathGraph.nodes.get(node.id);
+        if (!pathNode) 
+            return false;
+        return pathNode.pathCount === PathCount.One && selection.nodeIds.length < 2;
+    }
 
-    const pathNode = pathGraph.nodes.get(node.id);
-    if (!pathNode)
-        return false;
-
-    // The new node can be added (if it isn't ambigous). Or the last node can be removed.
-    return pathNode.pathCount === PathCount.One || pathNode.id === selection.lastNodeId;
+    return false;
 }
 
 const pathClasses: Record<PathCount, string | undefined> = {

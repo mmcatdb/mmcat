@@ -1,17 +1,27 @@
-import { Card } from '@nextui-org/react';
+import { Card, CardBody, CardHeader } from '@nextui-org/react';
 import { Button } from '@nextui-org/react';
 import { Link, useLoaderData, type Params } from 'react-router-dom';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { api } from '@/api';
 import { type SchemaCategoryStats } from '@/types/schema';
+import { routes } from '@/routes/routes';
+import { FaDatabase, FaPlus, FaPlay, FaSearch, FaEdit } from 'react-icons/fa';
 
 export function CategoryOverviewPage() {
     const { stats } = useLoaderData() as CategoryLoaderData;
-
     const { category } = useCategoryInfo();
+
+    if (!category) 
+        return <div className='p-6'>Category information not available.</div>;
+    
+
+    const categoryId = category.id;
 
     return (
         <div className='p-6 space-y-6'>
+            {/* Header */}
+            <h1 className='text-3xl font-bold text-primary-500'>{category.label} Overview</h1>
+
             {/* Overview Cards */}
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
                 <OverviewCard title='Total Objects' value={stats.objects} />
@@ -20,14 +30,71 @@ export function CategoryOverviewPage() {
                 <OverviewCard title='System Version ID' value={category.systemVersionId || 'N/A'} />
             </div>
 
-            {/* Recent Activity */}
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                <RecentActivity title='Recent Edits' data={[]} />
-                <RecentActivity title='Recent Jobs' data={[]} />
-            </div>
+            {/* Schema Category Explanation */}
+            <Card className='shadow-lg'>
+                <CardHeader>
+                    <h2 className='text-xl font-semibold'>What is a Schema Category?</h2>
+                </CardHeader>
+                <CardBody className='space-y-4'>
+                    <p className='text-default-700'>
+                        A <span className='font-semibold'>Schema Category</span> is a high-level model of your data, represented as a graph. It defines objects (data types) and morphisms (relationships) without tying them to specific database structures. Think of it as a conceptual workspace for your data modeling project.
+                    </p>
+                    <p className='text-default-700'>
+                        Within this category, you can:
+                    </p>
+                    <ul className='list-disc pl-6 space-y-2 text-default-700'>
+                        <li>Build a <strong>Schema Category Graph</strong> in the Editor to define objects and relationships.</li>
+                        <li>Create <strong>Mappings</strong> to connect your schema to data sources for import/export jobs.</li>
+                        <li>Manage <strong>Datasources</strong> (e.g., MongoDB, PostgreSQL) to link external databases.</li>
+                        <li>Define <strong>Actions</strong> and run <strong>Jobs</strong> to transform and process data.</li>
+                    </ul>
+                    <p className='text-default-600 text-sm'>
+                        Note: Changes to the graph that could break existing mappings are restricted. Future updates will include procedures to handle such breaking changes safely.
+                    </p>
+                </CardBody>
+            </Card>
 
             {/* Quick Actions */}
-            <QuickActions />
+            <div className='space-y-6'>
+                <h2 className='text-2xl font-semibold'>Quick Actions</h2>
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
+                    <FeatureCard
+                        icon={<FaEdit className='w-12 h-12 mx-auto text-primary-500' />}
+                        title='Edit Schema'
+                        description='Modify objects and relationships in the graph.'
+                        linkText='Open Editor'
+                        linkTo={routes.category.editor.resolve({ categoryId })}
+                    />
+                    <FeatureCard
+                        icon={<FaDatabase className='w-12 h-12 mx-auto text-secondary-500' />}
+                        title='Manage Datasources'
+                        description='Link databases and define mappings.'
+                        linkText='View Datasources'
+                        linkTo={routes.category.datasources.resolve({ categoryId })}
+                    />
+                    <FeatureCard
+                        icon={<FaPlus className='w-12 h-12 mx-auto text-success-500' />}
+                        title='Manage Actions'
+                        description='Set up data transformation actions.'
+                        linkText='Manage Actions'
+                        linkTo={routes.category.actions.resolve({ categoryId })}
+                    />
+                    <FeatureCard
+                        icon={<FaPlay className='w-12 h-12 mx-auto text-warning-500' />}
+                        title='View Jobs'
+                        description='Monitor and manage data processing jobs.'
+                        linkText='View Jobs'
+                        linkTo={routes.category.jobs.resolve({ categoryId })}
+                    />
+                    <FeatureCard
+                        icon={<FaSearch className='w-12 h-12 mx-auto text-default-500' />}
+                        title='Query Data'
+                        description='Explore data within this category.'
+                        linkText='Query Data'
+                        linkTo={routes.category.querying.resolve({ categoryId })}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
@@ -52,42 +119,29 @@ CategoryOverviewPage.loader = async ({ params: { categoryId } }: { params: Param
 function OverviewCard({ title, value }: { title: string, value: number | string }) {
     return (
         <Card className='p-4 text-center shadow-lg'>
-            <h3 className='text-lg font-semibold'>{title}</h3>
-            <p className='text-2xl font-bold'>{value}</p>
+            <h3 className='text-lg font-semibold text-default-700'>{title}</h3>
+            <p className='text-2xl font-bold text-primary-500'>{value}</p>
         </Card>
     );
 }
 
-function RecentActivity({ title, data }: { title: string, data: { name: string, date: string, link: string }[] }) {
-    return (
-        <Card className='p-4'>
-            <h3 className='text-lg font-semibold mb-2'>{title}</h3>
-            {data.length === 0 ? (
-                <p className='text-gray-500'>No recent activity</p>
-            ) : (
-                <ul className='space-y-2'>
-                    {data.map((item, index) => (
-                        <li key={index} className='flex justify-between'>
-                            <Link to={item.link} className='text-blue-500 hover:underline'>{item.name}</Link>
-                            <span className='text-gray-500 text-sm'>{item.date}</span>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </Card>
-    );
-}
+type FeatureCardProps = {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    linkText: string;
+    linkTo: string;
+};
 
-function QuickActions() {
+function FeatureCard({ icon, title, description, linkText, linkTo }: FeatureCardProps) {
     return (
-        <Card className='p-4'>
-            <h3 className='text-lg font-semibold mb-4'>Quick Actions</h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <Button as={Link} to='editor' color='primary'>Open Editor</Button>
-                <Button as={Link} to='datasources' color='secondary'>View Datasources with mappings</Button>
-                <Button as={Link} to='actions' color='success'>Manage Actions</Button>
-                <Button as={Link} to='jobs' color='warning'>View Jobs</Button>
-            </div>
+        <Card className='p-6 shadow-medium hover:shadow-large transition'>
+            {icon}
+            <h3 className='mt-4 font-semibold text-lg'>{title}</h3>
+            <p className='text-default-600'>{description}</p>
+            <Button as={Link} to={linkTo} variant='ghost' className='mt-4'>
+                {linkText}
+            </Button>
         </Card>
     );
 }

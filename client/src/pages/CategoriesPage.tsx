@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ReactNode } from 'react';
 import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTable';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
@@ -165,12 +165,13 @@ async function categoriesLoader(): Promise<CategoriesLoaderData> {
     };
 }
 
-type SchemaCategoryInfoBannerProps = {
+type InfoBannerProps = {
+    children: ReactNode;
     className?: string;
     dismissBanner: () => void;
 };
 
-export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCategoryInfoBannerProps) {
+export function InfoBanner({ children, className, dismissBanner }: InfoBannerProps) {
     return (
         <div className={cn('relative', className)}>
             <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
@@ -180,34 +181,46 @@ export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCat
                 >
                     <HiXMark className='w-5 h-5' />
                 </button>
+                <div className='space-y-3'>
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+}
 
-                <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
-                <p className='text-sm'>
+type SchemaCategoryInfoBannerProps = {
+    className?: string;
+    dismissBanner: () => void;
+};
+
+export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCategoryInfoBannerProps) {
+    return (
+        <InfoBanner className={className} dismissBanner={dismissBanner}>
+            <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
+            <p className='text-sm'>
                 A <strong>Schema Category</strong> represents the structure of your data at a high level.
                 It is a <em>project</em>, grouping everything related to a specific conceptual schema.
                 Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
-                </p>
-
-                <ul className='mt-3 text-sm space-y-2'>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Conceptual Schema:</strong> Defines the data model without focusing on storage details.
-                    </li>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Instance Category:</strong> Holds concrete data based on the schema.
-                    </li>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Logical Model:</strong> Defines how data is stored in tables, documents, or other structures.
-                    </li>
-                </ul>
-
-                <p className='text-sm mt-3'>
+            </p>
+            <ul className='mt-3 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Conceptual Schema:</strong> Defines the data model without focusing on storage details.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Instance Category:</strong> Holds concrete data based on the schema.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Logical Model:</strong> Defines how data is stored in tables, documents, or other structures.
+                </li>
+            </ul>
+            <p className='text-sm mt-3'>
                 Each Schema Category serves as a <em>workspace</em> where you define how data is structured and processed.
                 Start by creating a <em>Graph</em> in editor, then create <em>Mappings</em> and execute <em>Jobs</em> to transform data.
-                </p>
-            </div>
-        </div>
+            </p>
+        </InfoBanner>
     );
 }

@@ -18,6 +18,7 @@ import { JobsPage } from '@/pages/category/JobsPage';
 import { JobPage } from '@/pages/category/JobPage';
 import { type MappingLoaderData, MappingPage } from '@/pages/category/MappingPage';
 import { type ActionLoaderData, ActionPage } from '@/pages/category/ActionPage';
+import { NewMappingPage } from '@/pages/category/NewMappingPage';
 
 export const router = createBrowserRouter([
     {
@@ -27,8 +28,6 @@ export const router = createBrowserRouter([
         ErrorBoundary: ErrorPage,
         children: [
             {
-                // id: routes.home.id,
-                // path: routes.home.path,
                 index: true,
                 Component: Home,
             },
@@ -124,6 +123,13 @@ export const router = createBrowserRouter([
                                         // ],
                                     },
                                 ],
+                            },
+                            {
+                                path: routes.category.newMapping.path,
+                                id: routes.category.newMapping.id,
+                                loader: NewMappingPage.loader,
+                                Component: NewMappingPage,
+                                handle: { breadcrumb: 'New Mapping' },
                             },
                             {
                                 id: routes.category.mapping.id,

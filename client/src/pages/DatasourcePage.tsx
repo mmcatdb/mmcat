@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
+import { type Params, useLoaderData, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type Settings } from '@/types/datasource';
 import { Button, Input, Tooltip } from '@nextui-org/react';
@@ -40,25 +40,40 @@ async function datasourceLoader({ params: { id } }: { params: Params<'id'> }): P
 }
 
 export function DatasourceInCategoryPage() {
-    const { mappings } = useLoaderData() as DatasourceInCategoryLoaderData;
+    const { datasource, mappings } = useLoaderData() as DatasourceInCategoryLoaderData;
+    const { categoryId } = useParams<{ categoryId: string }>();
+    const navigate = useNavigate();
 
-    function handleAddMapping() {
-        toast.error('Add mapping functionality not implemented yet');
-    }
+    const handleCreateMapping = () => {
+        if (!categoryId) {
+            console.error('Category ID is missing');
+            return;
+        }
+        navigate(`/schema-categories/${categoryId}/mappings/new`);
+    };
 
     return (
         <div>
             <DatasourceDisplay />
 
             <div className='mt-6'>
-                <p className='text-xl pb-6'>Mappings Table</p>
+                <div className='flex justify-between items-center pb-6'>
+                    <p className='text-xl'>Mappings Table</p>
+                    <Button
+                        color='primary'
+                        onPress={handleCreateMapping}
+                        size='sm'
+                    >
+                        + Create Mapping
+                    </Button>
+                </div>
                 {mappings.length > 0 ? (
                     <MappingsTable mappings={mappings} />
                 ) : (
                     <EmptyState
                         message='This datasource does not have a mapping yet.'
                         buttonText='+ Add Mapping'
-                        onButtonClick={handleAddMapping}
+                        onButtonClick={handleCreateMapping}
                     />
                 )}
             </div>

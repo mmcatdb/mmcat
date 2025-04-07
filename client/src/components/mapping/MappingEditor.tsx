@@ -1,65 +1,74 @@
 import { EditMappingGraphDisplay } from './EditMappingGraphDisplay';
-import { createInitialState, type EditMappingDispatch, editMappingReducer, type EditMappingState } from './editMappingReducer';
+import { createInitialState, type EditMappingAction, editMappingReducer, type EditMappingState, EditorPhase } from './editMappingReducer';
 import { type Category } from '@/types/schema';
 import { useCallback, useReducer } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
 import { SelectionCard } from '../category/SelectionCard';
 import { type Mapping } from '@/types/mapping';
-import { Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Button } from '@nextui-org/react';
+import { useNavigate } from 'react-router-dom';
 
 type MappingEditorProps = Readonly<{
     category: Category;
     mapping: Mapping;
+    onSave?: (mapping: Mapping) => void;
 }>;
 
-export function MappingEditor({ category, mapping }: MappingEditorProps) {
+export function MappingEditor({ category, mapping, onSave }: MappingEditorProps) {
     const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
+    const navigate = useNavigate();
 
-    const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => dispatch({ type: 'select', ...action }), [ dispatch ]);
+    const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => {
+        dispatch({ type: 'select', ...action });
+    }, [ dispatch ]);
 
-    const selectSelectionType = useCallback((keys: SharedSelection) => {
-        dispatch({ type: 'selection-type', selectionType: (keys as Set<SelectionType>).values().next().value! });
-    }, []);
+    const handleSetRoot = () => {
+        if (state.selection instanceof FreeSelection && !state.selection.isEmpty) {
+            const rootNodeId = state.selection.nodeIds.values().next().value;
+            dispatch({ type: 'set-root', rootNodeId });
+        }
+    };
+
+    const handleSave = () => {
+        if (onSave) 
+            onSave(state.mapping);
+        navigate(-1);
+    };
+
+    const handleCancel = () => {
+        navigate(-1);
+    };
 
     return (
         <div className='relative h-[700px] flex'>
             <EditMappingGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
 
-            {state.selection instanceof FreeSelection && !state.selection.isEmpty && (
-                <div className='z-20 absolute top-2 right-2 bg-background'>
-                    <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />
+            {state.editorPhase === EditorPhase.SelectRoot && (
+                <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background p-4 rounded-lg shadow-lg z-20'>
+                    <p className='text-lg font-semibold text-default-800'>Please select a root node</p>
+                    {state.selection instanceof FreeSelection && !state.selection.isEmpty && (
+                        <>
+                            <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />
+                            <Button size='sm' color='primary' onPress={handleSetRoot} className='mt-2 w-full'>
+                                OK
+                            </Button>
+                        </>
+                    )}
                 </div>
             )}
 
-            {/* TODO */}
-
-            {/* <LeftPanelEditor state={state} dispatch={dispatch} className='w-80 z-20 absolute bottom-2 left-2' /> */}
-
             <AccessPathCard state={state} dispatch={dispatch} />
 
-            {/* <div className='absolute bottom-2 right-2'>
-                <SaveButton state={state} dispatch={dispatch} />
-            </div> */}
-
-            <PathCard state={state} dispatch={dispatch} />
-
-            <div className='absolute bottom-2 right-2 z-20 p-3 bg-background'>
-                {/* Just a temporary setter for testing. */}
-                <Select
-                    label='Selection type'
-                    defaultSelectedKeys={[ state.selectionType ]}
-                    onSelectionChange={selectSelectionType}
-                    disallowEmptySelection
-                    size='sm'
-                    className='w-[200px]'
-                >
-                    {selectionTypes.map(type => (
-                        <SelectItem key={type}>
-                            {type}
-                        </SelectItem>
-                    ))}
-                </Select>
-            </div>
+            {state.editorPhase === EditorPhase.BuildPath && (
+                <div className='absolute bottom-2 right-2 z-20 p-3 bg-background flex gap-2'>
+                    <Button color='primary' size='sm' onPress={handleSave}>
+                        Finish Mapping
+                    </Button>
+                    <Button color='default' variant='ghost' size='sm' onPress={handleCancel}>
+                        Cancel
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
@@ -73,17 +82,78 @@ const selectionTypes = [
 
 type StateDispatchProps = Readonly<{
     state: EditMappingState;
-    dispatch: EditMappingDispatch;
+    dispatch: React.Dispatch<EditMappingAction>;
 }>;
 
-function AccessPathCard({ state }: StateDispatchProps) {
+// function AccessPathCard({ state }: StateDispatchProps) {
+//     return (
+//         <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-background'>
+//             <h3>Access path</h3>
+
+//             <pre className='mt-3'>
+//                 {state.mapping.accessPath.toString()}
+//             </pre>
+//         </div>
+//     );
+// }
+
+
+
+function AccessPathCard({ state, dispatch }: StateDispatchProps) {
+    const { mapping, selection, selectionType, editorPhase } = state;
+
+    const handleAddSubpath = () => {
+        dispatch({ type: 'selection-type', selectionType: SelectionType.Path });
+    };
+
+    const handleConfirmPath = () => {
+        if (selection instanceof PathSelection && !selection.isEmpty) {
+            const newNodeId = selection.lastNodeId;
+            dispatch({ type: 'append-to-access-path', nodeId: newNodeId });
+        }
+    };
+
+    const accessPathJson = () => {
+        const subpaths = mapping.accessPath.subpaths.reduce((acc, subpath) => {
+            acc[subpath.name.toString()] = {};
+            return acc;
+        }, {} as Record<string, object>);
+        return JSON.stringify({ [mapping.accessPath.name.toString()]: subpaths }, null, 2);
+    };
+
     return (
         <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-background'>
-            <h3>Access path</h3>
-
-            <pre className='mt-3'>
-                {state.mapping.accessPath.toString()}
-            </pre>
+            <h3>Access Path</h3>
+            <div className='mt-3 space-y-2'>
+                {mapping.accessPath ? (
+                    <div>
+                        <pre className='text-sm text-default-800'>
+                            {accessPathJson()}
+                            {editorPhase === EditorPhase.BuildPath && (
+                                <Button
+                                    isIconOnly
+                                    size='sm'
+                                    variant='ghost'
+                                    onPress={handleAddSubpath}
+                                    className='text-primary-500 ml-2'
+                                >
+                                    +
+                                </Button>
+                            )}
+                        </pre>
+                    </div>
+                ) : (
+                    <p className='text-sm text-default-500'>No access path defined.</p>
+                )}
+            </div>
+            {selectionType === SelectionType.Path && selection instanceof PathSelection && !selection.isEmpty && (
+                <div className='mt-3'>
+                    <p className='text-sm text-default-600'>Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}</p>
+                    <Button size='sm' color='primary' onPress={handleConfirmPath} className='mt-2'>
+                        Add
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }

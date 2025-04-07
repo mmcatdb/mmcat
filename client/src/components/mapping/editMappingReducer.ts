@@ -3,15 +3,21 @@ import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelect
 import { type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
-import { type Mapping } from '@/types/mapping';
+import { type Mapping, SimpleProperty, RootProperty, type SimplePropertyFromServer, type RootPropertyFromServer } from '@/types/mapping';
+import { Key, type NameFromServer, type SignatureFromServer } from '@/types/identifiers';
+
+export enum EditorPhase {
+    SelectRoot = 'select-root',
+    BuildPath = 'build-path',
+}
 
 export type EditMappingState = {
     category: Category;
     graph: CategoryGraph;
     mapping: Mapping;
-    // phase: EditorPhase;
     selectionType: SelectionType;
     selection: FreeSelection | SequenceSelection | PathSelection;
+    editorPhase: EditorPhase;
 };
 
 export function createInitialState({ category, mapping }: { category: Category, mapping: Mapping }): EditMappingState {
@@ -22,23 +28,33 @@ export function createInitialState({ category, mapping }: { category: Category, 
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         mapping,
-        // phase: EditorPhase.default,
+        editorPhase: EditorPhase.SelectRoot,
     };
 }
 
 export type EditMappingDispatch = Dispatch<EditMappingAction>;
 
-// type EditMappingAction = GraphAction | SelectAction | PhaseAction;
-type EditMappingAction = GraphAction | SelectAction | SequenceAction | PathAction | TempSelectionTypeAction;
+export type EditMappingAction =
+    | GraphAction
+    | SelectAction
+    | SequenceAction
+    | PathAction
+    | TempSelectionTypeAction
+    | { type: 'set-root', rootNodeId: string }
+    | { type: 'append-to-access-path', nodeId: string };
 
 export function editMappingReducer(state: EditMappingState, action: EditMappingAction): EditMappingState {
     console.log('REDUCE', action, state);
 
     switch (action.type) {
-    case 'graph': return graph(state, action);
-    case 'select': return select(state, action);
-    case 'sequence': return sequence(state, action);
-    case 'path': return path(state, action);
+    case 'graph':
+        return graph(state, action);
+    case 'select':
+        return select(state, action);
+    case 'sequence':
+        return sequence(state, action);
+    case 'path':
+        return path(state, action);
     case 'selection-type': {
         const { selectionType } = action;
         if (selectionType === SelectionType.Free)
@@ -46,11 +62,57 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         if (selectionType === SelectionType.Sequence)
             return { ...state, selectionType, selection: SequenceSelection.create() };
         if (selectionType === SelectionType.Path)
-            return { ...state, selectionType, selection: PathSelection.create() };
-
+            return { ...state, selectionType, selection: PathSelection.create([ state.mapping.rootObjexKey.toString() ]) };
         return { ...state, selectionType: action.selectionType };
     }
-    // case 'phase': return phase(state, action);
+    case 'set-root': {
+        const { rootNodeId } = action;
+        const rootNode = state.graph.nodes.get(rootNodeId);
+        if (!rootNode) 
+            return state;
+
+        const newAccessPathInput: RootPropertyFromServer = {
+            name: { value: rootNode.metadata.label } as NameFromServer,
+            signature: 'EMPTY' as SignatureFromServer,
+            subpaths: [],
+        };
+        const newAccessPath = RootProperty.fromServer(newAccessPathInput);
+
+        return {
+            ...state,
+            mapping: { ...state.mapping, accessPath: newAccessPath, rootObjexKey: Key.fromServer(Number(rootNodeId)) },
+            selectionType: SelectionType.Path,
+            selection: PathSelection.create([ rootNodeId ]),
+            editorPhase: EditorPhase.BuildPath,
+        };
+    }
+    case 'append-to-access-path': {
+        const { nodeId } = action;
+        const newNode = state.graph.nodes.get(nodeId);
+        if (!newNode) 
+            return state;
+
+        const newSubpathInput: SimplePropertyFromServer = {
+            name: { value: newNode.metadata.label } as NameFromServer,
+            signature: 'EMPTY' as SignatureFromServer,
+        };
+        const newSubpath = SimpleProperty.fromServer(newSubpathInput, state.mapping.accessPath);
+
+        const currentAccessPathServer = state.mapping.accessPath.toServer();
+        const newAccessPathInput: RootPropertyFromServer = {
+            name: currentAccessPathServer.name,
+            signature: currentAccessPathServer.signature,
+            subpaths: [ ...currentAccessPathServer.subpaths, newSubpath.toServer() ],
+        };
+        const newAccessPath = RootProperty.fromServer(newAccessPathInput);
+
+        return {
+            ...state,
+            mapping: { ...state.mapping, accessPath: newAccessPath },
+            selectionType: SelectionType.Path,
+            selection: PathSelection.create([ state.mapping.rootObjexKey.toString() ]), // Reset to root
+        };
+    }
     }
 }
 
@@ -66,26 +128,20 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
     case 'move': {
         // TODO This is not supported, alghough it should be. Probably would require a new way how to handle metadata ...
         return state;
-
-        // const node = state.graph.nodes.get(event.nodeId);
-        // if (!node)
-        //     return state;
-
-        // state.evocat.updateObjex(node.schema.key, { position: event.position });
-
-        // return {
-        //     ...state,
-        //     graph: categoryToGraph(state.evocat.category),
-        // };
     }
     case 'select': {
-        if (!(state.selection instanceof FreeSelection))
+        if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot) 
             return state;
-
-        return {
-            ...state,
-            selection: state.selection.updateFromGraphEvent(event),
-        };
+        const updatedSelection = state.selection.updateFromGraphEvent(event);
+        // Limit to one node
+        if (updatedSelection.nodeIds.size > 1) {
+            const firstNode = updatedSelection.nodeIds.values().next().value;
+            return {
+                ...state,
+                selection: FreeSelection.create([ firstNode ]),
+            };
+        }
+        return { ...state, selection: updatedSelection };
     }
     }
 }
@@ -97,13 +153,15 @@ type SelectAction = {
 } & FreeSelectionAction;
 
 function select(state: EditMappingState, action: SelectAction): EditMappingState {
-    if (!(state.selection instanceof FreeSelection))
+    if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot) 
         return state;
-
-    return {
-        ...state,
-        selection: state.selection.updateFromAction(action),
-    };
+    const updatedSelection = state.selection.updateFromAction(action);
+    // Limit to one node
+    if (updatedSelection.nodeIds.size > 1) {
+        const firstNode = updatedSelection.nodeIds.values().next().value;
+        return { ...state, selection: FreeSelection.create([ firstNode ]) };
+    }
+    return { ...state, selection: updatedSelection };
 }
 
 type SequenceAction = {
@@ -125,7 +183,7 @@ type PathAction = {
 } & PathSelectionAction;
 
 function path(state: EditMappingState, action: PathAction): EditMappingState {
-    if (!(state.selection instanceof PathSelection))
+    if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath) 
         return state;
 
     return {
