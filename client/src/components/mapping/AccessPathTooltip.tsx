@@ -12,7 +12,7 @@ export function AccessPathTooltip({ accessPath }: { accessPath: RootProperty }) 
             placement='top-start'
         >
             <span className='underline cursor-pointer'>
-                View Access Path
+                Show Access Path
             </span>
         </Tooltip>
     );

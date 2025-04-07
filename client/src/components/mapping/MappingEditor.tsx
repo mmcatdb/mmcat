@@ -7,6 +7,7 @@ import { SelectionCard } from '../category/SelectionCard';
 import { type Mapping } from '@/types/mapping';
 import { Button } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
+import { PlusIcon } from '@heroicons/react/20/solid';
 
 type MappingEditorProps = Readonly<{
     category: Category;
@@ -22,22 +23,22 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
         dispatch({ type: 'select', ...action });
     }, [ dispatch ]);
 
-    const handleSetRoot = () => {
+    function handleSetRoot() {
         if (state.selection instanceof FreeSelection && !state.selection.isEmpty) {
             const rootNodeId = state.selection.nodeIds.values().next().value;
             dispatch({ type: 'set-root', rootNodeId });
         }
-    };
+    }
 
-    const handleSave = () => {
+    function handleSave() {
         if (onSave) 
             onSave(state.mapping);
         navigate(-1);
-    };
+    }
 
-    const handleCancel = () => {
+    function handleCancel() {
         navigate(-1);
-    };
+    }
 
     return (
         <div className='relative h-[700px] flex'>
@@ -85,50 +86,38 @@ type StateDispatchProps = Readonly<{
     dispatch: React.Dispatch<EditMappingAction>;
 }>;
 
-// function AccessPathCard({ state }: StateDispatchProps) {
-//     return (
-//         <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-background'>
-//             <h3>Access path</h3>
-
-//             <pre className='mt-3'>
-//                 {state.mapping.accessPath.toString()}
-//             </pre>
-//         </div>
-//     );
-// }
-
-
-
 function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     const { mapping, selection, selectionType, editorPhase } = state;
 
-    const handleAddSubpath = () => {
+    function handleAddSubpath() {
         // Switch to path selection mode when + is clicked
         dispatch({ type: 'selection-type', selectionType: SelectionType.Path });
-    };
+    }
 
-    const handleConfirmPath = () => {
+    function handleConfirmPath() {
         if (selection instanceof PathSelection && !selection.isEmpty) {
             const newNodeId = selection.lastNodeId;
             dispatch({ type: 'append-to-access-path', nodeId: newNodeId });
             // Reset to free selection after adding
             dispatch({ type: 'selection-type', selectionType: SelectionType.Free });
         }
-    };
+    }
 
-    const renderAccessPath = () => {
+    function renderAccessPath() {
         const root = mapping.accessPath;
         const subpaths = root.subpaths.reduce((acc: Record<string, string>, subpath) => {
             acc[subpath.name.toString()] = subpath.signature.toString();
             return acc;
         }, {});
 
-        // Format the output to match json-like structure
-        return JSON.stringify({ [root.name.toString()]: subpaths }, null, 2)
-            .replace(/"(\w+)": "([^"]+)"/g, '$1: $2')
-            .replace(/"(\w+)": {/g, '$1: {')
-            .replace(/}/g, '}');
-    };
+        // json-like formatting of access path
+        let result = `${root.name.toString()}: {\n`;
+        for (const [ key, value ] of Object.entries(subpaths)) 
+            result += `    ${key}: ${value},\n`;
+        // result += '}';
+
+        return result;
+    }
 
     return (
         <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-background'>
@@ -140,13 +129,17 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
                         <Button
                             isIconOnly
                             size='sm'
-                            variant='ghost'
+                            variant='solid'
                             onPress={handleAddSubpath}
-                            className='text-primary-500 ml-2'
+                            color='primary'
+                            className='my-1 ml-7'
+                            radius='sm'
+                            isDisabled={selectionType !== SelectionType.Free}
                         >
-                            +
+                            <PlusIcon className='w-4 h-4' />
                         </Button>
                     )}
+                    <div className='text-default-800'>{'}'}</div>
                 </pre>
             </div>
             {selectionType === SelectionType.Path && (
@@ -165,6 +158,11 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
                     )}
                 </div>
             )}
+            {/* {selectionType === SelectionType.Free && (
+                <div className='mt-3 text-sm text-default-500'>
+                    <p>Click on + button to add properties.</p>
+                </div>
+            )} */}
         </div>
     );
 }
