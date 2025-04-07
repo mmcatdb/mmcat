@@ -64,7 +64,7 @@ export function DatasourceInCategoryPage() {
                         onPress={handleCreateMapping}
                         size='sm'
                     >
-                        + Create Mapping
+                        + Add Mapping
                     </Button>
                 </div>
                 {mappings.length > 0 ? (

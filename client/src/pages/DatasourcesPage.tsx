@@ -36,7 +36,7 @@ export function DatasourcesPage() {
     }
 
     return (
-        <div className='p-8'>
+        <div className='p-4'>
             {/* Header Section */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>

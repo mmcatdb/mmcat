@@ -18,7 +18,7 @@ export function CategoryOverviewPage() {
     const categoryId = category.id;
 
     return (
-        <div className='p-6 space-y-6'>
+        <div className='p-4 space-y-6'>
             {/* Header */}
             <h1 className='text-3xl font-bold text-primary-500'>{category.label} Overview</h1>
 

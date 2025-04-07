@@ -59,7 +59,7 @@ export function CategoriesPage() {
     );
 
     return (
-        <div className='p-8'>
+        <div className='p-4'>
             {/* Header Section */}
             <div className='flex items-center gap-2 mb-4'>
                 <h1 className='text-2xl font-semibold'>Schema Categories</h1>

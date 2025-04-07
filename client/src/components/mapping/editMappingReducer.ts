@@ -24,7 +24,6 @@ export function createInitialState({ category, mapping }: { category: Category, 
     return {
         category,
         graph: categoryToGraph(category),
-        // TODO This should depened on the selection class.
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         mapping,
@@ -73,7 +72,7 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
 
         const newAccessPathInput: RootPropertyFromServer = {
             name: { value: rootNode.metadata.label } as NameFromServer,
-            signature: 'EMPTY' as SignatureFromServer,
+            signature: '0' as SignatureFromServer,
             subpaths: [],
         };
         const newAccessPath = RootProperty.fromServer(newAccessPathInput);
@@ -81,8 +80,8 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         return {
             ...state,
             mapping: { ...state.mapping, accessPath: newAccessPath, rootObjexKey: Key.fromServer(Number(rootNodeId)) },
-            selectionType: SelectionType.Path,
-            selection: PathSelection.create([ rootNodeId ]),
+            selectionType: SelectionType.Free,
+            selection: FreeSelection.create(),
             editorPhase: EditorPhase.BuildPath,
         };
     }
@@ -91,66 +90,102 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         const newNode = state.graph.nodes.get(nodeId);
         if (!newNode) 
             return state;
-
+    
+        // TODO: How to do this properly?
+        // Calculate signature using PathSelection
+        let signature = '1'; // there should be no value and dynamic property? or what?
+        if (state.selection instanceof PathSelection && state.selection.edgeIds.length > 0) {
+            const edgeSignatures = state.selection.edgeIds.map((edgeId, index) => {
+                const edge = state.graph.edges.bundledEdges.flat().find(e => e.id === edgeId);
+                if (!edge) 
+                    return `${index + 1}`; // Fallback
+    
+                // here to check direction (+/-)
+                const lastNodeId = state.selection.nodeIds[index];
+                const nextNodeId = state.selection.nodeIds[index + 1];
+                const isForward = edge.from === lastNodeId && edge.to === nextNodeId;
+    
+                // Use edge signature or ID if signature not available
+                const edgeSignature = edge.metadata?.signature || edge.id;
+                return isForward ? edgeSignature : `-${edgeSignature}`;
+            });
+            signature = edgeSignatures.join('.');
+        }
+    
         const newSubpathInput: SimplePropertyFromServer = {
             name: { value: newNode.metadata.label } as NameFromServer,
-            signature: 'EMPTY' as SignatureFromServer,
+            signature: signature,
         };
         const newSubpath = SimpleProperty.fromServer(newSubpathInput, state.mapping.accessPath);
-
+    
+        // Merge with existing subpaths (just add new ones)
         const currentAccessPathServer = state.mapping.accessPath.toServer();
         const newAccessPathInput: RootPropertyFromServer = {
-            name: currentAccessPathServer.name,
-            signature: currentAccessPathServer.signature,
-            subpaths: [ ...currentAccessPathServer.subpaths, newSubpath.toServer() ],
+            ...currentAccessPathServer,
+            subpaths: [
+                ...currentAccessPathServer.subpaths,
+                newSubpath.toServer(),
+            ],
         };
         const newAccessPath = RootProperty.fromServer(newAccessPathInput);
-
+    
         return {
             ...state,
             mapping: { ...state.mapping, accessPath: newAccessPath },
-            selectionType: SelectionType.Path,
-            selection: PathSelection.create([ state.mapping.rootObjexKey.toString() ]), // Reset to root
+            selection: FreeSelection.create(),
         };
     }
     }
 }
 
-// Low-level graph library events
-
-type GraphAction = {
-    type: 'graph';
-    event: GraphEvent;
-};
+type GraphAction = { type: 'graph', event: GraphEvent };
 
 function graph(state: EditMappingState, { event }: GraphAction): EditMappingState {
     switch (event.type) {
-    case 'move': {
-        // TODO This is not supported, alghough it should be. Probably would require a new way how to handle metadata ...
+    case 'move':
         return state;
-    }
     case 'select': {
-        if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot) 
-            return state;
-        const updatedSelection = state.selection.updateFromGraphEvent(event);
-        // Limit to one node
-        if (updatedSelection.nodeIds.size > 1) {
-            const firstNode = updatedSelection.nodeIds.values().next().value;
-            return {
-                ...state,
-                selection: FreeSelection.create([ firstNode ]),
-            };
+        if (state.selectionType === SelectionType.Path && state.selection instanceof PathSelection) {
+            // Handle path selection
+            if (state.selection.isEmpty) {
+                // Starting a new path
+                return {
+                    ...state,
+                    selection: PathSelection.create([ event.nodeId ]),
+                };
+            }
+            else {
+                // Find the edge between last node and new node
+                const lastNodeId = state.selection.lastNodeId;
+                const edge = state.graph.edges.bundledEdges.flat().find(e => 
+                    (e.from === lastNodeId && e.to === event.nodeId) ||
+                    (e.to === lastNodeId && e.from === event.nodeId),
+                );
+
+                if (edge) {
+                    return {
+                        ...state,
+                        selection: state.selection.updateFromAction({
+                            operation: 'add',
+                            nodeIds: [ event.nodeId ],
+                            edgeIds: [ edge.id ],
+                        }),
+                    };
+                }
+            }
         }
-        return { ...state, selection: updatedSelection };
+        
+        // Default free selection handling
+        if (state.selection instanceof FreeSelection) {
+            const updatedSelection = state.selection.updateFromGraphEvent(event);
+            return { ...state, selection: updatedSelection };
+        }
+        return state;
     }
     }
 }
 
-// Selection
-
-type SelectAction = {
-    type: 'select';
-} & FreeSelectionAction;
+type SelectAction = { type: 'select' } & FreeSelectionAction;
 
 function select(state: EditMappingState, action: SelectAction): EditMappingState {
     if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot) 
@@ -164,64 +199,20 @@ function select(state: EditMappingState, action: SelectAction): EditMappingState
     return { ...state, selection: updatedSelection };
 }
 
-type SequenceAction = {
-    type: 'sequence';
-} & SequenceSelectionAction;
+type SequenceAction = { type: 'sequence' } & SequenceSelectionAction;
 
 function sequence(state: EditMappingState, action: SequenceAction): EditMappingState {
     if (!(state.selection instanceof SequenceSelection))
         return state;
-
-    return {
-        ...state,
-        selection: state.selection.updateFromAction(action),
-    };
+    return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
-type PathAction = {
-    type: 'path';
-} & PathSelectionAction;
+type PathAction = { type: 'path' } & PathSelectionAction;
 
 function path(state: EditMappingState, action: PathAction): EditMappingState {
     if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath) 
         return state;
-
-    return {
-        ...state,
-        selection: state.selection.updateFromAction(action),
-    };
+    return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
-/** @deprecated */
-type TempSelectionTypeAction = {
-    type: 'selection-type';
-    selectionType: SelectionType;
-};
-
-// TODO This
-
-// Editor phases
-
-// export enum EditorPhase {
-//     default = 'default',
-// }
-
-// export type PhaseAction = {
-//     type: 'phase';
-//     /** The phase we want to switch to. */
-//     phase: EditorPhase;
-//     /** If defined, the graph state should be updated by this value. */
-//     graph?: CategoryGraph;
-// }
-
-// function phase(state: EditMappingState, { phase, graph }: PhaseAction): EditMappingState {
-//     if (!graph)
-//         return { ...state, phase };
-
-//     return {
-//         ...state,
-//         graph,
-//         selection: state.selection.updateFromGraph(graph),
-//         phase,
-//     };
-// }
+type TempSelectionTypeAction = { type: 'selection-type', selectionType: SelectionType };

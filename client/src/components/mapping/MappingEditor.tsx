@@ -103,6 +103,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     const { mapping, selection, selectionType, editorPhase } = state;
 
     const handleAddSubpath = () => {
+        // Switch to path selection mode when + is clicked
         dispatch({ type: 'selection-type', selectionType: SelectionType.Path });
     };
 
@@ -110,48 +111,58 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
         if (selection instanceof PathSelection && !selection.isEmpty) {
             const newNodeId = selection.lastNodeId;
             dispatch({ type: 'append-to-access-path', nodeId: newNodeId });
+            // Reset to free selection after adding
+            dispatch({ type: 'selection-type', selectionType: SelectionType.Free });
         }
     };
 
-    const accessPathJson = () => {
-        const subpaths = mapping.accessPath.subpaths.reduce((acc, subpath) => {
-            acc[subpath.name.toString()] = {};
+    const renderAccessPath = () => {
+        const root = mapping.accessPath;
+        const subpaths = root.subpaths.reduce((acc: Record<string, string>, subpath) => {
+            acc[subpath.name.toString()] = subpath.signature.toString();
             return acc;
-        }, {} as Record<string, object>);
-        return JSON.stringify({ [mapping.accessPath.name.toString()]: subpaths }, null, 2);
+        }, {});
+
+        // Format the output to match json-like structure
+        return JSON.stringify({ [root.name.toString()]: subpaths }, null, 2)
+            .replace(/"(\w+)": "([^"]+)"/g, '$1: $2')
+            .replace(/"(\w+)": {/g, '$1: {')
+            .replace(/}/g, '}');
     };
 
     return (
         <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-background'>
             <h3>Access Path</h3>
             <div className='mt-3 space-y-2'>
-                {mapping.accessPath ? (
-                    <div>
-                        <pre className='text-sm text-default-800'>
-                            {accessPathJson()}
-                            {editorPhase === EditorPhase.BuildPath && (
-                                <Button
-                                    isIconOnly
-                                    size='sm'
-                                    variant='ghost'
-                                    onPress={handleAddSubpath}
-                                    className='text-primary-500 ml-2'
-                                >
-                                    +
-                                </Button>
-                            )}
-                        </pre>
-                    </div>
-                ) : (
-                    <p className='text-sm text-default-500'>No access path defined.</p>
-                )}
+                <pre className='text-sm text-default-800'>
+                    {renderAccessPath()}
+                    {editorPhase === EditorPhase.BuildPath && (
+                        <Button
+                            isIconOnly
+                            size='sm'
+                            variant='ghost'
+                            onPress={handleAddSubpath}
+                            className='text-primary-500 ml-2'
+                        >
+                            +
+                        </Button>
+                    )}
+                </pre>
             </div>
-            {selectionType === SelectionType.Path && selection instanceof PathSelection && !selection.isEmpty && (
+            {selectionType === SelectionType.Path && (
                 <div className='mt-3'>
-                    <p className='text-sm text-default-600'>Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}</p>
-                    <Button size='sm' color='primary' onPress={handleConfirmPath} className='mt-2'>
-                        Add
-                    </Button>
+                    {selection instanceof PathSelection && !selection.isEmpty ? (
+                        <>
+                            <p className='text-sm text-default-600'>
+                                Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}
+                            </p>
+                            <Button size='sm' color='primary' onPress={handleConfirmPath} className='mt-2'>
+                                Add
+                            </Button>
+                        </>
+                    ) : (
+                        <p className='text-sm text-default-500'>Select a path in the graph</p>
+                    )}
                 </div>
             )}
         </div>
