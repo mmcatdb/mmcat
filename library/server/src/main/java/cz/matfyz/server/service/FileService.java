@@ -85,12 +85,11 @@ public class FileService {
         // Here similarly as for "database" field. I am in trouble if the field names change
         final AbstractStatement creationStatement = oldDDLWrapper.createCreationStatement(newDBName, datasourceWrapper.settings.get("username").asText());
 
-        // this needs to be executed as admin (well at least for Postgres it does)
+        // this could be only executed if the datasource isClonable (which in most cases mean that the current user has admin privileges)
         oldControl.execute(Collections.singletonList(creationStatement));
 
         // This approach is ok for MongoDB, PostgreSQL and Neo4j, since their settings all have the "database" field
         // (will it be ok on other DBs?)
-        // The "database" field gets overwritten
         ObjectNode newSettings = datasourceWrapper.settings.put("database", newDBName);
         DatasourceInit newDataSourceInit = new DatasourceInit(datasourceWrapper.label, datasourceWrapper.type, newSettings);
         final DatasourceWrapper newDatasourceWrapper = DatasourceWrapper.createNew(newDataSourceInit);

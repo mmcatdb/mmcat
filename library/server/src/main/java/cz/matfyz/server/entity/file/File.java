@@ -77,10 +77,10 @@ public class File extends Entity {
             default -> "Unknown file type";
         };
     }
-    
+
     private static String capitalize(String input) {
         return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
-    }    
+    }
 
     /**
      * Get the file path based on the file type

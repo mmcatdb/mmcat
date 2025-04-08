@@ -29,7 +29,8 @@ public class DatasourceSettings {
             properties.username(),
             properties.password(),
             true,
-            true
+            true,
+            false
         );
 
         return new DatasourceInit(label, DatasourceType.postgresql, mapper.valueToTree(settings));
@@ -44,7 +45,8 @@ public class DatasourceSettings {
             properties.username(),
             properties.password(),
             true,
-            true
+            true,
+            false
         );
 
         return new DatasourceInit(label, DatasourceType.mongodb, mapper.valueToTree(settings));
@@ -59,6 +61,7 @@ public class DatasourceSettings {
             properties.password(),
             true,
             // TODO enable when it's implemented
+            false,
             false
         );
 

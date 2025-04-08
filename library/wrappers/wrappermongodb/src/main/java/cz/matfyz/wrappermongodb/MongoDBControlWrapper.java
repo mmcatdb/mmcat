@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import com.mongodb.MongoException;
-import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,35 +33,16 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
         this.provider = provider;
     }
 
-    // If the command is grantRolesToUser, use no-user (unauthenticated) connection
     @Override public void execute(Collection<AbstractStatement> statements) {
-        try {
-            boolean requiresNoAuth = statements.stream().anyMatch(this::isGrantRolesStatement);
-            MongoDatabase database = requiresNoAuth
-                ? provider.getNoUserDatabase()
-                : provider.getDatabase();
-
-            for (final var statement : statements) {
-                try {
-                    if (statement instanceof MongoDBCommandStatement commandStatement) {
-                        database.runCommand(commandStatement.getCommand());
-                    }
-                }
-                catch (MongoException e) {
-                    throw new ExecuteException(e, statements);
-                }
+        for (final var statement : statements) {
+            try {
+                if (statement instanceof MongoDBCommandStatement commandStatement)
+                    provider.getDatabase().runCommand(commandStatement.getCommand());
+            }
+            catch (MongoException e) {
+                throw new ExecuteException(e, statements);
             }
         }
-        catch (Exception e) {
-            throw new ExecuteException(e, statements);
-        }
-    }
-
-    private boolean isGrantRolesStatement(AbstractStatement statement) {
-        if (statement instanceof MongoDBCommandStatement commandStatement) {
-            return commandStatement.getCommand().containsKey("grantRolesToUser");
-        }
-        return false;
     }
 
     @Override public void execute(Path path) {

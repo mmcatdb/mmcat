@@ -16,10 +16,6 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
     // This also means that there should be at most one instance of this class so it should be cached somewhere.
     private MongoClient mongoClient;
 
-    private MongoClient noUserMongoClient;
-
-    private static final String ADMIN_NAME = "admin";
-
     public MongoDBProvider(MongoDBSettings settings) {
         this.settings = settings;
     }
@@ -29,13 +25,6 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
             mongoClient = MongoClients.create(settings.createConnectionString());
 
         return mongoClient.getDatabase(settings.database);
-    }
-
-    public MongoDatabase getNoUserDatabase() {
-        if (noUserMongoClient == null)
-            noUserMongoClient = MongoClients.create(settings.createNoUserConnectionString());
-
-        return noUserMongoClient.getDatabase(ADMIN_NAME);
     }
 
     public boolean isStillValid(Object settings) {
@@ -52,9 +41,6 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
     public void close() {
         if (mongoClient != null)
             mongoClient.close();
-
-        if (noUserMongoClient != null)
-            noUserMongoClient.close();
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -66,7 +52,8 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         @Nullable String username,
         @Nullable String password,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {
 
         public String createConnectionString() {
@@ -116,10 +103,6 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
                 .append("/");
 
             return builder.toString();
-        }
-
-        public String createNoUserConnectionString() {
-            return "mongodb://" + host + ":" + port + "/" + ADMIN_NAME;
         }
 
     }

@@ -34,7 +34,7 @@ class CsvTests {
     void testServerUrl() throws Exception { // testing file
         @SuppressWarnings("deprecation")
         final URL url = new URL("https://data.mmcatdb.com/googleplaystore.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false, false);
         final var provider = new CsvProvider(settings);
 
         final List<String> fileNames = List.of(provider.getCsvFileNames());
@@ -54,7 +54,7 @@ class CsvTests {
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
         final URL url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv"); // the file includes comma as a delimiter
-        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false, false);
         final var provider = new CsvProvider(settings);
         final CsvInferenceWrapper inferenceWrapper = setup(provider);
         final var documents = inferenceWrapper.loadDocuments();
@@ -122,7 +122,7 @@ class CsvTests {
         private final String csvContent;
 
         StringCsvProvider(char separator, boolean hasHeader, String csvContent) {
-            super(new CsvSettings("", separator, hasHeader, false, false));
+            super(new CsvSettings("", separator, hasHeader, false, false, false));
             this.csvContent = csvContent;
         }
 

@@ -54,6 +54,7 @@ public class DatabaseWrapper {
                 properties.username(),
                 properties.password(),
                 true,
+                true,
                 true
             ));
 
