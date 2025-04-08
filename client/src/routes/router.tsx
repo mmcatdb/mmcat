@@ -125,8 +125,8 @@ export const router = createBrowserRouter([
                                 ],
                             },
                             {
-                                path: routes.category.newMapping.path,
                                 id: routes.category.newMapping.id,
+                                path: routes.category.newMapping.path,
                                 loader: NewMappingPage.loader,
                                 Component: NewMappingPage,
                                 handle: { breadcrumb: 'New Mapping' },
@@ -136,7 +136,7 @@ export const router = createBrowserRouter([
                                 path: routes.category.mapping.path,
                                 loader: MappingPage.loader,
                                 Component: MappingPage,
-                                handle: { 
+                                handle: {
                                     breadcrumb: (data: MappingLoaderData) => data.mapping.kindName,
                                 },
                             },

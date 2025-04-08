@@ -161,19 +161,19 @@ function isNodeSelected({ selection, selectionType }: EditMappingState, node: Ca
 }
 
 function isNodeSelectionAllowed({ selection, selectionType, editorPhase }: EditMappingState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
-    if (selectionType === SelectionType.None) 
+    if (selectionType === SelectionType.None)
         return false;
 
-    if (selection instanceof FreeSelection && editorPhase === EditorPhase.SelectRoot) 
+    if (selection instanceof FreeSelection && editorPhase === EditorPhase.SelectRoot)
         return true;
 
     if (selection instanceof PathSelection && editorPhase === EditorPhase.BuildPath) {
-        if (!pathGraph) 
+        if (!pathGraph)
             return true;
         const pathNode = pathGraph.nodes.get(node.id);
-        if (!pathNode) 
+        if (!pathNode)
             return false;
-        return pathNode.pathCount === PathCount.One && selection.nodeIds.length < 2;
+        return pathNode.pathCount === PathCount.One || pathNode.id === selection.lastNodeId;
     }
 
     return false;

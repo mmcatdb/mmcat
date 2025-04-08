@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate, useParams } from 'react-router-dom';
+import { type Params, useLoaderData, useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/api';
 import { MappingEditor } from '@/components/mapping/MappingEditor';
 import { Mapping, type MappingFromServer, type MappingInit } from '@/types/mapping';
@@ -71,8 +71,8 @@ export type NewMappingLoaderData = {
     category: Category;
 };
 
-async function newMappingLoader({ params: { categoryId } }: { params: { categoryId: string } }) {
-    if (!categoryId) 
+async function newMappingLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+    if (!categoryId)
         throw new Error('Category ID required');
 
     const categoryResponse = await api.schemas.getCategory({ id: categoryId });

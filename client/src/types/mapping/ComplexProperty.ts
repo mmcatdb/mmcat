@@ -22,7 +22,7 @@ export function subpathFromFromServer(input: ChildPropertyFromServer, parent: Pa
 }
 
 export class ComplexProperty implements Printable {
-    private constructor(
+    public constructor(
         readonly name: Name,
         readonly signature: Signature,
         readonly parent: ParentProperty | undefined,
