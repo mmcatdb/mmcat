@@ -11,9 +11,10 @@ import { routes } from '@/routes/routes';
 type DatasourcesTableProps = {
     datasources: Datasource[];
     deleteDatasource: (id: string) => void;
+    datasourcesWithMappings?: string[];
 };
 
-export function DatasourcesTable({ datasources, deleteDatasource }: DatasourcesTableProps) {
+export function DatasourcesTable({ datasources, deleteDatasource, datasourcesWithMappings = [] }: DatasourcesTableProps) {
     const { sortedData: sortedDatasources, sortDescriptor, setSortDescriptor } = useSortableData(datasources, {
         column: 'label',
         direction: 'ascending',
@@ -29,6 +30,7 @@ export function DatasourcesTable({ datasources, deleteDatasource }: DatasourcesT
             deleteDatasource={deleteDatasource}
             sortDescriptor={sortDescriptor}
             onSortChange={handleSortChange}
+            datasourcesWithMappings={datasourcesWithMappings}
         />
     );
 }
@@ -38,9 +40,16 @@ type DatasourceTableProps = {
   deleteDatasource: (id: string) => void;
   sortDescriptor: SortDescriptor;
   onSortChange: (sortDescriptor: SortDescriptor) => void;
+  datasourcesWithMappings?: string[];
 };
 
-function DatasourceTable({ datasources, deleteDatasource, sortDescriptor, onSortChange }: DatasourceTableProps) {
+function DatasourceTable({ 
+    datasources, 
+    deleteDatasource, 
+    sortDescriptor, 
+    onSortChange, 
+    datasourcesWithMappings = [], 
+}: DatasourceTableProps) {
     const { showTableIDs } = usePreferences().preferences;
     const { categoryId } = useParams();
 
@@ -101,39 +110,41 @@ function DatasourceTable({ datasources, deleteDatasource, sortDescriptor, onSort
                     <TableColumn key='type' allowsSorting>
                             Type
                     </TableColumn>,
-                    // <TableColumn key='settings'>Settings</TableColumn>,
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
             <TableBody emptyContent={'No rows to display.'}>
-                {datasources.map(datasource => (
-                    <TableRow
-                        key={datasource.id}
-                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
-                    >
-                        {[
-                            ...(showTableIDs
-                                ? [ <TableCell key='id'>{datasource.id}</TableCell> ]
-                                : []),
-                            <TableCell key='label'>{datasource.label}</TableCell>,
-                            <TableCell key='type'>{datasource.type}</TableCell>,
-                            // <TableCell key='settings' className='break-all'>
-                            //     {JSON.stringify(datasource.settings, null, 2)}
-                            // </TableCell>,
-                            <TableCell key='actions'>
-                                <Button
-                                    isIconOnly
-                                    aria-label='Delete'
-                                    color='danger'
-                                    variant='light'
-                                    onPress={() => handleDeleteClick(datasource.id)}
-                                >
-                                    <TrashIcon className='w-5 h-5' />
-                                </Button>
-                            </TableCell>,
-                        ]}
-                    </TableRow>
-                ))}
+                {datasources.map(datasource => {
+                    const hasMappings = datasourcesWithMappings.includes(datasource.id);
+                    return (
+                        <TableRow
+                            key={datasource.id}
+                            className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
+                        >
+                            {[
+                                ...(showTableIDs
+                                    ? [ <TableCell key='id'>{datasource.id}</TableCell> ]
+                                    : []),
+                                <TableCell key='label'>{datasource.label}</TableCell>,
+                                <TableCell key='type'>{datasource.type}</TableCell>,
+                                <TableCell key='actions' title={hasMappings 
+                                    ? 'Delete disabled - datasource has active mappings' 
+                                    : 'Delete datasource'}>
+                                    <Button
+                                        isIconOnly
+                                        aria-label='Delete'
+                                        color='danger'
+                                        variant='light'
+                                        onPress={() => handleDeleteClick(datasource.id)}
+                                        isDisabled={hasMappings}
+                                    >
+                                        <TrashIcon className='w-5 h-5' />
+                                    </Button>
+                                </TableCell>,
+                            ]}
+                        </TableRow>
+                    );
+                })}
             </TableBody>
         </Table>
 

@@ -14,13 +14,13 @@ import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 
-export function DatasourcePage() {
+export function DatasourceDetailPage() {
     return (<>
         <DatasourceDisplay />
     </>);
 }
 
-DatasourcePage.loader = datasourceLoader;
+DatasourceDetailPage.loader = datasourceLoader;
 
 export type DatasourceLoaderData = {
     datasource: Datasource;
@@ -44,13 +44,15 @@ export function DatasourceInCategoryPage() {
     const { categoryId } = useParams<{ categoryId: string }>();
     const navigate = useNavigate();
 
-    const handleCreateMapping = () => {
+    function handleCreateMapping() {
         if (!categoryId) {
             console.error('Category ID is missing');
             return;
         }
-        navigate(`/schema-categories/${categoryId}/mappings/new`);
-    };
+        navigate(`/schema-categories/${categoryId}/mappings/new`, {
+            state: { datasourceId: datasource.id },   // pass datasource ID for new mapping creation
+        });
+    }
 
     return (
         <div>

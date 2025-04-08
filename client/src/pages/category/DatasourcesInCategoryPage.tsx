@@ -25,6 +25,8 @@ export function DatasourcesInCategoryPage() {
     const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
 
+    const [ datasourcesWithMappings, setDatasourcesWithMappings ] = useState<string[]>(data.allDatasourcesWithMappings);
+
     function onDatasourceCreated(newDatasource: Datasource) {
         setDatasourcesNotIn(prev => [ ...prev, newDatasource ]);
     }
@@ -62,6 +64,7 @@ export function DatasourcesInCategoryPage() {
                     <DatasourcesTable
                         datasources={datasourcesIn}
                         deleteDatasource={deleteDatasource}
+                        datasourcesWithMappings={datasourcesWithMappings}
                     />
                 ) : (
                     <div className='text-center border border-default-300 p-6 rounded-lg bg-default-100'>
@@ -102,6 +105,7 @@ export function DatasourcesInCategoryPage() {
                     <DatasourcesTable
                         datasources={datasourcesNotIn}
                         deleteDatasource={deleteDatasource}
+                        datasourcesWithMappings={datasourcesWithMappings}
                     />
                 ) : (
                     <EmptyState
@@ -126,17 +130,20 @@ DatasourcesInCategoryPage.loader = datasourcesInCategoryLoader;
 export type DatasourcesInCategoryLoaderData = {
     datasourcesIn: Datasource[];
     datasourcesNotIn: Datasource[];
+    allDatasourcesWithMappings: string[];  // IDs of all datasources with mappings in any category
 };
 
 async function datasourcesInCategoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<DatasourcesInCategoryLoaderData> {
     if (!categoryId)
         throw new Error('Action ID is required');
 
-    const [ inCategoryResponse, allResponse ] = await Promise.all([
+    const [ inCategoryResponse, allResponse, allMappingsResponse ] = await Promise.all([
         api.datasources.getAllDatasources({}, { categoryId: categoryId }),
         api.datasources.getAllDatasources({}),
+        api.mappings.getAllMappings({}), // Get ALL mappings to check for datasources used elsewhere
     ]);
-    if (!inCategoryResponse.status || !allResponse.status)
+    
+    if (!inCategoryResponse.status || !allResponse.status || !allMappingsResponse.status)
         throw new Error('Failed to load datasources in category');
 
     const datasourcesIn = inCategoryResponse.data.map(Datasource.fromServer);
@@ -144,9 +151,14 @@ async function datasourcesInCategoryLoader({ params: { categoryId } }: { params:
         .filter(ds => !datasourcesIn.some(inCategory => inCategory.id === ds.id))
         .map(Datasource.fromServer);
 
+    const allDatasourcesWithMappings = Array.from(
+        new Set(allMappingsResponse.data.map(m => m.datasourceId)),
+    );
+
     return {
         datasourcesIn,
         datasourcesNotIn,
+        allDatasourcesWithMappings,
     };
 }
 

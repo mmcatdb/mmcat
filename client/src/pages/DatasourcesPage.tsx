@@ -63,7 +63,11 @@ export function DatasourcesPage() {
 
             {/* Table Section */}
             {datasources.length > 0 ? (
-                <DatasourcesTable datasources={datasources} deleteDatasource={deleteDatasource} />
+                <DatasourcesTable 
+                    datasources={datasources} 
+                    deleteDatasource={deleteDatasource}
+                    datasourcesWithMappings={data.datasourcesWithMappings}
+                />
             ) : (
                 <EmptyState
                     message='No datasources available.'
@@ -85,15 +89,25 @@ DatasourcesPage.loader = datasourcesLoader;
 
 export type DatasourcesLoaderData = {
     datasources: Datasource[];
+    datasourcesWithMappings: string[]; // IDs of datasources with mappings
 };
 
 async function datasourcesLoader(): Promise<DatasourcesLoaderData> {
-    const response = await api.datasources.getAllDatasources({});
-    if (!response.status)
+    const [ datasourcesResponse, mappingsResponse ] = await Promise.all([
+        api.datasources.getAllDatasources({}),
+        api.mappings.getAllMappings({}),
+    ]);
+    
+    if (!datasourcesResponse.status || !mappingsResponse.status)
         throw new Error('Failed to load datasources');
 
+    const datasourceIdsWithMappings = new Set(
+        mappingsResponse.data.map(m => m.datasourceId),
+    );
+
     return {
-        datasources: response.data.map(Datasource.fromServer),
+        datasources: datasourcesResponse.data.map(Datasource.fromServer),
+        datasourcesWithMappings: Array.from(datasourceIdsWithMappings),
     };
 }
 

@@ -19,7 +19,7 @@ export function NewMappingPage() {
     
     if (!datasourceId) {
         navigate(-1); // Go back if no datasource ID
-        toast.error('Datasource ID is required');
+        // toast.error('Datasource ID is required');
         return null;
     }
 

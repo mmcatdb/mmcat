@@ -5,7 +5,7 @@ import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
 import { CategoryPage, type CategoryLoaderData } from '@/pages/CategoryPage';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
-import { type DatasourceLoaderData, DatasourcePage, DatasourceInCategoryPage } from '@/pages/DatasourcePage';
+import { type DatasourceLoaderData, DatasourceDetailPage, DatasourceInCategoryPage } from '@/pages/DatasourcePage';
 import { AdminerPage } from '@/pages/AdminerPage';
 import { CategoriesPage, SchemaCategoriesPage } from '@/pages/CategoriesPage';
 import { QueryingPage } from '@/pages/category/QueryingPage';
@@ -42,8 +42,8 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: ':id',
-                        loader: DatasourcePage.loader,
-                        Component: DatasourcePage,
+                        loader: DatasourceDetailPage.loader,
+                        Component: DatasourceDetailPage,
                         handle: {
                             breadcrumb: (data: DatasourceLoaderData) => data.datasource.label,
                         },
@@ -110,17 +110,6 @@ export const router = createBrowserRouter([
                                         handle: {
                                             breadcrumb: (data: DatasourceLoaderData) => data.datasource.label,
                                         },
-                                        // children: [
-                                        //     {
-                                        //         id: routes.category.mapping.id,
-                                        //         path: routes.category.mapping.path, // `mappings/:mappingId`
-                                        //         loader: MappingPage.loader,
-                                        //         Component: MappingPage,
-                                        //         handle: {
-                                        //             breadcrumb: (data: MappingLoaderData) => data.mapping.kindName,
-                                        //         },
-                                        //     },
-                                        // ],
                                     },
                                 ],
                             },
