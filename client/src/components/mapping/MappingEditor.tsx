@@ -1,9 +1,8 @@
 import { EditMappingGraphDisplay } from './EditMappingGraphDisplay';
 import { createInitialState, type EditMappingAction, editMappingReducer, type EditMappingState, EditorPhase } from './editMappingReducer';
 import { type Category } from '@/types/schema';
-import { useCallback, useReducer } from 'react';
+import { type Dispatch, useCallback, useReducer } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
-import { SelectionCard } from '../category/SelectionCard';
 import { type Mapping } from '@/types/mapping';
 import { Button } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
@@ -43,31 +42,108 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
     return (
         <div className='relative h-[700px] flex'>
             <EditMappingGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
-
+    
             {state.editorPhase === EditorPhase.SelectRoot && (
-                <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background p-4 rounded-lg shadow-lg z-20'>
-                    <p className='text-lg font-semibold text-default-800'>Please select a root node</p>
-                    {state.selection instanceof FreeSelection && !state.selection.isEmpty && (
-                        <>
-                            <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />
-                            <Button size='sm' color='primary' onPress={handleSetRoot} className='mt-2 w-full'>
-                                OK
-                            </Button>
-                        </>
-                    )}
+                <RootSelectionPanel 
+                    selection={state.selection} 
+                    graph={state.graph}
+                    dispatch={freeSelectionDispatch}
+                    onConfirm={handleSetRoot}
+                />
+            )}
+    
+            {state.editorPhase !== EditorPhase.SelectRoot && (
+                <AccessPathCard state={state} dispatch={dispatch} />
+            )}
+
+            {state.editorPhase === EditorPhase.BuildPath && (
+                <div className='absolute bottom-2 right-2 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-3'>
+                    <div className='flex gap-3'>
+                        <Button 
+                            color='danger' 
+                            variant='flat' 
+                            onPress={handleCancel}
+                            startContent={<XMarkIcon className='h-4 w-4' />}
+                            size='sm'
+                        >
+                            Discard
+                        </Button>
+                        <Button 
+                            color='success' 
+                            variant='solid' 
+                            onPress={handleSave}
+                            startContent={<CheckCircleIcon className='h-4 w-4' />}
+                            size='sm'
+                        >
+                            Create Mapping
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { type CategoryGraph } from '../category/categoryGraph';
+
+type RootSelectionPanelProps = {
+    selection: FreeSelection;
+    graph: CategoryGraph;
+    dispatch: Dispatch<FreeSelectionAction>;
+    onConfirm: () => void;
+};
+
+function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelectionPanelProps) {
+    const selectedNode = selection.nodeIds.size > 0 
+        ? graph.nodes.get([ ...selection.nodeIds ][0])
+        : null;
+
+    return (
+        <div className='absolute bottom-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
+            <div className='flex items-center justify-between'>
+                <h3 className='text-lg font-semibold'>Select Root Node</h3>
+                {selectedNode && (
+                    <Button 
+                        size='sm' 
+                        color='success' 
+                        variant='flat'
+                        onPress={onConfirm}
+                        startContent={<CheckCircleIcon className='h-4 w-4' />}
+                    >
+                        Confirm
+                    </Button>
+                )}
+            </div>
+
+            {selectedNode ? (
+                <div className='bg-default-100 rounded-lg p-3'>
+                    <div className='flex items-center justify-between'>
+                        <div>
+                            <p className='font-medium'>{selectedNode.metadata.label}</p>
+                            <p className='text-xs text-default-500'>{selectedNode.schema.key.toString()}</p>
+                        </div>
+                        <Button
+                            isIconOnly
+                            size='sm'
+                            variant='light'
+                            onClick={() => dispatch({ operation: 'clear', range: 'nodes' })}
+                        >
+                            <XMarkIcon className='h-4 w-4' />
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <div className='bg-default-100 rounded-lg p-3 text-center'>
+                    <p className='text-default-500 text-sm'>
+                        Click on a node in the graph to select it as root
+                    </p>
                 </div>
             )}
 
-            <AccessPathCard state={state} dispatch={dispatch} />
-
-            {state.editorPhase === EditorPhase.BuildPath && (
-                <div className='absolute bottom-2 right-2 z-20 p-3 bg-background flex gap-2'>
-                    <Button color='primary' size='sm' onPress={handleSave}>
-                        Finish Mapping
-                    </Button>
-                    <Button color='default' variant='ghost' size='sm' onPress={handleCancel}>
-                        Cancel
-                    </Button>
+            {selection.edgeIds.size > 0 && (
+                <div className='bg-warning-100 rounded-lg p-3 text-warning-800 text-sm'>
+                    <p>Only nodes can be selected as root objects</p>
                 </div>
             )}
         </div>
@@ -120,7 +196,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     }
 
     return (
-        <div className='absolute bottom-2 left-2 z-20 w-[300px] p-3 bg-background'>
+        <div className='absolute bottom-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
             <h3>Access Path</h3>
             <div className='mt-3 space-y-2'>
                 <pre className='text-sm text-default-800'>
@@ -158,11 +234,11 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
                     )}
                 </div>
             )}
-            {/* {selectionType === SelectionType.Free && (
+            {selectionType === SelectionType.Free && editorPhase === EditorPhase.BuildPath && (
                 <div className='mt-3 text-sm text-default-500'>
                     <p>Click on + button to add properties.</p>
                 </div>
-            )} */}
+            )}
         </div>
     );
 }

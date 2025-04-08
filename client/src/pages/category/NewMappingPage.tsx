@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate, useParams } from 'react-router-dom';
+import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { MappingEditor } from '@/components/mapping/MappingEditor';
 import { Mapping, type MappingFromServer, type MappingInit } from '@/types/mapping';
@@ -10,15 +10,24 @@ import { Category } from '@/types/schema';
 
 export function NewMappingPage() {
     const { category } = useLoaderData() as NewMappingLoaderData;
-    const { id: datasourceId } = useParams<{ id: string }>(); // From route :id
     const navigate = useNavigate();
-    const [ kindName, setKindName ] = useState('New Mapping');
+    const [ kindName, setKindName ] = useState('');
+    const location = useLocation();
+    
+    // Get datasource ID from route state
+    const datasourceId = location.state?.datasourceId;
+    
+    if (!datasourceId) {
+        navigate(-1); // Go back if no datasource ID
+        toast.error('Datasource ID is required');
+        return null;
+    }
 
     const initialMappingData: MappingFromServer = {
         id: '',
         kindName,
         categoryId: category.id,
-        datasourceId: datasourceId ?? 'a3553b6a-e6aa-4a1c-af11-e294c89a4044', // FIXME
+        datasourceId: datasourceId,
         rootObjectKey: 0 as KeyFromServer,
         primaryKey: [ 'EMPTY' ] as SignatureIdFromServer,
         accessPath: {
@@ -59,6 +68,7 @@ export function NewMappingPage() {
                 value={kindName}
                 onChange={e => setKindName(e.target.value)}
                 className='mb-4 max-w-xs'
+                placeholder='Enter Kind Name or leave blank'
             />
             <MappingEditor category={category} mapping={initialMapping} onSave={handleSaveMapping} />
         </div>
@@ -82,26 +92,3 @@ async function newMappingLoader({ params: { categoryId } }: { params: { category
 
     return { category: Category.fromServer(categoryResponse.data) };
 }
-
-// export type NewMappingLoaderData = {
-//     category: Category;
-//     datasource: Datasource;
-// };
-
-// async function newMappingLoader({ params: { categoryId, id } }: { params: Params<'categoryId' | 'id'> }): Promise<NewMappingLoaderData> {
-//     if (!categoryId || !id)
-//         throw new Error('Category ID and Datasource ID are required');
-
-//     const [ categoryResponse, datasourceResponse ] = await Promise.all([
-//         api.schemas.getCategory({ id: categoryId }),
-//         api.datasources.getDatasource({ id }),
-//     ]);
-
-//     if (!categoryResponse.status || !datasourceResponse.status)
-//         throw new Error('Failed to load category or datasource');
-
-//     return {
-//         category: Category.fromServer(categoryResponse.data),
-//         datasource: Datasource.fromServer(datasourceResponse.data),
-//     };
-// }

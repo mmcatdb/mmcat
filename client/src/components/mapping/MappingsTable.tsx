@@ -5,8 +5,6 @@ import { type SortDescriptor } from '@react-types/shared';
 import type { Mapping } from '@/types/mapping';
 import { useCategoryInfo } from '../CategoryInfoProvider';
 import { AccessPathTooltip } from './AccessPathTooltip';
-import { useNavigate } from 'react-router-dom';
-import { routes } from '@/routes/routes';
 import { useMemo } from 'react';
 
 type MappingsTableProps = {
@@ -44,7 +42,6 @@ function MappingsTableContent({
     onSortChange = () => {},
 }: MappingsTableContentProps) {
     const { showTableIDs } = usePreferences().preferences;
-    const navigate = useNavigate();
     const { category } = useCategoryInfo();
 
     // Common sorting did not work for the versions, this is override
@@ -72,19 +69,20 @@ function MappingsTableContent({
         });
     }, [ mappings, sortDescriptor ]);
 
-    const handleRowAction = (mappingId: React.Key) => {
-        navigate(routes.category.mapping.resolve({ 
-            categoryId: category.id, 
-            mappingId: String(mappingId), 
-        }));
-    };
+    // left for future use, if update of mapping needed
+    // const handleRowAction = (mappingId: React.Key) => {
+    //     navigate(routes.category.mapping.resolve({ 
+    //         categoryId: category.id, 
+    //         mappingId: String(mappingId), 
+    //     }));
+    // };
 
     return (
         <Table
             aria-label='Mappings Table'
             sortDescriptor={sortDescriptor}
             onSortChange={onSortChange}
-            onRowAction={handleRowAction}
+            // onRowAction={handleRowAction}
             removeWrapper
             isCompact
         >

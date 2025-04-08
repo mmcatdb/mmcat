@@ -91,7 +91,6 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         if (!newNode) 
             return state;
     
-        // TODO: How to do this properly?
         // Calculate signature using PathSelection
         let signature = '1'; // there should be no value and dynamic property? or what?
         if (state.selection instanceof PathSelection && state.selection.edgeIds.length > 0) {
@@ -118,7 +117,6 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         };
         const newSubpath = SimpleProperty.fromServer(newSubpathInput, state.mapping.accessPath);
     
-        // Merge with existing subpaths (just add new ones)
         const currentAccessPathServer = state.mapping.accessPath.toServer();
         const newAccessPathInput: RootPropertyFromServer = {
             ...currentAccessPathServer,
@@ -132,6 +130,7 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         return {
             ...state,
             mapping: { ...state.mapping, accessPath: newAccessPath },
+            selectionType: SelectionType.Free,
             selection: FreeSelection.create(),
         };
     }
