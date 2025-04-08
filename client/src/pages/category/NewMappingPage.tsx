@@ -81,8 +81,8 @@ export type NewMappingLoaderData = {
     category: Category;
 };
 
-async function newMappingLoader({ params: { categoryId } }: { params: { categoryId: string } }) {
-    if (!categoryId) 
+async function newMappingLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+    if (!categoryId)
         throw new Error('Category ID required');
 
     const categoryResponse = await api.schemas.getCategory({ id: categoryId });

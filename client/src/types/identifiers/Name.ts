@@ -66,6 +66,13 @@ export class TypedName {
     toString(): string {
         return `<${this.type}>`;
     }
+
+    /** The property is a root of the access path tree, the name doesn't mean anything. */
+    public static readonly ROOT = 'root';
+    /** The property is a value in an object, the name represents its key. */
+    public static readonly KEY = 'key';
+    /** The property is an element of an array, the name represents its index. */
+    public static readonly INDEX = 'index';
 }
 
 type DynamicNameFromServer = TypedNameFromServer & {

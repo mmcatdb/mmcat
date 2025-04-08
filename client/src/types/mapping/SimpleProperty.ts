@@ -8,10 +8,10 @@ export type SimplePropertyFromServer = {
 };
 
 export class SimpleProperty implements Printable {
-    private constructor(
+    public constructor(
         readonly name: Name,
         readonly signature: Signature,
-        public parent?: ParentProperty,
+        readonly parent: ParentProperty | undefined,
     ) {}
 
     static fromServer(input: SimplePropertyFromServer, parent: ParentProperty): SimpleProperty {

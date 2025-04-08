@@ -1,10 +1,10 @@
 import { type Dispatch } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SelectionType, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
-import { type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
+import { type CategoryEdge, type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
-import { type Mapping, SimpleProperty, RootProperty, type SimplePropertyFromServer, type RootPropertyFromServer } from '@/types/mapping';
-import { Key, type NameFromServer, type SignatureFromServer } from '@/types/identifiers';
+import { type Mapping, SimpleProperty, RootProperty } from '@/types/mapping';
+import { Key, Signature, StringName, TypedName } from '@/types/identifiers';
 
 export enum EditorPhase {
     SelectRoot = 'select-root',
@@ -67,15 +67,12 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
     case 'set-root': {
         const { rootNodeId } = action;
         const rootNode = state.graph.nodes.get(rootNodeId);
-        if (!rootNode) 
+        if (!rootNode)
             return state;
 
-        const newAccessPathInput: RootPropertyFromServer = {
-            name: { value: rootNode.metadata.label } as NameFromServer,
-            signature: '0' as SignatureFromServer,
-            subpaths: [],
-        };
-        const newAccessPath = RootProperty.fromServer(newAccessPathInput);
+        const newAccessPath = new RootProperty(new TypedName(TypedName.ROOT), []);
+
+        // .fromServer(newAccessPathInput);
 
         return {
             ...state,
@@ -86,47 +83,32 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         };
     }
     case 'append-to-access-path': {
+        const selection = state.selection;
+        if (!(selection instanceof PathSelection))
+            return state;
+
         const { nodeId } = action;
         const newNode = state.graph.nodes.get(nodeId);
-        if (!newNode) 
+        if (!newNode)
             return state;
     
         // Calculate signature using PathSelection
-        let signature = '1'; // there should be no value and dynamic property? or what?
-        if (state.selection instanceof PathSelection && state.selection.edgeIds.length > 0) {
-            const edgeSignatures = state.selection.edgeIds.map((edgeId, index) => {
-                const edge = state.graph.edges.bundledEdges.flat().find(e => e.id === edgeId);
-                if (!edge) 
-                    return `${index + 1}`; // Fallback
-    
-                // here to check direction (+/-)
-                const lastNodeId = state.selection.nodeIds[index];
-                const nextNodeId = state.selection.nodeIds[index + 1];
-                const isForward = edge.from === lastNodeId && edge.to === nextNodeId;
-    
-                // Use edge signature or ID if signature not available
-                const edgeSignature = edge.metadata?.signature || edge.id;
-                return isForward ? edgeSignature : `-${edgeSignature}`;
-            });
-            signature = edgeSignatures.join('.');
-        }
-    
-        const newSubpathInput: SimplePropertyFromServer = {
-            name: { value: newNode.metadata.label } as NameFromServer,
-            signature: signature,
-        };
-        const newSubpath = SimpleProperty.fromServer(newSubpathInput, state.mapping.accessPath);
-    
-        const currentAccessPathServer = state.mapping.accessPath.toServer();
-        const newAccessPathInput: RootPropertyFromServer = {
-            ...currentAccessPathServer,
-            subpaths: [
-                ...currentAccessPathServer.subpaths,
-                newSubpath.toServer(),
-            ],
-        };
-        const newAccessPath = RootProperty.fromServer(newAccessPathInput);
-    
+        const signatures = selection.edgeIds.map((edgeId, index) => {
+            const edge: CategoryEdge = state.graph.edges.get(edgeId)!;
+            const fromNodeId = selection.nodeIds[index];
+            return edge.from === fromNodeId ? edge.schema.signature : edge.schema.signature.dual();
+        });
+
+        const signature = Signature.concatenate(...signatures);
+
+        const newSubpath = new SimpleProperty(new StringName(newNode.metadata.label), signature, state.mapping.accessPath);
+
+        // Merge with existing subpaths (just add new ones)
+        const newAccessPath = new RootProperty(state.mapping.accessPath.name, [
+            ...state.mapping.accessPath.subpaths,
+            newSubpath,
+        ]);
+
         return {
             ...state,
             mapping: { ...state.mapping, accessPath: newAccessPath },
@@ -156,7 +138,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
             else {
                 // Find the edge between last node and new node
                 const lastNodeId = state.selection.lastNodeId;
-                const edge = state.graph.edges.bundledEdges.flat().find(e => 
+                const edge = state.graph.edges.bundledEdges.flat().find(e =>
                     (e.from === lastNodeId && e.to === event.nodeId) ||
                     (e.to === lastNodeId && e.from === event.nodeId),
                 );
@@ -173,7 +155,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
                 }
             }
         }
-        
+
         // Default free selection handling
         if (state.selection instanceof FreeSelection) {
             const updatedSelection = state.selection.updateFromGraphEvent(event);
@@ -187,7 +169,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
 type SelectAction = { type: 'select' } & FreeSelectionAction;
 
 function select(state: EditMappingState, action: SelectAction): EditMappingState {
-    if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot) 
+    if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot)
         return state;
     const updatedSelection = state.selection.updateFromAction(action);
     // Limit to one node
@@ -209,7 +191,7 @@ function sequence(state: EditMappingState, action: SequenceAction): EditMappingS
 type PathAction = { type: 'path' } & PathSelectionAction;
 
 function path(state: EditMappingState, action: PathAction): EditMappingState {
-    if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath) 
+    if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath)
         return state;
     return { ...state, selection: state.selection.updateFromAction(action) };
 }

@@ -7,7 +7,7 @@ import { subpathFromFromServer, type ChildProperty, type ComplexPropertyFromServ
 export type RootPropertyFromServer = ComplexPropertyFromServer & { name: NameFromServer };
 
 export class RootProperty implements Printable {
-    private constructor(
+    public constructor(
         readonly name: Name,
         readonly subpaths: ChildProperty[],
     ) {}

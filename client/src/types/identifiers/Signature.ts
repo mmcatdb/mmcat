@@ -56,8 +56,12 @@ export class Signature {
         return this.baseValue !== null && signature.baseValue !== null && this.baseValue === -signature.baseValue;
     }
 
-    concatenate(other: Signature): Signature {
-        return new Signature(this.ids.concat(other.ids));
+    concatenate(...other: Signature[]): Signature {
+        return Signature.fromIds([ ...this.ids, ...other.flatMap(s => s.ids) ]);
+    }
+
+    public static concatenate(...signatures: Signature[]): Signature {
+        return Signature.fromIds(signatures.flatMap(s => s.ids));
     }
 
     private static emptyInstance = new Signature([]);

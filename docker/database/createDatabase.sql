@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS workflow;
+DROP TABLE IF EXISTS "file";
 
 DROP TABLE IF EXISTS job;
 DROP TABLE IF EXISTS run;
@@ -8,14 +9,16 @@ DROP TABLE IF EXISTS action;
 DROP TABLE IF EXISTS query_version;
 DROP TABLE IF EXISTS mapping_update;
 DROP TABLE IF EXISTS schema_update;
+
+DROP TABLE IF EXISTS category_evolution;
+DROP TABLE IF EXISTS mapping_evolution;
+DROP TABLE IF EXISTS query_evolution;
 DROP TABLE IF EXISTS evolution;
 
 DROP TABLE IF EXISTS query;
 DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS datasource;
 DROP TABLE IF EXISTS schema_category;
-
-DROP TABLE IF EXISTS "file";
 
 -- Schema
 
@@ -204,7 +207,7 @@ CREATE TABLE workflow (
     id UUID PRIMARY KEY,
     category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
     label VARCHAR(255) NOT NULL,
-    job_id UUID REFERENCES job,#
+    job_id UUID REFERENCES job ON DELETE CASCADE,
     json_value JSONB NOT NULL
 );
 
