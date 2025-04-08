@@ -66,34 +66,52 @@ export function AddActionPage() {
     }
 
     async function handleSubmit() {
+        // Validate required fields
         if (!label || !type || steps.length === 0) {
             toast.error('All fields and at least one step are required.');
+            return;
+        }
+
+        // Validate that each step has at least one datasource selected
+        const hasInvalidSteps = steps.some(step => {
+            if (step.type === ActionType.ModelToCategory || step.type === ActionType.CategoryToModel) 
+                return !step.datasourceId;
+            else if (step.type === ActionType.RSDToCategory) 
+                return step.datasourceIds.length === 0;
+            
+            return true;
+        });
+
+        if (hasInvalidSteps) {
+            toast.error('Each step must have at least one datasource selected.');
             return;
         }
 
         setLoading(true);
         setError(false);
 
-        const newAction: ActionInit = {
-            categoryId: category.id,
-            label,
-            payloads: steps,
-        };
+        try {
+            const newAction: ActionInit = {
+                categoryId: category.id,
+                label,
+                payloads: steps,
+            };
+            const response = await api.actions.createAction({}, newAction);
+            if (!response.status) 
+                throw new Error('Failed to create action');
 
-        const response = await api.actions.createAction({}, newAction);
-        if (!response.status) {
+            toast.success('Action created successfully.');
+            navigate(-1);
+        }
+        catch (err) {
             toast.error('Something went wrong when creating an action.');
             setError(true);
-            navigate(-1);
-            return;
         }
-        toast.success('Action created successfully.');
-        navigate(-1);
-
-        setLoading(false);
+        finally {
+            setLoading(false);
+        }
     }
 
-    // TODO: resource not found
     if (error)
         return <ErrorPage />;
 

@@ -70,7 +70,7 @@ export function DatasourcesPage() {
                 />
             ) : (
                 <EmptyState
-                    message='No datasources available.'
+                    message='No datasources available. Create one to get started.'
                     buttonText='+ Add Datasource'
                     onButtonClick={() => setIsModalOpen(true)}
                 />

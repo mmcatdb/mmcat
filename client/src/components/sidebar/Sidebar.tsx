@@ -127,7 +127,7 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
     return (
         <Link to={routes.home.path} className='flex items-center mb-6'>
             <h1
-                className='text-2xl font-semibold pt-2 pl-3 whitespace-nowrap overflow-hidden'
+                className='text-2xl font-semibold pt-2 pl-2 whitespace-nowrap overflow-hidden'
             >
                 {isCollapsed ? 'MM' : 'MM-cat'}
             </h1>

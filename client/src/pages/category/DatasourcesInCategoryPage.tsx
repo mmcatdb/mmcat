@@ -67,7 +67,7 @@ export function DatasourcesInCategoryPage() {
                         datasourcesWithMappings={datasourcesWithMappings}
                     />
                 ) : (
-                    <div className='text-center border border-default-300 p-6 rounded-lg bg-default-100'>
+                    <div className='text-center border-2 border-dashed border-default-300 p-6 rounded-lg bg-default-50'>
                         <p className='text-lg font-semibold text-default-900'>
                             No Datasources with Mappings Found
                         </p>

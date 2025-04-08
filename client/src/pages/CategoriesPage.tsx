@@ -11,6 +11,7 @@ import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
+import { FaPlus } from 'react-icons/fa';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -26,7 +27,9 @@ export function CategoriesPage() {
     const { categories: loadedCategories } = useLoaderData() as CategoriesLoaderData;
     const [ categories, setCategories ] = useState(loadedCategories);
     const [ isModalOpen, setIsModalOpen ] = useState(false);
-    const [ isFetching, setIsFetching ] = useState(false);
+    // const [ isFetching, setIsFetching ] = useState(false);
+    const [ isCreatingSchema, setIsCreatingSchema ] = useState(false);
+    const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
     const [ searchTerm, setSearchTerm ] = useState('');
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
 
@@ -35,13 +38,15 @@ export function CategoriesPage() {
     }, []);
 
     const createSchema = useCallback(async (name: string, isExample = false) => {
-        setIsFetching(true);
+        // setIsFetching(true);
+        isExample ? setIsCreatingExampleSchema(true) : setIsCreatingSchema(true);
 
         const response = isExample
             ? await api.schemas.createExampleCategory({ name })
             : await api.schemas.createNewCategory({}, { label: name });
 
-        setIsFetching(false);
+        // setIsFetching(false);
+        isExample ? setIsCreatingExampleSchema(false) : setIsCreatingSchema(false);
 
         if (!response.status) {
             toast.error('Error creating schema category.');
@@ -60,17 +65,46 @@ export function CategoriesPage() {
 
     return (
         <div className='p-4'>
-            {/* Header Section */}
-            <div className='flex items-center gap-2 mb-4'>
-                <h1 className='text-2xl font-semibold'>Schema Categories</h1>
-                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                    <button
-                        onClick={isVisible ? dismissBanner : restoreBanner}
-                        className='text-primary-500 hover:text-primary-700 transition'
+            {/* Header Section with Info button */}
+            <div className='flex items-center justify-between mb-4'>
+                <div className='flex items-center gap-2'>
+                    <h1 className='text-2xl font-bold'>
+                        Schema Categories
+                    </h1>
+                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                        <button
+                            onClick={isVisible ? dismissBanner : restoreBanner}
+                            className='text-primary-500 hover:text-primary-700 transition'
+                        >
+                            <IoInformationCircleOutline className='w-6 h-6' />
+                        </button>
+                    </Tooltip>
+                </div>
+                
+                <div className='flex gap-2'>
+                    <Button
+                        onPress={() => setIsModalOpen(true)}
+                        isLoading={isCreatingSchema}
+                        color='primary'
+                        // size='sm'
+                        startContent={<FaPlus className='w-3 h-3' />}
                     >
-                        <IoInformationCircleOutline className='w-6 h-6' />
-                    </button>
-                </Tooltip>
+                        New Schema
+                    </Button>
+                    {EXAMPLE_SCHEMAS.map(example => (
+                        <Button
+                            key={example}
+                            onPress={() => createSchema(example, true)}
+                            isLoading={isCreatingExampleSchema}
+                            color='secondary'
+                            variant='flat'
+                            // size='sm'
+                            startContent={<FaPlus className='w-3 h-3' />}
+                        >
+                            Example
+                        </Button>
+                    ))}
+                </div>
             </div>
 
             {isVisible && <SchemaCategoryInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
@@ -97,29 +131,6 @@ export function CategoriesPage() {
                     }
                     disabled={categories.length === 0}
                 />
-
-                {/* Buttons */}
-                <div className='flex gap-3'>
-                    {EXAMPLE_SCHEMAS.map(example => (
-                        <Button
-                            key={example}
-                            onPress={() => createSchema(example, true)}
-                            isLoading={isFetching}
-                            color='secondary'
-                            title='Add an example (pre-made) schema category'
-                        >
-                            + Add Example Schema
-                        </Button>
-                    ))}
-                    <Button
-                        onPress={() => setIsModalOpen(true)}
-                        isLoading={isFetching}
-                        color='primary'
-                        title='Add an empty schema category'
-                    >
-                        + Add Empty Schema
-                    </Button>
-                </div>
             </div>
 
             <div className='space-y-6'>
@@ -133,8 +144,9 @@ export function CategoriesPage() {
                         <p className='text-default-500 text-center'>No matching categories.</p>
                     )
                 ) : (
-                    <div className='text-center border p-6 rounded-lg border-default-200'>
-                        <p className='mt-2 text-default-500'>No categories available. Create one to get started!</p>
+                    <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
+                        <FaPlus className='w-8 h-8 mx-auto text-default-300' />
+                        <p className='mt-4 text-default-500'>No schema categories yet. Create your first one to get started!</p>
                     </div>
                 )}
             </div>
@@ -143,7 +155,7 @@ export function CategoriesPage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={label => createSchema(label, false)}
-                isSubmitting={isFetching}
+                isSubmitting={isCreatingSchema}
             />
         </div>
     );

@@ -90,7 +90,7 @@ export function EmptyState({
     buttonClassName = 'px-4 py-2',
 }: EmptyStateProps) {
     return (
-        <div className='text-center border p-6 rounded-lg border-default-200'>
+        <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
             <p className='text-lg mb-4'>{message}</p>
             <Button
                 className={buttonClassName}

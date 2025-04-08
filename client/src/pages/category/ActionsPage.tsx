@@ -5,7 +5,6 @@ import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
 import { ConfirmationModal, EmptyState, useSortableData } from '@/components/TableCommon';
-import { AddIcon } from '@/components/icons/PlusIcon';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
@@ -15,6 +14,7 @@ import { cn } from '@/components/utils';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
+import { FaPlus } from 'react-icons/fa';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
@@ -53,7 +53,8 @@ export function ActionsPage() {
                 <Button
                     onPress={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
                     color='primary'
-                    startContent={<AddIcon />}
+                    startContent={<FaPlus />}
+                    size='sm'
                 >
                     Add Action
                 </Button>
