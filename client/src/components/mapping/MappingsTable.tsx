@@ -7,6 +7,7 @@ import { useCategoryInfo } from '../CategoryInfoProvider';
 import { AccessPathTooltip } from './AccessPathTooltip';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/routes/routes';
+import { useMemo } from 'react';
 
 type MappingsTableProps = {
     mappings: Mapping[];
@@ -14,8 +15,8 @@ type MappingsTableProps = {
 
 export function MappingsTable({ mappings }: MappingsTableProps) {
     const { sortedData: sortedMappings, sortDescriptor, setSortDescriptor } = useSortableData(mappings, {
-        column: 'kindName',
-        direction: 'ascending',
+        column: 'version',
+        direction: 'descending',
     });
 
     const handleSortChange = (newSortDescriptor: SortDescriptor) => {
@@ -33,17 +34,49 @@ export function MappingsTable({ mappings }: MappingsTableProps) {
 
 type MappingsTableContentProps = {
     mappings: Mapping[];
-    sortDescriptor: SortDescriptor;
-    onSortChange: (sortDescriptor: SortDescriptor) => void;
+    sortDescriptor?: SortDescriptor;  // Make optional
+    onSortChange?: (sortDescriptor: SortDescriptor) => void;  // Make optional
 };
 
-function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: MappingsTableContentProps) {
+function MappingsTableContent({ 
+    mappings, 
+    sortDescriptor = { column: 'version', direction: 'descending' },
+    onSortChange = () => {},
+}: MappingsTableContentProps) {
     const { showTableIDs } = usePreferences().preferences;
     const navigate = useNavigate();
     const { category } = useCategoryInfo();
 
+    // Common sorting did not work for the versions, this is override
+    const sortedMappings = useMemo(() => {
+        return [ ...mappings ].sort((a, b) => {
+            let first: number, second: number;
+            
+            // Force version sorting for initial render
+            const sortColumn = sortDescriptor?.column || 'version';
+            const sortDirection = sortDescriptor?.direction || 'descending';
+            
+            if (sortColumn === 'kindName') {
+                const firstStr = a.kindName.toLowerCase();
+                const secondStr = b.kindName.toLowerCase();
+                const cmp = firstStr.localeCompare(secondStr);
+                return sortDirection === 'descending' ? -cmp : cmp;
+            }
+            
+            // Default to version sorting (including initial render)
+            first = parseFloat(a.version) || 0;
+            second = parseFloat(b.version) || 0;
+            
+            const cmp = first < second ? -1 : (first > second ? 1 : 0);
+            return sortDirection === 'descending' ? -cmp : cmp;
+        });
+    }, [ mappings, sortDescriptor ]);
+
     const handleRowAction = (mappingId: React.Key) => {
-        navigate(routes.category.mapping.resolve({ categoryId: category.id, mappingId: String(mappingId) }));
+        navigate(routes.category.mapping.resolve({ 
+            categoryId: category.id, 
+            mappingId: String(mappingId), 
+        }));
     };
 
     return (
@@ -51,7 +84,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
             aria-label='Mappings Table'
             sortDescriptor={sortDescriptor}
             onSortChange={onSortChange}
-            onRowAction={(key: React.Key) => handleRowAction(key)}
+            onRowAction={handleRowAction}
             removeWrapper
             isCompact
         >
@@ -59,33 +92,33 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                 {[
                     ...(showTableIDs
                         ? [
-                            <TableColumn key='id' allowsSorting>
-                                    ID
+                            <TableColumn key='id'>
+                                ID
                             </TableColumn>,
                         ]
                         : []),
                     <TableColumn key='kindName' allowsSorting>
-                            Kind Name
+                        Kind Name
                     </TableColumn>,
-                    <TableColumn key='version' allowsSorting>
-                            Version
+                    <TableColumn key='version' allowsSorting allowsResizing>
+                        Version
                     </TableColumn>,
                     <TableColumn key='rootObject'>
-                            Root object
+                        Root object
                     </TableColumn>,
                     <TableColumn key='primaryKey'>
-                            Primary Key
+                        Primary Key
                     </TableColumn>,
                     <TableColumn key='accessPath'>
-                            Access Path
+                        Access Path
                     </TableColumn>,
                 ]}
             </TableHeader>
             <TableBody emptyContent={'No mappings to display.'}>
-                {mappings.map(mapping => (
-                    <TableRow
-                        key={mapping.id}
-                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
+                {sortedMappings.map(mapping => (
+                    <TableRow 
+                        key={mapping.id} 
+                        className='hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
                             ...(showTableIDs
@@ -100,7 +133,6 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                 </span>
                             </TableCell>,
                             <TableCell key='rootObject'>
-                                {/* // TODO - load whole schema category and display the object name that corresponds to this key */}
                                 {mapping.rootObjexKey.value}
                             </TableCell>,
                             <TableCell key='primaryKey'>
