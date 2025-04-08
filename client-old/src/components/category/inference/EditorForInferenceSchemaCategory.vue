@@ -84,6 +84,7 @@ function setStateToDefault() {
  * Emits the 'confirm-merge' event when a reference merge is confirmed.
  */
 function confirmReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
+    console.log('i want to confirm this edit');
     emit('confirm-merge', payload);
 }
 
@@ -165,7 +166,7 @@ onMounted(() => {
             v-else-if="state.type === State.Merge"
             :graph="props.graph"
             :candidates="props.candidates"
-            @confirm-merge="confirmReferenceMergeEdit"
+            @confirm="confirmReferenceMergeEdit"
             @cancel="setStateToDefault"
             @cancel-edit="cancelEdit"
         />
