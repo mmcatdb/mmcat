@@ -85,6 +85,8 @@ function confirmCandidate(candidate: PrimaryKeyCandidate) {
  * Confirms the selected nodes and emits the 'confirm' event.
  */
 function confirmNodes() {
+    messageText.value = 'Applicable changes applied. Save to confirm.';
+    showMessage.value = true;
     confirmClicked.value = true;
     emit('confirm', nodes.value as Node[]);
 }
