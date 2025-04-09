@@ -97,6 +97,8 @@ public class FileService {
 
         newControl.execute(filePath);
         LOGGER.info("... models executed");
+
+        datasourceRepository.save(newDatasourceWrapper);
     }
 
     private void executeWithDelete(Path filePath, AbstractControlWrapper control, File file) {
