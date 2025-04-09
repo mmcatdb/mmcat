@@ -23,7 +23,7 @@
         "@rushstack/eslint-patch": "^1.1.0",
         "@types/cytoscape": "^3.19.4",
         "@types/cytoscape-dagre": "^2.3.0",
-        "@types/node": "^16.11.22",
+        "@types/node": "^20.0.0",
         "@typescript-eslint/eslint-plugin": "^5.11.0",
         "@typescript-eslint/parser": "^5.11.0",
         "@vitejs/plugin-vue": "^5.1.4",

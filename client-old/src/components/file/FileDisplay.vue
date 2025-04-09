@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import API from '@/utils/api';
 import type { File } from '@/types/file';
 import FixedRouterLink from '@/components/common/FixedRouterLink.vue';
@@ -26,6 +26,26 @@ const showDetails = ref(false);
 const showExecutionPrompt = ref(false);
 
 const newDatabaseName = ref('');
+
+const isClonable = ref(false);
+
+const errorMessage = ref('');
+
+onMounted(async () => {
+    const datasourceId = props.file.datasourceId;
+    if (!datasourceId) {
+        isClonable.value = false;
+        return;
+    }
+
+    const result = await API.datasources.getDatasource({ id: datasourceId });
+
+    if (result.status === true && result.data) {
+        isClonable.value = result.data.settings.isClonable ?? false;
+    } else {
+        isClonable.value = false;
+    }
+});
 
 async function saveLabel() {
     const newLabel = editedLabel.value.trim();
@@ -91,9 +111,8 @@ function triggerDownload(content: string | Blob, filename: string, mimeType: str
 }
 
 const fileTypes: Record<string, { extension: string, mimeType: string }> = {
-    JSON: { extension: 'json', mimeType: 'application/json' },
-    CSV: { extension: 'csv', mimeType: 'text/csv' },
-    DML: { extension: 'txt', mimeType: 'text/plain' },
+  json: { extension: 'json', mimeType: 'application/json' },
+  csv:  { extension: 'csv',  mimeType: 'text/csv' },
 };
 
 function getFileType(fileType: string) {
@@ -101,16 +120,36 @@ function getFileType(fileType: string) {
     return fileTypes[fileType] ?? { extension: 'txt', mimeType: 'text/plain' };
 }
 
+const DML_TYPES = ['mongodb', 'postgresql', 'neo4j'];
+
+function isDMLFileType(type: string): boolean {
+  return DML_TYPES.includes(type);
+}
+
 async function executeDML(mode: string, newDBName?: string) {
+    errorMessage.value = '';
+    
     if (props.file.executedAt?.length && !showExecutionPrompt.value) {
         showExecutionPrompt.value = true;
         return;
     }
 
     fetching.value = true;
-    const result = await API.files.executeDML({ id: props.file.id }, { mode: mode, newDBName: newDBName });
-    showExecutionPrompt.value = false;
-    fetching.value = false;    
+
+    try {
+        const result = await API.files.executeDML({ id: props.file.id }, { mode: mode, newDBName: newDBName });
+
+        if (!result.status) {
+            throw new Error('Execution failed on the server. Are you sure the Datasource is clonable?');
+        }
+
+    } catch (error: any) {
+        errorMessage.value = error.message || 'Something went wrong during execution.';
+        console.error('Execution error:', error);
+    } finally {
+        fetching.value = false;
+        showExecutionPrompt.value = false;
+    }
 }
 
 </script>
@@ -166,7 +205,7 @@ async function executeDML(mode: string, newDBName?: string) {
                     Download
                 </button>
                 <button
-                    v-if="file.fileType === 'DML'"
+                    v-if="isDMLFileType(file.fileType)"
                     :disabled="fetching"
                     class="info"
                     @click="executeDML('execute')"
@@ -185,7 +224,7 @@ async function executeDML(mode: string, newDBName?: string) {
                 <p><strong>Id:</strong> {{ file.id }}</p>
                 <p><strong>Type:</strong> {{ file.fileType }}</p>
                 <p><strong>Date of creation:</strong> {{ file.createdAt.toLocaleString() }}</p>
-                <p v-if="file.fileType === 'DML'">
+                <p v-if="isDMLFileType(file.fileType)">
                     <strong>Dates of executions:</strong> 
                     {{ file.executedAt?.length ? file.executedAt.map(date => date.toLocaleString()).join(', ') : 'No executions' }}
                 </p>
@@ -239,7 +278,7 @@ async function executeDML(mode: string, newDBName?: string) {
                             Overwrite
                         </button>
                     </div>
-                    <div class="option">
+                    <div class="option" v-if="isClonable">
                         <h4>Create New Database</h4>
                         <p>Execute commands in a new database without affecting existing data.</p>
                         <input 
@@ -262,6 +301,17 @@ async function executeDML(mode: string, newDBName?: string) {
                 >
                     Cancel
                 </button>
+            </div>
+        </transition>
+        <transition name="fade">
+            <div v-if="errorMessage" class="overlay" />
+        </transition>
+
+        <transition name="fade">
+            <div v-if="errorMessage" class="error-modal">
+                <h3>Error</h3>
+                <p>{{ errorMessage }}</p>
+                <button class="dismiss" @click="errorMessage = ''">OK</button>
             </div>
         </transition>
     </div>
@@ -371,6 +421,53 @@ async function executeDML(mode: string, newDBName?: string) {
 .option input {
     width: 100%;
     margin-bottom: 10px;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.error-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    width: 400px;
+    text-align: center;
+    color: #721c24;
+}
+
+.error-modal h3 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.error-modal p {
+    margin-bottom: 20px;
+}
+
+.error-modal .dismiss {
+    background-color: #f1b0b7;
+    color: #721c24;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.error-modal .dismiss:hover {
+    background-color: #e09aa2;
 }
 
 </style>

@@ -42,7 +42,7 @@ public class SchemaConversionTests {
     @Test
     void testRSDToAccessTree() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleYelpSimple.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
 
         final var inferenceWrapper = new JsonControlWrapper(jsonProvider)
@@ -116,7 +116,7 @@ public class SchemaConversionTests {
     @Test
     void testBasicRSDToSchemaCategoryAndMapping() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false, false);
         final var csvProvider = new CsvProvider(settings);
 
         final var provider = new CsvControlWrapper(csvProvider)
@@ -142,7 +142,7 @@ public class SchemaConversionTests {
     @Test
     void testComplexRSDToSchemaCategoryAndMapping() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
 
         final var provider = new JsonControlWrapper(jsonProvider)

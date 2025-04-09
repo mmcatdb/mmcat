@@ -25,10 +25,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class File extends Entity {
 
-    public enum FileType {
-        DML, CSV, JSON;
-    }
-
     public @Nullable Id jobId;
     public @Nullable Id datasourceId;
     public @Nullable Id categoryId;
@@ -36,11 +32,11 @@ public class File extends Entity {
     public String description;
     public final String filename; // filename under which the file is stored = the file's id
     public final String jobLabel;
-    public final FileType fileType;
+    public final DatasourceType fileType;
     public final Date createdAt;
     public @Nullable List<Date> executedAt;
 
-    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, String description, String jobLabel, FileType fileType, Date createdAt, @Nullable List<Date> executedAt) {
+    private File(Id id, @Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String label, String description, String jobLabel, DatasourceType fileType, Date createdAt, @Nullable List<Date> executedAt) {
         super(id);
         this.jobId = jobId;
         this.datasourceId = datasourceId;
@@ -56,17 +52,16 @@ public class File extends Entity {
 
     public static File createnew(@Nullable Id jobId, @Nullable Id datasourceId, @Nullable Id categoryId, String jobLabel, boolean executed, DatasourceType datasourceType, String contents, UploadsProperties uploads) {
         Id newId = Id.createNew();
-        FileType fileType = getFileType(datasourceType);
 
         File newFile = new File(
             newId,
             jobId,
             datasourceId,
             categoryId,
-            getInitialLabel(fileType),
+            getInitialLabel(datasourceType),
             null,
             jobLabel,
-            fileType,
+            datasourceType,
             new Date(),
             executed ? new ArrayList<>(List.of(new Date())) : null
         );
@@ -75,20 +70,16 @@ public class File extends Entity {
         return newFile;
     }
 
-    private static FileType getFileType(DatasourceType datasourceType) {
-        return switch (datasourceType) {
-            case mongodb, postgresql, neo4j -> FileType.DML;
-            case csv -> FileType.CSV;
-            default -> FileType.JSON;
+    private static String getInitialLabel(DatasourceType fileType) {
+        return switch (fileType) {
+            case json, jsonld, csv -> capitalize(fileType.name()) + " File";
+            case mongodb, postgresql, neo4j -> capitalize(fileType.name()) + " DML Commands";
+            default -> "Unknown file type";
         };
     }
 
-    private static String getInitialLabel(FileType fileType) {
-        return switch (fileType) {
-            case JSON -> "JSON File";
-            case CSV -> "CSV File";
-            default -> "DML Commands";
-        };
+    private static String capitalize(String input) {
+        return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
     }
 
     /**
@@ -98,11 +89,11 @@ public class File extends Entity {
         return uploads.folder() + "/" + file.filename + getFileExtension(file.fileType);
     }
 
-    private static String getFileExtension(FileType fileType) {
+    private static String getFileExtension(DatasourceType fileType) {
         return switch (fileType) {
-            case JSON -> ".json";
-            case CSV -> ".csv";
-            case DML -> ".txt"; // DML stored as .txt
+            case json -> ".json";
+            case csv -> ".csv";
+            default -> ".txt"; // DML stored as .txt
         };
     }
 
@@ -140,7 +131,7 @@ public class File extends Entity {
         String label,
         String description,
         String jobLabel,
-        FileType fileType,
+        DatasourceType fileType,
         Date createdAt,
         List<Date> executedAt
     ) {}
