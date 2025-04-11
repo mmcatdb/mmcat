@@ -67,7 +67,7 @@ export function CategoryEditorPage() {
     }, []);
 
     return (
-        <div className='flex flex-col h-screen'>
+        <div className='flex flex-col h-[calc(100vh-40px)]'>
             {/* Navbar */}
             <div className='h-8 flex items-center justify-between px-4 shadow-md bg-default-100 border-b border-default-200'>
                 <div className='flex items-center gap-3'>
@@ -113,15 +113,15 @@ export function CategoryEditorPage() {
                 </div>
             </div>
 
-            <div className='flex flex-grow'>
+            <div className='relative flex flex-grow'>
                 {/* Left Sidebar */}
-                <div className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
-                    {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
+                <div className={cn(`z-50 absolute left-2 top-2 bottom-2 transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden`)}>
+                    {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} className='h-full bg-default-50 rounded-lg' />}
                 </div>
 
                 {/* Main Canvas */}
                 <div className='flex-grow relative'>
-                    <EditCategoryGraphDisplay state={state} dispatch={dispatch} className='w-full h-full' />
+                    <EditCategoryGraphDisplay state={state} dispatch={dispatch} className={cn('w-full h-full', sidebarState.left)} />
                 </div>
 
                 {/* Right Sidebar */}

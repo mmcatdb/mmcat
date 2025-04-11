@@ -10,7 +10,7 @@ import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
 
 /** In ms. */
-const REFRESH_INTERVAL = 3000;
+const REFRESH_INTERVAL = 1000;
 
 export function JobPage() {
     const data = useLoaderData() as JobLoaderData;
@@ -19,6 +19,11 @@ export function JobPage() {
     const [ job, setJob ] = useState(() => Job.fromServer(data.job, category));
 
     const revalidator = useRevalidator();
+
+    useEffect(() => {
+        if (job.id !== data.job.id)
+            setJob(Job.fromServer(data.job, category));
+    }, [ data.job ]);
 
     useEffect(() => {
         if ([ JobState.Finished, JobState.Failed ].includes(job.state))
