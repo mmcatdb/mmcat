@@ -10,7 +10,7 @@ import { useFetchData } from './useFetchData';
 import { getFiltersURLParam } from './URLParamsState';
 import type { Id } from '@/types/id';
 import type { QueryParams } from '@/types/api/routes';
-import type { AdminerState, AdminerStateAction, KindFilterState } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryState, AdminerFilterQueryStateAction, KindFilterState } from '@/types/adminer/ReducerTypes';
 import type { GraphResponse, DataResponse, TableResponse, DocumentResponse } from '@/types/adminer/DataResponse';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 import type { Datasource } from '@/types/datasource/Datasource';
@@ -48,9 +48,9 @@ function getKindReferences(references: AdminerReferences, datasourceId: Id, kind
 }
 
 type DatabaseViewProps = Readonly<{
-    state: AdminerState;
+    state: AdminerFilterQueryState;
     datasources: Datasource[];
-    dispatch: React.Dispatch<AdminerStateAction>;
+    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 
 export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps) {

@@ -1,16 +1,53 @@
 import { View } from '@/types/adminer/View';
 import { Operator } from '@/types/adminer/Operators';
 import type { Datasource } from '@/types/datasource/Datasource';
-import type { ActiveAdminerState, AdminerState, KindFilterState } from '@/types/adminer/Reducer';
+import type { ActiveAdminerState, AdminerCustomQueryState, AdminerFilterQueryState, KindFilterState } from '@/types/adminer/ReducerTypes';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
+import { QueryType } from '@/types/adminer/QueryType';
 
 export function getFiltersURLParam(filterState: KindFilterState): string {
     return JSON.stringify(filterState.filters);
 }
 
-export function getURLParamsFromState(state: AdminerState | ActiveAdminerState): URLSearchParams {
+function getParamsWithQueryType(queryType: QueryType | undefined): URLSearchParams {
     const params = new URLSearchParams();
+    params.set('queryType', queryType ?? QueryType.filter);
+    return params;
+}
+
+export function getInitURLParams(previousParams: URLSearchParams): URLSearchParams {
+    const queryTypeParam = previousParams.get('queryType');
+    const queryType = Object.values(QueryType).includes(queryTypeParam as QueryType)
+        ? (queryTypeParam as QueryType)
+        : undefined;
+    const params = getParamsWithQueryType(queryType);
+    return params;
+}
+
+export function getAdminerURLParams(previousParams: URLSearchParams, queryType: QueryType | undefined): URLSearchParams {
+    const params = getParamsWithQueryType(queryType);
+
+    const datasourceId = previousParams.get('datasourceId');
+    if (datasourceId)
+        params.set('datasourceId', datasourceId);
+
+    return params;
+}
+
+export function getURLParamsFromCustomQueryState(state: AdminerCustomQueryState): URLSearchParams {
+    const params = getParamsWithQueryType(QueryType.custom);
+
+    params.set('query', state.query);
+
+    if (state.datasourceId)
+        params.set('datasourceId', state.datasourceId);
+
+    return params;
+}
+
+export function getURLParamsFromFilterQueryState(state: AdminerFilterQueryState | ActiveAdminerState): URLSearchParams {
+    const params = getParamsWithQueryType(QueryType.filter);
 
     params.set('limit', String(state.active.limit));
     params.set('offset', String(state.active.offset));
@@ -44,12 +81,12 @@ export function getHrefFromReference(reference: KindReference, item: Record<stri
         view: AVAILABLE_VIEWS[datasources.find(source => source.id === reference.datasourceId)!.type][0],
     };
 
-    const urlParams = getURLParamsFromState(state);
+    const urlParams = getURLParamsFromFilterQueryState(state);
 
     return urlParams.toString();
 }
 
-export function getStateFromURLParams(params: URLSearchParams): AdminerState {
+export function getFilterQueryStateFromURLParams(params: URLSearchParams): AdminerFilterQueryState {
     const viewParam = params.get('view');
     const view = Object.values(View).includes(viewParam as View)
         ? (viewParam as View)
@@ -62,5 +99,12 @@ export function getStateFromURLParams(params: URLSearchParams): AdminerState {
         datasourceId: params.get('datasourceId') ?? undefined,
         kindName: params.get('kindName') ?? undefined,
         view: view,
+    };
+}
+
+export function getCustomQueryStateFromURLParams(params: URLSearchParams): AdminerCustomQueryState {
+    return {
+        query: params.get('query') ?? '',
+        datasourceId: params.get('datasourceId') ?? undefined,
     };
 }

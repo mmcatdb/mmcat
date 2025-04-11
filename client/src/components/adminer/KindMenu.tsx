@@ -2,14 +2,14 @@ import { useCallback } from 'react';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { api } from '@/api';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryStateAction } from '@/types/adminer/ReducerTypes';
 import type { Id } from '@/types/id';
 
 type KindMenuProps = Readonly<{
     datasourceId: Id;
     kind: string | undefined;
     showUnlabeled: boolean;
-    dispatch: React.Dispatch<AdminerStateAction>;
+    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 
 type KindLabelValues = {label: string, value: string }[];

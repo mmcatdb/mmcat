@@ -99,22 +99,8 @@ export const router = createBrowserRouter([
             {
                 path: routes.adminer,
                 Component: AdminerPage,
+                loader: adminerLoader,
                 handle: { breadcrumb: 'Adminer' },
-                children: [
-                    {
-                        index: true,
-                        Component: AdminerPageOverview,
-                        loader: adminerLoader,
-                    },
-                    {
-                        path: 'query',
-                        Component: AdminerCustomQueryPage,
-                        loader: adminerLoader,
-                        handle: {
-                            breadcrumb: 'Query',
-                        },
-                    },
-                ],
             },
             {
                 path: routes.category.index.path,

@@ -2,12 +2,12 @@ import { Select, SelectItem } from '@nextui-org/react';
 import { AVAILABLE_VIEWS } from './Views';
 import type { DatasourceType } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryStateAction } from '@/types/adminer/ReducerTypes';
 
 type ViewMenuProps = Readonly<{
     datasourceType: DatasourceType;
     view: View;
-    dispatch: React.Dispatch<AdminerStateAction>;
+    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 
 export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {

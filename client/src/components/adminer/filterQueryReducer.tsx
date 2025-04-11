@@ -2,9 +2,9 @@ import { getNewView } from './Views';
 import { View } from '@/types/adminer/View';
 import { Operator, UNARY_OPERATORS } from '@/types/adminer/Operators';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
-import type { AdminerState, AdminerStateAction, FormAction, InputAction } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryState, AdminerFilterQueryStateAction, FormAction, InputAction } from '@/types/adminer/ReducerTypes';
 
-export function reducer(state: AdminerState, action: AdminerStateAction): AdminerState {
+export function filterQueryReducer(state: AdminerFilterQueryState, action: AdminerFilterQueryStateAction): AdminerFilterQueryState {
     switch (action.type) {
     case 'initialize': {
         return {
@@ -61,7 +61,7 @@ export function reducer(state: AdminerState, action: AdminerStateAction): Admine
     }
 }
 
-function reducerInput(state: AdminerState, action: InputAction): AdminerState {
+function reducerInput(state: AdminerFilterQueryState, action: InputAction): AdminerFilterQueryState {
     const { field, value } = action;
 
     switch (field) {
@@ -88,7 +88,7 @@ function reducerInput(state: AdminerState, action: InputAction): AdminerState {
     }
 }
 
-function reducerForm(state: AdminerState, action: FormAction): AdminerState {
+function reducerForm(state: AdminerFilterQueryState, action: FormAction): AdminerFilterQueryState {
     const { action: formAction } = action;
 
     switch (formAction) {

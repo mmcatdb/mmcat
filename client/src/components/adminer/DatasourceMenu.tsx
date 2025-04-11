@@ -1,15 +1,14 @@
 import { Select, SelectItem } from '@nextui-org/react';
 import { type Datasource, DatasourceType } from '@/types/datasource';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
 import type { Id } from '@/types/id';
 
 type DatasourceMenuProps = Readonly<{
-    dispatch: React.Dispatch<AdminerStateAction>;
+    setDatasource: React.Dispatch<React.SetStateAction<Datasource | undefined>>;
     datasourceId: Id | undefined;
     datasources: Datasource[];
 }>;
 
-export function DatasourceMenu({ dispatch, datasourceId, datasources }: DatasourceMenuProps) {
+export function DatasourceMenu({ setDatasource, datasourceId, datasources }: DatasourceMenuProps) {
     const sources = datasources
         .filter(item =>
             item.type === DatasourceType.postgresql ||
@@ -34,7 +33,7 @@ export function DatasourceMenu({ dispatch, datasourceId, datasources }: Datasour
                 {item => (
                     <SelectItem
                         key={item.id}
-                        onPress={() => dispatch({ type:'datasource', newDatasource: item })}
+                        onPress={() => setDatasource(item)}
                     >
                         {item.label}
                     </SelectItem>

@@ -1,17 +1,16 @@
 import clsx from 'clsx';
-import { useEffect, useReducer, useState, useMemo, useRef } from 'react';
-import { Outlet, useLoaderData, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Spinner } from '@nextui-org/react';
+import { useEffect, useState } from 'react';
+import { useLoaderData, useSearchParams } from 'react-router-dom';
+import { Button, ButtonGroup, Spinner } from '@nextui-org/react';
+import { AdminerCustomQueryPage } from '@/pages/AdminerCustomQueryPage';
+import { AdminerFilterQueryPage } from '@/pages/AdminerFilterQueryPage';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { getStateFromURLParams, getURLParamsFromState } from '@/components/adminer/URLParamsState';
+import { getAdminerURLParams, getInitURLParams } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
-import { KindMenu } from '@/components/adminer/KindMenu';
-import { ViewMenu } from '@/components/adminer/ViewMenu';
-import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
-import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
-import { type Datasource, DatasourceType } from '@/types/datasource';
+import { QueryType } from '@/types/adminer/QueryType';
+import type { Datasource } from '@/types/datasource';
 
 export async function adminerLoader(): Promise<Datasource[]> {
     const response = await api.datasources.getAllDatasources({});
@@ -23,47 +22,31 @@ export async function adminerLoader(): Promise<Datasource[]> {
 }
 
 export function AdminerPage() {
-    return (
-        <div>
-            <Outlet />
-        </div>
-    );
-}
-
-export function AdminerPageOverview() {
-    const navigate = useNavigate();
     const { theme } = usePreferences().preferences;
     const allDatasources = useLoaderData() as Datasource[];
     const [ searchParams, setSearchParams ] = useSearchParams();
-    const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
-    const stateRef = useRef(state);
-    const searchParamsRef = useRef(searchParams);
+    const [ queryType, setQueryType ] = useState<QueryType>();
 
-    // Sync state with URL search parameters
     useEffect(() => {
-        if (searchParams.get('reload') === 'true') {
-            dispatch({ type:'initialize' });
-            searchParamsRef.current = searchParams;
-        }
+        const queryTypeParam = searchParams.get('queryType');
+        setQueryType(Object.values(QueryType).includes(queryTypeParam as QueryType)
+            ? (queryTypeParam as QueryType)
+            : QueryType.filter);
 
-        if (searchParamsRef.current != searchParams) {
-            dispatch({ type:'update', newState: getStateFromURLParams(searchParams) });
-            searchParamsRef.current = searchParams;
-        }
+        if (searchParams.get('reload') === 'true')
+            setSearchParams(prevParams => getInitURLParams(prevParams));
+
+        const datasourceIdParam = searchParams.get('datasourceId');
+        if (datasourceIdParam !== datasource?.id)
+            setDatasource(allDatasources?.find(source => source.id === datasourceIdParam));
     }, [ searchParams ]);
 
-    // Update URL search parameters whenever state changes
     useEffect(() => {
-        if (stateRef.current != state && searchParamsRef.current == searchParams) {
-            setSearchParams(getURLParamsFromState(state));
-            stateRef.current = state;
-        }
-    }, [ state, searchParams ]);
-
-    useMemo(() => {
-        setDatasource(allDatasources?.find(source => source.id === state.datasourceId));
-    }, [ state.datasourceId, allDatasources ]);
+        const queryTypeParam = searchParams.get('queryType');
+        if (queryType !== queryTypeParam)
+            setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType));
+    }, [ queryType ]);
 
     return (
         <div>
@@ -72,42 +55,43 @@ export function AdminerPageOverview() {
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}>
                 {allDatasources ? (
-                    <DatasourceMenu dispatch={dispatch} datasourceId={state.datasourceId} datasources={allDatasources}/>
+                    <>
+                        <DatasourceMenu setDatasource={setDatasource} datasourceId={searchParams.get('datasourceId') ?? datasource?.id} datasources={allDatasources}/>
+
+                        <ButtonGroup
+                            className='mx-2'
+                        >
+                            {Object.values(QueryType).map(qt => (
+                                <Button
+                                    size='sm'
+                                    aria-label='Query type'
+                                    type='submit'
+                                    variant={qt === queryType ? 'solid' : 'ghost'}
+                                    key={qt}
+                                    onPress={() => setQueryType(qt)}
+                                >
+                                    {qt}
+                                </Button>
+                            ),
+                            )}
+                        </ButtonGroup>
+
+                        <LinkLengthSwitch/>
+                    </>
+
                 ) : (
                     <div className='h-8 flex items-center justify-center'>
                         <Spinner />
                     </div>
                 )}
-
-                {datasource &&
-                    (
-                        <>
-                            <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
-
-                            {state.kindName !== undefined && (
-                                <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
-                            )}
-
-                            <LinkLengthSwitch/>
-
-                            <Button
-                                className='flex items-center ml-auto min-w-28 h-8'
-                                size='sm'
-                                aria-label='Custom query'
-                                type='submit'
-                                color='primary'
-                                onPress={() => navigate(`/adminer/query?datasourceId=${datasource.id}`)}
-                            >
-                                CUSTOM QUERY
-                            </Button>
-                        </>
-                    )}
             </div>
 
-            {datasource && state.kindName && typeof state.kindName === 'string' &&(
-                <div className='m-2'>
-                    <DatabaseView state={state} datasources={allDatasources} dispatch={dispatch}/>
-                </div>
+            {datasource && (
+                queryType === QueryType.custom ? (
+                    <AdminerCustomQueryPage datasource={datasource} datasources={allDatasources}/>
+                ) : (
+                    <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources}/>
+                )
             )}
         </div>
     );

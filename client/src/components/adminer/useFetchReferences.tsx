@@ -3,7 +3,7 @@ import { api } from '@/api';
 import { Signature } from '@/types/identifiers/Signature';
 import type { StaticNameFromServer } from '@/types/identifiers/Name';
 import type { SignatureIdFromServer } from '@/types/identifiers/SignatureId';
-import type { AdminerState } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryState } from '@/types/adminer/ReducerTypes';
 import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
 import type { ChildPropertyFromServer, ComplexPropertyFromServer, RootPropertyFromServer, SimplePropertyFromServer } from '@/types/accessPath/serverTypes';
 import type { SchemaCategoryFromServer } from '@/types/schema';
@@ -211,7 +211,7 @@ async function getForeignKeys(datasourceId: Id, kindName: string): Promise<Admin
     return foreignKeysResponse.data;
 }
 
-export function useFetchReferences(state: AdminerState) {
+export function useFetchReferences(state: AdminerFilterQueryState) {
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ references, setReferences ] = useState<AdminerReferences>([]);
 

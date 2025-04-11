@@ -3,14 +3,14 @@ import { Button, Input } from '@nextui-org/react';
 import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 import { ColumnForm } from '@/components/adminer/ColumnForm';
-import type { AdminerStateAction, AdminerState } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryStateAction, AdminerFilterQueryState } from '@/types/adminer/ReducerTypes';
 import type { DatasourceType } from '@/types/datasource/Datasource';
 
 type FilterFormProps = Readonly<{
-    state: AdminerState;
+    state: AdminerFilterQueryState;
     datasourceType: DatasourceType;
     propertyNames: string[] | undefined;
-    dispatch: React.Dispatch<AdminerStateAction>;
+    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 
 export function FilterForm({ state, datasourceType, propertyNames, dispatch }: FilterFormProps) {

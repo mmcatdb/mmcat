@@ -4,24 +4,37 @@ import type { Datasource } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
 import type { Id } from '@/types/id';
 
+export type AdminerCustomQueryState = AdminerStateBase & {
+    query: string;
+}
+
+export type AdminerFilterQueryState = ActiveAdminerState & {
+    form: KindFilterState;
+};
+
+export type ActiveAdminerState = {
+    active: KindFilterState;
+    kindName?: string;
+    view: View;
+} & AdminerStateBase
+
 export type KindFilterState = {
     limit: number;
     offset: number;
     filters: PropertyFilter[];
 }
 
-export type AdminerState = ActiveAdminerState & {
-    form: KindFilterState;
-};
-
-export type ActiveAdminerState = {
-    active: KindFilterState;
+type AdminerStateBase = {
     datasourceId?: Id;
-    kindName?: string;
-    view: View;
 }
 
-export type AdminerStateAction =
+export type AdminerCustomQueryStateAction =
+| DatasourceAction
+| QueryAction
+| InitializeAction
+| CustomQueryUpdateAction;
+
+export type AdminerFilterQueryStateAction =
 | DatasourceAction
 | KindAction
 | ViewAction
@@ -29,7 +42,7 @@ export type AdminerStateAction =
 | FormAction
 | SubmitAction
 | InitializeAction
-| UpdateAction;
+| FilterQueryUpdateAction;
 
 type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
   ? { type: T }
@@ -62,4 +75,6 @@ type KindAction = AdminerTypedAction<'kind', { newKind: string }>;
 type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
 type InitializeAction = AdminerTypedAction<'initialize'>;
-type UpdateAction = AdminerTypedAction<'update', {newState: AdminerState }>;
+type FilterQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerFilterQueryState }>;
+type QueryAction = AdminerTypedAction<'query', { newQuery: string }>;
+type CustomQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerCustomQueryState }>;
