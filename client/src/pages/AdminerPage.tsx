@@ -76,7 +76,7 @@ export function AdminerPage() {
 
             {datasource && (
                 getQueryTypeFromURLParams(searchParams) === QueryType.custom ? (
-                    <AdminerCustomQueryPage datasource={datasource} datasources={allDatasources}/>
+                    <AdminerCustomQueryPage datasource={datasource} datasources={allDatasources} theme={theme}/>
                 ) : (
                     <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources}/>
                 )
