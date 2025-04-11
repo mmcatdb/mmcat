@@ -6,6 +6,7 @@ import type { Id } from '@/types/id';
 
 export type AdminerCustomQueryState = AdminerStateBase & {
     query: string;
+    unsubmittedQuery: string;
 }
 
 export type AdminerFilterQueryState = ActiveAdminerState & {
@@ -30,9 +31,10 @@ type AdminerStateBase = {
 
 export type AdminerCustomQueryStateAction =
 | DatasourceAction
-| QueryAction
+| UpdateQueryAction
 | InitializeAction
-| CustomQueryUpdateAction;
+| CustomQueryUpdateAction
+| SubmitAction;
 
 export type AdminerFilterQueryStateAction =
 | DatasourceAction
@@ -76,5 +78,5 @@ type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
 type InitializeAction = AdminerTypedAction<'initialize'>;
 type FilterQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerFilterQueryState }>;
-type QueryAction = AdminerTypedAction<'query', { newQuery: string }>;
+type UpdateQueryAction = AdminerTypedAction<'query', { newQuery: string }>;
 type CustomQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerCustomQueryState }>;

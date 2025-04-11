@@ -9,8 +9,11 @@ import { customQueryReducer } from '@/components/adminer/customQueryReducer';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
 import type { Id } from '@/types/id';
 import type { DataResponse, DocumentResponse, ErrorResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
+import type { AdminerCustomQueryStateAction } from '@/types/adminer/ReducerTypes';
 
-async function handleOnPress(datasourceId: Id, query: string, setQueryResult: (queryResult: DataResponse|ErrorResponse) => void) {
+async function handleOnPress(datasourceId: Id, query: string, setQueryResult: (queryResult: DataResponse|ErrorResponse) => void, dispatch: React.Dispatch<AdminerCustomQueryStateAction>) {
+    dispatch({ type:'submit' });
+
     const queryResult = await api.adminer.getQueryResult({ datasourceId: datasourceId }, { query: query });
 
     if (queryResult.status) {
@@ -36,8 +39,17 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
     const searchParamsRef = useRef(searchParams);
 
     useEffect(() => {
-        if (state.datasourceId !== datasource.id)
+        const currentDatasource = datasource;
+        const stateDatasourceId = state.datasourceId;
+        const stateDatasource = datasources?.find(source => source.id === stateDatasourceId);
+
+        if (stateDatasourceId !== currentDatasource.id) {
             dispatch({ type:'datasource', newDatasource: datasource });
+            setQueryResult(undefined);
+        }
+
+        if (stateDatasource?.type !== currentDatasource.type)
+            setQueryResult(undefined);
 
     }, [ datasource ]);
 
@@ -65,12 +77,12 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
                 maxRows={Infinity}
                 label='Custom query'
                 placeholder='Enter your query'
-                value={state.query}
+                value={state.unsubmittedQuery}
                 onChange={e => dispatch({ type:'query', newQuery: e.target.value })}
                 onKeyDown={async e => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        await handleOnPress(datasource.id, state.query, setQueryResult);
+                        await handleOnPress(datasource.id, state.unsubmittedQuery, setQueryResult, dispatch);
                     }
                 }}
             />
@@ -81,7 +93,7 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
                 aria-label='Execute query'
                 type='submit'
                 color='primary'
-                onPress={() => handleOnPress(datasource.id, state.query, setQueryResult)}
+                onPress={() => handleOnPress(datasource.id, state.unsubmittedQuery, setQueryResult, dispatch)}
             >
                 EXECUTE QUERY
             </Button>

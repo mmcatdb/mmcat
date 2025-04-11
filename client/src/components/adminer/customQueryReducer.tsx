@@ -6,22 +6,30 @@ export function customQueryReducer(state: AdminerCustomQueryState, action: Admin
         return {
             datasourceId: undefined,
             query: '',
+            unsubmittedQuery: '',
         };
     }
     case 'datasource': {
         return {
-            ...state,
             datasourceId: action.newDatasource.id,
+            query: '',
+            unsubmittedQuery: '',
         };
     }
     case 'query': {
         return {
             ...state,
-            query: action.newQuery,
+            unsubmittedQuery: action.newQuery,
         };
     }
     case 'update': {
         return action.newState;
+    }
+    case 'submit': {
+        return {
+            ...state,
+            query: state.unsubmittedQuery,
+        };
     }
     default:
         throw new Error('Unknown action');

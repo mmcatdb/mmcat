@@ -105,6 +105,7 @@ export function getFilterQueryStateFromURLParams(params: URLSearchParams): Admin
 export function getCustomQueryStateFromURLParams(params: URLSearchParams): AdminerCustomQueryState {
     return {
         query: params.get('query') ?? '',
+        unsubmittedQuery: params.get('query') ?? '',
         datasourceId: params.get('datasourceId') ?? undefined,
     };
 }
