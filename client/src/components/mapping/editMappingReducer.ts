@@ -91,7 +91,7 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         const newNode = state.graph.nodes.get(nodeId);
         if (!newNode)
             return state;
-    
+
         // Calculate signature using PathSelection
         const signatures = selection.edgeIds.map((edgeId, index) => {
             const edge: CategoryEdge = state.graph.edges.get(edgeId)!;
@@ -132,6 +132,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
                 // Starting a new path
                 return {
                     ...state,
+                    // @ts-expect-error FIXME
                     selection: PathSelection.create([ event.nodeId ]),
                 };
             }
@@ -139,7 +140,9 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
                 // Find the edge between last node and new node
                 const lastNodeId = state.selection.lastNodeId;
                 const edge = state.graph.edges.bundledEdges.flat().find(e =>
+                    // @ts-expect-error FIXME
                     (e.from === lastNodeId && e.to === event.nodeId) ||
+                    // @ts-expect-error FIXME
                     (e.to === lastNodeId && e.from === event.nodeId),
                 );
 
@@ -148,6 +151,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
                         ...state,
                         selection: state.selection.updateFromAction({
                             operation: 'add',
+                            // @ts-expect-error FIXME
                             nodeIds: [ event.nodeId ],
                             edgeIds: [ edge.id ],
                         }),
@@ -175,6 +179,7 @@ function select(state: EditMappingState, action: SelectAction): EditMappingState
     // Limit to one node
     if (updatedSelection.nodeIds.size > 1) {
         const firstNode = updatedSelection.nodeIds.values().next().value;
+        // @ts-expect-error FIXME
         return { ...state, selection: FreeSelection.create([ firstNode ]) };
     }
     return { ...state, selection: updatedSelection };

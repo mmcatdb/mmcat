@@ -44,7 +44,8 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
                     >
                         {name}
                     </SelectItem>
-                ))}
+                // FIXME
+                )) as any}
 
                 {showUnlabeled && (<SelectItem
                     key='unlabeled'

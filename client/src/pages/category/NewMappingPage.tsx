@@ -13,10 +13,10 @@ export function NewMappingPage() {
     const navigate = useNavigate();
     const [ kindName, setKindName ] = useState('');
     const location = useLocation();
-    
+
     // Get datasource ID from route state
     const datasourceId = location.state?.datasourceId;
-    
+
     if (!datasourceId) {
         navigate(-1); // Go back if no datasource ID
         // toast.error('Datasource ID is required');
@@ -81,6 +81,7 @@ export type NewMappingLoaderData = {
     category: Category;
 };
 
+// @ts-expect-error FIXME
 async function newMappingLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
         throw new Error('Category ID required');

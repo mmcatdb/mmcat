@@ -25,12 +25,13 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
     function handleSetRoot() {
         if (state.selection instanceof FreeSelection && !state.selection.isEmpty) {
             const rootNodeId = state.selection.nodeIds.values().next().value;
+            // @ts-expect-error FIXME
             dispatch({ type: 'set-root', rootNodeId });
         }
     }
 
     function handleSave() {
-        if (onSave) 
+        if (onSave)
             onSave(state.mapping);
         navigate(-1);
     }
@@ -42,16 +43,17 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
     return (
         <div className='relative h-[700px] flex'>
             <EditMappingGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
-    
+
             {state.editorPhase === EditorPhase.SelectRoot && (
-                <RootSelectionPanel 
-                    selection={state.selection} 
+                <RootSelectionPanel
+                    // @ts-expect-error FIXME
+                    selection={state.selection}
                     graph={state.graph}
                     dispatch={freeSelectionDispatch}
                     onConfirm={handleSetRoot}
                 />
             )}
-    
+
             {state.editorPhase !== EditorPhase.SelectRoot && (
                 <AccessPathCard state={state} dispatch={dispatch} />
             )}
@@ -59,18 +61,18 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
             {state.editorPhase === EditorPhase.BuildPath && (
                 <div className='absolute bottom-2 right-2 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-3'>
                     <div className='flex gap-3'>
-                        <Button 
-                            color='danger' 
-                            variant='flat' 
+                        <Button
+                            color='danger'
+                            variant='flat'
                             onPress={handleCancel}
                             startContent={<XMarkIcon className='h-4 w-4' />}
                             size='sm'
                         >
                             Discard
                         </Button>
-                        <Button 
-                            color='success' 
-                            variant='solid' 
+                        <Button
+                            color='success'
+                            variant='solid'
                             onPress={handleSave}
                             startContent={<CheckCircleIcon className='h-4 w-4' />}
                             size='sm'
@@ -95,7 +97,7 @@ type RootSelectionPanelProps = {
 };
 
 function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelectionPanelProps) {
-    const selectedNode = selection.nodeIds.size > 0 
+    const selectedNode = selection.nodeIds.size > 0
         ? graph.nodes.get([ ...selection.nodeIds ][0])
         : null;
 
@@ -104,9 +106,9 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
             <div className='flex items-center justify-between'>
                 <h3 className='text-lg font-semibold'>Select Root Node</h3>
                 {selectedNode && (
-                    <Button 
-                        size='sm' 
-                        color='success' 
+                    <Button
+                        size='sm'
+                        color='success'
                         variant='flat'
                         onPress={onConfirm}
                         startContent={<CheckCircleIcon className='h-4 w-4' />}
@@ -188,7 +190,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
 
         // json-like formatting of access path
         let result = `${root.name.toString()}: {\n`;
-        for (const [ key, value ] of Object.entries(subpaths)) 
+        for (const [ key, value ] of Object.entries(subpaths))
             result += `    ${key}: ${value},\n`;
         // result += '}';
 

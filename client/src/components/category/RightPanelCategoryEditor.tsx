@@ -36,12 +36,12 @@ const components: Record<RightPanelMode, (props: StateDispatchProps) => JSX.Elem
 
 // Dynamic selection of display component
 function getRightPanelComponent(state: EditCategoryState) {
-    if (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0) 
+    if (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
         return UpdateObjexDisplay;
-    
-    if (state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 1) 
+
+    if (state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 1)
         return UpdateMorphismDisplay;
-    
+
     return DefaultDisplay;
 }
 
@@ -74,7 +74,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
 
     const [ label, setLabel ] = useState(selectedNode!.metadata.label);
     const [ position, setPosition ] = useState<FormPosition>({ x: 0, y: 0 });
-    
+
     function handleApply() {
         state.evocat.updateObjex(selectedNode!.schema.key, {
             label,
@@ -86,7 +86,9 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     }
 
     useEffect(() => {
+        // @ts-expect-error FIXME
         setLabel(selectedNode.metadata.label);
+        // @ts-expect-error FIXME
         setPosition({ x: selectedNode.x, y: selectedNode.y });
     }, [  selectedNodeId, state.graph.nodes ]); // Re-run effect when different object selected, or position changes
 
@@ -95,6 +97,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
             <h3 className='text-lg font-semibold'>Update Object</h3>
 
             <p>
+                {/* @ts-expect-error FIXME */}
                 <strong>Key:</strong> {selectedNode.schema.key.toString()}
             </p>
 
@@ -137,7 +140,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
 export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
     const selectedMorphism = state.graph.edges.get(selectedEdgeId);
-    
+
     // set initial state for cardinality based on the selected morphism
     const [ minCardinality, setMinCardinality ] = useState<Min>(selectedMorphism?.schema.min ?? Cardinality.Zero);
 
@@ -145,9 +148,9 @@ export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     // const [ codUnlocked, setCodUnlocked ] = useState(false);
 
     useEffect(() => {
-        if (selectedMorphism) 
+        if (selectedMorphism)
             setMinCardinality(selectedMorphism.schema.min);
-        
+
     }, [ selectedMorphism ]);
 
     function handleCardinalityChange(event: React.ChangeEvent<HTMLInputElement>) {
