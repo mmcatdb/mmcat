@@ -6,6 +6,14 @@ import type { KindReference } from '@/types/adminer/AdminerReferences';
 import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { QueryType } from '@/types/adminer/QueryType';
 
+export function getQueryTypeFromURLParams(params: URLSearchParams): QueryType | undefined {
+    const queryTypeParam = params.get('queryType');
+    const queryType = Object.values(QueryType).includes(queryTypeParam as QueryType)
+        ? (queryTypeParam as QueryType)
+        : undefined;
+    return queryType;
+}
+
 export function getFiltersURLParam(filterState: KindFilterState): string {
     return JSON.stringify(filterState.filters);
 }
@@ -17,22 +25,14 @@ function getParamsWithQueryType(queryType: QueryType | undefined): URLSearchPara
 }
 
 export function getInitURLParams(previousParams: URLSearchParams): URLSearchParams {
-    const queryTypeParam = previousParams.get('queryType');
-    const queryType = Object.values(QueryType).includes(queryTypeParam as QueryType)
-        ? (queryTypeParam as QueryType)
-        : undefined;
+    const queryType = getQueryTypeFromURLParams(previousParams);
     const params = getParamsWithQueryType(queryType);
     return params;
 }
 
 export function getAdminerURLParams(previousParams: URLSearchParams, queryType: QueryType | undefined): URLSearchParams {
-    const params = getParamsWithQueryType(queryType);
-
-    const datasourceId = previousParams.get('datasourceId');
-    if (datasourceId)
-        params.set('datasourceId', datasourceId);
-
-    return params;
+    previousParams.set('queryType', queryType ?? QueryType.filter);
+    return previousParams;
 }
 
 export function getURLParamsFromCustomQueryState(state: AdminerCustomQueryState): URLSearchParams {

@@ -5,7 +5,7 @@ import { Button, ButtonGroup, Spinner } from '@nextui-org/react';
 import { AdminerCustomQueryPage } from '@/pages/AdminerCustomQueryPage';
 import { AdminerFilterQueryPage } from '@/pages/AdminerFilterQueryPage';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { getAdminerURLParams, getInitURLParams } from '@/components/adminer/URLParamsState';
+import { getAdminerURLParams, getInitURLParams, getQueryTypeFromURLParams } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
 import { api } from '@/api';
@@ -26,14 +26,8 @@ export function AdminerPage() {
     const allDatasources = useLoaderData() as Datasource[];
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ datasource, setDatasource ] = useState<Datasource>();
-    const [ queryType, setQueryType ] = useState<QueryType>();
 
     useEffect(() => {
-        const queryTypeParam = searchParams.get('queryType');
-        setQueryType(Object.values(QueryType).includes(queryTypeParam as QueryType)
-            ? (queryTypeParam as QueryType)
-            : QueryType.filter);
-
         if (searchParams.get('reload') === 'true')
             setSearchParams(prevParams => getInitURLParams(prevParams));
 
@@ -41,12 +35,6 @@ export function AdminerPage() {
         if (datasourceIdParam !== datasource?.id)
             setDatasource(allDatasources?.find(source => source.id === datasourceIdParam));
     }, [ searchParams ]);
-
-    useEffect(() => {
-        const queryTypeParam = searchParams.get('queryType');
-        if (queryType !== queryTypeParam)
-            setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType));
-    }, [ queryType ]);
 
     return (
         <div>
@@ -61,16 +49,16 @@ export function AdminerPage() {
                         <ButtonGroup
                             className='mx-2'
                         >
-                            {Object.values(QueryType).map(qt => (
+                            {Object.values(QueryType).map(queryType => (
                                 <Button
                                     size='sm'
                                     aria-label='Query type'
                                     type='submit'
-                                    variant={qt === queryType ? 'solid' : 'ghost'}
-                                    key={qt}
-                                    onPress={() => setQueryType(qt)}
+                                    variant={queryType === getQueryTypeFromURLParams(searchParams) ? 'solid' : 'ghost'}
+                                    key={queryType}
+                                    onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
                                 >
-                                    {qt}
+                                    {queryType}
                                 </Button>
                             ),
                             )}
@@ -87,7 +75,7 @@ export function AdminerPage() {
             </div>
 
             {datasource && (
-                queryType === QueryType.custom ? (
+                getQueryTypeFromURLParams(searchParams) === QueryType.custom ? (
                     <AdminerCustomQueryPage datasource={datasource} datasources={allDatasources}/>
                 ) : (
                     <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources}/>
