@@ -3,6 +3,7 @@ import { Spinner, Pagination } from '@nextui-org/react';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
+import { DatabaseGraph } from '@/components/adminer/DatabaseGraph';
 import { View } from '@/types/adminer/View';
 import { api } from '@/api';
 import { useFetchReferences } from './useFetchReferences';
@@ -125,11 +126,37 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
                 <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
             </div>
 
-            {state.view === View.table ? (
-                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!} datasources={datasources}/>
-            ) : (
-                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} kindReferences={kindReferences} kind={state.kindName!} datasourceId={state.datasourceId!}  datasources={datasources}/>
-            )}
+            {(() => {
+                switch (state.view) {
+                case View.table:
+                    return (
+                        <DatabaseTable
+                            fetchedData={fetchedData as TableResponse | GraphResponse}
+                            kindReferences={kindReferences}
+                            kind={state.kindName!}
+                            datasourceId={state.datasourceId!}
+                            datasources={datasources}
+                        />
+                    );
+                case View.document:
+                    return (
+                        <DatabaseDocument
+                            fetchedData={fetchedData as DocumentResponse | GraphResponse}
+                            kindReferences={kindReferences}
+                            kind={state.kindName!}
+                            datasourceId={state.datasourceId!}
+                            datasources={datasources}
+                        />
+                    );
+                case View.graph:
+                    return (
+                        <DatabaseGraph
+                            fetchedData={fetchedData as GraphResponse}
+                            kind={state.kindName!}
+                        />
+                    );
+                }
+            })()}
 
             {itemCount !== undefined && itemCount > 0 && (
                 <div className='mt-5 inline-flex gap-3 items-center'>
