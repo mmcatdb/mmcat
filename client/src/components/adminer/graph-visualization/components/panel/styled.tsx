@@ -20,31 +20,3 @@ export const StyledNodeInspectorContainer = styled.div<{
   overflow: hidden;
   overflow-y: auto;
 `;
-export const StyledNodeInspectorTopMenuChevron = styled.button<{
-  expanded: boolean;
-}>`
-  background-color: ${props => props.theme.frameSidebarBackground};
-  cursor: pointer;
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  z-index: 2;
-  width: 32px;
-  height: 32px;
-  padding: 6px;
-  color: ${props => props.theme.frameNodePropertiesPanelIconTextColor};
-  text-align: center;
-  ${props =>
-        !props.expanded &&
-    `background: ${props.theme.editorBackground};
-       box-shadow: ${props.theme.standardShadow};
-    `}
-`;
-
-export const PaneContainer = styled.div`
-  width: ${panelWidth}px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding-right: 16px;
-`;

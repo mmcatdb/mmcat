@@ -84,13 +84,10 @@ export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
         <div className='max-w-[1280px] text-center h-[400px]'>
             {fetchedData && (
                 <ArcThemeProvider theme={'dark'}>
-                    <StyledVisContainer isFullscreen={false}>
-                        <GraphVisualizer
-                            nodes={nodes}
-                            relationships={relationships}
-                            fetchedData={fetchedData}
-                        />
-                    </StyledVisContainer>
+                    <GraphVisualizer
+                        nodes={nodes}
+                        relationships={relationships}
+                    />
                 </ArcThemeProvider>
             )
             }
