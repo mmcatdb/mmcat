@@ -325,7 +325,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             whereClause.insert(0, WHERE);
         }
 
-        if (kindName == null) {
+        if (unlabeled || kindName == null) {
             whereClause.append(whereClause.isEmpty() ? WHERE : " AND ");
             whereClause.append("size(labels(n)) = 0");
         }
@@ -338,7 +338,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 .toList();
         });
 
-        Result countQueryResult = session.run(queryBase + " RETURN COUNT(n) AS recordCount;");
+        Result countQueryResult = session.run(queryBase + whereClause.toString() + " RETURN COUNT(n) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
         Set<String> properties = Neo4jAlgorithms.getNodePropertyNames(session, kindName);
