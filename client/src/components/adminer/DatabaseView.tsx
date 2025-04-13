@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Spinner, Pagination } from '@nextui-org/react';
+import { ExportComponent } from '@/components/adminer//ExportComponent';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
@@ -122,9 +123,30 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
 
     return (
         <div>
-            <div className='mb-5'>
+            <div>
                 <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
             </div>
+
+            {itemCount !== undefined && itemCount > 0 && (
+                <div className='my-5 inline-flex gap-3 items-center'>
+                    {state.view !== View.graph && (
+                        <>
+                            <Pagination
+                                total={totalPages}
+                                page={currentPage}
+                                onChange={page => {
+                                    setCurrentPage(page);
+                                    setOffset(state.active.limit * (page - 1));
+                                }}
+                                color='primary'
+                            />
+                            <p>Number of rows: {itemCount}</p>
+                        </>
+                    )}
+
+                    <ExportComponent data={fetchedData}/>
+                </div>
+            )}
 
             {(() => {
                 switch (state.view) {
@@ -157,21 +179,6 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
                     );
                 }
             })()}
-
-            {itemCount !== undefined && itemCount > 0 && state.view !== View.graph && (
-                <div className='mt-5 inline-flex gap-3 items-center'>
-                    <Pagination
-                        total={totalPages}
-                        page={currentPage}
-                        onChange={page => {
-                            setCurrentPage(page);
-                            setOffset(state.active.limit * (page - 1));
-                        }}
-                        color='primary'
-                    />
-                    <p>Number of rows: {itemCount}</p>
-                </div>
-            )}
         </div>
     );
 }

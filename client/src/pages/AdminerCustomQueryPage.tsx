@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
+import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
@@ -101,6 +102,12 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
             >
                 EXECUTE QUERY
             </Button>
+
+            {queryResult && 'data' in queryResult && (
+                <span className='ml-3'>
+                    <ExportComponent data={queryResult}/>
+                </span>
+            )}
 
             <div className='mt-5'>
                 {queryResult && 'message' in queryResult && (<>
