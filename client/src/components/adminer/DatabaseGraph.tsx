@@ -81,16 +81,19 @@ export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
     }, [ fetchedData ]);
 
     return (
-        <div className='max-w-[1280px] text-center h-[400px]'>
-            {fetchedData && (
-                <ArcThemeProvider theme={'dark'}>
-                    <GraphVisualizer
-                        nodes={nodes}
-                        relationships={relationships}
-                    />
-                </ArcThemeProvider>
-            )
-            }
+        <div>
+            {fetchedData && fetchedData.data.length > 0 ? (
+                <div className='max-w-[1280px] text-center h-[400px]'>
+                    <ArcThemeProvider theme={'dark'}>
+                        <GraphVisualizer
+                            nodes={nodes}
+                            relationships={relationships}
+                        />
+                    </ArcThemeProvider>
+                </div>
+            ) : (
+                <span>No records to display.</span>
+            )}
         </div>
     );
 }
