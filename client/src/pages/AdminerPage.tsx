@@ -44,7 +44,7 @@ export function AdminerPage() {
             )}>
                 {allDatasources ? (
                     <>
-                        <DatasourceMenu setDatasource={setDatasource} datasourceId={searchParams.get('datasourceId') ?? datasource?.id} datasources={allDatasources}/>
+                        <DatasourceMenu setDatasource={setDatasource} datasourceId={datasource?.id} datasources={allDatasources}/>
 
                         <ButtonGroup
                             className='mx-2'

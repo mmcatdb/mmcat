@@ -1,7 +1,7 @@
 import { View } from '@/types/adminer/View';
 import { Operator } from '@/types/adminer/Operators';
 import type { Datasource } from '@/types/datasource/Datasource';
-import type { ActiveAdminerState, AdminerCustomQueryState, AdminerFilterQueryState, KindFilterState } from '@/types/adminer/ReducerTypes';
+import type { ActiveAdminerState, AdminerFilterQueryState, KindFilterState } from '@/types/adminer/ReducerTypes';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { QueryType } from '@/types/adminer/QueryType';
@@ -35,13 +35,10 @@ export function getAdminerURLParams(previousParams: URLSearchParams, queryType: 
     return previousParams;
 }
 
-export function getURLParamsFromCustomQueryState(state: AdminerCustomQueryState): URLSearchParams {
+export function getURLParamsFromCustomQueryState(query: string, datasource: Datasource): URLSearchParams {
     const params = getParamsWithQueryType(QueryType.custom);
-
-    params.set('query', state.query);
-
-    if (state.datasourceId)
-        params.set('datasourceId', state.datasourceId);
+    params.set('query', query);
+    params.set('datasourceId', datasource.id);
 
     return params;
 }
@@ -102,10 +99,9 @@ export function getFilterQueryStateFromURLParams(params: URLSearchParams): Admin
     };
 }
 
-export function getCustomQueryStateFromURLParams(params: URLSearchParams): AdminerCustomQueryState {
+export function getCustomQueryStateFromURLParams(params: URLSearchParams): { query?: string, datasourceId?: string } {
     return {
         query: params.get('query') ?? '',
-        unsubmittedQuery: params.get('query') ?? '',
         datasourceId: params.get('datasourceId') ?? undefined,
     };
 }

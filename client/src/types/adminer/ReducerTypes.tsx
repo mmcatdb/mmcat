@@ -4,11 +4,6 @@ import type { Datasource } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
 import type { Id } from '@/types/id';
 
-export type AdminerCustomQueryState = AdminerStateBase & {
-    query: string;
-    unsubmittedQuery: string;
-}
-
 export type AdminerFilterQueryState = ActiveAdminerState & {
     form: KindFilterState;
 };
@@ -17,24 +12,17 @@ export type ActiveAdminerState = {
     active: KindFilterState;
     kindName?: string;
     view: View;
-} & AdminerStateBase
+} & AdminerStateBase;
 
 export type KindFilterState = {
     limit: number;
     offset: number;
     filters: PropertyFilter[];
-}
+};
 
 type AdminerStateBase = {
     datasourceId?: Id;
-}
-
-export type AdminerCustomQueryStateAction =
-| DatasourceAction
-| UpdateQueryAction
-| InitializeAction
-| CustomQueryUpdateAction
-| SubmitAction;
+};
 
 export type AdminerFilterQueryStateAction =
 | DatasourceAction
@@ -78,5 +66,3 @@ type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
 type InitializeAction = AdminerTypedAction<'initialize'>;
 type FilterQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerFilterQueryState }>;
-type UpdateQueryAction = AdminerTypedAction<'query', { newQuery: string }>;
-type CustomQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerCustomQueryState }>;
