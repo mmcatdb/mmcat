@@ -126,7 +126,7 @@ function GettingStartedSection() {
                     icon={<div className='w-14 h-14 rounded-full bg-secondary-100 flex items-center justify-center'>
                         <FaPlus className='w-7 h-7 text-secondary-600' />
                     </div>}
-                    title='Create Schema'
+                    title='Create Schema Category'
                     description='Start a new project to model your data relationships and structure.'
                     buttonText='New Schema'
                     buttonVariant='solid'
@@ -137,8 +137,8 @@ function GettingStartedSection() {
                     icon={<div className='w-14 h-14 rounded-full bg-success-100 flex items-center justify-center'>
                         <BookOpenIcon className='w-7 h-7 text-success-600' />
                     </div>}
-                    title='Define Objects'
-                    description='Open schema category and use our visual editor to define objects and their relationships.'
+                    title='Define Objects in Editor'
+                    description='Open schema category and define objects and their relationships.'
                     buttonText='Explore'
                     buttonVariant='solid'
                     buttonColor='success'
@@ -258,21 +258,29 @@ type FeatureCardProps = {
 function FeatureCard({ icon, title, description, buttonText, buttonVariant = 'solid', buttonColor = 'primary', buttonAction }: FeatureCardProps) {
     return (
         <Card className='p-6 h-full flex flex-col'>
-            <CardBody className='flex flex-col gap-4 flex-grow p-0'>
-                {icon}
-                <h3 className='text-xl font-semibold text-default-800'>{title}</h3>
-                <p className='text-default-600 flex-grow'>{description}</p>
-                {buttonText && (
-                    <Button 
-                        color={buttonColor}
-                        variant={buttonVariant}
-                        onPress={buttonAction}
-                        className='mt-4 self-start'
-                        endContent={<FaArrowRight className='w-3 h-3' />}
-                    >
-                        {buttonText}
-                    </Button>
-                )}
+            <CardBody className='flex flex-col gap-4 h-full p-0'>
+                <div className='flex justify-center'>
+                    {icon}
+                </div>
+                
+                <div className='flex flex-col items-center text-center flex-grow min-h-[120px]'>
+                    <h3 className='text-xl font-semibold text-default-800'>{title}</h3>
+                    <p className='text-default-600 mt-2'>{description}</p>
+                </div>
+                
+                <div className='h-[40px] flex items-center justify-center'>
+                    {buttonText && (
+                        <Button 
+                            color={buttonColor}
+                            variant={buttonVariant}
+                            onPress={buttonAction}
+                            endContent={<FaArrowRight className='w-3 h-3' />}
+                            className='w-full max-w-[200px]'
+                        >
+                            {buttonText}
+                        </Button>
+                    )}
+                </div>
             </CardBody>
         </Card>
     );

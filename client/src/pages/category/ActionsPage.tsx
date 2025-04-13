@@ -206,7 +206,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                 </Button>
                                 <Button
                                     color='primary'
-                                    variant='bordered'
+                                    variant='flat'
                                     isDisabled={loadingMap[action.id]}
                                     onPress={() => createRun(action.id)}
                                 >

@@ -112,7 +112,7 @@ function DatasourceDisplay() {
 
     const [ datasource, setDatasource ] = useState<Datasource>(initialDatasource);
     const [ formValues, setFormValues ] = useState<Settings>(initialDatasource.settings);
-    const [ isConfigurationShown, setisConfigurationShown ] = useState(false);
+    const [ isConfigurationShown, setIsConfigurationShown ] = useState(false);
     const [ isEditing, setIsEditing ] = useState(false);
     const [ isSaving, setIsSaving ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasource-detail-page');
@@ -164,10 +164,31 @@ function DatasourceDisplay() {
         }
     }
 
+    const renderSettingsView = (settings: Settings) => {
+        return (
+            <div className='space-y-4'>
+                {Object.entries(settings).map(([ key, value ]) => (
+                    <div key={key} className='flex gap-4'>
+                        <span className='w-1/3 text-sm font-medium text-default-500 capitalize'>
+                            {key.replace(/([A-Z])/g, ' $1').trim()}
+                        </span>
+                        <span className='flex-1 text-default-800 break-all'>
+                            {typeof value === 'object' 
+                                ? JSON.stringify(value) 
+                                : key.toLowerCase().includes('password')
+                                    ? '••••••••'
+                                    : String(value)}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div className='mt-5'>
             <div className='flex items-center gap-2 mb-4'>
-                <h1 className='text-2xl font-bold  text-default-800'>{initialDatasource.label}</h1>
+                <h1 className='text-2xl font-bold text-default-800'>{initialDatasource.label}</h1>
                 <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
                     <button
                         onClick={isVisible ? dismissBanner : restoreBanner}
@@ -180,26 +201,42 @@ function DatasourceDisplay() {
 
             {isVisible && <DatasourceDetailInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
-            <p className='mb-5 text-default-800'>Type: {datasource.type}</p>
+            <div className='mb-6 p-4 bg-default-50 rounded-lg'>
+                <div className='flex gap-8'>
+                    <div>
+                        <p className='text-sm font-medium text-default-500'>Type</p>
+                        <p className='text-default-800'>{datasource.type}</p>
+                    </div>
+                    <div>
+                        <p className='text-sm font-medium text-default-500'>ID</p>
+                        <p className='text-default-800'>{datasource.id}</p>
+                    </div>
+                </div>
+            </div>
 
             {!isEditing ? (
                 // View Mode
                 <>
-                    <pre className='p-4 rounded-lg text-sm bg-default-50 text-default-800'>
-                        {JSON.stringify(datasource.settings, null, 2)}
-                    </pre>
-                    <Button
-                        onClick={() => setIsEditing(true)} // start editing
-                        className='mt-5'
-                        color='primary'
-                    >
-                        Edit
-                    </Button>
+                    <div className='mb-6'>
+                        <div className='flex justify-between items-center mb-3'>
+                            <h2 className='text-lg font-semibold'>Connection Settings</h2>
+                            <Button
+                                onClick={() => setIsEditing(true)}
+                                color='primary'
+                                size='sm'
+                            >
+                                Edit Settings
+                            </Button>
+                        </div>
+                        <div className='p-4 rounded-lg bg-default-50'>
+                            {renderSettingsView(datasource.settings)}
+                        </div>
+                    </div>
                 </>
             ) : (
                 // Edit Mode
-                <div className='p-6 rounded-lg border border-blue-200 bg-default-50'>
-                    <h2 className='text-xl font-semibold mb-4 text-primary-500'>
+                <div className='p-6 rounded-lg border border-blue-200 bg-default-50 mb-6'>
+                    <h2 className='text-xl font-semibold mb-4'>
                         Edit Datasource
                     </h2>
                     <Input
@@ -223,7 +260,7 @@ function DatasourceDisplay() {
                             >
                                 Save
                             </Button>
-                            <Button color='primary' variant='ghost' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
+                            <Button variant='flat' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>
                         </div>
@@ -231,18 +268,21 @@ function DatasourceDisplay() {
                 </div>
             )}
 
-            <div className='pt-5'>
+            <div>
                 <Button
                     size='sm'
                     variant='solid'
-                    onPress={() => setisConfigurationShown(prev => !prev)}
+                    onPress={() => setIsConfigurationShown(prev => !prev)}
+                    className='mb-2'
                 >
                     {isConfigurationShown ? 'Hide Configuration' : 'Show Configuration'}
                 </Button>
                 {isConfigurationShown && (
-                    <pre className='mt-4 p-4 rounded-md text-sm bg-default-50 text-default-600'>
-                        {JSON.stringify(datasource?.configuration, null, 2)}
-                    </pre>
+                    <div className='p-4 rounded-md bg-default-50'>
+                        <pre className='text-sm text-default-600 overflow-x-auto'>
+                            {JSON.stringify(datasource?.configuration, null, 2)}
+                        </pre>
+                    </div>
                 )}
             </div>
         </div>

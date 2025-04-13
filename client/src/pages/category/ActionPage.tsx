@@ -7,7 +7,7 @@ import { ConfirmationModal } from '@/components/TableCommon';
 import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 
-export function ActionPage() {
+export function ActionDetailPage() {
     const { action } = useLoaderData() as ActionLoaderData;
     const navigate = useNavigate();
     const [ isCreatingRun, setIsCreatingRun ] = useState<boolean>(false);
@@ -68,7 +68,7 @@ export function ActionPage() {
                 </Button>
                 <Button
                     color='danger'
-                    variant='bordered'
+                    variant='flat'
                     onPress={openModal}
                     isDisabled={isDeleting}
                 >
@@ -90,7 +90,7 @@ export function ActionPage() {
     );
 }
 
-ActionPage.loader = actionLoader;
+ActionDetailPage.loader = actionLoader;
 
 export type ActionLoaderData = {
     action: Action;

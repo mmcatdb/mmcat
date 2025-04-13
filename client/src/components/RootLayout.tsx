@@ -9,6 +9,7 @@ import { cn } from './utils';
 import { useLocation } from 'react-router-dom';
 import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
+import { useEffect } from 'react';
 
 export function RootLayout() {
     const { isCollapsed } = usePreferences().preferences;
@@ -17,7 +18,8 @@ export function RootLayout() {
     // A workaround to detect if we are on the editor page and adjust the layout accordingly.
     const isEditorPage = location.pathname.includes('/editor');
 
-    return (
+    return (<>
+        <ScrollToTop />
         <div className={cn('h-screen overflow-hidden text-foreground bg-background')}>
             <div className='flex h-full'>
                 <Sidebar />
@@ -39,7 +41,7 @@ export function RootLayout() {
                 </div>
             </div>
         </div>
-    );
+    </>);
 }
 
 function CommonNavbar() {
@@ -57,6 +59,27 @@ function CommonNavbar() {
             </div>
         </Navbar>
     );
+}
+
+export default function ScrollToTop() {
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            // Try window scroll first
+            window.scrollTo(0, 0);
+            // Target the scrollable container in RootLayout, without this it won't work
+            // because the scrollable container is not the whole window
+            const scrollable = document.querySelector('.overflow-y-auto');
+            if (scrollable) 
+                scrollable.scrollTop = 0;
+      
+        }, 0);
+
+        return () => clearTimeout(timer);
+    }, [ pathname ]);
+
+    return null;
 }
 
 type BreadcrumbData = {
@@ -158,7 +181,7 @@ type ThemeToggleProps = Readonly<{
 export function ThemeToggle({ className }: ThemeToggleProps) {
     const { preferences, setPreferences } = usePreferences();
     const { theme } = preferences;
-    const nextValue = theme === 'dark' ? 'light' : 'dark';
+    const nextValue = theme === 'light' ? 'dark' : 'light';
     const label = `Switch to ${nextValue} theme`;
 
     return (

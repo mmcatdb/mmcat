@@ -17,7 +17,7 @@ import { CategoryOverviewPage } from '@/pages/category/CategoryOverviewPage';
 import { JobsPage } from '@/pages/category/JobsPage';
 import { JobPage } from '@/pages/category/JobPage';
 import { type MappingLoaderData, MappingPage } from '@/pages/category/MappingPage';
-import { type ActionLoaderData, ActionPage } from '@/pages/category/ActionPage';
+import { type ActionLoaderData, ActionDetailPage } from '@/pages/category/ActionPage';
 import { NewMappingPage } from '@/pages/category/NewMappingPage';
 
 export const router = createBrowserRouter([
@@ -148,8 +148,8 @@ export const router = createBrowserRouter([
                                     {
                                         id: 'action',
                                         path: ':actionId',
-                                        loader: ActionPage.loader,
-                                        Component: ActionPage,
+                                        loader: ActionDetailPage.loader,
+                                        Component: ActionDetailPage,
                                         handle: {
                                             breadcrumb: (data: ActionLoaderData) => data.action.label,
                                         },
