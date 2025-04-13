@@ -14,24 +14,18 @@ type DatabaseDocumentProps = Readonly<{
 }>;
 
 export function DatabaseDocument({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
-    if (fetchedData && fetchedData.data.length > 1) {
-        return (
-            <div>
-                {fetchedData.data.map((value, index) =>
-                    <div key={index}>
-                        <DocumentComponent valueKey={null} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
-
-                        {(index != fetchedData.data.length - 1) && <Divider className='my-4'/> }
-                    </div>,
-                )}
-            </div>
-        );
-    }
-
     return (
         <div>
             {fetchedData && fetchedData.data.length > 0 ? (
-                <DocumentComponent valueKey={null} value={fetchedData.data} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
+                <div>
+                    {fetchedData.data.map((value, index) =>
+                        <div key={index}>
+                            <DocumentComponent valueKey={null} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
+
+                            {(index != fetchedData.data.length - 1) && <Divider className='my-4'/> }
+                        </div>,
+                    )}
+                </div>
             ) : (
                 <span>No rows to display.</span>
             )}

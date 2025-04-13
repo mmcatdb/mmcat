@@ -30,29 +30,20 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
 
     if (typeof value === 'object' && value && !Array.isArray(value)) {
         // If value is an object, create another unordered list for its key-value pairs
-        const len = Object.entries(value).filter(([ key ]) => key !== '_id').length;
         return (
             <span>
                 {'{'}
 
-                {/* If length is 1, just render a single line, otherwise render the entire list */}
-                {len === 1 ? (
-                    <span className='mx-3'>
-                        <strong className='mr-3'>{Object.keys(value)[0]}:</strong>
-                        <DocumentComponent valueKey={Object.keys(value)[0]} value={Object.values(value)[0] as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                    </span>
-                ) : (
-                    <ul>
-                        {Object.entries(value)
-                            .filter(([ key ]) => key !== '_id')
-                            .map(([ key, val ]) => (
-                                <li className='ps-8' key={key}>
-                                    <strong className='mr-3'>{key}:</strong>
-                                    <DocumentComponent valueKey={key} value={val as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                                </li>
-                            ))}
-                    </ul>
-                )}
+                <ul>
+                    {Object.entries(value)
+                        .filter(([ key ]) => key !== '_id')
+                        .map(([ key, val ]) => (
+                            <li className='ps-8' key={key}>
+                                <strong className='mr-3'>{key}:</strong>
+                                <DocumentComponent valueKey={key} value={val as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                            </li>
+                        ))}
+                </ul>
 
                 {'}'}
 
@@ -68,27 +59,21 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
 
     if (Array.isArray(value)) {
         // If value is an array, create a list for each item
-        const len = value.length;
         return (
             <span>
-                {'{'}
+                {'['}
 
-                {/* If length is 1, just render a single line, otherwise render the entire list */}
-                {len === 1 ? (
-                    <span className='mx-3'>
-                        <DocumentComponent valueKey={null} value={value[0] as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                    </span>
-                ) : (
+                <div className='ml-4'>
                     <ul>
                         {value.map((item, index) => (
-                            <li className='ps-8' key={index}>
+                            <li className='ps-4' key={index}>
                                 <DocumentComponent valueKey={null} value={item as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                             </li>
                         ))}
                     </ul>
-                )}
+                </div>
 
-                {'}'}
+                {']'}
 
                 <Button
                     className='mx-2 h-5'
