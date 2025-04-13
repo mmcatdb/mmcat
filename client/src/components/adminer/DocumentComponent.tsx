@@ -20,10 +20,10 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
     if (!isOpen) {
         return (
             <Button
-                className='mx-2 h-5'
+                className='m-1 h-5 px-1 min-w-5'
                 variant='ghost'
                 onPress={() => setIsOpen(true)}>
-                Open
+                +
             </Button>
         );
     }
@@ -31,7 +31,7 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
     if (typeof value === 'object' && value && !Array.isArray(value)) {
         // If value is an object, create another unordered list for its key-value pairs
         return (
-            <span>
+            <span className='group'>
                 {'{'}
 
                 <ul>
@@ -48,10 +48,10 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
                 {'}'}
 
                 <Button
-                    className='mx-2 h-5'
+                    className='m-1 h-5 px-1 min-w-5 opacity-0 group-hover:opacity-100'
                     variant='ghost'
                     onPress={() => setIsOpen(false)}>
-                    Close
+                    -
                 </Button>
             </span>
         );
@@ -60,7 +60,7 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
     if (Array.isArray(value)) {
         // If value is an array, create a list for each item
         return (
-            <span>
+            <span className='group'>
                 {'['}
 
                 <div className='ml-4'>
@@ -68,6 +68,7 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
                         {value.map((item, index) => (
                             <li className='ps-4' key={index}>
                                 <DocumentComponent valueKey={null} value={item as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                                {(index != value.length - 1) && ',' }
                             </li>
                         ))}
                     </ul>
@@ -76,10 +77,10 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
                 {']'}
 
                 <Button
-                    className='mx-2 h-5'
+                    className='m-1 h-5 px-1 min-w-5 opacity-0 group-hover:opacity-100'
                     variant='ghost'
                     onPress={() => setIsOpen(false)}>
-                    Close
+                    -
                 </Button>
             </span>
         );
@@ -89,13 +90,14 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
     return (
         <span>
             {String(value)}
-            <div className='ps-4'>
-                {valueKey !== null
-                    && kindReferences.length > 0
-                    && kindReferences.some(ref => ref.referencingProperty === valueKey)
-                    && (<ReferenceComponent references={kindReferences} data={({ [valueKey as string]: value as string })} propertyName={valueKey as string} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                    )}
-            </div>
+            {valueKey !== null
+                && kindReferences.length > 0
+                && kindReferences.some(ref => ref.referencingProperty === valueKey)
+                && (
+                    <div className='ps-4'>
+                        <ReferenceComponent references={kindReferences} data={({ [valueKey as string]: value as string })} propertyName={valueKey as string} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                    </div>
+                )}
         </span>
     );
 }
