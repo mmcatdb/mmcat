@@ -10,7 +10,6 @@ import { type RelationshipModel } from '@/components/adminer/graph-visualization
 import { ForceSimulation } from './ForceSimulation';
 import { nodeEventHandlers, relationshipEventHandlers } from './mouseEventHandlers';
 import { nodeRenderer, relationshipRenderer } from './renderers';
-import { nodeMenuRenderer } from './menu';
 import { type ZoomLimitsReached, ZoomType } from '@/components/adminer/graph-visualization/types/types';
 
 type MeasureSizeFn = () => { width: number, height: number }
@@ -155,14 +154,9 @@ export class Visualization {
             .join('g')
             .attr('class', 'node')
             .attr('aria-label', d => `graph-node${d.id}`)
-            .call(nodeEventHandlers, this.trigger, this.forceSimulation.simulation)
-            .classed('selected', node => node.selected);
+            .call(nodeEventHandlers, this.trigger, this.forceSimulation.simulation);
 
         nodeRenderer.forEach(renderer =>
-            nodeGroups.call(renderer.onGraphChange, this),
-        );
-
-        nodeMenuRenderer.forEach(renderer =>
             nodeGroups.call(renderer.onGraphChange, this),
         );
 
@@ -183,8 +177,7 @@ export class Visualization {
             .data(relationships, d => d.id)
             .join('g')
             .attr('class', 'relationship')
-            .call(relationshipEventHandlers, this.trigger)
-            .classed('selected', relationship => relationship.selected);
+            .call(relationshipEventHandlers, this.trigger);
 
         relationshipRenderer.forEach(renderer =>
             relationshipGroups.call(renderer.onGraphChange, this),
