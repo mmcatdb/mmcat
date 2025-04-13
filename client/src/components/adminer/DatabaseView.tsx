@@ -158,7 +158,7 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
                 }
             })()}
 
-            {itemCount !== undefined && itemCount > 0 && (
+            {itemCount !== undefined && itemCount > 0 && state.view !== View.graph && (
                 <div className='mt-5 inline-flex gap-3 items-center'>
                     <Pagination
                         total={totalPages}

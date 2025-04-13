@@ -1,7 +1,8 @@
 import { Component, createRef, type RefObject, type JSX } from 'react';
 import { type GraphModel } from '@/components/adminer/graph-visualization/types/Graph';
+import { GraphEventHandlerModel, type GraphInteractionCallBack } from './GraphEventHandlerModel';
 import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
-import { type ZoomLimitsReached, ZoomType } from '@/components/adminer/graph-visualization/types/types';
+import { type GetNodeNeighborsFn, type VizItem, type ZoomLimitsReached, ZoomType } from '@/components/adminer/graph-visualization/types/types';
 import { type GraphStats, createGraph, getGraphStats } from '@/components/adminer/graph-visualization/utils/mapper';
 import { Visualization } from './visualization/Visualization';
 import { StyledSvgWrapper, StyledZoomButton, StyledZoomHolder } from './styled';
@@ -13,11 +14,15 @@ export type GraphProps = {
   isFullscreen: boolean;
   relationships: BasicRelationship[];
   nodes: BasicNode[];
+  getNodeNeighbors: GetNodeNeighborsFn;
+  onItemMouseOver: (item: VizItem) => void;
+  onItemSelect: (item: VizItem) => void;
   graphStyle: GraphStyleModel;
   styleVersion: number;
   onGraphModelChange: (stats: GraphStats) => void;
   setGraph: (graph: GraphModel) => void;
   initialZoomToFit?: boolean;
+  onGraphInteraction?: GraphInteractionCallBack;
 }
 
 type GraphState = {
@@ -49,11 +54,15 @@ export class Graph extends Component<GraphProps, GraphState> {
 
     componentDidMount(): void {
         const {
+            getNodeNeighbors,
             graphStyle,
             initialZoomToFit,
             isFullscreen,
             nodes,
+            onGraphInteraction,
             onGraphModelChange,
+            onItemMouseOver,
+            onItemSelect,
             relationships,
             setGraph,
         } = this.props;
@@ -76,6 +85,17 @@ export class Graph extends Component<GraphProps, GraphState> {
             isFullscreen,
             initialZoomToFit,
         );
+
+        const graphEventHandler = new GraphEventHandlerModel(
+            graph,
+            this.visualization,
+            getNodeNeighbors,
+            onItemMouseOver,
+            onItemSelect,
+            onGraphModelChange,
+            onGraphInteraction,
+        );
+        graphEventHandler.bindEventHandlers();
 
         onGraphModelChange(getGraphStats(graph));
         this.visualization.resize(isFullscreen);
