@@ -4,7 +4,6 @@ import { DatasourceModal } from '@/components/datasources/DatasourceModal';
 import { api } from '@/api';
 import { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { EmptyState } from '@/components/TableCommon';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
@@ -22,7 +21,6 @@ export function DatasourcesInCategoryPage() {
     const [ datasourcesNotIn, setDatasourcesNotIn ] = useState<Datasource[]>(data.datasourcesNotIn);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasources-in-category-page');
 
-    const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
 
     const [ datasourcesWithMappings, setDatasourcesWithMappings ] = useState<string[]>(data.allDatasourcesWithMappings);
@@ -83,7 +81,7 @@ export function DatasourcesInCategoryPage() {
                             </div>
                             <div className='flex items-center gap-2'>
                                 <RiMapPin2Line />
-                                <span className='font-bold'> Navigate to:</span> 
+                                <span className='font-bold'> Select:</span> 
                                 Your desired datasource
                             </div>
                             <div className='flex items-center gap-2'>

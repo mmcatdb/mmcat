@@ -20,7 +20,7 @@ export function CategoryOverviewPage() {
     return (
         <div className='pt-4 space-y-6'>
             {/* Header */}
-            <h1 className='text-3xl font-bold text-primary-500'>{category.label}</h1>
+            <h1 className='text-3xl font-bold text-primary-500 truncate max-w-[1000px]' title={category.label}>{category.label}</h1>
 
             {/* Overview Cards */}
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
@@ -75,7 +75,7 @@ export function CategoryOverviewPage() {
                     <FeatureCard
                         icon={<FaPlus className='w-12 h-12 mx-auto text-success-500' />}
                         title='Manage Actions'
-                        description='Set up data transformation actions.'
+                        description='Set up data transformation actions and create runs.'
                         linkText='Manage Actions'
                         linkTo={routes.category.actions.resolve({ categoryId })}
                     />
@@ -89,7 +89,7 @@ export function CategoryOverviewPage() {
                     <FeatureCard
                         icon={<FaSearch className='w-12 h-12 mx-auto text-default-500' />}
                         title='Query Data'
-                        description='Explore data within this category.'
+                        description='Explore and query data within this category.'
                         linkText='Query Data'
                         linkTo={routes.category.querying.resolve({ categoryId })}
                     />
@@ -135,11 +135,16 @@ type FeatureCardProps = {
 
 function FeatureCard({ icon, title, description, linkText, linkTo }: FeatureCardProps) {
     return (
-        <Card className='p-6 shadow-medium hover:shadow-large transition'>
+        <Card className='p-6 shadow-medium hover:shadow-large transition h-full flex flex-col'>
             {icon}
             <h3 className='mt-4 font-semibold text-lg'>{title}</h3>
-            <p className='text-default-600'>{description}</p>
-            <Button as={Link} to={linkTo} variant='ghost' className='mt-4'>
+            <p className='text-default-600 mb-4'>{description}</p>
+            <Button 
+                as={Link} 
+                to={linkTo} 
+                variant='ghost' 
+                className='mt-auto'
+            >
                 {linkText}
             </Button>
         </Card>

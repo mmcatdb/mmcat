@@ -174,7 +174,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             </Button>
 
             <Button color='primary' onClick={createMorphism} isDisabled={!isValidSelection || label === ''}>
-                Finish
+                Add
             </Button>
         </div>
     </>);
