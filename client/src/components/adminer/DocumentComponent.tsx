@@ -5,6 +5,16 @@ import type { Datasource } from '@/types/datasource/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
+function getColor(value: string): string {
+    if (!Number.isNaN(Number.parseFloat(value)))
+        return 'text-success-600';
+
+    if (value.toLocaleLowerCase() === 'true' || value.toLocaleLowerCase() === 'false')
+        return 'text-danger-400';
+
+    return 'text-foreground';
+}
+
 type DocumentComponentProps = Readonly<{
     valueKey: unknown;
     value: unknown;
@@ -39,7 +49,9 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
                         .filter(([ key ]) => key !== '_id')
                         .map(([ key, val ]) => (
                             <li className='ps-8' key={key}>
-                                <strong className='mr-3'>{key}:</strong>
+                                <span className='text-secondary-600'>
+                                    <strong className='mr-3'>{key}:</strong>
+                                </span>
                                 <DocumentComponent valueKey={key} value={val as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                             </li>
                         ))}
@@ -89,7 +101,9 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
     // For primitive values (string, number, etc.), return them as a string
     return (
         <span>
-            {String(value)}
+            <span className={getColor(String(value))}>
+                {String(value)}
+            </span>
             {valueKey !== null
                 && kindReferences.length > 0
                 && kindReferences.some(ref => ref.referencingProperty === valueKey)
