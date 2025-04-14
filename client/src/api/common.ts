@@ -17,7 +17,7 @@ export function createAxiosInstance(baseURL?: string, withCredentials = true) {
         },
         error => {
             // Do something with request error
-            console.log('Request error:', error);
+            // console.log('Request error:', error);
             return Promise.reject(error);
         },
     );
@@ -35,20 +35,22 @@ export function createAxiosInstance(baseURL?: string, withCredentials = true) {
 
     instance.interceptors.response.use(
         response => {
-            console.log('Response:', response);
+            // console.log('Response:', response);
             return response;
         },
         error => {
-            console.log('Response error:', error);
-            console.log('Error config:', error.config);
+            // console.log('Response error:', error);
+            // console.log('Error config:', error.config);
 
             if (error.response)
-                console.log('Error response:', error.response);
+            // console.log('Error response:', error.response);
 
-            if (error.request)
-                console.log('Error request:', error.request);
+            {
+                if (error.request)
+                // console.log('Error request:', error.request);
 
-            return Promise.reject(generateErrorObject(error));
+                    return Promise.reject(generateErrorObject(error));
+            }
         },
     );
 

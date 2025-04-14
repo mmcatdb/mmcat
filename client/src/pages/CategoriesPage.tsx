@@ -5,13 +5,14 @@ import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
 import { Button, cn, Input, Tooltip } from '@nextui-org/react';
 import { AddSchemaModal } from './Home';
-import { Outlet, useLoaderData } from 'react-router-dom';
+import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
+import { routes } from '@/routes/routes';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -32,6 +33,7 @@ export function CategoriesPage() {
     const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
     const [ searchTerm, setSearchTerm ] = useState('');
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
+    const navigate = useNavigate();
 
     const categoryDeleted = useCallback((id: Id) => {
         setCategories(prev => prev?.filter(category => category.id !== id) ?? []);
@@ -57,7 +59,9 @@ export function CategoriesPage() {
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
-    }, []);
+
+        navigate(routes.category.index.resolve({ categoryId: newCategory.id }));
+    }, [ navigate ]);
 
     const filteredCategories = categories.filter(category =>
         category.label.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -94,7 +98,9 @@ export function CategoriesPage() {
                     {EXAMPLE_SCHEMAS.map(example => (
                         <Button
                             key={example}
-                            onPress={() => createSchema(example, true)}
+                            onPress={() => {
+                                void createSchema(example, true); 
+                            }}
                             isLoading={isCreatingExampleSchema}
                             color='secondary'
                             variant='flat'

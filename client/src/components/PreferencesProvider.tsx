@@ -26,7 +26,7 @@ function fromStored(): Preferences {
     const stored = localStorage.get<Partial<StoredPreferences>>(PREFERENCES_KEY) ?? {};
 
     return {
-        theme: stored.theme ?? 'dark',
+        theme: stored.theme ?? 'light',
         isCollapsed: stored.isCollapsed ?? false,
         showTableIDs: stored.showTableIDs ?? false,
     };

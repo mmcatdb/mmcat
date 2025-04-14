@@ -72,7 +72,7 @@ export class GraphEngine {
         private readonly propagateState: Dispatch<ReactiveGraphState>,
         private readonly options: FullGraphOptions,
     ) {
-        console.log('CREATE Graph Engine');
+        // console.log('CREATE Graph Engine');
 
         this.nodes = input.nodes;
         this.edges = input.edges;
@@ -88,7 +88,7 @@ export class GraphEngine {
 
     /** Use this for the engine to start listening to events. Returns a cleanup function. */
     setup(): () => void {
-        console.log('SETUP graph engine');
+        // console.log('SETUP graph engine');
 
         // The event is throttled because we don't need to update the state that often.
         const mousemove = throttle((e: MouseEvent) => this.handleGlobalMousemove(e));
@@ -98,7 +98,7 @@ export class GraphEngine {
         document.addEventListener('mouseup', mouseup);
 
         return () => {
-            console.log('CLEANUP graph engine');
+            // console.log('CLEANUP graph engine');
 
             document.removeEventListener('mousemove', mousemove);
             document.removeEventListener('mouseup', mouseup);
@@ -106,7 +106,7 @@ export class GraphEngine {
     }
 
     update(input: Graph) {
-        console.log('UPDATE graph engine');
+        // console.log('UPDATE graph engine');
 
         this.nodes = input.nodes;
         this.edges = input.edges;
@@ -121,12 +121,12 @@ export class GraphEngine {
 
     setCanvasRef(ref: HTMLElement | null) {
         if (!ref) {
-            console.log('DELETE canvas ref');
+            // console.log('DELETE canvas ref');
             this.canvasConnection?.cleanup();
             this.canvasConnection = undefined;
         }
         else {
-            console.log('CREATE canvas ref');
+            // console.log('CREATE canvas ref');
 
             const wheel = (e: WheelEvent) => this.handleCanvasWheel(e);
             ref.addEventListener('wheel', wheel, { passive: false });
@@ -146,11 +146,11 @@ export class GraphEngine {
 
     setNodeRef(nodeId: string, ref: HTMLElement | null) {
         if (!ref) {
-            console.log('DELETE node ref');
+            // console.log('DELETE node ref');
             this.nodeRefs.delete(nodeId);
         }
         else {
-            console.log('CREATE node ref');
+            // console.log('CREATE node ref');
             this.nodeRefs.set(nodeId, ref);
         }
     }
@@ -172,11 +172,11 @@ export class GraphEngine {
 
     setEdgeRef(edgeId: string, ref: SVGPathElement | null) {
         if (!ref) {
-            console.log('DELETE edge ref');
+            // console.log('DELETE edge ref');
             this.edgeRefs.delete(edgeId);
         }
         else {
-            console.log('CREATE edge ref');
+            // console.log('CREATE edge ref');
             this.edgeRefs.set(edgeId, ref);
         }
     }
@@ -199,11 +199,11 @@ export class GraphEngine {
 
     setSelectionBoxRef(ref: HTMLElement | null) {
         if (!ref) {
-            console.log('DELETE selection box ref');
+            // console.log('DELETE selection box ref');
             this.selectionBoxRef = undefined;
         }
         else {
-            console.log('CREATE selection box ref');
+            // console.log('CREATE selection box ref');
             this.selectionBoxRef = ref;
         }
     }

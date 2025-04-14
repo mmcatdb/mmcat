@@ -66,7 +66,12 @@ export function ActionsPage() {
             {/* Actions Table or Empty State */}
             <div>
                 {actions.length > 0 ? (
-                    <ActionsTable actions={actions} onDeleteAction={deleteAction} />
+                    <ActionsTable
+                        actions={actions}
+                        onDeleteAction={id => {
+                            void deleteAction(id);
+                        }}
+                    />
                 ) : (
                     <EmptyState
                         message='No actions available.'
@@ -123,13 +128,11 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
 
         const response = await api.jobs.createRun({ actionId });
 
-        if (!response.status) {
+        if (!response.status) 
             toast.error('Error creating run');
-        }
-        else {
+        else 
             toast.success('Run created successfully.');
-            console.log('New Run:', response.data);
-        }
+            // console.log('New Run:', response.data);
 
         setLoadingMap(prev => ({ ...prev, [actionId]: false }));
     }
@@ -208,7 +211,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                     color='primary'
                                     variant='flat'
                                     isDisabled={loadingMap[action.id]}
-                                    onPress={() => createRun(action.id)}
+                                    onPress={() => {
+                                        void createRun(action.id); 
+                                    }}
                                 >
                                     {loadingMap[action.id] ? 'Creating...' : 'Create Run'}
                                 </Button>

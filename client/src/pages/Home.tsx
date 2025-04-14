@@ -18,6 +18,7 @@ export function Home() {
     const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ showAllCategories, setShowAllCategories ] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         void fetchCategories();
@@ -47,12 +48,18 @@ export function Home() {
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${name}' created successfully!`);
-    }, []);
+
+        navigate(routes.category.index.resolve({ categoryId: newCategory.id }));
+    }, [ navigate ]);
 
     return (
         <div className='p-6 max-w-7xl mx-auto space-y-16'>
             <HeaderSection />
-            <GettingStartedSection />
+            <GettingStartedSection
+                onOpenModal={() => setIsModalOpen(true)}
+                isCreatingSchema={isCreatingSchema}
+                categories={categories}
+            />
             <SchemaCategoriesSection
                 categories={categories}
                 showAllCategories={showAllCategories}
@@ -60,12 +67,14 @@ export function Home() {
                 onOpenModal={() => setIsModalOpen(true)}
                 isCreatingSchema={isCreatingSchema}
                 isCreatingExampleSchema={isCreatingExampleSchema}
-                onCreateSchema={handleCreateSchema}
+                onCreateSchema={(name, isExample) => {
+                    void handleCreateSchema(name, isExample); 
+                }}
             />
             <AddSchemaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={label => handleCreateSchema(label, false)}
+                onSubmit={label => void handleCreateSchema(label, false)}
                 isSubmitting={isCreatingSchema}
             />
         </div>
@@ -97,7 +106,15 @@ function HeaderSection() {
     );
 }
 
-function GettingStartedSection() {
+function GettingStartedSection({
+    onOpenModal,
+    isCreatingSchema,
+    categories,
+}: {
+    onOpenModal: () => void;
+    isCreatingSchema: boolean;
+    categories?: SchemaCategoryInfo[];
+}) {
     const navigate = useNavigate();
 
     return (
@@ -112,37 +129,49 @@ function GettingStartedSection() {
             </div>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 <FeatureCard
-                    icon={<div className='w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center'>
-                        <FaDatabase className='w-7 h-7 text-primary-600' />
-                    </div>}
+                    icon={
+                        <div className='w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center'>
+                            <FaDatabase className='w-7 h-7 text-primary-600' />
+                        </div>
+                    }
                     title='Connect Data Sources'
                     description='Link your existing databases or files to start modeling your data.'
                     buttonText='Connect Now'
                     buttonVariant='solid'
                     buttonColor='primary'
-                    buttonAction={() => navigate(routes.datasources)}
+                    buttonAction={() => navigate(routes.datasources, { state: { openModal: true } })}
                 />
                 <FeatureCard
-                    icon={<div className='w-14 h-14 rounded-full bg-secondary-100 flex items-center justify-center'>
-                        <FaPlus className='w-7 h-7 text-secondary-600' />
-                    </div>}
+                    icon={
+                        <div className='w-14 h-14 rounded-full bg-secondary-100 flex items-center justify-center'>
+                            <FaPlus className='w-7 h-7 text-secondary-600' />
+                        </div>
+                    }
                     title='Create Schema Category'
                     description='Start a new project to model your data relationships and structure.'
                     buttonText='New Schema'
                     buttonVariant='solid'
                     buttonColor='secondary'
-                    buttonAction={() => navigate(routes.categories)} // TODO: href on this page, to next section
+                    buttonAction={onOpenModal}
+                    isLoading={isCreatingSchema}
                 />
                 <FeatureCard
-                    icon={<div className='w-14 h-14 rounded-full bg-success-100 flex items-center justify-center'>
-                        <BookOpenIcon className='w-7 h-7 text-success-600' />
-                    </div>}
+                    icon={
+                        <div className='w-14 h-14 rounded-full bg-success-100 flex items-center justify-center'>
+                            <BookOpenIcon className='w-7 h-7 text-success-600' />
+                        </div>
+                    }
                     title='Define Objects in Editor'
                     description='Open schema category and define objects and their relationships.'
                     buttonText='Explore'
                     buttonVariant='solid'
                     buttonColor='success'
-                    buttonAction={() => navigate(routes.categories)}
+                    buttonAction={() =>
+                        categories && categories.length > 0
+                            ? navigate(routes.category.editor.resolve({ categoryId: categories[0].id }))
+                            : toast.error('No schema categories available. Please create one first.')
+                    }
+                    isDisabled={!categories || categories.length === 0}
                 />
             </div>
         </div>
@@ -253,31 +282,45 @@ type FeatureCardProps = {
     buttonVariant?: 'solid' | 'flat' | 'ghost';
     buttonColor?: 'default' | 'primary' | 'secondary' | 'success';
     buttonAction?: () => void;
+    isLoading?: boolean;
+    isDisabled?: boolean;
 };
 
-function FeatureCard({ icon, title, description, buttonText, buttonVariant = 'solid', buttonColor = 'primary', buttonAction }: FeatureCardProps) {
+function FeatureCard({
+    icon,
+    title,
+    description,
+    buttonText,
+    buttonVariant = 'solid',
+    buttonColor = 'primary',
+    buttonAction,
+    isLoading = false,
+    isDisabled = false,
+}: FeatureCardProps) {
     return (
         <Card className='p-6 h-full flex flex-col'>
             <CardBody className='flex flex-col gap-4 h-full p-0'>
-                <div className='flex justify-center'>
-                    {icon}
-                </div>
-                
+                <div className='flex justify-center'>{icon}</div>
                 <div className='flex flex-col items-center text-center flex-grow min-h-[120px]'>
-                    <h3 className='text-xl font-semibold text-default-800'>{title}</h3>
-                    <p className='text-default-600 mt-2'>{description}</p>
+                    <h3 className='text-xl font-semibold text-default-800'>
+                        <span>{title}</span>
+                    </h3>
+                    <p className='text-default-600 mt-2'>
+                        <span>{description}</span>
+                    </p>
                 </div>
-                
                 <div className='h-[40px] flex items-center justify-center'>
                     {buttonText && (
-                        <Button 
+                        <Button
                             color={buttonColor}
                             variant={buttonVariant}
                             onPress={buttonAction}
                             endContent={<FaArrowRight className='w-3 h-3' />}
                             className='w-full max-w-[200px]'
+                            isLoading={isLoading}
+                            isDisabled={isDisabled}
                         >
-                            {buttonText}
+                            <span>{buttonText}</span>
                         </Button>
                     )}
                 </div>
@@ -310,6 +353,11 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
         onClose();
     }
 
+    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter') 
+            handleSubmit();
+    }
+
     return (
         <Modal isOpen={isOpen} onClose={handleClose} isDismissable={false}>
             <ModalContent>
@@ -325,6 +373,7 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
                         label='Schema Name'
                         value={label}
                         onChange={e => setLabel(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         classNames={{
                             input: 'text-lg',
                         }}

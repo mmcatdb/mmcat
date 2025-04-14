@@ -17,7 +17,7 @@ import { CategoryOverviewPage } from '@/pages/category/CategoryOverviewPage';
 import { JobsPage } from '@/pages/category/JobsPage';
 import { JobPage } from '@/pages/category/JobPage';
 import { type MappingLoaderData, MappingPage } from '@/pages/category/MappingPage';
-import { type ActionLoaderData, ActionDetailPage } from '@/pages/category/ActionPage';
+import { type ActionLoaderData, ActionDetailPage } from '@/pages/category/ActionDetailPage';
 import { NewMappingPage } from '@/pages/category/NewMappingPage';
 
 export const router = createBrowserRouter([

@@ -89,7 +89,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
             </Button>
 
             <Button color='primary' onClick={createObjex} isDisabled={label === ''}>
-                Finish
+                Add
             </Button>
         </div>
     </>);

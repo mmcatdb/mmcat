@@ -132,7 +132,9 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
         <ConfirmationModal
             isOpen={!!rawDeletingCategory}
             onClose={() => setDeletingCategoryId(undefined)}
-            onConfirm={confirmDelete}
+            onConfirm={() => {
+                void confirmDelete(); 
+            }}
             isFetching={isDeleting}
             title='Confirm Deletion?'
             message={`The schema category ${deletingCategory?.label} will be permanently deleted.`}

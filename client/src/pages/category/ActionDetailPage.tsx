@@ -36,13 +36,11 @@ export function ActionDetailPage() {
         const response = await api.jobs.createRun({ actionId });
         setIsCreatingRun(false);
 
-        if (!response.status) {
+        if (!response.status) 
             toast.error('Error creating run');
-        }
-        else {
+        else 
             toast.success('Run created successfully.');
-            console.log('New Run:', response.data);
-        }
+            // console.log('New Run:', response.data);
     }
 
     return (
@@ -62,7 +60,9 @@ export function ActionDetailPage() {
                     color='primary'
                     variant='solid'
                     isDisabled={isCreatingRun}
-                    onPress={() => handleCreateRun(action.id)}
+                    onPress={() => {
+                        void handleCreateRun(action.id); 
+                    }}
                 >
                     {isCreatingRun ? 'Creating...' : 'Create Run'}
                 </Button>
@@ -79,7 +79,9 @@ export function ActionDetailPage() {
             <ConfirmationModal
                 isOpen={isModalOpen}
                 onClose={closeModal}
-                onConfirm={confirmDelete}
+                onConfirm={() => {
+                    void confirmDelete(); 
+                }}
                 title='Confirm Deletion?'
                 message='This will permanently delete the action.'
                 confirmButtonText='Yes, Delete'

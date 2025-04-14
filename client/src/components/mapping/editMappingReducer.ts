@@ -43,7 +43,7 @@ export type EditMappingAction =
     | { type: 'append-to-access-path', nodeId: string };
 
 export function editMappingReducer(state: EditMappingState, action: EditMappingAction): EditMappingState {
-    console.log('REDUCE', action, state);
+    // console.log('REDUCE', action, state);
 
     switch (action.type) {
     case 'graph':
@@ -133,7 +133,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
                 return {
                     ...state,
                     // @ts-expect-error FIXME
-                    selection: PathSelection.create([ event.nodeId ]),
+                    selection: PathSelection.create([ String(event.nodeId) ]),
                 };
             }
             else {
@@ -152,7 +152,7 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
                         selection: state.selection.updateFromAction({
                             operation: 'add',
                             // @ts-expect-error FIXME
-                            nodeIds: [ event.nodeId ],
+                            nodeIds: [ String(event.nodeId) ],
                             edgeIds: [ edge.id ],
                         }),
                     };

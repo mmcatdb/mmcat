@@ -28,7 +28,7 @@ export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
 type EditCategoryAction = GraphAction | SelectAction | LeftPanelAction | RightPanelAction | CreateObjexAction | CreateMorphismAction | DeleteElementsAction;
 
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
-    console.log('REDUCE', state.leftPanelMode, action, state);
+    // console.log('REDUCE', state.leftPanelMode, action, state);
 
     switch (action.type) {
     case 'graph': return graph(state, action);

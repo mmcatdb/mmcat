@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
 import { DatasourceModal } from '@/components/datasources/DatasourceModal';
 import { api } from '@/api';
@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { Button, Tooltip } from '@nextui-org/react';
 import { AddIcon } from '@/components/icons/PlusIcon';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { cn } from '@/components/utils';
@@ -19,6 +19,17 @@ export function DatasourcesPage() {
     const [ datasources, setDatasources ] = useState(data.datasources);
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasources-page');
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Open modal if navigated with state.openModal
+    useEffect(() => {
+        if (location.state?.openModal) {
+            setIsModalOpen(true);
+            // Clear state to prevent re-opening on refresh
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [ location, navigate ]);
 
     function onDatasourceCreated(newDatasource: Datasource) {
         setDatasources(prev => [ ...prev, newDatasource ]);
@@ -65,7 +76,9 @@ export function DatasourcesPage() {
             {datasources.length > 0 ? (
                 <DatasourcesTable 
                     datasources={datasources} 
-                    deleteDatasource={deleteDatasource}
+                    deleteDatasource={id => {
+                        void deleteDatasource(id); 
+                    }}
                     datasourcesWithMappings={data.datasourcesWithMappings}
                 />
             ) : (

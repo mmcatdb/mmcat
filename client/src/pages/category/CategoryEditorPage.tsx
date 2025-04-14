@@ -25,10 +25,7 @@ type EditorSidebarState = {
 
 export function CategoryEditorPage() {
     const loaderData = useLoaderData() as Awaited<ReturnType<typeof categoryEditorLoader>>;
-
-    // TODO Use this to display logical models.
-    // const logicalModels = useMemo(() => logicalModelsFromServer(loaderData.datasources, loaderData.mappings), [ loaderData.datasources, loaderData.mappings ]);
-
+    
     // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
     const evocatRef = useRef<Evocat>();
     if (!evocatRef.current) {
@@ -115,8 +112,8 @@ export function CategoryEditorPage() {
 
             <div className='relative flex flex-grow'>
                 {/* Left Sidebar */}
-                <div className={cn(`z-50 absolute left-2 top-2 bottom-2 transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden`)}>
-                    {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} className='h-full bg-default-50 rounded-lg' />}
+                <div className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
+                    {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
                 </div>
 
                 {/* Main Canvas */}
@@ -203,7 +200,9 @@ function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
         <div
             id='save-button' // id for triggering via Ctrl+S
             className='flex items-center gap-1 text-default-600 hover:text-default-800 cursor-pointer relative'
-            onClick={save}
+            onClick={() => {
+                void save(); 
+            }}
             title='Save Changes (Ctrl+S)'
         >
             {isFetching ? (

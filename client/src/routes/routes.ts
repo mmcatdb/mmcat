@@ -36,7 +36,6 @@ export const routes = {
         editor: categoryIndex.child('/editor', 'editor'),
         datasources: categoryIndex.child('/datasources', 'datasources'),
         mapping: categoryIndex.child<'categoryId' | 'mappingId'>('/mappings/:mappingId', 'mappings'),
-        // newMapping: categoryIndex.child<'categoryId' | 'datasourceId'>('/datasources/:datasourceId/mappings/new', 'new-mapping'),
         newMapping: categoryIndex.child<'categoryId'>('/mappings/new', 'new-mapping'),
         querying: categoryIndex.child('/querying', 'querying'),
         actions: categoryIndex.child('/actions', 'actions'),
