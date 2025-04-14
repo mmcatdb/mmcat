@@ -15,6 +15,7 @@ import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
+import { InfoBanner } from '../CategoriesPage';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
@@ -35,7 +36,7 @@ export function ActionsPage() {
     }
 
     return (
-        <div>
+        <div className='pt-4'>
             {/* Header with Info Icon */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
@@ -246,43 +247,41 @@ type ActionInfoBannerProps = {
 
 export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerProps) {
     return (
-        <div className={cn('relative', className)}>
-            <div className='bg-default-50 text-default-900 p-4 rounded-lg border border-default-300 mt-2 animate-fade-in'>
-                <button
-                    onClick={dismissBanner}
-                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-                >
-                    <HiXMark className='w-5 h-5' />
-                </button>
+        <InfoBanner className={className} dismissBanner={dismissBanner}>
+            <button
+                onClick={dismissBanner}
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
 
-                <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
+            <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
 
-                {/* Info Content */}
-                <p className='text-sm'>
+            {/* Info Content */}
+            <p className='text-sm'>
                     An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
                     Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
                     For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
-                </p>
+            </p>
 
-                <ul className='mt-3 text-sm space-y-2'>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Action:</strong> Spawns jobs (e.g., exporting data to PostgreSQL).
-                    </li>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Job:</strong> A single execution of a transformation algorithm.
-                    </li>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Run:</strong> A collection of multiple Job executions (similar to a CI/CD pipeline).
-                    </li>
-                </ul>
+            <ul className='mt-3 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Action:</strong> Spawns jobs (e.g., exporting data to PostgreSQL).
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Job:</strong> A single execution of a transformation algorithm.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Run:</strong> A collection of multiple Job executions (similar to a CI/CD pipeline).
+                </li>
+            </ul>
 
-                <p className='text-sm mt-3'>
+            <p className='text-sm mt-3'>
                     Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
-                </p>
-            </div>
-        </div>
+            </p>
+        </InfoBanner>
     );
 }

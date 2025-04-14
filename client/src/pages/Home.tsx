@@ -162,7 +162,7 @@ function GettingStartedSection({
                         </div>
                     }
                     title='Define Objects in Editor'
-                    description='Open schema category and define objects and their relationships.'
+                    description='Open last created schema category and define objects.'
                     buttonText='Explore'
                     buttonVariant='solid'
                     buttonColor='success'
@@ -198,7 +198,7 @@ function SchemaCategoriesSection({
     return (
         <div className='space-y-8'>
             <div className='flex flex-col md:flex-row md:items-end justify-between gap-4'>
-                <div>
+                <div className='mt-5'>
                     <h2 className='text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                         Your Schema Categories
                     </h2>

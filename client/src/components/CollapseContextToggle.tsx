@@ -6,10 +6,10 @@ import { BsWindowSidebar } from 'react-icons/bs';
 export function CollapseContextToggle() {
     const { preferences, setPreferences } = usePreferences();
     const { isCollapsed } = preferences;
-    const label = 'Toggle Primary Side Bar';
+    const label = 'Toggle Side Bar';
 
     return (
-        <Tooltip content={label}>
+        <Tooltip content={label} placement='right'>
             <Button
                 isIconOnly
                 aria-label={label}

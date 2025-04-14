@@ -18,9 +18,9 @@ export function CategoryOverviewPage() {
     const categoryId = category.id;
 
     return (
-        <div className='p-4 space-y-6'>
+        <div className='pt-4 space-y-6'>
             {/* Header */}
-            <h1 className='text-3xl font-bold text-primary-500'>{category.label} Overview</h1>
+            <h1 className='text-3xl font-bold text-primary-500'>{category.label}</h1>
 
             {/* Overview Cards */}
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
@@ -60,7 +60,7 @@ export function CategoryOverviewPage() {
                 <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
                     <FeatureCard
                         icon={<FaEdit className='w-12 h-12 mx-auto text-primary-500' />}
-                        title='Edit Schema'
+                        title='Schema Editor'
                         description='Modify objects and relationships in the graph.'
                         linkText='Open Editor'
                         linkTo={routes.category.editor.resolve({ categoryId })}

@@ -93,25 +93,37 @@ function Breadcrumbs() {
     const matches = useMatches();
 
     const breadcrumbs: BreadcrumbData[] = useMemo(() => {
-        return matches.
-            filter((match): match is BreadcrumbMatch<unknown> => !!(match.handle && typeof match.handle === 'object' && 'breadcrumb' in match.handle))
+        return matches
+            .filter((match): match is BreadcrumbMatch<unknown> => 
+                !!(match.handle && typeof match.handle === 'object' && 'breadcrumb' in match.handle))
             .map(match => ({
                 path: match.pathname,
-                label: typeof match.handle.breadcrumb === 'function' ? match.handle.breadcrumb(match.data) : match.handle.breadcrumb,
+                label: typeof match.handle.breadcrumb === 'function' 
+                    ? match.handle.breadcrumb(match.data) 
+                    : match.handle.breadcrumb,
             }));
     }, [ matches ]);
 
     return (
-        <NextUIBreadcrumbs separator='/'>
+        <NextUIBreadcrumbs 
+            separator={
+                <span className='mx-1 text-default-400 select-none'>/</span>
+            }
+            className='px-2 py-1'
+        >
             {breadcrumbs.map((crumb, index) => {
                 const isCurrent = index === breadcrumbs.length - 1;
                 return (
                     <BreadcrumbItem key={crumb.path} isCurrent={isCurrent}>
                         <Link
                             to={crumb.path}
-                            className={cn(`truncate max-w-[160px] ${
-                                isCurrent ? 'font-semibold text-secondary-600' : 'font-medium text-secondary-600'
-                            }`)}
+                            className={cn(
+                                'truncate max-w-[160px] ',
+                                'hover:text-default-800 focus-visible:outline-none',
+                                isCurrent 
+                                    ? 'text-foreground font-semibold' 
+                                    : 'text-default-800 hover:text-default-700',
+                            )}
                             title={crumb.label}
                         >
                             {crumb.label}

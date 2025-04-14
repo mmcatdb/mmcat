@@ -7,6 +7,7 @@ import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/CollapseContextToggle';
 import { cn } from '@/components/utils';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { PiCat } from 'react-icons/pi';
 
 type NormalSidebarItem = {
     type: 'normal';
@@ -123,16 +124,40 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
     );
 }
 
-function SidebarHeader({ isCollapsed }: { isCollapsed: boolean })  {
-    return (
-        <Link to={routes.home.path} className='flex items-center mb-6'>
-            <h1
-                className='text-2xl font-semibold pt-2 pl-2 whitespace-nowrap overflow-hidden'
-            >
-                {isCollapsed ? 'MM' : 'MM-cat'}
+function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
+    const content = (
+        <Link
+            to={routes.home.path}
+            className={cn(
+                'flex items-center mb-6 mt-2 pl-5 group',
+                'transition-all duration-300 ease-in-out',
+            )}
+        >
+            <div className={cn(
+                'flex-shrink-0 text-foreground pr-2',
+                'transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
+                isCollapsed ? 'w-8 h-8 text-xl' : 'w-8 h-8 text-2xl',
+            )}>
+                <PiCat className='w-full h-full' />
+            </div>
+
+            <h1 className={cn(
+                'text-2xl whitespace-nowrap overflow-hidden',
+                'transition-all duration-300 ease-in-out',
+                isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
+            )}>
+                <span className='inline-block transition-transform duration-300 group-hover:translate-y-[-1px]'>
+                    MM-cat
+                </span>
             </h1>
         </Link>
     );
+
+    return isCollapsed ? (
+        <Tooltip content='Home' placement='right' showArrow>
+            {content}
+        </Tooltip>
+    ) : content;
 }
 
 function SidebarItemDisplay({ item }: {

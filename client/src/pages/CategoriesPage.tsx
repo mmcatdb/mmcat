@@ -13,6 +13,7 @@ import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
+import { Card, CardBody } from '@nextui-org/react';
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -68,11 +69,11 @@ export function CategoriesPage() {
     );
 
     return (
-        <div className='p-4'>
+        <div className='pt-4'>
             {/* Header Section with Info button */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
-                    <h1 className='text-2xl font-bold'>
+                    <h1 className='text-xl font-bold'>
                         Schema Categories
                     </h1>
                     <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
@@ -160,7 +161,9 @@ export function CategoriesPage() {
             <AddSchemaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={label => createSchema(label, false)}
+                onSubmit={label => {
+                    void createSchema(label, false);
+                }}
                 isSubmitting={isCreatingSchema}
             />
         </div>
@@ -191,21 +194,24 @@ type InfoBannerProps = {
 
 export function InfoBanner({ children, className, dismissBanner }: InfoBannerProps) {
     return (
-        <div className={cn('relative', className)}>
-            <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
+        <Card 
+            shadow='sm' 
+            radius='lg' 
+            className={cn('relative bg-content1', className)}
+        >
+            <CardBody className='text-sm text-foreground px-4 py-3 relative'>
                 <button
                     onClick={dismissBanner}
-                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+                    className='absolute top-2 right-2 text-default-500 hover:text-foreground transition'
                 >
                     <HiXMark className='w-5 h-5' />
                 </button>
-                <div className='space-y-3'>
-                    {children}
-                </div>
-            </div>
-        </div>
+                {children}
+            </CardBody>
+        </Card>
     );
 }
+
 
 type SchemaCategoryInfoBannerProps = {
     className?: string;

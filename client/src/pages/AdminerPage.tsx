@@ -33,8 +33,8 @@ export function AdminerPage() {
     }, [ state.datasourceId, allDatasources ]);
 
     return (
-        <div className='p-4'>
-            <h1 className='text-2xl font-bold mb-2'>Adminer for Multi-Model Data</h1>
+        <div className='pt-4'>
+            <h1 className='text-xl font-bold mb-2'>Adminer for Multi-Model Data</h1>
             <p className='text-muted-foreground mb-2'>Adminer for MM-cat is a tool designed to extend the functionality of MM-cat by enabling users to browse, display, and edit data across multiple database systems, including PostgreSQL, MongoDB, and Neo4j.</p>
             <p className='text-muted-foreground italic text-default-500'>Note: This page is a separate tool and was developed by my colleague. It is not part of my bachelor thesis implementation.</p>
             <div className='mt-5 flex flex-wrap gap-3 items-center'>

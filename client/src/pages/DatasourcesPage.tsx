@@ -13,6 +13,7 @@ import { GoDotFill } from 'react-icons/go';
 import { cn } from '@/components/utils';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { InfoBanner } from './CategoriesPage';
 
 export function DatasourcesPage() {
     const data = useLoaderData() as DatasourcesLoaderData;
@@ -47,11 +48,11 @@ export function DatasourcesPage() {
     }
 
     return (
-        <div className='p-4'>
+        <div className='pt-4'>
             {/* Header Section */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
-                    <h1 className='text-2xl font-semibold'>Datasources</h1>
+                    <h1 className='text-xl font-semibold'>Datasources</h1>
                     <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
                         <button
                             onClick={isVisible ? dismissBanner : restoreBanner}
@@ -131,35 +132,33 @@ type DatasourcesInfoBannerProps = {
 
 export function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBannerProps) {
     return (
-        <div className={cn('relative', className)}>
-            <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
-                <button 
-                    onClick={dismissBanner}
-                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-                >
-                    <HiXMark className='w-5 h-5' />
-                </button>
+        <InfoBanner className={className} dismissBanner={dismissBanner}>
+            <button 
+                onClick={dismissBanner}
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
 
-                <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
-                <p className='text-sm'>
+            <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
+            <p className='text-sm'>
                 A <strong>Datasource</strong> represents where your data is stored. You can <strong>import from</strong> or <strong>export to</strong> different sources, including databases and files.
-                </p>
+            </p>
 
-                <ul className='mt-3 text-sm space-y-2'>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Databases:</strong> MongoDB, PostgreSQL, Neo4j.
-                    </li>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Files:</strong> CSV, JSON, JSON-LD.
-                    </li>
-                </ul>
+            <ul className='mt-3 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Databases:</strong> MongoDB, PostgreSQL, Neo4j.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Files:</strong> CSV, JSON, JSON-LD.
+                </li>
+            </ul>
 
-                <p className='text-sm mt-3'>
+            <p className='text-sm mt-3'>
                 Click <strong>&quot;+ Add Datasource&quot;</strong> to connect a new source. Once added, it will appear in the table below.
-                </p>
-            </div>
-        </div>
+            </p>
+        </InfoBanner>
     );
 }

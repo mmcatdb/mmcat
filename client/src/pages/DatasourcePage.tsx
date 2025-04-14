@@ -186,9 +186,9 @@ function DatasourceDisplay() {
     };
 
     return (
-        <div className='mt-5'>
+        <div className='pt-4'>
             <div className='flex items-center gap-2 mb-4'>
-                <h1 className='text-2xl font-bold text-default-800'>{initialDatasource.label}</h1>
+                <h1 className='text-xl font-bold text-default-800'>{initialDatasource.label}</h1>
                 <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
                     <button
                         onClick={isVisible ? dismissBanner : restoreBanner}
