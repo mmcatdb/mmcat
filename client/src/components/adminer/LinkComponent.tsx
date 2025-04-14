@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Tooltip } from '@nextui-org/react';
 import { routes } from '@/routes/routes';
 import { usePreferences } from '@/components/PreferencesProvider';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
@@ -35,12 +36,17 @@ export function LinkComponent({ index, reference, kind, datasourceId, datasource
     const { preferences } = usePreferences();
 
     return (
-        <Link
-            key={index}
-            to={{ pathname:routes.adminer, search: link }}
-            className='mr-2 hover:underline text-blue-500'
+        <Tooltip
+            content={createLinkText(reference, datasourceId, datasources, kind, false)}
+            color='primary'
         >
-            {createLinkText(reference, datasourceId, datasources, kind, preferences.adminerShortLinks)}
-        </Link>
+            <Link
+                key={index}
+                to={{ pathname:routes.adminer, search: link }}
+                className='mr-2 hover:underline text-blue-500'
+            >
+                {createLinkText(reference, datasourceId, datasources, kind, preferences.adminerShortLinks)}
+            </Link>
+        </Tooltip>
     );
 }
