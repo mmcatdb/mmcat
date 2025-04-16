@@ -64,7 +64,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                     aria-label='Delete filters'
                     type='submit'
                     color='danger'
-                    variant='ghost'
+                    variant='bordered'
                     onPress={() => {
                         dispatch({ type: 'form', action: 'delete_filters' });
                     }}
@@ -78,7 +78,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                     aria-label='Add filter'
                     type='submit'
                     color='success'
-                    variant='ghost'
+                    variant='bordered'
                     onPress={() => dispatch({ type: 'form', action: 'add_filter' })}
                 >
                     <FaPlusCircle /> Add filter
