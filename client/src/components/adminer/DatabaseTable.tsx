@@ -39,7 +39,19 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
         fetchedData = modifiedData;
     }
 
-    const keys: string[] = typeof fetchedData.data[0] === 'object' ? Object.keys(fetchedData.data[0]) : [ 'Value' ];
+    const keysSet = new Set<string>();
+    for (const dataItem of fetchedData.data) {
+        if (typeof dataItem === 'object' && dataItem !== null) {
+            for (const key of Object.keys(dataItem))
+                keysSet.add(key);
+
+        }
+    }
+
+    if (keysSet.size === 0)
+        keysSet.add('Value');
+
+    const keys = Array.from(keysSet);
     const propertyNames: string[] = fetchedData.data.length > 0 ? keys : [];
 
     return (
