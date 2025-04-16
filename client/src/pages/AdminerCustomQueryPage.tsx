@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
+import { EXAMPLE_QUERY } from '@/components/adminer/Queries';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
@@ -46,6 +47,7 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
 
     useEffect(() => {
         setQueryResult(undefined);
+        onQueryChange('');
     }, [ datasource ]);
 
     // Sync state with URL search parameters
@@ -104,6 +106,16 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 onPress={execute}
             >
                 EXECUTE QUERY
+            </Button>
+
+            <Button
+                className='ml-2 mt-5 items-center gap-1 min-w-40'
+                size='sm'
+                aria-label='Show query example'
+                type='submit'
+                onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
+            >
+                SHOW QUERY EXAMPLE
             </Button>
 
             {datasource.type === DatasourceType.neo4j && (
