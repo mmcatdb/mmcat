@@ -15,9 +15,10 @@ type LinkComponentProps = Readonly<{
     datasourceId: Id;
     datasources: Datasource[];
     link: string;
+    kindDuplicated: boolean;
 }>;
 
-function createLinkText(reference: KindReference, datasourceId: Id, datasources: Datasource[], kind: string, short: boolean) {
+function createLinkText(reference: KindReference, datasourceId: Id, datasources: Datasource[], kind: string, kindDuplicated: boolean, short: boolean) {
     const datasourceLabel: string = datasources.find(source => source.id === reference.datasourceId)!.label;
     const kindName = reference.kindName;
     const property = reference.property;
@@ -26,18 +27,19 @@ function createLinkText(reference: KindReference, datasourceId: Id, datasources:
     if (datasourceId !== reference.datasourceId)
         linkText += `${short ? datasourceLabel.substring(0, NAME_LENGTH) : datasourceLabel}/`;
     if (kind !== reference.kindName)
-        linkText += `${short ? kindName.substring(0, NAME_LENGTH) : kindName}:`;
-    linkText += `${short ? property.substring(0, NAME_LENGTH) : property}`;
+        linkText += `${short ? kindName.substring(0, NAME_LENGTH) : kindName}`;
+    if (kindDuplicated)
+        linkText += `:${short ? property.substring(0, NAME_LENGTH) : property}`;
 
     return linkText;
 }
 
-export function LinkComponent({ index, reference, kind, datasourceId, datasources, link }: LinkComponentProps ) {
+export function LinkComponent({ index, reference, kind, datasourceId, datasources, link, kindDuplicated }: LinkComponentProps ) {
     const { preferences } = usePreferences();
 
     return (
         <Tooltip
-            content={createLinkText(reference, datasourceId, datasources, kind, false)}
+            content={createLinkText(reference, datasourceId, datasources, kind, true, false)}
             color='primary'
         >
             <Link
@@ -45,7 +47,7 @@ export function LinkComponent({ index, reference, kind, datasourceId, datasource
                 to={{ pathname:routes.adminer, search: link }}
                 className='mr-2 hover:underline text-blue-500'
             >
-                {createLinkText(reference, datasourceId, datasources, kind, preferences.adminerShortLinks)}
+                {createLinkText(reference, datasourceId, datasources, kind, kindDuplicated, preferences.adminerShortLinks)}
             </Link>
         </Tooltip>
     );

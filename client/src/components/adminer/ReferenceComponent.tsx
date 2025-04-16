@@ -7,6 +7,46 @@ import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
+function isInKind(ref: KindReference, kind: string, datasourceId: Id): boolean {
+    return ref.kindName === kind && ref.datasourceId === datasourceId;
+}
+
+function isInDatasource(ref: KindReference, datasourceId: Id): boolean {
+    return ref.datasourceId === datasourceId;
+}
+
+function compareReferences(a: KindReference, b: KindReference, kind: string, datasourceId: Id): number {
+    const aInKind = isInKind(a, kind, datasourceId);
+    const bInKind = isInKind(b, kind, datasourceId);
+    if (aInKind !== bInKind)
+        return aInKind ? -1 : 1;
+
+    const aIsDatasource = isInDatasource(a, datasourceId);
+    const bIsDatasource = isInDatasource(b, datasourceId);
+    if (aIsDatasource !== bIsDatasource)
+        return aIsDatasource ? -1 : 1;
+
+    if (a.datasourceId !== b.datasourceId)
+        return a.datasourceId.localeCompare(b.datasourceId);
+    if (a.kindName !== b.kindName)
+        return a.kindName.localeCompare(b.kindName);
+    return a.property.localeCompare(b.property);
+}
+
+function getCompressedLinks(links: [string, KindReference][]): [string, KindReference, boolean][] {
+    return links.map((current, index) => {
+        const [ currentLink, currentRef ] = current;
+
+        const kindDuplicated = links.some(([ _, ref ], i) =>
+            i !== index &&
+            ref.datasourceId === currentRef.datasourceId &&
+            ref.kindName === currentRef.kindName,
+        );
+
+        return [ currentLink, currentRef, kindDuplicated ];
+    });
+}
+
 type ReferenceComponentProps = Readonly<{
     references: KindReference[];
     data: Record<string, string> | GraphResponseData;
@@ -23,19 +63,28 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
     references
         .filter(ref => ref.referencingProperty === propertyName)
         .forEach(ref => {
-            const link = getHrefFromReference(ref, data, propertyName, datasources);
-            if (!links.has(link))
-                links.set(link, ref);
+            // Filter out the references to the actual property
+            if (!(ref.datasourceId === datasourceId && ref.kindName === kind && ref.property === propertyName)) {
+                const link = getHrefFromReference(ref, data, propertyName, datasources);
+                if (!links.has(link))
+                    links.set(link, ref);
+            }
         });
 
     const linkEntries = Array.from(links.entries());
-    const visibleCount = Math.min(5, linkEntries.length);
-    const alwaysVisibleLinks = linkEntries.slice(0, visibleCount);
-    const hiddenLinks = linkEntries.slice(visibleCount);
+    linkEntries.sort((a, b) =>
+        compareReferences(a[1], b[1], kind, datasourceId),
+    );
+
+    const compressedLinks = getCompressedLinks(linkEntries);
+
+    const visibleCount = Math.min(5, compressedLinks.length);
+    const alwaysVisibleLinks = compressedLinks.slice(0, visibleCount);
+    const hiddenLinks = compressedLinks.slice(visibleCount);
 
     return (
         <div>
-            {alwaysVisibleLinks.map(([ link, ref ]) => (
+            {alwaysVisibleLinks.map(([ link, ref, duplicatedKind ]) => (
                 <LinkComponent
                     key={link}
                     index={link}
@@ -44,10 +93,11 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
                     datasourceId={datasourceId}
                     datasources={datasources}
                     link={link}
+                    kindDuplicated={duplicatedKind}
                 />
             ))}
 
-            {visible && hiddenLinks.map(([ link, ref ]) => (
+            {visible && hiddenLinks.map(([ link, ref, duplicatedKind ]) => (
                 <LinkComponent
                     key={link}
                     index={link}
@@ -56,6 +106,7 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
                     datasourceId={datasourceId}
                     datasources={datasources}
                     link={link}
+                    kindDuplicated={duplicatedKind}
                 />
             ))}
 
