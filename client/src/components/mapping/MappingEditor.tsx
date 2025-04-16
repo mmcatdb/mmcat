@@ -7,13 +7,25 @@ import { type Mapping } from '@/types/mapping';
 import { Button } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/20/solid';
+import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { type CategoryGraph } from '../category/categoryGraph';
 
+/**
+ * Props for the MappingEditor component.
+ *
+ * @property category - The schema category being edited.
+ * @property mapping - The initial mapping to edit.
+ * @property onSave - Optional callback to handle saving the mapping.
+ */
 type MappingEditorProps = Readonly<{
     category: Category;
     mapping: Mapping;
     onSave?: (mapping: Mapping) => void;
 }>;
 
+/**
+ * Renders the mapping editor with a graph display and panels for root selection and access path building.
+ */
 export function MappingEditor({ category, mapping, onSave }: MappingEditorProps) {
     const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
     const navigate = useNavigate();
@@ -86,9 +98,14 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
     );
 }
 
-import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import { type CategoryGraph } from '../category/categoryGraph';
-
+/**
+ * Props for the RootSelectionPanel component.
+ *
+ * @property selection - The current free selection state.
+ * @property graph - The category graph.
+ * @property dispatch - Dispatch function for selection actions.
+ * @property onConfirm - Callback to confirm the root node.
+ */
 type RootSelectionPanelProps = {
     selection: FreeSelection;
     graph: CategoryGraph;
@@ -96,6 +113,9 @@ type RootSelectionPanelProps = {
     onConfirm: () => void;
 };
 
+/**
+ * Renders a panel for selecting the root node during the SelectRoot phase.
+ */
 function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelectionPanelProps) {
     const selectedNode = selection.nodeIds.size > 0
         ? graph.nodes.get([ ...selection.nodeIds ][0])
@@ -105,6 +125,7 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
         <div className='absolute bottom-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
             <div className='flex items-center justify-between'>
                 <h3 className='text-lg font-semibold'>Select Root Node</h3>
+                {/* Confirm button shown only when a node is selected */}
                 {selectedNode && (
                     <Button
                         size='sm'
@@ -152,6 +173,9 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
     );
 }
 
+/**
+ * List of available selection types.
+ */
 const selectionTypes = [
     SelectionType.None,
     SelectionType.Free,
@@ -164,6 +188,9 @@ type StateDispatchProps = Readonly<{
     dispatch: React.Dispatch<EditMappingAction>;
 }>;
 
+/**
+ * Renders a card for building and displaying the access path.
+ */
 function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     const { mapping, selection, selectionType, editorPhase } = state;
 

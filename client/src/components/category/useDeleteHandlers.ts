@@ -2,6 +2,9 @@ import { useEffect, useCallback } from 'react';
 import { type EditCategoryState, type EditCategoryDispatch } from '@/components/category/editCategoryReducer';
 import { categoryToGraph } from '@/components/category/categoryGraph';
 
+/**
+ * Hook to handle deletion of selected elements via keyboard or programmatic trigger.
+ */
 export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCategoryDispatch) {
     const deleteSelectedElements = useCallback(() => {
         let updated = false;
@@ -29,6 +32,7 @@ export function useDeleteHandlers(state: EditCategoryState, dispatch: EditCatego
         }
     }, [ state, dispatch ]);
 
+    // Set up keyboard listener for Delete key
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
             if (event.key === 'Delete') 

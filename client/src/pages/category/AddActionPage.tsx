@@ -160,7 +160,9 @@ export function AddActionPage() {
                 </Button>
                 <Button
                     color='primary'
-                    onPress={handleSubmit}
+                    onPress={() => {
+                        void handleSubmit(); 
+                    }}
                     isLoading={loading}
                 >
                     Submit

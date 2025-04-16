@@ -11,6 +11,9 @@ type MappingsTableProps = {
     mappings: Mapping[];
 };
 
+/**
+ * Renders a sortable table of mappings.
+ */
 export function MappingsTable({ mappings }: MappingsTableProps) {
     const { sortedData: sortedMappings, sortDescriptor, setSortDescriptor } = useSortableData(mappings, {
         column: 'version',
@@ -30,10 +33,17 @@ export function MappingsTable({ mappings }: MappingsTableProps) {
     );
 }
 
+/**
+ * Props for the MappingsTableContent component.
+ *
+ * @property mappings - List of mappings to display.
+ * @property sortDescriptor - Current sorting configuration (optional).
+ * @property onSortChange - Callback to update sorting (optional).
+ */
 type MappingsTableContentProps = {
     mappings: Mapping[];
-    sortDescriptor?: SortDescriptor;  // Make optional
-    onSortChange?: (sortDescriptor: SortDescriptor) => void;  // Make optional
+    sortDescriptor?: SortDescriptor;
+    onSortChange?: (sortDescriptor: SortDescriptor) => void;
 };
 
 function MappingsTableContent({ 
@@ -50,8 +60,8 @@ function MappingsTableContent({
             let first: number, second: number;
             
             // Force version sorting for initial render
-            const sortColumn = sortDescriptor?.column || 'version';
-            const sortDirection = sortDescriptor?.direction || 'descending';
+            const sortColumn = sortDescriptor?.column ?? 'version';
+            const sortDirection = sortDescriptor?.direction ?? 'descending';
             
             if (sortColumn === 'kindName') {
                 const firstStr = a.kindName.toLowerCase();

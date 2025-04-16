@@ -1,8 +1,11 @@
 import { Button } from '@nextui-org/react';
-import { usePreferences } from './PreferencesProvider';
-import { Tooltip } from './common';
+import { usePreferences } from '@/components/PreferencesProvider';
+import { Tooltip } from '@/components/common';
 import { BsWindowSidebar } from 'react-icons/bs';
 
+/**
+ * Renders a button to toggle the sidebar's collapsed state.
+ */
 export function CollapseContextToggle() {
     const { preferences, setPreferences } = usePreferences();
     const { isCollapsed } = preferences;

@@ -237,7 +237,9 @@ function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategory
     dispatch({ type: 'deleteElements', graph });
 }
 
-// Function to detect unsaved changes: node movement, schema updates
+/*
+ * Function to detect unsaved changes: node movement, schema updates
+ */
 function detectUnsavedChanges(state: EditCategoryState) {
     const evocat = state.evocat;
 

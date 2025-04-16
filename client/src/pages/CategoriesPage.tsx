@@ -15,16 +15,25 @@ import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
 import { Card, CardBody } from '@nextui-org/react';
 
+/**
+ * List of example schema names available for creation.
+ */
 const EXAMPLE_SCHEMAS = [
     'basic',
 ] as const;
 
+/**
+ * Renders the parent route for schema categories, delegating to child routes via Outlet.
+ */
 export function SchemaCategoriesPage() {
     return (
         <Outlet />
     );
 }
 
+/**
+ * Renders the main page for managing schema categories, including creation, search, and display.
+ */
 export function CategoriesPage() {
     const { categories: loadedCategories } = useLoaderData() as CategoriesLoaderData;
     const [ categories, setCategories ] = useState(loadedCategories);

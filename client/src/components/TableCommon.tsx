@@ -2,8 +2,10 @@ import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from
 import { type SortDescriptor } from '@react-types/shared';
 import { useState } from 'react';
 
-// Sorting of specified data
-// using SortDescriptor for NextUI's 2.0 Table onSortChange()
+/**
+ * Hook to manage sorting of data for NextUI tables.
+ * using SortDescriptor for NextUI's 2.0 Table onSortChange()
+ */
 // hours wasted: 5
 export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescriptor) {
     const [ sortDescriptor, setSortDescriptor ] = useState<SortDescriptor>(initialSortDescriptor);
@@ -44,6 +46,9 @@ type ConfirmationModalProps = {
     confirmButtonColor: 'success' | 'danger' | 'warning';
 };
 
+/*
+ * Modal for confirming actions.
+ */
 export function ConfirmationModal({
     isOpen,
     onClose,
@@ -83,6 +88,11 @@ type EmptyStateProps = {
     buttonClassName?: string;
 };
 
+/**
+ * A placeholder for empty states in tables.
+ * @param message - The message to display in the empty state.
+ * @param buttonText - The text for the button.
+ */
 export function EmptyState({
     message,
     buttonText,

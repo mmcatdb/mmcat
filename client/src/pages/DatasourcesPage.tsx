@@ -10,7 +10,6 @@ import { AddIcon } from '@/components/icons/PlusIcon';
 import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
-import { cn } from '@/components/utils';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { InfoBanner } from './CategoriesPage';

@@ -4,6 +4,14 @@ import { type Dispatch } from 'react';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 
+/**
+ * Props for the SelectionCard component.
+ *
+ * @interface SelectionCardProps
+ * @property selection - The current selection state of nodes and edges.
+ * @property graph - The graph containing node and edge data.
+ * @property dispatch - Dispatch function for updating selection state.
+ */
 type SelectionCardProps = Readonly<{
     selection: FreeSelection;
         graph: CategoryGraph;

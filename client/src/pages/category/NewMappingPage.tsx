@@ -8,6 +8,9 @@ import { Input } from '@nextui-org/react';
 import { useState } from 'react';
 import { Category } from '@/types/schema';
 
+/**
+ * Page for adding a new mapping.
+ */
 export function NewMappingPage() {
     const { category } = useLoaderData() as NewMappingLoaderData;
     const navigate = useNavigate();

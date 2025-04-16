@@ -2,30 +2,56 @@ import { EdgeMap, type Edge, type Node } from '../graph/graphUtils';
 import { type SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex, type SchemaMorphism } from '@/types/schema';
 
 /**
- * A plain object that can be displayed by the graph library.
- * All its objects are immutable so they are safe to use in React.
+ * Represents a graph structure for a category, compatible with the graph library.
+ * Nodes and edges are immutable to ensure safe usage in React's rendering lifecycle.
+ *
+ * @interface CategoryGraph
  */
 export type CategoryGraph = {
     nodes: Map<string, CategoryNode>;
     edges: EdgeMap<CategoryEdge>;
 };
 
+/**
+ * A node in the category graph, extending the base graph Node with schema and metadata.
+ */
 export type CategoryNode = Node & {
     schema: SchemaObjex;
     metadata: MetadataObjex;
 };
 
+/**
+ * An edge in the category graph, extending the base graph Edge with schema and metadata.
+ */
 export type CategoryEdge = Edge & {
     schema: SchemaMorphism;
     metadata: MetadataMorphism;
 };
 
-/** Transforms the category to a reactive state that can be rendered by React. */
+/**
+ * Converts a category into a graph structure suitable for rendering in React.
+ * Creates immutable node and edge maps from the category's objects and morphisms.
+ *
+ * @param category - The category to transform into a graph.
+ * @returns A CategoryGraph containing nodes and edges.
+ */
 export function categoryToGraph(category: Category): CategoryGraph {
-    const nodes = category.getObjexes().map(objex => {
-        const schema = objex.schema;
-        const metadata = objex.metadata;
+    const nodes = mapCategoryToNodes(category);
+    const edges = mapCategoryToEdges(category);
 
+    return {
+        nodes: new Map(nodes.map(node => [ node.id, node ])),
+        edges: new EdgeMap(edges),
+    };
+}
+
+/**
+ * Maps the object components of a category into graph nodes.
+ * Schema objet = Objex 
+ */
+function mapCategoryToNodes(category: Category): CategoryNode[] {
+    return category.getObjexes().map(objex => {
+        const { schema, metadata } = objex;
         return {
             id: schema.key.toString(),
             ...metadata.position,
@@ -33,11 +59,12 @@ export function categoryToGraph(category: Category): CategoryGraph {
             metadata,
         } satisfies CategoryNode;
     });
+}
 
-    const edges = category.getMorphisms().map(morphism => {
-        const schema = morphism.schema;
-        const metadata = morphism.metadata;
-
+/** Maps the morphism components of a category into graph edges. */
+function mapCategoryToEdges(category: Category): CategoryEdge[] {
+    return category.getMorphisms().map(morphism => {
+        const { schema, metadata } = morphism;
         return {
             id: schema.signature.toString(),
             from: schema.domKey.toString(),
@@ -46,9 +73,4 @@ export function categoryToGraph(category: Category): CategoryGraph {
             metadata,
         } satisfies CategoryEdge;
     });
-
-    return {
-        nodes: new Map(nodes.map(node => [ node.id, node ])),
-        edges: new EdgeMap(edges),
-    };
 }

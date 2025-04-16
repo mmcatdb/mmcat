@@ -8,6 +8,10 @@ import { useCategoryInfo } from './CategoryInfoProvider';
 
 const SESSION_COOKIE_NAME = 'session';
 
+/**
+ * Dropdown to to select a session, and button to create a new session, for a schema category.
+ */
+// This is implemented for testing purposes only. The functionality should be moved to Backend in the future.
 export function SessionSelect() {
     const categoryId = useCategoryInfo().category.id;
     const [ sessions, setSessions ] = useState<Session[]>([]);

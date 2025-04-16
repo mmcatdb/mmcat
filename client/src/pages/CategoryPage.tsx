@@ -4,6 +4,9 @@ import { SchemaCategoryInfo } from '@/types/schema';
 import { CategoryInfoProvider } from '@/components/CategoryInfoProvider';
 import { SessionSelect } from '@/components/SessionSelect';
 
+/**
+ * Main page for the schema category project.
+ */
 export function CategoryPage() {
     const { category } = useLoaderData() as CategoryLoaderData;
 

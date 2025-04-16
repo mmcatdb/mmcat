@@ -4,11 +4,14 @@ import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switc
 import { routes } from '@/routes/routes';
 import { sidebarIconMap } from '@/components/icons/Icons';
 import { usePreferences } from '../PreferencesProvider';
-import { CollapseContextToggle } from '@/components/CollapseContextToggle';
+import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggle';
 import { cn } from '@/components/utils';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { PiCat } from 'react-icons/pi';
 
+/**
+ * Type for navigation items in the sidebar.
+ */
 type NormalSidebarItem = {
     type: 'normal';
     label: string;
@@ -17,6 +20,10 @@ type NormalSidebarItem = {
     match?: string[];
 };
 
+/**
+ * This is a special type of item that is only used to separate other items.
+ * It does not have a route or icon.
+ */
 type SeparatorSidebarItem = {
     type: 'separator';
     label: string;
@@ -59,6 +66,9 @@ export function Sidebar() {
     );
 }
 
+/**
+ * Display the settings button in the sidebar and modal for updating user preferences.
+ */
 function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapsed: boolean }) {
     const [ isSettingsOpen, setIsSettingsOpen ] = useState(false);
 
@@ -103,6 +113,10 @@ type ShowTableIDsSwitchProps = {
     className?: string;
 };
 
+/**
+ * Renders a switch to toggle visibility of table IDs.
+ * It is a user preference updated in Settings.
+ */
 export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
     const { preferences, setPreferences } = usePreferences();
     const { showTableIDs } = preferences;
@@ -124,6 +138,9 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
     );
 }
 
+/**
+ * A link to the home page of the application.
+ */
 function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
     const content = (
         <Link
@@ -160,6 +177,9 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
     ) : content;
 }
 
+/**
+ * Renders a single sidebar item (normal link or separator).
+ */
 function SidebarItemDisplay({ item }: {
     item : SidebarItem;
 }) {
@@ -220,6 +240,9 @@ function SidebarItemDisplay({ item }: {
     }
 }
 
+/**
+ * Generates sidebar items for general navigation (no schema category context).
+ */
 function generalSidebarItems(): SidebarItem[] {
     return [
         {
@@ -244,6 +267,9 @@ function generalSidebarItems(): SidebarItem[] {
     ];
 }
 
+/**
+ * Generates sidebar items for category-specific navigation.
+ */
 function categorySidebarItems(categoryId: string): SidebarItem[] {
     return [
         {

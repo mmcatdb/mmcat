@@ -23,6 +23,9 @@ export function SchemaCategoriesTable({ categories, onDeleteCategory }: SchemaCa
         direction: 'ascending',
     });
 
+    /**
+     * Updates the sort descriptor when the user changes sorting.
+     */
     const handleSortChange = (newSortDescriptor: SortDescriptor) => {
         setSortDescriptor(newSortDescriptor);
     };

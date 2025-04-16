@@ -57,6 +57,14 @@ export function ActionDetailPage() {
 
             <div className='flex space-x-4'>
                 <Button
+                    color='danger'
+                    variant='flat'
+                    onPress={openModal}
+                    isDisabled={isDeleting}
+                >
+                    Delete
+                </Button>
+                <Button
                     color='primary'
                     variant='solid'
                     isDisabled={isCreatingRun}
@@ -65,14 +73,6 @@ export function ActionDetailPage() {
                     }}
                 >
                     {isCreatingRun ? 'Creating...' : 'Create Run'}
-                </Button>
-                <Button
-                    color='danger'
-                    variant='flat'
-                    onPress={openModal}
-                    isDisabled={isDeleting}
-                >
-                    Delete
                 </Button>
             </div>
 
@@ -117,6 +117,9 @@ type StepsTableProps = {
     categoryId: string;
 }
 
+/**
+ * Renders a table of steps for the action.
+ */
 function StepsTable({ payloads, categoryId }: StepsTableProps) {
     if (!payloads || payloads.length === 0)
         return <p className='text-gray-500'>No steps available.</p>;
@@ -153,6 +156,9 @@ type renderDatasourceElementProps = {
     categoryId: string;
 }
 
+/**
+ * Renders the datasource element based on the payload type.
+ */
 function renderDatasourceElement({ payload, categoryId }: renderDatasourceElementProps) {
     if (payload.type === ActionType.ModelToCategory || payload.type === ActionType.CategoryToModel) {
         if (payload.datasource) {

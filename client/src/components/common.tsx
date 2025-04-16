@@ -4,10 +4,14 @@ import clsx from 'clsx';
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 
-// The tooltip has no delay by default, so we add it here.
+/** The tooltip has no delay by default, so we add it here. */
+// The delay is in milliseconds.
 
 const TOOLTIP_DELAY = 100;
 
+/**
+ * Wrapper around NextUI Tooltip with a default delay.
+ */
 export function Tooltip(props: Readonly<Omit<TooltipProps, 'delay' | 'isOpen'>>) {
     return (
         <NextuiTooltip {...props} delay={TOOLTIP_DELAY} />
@@ -43,6 +47,9 @@ export function Portal({ children, to }: PortalProps) {
     return target ? createPortal(children, target) : null;
 }
 
+/**
+ * IDs for predefined portal targets.
+ */
 export const portals = {
     context: 'context-portal',
 };

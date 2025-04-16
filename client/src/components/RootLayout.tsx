@@ -11,6 +11,10 @@ import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
 
+/**
+ * The main layout of the application.
+ * It contains the sidebar, navbar, and main content area.
+ */
 export function RootLayout() {
     const { isCollapsed } = usePreferences().preferences;
     const location = useLocation(); // Get current route
@@ -61,6 +65,9 @@ function CommonNavbar() {
     );
 }
 
+/**
+ * Resets scroll position on route changes.
+ */
 export default function ScrollToTop() {
     const { pathname } = useLocation();
 
@@ -89,6 +96,9 @@ type BreadcrumbData = {
 
 type BreadcrumbMatch<TData> = UIMatch<TData, { breadcrumb: string | ((data: TData) => string) }>;
 
+/**
+ * Renders breadcrumbs based on route matches.
+ */
 function Breadcrumbs() {
     const matches = useMatches();
 
@@ -135,6 +145,9 @@ function Breadcrumbs() {
     );
 }
 
+/**
+ * A dropdown menu with help related links.
+ */
 function HelpDropdown() {
     return (
         <Dropdown>
@@ -190,6 +203,9 @@ type ThemeToggleProps = Readonly<{
     className?: string;
 }>;
 
+/**
+ * A button to toggle between light and dark themes.
+ */
 export function ThemeToggle({ className }: ThemeToggleProps) {
     const { preferences, setPreferences } = usePreferences();
     const { theme } = preferences;

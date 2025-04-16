@@ -1,10 +1,16 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { localStorage } from '@/types/utils/localStorage';
 
+/**
+ * Key for storing preferences in local storage.
+ */
 const PREFERENCES_KEY = 'preferences';
 
 export type Theme = 'dark' | 'light';
 
+/**
+ * User preferences for the application.
+ */
 type Preferences = {
     theme: Theme;
     isCollapsed: boolean;
@@ -22,6 +28,9 @@ type StoredPreferences = {
     showTableIDs: boolean;
 };
 
+/**
+ * Loads preferences from local storage with defaults.
+ */
 function fromStored(): Preferences {
     const stored = localStorage.get<Partial<StoredPreferences>>(PREFERENCES_KEY) ?? {};
 
@@ -34,6 +43,9 @@ function fromStored(): Preferences {
 
 const defaultPreferences = fromStored();
 
+/*
+ * Converts preferences to a format suitable for local storage.
+ */
 function toStored(preferences: Preferences): StoredPreferences {
     return {
         theme: preferences.theme,
@@ -42,8 +54,14 @@ function toStored(preferences: Preferences): StoredPreferences {
     };
 }
 
+/**
+ * Context for providing preferences to child components.
+ */
 export const PreferencesContext = createContext<PreferencesContext | undefined>(undefined);
 
+/**
+ * Provides user preferences to child components via context, with local storage persistence.
+ */
 export function PreferencesProvider({ children }: Readonly<{ children: ReactNode }>) {
     const [ preferences, setPreferences ] = useState(defaultPreferences);
 
@@ -66,6 +84,9 @@ export function PreferencesProvider({ children }: Readonly<{ children: ReactNode
     );
 }
 
+/**
+ * Hook to access preferences from context.
+ */
 export function usePreferences(): PreferencesContext {
     const context = useContext(PreferencesContext);
     if (context === undefined)

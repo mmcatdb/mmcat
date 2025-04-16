@@ -9,8 +9,8 @@ import { cn } from '@/components/utils';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
 
-/** In ms. */
-const REFRESH_INTERVAL = 1000;
+/** In miliseconds. */
+const REFRESH_INTERVAL_MS = 1000;
 
 export function JobPage() {
     const data = useLoaderData() as JobLoaderData;
@@ -29,7 +29,7 @@ export function JobPage() {
         if ([ JobState.Finished, JobState.Failed ].includes(job.state))
             return;
 
-        setTimeout(() => revalidator.revalidate(), REFRESH_INTERVAL);
+        setTimeout(() => revalidator.revalidate(), REFRESH_INTERVAL_MS);
     }, [ job ]);
 
     // FIXME This does not work properly. We have to set the timeout again after the revalidation. However, we don't update the job from the server after revalidation.

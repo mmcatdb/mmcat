@@ -20,9 +20,13 @@ export type EditMappingState = {
     editorPhase: EditorPhase;
 };
 
+/**
+ * Creates the initial state for the mapping editor.
+ */
 export function createInitialState({ category, mapping }: { category: Category, mapping: Mapping }): EditMappingState {
     return {
         category,
+        // Convert category to graph for visualization
         graph: categoryToGraph(category),
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
@@ -31,6 +35,9 @@ export function createInitialState({ category, mapping }: { category: Category, 
     };
 }
 
+/**
+ * Type for the dispatch function used in the mapping editor.
+ */
 export type EditMappingDispatch = Dispatch<EditMappingAction>;
 
 export type EditMappingAction =
@@ -42,6 +49,9 @@ export type EditMappingAction =
     | { type: 'set-root', rootNodeId: string }
     | { type: 'append-to-access-path', nodeId: string };
 
+/**
+ * Reduces the editor state based on the provided action.
+ */
 export function editMappingReducer(state: EditMappingState, action: EditMappingAction): EditMappingState {
     // console.log('REDUCE', action, state);
 
@@ -65,65 +75,23 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
         return { ...state, selectionType: action.selectionType };
     }
     case 'set-root': {
-        const { rootNodeId } = action;
-        const rootNode = state.graph.nodes.get(rootNodeId);
-        if (!rootNode)
-            return state;
-
-        const newAccessPath = new RootProperty(new TypedName(TypedName.ROOT), []);
-
-        // .fromServer(newAccessPathInput);
-
-        return {
-            ...state,
-            mapping: { ...state.mapping, accessPath: newAccessPath, rootObjexKey: Key.fromServer(Number(rootNodeId)) },
-            selectionType: SelectionType.Free,
-            selection: FreeSelection.create(),
-            editorPhase: EditorPhase.BuildPath,
-        };
+        return root(state, action.rootNodeId);
     }
     case 'append-to-access-path': {
-        const selection = state.selection;
-        if (!(selection instanceof PathSelection))
-            return state;
-
-        const { nodeId } = action;
-        const newNode = state.graph.nodes.get(nodeId);
-        if (!newNode)
-            return state;
-
-        // Calculate signature using PathSelection
-        const signatures = selection.edgeIds.map((edgeId, index) => {
-            const edge: CategoryEdge = state.graph.edges.get(edgeId)!;
-            const fromNodeId = selection.nodeIds[index];
-            return edge.from === fromNodeId ? edge.schema.signature : edge.schema.signature.dual();
-        });
-
-        const signature = Signature.concatenate(...signatures);
-
-        const newSubpath = new SimpleProperty(new StringName(newNode.metadata.label), signature, state.mapping.accessPath);
-
-        // Merge with existing subpaths (just add new ones)
-        const newAccessPath = new RootProperty(state.mapping.accessPath.name, [
-            ...state.mapping.accessPath.subpaths,
-            newSubpath,
-        ]);
-
-        return {
-            ...state,
-            mapping: { ...state.mapping, accessPath: newAccessPath },
-            selectionType: SelectionType.Free,
-            selection: FreeSelection.create(),
-        };
+        return appendToAccessPath(state, action.nodeId);
     }
     }
 }
 
 type GraphAction = { type: 'graph', event: GraphEvent };
 
+/**
+ * Handles graph-related actions (e.g., node movement, selection).
+ */
 function graph(state: EditMappingState, { event }: GraphAction): EditMappingState {
     switch (event.type) {
     case 'move':
+        // Node movement doesn’t update state in mapping editor (handled by graph engine)
         return state;
     case 'select': {
         if (state.selectionType === SelectionType.Path && state.selection instanceof PathSelection) {
@@ -170,8 +138,14 @@ function graph(state: EditMappingState, { event }: GraphAction): EditMappingStat
     }
 }
 
+/**
+ * Action for free selection operations.
+ */
 type SelectAction = { type: 'select' } & FreeSelectionAction;
 
+/**
+ * Handles free selection actions (e.g., node selection).
+ */
 function select(state: EditMappingState, action: SelectAction): EditMappingState {
     if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot)
         return state;
@@ -187,6 +161,9 @@ function select(state: EditMappingState, action: SelectAction): EditMappingState
 
 type SequenceAction = { type: 'sequence' } & SequenceSelectionAction;
 
+/**
+ * Handles sequence selection actions.
+ */
 function sequence(state: EditMappingState, action: SequenceAction): EditMappingState {
     if (!(state.selection instanceof SequenceSelection))
         return state;
@@ -195,10 +172,83 @@ function sequence(state: EditMappingState, action: SequenceAction): EditMappingS
 
 type PathAction = { type: 'path' } & PathSelectionAction;
 
+/**
+ * Handles path selection actions.
+ */
 function path(state: EditMappingState, action: PathAction): EditMappingState {
     if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath)
         return state;
     return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
+/**
+ * Action for changing the selection type.
+ */
 type TempSelectionTypeAction = { type: 'selection-type', selectionType: SelectionType };
+
+/**
+ * Sets the root node in the mapping editor state.
+ */
+function root(state: EditMappingState, rootNodeId: string): EditMappingState {
+    const rootNode = state.graph.nodes.get(rootNodeId);
+    if (!rootNode)
+        return state;
+
+    const newAccessPath = new RootProperty(
+        new TypedName(TypedName.ROOT),
+        [],
+    );
+
+    return {
+        ...state,
+        mapping: {
+            ...state.mapping,
+            accessPath: newAccessPath,
+            rootObjexKey: Key.fromServer(Number(rootNodeId)),
+        },
+        selectionType: SelectionType.Free,
+        selection: FreeSelection.create(),
+        editorPhase: EditorPhase.BuildPath,
+    };
+}
+
+/**
+ * Appends a node to the access path in the mapping editor state.
+ */
+function appendToAccessPath(state: EditMappingState, nodeId: string): EditMappingState {
+    if (!(state.selection instanceof PathSelection)) 
+        return state;
+
+    const newNode = state.graph.nodes.get(nodeId);
+    if (!newNode) 
+        return state;
+
+    const signatures = state.selection.edgeIds.map((edgeId, index) => {
+        const edge: CategoryEdge = state.graph.edges.get(edgeId)!;
+        const fromNodeId = Array.from(state.selection.nodeIds)[index];
+        return edge.from === fromNodeId ? edge.schema.signature : edge.schema.signature.dual();
+    });
+
+    const signature = Signature.concatenate(...signatures);
+
+    const newSubpath = new SimpleProperty(
+        new StringName(newNode.metadata.label),
+        signature,
+        state.mapping.accessPath,
+    );
+
+    const newAccessPath = new RootProperty(state.mapping.accessPath.name, [
+        ...state.mapping.accessPath.subpaths,
+        newSubpath,
+    ]);
+
+    return {
+        ...state,
+        mapping: {
+            ...state.mapping,
+            accessPath: newAccessPath,
+        },
+        selectionType: SelectionType.Free,
+        selection: FreeSelection.create(),
+    };
+}

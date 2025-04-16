@@ -1,3 +1,6 @@
+/**
+ * A placeholder page for the querying functionality.
+ */
 export function QueryingPage() {
     return (
         <div className='pt-4'>

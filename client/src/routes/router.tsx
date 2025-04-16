@@ -20,6 +20,9 @@ import { type MappingLoaderData, MappingPage } from '@/pages/category/MappingPag
 import { type ActionLoaderData, ActionDetailPage } from '@/pages/category/ActionDetailPage';
 import { NewMappingPage } from '@/pages/category/NewMappingPage';
 
+/**
+ * Creates the application's routing configuration.
+ */
 export const router = createBrowserRouter([
     {
         path: routes.home.path,

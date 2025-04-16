@@ -34,6 +34,9 @@ import {
 import { HiDatabase, HiOutlineDatabase } from 'react-icons/hi';
 import { BiCategory, BiSolidCategory } from 'react-icons/bi';
 
+/**
+ * Type for an icon set with outline and solid variants.
+ */
 type IconSet = {
     outline: JSX.Element;
     solid: JSX.Element;
@@ -41,6 +44,9 @@ type IconSet = {
 
 const sidebarIconStyle='mr-2 w-6 h-6';
 
+/**
+ * Mapping of sidebar icon sets for different navigation items.
+ */
 export const sidebarIconMap: Record<string, IconSet> = {
     heart: {
         outline: <HeartIconOutline className={sidebarIconStyle} />,
@@ -102,6 +108,9 @@ export const sidebarIconMap: Record<string, IconSet> = {
 
 const jobStatusIconStyle = 'w-8 h-8';
 
+/**
+ * Styling configuration for job states, mapping each state to color and background.
+ */
 const jobStateStyles: Record<JobState, { color: string, bg: string }> = {
     Disabled: { color: 'text-default-400', bg: 'bg-default-400' },
     Ready: { color: 'text-primary-400', bg: 'bg-primary-400' },
@@ -119,6 +128,9 @@ function getJobStateIconStyle(state: JobState): string {
     return jobStateStyles[state]?.color;
 }
 
+/**
+ * Returns the appropriate icon for a job’s status.
+ */
 export function getJobStatusIcon(state: string): JSX.Element {
     const iconColor = getJobStateIconStyle(state as JobState);
 

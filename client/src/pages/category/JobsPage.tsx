@@ -116,7 +116,9 @@ export function JobsPage() {
     </>);
 }
 
-/** Compare old and new job groups for differences.  */
+/**
+ * Compare old and new job groups for differences.
+*/
 function detectChanges(oldGroups: Record<string, Job[]>, newGroups: Record<string, Job[]>) {
     for (const runId in newGroups) {
         const oldJobs = oldGroups[runId] || [];
