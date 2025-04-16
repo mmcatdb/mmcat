@@ -9,7 +9,7 @@ import { lintKeymap } from '@codemirror/lint';
 import { materialLight, materialDark } from '@uiw/codemirror-theme-material';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
 import { javascript } from '@codemirror/lang-javascript';
-import { Button } from '@nextui-org/react';
+import { Button, Select, SelectItem } from '@nextui-org/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
@@ -17,6 +17,7 @@ import { api } from '@/api';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
+import { View } from '@/types/adminer/View';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
 import type { DataResponse, DocumentResponse, ErrorResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
 import type { Theme } from '@/components/PreferencesProvider';
@@ -28,6 +29,8 @@ type AdminerCustomQueryPageProps = Readonly<{
 }>;
 
 export function AdminerCustomQueryPage({ datasource, datasources, theme }: AdminerCustomQueryPageProps) {
+    const availableViews = [ View.table, View.document ];
+    const [ view, setView ] = useState<View>(View.table);
     const [ queryResult, setQueryResult ] = useState<DataResponse | ErrorResponse>();
     const [ searchParams ] = useSearchParams();
     const [ query, setQuery ] = useState<string>(() => {
@@ -103,6 +106,30 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 EXECUTE QUERY
             </Button>
 
+            {datasource.type === DatasourceType.neo4j && (
+                <Select
+                    items={availableViews.entries()}
+                    label='View'
+                    labelPlacement='outside-left'
+                    classNames={
+                        { label:'sr-only' }
+                    }
+                    size='sm'
+                    placeholder='Select view'
+                    className='ml-2 max-w-xs align-middle'
+                    selectedKeys={[ view ]}
+                >
+                    {availableViews.map(v => (
+                        <SelectItem
+                            key={v}
+                            onPress={() => setView(v)}
+                        >
+                            {v}
+                        </SelectItem>
+                    ))}
+                </Select>
+            )}
+
             {queryResult && 'data' in queryResult && (
                 <span className='ml-3'>
                     <ExportComponent data={queryResult}/>
@@ -114,13 +141,59 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                     {queryResult.message}
                 </>)}
 
-                {queryResult && 'data' in queryResult && (<>
-                    {datasource.type === DatasourceType.postgresql ? (
-                        <DatabaseTable fetchedData={queryResult as TableResponse} kindReferences={[]} kind={''} datasourceId={datasource.id} datasources={datasources}/>
-                    ) : (
-                        <DatabaseDocument fetchedData={queryResult as DocumentResponse | GraphResponse} kindReferences={[]} kind={''} datasourceId={datasource.id} datasources={datasources}/>
-                    )}
-                </>)}
+                {queryResult && 'data' in queryResult && (
+                    <>
+                        {(() => {
+                            switch (datasource.type) {
+                            case DatasourceType.mongodb:
+                                return (
+                                    <DatabaseDocument
+                                        fetchedData={queryResult as DocumentResponse}
+                                        kindReferences={[]}
+                                        kind={''}
+                                        datasourceId={datasource.id}
+                                        datasources={datasources}
+                                    />
+                                );
+                            case DatasourceType.neo4j:
+                                return (
+                                    <>
+                                        {view === View.document ? (
+                                            <DatabaseDocument
+                                                fetchedData={queryResult as GraphResponse}
+                                                kindReferences={[]}
+                                                kind={''}
+                                                datasourceId={datasource.id}
+                                                datasources={datasources}
+                                            />
+                                        ) : (
+                                            <DatabaseTable
+                                                fetchedData={queryResult as GraphResponse}
+                                                kindReferences={[]}
+                                                kind={''}
+                                                datasourceId={datasource.id}
+                                                datasources={datasources}
+                                            />
+                                        )}
+
+                                    </>
+                                );
+                            default:
+                                return (
+                                    <DatabaseTable
+                                        fetchedData={queryResult as TableResponse}
+                                        kindReferences={[]}
+                                        kind={''}
+                                        datasourceId={datasource.id}
+                                        datasources={datasources}
+                                    />
+                                );
+                            }
+                        })()}
+                    </>
+                )}
+
+
             </div>
         </div>
     );

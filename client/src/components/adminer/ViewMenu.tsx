@@ -25,7 +25,7 @@ export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
                 { label:'sr-only' }
             }
             size='sm'
-            placeholder='Select datasource'
+            placeholder='Select view'
             className='max-w-xs'
             selectedKeys={[ view ]}
         >
