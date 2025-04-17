@@ -3,7 +3,7 @@ import { cn } from '../utils';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
-import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
+import { type EditCategoryDispatch, type EditCategoryState, LeftPanelMode } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { getEdgeDegree } from '../graph/graphUtils';
 import { usePreferences } from '../PreferencesProvider';
@@ -130,11 +130,25 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     const isSelected = state.selection.nodeIds.has(node.id);
     const { theme } = usePreferences().preferences;
 
-    // Handle node selection with support for toggle (Ctrl key)
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
-        const isSpecialKey = event.ctrlKey;
-        dispatch({ type: 'select', nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' });
+        if (state.leftPanelMode === LeftPanelMode.createMorphism) {
+            // Toggle selection without Ctrl in createMorphism mode
+            dispatch({
+                type: 'select',
+                nodeId: node.id,
+                operation: 'toggle',
+            });
+        }
+        else {
+            // Use Ctrl for toggle in other modes
+            const isSpecialKey = event.ctrlKey;
+            dispatch({
+                type: 'select',
+                nodeId: node.id,
+                operation: isSpecialKey ? 'toggle' : 'set',
+            });
+        }
     }
 
     return (
@@ -196,7 +210,11 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();
         const isSpecialKey = event.ctrlKey;
-        dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
+        dispatch({
+            type: 'select',
+            edgeId: edge.id,
+            operation: isSpecialKey ? 'toggle' : 'set',
+        });
     }
 
     return (

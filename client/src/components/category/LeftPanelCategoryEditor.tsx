@@ -4,9 +4,9 @@ import { LeftPanelMode, type EditCategoryDispatch, type EditCategoryState } from
 import { cn } from '../utils';
 import { toPosition } from '@/types/utils/common';
 import { Cardinality } from '@/types/schema/Morphism';
-import { Key } from '@/types/identifiers/Key';
+import { Key } from '@/types/identifiers';
 import { categoryToGraph } from './categoryGraph';
-import { detectUnsavedChanges, SaveButton } from '@/pages/category/CategoryEditorPage';
+import { detectUnsavedChanges } from '@/pages/category/CategoryEditorPage';
 
 /**
  * Props for components that receive editor state and dispatch.
@@ -33,8 +33,31 @@ type LeftPanelEditorProps = StateDispatchProps & Readonly<{
  * Renders the left panel for editing a category, dynamically displaying content based on the current mode.
  */
 export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPanelEditorProps) {
-    // Dynamically select the component based on the current left panel mode
     const Component = components[state.leftPanelMode];
+
+    // Add keyboard shortcuts for Ctrl+O (Create Object) and Ctrl+M (Create Morphism)
+    useEffect(() => {
+        // Only handle shortcuts in default mode to avoid conflicts with input fields
+        if (state.leftPanelMode !== LeftPanelMode.default) 
+            return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Check for Ctrl key (or Cmd on Mac) and the specific key
+            if (event.ctrlKey || event.metaKey) {
+                if (event.key === 'o' || event.key === 'O') {
+                    event.preventDefault(); // Prevent browser shortcuts (e.g., open file)
+                    dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex });
+                }
+                else if (event.key === 'm' || event.key === 'M') {
+                    event.preventDefault();
+                    dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism });
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [ state.leftPanelMode, dispatch ]);
 
     return (
         <div className={cn('p-3 flex flex-col gap-3', className)}>
@@ -56,19 +79,8 @@ const components: Record<LeftPanelMode, (props: StateDispatchProps) => JSX.Eleme
  * Displays the default mode of the left panel, offering options to create objects or morphisms.
  */
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
-    // Disable morphism creation if more than 2 nodes or any edges are selected
-    // unselect if some morphisms selected
-    const isValidSelection = state.selection.nodeIds.size <= 2 && state.selection.edgeIds.size === 0;
-
-    const handleCreateMorphismClick = () => {
-        if (!isValidSelection) {
-            // Clear selection if not exactly 2 nodes selected
-            dispatch({ type: 'select', operation: 'clear', range: 'all' });
-        }
-        dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism });
-    };
-
     const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
+    const category = state.evocat.category;
     
     useEffect(() => {
         const checkForChanges = () => {
@@ -81,9 +93,10 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
     return (
         <>
-            <h3 className='text-lg font-semibold py-2 text-default-800'>Default</h3>
+            <h3 className='text-lg font-semibold py-2 text-default-800 truncate max-w-[180px]'>{category.label}{hasUnsavedChanges && '•'}</h3>
 
             <Button
+                title='Create object (Ctrl+O)'
                 onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}
                 color='default'
             >
@@ -91,14 +104,15 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             </Button>
 
             <Button
-                onClick={handleCreateMorphismClick}
+                title='Create morphism (Ctrl+M)'
+                onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
                 color='default'
             >
                 Create Morphism
             </Button>
 
             {hasUnsavedChanges && (
-                <div className='text-warning-600 bg-warning-100 text-sm px-3 mt-4  py-2 rounded-lg border border-warning-300 mb-2 animate-fade-in'>
+                <div className='text-warning-600 bg-warning-100 text-sm px-3 mt-4 py-2 rounded-lg border border-warning-300 mb-2 animate-fade-in'>
                     You have unsaved changes.
                 </div>
             )}
@@ -106,9 +120,6 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     );
 }
 
-/**
- * Props for the reusable editor form component.
- */
 type EditorFormProps = {
     label: string;
     setLabel: (value: string) => void;
@@ -162,8 +173,6 @@ function EditorForm({
  */
 function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const [ label, setLabel ] = useState('');
-    // Fixed initial position for new objects
-    const position = { x: 0, y: 0 };
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Auto-focus the input field when the component mounts
@@ -171,13 +180,23 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         inputRef.current?.focus();
     }, []);
 
-    /**
-     * Creates a new schema object and updates the graph state.
-     */
+    // Calculate position for the new object
+    const getNewObjectPosition = () => {
+        const nodes = state.graph.nodes.values().toArray();
+        const index = nodes.length % 9; // Reset to 0 after 9 objects
+        const gridSize = 3; // 3x3
+        const spacing = 7;
+        return {
+            x: ((index % gridSize) * spacing) - spacing,
+            y: (Math.floor(index / gridSize) * spacing) - spacing,
+        };
+    };
+
     function createObjex() {
-        if (!label) 
-            return; // Prevent creating with empty label
-        state.evocat.createObjex({ label, position: toPosition(position) });
+        state.evocat.createObjex({
+            label: label,
+            position: toPosition(getNewObjectPosition()),
+        });
         const graph = categoryToGraph(state.evocat.category);
         dispatch({ type: 'createObjex', graph });
     }
@@ -191,8 +210,8 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
                 onSubmit={createObjex}
                 onCancel={() => resetToDefaultMode(dispatch)}
                 inputRef={inputRef}
-                isSubmitDisabled={label === ''}
-                placeholder='Enter object label'
+                isSubmitDisabled={false} // Label is optional
+                placeholder='Enter object label (optional)'
             />
         </>
     );
@@ -205,7 +224,7 @@ function useMorphismSelection(state: EditCategoryState) {
     const selectedNodes = Array.from(state.selection.nodeIds);
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
     const domainNode = state.graph.nodes.get(selectedNodes[0]);
-    const codomainNode = state.graph.nodes.get(selectedNodes[1]);
+    const codomainNode = selectedNodes[1] ? state.graph.nodes.get(selectedNodes[1]) : undefined;
     return { selectedNodes, isValidSelection, domainNode, codomainNode };
 }
 
@@ -228,7 +247,6 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     useEffect(() => {
         if (isValidSelection && inputRef.current) 
             inputRef.current.focus();
-        
     }, [ isValidSelection ]);
 
     function createMorphism() {
@@ -238,7 +256,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         const domId = Number(selectedNodes[0]);
         const codId = Number(selectedNodes[1]);
         if (isNaN(domId) || isNaN(codId)) 
-            return; // if invalid node IDs
+            return;
 
         const domKey = Key.createNew(domId);
         const codKey = Key.createNew(codId);
@@ -267,7 +285,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
                         !domainNode && 'font-bold text-danger-500',
                     )}
                 >
-                    {domainNode?.metadata.label ?? 'Select a node'}
+                    {domainNode?.metadata.label ?? 'Select first node'}
                 </span>
             </p>
 
@@ -279,7 +297,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
                         domainNode && !codomainNode && 'font-bold text-danger-500',
                     )}
                 >
-                    {codomainNode?.metadata.label ?? 'Hold Ctrl and Select a second node'}
+                    {codomainNode?.metadata.label ?? (domainNode ? 'Select second node' : 'Select first node first')}
                 </span>
             </p>
         </div>
@@ -291,7 +309,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             onCancel={() => resetToDefaultMode(dispatch)}
             inputRef={inputRef}
             isSubmitDisabled={!isValidSelection}
-            placeholder='Enter morphism label'
+            placeholder='Enter label (optional)'
         />
     </>);
 }

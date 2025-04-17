@@ -122,7 +122,7 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
         : null;
 
     return (
-        <div className='absolute bottom-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
+        <div className='absolute top-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
             <div className='flex items-center justify-between'>
                 <h3 className='text-lg font-semibold'>Select Root Node</h3>
                 {/* Confirm button shown only when a node is selected */}
@@ -225,7 +225,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     }
 
     return (
-        <div className='absolute bottom-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
+        <div className='absolute top-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
             <h3>Access Path</h3>
             <div className='mt-3 space-y-2'>
                 <pre className='text-sm text-default-800'>
