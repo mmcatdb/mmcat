@@ -6,6 +6,7 @@ import { toPosition } from '@/types/utils/common';
 import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers/Key';
 import { categoryToGraph } from './categoryGraph';
+import { detectUnsavedChanges, SaveButton } from '@/pages/category/CategoryEditorPage';
 
 /**
  * Props for components that receive editor state and dispatch.
@@ -56,26 +57,51 @@ const components: Record<LeftPanelMode, (props: StateDispatchProps) => JSX.Eleme
  */
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     // Disable morphism creation if more than 2 nodes or any edges are selected
+    // unselect if some morphisms selected
     const isValidSelection = state.selection.nodeIds.size <= 2 && state.selection.edgeIds.size === 0;
+
+    const handleCreateMorphismClick = () => {
+        if (!isValidSelection) {
+            // Clear selection if not exactly 2 nodes selected
+            dispatch({ type: 'select', operation: 'clear', range: 'all' });
+        }
+        dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism });
+    };
+
+    const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
+    
+    useEffect(() => {
+        const checkForChanges = () => {
+            setHasUnsavedChanges(detectUnsavedChanges(state));
+        };
+        checkForChanges();
+        const interval = setInterval(checkForChanges, 1000);
+        return () => clearInterval(interval);
+    }, [ state ]);
 
     return (
         <>
-            <h3 className='text-lg font-semibold py-2'>Default</h3>
+            <h3 className='text-lg font-semibold py-2 text-default-800'>Default</h3>
 
             <Button
                 onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}
-                color='primary'
+                color='default'
             >
                 Create object
             </Button>
 
             <Button
-                onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
-                isDisabled={!isValidSelection}
-                color='primary'
+                onClick={handleCreateMorphismClick}
+                color='default'
             >
                 Create Morphism
             </Button>
+
+            {hasUnsavedChanges && (
+                <div className='text-warning-600 bg-warning-100 text-sm px-3 mt-4  py-2 rounded-lg border border-warning-300 mb-2 animate-fade-in'>
+                    You have unsaved changes.
+                </div>
+            )}
         </>
     );
 }
@@ -206,8 +232,8 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     }, [ isValidSelection ]);
 
     function createMorphism() {
-        if (!isValidSelection || !label) 
-            return; // if invalid state
+        if (!isValidSelection) 
+            return;
 
         const domId = Number(selectedNodes[0]);
         const codId = Number(selectedNodes[1]);
@@ -264,7 +290,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             onSubmit={createMorphism}
             onCancel={() => resetToDefaultMode(dispatch)}
             inputRef={inputRef}
-            isSubmitDisabled={!isValidSelection || label === ''}
+            isSubmitDisabled={!isValidSelection}
             placeholder='Enter morphism label'
         />
     </>);

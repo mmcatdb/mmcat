@@ -154,7 +154,7 @@ async function categoryEditorLoader({ params: { categoryId } }: { params: Params
     };
 }
 
-function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
+export function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
     const [ isFetching, setIsFetching ] = useState(false);
     const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
 
@@ -240,7 +240,7 @@ function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategory
 /*
  * Function to detect unsaved changes: node movement, schema updates
  */
-function detectUnsavedChanges(state: EditCategoryState) {
+export function detectUnsavedChanges(state: EditCategoryState) {
     const evocat = state.evocat;
 
     const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();

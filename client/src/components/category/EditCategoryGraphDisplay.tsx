@@ -6,6 +6,7 @@ import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHook
 import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { getEdgeDegree } from '../graph/graphUtils';
+import { usePreferences } from '../PreferencesProvider';
 
 /**
  * Props for the EditCategoryGraphDisplay component.
@@ -97,7 +98,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
         <div
             ref={setCanvasRef}
             className={cn(
-                'relative bg-slate-400 overflow-hidden',
+                'relative bg-default-200 overflow-hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-default',
                 className,
             )}
@@ -127,6 +128,7 @@ type NodeDisplayProps = Readonly<{
 function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragging } = useNode(node);
     const isSelected = state.selection.nodeIds.has(node.id);
+    const { theme } = usePreferences().preferences;
 
     // Handle node selection with support for toggle (Ctrl key)
     function onClick(event: MouseEvent<HTMLElement>) {
@@ -143,11 +145,12 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
         >
             <div
                 className={cn(
-                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white',
+                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-500 bg-content1',
+                    theme === 'dark' && 'bg-default-700',
                     isHoverAllowed &&
-                        'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 active:bg-cyan-300',
-                    isDragging && 'pointer-events-none shadow-[3px_7px_10px_3px_rgba(0,0,0,0.5)]',
-                    isSelected && 'bg-cyan-200',
+                        'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200',
+                    isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
+                    isSelected && 'bg-primary-200 border-primary-500',
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}
@@ -155,7 +158,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
 
             {/* Node label with truncation for long text */}
             <div className='w-fit h-0'>
-                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]'>
+                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px] text-default-700'>
                     {node.metadata.label}
                 </span>
             </div>
@@ -201,9 +204,9 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
             ref={setEdgeRef}
             onClick={onClick}
             d={path}
-            stroke={isSelected ? 'rgb(8, 145, 178)' : 'rgb(71, 85, 105)'}
+            stroke={isSelected ? 'hsl(var(--nextui-primary))' : 'hsl(var(--nextui-default-500))'}
             strokeWidth='4'
-            className={cn(isHoverAllowed && 'cursor-pointer pointer-events-auto path-shadow')}
+            className={cn(isHoverAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]')}
             markerEnd='url(#arrow)'
         />
     );
@@ -216,7 +219,7 @@ function SelectionBox() {
     return (
         <div
             ref={setSelectionBoxRef}
-            className='absolute border-2 border-slate-700 border-dotted pointer-events-none'
+            className='absolute border-2 border-primary-500 border-dashed pointer-events-none bg-primary-100/20'
             style={style}
         />
     );
