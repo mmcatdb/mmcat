@@ -44,6 +44,7 @@ export type Settings = {
     hasHeader?: boolean;
     isWritable?: boolean;
     isQueryable?: boolean;
+    isClonable?: boolean;
 };
 
 export type DatasourceInit = {

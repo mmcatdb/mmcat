@@ -58,6 +58,7 @@ watch(() => innerValue.value.type, (type) => {
         innerValue.value.settings.isWritable = false;
         innerValue.value.settings.isQueryable = false;
     }
+    innerValue.value.settings.isClonable = false;
 });
 
 async function save() {
@@ -219,6 +220,14 @@ async function deleteMethod() {
             >
                 <input
                     v-model="innerValue.settings.isQueryable"
+                    type="checkbox"
+                />
+            </ValueRow>
+            <ValueRow
+                label="Is clonable:"
+            >
+                <input
+                    v-model="innerValue.settings.isClonable"
                     type="checkbox"
                 />
             </ValueRow>

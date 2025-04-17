@@ -29,16 +29,6 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
         }
     }
 
-    public Connection getAdminConnection() {
-        System.out.println("postgres pswd in provider: " + System.getenv("POSTGRESQL_SUPERUSER_PASSWORD"));
-        try {
-            return DriverManager.getConnection(settings.createAdminConnectionString());
-        }
-        catch (SQLException e) {
-            throw new OtherException(e);
-        }
-    }
-
     public boolean isStillValid(Object settings) {
         // We always create a new connection so we don't need to cache anything.
         return false;
@@ -56,7 +46,8 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
         String username,
         String password,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {
 
         String createConnectionString() {
@@ -71,19 +62,6 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
                 .append(username)
                 .append("&password=")
                 .append(password)
-                .toString();
-        }
-
-        String createAdminConnectionString() {
-            return new StringBuilder()
-                .append("jdbc:postgresql://")
-                .append(host)
-                .append(":")
-                .append(port)
-                .append("/postgres")
-                .append("?user=postgres")
-                .append("&password=")
-                .append(System.getenv("POSTGRESQL_SUPERUSER_PASSWORD")) // TODO: Does this work always?
                 .toString();
         }
 

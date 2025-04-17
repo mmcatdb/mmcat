@@ -51,7 +51,8 @@ public class JsonProvider {
     public record JsonSettings(
         String url,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {}
 
 }

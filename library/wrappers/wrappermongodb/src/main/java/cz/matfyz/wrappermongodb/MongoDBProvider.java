@@ -52,7 +52,8 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         @Nullable String username,
         @Nullable String password,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {
 
         public String createConnectionString() {
