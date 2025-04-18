@@ -6,8 +6,7 @@ import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType }
 import { type Mapping } from '@/types/mapping';
 import { Button, Input } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
-import { PlusIcon } from '@heroicons/react/20/solid';
-import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { type CategoryGraph } from '../category/categoryGraph';
 
 type MappingEditorProps = Readonly<{
@@ -212,20 +211,60 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
         }
     }
 
+    function handleDeleteSubpath(index: number) {
+        dispatch({ 
+            type: 'remove-from-access-path', 
+            subpathIndex: index, 
+        });
+    }
+
     function renderAccessPath() {
         const root = mapping.accessPath;
-        const subpaths = root.subpaths.reduce((acc: Record<string, string>, subpath) => {
-            acc[subpath.name.toString()] = subpath.signature.toString();
-            return acc;
-        }, {});
-
-        // json-like formatting of access path
-        let result = `${root.name.toString()}: {\n`;
-        for (const [ key, value ] of Object.entries(subpaths))
-            result += `    ${key}: ${value},\n`;
-        // result += '}';
-
-        return result;
+        
+        return (
+            <div className='text-sm text-default-800'>
+                <div>{root.name.toString()}: {'{'}</div>
+                {root.subpaths.map((subpath, index) => (
+                    <div key={index} className='ml-6 my-1 group'>
+                        <span className='inline-flex items-center'>
+                            <span className='flex-1'>
+                                {subpath.name.toString()}: {subpath.signature.toString()},
+                            </span>
+                            <span
+                                role='button'
+                                aria-label={`Delete subpath ${subpath.name.toString()}`}
+                                className='inline-flex items-center justify-center w-5 h-5 ml-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-danger-100 text-danger-500 hover:text-danger-700'
+                                onClick={() => handleDeleteSubpath(index)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        handleDeleteSubpath(index);
+                                    }
+                                }}
+                                tabIndex={0}
+                            >
+                                <XMarkIcon className='w-3 h-3' />
+                            </span>
+                        </span>
+                    </div>
+                ))}
+                <div className='flex items-start'>
+                    <Button
+                        isIconOnly
+                        size='sm'
+                        variant='solid'
+                        onPress={handleAddSubpath}
+                        color='primary'
+                        className='ml-6 mt-1'
+                        radius='sm'
+                        isDisabled={selectionType !== SelectionType.Free}
+                    >
+                        <PlusIcon className='w-4 h-4' />
+                    </Button>
+                </div>
+                <span>{'}'}</span>
+            </div>
+        );
     }
 
     return (
@@ -234,31 +273,14 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
             
             <div className='bg-default-100 rounded-lg p-3'>
                 <div className='overflow-x-auto'>
-                    <pre className='text-sm text-default-800 whitespace-pre-wrap break-all'>
-                        {renderAccessPath()}
-                        <div className='flex items-start'>
-                            <Button
-                                isIconOnly
-                                size='sm'
-                                variant='solid'
-                                onPress={handleAddSubpath}
-                                color='primary'
-                                className='ml-7 mt-1'
-                                radius='sm'
-                                isDisabled={selectionType !== SelectionType.Free}
-                            >
-                                <PlusIcon className='w-4 h-4' />
-                            </Button>
-                        </div>
-                        <span>{'}'}</span>
-                    </pre>
+                    {renderAccessPath()}
                 </div>
 
                 {selectionType === SelectionType.Path && (
                     <div className='mt-3'>
                         {selection instanceof PathSelection && !selection.isEmpty ? (
                             <>
-                                <p className='text-sm text-default-600 mb-2'>
+                                <p className='text-sm text-default-600 mb-2 truncate'>
                                     Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}
                                 </p>
                                 <Button 
