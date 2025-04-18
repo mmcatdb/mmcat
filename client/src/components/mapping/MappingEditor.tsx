@@ -53,7 +53,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
     return (
         <div className='relative flex h-[calc(100vh-40px)]'>
             {/* Left Panel - Form Controls */}
-            <div className='w-80 bg-content1 border-r-1 border-default-200 p-4 space-y-6 flex flex-col'>
+            <div className='w-80 bg-content1 border-r-1 border-default-200 p-4 flex flex-col'>
                 <div className='space-y-4'>
                     <h2 className='text-xl font-semibold'>Create Mapping</h2>
                     <Input
@@ -66,19 +66,23 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                     />
                 </div>
 
-                {state.editorPhase === EditorPhase.SelectRoot ? (
-                    <RootSelectionPanel
-                        // @ts-expect-error FIXME
-                        selection={state.selection}
-                        graph={state.graph}
-                        dispatch={freeSelectionDispatch}
-                        onConfirm={handleSetRoot}
-                    />
-                ) : (
-                    <AccessPathCard state={state} dispatch={dispatch} />
-                )}
+                {/* Scrollable content area */}
+                <div className='flex-1 overflow-y-auto py-2 mt-2'>
+                    {state.editorPhase === EditorPhase.SelectRoot ? (
+                        <RootSelectionPanel
+                            // @ts-expect-error FIXME
+                            selection={state.selection}
+                            graph={state.graph}
+                            dispatch={freeSelectionDispatch}
+                            onConfirm={handleSetRoot}
+                        />
+                    ) : (
+                        <AccessPathCard state={state} dispatch={dispatch} />
+                    )}
+                </div>
 
-                <div className='mt-auto pt-4 border-t-1 border-default-100'>
+                {/* Fixed footer with buttons */}
+                <div className='pt-4 border-t-1 border-default-100'>
                     <div className='flex gap-3 justify-end'>
                         <Button
                             color='danger'
@@ -229,24 +233,26 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
             <h3 className='text-lg font-semibold'>Access Path</h3>
             
             <div className='bg-default-100 rounded-lg p-3'>
-                <pre className='text-sm text-default-800'>
-                    {renderAccessPath()}
-                    <div className='flex items-center'>
-                        <Button
-                            isIconOnly
-                            size='sm'
-                            variant='solid'
-                            onPress={handleAddSubpath}
-                            color='primary'
-                            className='mt-1 ml-7'
-                            radius='sm'
-                            isDisabled={selectionType !== SelectionType.Free}
-                        >
-                            <PlusIcon className='w-4 h-4' />
-                        </Button>
-                    </div>
-                    <span>{'}'}</span>
-                </pre>
+                <div className='overflow-x-auto'>
+                    <pre className='text-sm text-default-800 whitespace-pre-wrap break-all'>
+                        {renderAccessPath()}
+                        <div className='flex items-start'>
+                            <Button
+                                isIconOnly
+                                size='sm'
+                                variant='solid'
+                                onPress={handleAddSubpath}
+                                color='primary'
+                                className='ml-7 mt-1'
+                                radius='sm'
+                                isDisabled={selectionType !== SelectionType.Free}
+                            >
+                                <PlusIcon className='w-4 h-4' />
+                            </Button>
+                        </div>
+                        <span>{'}'}</span>
+                    </pre>
+                </div>
 
                 {selectionType === SelectionType.Path && (
                     <div className='mt-3'>
