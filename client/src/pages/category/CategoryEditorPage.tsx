@@ -66,7 +66,7 @@ export function CategoryEditorPage() {
     return (
         <div className='flex flex-col h-[calc(100vh-40px)]'>
             {/* Navbar */}
-            <div className='h-8 flex items-center justify-between px-4 shadow-md bg-default-100 border-b border-default-200'>
+            <div className='h-8 flex items-center justify-between px-4 bg-default-100 border-b border-default-200'>
                 <div className='flex items-center gap-3'>
                     {/* Left Sidebar Toggle */}
                     <TbLayoutSidebarFilled

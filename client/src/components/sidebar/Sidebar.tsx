@@ -43,7 +43,7 @@ export function Sidebar() {
     return (
         <div
             className={cn(
-                'border-r fixed h-screen z-10 transition-all duration-300 ease-in-out border-default-200',
+                'fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200',
                 isCollapsed ? 'w-16' : 'w-64',
             )}
         >

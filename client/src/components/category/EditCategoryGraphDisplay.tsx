@@ -82,6 +82,7 @@ type CanvasDisplayProps = Readonly<{
  */
 function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     const { setCanvasRef, onMouseDown, isDragging } = useCanvas();
+    const { theme } = usePreferences().preferences;
 
     return (
         <div
@@ -90,6 +91,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
                 'relative bg-default-200 overflow-hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-default',
                 className,
+                theme === 'dark' && 'bg-background',
             )}
             onMouseDown={onMouseDown}
         >
@@ -148,12 +150,13 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
         >
             <div
                 className={cn(
-                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-500 bg-content1',
-                    theme === 'dark' && 'bg-default-700',
+                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
                     isHoverAllowed &&
                         'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200',
                     isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
                     isSelected && 'bg-primary-200 border-primary-500',
+                    theme === 'dark' && !isSelected && 'bg-default-50 border-default-900',
+                    theme === 'dark' && isSelected && 'bg-primary-400 border-primary-600',
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}
