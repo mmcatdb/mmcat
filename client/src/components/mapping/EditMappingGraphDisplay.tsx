@@ -9,18 +9,14 @@ import { getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
 import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '../graph/graphSelection';
 
-/**
- * Props for the EditMappingGraphDisplay component.
- *
- * @property state - The current state of the mapping editor.
- * @property dispatch - Dispatch function for updating the editor state.
- * @property options - Optional graph rendering options.
- * @property className - Optional CSS class for styling the canvas.
- */
 type EditMappingGraphDisplayProps = Readonly<{
+    /** The current state of the mapping editor. */
     state: EditMappingState;
+    /** Dispatch function for updating the editor state. */
     dispatch: EditMappingDispatch;
+    /** Optional graph rendering options. */
     options?: GraphOptions;
+    /** Optional CSS class for styling the canvas. */
     className?: string;
 }>;
 
@@ -71,14 +67,8 @@ export function EditMappingGraphDisplay({ state, dispatch, options, className }:
     );
 }
 
-/**
- * Props for the CanvasDisplay component.
- *
- * @interface CanvasDisplayProps
- * @property children - Content to render inside the canvas.
- * @property className - Optional CSS class for styling.
- */
 type CanvasDisplayProps = Readonly<{
+    /** The content to render inside the canvas. */
     children: ReactNode;
     className?: string;
 }>;
@@ -100,19 +90,14 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     );
 }
 
-/**
- * Props for the NodeDisplay component.
- *
- * @interface NodeDisplayProps
- * @property node - The node to render.
- * @property state - The current editor state.
- * @property dispatch - Dispatch function for state updates.
- * @property pathGraph - Optional path graph for path-based selections.
- */
 type NodeDisplayProps = Readonly<{
+    /** The node to render. */
     node: CategoryNode;
+    /** The current editor state. */
     state: EditMappingState;
+    /** Dispatch function for updating the editor state. */
     dispatch: EditMappingDispatch;
+    /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
 }>;
 
@@ -232,21 +217,16 @@ const pathClasses: Record<PathCount, string | undefined> = {
     [PathCount.Many]: 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-red-400',
 };
 
-/**
- * Props for the EdgeDisplay component.
- *
- * @interface EdgeDisplayProps
- * @property edge - The edge to render.
- * @property degree - The degree offset for bundled edges.
- * @property state - The current editor state.
- * @property dispatch - Dispatch function for state updates.
- * @property pathGraph - Optional path graph for path-based selections.
- */
 type EdgeDisplayProps = Readonly<{
+    /** The edge to render. */
     edge: CategoryEdge;
+    /** The degree offset for bundled edges. */
     degree: number;
+    /** The current editor state. */
     state: EditMappingState;
+    /** Dispatch function for updating the editor state. */
     dispatch: EditMappingDispatch;
+    /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
 }>;
 

@@ -8,24 +8,15 @@ import { Key } from '@/types/identifiers';
 import { categoryToGraph } from './categoryGraph';
 import { detectUnsavedChanges } from '@/pages/category/CategoryEditorPage';
 
-/**
- * Props for components that receive editor state and dispatch.
- *
- * @property state - The current state of the category editor.
- * @property dispatch - The dispatch function for updating the editor state.
- */
 type StateDispatchProps = Readonly<{
+    /** The current state of the category editor. */
     state: EditCategoryState;
+    /** The dispatch function for updating the editor state. */
     dispatch: EditCategoryDispatch;
 }>;
 
-/**
- * Props for the LeftPanelCategoryEditor component.
- *
- * @extends StateDispatchProps
- * @property className - Optional CSS class for custom styling.
- */
 type LeftPanelEditorProps = StateDispatchProps & Readonly<{
+    /** Optional CSS class for custom styling. */
     className?: string;
 }>;
 
@@ -93,7 +84,8 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
     return (
         <>
-            <h3 className='text-lg font-semibold py-2 text-default-800 truncate max-w-[180px]'>{category.label}{hasUnsavedChanges && '•'}</h3>
+            {/* TODO: truncate does not work for dot */}
+            <h3 className='text-lg font-semibold py-2 text-default-800 truncate max-w-[180px]'>{category.label}</h3>
 
             <Button
                 title='Create object (Ctrl+O)'
@@ -185,7 +177,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         const nodes = state.graph.nodes.values().toArray();
         const index = nodes.length % 9; // Reset to 0 after 9 objects
         const gridSize = 3; // 3x3
-        const spacing = 7;
+        const spacing = 20;
         return {
             x: ((index % gridSize) * spacing) - spacing,
             y: (Math.floor(index / gridSize) * spacing) - spacing,

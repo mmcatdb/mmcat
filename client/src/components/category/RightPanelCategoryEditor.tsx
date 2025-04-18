@@ -8,27 +8,20 @@ import { type FreeSelectionAction } from '../graph/FreeSelection';
 import { SelectionCard } from './SelectionCard';
 import { Cardinality, type Min } from '@/types/schema';
 
-/**
- * Props for components that receive editor state and dispatch.
- *
- * @interface StateDispatchProps
- * @property state - The current state of the category editor.
- * @property dispatch - The dispatch function for updating the editor state.
- */
 type StateDispatchProps = Readonly<{
+    /** The current state of the category editor. */
     state: EditCategoryState;
+    /** The dispatch function for updating the editor state. */
     dispatch: EditCategoryDispatch;
 }>;
 
 type RightPanelEditorProps = StateDispatchProps & Readonly<{
+    /** Optional class name for additional styling. */
     className?: string;
 }>;
 
 /**
  * Renders the right panel for editing a category, dynamically displaying content based on the current selection and mode.
- *
- * @param props - The component props.
- * @returns A React component rendering the right panel.
  */
 export function RightPanelCategoryEditor({ state, dispatch, className }: RightPanelEditorProps) {
     // Dynamically select the component based on selection state
@@ -54,7 +47,6 @@ const components: Record<RightPanelMode, (props: StateDispatchProps) => JSX.Elem
  * Determines the appropriate display component based on the current selection.
  *
  * @param state - The current editor state.
- * @returns The component to render for the right panel.
  */
 function getRightPanelComponent(state: EditCategoryState) {
     if (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0) 
@@ -93,9 +85,6 @@ function resetToDefaultMode(dispatch: EditCategoryDispatch) {
 
 /**
  * Displays the default mode of the right panel, showing selection details or a prompt if nothing is selected.
- *
- * @param props - The component props with state and dispatch.
- * @returns A React component for the default panel mode.
  */
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     // Memoize dispatch to prevent unnecessary re-renders
@@ -122,27 +111,19 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     );
 }
 
-/**
- * Props for the reusable editor form component.
- *
- * @interface EditorFormProps
- * @property children - Additional form fields or content.
- * @property onSubmit - Function to call when submitting the form.
- * @property onCancel - Function to call when canceling the form.
- * @property isSubmitDisabled - Whether the submit button should be disabled.
- */
 type EditorFormProps = {
+    /** Additional form fields or content. */
     children: React.ReactNode;
+    /** Function to call when submitting the form. */
     onSubmit: () => void;
+    /** Function to call when canceling the form. */
     onCancel: () => void;
+    /** Whether the submit button should be disabled. */
     isSubmitDisabled: boolean;
 };
 
 /**
  * Reusable form component for editing objects and morphisms with consistent button behavior.
- *
- * @param props - The form component props.
- * @returns A React component rendering the form buttons.
  */
 function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFormProps) {
     return (
@@ -160,9 +141,6 @@ function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFo
 
 /**
  * Renders a form to update a selected schema object’s label and position.
- *
- * @param props - The component props with state and dispatch.
- * @returns A React component for updating a schema object.
  */
 function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const { selectedNode } = useSelection(state);
@@ -234,9 +212,6 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
 
 /**
  * Renders a form to update a selected morphism’s cardinality.
- *
- * @param props - The component props with state and dispatch.
- * @returns A React component for updating a morphism.
  */
 export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const { selectedMorphism } = useSelection(state);

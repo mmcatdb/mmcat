@@ -1,8 +1,10 @@
 import { type ReactNode, useEffect, useState } from 'react';
-import { Tooltip as NextuiTooltip, type TooltipProps } from '@nextui-org/react';
+import { Card, CardBody, Tooltip as NextuiTooltip, type TooltipProps } from '@nextui-org/react';
 import clsx from 'clsx';
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
+import { cn } from './utils';
+import { HiXMark } from 'react-icons/hi2';
 
 /** The tooltip has no delay by default, so we add it here. */
 // The delay is in milliseconds.
@@ -53,3 +55,35 @@ export function Portal({ children, to }: PortalProps) {
 export const portals = {
     context: 'context-portal',
 };
+
+type InfoBannerProps = {
+    /** The content of the banner. */
+    children: ReactNode;
+    /** Additional classes to apply to the banner. */
+    className?: string;
+    /** A function to call when the banner is dismissed. */
+    dismissBanner: () => void;
+};
+
+/**
+ * A reusable banner card with content to be provided via children.
+ */
+export function InfoBanner({ children, className, dismissBanner }: InfoBannerProps) {
+    return (
+        <Card 
+            shadow='sm' 
+            radius='lg' 
+            className={cn('relative bg-content1', className)}
+        >
+            <CardBody className='text-sm text-foreground px-4 py-3 relative'>
+                <button
+                    onClick={dismissBanner}
+                    className='absolute top-2 right-2 text-default-500 hover:text-foreground transition'
+                >
+                    <HiXMark className='w-5 h-5' />
+                </button>
+                {children}
+            </CardBody>
+        </Card>
+    );
+}

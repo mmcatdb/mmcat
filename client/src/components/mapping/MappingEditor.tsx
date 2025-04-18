@@ -10,16 +10,12 @@ import { PlusIcon } from '@heroicons/react/20/solid';
 import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { type CategoryGraph } from '../category/categoryGraph';
 
-/**
- * Props for the MappingEditor component.
- *
- * @property category - The schema category being edited.
- * @property mapping - The initial mapping to edit.
- * @property onSave - Optional callback to handle saving the mapping.
- */
 type MappingEditorProps = Readonly<{
+    /** The schema category being edited. */
     category: Category;
+    /** The initial mapping to edit. */
     mapping: Mapping;
+    /** Optional callback to handle saving the mapping. */
     onSave?: (mapping: Mapping) => void;
 }>;
 
@@ -98,18 +94,13 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
     );
 }
 
-/**
- * Props for the RootSelectionPanel component.
- *
- * @property selection - The current free selection state.
- * @property graph - The category graph.
- * @property dispatch - Dispatch function for selection actions.
- * @property onConfirm - Callback to confirm the root node.
- */
 type RootSelectionPanelProps = {
+    /** The current selection state. */
     selection: FreeSelection;
     graph: CategoryGraph;
+    /** Dispatch function for selection actions. */
     dispatch: Dispatch<FreeSelectionAction>;
+    /** Callback to confirm the root node. */
     onConfirm: () => void;
 };
 

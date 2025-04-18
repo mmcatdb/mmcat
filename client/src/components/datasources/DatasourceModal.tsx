@@ -11,54 +11,31 @@ import {
 } from '@/types/datasource';
 import { toast } from 'react-toastify';
 
-/**
- * Props for the DatasourceModal component.
- *
- * @interface DatasourceModalProps
- * @property isOpen - Whether the modal is visible.
- * @property onClose - Callback to close the modal.
- * @property onDatasourceCreated - Callback to handle successful datasource creation.
- */
 type DatasourceModalProps = {
+    /** Whether the modal is visible. */
     isOpen: boolean;
+    /** Callback to close the modal. */
     onClose: () => void;
+    /** Callback to handle successful datasource creation. */
     onDatasourceCreated: (newDatasource: Datasource) => void;
 };
 
-/**
- * Props for the SelectDatasourceType component.
- *
- * @interface SelectDatasourceTypeProps
- * @property datasourceType - The currently selected datasource type.
- * @property setDatasourceType - Function to update the datasource type and settings.
- */
 type SelectDatasourceTypeProps = {
+    /** The currently selected datasource type. */
     datasourceType: DatasourceType | '';
+    /** Function to update the datasource type and settings. */
     setDatasourceType: (type: DatasourceType, prevSettings: Settings) => void;
 };
 
-/**
- * Props for the DatasourceSpecificFields component.
- *
- * @interface DatasourceSpecificFieldsProps
- * @property datasourceType - The selected datasource type.
- * @property settings - The current settings for the datasource.
- * @property handleSettingsChange - Function to update settings fields.
- */
 type DatasourceSpecificFieldsProps = {
+    /** The selected datasource type. */
     datasourceType: DatasourceType;
+    /** The current settings for the datasource. */
     settings: Settings;
+    /** Function to update settings fields. */
     handleSettingsChange: (field: keyof Settings, value: unknown) => void;
 };
 
-/**
- * Props for the FormButtons component.
- *
- * @interface FormButtonsProps
- * @property onSubmit - Function to call when submitting the form.
- * @property onCancel - Function to call when canceling the form.
- * @property isSubmitting - Whether the form is currently submitting.
- */
 type FormButtonsProps = {
     onSubmit: () => void;
     onCancel: () => void;
@@ -170,9 +147,6 @@ function initializeSettings(type: DatasourceType, currentSettings: Settings): Se
 
 /**
  * Reusable component for modal submit and cancel buttons.
- *
- * @param props - The component props.
- * @returns A React component rendering the modal buttons.
  */
 function FormButtons({ onSubmit, onCancel, isSubmitting }: FormButtonsProps) {
     return (
@@ -189,9 +163,6 @@ function FormButtons({ onSubmit, onCancel, isSubmitting }: FormButtonsProps) {
 
 /**
  * Renders a modal for creating a new datasource with type-specific fields.
- *
- * @param props - The component props.
- * @returns A React component rendering the datasource modal.
  */
 export function DatasourceModal({
     isOpen,
@@ -263,9 +234,6 @@ export function DatasourceModal({
 
 /**
  * Renders a dropdown to select the datasource type.
- *
- * @param props - The component props.
- * @returns A React component rendering the type selector.
  */
 function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatasourceTypeProps) {
     return (
@@ -292,9 +260,6 @@ function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatas
 
 /**
  * Renders type-specific fields for configuring the datasource.
- *
- * @param props - The component props.
- * @returns A React component rendering the specific fields, or null if not applicable.
  */
 export function DatasourceSpecificFields({ datasourceType, settings, handleSettingsChange }: DatasourceSpecificFieldsProps) {
     if ([ DatasourceType.mongodb, DatasourceType.postgresql, DatasourceType.neo4j ].includes(datasourceType)) {

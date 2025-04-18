@@ -8,11 +8,6 @@ import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { getEdgeDegree } from '../graph/graphUtils';
 import { usePreferences } from '../PreferencesProvider';
 
-/**
- * Props for the EditCategoryGraphDisplay component.
- *
- * @interface EditCategoryGraphDisplayProps
- */
 type EditCategoryGraphDisplayProps = Readonly<{
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
@@ -23,9 +18,6 @@ type EditCategoryGraphDisplayProps = Readonly<{
 /**
  * Renders an interactive graph for editing a category.
  * Manages nodes, edges, and selection box rendering within a canvas.
- *
- * @param props - The component props.
- * @returns A React component rendering the category graph.
  */
 export function EditCategoryGraphDisplay({ state, dispatch, options, className }: EditCategoryGraphDisplayProps) {
     // Memoize dispatch to prevent unnecessary re-renders
@@ -87,9 +79,6 @@ type CanvasDisplayProps = Readonly<{
 
 /**
  * Renders the canvas for the graph, handling mouse interactions and styling.
- *
- * @param props - The component props.
- * @returns A React component rendering the graph canvas.
  */
 function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     const { setCanvasRef, onMouseDown, isDragging } = useCanvas();
@@ -180,27 +169,19 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     );
 }
 
-/**
- * Props for rendering an interactive edge in the graph editor.
- *
- * @interface EdgeDisplayProps
- * @property edge - The edge data, including schema and metadata.
- * @property degree - The curvature factor for bundled edges to avoid overlap.
- * @property state - The current state of the category graph for selection and rendering.
- * @property dispatch - The dispatch function to handle edge interactions like selection.
- */
 type EdgeDisplayProps = Readonly<{
+    /** The edge data, including schema and metadata. */
     edge: CategoryEdge;
+    /** The curvature factor for bundled edges to avoid overlap. */
     degree: number;
+    /** The current state of the category graph for selection and rendering. */
     state: EditCategoryState;
+    /** The dispatch function to handle edge interactions like selection. */
     dispatch: EditCategoryDispatch;
 }>;
 
 /**
  * Renders a single edge in the graph with interactive selection and curvature.
- *
- * @param props - The component props.
- * @returns A React component rendering a graph edge.
  */
 function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);

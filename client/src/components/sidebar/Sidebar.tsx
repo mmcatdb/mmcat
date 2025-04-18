@@ -163,7 +163,7 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
                 'transition-all duration-300 ease-in-out',
                 isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
             )}>
-                <span className='inline-block transition-transform duration-300 group-hover:translate-y-[-1px]'>
+                <span className='inline-block transition-transform duration-300 group-hover:translate-y-[-1px] font-medium'>
                     MM-cat
                 </span>
             </h1>

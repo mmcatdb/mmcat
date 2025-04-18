@@ -13,7 +13,7 @@ import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
-import { InfoBanner } from '../CategoriesPage';
+import { InfoBanner } from '@/components/common';
 import { EmptyState } from '@/components/TableCommon';
 
 /** In ms. */
@@ -164,7 +164,7 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
             {showTableIDs && <td className={'px-4 py-2'}>{runId}</td>}
             <td className={'px-4 py-2'}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
             <td className={'px-4 py-2'}>
-                <div className='flex items-center gap-2'>
+                <div className='flex  gap-2'>
                     {newestJobs.map(job => (
                         <Tooltip
                             key={job.id}
