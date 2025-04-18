@@ -22,7 +22,14 @@ export default {
             '5xl': '2.25rem',   // 36px
             '6xl': '2.5rem',    // 40px
         },
-        extend: {},
+        extend: {
+            colors: {
+                canvas: {
+                    light: '#e4e4e7',
+                    dark: '#000000',
+                },
+            },
+        },
         menuDimension: '4rem',
         contextWidth: '20rem',
         layoutBorderWidth: '1px',

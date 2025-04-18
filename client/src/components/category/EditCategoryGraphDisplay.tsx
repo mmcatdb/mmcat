@@ -88,10 +88,10 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
         <div
             ref={setCanvasRef}
             className={cn(
-                'relative bg-default-200 overflow-hidden',
+                'relative bg-canvas-light overflow-hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-default',
                 className,
-                theme === 'dark' && 'bg-background',
+                theme === 'dark' && 'bg-canvas-dark',
             )}
             onMouseDown={onMouseDown}
         >
@@ -152,11 +152,12 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
                 className={cn(
                     'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
                     isHoverAllowed &&
-                        'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200',
+                        'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
                     isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
                     isSelected && 'bg-primary-200 border-primary-500',
                     theme === 'dark' && !isSelected && 'bg-default-50 border-default-900',
                     theme === 'dark' && isSelected && 'bg-primary-400 border-primary-600',
+                    theme === 'dark' && isHoverAllowed && 'active:bg-primary-500 active:border-default-900',
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}

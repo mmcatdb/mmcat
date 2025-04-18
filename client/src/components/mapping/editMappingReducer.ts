@@ -18,6 +18,7 @@ export type EditMappingState = {
     selectionType: SelectionType;
     selection: FreeSelection | SequenceSelection | PathSelection;
     editorPhase: EditorPhase;
+    rootNodeId: string | null;
 };
 
 /**
@@ -32,6 +33,7 @@ export function createInitialState({ category, mapping }: { category: Category, 
         selection: FreeSelection.create(),
         mapping,
         editorPhase: EditorPhase.SelectRoot,
+        rootNodeId: null,
     };
 }
 
@@ -209,6 +211,7 @@ function root(state: EditMappingState, rootNodeId: string): EditMappingState {
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         editorPhase: EditorPhase.BuildPath,
+        rootNodeId: rootNodeId,
     };
 }
 

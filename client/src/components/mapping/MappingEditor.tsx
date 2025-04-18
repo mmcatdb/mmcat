@@ -4,7 +4,7 @@ import { type Category } from '@/types/schema';
 import { type Dispatch, useCallback, useReducer } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
 import { type Mapping } from '@/types/mapping';
-import { Button } from '@nextui-org/react';
+import { Button, Input } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/20/solid';
 import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
@@ -15,14 +15,16 @@ type MappingEditorProps = Readonly<{
     category: Category;
     /** The initial mapping to edit. */
     mapping: Mapping;
+    kindName: string;
+    setKindName: (name: string) => void;
     /** Optional callback to handle saving the mapping. */
-    onSave?: (mapping: Mapping) => void;
+    onSave?: (mapping: Mapping, kindName: string) => void;
 }>;
 
 /**
  * Renders the mapping editor with a graph display and panels for root selection and access path building.
  */
-export function MappingEditor({ category, mapping, onSave }: MappingEditorProps) {
+export function MappingEditor({ category, mapping, kindName, setKindName, onSave }: MappingEditorProps) {
     const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
     const navigate = useNavigate();
 
@@ -40,7 +42,7 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
 
     function handleSave() {
         if (onSave)
-            onSave(state.mapping);
+            onSave(state.mapping, kindName);
         navigate(-1);
     }
 
@@ -49,26 +51,35 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
     }
 
     return (
-        <div className='relative h-[700px] flex'>
-            <EditMappingGraphDisplay state={state} dispatch={dispatch} className='w-full h-full flex-grow' />
+        <div className='relative flex h-[calc(100vh-40px)]'>
+            {/* Left Panel - Form Controls */}
+            <div className='w-80 bg-content1 border-r-1 border-default-200 p-4 space-y-6 flex flex-col'>
+                <div className='space-y-4'>
+                    <h2 className='text-xl font-semibold'>Create Mapping</h2>
+                    <Input
+                        label='Kind Name'
+                        value={kindName}
+                        onChange={e => setKindName(e.target.value)}
+                        placeholder='Enter Kind Name'
+                        fullWidth
+                        autoFocus
+                    />
+                </div>
 
-            {state.editorPhase === EditorPhase.SelectRoot && (
-                <RootSelectionPanel
-                    // @ts-expect-error FIXME
-                    selection={state.selection}
-                    graph={state.graph}
-                    dispatch={freeSelectionDispatch}
-                    onConfirm={handleSetRoot}
-                />
-            )}
+                {state.editorPhase === EditorPhase.SelectRoot ? (
+                    <RootSelectionPanel
+                        // @ts-expect-error FIXME
+                        selection={state.selection}
+                        graph={state.graph}
+                        dispatch={freeSelectionDispatch}
+                        onConfirm={handleSetRoot}
+                    />
+                ) : (
+                    <AccessPathCard state={state} dispatch={dispatch} />
+                )}
 
-            {state.editorPhase !== EditorPhase.SelectRoot && (
-                <AccessPathCard state={state} dispatch={dispatch} />
-            )}
-
-            {state.editorPhase === EditorPhase.BuildPath && (
-                <div className='absolute bottom-2 right-2 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-3'>
-                    <div className='flex gap-3'>
+                <div className='mt-auto pt-4 border-t-1 border-default-100'>
+                    <div className='flex gap-3 justify-end'>
                         <Button
                             color='danger'
                             variant='flat'
@@ -84,12 +95,16 @@ export function MappingEditor({ category, mapping, onSave }: MappingEditorProps)
                             onPress={handleSave}
                             startContent={<CheckCircleIcon className='h-4 w-4' />}
                             size='sm'
+                            isDisabled={!state.rootNodeId}
                         >
                             Create Mapping
                         </Button>
                     </div>
                 </div>
-            )}
+            </div>
+
+            {/* Main Graph Area */}
+            <EditMappingGraphDisplay state={state} dispatch={dispatch} className='flex-grow' />
         </div>
     );
 }
@@ -113,23 +128,9 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
         : null;
 
     return (
-        <div className='absolute top-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
-            <div className='flex items-center justify-between'>
-                <h3 className='text-lg font-semibold'>Select Root Node</h3>
-                {/* Confirm button shown only when a node is selected */}
-                {selectedNode && (
-                    <Button
-                        size='sm'
-                        color='success'
-                        variant='flat'
-                        onPress={onConfirm}
-                        startContent={<CheckCircleIcon className='h-4 w-4' />}
-                    >
-                        Confirm
-                    </Button>
-                )}
-            </div>
-
+        <div className='space-y-4'>
+            <h3 className='text-lg font-semibold'>Select Root Node</h3>
+            
             {selectedNode ? (
                 <div className='bg-default-100 rounded-lg p-3'>
                     <div className='flex items-center justify-between'>
@@ -146,6 +147,14 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
                             <XMarkIcon className='h-4 w-4' />
                         </Button>
                     </div>
+                    <Button
+                        fullWidth
+                        color='primary'
+                        className='mt-3'
+                        onPress={onConfirm}
+                    >
+                        Confirm Root Selection
+                    </Button>
                 </div>
             ) : (
                 <div className='bg-default-100 rounded-lg p-3 text-center'>
@@ -183,7 +192,7 @@ type StateDispatchProps = Readonly<{
  * Renders a card for building and displaying the access path.
  */
 function AccessPathCard({ state, dispatch }: StateDispatchProps) {
-    const { mapping, selection, selectionType, editorPhase } = state;
+    const { mapping, selection, selectionType } = state;
 
     function handleAddSubpath() {
         // Switch to path selection mode when + is clicked
@@ -216,49 +225,50 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     }
 
     return (
-        <div className='absolute top-2 left-2 w-80 bg-content1 rounded-xl shadow-lg z-20 p-4 space-y-4'>
-            <h3>Access Path</h3>
-            <div className='mt-3 space-y-2'>
+        <div className='space-y-4'>
+            <h3 className='text-lg font-semibold'>Access Path</h3>
+            
+            <div className='bg-default-100 rounded-lg p-3'>
                 <pre className='text-sm text-default-800'>
                     {renderAccessPath()}
-                    {editorPhase === EditorPhase.BuildPath && (
+                    <div className='flex items-center'>
                         <Button
                             isIconOnly
                             size='sm'
                             variant='solid'
                             onPress={handleAddSubpath}
                             color='primary'
-                            className='my-1 ml-7'
+                            className='mt-1 ml-7'
                             radius='sm'
                             isDisabled={selectionType !== SelectionType.Free}
                         >
                             <PlusIcon className='w-4 h-4' />
                         </Button>
-                    )}
-                    <div className='text-default-800'>{'}'}</div>
+                    </div>
+                    <span>{'}'}</span>
                 </pre>
+
+                {selectionType === SelectionType.Path && (
+                    <div className='mt-3'>
+                        {selection instanceof PathSelection && !selection.isEmpty ? (
+                            <>
+                                <p className='text-sm text-default-600 mb-2'>
+                                    Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}
+                                </p>
+                                <Button 
+                                    fullWidth 
+                                    color='primary' 
+                                    onPress={handleConfirmPath}
+                                >
+                                    Add to Path
+                                </Button>
+                            </>
+                        ) : (
+                            <p className='text-sm text-default-500'>Select a path in the graph</p>
+                        )}
+                    </div>
+                )}
             </div>
-            {selectionType === SelectionType.Path && (
-                <div className='mt-3'>
-                    {selection instanceof PathSelection && !selection.isEmpty ? (
-                        <>
-                            <p className='text-sm text-default-600'>
-                                Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}
-                            </p>
-                            <Button size='sm' color='primary' onPress={handleConfirmPath} className='mt-2'>
-                                Add
-                            </Button>
-                        </>
-                    ) : (
-                        <p className='text-sm text-default-500'>Select a path in the graph</p>
-                    )}
-                </div>
-            )}
-            {selectionType === SelectionType.Free && editorPhase === EditorPhase.BuildPath && (
-                <div className='mt-3 text-sm text-default-500'>
-                    <p>Click on + button to add properties.</p>
-                </div>
-            )}
         </div>
     );
 }
