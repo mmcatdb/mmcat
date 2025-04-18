@@ -140,13 +140,20 @@ function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFo
 }
 
 /**
- * Renders a form to update a selected schema object’s label and position.
+ * Renders a form to update a selected schema object's label and position.
  */
 function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const { selectedNode } = useSelection(state);
     const [ label, setLabel ] = useState(selectedNode?.metadata.label ?? '');
     const [ position, setPosition ] = useState<FormPosition>(
         selectedNode ? { x: selectedNode.x, y: selectedNode.y } : { x: 0, y: 0 },
+    );
+
+    // Check if any changes were made
+    const hasChanges = selectedNode && (
+        label !== selectedNode.metadata.label ||
+        position.x !== selectedNode.x ||
+        position.y !== selectedNode.y
     );
 
     // Sync form state when selection or node data changes
@@ -161,8 +168,8 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
      * Updates the schema object with new label and position, then refreshes the graph.
      */
     function handleApply() {
-        if (!selectedNode || !label) 
-            return; // Guard against invalid state
+        if (!selectedNode || !label || !hasChanges) 
+            return;
         state.evocat.updateObjex(selectedNode.schema.key, {
             label,
             position: toPosition(position),
@@ -171,10 +178,15 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         dispatch({ type: 'rightPanelMode', mode: RightPanelMode.updateObjex, graph });
     }
 
-    // Guard against rendering if no node is selected
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && hasChanges) {
+            e.preventDefault();
+            handleApply();
+        }
+    };
+
     if (!selectedNode) 
         return <div className='p-4 text-danger-500'>Error: No object selected</div>;
-    
 
     return (
         <div className='p-3 flex flex-col gap-3'>
@@ -184,11 +196,16 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
                 <strong>Key:</strong> {selectedNode.schema.key.toString()}
             </p>
 
-            <EditorForm onSubmit={handleApply} onCancel={() => resetToDefaultMode(dispatch)} isSubmitDisabled={!label}>
+            <EditorForm 
+                onSubmit={handleApply} 
+                onCancel={() => resetToDefaultMode(dispatch)} 
+                isSubmitDisabled={!hasChanges || !label}
+            >
                 <Input
                     label='Label'
                     value={label}
                     onChange={e => setLabel(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     placeholder='Enter object label'
                 />
                 <div className='grid grid-cols-2 gap-2'>
@@ -197,12 +214,14 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
                         type='number'
                         value={toNumber(position.x).toFixed(0)}
                         onChange={e => setPosition({ ...position, x: toFormNumber(e.target.value) })}
+                        onKeyDown={handleKeyDown}
                     />
                     <Input
                         label='Position y'
                         type='number'
                         value={toNumber(position.y).toFixed(0)}
                         onChange={e => setPosition({ ...position, y: toFormNumber(e.target.value) })}
+                        onKeyDown={handleKeyDown}
                     />
                 </div>
             </EditorForm>
@@ -211,57 +230,88 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
 }
 
 /**
- * Renders a form to update a selected morphism’s cardinality.
+ * Renders a form to update a selected morphism's cardinality.
  */
 export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
     const { selectedMorphism } = useSelection(state);
     const [ minCardinality, setMinCardinality ] = useState<Min>(selectedMorphism?.schema.min ?? Cardinality.Zero);
+    const [ label, setLabel ] = useState(selectedMorphism?.metadata.label ?? '');
 
-    // Sync cardinality when morphism changes
+    // Check if any changes were made
+    const hasChanges = selectedMorphism && (
+        minCardinality !== selectedMorphism.schema.min ||
+        label !== selectedMorphism.metadata.label
+    );
+
+    // Sync state when morphism changes
     useEffect(() => {
-        if (selectedMorphism) 
+        if (selectedMorphism) {
             setMinCardinality(selectedMorphism.schema.min);
-        
+            setLabel(selectedMorphism.metadata.label);
+        }
     }, [ selectedMorphism ]);
 
     /**
-     * Updates the morphism’s cardinality and refreshes the graph.
+     * Updates the morphism and refreshes the graph.
      */
     function handleApply() {
-        if (!selectedMorphism) 
-            return; // Guard against invalid state
-        state.evocat.updateMorphism(selectedMorphism.schema, { min: minCardinality });
+        if (!selectedMorphism || !hasChanges) 
+            return;
+        
+        state.evocat.updateMorphism(selectedMorphism.schema, { 
+            min: minCardinality,
+            label: label !== selectedMorphism.metadata.label ? label : undefined,
+        });
+        
         const graph = categoryToGraph(state.evocat.category);
-        dispatch({ type: 'rightPanelMode', mode: RightPanelMode.updateMorphism, graph });
+        dispatch({ 
+            type: 'rightPanelMode', 
+            mode: RightPanelMode.updateMorphism, 
+            graph, 
+        });
     }
 
-    /**
-     * Handles changes to the cardinality radio group.
-     */
-    function handleCardinalityChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setMinCardinality(event.target.value as Min);
+    function handleCancel() {
+        resetToDefaultMode(dispatch);
     }
 
-    // Guard against rendering if no morphism is selected
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && hasChanges) {
+            e.preventDefault();
+            handleApply();
+        }
+    };
+
     if (!selectedMorphism) 
         return <div className='p-4 text-danger-500'>Error: No morphism selected</div>;
 
     return (
         <div className='p-3 flex flex-col gap-3'>
             <h3 className='text-lg font-semibold'>Update Morphism</h3>
-            <p>
+            
+            <Input
+                label='Label'
+                value={label}
+                onValueChange={setLabel}
+                onKeyDown={handleKeyDown}
+                placeholder='No morphism label'
+                className='max-w-xs'
+            />
+            
+            <p className='text-default-600'>
                 <strong>Signature:</strong> {selectedMorphism.schema.signature.toString()}
             </p>
+            
             <EditorForm
                 onSubmit={handleApply}
-                onCancel={() => resetToDefaultMode(dispatch)}
-                isSubmitDisabled={false}
+                onCancel={handleCancel}
+                isSubmitDisabled={!hasChanges}
             >
-                <div>
-                    <p>Minimum Cardinality:</p>
+                <div className='space-y-2'>
+                    <p className='text-sm'>Minimum Cardinality:</p>
                     <RadioGroup
                         value={minCardinality}
-                        onChange={handleCardinalityChange}
+                        onChange={e => setMinCardinality(e.target.value as Min)}
                         orientation='horizontal'
                     >
                         <Radio value={Cardinality.Zero}>0</Radio>

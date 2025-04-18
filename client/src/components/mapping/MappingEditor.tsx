@@ -255,7 +255,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
                         variant='solid'
                         onPress={handleAddSubpath}
                         color='primary'
-                        className='ml-6 mt-1'
+                        className='ml-6'
                         radius='sm'
                         isDisabled={selectionType !== SelectionType.Free}
                     >
