@@ -7,6 +7,12 @@ import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers';
 import { categoryToGraph } from './categoryGraph';
 import { detectUnsavedChanges } from '@/pages/category/CategoryEditorPage';
+import { FaSave } from 'react-icons/fa';
+import { api } from '@/api';
+import { Category } from '@/types/schema';
+import { onSuccess } from '@/types/api/result';
+import { toast } from 'react-toastify';
+import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
 
 type StateDispatchProps = Readonly<{
     /** The current state of the category editor. */
@@ -71,6 +77,7 @@ const components: Record<LeftPanelMode, (props: StateDispatchProps) => JSX.Eleme
  */
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
+    const [ isSaving, setIsSaving ] = useState(false);
     const category = state.evocat.category;
     
     useEffect(() => {
@@ -82,10 +89,36 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
         return () => clearInterval(interval);
     }, [ state ]);
 
+    async function handleSave() {
+        if (isSaving) 
+            return;
+        
+        setIsSaving(true);
+        try {
+            await state.evocat.update(async edit => {
+                const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
+                if (!response.status) 
+                    throw new Error(typeof response.error === 'string' ? response.error : 'Failed to save changes');
+                
+                return onSuccess(response, fromServer => Category.fromServer(fromServer));
+            });
+            toast.success('Changes saved successfully');
+            setHasUnsavedChanges(false);
+        }
+        catch (err) {
+            toast.error('Failed to save changes', { autoClose: 5000 });
+            console.error('Save Error:', err);
+        }
+        finally {
+            setIsSaving(false);
+        }
+    }
+
     return (
         <>
-            {/* TODO: truncate does not work for dot */}
-            <h3 className='text-lg font-semibold py-2 text-default-800 truncate max-w-[180px]'>{category.label}</h3>
+            <h3 className='text-lg font-semibold py-2 text-default-800 truncate max-w-[180px]'>
+                {category.label}
+            </h3>
 
             <Button
                 title='Create object (Ctrl+O)'
@@ -104,8 +137,25 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             </Button>
 
             {hasUnsavedChanges && (
-                <div className='text-warning-600 bg-warning-100 text-sm px-3 mt-4 py-2 rounded-lg border border-warning-300 mb-2 animate-fade-in'>
-                    You have unsaved changes.
+                <div className='mt-4 animate-fade-in'>
+                    <div className='flex flex-col gap-2 p-3 bg-warning-100 rounded-lg border border-warning-300'>
+                        <div className='flex items-center gap-2 text-warning-800'>
+                            <ExclamationTriangleIcon className='h-4 w-4 flex-shrink-0' />
+                            <span className='text-sm font-medium'>You have unsaved changes.</span>
+                        </div>
+                        <Button 
+                            variant='solid'
+                            color='warning'
+                            size='sm'
+                            fullWidth
+                            onClick={handleSave}
+                            isLoading={isSaving}
+                            startContent={isSaving ? null : <FaSave className='h-3.5 w-3.5' />}
+                            className='shadow-sm hover:shadow-md transition-shadow'
+                        >
+                            {isSaving ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </div>
                 </div>
             )}
         </>

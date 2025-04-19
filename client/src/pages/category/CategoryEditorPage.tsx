@@ -211,7 +211,7 @@ export function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
                 <FaSave size={18} />
             )}
             {hasUnsavedChanges && !isFetching && (
-                <span className='text-danger-500 text-sm absolute -top-2 right-0'>*</span>
+                <span className='text-warning-600 text-sm font-bold absolute -top-2 right-0'>*</span>
             )}
         </div>
     );
