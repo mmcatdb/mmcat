@@ -1,5 +1,5 @@
 import { type Dispatch, type MouseEvent as ReactMouseEvent } from 'react';
-import { computeCoordinates, computeEdgePath, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getEdgeDegree, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
+import { computeCoordinates, computeEdgeSvg, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getEdgeDegree, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
 
 export type Graph = {
     nodes: Map<string, Node>;
@@ -58,6 +58,11 @@ export function createInitialGraphState(graph: Graph): ReactiveGraphState {
         coordinates: computeCoordinates(graph.nodes.values().toArray(), 1000, 1000),
     };
 }
+
+type EdgeRef = {
+    path?: SVGPathElement;
+    label?: SVGTextElement;
+};
 
 export class GraphEngine {
     private nodes: Map<string, Node>;
@@ -168,9 +173,9 @@ export class GraphEngine {
         EdgeMap.bundleEdges([ ...from, ...to ]).forEach(bundle => bundle.forEach((edge, index) => this.propagateEdge(edge, index, bundle.length)));
     }
 
-    private readonly edgeRefs = new Map<string, SVGPathElement>();
+    private readonly edgeRefs = new Map<string, EdgeRef>();
 
-    setEdgeRef(edgeId: string, ref: SVGPathElement | null) {
+    setEdgeRef(edgeId: string, ref: EdgeRef | null) {
         if (!ref) {
             // console.log('DELETE edge ref');
             this.edgeRefs.delete(edgeId);
@@ -191,8 +196,12 @@ export class GraphEngine {
         const from = this.nodes.get(edge.from)!;
         const to = this.nodes.get(edge.to)!;
 
-        const path = computeEdgePath(from, to, getEdgeDegree(edge, index, total), this.state.coordinates);
-        ref.setAttribute('d', path);
+        const svg = computeEdgeSvg(from, to, edge.label, getEdgeDegree(edge, index, total), this.state.coordinates);
+        ref.path?.setAttribute('d', svg.path);
+
+        // ref.label?.setAttribute('x', svg.label?.x ?? '0');
+        // ref.label?.setAttribute('y', svg.label?.y ?? '0');
+        ref.label?.setAttribute('transform', svg.label?.transform ?? '');
     }
 
     private selectionBoxRef?: HTMLElement;

@@ -5,9 +5,10 @@ import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { EditorPhase, type EditMappingDispatch, type EditMappingState } from './editMappingReducer';
 import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
-import { getEdgeDegree } from '../graph/graphUtils';
+import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
 import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '../graph/graphSelection';
+import clsx from 'clsx';
 import { usePreferences } from '../PreferencesProvider';
 
 type EditMappingGraphDisplayProps = Readonly<{
@@ -48,17 +49,33 @@ export function EditMappingGraphDisplay({ state, dispatch, options, className }:
                 ))}
 
                 {/* SVG layer for rendering edges with arrow markers */}
-                <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='absolute w-full h-full pointer-events-none'>
+                <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='w-full h-full pointer-events-none'>
                     <defs>
                         {/* Define arrow marker for edge ends */}
-                        <marker id='arrow' viewBox='0 0 12 12' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'>
-                            <path d='M 0 1 L 10 5 L 0 9 z' stroke='context-stroke' fill='context-stroke' pointerEvents='auto' />
+                        <marker
+                            id='arrow'
+                            viewBox='0 0 12 12'
+                            refX='0'
+                            refY='6'
+                            markerWidth={EDGE_ARROW_LENGTH}
+                            markerHeight={EDGE_ARROW_LENGTH}
+                            orient='auto-start-reverse'
+                            markerUnits='userSpaceOnUse'
+                        >
+                            <path d='M0 1 11 6 0 11z' stroke='context-stroke' fill='context-stroke' pointerEvents='auto' />
                         </marker>
                     </defs>
 
                     {/* Render edges with arrow markers */}
                     {state.graph.edges.bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
-                        <EdgeDisplay key={edge.id} edge={edge} degree={getEdgeDegree(edge, index, bundle.length)} state={state} dispatch={dispatch} pathGraph={pathGraph} />
+                        <EdgeDisplay
+                            key={edge.id}
+                            edge={edge}
+                            degree={getEdgeDegree(edge, index, bundle.length)}
+                            state={state}
+                            dispatch={dispatch}
+                            pathGraph={pathGraph}
+                        />
                     )))}
                 </svg>
 
@@ -257,8 +274,7 @@ type EdgeDisplayProps = Readonly<{
  * Renders a single edge with selection and path-based styling.
  */
 function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayProps) {
-    // Hook for edge rendering and interactions
-    const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);
+    const { setEdgeRef, svg, isHoverAllowed } = useEdge(edge, degree, state.graph);
 
     const isSelected = isEdgeSelected(state, edge);
     const isSelectionAllowed = isEdgeSelectionAllowed(state, edge, pathGraph);
@@ -280,11 +296,11 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
         dispatch({ type: 'path', operation: 'add', nodeIds, edgeIds });
     }
 
-    return (
+    return (<>
         <path
-            ref={setEdgeRef}
+            ref={setEdgeRef.path}
             onClick={onClick}
-            d={path}
+            d={svg.path}
             stroke={isSelected ? 'hsl(var(--nextui-primary))' : 'hsl(var(--nextui-default-500))'}
             strokeWidth='4'
             className={cn('text-zinc-600',
@@ -293,7 +309,17 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
             )}
             markerEnd='url(#arrow)'
         />
-    );
+
+        <text
+            ref={setEdgeRef.label}
+            transform={svg.label?.transform}
+            className={clsx('font-medium', !svg.label && 'hidden')}
+            fill='currentColor'
+            textAnchor='middle'
+        >
+            {edge.label}
+        </text>
+    </>);
 }
 
 /**
