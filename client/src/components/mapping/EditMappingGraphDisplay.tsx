@@ -9,19 +9,16 @@ import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
 import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '../graph/graphSelection';
 import clsx from 'clsx';
+import { usePreferences } from '../PreferencesProvider';
 
-/**
- * Props for the EditMappingGraphDisplay component.
- *
- * @property state - The current state of the mapping editor.
- * @property dispatch - Dispatch function for updating the editor state.
- * @property options - Optional graph rendering options.
- * @property className - Optional CSS class for styling the canvas.
- */
 type EditMappingGraphDisplayProps = Readonly<{
+    /** The current state of the mapping editor. */
     state: EditMappingState;
+    /** Dispatch function for updating the editor state. */
     dispatch: EditMappingDispatch;
+    /** Optional graph rendering options. */
     options?: GraphOptions;
+    /** Optional CSS class for styling the canvas. */
     className?: string;
 }>;
 
@@ -71,7 +68,14 @@ export function EditMappingGraphDisplay({ state, dispatch, options, className }:
 
                     {/* Render edges with arrow markers */}
                     {state.graph.edges.bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
-                        <EdgeDisplay key={edge.id} edge={edge} degree={getEdgeDegree(edge, index, bundle.length)} state={state} dispatch={dispatch} pathGraph={pathGraph} />
+                        <EdgeDisplay
+                            key={edge.id}
+                            edge={edge}
+                            degree={getEdgeDegree(edge, index, bundle.length)}
+                            state={state}
+                            dispatch={dispatch}
+                            pathGraph={pathGraph}
+                        />
                     )))}
                 </svg>
 
@@ -81,14 +85,8 @@ export function EditMappingGraphDisplay({ state, dispatch, options, className }:
     );
 }
 
-/**
- * Props for the CanvasDisplay component.
- *
- * @interface CanvasDisplayProps
- * @property children - Content to render inside the canvas.
- * @property className - Optional CSS class for styling.
- */
 type CanvasDisplayProps = Readonly<{
+    /** The content to render inside the canvas. */
     children: ReactNode;
     className?: string;
 }>;
@@ -98,11 +96,14 @@ type CanvasDisplayProps = Readonly<{
  */
 function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     const { setCanvasRef, onMouseDown, isDragging } = useCanvas();
+    const { theme } = usePreferences().preferences;
 
     return (
         <div
             ref={setCanvasRef}
-            className={cn('relative bg-slate-400 overflow-hidden', isDragging ? 'cursor-grabbing' : 'cursor-default', className)}
+            className={cn('relative bg-canvas-light overflow-hidden', isDragging ? 'cursor-grabbing' : 'cursor-default', className,
+                theme === 'dark' && 'bg-default-100',
+            )}
             onMouseDown={onMouseDown}
         >
             {children}
@@ -110,19 +111,14 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     );
 }
 
-/**
- * Props for the NodeDisplay component.
- *
- * @interface NodeDisplayProps
- * @property node - The node to render.
- * @property state - The current editor state.
- * @property dispatch - Dispatch function for state updates.
- * @property pathGraph - Optional path graph for path-based selections.
- */
 type NodeDisplayProps = Readonly<{
+    /** The node to render. */
     node: CategoryNode;
+    /** The current editor state. */
     state: EditMappingState;
+    /** Dispatch function for updating the editor state. */
     dispatch: EditMappingDispatch;
+    /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
 }>;
 
@@ -137,6 +133,9 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
     const isSelectionAllowed = isNodeSelectionAllowed(state, node, pathGraph);
 
     const pathNode = pathGraph?.nodes.get(node.id);
+    const isRoot = node.id === state.rootNodeId;
+
+    const { theme } = usePreferences().preferences;
 
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
@@ -177,19 +176,35 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
             className={cn('absolute w-0 h-0 select-none z-10', isDragging && 'z-20')}
         >
             <div
-                className={cn('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white',
-                    isHoverAllowed && isSelectionAllowed && 'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 active:bg-cyan-300',
-                    isDragging && 'pointer-events-none shadow-[3px_7px_10px_3px_rgba(0,0,0,0.5)]',
-                    isSelected && 'bg-cyan-200',
-                    pathNode && pathClasses[pathNode.pathCount],
+                className={cn(
+                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2',
+                    // Root node styling.
+                    isRoot && [
+                        'bg-success border-success-700',
+                    ],
+                    // Normal styling only applied if not root.
+                    !isRoot && [
+                        'border-default-600 bg-background',
+                        isHoverAllowed && isSelectionAllowed &&
+                            'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
+                        isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
+                        isSelected && 'bg-primary-200 border-primary-500',
+                        theme === 'dark' && !isSelected && 'bg-default-200 border-default-900',
+                        theme === 'dark' && isSelected && 'bg-primary-400 border-primary-600',
+                        theme === 'dark' && isHoverAllowed && isSelectionAllowed && 'active:bg-primary-500 active:border-default-900',
+                        pathNode && pathClasses[pathNode.pathCount],
+                    ],
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}
             />
 
             <div className='w-fit h-0'>
-                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]'>
-                    {node.metadata.label}
+                <span className={cn(
+                    'relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]',
+                    isRoot && 'text-success-600 font-bold',
+                )}>
+                    {isRoot && 'root:'} {node.metadata.label}
                 </span>
             </div>
         </div>
@@ -242,21 +257,16 @@ const pathClasses: Record<PathCount, string | undefined> = {
     [PathCount.Many]: 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-red-400',
 };
 
-/**
- * Props for the EdgeDisplay component.
- *
- * @interface EdgeDisplayProps
- * @property edge - The edge to render.
- * @property degree - The degree offset for bundled edges.
- * @property state - The current editor state.
- * @property dispatch - Dispatch function for state updates.
- * @property pathGraph - Optional path graph for path-based selections.
- */
 type EdgeDisplayProps = Readonly<{
+    /** The edge to render. */
     edge: CategoryEdge;
+    /** The degree offset for bundled edges. */
     degree: number;
+    /** The current editor state. */
     state: EditMappingState;
+    /** Dispatch function for updating the editor state. */
     dispatch: EditMappingDispatch;
+    /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
 }>;
 
@@ -291,10 +301,10 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
             ref={setEdgeRef.path}
             onClick={onClick}
             d={svg.path}
-            stroke={isSelected ? 'rgb(8, 145, 178)' : 'rgb(71, 85, 105)'}
+            stroke={isSelected ? 'hsl(var(--nextui-primary))' : 'hsl(var(--nextui-default-500))'}
             strokeWidth='4'
-            className={cn('text-slate-600',
-                isHoverAllowed && isSelectionAllowed && 'cursor-pointer pointer-events-auto path-shadow',
+            className={cn('text-zinc-600',
+                isHoverAllowed && isSelectionAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]',
                 pathEdge && isSelectionAllowed && 'path-shadow-green',
             )}
             markerEnd='url(#arrow)'
@@ -365,7 +375,7 @@ function SelectionBox() {
     return (
         <div
             ref={setSelectionBoxRef}
-            className='absolute border-2 border-slate-700 border-dotted pointer-events-none'
+            className='absolute border-2 border-zinc-700 border-dotted pointer-events-none'
             style={style}
         />
     );

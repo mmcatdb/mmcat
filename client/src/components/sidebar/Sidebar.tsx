@@ -43,7 +43,7 @@ export function Sidebar() {
     return (
         <div
             className={cn(
-                'border-r fixed h-screen z-10 transition-all duration-300 ease-in-out border-default-200',
+                'fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200',
                 isCollapsed ? 'w-16' : 'w-64',
             )}
         >
@@ -163,7 +163,7 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
                 'transition-all duration-300 ease-in-out',
                 isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
             )}>
-                <span className='inline-block transition-transform duration-300 group-hover:translate-y-[-1px]'>
+                <span className='inline-block transition-transform duration-300 group-hover:translate-y-[-1px] font-medium'>
                     MM-cat
                 </span>
             </h1>
@@ -258,12 +258,13 @@ function generalSidebarItems(): SidebarItem[] {
             iconName: 'datasources',
             match: [ '/datasources/:id' ],
         },
-        {
-            type: 'normal',
-            label: 'Adminer',
-            route: `${routes.adminer}?reload=true`,
-            iconName: 'codeBracketSquare',
-        },
+        // Work of other colleague, left here for future merge
+        // {
+        //     type: 'normal',
+        //     label: 'Adminer',
+        //     route: `${routes.adminer}?reload=true`,
+        //     iconName: 'codeBracketSquare',
+        // },
     ];
 }
 
@@ -312,12 +313,6 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
             route: routes.category.jobs.resolve({ categoryId }),
             iconName: 'playCircle',
             match: [ routes.category.jobs.resolve({ categoryId }) + '/:id' ],
-        },
-        {
-            type: 'normal',
-            label: 'Querying',
-            route: routes.category.querying.resolve({ categoryId }),
-            iconName: 'querying',
         },
     ];
 }

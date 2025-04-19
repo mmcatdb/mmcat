@@ -142,10 +142,14 @@ function select(state: EditCategoryState, action: SelectAction): EditCategorySta
     // Restrict selection during morphism creation to max 2 nodes and no edges
     if (state.leftPanelMode === LeftPanelMode.createMorphism) {
         const selectedNodeIds = Array.from(newSelection.nodeIds);
-        if (selectedNodeIds.length > 2 || newSelection.edgeIds.size > 0) 
-            return state; // Prevent invalid selections
+        // Limit to 2 nodes and no edges in createMorphism mode
+        if (selectedNodeIds.length > 2 || newSelection.edgeIds.size > 0) {
+            return {
+                ...state,
+                selection: FreeSelection.create(selectedNodeIds.slice(0, 2), []),
+            };
+        }
     }
-
     return {
         ...state,
         selection: newSelection,
@@ -185,11 +189,16 @@ export type LeftPanelAction = {
  */
 function setLeftPanel(state: EditCategoryState, { mode: leftPanelMode, graph }: LeftPanelAction): EditCategoryState {
     const updatedGraph = graph ?? state.graph;
+    let newSelection = state.selection;
 
+    // Clear selection when entering createMorphism mode
+    if (leftPanelMode === LeftPanelMode.createMorphism) 
+        newSelection = FreeSelection.create();
+    
     return {
         ...state,
         graph: updatedGraph,
-        selection: state.selection.updateFromGraph(updatedGraph),
+        selection: newSelection.updateFromGraph(updatedGraph),
         leftPanelMode,
     };
 }

@@ -7,7 +7,7 @@ function getBannerKey(page: string) {
 
 // Check if a banner is dismissed for the current page
 function isBannerDismissed(page: string) {
-    return get<boolean>(getBannerKey(page)) ?? false;
+    return get<boolean>(getBannerKey(page)) ?? true;
 }
 
 // Set banner dismissal for the current page

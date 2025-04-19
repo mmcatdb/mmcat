@@ -18,6 +18,7 @@ export type EditMappingState = {
     selectionType: SelectionType;
     selection: FreeSelection | SequenceSelection | PathSelection;
     editorPhase: EditorPhase;
+    rootNodeId: string | null;
 };
 
 /**
@@ -32,6 +33,7 @@ export function createInitialState({ category, mapping }: { category: Category, 
         selection: FreeSelection.create(),
         mapping,
         editorPhase: EditorPhase.SelectRoot,
+        rootNodeId: null,
     };
 }
 
@@ -47,7 +49,8 @@ export type EditMappingAction =
     | PathAction
     | TempSelectionTypeAction
     | { type: 'set-root', rootNodeId: string }
-    | { type: 'append-to-access-path', nodeId: string };
+    | { type: 'append-to-access-path', nodeId: string }
+    | { type: 'remove-from-access-path', subpathIndex: number };
 
 /**
  * Reduces the editor state based on the provided action.
@@ -80,6 +83,8 @@ export function editMappingReducer(state: EditMappingState, action: EditMappingA
     case 'append-to-access-path': {
         return appendToAccessPath(state, action.nodeId);
     }
+    case 'remove-from-access-path':
+        return removeFromAccessPath(state, action.subpathIndex);
     }
 }
 
@@ -209,6 +214,7 @@ function root(state: EditMappingState, rootNodeId: string): EditMappingState {
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         editorPhase: EditorPhase.BuildPath,
+        rootNodeId: rootNodeId,
     };
 }
 
@@ -250,5 +256,26 @@ function appendToAccessPath(state: EditMappingState, nodeId: string): EditMappin
         },
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
+    };
+}
+
+/**
+ * Removes a subpath from the access path in the mapping editor state.
+ */
+function removeFromAccessPath(state: EditMappingState, subpathIndex: number): EditMappingState {
+    const newSubpaths = [ ...state.mapping.accessPath.subpaths ];
+    newSubpaths.splice(subpathIndex, 1);
+    
+    const newAccessPath = new RootProperty(
+        state.mapping.accessPath.name,
+        newSubpaths,
+    );
+    
+    return {
+        ...state,
+        mapping: {
+            ...state.mapping,
+            accessPath: newAccessPath,
+        },
     };
 }

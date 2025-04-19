@@ -3,16 +3,12 @@ import { cn } from '../utils';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
-import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
+import { type EditCategoryDispatch, type EditCategoryState, LeftPanelMode } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import clsx from 'clsx';
+import { usePreferences } from '../PreferencesProvider';
 
-/**
- * Props for the EditCategoryGraphDisplay component.
- *
- * @interface EditCategoryGraphDisplayProps
- */
 type EditCategoryGraphDisplayProps = Readonly<{
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
@@ -23,9 +19,6 @@ type EditCategoryGraphDisplayProps = Readonly<{
 /**
  * Renders an interactive graph for editing a category.
  * Manages nodes, edges, and selection box rendering within a canvas.
- *
- * @param props - The component props.
- * @returns A React component rendering the category graph.
  */
 export function EditCategoryGraphDisplay({ state, dispatch, options, className }: EditCategoryGraphDisplayProps) {
     // Memoize dispatch to prevent unnecessary re-renders
@@ -57,16 +50,15 @@ export function EditCategoryGraphDisplay({ state, dispatch, options, className }
                     </defs>
 
                     {/* Render bundled edges with calculated degrees for curvature */}
-                    {state.graph.edges.bundledEdges.flatMap((bundle: CategoryEdge[]) =>
-                        bundle.map((edge: CategoryEdge, index: number) => (
-                            <EdgeDisplay
-                                key={edge.id}
-                                edge={edge}
-                                degree={getEdgeDegree(edge, index, bundle.length)}
-                                state={state}
-                                dispatch={dispatch}
-                            />
-                        )),
+                    {state.graph.edges.bundledEdges.flatMap(bundle => bundle.map((edge, index) => (
+                        <EdgeDisplay
+                            key={edge.id}
+                            edge={edge}
+                            degree={getEdgeDegree(edge, index, bundle.length)}
+                            state={state}
+                            dispatch={dispatch}
+                        />
+                    )),
                     )}
                 </svg>
 
@@ -83,20 +75,19 @@ type CanvasDisplayProps = Readonly<{
 
 /**
  * Renders the canvas for the graph, handling mouse interactions and styling.
- *
- * @param props - The component props.
- * @returns A React component rendering the graph canvas.
  */
 function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     const { setCanvasRef, onMouseDown, isDragging } = useCanvas();
+    const { theme } = usePreferences().preferences;
 
     return (
         <div
             ref={setCanvasRef}
             className={cn(
-                'relative bg-slate-400 overflow-hidden',
+                'relative bg-canvas-light overflow-hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-default',
                 className,
+                theme === 'dark' && 'bg-canvas-dark',
             )}
             onMouseDown={onMouseDown}
         >
@@ -124,12 +115,27 @@ type NodeDisplayProps = Readonly<{
 function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragging } = useNode(node);
     const isSelected = state.selection.nodeIds.has(node.id);
+    const { theme } = usePreferences().preferences;
 
-    // Handle node selection with support for toggle (Ctrl key)
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
-        const isSpecialKey = event.ctrlKey;
-        dispatch({ type: 'select', nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' });
+        if (state.leftPanelMode === LeftPanelMode.createMorphism) {
+            // Toggle selection without Ctrl in createMorphism mode
+            dispatch({
+                type: 'select',
+                nodeId: node.id,
+                operation: 'toggle',
+            });
+        }
+        else {
+            // Use Ctrl for toggle in other modes
+            const isSpecialKey = event.ctrlKey;
+            dispatch({
+                type: 'select',
+                nodeId: node.id,
+                operation: isSpecialKey ? 'toggle' : 'set',
+            });
+        }
     }
 
     return (
@@ -140,11 +146,14 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
         >
             <div
                 className={cn(
-                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-slate-700 bg-white',
+                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
                     isHoverAllowed &&
-                        'cursor-pointer hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] hover:shadow-cyan-300 active:bg-cyan-300',
-                    isDragging && 'pointer-events-none shadow-[3px_7px_10px_3px_rgba(0,0,0,0.5)]',
-                    isSelected && 'bg-cyan-200',
+                        'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
+                    isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
+                    isSelected && 'bg-primary-200 border-primary-500',
+                    theme === 'dark' && !isSelected && 'bg-default-50 border-default-900',
+                    theme === 'dark' && isSelected && 'bg-primary-400 border-primary-600',
+                    theme === 'dark' && isHoverAllowed && 'active:bg-primary-500 active:border-default-900',
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}
@@ -152,7 +161,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
 
             {/* Node label with truncation for long text */}
             <div className='w-fit h-0'>
-                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]'>
+                <span className='relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px] text-default-700'>
                     {node.metadata.label}
                 </span>
             </div>
@@ -160,27 +169,19 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     );
 }
 
-/**
- * Props for rendering an interactive edge in the graph editor.
- *
- * @interface EdgeDisplayProps
- * @property edge - The edge data, including schema and metadata.
- * @property degree - The curvature factor for bundled edges to avoid overlap.
- * @property state - The current state of the category graph for selection and rendering.
- * @property dispatch - The dispatch function to handle edge interactions like selection.
- */
 type EdgeDisplayProps = Readonly<{
+    /** The edge data, including schema and metadata. */
     edge: CategoryEdge;
+    /** The curvature factor for bundled edges to avoid overlap. */
     degree: number;
+    /** The current state of the category graph for selection and rendering. */
     state: EditCategoryState;
+    /** The dispatch function to handle edge interactions like selection. */
     dispatch: EditCategoryDispatch;
 }>;
 
 /**
  * Renders a single edge in the graph with interactive selection and curvature.
- *
- * @param props - The component props.
- * @returns A React component rendering a graph edge.
  */
 function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     const { setEdgeRef, svg, isHoverAllowed } = useEdge(edge, degree, state.graph);
@@ -190,7 +191,11 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
     function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();
         const isSpecialKey = event.ctrlKey;
-        dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
+        dispatch({
+            type: 'select',
+            edgeId: edge.id,
+            operation: isSpecialKey ? 'toggle' : 'set',
+        });
     }
 
     return (<>
@@ -198,9 +203,9 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
             ref={setEdgeRef.path}
             onClick={onClick}
             d={svg.path}
-            stroke={isSelected ? 'rgb(8, 145, 178)' : 'rgb(71, 85, 105)'}
+            stroke={isSelected ? 'hsl(var(--nextui-primary))' : 'hsl(var(--nextui-default-500))'}
             strokeWidth='4'
-            className={cn(isHoverAllowed && 'cursor-pointer pointer-events-auto path-shadow')}
+            className={cn(isHoverAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]')}
             markerEnd='url(#arrow)'
         />
 
@@ -223,7 +228,7 @@ function SelectionBox() {
     return (
         <div
             ref={setSelectionBoxRef}
-            className='absolute border-2 border-slate-700 border-dotted pointer-events-none'
+            className='absolute border-2 border-primary-500 border-dashed pointer-events-none bg-primary-100/20'
             style={style}
         />
     );

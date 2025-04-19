@@ -8,11 +8,11 @@ import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { DatasourceSpecificFields } from '@/components/datasources/DatasourceModal';
-import { cn } from '@/components/utils';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { InfoBanner } from '@/components/common';
 
 export function DatasourceDetailPage() {
     return (<>
@@ -296,31 +296,31 @@ type DatasourceDetailInfoBannerProps = {
 
 export function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
     return (
-        <div className={cn('relative', className)}>
-            <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
-                <button 
-                    onClick={dismissBanner} 
-                    className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-                >
-                    <HiXMark className='w-5 h-5' />
-                </button>
+        // <div className={cn('relative', className)}>
+        //     <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
+        <InfoBanner className={className} dismissBanner={dismissBanner}>
+            <button 
+                onClick={dismissBanner} 
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
 
-                <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
-                <ul className='mt-2 text-sm space-y-2'>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Edit:</strong> You can update connection details, but the type cannot be changed.
-                    </li>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Password:</strong> If edit password field left empty, the existing password remains unchanged.
-                    </li>
-                    <li className='flex items-center gap-2'>
-                        <GoDotFill className='text-primary-500' />
-                        <strong>Delete:</strong> A Data Source can be removed if it’s not in use.
-                    </li>
-                </ul>
-            </div>
-        </div>
+            <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
+            <ul className='mt-2 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Edit:</strong> You can update connection details, but the type cannot be changed.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Password:</strong> If edit password field left empty, the existing password remains unchanged.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Delete:</strong> A Data Source can be removed if it’s not in use.
+                </li>
+            </ul>
+        </InfoBanner>
     );
 }

@@ -40,7 +40,9 @@ export const routes = {
     categories: '/schema-categories',
     about: '/about',
     datasources: '/datasources',
-    adminer: '/adminer',
+    // Work of other colleague, left here for future merge
+    // adminer: '/adminer',
+    
     // Nested and dynamic routes
     category: {
         index: categoryIndex,

@@ -6,9 +6,8 @@ import { ErrorPage } from '@/pages/errorPages';
 import { CategoryPage, type CategoryLoaderData } from '@/pages/CategoryPage';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
 import { type DatasourceLoaderData, DatasourceDetailPage, DatasourceInCategoryPage } from '@/pages/DatasourcePage';
-import { AdminerPage } from '@/pages/AdminerPage';
+// import { AdminerPage } from '@/pages/AdminerPage';
 import { CategoriesPage, SchemaCategoriesPage } from '@/pages/CategoriesPage';
-import { QueryingPage } from '@/pages/category/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategoryPage';
 import { ActionsPage } from '@/pages/category/ActionsPage';
@@ -53,12 +52,13 @@ export const router = createBrowserRouter([
                     },
                 ],
             },
-            {
-                path: routes.adminer,
-                loader: AdminerPage.loader,
-                Component: AdminerPage,
-                handle: { breadcrumb: 'Adminer' },
-            },
+            // Work of other colleague, left here for future merge
+            // {
+            //     path: routes.adminer,
+            //     loader: AdminerPage.loader,
+            //     Component: AdminerPage,
+            //     handle: { breadcrumb: 'Adminer' },
+            // },
             {
                 path: routes.categories,
                 Component: SchemaCategoriesPage,
@@ -89,12 +89,6 @@ export const router = createBrowserRouter([
                                 loader: CategoryEditorPage.loader,
                                 Component: CategoryEditorPage,
                                 handle: { breadcrumb: 'Editor' },
-                            },
-                            {
-                                id: routes.category.querying.id,
-                                path: routes.category.querying.path,
-                                Component: QueryingPage,
-                                handle: { breadcrumb: 'Querying' },
                             },
                             {
                                 id: routes.category.datasources.id,

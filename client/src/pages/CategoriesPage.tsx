@@ -1,9 +1,9 @@
-import { useState, useCallback, type ReactNode } from 'react';
+import { useState, useCallback } from 'react';
 import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTable';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, cn, Input, Tooltip } from '@nextui-org/react';
+import { Button, Input, Tooltip } from '@nextui-org/react';
 import { AddSchemaModal } from './Home';
 import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
@@ -13,7 +13,7 @@ import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
-import { Card, CardBody } from '@nextui-org/react';
+import { InfoBanner } from '@/components/common';
 
 /**
  * List of example schema names available for creation.
@@ -194,33 +194,6 @@ async function categoriesLoader(): Promise<CategoriesLoaderData> {
         categories: response.data.map(SchemaCategoryInfo.fromServer),
     };
 }
-
-type InfoBannerProps = {
-    children: ReactNode;
-    className?: string;
-    dismissBanner: () => void;
-};
-
-export function InfoBanner({ children, className, dismissBanner }: InfoBannerProps) {
-    return (
-        <Card 
-            shadow='sm' 
-            radius='lg' 
-            className={cn('relative bg-content1', className)}
-        >
-            <CardBody className='text-sm text-foreground px-4 py-3 relative'>
-                <button
-                    onClick={dismissBanner}
-                    className='absolute top-2 right-2 text-default-500 hover:text-foreground transition'
-                >
-                    <HiXMark className='w-5 h-5' />
-                </button>
-                {children}
-            </CardBody>
-        </Card>
-    );
-}
-
 
 type SchemaCategoryInfoBannerProps = {
     className?: string;

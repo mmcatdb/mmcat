@@ -66,7 +66,7 @@ export function CategoryEditorPage() {
     return (
         <div className='flex flex-col h-[calc(100vh-40px)]'>
             {/* Navbar */}
-            <div className='h-8 flex items-center justify-between px-4 shadow-md bg-default-100 border-b border-default-200'>
+            <div className='h-8 flex items-center justify-between px-4 bg-default-100 border-b border-default-200'>
                 <div className='flex items-center gap-3'>
                     {/* Left Sidebar Toggle */}
                     <TbLayoutSidebarFilled
@@ -154,7 +154,7 @@ async function categoryEditorLoader({ params: { categoryId } }: { params: Params
     };
 }
 
-function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
+export function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
     const [ isFetching, setIsFetching ] = useState(false);
     const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
 
@@ -240,7 +240,7 @@ function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategory
 /*
  * Function to detect unsaved changes: node movement, schema updates
  */
-function detectUnsavedChanges(state: EditCategoryState) {
+export function detectUnsavedChanges(state: EditCategoryState) {
     const evocat = state.evocat;
 
     const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();

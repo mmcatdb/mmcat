@@ -33,16 +33,12 @@ export function MappingsTable({ mappings }: MappingsTableProps) {
     );
 }
 
-/**
- * Props for the MappingsTableContent component.
- *
- * @property mappings - List of mappings to display.
- * @property sortDescriptor - Current sorting configuration (optional).
- * @property onSortChange - Callback to update sorting (optional).
- */
 type MappingsTableContentProps = {
+    /** List of mappings to display. */
     mappings: Mapping[];
+    /** Current sorting configuration (optional). */
     sortDescriptor?: SortDescriptor;
+    /** Callback to update sorting (optional). */
     onSortChange?: (sortDescriptor: SortDescriptor) => void;
 };
 

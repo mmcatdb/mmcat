@@ -9,61 +9,42 @@ import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
 
-/**
- * Props for the DatasourcesTable component.
- *
- * @interface DatasourcesTableProps
- * @property datasources - List of datasources to display.
- * @property deleteDatasource - Callback to handle datasource deletion.
- * @property datasourcesWithMappings - IDs of datasources with active mappings (optional).
- */
 type DatasourcesTableProps = {
+    /** List of datasources to display. */
     datasources: Datasource[];
+    /** Callback to handle datasource deletion. */
     deleteDatasource: (id: string) => void;
+    /** IDs of datasources with active mappings (if some exist). */
     datasourcesWithMappings?: string[];
 };
 
-/**
- * Props for the DatasourceTable component.
- *
- * @interface DatasourceTableProps
- * @property datasources - Sorted list of datasources.
- * @property deleteDatasource - Callback to handle datasource deletion.
- * @property sortDescriptor - Current sorting configuration.
- * @property onSortChange - Callback to update sorting.
- * @property datasourcesWithMappings - IDs of datasources with active mappings (optional).
- */
 type DatasourceTableProps = {
+    /** Sorted list of datasources. */
     datasources: Datasource[];
+    /** Callback to handle datasource deletion. */
     deleteDatasource: (id: string) => void;
+    /** Current sorting configuration. */
     sortDescriptor: SortDescriptor;
+    /** Callback to update sorting. */
     onSortChange: (sortDescriptor: SortDescriptor) => void;
+    /** IDs of datasources with active mappings (if some exist). */
     datasourcesWithMappings?: string[];
 };
 
-/**
- * Props for the ConfirmationModalWrapper component.
- *
- * @interface ConfirmationModalWrapperProps
- * @property isOpen - Whether the modal is visible.
- * @property datasource - The datasource to delete, if selected.
- * @property onConfirm - Callback to confirm deletion.
- * @property onClose - Callback to close the modal.
- * @property isDeleting - Whether deletion is in progress.
- */
 type ConfirmationModalWrapperProps = {
     isOpen: boolean;
+    /** The datasource to delete, if selected. */
     datasource?: Datasource;
+    /** Callback to confirm deletion. */
     onConfirm: () => void;
+    /** Callback to close the modal. */
     onClose: () => void;
+    /** Whether deletion is in progress. */
     isDeleting: boolean;
 };
 
 /**
  * Renders a sortable table of datasources with delete functionality.
- *
- * @param props - The component props.
- * @returns A React component rendering the datasources table.
  */
 export function DatasourcesTable({ datasources, deleteDatasource, datasourcesWithMappings = [] }: DatasourcesTableProps) {
     // Manage sorting state for the table
@@ -199,9 +180,6 @@ function ConfirmationModalWrapper({ isOpen, datasource, onConfirm, onClose, isDe
 
 /**
  * Renders the table of datasources with sorting and deletion capabilities.
- *
- * @param props - The component props.
- * @returns A React component rendering the datasource table.
  */
 function DatasourceTable({
     datasources,

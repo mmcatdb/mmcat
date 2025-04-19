@@ -20,7 +20,7 @@ export function RootLayout() {
     const location = useLocation(); // Get current route
 
     // A workaround to detect if we are on the editor page and adjust the layout accordingly.
-    const isEditorPage = location.pathname.includes('/editor');
+    const isEditorPage = location.pathname.includes('/editor') || location.pathname.includes('/mappings');
 
     return (<>
         <ScrollToTop />

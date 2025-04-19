@@ -12,7 +12,7 @@ import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner } from './CategoriesPage';
+import { InfoBanner } from '@/components/common';
 
 export function DatasourcesPage() {
     const data = useLoaderData() as DatasourcesLoaderData;

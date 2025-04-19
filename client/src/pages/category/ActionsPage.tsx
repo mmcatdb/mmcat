@@ -14,7 +14,7 @@ import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
-import { InfoBanner } from '../CategoriesPage';
+import { InfoBanner } from '@/components/common';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;

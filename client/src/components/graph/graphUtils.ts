@@ -236,7 +236,7 @@ export function computeEdgeSvg(from: Node, to: Node, label: string, degree: numb
     const end = positionToOffset(to, coordinates);
     // Some heuristic. Not ideal tho.
     // TODO Replace by something like https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/measureText.
-    const labelLength = label.length * 7 + 12;
+    const labelLength = label.length * 7 + 16;
 
     return degree === 0
         ? computeEdgeStraightPath(start, end, labelLength)
