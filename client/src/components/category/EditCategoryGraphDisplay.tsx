@@ -5,7 +5,8 @@ import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
-import { getEdgeDegree } from '../graph/graphUtils';
+import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
+import clsx from 'clsx';
 
 /**
  * Props for the EditCategoryGraphDisplay component.
@@ -39,23 +40,19 @@ export function EditCategoryGraphDisplay({ state, dispatch, options, className }
                 ))}
 
                 {/* SVG layer for edges to ensure proper rendering */}
-                <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='absolute w-full h-full pointer-events-none'>
+                <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='w-full h-full pointer-events-none select-none'>
                     <defs>
                         <marker
                             id='arrow'
                             viewBox='0 0 12 12'
-                            refX='8'
-                            refY='5'
-                            markerWidth='6'
-                            markerHeight='6'
+                            refX='0'
+                            refY='6'
+                            markerWidth={EDGE_ARROW_LENGTH}
+                            markerHeight={EDGE_ARROW_LENGTH}
                             orient='auto-start-reverse'
+                            markerUnits='userSpaceOnUse'
                         >
-                            <path
-                                d='M 0 1 L 10 5 L 0 9 z'
-                                stroke='context-stroke'
-                                fill='context-stroke'
-                                pointerEvents='auto'
-                            />
+                            <path d='M0 1 11 6 0 11z' stroke='context-stroke' fill='context-stroke' pointerEvents='auto' />
                         </marker>
                     </defs>
 
@@ -186,7 +183,7 @@ type EdgeDisplayProps = Readonly<{
  * @returns A React component rendering a graph edge.
  */
 function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
-    const { setEdgeRef, path, isHoverAllowed } = useEdge(edge, degree, state.graph);
+    const { setEdgeRef, svg, isHoverAllowed } = useEdge(edge, degree, state.graph);
     const isSelected = state.selection.edgeIds.has(edge.id);
 
     // Handle edge selection with support for toggle (Ctrl key)
@@ -196,17 +193,27 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
         dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
     }
 
-    return (
+    return (<>
         <path
-            ref={setEdgeRef}
+            ref={setEdgeRef.path}
             onClick={onClick}
-            d={path}
+            d={svg.path}
             stroke={isSelected ? 'rgb(8, 145, 178)' : 'rgb(71, 85, 105)'}
             strokeWidth='4'
             className={cn(isHoverAllowed && 'cursor-pointer pointer-events-auto path-shadow')}
             markerEnd='url(#arrow)'
         />
-    );
+
+        <text
+            ref={setEdgeRef.label}
+            transform={svg.label?.transform}
+            className={clsx('font-medium', !svg.label && 'hidden')}
+            fill='currentColor'
+            textAnchor='middle'
+        >
+            {edge.label}
+        </text>
+    </>);
 }
 
 /** Renders a selection box for multi-select interactions in the graph. */

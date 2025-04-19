@@ -47,7 +47,7 @@ export function categoryToGraph(category: Category): CategoryGraph {
 
 /**
  * Maps the object components of a category into graph nodes.
- * Schema objet = Objex 
+ * Schema objet = Objex
  */
 function mapCategoryToNodes(category: Category): CategoryNode[] {
     return category.getObjexes().map(objex => {
@@ -71,6 +71,9 @@ function mapCategoryToEdges(category: Category): CategoryEdge[] {
             to: schema.codKey.toString(),
             schema,
             metadata,
+            get label() {
+                return this.schema.signature + (this.metadata.label ? ` - ${this.metadata.label}` : '');
+            },
         } satisfies CategoryEdge;
     });
 }
