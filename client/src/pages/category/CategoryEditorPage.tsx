@@ -4,19 +4,16 @@ import { Category, isPositionEqual } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { type Params, useLoaderData } from 'react-router-dom';
 import { EditCategoryGraphDisplay } from '@/components/category/EditCategoryGraphDisplay';
-import { FaSpinner, FaTrash } from 'react-icons/fa6';
+import { FaTrash } from 'react-icons/fa6';
 import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/category/editCategoryReducer';
 import { Evocat } from '@/types/evocat/Evocat';
 import { LeftPanelCategoryEditor } from '@/components/category/LeftPanelCategoryEditor';
 import { RightPanelCategoryEditor } from '@/components/category/RightPanelCategoryEditor';
-import { onSuccess } from '@/types/api/result';
 import { cn } from '@/components/utils';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
-import { FaSave } from 'react-icons/fa';
-import { toast } from 'react-toastify';
-// import { SelectionCard } from '@/components/category/SelectionCard';
 import { useDeleteHandlers } from '@/components/category/useDeleteHandlers';
 import { categoryToGraph } from '@/components/category/categoryGraph';
+import { SaveProvider, SaveButton } from '@/components/category/SaveContext';
 
 type EditorSidebarState = {
     left: boolean;
@@ -64,69 +61,68 @@ export function CategoryEditorPage() {
     }, []);
 
     return (
-        <div className='flex flex-col h-[calc(100vh-40px)]'>
-            {/* Navbar */}
-            <div className='h-8 flex items-center justify-between px-4 bg-default-100 border-b border-default-200'>
-                <div className='flex items-center gap-3'>
-                    {/* Left Sidebar Toggle */}
-                    <TbLayoutSidebarFilled
-                        className='cursor-pointer text-default-600 hover:text-default-700'
-                        onClick={() => toggleSidebar('left')}
-                        title='Toggle Main Editor Sidebar'
-                        size={18}
-                    />
+        <SaveProvider categoryState={state}>
+            <div className='flex flex-col h-[calc(100vh-40px)]'>
+                {/* Navbar */}
+                <div className='h-8 flex items-center justify-between px-4 bg-default-100 border-b border-default-200'>
+                    <div className='flex items-center gap-3'>
+                        {/* Left Sidebar Toggle */}
+                        <TbLayoutSidebarFilled
+                            className='cursor-pointer text-default-600 hover:text-default-700'
+                            onClick={() => toggleSidebar('left')}
+                            title='Toggle Main Editor Sidebar'
+                            size={18}
+                        />
+                    </div>
+
+                    {/* Save and Right Sidebar Toggle */}
+                    <div className='flex items-center gap-2'>
+                        {/* Delete Button */}
+                        <FaTrash
+                            className={`text-danger-400 ${state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
+                                ? 'opacity-50 cursor-auto'
+                                : 'cursor-pointer hover:text-danger-500'}`}
+                            onClick={() => {
+                                if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
+                                    deleteSelectedElements(state, dispatch);
+                            }}
+                            title='Delete selected elements (Delete)'
+                            size={16}
+                        />
+
+                        {/* Divider */}
+                        <div className='w-px bg-default-400 h-5 mx-2'></div>
+                        <SaveButton />
+                        <div className='w-px bg-default-400 h-5 mx-2'></div>
+
+                        {/* Right Sidebar Toggle */}
+                        <TbLayoutSidebarRightFilled
+                            className='cursor-pointer text-default-600 hover:text-default-700'
+                            onClick={() => toggleSidebar('right')}
+                            title='Toggle Edit Sidebar'
+                            size={18}
+                        />
+                    </div>
                 </div>
 
-                {/* Save and Right Sidebar Toggle */}
-                <div className='flex items-center gap-2'>
-                    {/* Delete Button */}
-                    <FaTrash
-                        className={`text-danger-400 ${state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
-                            ? 'opacity-50 cursor-auto'
-                            : 'cursor-pointer hover:text-danger-500'}`}
-                        onClick={() => {
-                            if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
-                                deleteSelectedElements(state, dispatch);
-                        }}
-                        title='Delete selected elements (Delete)'
-                        size={16}
-                    />
+                <div className='relative flex flex-grow'>
+                    {/* Left Sidebar */}
+                    <div className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
+                        {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
+                    </div>
 
-                    {/* Divider */}
-                    <div className='w-px bg-default-400 h-5 mx-2'></div>
+                    {/* Main Canvas */}
+                    <div className='flex-grow relative'>
+                        <EditCategoryGraphDisplay state={state} dispatch={dispatch} className={cn('w-full h-full', sidebarState.left)} />
+                    </div>
 
-                    <SaveButton state={state} />
-
-                    {/* Divider */}
-                    <div className='w-px bg-default-400 h-5 mx-2'></div>
-
-                    {/* Right Sidebar Toggle */}
-                    <TbLayoutSidebarRightFilled
-                        className='cursor-pointer text-default-600 hover:text-default-700'
-                        onClick={() => toggleSidebar('right')}
-                        title='Toggle Edit Sidebar'
-                        size={18}
-                    />
+                    {/* Right Sidebar */}
+                    <div className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
+                        {sidebarState.right && <RightPanelCategoryEditor state={state} dispatch={dispatch} />}
+                    </div>
                 </div>
             </div>
-
-            <div className='relative flex flex-grow'>
-                {/* Left Sidebar */}
-                <div className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
-                    {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
-                </div>
-
-                {/* Main Canvas */}
-                <div className='flex-grow relative'>
-                    <EditCategoryGraphDisplay state={state} dispatch={dispatch} className={cn('w-full h-full', sidebarState.left)} />
-                </div>
-
-                {/* Right Sidebar */}
-                <div className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
-                    {sidebarState.right && <RightPanelCategoryEditor state={state} dispatch={dispatch} />}
-                </div>
-            </div>
-        </div>
+        </SaveProvider>
     );
 }
 
@@ -154,69 +150,6 @@ async function categoryEditorLoader({ params: { categoryId } }: { params: Params
     };
 }
 
-export function SaveButton({ state }: Readonly<{ state: EditCategoryState }>) {
-    const [ isFetching, setIsFetching ] = useState(false);
-    const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
-
-    useEffect(() => {
-        const checkForChanges = () => {
-            setHasUnsavedChanges(detectUnsavedChanges(state));
-        };
-
-        // Check changes initially and every time the component updates
-        checkForChanges();
-
-        // Set an interval to check periodically (every 1s)
-        const interval = setInterval(checkForChanges, 1000);
-
-        return () => clearInterval(interval);
-    }, [ state ]);
-
-    async function save() {
-        if (isFetching)
-            return;
-
-        setIsFetching(true);
-
-        try {
-            await state.evocat.update(async edit => {
-                const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
-                if (!response.status)
-                    throw new Error(typeof response.error === 'string' ? response.error : 'Failed to save changes');
-                return onSuccess(response, fromServer => Category.fromServer(fromServer));
-            });
-            setHasUnsavedChanges(false);
-        }
-        catch (err) {
-            toast.error('Failed to save changes', { autoClose: 5000 });
-            console.error('Save Error: Failed to save changes');
-        }
-        finally {
-            setIsFetching(false);
-        }
-    }
-
-    return (
-        <div
-            id='save-button' // id for triggering via Ctrl+S
-            className='flex items-center gap-1 text-default-600 hover:text-default-800 cursor-pointer relative'
-            onClick={() => {
-                void save(); 
-            }}
-            title='Save Changes (Ctrl+S)'
-        >
-            {isFetching ? (
-                <FaSpinner className='animate-spin' size={18} />
-            ) : (
-                <FaSave size={18} />
-            )}
-            {hasUnsavedChanges && !isFetching && (
-                <span className='text-warning-600 text-sm font-bold absolute -top-2 right-0'>*</span>
-            )}
-        </div>
-    );
-}
-
 function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategoryDispatch) {
     // Delete all selected morphisms
     for (const edgeId of state.selection.edgeIds) {
@@ -242,16 +175,12 @@ function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategory
  */
 export function detectUnsavedChanges(state: EditCategoryState) {
     const evocat = state.evocat;
-
     const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();
-
-    const hasMovedNodes = evocat.category.getObjexes().some(objex => {
-        return !isPositionEqual(objex.metadata.position, objex.originalMetadata.position);
-    });
-
-    const hasRenamedNodes = evocat.category.getObjexes().some(objex => {
-        return objex.metadata.label !== objex.originalMetadata.label;
-    });
-
+    const hasMovedNodes = evocat.category.getObjexes().some(objex =>
+        !isPositionEqual(objex.metadata.position, objex.originalMetadata.position),
+    );
+    const hasRenamedNodes = evocat.category.getObjexes().some(
+        objex => objex.metadata.label !== objex.originalMetadata.label,
+    );
     return hasSchemaChanges || hasMovedNodes || hasRenamedNodes;
 }

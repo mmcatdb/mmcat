@@ -6,12 +6,8 @@ import { toPosition } from '@/types/utils/common';
 import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers';
 import { categoryToGraph } from './categoryGraph';
-import { detectUnsavedChanges } from '@/pages/category/CategoryEditorPage';
+import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
-import { api } from '@/api';
-import { Category } from '@/types/schema';
-import { onSuccess } from '@/types/api/result';
-import { toast } from 'react-toastify';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
 
 type StateDispatchProps = Readonly<{
@@ -76,43 +72,8 @@ const components: Record<LeftPanelMode, (props: StateDispatchProps) => JSX.Eleme
  * Displays the default mode of the left panel, offering options to create objects or morphisms.
  */
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
-    const [ hasUnsavedChanges, setHasUnsavedChanges ] = useState(false);
-    const [ isSaving, setIsSaving ] = useState(false);
+    const { hasUnsavedChanges, isSaving, handleSave } = useSave();
     const category = state.evocat.category;
-    
-    useEffect(() => {
-        const checkForChanges = () => {
-            setHasUnsavedChanges(detectUnsavedChanges(state));
-        };
-        checkForChanges();
-        const interval = setInterval(checkForChanges, 1000);
-        return () => clearInterval(interval);
-    }, [ state ]);
-
-    async function handleSave() {
-        if (isSaving) 
-            return;
-        
-        setIsSaving(true);
-        try {
-            await state.evocat.update(async edit => {
-                const response = await api.schemas.updateCategory({ id: state.evocat.category.id }, edit);
-                if (!response.status) 
-                    throw new Error(typeof response.error === 'string' ? response.error : 'Failed to save changes');
-                
-                return onSuccess(response, fromServer => Category.fromServer(fromServer));
-            });
-            toast.success('Changes saved successfully');
-            setHasUnsavedChanges(false);
-        }
-        catch (err) {
-            toast.error('Failed to save changes', { autoClose: 5000 });
-            console.error('Save Error:', err);
-        }
-        finally {
-            setIsSaving(false);
-        }
-    }
 
     return (
         <>
@@ -148,7 +109,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
                             color='warning'
                             size='sm'
                             fullWidth
-                            onClick={handleSave}
+                            onClick={() => handleSave()}
                             isLoading={isSaving}
                             startContent={isSaving ? null : <FaSave className='h-3.5 w-3.5' />}
                             className='shadow-sm hover:shadow-md transition-shadow'
@@ -322,10 +283,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             <p className='pb-2'>
                     Domain object:{' '}
                 <span
-                    className={cn(
-                        'font-semibold',
-                        !domainNode && 'font-bold text-danger-500',
-                    )}
+                    className={cn('font-semibold', !domainNode && 'font-bold text-danger-500')}
                 >
                     {domainNode?.metadata.label ?? 'Select first node'}
                 </span>
