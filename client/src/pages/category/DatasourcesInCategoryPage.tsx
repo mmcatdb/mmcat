@@ -8,12 +8,13 @@ import { EmptyState } from '@/components/TableCommon';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
 import { RiMapPin2Line } from 'react-icons/ri';
-import { Tooltip } from '@nextui-org/react';
+import { Button, Tooltip } from '@nextui-org/react';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { InfoBanner } from '@/components/common';
+import { AddIcon } from '@/components/icons/PlusIcon';
 
 export function DatasourcesInCategoryPage() {
     const data = useLoaderData() as DatasourcesInCategoryLoaderData;
@@ -96,6 +97,14 @@ export function DatasourcesInCategoryPage() {
 
             <div className='flex items-center justify-between mt-10'>
                 <h1 className='text-xl font-bold'>Other Datasources</h1>
+                <Button
+                    onPress={() => setIsModalOpen(true)}
+                    color='primary'
+                    variant='flat'
+                    startContent={<AddIcon />}
+                >
+                    Add Datasource
+                </Button>
             </div>
 
             <div className='mt-5'>
