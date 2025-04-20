@@ -7,7 +7,6 @@ import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.DataResponse;
-import cz.matfyz.core.adminer.DocumentResponse;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.Reference;

@@ -7,11 +7,8 @@ import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.DataResponse;
-import cz.matfyz.core.adminer.DocumentResponse;
 import cz.matfyz.core.adminer.GraphResponse;
 import cz.matfyz.core.adminer.GraphResponse.GraphElement;
-import cz.matfyz.core.adminer.GraphResponse.GraphNode;
-import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -27,7 +24,6 @@ import cz.matfyz.inference.adminer.AdminerAlgorithms;
 import cz.matfyz.inference.adminer.Neo4jAlgorithms;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -39,7 +35,6 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
-import org.neo4j.driver.types.TypeSystem;
 
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
