@@ -83,7 +83,7 @@ export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
     return (
         <div>
             {fetchedData && fetchedData.data.length > 0 ? (
-                <div className='max-w-[1280px] text-center h-[400px]'>
+                <div className='max-w-[1280px] text-left h-[400px]'>
                     <ArcThemeProvider theme={'dark'}>
                         <StyledVisContainer isFullscreen={false}>
                             <GraphVisualizer

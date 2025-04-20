@@ -46,5 +46,5 @@ export const PaneContainer = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding-right: 16px;
+  padding: 16px;
 `;

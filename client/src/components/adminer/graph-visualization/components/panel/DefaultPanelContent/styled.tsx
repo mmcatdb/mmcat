@@ -25,7 +25,6 @@ export const NonClickableRelTypeChip = styled(StyledRelationshipChip)`
 `;
 
 export const PaneWrapper = styled.div`
-  padding: 0 14px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -33,7 +32,6 @@ export const PaneWrapper = styled.div`
 
 export const PaneHeader = styled.div`
   font-size: 16px;
-  margin-top: 10px;
   flex: 0 0 auto;
   overflow: auto;
   max-height: 50%;
