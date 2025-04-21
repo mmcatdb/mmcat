@@ -70,6 +70,7 @@ export function Home() {
                 onCreateSchema={(name, isExample) => {
                     void handleCreateSchema(name, isExample); 
                 }}
+                fetchCategories={fetchCategories}
             />
             <AddSchemaModal
                 isOpen={isModalOpen}
@@ -186,6 +187,7 @@ function SchemaCategoriesSection({
     isCreatingSchema,
     isCreatingExampleSchema,
     onCreateSchema,
+    fetchCategories,
 }: {
     categories: SchemaCategoryInfo[] | undefined;
     showAllCategories: boolean;
@@ -194,7 +196,20 @@ function SchemaCategoriesSection({
     isCreatingSchema: boolean;
     isCreatingExampleSchema: boolean;
     onCreateSchema: (name: string, isExample?: boolean) => void;
+    fetchCategories: () => Promise<void>;
 }) {
+    const [ isReloading, setIsReloading ] = useState(false);
+
+    const handleReload = useCallback(async () => {
+        setIsReloading(true);
+        try {
+            await fetchCategories();
+        }
+        finally {
+            setIsReloading(false);
+        }
+    }, []);
+
     return (
         <div className='space-y-8'>
             <div className='flex flex-col md:flex-row md:items-end justify-between gap-4'>
@@ -231,8 +246,16 @@ function SchemaCategoriesSection({
             </div>
 
             {!categories ? (
-                <div className='flex justify-center py-12'>
-                    <p className='text-default-400'>Loading schemas...</p>
+                <div className='flex flex-col items-center justify-center py-12 gap-4'>
+                    <p className='text-default-400'>Failed to load schemas</p>
+                    <Button 
+                        onPress={handleReload}
+                        isLoading={isReloading}
+                        color='primary'
+                        variant='flat'
+                    >
+                        Reload Schemas
+                    </Button>
                 </div>
             ) : categories.length === 0 ? (
                 <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
