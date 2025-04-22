@@ -27,6 +27,13 @@ type DocumentComponentProps = Readonly<{
 export function DocumentComponent({ valueKey, value, kindReferences, kind, datasourceId, datasources }: DocumentComponentProps) {
     const [ isOpen, setIsOpen ] = useState(true);
 
+    try {
+        value = JSON.parse(value as string);
+    }
+    catch {
+        // The value cannot be parsed to JSON
+    }
+
     if (!isOpen) {
         return (
             <Button
