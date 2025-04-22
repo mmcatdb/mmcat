@@ -88,7 +88,7 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
         setTotalPages(1);
         setCurrentPage(1);
         setOffset(0);
-    }, [ state.active, state.datasourceId, state.kindName, state.view ]);
+    }, [ state.datasourceId, state.kindName ]);
 
     useEffect(() => {
         const count = fetchedData?.metadata.itemCount;

@@ -64,10 +64,13 @@ export function filterQueryReducer(state: AdminerFilterQueryState, action: Admin
 function reducerInput(state: AdminerFilterQueryState, action: InputAction): AdminerFilterQueryState {
     const { field, value } = action;
 
+    console.log('Action', action);
+
     switch (field) {
     case 'limit':
-    case 'offset':
         return { ...state, form: { ...state.form, [field]: action.value } };
+    case 'offset':
+        return { ...state, active: { ...state.form, [field]: action.value } };
     case 'propertyName':
     case 'propertyValue':
     case 'operator': {
