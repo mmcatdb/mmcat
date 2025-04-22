@@ -87,9 +87,15 @@ public class AdminerController {
 
         if (!filters.isEmpty() && !filters.equals("[]")) {
             try {
-                filterList = new ObjectMapper()
+                List<AdminerFilter> allFilters = new ObjectMapper()
                     .readerForListOf(AdminerFilter.class)
                     .readValue(filters);
+
+                for (AdminerFilter filter : allFilters) {
+                    if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty() && !filter.propertyValue().isEmpty()) {
+                        filterList.add(filter);
+                    }
+                }
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Invalid filter format.");
             }
