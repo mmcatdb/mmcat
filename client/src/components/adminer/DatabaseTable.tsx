@@ -55,7 +55,7 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
     const propertyNames: string[] = fetchedData.data.length > 0 ? keys : [];
 
     return (
-        <div>
+        <>
             {fetchedData && (
                 <Table isStriped isCompact aria-label='Table'>
                     <TableHeader>
@@ -67,7 +67,7 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
                 </Table>
             )
             }
-        </div>
+        </>
     );
 }
 

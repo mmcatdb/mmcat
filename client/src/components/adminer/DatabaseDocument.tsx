@@ -15,9 +15,9 @@ type DatabaseDocumentProps = Readonly<{
 
 export function DatabaseDocument({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
     return (
-        <div>
+        <>
             {fetchedData && fetchedData.data.length > 0 ? (
-                <div>
+                <div className='grow mt-2'>
                     {fetchedData.data.map((value, index) =>
                         <div key={index}>
                             <DocumentComponent valueKey={null} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
@@ -29,6 +29,6 @@ export function DatabaseDocument({ fetchedData, kindReferences, kind, datasource
             ) : (
                 <span>No rows to display.</span>
             )}
-        </div>
+        </>
     );
 }
