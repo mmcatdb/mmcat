@@ -53,7 +53,8 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
         String username,
         String password,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {
 
         String createConnectionString() {

@@ -8,7 +8,6 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,35 +39,36 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
     @Override
     public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
         Collection<AbstractStatement> deleteStatements = new ArrayList<>();
-        List<String> tableNames = extractCreatedTables(executionCommands);
+        List<String> constraintDrops = extractCreatedConstraints(executionCommands);
 
-        // To avoid errors with references among tables.
-        Collections.reverse(tableNames);
-
-        for (String tableName: tableNames)
-            deleteStatements.add(createDDLDeleteStatement(tableName));
+        for (String dropStatement : constraintDrops)
+            deleteStatements.add(StringStatement.create(dropStatement + ";"));
 
         return deleteStatements;
     }
 
-    private List<String> extractCreatedTables(List<String> executionCommands) {
-        List<String> labels = new ArrayList<>();
+    private List<String> extractCreatedConstraints(List<String> executionCommands) {
+        List<String> constraints = new ArrayList<>();
         for (String command : executionCommands) {
-            Matcher matcher = Pattern.compile("CREATE CONSTRAINT ON \\((\\w+):([^)]+)\\)").matcher(command);
-            if (matcher.find())
-                labels.add(matcher.group(2));
+            Matcher matcher = Pattern.compile("CREATE CONSTRAINT ON \\([^)]*\\) ASSERT [^;]+;?").matcher(command);
+            if (matcher.find()) {
+                String matched = matcher.group();
+                // Strip "CREATE " and keep everything else
+                String dropPart = matched.replaceFirst("CREATE", "DROP");
+                constraints.add(dropPart.trim().replaceAll(";$", ""));
+            }
         }
-        return labels;
+        return constraints;
     }
-
-    private StringStatement createDDLDeleteStatement(String tableName) {
-        return StringStatement.create("a");
-    }
-
+    // TODO: needs testing
+    // Note that only enterprise version of Neo4j supports multiple dbs. This command will fail on the community version.
     @Override
     public AbstractStatement createCreationStatement(String newDBName, String owner) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
+        final String content = String.format("""
+            CREATE DATABASE `%s`;
+            """, newDBName);
+
+        return StringStatement.create(content);
     }
 
 }

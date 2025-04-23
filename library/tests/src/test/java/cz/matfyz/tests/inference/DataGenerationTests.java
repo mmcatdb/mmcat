@@ -36,7 +36,7 @@ class DataGenerationTests {
     @Test
     void testArray() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleYelpSimpleArray.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
         final var control = new JsonControlWrapper(jsonProvider).enableSpark(sparkProvider.getSettings());
 
@@ -63,7 +63,7 @@ class DataGenerationTests {
     void testMergeKinds() throws Exception {
         final Path relativePath = Paths.get("src/test/resources/yelpTwoKinds");
         final var url = relativePath.toUri().toURL();
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
         final var control = new JsonControlWrapper(jsonProvider).enableSpark(sparkProvider.getSettings());
 
