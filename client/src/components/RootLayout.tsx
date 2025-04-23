@@ -24,7 +24,7 @@ export function RootLayout() {
                     <CommonNavbar />
                     <main className='flex-grow relative overflow-hidden'>
                         <div className='absolute inset-0 overflow-y-auto'>
-                            <div className='w-full max-w-screen-xl mx-auto p-6'>
+                            <div className='min-h-full w-full flex flex-col max-w-screen-xl mx-auto p-6'>
                                 <Outlet />
                             </div>
                         </div>
@@ -145,7 +145,7 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
         <div className={className}>
             <Switch
                 isSelected={showTableIDs}
-                onChange={(e) => handleChange(e.target.checked)}
+                onChange={e => handleChange(e.target.checked)}
                 size='sm'
             >
                 <p className='text-small'>Show Table IDs</p>

@@ -145,7 +145,7 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
                 </div>
             )}
 
-            <div className='flex'>
+            <div className='flex grow min-h-0'>
                 {(() => {
                     switch (state.view) {
                     case View.table:
