@@ -81,9 +81,9 @@ export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
     }, [ fetchedData ]);
 
     return (
-        <div>
+        <>
             {fetchedData && fetchedData.data.length > 0 ? (
-                <div className='max-w-[1280px] text-left h-[400px]'>
+                <div className='flex-grow text-left'>
                     <ArcThemeProvider theme={'dark'}>
                         <StyledVisContainer isFullscreen={false}>
                             <GraphVisualizer
@@ -97,6 +97,6 @@ export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
             ) : (
                 <span>No records to display.</span>
             )}
-        </div>
+        </>
     );
 }

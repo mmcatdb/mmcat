@@ -20,7 +20,7 @@ export function DatasourceMenu({ setDatasource, datasourceId, datasources }: Dat
         return (
             <Select
                 items={sources}
-                label='Datasource'
+                aria-label='Datasource'
                 labelPlacement='outside-left'
                 classNames={
                     { label:'sr-only' }

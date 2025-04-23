@@ -87,7 +87,7 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
     }, [ datasource.type, execute ]);
 
     return (
-        <div className='mt-4'>
+        <div className='mt-1'>
             <CodeMirror
                 value={query}
                 onChange={onQueryChange}
@@ -98,7 +98,7 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
             />
 
             <Button
-                className='mt-5 items-center gap-1 min-w-40'
+                className='mt-1 items-center gap-1 min-w-40'
                 size='sm'
                 aria-label='Execute query'
                 type='submit'
@@ -109,7 +109,7 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
             </Button>
 
             <Button
-                className='ml-2 mt-5 items-center gap-1 min-w-40'
+                className='ml-2 mt-1 items-center gap-1 min-w-40'
                 size='sm'
                 aria-label='Show query example'
                 type='submit'
@@ -128,7 +128,7 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                     }
                     size='sm'
                     placeholder='Select view'
-                    className='ml-2 max-w-xs align-middle'
+                    className='ml-1 max-w-xs align-middle'
                     selectedKeys={[ view ]}
                 >
                     {availableViews.map(v => (
@@ -143,12 +143,12 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
             )}
 
             {queryResult && 'data' in queryResult && (
-                <span className='ml-3'>
+                <span className='ml-2'>
                     <ExportComponent data={queryResult}/>
                 </span>
             )}
 
-            <div className='mt-5'>
+            <div className='mt-1'>
                 {queryResult && 'message' in queryResult && (<>
                     {queryResult.message}
                 </>)}

@@ -37,40 +37,43 @@ export function AdminerPage() {
     }, [ searchParams ]);
 
     return (
-        <div>
+        <>
             <div className={clsx(
-                'flex items-center z-20 w-full h-12 border-b px-0',
+                'flex items-center w-full h-10 border-b px-0',
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}>
                 {allDatasources ? (
                     <>
                         <DatasourceMenu setDatasource={setDatasource} datasourceId={datasource?.id} datasources={allDatasources}/>
 
-                        <ButtonGroup
-                            className='mx-2'
-                        >
-                            {Object.values(QueryType).map(queryType => (
-                                <Button
-                                    size='sm'
-                                    aria-label='Query type'
-                                    type='submit'
-                                    variant={queryType === getQueryTypeFromURLParams(searchParams) ? 'solid' : 'ghost'}
-                                    key={queryType}
-                                    onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
+                        {datasource && (
+                            <>
+                                <ButtonGroup
+                                    className='mx-2'
                                 >
-                                    {queryType}
-                                </Button>
-                            ),
-                            )}
-                        </ButtonGroup>
+                                    {Object.values(QueryType).map(queryType => (
+                                        <Button
+                                            size='sm'
+                                            aria-label='Query type'
+                                            type='submit'
+                                            variant={queryType === getQueryTypeFromURLParams(searchParams) ? 'solid' : 'ghost'}
+                                            key={queryType}
+                                            onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
+                                        >
+                                            {queryType}
+                                        </Button>
+                                    ),
+                                    )}
+                                </ButtonGroup>
 
-                        <LinkLengthSwitch/>
+                                <LinkLengthSwitch/>
+                            </>
+                        )}
                     </>
-
                 ) : (
-                    <div className='h-8 flex items-center justify-center'>
+                    <span className='h-8 flex items-center justify-center'>
                         <Spinner />
-                    </div>
+                    </span>
                 )}
             </div>
 
@@ -81,6 +84,6 @@ export function AdminerPage() {
                     <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources}/>
                 )
             )}
-        </div>
+        </>
     );
 }

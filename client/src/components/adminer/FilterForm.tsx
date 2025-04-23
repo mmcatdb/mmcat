@@ -28,35 +28,33 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
     });
 
     return (
-        <div>
-            <div>
+        <>
+            <>
                 {state.form.filters.map(filter => (
                     <ColumnForm key={filter.id} filter={filter} datasourceType={datasourceType} propertyNames={propertyNames} dispatch={dispatch}/>
                 ))}
-            </div>
+            </>
 
-            <div className='mt-2 flex flex-wrap gap-3 items-center'>
-                <div className='flex items-center gap-2'>
-                    <label htmlFor='limit'>
-                        Limit:
-                    </label>
-                    <Input
-                        id='limit'
-                        className='text-sm max-h-10 w-min min-w-24'
-                        type='number'
-                        min='0'
-                        label='Limit'
-                        labelPlacement='outside-left'
-                        classNames={
-                            { label:'sr-only' }
-                        }
-                        size='sm'
-                        placeholder='Enter limit'
-                        value={state.form.limit.toString()}
-                        onChange={e => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
-                        required
-                    />
-                </div>
+            <div className='mt-1 flex flex-wrap gap-2 items-center'>
+                <label htmlFor='limit'>
+                    Limit:
+                </label>
+                <Input
+                    id='limit'
+                    className='text-sm max-h-10 w-min min-w-24'
+                    type='number'
+                    min='0'
+                    label='Limit'
+                    labelPlacement='outside-left'
+                    classNames={
+                        { label:'sr-only' }
+                    }
+                    size='sm'
+                    placeholder='Enter limit'
+                    value={state.form.limit.toString()}
+                    onChange={e => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
+                    required
+                />
 
                 <Button
                     className='items-center gap-1 min-w-40'
@@ -95,6 +93,6 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                     <FaSave /> SUBMIT
                 </Button>
             </div>
-        </div>
+        </>
     );
 }

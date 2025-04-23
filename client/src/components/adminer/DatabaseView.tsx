@@ -97,13 +97,11 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
 
     if (error === `Failed to fetch data`) {
         return (
-            <div>
-                <div className='mb-5'>
-                    <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={undefined} dispatch={dispatch}/>
-                </div>
+            <>
+                <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={undefined} dispatch={dispatch}/>
 
                 <p>{error}</p>
-            </div>
+            </>
 
         );
     }
@@ -122,16 +120,15 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
     const kindReferences: KindReference[] = getKindReferences(references, state.datasourceId!, state.kindName!);
 
     return (
-        <div>
-            <div>
-                <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
-            </div>
+        <>
+            <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
 
             {itemCount !== undefined && itemCount > 0 && (
-                <div className='my-5 inline-flex gap-3 items-center'>
+                <div className='my-1 inline-flex gap-2 items-center'>
                     {state.view !== View.graph && (
                         <>
                             <Pagination
+                                size='sm'
                                 total={totalPages}
                                 page={currentPage}
                                 onChange={page => {
@@ -148,37 +145,39 @@ export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps
                 </div>
             )}
 
-            {(() => {
-                switch (state.view) {
-                case View.table:
-                    return (
-                        <DatabaseTable
-                            fetchedData={fetchedData as TableResponse | GraphResponse}
-                            kindReferences={kindReferences}
-                            kind={state.kindName!}
-                            datasourceId={state.datasourceId!}
-                            datasources={datasources}
-                        />
-                    );
-                case View.document:
-                    return (
-                        <DatabaseDocument
-                            fetchedData={fetchedData as DocumentResponse | GraphResponse}
-                            kindReferences={kindReferences}
-                            kind={state.kindName!}
-                            datasourceId={state.datasourceId!}
-                            datasources={datasources}
-                        />
-                    );
-                case View.graph:
-                    return (
-                        <DatabaseGraph
-                            fetchedData={fetchedData as GraphResponse}
-                            kind={state.kindName!}
-                        />
-                    );
-                }
-            })()}
-        </div>
+            <div className='flex'>
+                {(() => {
+                    switch (state.view) {
+                    case View.table:
+                        return (
+                            <DatabaseTable
+                                fetchedData={fetchedData as TableResponse | GraphResponse}
+                                kindReferences={kindReferences}
+                                kind={state.kindName!}
+                                datasourceId={state.datasourceId!}
+                                datasources={datasources}
+                            />
+                        );
+                    case View.document:
+                        return (
+                            <DatabaseDocument
+                                fetchedData={fetchedData as DocumentResponse | GraphResponse}
+                                kindReferences={kindReferences}
+                                kind={state.kindName!}
+                                datasourceId={state.datasourceId!}
+                                datasources={datasources}
+                            />
+                        );
+                    case View.graph:
+                        return (
+                            <DatabaseGraph
+                                fetchedData={fetchedData as GraphResponse}
+                                kind={state.kindName!}
+                            />
+                        );
+                    }
+                })()}
+            </div>
+        </>
     );
 }

@@ -1,4 +1,4 @@
-import { Select, SelectItem } from '@nextui-org/react';
+import { Button, ButtonGroup } from '@nextui-org/react';
 import { AVAILABLE_VIEWS } from './Views';
 import type { DatasourceType } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
@@ -17,26 +17,23 @@ export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
         return null;
 
     return (
-        <Select
-            items={availableViews.entries()}
-            label='View'
-            labelPlacement='outside-left'
-            classNames={
-                { label:'sr-only' }
-            }
+        <ButtonGroup
             size='sm'
-            placeholder='Select view'
-            className='max-w-xs'
-            selectedKeys={[ view ]}
+            className='max-w-m mx-2'
         >
-            {availableViews.map(view => (
-                <SelectItem
-                    key={view}
-                    onPress={() => dispatch({ type:'view', newView: view })}
+            {availableViews.map(availableView => (
+                <Button
+                    size='sm'
+                    aria-label='Query type'
+                    type='submit'
+                    variant={availableView === view ? 'solid' : 'ghost'}
+                    key={availableView}
+                    onPress={() => dispatch({ type:'view', newView: availableView })}
                 >
-                    {view}
-                </SelectItem>
-            ))}
-        </Select>
+                    {availableView}
+                </Button>
+            ),
+            )}
+        </ButtonGroup>
     );
 }

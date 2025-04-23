@@ -45,14 +45,14 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
         fetchedData && fetchedData.data.length > 0 ? (
             <Select
                 items={selectItems}
-                label='Kind'
+                aria-label='Kind'
                 labelPlacement='outside-left'
                 classNames={
                     { label:'sr-only' }
                 }
                 size='sm'
                 placeholder='Select kind'
-                className='max-w-xs'
+                className='max-w-xs px-0'
                 selectedKeys={ kind ? [ kind ] : undefined }
             >
                 {item => (

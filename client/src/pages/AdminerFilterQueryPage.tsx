@@ -40,8 +40,8 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     }, [ state, searchParams ]);
 
     return (
-        <div>
-            <div>
+        <>
+            <div className='flex mt-1'>
                 <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
                 {state.kindName !== undefined && (
@@ -49,11 +49,9 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
                 )}
             </div>
 
-            {datasource && state.kindName && typeof state.kindName === 'string' &&(
-                <div className='m-2'>
-                    <DatabaseView state={state} datasources={datasources} dispatch={dispatch}/>
-                </div>
+            {datasource && state.kindName && typeof state.kindName === 'string' && (
+                <DatabaseView state={state} datasources={datasources} dispatch={dispatch}/>
             )}
-        </div>
+        </>
     );
 }

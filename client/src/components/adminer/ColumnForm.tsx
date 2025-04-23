@@ -18,7 +18,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
         : OPERATOR_MAPPING[datasourceType];
 
     return (
-        <div className='mt-0 mr-5 flex flex-wrap gap-1 items-center'>
+        <div className='mt-0 flex flex-wrap gap-1 items-center'>
             <Autocomplete
                 className='py-0.5 text-sm w-min min-w-56'
                 size='sm'
