@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import API from '@/utils/api';
 import { Job, JobState, type ModelJobData } from '@/types/job';
 import { ActionType } from '@/types/action';
@@ -22,6 +22,8 @@ type JobDisplayProps = {
 
 const props = defineProps<JobDisplayProps>();
 const error = computed(() => props.job.error ? { name: props.job.error.name, data: stringify(props.job.error.data) } : undefined);
+
+const filePreview = ref('');
 
 function stringify(value: unknown): string | undefined {
     if (value === undefined || value === null)
@@ -88,6 +90,34 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
     if (result.status) 
         emit('updateJob', Job.fromServer(result.data, info.value));
 }
+
+function isModelJobData(data: unknown): data is { value: string } {
+    return !!data && typeof data === 'object' && 'value' in data && typeof (data as any).value === 'string';
+}
+
+watch(
+    () => [props.job, props.isShowDetail],
+    ([job, isShowDetail]) => {
+        if (!job || typeof job !== 'object') return;
+        if (
+            isShowDetail &&
+            job.payload.type === ActionType.CategoryToModel &&
+            isModelJobData(job.data)
+        ) {
+            loadFilePreview(job.data.value);
+        }
+    },
+    { immediate: true }
+);
+
+async function loadFilePreview(fileId: string) {
+    const result = await API.files.previewFile({ id: fileId });
+
+    if (result.status) {
+        filePreview.value = result.data.toString();
+    }
+}
+
 </script>
 
 <template>
@@ -194,12 +224,27 @@ async function updateJobResult(edit: InferenceEdit | null, isFinal: boolean | nu
                 :min-rows="1"
             />
             <TextArea
-                v-else-if="job.payload.type !== ActionType.RSDToCategory && job.data"
+                v-else-if="job.payload.type !== ActionType.RSDToCategory && job.payload.type !== ActionType.CategoryToModel && job.data"
                 v-model="(job.data as ModelJobData).value"
                 class="w-100 mt-2"
                 readonly
                 :min-rows="1"
             /> 
+            <template v-if="job.payload.type === ActionType.CategoryToModel && filePreview">
+                <div class="mb-2 small text-secondary">
+                    Below is the preview of the output, to get the full output go to
+                    <FixedRouterLink
+                        :to="{ name: 'files'}"
+                        class="ms-1"
+                    >Outputs</FixedRouterLink>.
+                </div>
+                <TextArea
+                    v-model="filePreview"
+                    class="w-100 mt-2"
+                    readonly
+                    :min-rows="1"
+                />
+            </template>
         </div>
     </div>
 </template>

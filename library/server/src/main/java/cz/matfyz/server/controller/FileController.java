@@ -74,4 +74,9 @@ public class FileController {
         return service.updateFile(id, edit);
     }
 
+    @GetMapping("files/{id}/preview")
+    public String previewFile(@PathVariable Id id) {
+        return service.readPreview(id);
+    }
+
 }

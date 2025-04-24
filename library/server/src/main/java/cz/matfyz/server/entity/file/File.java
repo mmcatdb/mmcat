@@ -25,6 +25,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class File extends Entity {
 
+    private static final int PREVIEW_LIMIT = 1000;
+
     public @Nullable Id jobId;
     public @Nullable Id datasourceId;
     public @Nullable Id categoryId;
@@ -125,6 +127,25 @@ public class File extends Entity {
         } catch (IOException e) {
             throw new RuntimeException("Failed to read execution file: " + filePath, e);
         }
+    }
+
+    public String readPreview(UploadsProperties uploads) {
+        String filePath = getFilePath(this, uploads);
+
+        StringBuilder preview = new StringBuilder();
+        int linesRead = 0;
+
+        try (var reader = Files.newBufferedReader(Paths.get(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null && linesRead < PREVIEW_LIMIT) {
+                preview.append(line).append("\n");
+                linesRead++;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read preview for file: " + filePath, e);
+        }
+
+        return preview.toString();
     }
 
     private record JsonValue(

@@ -138,4 +138,9 @@ public class FileService {
         return file;
     }
 
+    public String readPreview(Id id) {
+        final File file = repository.find(id);
+        return file.readPreview(uploads);
+    }
+
 }
