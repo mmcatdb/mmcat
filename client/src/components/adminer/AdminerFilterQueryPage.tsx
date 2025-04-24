@@ -12,14 +12,12 @@ import { filterQueryReducer } from '@/components/adminer/filterQueryReducer';
 import { getInitPaginationState, paginationReducer } from '@/components/adminer/paginationReducer';
 import { useFetchReferences } from '@/components/adminer/useFetchReferences';
 import { useFetchData } from '@/components/adminer/useFetchData';
-import { DatabaseTable } from '@/components/adminer/DatabaseTable';
-import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
-import { DatabaseGraph } from '@/components/adminer/DatabaseGraph';
+import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { View } from '@/types/adminer/View';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 import type { Id } from '@/types/id';
 import type { QueryParams } from '@/types/api/routes';
-import type { DataResponse, DocumentResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
+import type { DataResponse } from '@/types/adminer/DataResponse';
 import type { KindFilterState } from '@/types/adminer/ReducerTypes';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 import type { Theme } from '@/components/PreferencesProvider';
@@ -184,37 +182,14 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
 
                     {datasource && state.kindName && typeof state.kindName === 'string' && fetchedData?.data && (
                         <div className='flex grow min-h-0 mt-2'>
-                            {(() => {
-                                switch (state.view) {
-                                case View.table:
-                                    return (
-                                        <DatabaseTable
-                                            fetchedData={fetchedData as TableResponse | GraphResponse}
-                                            kindReferences={kindReferences}
-                                            kind={state.kindName}
-                                            datasourceId={state.datasourceId!}
-                                            datasources={datasources}
-                                        />
-                                    );
-                                case View.document:
-                                    return (
-                                        <DatabaseDocument
-                                            fetchedData={fetchedData as DocumentResponse | GraphResponse}
-                                            kindReferences={kindReferences}
-                                            kind={state.kindName}
-                                            datasourceId={state.datasourceId!}
-                                            datasources={datasources}
-                                        />
-                                    );
-                                case View.graph:
-                                    return (
-                                        <DatabaseGraph
-                                            fetchedData={fetchedData as GraphResponse}
-                                            kind={state.kindName}
-                                        />
-                                    );
-                                }
-                            })()}
+                            <DatabaseView
+                                view={state.view}
+                                fetchedData={fetchedData}
+                                kindReferences={kindReferences}
+                                kindName={state.kindName}
+                                datasourceId={state.datasourceId}
+                                datasources={datasources}
+                            />
                         </div>
                     )}
                 </>
