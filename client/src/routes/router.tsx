@@ -164,7 +164,6 @@ export const router = createBrowserRouter([
                                     },
                                     {
                                         path: ':jobId',
-                                        loader: JobPage.loader,
                                         Component: JobPage,
                                         handle: { breadcrumb: 'Job Details' },
                                     },

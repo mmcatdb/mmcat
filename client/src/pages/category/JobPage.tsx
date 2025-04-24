@@ -1,108 +1,68 @@
 import { api } from '@/api';
-import { Job, type JobFromServer, JobState } from '@/types/job';
-import { useEffect, useState } from 'react';
-import { type Params, useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
+import { Job, JobState } from '@/types/job';
+import { type Dispatch, useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@nextui-org/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { getJobStateTextStyle } from '@/components/icons/Icons';
 import { cn } from '@/components/utils';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
+import { type SchemaCategoryInfo } from '@/types/schema';
+import { LoadingPage, ReloadPage } from '../errorPages';
 
-/** In miliseconds. */
+/** In milliseconds. */
 const REFRESH_INTERVAL_MS = 1000;
+const TERMINAL_STATES = [ JobState.Finished, JobState.Failed ];
 
 export function JobPage() {
-    const data = useLoaderData() as JobLoaderData;
     const { category } = useCategoryInfo();
+    const { jobId } = useParams();
+    const [ job, setJob ] = useState<Job>();
+    const [ error, setError ] = useState(false);
 
-    const [ job, setJob ] = useState(() => Job.fromServer(data.job, category));
+    const intervalRef = useRef<NodeJS.Timeout>();
 
-    const revalidator = useRevalidator();
+    async function fetchJob() {
+        const response = await api.jobs.getJob({ id: jobId! });
+        if (!response.status) {
+            setError(true);
+            if (intervalRef.current)
+                clearInterval(intervalRef.current);
+
+            return;
+        }
+
+        setError(false);
+        const newJob = Job.fromServer(response.data, category);
+        setJob(newJob);
+
+        if (TERMINAL_STATES.includes(newJob.state) && intervalRef.current)
+            clearInterval(intervalRef.current);
+    }
 
     useEffect(() => {
-        if (job.id !== data.job.id)
-            setJob(Job.fromServer(data.job, category));
-    }, [ data.job ]);
+        void fetchJob();
 
-    useEffect(() => {
-        if ([ JobState.Finished, JobState.Failed ].includes(job.state))
-            return;
+        intervalRef.current = setInterval(() => {
+            void fetchJob();
+        }, REFRESH_INTERVAL_MS);
 
-        setTimeout(() => revalidator.revalidate(), REFRESH_INTERVAL_MS);
-    }, [ job ]);
+        return () => {
+            if (intervalRef.current)
+                clearInterval(intervalRef.current);
+        };
+    // Force the page to refetch the job navigation to the same page.
+    }, [ jobId ]);
 
-    // FIXME This does not work properly. We have to set the timeout again after the revalidation. However, we don't update the job from the server after revalidation.
+    if (!job)
+        return <LoadingPage />;
 
-    const navigate = useNavigate();
-
-    async function handleEnableJob() {
-        const result = await api.jobs.enableJob({ id: job?.id });
-        if (!result.status) {
-            toast.error('Error enabling job');
-            return;
-        }
-
-        setJob(Job.fromServer(result.data, category));
-    }
-
-    async function handleDisableJob() {
-        const result = await api.jobs.disableJob({ id: job?.id });
-        if (!result.status) {
-            toast.error('Error disabling job');
-            return;
-        }
-
-        setJob(Job.fromServer(result.data, category));
-    }
-
-    async function handleRestartJob() {
-        const result = await api.jobs.createRestartedJob({ id: job?.id });
-        if (!result.status) {
-            toast.error('Error restarting job');
-            return;
-        }
-
-        const newJob = Job.fromServer(result.data, category);
-        navigate(routes.category.job.resolve({ categoryId: category.id, jobId: newJob.id }));
-    }
-
-    function renderJobStateButton(customClassName: string) {
-        switch (job.state) {
-        case JobState.Disabled:
-            return (
-                <Button
-                    onClick={handleEnableJob}
-                    color='success'
-                    className={customClassName}
-                >
-                    Enable
-                </Button>
-            );
-        case JobState.Ready:
-            return (
-                <Button
-                    onClick={handleDisableJob}
-                    color='warning'
-                    className={customClassName}
-                >
-                    Disable
-                </Button>
-            );
-        case JobState.Finished:
-        case JobState.Failed:
-            return (
-                <Button
-                    onClick={handleRestartJob}
-                    color='primary'
-                    className={customClassName}
-                >
-                    Restart
-                </Button>
-            );
-        default:
-            return null;
-        }
+    if (error) {
+        return <ReloadPage onReload={() => {
+            // This will fetch the job only once, not repeatedly. Replace by a better solution once Tanstack query + router is used.
+            void fetchJob();
+        }} />;
     }
 
     return (
@@ -137,7 +97,7 @@ export function JobPage() {
                 </p>
             </div>
 
-            {renderJobStateButton('mt-5')}
+            <JobStateButton job={job} setJob={setJob} category={category} className='mt-5' />
 
             {job.error && (
                 <div className='mt-5 text-danger-400'>
@@ -151,21 +111,63 @@ export function JobPage() {
     );
 }
 
-JobPage.loader = jobLoader;
+function JobStateButton({ job, setJob, category, className }: { job: Job, setJob: Dispatch<Job>, category: SchemaCategoryInfo, className?: string }) {
+    const navigate = useNavigate();
 
-export type JobLoaderData = {
-    job: JobFromServer;
-};
+    async function handleEnableJob() {
+        const result = await api.jobs.enableJob({ id: job?.id });
+        if (!result.status) {
+            toast.error('Error enabling job');
+            return;
+        }
 
-async function jobLoader({ params: { jobId } }: { params: Params<'jobId'> }): Promise<JobLoaderData> {
-    if (!jobId)
-        throw new Error('Job ID is required');
+        setJob(Job.fromServer(result.data, category));
+    }
 
-    const response = await api.jobs.getJob({ id: jobId });
-    if (!response.status)
-        throw new Error('Failed to load job info');
+    async function handleDisableJob() {
+        const result = await api.jobs.disableJob({ id: job?.id });
+        if (!result.status) {
+            toast.error('Error disabling job');
+            return;
+        }
 
-    return {
-        job: response.data,
-    };
+        setJob(Job.fromServer(result.data, category));
+    }
+
+    async function handleRestartJob() {
+        const result = await api.jobs.createRestartedJob({ id: job?.id });
+        if (!result.status) {
+            toast.error('Error restarting job');
+            return;
+        }
+
+        const newJob = Job.fromServer(result.data, category);
+        navigate(routes.category.job.resolve({ categoryId: category.id, jobId: newJob.id }));
+    }
+
+    if (job.state === JobState.Disabled) {
+        return (
+            <Button color='success' onClick={handleEnableJob} className={className}>
+                Enable
+            </Button>
+        );
+    }
+
+    if (job.state === JobState.Ready) {
+        return (
+            <Button color='warning' onClick={handleDisableJob} className={className}>
+                Disable
+            </Button>
+        );
+    }
+
+    if (TERMINAL_STATES.includes(job.state)) {
+        return (
+            <Button color='primary' onClick={handleRestartJob} className={className}>
+                Restart
+            </Button>
+        );
+    }
+
+    return null;
 }
