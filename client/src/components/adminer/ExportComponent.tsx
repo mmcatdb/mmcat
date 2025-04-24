@@ -21,10 +21,11 @@ type ExportComponentProps = Readonly<{
 export function ExportComponent({ data }: ExportComponentProps) {
     return (
         <Button
-            className='items-center gap-1 min-w-20'
+            className='min-w-20'
             size='sm'
             aria-label='Export data'
             type='submit'
+            color='primary'
             onPress={() => exportJSON(data)}
         >
             Export

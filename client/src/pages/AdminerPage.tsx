@@ -2,9 +2,9 @@ import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, ButtonGroup, Spinner } from '@nextui-org/react';
-import { AdminerCustomQueryPage } from '@/pages/AdminerCustomQueryPage';
-import { AdminerFilterQueryPage } from '@/pages/AdminerFilterQueryPage';
 import { usePreferences } from '@/components/PreferencesProvider';
+import { AdminerCustomQueryPage } from '@/components/adminer/AdminerCustomQueryPage';
+import { AdminerFilterQueryPage } from '@/components/adminer/AdminerFilterQueryPage';
 import { getAdminerURLParams, getInitURLParams, getQueryTypeFromURLParams } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
@@ -81,7 +81,7 @@ export function AdminerPage() {
                 getQueryTypeFromURLParams(searchParams) === QueryType.custom ? (
                     <AdminerCustomQueryPage datasource={datasource} datasources={allDatasources} theme={theme}/>
                 ) : (
-                    <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources}/>
+                    <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources} theme={theme}/>
                 )
             )}
         </>

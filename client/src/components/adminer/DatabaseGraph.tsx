@@ -72,12 +72,14 @@ type DatabaseTableProps = Readonly<{
 }>;
 
 export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
-    const [ nodes, setNodes ] = useState<BasicNode[]>(getNodes(fetchedData.data));
-    const [ relationships, setRelationships ] = useState<BasicRelationship[]>(getRelationships(fetchedData.data, kind));
+    const [ nodes, setNodes ] = useState<BasicNode[]>(getNodes(fetchedData ? fetchedData.data : []));
+    const [ relationships, setRelationships ] = useState<BasicRelationship[]>(getRelationships(fetchedData ? fetchedData.data : [], kind));
 
     useEffect(() => {
-        setNodes(getNodes(fetchedData.data));
-        setRelationships(getRelationships(fetchedData.data, kind));
+        if (fetchedData?.data) {
+            setNodes(getNodes(fetchedData.data));
+            setRelationships(getRelationships(fetchedData.data, kind));
+        }
     }, [ fetchedData ]);
 
     return (

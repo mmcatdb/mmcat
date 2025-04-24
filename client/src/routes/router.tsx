@@ -7,7 +7,7 @@ import { ErrorPage } from '@/pages/errorPages';
 import { CategoryIndex, categoryIndexLoader, type CategoryIndexLoaderData } from '@/pages/CategoryIndex';
 import { DatasourcesPage, DatasourcesPageOverview } from '@/pages/DatasourcesPage';
 import { datasourceDetailLoader, type DatasourceDetailLoaderData, DatasourceDetailPage, DatasourceInCategoryDetailPage } from '@/pages/DatasourceDetailPage';
-import { adminerLoader, AdminerPage, AdminerPageOverview } from '@/pages/AdminerPage';
+import { adminerLoader, AdminerPage } from '@/pages/AdminerPage';
 import { SchemaCategoriesPage } from '@/pages/SchemaCategoriesPage';
 import { QueryingPage } from '@/pages/QueryingPage';
 import { RootLayout } from '@/components/RootLayout';
@@ -18,7 +18,6 @@ import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategor
 import { ActionDetailPage, actionLoader, type ActionLoaderData, ActionsPage, ActionsPageOverview } from '@/pages/category/ActionsPage';
 import { AddActionPage } from '@/components/schema-categories/AddActionPage';
 import { JobDetailPage, JobsPage, RunsPageOverview } from '@/pages/category/JobsPage';
-import { AdminerCustomQueryPage } from '@/pages/AdminerCustomQueryPage';
 
 type MappingLoaderData = {
     mapping: Mapping;

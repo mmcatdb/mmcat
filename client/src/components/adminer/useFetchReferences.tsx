@@ -220,10 +220,12 @@ export function useFetchReferences(state: AdminerFilterQueryState) {
             setLoading(true);
 
             try {
-                const foreignKeys = await getForeignKeys(state.datasourceId!, state.kindName!);
-                const schemaCategoryReferences = await getSchemaCategoryReferences(state.datasourceId!, state.kindName!);
+                if (state.datasourceId && state.kindName) {
+                    const foreignKeys = await getForeignKeys(state.datasourceId, state.kindName);
+                    const schemaCategoryReferences = await getSchemaCategoryReferences(state.datasourceId, state.kindName);
 
-                setReferences(foreignKeys.concat(schemaCategoryReferences));
+                    setReferences(foreignKeys.concat(schemaCategoryReferences));
+                }
             }
             catch (e) {
                 console.log(e);

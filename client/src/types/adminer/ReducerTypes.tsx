@@ -34,7 +34,7 @@ export type AdminerFilterQueryStateAction =
 | InitializeAction
 | FilterQueryUpdateAction;
 
-type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
+export type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
   ? { type: T }
   : { type: T } & P;
 

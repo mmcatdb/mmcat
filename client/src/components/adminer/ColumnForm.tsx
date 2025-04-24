@@ -67,7 +67,7 @@ export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: 
                 aria-label='Delete filter'
                 type='submit'
                 color='danger'
-                variant='ghost'
+                variant='bordered'
                 onPress={() => {
                     dispatch({ type:'form', action: 'delete_filter', id: filter.id });
                 }}
