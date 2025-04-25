@@ -10,6 +10,7 @@ const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
 const EXAMPLE_SCHEMAS = [
     'basic',
+    'adminer',
 ] as const;
 
 export function Home() {
@@ -43,11 +44,11 @@ export function Home() {
 
             if (!response.status) {
                 toast.error('Error creating schema category.');
-                return; 
+                return;
             }
 
             const newCategory = SchemaCategoryInfo.fromServer(response.data);
-            setCategories((categories) =>
+            setCategories(categories =>
                 categories ? [ ...categories, newCategory ] : [ newCategory ],
             );
 
@@ -80,10 +81,10 @@ export function Home() {
                     ))}
                 </div>
                 <h2 className='mt-3'>Add example schema category</h2>
-                <div className='flex'>
+                <div className='flex gap-2'>
                     {EXAMPLE_SCHEMAS.map(example => (
-                        <Button 
-                            key={example} 
+                        <Button
+                            key={example}
                             onPress={() => handleCreateSchema(example, true)}
                             isLoading={isCreatingExampleSchema}
                         >
@@ -93,7 +94,7 @@ export function Home() {
                 </div>
                 <h2 className='mt-3'>Add empty schema category</h2>
                 <Button
-                    key={'newSchema'} 
+                    key={'newSchema'}
                     onPress={() => setIsModalOpen(true)}
                     isLoading={isCreatingSchema}
                 >
@@ -106,7 +107,7 @@ export function Home() {
             <AddSchemaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={(label) => handleCreateSchema(label, false)}
+                onSubmit={label => handleCreateSchema(label, false)}
                 isSubmitting={isCreatingSchema}
             />
         </div>
@@ -151,7 +152,7 @@ export function AddSchemaModal({
                         label='Schema Label'
                         placeholder='Enter schema label'
                         value={label}
-                        onChange={(e) => setLabel(e.target.value)}
+                        onChange={e => setLabel(e.target.value)}
                         fullWidth
                     />
                 </ModalBody>

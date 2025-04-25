@@ -25,6 +25,10 @@ public class IndexController {
     cz.matfyz.server.example.basic.ExampleSetup basicExampleSetup;
 
     @Autowired
+    @Qualifier("adminerExampleSetup")
+    cz.matfyz.server.example.adminer.ExampleSetup adminerExampleSetup;
+
+    @Autowired
     @Qualifier("queryEvolutionExampleSetup")
     cz.matfyz.server.example.queryevolution.ExampleSetup queryEvolutionExampleSetup;
 
@@ -36,6 +40,7 @@ public class IndexController {
     public SchemaCategoryInfo createExampleCategory(@PathVariable String name) {
         final SchemaCategoryWrapper wrapper = switch (name) {
             case "basic" -> basicExampleSetup.setup();
+            case "adminer" -> adminerExampleSetup.setup();
             case "query-evolution-1" -> queryEvolutionExampleSetup.setup(1);
             case "query-evolution-2" -> queryEvolutionExampleSetup.setup(2);
             case "query-evolution-3" -> queryEvolutionExampleSetup.setup(3);
