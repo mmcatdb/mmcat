@@ -30,6 +30,14 @@ public class AdminerAlgorithms {
     private static void appendLabelsWhereClause(StringBuilder whereClause, String alias, String propertyName, String operator, String propertyValue, Double doubleValue, AdminerAlgorithmsInterface algorithms) {
         String function = Neo4jAlgorithms.getLabelFunction(propertyName);
 
+        if (propertyName.startsWith("#labelsStartNode")){
+            alias = "startNode";
+        }
+
+        if (propertyName.startsWith("#labelsEndNode")){
+            alias = "endNode";
+        }
+
         boolean isQuantifier = Neo4jAlgorithms.getQuantifiers().contains(function);
 
         whereClause
@@ -95,7 +103,7 @@ public class AdminerAlgorithms {
             whereClause.append("toFloat(");
         }
 
-        if (alias != null) {
+        if (alias != null && !propertyName.contains("startNode.") && !propertyName.contains("endNode.")) {
             whereClause.append(alias)
                 .append(".");
         }

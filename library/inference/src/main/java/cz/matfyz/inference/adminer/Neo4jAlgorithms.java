@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import cz.matfyz.core.adminer.GraphResponse.GraphElement;
 import cz.matfyz.core.adminer.GraphResponse.GraphNode;
 import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
+import cz.matfyz.core.adminer.GraphResponse.GraphRelationshipExtended;
 
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
@@ -52,6 +53,28 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
         }
 
         return new GraphNode(id, properties, labels);
+    }
+
+    /**
+     * Extracts the properties of a relationship and its start and end node.
+     *
+     * @param relationship The relationship represented as a {@link Value}.
+     * @param startNode The start node of the relationship represented as a {@link Value}.
+     * @param endNode The end node of the relationship represented as a {@link Value}.
+     * @return A {@link GraphElement} containing the relationship's ID and properties.
+     */
+    public static GraphElement getRelationshipProperties(Value relationship, Value startNode, Value endNode) {
+        String id = relationship.asRelationship().elementId();
+
+        Map<String, Object> properties = new HashMap<>();
+        relationship.asRelationship().asMap().forEach(properties::put);
+
+        String startNodeId = relationship.asRelationship().startNodeElementId();
+        GraphNode startNodeProperties = (GraphNode) getNodeProperties(startNode);
+        String endNodeId = relationship.asRelationship().endNodeElementId();
+        GraphNode endNodeProperties = (GraphNode) getNodeProperties(endNode);
+
+        return new GraphRelationshipExtended(id, properties, startNodeId, startNodeProperties.properties(), startNodeProperties.labels(), endNodeId, endNodeProperties.properties(), endNodeProperties.labels());
     }
 
     /**
@@ -99,39 +122,44 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      * @return A {@link Set} of property names.
      */
     private static Set<String> getPropertyNames(Session session, String kindName, boolean forNode) {
+        Set<String> properties = new HashSet<>();
         StringBuilder matchClause = new StringBuilder("MATCH ");
 
         if (forNode) {
             matchClause.append(kindName != null ? "(a: " + kindName + ")" : "(a)");
+            matchClause.append(" UNWIND keys(a) AS key");
         } else {
-            matchClause.append("()-[a]-()");
+            matchClause.append("(m)-[a]->(n)");
 
             if (kindName != null) {
                 matchClause.append(" WHERE type(a) = '" + kindName + "'");
             }
+
+            matchClause.append(" WITH m, a, n UNWIND [k IN keys(m) | 'startNode.' + k] + [k IN keys(a) | k] + [k IN keys(n) | 'endNode.' + k] AS key");
         }
 
-        Set<String> properties = new HashSet<>();
-
         Result queryResult = session.run(String.format("""
-            %s
-            UNWIND keys(a) AS key
-            RETURN DISTINCT key
-            ORDER BY key;
-            """, matchClause.toString()));
+        %s RETURN DISTINCT key ORDER BY key;
+        """, matchClause.toString()));
+
         while (queryResult.hasNext()) {
             Record queryRecord = queryResult.next();
             properties.add(queryRecord.get("key").asString());
         }
+
         properties.add("#elementId");
 
         if (forNode) {
-            for (String labelFunction: FUNCTIONS.keySet()){
+            for (String labelFunction: NODELABELFUNCTIONS.keySet()){
                 properties.add(labelFunction);
             }
         } else {
             properties.add("#startNodeId");
             properties.add("#endNodeId");
+
+            for (String labelFunction: RELATIONSHIPLABELFUNCTIONS.keySet()){
+                properties.add(labelFunction);
+            }
         }
 
         return properties;
@@ -251,11 +279,11 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
     }
 
     /**
-     * Defines a mapping of labels with functions to Cypher functions.
+     * Defines a mapping of node labels with functions to Cypher functions.
      *
      * @return A {@link Map} containing functions mappings.
      */
-    private static Map<String, String> defineFunctions() {
+    private static Map<String, String> defineNodeLabelFunctions() {
         final var functions = new TreeMap<String, String>();
         functions.put("#labels - SIZE", "SIZE");
         functions.put("#labels - ANY", "ANY");
@@ -267,11 +295,40 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
     }
 
     /**
-     * A map of labels with functions to Cypher functions.
+     * Defines a mapping of start end end node labels with functions to Cypher functions.
+     *
+     * @return A {@link Map} containing functions mappings.
+     */
+    private static Map<String, String> defineRelationshipLabelFunctions() {
+        final var functions = new TreeMap<String, String>();
+        functions.put("#labelsStartNode - SIZE", "SIZE");
+        functions.put("#labelsStartNode - ANY", "ANY");
+        functions.put("#labelsStartNode - ALL", "ALL");
+        functions.put("#labelsStartNode - NONE", "NONE");
+        functions.put("#labelsStartNode - SINGLE", "SINGLE");
+
+        functions.put("#labelsEndNode - SIZE", "SIZE");
+        functions.put("#labelsEndNode - ANY", "ANY");
+        functions.put("#labelsEndNode - ALL", "ALL");
+        functions.put("#labelsEndNode - NONE", "NONE");
+        functions.put("#labelsEndNode - SINGLE", "SINGLE");
+
+        return functions;
+    }
+
+    /**
+     * A map of node labels with functions to Cypher functions.
      *
      * @return A {@link Map} of labels with functions to Cypher functions.
      */
-    private static final Map<String, String> FUNCTIONS = defineFunctions();
+    private static final Map<String, String> NODELABELFUNCTIONS = defineNodeLabelFunctions();
+
+    /**
+     * A map of start end end node labels with functions to Cypher functions.
+     *
+     * @return A {@link Map} of labels with functions to Cypher functions.
+     */
+    private static final Map<String, String> RELATIONSHIPLABELFUNCTIONS = defineRelationshipLabelFunctions();
 
     /**
      * Retrieves the Neo4j function associated with the specified property name.
@@ -281,7 +338,11 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
      * @throws InvalidParameterException If no function is mapped to the given property name.
      */
     public static String getLabelFunction(String propertyName) {
-        String function = FUNCTIONS.get(propertyName);
+        String function = NODELABELFUNCTIONS.get(propertyName);
+
+        if (function == null) {
+            function = RELATIONSHIPLABELFUNCTIONS.get(propertyName);
+        }
 
         if (function == null) {
             throw new InvalidParameterException("No function mapped for given property name.");

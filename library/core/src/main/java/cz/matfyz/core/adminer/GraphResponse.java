@@ -38,4 +38,15 @@ public class GraphResponse extends DataResponse {
         @JsonProperty("#startNodeId") String startNodeId,
         @JsonProperty("#endNodeId") String endNodeId
     ) implements GraphElement {}
+
+    public record GraphRelationshipExtended(
+        @JsonProperty("#elementId")  String elementId,
+        @JsonProperty("properties") Map<String, Object> properties,
+        @JsonProperty("#startNodeId") String startNodeId,
+        @JsonProperty("startNode") Map<String, Object> startNode,
+        @JsonProperty("#labelsStartNode") List<String> labelsStartNode,
+        @JsonProperty("#endNodeId") String endNodeId,
+        @JsonProperty("endNode") Map<String, Object> endNode,
+        @JsonProperty("#labelsEndNode") List<String> labelsEndNode
+    ) implements GraphElement {}
 }

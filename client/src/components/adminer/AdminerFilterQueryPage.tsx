@@ -30,7 +30,7 @@ function getQueryParams(filterState: KindFilterState): QueryParams {
 }
 
 function getKindReferences(references: AdminerReferences, datasourceId: Id, kind: string): KindReference[] {
-    const outgoingReferences: KindReference[] = references
+    return references
         ? Object.values(references)
             .filter(ref => ref.referencingDatasourceId === datasourceId && ref.referencingKindName === kind)
             .map(ref => ({
@@ -40,18 +40,6 @@ function getKindReferences(references: AdminerReferences, datasourceId: Id, kind
                 property: ref.referencedProperty,
             }))
         : [];
-    const incomingReferences: KindReference[] = references
-        ? Object.values(references)
-            .filter(ref => ref.referencedDatasourceId === datasourceId && ref.referencedKindName === kind)
-            .map(ref => ({
-                referencingProperty: ref.referencedProperty,
-                datasourceId: ref.referencingDatasourceId,
-                kindName: ref.referencingKindName,
-                property: ref.referencingProperty,
-            }))
-        : [];
-
-    return [ ...incomingReferences, ...outgoingReferences ];
 }
 
 type AdminerFilterQueryPageProps = Readonly<{

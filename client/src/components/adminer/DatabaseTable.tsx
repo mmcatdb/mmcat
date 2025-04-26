@@ -24,11 +24,9 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
         for (const element of fetchedData.data) {
             const { properties, ...rest } = element;
 
-
             const prefixed = Object.fromEntries(
                 Object.entries(rest as Record<string, string>).map(([ key, value ]) => [ key, value ]),
             );
-
 
             modifiedData.data.push({
                 ...(properties as Record<string, string>),
@@ -44,7 +42,6 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
         if (typeof dataItem === 'object' && dataItem !== null) {
             for (const key of Object.keys(dataItem))
                 keysSet.add(key);
-
         }
     }
 

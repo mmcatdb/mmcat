@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api';
 import { Signature } from '@/types/identifiers/Signature';
-import type { StaticNameFromServer } from '@/types/identifiers/Name';
+import type { NameFromServer, StaticNameFromServer } from '@/types/identifiers/Name';
 import type { SignatureIdFromServer } from '@/types/identifiers/SignatureId';
 import type { AdminerFilterQueryState } from '@/types/adminer/ReducerTypes';
 import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
@@ -23,11 +23,9 @@ function getPropertiesFromAccessPath(
     if ('signature' in accessPath && accessPath.signature !== 'EMPTY')
         properties.add({ name: accessPath.name, signature: getLastBase(accessPath.signature) });
 
-
     if ('subpaths' in accessPath && Array.isArray(accessPath.subpaths)) {
         for (const subpath of accessPath.subpaths)
             getPropertiesFromAccessPath(subpath, properties);
-
     }
 
     return properties;
@@ -40,7 +38,6 @@ function addReferences(
     sourceMapping: MappingInit,
     targetProperties: SimplePropertyFromServer[],
     sourceProperties: SimplePropertyFromServer[],
-    primaryKeyInTarget: boolean,
 ) {
     for (const key of primaryKeys) {
         const keyLastBase = getLastBase(key);
@@ -53,13 +50,35 @@ function addReferences(
             .filter(mappingProp => mappingProp.signature === keyLastBase && 'value' in mappingProp.name)
             .forEach(mappingProp => {
                 const mappingPropertyValue = (mappingProp.name as StaticNameFromServer).value;
+
+                let referencingProperty = mappingPropertyValue;
+
+                if (sourceMapping.kindName.toUpperCase() === sourceMapping.kindName
+                    && mappingPropertyValue.includes('.') )
+                    referencingProperty = mappingPropertyValue.slice(mappingPropertyValue.lastIndexOf('.') + 1);
+
                 references.push({
                     referencedDatasourceId: targetMapping.datasourceId,
                     referencedKindName: targetMapping.kindName,
-                    referencedProperty: primaryKeyInTarget ? keyPropertyValue : mappingPropertyValue,
+                    referencedProperty: keyPropertyValue,
                     referencingDatasourceId: sourceMapping.datasourceId,
                     referencingKindName: sourceMapping.kindName,
-                    referencingProperty: primaryKeyInTarget ? mappingPropertyValue : keyPropertyValue,
+                    referencingProperty: referencingProperty,
+                });
+
+                let referencedProperty = keyPropertyValue;
+
+                if (targetMapping.kindName.toUpperCase() === targetMapping.kindName
+                    && keyPropertyValue.includes('.') )
+                    referencedProperty = keyPropertyValue.slice(keyPropertyValue.lastIndexOf('.') + 1);
+
+                references.push({
+                    referencedDatasourceId: sourceMapping.datasourceId,
+                    referencedKindName: sourceMapping.kindName,
+                    referencedProperty: mappingPropertyValue,
+                    referencingDatasourceId: targetMapping.datasourceId,
+                    referencingKindName: targetMapping.kindName,
+                    referencingProperty: referencedProperty,
                 });
             });
     }
@@ -75,9 +94,7 @@ function addMappingReferences(
     const mappingPropertiesArray = Array.from(mappingPathProperties);
     const kindPropertiesArray = Array.from(kindProperties);
 
-    addReferences(references, kindMapping.primaryKey, kindMapping, mapping, kindPropertiesArray, mappingPropertiesArray, true);
-
-    addReferences(references, mapping.primaryKey, mapping, kindMapping, mappingPropertiesArray, kindPropertiesArray, false);
+    addReferences(references, kindMapping.primaryKey, kindMapping, mapping, kindPropertiesArray, mappingPropertiesArray);
 
     return references;
 }
@@ -100,24 +117,48 @@ async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryFrom
     return schemaCategoryResponse.data;
 }
 
+function prefixSubpathNames(subpath: ChildPropertyFromServer, prefix: string, level: number): ChildPropertyFromServer {
+    let prefixedName: NameFromServer = subpath.name;
+    if ('value' in subpath.name && level > 0)
+        prefixedName = { value: `${prefix}.${subpath.name.value}`, type: subpath.name.type };
+
+    if ('subpaths' in subpath) {
+        return {
+            ...subpath,
+            name: prefixedName,
+            subpaths: subpath.subpaths.map(child => prefixSubpathNames(child, prefix, level + 1)),
+        };
+    }
+    else {
+        return {
+            ...subpath,
+            name: prefixedName,
+        };
+    }
+}
+
 function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
     return mappings.flatMap((mapping: MappingFromServer) => {
         let fromSubpath: ComplexPropertyFromServer | null = null;
         let toSubpath: ComplexPropertyFromServer | null = null;
-        const otherSubpaths: ChildPropertyFromServer[] = [];
+        const allSubpaths: ChildPropertyFromServer[] = [];
 
-        for (const subpath of mapping.accessPath.subpaths) {
+        for (let subpath of mapping.accessPath.subpaths) {
             if (subpath.name && (subpath.name as StaticNameFromServer).type === 'STATIC') {
                 const nameValue = (subpath.name as StaticNameFromServer).value;
-                if (nameValue.startsWith('_from.'))
+                if (nameValue.startsWith('_from.')) {
                     fromSubpath = subpath as ComplexPropertyFromServer;
-                else if (nameValue.startsWith('_to.'))
+                    subpath = prefixSubpathNames(subpath, 'startNode', 0);
+                }
+                else if (nameValue.startsWith('_to.')) {
                     toSubpath = subpath as ComplexPropertyFromServer;
-                else
-                    otherSubpaths.push(subpath);
+                    subpath = prefixSubpathNames(subpath, 'endNode', 0);
+                }
+
+                allSubpaths.push(subpath);
             }
             else {
-                otherSubpaths.push(subpath);
+                allSubpaths.push(subpath);
             }
         }
 
@@ -163,7 +204,7 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
                 accessPath: {
                     name: mapping.accessPath.name,
                     signature: mapping.accessPath.signature,
-                    subpaths: otherSubpaths,
+                    subpaths: allSubpaths,
                 },
             });
         }
@@ -191,7 +232,7 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
         const schemaCategory = await getSchemaCategory(kindMapping.categoryId);
 
         const schemaCategoryMappings = mappings.filter(mapping =>
-            mapping.categoryId === schemaCategory.id );
+            mapping.categoryId === schemaCategory.id);
 
         const mappingPathProperties = getPropertiesFromAccessPath(kindMapping.accessPath, new Set<SimplePropertyFromServer>());
 

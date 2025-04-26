@@ -364,14 +364,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         }
 
         List<GraphElement> data = session.executeRead(tx -> {
-            var query = new Query("MATCH ()-[r]->() " + whereClause.toString() + " RETURN r SKIP " + offset + " LIMIT " + limit + ";");
+            var query = new Query("MATCH (startNode)-[r]->(endNode) " + whereClause.toString() + " RETURN startNode, r, endNode SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
-                .map(relation -> Neo4jAlgorithms.getRelationshipProperties(relation.get("r")))
+                .map(relation -> Neo4jAlgorithms.getRelationshipProperties(relation.get("r"), relation.get("startNode"), relation.get("endNode")))
                 .toList();
         });
 
-        Result countQueryResult = session.run("MATCH ()-[r]->() " + whereClause + " RETURN COUNT(r) AS recordCount;");
+        Result countQueryResult = session.run("MATCH (startNode)-[r]->(endNode) " + whereClause + " RETURN COUNT(r) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
         Set<String> properties = Neo4jAlgorithms.getRelationshipPropertyNames(session, kindName);
@@ -410,8 +410,32 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @param kindName     The name of the kind.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
-        // No foreign keys can be fetched right from Neo4j
-        return new ArrayList<>();
+        try (Session session = provider.getSession()) {
+            List<Reference> references = new ArrayList<>();
+
+            Result result = session.run("MATCH (a)-[r]->(b) RETURN DISTINCT labels(a) as startNodeLabels, type(r) as relationshipType, labels(b) as endNodeLabels;");
+            while (result.hasNext()) {
+                Record reference = result.next();
+                String relationshipType = reference.get("relationshipType").asString();
+
+                List<String> startNodeLabels = reference.get("startNodeLabels").asList(Value::asString);
+
+                for (String startNodeLabel: startNodeLabels) {
+                    references.add(new Reference(datasourceId, startNodeLabel, "#elementId", datasourceId, relationshipType, "#startNodeId"));
+                }
+;
+                List<String> endNodeLabels = reference.get("endNodeLabels").asList(Value::asString);
+
+                for (String endNodeLabel: endNodeLabels) {
+                    references.add(new Reference(datasourceId, endNodeLabel, "#elementId", datasourceId, relationshipType, "#endNodeId"));
+                }
+            }
+
+            return references;
+        }
+        catch (Exception e){
+            throw PullForestException.innerException(e);
+        }
     }
 
     /**

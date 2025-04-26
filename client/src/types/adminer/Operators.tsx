@@ -63,7 +63,7 @@ const NEO4J_OPERATOR: OperatorLabels = {
 };
 
 export const getNeo4jOperators = (propertyName: string): OperatorLabels =>
-    propertyName === '#labels - SIZE' ? COMMON_OPERATORS : NEO4J_OPERATOR;
+    propertyName.startsWith('#') && propertyName.endsWith(' - SIZE') ? COMMON_OPERATORS : NEO4J_OPERATOR;
 
 export const OPERATOR_MAPPING: Partial<Record<DatasourceType, (propertyName: string) => OperatorLabels>> = {
     [DatasourceType.postgresql]: () => POSTGRESQL_OPERATOR,
