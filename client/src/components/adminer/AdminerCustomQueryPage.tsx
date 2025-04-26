@@ -16,12 +16,11 @@ import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } fr
 import { api } from '@/api';
 import { EXAMPLE_QUERY } from '@/components/adminer/Queries';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
-import { DatabaseTable } from '@/components/adminer/DatabaseTable';
-import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { View } from '@/types/adminer/View';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
-import type { DataResponse, DocumentResponse, ErrorResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
+import type { DataResponse, ErrorResponse } from '@/types/adminer/DataResponse';
 import type { Theme } from '@/components/PreferencesProvider';
+import { CustomQueryDatabaseView } from './CustomQueryDatabaseView';
 
 type AdminerCustomQueryPageProps = Readonly<{
     datasource: Datasource;
@@ -154,57 +153,8 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 </>)}
 
                 {queryResult && 'data' in queryResult && (
-                    <>
-                        {(() => {
-                            switch (datasource.type) {
-                            case DatasourceType.mongodb:
-                                return (
-                                    <DatabaseDocument
-                                        fetchedData={queryResult as DocumentResponse}
-                                        kindReferences={[]}
-                                        kind={''}
-                                        datasourceId={datasource.id}
-                                        datasources={datasources}
-                                    />
-                                );
-                            case DatasourceType.neo4j:
-                                return (
-                                    <>
-                                        {view === View.document ? (
-                                            <DatabaseDocument
-                                                fetchedData={queryResult as GraphResponse}
-                                                kindReferences={[]}
-                                                kind={''}
-                                                datasourceId={datasource.id}
-                                                datasources={datasources}
-                                            />
-                                        ) : (
-                                            <DatabaseTable
-                                                fetchedData={queryResult as GraphResponse}
-                                                kindReferences={[]}
-                                                kind={''}
-                                                datasourceId={datasource.id}
-                                                datasources={datasources}
-                                            />
-                                        )}
-
-                                    </>
-                                );
-                            default:
-                                return (
-                                    <DatabaseTable
-                                        fetchedData={queryResult as TableResponse}
-                                        kindReferences={[]}
-                                        kind={''}
-                                        datasourceId={datasource.id}
-                                        datasources={datasources}
-                                    />
-                                );
-                            }
-                        })()}
-                    </>
+                    <CustomQueryDatabaseView queryResult={queryResult} datasource={datasource} datasources={datasources} view={view} />
                 )}
-
 
             </div>
         </div>
