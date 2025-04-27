@@ -39,7 +39,6 @@ class SchemaSetup extends SchemaBase {
         // Comment
         addObject(Schema.comment, 1, 0);
         addMorphism(Schema.commentToUser);
-        addMorphism(Schema.commentToBusiness);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.commentId, 1, -1);
             addMorphism(Schema.commentToCommentId);
@@ -60,6 +59,7 @@ class SchemaSetup extends SchemaBase {
 
         // Business
         addObject(Schema.business, -1, 1);
+        addMorphism(Schema.commentToBusiness);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.businessId, -2, 1);
             addMorphism(Schema.businessToBusinessId);
@@ -94,12 +94,8 @@ class SchemaSetup extends SchemaBase {
         addIds(Schema.attributes);
 
         // Business Hours
-        addComposite(ADD_SET, () -> {
-            addObject(Schema.businessHours, 2, 1);
-            addMorphism(Schema.businessHoursToBusiness);
-            addMorphism(Schema.businessHoursToBusinessId);
-            addIds(Schema.businessHours);
-        });
+        addObject(Schema.businessHours, 2, 1);
+        addMorphism(Schema.businessHoursToBusiness);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.businessHoursId, 3, 1);
             addMorphism(Schema.businessHoursToBusinessHoursId);
@@ -108,6 +104,7 @@ class SchemaSetup extends SchemaBase {
             addObject(Schema.hours, 4, 1);
             addMorphism(Schema.businessHoursToHours);
         });
+        addIds(Schema.businessHours);
 
         // Friend
         addObject(Schema.friend, -1, -2);
