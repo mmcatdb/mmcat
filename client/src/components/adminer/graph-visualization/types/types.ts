@@ -15,6 +15,10 @@ export type BasicRelationship = {
     endNodeId: string;
     type: string;
     properties: Record<string, string>;
+    startNodeLabel: string[];
+    endNodeLabel: string[];
+    startNodeProperties: Record<string, string>;
+    endNodeProperties: Record<string, string>;
   };
 
 export type BasicNodesAndRels = {

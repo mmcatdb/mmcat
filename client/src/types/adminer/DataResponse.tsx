@@ -31,16 +31,24 @@ export type GraphResponse = {
     data: GraphResponseData[];
 };
 
-export type GraphResponseData = {
+export type GraphResponseData = GraphNode | GraphRelationship;
+
+type GraphNode = {
     '#elementId': string;
     properties: Record<string, unknown>;
     '#lables': string[];
     [key: string]: unknown;
-} | {
+};
+
+export type GraphRelationship = {
     '#elementId': string;
     properties: Record<string, unknown>;
     '#startNodeId': string;
     '#endNodeId': string;
+    '#labelsStartNode': string[];
+    '#labelsEndNode': string[];
+    startNode: Record<string, unknown>;
+    endNode: Record<string, unknown>;
     [key: string]: unknown;
 };
 

@@ -3,7 +3,7 @@ import { ArcThemeProvider } from '@/components/adminer/graph-visualization/compo
 import { StyledVisContainer } from '@/components/adminer/graph-visualization/VisualizationView.styled';
 import { GraphVisualizer } from '@/components/adminer/graph-visualization/GraphVisualizer';
 import type { BasicNode, BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
-import type { GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
+import type { GraphRelationship, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 
 function getNodes(data: GraphResponseData[]): BasicNode[] {
     const nodes: BasicNode[] = [];
@@ -26,7 +26,7 @@ function getNodes(data: GraphResponseData[]): BasicNode[] {
             const startNode: BasicNode = {
                 id: element['#startNodeId'] as string,
                 elementId: element['#startNodeId'] as string,
-                labels: [ element['#startNodeId'] as string ],
+                labels: element['#labelsStartNode'] as string[],
                 properties: {},
             };
             nodes.push(startNode);
@@ -34,7 +34,7 @@ function getNodes(data: GraphResponseData[]): BasicNode[] {
             const endNode: BasicNode = {
                 id: element['#endNodeId'] as string,
                 elementId: element['#endNodeId'] as string,
-                labels: [ element['#endNodeId'] as string ],
+                labels: element['#labelsEndNode'] as string[],
                 properties: {},
             };
             nodes.push(endNode);
@@ -47,18 +47,31 @@ function getRelationships(data: GraphResponseData[], type: string): BasicRelatio
     const relationships: BasicRelationship[] = [];
     for (const element of data) {
         if ('#startNodeId' in element) {
-            const properties: Record<string, string> = {};
+            const relation: GraphRelationship = element as GraphRelationship;
 
-            for (const [ key, value ] of Object.entries(element.properties))
+            const properties: Record<string, string> = {};
+            for (const [ key, value ] of Object.entries(relation.properties))
                 properties[key] = value as string;
 
+            const startNodeProperties: Record<string, string> = {};
+            for (const [ key, value ] of Object.entries(relation.startNode))
+                startNodeProperties[key] = value as string;
+
+            const endNodeProperties: Record<string, string> = {};
+            for (const [ key, value ] of Object.entries(relation.endNode))
+                endNodeProperties[key] = value as string;
+
             const relationship: BasicRelationship = {
-                id: element['#elementId'],
-                elementId: element['#elementId'],
-                startNodeId: element['#startNodeId'] as string,
-                endNodeId: element['#endNodeId'] as string,
+                id: relation['#elementId'],
+                elementId: relation['#elementId'],
+                startNodeId: relation['#startNodeId'],
+                endNodeId: relation['#endNodeId'],
                 type: type,
                 properties: properties,
+                startNodeLabel: relation['#labelsStartNode'],
+                endNodeLabel: relation['#labelsEndNode'],
+                startNodeProperties: startNodeProperties,
+                endNodeProperties: endNodeProperties,
             };
             relationships.push(relationship);
         }
