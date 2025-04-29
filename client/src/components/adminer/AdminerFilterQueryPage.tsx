@@ -94,7 +94,14 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
     }, [ paginationState.totalPages, paginationState.currentPage, paginationState.itemCount, state.active.limit ]);
 
     const fetchFunction = useCallback(() => {
-        return api.adminer.getKind({ datasourceId: state.datasourceId!, kindName: state.kindName! }, getQueryParams(state.active));
+        if (!state.datasourceId || !state.kindName) {
+            return Promise.resolve({
+                status: false as const,
+                error: undefined,
+            });
+        }
+
+        return api.adminer.getKind({ datasourceId: state.datasourceId, kindName: state.kindName }, getQueryParams(state.active));
     }, [ state.datasourceId, state.kindName, state.active ]);
 
     const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);
