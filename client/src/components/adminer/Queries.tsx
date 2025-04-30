@@ -1,5 +1,7 @@
 import { DatasourceType } from '@/types/datasource';
 
+// FIXME Toto bych dal do CustomQueryPage. Nebo mi to minimálně neměl být .tsx soubor.
+
 export const EXAMPLE_QUERY: Record<DatasourceType, string> = {
     [DatasourceType.neo4j]: 'MATCH (u)-[:FRIEND]->(f)-[:FRIEND]->(fof) WHERE f.id = \'user_005\' RETURN u, f, fof;',
     [DatasourceType.mongodb]: '{"find": "business", "filter": {"attributes.wifi": "free"}}',

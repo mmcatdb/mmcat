@@ -5,6 +5,7 @@ export function LinkLengthSwitch() {
     const { preferences, setPreferences } = usePreferences();
     const { adminerShortLinks: adminerShortRefs } = preferences;
 
+    // FIXME Funkce místo arrow funkce.
     const handleChange = (isChecked: boolean) => {
         setPreferences({ ...preferences, adminerShortLinks: isChecked });
     };

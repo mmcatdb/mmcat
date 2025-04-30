@@ -29,7 +29,9 @@ type AdminerCustomQueryPageProps = Readonly<{
 }>;
 
 export function AdminerCustomQueryPage({ datasource, datasources, theme }: AdminerCustomQueryPageProps) {
+    // FIXME Konstanty definujte mimo komponenty. Takhle se musí vytvářet znovu při každém renderu. Teď to sice nevadí, ale pokud by se např. předávaly do dalších komponent, které by se potom musely přerenderovávat, tak by to byl problém.
     const availableViews = [ View.table, View.document ];
+    // FIXME U setState není (typicky) potřeba definovat typ. TS ho dopočítá podle hodnoty (pokud máte počáteční hodnotu).
     const [ view, setView ] = useState<View>(View.table);
     const [ queryResult, setQueryResult ] = useState<DataResponse | ErrorResponse>();
     const [ searchParams ] = useSearchParams();
@@ -40,6 +42,7 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
     const queryRef = useRef(query);
 
     const onQueryChange = useCallback((newQuery: string) => {
+        // FIXME Toto je trochu hack, jak zařídit, aby nebylo nutné měnit execute a tedy celé extensions při každém renderu. Hodil by se vysvětlující komentář.
         queryRef.current = newQuery;
         setQuery(newQuery);
     }, []);
@@ -117,7 +120,9 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 SHOW QUERY EXAMPLE
             </Button>
 
+
             {datasource.type === DatasourceType.neo4j && (
+                // FIXME Záleží toto na neo4j? Nebo na tom, že daný datasource umožňuje více views?
                 <Select
                     items={availableViews.entries()}
                     label='View'

@@ -4,6 +4,9 @@ import type { Datasource } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
 import type { Id } from '@/types/id';
 
+// FIXME Tyto typy bych spíš přímo do reduceru. Nejedná se totiž o žádnou samostatnou logiku, ale o něco, co přímo souvisí s vnitřním fungováním reduceru. Takže bude přehlednější mít to na jednom místě.
+// To samé pro pagination.
+
 export type AdminerFilterQueryState = ActiveAdminerState & {
     form: KindFilterState;
 };

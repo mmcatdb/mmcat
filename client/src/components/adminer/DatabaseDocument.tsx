@@ -15,6 +15,7 @@ type DatabaseDocumentProps = Readonly<{
 
 export function DatabaseDocument({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
     return (
+        // FIXME Proč testujete fetched data? Podle props jsou vždy definovaná. Jinak bych opět použil early return na prázdnou odpověď.
         <>
             {fetchedData && fetchedData.data.length > 0 ? (
                 <div className='grow mt-2'>

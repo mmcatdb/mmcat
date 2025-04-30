@@ -7,6 +7,7 @@ const adminer = {
     getKindNames: GET<{ datasourceId: StringLike }, KindNameResponse>(
         u => `/adminer/${u.datasourceId}`,
     ),
+    // FIXME Toto je spíš drobnost, nicméně kindName by se neměl předávat v path části url, protože může teoreticky obsahovat nevalidní znaky či věci typu /, #, ?, atd. Neříkám, že to je časté, ale může to nastat. Takže by se to spíš mělo předávat v search části.
     getKind: GET<{ datasourceId: StringLike, kindName: StringLike }, DataResponse, QueryParams>(
         u => `/adminer/${u.datasourceId}/${u.kindName}`,
     ),

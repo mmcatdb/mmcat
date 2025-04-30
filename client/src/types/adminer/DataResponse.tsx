@@ -1,3 +1,6 @@
+// FIXME Opět to samé co na BE. Navíc tu máte pouze GraphNode a GraphRelationship, ne ExtendedGraphRelationship. Proč jsou na BE tři typy a tady pouze dva?
+// Nejspíš bych ještě do každého typu přidal property "type", která bude buď table, document, nebo graph. Teď se to dá sice vyčíst z dat, ale nejde to úplně snadno.
+
 export type DataResponse = TableResponse | DocumentResponse | GraphResponse;
 
 export type KindNameResponse = {

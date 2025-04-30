@@ -59,6 +59,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
     const { references, referencesLoading } = useFetchReferences(state);
 
     useEffect(() => {
+        // FIXME Tuto kontrolu můžete provést v reduceru, kde máte k dispozici celý stav. Teď tady dostávám eslint warning na dependency array.
         if (state.datasourceId !== datasource.id)
             dispatch({ type:'datasource', newDatasource: datasource });
     }, [ datasource ]);
@@ -72,12 +73,18 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
     }, [ searchParams ]);
 
     // Update URL search parameters whenever state changes
+    // FIXME Toto se provádí i když se změní searchParams, ne jen state. Nicméně potom nikdy nebude platit searchParamsRef.current == searchParams, čili se to stejně neprovede. Takže bych to vyřadil z dependency array. Nešlo by vyřadit i tu podmínku 'searchParamsRef.current == searchParams'?
     useEffect(() => {
         if (stateRef.current != state && searchParamsRef.current == searchParams) {
             setSearchParams(getURLParamsFromFilterQueryState(state));
             stateRef.current = state;
         }
     }, [ state, searchParams ]);
+
+    // FIXME Toto mi nepřijde úplně ideální. Hook useEffect je poslední možnost, pokud ostatní nefungují, ne default.
+    // Dále, máte tu spoustu logiky z pagination. To má být naopak. V reduceru řešíte logiku, a tady máte jen "hloupé" volání dispatchu.
+    // Nedává moc smysl mít useEffect, který reaguje na změnu stavu a rovnou volá dispatch. To se potom mělo vyřešit už v té počáteční změně stavu. Nebo dokonce dva dispatche hned za sebou, jak máte v Pagination.
+    // Také je trochu neideální, jak mezi sebou dva reducery interagují. Spíš bych doporučoval přesunout pagination jako jednu property do stavu hlavního reduceru.
 
     useEffect(() => {
         dispatch({ type: 'input', field: 'offset', value: paginationState.offset });
@@ -115,6 +122,8 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
         paginationDispatch({ type: 'itemCount', newItemCount: count ?? 0 });
     }, [ fetchedData ]);
 
+    // FIXME useMemo.
+    // U funkcí, které něco počítají, bych spíš zvolil název "computeKindReferences".
     useEffect(() => {
         if (state.datasourceId && state.kindName)
             setKindReferences(getKindReferences(references, state.datasourceId, state.kindName));
@@ -135,6 +144,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
                 </div>
 
                 {datasource && state.kindName && typeof state.kindName === 'string' && paginationState.itemCount !== undefined && paginationState.itemCount > 0 && (
+                    // FIXME Co jiného než string by to mohlo být?
                     <div className='inline-flex gap-2 items-center self-end'>
                         {state.view !== View.graph && (
                             <>
@@ -166,6 +176,8 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
             </div>
 
             {state.kindName && error ? (
+                // FIXME Error a loading bych řešil výše a rovnou vrátil chybovou hlášku / spinner.
+                // Podle props je datasource vždy definovaný, takže bych ho tady nekontroloval.
                 <p>{error}</p>
             ) : (
                 <>

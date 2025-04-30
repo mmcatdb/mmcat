@@ -31,6 +31,7 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
     if (error)
         return <p>{error}</p>;
 
+    // FIXME toto můžete dát do useMemo
     const selectItems: KindLabelValues = [];
     if (fetchedData && fetchedData.data.length > 0) {
         fetchedData.data.forEach(name => (
@@ -42,6 +43,7 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
     }
 
     return (
+        // FIXME early return jako jinde
         fetchedData && fetchedData.data.length > 0 ? (
             <Select
                 items={selectItems}

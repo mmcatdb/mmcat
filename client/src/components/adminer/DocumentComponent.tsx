@@ -16,8 +16,11 @@ function getColor(value: string): string {
 }
 
 type DocumentComponentProps = Readonly<{
+    // FIXME Může toto být něco jiného než string nebo null? Jinak, spíš bych používal undefined.
+    // Tím se vám zjednoduší hodně "as" statementů níže.
     valueKey: unknown;
     value: unknown;
+    // FIXME V mnoha komponentách předáváte tyto čtyři props. Předával bych je tedy jako jeden objekt.
     kindReferences: KindReference[];
     kind: string;
     datasourceId: Id;
@@ -28,6 +31,7 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
     const [ isOpen, setIsOpen ] = useState(true);
 
     try {
+        // FIXME Toto určitě nedělejte. Vytvořte novou proměnnou "parsedValue".
         value = JSON.parse(value as string);
     }
     catch {
@@ -53,6 +57,8 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
 
                 <ul>
                     {Object.entries(value)
+                        // FIXME Toto bych taky zobrazoval. V mongu má sice speciální význam, ale není to nic tajného.
+                        // Pokud už byste chtěla něco skrývat, tak pomocí funkce která podle typu datasourcu rozhodne, co skrýt.
                         .filter(([ key ]) => key !== '_id')
                         .map(([ key, val ]) => (
                             <li className='ps-8' key={key}>

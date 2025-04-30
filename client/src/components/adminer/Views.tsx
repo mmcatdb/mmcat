@@ -1,6 +1,8 @@
 import { View } from '@/types/adminer/View';
 import { DatasourceType } from '@/types/datasource';
 
+// FIXME Opět .ts
+
 export const AVAILABLE_VIEWS: Record<DatasourceType, View[]> = {
     [DatasourceType.neo4j]: [ View.table, View.document, View.graph ],
     [DatasourceType.mongodb]: [ View.document ],

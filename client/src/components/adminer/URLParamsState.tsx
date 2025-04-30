@@ -43,6 +43,7 @@ export function getURLParamsFromCustomQueryState(query: string, datasource: Data
     return params;
 }
 
+// FIXME Využijete nějak AdminerFilterQueryState?
 export function getURLParamsFromFilterQueryState(state: AdminerFilterQueryState | ActiveAdminerState): URLSearchParams {
     const params = getParamsWithQueryType(QueryType.filter);
 
@@ -88,6 +89,8 @@ export function getFilterQueryStateFromURLParams(params: URLSearchParams): Admin
     const view = Object.values(View).includes(viewParam as View)
         ? (viewParam as View)
         : View.table;
+        // FIXME Toto je trochu divné, proč sestavujete json a rovnou jej parsujete?
+        // Filters obsahují limit a offset, ale zároveň i pole filters? Co je tedy ten filter?
     const filters: KindFilterState = JSON.parse(`{"limit":${params.get('limit') ?? 50},"offset":${params.get('offset') ?? 0},"filters":${params.get('filters') ?? '[]'}}`) as KindFilterState;
 
     return {

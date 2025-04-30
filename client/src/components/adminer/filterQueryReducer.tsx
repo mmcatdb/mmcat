@@ -8,6 +8,7 @@ export function filterQueryReducer(state: AdminerFilterQueryState, action: Admin
     switch (action.type) {
     case 'initialize': {
         return {
+            // FIXME Máte tu spoustu magických čísel (myslím 50, ne 0). Nahraďte je konstantami. Nepoužívají se náhodou i jinde?
             form: { limit: 50, offset: 0, filters: [] },
             active: { limit: 50, offset: 0, filters: [] },
             view: View.table,

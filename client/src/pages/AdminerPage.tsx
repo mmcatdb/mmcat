@@ -43,6 +43,7 @@ export function AdminerPage() {
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}>
                 {allDatasources ? (
+                    // FIXME Pokud v případě, že datasources nejsou k dispozici, nedává smysl zobrazit nic kromě spinneru, můžete to řešit už na řádku 38 a rovnou vrátit div se spinnerem.
                     <>
                         <DatasourceMenu setDatasource={setDatasource} datasourceId={datasource?.id} datasources={allDatasources}/>
 
@@ -54,8 +55,14 @@ export function AdminerPage() {
                                     {Object.values(QueryType).map(queryType => (
                                         <Button
                                             size='sm'
+                                            // FIXME Toto je drobnost, ale aria-label se používá jako dodatečná informace pro tlačítko. Měl by tedy popisovat, co tlačítko dělá, tj. by neměl být stejný pro obě tlačítka.
+                                            // Nicméně pokud máte v tlačítku text (což teď máte), tak je to redundantní a je lepší ho vynechat. Hodí se spíš pro tlačítka, která mají jen ikonu či obrázek.
+                                            // Opravil bych to všude v kódu.
                                             aria-label='Query type'
+                                            // FIXME Jaký formulář totot tlačítko submituje? Taky bych to sem nedával.
+                                            // Opravil bych to všude v kódu.
                                             type='submit'
+                                            // FIXME Aktuální query type si spočítejte někde najednou a pak to použijte tady i o pár řádků níž.
                                             variant={queryType === getQueryTypeFromURLParams(searchParams) ? 'solid' : 'ghost'}
                                             key={queryType}
                                             onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
@@ -79,6 +86,7 @@ export function AdminerPage() {
 
             {datasource && (
                 getQueryTypeFromURLParams(searchParams) === QueryType.custom ? (
+                    // FIXME Pointou contextu v reactu je, že ho můžete používat kdekoli ve stromu komponent, a nemusíte ho předávat jako props. Tedy příslušné komponenty by si měly téma zjistit samy.
                     <AdminerCustomQueryPage datasource={datasource} datasources={allDatasources} theme={theme}/>
                 ) : (
                     <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources} theme={theme}/>

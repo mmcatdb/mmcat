@@ -164,6 +164,8 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
 
         const newMappings: MappingInit[] = [];
 
+        // FIXME Tento kód obsahuje celkem dost duplikací. Dále, _from a _to bych řešil konstantami. Ani nepotřebujete regex, stačí ověřit že strin začíná na daný prefix (value.startsWith()) a následně použít substring.
+
         if (fromSubpath) {
             newMappings.push({
                 categoryId: mapping.categoryId,

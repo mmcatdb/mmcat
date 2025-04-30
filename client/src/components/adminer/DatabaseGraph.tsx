@@ -88,6 +88,10 @@ export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
     const [ nodes, setNodes ] = useState<BasicNode[]>(getNodes(fetchedData ? fetchedData.data : []));
     const [ relationships, setRelationships ] = useState<BasicRelationship[]>(getRelationships(fetchedData ? fetchedData.data : [], kind));
 
+    // FIXME Pokud chcete jen něco spočítat, použijte useMemo.
+    // Dále, teď se děje to, že při každém renderu se znovu počítají všechny nodes a relationships. Pokud byste chtěla nastavit počáteční hodnotu ve stavu, ale tak, aby se spočítala jen jednou, dá se to pomocí funkce místo hodnoty:
+    // const [ nodes, setNodes ] = useState(() => getNodes(fetchedData ? fetchedData.data : []));
+    // Nicméně teď tu použijte to useMemo.
     useEffect(() => {
         if (fetchedData?.data) {
             setNodes(getNodes(fetchedData.data));

@@ -11,6 +11,9 @@ type CustomQueryDatabaseViewProps = Readonly<{
     view: View;
 }>;
 
+// FIXME Jak se toto liší od DatabaseView? Jako mohlo by to být že tu zavoláte DatabaseView a předáte mu kind='', kindReferences=[], ale jinak je to stejné, ne?
+// Každopádně by se mělo rozhodovat podle view, ne podle datasource.type.
+// Je zvláštní, že neo4j nepodporuje graf. Nešlo by to fixnout tak, aby to podporovalo?
 export function CustomQueryDatabaseView({ queryResult, datasource, datasources, view }: CustomQueryDatabaseViewProps) {
     switch (datasource.type) {
     case DatasourceType.mongodb:

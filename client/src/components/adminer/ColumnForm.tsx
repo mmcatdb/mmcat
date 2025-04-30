@@ -12,6 +12,7 @@ type ColumnFormProps = Readonly<{
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 
+// FIXME Co znamená column v tomto kontextu? Používal bych spíš "Property". Nicméně tady jde rovnou i o filtr, takže třeba "FilterCondition" nebo "PropertyFilter"?
 export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: ColumnFormProps) {
     const operators = typeof OPERATOR_MAPPING[datasourceType] === 'function' && filter.propertyName
         ? OPERATOR_MAPPING[datasourceType]?.(filter.propertyName)

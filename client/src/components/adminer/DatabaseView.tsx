@@ -9,7 +9,10 @@ import type { KindReference } from '@/types/adminer/AdminerReferences';
 
 type DatabaseViewProps = Readonly<{
     view: View;
+    // FIXME V tuto chvíli nevíte nic o fečování - data mohla přijít odkudkoliv. Takže už bych tomu neříkal fetchedData.
     fetchedData: DataResponse;
+    // FIXME Proč jsou references optional a následně níže povinné? Pokud můžou být undefined, tak by to mělo být řešeno. Pokud nemůžou, neměly by být ani v těchto props.
+    // To samé platí pro datasourceId a datasources.
     kindReferences: KindReference[] | undefined;
     kindName: string;
     datasourceId: Id | undefined;

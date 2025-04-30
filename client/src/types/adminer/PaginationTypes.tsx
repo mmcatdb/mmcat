@@ -1,5 +1,7 @@
 import type { AdminerTypedAction } from '@/types/adminer/ReducerTypes';
 
+// FIXME Není nutné pojmenovávat typové soubory "-Types".
+
 export type PaginationState = {
     currentPage: number;
     offset: number;

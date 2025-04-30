@@ -19,6 +19,7 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
 
     // If the data are for graph database, we want to display each property in its own column
     if (fetchedData.data.every((item: Record<string, string> | GraphResponseData) => 'properties' in item)) {
+        // FIXME Toto bych spíš řešil tak, že table dokáže zobrazit jen TableResponse, a o komponent výše se postaráte o tuto transformaci. Ta totiž může souviset např. se stránkováním a dalšími věcmi, které byste neměla řešit tady.
         const modifiedData = { metadata: fetchedData.metadata, data: [] } as TableResponse;
 
         for (const element of fetchedData.data) {
@@ -52,6 +53,8 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
     const propertyNames: string[] = fetchedData.data.length > 0 ? keys : [];
 
     return (
+        // FIXME fetchedData je vždy defined.
+        // Pokud vytváříte objekt, je přehlednější psát { property } než { property: property }.
         <>
             {fetchedData && (
                 <Table isStriped isCompact aria-label='Table'>
