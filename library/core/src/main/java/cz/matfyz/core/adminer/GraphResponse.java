@@ -26,6 +26,10 @@ public class GraphResponse extends DataResponse {
         Map<String, Object> properties();
     }
 
+// FIXME Toto se mi příliš nelíbí, protože to je velmi specifické pro neo4j. Jako tady je každá node či relationship de facto dokument, který může mít úplně libovolné věci (v závislosti na dané databázi). Spíš by mi dávalo smysl vytvořit nějaká "obecná" grafová data, která lze použít v každé databázi, a k nim přidat libovolná specifická data.
+// Např. si řekntete, že graf má množinu nodes a relationships. Takže místo List<GraphElement> vrátíte List<Node> a List<Relationship>. Dále, každá Node bude mít nějaké id, zatímco relationship bude mít id a dále id obou nodes. Každý také může mít Map<String, Object> properties.
+// No a na FE potom budete řešit, že konkrétní název "#elementId" (pro neo4j) odpovídá "id dané node" a podobně. Nicméně to myslím stačí řešit jen u filtračních funkcí a tak, ne nutně všude.
+
     public record GraphNode(
         @JsonProperty("#elementId") String elementId,
         @JsonProperty("properties") Map<String, Object> properties,

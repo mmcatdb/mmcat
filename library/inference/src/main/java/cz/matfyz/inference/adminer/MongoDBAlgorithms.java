@@ -15,6 +15,9 @@ import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+// FIXME Tento kód by měl být přímo v MongoDBPullWrapper-u. To je přesně ten point wrapperů - jsou specifické pro danou databázi. Všechen ostatní kód v library by měl být obecný.
+// Pokud se jedná o utility metody, které můžou potenciálně využít i další wrappery pro mongo, můžete je dát do souboru typu MongoDBUtils.java. Ale určitě by to mělo být v package wrappermongodb.
+
 public final class MongoDBAlgorithms {
     private MongoDBAlgorithms() {}
 

@@ -4,6 +4,9 @@ package cz.matfyz.core.adminer;
  * The Reference class represents a reference in a database.
  * It encapsulates information about the referencing and referenced kind and property and the ID of datasource.
  */
+// FIXME Tato třída je zřejmě jen DTO. Tedy bych z toho udělal record.
+// Dále, je zbytečně složitá. Ideálně bych vyrobil recored ReferenceKind, který bude mít datasourceId, kindName a property. A Reference bude mít dva ReferenceKindy.
+// Ty bych pojmenoval "from" a "to", to je mnohem jasnější a rozdílnější než "referenced" a "referencing".
 public class Reference {
     private String referencedDatasourceId;
     private String referencedKindName;

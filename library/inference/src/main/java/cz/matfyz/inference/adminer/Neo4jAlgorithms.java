@@ -26,6 +26,11 @@ public final class Neo4jAlgorithms implements AdminerAlgorithmsInterface {
 
     private Neo4jAlgorithms() {}
 
+    // FIXME Většina těchto @return komentářů je zbytečná. Naopak ještě potenciálně zhoršují rozšiřitelnost, protože pokud se změní funkce, tak se musí opravit i komentář.
+    // Javadoc věci typu @param či @return má smysl používat pouze tehdy, když obsahují nějakou netriviální informaci, která není zřejmá z názvu metody či parametru.
+    // Např. "@return A {@link GraphElement} containing the relationship's ID and properties." je zbytečné, protože to, co obsahuje GraphElement, je jasně definováno už v GraphElementu ...
+    // Naopak přínosné použití @return by mohlo být např. u metody "getSampleGraphElement", kde bychom měli upřesnění: "@return The first eligible GraphElement (has at least one nonempty string property) found in the collection, or null if none is found.". Protože to říká něco, co není zřejmé z názvu metody.
+
     /**
      * Retrieves the singleton instance of {@link Neo4jAlgorithms}.
      *

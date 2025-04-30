@@ -300,6 +300,13 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         }
     }
 
+    // FIXME V pull wrapperech byly public metody, které akceptovaly nějaké obecné query, které se pak přeložilo pro danou databázi. V rámci zachování kompatibility rozhraní bych to udělal stejně - můžete tu mít public metodu, která akceptuje QueryContent a pak použije metodu výše pro vytvoření query. Nejspíš vám nebude stačit KindNameQuery, ale můžete snadno vytvořit třídu, která jej rozšiřuje o filtry.
+    // Toto je jen drobnost, ale obecně se snažím strukturovat kód tak, že funkce následují v pořadí použití. Tj. bych měl např:
+    // a() { b(); }
+    // b() { c(); }
+    // c() { ... }
+    // Místo c, b, a. Kód se pak lépe čte, takže to tak doporučuji i vám.
+
     /**
      * Retrieves node data from the graph based on the specified query, filters, and pagination parameters.
      *

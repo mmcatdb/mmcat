@@ -4,6 +4,10 @@ import java.util.List;
 
 import cz.matfyz.core.record.AdminerFilter;
 
+// FIXME První věc, většina tohoto by opět měla být součástí pull wrapperů. Tyto algoritmy jsou velmi specifické. Ano, možná jsou společné jak pro postgres, tak pro neo4j, ale to je spíš náhoda než pravidlo (a stejně tu máte mnoho instanceof ifů).
+// Potenciálně byste mohla vytvořit nějaké společné "sql-like utils" v AbstractWrappers, nebo tak. Nicméně pokud tady řešíme dvě databáze, které jsou navíc celkem odlišné, spíš bude přehlednější to zduplikovat.
+// Dále, vytvářet statické metody, předávat instanci AdminerAlgorithmsInterface a pak podle toho dělat instanceof ify vypadá jako antipattern. Místo toho můžete rovnou vytvořit normální metody na rozhraní a pak je různě implementovat. Jinak, toto je vlastně přesně práce wrapperů - ty se používají tak, že odpovídají nějakému abstraktnímu interface. Přesně proto bych místo AdminerAlgorithmsInterface radši viděl nějaký wrapper (např. právě pull wrapper - není problém rozšířit AbstractPullWrapper). Popřípadě si můžete vytvořit AbstractAdminerWrapper. Každopádně ale, tady by se to, jak říkám výše, spíš vyplatilo duplikovat.
+
 public class AdminerAlgorithms {
     private AdminerAlgorithms() {}
 
@@ -34,6 +38,7 @@ public class AdminerAlgorithms {
             alias = "startNode";
         }
 
+        // FIXME Na hodně místech používáte tyto konstanty. Spíš by dávalo smysl definovat je jen jednou na nějakém neo4j wrapperu a pak je používat. Samozřejmě, nemusíte definovat výrazy jazyka typu "WHERE", to by bylo spíš kontraproduktivní. Nicméně tyto specifické názvy proměnných bych definoval.
         if (propertyName.startsWith("#labelsEndNode")){
             alias = "endNode";
         }
