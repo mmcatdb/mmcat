@@ -10,7 +10,7 @@ import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
@@ -139,7 +139,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 
-    @Override public KindNameResponse getKindNames(String limit, String offset) {
+    @Override public KindNamesResponse getKindNames(String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
     }
 

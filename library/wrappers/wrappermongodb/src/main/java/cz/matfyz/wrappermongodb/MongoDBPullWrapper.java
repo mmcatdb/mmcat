@@ -8,7 +8,7 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.DocumentResponse;
-import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -228,10 +228,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      *
      * @param limit The maximum number of results to return.
      * @param offsetString The number of results to skip.
-     * @return A {@link KindNameResponse} containing the list of collection names.
+     * @return A {@link KindNamesResponse} containing the list of collection names.
      * @throws PullForestException if an error occurs while querying the database.
      */
-    @Override public KindNameResponse getKindNames(String limit, String offsetString) {
+    @Override public KindNamesResponse getKindNames(String limit, String offsetString) {
         try {
             MongoIterable<String> kindNames = provider.getDatabase().listCollectionNames();
             List<String> data = new ArrayList<>();
@@ -251,7 +251,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 index++;
             }
 
-            return new KindNameResponse(data);
+            return new KindNamesResponse(data);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

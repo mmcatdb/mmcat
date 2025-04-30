@@ -6,7 +6,7 @@ import cz.matfyz.server.service.WrapperService;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.KindNamesResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,11 +37,11 @@ public class AdminerController {
      * @param db The ID of the datasource.
      * @param limit The maximum number of kind names to return. Defaults to 50.
      * @param offset The offset from which to start retrieving kind names. Defaults to 0.
-     * @return A {@link KindNameResponse} containing the kind names.
+     * @return A {@link KindNamesResponse} containing the kind names.
      * @throws ResponseStatusException if the datasource is not found.
      */
     @GetMapping(value = "/adminer/{db}")
-    public KindNameResponse getKindNames(
+    public KindNamesResponse getKindNames(
         @PathVariable Id db,
         @RequestParam(required = false, defaultValue = "50") String limit,
         @RequestParam(required = false, defaultValue = "0") String offset

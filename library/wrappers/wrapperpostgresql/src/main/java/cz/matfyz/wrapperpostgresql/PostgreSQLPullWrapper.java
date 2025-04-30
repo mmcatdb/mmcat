@@ -8,7 +8,7 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
-import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
@@ -185,10 +185,10 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      *
      * @param limit  The maximum number of results to return.
      * @param offset The starting position of the result set.
-     * @return A {@link KindNameResponse} containing a list of kind names.
+     * @return A {@link KindNamesResponse} containing a list of kind names.
      * @throws PullForestException if an error occurs during database access.
      */
-    @Override public KindNameResponse getKindNames(String limit, String offset) {
+    @Override public KindNamesResponse getKindNames(String limit, String offset) {
         try(
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
@@ -202,7 +202,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 data.add(kindName);
             }
 
-            return new KindNameResponse(data);
+            return new KindNamesResponse(data);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

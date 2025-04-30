@@ -5,4 +5,4 @@ import java.util.List;
 /**
  * Represents a response with kind names.
  */
-public record KindNameResponse(List<String> data) {}
+public record KindNamesResponse(List<String> data) {}

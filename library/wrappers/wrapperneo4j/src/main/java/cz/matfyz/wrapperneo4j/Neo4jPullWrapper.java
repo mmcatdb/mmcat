@@ -10,7 +10,7 @@ import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.GraphResponse;
 import cz.matfyz.core.adminer.GraphResponse.GraphElement;
-import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.ReferenceKind;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -275,10 +275,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      *
      * @param limit The maximum number of results to return.
      * @param offset The number of results to skip.
-     * @return A {@link KindNameResponse} containing the list of kind names.
+     * @return A {@link KindNamesResponse} containing the list of kind names.
      * @throws PullForestException if an error occurs during database access.
      */
-    @Override public KindNameResponse getKindNames(String limit, String offset) {
+    @Override public KindNamesResponse getKindNames(String limit, String offset) {
         try (Session session = provider.getSession()) {
             List<String> data = new ArrayList<>();
 
@@ -294,7 +294,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 data.add(typeQueryRecord.get("relationshipType").asString());
             }
 
-            return new KindNameResponse(data);
+            return new KindNamesResponse(data);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
