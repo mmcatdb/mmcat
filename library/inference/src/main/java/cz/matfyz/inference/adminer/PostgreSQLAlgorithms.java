@@ -13,6 +13,7 @@ import java.util.TreeMap;
 
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.core.adminer.Reference;
+import cz.matfyz.core.adminer.ReferenceKind;
 
 public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
     private static final PostgreSQLAlgorithms INSTANCE = new PostgreSQLAlgorithms();
@@ -87,9 +88,9 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
 
         String query = String.format("""
             SELECT
-                %s.column_name AS referenced_property,
-                %s.table_name AS referencing_kind,
-                %s.column_name AS referencing_property
+                %s.column_name AS to_property,
+                %s.table_name AS from_kind,
+                %s.column_name AS from_property
             FROM
                 information_schema.key_column_usage kcu
             JOIN
@@ -107,11 +108,11 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
         ResultSet result = stmt.executeQuery(query);
 
         while (result.next()) {
-            String referencedProperty = result.getString("referenced_property");
-            String referencingKindName = result.getString("referencing_kind");
-            String referencingProperty = result.getString("referencing_property");
+            String toProperty = result.getString("to_property");
+            String fromKindName = result.getString("from_kind");
+            String fromProperty = result.getString("from_property");
 
-            Reference reference = new Reference(datasourceId, kindName, referencedProperty, datasourceId, referencingKindName, referencingProperty);
+            Reference reference = new Reference(new ReferenceKind(datasourceId, fromKindName, fromProperty), new ReferenceKind(datasourceId, kindName, toProperty));
             references.add(reference);
         }
 

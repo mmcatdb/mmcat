@@ -113,7 +113,7 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
             </span>
             {valueKey !== null
                 && kindReferences.length > 0
-                && kindReferences.some(ref => ref.referencingProperty === valueKey)
+                && kindReferences.some(ref => ref.fromProperty === valueKey)
                 && (
                     <div className='ps-4'>
                         <ReferenceComponent references={kindReferences} data={({ [valueKey as string]: value as string })} propertyName={valueKey as string} kind={kind} datasourceId={datasourceId} datasources={datasources} />

@@ -3,17 +3,16 @@ import { type Id } from '../id';
 export type AdminerReferences = AdminerReference[];
 
 export type AdminerReference = {
-    referencedDatasourceId: Id;
-    referencedKindName: string;
-    referencedProperty: string;
-    referencingDatasourceId: Id;
-    referencingKindName: string;
-    referencingProperty: string;
+    from: AdminerReferenceKind;
+    to: AdminerReferenceKind;
 };
 
-export type KindReference = {
-    referencingProperty: string;
+export type AdminerReferenceKind = {
     datasourceId: Id;
     kindName: string;
     property: string;
 };
+
+export type KindReference = {
+    fromProperty: string;
+} & AdminerReferenceKind;

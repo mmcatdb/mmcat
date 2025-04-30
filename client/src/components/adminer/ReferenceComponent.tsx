@@ -61,7 +61,7 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
     const links = new Map<string, KindReference>();
 
     references
-        .filter(ref => ref.referencingProperty === propertyName)
+        .filter(ref => ref.fromProperty === propertyName)
         .forEach(ref => {
             // Filter out the references to the actual property
             if (!(ref.datasourceId === datasourceId && ref.kindName === kind && ref.property === propertyName)) {

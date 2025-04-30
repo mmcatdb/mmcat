@@ -51,34 +51,42 @@ function addReferences(
             .forEach(mappingProp => {
                 const mappingPropertyValue = (mappingProp.name as StaticNameFromServer).value;
 
-                let referencingProperty = mappingPropertyValue;
+                let fromProperty = mappingPropertyValue;
 
                 if (sourceMapping.kindName.toUpperCase() === sourceMapping.kindName
                     && mappingPropertyValue.includes('.') )
-                    referencingProperty = mappingPropertyValue.slice(mappingPropertyValue.lastIndexOf('.') + 1);
+                    fromProperty = mappingPropertyValue.slice(mappingPropertyValue.lastIndexOf('.') + 1);
 
                 references.push({
-                    referencedDatasourceId: targetMapping.datasourceId,
-                    referencedKindName: targetMapping.kindName,
-                    referencedProperty: keyPropertyValue,
-                    referencingDatasourceId: sourceMapping.datasourceId,
-                    referencingKindName: sourceMapping.kindName,
-                    referencingProperty: referencingProperty,
+                    from: {
+                        datasourceId: sourceMapping.datasourceId,
+                        kindName: sourceMapping.kindName,
+                        property: fromProperty,
+                    },
+                    to: {
+                        datasourceId: targetMapping.datasourceId,
+                        kindName: targetMapping.kindName,
+                        property: keyPropertyValue,
+                    },
                 });
 
-                let referencedProperty = keyPropertyValue;
+                let toProperty = keyPropertyValue;
 
                 if (targetMapping.kindName.toUpperCase() === targetMapping.kindName
                     && keyPropertyValue.includes('.') )
-                    referencedProperty = keyPropertyValue.slice(keyPropertyValue.lastIndexOf('.') + 1);
+                    toProperty = keyPropertyValue.slice(keyPropertyValue.lastIndexOf('.') + 1);
 
                 references.push({
-                    referencedDatasourceId: sourceMapping.datasourceId,
-                    referencedKindName: sourceMapping.kindName,
-                    referencedProperty: mappingPropertyValue,
-                    referencingDatasourceId: targetMapping.datasourceId,
-                    referencingKindName: targetMapping.kindName,
-                    referencingProperty: referencedProperty,
+                    from: {
+                        datasourceId: targetMapping.datasourceId,
+                        kindName: targetMapping.kindName,
+                        property: toProperty,
+                    },
+                    to: {
+                        datasourceId: sourceMapping.datasourceId,
+                        kindName: sourceMapping.kindName,
+                        property: mappingPropertyValue,
+                    },
                 });
             });
     }

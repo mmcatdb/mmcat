@@ -3,10 +3,10 @@ package cz.matfyz.server.controller;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.service.WrapperService;
+import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.KindNameResponse;
-import cz.matfyz.core.record.AdminerFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

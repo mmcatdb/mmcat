@@ -6,17 +6,18 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.GraphResponse;
 import cz.matfyz.core.adminer.GraphResponse.GraphElement;
 import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.Reference;
+import cz.matfyz.core.adminer.ReferenceKind;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.queryresult.QueryResult;
-import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
@@ -421,13 +422,13 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 List<String> startNodeLabels = reference.get("startNodeLabels").asList(Value::asString);
 
                 for (String startNodeLabel: startNodeLabels) {
-                    references.add(new Reference(datasourceId, startNodeLabel, "#elementId", datasourceId, relationshipType, "#startNodeId"));
+                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, "#startNodeId"), new ReferenceKind(datasourceId, startNodeLabel, "#elementId")));
                 }
 ;
                 List<String> endNodeLabels = reference.get("endNodeLabels").asList(Value::asString);
 
                 for (String endNodeLabel: endNodeLabels) {
-                    references.add(new Reference(datasourceId, endNodeLabel, "#elementId", datasourceId, relationshipType, "#endNodeId"));
+                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, "#endNodeId"), new ReferenceKind(datasourceId, endNodeLabel, "#elementId")));
                 }
             }
 

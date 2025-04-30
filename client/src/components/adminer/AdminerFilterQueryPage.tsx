@@ -32,12 +32,12 @@ function getQueryParams(filterState: KindFilterState): QueryParams {
 function getKindReferences(references: AdminerReferences, datasourceId: Id, kind: string): KindReference[] {
     return references
         ? Object.values(references)
-            .filter(ref => ref.referencingDatasourceId === datasourceId && ref.referencingKindName === kind)
+            .filter(ref => ref.from.datasourceId === datasourceId && ref.from.kindName === kind)
             .map(ref => ({
-                referencingProperty: ref.referencingProperty,
-                datasourceId: ref.referencedDatasourceId,
-                kindName: ref.referencedKindName,
-                property: ref.referencedProperty,
+                fromProperty: ref.from.property,
+                datasourceId: ref.to.datasourceId,
+                kindName: ref.to.kindName,
+                property: ref.to.property,
             }))
         : [];
 }

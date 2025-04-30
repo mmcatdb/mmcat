@@ -2,7 +2,7 @@ package cz.matfyz.inference.adminer;
 
 import java.util.List;
 
-import cz.matfyz.core.record.AdminerFilter;
+import cz.matfyz.core.adminer.AdminerFilter;
 
 public class AdminerAlgorithms {
     private AdminerAlgorithms() {}

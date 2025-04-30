@@ -9,6 +9,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.KindNameResponse;
@@ -28,7 +29,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import cz.matfyz.core.mapping.StaticName;
-import cz.matfyz.core.record.AdminerFilter;
 
 /**
  * A pull wrapper implementation for CSV files that implements the {@link AbstractPullWrapper} interface.
