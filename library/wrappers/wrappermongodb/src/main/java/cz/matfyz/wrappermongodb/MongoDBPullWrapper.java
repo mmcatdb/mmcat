@@ -28,7 +28,6 @@ import cz.matfyz.core.record.RootRecord;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -294,7 +293,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      */
     @Override public DocumentResponse getKind(String kindName, String limit, String offsetString, @Nullable List<AdminerFilter> filters){
         try {
-            List<Map<String, Object>> data = new ArrayList<>();
+            List<Document> data = new ArrayList<>();
             MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
             FindIterable<Document> documents = (filters == null || filters.isEmpty()) ? collection.find() : collection.find(createFilter(filters));
 
@@ -306,17 +305,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
             for (Document document : documents) {
                 if (itemCount >= offset && count < lim) {
-                    Map<String, Object> item = new HashMap<>();
-
-                    document.forEach((key, value) -> {
-                        if (value instanceof String stringValue) {
-                            item.put(key, stringValue.replace("\"", ""));
-                        } else {
-                            item.put(key, value);
-                        }
-                    });
-
-                    data.add(item);
+                    data.add(document);
                     count++;
                 }
 
@@ -351,31 +340,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      */
     @Override public DataResponse getQueryResult(String query) {
         try {
-            List<Map<String, Object>> data = new ArrayList<>();
-            int itemCount = 0;
-
             Document parsedQuery = Document.parse(query);
             Document result = provider.getDatabase().runCommand(parsedQuery);
 
             Document cursor = (Document) result.get("cursor");
             List<Document> documents = (List<Document>) cursor.get("firstBatch");
+            int itemCount = documents.size();
 
-            for (Document document : documents) {
-                Map<String, Object> item = new HashMap<>();
-
-                document.forEach((key, value) -> {
-                    if (value instanceof String stringValue) {
-                        item.put(key, stringValue.replace("\"", ""));
-                    } else {
-                        item.put(key, value);
-                    }
-                });
-
-                data.add(item);
-                itemCount++;
-            }
-
-            return new DocumentResponse(data, itemCount, null);
+            return new DocumentResponse(documents, itemCount, null);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);
