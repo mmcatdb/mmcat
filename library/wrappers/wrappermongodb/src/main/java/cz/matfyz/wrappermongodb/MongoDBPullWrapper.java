@@ -3,10 +3,11 @@ package cz.matfyz.wrappermongodb;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.querycontent.KindNameFilterQuery;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
-import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.DocumentResponse;
 import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.Reference;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoIterable;
@@ -56,7 +56,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private MongoCursor<Document> getDocumentIterator(QueryContent query) {
         if (query instanceof final KindNameQuery kindNameQuery)
-            return getDocumentIteratorFromKindName(kindNameQuery);
+            return getDocumentIteratorFromKindName(kindNameQuery, null);
+
+        if (query instanceof final KindNameFilterQuery kindNameFilterQuery)
+            return getDocumentIteratorFromKindName(kindNameFilterQuery.kindNameQuery, kindNameFilterQuery.getFilters());
 
         if (query instanceof final MongoDBQuery mongoQuery)
             return provider.getDatabase().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline).iterator();
@@ -64,8 +67,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         throw PullForestException.invalidQuery(this, query);
     }
 
-    private MongoCursor<Document> getDocumentIteratorFromKindName(KindNameQuery query) {
+    private MongoCursor<Document> getDocumentIteratorFromKindName(KindNameQuery query, @Nullable List<AdminerFilter> filters) {
         var find = provider.getDatabase().getCollection(query.kindName).find();
+        if (filters != null && !filters.isEmpty())
+            find = find.filter(createFilter(filters));
         if (query.hasOffset())
             find = find.skip(query.getOffset());
         if (query.hasLimit())
@@ -285,39 +290,19 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      *
      * @param kindName The name of the kind to query.
      * @param limit The maximum number of results to return.
-     * @param offsetString The number of results to skip.
+     * @param offset The number of results to skip.
      * @param filters The list of filters to apply (optional).
      * @return A {@link DocumentResponse} containing the retrieved documents, item count, and property names.
      * @throws PullForestException if an error occurs while querying the database.
      */
-    @Override public DocumentResponse getKind(String kindName, String limit, String offsetString, @Nullable List<AdminerFilter> filters){
-        try {
-            List<Document> data = new ArrayList<>();
-            MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
-            FindIterable<Document> documents = (filters == null || filters.isEmpty()) ? collection.find() : collection.find(createFilter(filters));
+    @Override public DocumentResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters){
+        KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
 
-            int lim = Integer.parseInt(limit);
-            int offset = Integer.parseInt(offsetString);
-
-            int itemCount = 0;
-            int count = 0;
-
-            for (Document document : documents) {
-                if (itemCount >= offset && count < lim) {
-                    data.add(document);
-                    count++;
-                }
-
-                itemCount++;
-            }
-
-            List<String> propertyNames = MongoDBUtils.getPropertyNames(collection);
-
-            return new DocumentResponse(data, itemCount, propertyNames);
+        if (filters == null){
+            return getQueryResult(kindNameQuery);
         }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
-        }
+
+        return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
 
     /**
@@ -335,25 +320,47 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      * Retrieves the result of the given query.
      *
      * @param query the custom query.
-     * @return a {@link DataResponse} containing the data result of custom query.
+     * @return a {@link DocumentResponse} containing the data result of custom query.
      */
-    @Override public DataResponse getQueryResult(String query) {
+    @Override public DocumentResponse getQueryResult(QueryContent query) {
         try {
-            Document parsedQuery = Document.parse(query);
-            Document result = provider.getDatabase().runCommand(parsedQuery);
+            if (query instanceof final StringQuery stringQuery){
+                Document parsedQuery = Document.parse(stringQuery.content);
+                Document result = provider.getDatabase().runCommand(parsedQuery);
 
-            Document cursor = (Document) result.get("cursor");
-            List<Document> documents = (List<Document>) cursor.get("firstBatch");
-            int itemCount = documents.size();
+                Document cursor = (Document) result.get("cursor");
+                List<Document> documents = (List<Document>) cursor.get("firstBatch");
+                int itemCount = documents.size();
 
-            List<String> propertyNames = new ArrayList<>();
-            if (parsedQuery.containsKey("find")) {
-                String kindName = parsedQuery.getString("find");
-                MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
-                propertyNames = MongoDBUtils.getPropertyNames(collection);
+                List<String> propertyNames = new ArrayList<>();
+                if (parsedQuery.containsKey("find")) {
+                    String kindName = parsedQuery.getString("find");
+                    MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
+                    propertyNames = MongoDBUtils.getPropertyNames(collection);
+                }
+
+                return new DocumentResponse(documents, itemCount, propertyNames);
             }
 
-            return new DocumentResponse(documents, itemCount, propertyNames);
+            List<Document> data = new ArrayList<>();
+            MongoCursor<Document> iterator = getDocumentIterator(query);
+            int itemCount = 0;
+
+            while (iterator.hasNext()) {
+                data.add(iterator.next());
+
+                itemCount++;
+            }
+
+            List<String> propertyNames;
+            if (query instanceof final KindNameQuery knQuery)
+                propertyNames = MongoDBUtils.getPropertyNames(provider.getDatabase().getCollection(knQuery.kindName));
+            else if (query instanceof final KindNameFilterQuery knfQuery)
+                propertyNames = MongoDBUtils.getPropertyNames(provider.getDatabase().getCollection(knfQuery.kindNameQuery.kindName));
+            else
+                throw PullForestException.invalidQuery(this, query);
+
+            return new DocumentResponse(data, itemCount, propertyNames);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);

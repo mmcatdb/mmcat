@@ -153,7 +153,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("CsvPullWrapper.getReferences not implemented.");
     }
 
-    @Override public DataResponse getQueryResult(String query){
+    @Override public DataResponse getQueryResult(QueryContent query){
         throw new UnsupportedOperationException("CsvPullWrapper.getQueryResult not implemented.");
     }
 

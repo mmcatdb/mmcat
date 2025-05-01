@@ -3,6 +3,7 @@ package cz.matfyz.server.controller;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.service.WrapperService;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
@@ -151,7 +152,7 @@ public class AdminerController {
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getQueryResult(query);
+        return pullWrapper.getQueryResult(new StringQuery(query));
     }
 
 }

@@ -14,44 +14,6 @@ public class PostgreSQLUtils {
     private PostgreSQLUtils() {}
 
     /**
-     * Retrieves all property names for a given kind.
-     *
-     * @param stmt     The {@link Statement} object used to execute the query.
-     * @param kindName The name of the kind whose property names are being retrieved.
-     * @return A {@link List} of property names for the specified kind.
-     * @throws PullForestException if an error occurs during database access.
-     */
-    public static List<String> getPropertyNames(Statement stmt, String kindName) {
-        try {
-            List<String> properties = new ArrayList<>();
-
-            String query = String.format("""
-                SELECT
-                    column_name
-                FROM
-                    information_schema.columns
-                WHERE
-                    table_schema = 'public'
-                    AND table_name = '%s'
-                ORDER BY
-                    ordinal_position;
-
-                """, kindName);
-            ResultSet resultSet = stmt.executeQuery(query);
-
-            while (resultSet.next()) {
-                String column = resultSet.getString(1);
-                properties.add(column);
-            }
-
-            return properties;
-        }
-        catch (SQLException e) {
-			throw PullForestException.innerException(e);
-		}
-    }
-
-    /**
      * Retrieves foreign key relationships from the database for the specified kind.
      *
      * @param stmt          The {@link Statement} object used to execute the SQL query.

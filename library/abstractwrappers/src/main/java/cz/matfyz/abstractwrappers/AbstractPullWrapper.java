@@ -55,6 +55,6 @@ public interface AbstractPullWrapper {
      * @param query the custom query.
      * @return a {@link DataResponse} containing the data result of custom query.
      */
-    DataResponse getQueryResult(String query);
+    DataResponse getQueryResult(QueryContent query);
 
 }

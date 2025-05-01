@@ -3,11 +3,11 @@ package cz.matfyz.wrapperpostgresql;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.querycontent.KindNameFilterQuery;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
-import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.Reference;
@@ -52,14 +52,19 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             return connection.prepareStatement(stringQuery.content);
 
         if (query instanceof final KindNameQuery kindNameQuery)
-            return connection.prepareStatement(kindNameQueryToString(kindNameQuery));
+            return connection.prepareStatement(kindNameQueryToString(kindNameQuery, null));
+
+        if (query instanceof final KindNameFilterQuery kindNameFilterQuery)
+            return connection.prepareStatement(kindNameQueryToString(kindNameFilterQuery.kindNameQuery, kindNameFilterQuery.getFilters() ));
 
         throw PullForestException.invalidQuery(this, query);
     }
 
-    private String kindNameQueryToString(KindNameQuery query) {
+    private String kindNameQueryToString(KindNameQuery query, @Nullable List<AdminerFilter> filters) {
         // TODO escape all table names globally
         var command = "SELECT * FROM " + "\"" + query.kindName + "\"";
+        if (filters != null)
+            command += createWhereClause(filters);
         if (query.hasLimit())
             command += "\nLIMIT " + query.getLimit();
         if (query.hasOffset())
@@ -67,6 +72,94 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         command += ";";
 
         return command;
+    }
+
+    /**
+     * Constructs a WHERE clause based on a list of filters.
+     *
+     * @param filters The filters to apply.
+     * @return A WHERE clause as a {@link String}.
+     */
+    private String createWhereClause(List<AdminerFilter> filters) {
+        if (filters.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder whereClause = new StringBuilder("\nWHERE ");
+
+        for (int i = 0; i < filters.size(); i++) {
+            AdminerFilter filter = filters.get(i);
+            String propertyName = filter.propertyName();
+
+            if (i != 0) {
+                whereClause.append(" AND ");
+            }
+
+            Double doubleValue = this.parseNumeric(filter.propertyValue());
+
+            appendPropertyName(whereClause, propertyName, doubleValue);
+
+            String operator = OPERATORS.get(filter.operator());
+            appendOperator(whereClause, operator);
+
+            appendPropertyValue(whereClause, filter.propertyValue(), operator, doubleValue);
+        }
+
+        return whereClause.toString();
+    }
+
+    /**
+     * Parses a numeric value from a given string.
+     * If the string represents a valid number, it returns the parsed {@code Double}.
+     * Otherwise, it returns {@code null}.
+     *
+     * @param str the string to be parsed
+     * @return the parsed {@code Double} value if valid, or {@code null} if the input is {@code null} or not a valid number
+     */
+    private Double parseNumeric(String str) {
+        if (str == null) {
+            return null;
+        }
+
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static void appendPropertyName(StringBuilder whereClause, String propertyName, Double doubleValue) {
+        whereClause.append(propertyName);
+
+        if (doubleValue != null) {
+            whereClause.append("::NUMERIC");
+        }
+    }
+
+    private static void appendOperator(StringBuilder whereClause, String operator) {
+        whereClause
+            .append(" ")
+            .append(operator)
+            .append(" ");
+    }
+
+    private static void appendPropertyValue(StringBuilder whereClause, String propertyValue, String operator, Double doubleValue) {
+        if (operator.equals("IN") || operator.equals("NOT IN")) {
+            whereClause
+                .append("(")
+                .append(propertyValue)
+                .append(")");
+        } else if (!UNARY_OPERATORS.contains(operator)) {
+            if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
+                whereClause
+                    .append(doubleValue);
+            } else {
+                whereClause
+                    .append("'")
+                    .append(propertyValue)
+                    .append("'");
+            }
+        }
     }
 
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
@@ -213,54 +306,18 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      * @param kindName The name of the kind to query.
      * @param limit    The maximum number of rows to return.
      * @param offset   The starting position of the result set.
-     * @param filter   A list of {@link AdminerFilter} objects representing filter conditions (optional).
+     * @param filters   A list of {@link AdminerFilter} objects representing filter conditions (optional).
      * @return A {@link TableResponse} containing the kind data, total row count, and column names.
      * @throws PullForestException if an error occurs during database access.
      */
-    @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
-        try(
-            Connection connection = provider.getConnection();
-            Statement stmt = connection.createStatement();
-        ){
-            List<List<String>> data = new ArrayList<>();
+    @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
+        KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
 
-            String whereClause = createWhereClause(filter);
-
-            if (!whereClause.isEmpty()) {
-                whereClause = "WHERE " + whereClause;
-            }
-
-            String selectQuery = "SELECT * FROM \"" + kindName +  "\" " + whereClause + " LIMIT " + limit + " OFFSET " + offset + ";";
-            ResultSet resultSet = stmt.executeQuery(selectQuery);
-
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            while (resultSet.next()) {
-                List<String> item = new ArrayList<>();
-
-                for (int i = 1; i <= columnCount; i++) {
-                    item.add(resultSet.getString(i));
-                }
-
-                data.add(item);
-            }
-
-            int itemCount = 0;
-            String countQuery = "SELECT COUNT(*) FROM \"" + kindName +  "\" " + whereClause + ";";
-
-            ResultSet countResultSet = stmt.executeQuery(countQuery);
-            if (countResultSet.next()) {
-                itemCount = countResultSet.getInt(1);
-            }
-
-            List<String> propertyNames = PostgreSQLUtils.getPropertyNames(stmt, kindName);
-
-            return new TableResponse(data, itemCount, propertyNames);
+        if (filters == null){
+            return getQueryResult(kindNameQuery);
         }
-        catch (Exception e) {
-			throw PullForestException.innerException(e);
-		}
+
+        return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
 
     /**
@@ -287,17 +344,17 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      * Retrieves the result of the given query.
      *
      * @param query the custom query.
-     * @return a {@link DataResponse} containing the data result of custom query.
+     * @return a {@link TableResponse} containing the data result of custom query.
      */
-    @Override public DataResponse getQueryResult(String query) {
+    @Override public TableResponse getQueryResult(QueryContent query) {
         try(
             Connection connection = provider.getConnection();
-            Statement stmt = connection.createStatement();
         ){
             List<List<String>> data = new ArrayList<>();
             List<String> propertyNames = new ArrayList<>();
 
-            ResultSet resultSet = stmt.executeQuery(query);
+            PreparedStatement stmt = prepareStatement(connection, query);
+            ResultSet resultSet = stmt.executeQuery();
 
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
@@ -326,94 +383,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         catch (Exception e) {
 			throw PullForestException.innerException(e);
 		}
-    }
-
-    /**
-     * Constructs a WHERE clause based on a list of filters.
-     *
-     * @param filters The filters to apply.
-     * @return A WHERE clause as a {@link String}.
-     */
-    private String createWhereClause(List<AdminerFilter> filters) {
-        if ((filters == null || filters.isEmpty())) {
-            return "";
-        }
-
-        StringBuilder whereClause = new StringBuilder();
-
-        for (int i = 0; i < filters.size(); i++) {
-            AdminerFilter filter = filters.get(i);
-            String propertyName = filter.propertyName();
-
-            if (i != 0) {
-                whereClause.append(" AND ");
-            }
-
-            Double doubleValue = this.parseNumeric(filter.propertyValue());
-
-            appendPropertyName(whereClause, propertyName, doubleValue);
-
-            String operator = OPERATORS.get(filter.operator());
-            appendOperator(whereClause, operator);
-
-            appendPropertyValue(whereClause, filter.propertyValue(), operator, doubleValue);
-        }
-
-        return whereClause.toString();
-    }
-
-    /**
-     * Parses a numeric value from a given string.
-     * If the string represents a valid number, it returns the parsed {@code Double}.
-     * Otherwise, it returns {@code null}.
-     *
-     * @param str the string to be parsed
-     * @return the parsed {@code Double} value if valid, or {@code null} if the input is {@code null} or not a valid number
-     */
-    private Double parseNumeric(String str) {
-        if (str == null) {
-            return null;
-        }
-
-        try {
-            return Double.parseDouble(str);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private static void appendPropertyName(StringBuilder whereClause, String propertyName, Double doubleValue) {
-        whereClause.append(propertyName);
-
-        if (doubleValue != null) {
-            whereClause.append("::NUMERIC");
-        }
-    }
-
-    private static void appendOperator(StringBuilder whereClause, String operator) {
-        whereClause
-            .append(" ")
-            .append(operator)
-            .append(" ");
-    }
-
-    private static void appendPropertyValue(StringBuilder whereClause, String propertyValue, String operator, Double doubleValue) {
-        if (operator.equals("IN") || operator.equals("NOT IN")) {
-            whereClause
-                .append("(")
-                .append(propertyValue)
-                .append(")");
-        } else if (!UNARY_OPERATORS.contains(operator)) {
-            if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
-                whereClause
-                    .append(doubleValue);
-            } else {
-                whereClause
-                    .append("'")
-                    .append(propertyValue)
-                    .append("'");
-            }
-        }
     }
 
     /**
