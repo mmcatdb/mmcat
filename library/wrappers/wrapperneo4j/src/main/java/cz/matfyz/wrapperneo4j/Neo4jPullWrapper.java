@@ -9,7 +9,9 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.GraphResponse;
-import cz.matfyz.core.adminer.GraphResponse.GraphElement;
+import cz.matfyz.core.adminer.GraphResponse.GraphData;
+import cz.matfyz.core.adminer.GraphResponse.GraphNode;
+import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
 import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.ReferenceKind;
@@ -25,9 +27,7 @@ import cz.matfyz.core.record.RootRecord;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map;
 
@@ -37,6 +37,7 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.types.TypeSystem;
 
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
@@ -314,6 +315,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @return A {@link GraphResponse} containing the nodes and metadata.
      */
     private GraphResponse getNode(Session session, String kindName, List<AdminerFilter> filters, boolean unlabeled, String limit, String offset) {
+        List<String> propertyNames = new ArrayList<>();
         String queryBase = unlabeled ? "MATCH (n) " : "MATCH (n:" + kindName + ") ";
 
         StringBuilder whereClause = new StringBuilder(createWhereClause(filters, "n"));
@@ -327,20 +329,18 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             whereClause.append("size(labels(n)) = 0");
         }
 
-        List<GraphElement> data = session.executeRead(tx -> {
+        List<GraphNode> data = session.executeRead(tx -> {
             var query = new Query(queryBase + whereClause.toString() + " RETURN n SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
-                .map(node -> Neo4jUtils.getNodeProperties(node.get("n")))
+                .map(node -> Neo4jUtils.getNodeProperties(node.get("n"), propertyNames))
                 .toList();
         });
 
         Result countQueryResult = session.run(queryBase + whereClause.toString() + " RETURN COUNT(n) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> properties = getNodePropertyNames(session, kindName);
-
-        return new GraphResponse(data, itemCount, properties);
+        return new GraphResponse(new GraphData(data, new ArrayList<>()), itemCount, propertyNames);
     }
 
     /**
@@ -354,6 +354,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @return A {@link GraphResponse} containing the relationships and metadata.
      */
     private GraphResponse getRelationship(Session session, String kindName, List<AdminerFilter> filters, String limit, String offset) {
+        List<String> propertyNames = new ArrayList<>();
         StringBuilder whereClause = new StringBuilder(createWhereClause(filters, "r"));
 
         if (!whereClause.isEmpty()) {
@@ -365,20 +366,32 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             whereClause.append("type(r) = '" + kindName + "'");
         }
 
-        List<GraphElement> data = session.executeRead(tx -> {
+        List<GraphRelationship> relationships = session.executeRead(tx -> {
             var query = new Query("MATCH (startNode)-[r]->(endNode) " + whereClause.toString() + " RETURN startNode, r, endNode SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
-                .map(relation -> Neo4jUtils.getRelationshipProperties(relation.get("r"), relation.get("startNode"), relation.get("endNode")))
+                .map(relation -> Neo4jUtils.getRelationshipProperties(relation.get("r"), propertyNames))
                 .toList();
+        });
+
+        List<GraphNode> nodes = session.executeRead(tx -> {
+            var query = new Query("MATCH (startNode)-[r]->(endNode) " + whereClause.toString() + " RETURN startNode, r, endNode SKIP " + offset + " LIMIT " + limit + ";");
+
+            Result result = tx.run(query);
+            List<GraphNode> recordNodes = new ArrayList<>();
+
+            result.stream().forEach(record -> {
+                recordNodes.add(Neo4jUtils.getNodeProperties(record.get("startNode"), propertyNames));
+                recordNodes.add(Neo4jUtils.getNodeProperties(record.get("endNode"), propertyNames));
+            });
+
+            return recordNodes;
         });
 
         Result countQueryResult = session.run("MATCH (startNode)-[r]->(endNode) " + whereClause + " RETURN COUNT(r) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> properties = getRelationshipPropertyNames(session, kindName);
-
-        return new GraphResponse(data, itemCount, properties);
+        return new GraphResponse(new GraphData(nodes, relationships), itemCount, propertyNames);
     }
 
     /**
@@ -448,18 +461,30 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      */
     @Override public DataResponse getQueryResult(String query) {
         try (Session session = provider.getSession()) {
-            List<GraphElement> data = session.executeRead(tx -> {
+            List<String> propertyNames = new ArrayList<>();
+
+            GraphData data = session.executeRead(tx -> {
                 var finalQuery = new Query(query);
 
-                return tx.run(finalQuery).stream()
-                    .flatMap(rec-> rec.values().stream())
-                    .map(Neo4jUtils::getGraphElementProperties)
-                    .toList();
+                List<GraphNode> nodes = new ArrayList<>();
+                List<GraphRelationship> relationships = new ArrayList<>();
+
+                tx.run(finalQuery).stream()
+                    .flatMap(rec -> rec.values().stream())
+                    .forEach(element -> {
+                        if (element.hasType(TypeSystem.getDefault().NODE())) {
+                            nodes.add(Neo4jUtils.getNodeProperties(element, propertyNames));
+                        } else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
+                            relationships.add(Neo4jUtils.getRelationshipProperties(element, propertyNames));
+                        }
+                    });
+
+                return new GraphData(nodes, relationships);
             });
 
-            int itemCount = data.size();
+            int itemCount = data.relationships().isEmpty() ? data.nodes().size() : data.relationships().size();
 
-            return new GraphResponse(data, itemCount, null);
+            return new GraphResponse(data, itemCount, propertyNames);
         } catch (Exception e) {
             throw PullForestException.innerException(e);
         }
@@ -633,82 +658,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                     .append("'");
             }
         }
-    }
-
-    /**
-     * Retrieves a set of distinct property names based on a specified match clause.
-     *
-     * @param session The Neo4j session to use for the query.
-     * @param kindName The name of the kind.
-     * @param forNode If {@code true}, retrieves properties for nodes; if {@code false}, retrieves properties for relationships.
-     * @return A {@link Set} of property names.
-     */
-    private static Set<String> getPropertyNames(Session session, String kindName, boolean forNode) {
-        Set<String> properties = new HashSet<>();
-        StringBuilder matchClause = new StringBuilder("MATCH ");
-
-        if (forNode) {
-            matchClause.append(kindName != null ? "(a: " + kindName + ")" : "(a)");
-            matchClause.append(" UNWIND keys(a) AS key");
-        } else {
-            matchClause.append("(m)-[a]->(n)");
-
-            if (kindName != null) {
-                matchClause.append(" WHERE type(a) = '" + kindName + "'");
-            }
-
-            matchClause.append(" WITH m, a, n UNWIND [k IN keys(m) | 'startNode.' + k] + [k IN keys(a) | k] + [k IN keys(n) | 'endNode.' + k] AS key");
-        }
-
-        Result queryResult = session.run(String.format("""
-        %s RETURN DISTINCT key ORDER BY key;
-        """, matchClause.toString()));
-
-        while (queryResult.hasNext()) {
-            Record queryRecord = queryResult.next();
-            properties.add(queryRecord.get("key").asString());
-        }
-
-        properties.add("#elementId");
-
-        return properties;
-    }
-
-    /**
-     * Retrieves a set of distinct property names for all nodes.
-     *
-     * @param session The Neo4j session to use for the query.
-     * @param kindName The name of the kind.
-     * @return A {@link Set} of node property names (keys).
-     */
-    private static Set<String> getNodePropertyNames(Session session, String kindName) {
-        Set<String> properties = getPropertyNames(session, kindName, true);
-
-        for (String labelFunction: NODE_LABEL_FUNCTIONS.keySet()){
-            properties.add(labelFunction);
-        }
-
-        return properties;
-    }
-
-    /**
-     * Retrieves a set of distinct property names for all relationships.
-     *
-     * @param session The Neo4j session to use for the query.
-     * @param kindName The name of the kind.
-     * @return A {@link Set} of relationship property names (keys).
-     */
-    private static Set<String> getRelationshipPropertyNames(Session session, String kindName) {
-        Set<String> properties = getPropertyNames(session, kindName, false);
-
-        properties.add("#startNodeId");
-        properties.add("#endNodeId");
-
-        for (String labelFunction: RELATIONSHIP_LABEL_FUNCTIONS.keySet()){
-            properties.add(labelFunction);
-        }
-
-        return properties;
     }
 
     /**

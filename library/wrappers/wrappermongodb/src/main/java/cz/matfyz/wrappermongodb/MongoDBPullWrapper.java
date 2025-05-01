@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 
@@ -312,7 +311,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 itemCount++;
             }
 
-            Set<String> propertyNames = MongoDBUtils.getPropertyNames(collection);
+            List<String> propertyNames = MongoDBUtils.getPropertyNames(collection);
 
             return new DocumentResponse(data, itemCount, propertyNames);
         }
@@ -347,7 +346,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             List<Document> documents = (List<Document>) cursor.get("firstBatch");
             int itemCount = documents.size();
 
-            return new DocumentResponse(documents, itemCount, null);
+            List<String> propertyNames = new ArrayList<>();
+            if (parsedQuery.containsKey("find")) {
+                String kindName = parsedQuery.getString("find");
+                MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
+                propertyNames = MongoDBUtils.getPropertyNames(collection);
+            }
+
+            return new DocumentResponse(documents, itemCount, propertyNames);
         }
         catch (Exception e){
             throw PullForestException.innerException(e);

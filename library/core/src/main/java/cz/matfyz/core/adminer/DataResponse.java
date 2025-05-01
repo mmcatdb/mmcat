@@ -1,8 +1,6 @@
 package cz.matfyz.core.adminer;
 
-import java.util.Set;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.List;
 
 /**
  * Represents a generic data response.
@@ -10,7 +8,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public abstract class DataResponse {
     private Metadata metadata;
 
-    protected DataResponse(int itemCount, Set<String> propertyNames) {
+    protected DataResponse(int itemCount, List<String> propertyNames) {
         this.metadata = new Metadata(itemCount, propertyNames);
     }
 
@@ -21,5 +19,5 @@ public abstract class DataResponse {
     /**
      * Represents metadata for the response.
      */
-    public record Metadata (int itemCount, @Nullable Set<String> propertyNames) {}
+    public record Metadata (int itemCount, List<String> propertyNames) {}
 }

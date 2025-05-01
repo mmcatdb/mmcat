@@ -28,10 +28,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -224,7 +222,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            List<Map<String, String>> data = new ArrayList<>();
+            List<List<String>> data = new ArrayList<>();
 
             String whereClause = createWhereClause(filter);
 
@@ -239,13 +237,10 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             int columnCount = metaData.getColumnCount();
 
             while (resultSet.next()) {
-                Map<String, String> item = new HashMap<>();
+                List<String> item = new ArrayList<>();
 
                 for (int i = 1; i <= columnCount; i++) {
-                    String columnName = metaData.getColumnName(i);
-                    String columnValue = resultSet.getString(i);
-
-                    item.put(columnName, columnValue);
+                    item.add(resultSet.getString(i));
                 }
 
                 data.add(item);
@@ -259,7 +254,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 itemCount = countResultSet.getInt(1);
             }
 
-            Set<String> propertyNames = PostgreSQLUtils.getPropertyNames(stmt, kindName);
+            List<String> propertyNames = PostgreSQLUtils.getPropertyNames(stmt, kindName);
 
             return new TableResponse(data, itemCount, propertyNames);
         }
@@ -299,7 +294,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            List<Map<String, String>> data = new ArrayList<>();
+            List<List<String>> data = new ArrayList<>();
+            List<String> propertyNames = new ArrayList<>();
 
             ResultSet resultSet = stmt.executeQuery(query);
 
@@ -307,21 +303,25 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             int columnCount = metaData.getColumnCount();
             int itemCount = 0;
 
+            boolean addPropertyNames = true;
+
             while (resultSet.next()) {
-                Map<String, String> item = new HashMap<>();
+                List<String> item = new ArrayList<>();
 
                 for (int i = 1; i <= columnCount; i++) {
-                    String columnName = metaData.getColumnName(i);
-                    String columnValue = resultSet.getString(i);
+                    if (addPropertyNames) {
+                        propertyNames.add(metaData.getColumnName(i));
+                    }
 
-                    item.put(columnName, columnValue);
+                    item.add(resultSet.getString(i));
                 }
 
                 data.add(item);
                 itemCount++;
+                addPropertyNames = false;
             }
 
-            return new TableResponse(data, itemCount, null);
+            return new TableResponse(data, itemCount, propertyNames);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);

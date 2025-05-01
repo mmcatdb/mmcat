@@ -4,9 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.core.adminer.Reference;
@@ -20,12 +18,12 @@ public class PostgreSQLUtils {
      *
      * @param stmt     The {@link Statement} object used to execute the query.
      * @param kindName The name of the kind whose property names are being retrieved.
-     * @return A {@link Set} of property names for the specified kind.
+     * @return A {@link List} of property names for the specified kind.
      * @throws PullForestException if an error occurs during database access.
      */
-    public static Set<String> getPropertyNames(Statement stmt, String kindName) {
+    public static List<String> getPropertyNames(Statement stmt, String kindName) {
         try {
-            Set<String> properties = new HashSet<>();
+            List<String> properties = new ArrayList<>();
 
             String query = String.format("""
                 SELECT
