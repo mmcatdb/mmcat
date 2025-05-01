@@ -9,7 +9,6 @@ import { BookOpenIcon } from '@heroicons/react/24/solid';
 import { FaDatabase, FaPlus, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const DOCUMENTATION_URL = 'https://mmcatdb.com/getting-started/quick-start/';
 const EXAMPLE_SCHEMAS = [ 'basic' ] as const;
 
 export function Home() {
@@ -92,17 +91,6 @@ function HeaderSection() {
                 A <span className='font-semibold text-primary-600'>multi-model data modeling framework</span> powered by category theory.
                 Model, transform, and explore multi-model data without database limitations.
             </p>
-            <Button 
-                as='a' 
-                href={DOCUMENTATION_URL} 
-                variant='flat'
-                color='primary'
-                target='_blank' 
-                endContent={<BookOpenIcon className='w-5 h-5' />}
-                className='font-medium'
-            >
-                    Documentation
-            </Button>
         </div>
     );
 }
@@ -140,7 +128,7 @@ function GettingStartedSection({
                     buttonText='Connect Now'
                     buttonVariant='solid'
                     buttonColor='primary'
-                    buttonAction={() => navigate(routes.datasources, { state: { openModal: true } })}
+                    buttonAction={() => navigate(routes.datasources.path, { state: { openModal: true } })}
                 />
                 <FeatureCard
                     icon={

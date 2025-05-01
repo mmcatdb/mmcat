@@ -4,29 +4,21 @@ import { type CategoryGraph, categoryToGraph } from './categoryGraph';
 import { type Evocat } from '@/types/evocat/Evocat';
 import { type GraphEvent } from '../graph/graphEngine';
 
-/**
- * Represents the state for editing a category graph, encapsulating all necessary data for rendering and interaction.
- *
- * @property evocat - The immutable category data model.
- * @property graph - The graph representation of the category for rendering.
- * @property selection - The current selection state of nodes and edges.
- * @property leftPanelMode - The mode of the left panel (e.g., creating objects or morphisms).
- * @property rightPanelMode - The mode of the right panel (e.g., updating objects or morphisms).
- */
 export type EditCategoryState = {
     /** Immutable category data model. */
     evocat: Evocat;
+    /** The graph representation of the category for rendering. */
     graph: CategoryGraph;
+    /** The current selection state of nodes and edges. */
     selection: FreeSelection;
+    /** The mode of the left panel (e.g., creating objects or morphisms). */
     leftPanelMode: LeftPanelMode;
+    /** The mode of the right panel (e.g., updating objects or morphisms). */
     rightPanelMode: RightPanelMode;
 };
 
 /**
  * Initializes the state for editing a category, setting up the graph and default modes.
- *
- * @param evocat - The category data model to initialize the state with.
- * @returns The initial state for editing the category.
  */
 export function createInitialState(evocat: Evocat): EditCategoryState {
     return {
@@ -57,10 +49,6 @@ type EditCategoryAction =
 
 /**
  * Reducer changing the category state based on the provided action, handling graph updates, selections, and mode changes.
- *
- * @param state - The current state of the category editor.
- * @param action - The action to apply to the state.
- * @returns The new state after applying the action.
  */
 export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
     // console.log('REDUCE', state.leftPanelMode, action, state);
@@ -88,10 +76,6 @@ type GraphAction = {
 
 /**
  * Processes graph-related events, such as moving nodes or updating selections.
- *
- * @param state - The current editor state.
- * @param action - The graph action containing the event.
- * @returns The updated state.
  */
 function graph(state: EditCategoryState, { event }: GraphAction): EditCategoryState {
     switch (event.type) {
@@ -167,25 +151,17 @@ export enum LeftPanelMode {
     createMorphism = 'createMorphism',
 }
 
-/**
- * Action to update the left panel's mode and optionally the graph state.
- *
- * @interface LeftPanelAction
- * @property mode - The new mode for the left panel.
- * @property graph - Optional updated graph to synchronize state.
- */
 export type LeftPanelAction = {
+    /** The type of action, indicating a left panel mode change. */
     type: 'leftPanelMode';
+    /** The new mode for the left panel. */
     mode: LeftPanelMode;
+    /** Optional updated graph to synchronize state. */
     graph?: CategoryGraph;
 };
 
 /**
  * Updates the left panel mode and synchronizes the graph and selection state.
- *
- * @param state - The current editor state.
- * @param action - The left panel action with mode and optional graph.
- * @returns The updated state.
  */
 function setLeftPanel(state: EditCategoryState, { mode: leftPanelMode, graph }: LeftPanelAction): EditCategoryState {
     const updatedGraph = graph ?? state.graph;
@@ -216,10 +192,6 @@ export enum RightPanelMode {
 
 /**
  * Action to update the right panel's mode and optionally the graph state.
- *
- * @interface RightPanelAction
- * @property mode - The new mode for the right panel.
- * @property graph - Optional updated graph to synchronize state.
  */
 export type RightPanelAction = {
     type: 'rightPanelMode';
@@ -229,10 +201,6 @@ export type RightPanelAction = {
 
 /**
  * Updates the right panel mode and synchronizes the graph and selection state.
- *
- * @param state - The current editor state.
- * @param action - The right panel action with mode and optional graph.
- * @returns The updated state.
  */
 function setRightPanel(state: EditCategoryState, { mode: rightPanelMode, graph }: RightPanelAction): EditCategoryState {
     const updatedGraph = graph ?? state.graph;
@@ -257,10 +225,6 @@ type CreateObjexAction = {
 
 /**
  * Updates state after creating a new schema object, selecting it and resetting the mode.
- *
- * @param state - The current editor state.
- * @param action - The action with the updated graph.
- * @returns The updated state with the new object selected.
  */
 function afterObjexCreation(state: EditCategoryState, { graph }: CreateObjexAction): EditCategoryState {
     const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
@@ -287,10 +251,6 @@ type CreateMorphismAction = {
 
 /**
  * Updates state after creating a new morphism, selecting it and resetting the mode.
- *
- * @param state - The current editor state.
- * @param action - The action with the updated graph.
- * @returns The updated state with the new morphism selected.
  */
 function afterMorphismCreation(state: EditCategoryState, { graph }: CreateMorphismAction): EditCategoryState {
     const latestMorphism = Array.from(state.evocat.category.morphisms.values()).pop();
@@ -317,10 +277,6 @@ type DeleteElementsAction = {
 
 /**
  * Updates state after deleting elements, synchronizing the selection with the new graph.
- *
- * @param state - The current editor state.
- * @param action - The action with the updated graph.
- * @returns The updated state with synchronized selection.
  */
 function afterElementsDeletion(state: EditCategoryState, { graph }: DeleteElementsAction): EditCategoryState {
     return {

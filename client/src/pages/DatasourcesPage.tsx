@@ -6,13 +6,13 @@ import { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { Button, Tooltip } from '@nextui-org/react';
-import { AddIcon } from '@/components/icons/PlusIcon';
 import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { InfoBanner } from '@/components/common';
+import { FaPlus } from 'react-icons/fa';
 
 export function DatasourcesPage() {
     const data = useLoaderData() as DatasourcesLoaderData;
@@ -64,7 +64,7 @@ export function DatasourcesPage() {
                 <Button
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
-                    startContent={<AddIcon />}
+                    startContent={<FaPlus className='w-3 h-3' />}
                 >
                     Add Datasource
                 </Button>

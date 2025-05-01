@@ -45,7 +45,7 @@ type MappingsTableContentProps = {
 function MappingsTableContent({ 
     mappings, 
     sortDescriptor = { column: 'version', direction: 'descending' },
-    onSortChange = () => {},
+    onSortChange,
 }: MappingsTableContentProps) {
     const { showTableIDs } = usePreferences().preferences;
     const { category } = useCategoryInfo();
@@ -67,7 +67,9 @@ function MappingsTableContent({
             }
             
             // Default to version sorting (including initial render)
+            // eslint-disable-next-line prefer-const
             first = parseFloat(a.version) || 0;
+            // eslint-disable-next-line prefer-const
             second = parseFloat(b.version) || 0;
             
             const cmp = first < second ? -1 : (first > second ? 1 : 0);

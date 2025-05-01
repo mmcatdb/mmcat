@@ -52,12 +52,26 @@ function CommonNavbar() {
     return (
         <Navbar className='z-20 w-full h-10 border-b border-default-200' isBlurred={false} maxWidth='full'>
             <div className='flex items-center h-full w-full'>
-                <div className='flex flex-1 items-center overflow-hidden'>
+                <div className='hidden lg:flex lg:flex-1 items-center overflow-hidden'>
                     <Breadcrumbs />
                 </div>
 
-                <div className='flex items-center shrink-0 gap-2 ml-4'>
-                    <HelpDropdown />
+                <div className='flex items-center shrink-0 gap-2 ml-auto'>
+                    {/* The documentation for help is not ready yet, so displaying just GitHub link. *}
+                    {/* <HelpDropdown /> */}
+                    <Tooltip content='GitHub Repository' placement='bottom'>
+                        <Button
+                            isIconOnly
+                            aria-label='GitHub Repository'
+                            variant='light'
+                            className='w-7 h-7 min-w-6'
+                            as='a'
+                            href='https://github.com/mmcatdb/mmcat/tree/ui'
+                            target='_blank'
+                        >
+                            <FaGithub size={20} />
+                        </Button>
+                    </Tooltip>
                     <ThemeToggle className='w-7 h-7' />
                 </div>
             </div>
@@ -128,7 +142,7 @@ function Breadcrumbs() {
                         <Link
                             to={crumb.path}
                             className={cn(
-                                'truncate max-w-[160px] ',
+                                'truncate max-w-[160px]',
                                 'hover:text-default-800 focus-visible:outline-none',
                                 isCurrent 
                                     ? 'text-foreground font-semibold' 
@@ -148,6 +162,8 @@ function Breadcrumbs() {
 /**
  * A dropdown menu with help related links.
  */
+// This is a placeholder for now, as the documentation is not ready yet.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function HelpDropdown() {
     return (
         <Dropdown>

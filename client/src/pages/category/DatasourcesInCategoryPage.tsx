@@ -14,7 +14,6 @@ import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { InfoBanner } from '@/components/common';
-import { AddIcon } from '@/components/icons/PlusIcon';
 
 export function DatasourcesInCategoryPage() {
     const data = useLoaderData() as DatasourcesInCategoryLoaderData;
@@ -24,7 +23,7 @@ export function DatasourcesInCategoryPage() {
 
     const [ isModalOpen, setIsModalOpen ] = useState(false);
 
-    const [ datasourcesWithMappings, setDatasourcesWithMappings ] = useState<string[]>(data.allDatasourcesWithMappings);
+    const [ datasourcesWithMappings ] = useState<string[]>(data.allDatasourcesWithMappings);
 
     function onDatasourceCreated(newDatasource: Datasource) {
         setDatasourcesNotIn(prev => [ ...prev, newDatasource ]);
@@ -101,7 +100,7 @@ export function DatasourcesInCategoryPage() {
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
                     variant='flat'
-                    startContent={<AddIcon />}
+                    startContent={<FaPlus className='w-3 h-3' />}
                 >
                     Add Datasource
                 </Button>

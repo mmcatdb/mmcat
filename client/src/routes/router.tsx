@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
+import { routes } from '@/routes/routes';
 import { Home } from '@/pages/Home';
 import { CategoryEditorPage } from '@/pages/category/CategoryEditorPage';
-import { routes } from '@/routes/routes';
 import { ErrorPage } from '@/pages/errorPages';
 import { CategoryPage, type CategoryLoaderData } from '@/pages/CategoryPage';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
@@ -34,7 +34,7 @@ export const router = createBrowserRouter([
                 Component: Home,
             },
             {
-                path: routes.datasources,
+                path: routes.datasources.path,
                 handle: { breadcrumb: 'Datasources' },
                 children: [
                     {
@@ -173,12 +173,16 @@ export const router = createBrowserRouter([
                     },
                 ],
             },
-            // catch-all route for 404 errors
-            {
-                path: '*',
-                Component: ErrorPage,
-            },
         ],
+    },
+    // Catch-all route for 404 errors
+    {
+        path: '*',
+        loader: () => {
+            throw new Response('Not Found', { status: 404, statusText: 'Not Found' });
+        },
+        element: <ErrorPage />,
+        ErrorBoundary: ErrorPage,
     },
 ], {
     future: {

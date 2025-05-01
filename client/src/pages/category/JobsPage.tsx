@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Chip, Tooltip } from '@nextui-org/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
-import { getJobStatusIcon } from '@/components/icons/Icons';
+import { getJobStateIcon } from '@/components/icons/Icons';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { cn } from '@/components/utils';
 import { HiXMark } from 'react-icons/hi2';
@@ -190,7 +190,7 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
                                 onClick={() => navigate(`${job.id}`)}
                                 className='cursor-pointer'
                             >
-                                {getJobStatusIcon(job.state)}
+                                {getJobStateIcon(job.state)}
                             </div>
                         </Tooltip>
                     ))}

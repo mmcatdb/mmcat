@@ -8,6 +8,7 @@ import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
+import { cn } from '../utils';
 
 type DatasourcesTableProps = {
     /** List of datasources to display. */
@@ -253,8 +254,19 @@ function DatasourceTable({
                                         aria-label='Delete'
                                         color='danger'
                                         variant='light'
-                                        onPress={() => handleDeleteClick(datasource.id)}
-                                        isDisabled={hasMappings}
+                                        onPress={() => {
+                                            if (!hasMappings) 
+                                                handleDeleteClick(datasource.id);
+        
+                                        }}
+                                        title={
+                                            hasMappings
+                                                ? 'Delete disabled - datasource has active mappings'
+                                                : 'Delete datasource'
+                                        }
+                                        className={cn(
+                                            hasMappings && 'opacity-50 pointer-events-auto cursor-not-allowed',
+                                        )}
                                     >
                                         <TrashIcon className='w-5 h-5' />
                                     </Button>

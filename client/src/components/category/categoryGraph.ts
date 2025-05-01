@@ -4,8 +4,6 @@ import { type SchemaObjex, type Category, type MetadataMorphism, type MetadataOb
 /**
  * Represents a graph structure for a category, compatible with the graph library.
  * Nodes and edges are immutable to ensure safe usage in React's rendering lifecycle.
- *
- * @interface CategoryGraph
  */
 export type CategoryGraph = {
     nodes: Map<string, CategoryNode>;

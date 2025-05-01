@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, matchPath, useParams } from 'react-router-dom';
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@nextui-org/react';
 import { routes } from '@/routes/routes';
-import { sidebarIconMap } from '@/components/icons/Icons';
+import { SidebarIconKey, sidebarIconMap } from '@/components/icons/Icons';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggle';
 import { cn } from '@/components/utils';
@@ -249,14 +249,14 @@ function generalSidebarItems(): SidebarItem[] {
             type: 'normal',
             label: 'Schema categories',
             route: routes.categories,
-            iconName: 'shcemacategory',
+            iconName: SidebarIconKey.SchemaCategory,
         },
         {
             type: 'normal',
             label: 'Datasources',
-            route: routes.datasources,
-            iconName: 'datasources',
-            match: [ '/datasources/:id' ],
+            route: routes.datasources.path,
+            iconName: SidebarIconKey.Datasources,
+            match: [ routes.datasourceRoutes.datasource.path ],
         },
         // Work of other colleague, left here for future merge
         // {
@@ -282,37 +282,34 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
             type: 'normal',
             label: 'Overview',
             route: routes.category.index.resolve({ categoryId }),
-            iconName: 'overview',
+            iconName: SidebarIconKey.Overview,
         },
         {
             type: 'normal',
             label: 'Editor',
             route: routes.category.editor.resolve({ categoryId }),
-            iconName: 'editor',
+            iconName: SidebarIconKey.Editor,
         },
         {
             type: 'normal',
             label: 'Datasources',
             route: routes.category.datasources.resolve({ categoryId }),
-            iconName: 'datasources',
-            match: [ routes.category.datasources.resolve({ categoryId }) + '/:id' ],
+            iconName: SidebarIconKey.Datasources,
+            match: [ routes.category.datasource.path ],
         },
         {
             type: 'normal',
             label: 'Actions',
             route: routes.category.actions.resolve({ categoryId }),
-            iconName: 'rocket',
-            match: [
-                routes.category.actions.resolve({ categoryId }) + '/:id',
-                routes.category.actions.resolve({ categoryId }) + '/add',
-            ],
+            iconName: SidebarIconKey.Rocket,
+            match: [ routes.category.action.path, routes.category.addAction.path ],
         },
         {
             type: 'normal',
             label: 'Jobs',
             route: routes.category.jobs.resolve({ categoryId }),
-            iconName: 'playCircle',
-            match: [ routes.category.jobs.resolve({ categoryId }) + '/:id' ],
+            iconName: SidebarIconKey.PlayCircle,
+            match: [ routes.category.job.path ],
         },
     ];
 }

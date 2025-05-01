@@ -1,35 +1,36 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
 import { type SortDescriptor } from '@react-types/shared';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 /**
  * Hook to manage sorting of data for NextUI tables.
  * using SortDescriptor for NextUI's 2.0 Table onSortChange()
  */
-// hours wasted: 5
 export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescriptor) {
     const [ sortDescriptor, setSortDescriptor ] = useState<SortDescriptor>(initialSortDescriptor);
 
-    const sortedData = [ ...data ].sort((a, b) => {
-        const fieldA = a[sortDescriptor.column as keyof T];
-        const fieldB = b[sortDescriptor.column as keyof T];
+    const sortedData = useMemo(() => {
+        return [ ...data ].sort((a, b) => {
+            const fieldA = a[sortDescriptor.column as keyof T];
+            const fieldB = b[sortDescriptor.column as keyof T];
 
-        if (typeof fieldA === 'string' && typeof fieldB === 'string') {
-            const lowerA = fieldA.toLowerCase();
-            const lowerB = fieldB.toLowerCase();
-            if (lowerA < lowerB)
-                return sortDescriptor.direction === 'ascending' ? -1 : 1;
-            if (lowerA > lowerB)
-                return sortDescriptor.direction === 'ascending' ? 1 : -1;
-        }
-        else {
-            if (fieldA < fieldB)
-                return sortDescriptor.direction === 'ascending' ? -1 : 1;
-            if (fieldA > fieldB)
-                return sortDescriptor.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-    });
+            if (typeof fieldA === 'string' && typeof fieldB === 'string') {
+                const lowerA = fieldA.toLowerCase();
+                const lowerB = fieldB.toLowerCase();
+                if (lowerA < lowerB)
+                    return sortDescriptor.direction === 'ascending' ? -1 : 1;
+                if (lowerA > lowerB)
+                    return sortDescriptor.direction === 'ascending' ? 1 : -1;
+            }
+            else {
+                if (fieldA < fieldB)
+                    return sortDescriptor.direction === 'ascending' ? -1 : 1;
+                if (fieldA > fieldB)
+                    return sortDescriptor.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+    }, [ data, sortDescriptor ]);
 
     return { sortedData, sortDescriptor, setSortDescriptor };
 }

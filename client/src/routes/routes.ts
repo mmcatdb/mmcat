@@ -33,13 +33,18 @@ class ParametrizedRoute<TParam extends string = never, TQuery extends string = n
  * Base route for schema category related paths.
  */
 const categoryIndex = new ParametrizedRoute<'categoryId'>('/schema-categories/:categoryId', 'category');
-
+  
+/**
+ * Base route for datasources related paths.
+ */
+const datasourcesIndex = new ParametrizedRoute('/datasources', 'datasources');
+  
 export const routes = {
     home: new ParametrizedRoute('/', 'home'),
     // Static routes
     categories: '/schema-categories',
     about: '/about',
-    datasources: '/datasources',
+    datasources: datasourcesIndex,
     // Work of other colleague, left here for future merge
     // adminer: '/adminer',
     
@@ -48,11 +53,18 @@ export const routes = {
         index: categoryIndex,
         editor: categoryIndex.child('/editor', 'editor'),
         datasources: categoryIndex.child('/datasources', 'datasources'),
+        datasource: categoryIndex.child<'categoryId' | 'datasourceId'>('/datasources/:datasourceId', 'datasource'),
         mapping: categoryIndex.child<'categoryId' | 'mappingId'>('/mappings/:mappingId', 'mappings'),
         newMapping: categoryIndex.child<'categoryId'>('/mappings/new', 'new-mapping'),
         querying: categoryIndex.child('/querying', 'querying'),
         actions: categoryIndex.child('/actions', 'actions'),
+        action: categoryIndex.child<'categoryId' | 'actionId'>('/actions/:actionId', 'action'),
+        addAction: categoryIndex.child('/actions/add', 'add-action'),
         jobs: categoryIndex.child('/jobs', 'jobs'),
         job: categoryIndex.child<'categoryId' | 'jobId'>('/jobs/:jobId', 'job'),
+    },
+    datasourceRoutes: {
+        index: datasourcesIndex,
+        datasource: datasourcesIndex.child<'id'>('/:id', 'datasource'),
     },
 } as const;
