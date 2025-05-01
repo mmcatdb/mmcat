@@ -381,8 +381,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             List<GraphNode> recordNodes = new ArrayList<>();
 
             result.stream().forEach(record -> {
-                recordNodes.add(Neo4jUtils.getNodeProperties(record.get("startNode"), propertyNames));
-                recordNodes.add(Neo4jUtils.getNodeProperties(record.get("endNode"), propertyNames));
+                recordNodes.add(Neo4jUtils.getNodeProperties(record.get("startNode"), new ArrayList<>()));
+                recordNodes.add(Neo4jUtils.getNodeProperties(record.get("endNode"), new ArrayList<>()));
             });
 
             return recordNodes;
@@ -461,7 +461,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      */
     @Override public DataResponse getQueryResult(String query) {
         try (Session session = provider.getSession()) {
-            List<String> propertyNames = new ArrayList<>();
+            List<String> nodePropertyNames = new ArrayList<>();
+            List<String> relationshipPropertyNames = new ArrayList<>();
 
             GraphData data = session.executeRead(tx -> {
                 var finalQuery = new Query(query);
@@ -473,9 +474,9 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                     .flatMap(rec -> rec.values().stream())
                     .forEach(element -> {
                         if (element.hasType(TypeSystem.getDefault().NODE())) {
-                            nodes.add(Neo4jUtils.getNodeProperties(element, propertyNames));
+                            nodes.add(Neo4jUtils.getNodeProperties(element, nodePropertyNames));
                         } else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
-                            relationships.add(Neo4jUtils.getRelationshipProperties(element, propertyNames));
+                            relationships.add(Neo4jUtils.getRelationshipProperties(element, relationshipPropertyNames));
                         }
                     });
 
@@ -483,6 +484,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             });
 
             int itemCount = data.relationships().isEmpty() ? data.nodes().size() : data.relationships().size();
+            List<String> propertyNames = data.relationships().isEmpty() ? nodePropertyNames : relationshipPropertyNames;
 
             return new GraphResponse(data, itemCount, propertyNames);
         } catch (Exception e) {
