@@ -21,13 +21,14 @@ import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
-import cz.matfyz.inference.adminer.AdminerAlgorithms;
-import cz.matfyz.inference.adminer.Neo4jAlgorithms;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import java.util.TreeMap;
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -315,7 +316,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     private GraphResponse getNode(Session session, String kindName, List<AdminerFilter> filters, boolean unlabeled, String limit, String offset) {
         String queryBase = unlabeled ? "MATCH (n) " : "MATCH (n:" + kindName + ") ";
 
-        StringBuilder whereClause = new StringBuilder(AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, "n"));
+        StringBuilder whereClause = new StringBuilder(createWhereClause(filters, "n"));
 
         if (!whereClause.isEmpty()) {
             whereClause.insert(0, WHERE);
@@ -330,14 +331,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             var query = new Query(queryBase + whereClause.toString() + " RETURN n SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
-                .map(node -> Neo4jAlgorithms.getNodeProperties(node.get("n")))
+                .map(node -> Neo4jUtils.getNodeProperties(node.get("n")))
                 .toList();
         });
 
         Result countQueryResult = session.run(queryBase + whereClause.toString() + " RETURN COUNT(n) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> properties = Neo4jAlgorithms.getNodePropertyNames(session, kindName);
+        Set<String> properties = getNodePropertyNames(session, kindName);
 
         return new GraphResponse(data, itemCount, properties);
     }
@@ -353,7 +354,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @return A {@link GraphResponse} containing the relationships and metadata.
      */
     private GraphResponse getRelationship(Session session, String kindName, List<AdminerFilter> filters, String limit, String offset) {
-        StringBuilder whereClause = new StringBuilder(AdminerAlgorithms.createWhereClause(Neo4jAlgorithms.getInstance(), filters, "r"));
+        StringBuilder whereClause = new StringBuilder(createWhereClause(filters, "r"));
 
         if (!whereClause.isEmpty()) {
             whereClause.insert(0, WHERE);
@@ -368,14 +369,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             var query = new Query("MATCH (startNode)-[r]->(endNode) " + whereClause.toString() + " RETURN startNode, r, endNode SKIP " + offset + " LIMIT " + limit + ";");
 
             return tx.run(query).stream()
-                .map(relation -> Neo4jAlgorithms.getRelationshipProperties(relation.get("r"), relation.get("startNode"), relation.get("endNode")))
+                .map(relation -> Neo4jUtils.getRelationshipProperties(relation.get("r"), relation.get("startNode"), relation.get("endNode")))
                 .toList();
         });
 
         Result countQueryResult = session.run("MATCH (startNode)-[r]->(endNode) " + whereClause + " RETURN COUNT(r) AS recordCount;");
         int itemCount = countQueryResult.next().get("recordCount").asInt();
 
-        Set<String> properties = Neo4jAlgorithms.getRelationshipPropertyNames(session, kindName);
+        Set<String> properties = getRelationshipPropertyNames(session, kindName);
 
         return new GraphResponse(data, itemCount, properties);
     }
@@ -424,7 +425,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 for (String startNodeLabel: startNodeLabels) {
                     references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, "#startNodeId"), new ReferenceKind(datasourceId, startNodeLabel, "#elementId")));
                 }
-;
+
                 List<String> endNodeLabels = reference.get("endNodeLabels").asList(Value::asString);
 
                 for (String endNodeLabel: endNodeLabels) {
@@ -452,7 +453,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
                 return tx.run(finalQuery).stream()
                     .flatMap(rec-> rec.values().stream())
-                    .map(Neo4jAlgorithms::getGraphElementProperties)
+                    .map(Neo4jUtils::getGraphElementProperties)
                     .toList();
             });
 
@@ -462,6 +463,376 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         } catch (Exception e) {
             throw PullForestException.innerException(e);
         }
+    }
+
+    /**
+     * Constructs a WHERE clause based on a list of filters.
+     *
+     * @param filters The filters to apply.
+     * @param alias The alias assigned to the graph element in the query: 'n' for nodes, 'r' for relationships.
+     * @return A WHERE clause as a {@link String}.
+     */
+    private String createWhereClause(List<AdminerFilter> filters, String alias) {
+        if ((filters == null || filters.isEmpty())) {
+            return "";
+        }
+
+        StringBuilder whereClause = new StringBuilder();
+
+        for (int i = 0; i < filters.size(); i++) {
+            AdminerFilter filter = filters.get(i);
+            String propertyName = filter.propertyName();
+
+            if (i != 0) {
+                whereClause.append(" AND ");
+            }
+
+            Double doubleValue = this.parseNumeric(filter.propertyValue());
+
+            if (propertyName.startsWith("#labels")) {
+                this.appendLabelsWhereClause(whereClause, alias, propertyName, filter.operator(), filter.propertyValue(), doubleValue);
+                continue;
+            }
+
+            appendPropertyName(whereClause, alias, propertyName, doubleValue);
+
+            String operator = OPERATORS.get(filter.operator());
+            appendOperator(whereClause, operator);
+
+            appendPropertyValue(whereClause, filter.propertyValue(), operator, doubleValue);
+        }
+
+        return whereClause.toString();
+    }
+
+    /**
+     * Parses a numeric value from a given string.
+     * If the string represents a valid number, it returns the parsed {@code Double}.
+     * Otherwise, it returns {@code null}.
+     */
+    private Double parseNumeric(String str) {
+        if (str == null) {
+            return null;
+        }
+
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private void appendLabelsWhereClause(StringBuilder whereClause, String alias, String propertyName, String operator, String propertyValue, Double doubleValue) {
+        String function = this.getLabelFunction(propertyName);
+
+        if (propertyName.startsWith("#labelsStartNode")){
+            alias = "startNode";
+        }
+
+        if (propertyName.startsWith("#labelsEndNode")){
+            alias = "endNode";
+        }
+
+        boolean isQuantifier = QUANTIFIERS.contains(function);
+
+        whereClause
+            .append(function)
+            .append("(");
+
+        if (isQuantifier){
+            whereClause.append("label IN ");
+        }
+
+        whereClause
+            .append("labels(")
+            .append(alias)
+            .append(")");
+
+        if (isQuantifier){
+            whereClause.append(" WHERE label ");
+        } else {
+            whereClause.append(")");
+        }
+
+        operator = OPERATORS.get(operator);
+
+        appendOperator(whereClause, operator);
+        appendPropertyValue(whereClause, propertyValue, operator, doubleValue);
+
+        if (isQuantifier) {
+            whereClause.append(")");
+        }
+    }
+
+    private static void appendIdPropertyName(StringBuilder whereClause, String alias, String propertyName) {
+        boolean startNodeId = propertyName.equals("startNodeId");
+        boolean endNodeId = propertyName.equals("endNodeId");
+
+        whereClause.append("elementId(");
+
+        if (startNodeId) {
+            whereClause.append("startNode(");
+        } else if (endNodeId) {
+            whereClause.append("endNode(");
+        }
+
+        whereClause
+            .append(alias);
+
+        if (startNodeId || endNodeId)
+            whereClause.append(")");
+
+        whereClause
+            .append(") ");
+    }
+
+    private static void appendPropertyName(StringBuilder whereClause, String alias, String propertyName, Double doubleValue) {
+        if (propertyName.startsWith("#")) {
+            propertyName = propertyName.substring(1); // Remove '#' prefix
+            appendIdPropertyName(whereClause, alias, propertyName);
+
+            return;
+        }
+
+        if (doubleValue != null) {
+            whereClause.append("toFloat(");
+        }
+
+        if (alias != null && !propertyName.contains("startNode.") && !propertyName.contains("endNode.")) {
+            whereClause.append(alias)
+                .append(".");
+        }
+        whereClause.append(propertyName);
+
+        if (doubleValue != null) {
+            whereClause.append(")");
+        }
+    }
+
+    private static void appendOperator(StringBuilder whereClause, String operator) {
+        whereClause
+            .append(" ")
+            .append(operator)
+            .append(" ");
+    }
+
+    private static void appendPropertyValue(StringBuilder whereClause, String propertyValue, String operator, Double doubleValue) {
+        if (operator.equals("IN")) {
+            whereClause
+                .append("[")
+                .append(propertyValue)
+                .append("]");
+        } else if (!UNARY_OPERATORS.contains(operator)) {
+            if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
+                whereClause
+                    .append(doubleValue);
+            } else {
+                whereClause
+                    .append("'")
+                    .append(propertyValue)
+                    .append("'");
+            }
+        }
+    }
+
+    /**
+     * Retrieves a set of distinct property names based on a specified match clause.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param kindName The name of the kind.
+     * @param forNode If {@code true}, retrieves properties for nodes; if {@code false}, retrieves properties for relationships.
+     * @return A {@link Set} of property names.
+     */
+    private static Set<String> getPropertyNames(Session session, String kindName, boolean forNode) {
+        Set<String> properties = new HashSet<>();
+        StringBuilder matchClause = new StringBuilder("MATCH ");
+
+        if (forNode) {
+            matchClause.append(kindName != null ? "(a: " + kindName + ")" : "(a)");
+            matchClause.append(" UNWIND keys(a) AS key");
+        } else {
+            matchClause.append("(m)-[a]->(n)");
+
+            if (kindName != null) {
+                matchClause.append(" WHERE type(a) = '" + kindName + "'");
+            }
+
+            matchClause.append(" WITH m, a, n UNWIND [k IN keys(m) | 'startNode.' + k] + [k IN keys(a) | k] + [k IN keys(n) | 'endNode.' + k] AS key");
+        }
+
+        Result queryResult = session.run(String.format("""
+        %s RETURN DISTINCT key ORDER BY key;
+        """, matchClause.toString()));
+
+        while (queryResult.hasNext()) {
+            Record queryRecord = queryResult.next();
+            properties.add(queryRecord.get("key").asString());
+        }
+
+        properties.add("#elementId");
+
+        return properties;
+    }
+
+    /**
+     * Retrieves a set of distinct property names for all nodes.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param kindName The name of the kind.
+     * @return A {@link Set} of node property names (keys).
+     */
+    private static Set<String> getNodePropertyNames(Session session, String kindName) {
+        Set<String> properties = getPropertyNames(session, kindName, true);
+
+        for (String labelFunction: NODE_LABEL_FUNCTIONS.keySet()){
+            properties.add(labelFunction);
+        }
+
+        return properties;
+    }
+
+    /**
+     * Retrieves a set of distinct property names for all relationships.
+     *
+     * @param session The Neo4j session to use for the query.
+     * @param kindName The name of the kind.
+     * @return A {@link Set} of relationship property names (keys).
+     */
+    private static Set<String> getRelationshipPropertyNames(Session session, String kindName) {
+        Set<String> properties = getPropertyNames(session, kindName, false);
+
+        properties.add("#startNodeId");
+        properties.add("#endNodeId");
+
+        for (String labelFunction: RELATIONSHIP_LABEL_FUNCTIONS.keySet()){
+            properties.add(labelFunction);
+        }
+
+        return properties;
+    }
+
+    /**
+     * Defines a mapping of comparison operators to their Cypher equivalents.
+     *
+     * @return A {@link Map} containing operator mappings.
+     */
+    private static Map<String, String> defineOperators() {
+        final var ops = new TreeMap<String, String>();
+        ops.put("Equal", "=");
+        ops.put("NotEqual", "<>");
+        ops.put("Less", "<");
+        ops.put("LessOrEqual", "<=");
+        ops.put("Greater", ">");
+        ops.put("GreaterOrEqual", ">=");
+
+        ops.put("IsNull", "IS NULL");
+        ops.put("IsNotNull", "IS NOT NULL");
+
+        ops.put("MatchRegEx", "=~");
+        ops.put("StartsWith", "STARTS WITH");
+        ops.put("EndsWith", "ENDS WITH");
+        ops.put("Contains", "CONTAINS");
+
+        ops.put("In", "IN");
+
+        return ops;
+    }
+
+    /**
+     * A map of operator names to Neo4j operators.
+     *
+     * @return A {@link Map} of operator names to Neo4j operators.
+     */
+    private static final Map<String, String> OPERATORS = defineOperators();
+
+    /**
+     * A list of Neo4j unary operators.
+     *
+     * @return A {@link List} of Neo4j unary operators.
+     */
+    private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
+
+    /**
+     * A list of Neo4j operators used with string values.
+     *
+     * @return A {@link List} of Neo4j operators used with string values.
+     */
+    private static final List<String> STRING_OPERATORS = Arrays.asList("=~", "STARTS WITH", "ENDS WITH", "CONTAINS");
+
+    /**
+     * A list of Neo4j quantifiers.
+     *
+     * @return A {@link List} of Neo4j quantifiers.
+     */
+    private static final List<String> QUANTIFIERS = Arrays.asList("ANY", "ALL", "NONE", "SINGLE");
+
+    /**
+     * Defines a mapping of node labels with functions to Cypher functions.
+     *
+     * @return A {@link Map} containing functions mappings.
+     */
+    private static Map<String, String> defineNodeLabelFunctions() {
+        final var functions = new TreeMap<String, String>();
+        functions.put("#labels - SIZE", "SIZE");
+        functions.put("#labels - ANY", "ANY");
+        functions.put("#labels - ALL", "ALL");
+        functions.put("#labels - NONE", "NONE");
+        functions.put("#labels - SINGLE", "SINGLE");
+
+        return functions;
+    }
+
+    /**
+     * Defines a mapping of start end end node labels with functions to Cypher functions.
+     *
+     * @return A {@link Map} containing functions mappings.
+     */
+    private static Map<String, String> defineRelationshipLabelFunctions() {
+        final var functions = new TreeMap<String, String>();
+        functions.put("#labelsStartNode - SIZE", "SIZE");
+        functions.put("#labelsStartNode - ANY", "ANY");
+        functions.put("#labelsStartNode - ALL", "ALL");
+        functions.put("#labelsStartNode - NONE", "NONE");
+        functions.put("#labelsStartNode - SINGLE", "SINGLE");
+
+        functions.put("#labelsEndNode - SIZE", "SIZE");
+        functions.put("#labelsEndNode - ANY", "ANY");
+        functions.put("#labelsEndNode - ALL", "ALL");
+        functions.put("#labelsEndNode - NONE", "NONE");
+        functions.put("#labelsEndNode - SINGLE", "SINGLE");
+
+        return functions;
+    }
+
+    /**
+     * A {@link Map} of functions that can be used on Neo4j nodes.
+     */
+    private static final Map<String, String> NODE_LABEL_FUNCTIONS = defineNodeLabelFunctions();
+
+    /**
+     * A {@link Map} of functions that can be used on Neo4j relationships.
+     */
+    private static final Map<String, String> RELATIONSHIP_LABEL_FUNCTIONS = defineRelationshipLabelFunctions();
+
+    /**
+     * Retrieves the Neo4j function associated with the specified property name.
+     *
+     * @param propertyName The name of the property for which the function is retrieved.
+     * @return A {@link String} representing the corresponding Neo4j function name.
+     * @throws InvalidParameterException If no function is mapped to the given property name.
+     */
+    private String getLabelFunction(String propertyName) {
+        String function = NODE_LABEL_FUNCTIONS.get(propertyName);
+
+        if (function == null) {
+            function = RELATIONSHIP_LABEL_FUNCTIONS.get(propertyName);
+        }
+
+        if (function == null) {
+            throw new InvalidParameterException("No function mapped for given property name.");
+        }
+
+        return function;
     }
 
 }

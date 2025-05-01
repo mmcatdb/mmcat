@@ -1,33 +1,19 @@
-package cz.matfyz.inference.adminer;
+package cz.matfyz.wrapperpostgresql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.ReferenceKind;
 
-public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
-    private static final PostgreSQLAlgorithms INSTANCE = new PostgreSQLAlgorithms();
-
-    private PostgreSQLAlgorithms() {}
-
-    /**
-     * Retrieves the singleton instance of {@link PostgreSQLAlgorithms}.
-     *
-     * @return The single instance of {@link PostgreSQLAlgorithms}.
-     */
-    public static PostgreSQLAlgorithms getInstance() {
-        return INSTANCE;
-    }
+public class PostgreSQLUtils {
+    private PostgreSQLUtils() {}
 
     /**
      * Retrieves all property names for a given kind.
@@ -141,80 +127,4 @@ public final class PostgreSQLAlgorithms implements AdminerAlgorithmsInterface {
         }
     }
 
-    /**
-     * Defines a mapping of comparison operator names to PostgreSQL operators.
-     *
-     * @return A {@link Map} containing operator names as keys and their PostgreSQL equivalents as values.
-     */
-    private static Map<String, String> defineOperators() {
-        final var ops = new TreeMap<String, String>();
-        ops.put("Equal", "=");
-        ops.put("NotEqual", "<>");
-        ops.put("Less", "<");
-        ops.put("LessOrEqual", "<=");
-        ops.put("Greater", ">");
-        ops.put("GreaterOrEqual", ">=");
-
-        ops.put("IsNull", "IS NULL");
-        ops.put("IsNotNull", "IS NOT NULL");
-
-        ops.put("Like", "LIKE");
-        ops.put("ILike", "ILIKE");
-        ops.put("NotLike", "NOT LIKE");
-        ops.put("MatchRegEx", "~");
-        ops.put("NotMatchRegEx", "!~");
-
-        ops.put("In", "IN");
-        ops.put("NotIn", "NOT IN");
-
-        return ops;
-    }
-
-    /**
-     * A map of operator names to PostgreSQL operators.
-     *
-     * @return A {@link Map} of operator names to PostgreSQL operators.
-     */
-    private static final Map<String, String> OPERATORS = defineOperators();
-
-    /**
-     * A list of PostgreSQL unary operators.
-     *
-     * @return A {@link List} of PostgreSQL unary operators.
-     */
-    private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
-
-    /**
-     * A list of PostgreSQL operators used with string values.
-     *
-     * @return A {@link List} of PostgreSQL operators used with string values.
-     */
-    private static final List<String> STRING_OPERATORS = Arrays.asList("LIKE", "ILIKE", "NOT LIKE", "~", "!~");
-
-    /**
-     * Returns a map of operator names to PostgreSQL operators.
-     *
-     * @return A {@link Map} of operator names to PostgreSQL operators.
-     */
-    public Map<String, String> getOperators() {
-        return OPERATORS;
-    }
-
-    /**
-     * Returns a list of PostgreSQL unary operators.
-     *
-     * @return A {@link List} of PostgreSQL unary operators.
-     */
-    public List<String> getUnaryOperators() {
-        return UNARY_OPERATORS;
-    }
-
-    /**
-     * Returns a list of PostgreSQL operators used with string values.
-     *
-     * @return A {@link List} of PostgreSQL operators used with string values.
-     */
-    public List<String> getStringOperators() {
-        return STRING_OPERATORS;
-    }
 }

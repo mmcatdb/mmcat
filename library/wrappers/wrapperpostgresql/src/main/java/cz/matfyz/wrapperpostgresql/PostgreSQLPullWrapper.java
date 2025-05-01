@@ -19,8 +19,6 @@ import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
-import cz.matfyz.inference.adminer.AdminerAlgorithms;
-import cz.matfyz.inference.adminer.PostgreSQLAlgorithms;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,10 +27,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -226,7 +226,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         ){
             List<Map<String, String>> data = new ArrayList<>();
 
-            String whereClause = AdminerAlgorithms.createWhereClause(PostgreSQLAlgorithms.getInstance(), filter, null);
+            String whereClause = createWhereClause(filter);
 
             if (!whereClause.isEmpty()) {
                 whereClause = "WHERE " + whereClause;
@@ -259,7 +259,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 itemCount = countResultSet.getInt(1);
             }
 
-            Set<String> propertyNames = PostgreSQLAlgorithms.getPropertyNames(stmt, kindName);
+            Set<String> propertyNames = PostgreSQLUtils.getPropertyNames(stmt, kindName);
 
             return new TableResponse(data, itemCount, propertyNames);
         }
@@ -281,7 +281,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ){
-            return PostgreSQLAlgorithms.getReferences(stmt, datasourceId, kindName);
+            return PostgreSQLUtils.getReferences(stmt, datasourceId, kindName);
         }
         catch (Exception e) {
 			throw PullForestException.innerException(e);
@@ -327,4 +327,143 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 			throw PullForestException.innerException(e);
 		}
     }
+
+    /**
+     * Constructs a WHERE clause based on a list of filters.
+     *
+     * @param filters The filters to apply.
+     * @return A WHERE clause as a {@link String}.
+     */
+    private String createWhereClause(List<AdminerFilter> filters) {
+        if ((filters == null || filters.isEmpty())) {
+            return "";
+        }
+
+        StringBuilder whereClause = new StringBuilder();
+
+        for (int i = 0; i < filters.size(); i++) {
+            AdminerFilter filter = filters.get(i);
+            String propertyName = filter.propertyName();
+
+            if (i != 0) {
+                whereClause.append(" AND ");
+            }
+
+            Double doubleValue = this.parseNumeric(filter.propertyValue());
+
+            appendPropertyName(whereClause, propertyName, doubleValue);
+
+            String operator = OPERATORS.get(filter.operator());
+            appendOperator(whereClause, operator);
+
+            appendPropertyValue(whereClause, filter.propertyValue(), operator, doubleValue);
+        }
+
+        return whereClause.toString();
+    }
+
+    /**
+     * Parses a numeric value from a given string.
+     * If the string represents a valid number, it returns the parsed {@code Double}.
+     * Otherwise, it returns {@code null}.
+     *
+     * @param str the string to be parsed
+     * @return the parsed {@code Double} value if valid, or {@code null} if the input is {@code null} or not a valid number
+     */
+    private Double parseNumeric(String str) {
+        if (str == null) {
+            return null;
+        }
+
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static void appendPropertyName(StringBuilder whereClause, String propertyName, Double doubleValue) {
+        whereClause.append(propertyName);
+
+        if (doubleValue != null) {
+            whereClause.append("::NUMERIC");
+        }
+    }
+
+    private static void appendOperator(StringBuilder whereClause, String operator) {
+        whereClause
+            .append(" ")
+            .append(operator)
+            .append(" ");
+    }
+
+    private static void appendPropertyValue(StringBuilder whereClause, String propertyValue, String operator, Double doubleValue) {
+        if (operator.equals("IN") || operator.equals("NOT IN")) {
+            whereClause
+                .append("(")
+                .append(propertyValue)
+                .append(")");
+        } else if (!UNARY_OPERATORS.contains(operator)) {
+            if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
+                whereClause
+                    .append(doubleValue);
+            } else {
+                whereClause
+                    .append("'")
+                    .append(propertyValue)
+                    .append("'");
+            }
+        }
+    }
+
+    /**
+     * Defines a mapping of comparison operator names to PostgreSQL operators.
+     *
+     * @return A {@link Map} containing operator names as keys and their PostgreSQL equivalents as values.
+     */
+    private static Map<String, String> defineOperators() {
+        final var ops = new TreeMap<String, String>();
+        ops.put("Equal", "=");
+        ops.put("NotEqual", "<>");
+        ops.put("Less", "<");
+        ops.put("LessOrEqual", "<=");
+        ops.put("Greater", ">");
+        ops.put("GreaterOrEqual", ">=");
+
+        ops.put("IsNull", "IS NULL");
+        ops.put("IsNotNull", "IS NOT NULL");
+
+        ops.put("Like", "LIKE");
+        ops.put("ILike", "ILIKE");
+        ops.put("NotLike", "NOT LIKE");
+        ops.put("MatchRegEx", "~");
+        ops.put("NotMatchRegEx", "!~");
+
+        ops.put("In", "IN");
+        ops.put("NotIn", "NOT IN");
+
+        return ops;
+    }
+
+    /**
+     * A map of operator names to PostgreSQL operators.
+     *
+     * @return A {@link Map} of operator names to PostgreSQL operators.
+     */
+    private static final Map<String, String> OPERATORS = defineOperators();
+
+    /**
+     * A list of PostgreSQL unary operators.
+     *
+     * @return A {@link List} of PostgreSQL unary operators.
+     */
+    private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
+
+    /**
+     * A list of PostgreSQL operators used with string values.
+     *
+     * @return A {@link List} of PostgreSQL operators used with string values.
+     */
+    private static final List<String> STRING_OPERATORS = Arrays.asList("LIKE", "ILIKE", "NOT LIKE", "~", "!~");
+
 }
