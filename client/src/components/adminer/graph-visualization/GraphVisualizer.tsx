@@ -8,7 +8,7 @@ import { type GraphInteractionCallBack } from './components/graph/GraphEventHand
 import { type GetNodeNeighborsFn, type VizItem, type BasicNode, type BasicNodesAndRels, type BasicRelationship } from './types/types';
 import { debounce } from './utils/debounce';
 import { StyledFullSizeContainer } from './VisualizationView.styled';
-import { type DocumentResponse, type GraphResponse } from '@/types/adminer/DataResponse';
+import { type GraphResponse } from '@/types/adminer/DataResponse';
 import { NodeInspectorPanel } from './components/panel/NodeInspectorPanel';
 
 const DEFAULT_MAX_NEIGHBORS = 100;
@@ -150,11 +150,6 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
             ? new GraphStyleModel(this.props.useGeneratedDefaultColors)
             : this.state.graphStyle;
 
-        const document: DocumentResponse = {
-            metadata: this.props.fetchedData.metadata,
-            data: this.props.fetchedData.data.map(item => ({ ...item })),
-        };
-
         return (
             <StyledFullSizeContainer id='svg-vis'>
                 <Graph
@@ -177,7 +172,7 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
                     hoveredItem={this.state.hoveredItem}
                     selectedItem={this.state.selectedItem}
                     stats={this.state.stats}
-                    data={document}
+                    data={this.props.fetchedData}
                 />
             </StyledFullSizeContainer>
         );

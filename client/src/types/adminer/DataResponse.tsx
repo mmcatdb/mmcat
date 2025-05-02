@@ -5,52 +5,60 @@ export type KindNameResponse = {
 }
 
 export type TableResponse = {
+    type: 'table';
     metadata: {
         itemCount: number;
-        propertyNames: string[] | undefined;
+        propertyNames: string[];
         [key: string]: unknown;
     };
-    data: Record<string, string>[];
+    data: string[][];
 };
 
 export type DocumentResponse = {
+    type: 'document';
     metadata: {
         itemCount: number;
-        propertyNames: string[] | undefined;
+        propertyNames: string[];
         [key: string]: unknown;
     };
     data: Record<string, unknown>[];
 };
 
 export type GraphResponse = {
+    type: 'graph';
     metadata: {
         itemCount: number;
-        propertyNames: string[] | undefined;
+        propertyNames: string[];
         [key: string]: unknown;
     };
-    data: GraphResponseData[];
+    data: GraphResponseData;
 };
 
-export type GraphResponseData = GraphNode | GraphRelationship;
+export type GraphResponseData = {
+    nodes: GraphNode[];
+    relationships: GraphRelationship[];
+};
 
-type GraphNode = {
-    '#elementId': string;
+export type GraphNode = {
+    type: 'node';
+    id: string;
     properties: Record<string, unknown>;
-    '#lables': string[];
-    [key: string]: unknown;
 };
 
 export type GraphRelationship = {
-    '#elementId': string;
+    type: 'relationship';
+    id: string;
+    fromNodeId: string;
+    toNodeId: string;
     properties: Record<string, unknown>;
-    '#startNodeId': string;
-    '#endNodeId': string;
-    '#labelsStartNode': string[];
-    '#labelsEndNode': string[];
-    startNode: Record<string, unknown>;
-    endNode: Record<string, unknown>;
-    [key: string]: unknown;
 };
+
+export type GraphRelationshipWithNodes = {
+    id: string;
+    properties: Record<string, unknown>;
+    from: GraphNode;
+    to: GraphNode;
+}
 
 export type ErrorResponse = {
     message: string;

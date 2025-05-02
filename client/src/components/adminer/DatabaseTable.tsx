@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
+import { getTableFromGraphData } from '@/components/adminer/reshapeData';
 import type { Datasource } from '@/types/datasource/Datasource';
-import type { TableResponse, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
+import type { TableResponse, GraphResponse } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
@@ -14,53 +16,25 @@ type DatabaseTableProps = Readonly<{
 }>;
 
 export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
-    if (fetchedData === undefined || fetchedData.data.length === 0)
+    const [ tableData, setTableData ] = useState<TableResponse>();
+
+    useEffect(() => {
+        setTableData(fetchedData.type === 'graph' ? getTableFromGraphData(fetchedData) : fetchedData);
+    }, [ fetchedData ]);
+
+    if (tableData === undefined || tableData.metadata.itemCount === 0)
         return <p>No rows to display.</p>;
-
-    // If the data are for graph database, we want to display each property in its own column
-    if (fetchedData.data.every((item: Record<string, string> | GraphResponseData) => 'properties' in item)) {
-        const modifiedData = { metadata: fetchedData.metadata, data: [] } as TableResponse;
-
-        for (const element of fetchedData.data) {
-            const { properties, ...rest } = element;
-
-            const prefixed = Object.fromEntries(
-                Object.entries(rest as Record<string, string>).map(([ key, value ]) => [ key, value ]),
-            );
-
-            modifiedData.data.push({
-                ...(properties as Record<string, string>),
-                ...prefixed,
-            } as Record<string, string>);
-        }
-
-        fetchedData = modifiedData;
-    }
-
-    const keysSet = new Set<string>();
-    for (const dataItem of fetchedData.data) {
-        if (typeof dataItem === 'object' && dataItem !== null) {
-            for (const key of Object.keys(dataItem))
-                keysSet.add(key);
-        }
-    }
-
-    if (keysSet.size === 0)
-        keysSet.add('Value');
-
-    const keys = Array.from(keysSet);
-    const propertyNames: string[] = fetchedData.data.length > 0 ? keys : [];
 
     return (
         <>
-            {fetchedData && (
+            {tableData && (
                 <Table isStriped isCompact aria-label='Table'>
                     <TableHeader>
-                        {propertyNames.map(propertyName => (
-                            <TableColumn key={propertyName}>{propertyName}</TableColumn>
+                        {tableData.metadata.propertyNames.map((propertyName, index) => (
+                            <TableColumn key={index}>{propertyName}</TableColumn>
                         ))}
                     </TableHeader>
-                    {TableBodyComponent({ fetchedData: fetchedData, propertyNames: propertyNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
+                    {TableBodyComponent({ tableBodyData: tableData.data, propertyNames: tableData.metadata.propertyNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
                 </Table>
             )
             }
@@ -69,7 +43,7 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
 }
 
 type TableBodyComponentProps = Readonly<{
-    fetchedData: TableResponse | GraphResponse;
+    tableBodyData: string[][];
     propertyNames: string[];
     references: KindReference[];
     kind: string;
@@ -77,20 +51,16 @@ type TableBodyComponentProps = Readonly<{
     datasources: Datasource[];
 }>;
 
-function TableBodyComponent({ fetchedData, propertyNames, references, kind, datasourceId, datasources }: TableBodyComponentProps ) {
+function TableBodyComponent({ tableBodyData, propertyNames, references, kind, datasourceId, datasources }: TableBodyComponentProps ) {
     return (
         <TableBody emptyContent={'No rows to display.'}>
-            {fetchedData.data.map((item, index) => (
-                <TableRow key={index}>
-                    {item && typeof item === 'object' && !Array.isArray(item)
-                        ? propertyNames.map(propertyName => (
-                            <TableCell key={propertyName}>
-                                <DocumentComponent valueKey={propertyName} value={item[propertyName]} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
-                            </TableCell>
-                        ))
-                        : <TableCell>
-                            <DocumentComponent valueKey={null} value={item} kindReferences={[]} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
-                        </TableCell>}
+            {tableBodyData.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                    {row.map((cellItem, cellIndex) => (
+                        <TableCell key={cellIndex}>
+                            <DocumentComponent valueKey={propertyNames[cellIndex]} value={cellItem} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
+                        </TableCell>
+                    ))}
                 </TableRow>
             ))}
         </TableBody>

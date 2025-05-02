@@ -7,7 +7,7 @@ import { type GraphStyleModel } from '../../types/GraphStyle';
 import { type VizItem } from '../../types/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
-import { type DocumentResponse } from '@/types/adminer/DataResponse';
+import { type GraphResponse } from '@/types/adminer/DataResponse';
 
 type NodeInspectorPanelProps = {
     graphStyle: GraphStyleModel;
@@ -15,7 +15,7 @@ type NodeInspectorPanelProps = {
     hoveredItem: VizItem;
     selectedItem: VizItem;
     stats: GraphStats;
-    data: DocumentResponse;
+    data: GraphResponse;
 };
 
 type NodeInspectorPanelState = {
