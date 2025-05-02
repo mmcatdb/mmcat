@@ -16,16 +16,12 @@ public class PostgreSQLUtils {
     /**
      * Retrieves foreign key relationships from the database for the specified kind.
      *
-     * @param stmt          The {@link Statement} object used to execute the SQL query.
      * @param references    The list of references to which the foreign keys will be added.
-     * @param datasourceId  The identifier of the data source.
-     * @param kindName      The name of the kind for which foreign keys are retrieved.
      * @param outgoing      A boolean flag indicating the direction of the foreign key relationship:
      *                   <ul>
      *                       <li><code>true</code> for outgoing foreign keys (keys where the kind references other kinds).</li>
      *                       <li><code>false</code> for incoming foreign keys (keys where other kinds reference the kind).</li>
      *                   </ul>
-     * @return A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
      * @throws SQLException if an error occurs during database access.
      */
     private static List<Reference> getReferences(Statement stmt, List<Reference> references, String datasourceId, String kindName, boolean outgoing) throws SQLException {
@@ -68,10 +64,6 @@ public class PostgreSQLUtils {
     /**
      * Retrieves references for the specified kind.
      *
-     * @param stmt         The {@link Statement} object used to execute the SQL query.
-     * @param datasourceId ID of the datasource.
-     * @param kindName     The name of the kind for which foreign key relationships are to be retrieved.
-     * @return             A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
      * @throws PullForestException if an error occurs during database access.
      */
     public static List<Reference> getReferences(Statement stmt, String datasourceId, String kindName) {

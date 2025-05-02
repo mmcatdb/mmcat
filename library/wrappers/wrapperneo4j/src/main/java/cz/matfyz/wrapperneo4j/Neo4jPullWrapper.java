@@ -44,30 +44,22 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     private Neo4jProvider provider;
 
     /**
-     * A list of Neo4j quantifiers.
-     *
-     * @return A {@link List} of Neo4j quantifiers.
+     * A {@link List} of Neo4j quantifiers.
      */
     private static final List<String> QUANTIFIERS = Arrays.asList("ANY", "ALL", "NONE", "SINGLE");
 
     /**
-     * A map of operator names to Neo4j operators.
-     *
-     * @return A {@link Map} of operator names to Neo4j operators.
+     * A {@link Map} of operator names to Neo4j operators.
      */
     private static final Map<String, String> OPERATORS = defineOperators();
 
     /**
-     * A list of Neo4j unary operators.
-     *
-     * @return A {@link List} of Neo4j unary operators.
+     * A {@link List} of Neo4j unary operators.
      */
     private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
 
     /**
-     * A list of Neo4j operators used with string values.
-     *
-     * @return A {@link List} of Neo4j operators used with string values.
+     * A {@link List} of Neo4j operators used with string values.
      */
     private static final List<String> STRING_OPERATORS = Arrays.asList("=~", "STARTS WITH", "ENDS WITH", "CONTAINS");
 
@@ -115,9 +107,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     /**
      * Constructs a WHERE clause based on a list of filters.
      *
-     * @param filters The filters to apply.
-     * @param alias The alias assigned to the graph element in the query: 'n' for nodes, 'r' for relationships.
-     * @return A WHERE clause as a {@link String}.
+     * @param alias The alias assigned to the graph element in the query.
      */
     private String createWhereClause(List<AdminerFilter> filters, String alias) {
         if (filters.isEmpty()) {
@@ -154,8 +144,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     /**
      * Parses a numeric value from a given string.
-     * If the string represents a valid number, it returns the parsed {@code Double}.
-     * Otherwise, it returns {@code null}.
+     *
+     * @return the parsed {@code Double} value if valid, or {@code null} if the input is {@code null} or not a valid number
      */
     private Double parseNumeric(String str) {
         if (str == null) {
@@ -214,8 +204,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     /**
      * Retrieves the Neo4j function associated with the specified property name.
      *
-     * @param propertyName The name of the property for which the function is retrieved.
-     * @return A {@link String} representing the corresponding Neo4j function name.
      * @throws InvalidParameterException If no function is mapped to the given property name.
      */
     private String getLabelFunction(String propertyName) {
@@ -313,8 +301,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     /**
      * Defines a mapping of comparison operators to their Cypher equivalents.
-     *
-     * @return A {@link Map} containing operator mappings.
      */
     private static Map<String, String> defineOperators() {
         final var ops = new TreeMap<String, String>();
@@ -544,9 +530,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     /**
      * Retrieves a list of distinct kind names (labels and relationship types).
      *
-     * @param limit The maximum number of results to return.
-     * @param offset The number of results to skip.
-     * @return A {@link KindNamesResponse} containing the list of kind names.
      * @throws PullForestException if an error occurs during database access.
      */
     @Override public KindNamesResponse getKindNames(String limit, String offset) {
@@ -573,13 +556,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Retrieves data of the specified kind from the graph.
+     * Retrieves data of the specified kind from the graph with optional filtering.
      *
-     * @param kindName The name of the kind.
-     * @param limit The maximum number of results to return.
-     * @param offset The number of results to skip.
-     * @param filters The filters to apply (optional).
-     * @return A {@link GraphResponse} containing the data and metadata.
      * @throws PullForestException if an error occurs during query execution.
      */
     @Override public GraphResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
@@ -594,9 +572,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves a list of references for a specified kind.
-     *
-     * @param datasourceId ID of the datasource.
-     * @param kindName     The name of the kind.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         try (Session session = provider.getSession()) {
@@ -629,9 +604,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves the result of the given query.
-     *
-     * @param query the custom query.
-     * @return a {@link GraphResponse} containing the data result of custom query.
      */
     @Override public GraphResponse getQueryResult(QueryContent query) {
         try (Session session = provider.getSession()) {

@@ -13,7 +13,6 @@ public final class MongoDBUtils {
     /**
      * Recursively collects all property names from a given document.
      *
-     * @param document The document to process.
      * @param propertyNames The set to store property names.
      * @param prefix The prefix to apply to nested properties.
      */
@@ -34,9 +33,6 @@ public final class MongoDBUtils {
 
     /**
      * Retrieves a list of all distinct property names in a given collection.
-     *
-     * @param collection The collection to inspect.
-     * @return A {@link List} containing all property names found in the collection.
      */
     public static List<String> getPropertyNames(MongoCollection<Document> collection) {
         List<String> propertyNames = new ArrayList<>();

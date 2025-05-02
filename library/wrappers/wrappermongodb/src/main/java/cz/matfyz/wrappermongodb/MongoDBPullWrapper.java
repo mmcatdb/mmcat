@@ -230,9 +230,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     /**
      * Retrieves a list of kind names with support for pagination.
      *
-     * @param limit The maximum number of results to return.
-     * @param offsetString The number of results to skip.
-     * @return A {@link KindNamesResponse} containing the list of collection names.
      * @throws PullForestException if an error occurs while querying the database.
      */
     @Override public KindNamesResponse getKindNames(String limit, String offsetString) {
@@ -265,8 +262,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     /**
      * Creates a MongoDB filter based on a list of filters.
      *
-     * @param filters The list of filters to apply.
-     * @return A {@link Bson} filter object.
      * @throws UnsupportedOperationException if an unsupported operator is encountered.
      */
     private Bson createFilter(List<AdminerFilter> filters) {
@@ -286,16 +281,11 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Retrieves documents from a collection based on filters, pagination parameters and kind name.
+     * Retrieves documents from a collection based on kind name, pagination parameters and optional filters.
      *
-     * @param kindName The name of the kind to query.
-     * @param limit The maximum number of results to return.
-     * @param offset The number of results to skip.
-     * @param filters The list of filters to apply (optional).
-     * @return A {@link DocumentResponse} containing the retrieved documents, item count, and property names.
      * @throws PullForestException if an error occurs while querying the database.
      */
-    @Override public DocumentResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters){
+    @Override public DocumentResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
         KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
 
         if (filters == null){
@@ -307,9 +297,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves a list of references for a specified kind.
-     *
-     * @param datasourceId ID of the datasource.
-     * @param kindName     The name of the kind.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         // No foreign keys can be fetched right from MongoDB
@@ -318,9 +305,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves the result of the given query.
-     *
-     * @param query the custom query.
-     * @return a {@link DocumentResponse} containing the data result of custom query.
      */
     @Override public DocumentResponse getQueryResult(QueryContent query) {
         try {
@@ -370,8 +354,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     /**
      * Parses a string into a list of strings.
      *
-     * @param value the input string to parse.
-     * @return a list of strings split by commas.
      * @throws InvalidParameterException if the input is not properly enclosed.
      */
     private static List<String> parseStringToList(String value) {
@@ -381,9 +363,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     /**
      * Defines a mapping between operator names and their corresponding MongoDB filter functions.
-     *
-     * @return A {@link Map} where the key is the operator name (e.g., "Equal", "Less") and the value
-     *         is a {@link BiFunction} that takes a column name and a value, and produces a {@link Bson} filter.
      */
     private static Map<String, BiFunction<String, Object, Bson>> defineOperators() {
         final var ops = new TreeMap<String, BiFunction<String, Object, Bson>>();
@@ -405,8 +384,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     /**
      * A map of operator names to MongoDB filter functions.
-     *
-     * @return A {@link Map} of operator names to MongoDB filter functions.
      */
     private static final Map<String, BiFunction<String, Object, Bson>> OPERATORS = defineOperators();
 

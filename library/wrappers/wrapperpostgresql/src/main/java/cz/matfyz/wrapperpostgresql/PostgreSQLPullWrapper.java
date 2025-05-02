@@ -76,9 +76,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     /**
      * Constructs a WHERE clause based on a list of filters.
-     *
-     * @param filters The filters to apply.
-     * @return A WHERE clause as a {@link String}.
      */
     private String createWhereClause(List<AdminerFilter> filters) {
         if (filters.isEmpty()) {
@@ -110,10 +107,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     /**
      * Parses a numeric value from a given string.
-     * If the string represents a valid number, it returns the parsed {@code Double}.
-     * Otherwise, it returns {@code null}.
      *
-     * @param str the string to be parsed
      * @return the parsed {@code Double} value if valid, or {@code null} if the input is {@code null} or not a valid number
      */
     private Double parseNumeric(String str) {
@@ -274,9 +268,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     /**
      * Retrieves a list of kind names from the database.
      *
-     * @param limit  The maximum number of results to return.
-     * @param offset The starting position of the result set.
-     * @return A {@link KindNamesResponse} containing a list of kind names.
      * @throws PullForestException if an error occurs during database access.
      */
     @Override public KindNamesResponse getKindNames(String limit, String offset) {
@@ -301,13 +292,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Retrieves data for a specific kind with optional filtering, pagination, and sorting.
+     * Retrieves data for a specific kind with pagination and optional filtering.
      *
-     * @param kindName The name of the kind to query.
-     * @param limit    The maximum number of rows to return.
-     * @param offset   The starting position of the result set.
-     * @param filters   A list of {@link AdminerFilter} objects representing filter conditions (optional).
-     * @return A {@link TableResponse} containing the kind data, total row count, and column names.
      * @throws PullForestException if an error occurs during database access.
      */
     @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
@@ -323,9 +309,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     /**
      * Retrieves a list of references for a specified kind.
      *
-     * @param datasourceId ID of the datasource.
-     * @param kindName     The name of the kind for which references are being retrieved.
-     * @return A {@link List} of {@link Reference} objects representing the references of the kind.
      * @throws PullForestException if an error occurs during database access.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
@@ -342,9 +325,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves the result of the given query.
-     *
-     * @param query the custom query.
-     * @return a {@link TableResponse} containing the data result of custom query.
      */
     @Override public TableResponse getQueryResult(QueryContent query) {
         try(
@@ -387,8 +367,6 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     /**
      * Defines a mapping of comparison operator names to PostgreSQL operators.
-     *
-     * @return A {@link Map} containing operator names as keys and their PostgreSQL equivalents as values.
      */
     private static Map<String, String> defineOperators() {
         final var ops = new TreeMap<String, String>();
@@ -416,22 +394,16 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     /**
      * A map of operator names to PostgreSQL operators.
-     *
-     * @return A {@link Map} of operator names to PostgreSQL operators.
      */
     private static final Map<String, String> OPERATORS = defineOperators();
 
     /**
      * A list of PostgreSQL unary operators.
-     *
-     * @return A {@link List} of PostgreSQL unary operators.
      */
     private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
 
     /**
      * A list of PostgreSQL operators used with string values.
-     *
-     * @return A {@link List} of PostgreSQL operators used with string values.
      */
     private static final List<String> STRING_OPERATORS = Arrays.asList("LIKE", "ILIKE", "NOT LIKE", "~", "!~");
 

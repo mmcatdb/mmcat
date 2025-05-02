@@ -21,9 +21,7 @@ public class Neo4jUtils {
     public static final String TO_NODE_PREFIX = "to.";
 
     /**
-     * A list of Neo4j functions.
-     *
-     * @return A {@link List} of Neo4j functions.
+     * A {@link List} of Neo4j functions.
      */
     public static final List<String> FUNCTIONS = Arrays.asList("ANY", "ALL", "NONE", "SINGLE", "SIZE");
 
@@ -39,8 +37,6 @@ public class Neo4jUtils {
 
     /**
      * Defines a mapping of node labels with functions to Cypher functions.
-     *
-     * @return A {@link Map} containing functions mappings.
      */
     private static Map<String, String> defineNodeLabelFunctions() {
         final var functions = new TreeMap<String, String>();
@@ -54,8 +50,6 @@ public class Neo4jUtils {
 
     /**
      * Defines a mapping of start end end node labels with functions to Cypher functions.
-     *
-     * @return A {@link Map} containing functions mappings.
      */
     private static Map<String, String> defineRelationshipLabelFunctions() {
         final var functions = new TreeMap<String, String>();
@@ -71,9 +65,7 @@ public class Neo4jUtils {
     /**
      * Extracts the properties of a node.
      *
-     * @param node The node represented as a {@link Value}.
      * @param propertyNames A {@link List} to add propertyNames to.
-     * @return A {@link GraphNode} containing the node's ID and properties.
      */
     public static GraphNode getNodeProperties(Value node, List<String> propertyNames) {
         String id = node.asNode().elementId();
@@ -106,9 +98,7 @@ public class Neo4jUtils {
     /**
      * Extracts the properties of a relationship.
      *
-     * @param relationship The relationship represented as a {@link Value}.
      * @param propertyNames A {@link List} to add propertyNames to.
-     * @return A {@link GraphRelationship} containing the relationship's ID and properties.
      */
     public static GraphRelationship getRelationshipProperties(Value relationship, List<String> propertyNames) {
         String id = relationship.asRelationship().elementId();
