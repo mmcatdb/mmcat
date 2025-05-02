@@ -43,6 +43,34 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     private Neo4jProvider provider;
 
+    /**
+     * A list of Neo4j quantifiers.
+     *
+     * @return A {@link List} of Neo4j quantifiers.
+     */
+    private static final List<String> QUANTIFIERS = Arrays.asList("ANY", "ALL", "NONE", "SINGLE");
+
+    /**
+     * A map of operator names to Neo4j operators.
+     *
+     * @return A {@link Map} of operator names to Neo4j operators.
+     */
+    private static final Map<String, String> OPERATORS = defineOperators();
+
+    /**
+     * A list of Neo4j unary operators.
+     *
+     * @return A {@link List} of Neo4j unary operators.
+     */
+    private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
+
+    /**
+     * A list of Neo4j operators used with string values.
+     *
+     * @return A {@link List} of Neo4j operators used with string values.
+     */
+    private static final List<String> STRING_OPERATORS = Arrays.asList("=~", "STARTS WITH", "ENDS WITH", "CONTAINS");
+
     public Neo4jPullWrapper(Neo4jProvider provider) {
         this.provider = provider;
     }
@@ -108,7 +136,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             Double doubleValue = this.parseNumeric(filter.propertyValue());
 
-            if (propertyName.startsWith("#labels")) {
+            if (propertyName.contains(Neo4jUtils.LABELS)) {
                 this.appendLabelsWhereClause(whereClause, alias, propertyName, filter.operator(), filter.propertyValue(), doubleValue);
                 continue;
             }
@@ -144,12 +172,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     private void appendLabelsWhereClause(StringBuilder whereClause, String alias, String propertyName, String operator, String propertyValue, Double doubleValue) {
         String function = this.getLabelFunction(propertyName);
 
-        if (propertyName.startsWith("#labelsStartNode")){
-            alias = "startNode";
+        if (propertyName.startsWith(Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.LABELS)){
+            alias = "from_node";
         }
 
-        if (propertyName.startsWith("#labelsEndNode")){
-            alias = "endNode";
+        if (propertyName.startsWith(Neo4jUtils.TO_NODE_PREFIX + Neo4jUtils.LABELS)){
+            alias = "to_node";
         }
 
         boolean isQuantifier = QUANTIFIERS.contains(function);
@@ -191,11 +219,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @throws InvalidParameterException If no function is mapped to the given property name.
      */
     private String getLabelFunction(String propertyName) {
-        String function = NODE_LABEL_FUNCTIONS.get(propertyName);
-
-        if (function == null) {
-            function = RELATIONSHIP_LABEL_FUNCTIONS.get(propertyName);
-        }
+        String nodeFunction = Neo4jUtils.NODE_LABEL_FUNCTIONS.get(propertyName);
+        String function =  nodeFunction != null ? nodeFunction : Neo4jUtils.RELATIONSHIP_LABEL_FUNCTIONS.get(propertyName);
 
         if (function == null) {
             throw new InvalidParameterException("No function mapped for given property name.");
@@ -204,57 +229,43 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return function;
     }
 
-    /**
-     * Defines a mapping of node labels with functions to Cypher functions.
-     *
-     * @return A {@link Map} containing functions mappings.
-     */
-    private static Map<String, String> defineNodeLabelFunctions() {
-        final var functions = new TreeMap<String, String>();
-        functions.put("#labels - SIZE", "SIZE");
-        functions.put("#labels - ANY", "ANY");
-        functions.put("#labels - ALL", "ALL");
-        functions.put("#labels - NONE", "NONE");
-        functions.put("#labels - SINGLE", "SINGLE");
+    private static void appendPropertyName(StringBuilder whereClause, String alias, String propertyName, Double doubleValue) {
+        if (propertyName.contains(Neo4jUtils.ID)) {
+            appendIdPropertyName(whereClause, alias, propertyName);
+            return;
+        }
 
-        return functions;
+        if (doubleValue != null) {
+            whereClause.append("toFloat(");
+        }
+
+        if (alias != null
+            && !propertyName.contains(Neo4jUtils.FROM_NODE_PREFIX)
+            && !propertyName.contains(Neo4jUtils.TO_NODE_PREFIX)) {
+            whereClause.append(alias)
+                .append(".");
+        }
+
+        if (propertyName.startsWith(Neo4jUtils.FROM_NODE_PREFIX)){
+            whereClause.append("from_node.")
+                .append(propertyName.substring(Neo4jUtils.FROM_NODE_PREFIX.length()));
+        }
+        else if (propertyName.startsWith(Neo4jUtils.TO_NODE_PREFIX)){
+            whereClause.append("to_node.")
+                .append(propertyName.substring(Neo4jUtils.TO_NODE_PREFIX.length()));
+        }
+        else {
+            whereClause.append(propertyName);
+        }
+
+        if (doubleValue != null) {
+            whereClause.append(")");
+        }
     }
-
-    /**
-     * A {@link Map} of functions that can be used on Neo4j nodes.
-     */
-    private static final Map<String, String> NODE_LABEL_FUNCTIONS = defineNodeLabelFunctions();
-
-    /**
-     * Defines a mapping of start end end node labels with functions to Cypher functions.
-     *
-     * @return A {@link Map} containing functions mappings.
-     */
-    private static Map<String, String> defineRelationshipLabelFunctions() {
-        final var functions = new TreeMap<String, String>();
-        functions.put("#labelsStartNode - SIZE", "SIZE");
-        functions.put("#labelsStartNode - ANY", "ANY");
-        functions.put("#labelsStartNode - ALL", "ALL");
-        functions.put("#labelsStartNode - NONE", "NONE");
-        functions.put("#labelsStartNode - SINGLE", "SINGLE");
-
-        functions.put("#labelsEndNode - SIZE", "SIZE");
-        functions.put("#labelsEndNode - ANY", "ANY");
-        functions.put("#labelsEndNode - ALL", "ALL");
-        functions.put("#labelsEndNode - NONE", "NONE");
-        functions.put("#labelsEndNode - SINGLE", "SINGLE");
-
-        return functions;
-    }
-
-    /**
-     * A {@link Map} of functions that can be used on Neo4j relationships.
-     */
-    private static final Map<String, String> RELATIONSHIP_LABEL_FUNCTIONS = defineRelationshipLabelFunctions();
 
     private static void appendIdPropertyName(StringBuilder whereClause, String alias, String propertyName) {
-        boolean startNodeId = propertyName.equals("startNodeId");
-        boolean endNodeId = propertyName.equals("endNodeId");
+        boolean startNodeId = propertyName.equals(Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.ID);
+        boolean endNodeId = propertyName.equals(Neo4jUtils.TO_NODE_PREFIX + Neo4jUtils.ID);
 
         whereClause.append("elementId(");
 
@@ -272,29 +283,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         whereClause
             .append(") ");
-    }
-
-    private static void appendPropertyName(StringBuilder whereClause, String alias, String propertyName, Double doubleValue) {
-        if (propertyName.startsWith("#")) {
-            propertyName = propertyName.substring(1); // Remove '#' prefix
-            appendIdPropertyName(whereClause, alias, propertyName);
-
-            return;
-        }
-
-        if (doubleValue != null) {
-            whereClause.append("toFloat(");
-        }
-
-        if (alias != null && !propertyName.contains("startNode.") && !propertyName.contains("endNode.")) {
-            whereClause.append(alias)
-                .append(".");
-        }
-        whereClause.append(propertyName);
-
-        if (doubleValue != null) {
-            whereClause.append(")");
-        }
     }
 
     private static void appendOperator(StringBuilder whereClause, String operator) {
@@ -321,6 +309,33 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                     .append("'");
             }
         }
+    }
+
+    /**
+     * Defines a mapping of comparison operators to their Cypher equivalents.
+     *
+     * @return A {@link Map} containing operator mappings.
+     */
+    private static Map<String, String> defineOperators() {
+        final var ops = new TreeMap<String, String>();
+        ops.put("Equal", "=");
+        ops.put("NotEqual", "<>");
+        ops.put("Less", "<");
+        ops.put("LessOrEqual", "<=");
+        ops.put("Greater", ">");
+        ops.put("GreaterOrEqual", ">=");
+
+        ops.put("IsNull", "IS NULL");
+        ops.put("IsNotNull", "IS NOT NULL");
+
+        ops.put("MatchRegEx", "=~");
+        ops.put("StartsWith", "STARTS WITH");
+        ops.put("EndsWith", "ENDS WITH");
+        ops.put("Contains", "CONTAINS");
+
+        ops.put("In", "IN");
+
+        return ops;
     }
 
     private String getOffsetAndLimit(KindNameQuery query) {
@@ -595,13 +610,13 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 List<String> startNodeLabels = reference.get("startNodeLabels").asList(Value::asString);
 
                 for (String startNodeLabel: startNodeLabels) {
-                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, "#startNodeId"), new ReferenceKind(datasourceId, startNodeLabel, "#elementId")));
+                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.ID), new ReferenceKind(datasourceId, startNodeLabel, Neo4jUtils.ID)));
                 }
 
                 List<String> endNodeLabels = reference.get("endNodeLabels").asList(Value::asString);
 
                 for (String endNodeLabel: endNodeLabels) {
-                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, "#endNodeId"), new ReferenceKind(datasourceId, endNodeLabel, "#elementId")));
+                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.ID), new ReferenceKind(datasourceId, endNodeLabel, Neo4jUtils.ID)));
                 }
             }
 
@@ -675,60 +690,5 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         throw PullForestException.invalidQuery(this, query);
     }
-
-    /**
-     * Defines a mapping of comparison operators to their Cypher equivalents.
-     *
-     * @return A {@link Map} containing operator mappings.
-     */
-    private static Map<String, String> defineOperators() {
-        final var ops = new TreeMap<String, String>();
-        ops.put("Equal", "=");
-        ops.put("NotEqual", "<>");
-        ops.put("Less", "<");
-        ops.put("LessOrEqual", "<=");
-        ops.put("Greater", ">");
-        ops.put("GreaterOrEqual", ">=");
-
-        ops.put("IsNull", "IS NULL");
-        ops.put("IsNotNull", "IS NOT NULL");
-
-        ops.put("MatchRegEx", "=~");
-        ops.put("StartsWith", "STARTS WITH");
-        ops.put("EndsWith", "ENDS WITH");
-        ops.put("Contains", "CONTAINS");
-
-        ops.put("In", "IN");
-
-        return ops;
-    }
-
-    /**
-     * A map of operator names to Neo4j operators.
-     *
-     * @return A {@link Map} of operator names to Neo4j operators.
-     */
-    private static final Map<String, String> OPERATORS = defineOperators();
-
-    /**
-     * A list of Neo4j unary operators.
-     *
-     * @return A {@link List} of Neo4j unary operators.
-     */
-    private static final List<String> UNARY_OPERATORS = Arrays.asList("IS NULL", "IS NOT NULL");
-
-    /**
-     * A list of Neo4j operators used with string values.
-     *
-     * @return A {@link List} of Neo4j operators used with string values.
-     */
-    private static final List<String> STRING_OPERATORS = Arrays.asList("=~", "STARTS WITH", "ENDS WITH", "CONTAINS");
-
-    /**
-     * A list of Neo4j quantifiers.
-     *
-     * @return A {@link List} of Neo4j quantifiers.
-     */
-    private static final List<String> QUANTIFIERS = Arrays.asList("ANY", "ALL", "NONE", "SINGLE");
 
 }

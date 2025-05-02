@@ -17,9 +17,15 @@ type DatabaseTableProps = Readonly<{
 
 export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
     const [ tableData, setTableData ] = useState<TableResponse>();
+    const [ tableColumnNames, setTableColumnNames ] = useState<string[]>();
 
     useEffect(() => {
-        setTableData(fetchedData.type === 'graph' ? getTableFromGraphData(fetchedData) : fetchedData);
+        const { data, columnNames } = fetchedData.type === 'graph'
+            ? getTableFromGraphData(fetchedData)
+            : { data: fetchedData, columnNames: fetchedData.metadata.propertyNames };
+
+        setTableData(data);
+        setTableColumnNames(columnNames);
     }, [ fetchedData ]);
 
     if (tableData === undefined || tableData.metadata.itemCount === 0)
@@ -27,14 +33,14 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
 
     return (
         <>
-            {tableData && (
+            {tableData && tableColumnNames && (
                 <Table isStriped isCompact aria-label='Table'>
                     <TableHeader>
-                        {tableData.metadata.propertyNames.map((propertyName, index) => (
-                            <TableColumn key={index}>{propertyName}</TableColumn>
+                        {tableColumnNames.map((columnName, index) => (
+                            <TableColumn key={index}>{columnName}</TableColumn>
                         ))}
                     </TableHeader>
-                    {TableBodyComponent({ tableBodyData: tableData.data, propertyNames: tableData.metadata.propertyNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
+                    {TableBodyComponent({ tableBodyData: tableData.data, columnNames: tableColumnNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
                 </Table>
             )
             }
@@ -44,21 +50,21 @@ export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId,
 
 type TableBodyComponentProps = Readonly<{
     tableBodyData: string[][];
-    propertyNames: string[];
+    columnNames: string[];
     references: KindReference[];
     kind: string;
     datasourceId: Id;
     datasources: Datasource[];
 }>;
 
-function TableBodyComponent({ tableBodyData, propertyNames, references, kind, datasourceId, datasources }: TableBodyComponentProps ) {
+function TableBodyComponent({ tableBodyData, columnNames, references, kind, datasourceId, datasources }: TableBodyComponentProps ) {
     return (
         <TableBody emptyContent={'No rows to display.'}>
             {tableBodyData.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                     {row.map((cellItem, cellIndex) => (
                         <TableCell key={cellIndex}>
-                            <DocumentComponent valueKey={propertyNames[cellIndex]} value={cellItem} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
+                            <DocumentComponent valueKey={columnNames[cellIndex]} value={cellItem} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
                         </TableCell>
                     ))}
                 </TableRow>

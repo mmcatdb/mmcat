@@ -1,36 +1,49 @@
 import type { TableResponse, GraphResponse, GraphRelationshipWithNodes, GraphNode, DocumentResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 
 const ID = '#id';
+const LABELS = '#labels';
 const FROM_NODE_PREFIX = 'from.';
 const TO_NODE_PREFIX = 'to.';
 
-export function getTableFromGraphData(graphData: GraphResponse): TableResponse {
+export function getTableFromGraphData(graphData: GraphResponse): { data: TableResponse, columnNames: string[]} {
     const modifiedData = { type: 'table', metadata: graphData.metadata, data: [] } as TableResponse;
 
     const fetchedPropertyNames: string[] = graphData.metadata.propertyNames;
 
     if (graphData.data.relationships.length === 0){
-        modifiedData.metadata.propertyNames = [ ID ];
+        modifiedData.metadata.propertyNames = [ ID, LABELS ];
 
         for (const propertyName of fetchedPropertyNames) {
             if (!modifiedData.metadata.propertyNames.includes(propertyName))
                 modifiedData.metadata.propertyNames.push(propertyName);
         }
 
-        const data: string[][] = getNodesData(graphData.data.nodes, modifiedData.metadata.propertyNames);
+        const tableColumnNames = modifiedData.metadata.propertyNames.filter(name => !name.includes(`${LABELS} - `));
+
+        const data: string[][] = getNodesData(graphData.data.nodes, tableColumnNames);
         modifiedData.data = data;
+        modifiedData.metadata.propertyNames = modifiedData.metadata.propertyNames.filter(name =>
+            name != LABELS,
+        );
+
+        return { data: modifiedData, columnNames: tableColumnNames };
     }
     else {
         const { graph, propertyNames } = getRelationshipsWithNodes(fetchedPropertyNames, graphData.data);
 
         modifiedData.metadata.propertyNames = propertyNames;
 
-        const data: string[][] = getRelationshipsData(graph, propertyNames);
+        const tableColumnNames = propertyNames.filter(name => !name.includes(`${LABELS} - `));
+
+        const data: string[][] = getRelationshipsData(graph, tableColumnNames);
 
         modifiedData.data = data;
-    }
+        modifiedData.metadata.propertyNames = modifiedData.metadata.propertyNames.filter(name =>
+            name != `${FROM_NODE_PREFIX}${LABELS}` && name != `${TO_NODE_PREFIX}${LABELS}`,
+        );
 
-    return modifiedData;
+        return { data: modifiedData, columnNames: tableColumnNames };
+    }
 }
 
 export function getDocumentFromGraphData(graphData: GraphResponse): DocumentResponse {

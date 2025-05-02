@@ -59,7 +59,7 @@ function getNodeLabelsAndProperties(properties: Record<string, unknown>):
     let labels: string[] = [];
 
     for (const [ key, value ] of Object.entries(properties)) {
-        if (key === 'labels')
+        if (key === '#labels')
             labels = value as string[];
         else
             props[key] = value as string;
