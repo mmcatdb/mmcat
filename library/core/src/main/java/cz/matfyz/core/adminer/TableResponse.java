@@ -7,6 +7,7 @@ import java.util.List;
  */
 public class TableResponse extends DataResponse {
     private List<List<String>> data;
+    private static final String TYPE = "table";
 
     public TableResponse(List<List<String>> data, int itemCount, List<String> propertyNames){
         super(itemCount, propertyNames);
@@ -16,4 +17,9 @@ public class TableResponse extends DataResponse {
     public List<List<String>> getData() {
         return data;
     }
+
+    @Override public String getType() {
+        return TYPE;
+    }
+
 }

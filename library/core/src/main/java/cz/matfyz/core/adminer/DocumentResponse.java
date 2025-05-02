@@ -9,6 +9,7 @@ import org.bson.Document;
  */
 public class DocumentResponse extends DataResponse {
     private List<Document> data;
+    private static final String TYPE = "document";
 
     public DocumentResponse(List<Document> data, int itemCount, List<String> propertyNames){
         super(itemCount, propertyNames);
@@ -18,4 +19,9 @@ public class DocumentResponse extends DataResponse {
     public List<Document> getData() {
         return data;
     }
+
+    @Override public String getType() {
+        return TYPE;
+    }
+
 }

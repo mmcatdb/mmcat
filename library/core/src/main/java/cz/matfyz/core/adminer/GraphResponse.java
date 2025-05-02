@@ -8,6 +8,7 @@ import java.util.Map;
  */
 public class GraphResponse extends DataResponse {
     private GraphData data;
+    private static final String TYPE = "graph";
 
     public GraphResponse(GraphData data, int itemCount, List<String> propertyNames){
         super(itemCount, propertyNames);
@@ -35,9 +36,13 @@ public class GraphResponse extends DataResponse {
 
     public record GraphRelationship(
         String id,
-        String startNodeId,
-        String endNodeId,
+        String fromNodeId,
+        String toNodeId,
         Map<String, Object> properties
     ) implements GraphElement {}
+
+    @Override public String getType() {
+        return TYPE;
+    }
 
 }

@@ -20,4 +20,7 @@ public abstract class DataResponse {
      * Represents metadata for the response.
      */
     public record Metadata (int itemCount, List<String> propertyNames) {}
+
+    public abstract String getType();
+
 }
