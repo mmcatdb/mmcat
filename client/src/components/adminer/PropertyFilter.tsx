@@ -5,14 +5,14 @@ import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/filterQueryReducer';
 import type { DatasourceType } from '@/types/datasource';
 
-type ColumnFormProps = Readonly<{
+type PropertyFilterProps = Readonly<{
     filter: PropertyFilter;
     datasourceType: DatasourceType;
     propertyNames: string[] | undefined;
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 
-export function ColumnForm({ filter, datasourceType, propertyNames, dispatch }: ColumnFormProps) {
+export function PropertyFilter({ filter, datasourceType, propertyNames, dispatch }: PropertyFilterProps) {
     const operators = typeof OPERATOR_MAPPING[datasourceType] === 'function' && filter.propertyName
         ? OPERATOR_MAPPING[datasourceType]?.(filter.propertyName)
         : OPERATOR_MAPPING[datasourceType];

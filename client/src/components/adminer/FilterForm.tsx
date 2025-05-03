@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
-import { ColumnForm } from '@/components/adminer/ColumnForm';
+import { PropertyFilter } from '@/components/adminer/PropertyFilter';
 import type { AdminerFilterQueryStateAction, AdminerFilterQueryState } from '@/components/adminer/filterQueryReducer';
 import type { DatasourceType } from '@/types/datasource/Datasource';
 
@@ -31,7 +31,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
         <>
             <>
                 {state.form.filters.map(filter => (
-                    <ColumnForm key={filter.id} filter={filter} datasourceType={datasourceType} propertyNames={propertyNames} dispatch={dispatch}/>
+                    <PropertyFilter key={filter.id} filter={filter} datasourceType={datasourceType} propertyNames={propertyNames} dispatch={dispatch}/>
                 ))}
             </>
 
