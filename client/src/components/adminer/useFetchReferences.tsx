@@ -252,7 +252,7 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
 }
 
 async function getForeignKeys(datasourceId: Id, kindName: string): Promise<AdminerReferences> {
-    const foreignKeysResponse = await api.adminer.getReferences({ datasourceId: datasourceId, kindName: kindName });
+    const foreignKeysResponse = await api.adminer.getReferences({ datasourceId: datasourceId }, { kind: kindName });
 
     if (!foreignKeysResponse.status)
         throw new Error(`Failed to fetch foreign keys`);

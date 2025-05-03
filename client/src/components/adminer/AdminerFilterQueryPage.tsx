@@ -22,11 +22,11 @@ import type { KindFilterState } from '@/types/adminer/ReducerTypes';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 import type { Theme } from '@/components/PreferencesProvider';
 
-function getQueryParams(filterState: KindFilterState): QueryParams {
+function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {
     if (filterState.filters.length > 0)
-        return { filters: getFiltersURLParam(filterState), limit: filterState.limit, offset: filterState.offset };
+        return { kind: kindName, filters: getFiltersURLParam(filterState), limit: filterState.limit, offset: filterState.offset };
 
-    return { limit: filterState.limit, offset: filterState.offset };
+    return { kind: kindName, limit: filterState.limit, offset: filterState.offset };
 }
 
 function getKindReferences(references: AdminerReferences, datasourceId: Id, kind: string): KindReference[] {
@@ -101,7 +101,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
             });
         }
 
-        return api.adminer.getKind({ datasourceId: state.datasourceId, kindName: state.kindName }, getQueryParams(state.active));
+        return api.adminer.getKind({ datasourceId: state.datasourceId }, getQueryParams(state.kindName, state.active));
     }, [ state.datasourceId, state.kindName, state.active ]);
 
     const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);

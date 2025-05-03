@@ -70,10 +70,10 @@ public class AdminerController {
      * @throws ResponseStatusException if the datasource is not found.
      * @throws IllegalArgumentException if the filter format is invalid.
      */
-    @GetMapping(value = "/adminer/{db}/{kind}")
+    @GetMapping(value = "/adminer/{db}/kind")
     public DataResponse getKind(
         @PathVariable Id db,
-        @PathVariable String kind,
+        @RequestParam(required = true) String kind,
         @RequestParam(required = false, defaultValue = "") String filters,
         @RequestParam(required = false, defaultValue = "50") String limit,
         @RequestParam(required = false, defaultValue = "0") String offset
@@ -115,10 +115,10 @@ public class AdminerController {
      * @return A {@link List} of {@link Reference} representing the relationships.
      * @throws ResponseStatusException if the datasource is not found.
      */
-    @GetMapping(value = "/adminer/{db}/{kind}/references")
+    @GetMapping(value = "/adminer/{db}/references")
     public List<Reference> getReferences(
         @PathVariable Id db,
-        @PathVariable String kind
+        @RequestParam(required = true) String kind
         ) {
         final var datasource = datasourceRepository.find(db);
 

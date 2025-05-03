@@ -7,11 +7,11 @@ const adminer = {
     getKindNames: GET<{ datasourceId: StringLike }, KindNameResponse>(
         u => `/adminer/${u.datasourceId}`,
     ),
-    getKind: GET<{ datasourceId: StringLike, kindName: StringLike }, DataResponse, QueryParams>(
-        u => `/adminer/${u.datasourceId}/${u.kindName}`,
+    getKind: GET<{ datasourceId: StringLike }, DataResponse, QueryParams>(
+        u => `/adminer/${u.datasourceId}/kind`,
     ),
-    getReferences: GET<{ datasourceId: StringLike, kindName: StringLike }, AdminerReferences>(
-        u => `/adminer/${u.datasourceId}/${u.kindName}/references`,
+    getReferences: GET<{ datasourceId: StringLike }, AdminerReferences, QueryParams>(
+        u => `/adminer/${u.datasourceId}/references`,
     ),
     getQueryResult: GET<{ datasourceId: StringLike}, DataResponse, QueryParams>(
         u => `/adminer/${u.datasourceId}/query`,
