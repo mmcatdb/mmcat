@@ -92,7 +92,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             if (kindName.isEmpty()) {
                 whereClause.append(whereClause.isEmpty() ? "WHERE" : " AND ");
-                whereClause.append("size(labels(node)) = 0");
+                whereClause.append(" size(labels(node)) = 0 ");
             }
 
             return queryBase + " " + whereClause.toString() + "RETURN node" + getOffsetAndLimit(knfQuery.kindNameQuery) + ";";
@@ -645,22 +645,23 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         if (query instanceof KindNameFilterQuery knfQuery) {
             String kindName = knfQuery.kindNameQuery.kindName;
 
-            if (kindName.isEmpty() || !kindName.equals(kindName.toUpperCase()))
-                return createNodeQueryString(query);
-
-            return createRelationshipQueryString(query);
+            return createQueryString(kindName, query);
         }
 
         if (query instanceof KindNameQuery knQuery){
             String kindName = knQuery.kindName;
 
-            if (kindName.isEmpty() || !kindName.equals(kindName.toUpperCase()))
-                return createNodeQueryString(query);
-
-            return createRelationshipQueryString(query);
+            return createQueryString(kindName, query);
         }
 
         throw PullForestException.invalidQuery(this, query);
+    }
+
+    private String createQueryString(String kindName, QueryContent query) {
+        if (kindName.isEmpty() || !kindName.equals(kindName.toUpperCase()))
+            return createNodeQueryString(query);
+
+        return createRelationshipQueryString(query);
     }
 
 }

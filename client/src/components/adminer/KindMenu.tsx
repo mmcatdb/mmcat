@@ -5,6 +5,8 @@ import { api } from '@/api';
 import type { AdminerFilterQueryStateAction } from '@/types/adminer/ReducerTypes';
 import type { Id } from '@/types/id';
 
+export const UNLABELED = '#unlabeled';
+
 type KindMenuProps = Readonly<{
     datasourceId: Id;
     kind: string | undefined;
@@ -38,7 +40,7 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
         ));
 
         if (showUnlabeled)
-            selectItems.push({ label: 'Unlabeled', value: 'unlabeled' });
+            selectItems.push({ label: UNLABELED, value: UNLABELED });
     }
 
     return (

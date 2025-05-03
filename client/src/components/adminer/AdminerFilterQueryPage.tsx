@@ -5,7 +5,7 @@ import { Spinner, Pagination } from '@nextui-org/react';
 import { api } from '@/api';
 import { getFilterQueryStateFromURLParams, getFiltersURLParam, getURLParamsFromFilterQueryState } from '@/components/adminer/URLParamsState';
 import { FilterForm } from '@/components/adminer/FilterForm';
-import { KindMenu } from '@/components/adminer/KindMenu';
+import { KindMenu, UNLABELED } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { filterQueryReducer } from '@/components/adminer/filterQueryReducer';
@@ -23,10 +23,15 @@ import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerRe
 import type { Theme } from '@/components/PreferencesProvider';
 
 function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {
-    if (filterState.filters.length > 0)
-        return { kind: kindName, filters: getFiltersURLParam(filterState), limit: filterState.limit, offset: filterState.offset };
+    const queryParams: QueryParams = { limit: filterState.limit, offset: filterState.offset };
 
-    return { kind: kindName, limit: filterState.limit, offset: filterState.offset };
+    if (filterState.filters.length > 0)
+        queryParams.filters = getFiltersURLParam(filterState);
+
+    if (kindName !== UNLABELED)
+        queryParams.kind = kindName;
+
+    return queryParams;
 }
 
 function getKindReferences(references: AdminerReferences, datasourceId: Id, kind: string): KindReference[] {

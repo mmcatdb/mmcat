@@ -73,7 +73,7 @@ public class AdminerController {
     @GetMapping(value = "/adminer/{db}/kind")
     public DataResponse getKind(
         @PathVariable Id db,
-        @RequestParam(required = true) String kind,
+        @RequestParam(required = false, defaultValue = "") String kind,
         @RequestParam(required = false, defaultValue = "") String filters,
         @RequestParam(required = false, defaultValue = "50") String limit,
         @RequestParam(required = false, defaultValue = "0") String offset
