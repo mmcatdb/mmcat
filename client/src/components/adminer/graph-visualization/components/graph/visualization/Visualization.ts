@@ -351,5 +351,13 @@ export class Visualization {
 
     updateGraph(graph: GraphModel) {
         this.graph = graph;
+
+        this.update({
+            updateNodes: true,
+            updateRelationships: true,
+            restartSimulation: true,
+        });
+
+        this.adjustZoomMinScaleExtentToFitGraph();
     }
 }

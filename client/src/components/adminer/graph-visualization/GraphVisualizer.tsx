@@ -154,8 +154,8 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
             <StyledFullSizeContainer id='svg-vis'>
                 <Graph
                     isFullscreen={this.props.isFullscreen}
-                    relationships={this.state.relationships}
-                    nodes={this.state.nodes}
+                    relationships={this.props.relationships}
+                    nodes={this.props.nodes}
                     getNodeNeighbors={this.getNodeNeighbors.bind(this)}
                     onItemMouseOver={this.onItemMouseOver.bind(this)}
                     onItemSelect={this.onItemSelect.bind(this)}
