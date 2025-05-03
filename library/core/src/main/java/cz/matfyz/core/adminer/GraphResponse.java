@@ -10,7 +10,7 @@ public class GraphResponse extends DataResponse {
     private GraphData data;
     private static final String TYPE = "graph";
 
-    public GraphResponse(GraphData data, int itemCount, List<String> propertyNames){
+    public GraphResponse(GraphData data, long itemCount, List<String> propertyNames){
         super(itemCount, propertyNames);
         this.data = data;
     }

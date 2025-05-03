@@ -47,27 +47,28 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         this.provider = provider;
     }
 
-    private PreparedStatement prepareStatement(Connection connection, QueryContent query) throws SQLException {
+    private PreparedStatement prepareStatement(Connection connection, QueryContent query, boolean countQuery) throws SQLException {
         if (query instanceof final StringQuery stringQuery)
             return connection.prepareStatement(stringQuery.content);
 
         if (query instanceof final KindNameQuery kindNameQuery)
-            return connection.prepareStatement(kindNameQueryToString(kindNameQuery, null));
+            return connection.prepareStatement(kindNameQueryToString(kindNameQuery, null, countQuery));
 
         if (query instanceof final KindNameFilterQuery kindNameFilterQuery)
-            return connection.prepareStatement(kindNameQueryToString(kindNameFilterQuery.kindNameQuery, kindNameFilterQuery.getFilters() ));
+            return connection.prepareStatement(kindNameQueryToString(kindNameFilterQuery.kindNameQuery, kindNameFilterQuery.getFilters(), countQuery));
 
         throw PullForestException.invalidQuery(this, query);
     }
 
-    private String kindNameQueryToString(KindNameQuery query, @Nullable List<AdminerFilter> filters) {
+    private String kindNameQueryToString(KindNameQuery query, @Nullable List<AdminerFilter> filters, boolean countQuery) {
+        String columns = countQuery ? "COUNT(1)" : "*";
         // TODO escape all table names globally
-        var command = "SELECT * FROM " + "\"" + query.kindName + "\"";
+        var command = "SELECT " + columns + " FROM " + "\"" + query.kindName + "\"";
         if (filters != null)
             command += createWhereClause(filters);
-        if (query.hasLimit())
+        if (!countQuery && query.hasLimit())
             command += "\nLIMIT " + query.getLimit();
-        if (query.hasOffset())
+        if (!countQuery && query.hasOffset())
             command += "\nOFFSET " + query.getOffset();
         command += ";";
 
@@ -159,7 +160,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         try (
             Connection connection = provider.getConnection();
-            PreparedStatement statement = prepareStatement(connection, query);
+            PreparedStatement statement = prepareStatement(connection, query, false);
         ) {
             LOGGER.debug("Execute PostgreSQL query:\n{}", statement);
 
@@ -241,7 +242,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
         try (
             Connection connection = provider.getConnection();
-            PreparedStatement statement = prepareStatement(connection, query.content());
+            PreparedStatement statement = prepareStatement(connection, query.content(), false);
         ) {
             LOGGER.info("Execute PostgreSQL query:\n{}", statement);
 
@@ -333,12 +334,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             List<List<String>> data = new ArrayList<>();
             List<String> propertyNames = new ArrayList<>();
 
-            PreparedStatement stmt = prepareStatement(connection, query);
+            PreparedStatement stmt = prepareStatement(connection, query, false);
             ResultSet resultSet = stmt.executeQuery();
 
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
-            int itemCount = 0;
+            long itemCount = 0;
 
             boolean addPropertyNames = true;
 
@@ -356,6 +357,13 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 data.add(item);
                 itemCount++;
                 addPropertyNames = false;
+            }
+
+            PreparedStatement countStmt = prepareStatement(connection, query, true);
+            if (!(query instanceof StringQuery)) {
+                ResultSet countResultSet = countStmt.executeQuery();
+                if (countResultSet.next())
+                    itemCount = countResultSet.getInt(1);
             }
 
             return new TableResponse(data, itemCount, propertyNames);

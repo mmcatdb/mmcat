@@ -314,7 +314,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
                 Document cursor = (Document) result.get("cursor");
                 List<Document> documents = (List<Document>) cursor.get("firstBatch");
-                int itemCount = documents.size();
+                long itemCount = documents.size();
 
                 List<String> propertyNames = new ArrayList<>();
                 if (parsedQuery.containsKey("find")) {
@@ -328,7 +328,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
             List<Document> data = new ArrayList<>();
             MongoCursor<Document> iterator = getDocumentIterator(query);
-            int itemCount = 0;
+            long itemCount = 0;
 
             while (iterator.hasNext()) {
                 data.add(iterator.next());
@@ -337,10 +337,16 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             }
 
             List<String> propertyNames;
-            if (query instanceof final KindNameQuery knQuery)
-                propertyNames = MongoDBUtils.getPropertyNames(provider.getDatabase().getCollection(knQuery.kindName));
-            else if (query instanceof final KindNameFilterQuery knfQuery)
-                propertyNames = MongoDBUtils.getPropertyNames(provider.getDatabase().getCollection(knfQuery.kindNameQuery.kindName));
+            if (query instanceof final KindNameQuery knQuery) {
+                MongoCollection<Document> collection = provider.getDatabase().getCollection(knQuery.kindName);
+                propertyNames = MongoDBUtils.getPropertyNames(collection);
+                itemCount = collection.countDocuments();
+            }
+            else if (query instanceof final KindNameFilterQuery knfQuery) {
+                MongoCollection<Document> collection = provider.getDatabase().getCollection(knfQuery.kindNameQuery.kindName);
+                propertyNames = MongoDBUtils.getPropertyNames(collection);
+                itemCount = collection.countDocuments();
+            }
             else
                 throw PullForestException.invalidQuery(this, query);
 

@@ -11,7 +11,7 @@ public class DocumentResponse extends DataResponse {
     private List<Document> data;
     private static final String TYPE = "document";
 
-    public DocumentResponse(List<Document> data, int itemCount, List<String> propertyNames){
+    public DocumentResponse(List<Document> data, long itemCount, List<String> propertyNames){
         super(itemCount, propertyNames);
         this.data = data;
     }

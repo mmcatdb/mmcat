@@ -9,7 +9,7 @@ public class TableResponse extends DataResponse {
     private List<List<String>> data;
     private static final String TYPE = "table";
 
-    public TableResponse(List<List<String>> data, int itemCount, List<String> propertyNames){
+    public TableResponse(List<List<String>> data, long itemCount, List<String> propertyNames){
         super(itemCount, propertyNames);
         this.data = data;
     }
