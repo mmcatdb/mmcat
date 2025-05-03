@@ -156,7 +156,7 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 </>)}
 
                 {queryResult && 'data' in queryResult && (
-                    <DatabaseView view={AVAILABLE_VIEWS[datasource.type].length === 1 ? AVAILABLE_VIEWS[datasource.type][0] : view} fetchedData={queryResult} kindReferences={[]} kindName={''} datasourceId={datasource.id} datasources={datasources} />
+                    <DatabaseView view={AVAILABLE_VIEWS[datasource.type].length === 1 ? AVAILABLE_VIEWS[datasource.type][0] : view} data={queryResult} kindReferences={[]} kindName={''} datasourceId={datasource.id} datasources={datasources} />
                 )}
 
             </div>

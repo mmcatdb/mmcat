@@ -134,7 +134,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
                         <div className='flex grow min-h-0 mt-2'>
                             <DatabaseView
                                 view={state.view}
-                                fetchedData={fetchedData}
+                                data={fetchedData}
                                 kindReferences={kindReferences}
                                 kindName={state.kindName}
                                 datasourceId={state.datasourceId}

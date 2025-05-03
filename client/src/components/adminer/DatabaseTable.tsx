@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { getTableFromGraphData } from '@/components/adminer/reshapeData';
@@ -8,25 +8,25 @@ import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
 type DatabaseTableProps = Readonly<{
-    fetchedData: TableResponse | GraphResponse;
+    data: TableResponse | GraphResponse;
     kindReferences: KindReference[];
     kind: string;
     datasourceId: Id;
     datasources: Datasource[];
 }>;
 
-export function DatabaseTable({ fetchedData, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
+export function DatabaseTable({ data, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
     const [ tableData, setTableData ] = useState<TableResponse>();
     const [ tableColumnNames, setTableColumnNames ] = useState<string[]>();
 
-    useEffect(() => {
-        const { data, columnNames } = fetchedData.type === 'graph'
-            ? getTableFromGraphData(fetchedData)
-            : { data: fetchedData, columnNames: fetchedData.metadata.propertyNames };
+    useMemo(() => {
+        const { reshapedData, columnNames } = data.type === 'graph'
+            ? getTableFromGraphData(data)
+            : { reshapedData: data, columnNames: data.metadata.propertyNames };
 
-        setTableData(data);
+        setTableData(reshapedData);
         setTableColumnNames(columnNames);
-    }, [ fetchedData ]);
+    }, [ data ]);
 
     if (tableData === undefined || tableData.metadata.itemCount === 0)
         return <p>No rows to display.</p>;

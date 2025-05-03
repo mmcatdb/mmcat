@@ -64,7 +64,7 @@ export class NodeInspectorPanel extends Component<NodeInspectorPanelProps, NodeI
                         />
                     ) : (
                         <DatabaseDocument
-                            fetchedData={this.props.data}
+                            data={this.props.data}
                             kindReferences={[]}
                             kind={''}
                             datasourceId={''}

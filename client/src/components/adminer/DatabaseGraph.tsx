@@ -1,9 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { ArcThemeProvider } from '@/components/adminer/graph-visualization/components/themes';
 import { StyledVisContainer } from '@/components/adminer/graph-visualization/VisualizationView.styled';
 import { GraphVisualizer } from '@/components/adminer/graph-visualization/GraphVisualizer';
 import type { BasicNode, BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 import type { GraphNode, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
+
+type DatabaseTableProps = Readonly<{
+    data: GraphResponse;
+    kind: string;
+}>;
+
+export function DatabaseGraph({ data, kind }: DatabaseTableProps ) {
+    const [ nodes, setNodes ] = useState<BasicNode[]>(data?.data ? getNodes(data.data) : []);
+    const [ relationships, setRelationships ] = useState<BasicRelationship[]>(data?.data ? getRelationships(data.data, kind) : []);
+
+    useMemo(() => {
+        if (data?.data) {
+            setNodes(getNodes(data.data));
+            setRelationships(getRelationships(data.data, kind));
+        }
+    }, [ data ]);
+
+    return (
+        <>
+            {data && (data.data.nodes.length > 0 || data.data.relationships.length > 0) ? (
+                <div className='grow text-left'>
+                    <ArcThemeProvider theme={'dark'}>
+                        <StyledVisContainer isFullscreen={false}>
+                            <GraphVisualizer
+                                nodes={nodes}
+                                relationships={relationships}
+                                fetchedData={data}
+                            />
+                        </StyledVisContainer>
+                    </ArcThemeProvider>
+                </div>
+            ) : (
+                <span>No records to display.</span>
+            )}
+        </>
+    );
+}
 
 function getNodes(data: GraphResponseData): BasicNode[] {
     const nodes: BasicNode[] = [];
@@ -65,41 +102,4 @@ function getNodeLabelsAndProperties(properties: Record<string, unknown>):
             props[key] = value as string;
     }
     return { labels: labels, properties: props };
-}
-
-type DatabaseTableProps = Readonly<{
-    fetchedData: GraphResponse;
-    kind: string;
-}>;
-
-export function DatabaseGraph({ fetchedData, kind }: DatabaseTableProps ) {
-    const [ nodes, setNodes ] = useState<BasicNode[]>(fetchedData?.data ? getNodes(fetchedData.data) : []);
-    const [ relationships, setRelationships ] = useState<BasicRelationship[]>(fetchedData?.data ? getRelationships(fetchedData.data, kind) : []);
-
-    useEffect(() => {
-        if (fetchedData?.data) {
-            setNodes(getNodes(fetchedData.data));
-            setRelationships(getRelationships(fetchedData.data, kind));
-        }
-    }, [ fetchedData ]);
-
-    return (
-        <>
-            {fetchedData && (fetchedData.data.nodes.length > 0 || fetchedData.data.relationships.length > 0) ? (
-                <div className='grow text-left'>
-                    <ArcThemeProvider theme={'dark'}>
-                        <StyledVisContainer isFullscreen={false}>
-                            <GraphVisualizer
-                                nodes={nodes}
-                                relationships={relationships}
-                                fetchedData={fetchedData}
-                            />
-                        </StyledVisContainer>
-                    </ArcThemeProvider>
-                </div>
-            ) : (
-                <span>No records to display.</span>
-            )}
-        </>
-    );
 }
