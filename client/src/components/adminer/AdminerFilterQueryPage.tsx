@@ -42,7 +42,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
 
     // Sync state with URL search parameters
     useEffect(() => {
-        if (searchParamsRef.current !== searchParams) {
+        if (JSON.stringify(searchParamsRef.current) !== JSON.stringify(searchParams)) {
             dispatch({ type:'update', newState: getFilterQueryStateFromURLParams(searchParams) });
             searchParamsRef.current = searchParams;
         }
@@ -50,7 +50,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
 
     // Update URL search parameters whenever state changes
     useEffect(() => {
-        if (stateRef.current !== state && searchParamsRef.current !== searchParams) {
+        if (stateRef.current !== state) {
             setSearchParams(getURLParamsFromFilterQueryState(state));
             stateRef.current = state;
         }
@@ -71,7 +71,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
 
     useEffect(() => {
         dispatch({ type: 'itemCount', newItemCount: fetchedData?.metadata.itemCount });
-    }, [ fetchedData ]);
+    }, [ fetchedData?.metadata.itemCount ]);
 
     useMemo(() => {
         if (state.datasourceId && state.kindName)

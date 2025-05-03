@@ -35,6 +35,19 @@ export function getInitURLParams(previousParams: URLSearchParams): URLSearchPara
 }
 
 export function getAdminerURLParams(previousParams: URLSearchParams, queryType: QueryType | undefined): URLSearchParams {
+    const previousQueryType = getQueryTypeFromURLParams(previousParams);
+
+    if (previousQueryType === undefined || previousQueryType !== queryType) {
+        const params = new  URLSearchParams();
+        params.set('queryType', queryType ?? QueryType.filter);
+
+        const datasourceId = previousParams.get('datasourceId');
+        if (datasourceId)
+            params.set('datasourceId', datasourceId);
+
+        return params;
+    }
+
     previousParams.set('queryType', queryType ?? QueryType.filter);
     return previousParams;
 }
