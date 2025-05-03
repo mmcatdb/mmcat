@@ -15,12 +15,13 @@ import { useSearchParams } from 'react-router-dom';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
 import { EXAMPLE_QUERY } from '@/components/adminer/Queries';
+import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
+import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { View } from '@/types/adminer/View';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
 import type { DataResponse, ErrorResponse } from '@/types/adminer/DataResponse';
 import type { Theme } from '@/components/PreferencesProvider';
-import { CustomQueryDatabaseView } from './CustomQueryDatabaseView';
 
 type AdminerCustomQueryPageProps = Readonly<{
     datasource: Datasource;
@@ -29,16 +30,16 @@ type AdminerCustomQueryPageProps = Readonly<{
 }>;
 
 export function AdminerCustomQueryPage({ datasource, datasources, theme }: AdminerCustomQueryPageProps) {
-    const availableViews = [ View.table, View.document ];
-    const [ view, setView ] = useState<View>(View.table);
+    const [ view, setView ] = useState(View.table);
     const [ queryResult, setQueryResult ] = useState<DataResponse | ErrorResponse>();
     const [ searchParams ] = useSearchParams();
-    const [ query, setQuery ] = useState<string>(() => {
+    const [ query, setQuery ] = useState(() => {
         const { query: newQuery } = getCustomQueryStateFromURLParams(searchParams);
         return newQuery ?? '';
     });
     const queryRef = useRef(query);
 
+    // Allows to rerender the component with no need to change the extensions with each render
     const onQueryChange = useCallback((newQuery: string) => {
         queryRef.current = newQuery;
         setQuery(newQuery);
@@ -86,78 +87,80 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
     }, [ datasource.type, execute ]);
 
     return (
-        <div className='mt-1'>
-            <CodeMirror
-                value={query}
-                onChange={onQueryChange}
-                extensions={extensions}
-                basicSetup={false}
-                theme={theme === 'light' ? materialLight : materialDark}
-                minHeight='105.97px'
-            />
-
-            <Button
-                className='mt-1 items-center gap-1 min-w-40'
-                size='sm'
-                aria-label='Execute query'
-                type='submit'
-                color='primary'
-                onPress={execute}
-            >
-                EXECUTE QUERY
-            </Button>
-
-            <Button
-                className='ml-2 mt-1 items-center gap-1 min-w-40'
-                size='sm'
-                aria-label='Show query example'
-                type='submit'
-                onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
-            >
-                SHOW QUERY EXAMPLE
-            </Button>
-
-            {datasource.type === DatasourceType.neo4j && (
-                <Select
-                    items={availableViews.entries()}
-                    label='View'
-                    labelPlacement='outside-left'
-                    classNames={
-                        { label:'sr-only' }
-                    }
-                    size='sm'
-                    placeholder='Select view'
-                    className='ml-1 max-w-xs align-middle'
-                    selectedKeys={[ view ]}
-                >
-                    {availableViews.map(v => (
-                        <SelectItem
-                            key={v}
-                            onPress={() => setView(v)}
-                        >
-                            {v}
-                        </SelectItem>
-                    ))}
-                </Select>
-            )}
-
-            {queryResult && 'data' in queryResult && (
-                <span className='ml-2'>
-                    <ExportComponent data={queryResult}/>
-                </span>
-            )}
-
+        <>
             <div className='mt-1'>
+                <CodeMirror
+                    value={query}
+                    onChange={onQueryChange}
+                    extensions={extensions}
+                    basicSetup={false}
+                    theme={theme === 'light' ? materialLight : materialDark}
+                    minHeight='105.97px'
+                />
+
+                <Button
+                    className='mt-1 items-center gap-1 min-w-40'
+                    size='sm'
+                    aria-label='Execute query'
+                    type='submit'
+                    color='primary'
+                    onPress={execute}
+                >
+                    EXECUTE QUERY
+                </Button>
+
+                <Button
+                    className='ml-2 mt-1 items-center gap-1 min-w-40'
+                    size='sm'
+                    aria-label='Show query example'
+                    type='submit'
+                    onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
+                >
+                    SHOW QUERY EXAMPLE
+                </Button>
+
+                {AVAILABLE_VIEWS[datasource.type].length > 1 && (
+                    <Select
+                        items={AVAILABLE_VIEWS[datasource.type].entries()}
+                        label='View'
+                        labelPlacement='outside-left'
+                        classNames={
+                            { label:'sr-only' }
+                        }
+                        size='sm'
+                        placeholder='Select view'
+                        className='ml-1 max-w-xs align-middle'
+                        selectedKeys={[ view ]}
+                    >
+                        {AVAILABLE_VIEWS[datasource.type].map(v => (
+                            <SelectItem
+                                key={v}
+                                onPress={() => setView(v)}
+                            >
+                                {v}
+                            </SelectItem>
+                        ))}
+                    </Select>
+                )}
+
+                {queryResult && 'data' in queryResult && (
+                    <span className='ml-2'>
+                        <ExportComponent data={queryResult}/>
+                    </span>
+                )}
+            </div>
+
+            <div className='flex grow min-h-0 mt-2'>
                 {queryResult && 'message' in queryResult && (<>
                     {queryResult.message}
                 </>)}
 
                 {queryResult && 'data' in queryResult && (
-                    <CustomQueryDatabaseView queryResult={queryResult} datasource={datasource} datasources={datasources} view={view} />
+                    <DatabaseView view={view} fetchedData={queryResult} kindReferences={[]} kindName={''} datasourceId={datasource.id} datasources={datasources} />
                 )}
 
             </div>
-        </div>
+        </>
     );
 }
 

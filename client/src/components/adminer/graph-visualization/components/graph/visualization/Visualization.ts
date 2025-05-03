@@ -348,4 +348,8 @@ export class Visualization {
             ].join(' '),
         );
     }
+
+    updateGraph(graph: GraphModel) {
+        this.graph = graph;
+    }
 }

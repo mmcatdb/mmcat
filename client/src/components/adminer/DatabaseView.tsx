@@ -10,10 +10,10 @@ import type { KindReference } from '@/types/adminer/AdminerReferences';
 type DatabaseViewProps = Readonly<{
     view: View;
     fetchedData: DataResponse;
-    kindReferences: KindReference[] | undefined;
+    kindReferences: KindReference[];
     kindName: string;
-    datasourceId: Id | undefined;
-    datasources: Datasource[] | undefined;
+    datasourceId: Id;
+    datasources: Datasource[];
 }>;
 
 export function DatabaseView({ view, fetchedData, kindReferences, kindName, datasourceId, datasources }: DatabaseViewProps) {
@@ -22,20 +22,20 @@ export function DatabaseView({ view, fetchedData, kindReferences, kindName, data
         return (
             <DatabaseTable
                 fetchedData={fetchedData as TableResponse | GraphResponse}
-                kindReferences={kindReferences!}
+                kindReferences={kindReferences}
                 kind={kindName}
-                datasourceId={datasourceId!}
-                datasources={datasources!}
+                datasourceId={datasourceId}
+                datasources={datasources}
             />
         );
     case View.document:
         return (
             <DatabaseDocument
                 fetchedData={fetchedData as DocumentResponse | GraphResponse}
-                kindReferences={kindReferences!}
+                kindReferences={kindReferences}
                 kind={kindName}
-                datasourceId={datasourceId!}
-                datasources={datasources!}
+                datasourceId={datasourceId}
+                datasources={datasources}
             />
         );
     case View.graph:

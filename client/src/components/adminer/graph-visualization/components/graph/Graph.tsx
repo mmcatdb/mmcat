@@ -2,13 +2,12 @@ import { Component, createRef, type RefObject, type JSX } from 'react';
 import { type GraphModel } from '@/components/adminer/graph-visualization/types/Graph';
 import { GraphEventHandlerModel, type GraphInteractionCallBack } from './GraphEventHandlerModel';
 import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
-import { type GetNodeNeighborsFn, type VizItem, type ZoomLimitsReached, ZoomType } from '@/components/adminer/graph-visualization/types/types';
+import { type GetNodeNeighborsFn, type VizItem, type ZoomLimitsReached, ZoomType, type BasicNode, type BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 import { type GraphStats, createGraph, getGraphStats } from '@/components/adminer/graph-visualization/utils/mapper';
 import { Visualization } from './visualization/Visualization';
 import { StyledSvgWrapper, StyledZoomButton, StyledZoomHolder } from './styled';
 import { ResizeObserver } from '@juggle/resize-observer';
 import { ZoomInIcon, ZoomOutIcon, ZoomToFitIcon } from '@/components/adminer/graph-visualization/components/Icons';
-import { type BasicNode, type BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 
 export type GraphProps = {
   isFullscreen: boolean;
@@ -32,8 +31,8 @@ type GraphState = {
 }
 
 export class Graph extends Component<GraphProps, GraphState> {
-    svgElement: RefObject<SVGSVGElement | null>;
-    wrapperElement: RefObject<HTMLDivElement | null>;
+    svgElement: RefObject<SVGSVGElement>;
+    wrapperElement: RefObject<HTMLDivElement>;
     wrapperResizeObserver: ResizeObserver;
     visualization: Visualization | null = null;
 
@@ -44,8 +43,8 @@ export class Graph extends Component<GraphProps, GraphState> {
             zoomOutLimitReached: false,
             displayingWheelZoomInfoMessage: false,
         };
-        this.svgElement = createRef();
-        this.wrapperElement = createRef();
+        this.svgElement = createRef<SVGSVGElement>();
+        this.wrapperElement = createRef<HTMLDivElement>();
 
         this.wrapperResizeObserver = new ResizeObserver(() => {
             this.visualization?.resize(this.props.isFullscreen);
@@ -113,7 +112,13 @@ export class Graph extends Component<GraphProps, GraphState> {
         if (this.props.isFullscreen !== prevProps.isFullscreen)
             this.visualization?.resize(this.props.isFullscreen);
 
-        if (this.props.styleVersion !== prevProps.styleVersion) {
+        if (this.props.styleVersion !== prevProps.styleVersion
+            || this.props.nodes !== prevProps.nodes
+            || this.props.relationships !== prevProps.relationships
+        ) {
+            this.visualization?.updateGraph(
+                createGraph(this.props.nodes, this.props.relationships),
+            );
             this.visualization?.update({
                 updateNodes: true,
                 updateRelationships: true,
