@@ -1,7 +1,7 @@
 import { View } from '@/types/adminer/View';
 import { Operator } from '@/types/adminer/Operators';
 import type { Datasource } from '@/types/datasource/Datasource';
-import type { ActiveAdminerState, AdminerFilterQueryState, KindFilterState } from '@/types/adminer/ReducerTypes';
+import { getInitPaginationState, type PaginationState, type ActiveAdminerState, type AdminerFilterQueryState, type KindFilterState } from '@/components/adminer/filterQueryReducer';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { QueryType } from '@/types/adminer/QueryType';
@@ -16,6 +16,10 @@ export function getQueryTypeFromURLParams(params: URLSearchParams): QueryType | 
 
 export function getFiltersURLParam(filterState: KindFilterState): string {
     return JSON.stringify(filterState.filters);
+}
+
+function getPaginationURLParam(pagination: PaginationState): string {
+    return JSON.stringify(pagination);
 }
 
 function getParamsWithQueryType(queryType: QueryType | undefined): URLSearchParams {
@@ -49,6 +53,9 @@ export function getURLParamsFromFilterQueryState(state: AdminerFilterQueryState 
     params.set('limit', String(state.active.limit));
     params.set('offset', String(state.active.offset));
     params.set('filters', getFiltersURLParam(state.active));
+
+    if ('pagination' in state)
+        params.set('pagination', getPaginationURLParam(state.pagination));
 
     if (state.datasourceId)
         params.set('datasourceId', state.datasourceId);
@@ -89,6 +96,10 @@ export function getFilterQueryStateFromURLParams(params: URLSearchParams): Admin
         ? (viewParam as View)
         : View.table;
     const filters: KindFilterState = JSON.parse(`{"limit":${params.get('limit') ?? 50},"offset":${params.get('offset') ?? 0},"filters":${params.get('filters') ?? '[]'}}`) as KindFilterState;
+    const paramsPagination = params.get('pagination');
+    const pagination: PaginationState = paramsPagination != null
+        ? JSON.parse(paramsPagination) as PaginationState
+        : getInitPaginationState();
 
     return {
         form: filters,
@@ -96,6 +107,7 @@ export function getFilterQueryStateFromURLParams(params: URLSearchParams): Admin
         datasourceId: params.get('datasourceId') ?? undefined,
         kindName: params.get('kindName') ?? undefined,
         view: view,
+        pagination: pagination,
     };
 }
 

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { api } from '@/api';
-import type { AdminerFilterQueryStateAction } from '@/types/adminer/ReducerTypes';
+import type { AdminerFilterQueryStateAction } from '@/components/adminer/filterQueryReducer';
 import type { Id } from '@/types/id';
 
 export const UNLABELED = '#unlabeled';

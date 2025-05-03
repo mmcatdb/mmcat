@@ -2,7 +2,7 @@ import { Input, Select, SelectItem, Button, Autocomplete, AutocompleteItem } fro
 import { IoTrashBin } from 'react-icons/io5';
 import { OPERATOR_MAPPING, UNARY_OPERATORS, type Operator } from '@/types/adminer/Operators';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
-import type { AdminerFilterQueryStateAction } from '@/types/adminer/ReducerTypes';
+import type { AdminerFilterQueryStateAction } from '@/components/adminer/filterQueryReducer';
 import type { DatasourceType } from '@/types/datasource';
 
 type ColumnFormProps = Readonly<{

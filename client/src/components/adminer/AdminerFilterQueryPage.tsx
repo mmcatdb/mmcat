@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Spinner, Pagination } from '@nextui-org/react';
 import { api } from '@/api';
@@ -9,7 +9,6 @@ import { KindMenu, UNLABELED } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { filterQueryReducer } from '@/components/adminer/filterQueryReducer';
-import { getInitPaginationState, paginationReducer } from '@/components/adminer/paginationReducer';
 import { useFetchReferences } from '@/components/adminer/useFetchReferences';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
@@ -18,34 +17,9 @@ import { type Datasource, DatasourceType } from '@/types/datasource';
 import type { Id } from '@/types/id';
 import type { QueryParams } from '@/types/api/routes';
 import type { DataResponse } from '@/types/adminer/DataResponse';
-import type { KindFilterState } from '@/types/adminer/ReducerTypes';
+import type { KindFilterState } from '@/components/adminer/filterQueryReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 import type { Theme } from '@/components/PreferencesProvider';
-
-function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {
-    const queryParams: QueryParams = { limit: filterState.limit, offset: filterState.offset };
-
-    if (filterState.filters.length > 0)
-        queryParams.filters = getFiltersURLParam(filterState);
-
-    if (kindName !== UNLABELED)
-        queryParams.kind = kindName;
-
-    return queryParams;
-}
-
-function getKindReferences(references: AdminerReferences, datasourceId: Id, kind: string): KindReference[] {
-    return references
-        ? Object.values(references)
-            .filter(ref => ref.from.datasourceId === datasourceId && ref.from.kindName === kind)
-            .map(ref => ({
-                fromProperty: ref.from.property,
-                datasourceId: ref.to.datasourceId,
-                kindName: ref.to.kindName,
-                property: ref.to.property,
-            }))
-        : [];
-}
 
 type AdminerFilterQueryPageProps = Readonly<{
     datasource: Datasource;
@@ -55,7 +29,6 @@ type AdminerFilterQueryPageProps = Readonly<{
 
 export function AdminerFilterQueryPage({ datasource, datasources, theme }: AdminerFilterQueryPageProps) {
     const [ searchParams, setSearchParams ] = useSearchParams();
-    const [ paginationState, paginationDispatch ] = useReducer(paginationReducer, getInitPaginationState());
     const [ state, dispatch ] = useReducer(filterQueryReducer, searchParams, getFilterQueryStateFromURLParams);
     const [ kindReferences, setKindReferences ] = useState<KindReference[]>([]);
     const stateRef = useRef(state);
@@ -64,13 +37,12 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
     const { references, referencesLoading } = useFetchReferences(state);
 
     useEffect(() => {
-        if (state.datasourceId !== datasource.id)
-            dispatch({ type:'datasource', newDatasource: datasource });
+        dispatch({ type:'datasource', newDatasource: datasource });
     }, [ datasource ]);
 
     // Sync state with URL search parameters
     useEffect(() => {
-        if (searchParamsRef.current != searchParams) {
+        if (searchParamsRef.current !== searchParams) {
             dispatch({ type:'update', newState: getFilterQueryStateFromURLParams(searchParams) });
             searchParamsRef.current = searchParams;
         }
@@ -78,25 +50,11 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
 
     // Update URL search parameters whenever state changes
     useEffect(() => {
-        if (stateRef.current != state && searchParamsRef.current == searchParams) {
+        if (stateRef.current !== state && searchParamsRef.current !== searchParams) {
             setSearchParams(getURLParamsFromFilterQueryState(state));
             stateRef.current = state;
         }
-    }, [ state, searchParams ]);
-
-    useEffect(() => {
-        dispatch({ type: 'input', field: 'offset', value: paginationState.offset });
-    }, [ paginationState.offset ]);
-
-    useEffect(() => {
-        if (paginationState.itemCount)
-            paginationDispatch({ type: 'totalPages', newTotalPages: Math.ceil(paginationState.itemCount / state.active.limit) });
-
-        if (paginationState.currentPage > paginationState.totalPages) {
-            paginationDispatch({ type: 'currentPage', newCurrentPage: paginationState.totalPages });
-            paginationDispatch({ type: 'offset', newOffset: state.active.limit * (paginationState.totalPages - 1) });
-        }
-    }, [ paginationState.totalPages, paginationState.currentPage, paginationState.itemCount, state.active.limit ]);
+    }, [ state ]);
 
     const fetchFunction = useCallback(() => {
         if (!state.datasourceId || !state.kindName) {
@@ -112,17 +70,12 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
     const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);
 
     useEffect(() => {
-        paginationDispatch({ type: 'initialize' });
-    }, [ state.datasourceId, state.kindName ]);
-
-    useEffect(() => {
-        const count = fetchedData?.metadata.itemCount;
-        paginationDispatch({ type: 'itemCount', newItemCount: count ?? 0 });
+        dispatch({ type: 'itemCount', newItemCount: fetchedData?.metadata.itemCount });
     }, [ fetchedData ]);
 
-    useEffect(() => {
+    useMemo(() => {
         if (state.datasourceId && state.kindName)
-            setKindReferences(getKindReferences(references, state.datasourceId, state.kindName));
+            setKindReferences(computeKindReferences(references, state.datasourceId, state.kindName));
     }, [ references, state.datasourceId, state.kindName ]);
 
     return (
@@ -139,21 +92,18 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
                     )}
                 </div>
 
-                {datasource && state.kindName && typeof state.kindName === 'string' && paginationState.itemCount !== undefined && paginationState.itemCount > 0 && (
+                {datasource && state.kindName && state.pagination.itemCount !== undefined && state.pagination.itemCount > 0 && (
                     <div className='inline-flex gap-2 items-center self-end'>
                         {state.view !== View.graph && (
                             <>
                                 <Pagination
                                     size='sm'
-                                    total={paginationState.totalPages}
-                                    page={paginationState.currentPage}
-                                    onChange={page => {
-                                        paginationDispatch({ type: 'currentPage', newCurrentPage: page });
-                                        paginationDispatch({ type: 'offset', newOffset: state.active.limit * (page - 1) });
-                                    }}
+                                    total={state.pagination.totalPages}
+                                    page={state.pagination.currentPage}
+                                    onChange={page => dispatch({ type: 'page', newCurrentPage: page, newOffset: state.active.limit * (page - 1) })}
                                     color='primary'
                                 />
-                                <p className='min-w-36'>Number of rows: {paginationState.itemCount}</p>
+                                <p className='min-w-36'>Number of rows: {state.pagination.itemCount}</p>
                             </>
                         )}
 
@@ -180,7 +130,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
                         </div>
                     )}
 
-                    {datasource && state.kindName && typeof state.kindName === 'string' && fetchedData?.data && (
+                    {state.kindName && state.datasourceId && typeof state.kindName === 'string' && fetchedData?.data && (
                         <div className='flex grow min-h-0 mt-2'>
                             <DatabaseView
                                 view={state.view}
@@ -196,4 +146,29 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
             )}
         </>
     );
+}
+
+function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {
+    const queryParams: QueryParams = { limit: filterState.limit, offset: filterState.offset };
+
+    if (filterState.filters.length > 0)
+        queryParams.filters = getFiltersURLParam(filterState);
+
+    if (kindName !== UNLABELED)
+        queryParams.kind = kindName;
+
+    return queryParams;
+}
+
+function computeKindReferences(references: AdminerReferences, datasourceId: Id, kind: string): KindReference[] {
+    return references
+        ? Object.values(references)
+            .filter(ref => ref.from.datasourceId === datasourceId && ref.from.kindName === kind)
+            .map(ref => ({
+                fromProperty: ref.from.property,
+                datasourceId: ref.to.datasourceId,
+                kindName: ref.to.kindName,
+                property: ref.to.property,
+            }))
+        : [];
 }
