@@ -43,7 +43,7 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
     const hiddenLinks = compressedLinks.slice(visibleCount);
 
     return (
-        <div>
+        <>
             {alwaysVisibleLinks.map(([ link, ref, duplicatedKind ]) => (
                 <LinkComponent
                     key={link}
@@ -79,7 +79,7 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
                     {visible ? '-' : '+'}
                 </Button>
             )}
-        </div>
+        </>
     );
 }
 

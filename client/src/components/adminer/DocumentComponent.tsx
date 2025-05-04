@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@nextui-org/react';
+import { usePreferences } from '@/components/PreferencesProvider';
 import { ReferenceComponent } from '@/components/adminer/ReferenceComponent';
 import type { Datasource } from '@/types/datasource/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
@@ -15,6 +16,7 @@ type DocumentComponentProps = Readonly<{
 }>;
 
 export function DocumentComponent({ valueKey, value, kindReferences, kind, datasourceId, datasources }: DocumentComponentProps) {
+    const { adminerShortLinks } = usePreferences().preferences;
     const [ isOpen, setIsOpen ] = useState(true);
     const [ parsedValue, setParsedValue ] = useState(value);
 
@@ -102,9 +104,15 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
                 && kindReferences.length > 0
                 && kindReferences.some(ref => ref.fromProperty === valueKey)
                 && (
-                    <div className='ps-4'>
-                        <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                    </div>
+                    adminerShortLinks ? (
+                        <div className='ps-4'>
+                            <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                        </div>
+                    ) : (
+                        <span className='ps-4'>
+                            <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                        </span>
+                    )
                 )}
         </span>
     );
