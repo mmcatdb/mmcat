@@ -1,48 +1,45 @@
 import { Select, SelectItem } from '@nextui-org/react';
 import { type Datasource, DatasourceType } from '@/types/datasource';
-import type { Id } from '@/types/id';
 
 type DatasourceMenuProps = Readonly<{
     setDatasource: React.Dispatch<React.SetStateAction<Datasource | undefined>>;
-    datasourceId: Id | undefined;
+    datasource: Datasource | undefined;
     datasources: Datasource[];
 }>;
 
-export function DatasourceMenu({ setDatasource, datasourceId, datasources }: DatasourceMenuProps) {
+export function DatasourceMenu({ setDatasource, datasource, datasources }: DatasourceMenuProps) {
     const sources = datasources
         .filter(item =>
-            item.type === DatasourceType.postgresql ||
-            item.type === DatasourceType.mongodb ||
-            item.type === DatasourceType.neo4j,
+            [ DatasourceType.postgresql, DatasourceType.mongodb, DatasourceType.neo4j ].includes(item.type),
         );
 
-    if (sources.length > 0) {
+    if (sources.length === 0) {
         return (
-            <Select
-                items={sources}
-                aria-label='Datasource'
-                labelPlacement='outside-left'
-                classNames={
-                    { label:'sr-only' }
-                }
-                size='sm'
-                placeholder='Select datasource'
-                className='max-w-xs'
-                selectedKeys={ datasourceId ? [ datasourceId ] : [] }
-            >
-                {item => (
-                    <SelectItem
-                        key={item.id}
-                        onPress={() => setDatasource(item)}
-                    >
-                        {item.label}
-                    </SelectItem>
-                )}
-            </Select>
+            <p>No datasources to display.</p>
         );
     }
 
     return (
-        <p>No datasources to display.</p>
+        <Select
+            items={sources}
+            aria-label='Datasource'
+            labelPlacement='outside-left'
+            classNames={
+                { label:'sr-only' }
+            }
+            size='sm'
+            placeholder='Select datasource'
+            className='max-w-xs'
+            selectedKeys={ datasource?.id ? [ datasource.id ] : [] }
+        >
+            {item => (
+                <SelectItem
+                    key={item.id}
+                    onPress={() => setDatasource(item)}
+                >
+                    {item.label}
+                </SelectItem>
+            )}
+        </Select>
     );
 }
