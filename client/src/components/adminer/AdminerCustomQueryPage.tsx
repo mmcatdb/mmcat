@@ -12,6 +12,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { Button, Select, SelectItem } from '@nextui-org/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { usePreferences } from '@/components/PreferencesProvider';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
 import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
@@ -20,7 +21,6 @@ import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { View } from '@/types/adminer/View';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
 import type { DataResponse, ErrorResponse } from '@/types/adminer/DataResponse';
-import type { Theme } from '@/components/PreferencesProvider';
 
 const EXAMPLE_QUERY: Record<DatasourceType, string> = {
     [DatasourceType.neo4j]: 'MATCH (u)-[friend:FRIEND]->(f) WHERE f.id = \'user_005\' RETURN u, friend, f;',
@@ -34,10 +34,10 @@ const EXAMPLE_QUERY: Record<DatasourceType, string> = {
 type AdminerCustomQueryPageProps = Readonly<{
     datasource: Datasource;
     datasources: Datasource[];
-    theme: Theme;
 }>;
 
-export function AdminerCustomQueryPage({ datasource, datasources, theme }: AdminerCustomQueryPageProps) {
+export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCustomQueryPageProps) {
+    const { theme } = usePreferences().preferences;
     const [ view, setView ] = useState(View.table);
     const [ queryResult, setQueryResult ] = useState<DataResponse | ErrorResponse>();
     const [ searchParams ] = useSearchParams();
@@ -109,7 +109,6 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 <Button
                     className='mt-1 items-center gap-1 min-w-40'
                     size='sm'
-                    type='submit'
                     color='primary'
                     onPress={execute}
                 >
@@ -119,7 +118,6 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 <Button
                     className='ml-2 mt-1 items-center gap-1 min-w-40'
                     size='sm'
-                    type='submit'
                     onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
                 >
                     SHOW QUERY EXAMPLE

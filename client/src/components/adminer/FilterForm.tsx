@@ -59,7 +59,6 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 <Button
                     className='items-center gap-1 min-w-40'
                     size='sm'
-                    type='submit'
                     color='danger'
                     variant='bordered'
                     onPress={() => {
@@ -72,7 +71,6 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 <Button
                     className='items-center gap-1 min-w-40'
                     size='sm'
-                    type='submit'
                     color='success'
                     variant='bordered'
                     onPress={() => dispatch({ type: 'form', action: 'add_filter' })}
@@ -83,7 +81,6 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 <Button
                     className='items-center gap-1 min-w-40'
                     size='sm'
-                    type='submit'
                     color='primary'
                     onPress={() => dispatch({ type: 'submit' })}
                 >

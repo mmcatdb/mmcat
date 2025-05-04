@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { useSearchParams } from 'react-router-dom';
 import { Spinner, Pagination } from '@nextui-org/react';
 import { api } from '@/api';
+import { usePreferences } from '@/components/PreferencesProvider';
 import { getFilterQueryStateFromURLParams, getFiltersURLParam, getURLParamsFromFilterQueryState } from '@/components/adminer/URLParamsState';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { KindMenu, UNLABELED } from '@/components/adminer/KindMenu';
@@ -19,15 +20,14 @@ import type { QueryParams } from '@/types/api/routes';
 import type { DataResponse } from '@/types/adminer/DataResponse';
 import type { KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
-import type { Theme } from '@/components/PreferencesProvider';
 
 type AdminerFilterQueryPageProps = Readonly<{
     datasource: Datasource;
     datasources: Datasource[];
-    theme: Theme;
 }>;
 
-export function AdminerFilterQueryPage({ datasource, datasources, theme }: AdminerFilterQueryPageProps) {
+export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilterQueryPageProps) {
+    const { theme } = usePreferences().preferences;
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(filterQueryReducer, searchParams, getFilterQueryStateFromURLParams);
     const [ kindReferences, setKindReferences ] = useState<KindReference[]>([]);
@@ -114,7 +114,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
                 )}
 
                 <div className='row-span-2 justify-self-end'>
-                    {datasource && state.kindName && typeof state.kindName === 'string' && (
+                    {datasource && state.kindName && (
                         <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
                     )}
                 </div>
@@ -130,7 +130,7 @@ export function AdminerFilterQueryPage({ datasource, datasources, theme }: Admin
                         </div>
                     )}
 
-                    {state.kindName && state.datasourceId && typeof state.kindName === 'string' && fetchedData?.data && (
+                    {state.kindName && state.datasourceId && fetchedData?.data && (
                         <div className='flex grow min-h-0 mt-2'>
                             <DatabaseView
                                 view={state.view}
@@ -155,7 +155,7 @@ function getQueryParams(kindName: string, filterState: KindFilterState): QueryPa
         queryParams.filters = getFiltersURLParam(filterState);
 
     if (kindName !== UNLABELED)
-        queryParams.kind = kindName;
+        queryParams.kindName = kindName;
 
     return queryParams;
 }

@@ -28,7 +28,7 @@ export function DatabaseTable({ data, kindReferences, kind, datasourceId, dataso
         setTableColumnNames(columnNames);
     }, [ data ]);
 
-    if (tableData === undefined || tableData.metadata.itemCount === 0)
+    if (tableData === undefined || tableData.data.length === 0 || tableData.metadata.itemCount === 0)
         return <p>No rows to display.</p>;
 
     return (

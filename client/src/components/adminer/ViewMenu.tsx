@@ -24,7 +24,6 @@ export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
             {availableViews.map(availableView => (
                 <Button
                     size='sm'
-                    type='submit'
                     variant={availableView === view ? 'solid' : 'ghost'}
                     key={availableView}
                     onPress={() => dispatch({ type:'view', newView: availableView })}

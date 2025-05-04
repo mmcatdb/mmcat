@@ -65,7 +65,6 @@ export function PropertyFilter({ filter, datasourceType, propertyNames, dispatch
                 className='py-0.5 text-sm min-w-4'
                 size='sm'
                 aria-label='Delete filter'
-                type='submit'
                 color='danger'
                 variant='bordered'
                 onPress={() => {
