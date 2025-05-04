@@ -6,7 +6,7 @@ import type { Datasource } from '@/types/datasource';
 import type { Id } from '@/types/id';
 
 export const DEFAULT_LIMIT = 50;
-export const DEFAULT_OFFSET = 50;
+export const DEFAULT_OFFSET = 0;
 
 export function filterQueryReducer(state: AdminerFilterQueryState, action: AdminerFilterQueryStateAction): AdminerFilterQueryState {
     switch (action.type) {
