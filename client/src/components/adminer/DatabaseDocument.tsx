@@ -30,7 +30,7 @@ export function DatabaseDocument({ data, kindReferences, kind, datasourceId, dat
         <div className='grow mt-2'>
             {documentData.data.map((value, index) =>
                 <div key={index}>
-                    <DocumentComponent valueKey={null} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
+                    <DocumentComponent valueKey={undefined} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
 
                     {(index != documentData.data.length - 1) && <Divider className='my-4'/> }
                 </div>,
