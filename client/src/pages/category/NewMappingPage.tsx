@@ -17,7 +17,8 @@ export function NewMappingPage() {
     const [ kindName, setKindName ] = useState('');
 
     // Get datasource ID from route state
-    const datasourceId = location.state?.datasourceId;
+    // const datasourceId = location.state?.datasourceId;
+    const { datasourceId, datasourceLabel } = location.state || {};
 
     if (!datasourceId) {
         navigate(-1); // Go back if no datasource ID
@@ -69,6 +70,7 @@ export function NewMappingPage() {
             kindName={kindName}
             setKindName={setKindName}
             onSave={handleSaveMapping}
+            datasourceLabel={datasourceLabel}
         />
     );
 }

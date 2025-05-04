@@ -49,8 +49,15 @@ export function DatasourceInCategoryPage() {
             console.error('Category ID is missing');
             return;
         }
+        // navigate(`/schema-categories/${categoryId}/mappings/new`, {
+        //     state: { datasourceId: datasource.id },   // pass datasource ID for new mapping creation
+            
+        // });
         navigate(`/schema-categories/${categoryId}/mappings/new`, {
-            state: { datasourceId: datasource.id },   // pass datasource ID for new mapping creation
+            state: {
+                datasourceId: datasource.id,       // Pass datasource ID for new mapping creation
+                datasourceLabel: datasource.label, // Add datasource label
+            },
         });
     }
 

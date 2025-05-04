@@ -65,44 +65,49 @@ export function CategoryEditorPage() {
             <div className='flex flex-col h-[calc(100vh-40px)]'>
                 {/* Navbar */}
                 <div className='h-8 flex items-center justify-between px-4 bg-default-100 border-b border-default-200'>
-                    <div className='flex items-center gap-3'>
-                        {/* Left Sidebar Toggle */}
-                        <TbLayoutSidebarFilled
-                            className='cursor-pointer text-default-600 hover:text-default-700'
-                            onClick={() => toggleSidebar('left')}
-                            title='Toggle Main Editor Sidebar'
-                            size={18}
-                        />
-                    </div>
+                    {/* Left Sidebar Toggle */}
+                    <button
+                        onClick={() => toggleSidebar('left')}
+                        title='Toggle Main Editor Sidebar'
+                        className='text-default-600 hover:text-default-800'
+                    >
+                        <TbLayoutSidebarFilled size={20} aria-hidden='true' />
+                    </button>
 
-                    {/* Save and Right Sidebar Toggle */}
+                    {/* Delete, Save and Right Sidebar Toggle */}
                     <div className='flex items-center gap-2'>
                         {/* Delete Button */}
-                        <FaTrash
-                            className={`text-danger-400 ${state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
-                                ? 'opacity-50 cursor-auto'
-                                : 'cursor-pointer hover:text-danger-500'}`}
+                        <button
                             onClick={() => {
                                 if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
                                     deleteSelectedElements(state, dispatch);
                             }}
+                            disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
                             title='Delete selected elements (Delete)'
-                            size={16}
-                        />
+                            className={`p-1 transition rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-danger-300 ${
+                                state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
+                                    ? 'text-danger-400 opacity-50 cursor-not-allowed'
+                                    : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer'
+                            }`}
+                        >
+                            <FaTrash size={16} aria-hidden='true' />
+                        </button>
 
-                        {/* Divider */}
+                        {/* Save Button */}
                         <div className='w-px bg-default-400 h-5 mx-2'></div>
                         <SaveButton />
                         <div className='w-px bg-default-400 h-5 mx-2'></div>
 
                         {/* Right Sidebar Toggle */}
-                        <TbLayoutSidebarRightFilled
-                            className='cursor-pointer text-default-600 hover:text-default-700'
+                        <button
                             onClick={() => toggleSidebar('right')}
                             title='Toggle Edit Sidebar'
-                            size={18}
-                        />
+                            className='text-default-600 hover:text-default-800'
+                        >
+                            <TbLayoutSidebarRightFilled size={20} aria-hidden='true' />
+                        </button>
                     </div>
+
                 </div>
 
                 <div className='relative flex flex-grow'>

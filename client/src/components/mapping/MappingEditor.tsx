@@ -18,12 +18,14 @@ type MappingEditorProps = Readonly<{
     setKindName: (name: string) => void;
     /** Optional callback to handle saving the mapping. */
     onSave?: (mapping: Mapping, kindName: string) => void;
+    /** Name of the datasource for which the mapping is created. */
+    datasourceLabel: string;
 }>;
 
 /**
  * Renders the mapping editor with a graph display and panels for root selection and access path building.
  */
-export function MappingEditor({ category, mapping, kindName, setKindName, onSave }: MappingEditorProps) {
+export function MappingEditor({ category, mapping, kindName, setKindName, onSave, datasourceLabel }: MappingEditorProps) {
     const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
     const navigate = useNavigate();
 
@@ -53,8 +55,15 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
         <div className='relative flex h-[calc(100vh-40px)]'>
             {/* Left Panel - Form Controls */}
             <div className='w-80 bg-content1 border-r-1 border-default-200 p-4 flex flex-col'>
-                <div className='space-y-4'>
+                <div className=''>
                     <h2 className='text-xl font-semibold'>Create Mapping</h2>
+
+                    {/* Show datasource info */}
+                    <div className='pt-2 pb-6 text-sm text-default-600'>
+                        For datasource 
+                        {datasourceLabel ?? mapping.datasourceId}
+                    </div>
+
                     <Input
                         label='Kind Name'
                         value={kindName}
@@ -65,8 +74,10 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                     />
                 </div>
 
+                {/* <PathCard state={state} dispatch={dispatch} /> */}
+
                 {/* Scrollable content area */}
-                <div className='flex-1 overflow-y-auto py-2 mt-2'>
+                <div className='flex-1 overflow-y-auto py-2 mt-3'>
                     {state.editorPhase === EditorPhase.SelectRoot ? (
                         <RootSelectionPanel
                             // @ts-expect-error FIXME

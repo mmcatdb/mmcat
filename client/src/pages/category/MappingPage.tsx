@@ -22,7 +22,12 @@ export function MappingPage() {
             </div>
 
             <div className='mt-4'>
-                <MappingEditor category={category} mapping={mapping} />
+                <MappingEditor 
+                    category={category} 
+                    mapping={mapping} 
+                    kindName={''} 
+                    setKindName={(name: string) => console.log('Set kind name:', name)} 
+                />
             </div>
         </div>
     );

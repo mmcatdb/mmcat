@@ -145,10 +145,12 @@ function EditorForm({
     isSubmitDisabled,
     placeholder,
 }: EditorFormProps) {
-    // Handles Enter key press to trigger form submission.
+    // Handles Enter key press to trigger form submission and Escape for cancel.
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') 
             onSubmit();
+        if (event.key === 'Escape') 
+            onCancel();
     };
 
     return (
