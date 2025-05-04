@@ -3,7 +3,7 @@ import { Button, Input } from '@nextui-org/react';
 import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 import { PropertyFilter } from '@/components/adminer/PropertyFilter';
-import type { AdminerFilterQueryStateAction, AdminerFilterQueryState } from '@/components/adminer/filterQueryReducer';
+import type { AdminerFilterQueryStateAction, AdminerFilterQueryState } from '@/components/adminer/adminerReducer';
 import type { DatasourceType } from '@/types/datasource/Datasource';
 
 type FilterFormProps = Readonly<{

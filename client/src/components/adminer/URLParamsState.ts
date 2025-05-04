@@ -1,10 +1,17 @@
+import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { View } from '@/types/adminer/View';
 import { Operator } from '@/types/adminer/Operators';
-import type { Datasource } from '@/types/datasource/Datasource';
-import { getInitPaginationState, type PaginationState, type ActiveAdminerState, type AdminerFilterQueryState, type KindFilterState } from '@/components/adminer/filterQueryReducer';
-import type { KindReference } from '@/types/adminer/AdminerReferences';
-import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { QueryType } from '@/types/adminer/QueryType';
+import type { Datasource } from '@/types/datasource/Datasource';
+import type { KindReference } from '@/types/adminer/AdminerReferences';
+import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
+import { getInitPaginationState, type PaginationState, type ActiveAdminerState, type AdminerFilterQueryState, type KindFilterState, DEFAULT_LIMIT, DEFAULT_OFFSET } from '@/components/adminer/adminerReducer';
+
+export function getInitURLParams(previousParams: URLSearchParams): URLSearchParams {
+    const queryType = getQueryTypeFromURLParams(previousParams);
+    const params = getParamsWithQueryType(queryType);
+    return params;
+}
 
 export function getQueryTypeFromURLParams(params: URLSearchParams): QueryType | undefined {
     const queryTypeParam = params.get('queryType');
@@ -16,22 +23,6 @@ export function getQueryTypeFromURLParams(params: URLSearchParams): QueryType | 
 
 export function getFiltersURLParam(filterState: KindFilterState): string {
     return JSON.stringify(filterState.filters);
-}
-
-function getPaginationURLParam(pagination: PaginationState): string {
-    return JSON.stringify(pagination);
-}
-
-function getParamsWithQueryType(queryType: QueryType | undefined): URLSearchParams {
-    const params = new URLSearchParams();
-    params.set('queryType', queryType ?? QueryType.filter);
-    return params;
-}
-
-export function getInitURLParams(previousParams: URLSearchParams): URLSearchParams {
-    const queryType = getQueryTypeFromURLParams(previousParams);
-    const params = getParamsWithQueryType(queryType);
-    return params;
 }
 
 export function getAdminerURLParams(previousParams: URLSearchParams, queryType: QueryType | undefined): URLSearchParams {
@@ -79,11 +70,63 @@ export function getURLParamsFromFilterQueryState(state: AdminerFilterQueryState 
     return params;
 }
 
+function getParamsWithQueryType(queryType: QueryType | undefined): URLSearchParams {
+    const params = new URLSearchParams();
+    params.set('queryType', queryType ?? QueryType.filter);
+    return params;
+}
+
+function getPaginationURLParam(pagination: PaginationState): string {
+    return JSON.stringify(pagination);
+}
+
+export function getFilterQueryStateFromURLParams(params: URLSearchParams): AdminerFilterQueryState {
+    const viewParam = params.get('view');
+    const view = Object.values(View).includes(viewParam as View)
+        ? (viewParam as View)
+        : View.table;
+
+    const kindFilters: KindFilterState = getKindFiltersFromURLParams(params);
+
+    const paramsPagination = params.get('pagination');
+    const pagination: PaginationState = paramsPagination != null
+        ? JSON.parse(paramsPagination) as PaginationState
+        : getInitPaginationState();
+
+    return {
+        form: kindFilters,
+        active: kindFilters,
+        datasourceId: params.get('datasourceId') ?? undefined,
+        kindName: params.get('kindName') ?? undefined,
+        view: view,
+        pagination: pagination,
+    };
+}
+
+export function getCustomQueryStateFromURLParams(params: URLSearchParams): { query?: string, datasourceId?: string } {
+    return {
+        query: params.get('query') ?? '',
+        datasourceId: params.get('datasourceId') ?? undefined,
+    };
+}
+
+function getKindFiltersFromURLParams(params: URLSearchParams): KindFilterState {
+    const paramsLimit = params.get('limit');
+    const paramsOffset = params.get('offset');
+    const paramsFilters = params.get('filters');
+
+    return {
+        limit: paramsLimit ? parseInt(paramsLimit) : DEFAULT_LIMIT,
+        offset: paramsOffset ? parseInt(paramsOffset) : DEFAULT_OFFSET,
+        filters: JSON.parse(paramsFilters ?? '[]') as PropertyFilter[],
+    };
+}
+
 export function getHrefFromReference(reference: KindReference, item: Record<string, unknown>, propertyName: string, datasources: Datasource[]): string {
     const state: ActiveAdminerState = {
         active: {
-            limit: 50,
-            offset: 0,
+            limit: DEFAULT_LIMIT,
+            offset: DEFAULT_OFFSET,
             filters: [
                 {
                     id: 0,
@@ -101,32 +144,4 @@ export function getHrefFromReference(reference: KindReference, item: Record<stri
     const urlParams = getURLParamsFromFilterQueryState(state);
 
     return urlParams.toString();
-}
-
-export function getFilterQueryStateFromURLParams(params: URLSearchParams): AdminerFilterQueryState {
-    const viewParam = params.get('view');
-    const view = Object.values(View).includes(viewParam as View)
-        ? (viewParam as View)
-        : View.table;
-    const filters: KindFilterState = JSON.parse(`{"limit":${params.get('limit') ?? 50},"offset":${params.get('offset') ?? 0},"filters":${params.get('filters') ?? '[]'}}`) as KindFilterState;
-    const paramsPagination = params.get('pagination');
-    const pagination: PaginationState = paramsPagination != null
-        ? JSON.parse(paramsPagination) as PaginationState
-        : getInitPaginationState();
-
-    return {
-        form: filters,
-        active: filters,
-        datasourceId: params.get('datasourceId') ?? undefined,
-        kindName: params.get('kindName') ?? undefined,
-        view: view,
-        pagination: pagination,
-    };
-}
-
-export function getCustomQueryStateFromURLParams(params: URLSearchParams): { query?: string, datasourceId?: string } {
-    return {
-        query: params.get('query') ?? '',
-        datasourceId: params.get('datasourceId') ?? undefined,
-    };
 }

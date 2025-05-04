@@ -5,12 +5,15 @@ import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { Datasource } from '@/types/datasource';
 import type { Id } from '@/types/id';
 
+export const DEFAULT_LIMIT = 50;
+export const DEFAULT_OFFSET = 50;
+
 export function filterQueryReducer(state: AdminerFilterQueryState, action: AdminerFilterQueryStateAction): AdminerFilterQueryState {
     switch (action.type) {
     case 'initialize': {
         return {
-            form: { limit: 50, offset: 0, filters: [] },
-            active: { limit: 50, offset: 0, filters: [] },
+            form: getInitKindFilterState(),
+            active: getInitKindFilterState(),
             view: View.table,
             datasourceId: undefined,
             kindName: undefined,
@@ -23,8 +26,8 @@ export function filterQueryReducer(state: AdminerFilterQueryState, action: Admin
     case 'datasource': {
         if (state.datasourceId !== action.newDatasource.id) {
             return {
-                form: { limit: 50, offset: 0, filters: [] },
-                active: { limit: 50, offset: 0, filters: [] },
+                form: getInitKindFilterState(),
+                active: getInitKindFilterState(),
                 datasourceId: action.newDatasource.id,
                 view: getNewView(state.view, action.newDatasource.type),
                 pagination: getInitPaginationState(),
@@ -36,8 +39,8 @@ export function filterQueryReducer(state: AdminerFilterQueryState, action: Admin
     case 'kind': {
         return {
             ...state,
-            form: { limit: 50, offset: 0, filters: [] },
-            active: { limit: 50, offset: 0, filters: [] },
+            form: getInitKindFilterState(),
+            active: getInitKindFilterState(),
             kindName: action.newKind,
             pagination: getInitPaginationState(),
         };
@@ -108,6 +111,10 @@ export function filterQueryReducer(state: AdminerFilterQueryState, action: Admin
     default:
         throw new Error('Unknown action');
     }
+}
+
+function getInitKindFilterState(): KindFilterState {
+    return { limit: DEFAULT_LIMIT, offset: DEFAULT_OFFSET, filters: [] };
 }
 
 export function getInitPaginationState(): PaginationState {

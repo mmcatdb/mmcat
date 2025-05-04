@@ -8,7 +8,7 @@ import { FilterForm } from '@/components/adminer/FilterForm';
 import { KindMenu, UNLABELED } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
-import { filterQueryReducer } from '@/components/adminer/filterQueryReducer';
+import { filterQueryReducer } from '@/components/adminer/adminerReducer';
 import { useFetchReferences } from '@/components/adminer/useFetchReferences';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
@@ -17,7 +17,7 @@ import { type Datasource, DatasourceType } from '@/types/datasource';
 import type { Id } from '@/types/id';
 import type { QueryParams } from '@/types/api/routes';
 import type { DataResponse } from '@/types/adminer/DataResponse';
-import type { KindFilterState } from '@/components/adminer/filterQueryReducer';
+import type { KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 import type { Theme } from '@/components/PreferencesProvider';
 

@@ -2,7 +2,7 @@ import { Button, ButtonGroup } from '@nextui-org/react';
 import { AVAILABLE_VIEWS } from './Views';
 import type { DatasourceType } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
-import type { AdminerFilterQueryStateAction } from '@/components/adminer/filterQueryReducer';
+import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 
 type ViewMenuProps = Readonly<{
     datasourceType: DatasourceType;

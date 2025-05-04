@@ -14,7 +14,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
-import { EXAMPLE_QUERY } from '@/components/adminer/Queries';
 import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
@@ -22,6 +21,15 @@ import { View } from '@/types/adminer/View';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
 import type { DataResponse, ErrorResponse } from '@/types/adminer/DataResponse';
 import type { Theme } from '@/components/PreferencesProvider';
+
+const EXAMPLE_QUERY: Record<DatasourceType, string> = {
+    [DatasourceType.neo4j]: 'MATCH (u)-[friend:FRIEND]->(f) WHERE f.id = \'user_005\' RETURN u, friend, f;',
+    [DatasourceType.mongodb]: '{"find": "business", "filter": {"attributes.wifi": "free"}}',
+    [DatasourceType.postgresql]: 'SELECT u.name, u.fans, c.business_id, c.date, c.text, c.stars FROM "user" u JOIN "comment" c ON (u.user_id = c.user_id) WHERE c.stars >= 2;',
+    [DatasourceType.csv]: '',
+    [DatasourceType.json]: '',
+    [DatasourceType.jsonld]: '',
+};
 
 type AdminerCustomQueryPageProps = Readonly<{
     datasource: Datasource;
