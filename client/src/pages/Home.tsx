@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CustomLink } from '@/components/common';
-import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
 import { toast } from 'react-toastify';
-
-const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
 const EXAMPLE_SCHEMAS = [
     'basic',
@@ -15,9 +11,7 @@ const EXAMPLE_SCHEMAS = [
 
 export function Home() {
     const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>();
-    const [ isCreatingSchema, setIsCreatingSchema ] = useState(false);
-    const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
-    const [ isModalOpen, setIsModalOpen ] = useState(false);
+    const [ creatingSchema, setCreatingSchema ] = useState<string>();
 
     async function fetchCategories() {
         const result = await api.schemas.getAllCategoryInfos({});
@@ -28,19 +22,18 @@ export function Home() {
     }
 
     useEffect(() => {
-        // TODO signal/abort
         void fetchCategories();
     }, []);
 
     const handleCreateSchema = useCallback(
         async (name: string, isExample = false) => {
-            isExample ? setIsCreatingExampleSchema(true) : setIsCreatingSchema(true);
+            setCreatingSchema(name);
 
             const response = isExample
                 ? await api.schemas.createExampleCategory({ name })
                 : await api.schemas.createNewCategory({}, { label: name });
 
-            isExample ? setIsCreatingExampleSchema(false) : setIsCreatingSchema(false);
+            setCreatingSchema(undefined);
 
             if (!response.status) {
                 toast.error('Error creating schema category.');
@@ -60,56 +53,40 @@ export function Home() {
     );
 
     return (
-        <div>
-            <h1 className='heading-main'>MM-cat</h1>
+        <div className='text-justify text-lg'>
+            <h1 className='heading-main text-4xl'>MM-cat</h1>
             <p>
                 A multi-model data modeling framework based on category theory.
             </p>
-            <br />
-            <p>
-                Detailed instructions on how to use this tool can be found <a href={DOCUMENTATION_URL} className='underline text-blue-600 hover:text-blue-800 visited:text-purple-600'>here</a>.
+            <p className='mt-3'>
+                Adminer is designed for visualizing multi-model data and references between them, based on the schemata of schemafull databases and schema category.
+                Using the structure of the schema category, it connects and allows traversal of stored records both within a single database and across heterogeneous systems.
+                It supports filtering and multiple data visualization modes.
             </p>
             <h2 className='mt-3'>Current schema categories</h2>
             {categories ? (<>
                 <div className='flex flex-col'>
                     {categories.map(category => (
-                        <div key={category.id}>
-                            <CustomLink to={routes.category.index.resolve({ categoryId: category.id })}>
-                                {category.label}
-                            </CustomLink>
+                        <div key={category.id} className='text-primary-500'>
+                            {category.label}
                         </div>
                     ))}
                 </div>
                 <h2 className='mt-3'>Add example schema category</h2>
-                <div className='flex gap-2'>
+                <div className='flex mt-1 gap-2'>
                     {EXAMPLE_SCHEMAS.map(example => (
                         <Button
                             key={example}
                             onPress={() => handleCreateSchema(example, true)}
-                            isLoading={isCreatingExampleSchema}
+                            isLoading={creatingSchema === example}
                         >
                             {example}
                         </Button>
                     ))}
                 </div>
-                <h2 className='mt-3'>Add empty schema category</h2>
-                <Button
-                    key={'newSchema'}
-                    onPress={() => setIsModalOpen(true)}
-                    isLoading={isCreatingSchema}
-                >
-                        + Add schema
-                </Button>
             </>) : (
                 <p>Loading...</p>
             )}
-
-            <AddSchemaModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSubmit={label => handleCreateSchema(label, false)}
-                isSubmitting={isCreatingSchema}
-            />
         </div>
     );
 }

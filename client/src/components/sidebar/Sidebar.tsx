@@ -46,7 +46,7 @@ export function Sidebar() {
             </div>
 
             <div className='flex flex-col'>
-                {dynamicSidebarItems.map((item) => (
+                {dynamicSidebarItems.map(item => (
                     <SidebarItemDisplay key={item.label} item={item} currentPath={location.pathname} />
 
                 ))}
@@ -138,6 +138,13 @@ function generalSidebarItems(): SidebarItem[] {
         [
             {
                 type: 'normal',
+                label: 'Adminer',
+                route: `${routes.adminer}?reload=true`,
+                iconName: 'codeBracketSquare',
+            },
+            /*
+            {
+                type: 'normal',
                 label: 'Schema categories',
                 route: routes.categories,
                 iconName: 'heart',
@@ -148,18 +155,13 @@ function generalSidebarItems(): SidebarItem[] {
                 route: routes.about,
                 iconName: 'lightBulb',
             },
+            */
             {
                 type: 'normal',
                 label: 'Datasources',
                 route: routes.datasources,
                 iconName: 'circleStack',
                 match: [ '/datasources/:id' ],
-            },
-            {
-                type: 'normal',
-                label: 'Adminer',
-                route: `${routes.adminer}?reload=true`,
-                iconName: 'codeBracketSquare',
             },
         ]
     );
