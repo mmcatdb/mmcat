@@ -22,7 +22,7 @@ export function getQueryTypeFromURLParams(params: URLSearchParams): QueryType | 
 }
 
 export function getFiltersURLParam(filterState: KindFilterState): string {
-    return JSON.stringify(filterState.filters);
+    return JSON.stringify(filterState.propertyFilters);
 }
 
 export function getAdminerURLParams(previousParams: URLSearchParams, queryType: QueryType | undefined): URLSearchParams {
@@ -118,7 +118,7 @@ function getKindFiltersFromURLParams(params: URLSearchParams): KindFilterState {
     return {
         limit: paramsLimit ? parseInt(paramsLimit) : DEFAULT_LIMIT,
         offset: paramsOffset ? parseInt(paramsOffset) : DEFAULT_OFFSET,
-        filters: JSON.parse(paramsFilters ?? '[]') as PropertyFilter[],
+        propertyFilters: JSON.parse(paramsFilters ?? '[]') as PropertyFilter[],
     };
 }
 
@@ -127,7 +127,7 @@ export function getHrefFromReference(reference: KindReference, item: Record<stri
         active: {
             limit: DEFAULT_LIMIT,
             offset: DEFAULT_OFFSET,
-            filters: [
+            propertyFilters: [
                 {
                     id: 0,
                     propertyName: reference.property,

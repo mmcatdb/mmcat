@@ -151,7 +151,7 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
 function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {
     const queryParams: QueryParams = { limit: filterState.limit, offset: filterState.offset };
 
-    if (filterState.filters.length > 0)
+    if (filterState.propertyFilters.length > 0)
         queryParams.filters = getFiltersURLParam(filterState);
 
     if (kindName !== UNLABELED)

@@ -96,7 +96,7 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
     return (
         <span>
             <span className={getColor(String(parsedValue))}>
-                {String(parsedValue)}
+                {parsedValue === null ? '' : String(parsedValue)}
             </span>
             {valueKey
                 && kindReferences.length > 0

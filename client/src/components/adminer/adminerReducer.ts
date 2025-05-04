@@ -57,7 +57,7 @@ export function filterQueryReducer(state: AdminerFilterQueryState, action: Admin
             active: {
                 limit: state.form.limit,
                 offset: state.form.offset,
-                filters: state.form.filters.map(filter => ({ ...filter })),
+                propertyFilters: state.form.propertyFilters.map(filter => ({ ...filter })),
             },
         };
     }
@@ -113,19 +113,6 @@ export function filterQueryReducer(state: AdminerFilterQueryState, action: Admin
     }
 }
 
-function getInitKindFilterState(): KindFilterState {
-    return { limit: DEFAULT_LIMIT, offset: DEFAULT_OFFSET, filters: [] };
-}
-
-export function getInitPaginationState(): PaginationState {
-    return {
-        currentPage: 1,
-        offset: 0,
-        itemCount: undefined,
-        totalPages: 1,
-    };
-}
-
 function reducerInput(state: AdminerFilterQueryState, action: InputAction): AdminerFilterQueryState {
     const { field, value } = action;
 
@@ -137,7 +124,7 @@ function reducerInput(state: AdminerFilterQueryState, action: InputAction): Admi
     case 'propertyName':
     case 'propertyValue':
     case 'operator': {
-        const updatedFilters = state.form.filters.map(filter => {
+        const updatedFilters = state.form.propertyFilters.map(filter => {
             if (filter.id === action.id) {
                 const updatedFilter = { ...filter, [field]: value };
 
@@ -149,7 +136,7 @@ function reducerInput(state: AdminerFilterQueryState, action: InputAction): Admi
             }
             return filter;
         });
-        return { ...state, form: { ...state.form, filters: updatedFilters } };
+        return { ...state, form: { ...state.form, propertyFilters: updatedFilters } };
     }
     }
 }
@@ -159,7 +146,7 @@ function reducerForm(state: AdminerFilterQueryState, action: FormAction): Admine
 
     switch (formAction) {
     case 'add_filter': {
-        const nextId = state.form.filters ? state.form.filters.length : 0;
+        const nextId = state.form.propertyFilters ? state.form.propertyFilters.length : 0;
         const newFilter: PropertyFilter = {
             id: nextId,
             propertyName: '',
@@ -168,31 +155,44 @@ function reducerForm(state: AdminerFilterQueryState, action: FormAction): Admine
         };
         return {
             ...state,
-            form: { ...state.form, filters: [ ...state.form.filters, newFilter ] },
+            form: { ...state.form, propertyFilters: [ ...state.form.propertyFilters, newFilter ] },
         };
     }
     case 'delete_filter': {
-        const activeFilters = state.active.filters.filter(filter => filter.id !== action.id);
-        const newFilters = state.form.filters.filter(filter => filter.id !== action.id);
+        const activeFilters = state.active.propertyFilters.filter(filter => filter.id !== action.id);
+        const newFilters = state.form.propertyFilters.filter(filter => filter.id !== action.id);
         return {
             ...state,
             active: {
                 ...state.active,
-                filters: activeFilters,
+                propertyFilters: activeFilters,
             },
-            form: { ...state.form, filters: newFilters },
+            form: { ...state.form, propertyFilters: newFilters },
         };
     }
     case 'delete_filters': {
         return {
             ...state,
-            form: { limit: 50, offset: 0, filters: [] },
-            active: { limit: 50, offset: 0, filters: [] },
+            form: { limit: 50, offset: 0, propertyFilters: [] },
+            active: { limit: 50, offset: 0, propertyFilters: [] },
         };
     }
     default:
         throw new Error('Unknown action');
     }
+}
+
+function getInitKindFilterState(): KindFilterState {
+    return { limit: DEFAULT_LIMIT, offset: DEFAULT_OFFSET, propertyFilters: [] };
+}
+
+export function getInitPaginationState(): PaginationState {
+    return {
+        currentPage: 1,
+        offset: 0,
+        itemCount: undefined,
+        totalPages: 1,
+    };
 }
 
 export type AdminerFilterQueryState = ActiveAdminerState & {
@@ -209,7 +209,7 @@ export type ActiveAdminerState = {
 export type KindFilterState = {
     limit: number;
     offset: number;
-    filters: PropertyFilter[];
+    propertyFilters: PropertyFilter[];
 };
 
 type AdminerStateBase = {

@@ -93,7 +93,7 @@ public class AdminerController {
                     .readValue(filters);
 
                 for (AdminerFilter filter : allFilters) {
-                    if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty() && !filter.propertyValue().isEmpty()) {
+                    if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty()) {
                         filterList.add(filter);
                     }
                 }
