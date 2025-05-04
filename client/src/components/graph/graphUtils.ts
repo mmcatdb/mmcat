@@ -1,5 +1,8 @@
 import { compareStringsAscii } from '@/types/utils/common';
 import { type CSSProperties } from 'react';
+import { type CategoryEdge, type CategoryGraph } from '../category/categoryGraph';
+import { type PathSelection } from './PathSelection';
+import { Signature } from '@/types/identifiers';
 
 export type Node = {
     id: string;
@@ -452,4 +455,18 @@ export function computeSelectionBoxStyle(select: SelectState | undefined, coordi
 export type HTMLConnection = {
     ref: HTMLElement;
     cleanup: () => void;
+}
+
+export function getPathSignature(
+    graph: CategoryGraph,
+    selection: PathSelection,
+): Signature {
+    const nodeIds = Array.from(selection.nodeIds);
+    const signatures = selection.edgeIds.map((edgeId, index) => {
+        const edge: CategoryEdge = graph.edges.get(edgeId)!;
+        const fromNodeId = nodeIds[index];
+        return edge.from === fromNodeId ? edge.schema.signature : edge.schema.signature.dual();
+    });
+
+    return Signature.concatenate(...signatures);
 }

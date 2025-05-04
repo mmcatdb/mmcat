@@ -8,6 +8,7 @@ import { Button, Input } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
 import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { type CategoryGraph } from '../category/categoryGraph';
+import { getPathSignature } from '../graph/graphUtils';
 
 type MappingEditorProps = Readonly<{
     /** The schema category being edited. */
@@ -73,8 +74,6 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                         autoFocus
                     />
                 </div>
-
-                {/* <PathCard state={state} dispatch={dispatch} /> */}
 
                 {/* Scrollable content area */}
                 <div className='flex-1 overflow-y-auto py-2 mt-3'>
@@ -187,16 +186,6 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
     );
 }
 
-/**
- * List of available selection types.
- */
-const selectionTypes = [
-    SelectionType.None,
-    SelectionType.Free,
-    SelectionType.Sequence,
-    SelectionType.Path,
-];
-
 type StateDispatchProps = Readonly<{
     state: EditMappingState;
     dispatch: React.Dispatch<EditMappingAction>;
@@ -291,9 +280,12 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
                     <div className='mt-3'>
                         {selection instanceof PathSelection && !selection.isEmpty ? (
                             <>
-                                <p className='text-sm text-default-600 mb-2 truncate'>
+                                <p className='text-default-800 truncate'>
                                     Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}
                                 </p>
+                                <div className='overflow-x-auto whitespace-nowrap text-sm text-default-600 mb-2'>       
+                                    Path: {getPathSignature(state.graph, selection).toString()}
+                                </div>
                                 <Button 
                                     fullWidth 
                                     color='primary' 
@@ -308,23 +300,6 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
                     </div>
                 )}
             </div>
-        </div>
-    );
-}
-
-function PathCard({ state }: StateDispatchProps) {
-    const { selection } = state;
-
-    if (!(selection instanceof PathSelection) || selection.isEmpty)
-        return null;
-
-    return (
-        <div className='absolute top-2 left-2 z-20 p-3 flex gap-3 bg-background'>
-            {selection.nodeIds.map((nodeIds, index) => (
-                <div key={index}>
-                    {state.graph.nodes.get(nodeIds)!.metadata.label}
-                </div>
-            ))}
         </div>
     );
 }
