@@ -44,6 +44,11 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     useEffect(() => {
         if (!areEqualURLParams(searchParamsRef.current, searchParams)) {
             dispatch({ type:'update', newState: getFilterQueryStateFromURLParams(searchParams) });
+            const newState = getFilterQueryStateFromURLParams(searchParams);
+            if (JSON.stringify(stateRef.current) !== JSON.stringify(newState)) {
+                dispatch({ type: 'update', newState });
+                stateRef.current = newState;
+            }
             searchParamsRef.current = searchParams;
         }
     }, [ searchParams ]);
