@@ -10,7 +10,6 @@ export function ExportComponent({ data }: ExportComponentProps) {
         <Button
             className='min-w-20'
             size='sm'
-            aria-label='Export data'
             type='submit'
             color='primary'
             onPress={() => exportJSON(data)}

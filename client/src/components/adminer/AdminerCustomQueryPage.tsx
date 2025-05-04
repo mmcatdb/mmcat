@@ -109,7 +109,6 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 <Button
                     className='mt-1 items-center gap-1 min-w-40'
                     size='sm'
-                    aria-label='Execute query'
                     type='submit'
                     color='primary'
                     onPress={execute}
@@ -120,7 +119,6 @@ export function AdminerCustomQueryPage({ datasource, datasources, theme }: Admin
                 <Button
                     className='ml-2 mt-1 items-center gap-1 min-w-40'
                     size='sm'
-                    aria-label='Show query example'
                     type='submit'
                     onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
                 >

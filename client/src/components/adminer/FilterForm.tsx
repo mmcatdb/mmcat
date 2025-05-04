@@ -59,7 +59,6 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 <Button
                     className='items-center gap-1 min-w-40'
                     size='sm'
-                    aria-label='Delete filters'
                     type='submit'
                     color='danger'
                     variant='bordered'
@@ -73,7 +72,6 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 <Button
                     className='items-center gap-1 min-w-40'
                     size='sm'
-                    aria-label='Add filter'
                     type='submit'
                     color='success'
                     variant='bordered'
@@ -85,7 +83,6 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                 <Button
                     className='items-center gap-1 min-w-40'
                     size='sm'
-                    aria-label='Submit filters'
                     type='submit'
                     color='primary'
                     onPress={() => dispatch({ type: 'submit' })}

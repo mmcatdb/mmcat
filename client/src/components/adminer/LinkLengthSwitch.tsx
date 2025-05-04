@@ -8,7 +8,6 @@ export function LinkLengthSwitch() {
     return (
         <Switch
             className='ml-auto'
-            aria-label='Short names'
             isSelected={adminerShortRefs}
             onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
             size='sm'
