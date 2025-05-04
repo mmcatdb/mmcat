@@ -76,14 +76,15 @@ public class Schema {
     public static final BuilderMorphism businessHoursToBusinessId =         builder.composite(businessHoursToBusiness, businessToBusinessId);
 
     public static final BuilderMorphism friendToSince =                     builder.morphism(friend, since, 22);
-    public static final BuilderMorphism friendToUser =                      builder.tags(Tag.role).morphism(friend, user, 23);
+    public static final BuilderMorphism friendToFromUser =                  builder.tags(Tag.role).morphism(friend, user, 23);
+    public static final BuilderMorphism friendToToUser =                    builder.tags(Tag.role).morphism(friend, user, 24);
 
     private static final SchemaBuilder ids = builder
         .ids(user, userToUserId)
         .ids(comment, commentToCommentId)
         .ids(business, businessToBusinessId)
         .ids(businessHours, businessHoursToBusinessHoursId)
-        .ids(friend, friendToUser, friendToUser);
+        .ids(friend, friendToFromUser, friendToToUser);
 
     /**
      * Create new full schema category.
