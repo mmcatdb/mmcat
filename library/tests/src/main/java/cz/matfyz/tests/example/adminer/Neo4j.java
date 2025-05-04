@@ -31,10 +31,10 @@ public abstract class Neo4j {
             b -> b.root(
                 b.simple("since", Schema.friendToSince),
                 b.complex("_from.User", Schema.friendToFromUser,
-                    b.simple("user_id", Schema.userToUserId)
+                    b.simple("id", Schema.userToUserId)
                 ),
                 b.complex("_to.User", Schema.friendToToUser,
-                    b.simple("user_id", Schema.userToUserId)
+                    b.simple("id", Schema.userToUserId)
                 )
             )
         );
