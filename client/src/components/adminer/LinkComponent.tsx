@@ -18,22 +18,6 @@ type LinkComponentProps = Readonly<{
     kindDuplicated: boolean;
 }>;
 
-function createLinkText(reference: KindReference, datasourceId: Id, datasources: Datasource[], kind: string, kindDuplicated: boolean, short: boolean) {
-    const datasourceLabel: string = datasources.find(source => source.id === reference.datasourceId)!.label;
-    const kindName = reference.kindName;
-    const property = reference.property;
-
-    let linkText = '';
-    if (datasourceId !== reference.datasourceId)
-        linkText += `${short ? datasourceLabel.substring(0, NAME_LENGTH) : datasourceLabel}/`;
-    if (kind !== reference.kindName)
-        linkText += `${short ? kindName.substring(0, NAME_LENGTH) : kindName}`;
-    if (kindDuplicated)
-        linkText += `:${short ? property.substring(0, NAME_LENGTH) : property}`;
-
-    return linkText;
-}
-
 export function LinkComponent({ index, reference, kind, datasourceId, datasources, link, kindDuplicated }: LinkComponentProps ) {
     const { preferences } = usePreferences();
 
@@ -51,4 +35,20 @@ export function LinkComponent({ index, reference, kind, datasourceId, datasource
             </Link>
         </Tooltip>
     );
+}
+
+function createLinkText(reference: KindReference, datasourceId: Id, datasources: Datasource[], kind: string, kindDuplicated: boolean, short: boolean) {
+    const datasourceLabel: string = datasources.find(source => source.id === reference.datasourceId)!.label;
+    const kindName = reference.kindName;
+    const property = reference.property;
+
+    let linkText = '';
+    if (datasourceId !== reference.datasourceId)
+        linkText += `${short ? datasourceLabel.substring(0, NAME_LENGTH) : datasourceLabel}/`;
+    if (kind !== reference.kindName)
+        linkText += `${short ? kindName.substring(0, NAME_LENGTH) : kindName}`;
+    if (kindDuplicated)
+        linkText += `:${short ? property.substring(0, NAME_LENGTH) : property}`;
+
+    return linkText;
 }

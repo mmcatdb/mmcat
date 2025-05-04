@@ -7,46 +7,6 @@ import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-function isInKind(ref: KindReference, kind: string, datasourceId: Id): boolean {
-    return ref.kindName === kind && ref.datasourceId === datasourceId;
-}
-
-function isInDatasource(ref: KindReference, datasourceId: Id): boolean {
-    return ref.datasourceId === datasourceId;
-}
-
-function compareReferences(a: KindReference, b: KindReference, kind: string, datasourceId: Id): number {
-    const aInKind = isInKind(a, kind, datasourceId);
-    const bInKind = isInKind(b, kind, datasourceId);
-    if (aInKind !== bInKind)
-        return aInKind ? -1 : 1;
-
-    const aIsDatasource = isInDatasource(a, datasourceId);
-    const bIsDatasource = isInDatasource(b, datasourceId);
-    if (aIsDatasource !== bIsDatasource)
-        return aIsDatasource ? -1 : 1;
-
-    if (a.datasourceId !== b.datasourceId)
-        return a.datasourceId.localeCompare(b.datasourceId);
-    if (a.kindName !== b.kindName)
-        return a.kindName.localeCompare(b.kindName);
-    return a.property.localeCompare(b.property);
-}
-
-function getCompressedLinks(links: [string, KindReference][]): [string, KindReference, boolean][] {
-    return links.map((current, index) => {
-        const [ currentLink, currentRef ] = current;
-
-        const kindDuplicated = links.some(([ _, ref ], i) =>
-            i !== index &&
-            ref.datasourceId === currentRef.datasourceId &&
-            ref.kindName === currentRef.kindName,
-        );
-
-        return [ currentLink, currentRef, kindDuplicated ];
-    });
-}
-
 type ReferenceComponentProps = Readonly<{
     references: KindReference[];
     data: Record<string, string> | GraphResponseData;
@@ -121,4 +81,44 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
             )}
         </div>
     );
+}
+
+function compareReferences(a: KindReference, b: KindReference, kind: string, datasourceId: Id): number {
+    const aInKind = isInKind(a, kind, datasourceId);
+    const bInKind = isInKind(b, kind, datasourceId);
+    if (aInKind !== bInKind)
+        return aInKind ? -1 : 1;
+
+    const aIsDatasource = isInDatasource(a, datasourceId);
+    const bIsDatasource = isInDatasource(b, datasourceId);
+    if (aIsDatasource !== bIsDatasource)
+        return aIsDatasource ? -1 : 1;
+
+    if (a.datasourceId !== b.datasourceId)
+        return a.datasourceId.localeCompare(b.datasourceId);
+    if (a.kindName !== b.kindName)
+        return a.kindName.localeCompare(b.kindName);
+    return a.property.localeCompare(b.property);
+}
+
+function isInKind(ref: KindReference, kind: string, datasourceId: Id): boolean {
+    return ref.kindName === kind && ref.datasourceId === datasourceId;
+}
+
+function isInDatasource(ref: KindReference, datasourceId: Id): boolean {
+    return ref.datasourceId === datasourceId;
+}
+
+function getCompressedLinks(links: [string, KindReference][]): [string, KindReference, boolean][] {
+    return links.map((current, index) => {
+        const [ currentLink, currentRef ] = current;
+
+        const kindDuplicated = links.some(([ _, ref ], i) =>
+            i !== index &&
+            ref.datasourceId === currentRef.datasourceId &&
+            ref.kindName === currentRef.kindName,
+        );
+
+        return [ currentLink, currentRef, kindDuplicated ];
+    });
 }

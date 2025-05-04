@@ -5,16 +5,12 @@ export function LinkLengthSwitch() {
     const { preferences, setPreferences } = usePreferences();
     const { adminerShortLinks: adminerShortRefs } = preferences;
 
-    const handleChange = (isChecked: boolean) => {
-        setPreferences({ ...preferences, adminerShortLinks: isChecked });
-    };
-
     return (
         <Switch
             className='ml-auto'
             aria-label='Short names'
             isSelected={adminerShortRefs}
-            onChange={e => handleChange(e.target.checked)}
+            onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
             size='sm'
         >
             <p className='text-small'>Short names</p>
