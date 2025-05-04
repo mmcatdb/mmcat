@@ -62,7 +62,7 @@ public class AdminerController {
      * Retrieves the data from a specific kind with optional filtering.
      *
      * @param db The ID of the datasource.
-     * @param kind The name of the kind.
+     * @param kindName The name of the kind.
      * @param filters A JSON array string representing the filters to apply.
      * @param limit The maximum number of records to return. Defaults to 50.
      * @param offset The offset from which to start retrieving records. Defaults to 0.
@@ -73,7 +73,7 @@ public class AdminerController {
     @GetMapping(value = "/adminer/{db}/kind")
     public DataResponse getKind(
         @PathVariable Id db,
-        @RequestParam(required = false, defaultValue = "") String kind,
+        @RequestParam(required = false, defaultValue = "") String kindName,
         @RequestParam(required = false, defaultValue = "") String filters,
         @RequestParam(required = false, defaultValue = "50") String limit,
         @RequestParam(required = false, defaultValue = "0") String offset
@@ -104,21 +104,21 @@ public class AdminerController {
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getKind(kind, limit, offset, filterList);
+        return pullWrapper.getKind(kindName, limit, offset, filterList);
     }
 
     /**
      * Retrieves the references (foreign key-like relationships) for a given kind in the specified datasource.
      *
      * @param db The ID of the datasource.
-     * @param kind The name of the kind for which to retrieve references.
+     * @param kindName The name of the kind for which to retrieve references.
      * @return A {@link List} of {@link Reference} representing the relationships.
      * @throws ResponseStatusException if the datasource is not found.
      */
     @GetMapping(value = "/adminer/{db}/references")
     public List<Reference> getReferences(
         @PathVariable Id db,
-        @RequestParam(required = true) String kind
+        @RequestParam(required = true) String kindName
         ) {
         final var datasource = datasourceRepository.find(db);
 
@@ -128,7 +128,7 @@ public class AdminerController {
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getReferences(db.toString(), kind);
+        return pullWrapper.getReferences(db.toString(), kindName);
     }
 
     /**
