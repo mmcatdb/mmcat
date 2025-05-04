@@ -42,7 +42,7 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
 
     // Sync state with URL search parameters
     useEffect(() => {
-        if (JSON.stringify(searchParamsRef.current) !== JSON.stringify(searchParams)) {
+        if (!areEqualURLParams(searchParamsRef.current, searchParams)) {
             dispatch({ type:'update', newState: getFilterQueryStateFromURLParams(searchParams) });
             searchParamsRef.current = searchParams;
         }
@@ -50,7 +50,7 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
 
     // Update URL search parameters whenever state changes
     useEffect(() => {
-        if (stateRef.current !== state) {
+        if (JSON.stringify(stateRef.current) !== JSON.stringify(state)) {
             setSearchParams(getURLParamsFromFilterQueryState(state));
             stateRef.current = state;
         }
@@ -146,6 +146,31 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
             )}
         </>
     );
+}
+
+function areEqualURLParams(first: URLSearchParams, second: URLSearchParams) {
+    if (first.get('queryType') !== second.get('queryType'))
+        return false;
+
+    if (first.get('datasourceId') !== second.get('datasourceId'))
+        return false;
+
+    if (first.get('kindName') !== second.get('kindName'))
+        return false;
+
+    if (first.get('view') !== second.get('view'))
+        return false;
+
+    if (first.get('limit') !== second.get('limit'))
+        return false;
+
+    if (first.get('offset') !== second.get('offset'))
+        return false;
+
+    if (first.get('filters') !== second.get('filters'))
+        return false;
+
+    return true;
 }
 
 function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {
