@@ -3,7 +3,7 @@ import { api } from '@/api';
 import { Signature } from '@/types/identifiers/Signature';
 import type { NameFromServer, StaticNameFromServer } from '@/types/identifiers/Name';
 import type { SignatureIdFromServer } from '@/types/identifiers/SignatureId';
-import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
+import type { AdminerReferenceKind, AdminerReferences } from '@/types/adminer/AdminerReferences';
 import type { ChildPropertyFromServer, ComplexPropertyFromServer, RootPropertyFromServer, SimplePropertyFromServer } from '@/types/accessPath/serverTypes';
 import type { SchemaCategoryFromServer } from '@/types/schema';
 import type { MappingFromServer, MappingInit } from '@/types/mapping';
@@ -58,6 +58,7 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
     const allMappings = await getAllMappings();
     const mappings: MappingInit[] = extractAllKindMappings(allMappings);
 
+    // All mappings for given kind
     const kindMappings = mappings.filter(mapping =>
         mapping.kindName === kindName &&
         mapping.datasourceId === datasourceId);
@@ -65,17 +66,21 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
     if (kindMappings.length === 0)
         return [];
 
+    const primaryKeys = getAllPrimaryKeys(mappings);
+
     const references: AdminerReferences = [];
     for (const kindMapping of kindMappings) {
+        // Schema category that includes the given mapping of given kind
         const schemaCategory = await getSchemaCategory(kindMapping.categoryId);
 
+        // All mappings in the given schema category
         const schemaCategoryMappings = mappings.filter(mapping =>
             mapping.categoryId === schemaCategory.id);
 
         const mappingPathProperties = getPropertiesFromAccessPath(kindMapping.accessPath, new Set<SimplePropertyFromServer>());
 
         for (const mapping of schemaCategoryMappings)
-            addMappingReferences(references, mapping, kindMapping, mappingPathProperties);
+            addMappingReferences(references, primaryKeys, mapping, kindMapping, mappingPathProperties);
     }
 
     return references;
@@ -119,6 +124,8 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
 
         if (fromSubpath) {
             const kindName = (fromSubpath.name as StaticNameFromServer).value;
+
+            // Mapping for kind that is used as a start node of a relationship kind
             newMappings.push({
                 categoryId: mapping.categoryId,
                 datasourceId: mapping.datasourceId,
@@ -136,6 +143,7 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
         if (toSubpath) {
             const kindName = (toSubpath.name as StaticNameFromServer).value;
 
+            // Mapping for kind that is used as an end node of a relationship kind
             newMappings.push({
                 categoryId: mapping.categoryId,
                 datasourceId: mapping.datasourceId,
@@ -151,6 +159,7 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
         }
 
         if (fromSubpath != null || toSubpath != null) {
+            // Maapping with prefxed names
             newMappings.push({
                 categoryId: mapping.categoryId,
                 datasourceId: mapping.datasourceId,
@@ -172,6 +181,9 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
     });
 }
 
+/**
+* Adds given prefix to all names in access path of a relationship kind excluding names of node kinds.
+*/
 function prefixSubpathNames(subpath: ChildPropertyFromServer, prefix: string, level: number): ChildPropertyFromServer {
     let prefixedName: NameFromServer = subpath.name;
     if ('value' in subpath.name && level > 0)
@@ -192,6 +204,20 @@ function prefixSubpathNames(subpath: ChildPropertyFromServer, prefix: string, le
     }
 }
 
+function getAllPrimaryKeys(kindMappings: MappingInit[]): SignatureIdFromServer {
+    const primaryKeys: SignatureIdFromServer = [];
+
+    for (const mapping of kindMappings) {
+        for (const key of mapping.primaryKey) {
+            const signatureBase = getLastBase(key);
+            if (!primaryKeys.includes(signatureBase))
+                primaryKeys.push(signatureBase);
+        }
+    }
+
+    return primaryKeys;
+}
+
 async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryFromServer> {
     const schemaCategoryResponse = await api.schemas.getCategory({ id: categoryId });
 
@@ -201,6 +227,9 @@ async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryFrom
     return schemaCategoryResponse.data;
 }
 
+/**
+* Returns a set of objects with name and signature of each object in the given access path.
+*/
 function getPropertiesFromAccessPath(
     accessPath: RootPropertyFromServer | ChildPropertyFromServer,
     properties: Set<SimplePropertyFromServer>,
@@ -216,23 +245,31 @@ function getPropertiesFromAccessPath(
     return properties;
 }
 
+/**
+* Returns the last base of a given signature.
+*/
 function getLastBase(signature: string): string {
     const signatureFromServer: Signature = Signature.fromServer(signature);
     const lastBase = signatureFromServer.getLastBase();
     return lastBase!.last.toString();
 }
 
+/**
+* Extends list of references.
+* Adds references between mapping of given kind ('givenKindMapping') and another mapping from the same schema category ('anotherKindMapping').
+*/
 function addMappingReferences(
     references: AdminerReferences,
-    mapping: MappingInit,
-    kindMapping: MappingInit,
-    kindProperties: Set<SimplePropertyFromServer>,
+    primaryKeys: SignatureIdFromServer,
+    anotherKindMapping: MappingInit,
+    givenKindMapping: MappingInit,
+    givenKindProperties: Set<SimplePropertyFromServer>,
 ): AdminerReferences {
-    const mappingPathProperties = getPropertiesFromAccessPath(mapping.accessPath, new Set<SimplePropertyFromServer>());
-    const mappingPropertiesArray = Array.from(mappingPathProperties);
-    const kindPropertiesArray = Array.from(kindProperties);
+    const anotherKindProperties = getPropertiesFromAccessPath(anotherKindMapping.accessPath, new Set<SimplePropertyFromServer>());
+    const anotherKindPropertiesArray = Array.from(anotherKindProperties);
+    const givenKindPropertiesArray = Array.from(givenKindProperties);
 
-    addReferences(references, kindMapping.primaryKey, kindMapping, mapping, kindPropertiesArray, mappingPropertiesArray);
+    addReferences(references, primaryKeys, givenKindMapping, givenKindPropertiesArray, anotherKindMapping, anotherKindPropertiesArray);
 
     return references;
 }
@@ -240,60 +277,62 @@ function addMappingReferences(
 function addReferences(
     references: AdminerReferences,
     primaryKeys: SignatureIdFromServer,
-    targetMapping: MappingInit,
-    sourceMapping: MappingInit,
-    targetProperties: SimplePropertyFromServer[],
-    sourceProperties: SimplePropertyFromServer[],
+    fromKindMapping: MappingInit,
+    fromKindProperties: SimplePropertyFromServer[],
+    toKindMapping: MappingInit,
+    toKindProperties: SimplePropertyFromServer[],
 ) {
-    for (const key of primaryKeys) {
-        const keyLastBase = getLastBase(key);
+    for (const keySignature of primaryKeys) {
+        // Name of properties that are primary keys in the given kind
+        const fromKindKeyProperties = getKeyProperties(fromKindProperties, keySignature);
 
-        const keyPropertyValue = targetProperties
-            .filter(property => property.signature === keyLastBase && 'value' in property.name)
-            .map(property => (property.name as StaticNameFromServer).value)[0] || '';
+        for (const fromKindNameProp of fromKindKeyProperties) {
+            const fromKindKeyName = getPropertyName(fromKindNameProp);
 
-        sourceProperties
-            .filter(mappingProp => mappingProp.signature === keyLastBase && 'value' in mappingProp.name)
-            .forEach(mappingProp => {
-                const mappingPropertyValue = (mappingProp.name as StaticNameFromServer).value;
+            if (fromKindKeyName.length == 0)
+                continue;
 
-                let fromProperty = mappingPropertyValue;
+            // All properties from the another kind with signature equal to the last base of the signature of the given key of given kind
+            const toKindKeyProperties = getKeyProperties(toKindProperties, keySignature);
 
-                if (sourceMapping.kindName.toUpperCase() === sourceMapping.kindName
-                    && mappingPropertyValue.includes('.') )
-                    fromProperty = mappingPropertyValue.slice(mappingPropertyValue.lastIndexOf('.') + 1);
+            for (const toKindKeyProp of toKindKeyProperties) {
+                const toKindKeyName = getPropertyName(toKindKeyProp);
 
-                references.push({
-                    from: {
-                        datasourceId: sourceMapping.datasourceId,
-                        kindName: sourceMapping.kindName,
-                        property: fromProperty,
-                    },
-                    to: {
-                        datasourceId: targetMapping.datasourceId,
-                        kindName: targetMapping.kindName,
-                        property: keyPropertyValue,
-                    },
-                });
+                if (toKindKeyName.length == 0)
+                    continue;
 
-                let toProperty = keyPropertyValue;
+                const fromKindReference = getKindReference(fromKindMapping, fromKindKeyName);
+                const toKindReference = getKindReference(toKindMapping, toKindKeyName);
 
-                if (targetMapping.kindName.toUpperCase() === targetMapping.kindName
-                    && keyPropertyValue.includes('.') )
-                    toProperty = keyPropertyValue.slice(keyPropertyValue.lastIndexOf('.') + 1);
+                addReference(references, fromKindReference, toKindReference);
+                addReference(references, toKindReference, fromKindReference);
+            }
+        }
+    }
+}
 
-                references.push({
-                    from: {
-                        datasourceId: targetMapping.datasourceId,
-                        kindName: targetMapping.kindName,
-                        property: toProperty,
-                    },
-                    to: {
-                        datasourceId: sourceMapping.datasourceId,
-                        kindName: sourceMapping.kindName,
-                        property: mappingPropertyValue,
-                    },
-                });
-            });
+function getKeyProperties(properties: SimplePropertyFromServer[], keySignature: string): SimplePropertyFromServer[] {
+    return properties
+        .filter(property => property.signature === keySignature && 'value' in property.name);
+}
+
+function getPropertyName(property: SimplePropertyFromServer): string {
+    return (property.name as StaticNameFromServer).value;
+}
+
+function getKindReference(mapping: MappingInit, propertyName: string): AdminerReferenceKind {
+    return {
+        datasourceId: mapping.datasourceId,
+        kindName: mapping.kindName,
+        property: propertyName,
+    };
+}
+
+function addReference(references: AdminerReferences, from: AdminerReferenceKind, to: AdminerReferenceKind) {
+    if (from.datasourceId !== to.datasourceId || from.kindName !== to.kindName || from.property !== to.property) {
+        references.push({
+            from: from,
+            to: to,
+        });
     }
 }
