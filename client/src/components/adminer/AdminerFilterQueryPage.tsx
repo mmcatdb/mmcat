@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Spinner, Pagination } from '@nextui-org/react';
 import { api } from '@/api';
@@ -18,7 +18,7 @@ import { type Datasource, DatasourceType } from '@/types/datasource';
 import type { Id } from '@/types/id';
 import type { QueryParams } from '@/types/api/routes';
 import type { DataResponse } from '@/types/adminer/DataResponse';
-import type { KindFilterState } from '@/components/adminer/adminerReducer';
+import type { AdminerFilterQueryState, KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 
 type AdminerFilterQueryPageProps = Readonly<{
@@ -34,8 +34,6 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     const stateRef = useRef(state);
     const searchParamsRef = useRef(searchParams);
 
-    const { references, referencesLoading } = useFetchReferences(state);
-
     useEffect(() => {
         dispatch({ type:'datasource', newDatasource: datasource });
     }, [ datasource ]);
@@ -44,18 +42,13 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     useEffect(() => {
         if (!areEqualURLParams(searchParamsRef.current, searchParams)) {
             dispatch({ type:'update', newState: getFilterQueryStateFromURLParams(searchParams) });
-            const newState = getFilterQueryStateFromURLParams(searchParams);
-            if (JSON.stringify(stateRef.current) !== JSON.stringify(newState)) {
-                dispatch({ type: 'update', newState });
-                stateRef.current = newState;
-            }
             searchParamsRef.current = searchParams;
         }
     }, [ searchParams ]);
 
     // Update URL search parameters whenever state changes
     useEffect(() => {
-        if (JSON.stringify(stateRef.current) !== JSON.stringify(state)) {
+        if (stateRef.current != state && searchParamsRef.current == searchParams) {
             setSearchParams(getURLParamsFromFilterQueryState(state));
             stateRef.current = state;
         }
@@ -70,15 +63,16 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
         }
 
         return api.adminer.getKind({ datasourceId: state.datasourceId }, getQueryParams(state.kindName, state.active));
-    }, [ state.datasourceId, state.kindName, state.active ]);
+    }, [ searchParams, state.datasourceId, state.kindName, state.active ]);
 
     const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);
+    const { references, referencesLoading } = useFetchReferences(state.datasourceId, state.kindName);
 
     useEffect(() => {
         dispatch({ type: 'itemCount', newItemCount: fetchedData?.metadata.itemCount });
     }, [ fetchedData?.metadata.itemCount ]);
 
-    useMemo(() => {
+    useEffect(() => {
         if (state.datasourceId && state.kindName)
             setKindReferences(computeKindReferences(references, state.datasourceId, state.kindName));
     }, [ references, state.datasourceId, state.kindName ]);
@@ -125,31 +119,52 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
                 </div>
             </div>
 
-            {state.kindName && error ? (
-                <p>{error}</p>
-            ) : (
-                <>
-                    {loading || referencesLoading && (
-                        <div className='h-10 flex items-center justify-center'>
-                            <Spinner />
-                        </div>
-                    )}
-
-                    {state.kindName && state.datasourceId && fetchedData?.data && (
-                        <div className='flex grow min-h-0 mt-2'>
-                            <DatabaseView
-                                view={state.view}
-                                data={fetchedData}
-                                kindReferences={kindReferences}
-                                kindName={state.kindName}
-                                datasourceId={state.datasourceId}
-                                datasources={datasources}
-                            />
-                        </div>
-                    )}
-                </>
-            )}
+            <DataComponent state={state} fetchedData={fetchedData} datasources={datasources} kindReferences={kindReferences} error={error} loading={loading || referencesLoading} />
         </>
+    );
+}
+
+type DataComponentProps = Readonly<{
+    state: AdminerFilterQueryState;
+    fetchedData: DataResponse | undefined;
+    datasources: Datasource[];
+    kindReferences: KindReference[];
+    error: string | undefined;
+    loading: boolean;
+}>;
+
+function DataComponent({ state, fetchedData, datasources, kindReferences, error, loading }: DataComponentProps) {
+    if (loading) {
+        return (
+            <div className='h-10 flex items-center justify-center'>
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (state.kindName && error) {
+        return (
+            <p>{error}</p>
+        );
+    }
+
+    if (state.kindName && state.datasourceId && fetchedData?.data) {
+        return (
+            <div className='flex grow min-h-0 mt-2'>
+                <DatabaseView
+                    view={state.view}
+                    data={fetchedData}
+                    kindReferences={kindReferences}
+                    kindName={state.kindName}
+                    datasourceId={state.datasourceId}
+                    datasources={datasources}
+                />
+            </div>
+        );
+    }
+
+    return (
+        <></>
     );
 }
 
@@ -193,7 +208,12 @@ function getQueryParams(kindName: string, filterState: KindFilterState): QueryPa
 function computeKindReferences(references: AdminerReferences, datasourceId: Id, kind: string): KindReference[] {
     return references
         ? Object.values(references)
-            .filter(ref => ref.from.datasourceId === datasourceId && ref.from.kindName === kind)
+            .filter(ref => ref.from.datasourceId === datasourceId && ref.from.kindName === kind
+                && (ref.from.datasourceId !== ref.to.datasourceId
+                    || ref.from.kindName !== ref.to.kindName
+                    || ref.from.property !== ref.to.property
+                ),
+            )
             .map(ref => ({
                 fromProperty: ref.from.property,
                 datasourceId: ref.to.datasourceId,
