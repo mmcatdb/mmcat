@@ -131,6 +131,7 @@ type JobDataFromServer = ModelJobData;
 type JobData = ModelJobData;
 
 function jobDataFromServer(input: JobDataFromServer, info: SchemaCategoryInfo): JobData {
+    console.log('Job data from server', info);
     switch (input.type) {
     case JobDataType.Model:
         return input;

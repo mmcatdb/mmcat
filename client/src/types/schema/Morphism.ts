@@ -13,7 +13,7 @@ export class Morphism {
     public readonly originalMetadata: MetadataMorphism;
 
     constructor(
-        private readonly category: Category,
+        readonly category: Category,
         public schema: SchemaMorphism,
         public metadata: MetadataMorphism,
         public from: Objex,

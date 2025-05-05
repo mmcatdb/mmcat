@@ -36,11 +36,11 @@ export function RunsPageOverview() {
 
         setError(false);
 
-        const jobsFromServer = response.data.map((job) => Job.fromServer(job, category));
+        const jobsFromServer = response.data.map(job => Job.fromServer(job, category));
         const grouped = groupJobsByRunId(jobsFromServer);
 
         // Compare states and update if needed
-        setGroupedJobs((prev) => {
+        setGroupedJobs(prev => {
             const hasChanges = detectChanges(prev, grouped);
             return hasChanges ? grouped : prev;
         });
@@ -66,7 +66,7 @@ export function RunsPageOverview() {
     function groupJobsByRunId(jobs: Job[]) {
         return jobs.reduce((acc, job) => {
             const runId = job.runId;
-            if (!acc[runId]) 
+            if (!acc[runId])
                 acc[runId] = [];
             acc[runId].push(job);
             return acc;
@@ -80,10 +80,10 @@ export function RunsPageOverview() {
         return () => clearInterval(intervalId);
     }, []);
 
-    if (isInitialLoad) 
+    if (isInitialLoad)
         return <LoadingPage />;
 
-    if (error) 
+    if (error)
         return <ReloadPage onReload={fetchJobs} />;
 
     const classNameTR = cn('px-4 py-2 text-left border', theme === 'dark' ? 'border-zinc-500' : 'border-zinc-300');
@@ -139,7 +139,7 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
             <td className={classNameTD}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
             <td className={classNameTD}>
                 <div className='flex items-center gap-2'>
-                    {newestJobs.map((job) => (
+                    {newestJobs.map(job => (
                         <Tooltip
                             key={job.id}
                             content={
@@ -193,21 +193,20 @@ export function JobDetailPage() {
     const navigate = useNavigate();
 
     async function fetchJobDetails() {
-        setJobStatus((prev) => ({ ...prev, error: false }));
-        const response = await api.jobs.getJob({ id: jobId });
-        setJobStatus((prev) => ({ ...prev, loading: false }));
+        setJobStatus(prev => ({ ...prev, error: false }));
+        const response = await api.jobs.getJob({ id: jobId! });
+        setJobStatus(prev => ({ ...prev, loading: false }));
 
         if (!response.status) {
-            setJobStatus((prev) => ({ ...prev, error: true }));
+            setJobStatus(prev => ({ ...prev, error: true }));
             return;
         }
 
         const fetchedJob = Job.fromServer(response.data, category);
         setJob(fetchedJob);
 
-        if ([ JobState.Finished, JobState.Failed ].includes(fetchedJob.state)) 
-            setJobStatus((prev) => ({ ...prev, polling: false }));
-        
+        if ([ JobState.Finished, JobState.Failed ].includes(fetchedJob.state))
+            setJobStatus(prev => ({ ...prev, polling: false }));
     }
 
     const pollInterval = 3000;
@@ -221,39 +220,39 @@ export function JobDetailPage() {
 
         void fetchJobDetails();
 
-        if (jobStatus.polling) 
+        if (jobStatus.polling)
             startPolling();
 
         return () => {
-            if (intervalId) 
+            if (intervalId)
                 clearInterval(intervalId);
         };
     }, [ jobId, jobStatus.polling ]);
 
     async function handleEnableJob() {
-        setJobStatus((prev) => ({ ...prev, polling: true }));
-        const result = await api.jobs.enableJob({ id: job?.id });
-        if (result.status) 
+        setJobStatus(prev => ({ ...prev, polling: true }));
+        const result = await api.jobs.enableJob({ id: job!.id });
+        if (result.status)
             setJob(Job.fromServer(result.data, category));
     }
 
     async function handleDisableJob() {
-        setJobStatus((prev) => ({ ...prev, polling: true }));
-        const result = await api.jobs.disableJob({ id: job?.id });
-        if (result.status) 
+        setJobStatus(prev => ({ ...prev, polling: true }));
+        const result = await api.jobs.disableJob({ id: job!.id });
+        if (result.status)
             setJob(Job.fromServer(result.data, category));
     }
 
     async function handleRestartJob() {
-        const result = await api.jobs.createRestartedJob({ id: job?.id });
-        setJobStatus((prev) => ({ ...prev, polling: true }));
-        if (result.status) 
+        const result = await api.jobs.createRestartedJob({ id: job!.id });
+        setJobStatus(prev => ({ ...prev, polling: true }));
+        if (result.status)
             navigate(`/category/${category.id}/jobs/${result.data.id}`);
-        
+
     }
 
     function renderJobStateButton(customClassName: string) {
-        if (!job) 
+        if (!job)
             return null;
 
         switch (job.state) {
@@ -293,9 +292,9 @@ export function JobDetailPage() {
         }
     }
 
-    if (jobStatus.loading) 
+    if (jobStatus.loading)
         return <LoadingPage />;
-    if (jobStatus.error) 
+    if (jobStatus.error)
         return <ReloadPage onReload={fetchJobDetails} />;
 
     return (
@@ -348,7 +347,7 @@ export function JobDetailPage() {
                             </div>
                         </div>
                     )}
-                    
+
                 </div>
             ) : (
                 <p>No job details available.</p>

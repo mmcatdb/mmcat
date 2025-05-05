@@ -2,7 +2,6 @@ import { type JSX } from 'react';
 import { Component } from 'react';
 import { Graph } from './components/graph/Graph';
 import { GraphStyleModel } from './types/GraphStyle';
-import { type GraphStats } from './utils/mapper';
 import { type GraphModel } from './types/Graph';
 import { type GraphInteractionCallBack } from './components/graph/GraphEventHandlerModel';
 import { type GetNodeNeighborsFn, type VizItem, type BasicNode, type BasicNodesAndRels, type BasicRelationship } from './types/types';
@@ -17,7 +16,6 @@ type GraphVisualizerDefaultProps = {
   maxNeighbors: number;
   isFullscreen: boolean;
   setGraph: (graph: GraphModel) => void;
-  hasTruncatedFields: boolean;
   initialZoomToFit?: boolean;
   useGeneratedDefaultColors: boolean;
 }
@@ -32,7 +30,6 @@ type GraphVisualizerProps = GraphVisualizerDefaultProps & {
   ) => Promise<BasicNodesAndRels & { allNeighborsCount: number }>;
   isFullscreen?: boolean;
   setGraph?: (graph: GraphModel) => void;
-  hasTruncatedFields?: boolean;
   nodeLimitHit?: boolean;
   onGraphInteraction?: GraphInteractionCallBack;
   useGeneratedDefaultColors?: boolean;
@@ -45,7 +42,6 @@ type GraphVisualizerState = {
   nodes: BasicNode[];
   relationships: BasicRelationship[];
   selectedItem: VizItem;
-  stats: GraphStats;
   styleVersion: number;
   freezeLegend: boolean;
   expanded: boolean;
@@ -56,7 +52,6 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
         maxNeighbors: DEFAULT_MAX_NEIGHBORS,
         isFullscreen: false,
         setGraph: () => undefined,
-        hasTruncatedFields: false,
         useGeneratedDefaultColors: true,
     };
 
@@ -83,10 +78,6 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
             };
 
         this.state = {
-            stats: {
-                labels: {},
-                relTypes: {},
-            },
             graphStyle,
             styleVersion: 0,
             nodes,
@@ -138,10 +129,6 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
         this.setState({ selectedItem });
     }
 
-    onGraphModelChange(stats: GraphStats): void {
-        this.setState({ stats });
-    }
-
     render(): JSX.Element {
         // This is a workaround to make the style reset to the same colors as when starting the browser with an empty style
         // If the legend component has the style it will ask the neoGraphStyle object for styling before the graph component,
@@ -161,17 +148,14 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
                     onItemSelect={this.onItemSelect.bind(this)}
                     graphStyle={graphStyle}
                     styleVersion={this.state.styleVersion} // cheap way for child to check style updates
-                    onGraphModelChange={this.onGraphModelChange.bind(this)}
                     setGraph={this.props.setGraph}
                     initialZoomToFit={this.props.initialZoomToFit}
                     onGraphInteraction={this.props.onGraphInteraction}
                 />
                 <NodeInspectorPanel
                     graphStyle={graphStyle}
-                    hasTruncatedFields={this.props.hasTruncatedFields}
                     hoveredItem={this.state.hoveredItem}
                     selectedItem={this.state.selectedItem}
-                    stats={this.state.stats}
                     data={this.props.fetchedData}
                 />
             </StyledFullSizeContainer>

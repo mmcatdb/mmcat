@@ -46,9 +46,11 @@ export class ObjexMetadata implements MMO<MMOType.Objex> {
 
     up(category: Category): void {
         // category.getObject(this.key).current = this.newObject;
+        console.log('up', category);
     }
 
     down(category: Category): void {
         // category.getObject(this.key).current = this.oldObject;
+        console.log('down', category);
     }
 }
