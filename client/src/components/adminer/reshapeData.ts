@@ -95,8 +95,13 @@ function getRelationshipsWithNodes(fetchedPropertyNames: string[], data: GraphRe
     { graph: GraphRelationshipWithNodes[], propertyNames: string[] } {
     const graph: GraphRelationshipWithNodes[] = [];
     const propertyNames: string[] = [ ID, `${FROM_NODE_PREFIX}${ID}`, `${TO_NODE_PREFIX}${ID}` ];
+    const relationshipPropertyNames = fetchedPropertyNames
+        .filter(name =>
+            name.startsWith(`${TO_NODE_PREFIX}${LABELS}`)
+            || name.startsWith(`${FROM_NODE_PREFIX}${LABELS}`),
+        );
 
-    for (const propertyName of fetchedPropertyNames) {
+    for (const propertyName of relationshipPropertyNames) {
         if (!propertyNames.includes(propertyName))
             propertyNames.push(propertyName);
     }
