@@ -605,7 +605,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 List<String> endNodeLabels = reference.get("endNodeLabels").asList(Value::asString);
 
                 for (String endNodeLabel: endNodeLabels) {
-                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.ID), new ReferenceKind(datasourceId, endNodeLabel, Neo4jUtils.ID)));
+                    references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, Neo4jUtils.TO_NODE_PREFIX + Neo4jUtils.ID), new ReferenceKind(datasourceId, endNodeLabel, Neo4jUtils.ID)));
                 }
             }
 
