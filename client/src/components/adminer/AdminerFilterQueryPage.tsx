@@ -169,28 +169,9 @@ function DataComponent({ state, fetchedData, datasources, kindReferences, error,
 }
 
 function areEqualURLParams(first: URLSearchParams, second: URLSearchParams) {
-    if (first.get('queryType') !== second.get('queryType'))
-        return false;
+    const params = [ 'queryType', 'datasourceId', 'kindName', 'view', 'limit', 'offset', 'filters' ];
 
-    if (first.get('datasourceId') !== second.get('datasourceId'))
-        return false;
-
-    if (first.get('kindName') !== second.get('kindName'))
-        return false;
-
-    if (first.get('view') !== second.get('view'))
-        return false;
-
-    if (first.get('limit') !== second.get('limit'))
-        return false;
-
-    if (first.get('offset') !== second.get('offset'))
-        return false;
-
-    if (first.get('filters') !== second.get('filters'))
-        return false;
-
-    return true;
+    return params.every(param => first.get(param) === second.get(param));
 }
 
 function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {

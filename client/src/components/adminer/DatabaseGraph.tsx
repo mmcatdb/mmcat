@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import { usePreferences } from '@/components/PreferencesProvider';
 import { ArcThemeProvider } from '@/components/adminer/graph-visualization/components/themes';
 import { StyledVisContainer } from '@/components/adminer/graph-visualization/VisualizationView.styled';
 import { GraphVisualizer } from '@/components/adminer/graph-visualization/GraphVisualizer';
@@ -11,34 +12,36 @@ type DatabaseTableProps = Readonly<{
 }>;
 
 export function DatabaseGraph({ data, kind }: DatabaseTableProps ) {
-    const [ nodes, setNodes ] = useState<BasicNode[]>(data?.data ? getNodes(data.data) : []);
-    const [ relationships, setRelationships ] = useState<BasicRelationship[]>(data?.data ? getRelationships(data.data, kind) : []);
+    const { theme } = usePreferences().preferences;
 
-    useMemo(() => {
-        if (data?.data) {
-            setNodes(getNodes(data.data));
-            setRelationships(getRelationships(data.data, kind));
-        }
-    }, [ data ]);
+    const graph = useMemo(() => {
+        if (!data.data)
+            return;
+
+        return {
+            nodes: getNodes(data.data),
+            relationships: getRelationships(data.data, kind),
+        };
+    }, [ data, kind ]);
+
+    if (!graph || (!graph.nodes.length && !graph.relationships.length)) {
+        return (
+            <span>No records to display.</span>
+        );
+    }
 
     return (
-        <>
-            {data && (data.data.nodes.length > 0 || data.data.relationships.length > 0) ? (
-                <div className='grow text-left'>
-                    <ArcThemeProvider theme={'dark'}>
-                        <StyledVisContainer isFullscreen={false}>
-                            <GraphVisualizer
-                                nodes={nodes}
-                                relationships={relationships}
-                                fetchedData={data}
-                            />
-                        </StyledVisContainer>
-                    </ArcThemeProvider>
-                </div>
-            ) : (
-                <span>No records to display.</span>
-            )}
-        </>
+        <div className='grow text-left'>
+            <ArcThemeProvider theme={theme}>
+                <StyledVisContainer isFullscreen={false}>
+                    <GraphVisualizer
+                        nodes={graph.nodes}
+                        relationships={graph.relationships}
+                        fetchedData={data}
+                    />
+                </StyledVisContainer>
+            </ArcThemeProvider>
+        </div>
     );
 }
 

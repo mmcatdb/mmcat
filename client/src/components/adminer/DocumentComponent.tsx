@@ -18,10 +18,9 @@ type DocumentComponentProps = Readonly<{
 export function DocumentComponent({ valueKey, value, kindReferences, kind, datasourceId, datasources }: DocumentComponentProps) {
     const { adminerShortLinks } = usePreferences().preferences;
     const [ isOpen, setIsOpen ] = useState(true);
-    const [ parsedValue, setParsedValue ] = useState(value);
 
-    useMemo(() => {
-        setParsedValue(computeParsedValue(value));
+    const parsedValue = useMemo(() => {
+        return computeParsedValue(value);
     }, [ value ]);
 
     if (!isOpen) {

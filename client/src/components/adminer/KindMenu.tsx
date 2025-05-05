@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { api } from '@/api';
@@ -17,14 +17,12 @@ type KindMenuProps = Readonly<{
 type KindLabelValues = {label: string, value: string }[];
 
 export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMenuProps) {
-    const [ selectItems, setSelectItems ] = useState<KindLabelValues>([]);
-
     const fetchFunction = useCallback(() => {
         return api.adminer.getKindNames({ datasourceId });
     }, [ datasourceId ]);
     const { fetchedData, loading, error } = useFetchData(fetchFunction);
 
-    useMemo(() => {
+    const selectItems = useMemo(() => {
         const items: KindLabelValues = [];
 
         if (fetchedData && fetchedData.data.length > 0) {
@@ -36,7 +34,7 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
                 items.push({ label: UNLABELED, value: UNLABELED });
         }
 
-        setSelectItems(items);
+        return items;
     }, [ fetchedData, showUnlabeled ]);
 
     if (loading) {

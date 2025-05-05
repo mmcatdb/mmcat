@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { getTableFromGraphData } from '@/components/adminer/reshapeData';
@@ -16,16 +16,11 @@ type DatabaseTableProps = Readonly<{
 }>;
 
 export function DatabaseTable({ data, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
-    const [ tableData, setTableData ] = useState<TableResponse>();
-    const [ tableColumnNames, setTableColumnNames ] = useState<string[]>();
+    const { tableData, columnNames } = useMemo(() => {
+        if (data.type === 'graph')
+            return getTableFromGraphData(data);
 
-    useMemo(() => {
-        const { reshapedData, columnNames } = data.type === 'graph'
-            ? getTableFromGraphData(data)
-            : { reshapedData: data, columnNames: data.metadata.propertyNames };
-
-        setTableData(reshapedData);
-        setTableColumnNames(columnNames);
+        return { tableData: data, columnNames: data.metadata.propertyNames };
     }, [ data ]);
 
     if (tableData === undefined || tableData.data.length === 0 || tableData.metadata.itemCount === 0)
@@ -33,14 +28,14 @@ export function DatabaseTable({ data, kindReferences, kind, datasourceId, dataso
 
     return (
         <>
-            {tableData && tableColumnNames && (
+            {tableData && columnNames && (
                 <Table isStriped isCompact aria-label='Table'>
                     <TableHeader>
-                        {tableColumnNames.map((columnName, index) => (
+                        {columnNames.map((columnName, index) => (
                             <TableColumn key={index}>{columnName}</TableColumn>
                         ))}
                     </TableHeader>
-                    {TableBodyComponent({ tableBodyData: tableData.data, columnNames: tableColumnNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
+                    {TableBodyComponent({ tableBodyData: tableData.data, columnNames: columnNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
                 </Table>
             )
             }

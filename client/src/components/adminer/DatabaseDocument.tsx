@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Divider } from '@nextui-org/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { getDocumentFromGraphData } from '@/components/adminer/reshapeData';
@@ -16,10 +16,11 @@ type DatabaseDocumentProps = Readonly<{
 }>;
 
 export function DatabaseDocument({ data, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
-    const [ documentData, setDocumentData ] = useState<DocumentResponse>();
+    const documentData = useMemo(() => {
+        if (data.type === 'graph')
+            return getDocumentFromGraphData(data);
 
-    useMemo(() => {
-        setDocumentData(data.type === 'graph' ? getDocumentFromGraphData(data) : data);
+        return data;
     }, [ data ]);
 
     if (!documentData || documentData.data.length === 0)

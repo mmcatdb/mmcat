@@ -5,7 +5,7 @@ const LABELS = '#labels';
 const FROM_NODE_PREFIX = 'from.';
 const TO_NODE_PREFIX = 'to.';
 
-export function getTableFromGraphData(graphData: GraphResponse): { reshapedData: TableResponse, columnNames: string[]} {
+export function getTableFromGraphData(graphData: GraphResponse): { tableData: TableResponse, columnNames: string[]} {
     const modifiedData = { type: 'table', metadata: graphData.metadata, data: [] } as TableResponse;
 
     const fetchedPropertyNames: string[] = graphData.metadata.propertyNames;
@@ -26,7 +26,7 @@ export function getTableFromGraphData(graphData: GraphResponse): { reshapedData:
             name != LABELS,
         );
 
-        return { reshapedData: modifiedData, columnNames: tableColumnNames };
+        return { tableData: modifiedData, columnNames: tableColumnNames };
     }
     else {
         const { graph, propertyNames } = getRelationshipsWithNodes(fetchedPropertyNames, graphData.data);
@@ -42,7 +42,7 @@ export function getTableFromGraphData(graphData: GraphResponse): { reshapedData:
             name != `${FROM_NODE_PREFIX}${LABELS}` && name != `${TO_NODE_PREFIX}${LABELS}`,
         );
 
-        return { reshapedData: modifiedData, columnNames: tableColumnNames };
+        return { tableData: modifiedData, columnNames: tableColumnNames };
     }
 }
 
