@@ -23,8 +23,8 @@ public class DatasourceSettings {
 
     public DatasourceInit createPostgreSQL(String label) {
         final var settings = new PostgreSQLSettings(
-            properties.isInDocker() ? "mmcat-postgresql" : "localhost",
-            properties.isInDocker() ? "5432" : "3204",
+            properties.isInDocker() ? "mmdog-postgresql" : "localhost",
+            properties.isInDocker() ? "5432" : "3404",
             database,
             properties.username(),
             properties.password(),
@@ -37,8 +37,8 @@ public class DatasourceSettings {
 
     public DatasourceInit createMongoDB(String label) {
         final var settings = new MongoDBSettings(
-            properties.isInDocker() ? "mmcat-mongodb" : "localhost",
-            properties.isInDocker() ? "27017" : "3205",
+            properties.isInDocker() ? "mmdog-mongodb" : "localhost",
+            properties.isInDocker() ? "27017" : "3405",
             "admin",
             database,
             properties.username(),
@@ -52,8 +52,8 @@ public class DatasourceSettings {
 
     public DatasourceInit createNeo4j(String label) {
         final var settings = new Neo4jSettings(
-            properties.isInDocker() ? "mmcat-neo4j" : "localhost",
-            properties.isInDocker() ? "7687" : "3206",
+            properties.isInDocker() ? "mmdog-neo4j" : "localhost",
+            properties.isInDocker() ? "7687" : "3406",
             "neo4j",
             "neo4j",
             properties.password(),

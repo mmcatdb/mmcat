@@ -1,6 +1,6 @@
 services:
     server:
-        container_name: "mmcat-server"
+        container_name: "mmdog-server"
         restart: always
         build:
             context: library
@@ -8,13 +8,12 @@ services:
             args:
                 serverPort: ${SERVER_PORT}
                 serverOrigin: ${CLIENT_DOMAIN}
-                serverOriginOld: ${CLIENT_OLD_DOMAIN}
                 databasePassword: ${DATABASE_PASSWORD}
         expose:
             - "${SERVER_PORT}"
 
     client:
-        container_name: "mmcat-client"
+        container_name: "mmdog-client"
         restart: always
         build:
             # Sets source directory for all COPY, ADD, etc. commands in the Dockerfile
@@ -25,19 +24,7 @@ services:
             # Map localhost port to 80 in docker
             - ${CLIENT_PORT}:80
 
-    client-old:
-        container_name: "mmcat-client-old"
-        restart: always
-        build:
-            # Sets source directory for all COPY, ADD, etc. commands in the Dockerfile
-            context: client-old
-            # Path to the dockerfile
-            dockerfile: docker/prod/Dockerfile
-        ports:
-            # Map localhost port to 80 in docker
-            - ${CLIENT_OLD_PORT}:80
-
 networks:
     default:
-        name: mmcat-network
+        name: mmdog-network
         external: true

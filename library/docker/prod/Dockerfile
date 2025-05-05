@@ -6,15 +6,13 @@ COPY . .
 
 ARG serverPort
 ARG serverOrigin
-ARG serverOriginOld
 ARG databasePassword
 
 # We use /bin/echo because docker uses sh instead of bash where echo -e is not supported.
 RUN /bin/echo -e "\n\
 server.port=${serverPort}\n\
 server.origin=${serverOrigin}\n\
-server.originOld=${serverOriginOld}\n\
-database.host=mmcat-database\n\
+database.host=mmdog-database\n\
 database.port=5432\n\
 database.password=${databasePassword}\n\
 setup.isInDocker=true" >> application.properties

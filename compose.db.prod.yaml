@@ -1,13 +1,13 @@
 services:
     adminer:
-        container_name: "mmcat-adminer"
+        container_name: "mmdog-adminer"
         restart: always
         image: adminer:latest
         ports:
             - ${ADMINER_PORT}:8080
 
     database:
-        container_name: "mmcat-database"
+        container_name: "mmdog-database"
         restart: always
         build:
             context: .
@@ -19,7 +19,7 @@ services:
             - 5432
 
     postgresql:
-        container_name: "mmcat-postgresql"
+        container_name: "mmdog-postgresql"
         restart: always
         build:
             context: .
@@ -31,7 +31,7 @@ services:
             - 5432
 
     mongodb:
-        container_name: "mmcat-mongodb"
+        container_name: "mmdog-mongodb"
         restart: always
         build:
             context: .
@@ -41,7 +41,7 @@ services:
             - 27017
 
     neo4j:
-        container_name: "mmcat-neo4j"
+        container_name: "mmdog-neo4j"
         restart: always
         build:
             context: .
@@ -56,4 +56,4 @@ services:
 
 networks:
     default:
-        name: mmcat-network
+        name: mmdog-network

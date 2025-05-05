@@ -28,8 +28,8 @@ public class DatasourceProvider {
     public PostgreSQLProvider getPostgreSQLProvider() {
         if (postgreSQLProvider == null) {
             postgreSQLProvider = new PostgreSQLProvider(new PostgreSQLSettings(
-                config.getBool("isInDocker") ? "mmcat-postgresql" : "localhost",
-                config.getBool("isInDocker") ? "5432" : "3204",
+                config.getBool("isInDocker") ? "mmdog-postgresql" : "localhost",
+                config.getBool("isInDocker") ? "5432" : "3404",
                 config.get("database"),
                 config.get("username"),
                 config.get("password"),
@@ -53,8 +53,8 @@ public class DatasourceProvider {
     public MongoDBProvider getMongoDBProvider() {
         if (mongoDBProvider == null) {
             mongoDBProvider = new MongoDBProvider(new MongoDBSettings(
-                config.getBool("isInDocker") ? "mmcat-mongodb" : "localhost",
-                config.getBool("isInDocker") ? "27017" : "3205",
+                config.getBool("isInDocker") ? "mmdog-mongodb" : "localhost",
+                config.getBool("isInDocker") ? "27017" : "3405",
                 "admin",
                 config.get("database"),
                 config.get("username"),
@@ -79,8 +79,8 @@ public class DatasourceProvider {
     public Neo4jProvider getNeo4jProvider() {
         if (neo4jProvider == null) {
             neo4jProvider = new Neo4jProvider(new Neo4jSettings(
-                config.getBool("isInDocker") ? "mmcat-neo4j" : "localhost",
-                config.getBool("isInDocker") ? "7687" : "3206",
+                config.getBool("isInDocker") ? "mmdog-neo4j" : "localhost",
+                config.getBool("isInDocker") ? "7687" : "3406",
                 "neo4j",
                 "neo4j",
                 config.get("password"),
