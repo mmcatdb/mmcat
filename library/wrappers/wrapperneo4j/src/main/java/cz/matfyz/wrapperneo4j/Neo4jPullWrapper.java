@@ -621,8 +621,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      */
     @Override public GraphResponse getQueryResult(QueryContent query) {
         try (Session session = provider.getSession()) {
-            List<String> nodePropertyNames = new ArrayList<>();
-            List<String> relationshipPropertyNames = new ArrayList<>();
+            List<String> propertyNames = getPropertyNames(query, session);
 
             GraphData data = session.executeRead(tx -> {
                 Query finalQuery = new Query(getQueryString(query, false));
@@ -634,9 +633,9 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                     .flatMap(rec -> rec.values().stream())
                     .forEach(element -> {
                         if (element.hasType(TypeSystem.getDefault().NODE())) {
-                            nodes.add(Neo4jUtils.getNodeProperties(element, nodePropertyNames));
+                            nodes.add(Neo4jUtils.getNodeProperties(element, propertyNames));
                         } else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
-                            relationships.add(Neo4jUtils.getRelationshipProperties(element, relationshipPropertyNames));
+                            relationships.add(Neo4jUtils.getRelationshipProperties(element, propertyNames));
                         }
                     });
 
@@ -652,12 +651,29 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 itemCount = countQueryResult.next().get("recordCount").asLong();
             }
 
-            List<String> propertyNames = data.relationships().isEmpty() ? nodePropertyNames : relationshipPropertyNames;
-
             return new GraphResponse(data, itemCount, propertyNames);
         } catch (Exception e) {
             throw PullForestException.innerException(e);
         }
+    }
+
+    private List<String> getPropertyNames(QueryContent query, Session session) {
+        List<String> propertyNames = new ArrayList<>();
+        Result propertyNamesQueryResult = session.run(getQueryString(query instanceof KindNameFilterQuery knfQuery ? knfQuery.kindNameQuery : query, false));
+
+        while(propertyNamesQueryResult.hasNext()) {
+            Record propertyNameRecord = propertyNamesQueryResult.next();
+            propertyNameRecord.values().stream()
+                .forEach(element -> {
+                    if (element.hasType(TypeSystem.getDefault().NODE())) {
+                        Neo4jUtils.getNodeProperties(element, propertyNames);
+                    } else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
+                        Neo4jUtils.getRelationshipProperties(element, propertyNames);
+                    }
+                });
+        }
+
+        return propertyNames;
     }
 
     private String getQueryString(QueryContent query, boolean countQuery) {

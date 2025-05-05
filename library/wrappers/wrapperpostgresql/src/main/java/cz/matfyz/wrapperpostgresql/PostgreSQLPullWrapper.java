@@ -332,31 +332,29 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             Connection connection = provider.getConnection();
         ){
             List<List<String>> data = new ArrayList<>();
-            List<String> propertyNames = new ArrayList<>();
 
             PreparedStatement stmt = prepareStatement(connection, query, false);
             ResultSet resultSet = stmt.executeQuery();
 
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
-            long itemCount = 0;
 
-            boolean addPropertyNames = true;
+            List<String> propertyNames = new ArrayList<>();
+            for (int i = 1; i <= columnCount; i++) {
+                propertyNames.add(metaData.getColumnName(i));
+            }
+
+            long itemCount = 0;
 
             while (resultSet.next()) {
                 List<String> item = new ArrayList<>();
 
                 for (int i = 1; i <= columnCount; i++) {
-                    if (addPropertyNames) {
-                        propertyNames.add(metaData.getColumnName(i));
-                    }
-
                     item.add(resultSet.getString(i));
                 }
 
                 data.add(item);
                 itemCount++;
-                addPropertyNames = false;
             }
 
             PreparedStatement countStmt = prepareStatement(connection, query, true);
