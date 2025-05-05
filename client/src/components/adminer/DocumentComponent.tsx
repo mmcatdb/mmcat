@@ -105,13 +105,13 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
                 && kindReferences.some(ref => ref.fromProperty === valueKey)
                 && (
                     adminerShortLinks ? (
-                        <div className='ps-4'>
-                            <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
-                        </div>
-                    ) : (
                         <span className='ps-4'>
                             <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                         </span>
+                    ) : (
+                        <div className='ps-4'>
+                            <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                        </div>
                     )
                 )}
         </span>
@@ -119,11 +119,20 @@ export function DocumentComponent({ valueKey, value, kindReferences, kind, datas
 }
 
 function getColor(value: string): string {
-    if (!Number.isNaN(Number.parseFloat(value)))
-        return 'text-success-600';
+    const patterns = {
+        boolean: /^(true|false)$/i,
+        number: /^-?\d+(\.\d+)?$/,
+        elementId: /^\d+:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}):\d+$/,
+    };
 
-    if (value.toLocaleLowerCase() === 'true' || value.toLocaleLowerCase() === 'false')
+    if (patterns.elementId.test(value))
+        return 'text-secondary-600';
+
+    if (patterns.boolean.test(value))
         return 'text-danger-400';
+
+    if (patterns.number.test(value))
+        return 'text-success-600';
 
     return 'text-foreground';
 }
