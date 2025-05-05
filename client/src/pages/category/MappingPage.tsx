@@ -27,6 +27,7 @@ export function MappingPage() {
                     mapping={mapping} 
                     kindName={''} 
                     setKindName={(name: string) => console.log('Set kind name:', name)} 
+                    datasourceLabel='Default Datasource' 
                 />
             </div>
         </div>
