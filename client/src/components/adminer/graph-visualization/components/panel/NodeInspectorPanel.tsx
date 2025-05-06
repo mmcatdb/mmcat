@@ -2,7 +2,6 @@ import { type JSX, Component } from 'react';
 import { DefaultDetailsPane } from './DefaultPanelContent/DefaultDetailsPane';
 import { NodeInspectorDrawer } from './NodeInspectorDrawer';
 import { PaneContainer, StyledNodeInspectorTopMenuChevron } from './styled';
-import { type GraphStats } from '../../utils/mapper';
 import { type GraphStyleModel } from '../../types/GraphStyle';
 import { type VizItem } from '../../types/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
@@ -11,10 +10,8 @@ import { type GraphResponse } from '@/types/adminer/DataResponse';
 
 type NodeInspectorPanelProps = {
     graphStyle: GraphStyleModel;
-    hasTruncatedFields: boolean;
     hoveredItem: VizItem;
     selectedItem: VizItem;
-    stats: GraphStats;
     data: GraphResponse;
 };
 
@@ -34,10 +31,8 @@ export class NodeInspectorPanel extends Component<NodeInspectorPanelProps, NodeI
     render(): JSX.Element {
         const {
             graphStyle,
-            hasTruncatedFields,
             hoveredItem,
             selectedItem,
-            stats,
         } = this.props;
 
         const { expanded } = this.state;

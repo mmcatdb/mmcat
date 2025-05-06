@@ -3,7 +3,7 @@ import { type GraphModel } from '@/components/adminer/graph-visualization/types/
 import { GraphEventHandlerModel, type GraphInteractionCallBack } from './GraphEventHandlerModel';
 import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
 import { type GetNodeNeighborsFn, type VizItem, type ZoomLimitsReached, ZoomType, type BasicNode, type BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
-import { type GraphStats, createGraph, getGraphStats } from '@/components/adminer/graph-visualization/utils/mapper';
+import { createGraph } from '@/components/adminer/graph-visualization/utils/mapper';
 import { Visualization } from './visualization/Visualization';
 import { StyledSvgWrapper, StyledZoomButton, StyledZoomHolder } from './styled';
 import { ResizeObserver } from '@juggle/resize-observer';
@@ -18,7 +18,6 @@ export type GraphProps = {
   onItemSelect: (item: VizItem) => void;
   graphStyle: GraphStyleModel;
   styleVersion: number;
-  onGraphModelChange: (stats: GraphStats) => void;
   setGraph: (graph: GraphModel) => void;
   initialZoomToFit?: boolean;
   onGraphInteraction?: GraphInteractionCallBack;
@@ -59,7 +58,6 @@ export class Graph extends Component<GraphProps, GraphState> {
             isFullscreen,
             nodes,
             onGraphInteraction,
-            onGraphModelChange,
             onItemMouseOver,
             onItemSelect,
             relationships,
@@ -91,12 +89,10 @@ export class Graph extends Component<GraphProps, GraphState> {
             getNodeNeighbors,
             onItemMouseOver,
             onItemSelect,
-            onGraphModelChange,
             onGraphInteraction,
         );
         graphEventHandler.bindEventHandlers();
 
-        onGraphModelChange(getGraphStats(graph));
         this.visualization.resize(isFullscreen);
 
         if (setGraph)

@@ -2,7 +2,7 @@ import { type GraphModel } from '@/components/adminer/graph-visualization/types/
 import { type NodeModel } from '@/components/adminer/graph-visualization/types/Node';
 import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
 import { type GetNodeNeighborsFn, type VizItem } from '@/components/adminer/graph-visualization/types/types';
-import { type GraphStats, getGraphStats, mapNodes, mapRelationships } from '@/components/adminer/graph-visualization/utils/mapper';
+import { mapNodes, mapRelationships } from '@/components/adminer/graph-visualization/utils/mapper';
 import { type Visualization } from './visualization/Visualization';
 
 export type GraphInteraction =
@@ -19,7 +19,6 @@ export class GraphEventHandlerModel {
     getNodeNeighbors: GetNodeNeighborsFn;
     graph: GraphModel;
     visualization: Visualization;
-    onGraphModelChange: (stats: GraphStats) => void;
     onItemMouseOver: (item: VizItem) => void;
     onItemSelected: (item: VizItem) => void;
     onGraphInteraction: GraphInteractionCallBack;
@@ -31,7 +30,6 @@ export class GraphEventHandlerModel {
         getNodeNeighbors: GetNodeNeighborsFn,
         onItemMouseOver: (item: VizItem) => void,
         onItemSelected: (item: VizItem) => void,
-        onGraphModelChange: (stats: GraphStats) => void,
         onGraphInteraction?: (event: GraphInteraction) => void,
     ) {
         this.graph = graph;
@@ -41,12 +39,6 @@ export class GraphEventHandlerModel {
         this.onItemMouseOver = onItemMouseOver;
         this.onItemSelected = onItemSelected;
         this.onGraphInteraction = onGraphInteraction ?? (() => undefined);
-
-        this.onGraphModelChange = onGraphModelChange;
-    }
-
-    graphModelChanged(): void {
-        this.onGraphModelChange(getGraphStats(this.graph));
     }
 
     selectItem(item: NodeModel | RelationshipModel): void {
@@ -93,7 +85,6 @@ export class GraphEventHandlerModel {
             updateRelationships: true,
             restartSimulation: true,
         });
-        this.graphModelChanged();
         this.onGraphInteraction('NODE_DISMISSED');
     }
 
@@ -134,7 +125,6 @@ export class GraphEventHandlerModel {
         d.expanded = true;
         const graph = this.graph;
         const visualization = this.visualization;
-        const graphModelChanged = this.graphModelChanged.bind(this);
         this.getNodeNeighbors(
             d,
             this.graph.findNodeNeighborIds(d.id),
@@ -142,7 +132,6 @@ export class GraphEventHandlerModel {
                 graph.addExpandedNodes(d, mapNodes(nodes));
                 graph.addRelationships(mapRelationships(relationships, graph));
                 visualization.update({ updateNodes: true, updateRelationships: true });
-                graphModelChanged();
             },
         );
         this.onGraphInteraction('NODE_EXPAND');
@@ -152,7 +141,6 @@ export class GraphEventHandlerModel {
         d.expanded = false;
         this.graph.collapseNode(d);
         this.visualization.update({ updateNodes: true, updateRelationships: true });
-        this.graphModelChanged();
     }
 
     onNodeMouseOver(node: NodeModel): void {
