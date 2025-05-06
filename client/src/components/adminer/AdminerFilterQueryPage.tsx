@@ -9,7 +9,7 @@ import { FilterForm } from '@/components/adminer/FilterForm';
 import { KindMenu, UNLABELED } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
-import { filterQueryReducer } from '@/components/adminer/adminerReducer';
+import { adminerReducer } from '@/components/adminer/adminerReducer';
 import { useFetchReferences } from '@/components/adminer/useFetchReferences';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
@@ -29,7 +29,7 @@ type AdminerFilterQueryPageProps = Readonly<{
 export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilterQueryPageProps) {
     const { theme } = usePreferences().preferences;
     const [ searchParams, setSearchParams ] = useSearchParams();
-    const [ state, dispatch ] = useReducer(filterQueryReducer, searchParams, getFilterQueryStateFromURLParams);
+    const [ state, dispatch ] = useReducer(adminerReducer, searchParams, getFilterQueryStateFromURLParams);
     const [ kindReferences, setKindReferences ] = useState<KindReference[]>([]);
     const stateRef = useRef(state);
     const searchParamsRef = useRef(searchParams);
