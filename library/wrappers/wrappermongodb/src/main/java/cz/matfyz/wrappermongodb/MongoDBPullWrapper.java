@@ -378,7 +378,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      */
     private static List<String> parseStringToList(String value) {
         return Arrays.stream(value.split(","))
-            .map(String::trim).toList();
+            .map(String::trim)
+            .map(str -> str.substring(1, str.length() - 1))
+            .toList();
     }
 
     /**
