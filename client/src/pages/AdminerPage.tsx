@@ -39,7 +39,7 @@ export function AdminerPage() {
 
     useEffect(() => {
         if (searchParams.get('reload') === 'true')
-            setSearchParams(prevParams => getInitURLParams(prevParams));
+            window.history.replaceState({}, '', '?' + getInitURLParams(searchParams));
 
         const datasourceIdParam = searchParams.get('datasourceId');
         if (datasourceIdParam !== datasource?.id)
