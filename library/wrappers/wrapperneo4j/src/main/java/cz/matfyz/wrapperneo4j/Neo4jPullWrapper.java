@@ -76,8 +76,9 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         if (query instanceof KindNameFilterQuery knfQuery) {
             String returnQueryPart = countQuery ? RELATIONSHIPS_COUNT : "from_node, relationship, to_node" + getOffsetAndLimit(knfQuery.kindNameQuery);
+            List<String> whereConditions = createWhereConditions(knfQuery.getFilters(), "relationship");
 
-            return "MATCH (from_node)-[relationship: " + knfQuery.kindNameQuery.kindName + "]->(to_node) " + createWhereClause(knfQuery.getFilters(), "relationship") + " RETURN " + returnQueryPart + ";";
+            return "MATCH (from_node)-[relationship: " + knfQuery.kindNameQuery.kindName + "]->(to_node) " + createWhereClause(whereConditions) + " RETURN " + returnQueryPart + ";";
         }
 
         if (query instanceof KindNameQuery knQuery) {
@@ -93,29 +94,30 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         if (query instanceof StringQuery stringQuery)
             return stringQuery.content;
 
-        if (query instanceof KindNameFilterQuery knfQuery) {
-            String kindName = knfQuery.kindNameQuery.kindName;
-            String queryBase = kindName.isEmpty() ? "MATCH (node) " : "MATCH (node:" + kindName + ") ";
+        if (!(query instanceof KindNameFilterQuery) && !(query instanceof KindNameQuery))
+            throw PullForestException.invalidQuery(this, query);
 
-            StringBuilder whereClause = new StringBuilder(createWhereClause(knfQuery.getFilters(), "node"));
+        KindNameQuery knQuery = query instanceof KindNameFilterQuery knfQuery ? knfQuery.kindNameQuery : (KindNameQuery) query;
 
-            if (kindName.isEmpty()) {
-                whereClause.append(whereClause.isEmpty() ? "WHERE" : " AND ");
-                whereClause.append(" size(labels(node)) = 0 ");
-            }
+        String basePart = knQuery.kindName.isEmpty() ? "MATCH (node)" : "MATCH (node:" + knQuery.kindName + ")";
 
-            String returnQueryPart = countQuery ? NODES_COUNT : "node" + getOffsetAndLimit(knfQuery.kindNameQuery);
+        List<String> whereConditions = new ArrayList<>();
+        if (query instanceof KindNameFilterQuery knfQuery)
+            whereConditions = createWhereConditions(knfQuery.getFilters(), "node");
+        if (knQuery.kindName.isEmpty())
+            whereConditions.add("size(labels(node)) = 0");
+        String wherePart = createWhereClause(whereConditions);
 
-            return queryBase + " " + whereClause.toString() + "RETURN " + returnQueryPart + ";";
-        }
+        String returnPart = countQuery ? NODES_COUNT : "node" + getOffsetAndLimit(knQuery);
 
-        if (query instanceof KindNameQuery knQuery) {
-            String returnQueryPart = countQuery ? NODES_COUNT : "node" + getOffsetAndLimit(knQuery);
+        return basePart + " " + wherePart + " RETURN " + returnPart + ";";
+    }
 
-            return "MATCH (node: " + knQuery.kindName + ") RETURN " + returnQueryPart + ";";
-        }
+    private String createWhereClause(List<String> conditions) {
+        if (conditions.size() == 0)
+            return "";
 
-        throw PullForestException.invalidQuery(this, query);
+        return "WHERE " + String.join(" AND ", conditions);
     }
 
     /**
@@ -123,37 +125,31 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      *
      * @param alias The alias assigned to the graph element in the query.
      */
-    private String createWhereClause(List<AdminerFilter> filters, String alias) {
-        if (filters.isEmpty()) {
-            return "";
-        }
+    private List<String> createWhereConditions(List<AdminerFilter> filters, String alias) {
+        List<String> conditions = new ArrayList<>();
 
-        StringBuilder whereClause = new StringBuilder("WHERE ");
+        for (AdminerFilter filter : filters) {
+            StringBuilder condition = new StringBuilder();
 
-        for (int i = 0; i < filters.size(); i++) {
-            AdminerFilter filter = filters.get(i);
             String propertyName = filter.propertyName();
-
-            if (i != 0) {
-                whereClause.append(" AND ");
-            }
-
             Double doubleValue = this.parseNumeric(filter.propertyValue());
 
             if (propertyName.contains(Neo4jUtils.LABELS)) {
-                this.appendLabelsWhereClause(whereClause, alias, propertyName, filter.operator(), filter.propertyValue(), doubleValue);
+                this.appendLabelsWhereClause(condition, alias, propertyName, filter.operator(), filter.propertyValue(), doubleValue);
                 continue;
             }
 
-            appendPropertyName(whereClause, alias, propertyName, doubleValue);
+            appendPropertyName(condition, alias, propertyName, doubleValue);
 
             String operator = OPERATORS.get(filter.operator());
-            appendOperator(whereClause, operator);
+            appendOperator(condition, operator);
 
-            appendPropertyValue(whereClause, filter.propertyValue(), operator, doubleValue);
+            appendPropertyValue(condition, filter.propertyValue(), operator, doubleValue);
+
+            conditions.add(condition.toString());
         }
 
-        return whereClause.toString();
+        return conditions;
     }
 
     /**
