@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
+import java.util.regex.Pattern;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -271,7 +272,19 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             var columnName = filter.propertyName();
             var operator = filter.operator();
             var columnValue = filter.propertyValue();
-            var value = "_id".equals(columnName) ? new ObjectId(columnValue) : columnValue;
+
+            Object value;
+            if ("_id".equals(columnName)) {
+                value = new ObjectId(columnValue);
+            } else if (BOOLEAN_PATTERN.matcher(columnValue).matches()) {
+                value = Boolean.parseBoolean(columnValue);
+            } else if (NUMBER_PATTERN.matcher(columnValue).matches()) {
+                value = columnValue.contains(".")
+                    ? Double.parseDouble(columnValue)
+                    : Long.parseLong(columnValue);
+            } else {
+                value = columnValue;
+            }
 
             BiFunction<String, Object, Bson> filterFunction = OPERATORS.get(operator);
             filterList.add(filterFunction.apply(columnName, value));
@@ -279,6 +292,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
         return Filters.and(filterList);
     }
+
+    private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+(\\.\\d+)?$");
 
     /**
      * Retrieves documents from a collection based on kind name, pagination parameters and optional filters.
@@ -340,12 +356,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             if (query instanceof final KindNameQuery knQuery) {
                 MongoCollection<Document> collection = provider.getDatabase().getCollection(knQuery.kindName);
                 propertyNames = MongoDBUtils.getPropertyNames(collection);
-                itemCount = collection.countDocuments();
             }
             else if (query instanceof final KindNameFilterQuery knfQuery) {
                 MongoCollection<Document> collection = provider.getDatabase().getCollection(knfQuery.kindNameQuery.kindName);
                 propertyNames = MongoDBUtils.getPropertyNames(collection);
-                itemCount = collection.countDocuments();
             }
             else
                 throw PullForestException.invalidQuery(this, query);
@@ -363,7 +377,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      * @throws InvalidParameterException if the input is not properly enclosed.
      */
     private static List<String> parseStringToList(String value) {
-        return Arrays.stream(value.split(";"))
+        return Arrays.stream(value.split(","))
             .map(String::trim).toList();
     }
 
