@@ -134,17 +134,17 @@ type DataComponentProps = Readonly<{
 }>;
 
 function DataComponent({ state, fetchedData, datasources, kindReferences, error, loading }: DataComponentProps) {
+    if (state.kindName && error) {
+        return (
+            <p className='ml-1 mt-1'>{error}</p>
+        );
+    }
+
     if (loading) {
         return (
             <div className='h-10 flex items-center justify-center'>
                 <Spinner />
             </div>
-        );
-    }
-
-    if (state.kindName && error) {
-        return (
-            <p>{error}</p>
         );
     }
 

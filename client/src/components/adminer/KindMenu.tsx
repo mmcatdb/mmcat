@@ -37,6 +37,9 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
         return items;
     }, [ fetchedData, showUnlabeled ]);
 
+    if (error)
+        return <p className='ml-1 mt-1'>{error}</p>;
+
     if (loading) {
         return (
             <div className='h-10 flex items-center justify-center'>
@@ -44,9 +47,6 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
             </div>
         );
     }
-
-    if (error)
-        return <p>{error}</p>;
 
     if (!fetchedData || fetchedData.data.length === 0)
         return <span>No kinds to display.</span>;
