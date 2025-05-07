@@ -12,6 +12,9 @@ import type { Id } from '@/types/id';
 const FROM_PREFIX = '_from.';
 const TO_PREFIX = '_to.';
 
+/**
+ * Fetches all references (foreign keys and references from schema category)
+ */
 export function useFetchReferences(datasourceId?: Id, kindName?: string) {
     const [ loading, setLoading ] = useState(true);
     const [ references, setReferences ] = useState<AdminerReferences>([]);

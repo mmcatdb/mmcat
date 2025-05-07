@@ -7,6 +7,13 @@ import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataRespon
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
+/**
+ * @param data The data to display
+ * @param kindReferences References from and to the current kind
+ * @param kind Name of the current kind
+ * @param datasourceId The id of selected datasource
+ * @param datasources All active datasources
+ */
 type DatabaseDocumentProps = Readonly<{
     data: DocumentResponse | GraphResponse;
     kindReferences: KindReference[];
@@ -15,6 +22,9 @@ type DatabaseDocumentProps = Readonly<{
     datasources: Datasource[];
 }>;
 
+/**
+ * Component for displaying data in document
+ */
 export function DatabaseDocument({ data, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
     const documentData = useMemo(() => {
         if (data.type === 'graph')

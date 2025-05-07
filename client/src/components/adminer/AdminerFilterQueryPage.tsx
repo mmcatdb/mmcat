@@ -21,11 +21,18 @@ import type { DataResponse } from '@/types/adminer/DataResponse';
 import type { AdminerFilterQueryState, KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 
+/**
+ * @param datasource The selected datasource
+ * @param datasources All active datasources
+ */
 type AdminerFilterQueryPageProps = Readonly<{
     datasource: Datasource;
     datasources: Datasource[];
 }>;
 
+/**
+ * Component for fetching the data using filer query
+ */
 export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilterQueryPageProps) {
     const { theme } = usePreferences().preferences;
     const [ searchParams ] = useSearchParams();

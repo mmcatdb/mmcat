@@ -21,6 +21,9 @@ type FetchDatasourcesResult = {
     error: true;
 };
 
+/**
+ * Loader for Adminer that fetches all datasources from server
+ */
 export async function adminerLoader(): Promise<FetchDatasourcesResult> {
     const response = await api.datasources.getAllDatasources({});
 
@@ -30,6 +33,9 @@ export async function adminerLoader(): Promise<FetchDatasourcesResult> {
     return { allDatasources: response.data, error: false };
 }
 
+/**
+ * Main page of Adminer, data visualization and browsing tool
+ */
 export function AdminerPage() {
     const { theme } = usePreferences().preferences;
     const { allDatasources, error } = useLoaderData() as FetchDatasourcesResult;

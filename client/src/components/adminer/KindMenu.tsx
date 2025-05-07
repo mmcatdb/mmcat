@@ -7,6 +7,12 @@ import type { Id } from '@/types/id';
 
 export const UNLABELED = '#unlabeled';
 
+/**
+ * @param datasourceId The id of the current datasource
+ * @param kind Name of selected kind
+ * @param showUnlabeled If 'true', additional kind name for unlabeled nodes from Neo4j is added
+ * @param dispatch A function for state updating
+ */
 type KindMenuProps = Readonly<{
     datasourceId: Id;
     kind: string | undefined;
@@ -16,6 +22,9 @@ type KindMenuProps = Readonly<{
 
 type KindLabelValues = {label: string, value: string }[];
 
+/**
+ * Component for selecting kind
+ */
 export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMenuProps) {
     const fetchFunction = useCallback(() => {
         return api.adminer.getKindNames({ datasourceId });

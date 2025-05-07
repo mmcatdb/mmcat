@@ -6,11 +6,18 @@ import { GraphVisualizer } from '@/components/adminer/graph-visualization/GraphV
 import type { BasicNode, BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 import type { GraphNode, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 
+/**
+ * @param data The data to display
+ * @param kindName Name of the current kind
+ */
 type DatabaseTableProps = Readonly<{
     data: GraphResponse;
     kind: string;
 }>;
 
+/**
+ * Component for displaying data in graph
+ */
 export function DatabaseGraph({ data, kind }: DatabaseTableProps ) {
     const { theme } = usePreferences().preferences;
 

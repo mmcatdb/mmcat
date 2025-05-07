@@ -7,6 +7,14 @@ import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
+/**
+ * @param references The references to create links for
+ * @param data The displayeddata
+ * @param propertyName The name of the property to create links for
+ * @param kind Name of current kind
+ * @param datasourceId The id of the current datasource
+ * @param datasources All active datasources
+ */
 type ReferenceComponentProps = Readonly<{
     references: KindReference[];
     data: Record<string, string> | GraphResponseData;
@@ -16,6 +24,9 @@ type ReferenceComponentProps = Readonly<{
     datasources: Datasource[];
 }>;
 
+/**
+ * Component for displaying references
+ */
 export function ReferenceComponent({ references, data, propertyName, kind, datasourceId, datasources }: ReferenceComponentProps ) {
     const [ visible, setVisible ] = useState(false);
     const links = new Map<string, KindReference>();

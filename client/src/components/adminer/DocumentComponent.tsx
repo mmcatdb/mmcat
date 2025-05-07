@@ -6,6 +6,14 @@ import type { Datasource } from '@/types/datasource/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
+/**
+ * @param valueKey The name of the property
+ * @param value The value the for given property
+ * @param kindReferences References from and to the current kind
+ * @param kindName Name of the current kind
+ * @param datasourceId The id of selected datasource
+ * @param datasources All active datasources
+ */
 type DocumentComponentProps = Readonly<{
     valueKey: string | undefined;
     value: unknown;
@@ -15,6 +23,9 @@ type DocumentComponentProps = Readonly<{
     datasources: Datasource[];
 }>;
 
+/**
+ * Component for displaying data recursively in a JSON-like structure
+ */
 export function DocumentComponent({ valueKey, value, kindReferences, kind, datasourceId, datasources }: DocumentComponentProps) {
     const { adminerShortLinks } = usePreferences().preferences;
     const [ isOpen, setIsOpen ] = useState(true);
