@@ -28,7 +28,7 @@ type AdminerFilterQueryPageProps = Readonly<{
 
 export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilterQueryPageProps) {
     const { theme } = usePreferences().preferences;
-    const [ searchParams, setSearchParams ] = useSearchParams();
+    const [ searchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(adminerReducer, searchParams, getFilterQueryStateFromURLParams);
     const [ kindReferences, setKindReferences ] = useState<KindReference[]>([]);
     const stateRef = useRef(state);
@@ -49,7 +49,7 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     // Update URL search parameters whenever state changes
     useEffect(() => {
         if (stateRef.current != state && searchParamsRef.current == searchParams) {
-            setSearchParams(getURLParamsFromFilterQueryState(state));
+            window.history.pushState({}, '', '?' + getURLParamsFromFilterQueryState(state));
             stateRef.current = state;
         }
     }, [ state ]);
