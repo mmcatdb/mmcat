@@ -8,6 +8,15 @@ import type { Datasource } from '@/types/datasource/Datasource';
 
 const NAME_LENGTH = 2;
 
+/**
+ * @param index The id of the current link
+ * @param reference The reference to create the link for
+ * @param kind Name of current kind
+ * @param datasourceId The id of the current datasource
+ * @param datasources All active datasources
+ * @param link The URL parameters to be added to the link
+ * @param kindDuplicated 'true' if there exist another link that points to the same kind
+ */
 type LinkComponentProps = Readonly<{
     index: string;
     reference: KindReference;
@@ -18,6 +27,9 @@ type LinkComponentProps = Readonly<{
     kindDuplicated: boolean;
 }>;
 
+/**
+ * Component that returns a link with tooltip
+ */
 export function LinkComponent({ index, reference, kind, datasourceId, datasources, link, kindDuplicated }: LinkComponentProps ) {
     const { preferences } = usePreferences();
 

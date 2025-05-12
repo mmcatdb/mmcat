@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, ButtonGroup } from '@nextui-org/react';
+import { ErrorPage } from '@/pages/errorPages';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { AdminerCustomQueryPage } from '@/components/adminer/AdminerCustomQueryPage';
 import { AdminerFilterQueryPage } from '@/components/adminer/AdminerFilterQueryPage';
@@ -12,25 +13,39 @@ import { api } from '@/api';
 import { QueryType } from '@/types/adminer/QueryType';
 import type { Datasource } from '@/types/datasource';
 
-export async function adminerLoader(): Promise<Datasource[]> {
+type FetchDatasourcesResult = {
+    allDatasources: Datasource[];
+    error: false;
+} | {
+    allDatasources: undefined;
+    error: true;
+};
+
+/**
+ * Loader for Adminer that fetches all datasources from server
+ */
+export async function adminerLoader(): Promise<FetchDatasourcesResult> {
     const response = await api.datasources.getAllDatasources({});
 
     if (!response.status)
-        throw new Error('Failed to load datasources');
+        return { allDatasources: undefined, error: true };
 
-    return response.data;
+    return { allDatasources: response.data, error: false };
 }
 
+/**
+ * Main page of Adminer, data visualization and browsing tool
+ */
 export function AdminerPage() {
     const { theme } = usePreferences().preferences;
-    const allDatasources = useLoaderData() as Datasource[];
+    const { allDatasources, error } = useLoaderData() as FetchDatasourcesResult;
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ datasource, setDatasource ] = useState<Datasource>();
     const [ selectedQueryType, setSelectedQueryType ] = useState<QueryType>();
 
     useEffect(() => {
         if (searchParams.get('reload') === 'true')
-            setSearchParams(prevParams => getInitURLParams(prevParams));
+            window.history.replaceState({}, '', '?' + getInitURLParams(searchParams));
 
         const datasourceIdParam = searchParams.get('datasourceId');
         if (datasourceIdParam !== datasource?.id)
@@ -38,6 +53,9 @@ export function AdminerPage() {
 
         setSelectedQueryType(getQueryTypeFromURLParams(searchParams));
     }, [ searchParams ]);
+
+    if (error)
+        return <ErrorPage />;
 
     return (
         <>

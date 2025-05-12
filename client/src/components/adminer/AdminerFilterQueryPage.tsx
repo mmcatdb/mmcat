@@ -9,7 +9,7 @@ import { FilterForm } from '@/components/adminer/FilterForm';
 import { KindMenu, UNLABELED } from '@/components/adminer/KindMenu';
 import { ViewMenu } from '@/components/adminer/ViewMenu';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
-import { filterQueryReducer } from '@/components/adminer/adminerReducer';
+import { adminerReducer } from '@/components/adminer/adminerReducer';
 import { useFetchReferences } from '@/components/adminer/useFetchReferences';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
@@ -21,15 +21,22 @@ import type { DataResponse } from '@/types/adminer/DataResponse';
 import type { AdminerFilterQueryState, KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 
+/**
+ * @param datasource The selected datasource
+ * @param datasources All active datasources
+ */
 type AdminerFilterQueryPageProps = Readonly<{
     datasource: Datasource;
     datasources: Datasource[];
 }>;
 
+/**
+ * Component for fetching the data using filer query
+ */
 export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilterQueryPageProps) {
     const { theme } = usePreferences().preferences;
-    const [ searchParams, setSearchParams ] = useSearchParams();
-    const [ state, dispatch ] = useReducer(filterQueryReducer, searchParams, getFilterQueryStateFromURLParams);
+    const [ searchParams ] = useSearchParams();
+    const [ state, dispatch ] = useReducer(adminerReducer, searchParams, getFilterQueryStateFromURLParams);
     const [ kindReferences, setKindReferences ] = useState<KindReference[]>([]);
     const stateRef = useRef(state);
     const searchParamsRef = useRef(searchParams);
@@ -49,7 +56,7 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     // Update URL search parameters whenever state changes
     useEffect(() => {
         if (stateRef.current != state && searchParamsRef.current == searchParams) {
-            setSearchParams(getURLParamsFromFilterQueryState(state));
+            window.history.pushState({}, '', '?' + getURLParamsFromFilterQueryState(state));
             stateRef.current = state;
         }
     }, [ state ]);
@@ -134,17 +141,17 @@ type DataComponentProps = Readonly<{
 }>;
 
 function DataComponent({ state, fetchedData, datasources, kindReferences, error, loading }: DataComponentProps) {
+    if (state.kindName && error) {
+        return (
+            <p className='ml-1 mt-1'>{error}</p>
+        );
+    }
+
     if (loading) {
         return (
             <div className='h-10 flex items-center justify-center'>
                 <Spinner />
             </div>
-        );
-    }
-
-    if (state.kindName && error) {
-        return (
-            <p>{error}</p>
         );
     }
 

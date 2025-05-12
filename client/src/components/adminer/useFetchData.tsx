@@ -17,6 +17,9 @@ type FetchResult<T> = {
     error: undefined;
 };
 
+/**
+ * Fetches all data
+ */
 export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<T> {
     const [ result, setResult ] = useState<FetchResult<T>>({
         fetchedData: undefined,

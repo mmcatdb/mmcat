@@ -1,6 +1,9 @@
 import { Switch } from '@nextui-org/react';
 import { usePreferences } from '@/components/PreferencesProvider';
 
+/**
+ * Switch for setting the length of names of datasources, kinds and properties used in links
+ */
 export function LinkLengthSwitch() {
     const { preferences, setPreferences } = usePreferences();
     const { adminerShortLinks: adminerShortRefs } = preferences;

@@ -31,11 +31,18 @@ const EXAMPLE_QUERY: Record<DatasourceType, string> = {
     [DatasourceType.jsonld]: '',
 };
 
+/**
+ * @param datasource The selected datasource
+ * @param datasources All active datasources
+ */
 type AdminerCustomQueryPageProps = Readonly<{
     datasource: Datasource;
     datasources: Datasource[];
 }>;
 
+/**
+ * Component for fetching the data using custom query
+ */
 export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCustomQueryPageProps) {
     const { theme } = usePreferences().preferences;
     const [ view, setView ] = useState(View.table);

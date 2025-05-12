@@ -7,6 +7,13 @@ import type { TableResponse, GraphResponse } from '@/types/adminer/DataResponse'
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
+/**
+ * @param data The data to display
+ * @param kindReferences References from and to the current kind
+ * @param kind Name of the current kind
+ * @param datasourceId The id of selected datasource
+ * @param datasources All active datasources
+ */
 type DatabaseTableProps = Readonly<{
     data: TableResponse | GraphResponse;
     kindReferences: KindReference[];
@@ -15,6 +22,9 @@ type DatabaseTableProps = Readonly<{
     datasources: Datasource[];
 }>;
 
+/**
+ * Component for displaying data in table
+ */
 export function DatabaseTable({ data, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
     const { tableData, columnNames } = useMemo(() => {
         if (data.type === 'graph')
