@@ -1,21 +1,9 @@
 package cz.matfyz.wrapperjsonld;
 
 import cz.matfyz.abstractwrappers.AbstractPathWrapper;
-
-import java.util.ArrayList;
-import java.util.List;
+import cz.matfyz.core.mapping.ComplexProperty;
 
 public class JsonLdPathWrapper implements AbstractPathWrapper {
-
-    private final List<String> properties = new ArrayList<>();
-
-    @Override public void addProperty(String path) {
-        properties.add(path);
-    }
-
-    @Override public boolean check() {
-        throw new UnsupportedOperationException("JsonLdPathWrapper.check not implemented.");
-    }
 
     // CHECKSTYLE:OFF
     // TODO check the correctness of the following methods:
@@ -28,4 +16,9 @@ public class JsonLdPathWrapper implements AbstractPathWrapper {
     @Override public boolean isComplexPropertyAllowed() { return true; }
     @Override public boolean isSchemaless() { return true; }
     // CHECKSTYLE:ON
+
+    @Override public boolean isPathValid(ComplexProperty accessPath) {
+        throw new UnsupportedOperationException("JsonLdPathWrapper.isPathValid not implemented.");
+    }
+
 }

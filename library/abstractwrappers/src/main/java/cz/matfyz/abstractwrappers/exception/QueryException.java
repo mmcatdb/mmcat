@@ -1,8 +1,7 @@
 package cz.matfyz.abstractwrappers.exception;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AggregationOperator;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
+import cz.matfyz.core.querying.Computation.Operator;
 
 import java.io.Serializable;
 
@@ -17,11 +16,11 @@ public class QueryException extends WrapperException {
         return new QueryException("message", message);
     }
 
-    public static QueryException unsupportedOperator(ComparisonOperator operator) {
+    public static QueryException unsupportedOperator(Operator operator) {
         return new QueryException("unsupportedOperator", operator);
     }
 
-    public static QueryException unsupportedOperator(AggregationOperator operator) {
+    public static QueryException unsupportedOperator(String operator) {
         return new QueryException("unsupportedOperator", operator);
     }
 

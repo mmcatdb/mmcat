@@ -2,7 +2,7 @@ package cz.matfyz.querying.core;
 
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
-import cz.matfyz.querying.core.patterntree.PatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree;
 
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +28,7 @@ public class ObjectColoring {
         return coloring;
     }
 
-    private void colorObjects(PatternForKind kind, PatternObject object) {
+    private void colorObjects(PatternForKind kind, PatternTree object) {
         objectToColors
             .computeIfAbsent(object.schemaObject, x -> new TreeSet<>())
             .add(kind);

@@ -7,7 +7,6 @@ public interface QueryVisitor<T> {
     T visit(JoinNode node);
     T visit(MinusNode node);
     T visit(OptionalNode node);
-    T visit(PatternNode node);
     T visit(UnionNode node);
 
 }

@@ -1,10 +1,21 @@
 package cz.matfyz.abstractwrappers;
 
+import cz.matfyz.core.mapping.ComplexProperty;
+
+/**
+ * Defines which operations are allowed for an access path for the specific database system.
+ * Also can be used to check whether a given access path is valid.
+ */
 public interface AbstractPathWrapper {
 
-    void addProperty(String path);
+    // TODO Create a base check method that will use all of these "isAllowed" methods for a simple basic check. Then use the specific implementation for more detailed rules.
+    // TODO Use some basic constraint for characters in the names of properties (although this probably needs to be specifc for each database system).
+    // TODO Also check for uniqueness of the names.
 
-    boolean check();
+    /**
+     * Check whether the access path is valid.
+     */
+    boolean isPathValid(ComplexProperty accessPath);
 
     /**
      * A property of the access path can have a signature of a base morphism with cardinality "something to 1".

@@ -13,12 +13,21 @@ import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class DatasourceProvider {
 
     private final Config config;
+    /** If null, the value is loaded from the config. */
+    private final @Nullable String database;
+
+    public DatasourceProvider(String namespace, String database) {
+        this.config = new Config(namespace);
+        this.database = database;
+    }
 
     public DatasourceProvider(String namespace) {
-        this.config = new Config(namespace);
+        this(namespace, null);
     }
 
     // PostgreSQL
@@ -30,7 +39,7 @@ public class DatasourceProvider {
             postgreSQLProvider = new PostgreSQLProvider(new PostgreSQLSettings(
                 config.getBool("isInDocker") ? "mmcat-postgresql" : "localhost",
                 config.getBool("isInDocker") ? "5432" : "3204",
-                config.get("database"),
+                database != null ? database : config.get("database"),
                 config.get("username"),
                 config.get("password"),
                 true,
@@ -57,7 +66,7 @@ public class DatasourceProvider {
                 config.getBool("isInDocker") ? "mmcat-mongodb" : "localhost",
                 config.getBool("isInDocker") ? "27017" : "3205",
                 "admin",
-                config.get("database"),
+                database != null ? database : config.get("database"),
                 config.get("username"),
                 config.get("password"),
                 true,

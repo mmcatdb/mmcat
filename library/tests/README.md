@@ -14,6 +14,7 @@ In order to run tests on databases, we have to setup them first. This means runn
 
 For this reason, the application relies on several programs to run the setup scripts. Make sure these are available and executable on your system:
 - `mongosh` (MongoDB Shell)
+- `mongo-tools` or `mongodb-tools` depending on package manager
 
 In other database systems, format your scripts very strictly. This means:
 - Each statement or comment on a separate line.

@@ -17,7 +17,7 @@ public class DefaultLocalCombFunction implements AbstractCombFunction {
                 PropertyHeuristics h1 = t1.getHeuristics();
                 h1.merge(t2.getHeuristics());
                 t1.setHeuristics(h1);
-        // heuristics.merge(property.getHeuristics());	     // REMOVE COMMENT IN ORDER TO FIX CANDIDATE MINER ALGORITHM
+        // heuristics.merge(property.getHeuristics());      // REMOVE COMMENT IN ORDER TO FIX CANDIDATE MINER ALGORITHM
 
         DefaultLocalReductionFunction reductionFunction = new DefaultLocalReductionFunction();
         RecordSchemaDescription mergedSchema = reductionFunction.call(t1.getSchema(), t2.getSchema());

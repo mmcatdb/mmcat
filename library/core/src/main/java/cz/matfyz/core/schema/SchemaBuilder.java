@@ -144,12 +144,14 @@ public class SchemaBuilder {
     }
 
     private Min nextMin = Min.ONE;
+    /** @see SchemaMorphism.Min */
     public SchemaBuilder min(Min nextMin) {
         this.nextMin = nextMin;
         return this;
     }
 
     private Set<Tag> nextTags = Set.of();
+    /** @see SchemaMorphism.Tag */
     public SchemaBuilder tags(Tag... nextTags) {
         this.nextTags = Set.of(nextTags);
         return this;

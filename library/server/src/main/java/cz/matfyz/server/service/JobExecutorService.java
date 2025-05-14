@@ -57,10 +57,10 @@ import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.JobRepository.JobInfo;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
+import cz.matfyz.transformations.DatabaseToInstance;
+import cz.matfyz.transformations.InstanceToDatabase;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
-import cz.matfyz.transformations.processes.DatabaseToInstance;
-import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.ArrayList;
 import java.util.List;

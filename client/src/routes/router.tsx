@@ -125,6 +125,7 @@ export const router = createBrowserRouter([
                         id: routes.category.querying.id,
                         path: routes.category.querying.path,
                         Component: QueryingPage,
+                        loader: QueryingPage.loader,
                         handle: { breadcrumb: 'Querying' },
                     },
                     {

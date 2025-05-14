@@ -92,19 +92,15 @@ export class GraphEngine {
     /** Use this for the engine to start listening to events. Returns a cleanup function. */
     setup(): () => void {
         console.log('SETUP graph engine');
+        const c = new AbortController();
 
         // The event is throttled because we don't need to update the state that often.
-        const mousemove = throttle((e: MouseEvent) => this.handleGlobalMousemove(e));
-        document.addEventListener('mousemove', mousemove);
-
-        const mouseup = (e: MouseEvent) => this.handleGlobalMouseup(e);
-        document.addEventListener('mouseup', mouseup);
+        document.addEventListener('mousemove', throttle((e: MouseEvent) => this.handleGlobalMousemove(e)), { signal: c.signal });
+        document.addEventListener('mouseup', (e: MouseEvent) => this.handleGlobalMouseup(e), { signal: c.signal });
 
         return () => {
             console.log('CLEANUP graph engine');
-
-            document.removeEventListener('mousemove', mousemove);
-            document.removeEventListener('mouseup', mouseup);
+            c.abort();
         };
     }
 
