@@ -43,7 +43,8 @@ public class DatasourceProvider {
                 config.get("username"),
                 config.get("password"),
                 true,
-                true
+                true,
+                false
             ));
         }
 
@@ -69,7 +70,8 @@ public class DatasourceProvider {
                 config.get("username"),
                 config.get("password"),
                 true,
-                true
+                true,
+                false
             ));
         }
 
@@ -94,7 +96,8 @@ public class DatasourceProvider {
                 "neo4j",
                 config.get("password"),
                 true,
-                true
+                true,
+                false
             ));
         }
 

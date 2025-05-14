@@ -110,11 +110,11 @@ public class SuperIdsFetcher {
 
     private void processComplexRecord(ComplexRecord childRecord) {
         final var builder = new SuperIdWithValues.Builder();
-        addStaticNameSignaturesToBuilder(builder, childObject.superId().signatures(), childRecord);
+        addStringNameSignaturesToBuilder(builder, childObject.superId().signatures(), childRecord);
         output.add(new FetchedSuperId(builder.build(), childRecord));
     }
 
-    private void addStaticNameSignaturesToBuilder(SuperIdWithValues.Builder builder, Set<Signature> signatures, ComplexRecord childRecord) {
+    private void addStringNameSignaturesToBuilder(SuperIdWithValues.Builder builder, Set<Signature> signatures, ComplexRecord childRecord) {
         for (final Signature signature : signatures) {
             // How the signature looks like from the parent object.
             final var signatureInParentRow = signature.traverseThrough(parentToChild);

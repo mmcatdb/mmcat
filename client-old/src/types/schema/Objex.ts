@@ -3,19 +3,19 @@ import { idsAreEqual, Key, ObjectIds, SignatureId, type KeyFromServer, type Obje
 import { SchemaCategoryInvalidError } from './Error';
 import { isPositionEqual, type Graph } from '../categoryGraph';
 
-export type SchemaObjectFromServer = {
+export type SchemaObjexFromServer = {
     key: KeyFromServer;
     ids?: ObjectIdsFromServer;
     superId: SignatureIdFromServer;
 };
 
-export type MetadataObjectFromServer = {
+export type MetadataObjexFromServer = {
     key: KeyFromServer;
     label: string;
     position: Position;
 };
 
-export class SchemaObject {
+export class SchemaObjex {
     private constructor(
         readonly key: Key,
         readonly ids: ObjectIds | undefined,
@@ -23,8 +23,8 @@ export class SchemaObject {
         private _isNew: boolean,
     ) {}
 
-    static fromServer(schema: SchemaObjectFromServer): SchemaObject {
-        const object = new SchemaObject(
+    static fromServer(schema: SchemaObjexFromServer): SchemaObjex {
+        const object = new SchemaObjex(
             Key.fromServer(schema.key),
             schema.ids ? ObjectIds.fromServer(schema.ids) : undefined,
             SignatureId.fromServer(schema.superId),
@@ -34,8 +34,8 @@ export class SchemaObject {
         return object;
     }
 
-    static createNew(key: Key, def: Omit<ObjectDefinition, 'label'>): SchemaObject {
-        const object = new SchemaObject(
+    static createNew(key: Key, def: Omit<ObjectDefinition, 'label'>): SchemaObjex {
+        const object = new SchemaObjex(
             key,
             def.ids,
             def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
@@ -46,12 +46,12 @@ export class SchemaObject {
     }
 
     /** If there is nothing to update, undefined will be returned. */
-    update({ ids }: { ids?: ObjectIds | null }): SchemaObject | undefined {
+    update({ ids }: { ids?: ObjectIds | null }): SchemaObjex | undefined {
         if (ids === null && this.ids)
-            return SchemaObject.createNew(this.key, {});
+            return SchemaObjex.createNew(this.key, {});
 
         if (ids && !idsAreEqual(ids, this.ids))
-            return SchemaObject.createNew(this.key, { ids });
+            return SchemaObjex.createNew(this.key, { ids });
 
         return undefined;
     }
@@ -67,7 +67,7 @@ export class SchemaObject {
         return this.ids;
     }
 
-    toServer(): SchemaObjectFromServer {
+    toServer(): SchemaObjexFromServer {
         return {
             key: this.key.toServer(),
             ids: this.ids?.toServer(),
@@ -75,7 +75,7 @@ export class SchemaObject {
         };
     }
 
-    equals(other: SchemaObject | null | undefined): boolean {
+    equals(other: SchemaObjex | null | undefined): boolean {
         return !!other && this.key.equals(other.key);
     }
 }
@@ -85,34 +85,34 @@ export type ObjectDefinition = {
     ids?: ObjectIds;
 };
 
-export class MetadataObject {
-    private constructor(
+export class MetadataObjex {
+    constructor(
         readonly label: string,
         readonly position: Position,
     ) {}
 
-    static fromServer(input: MetadataObjectFromServer): MetadataObject {
-        return new MetadataObject(
+    static fromServer(input: MetadataObjexFromServer): MetadataObjex {
+        return new MetadataObjex(
             input.label,
             input.position,
         );
     }
 
-    static createDefault(): MetadataObject {
-        return new MetadataObject(
+    static createDefault(): MetadataObjex {
+        return new MetadataObjex(
             '',
             { x: 0, y: 0 },
         );
     }
 
-    static create(label: string, position: Position): MetadataObject {
-        return new MetadataObject(
+    create(label: string, position: Position): MetadataObjex {
+        return new MetadataObjex(
             label,
             position,
         );
     }
 
-    toServer(key: Key): MetadataObjectFromServer {
+    toServer(key: Key): MetadataObjexFromServer {
         return {
             key: key.toServer(),
             label: this.label,
@@ -123,31 +123,31 @@ export class MetadataObject {
 
 // TODO rename for consistency
 
-export class VersionedSchemaObject {
-    public readonly originalMetadata: MetadataObject;
+export class VersionedSchemaObjex {
+    public readonly originalMetadata: MetadataObjex;
 
     private constructor(
         readonly key: Key,
-        private _metadata: MetadataObject,
+        private _metadata: MetadataObjex,
         private _graph?: Graph,
     ) {
         this.originalMetadata = _metadata;
     }
 
-    static fromServer(input: SchemaObjectFromServer, metadata: MetadataObjectFromServer): VersionedSchemaObject {
-        const output = new VersionedSchemaObject(
+    static fromServer(input: SchemaObjexFromServer, metadata: MetadataObjexFromServer): VersionedSchemaObjex {
+        const output = new VersionedSchemaObjex(
             Key.fromServer(input.key),
-            MetadataObject.fromServer(metadata),
+            MetadataObjex.fromServer(metadata),
         );
-        output.current = SchemaObject.fromServer(input);
+        output.current = SchemaObjex.fromServer(input);
 
         return output;
     }
 
-    static create(key: Key, graph: Graph | undefined): VersionedSchemaObject {
-        return new VersionedSchemaObject(
+    static create(key: Key, graph: Graph | undefined): VersionedSchemaObjex {
+        return new VersionedSchemaObjex(
             key,
-            MetadataObject.createDefault(),
+            MetadataObjex.createDefault(),
             graph,
         );
     }
@@ -160,25 +160,25 @@ export class VersionedSchemaObject {
         this.updateGraph(newGraph);
     }
 
-    private _current?: SchemaObject;
+    private _current?: SchemaObjex;
 
-    get current(): SchemaObject | undefined {
+    get current(): SchemaObjex | undefined {
         return this._current;
     }
 
-    set current(value: SchemaObject | undefined) {
+    set current(value: SchemaObjex | undefined) {
         this._current = value;
         if (this._graph)
             this.updateGraph(this._graph);
     }
 
-    get metadata(): MetadataObject {
+    get metadata(): MetadataObjex {
         return this._metadata;
     }
 
     // TODO position and label sync with cytoscape ...
 
-    set metadata(value: MetadataObject) {
+    set metadata(value: MetadataObjex) {
         const isUpdateNeeded = this._metadata.label !== value.label || !isPositionEqual(this._metadata.position, value.position);
         this._metadata = value;
 

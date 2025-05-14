@@ -40,6 +40,7 @@ import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
+import cz.matfyz.server.entity.file.File;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
@@ -116,6 +117,9 @@ public class JobExecutorService {
 
     @Autowired
     private DatasourceRepository datasourceRepository;
+
+    @Autowired
+    private FileService fileService;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is an opportunity for optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require synchronization on the instance level in the transformation algorithms.
@@ -251,13 +255,21 @@ public class JobExecutorService {
         //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
         //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
 
+        Boolean executed = false;
+
         if (server.executeModels() && control.isWritable()) {
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
             LOGGER.info("... models executed.");
+            executed = true;
         }
 
-        job.data = new ModelJobData(result.statementsAsString());
+        final var resultString = result.statementsAsString();
+
+        final File file = fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, executed, datasource.type, resultString);
+
+        // Instead of the result we are saving only the id of the file, where the result is saved
+        job.data = new ModelJobData(file.id().toString());
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {

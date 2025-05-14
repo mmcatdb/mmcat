@@ -10,57 +10,38 @@ export function nameFromServer(input: NameFromServer): Name {
 
 export type Name = StaticName | DynamicName;
 
-export type StaticNameFromServer = { value: string, type: 'STATIC' | 'ANONYMOUS' };
+export type StaticNameFromServer = {
+    value: string;
+};
 
 export class StaticName {
-    readonly value: string;
-    readonly _isAnonymous: boolean;
-
-    private constructor(value: string, anonymous = false) {
-        this.value = value;
-        this._isAnonymous = anonymous;
-    }
+    private constructor(
+        readonly value: string,
+    ) {}
 
     static fromString(value: string): StaticName {
         return new StaticName(value);
     }
 
-    static copy(name: StaticName): StaticName {
-        return name._isAnonymous ? StaticName.anonymous : new StaticName(name.value);
-    }
-
     copy(): StaticName {
-        return this._isAnonymous ? StaticName.anonymous : new StaticName(this.value);
-    }
-
-    static _anonymousInstance = new StaticName('', true);
-
-    static get anonymous(): StaticName {
-        return this._anonymousInstance;
-    }
-
-    get isAnonymous(): boolean {
-        return this._isAnonymous;
+        return new StaticName(this.value);
     }
 
     equals(other: Name | undefined): boolean {
-        return other instanceof StaticName
-            && other._isAnonymous === this._isAnonymous
-            && other.value === this.value;
+        return other instanceof StaticName && other.value === this.value;
     }
 
     toString(): string {
-        return this._isAnonymous ? '_' : this.value;
+        return this.value;
     }
 
     static fromServer(input: StaticNameFromServer): StaticName {
-        return new StaticName(input.value, input.type === 'ANONYMOUS');
+        return new StaticName(input.value);
     }
 
     toServer(): StaticNameFromServer {
         return {
             value: this.value,
-            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC',
         };
     }
 }
@@ -76,10 +57,6 @@ export class DynamicName {
 
     static fromSignature(signature: Signature) {
         return new DynamicName(signature);
-    }
-
-    static copy(name: DynamicName): DynamicName {
-        return new DynamicName(name.signature.copy());
     }
 
     copy(): DynamicName {

@@ -1,12 +1,17 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
@@ -57,4 +62,44 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         String name,
         String command
     ) {}
+
+    @Override
+    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+        Collection<AbstractStatement> deleteStatements = new ArrayList<>();
+        List<String> tableNames = extractCreatedTables(executionCommands);
+
+        // To avoid errors with references among tables.
+        Collections.reverse(tableNames);
+
+        for (String tableName: tableNames)
+            deleteStatements.add(createDDLDeleteStatement(tableName));
+
+        return deleteStatements;
+    }
+
+    private List<String> extractCreatedTables(List<String> executionCommands) {
+        List<String> tableNames = new ArrayList<>();
+        for (String command : executionCommands) {
+            Matcher matcher = Pattern.compile("CREATE TABLE\\s+\"([^\"]+)\"").matcher(command);
+            if (matcher.find())
+                tableNames.add(matcher.group(1));
+        }
+        return tableNames;
+    }
+
+    private StringStatement createDDLDeleteStatement(String tableName) {
+        final String content = String.format("""
+            DROP TABLE \"%s\" ;
+            """, tableName);
+        return StringStatement.create(content);
+    }
+
+    @Override
+    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+        final String content = String.format("""
+                CREATE DATABASE \"%s\" OWNER \"%s\";
+                """, newDBName, owner);
+        return StringStatement.create(content);
+    }
+
 }

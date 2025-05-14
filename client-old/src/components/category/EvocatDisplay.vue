@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef } from 'vue';
 import API from '@/utils/api';
-import { SchemaCategory } from '@/types/schema';
+import { Category } from '@/types/schema';
 import ResourceNotFound from '@/components/common/ResourceNotFound.vue';
 import type { Graph } from '@/types/categoryGraph';
 import { useSchemaCategoryId, useSchemaCategoryInfo } from '@/utils/injects';
@@ -12,7 +12,7 @@ import { SchemaUpdate, type SchemaUpdateInit } from '@/types/schema/SchemaUpdate
 import { type LogicalModel, logicalModelsFromServer } from '@/types/datasource';
 
 const props = defineProps<{
-    schemaCategory?: SchemaCategory;
+    schemaCategory?: Category;
 }>();
 
 const categoryId = useSchemaCategoryId();
@@ -38,7 +38,7 @@ onMounted(async () => {
     const schemaUpdates = schemaUpdatesResult.data.map(SchemaUpdate.fromServer);
     const logicalModels = logicalModelsFromServer(datasourcesResult.data, mappingsResult.data);
 
-    const schemaCategory = SchemaCategory.fromServer(schemaCategoryResult.data, logicalModels);
+    const schemaCategory = Category.fromServer(schemaCategoryResult.data, logicalModels);
     const newEvocat = Evocat.create(schemaCategory, schemaUpdates, logicalModels, {
         update: updateFunction,
     });
@@ -62,7 +62,7 @@ async function updateFunction(update: SchemaUpdateInit, models: LogicalModel[]) 
         return result;
     }
 
-    const schemaCategory = SchemaCategory.fromServer(result.data, models);
+    const schemaCategory = Category.fromServer(result.data, models);
     info.value = schemaCategory;
 
     return DataResultSuccess(schemaCategory);

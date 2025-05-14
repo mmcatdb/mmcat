@@ -1,5 +1,5 @@
 import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular, Position } from 'cytoscape';
-import type { GroupData, SchemaMorphism, SchemaObject, VersionedSchemaMorphism, VersionedSchemaObject } from '../schema';
+import type { GroupData, SchemaMorphism, SchemaObjex, VersionedSchemaMorphism, VersionedSchemaObjex } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
@@ -43,7 +43,7 @@ export class Graph {
             );
 
         if (!edge) {
-            console.warn(`No edge found between parent ${parentNode.schemaObject.key.value} and node ${node.schemaObject.key.value}`);
+            console.warn(`No edge found between parent ${parentNode.schemaObjex.key.value} and node ${node.schemaObjex.key.value}`);
             return SequenceSignature.empty(node);
         }
 
@@ -71,7 +71,7 @@ export class Graph {
             if (!edge.morphism.signature.isBaseDual)
                 return edge.domainNode;
         }
-        
+
         //return incomingEdges[0].domainNode;
         return undefined;
     }
@@ -97,15 +97,15 @@ export class Graph {
         this.nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
-    createNode(object: VersionedSchemaObject, schemaObject: SchemaObject, position: Position, groupIds: string[]): Node {
+    createNode(object: VersionedSchemaObjex, schemaObjex: SchemaObjex, position: Position, groupIds: string[]): Node {
         const nodeGroups = groupIds.map(groupId => this.highlights.getOrCreateGroup(groupId));
-        const node = Node.create(this.cytoscape, object, schemaObject, position, nodeGroups);
-        this.nodes.set(schemaObject.key, node);
+        const node = Node.create(this.cytoscape, object, schemaObjex, position, nodeGroups);
+        this.nodes.set(schemaObjex.key, node);
 
         return node;
     }
 
-    deleteNode(object: SchemaObject) {
+    deleteNode(object: SchemaObjex) {
         const node = this.nodes.get(object.key);
         if (!node)
             return;
@@ -145,8 +145,8 @@ export class Graph {
         this.cytoscape.add({
             data: {
                 id,
-                source: node1.schemaObject.key.value,
-                target: node2.schemaObject.key.value,
+                source: node1.schemaObjex.key.value,
+                target: node2.schemaObjex.key.value,
                 label: '',
             },
             classes: 'temporary',
@@ -396,7 +396,7 @@ class GraphHighlights {
         if (!this.state)
             return;
 
-        const mappings = this._groups.get(this.state.groupId)?.mappings.filter(mapping => mapping.root.key.equals(node.schemaObject.key));
+        const mappings = this._groups.get(this.state.groupId)?.mappings.filter(mapping => mapping.root.key.equals(node.schemaObjex.key));
         if (!mappings || mappings.length === 0)
             // The node is not a root of any mapping in the current active group.
             return;

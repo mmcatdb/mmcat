@@ -19,7 +19,7 @@ function cancel() {
             <ValueRow label="Objects:" />
             <ValueRow
                 v-for="node in nodes"
-                :key="node.schemaObject.key.value"
+                :key="node.schemaObjex.key.value"
                 label="-"
             >
                 {{ node.metadata.label }}

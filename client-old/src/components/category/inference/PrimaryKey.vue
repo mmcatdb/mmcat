@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, shallowRef, computed } from 'vue';
 import { type Graph, SelectionType, type Node } from '@/types/categoryGraph';
-import type { Candidates, ReferenceCandidate } from '@/types/inference/candidates';
+import type { Candidates, PrimaryKeyCandidate } from '@/types/inference/candidates';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
+import Message from './Message.vue';
+import Divider from '@/components/layout/Divider.vue';
 
 /**
  * Props passed to the component.
@@ -12,7 +14,7 @@ import NodeInput from '@/components/input/NodeInput.vue';
 const props = defineProps<{
     /** The graph object used for selecting nodes. */
     graph: Graph;
-    /** The candidates available for reference merging. */
+    /** The candidates available for primary key merging. */
     candidates: Candidates;
 }>();
 
@@ -20,7 +22,7 @@ const props = defineProps<{
  * Emits custom events to the parent component.
  */
 const emit = defineEmits<{
-    (e: 'confirm', payload: Node[] | ReferenceCandidate): void;
+    (e: 'confirm', payload: Node[] | PrimaryKeyCandidate): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
 }>();
@@ -41,14 +43,9 @@ const nodes = shallowRef<(Node)[]>([]);
 const confirmClicked = ref(false);
 
 /**
- * Reactive reference for tracking clicked reference candidates.
+ * Reactive reference for tracking which candidates have been clicked.
  */
-const clickedCandidates = ref<ReferenceCandidate[]>([]);
-
-/**
- * Reactive reference for tracking the index of the clicked candidate.
- */
-const clickedIndex = ref<number | undefined>(undefined);
+const clickedCandidates = ref<PrimaryKeyCandidate[]>([]);
 
 /**
  * Computed property to check if two nodes have been selected.
@@ -61,14 +58,26 @@ const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
 const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
 /**
- * Confirms the selected reference candidate and emits the 'confirm' event.
+ * Reactive reference to control the visibility of the warning message.
  */
-function confirmCandidate(candidate: ReferenceCandidate, index: number) {
-    if (!clickedCandidates.value.includes(candidate)) 
+const showMessage = ref(false);
+
+/**
+ * Reactive reference to hold the warning message text.
+ */
+const messageText = ref('');
+
+/**
+ * Confirms the selected primary key candidate and emits the 'confirm' event.
+ */
+function confirmCandidate(candidate: PrimaryKeyCandidate) {
+    if (!clickedCandidates.value.includes(candidate)) {
         clickedCandidates.value.push(candidate);
+        messageText.value = 'Candidate applied. Save to confirm.';
+        showMessage.value = true;
+    }
 
     confirmClicked.value = true;
-    clickedIndex.value = index;
     emit('confirm', candidate);
 }
 
@@ -76,35 +85,38 @@ function confirmCandidate(candidate: ReferenceCandidate, index: number) {
  * Confirms the selected nodes and emits the 'confirm' event.
  */
 function confirmNodes() {
+    messageText.value = 'Applicable changes applied. Save to confirm.';
+    showMessage.value = true;
     confirmClicked.value = true;
     emit('confirm', nodes.value as Node[]);
 }
 
 /**
- * Cancels the current operation and goes back to the editor without making changes.
+ * Cancels the current operation and goes back to the editor.
  * Emits the 'cancel' event.
  */
 function save() {
+    showMessage.value = false;
     emit('cancel');
 }
 
 /**
  * Cancels the current selection or edit.
- * If no nodes are selected and the confirm button has not been clicked, it goes back to the editor.
- * Otherwise, it unselects nodes and resets the edit state, emitting the 'cancel-edit' event.
+ * If no nodes are selected and confirm button has not been clicked, it goes back to the editor.
+ * Otherwise, it emits the 'cancel-edit' event.
  */
 function cancel() {
-    if (noNodesSelected.value && !confirmClicked.value) { // go back to editor
-        emit('cancel');
-    }
+    if (noNodesSelected.value && !confirmClicked.value) 
+        emit('cancel');    
     
     nodes.value = [];  // Unselect selected nodes.
 
     if (confirmClicked.value) {
         emit('cancel-edit');
         confirmClicked.value = false;
-        clickedIndex.value = undefined;  // Optionally reset clicked index.
     }
+
+    showMessage.value = false;
 }
 
 /**
@@ -118,28 +130,47 @@ function splitName(name: string) {
 </script>
 
 <template>
-    <div class="referenceMerge">
-        <div class="input-type">
-            <label class="radio-label">
+    <div class="position-relative">
+        <Message 
+            :show="showMessage"
+            :message="messageText"
+        />
+        <h3>
+            Add primary key
+        </h3>
+        <p>
+            Define a relationship between objects by marking an object as a <strong>Primary Key</strong>. This designates it as the unique identifier for the given entity.
+        </p>
+
+        <Divider class="my-3" />
+        <div class="mb-2 d-flex gap-4">
+            <label class="d-flex align-items-center cursor-pointer">
                 <input
                     v-model="inputType"
                     type="radio"
                     value="manual"
-                /> Manual
+                />
+                Manual
             </label>
-            <label class="radio-label">
+            <label class="d-flex align-items-center cursor-pointer">
                 <input
                     v-model="inputType"
                     type="radio"
                     value="candidate"
-                /> Candidate
+                />
+                Candidate
             </label>
         </div>
+
+        <p>
+            First select the object with the primary key, then the object identified by it.
+        </p>
+
         <ValueContainer v-if="inputType === 'manual'">
-            <ValueRow label="Reference object:"> 
+            <ValueRow label="Primary Key object:"> 
                 {{ nodes[0]?.metadata.label }}
             </ValueRow>
-            <ValueRow label="Referred object:"> 
+            <ValueRow label="Identified object:"> 
                 {{ nodes[1]?.metadata.label }}
             </ValueRow>
             <NodeInput
@@ -149,27 +180,28 @@ function splitName(name: string) {
                 :type="SelectionType.Selected"
             />
         </ValueContainer>
+
         <div v-else>
-            <div v-if="props.candidates.refCandidates.length > 0">
+            <div v-if="props.candidates.pkCandidates.length > 0">
+                <p>
+                    Select from the discovered candidates:
+                </p>
+
                 <button
-                    v-for="(candidate, index) in props.candidates.refCandidates"
-                    :key="'ref-' + index"
+                    v-for="(candidate, index) in props.candidates.pkCandidates"
+                    :key="'pk-' + index"
                     class="candidate-button"
-                    :disabled="clickedIndex !== undefined && clickedIndex !== index"
+                    :disabled="confirmClicked"
                     :class="{ 'clicked': clickedCandidates.includes(candidate) }"
-                    @click="confirmCandidate(candidate, index)"
+                    @click="confirmCandidate(candidate)"
                 >
                     <div class="candidate-content">
-                        <div class="candidate-side">
-                            <div>{{ splitName(candidate.referencing).partA }}</div>
-                            <div>{{ splitName(candidate.referencing).partB }}</div>
+                        <div class="candidate-side pk-label">
+                            <strong>PK</strong>
                         </div>
-                        <div class="candidate-middle">
-                            REF
-                        </div>
-                        <div class="candidate-side">
-                            <div>{{ splitName(candidate.referred).partA }}</div>
-                            <div>{{ splitName(candidate.referred).partB }}</div>
+                        <div class="candidate-side candidate-text">
+                            <div>{{ splitName(candidate.hierarchicalName).partA }}</div>
+                            <div>{{ splitName(candidate.hierarchicalName).partB }}</div>
                         </div>
                     </div>
                 </button>
@@ -178,6 +210,7 @@ function splitName(name: string) {
                 No candidates available
             </p>
         </div>
+
         <div class="button-row">
             <button
                 v-if="inputType === 'manual'"
@@ -202,11 +235,6 @@ function splitName(name: string) {
 </template>
 
 <style scoped>
-.radio-label {
-    margin-right: 20px;
-    cursor: pointer;
-} 
-
 .candidate-button {
     display: flex;
     justify-content: space-between;
@@ -254,15 +282,15 @@ function splitName(name: string) {
     align-items: center;
 }
 
-.candidate-side {
-    display: flex;
-    flex-direction: column;
+.pk-label {
     margin-right: 10px;
-    text-align: center;
+    font-weight: bold;
 }
 
-.candidate-middle {
-    font-weight: bold;
-    margin: 0 10px;
+.candidate-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    justify-content: center;
 }
 </style>

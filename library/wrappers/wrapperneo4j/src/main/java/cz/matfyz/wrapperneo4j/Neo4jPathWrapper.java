@@ -2,7 +2,7 @@ package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 
 public class Neo4jPathWrapper implements AbstractPathWrapper {
 
@@ -12,7 +12,6 @@ public class Neo4jPathWrapper implements AbstractPathWrapper {
     @Override public boolean isInliningToOneAllowed() { return true; }
     @Override public boolean isInliningToManyAllowed() { return false; }
     @Override public boolean isGroupingAllowed() { return false; }
-    @Override public boolean isAnonymousNamingAllowed() { return false; }
     @Override public boolean isReferenceAllowed() { return false; }
     @Override public boolean isComplexPropertyAllowed() { return true; } // Just for the _from and _to nodes, false otherwise.
     @Override public boolean isSchemaless() { return true; }
@@ -24,11 +23,11 @@ public class Neo4jPathWrapper implements AbstractPathWrapper {
         boolean hasToNode = false;
 
         for (final var subpath : accessPath.subpaths()) {
-            if (!(subpath.name() instanceof StaticName name))
+            if (!(subpath.name() instanceof StringName name))
                 continue;
 
-            final var isFrom = name.getStringName().startsWith(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
-            final var isTo = name.getStringName().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
+            final var isFrom = name.value.startsWith(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
+            final var isTo = name.value.startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
             if (!isFrom && !isTo)
                 continue;
 

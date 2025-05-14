@@ -6,9 +6,9 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.core.mapping.Name.StringName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,10 +113,10 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     private static String getPropertyName(Property property) {
         return property.mapping.accessPath().getPropertyPath(property.path).stream().map(accPath -> {
             final var name = accPath.name();
-            if (!(name instanceof StaticName staticName))
-                throw new UnsupportedOperationException("Only static names are supported.");
+            if (!(name instanceof StringName stringName))
+                throw new UnsupportedOperationException("Only string names are supported.");
 
-            return staticName.getStringName();
+            return stringName.value;
         }).collect(Collectors.joining("."));
     }
 
@@ -228,10 +228,10 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         private String createNameInMongo() {
             final String output = emptyLastPathBuffer().stream()
                 .map(accessPath -> {
-                    if (!(accessPath.name() instanceof StaticName staticName))
+                    if (!(accessPath.name() instanceof StringName stringName))
                         throw new UnsupportedOperationException("Only static names are supported.");
 
-                    return staticName.getStringName();
+                    return stringName.value;
                 })
                 .collect(Collectors.joining("."));
 

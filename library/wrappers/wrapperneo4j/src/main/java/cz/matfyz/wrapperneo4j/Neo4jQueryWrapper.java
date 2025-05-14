@@ -9,7 +9,7 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 
 import java.util.stream.Collectors;
 
@@ -182,10 +182,8 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
     private static boolean hasSubpathByPrefix(ComplexProperty path, String namePrefix) {
         for (final var subpath : path.subpaths()) {
-            if (
-                (subpath.name() instanceof final StaticName staticName)
-                && staticName.getStringName().startsWith(namePrefix)
-            ) return true;
+            if ((subpath.name() instanceof final StringName stringName) && stringName.value.startsWith(namePrefix))
+                return true;
         }
         return false;
     }
@@ -234,11 +232,11 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         if (
             subpath == null ||
             !(subpath instanceof SimpleProperty simpleSubpath) ||
-            !(simpleSubpath.name() instanceof StaticName staticName)
+            !(simpleSubpath.name() instanceof StringName stringName)
         )
             throw QueryException.propertyNotFoundInMapping(property);
 
-        return escapeName(staticName.getStringName());
+        return escapeName(stringName.value);
     }
 
 }

@@ -147,7 +147,7 @@ public abstract class MongoDB {
             b -> b.root(
                 b.simple("number", Schema.orderToNumber),
                 b.auxiliary("contact",
-                    b.simple(Schema.orderToType, Schema.orderToValue)
+                    b.simple(Schema.orderToType, true, Schema.orderToValue)
                 )
             )
         );
@@ -203,7 +203,7 @@ public abstract class MongoDB {
             b -> b.root(
                 b.simple("number", Schema.orderToNumber),
                 b.auxiliary("note",
-                    b.complex(Schema.orderToLocale, Schema.orderToData,
+                    b.complex(Schema.orderToLocale, true, Schema.orderToData,
                         b.simple("subject", Schema.dataToSubject),
                         b.simple("content", Schema.dataToContent)
                     )

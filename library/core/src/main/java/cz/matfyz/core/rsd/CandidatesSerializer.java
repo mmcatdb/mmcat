@@ -42,14 +42,14 @@ public class CandidatesSerializer {
     public record SerializedPrimaryKeyCandidate(
         String type,
         String hierarchicalName,
-        boolean selected
+        boolean isSelected
     ) implements Serializable {
 
         public static SerializedPrimaryKeyCandidate serialize(PrimaryKeyCandidate candidate) {
             return new SerializedPrimaryKeyCandidate(
                 candidate.type(),
                 candidate.hierarchicalName(),
-                candidate.selected()
+                candidate.isSelected()
             );
         }
 
@@ -58,7 +58,7 @@ public class CandidatesSerializer {
                 this.type(),
                 null,
                 this.hierarchicalName(),
-                this.selected()
+                this.isSelected()
             );
         }
     }
@@ -67,8 +67,8 @@ public class CandidatesSerializer {
         String type,
         String referred,
         String referencing,
-        boolean weak,
-        boolean selected
+        boolean isWeak,
+        boolean isSelected
     ) implements Serializable {
 
     public static SerializedReferenceCandidate serialize(ReferenceCandidate candidate) {
@@ -76,8 +76,8 @@ public class CandidatesSerializer {
             candidate.type(),
             candidate.referred(),
             candidate.referencing(),
-            candidate.weak(),
-            candidate.selected()
+            candidate.isWeak(),
+            candidate.isSelected()
         );
     }
 
@@ -88,8 +88,8 @@ public class CandidatesSerializer {
             null, // referencingProperty
             this.referred(),
             this.referencing(),
-            this.weak(),
-            this.selected()
+            this.isWeak(),
+            this.isSelected()
         );
     }
 }

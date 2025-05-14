@@ -36,7 +36,6 @@ public record DatasourceDetail(
         boolean isInliningToOneAllowed,
         boolean isInliningToManyAllowed,
         boolean isGroupingAllowed,
-        boolean isAnonymousNamingAllowed,
         boolean isReferenceAllowed,
         boolean isComplexPropertyAllowed,
         boolean isSchemaless
@@ -53,7 +52,6 @@ public record DatasourceDetail(
                 path.isInliningToOneAllowed(),
                 path.isInliningToManyAllowed(),
                 path.isGroupingAllowed(),
-                path.isAnonymousNamingAllowed(),
                 path.isReferenceAllowed(),
                 path.isComplexPropertyAllowed(),
                 path.isSchemaless()

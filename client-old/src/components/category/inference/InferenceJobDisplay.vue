@@ -3,7 +3,7 @@ import { shallowRef, watch, ref } from 'vue';
 import type { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
-import type { SchemaCategory } from '@/types/schema';
+import type { Category } from '@/types/schema';
 import EditorForInferenceSchemaCategory from './EditorForInferenceSchemaCategory.vue';
 import LayoutSelector from './LayoutSelector.vue';
 import type { LayoutType } from '@/types/inference/layoutType';
@@ -16,7 +16,7 @@ type InferenceJobDisplayProps = {
     /** The current inference job. */
     job: Job;
     /** The schema category used in the job. */
-    schemaCategory: SchemaCategory;
+    schemaCategory: Category;
     /** List of inference edits. */
     inferenceEdits: InferenceEdit[];
     /** The current layout type. */
@@ -83,17 +83,17 @@ function changeLayout(newLayoutType: LayoutType) {
  * Creates a reference merge edit from the provided payload.
  * Emits the 'update-edit' event with the new edit.
  */
-function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
+function createMergeEdit(payload: Node[] | ReferenceCandidate) {
     let edit;
 
     if (payload instanceof ReferenceCandidate) {
         edit = new ReferenceMergeInferenceEdit(payload, true);
     }
     else {
-        const referenceKey = payload[0].schemaObject.key;
-        const referredKey = payload[1].schemaObject.key;
+        const referencingKey = payload[0].schemaObjex.key;
+        const referencedKey = payload[1].schemaObjex.key;
 
-        edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey, true);
+        edit = new ReferenceMergeInferenceEdit(referencingKey, referencedKey, true);
     }
     confirmOrRevert(edit);
 }
@@ -102,15 +102,15 @@ function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
  * Creates a primary key merge edit from the provided payload.
  * Emits the 'update-edit' event with the new edit.
  */
-function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
+function createPrimaryKeyEdit(payload: Node[] | PrimaryKeyCandidate) {
     let edit;
 
     if (payload instanceof PrimaryKeyCandidate) {
         edit = new PrimaryKeyMergeInferenceEdit(payload, true);
     }
     else {
-        const primaryKey = payload[0].schemaObject.key;
-        const primaryKeyIdentified = payload[1].schemaObject.key;
+        const primaryKey = payload[0].schemaObjex.key;
+        const primaryKeyIdentified = payload[1].schemaObjex.key;
 
         edit = new PrimaryKeyMergeInferenceEdit(primaryKey, primaryKeyIdentified, true);
     }
@@ -122,7 +122,7 @@ function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
  * Emits the 'update-edit' event with the new cluster edit.
  */
 function createClusterEdit(nodes: Node[]) {
-    const clusterKeys = nodes.map(node => node.schemaObject.key);
+    const clusterKeys = nodes.map(node => node.schemaObjex.key);
 
     const edit = new ClusterInferenceEdit(clusterKeys, true);
     confirmOrRevert(edit);
@@ -175,10 +175,6 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
-function savePositions(map: Map<Key, Position>) {
-    emit('save-positions', map);
-}
-
 /**
  * Handles signatures view when graph updated
  */
@@ -188,6 +184,21 @@ function handleShowSignaturesUpdate(newState: boolean) {
         graph.value.toggleEdgeLabels(newState);
 }
 
+const updatedPositionsMap = ref(new Map<Key, Position>());
+
+function updatePosition(key: Key, newPosition: Position) {
+    updatedPositionsMap.value.set(key, newPosition);
+}
+
+/**
+ * Emits the 'save-positions' even when positions are saved.
+ */
+function savePositions() {
+    if (updatedPositionsMap.value.size > 0) {
+        emit('save-positions', updatedPositionsMap.value);
+        updatedPositionsMap.value.clear();
+    }
+}
 </script>
 
 <template>
@@ -200,25 +211,41 @@ function handleShowSignaturesUpdate(newState: boolean) {
                 @graph-created="graphCreated"
                 @update-show-signatures="handleShowSignaturesUpdate"
             />
-            <div v-if="graph">
-                <LayoutSelector
-                    :layout-type="props.layoutType"
-                    @change-layout="changeLayout"
-                />
+            <div
+                v-if="graph"
+                class="w-100 d-flex flex-column gap-2"
+            >
                 <EditorForInferenceSchemaCategory 
                     :graph="graph" 
                     :schema-category="props.schemaCategory" 
                     :inference-edits="props.inferenceEdits"
                     :candidates="props.candidates"
-                    @confirm-reference-merge="createReferenceMergeEdit"    
-                    @confirm-primary-key-merge="createPrimaryKeyMergeEdit"
+                    @confirm-merge="createMergeEdit"    
+                    @confirm-primary-key="createPrimaryKeyEdit"
                     @confirm-cluster="createClusterEdit"
                     @confirm-recursion="createRecursionEdit"
                     @cancel-edit="cancelEdit"   
                     @revert-edit="confirmOrRevert"    
-                    @save-positions="savePositions"     
+                    @update-position="updatePosition"
                 />
-                <slot name="below-editor" />
+
+                <div class="flex-grow-1" />
+
+                <LayoutSelector
+                    :layout-type="props.layoutType"
+                    @change-layout="changeLayout"
+                />
+
+                <div class="w-100 py-2 d-flex gap-2">
+                    <slot name="button-row" />
+
+                    <button
+                        :disabled="!updatedPositionsMap.size"
+                        @click="savePositions"
+                    >
+                        Save Positions
+                    </button>
+                </div>
             </div>
         </div>
     </div>

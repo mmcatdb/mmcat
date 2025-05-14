@@ -11,7 +11,7 @@ import cz.matfyz.evolution.exception.DependencyException;
 
 import java.util.List;
 
-public record CreateObject(
+public record CreateObjex(
     SerializedObject schema,
     SerializedMetadataObject metadata
 ) implements SMO {

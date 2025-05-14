@@ -1,4 +1,4 @@
-import type { NameFromServer, SignatureFromServer, StaticNameFromServer } from '../identifiers';
+import type { NameFromServer, SignatureFromServer } from '../identifiers';
 
 export type SimplePropertyFromServer = {
     name: NameFromServer;
@@ -10,7 +10,5 @@ export type ComplexPropertyFromServer = {
     signature: SignatureFromServer;
     subpaths: ChildPropertyFromServer[];
 };
-
-export type RootPropertyFromServer = ComplexPropertyFromServer & { name: StaticNameFromServer };
 
 export type ChildPropertyFromServer = ComplexPropertyFromServer | SimplePropertyFromServer;

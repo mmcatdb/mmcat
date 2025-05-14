@@ -26,7 +26,7 @@ function setValueFromParent(newValue: StaticName) {
 
     staticValue.value = validateDatasourceName(props.modelValue.value);
     if (staticValue.value !== props.modelValue.value) {
-        innerValue.value = StaticName.fromString(staticValue.value);
+        innerValue.value = new StaticName(staticValue.value);
         emit('update:modelValue', innerValue.value);
         return;
     }
@@ -39,7 +39,7 @@ function validateDatasourceName(value: string): string {
 
 function updateInnerValue() {
     staticValue.value = validateDatasourceName(staticValue.value);
-    innerValue.value = StaticName.fromString(staticValue.value);
+    innerValue.value = new StaticName(staticValue.value);
     emit('update:modelValue', innerValue.value);
 }
 </script>
@@ -48,6 +48,7 @@ function updateInnerValue() {
     <input
         v-model="staticValue"
         :disabled="disabled"
+        style="height: 24px;"
         @input="updateInnerValue"
     />
 </template>

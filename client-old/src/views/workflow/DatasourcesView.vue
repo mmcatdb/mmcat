@@ -99,7 +99,7 @@ async function toggleSelected(id: Id, doSelect: boolean) {
     <ResourceLoader :loading-function="fetchDatasources" />
     <Teleport to="#app-left-bar-content">
         <button
-            class="mt-4 order-2"
+            class="mt-4 order-2 primary"
             :disabled="!datasources?.selected"
             @click="emit('continue')"
         >

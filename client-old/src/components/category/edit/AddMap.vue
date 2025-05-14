@@ -36,16 +36,16 @@ onUnmounted(() => {
 function save() {
     evocat.compositeOperation('addMap', () => {
         const [ sourceNode, valueNode ] = nodes.value;
-        if (!sourceNode || !valueNode || !sourceNode.schemaObject.ids)
+        if (!sourceNode || !valueNode || !sourceNode.schemaObjex.ids)
             return;
 
         const keyObjectIds = ObjectIds.createNonSignatures(Type.Value);
-        const keyObject = evocat.createObject({
+        const keyObject = evocat.createObjex({
             label: keyLabel.value,
             ids: keyObjectIds,
         });
 
-        const mapObject = evocat.createObject({
+        const mapObject = evocat.createObjex({
             label: mapLabel.value,
         });
 
@@ -58,20 +58,20 @@ function save() {
 
         const mapToSourceNode = evocat.createMorphism({
             domKey: mapObject.key,
-            codKey: sourceNode.schemaObject.key,
+            codKey: sourceNode.schemaObjex.key,
             min: Cardinality.One,
         });
 
         evocat.createMorphism({
             domKey: mapObject.key,
-            codKey: valueNode.schemaObject.key,
+            codKey: valueNode.schemaObjex.key,
             min: Cardinality.One,
         });
 
-        evocat.updateObject(mapObject, {
+        evocat.updateObjex(mapObject, {
             ids: ObjectIds.createCrossProduct([
                 { signature: mapToKey.signature, ids: keyObjectIds },
-                { signature: mapToSourceNode.signature, ids: sourceNode.schemaObject.ids },
+                { signature: mapToSourceNode.signature, ids: sourceNode.schemaObjex.ids },
             ]),
         });
     });

@@ -74,7 +74,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
     /**
      * Replace old version of dom/cod by its newer version (which has the same key).
      */
-    public void updateObject(SchemaObject object) {
+    public void updateObjex(SchemaObject object) {
         if (this.dom.equals(object))
             this.dom = object;
         if (this.cod.equals(object))

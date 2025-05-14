@@ -1,6 +1,6 @@
 package cz.matfyz.transformations.exception;
 
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.record.SimpleRecord;
 

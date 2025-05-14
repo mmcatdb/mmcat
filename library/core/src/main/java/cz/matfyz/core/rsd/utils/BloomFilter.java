@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+// FIXME This comment.
 /**
  * pridej hodnotu do bloom filteru - je to optimalizovany bloom filter, lazy
  * evaluace... nejprve pridavas postupne 10 000 cisel a teprve potom zacnes

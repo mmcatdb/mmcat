@@ -1,85 +1,93 @@
 import { Signature, type SignatureFromServer } from './Signature';
 
-export type NameFromServer = StaticNameFromServer | DynamicNameFromServer;
+export type NameFromServer = StaticNameFromServer | SpecialNameFromServer | DynamicNameFromServer;
 
 export function nameFromServer(input: NameFromServer): Name {
-    return 'signature' in  input
-        ? DynamicName.fromServer(input)
-        : StaticName.fromServer(input);
+    if ('value' in input)
+        return StaticName.fromServer(input);
+    if ('type' in input)
+        return SpecialName.fromServer(input);
+    return DynamicName.fromServer(input);
 }
 
-export type Name = StaticName | DynamicName;
+export type Name = StaticName | SpecialName | DynamicName;
 
-export type StaticNameFromServer = { value: string, type: 'STATIC' | 'ANONYMOUS' };
+type StaticNameFromServer = {
+    value: string;
+};
 
 export class StaticName {
-    readonly value: string;
-    readonly _isAnonymous: boolean;
-
-    private constructor(value: string, anonymous = false) {
-        this.value = value;
-        this._isAnonymous = anonymous;
-    }
-
-    static fromString(value: string): StaticName {
-        return new StaticName(value);
-    }
-
-    static copy(name: StaticName): StaticName {
-        return name._isAnonymous ? StaticName.anonymous : new StaticName(name.value);
-    }
+    constructor(
+        readonly value: string,
+    ) {}
 
     copy(): StaticName {
-        return this._isAnonymous ? StaticName.anonymous : new StaticName(this.value);
-    }
-
-    static _anonymousInstance = new StaticName('', true);
-
-    static get anonymous(): StaticName {
-        return this._anonymousInstance;
-    }
-
-    get isAnonymous(): boolean {
-        return this._isAnonymous;
+        return new StaticName(this.value);
     }
 
     equals(other: Name | undefined): boolean {
-        return other instanceof StaticName
-            && other._isAnonymous === this._isAnonymous
-            && other.value === this.value;
+        return other instanceof StaticName && other.value === this.value;
     }
 
     toString(): string {
-        return this._isAnonymous ? '_' : this.value;
+        return this.value;
     }
 
     static fromServer(input: StaticNameFromServer): StaticName {
-        return new StaticName(input.value, input.type === 'ANONYMOUS');
+        return new StaticName(input.value);
     }
 
     toServer(): StaticNameFromServer {
         return {
             value: this.value,
-            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC',
         };
     }
 }
 
-export type DynamicNameFromServer = { signature: SignatureFromServer };
+type SpecialNameFromServer = {
+    type: string;
+};
+
+export class SpecialName {
+    constructor(
+        readonly type: string,
+    ) {}
+
+    copy(): SpecialName {
+        return new SpecialName(this.type);
+    }
+
+    equals(other: Name | undefined): boolean {
+        return other instanceof SpecialName && other.type === this.type;
+    }
+
+    toString(): string {
+        return `<${this.type}>`;
+    }
+
+    static fromServer(input: SpecialNameFromServer): SpecialName {
+        return new SpecialName(input.type);
+    }
+
+    toServer(): SpecialNameFromServer {
+        return {
+            type: this.type,
+        };
+    }
+}
+
+type DynamicNameFromServer = {
+    signature: SignatureFromServer;
+};
 
 export class DynamicName {
-    readonly signature: Signature;
-
-    private constructor(signature: Signature) {
-        this.signature = signature;
-    }
+    constructor(
+        readonly signature: Signature,
+        // No patterns yet - we will add them later.
+    ) {}
 
     static fromSignature(signature: Signature) {
         return new DynamicName(signature);
-    }
-
-    static copy(name: DynamicName): DynamicName {
-        return new DynamicName(name.signature.copy());
     }
 
     copy(): DynamicName {

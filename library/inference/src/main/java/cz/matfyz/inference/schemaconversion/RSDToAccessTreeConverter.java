@@ -6,6 +6,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key.KeyGenerator;
 import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
+import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Type;
 
@@ -18,8 +19,6 @@ public class RSDToAccessTreeConverter {
 
     public static final String INDEX_LABEL = "_index";
     public static final String VALUE_LABEL = "_value";
-
-    public static final String ROOT_NAME = "root";
 
     public static final String MONGO_IDENTIFIER = "_id";
 
@@ -39,7 +38,7 @@ public class RSDToAccessTreeConverter {
      * the access tree structure.
      */
     public AccessTreeNode convert(RecordSchemaDescription rsd) {
-        rsd.setName(ROOT_NAME);
+        rsd.setName(TypedName.ROOT);
         root = new AccessTreeNode(kindName, null, keyGenerator.next(), null, null, null, false);
         buildAccessTree(rsd, root.key, 1, root);
         root.transformArrayNodes();
@@ -51,7 +50,7 @@ public class RSDToAccessTreeConverter {
             return;
         }
 
-        if (ROOT_NAME.equals(rsdParent.getName())) {
+        if (TypedName.ROOT.equals(rsdParent.getName())) {
             currentNode = root;
         }
 

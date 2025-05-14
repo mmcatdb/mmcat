@@ -6,8 +6,8 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.Computation.Operator;
+import cz.matfyz.core.mapping.Name.StringName;
 
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -205,11 +205,11 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         if (
             subpath == null ||
             !(subpath instanceof SimpleProperty simpleSubpath) ||
-            !(simpleSubpath.name() instanceof StaticName staticName)
+            !(simpleSubpath.name() instanceof StringName stringName)
         )
             throw QueryException.propertyNotFoundInMapping(property);
 
-        return staticName.getStringName();
+        return stringName.value;
     }
 
     private String getAggregationName(PropertyWithAggregation aggregation) {

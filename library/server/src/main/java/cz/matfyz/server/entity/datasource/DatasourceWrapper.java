@@ -84,4 +84,8 @@ public class DatasourceWrapper extends Entity {
         ));
     }
 
+    public boolean isEqualToInit(DatasourceInit init) {
+        return label.equals(init.label()) && type.equals(init.type()) && settings.equals(init.settings());
+    }
+
 }
