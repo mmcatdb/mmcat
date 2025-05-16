@@ -1,6 +1,6 @@
 package cz.matfyz.querying.exception;
 
-import cz.matfyz.querying.parsing.ParserNode;
+import cz.matfyz.querying.parser.ParserNode;
 
 import java.io.Serializable;
 

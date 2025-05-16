@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS "order_item";
 DROP TABLE IF EXISTS "order";
+DROP TABLE IF EXISTS "product";
+DROP TABLE IF EXISTS "dynamic";
 
 -- The most simple order table for some tests. --
 CREATE TABLE "order" (
@@ -12,7 +14,6 @@ VALUES
     ('o_200');
 
 -- The order table for the structure test. --
-DROP TABLE IF EXISTS "product";
 CREATE TABLE "product" (
     "id" TEXT PRIMARY KEY,
     "label" TEXT,
@@ -42,7 +43,6 @@ VALUES
     ('o_200', '457', '7'),
     ('o_200', '734', '3');
 
-DROP TABLE IF EXISTS "dynamic";
 CREATE TABLE "dynamic" (
     "id" TEXT PRIMARY KEY,
     "label" TEXT,

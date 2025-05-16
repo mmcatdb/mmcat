@@ -1,3 +1,4 @@
+import type { DatasourceType } from './datasource';
 import type { Entity, Id } from './id';
 
 export type FileFromServer = {
@@ -8,7 +9,7 @@ export type FileFromServer = {
     label: string;
     description: string;
     jobLabel: string;
-    fileType: string; //TODO
+    fileType: DatasourceType;
     createdAt: string;
     executedAt?: string[];
 };
@@ -22,7 +23,7 @@ export class File implements Entity {
         public readonly label: string,
         public readonly description: string,
         public readonly jobLabel: string,
-        public readonly fileType: string, //TODO (should this be an enum here?)
+        public readonly fileType: DatasourceType,
         public readonly createdAt: Date,
         public readonly executedAt: Date[] | undefined,
     ) {}

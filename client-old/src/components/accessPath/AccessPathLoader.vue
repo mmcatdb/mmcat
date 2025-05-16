@@ -153,8 +153,8 @@ function undoAccessPath() {
 /**
  * Emits the finish event to create a mapping with the given primary key and selected mapping kind name.
  */
-function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath.value, selectedMapping.value?.kindName);
+function createMapping(primaryKey: SignatureId, rootProperty: GraphRootProperty, kindName: String) {
+    emit('finish', primaryKey, accessPath.value, kindName);
 }
 
 /**

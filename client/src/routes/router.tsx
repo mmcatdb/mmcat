@@ -18,6 +18,7 @@ import { JobPage } from '@/pages/category/JobPage';
 import { type MappingLoaderData, MappingPage } from '@/pages/category/MappingPage';
 import { type ActionLoaderData, ActionDetailPage } from '@/pages/category/ActionDetailPage';
 import { NewMappingPage } from '@/pages/category/NewMappingPage';
+import { QueryingPage } from '@/pages/QueryingPage';
 
 /**
  * Creates the application's routing configuration.
@@ -70,7 +71,7 @@ export const router = createBrowserRouter([
                         loader: CategoriesPage.loader,
                     },
                     {
-                        path: ':categoryId',
+                        path: routes.category.editor.path,
                         loader: CategoryPage.loader,
                         Component: CategoryPage,
                         handle: {
@@ -168,6 +169,13 @@ export const router = createBrowserRouter([
                                         handle: { breadcrumb: 'Job Details' },
                                     },
                                 ],
+                            },
+                            {
+                                id: routes.category.querying.id,
+                                path: routes.category.querying.path,
+                                Component: QueryingPage,
+                                loader: QueryingPage.loader,
+                                handle: { breadcrumb: 'Querying' },
                             },
                         ],
                     },

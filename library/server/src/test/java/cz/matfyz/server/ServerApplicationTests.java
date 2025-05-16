@@ -18,8 +18,8 @@ import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.service.WrapperService;
-import cz.matfyz.transformations.processes.DatabaseToInstance;
-import cz.matfyz.transformations.processes.InstanceToDatabase;
+import cz.matfyz.transformations.DatabaseToInstance;
+import cz.matfyz.transformations.InstanceToDatabase;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

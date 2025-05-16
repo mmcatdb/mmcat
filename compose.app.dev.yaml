@@ -15,6 +15,8 @@ services:
         ports:
             # Make the server available for development.
             - 3201:3201
+        volumes:
+            - .uploads:/app/uploads
 
     # client:
     #     container_name: "mmcat-client"

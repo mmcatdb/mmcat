@@ -22,7 +22,7 @@ public class RSDTests {
     @Test
     void testRBAalgorithmJSON() throws Exception {
         final var url = ClassLoader.getSystemResource("RSDTestFile.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
 
         final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider)
@@ -39,7 +39,7 @@ public class RSDTests {
     @Test
     void testRBAalgorithmCSV() throws Exception {
         final var url = ClassLoader.getSystemResource("RSDTestFile.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false);
+        final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false, false);
         final var jsonProvider = new CsvProvider(settings);
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(jsonProvider)

@@ -1,7 +1,14 @@
 package cz.matfyz.tests.querying;
 
+import cz.matfyz.core.querying.Computation.Operator;
+import cz.matfyz.core.querying.Expression.Constant;
+import cz.matfyz.core.querying.Expression.ExpressionScope;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.core.querytree.JoinNode.SerializedJoinNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -14,11 +21,13 @@ class QueryTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
     private static final Datasources datasources = new Datasources();
+    private static final ExpressionScope scope = new ExpressionScope();
 
     @BeforeAll
     static void setup() {
         datasources.postgreSQL().setup();
         datasources.mongoDB().setup();
+        datasources.neo4j().setup();
     }
 
     @Test
@@ -47,6 +56,28 @@ class QueryTests {
     void basicMongoDB() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.mongoDB())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void basicNeo4J() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
             .query("""
                 SELECT {
                     ?order number ?number .
@@ -274,6 +305,114 @@ class QueryTests {
     }
 
     @Test
+    void filterPostgreSQL() {
+        new QueryCustomTreeTest<>(
+            datasources,
+            datasources.postgreSQL(),
+            """
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = "o_100")
+                }
+            """,
+            (schema, datasource, plan) -> {
+                final var onlyPattern = plan.stream().findFirst().get();
+
+                return new DatasourceNode(
+                    datasource,
+                    plan,
+                    schema,
+                    List.of(),
+                    List.of(
+                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                    ),
+                    onlyPattern.root.variable
+                );
+            },
+            """
+                [ {
+                    "number": "o_100"
+                } ]
+            """).run();
+    }
+
+    @Test
+    void filterMongoDB() {
+        new QueryCustomTreeTest<>(
+            datasources,
+            datasources.mongoDB(),
+            """
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = "o_100")
+                }
+            """,
+            (schema, datasource, plan) -> {
+                final var onlyPattern = plan.stream().findFirst().get();
+
+                return new DatasourceNode(
+                    datasource,
+                    plan,
+                    schema,
+                    List.of(),
+                    List.of(
+                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                    ),
+                    onlyPattern.root.variable
+                );
+            },
+            """
+                [ {
+                    "number": "o_100"
+                } ]
+            """).run();
+    }
+
+    @Test
+    void filterNeo4J() {
+        new QueryCustomTreeTest<>(
+            datasources,
+            datasources.neo4j(),
+            """
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = "o_100")
+                }
+            """,
+            (schema, datasource, plan) -> {
+                final var onlyPattern = plan.stream().findFirst().get();
+
+                return new DatasourceNode(
+                    datasource,
+                    plan,
+                    schema,
+                    List.of(),
+                    List.of(
+                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                    ),
+                    onlyPattern.root.variable
+                );
+            },
+            """
+                [ {
+                    "number": "o_100"
+                } ]
+            """).run();
+    }
+
+    @Test
     void filter() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
@@ -284,12 +423,37 @@ class QueryTests {
                 WHERE {
                     ?order 1 ?number .
 
-                    FILTER(?number = \"o_100\")
+                    FILTER(?number = "o_100")
                 }
             """)
             .expected("""
                 [ {
                     "number": "o_100"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void stringEscaping() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number != "x\\\\x\\nx'x\\'\\"x")
+                    FILTER(?number != 'x\\\\x\\nx"x\\'\\"x')
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
                 } ]
             """)
             .run();
@@ -306,13 +470,147 @@ class QueryTests {
                 WHERE {
                     ?order 1 ?number .
 
-                    FILTER(?number != \"o_200\")
-                    FILTER(?number != \"o_300\")
+                    FILTER(?number != "o_200")
+                    FILTER(?number != "o_300")
                 }
             """)
             .expected("""
                 [ {
                     "number": "o_100"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void tautologyFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = ?number)
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void contradictionFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number != ?number)
+                }
+            """)
+            .expected("""
+                []
+            """)
+            .run();
+    }
+
+    @Test
+    void constantTautologyFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER("1" = "1")
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void constantContradictionFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER("1" = "2")
+                }
+            """)
+            .expected("""
+                []
+            """)
+            .run();
+    }
+
+    @Test
+    void computationFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER("true" != (?number = "o_100"))
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void disjunctionFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = "o_100" || ?number = "o_200")
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
                 } ]
             """)
             .run();
@@ -525,6 +823,40 @@ class QueryTests {
             .run();
     }
 
+    @Test
+    void mergeJoin() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .addDatasource(
+                datasources.createNewMongoDB()
+                    .addMapping(MongoDB.tag(datasources.schema))
+                    .addMapping(MongoDB.customer(datasources.schema))
+            )
+            .query("""
+                SELECT {
+                    ?order
+                        name ?customerName ;
+                        tags ?tag .
+
+                }
+                WHERE {
+                    ?order
+                        3/4 ?customerName ;
+                        -2 ?tag .
+                }
+            """)
+            .expected("""
+                [ {
+                    "name": "Alice",
+                    "tags": [ "123", "456", "789" ]
+                }, {
+                    "name": "Bob",
+                    "tags": [ "123", "String456", "String789" ]
+                } ]
+            """)
+            .run();
+    }
+
     /**
      * The variables ?order and ?product are not needed. However, the query result should be the same as if the user used composite morphisms instead.
      */
@@ -564,4 +896,26 @@ class QueryTests {
 
     // TODO - something breaks when one kind is in multiple mappings. The planning algorithm can't deal with it. Don't know why. Test it.
 
+    @Test
+    void filterConcatenation() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = CONCAT("o", "_", "100"))
+                    # FILTER(CONCAT(?number, "-xyz") = CONCAT(CONCAT("o", "_", "100"), "-xyz"))
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                } ]
+            """)
+            .run();
+    }
 }

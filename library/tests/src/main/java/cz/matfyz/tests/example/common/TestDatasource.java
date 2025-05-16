@@ -43,10 +43,13 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
     }
 
     public void setup() {
-        wrapper.execute(getFilePath());
+        final var filePath = getFilePath();
+        if (filePath != null) wrapper.execute(filePath);
     }
 
+    @Nullable
     private Path getFilePath() {
+        if (setupFileName == null) return null;
         try {
             final var url = ClassLoader.getSystemResource(setupFileName);
             return Paths.get(url.toURI()).toAbsolutePath();

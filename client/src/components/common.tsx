@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useLayoutEffect, useState } from 'react';
 import { Card, CardBody, Tooltip as NextuiTooltip, type TooltipProps } from '@nextui-org/react';
 import clsx from 'clsx';
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
@@ -42,7 +42,7 @@ type PortalProps = {
 export function Portal({ children, to }: PortalProps) {
     const [ target, setTarget ] = useState(document.getElementById(to));
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setTarget(document.getElementById(to));
     }, [ to ]);
 
@@ -70,9 +70,9 @@ type InfoBannerProps = {
  */
 export function InfoBanner({ children, className, dismissBanner }: InfoBannerProps) {
     return (
-        <Card 
-            shadow='sm' 
-            radius='lg' 
+        <Card
+            shadow='sm'
+            radius='lg'
             className={cn('relative bg-content1', className)}
         >
             <CardBody className='text-sm text-foreground px-4 py-3 relative'>

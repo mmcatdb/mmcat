@@ -12,9 +12,10 @@ import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Name.StringName;
-import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
@@ -263,8 +264,30 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public QueryResult executeQuery(QueryStatement statement) {
-        // TODO
-        throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
+        // TODO: Neo4J might be able to return nested results, but this implementation so far covers only flat relations.
+        final var columns = statement.structure().children().stream().map(c -> c.name).toList();
+        final var builder = new ListResult.TableBuilder();
+        builder.addColumns(columns);
+
+        try (Session session = provider.getSession()) {
+            session.executeRead(tx -> {
+                final var query = new Query(statement.content().toString());
+                tx.run(query).forEachRemaining(result -> {
+                    final var row = new ArrayList<String>();
+                    for (final var column : columns) {
+                        final var columnValue = result.get(column).asString();
+                        row.add(columnValue);
+                    }
+
+                    builder.addRow(row);
+                });
+                return null;
+            });
+
+            return new QueryResult(builder.build(), statement.structure());
+        } catch (Exception e) {
+            throw PullForestException.innerException(e);
+        }
     }
 
     /**

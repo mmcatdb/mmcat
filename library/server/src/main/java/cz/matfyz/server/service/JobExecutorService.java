@@ -40,6 +40,7 @@ import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
+import cz.matfyz.server.entity.file.File;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
@@ -56,10 +57,10 @@ import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.JobRepository.JobInfo;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
+import cz.matfyz.transformations.DatabaseToInstance;
+import cz.matfyz.transformations.InstanceToDatabase;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
-import cz.matfyz.transformations.processes.DatabaseToInstance;
-import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -265,9 +266,10 @@ public class JobExecutorService {
 
         final var resultString = result.statementsAsString();
 
-        fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, executed, datasource.type, resultString);
+        final File file = fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, executed, datasource.type, resultString);
 
-        job.data = new ModelJobData(resultString);
+        // Instead of the result we are saving only the id of the file, where the result is saved
+        job.data = new ModelJobData(file.id().toString());
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {

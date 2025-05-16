@@ -15,6 +15,9 @@ const files = {
     updateFile: PUT<{ id: StringLike }, FileFromServer, FileEdit>(
         u => `/files/${u.id}/update`,
     ),
+    previewFile: GET<{ id: StringLike }, String>(
+        u => `/files/${u.id}/preview`,
+    ),
 };
 
 export default files;

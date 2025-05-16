@@ -11,6 +11,7 @@ db.createUser({
         { role: "readWrite", db: "${EXAMPLE_DATABASE_BASIC}" },
         { role: "readWrite", db: "${EXAMPLE_DATABASE_QUERY_EVOLUTION}" },
         { role: "readWrite", db: "${EXAMPLE_DATABASE_INFERENCE}" },
+        { role: "readWrite", db: "${BENCHMARK_DATABASE_YELP}" },
         { role: "readWrite", db: "test" },
     ],
 });

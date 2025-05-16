@@ -13,7 +13,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;

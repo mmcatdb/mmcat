@@ -85,13 +85,17 @@ public class Schema {
 
     // Ids
 
-    private static final SchemaBuilder ids = builder
-        .ids(customer, customerToCustomerId)
-        .ids(knows, knowsToCustomerA, knowsToCustomerB)
-        .ids(product, productToProductId)
-        .ids(order, orderToOrderId, orderToProductId)
-        .ids(item, itemToOrderId, itemToProductId)
-        .ids(ordered, orderedToOrderId, orderedToCustomerId);
+    static {
+
+        builder
+            .ids(customer, customerToCustomerId)
+            .ids(knows, knowsToCustomerA, knowsToCustomerB)
+            .ids(product, productToProductId)
+            .ids(order, orderToOrderId, orderToProductId)
+            .ids(item, itemToOrderId, itemToProductId)
+            .ids(ordered, orderedToOrderId, orderedToCustomerId);
+
+    }
 
     /**
      * Create new full schema category.
@@ -110,5 +114,7 @@ public class Schema {
     public static MetadataCategory newMetadata(SchemaCategory schema) {
         return builder.buildMetadata(schema);
     }
+
+    private Schema() {}
 
 }

@@ -6,10 +6,9 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.mapping.Name.StringName;
 
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -24,25 +23,26 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
-    @Override protected Map<ComparisonOperator, String> defineComparisonOperators() {
-        final var output = new TreeMap<ComparisonOperator, String>();
-        output.put(ComparisonOperator.Equal, "=");
-        output.put(ComparisonOperator.NotEqual, "<>");
-        output.put(ComparisonOperator.Less, "<");
-        output.put(ComparisonOperator.LessOrEqual, "<=");
-        output.put(ComparisonOperator.Greater, ">");
-        output.put(ComparisonOperator.GreaterOrEqual, ">=");
-        return output;
-    }
+    private static final Operators operators = new Operators();
 
-    @Override protected Map<AggregationOperator, String> defineAggregationOperators() {
-        final var output = new TreeMap<AggregationOperator, String>();
-        output.put(AggregationOperator.Count, "COUNT");
-        output.put(AggregationOperator.Sum, "SUM");
-        output.put(AggregationOperator.Min, "MIN");
-        output.put(AggregationOperator.Max, "MAX");
-        output.put(AggregationOperator.Average, "AVG");
-        return output;
+    static {
+
+        operators.define(Operator.Equal, "=");
+        operators.define(Operator.NotEqual, "<>");
+        operators.define(Operator.Less, "<");
+        operators.define(Operator.LessOrEqual, "<=");
+        operators.define(Operator.Greater, ">");
+        operators.define(Operator.GreaterOrEqual, ">=");
+
+        operators.define(Operator.Count, "COUNT");
+        operators.define(Operator.Sum, "SUM");
+        operators.define(Operator.Min, "MIN");
+        operators.define(Operator.Max, "MAX");
+        operators.define(Operator.Average, "AVG");
+
+        operators.define(Operator.In, "IN");
+        operators.define(Operator.NotIn, "NOT IN");
+
     }
 
     private StringBuilder builder;
@@ -109,19 +109,16 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
             joinedKinds.add(newKind);
 
-            final String conditions = join.conditions().stream().map(condition -> {
-                // TODO there shouldn't be a null for the schema object key ...
-                final String fromProjection = getPropertyName(new Property(join.from(), condition.from(), null));
-                final String toProjection = getPropertyName(new Property(join.to(), condition.to(), null));
-                return fromProjection + " = " + toProjection;
-            })
-                .collect(Collectors.joining(" AND "));
+            // TODO there shouldn't be a null for the schema object key ...
+            final String fromProjection = getPropertyName(new Property(join.from(), join.fromPath(), null));
+            final String toProjection = getPropertyName(new Property(join.to(), join.toPath(), null));
+            final String condition = fromProjection + " = " + toProjection;
 
             builder
                 .append(" JOIN ")
                 .append(escapeName(newKind.kindName()))
                 .append(" ON (")
-                .append(conditions)
+                .append(condition)
                 .append(")\n");
         }
     }
@@ -144,30 +141,38 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             addUnaryFilter(unaryFilter);
         else if (filter instanceof BinaryFilter binaryFilter)
             addBinaryFilter(binaryFilter);
+        else if (filter instanceof SetFilter setFilter)
+            addSetFilter(setFilter);
 
         builder.append("\n");
     }
 
     private void addUnaryFilter(UnaryFilter filter) {
+        builder
+            .append(getPropertyName(filter.property()))
+            .append(" ")
+            .append(operators.stringify(filter.operator()))
+            // TODO Some sanitization should be done here.
+            .append(" '")
+            .append(filter.constant().value())
+            .append("'");
+    }
+
+    private void addBinaryFilter(BinaryFilter filter) {
+        builder
+            .append(getPropertyName(filter.property1()))
+            .append(operators.stringify(filter.operator()))
+            .append(getPropertyName(filter.property2()));
+    }
+
+    private void addSetFilter(SetFilter filter) {
         builder.append(getPropertyName(filter.property()));
 
-        final var values = filter.constant().values();
-        if (values.size() == 1) {
-            builder
-                .append(" ")
-                .append(getComparisonOperatorValue(filter.operator()))
-                .append(" '")
-                .append(values.get(0))
-                .append("'");
-
-            return;
-        }
-
-        if (filter.operator() != ComparisonOperator.Equal)
-            throw QueryException.message("Operator " + filter.operator() + " can't be used for multiple values.");
-
+        final var values = filter.set();
         builder
-            .append(" IN (")
+            .append(" ")
+            .append(operators.stringify(filter.operator()))
+            .append(" (")
             .append(values.get(0));
 
         values.stream().skip(1).forEach(value -> builder.append(", ").append(value));
@@ -175,14 +180,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         builder.append(")");
     }
 
-    private void addBinaryFilter(BinaryFilter filter) {
-        builder
-            .append(getPropertyName(filter.property1()))
-            .append(getComparisonOperatorValue(filter.operator()))
-            .append(getPropertyName(filter.property2()));
-    }
-
-    private String escapeName(String name) {
+    private static String escapeName(String name) {
         return "\"" + name + "\"";
     }
 
@@ -215,7 +213,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private String getAggregationName(PropertyWithAggregation aggregation) {
-        return getAggregationOperatorValue(aggregation.aggregationOperator) + "(" + getPropertyNameWithoutAggregation(aggregation) + ")";
+        return operators.stringify(aggregation.operator) + "(" + getPropertyNameWithoutAggregation(aggregation) + ")";
     }
 
 }

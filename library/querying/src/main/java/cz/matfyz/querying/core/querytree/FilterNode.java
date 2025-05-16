@@ -1,14 +1,18 @@
 package cz.matfyz.querying.core.querytree;
 
-import cz.matfyz.querying.parsing.Filter;
+import cz.matfyz.core.querying.Computation;
+import cz.matfyz.querying.resolver.queryresult.ResultStructureComputer.ComputationTform;
 
 public class FilterNode extends QueryNode {
 
-    public final QueryNode child;
-    public final Filter filter;
+    public QueryNode child() { return children.get(0); }
+    public QueryNode setChild(QueryNode node) { return children.set(0, node); }
+    public final Computation filter;
 
-    public FilterNode(QueryNode child, Filter filter) {
-        this.child = child;
+    public ComputationTform tform;
+
+    public FilterNode(QueryNode child, Computation filter) {
+        this.children.add(child);
         this.filter = filter;
 
         child.setParent(this);
@@ -16,6 +20,15 @@ public class FilterNode extends QueryNode {
 
     @Override public <T> T accept(QueryVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    public record SerializedFilterNode(
+        SerializedQueryNode child,
+        String filter
+    ) implements SerializedQueryNode{
+
+        @Override public String getType() { return "filter"; }
+
     }
 
 }

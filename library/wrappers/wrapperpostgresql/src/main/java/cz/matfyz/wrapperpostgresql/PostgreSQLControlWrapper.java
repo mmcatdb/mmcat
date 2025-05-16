@@ -34,12 +34,10 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
         this.provider = provider;
     }
 
-    // First check if the statements require admin (postgres) privileges
-    // then obtain appropriate connection
     @Override public void execute(Collection<AbstractStatement> statements) {
-        try (Connection connection = statements.stream().anyMatch(this::isCreateDatabaseStatement)
-                ? provider.getAdminConnection()
-                : provider.getConnection()) {
+        try (
+            Connection connection = provider.getConnection();
+        ) {
             // TODO transactions?
             for (final var statement : statements) {
                 try (
@@ -53,11 +51,6 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
         catch (Exception e) {
             throw new ExecuteException(e, statements);
         }
-    }
-
-    private boolean isCreateDatabaseStatement(AbstractStatement statement) {
-        String sql = statement.getContent().trim().toUpperCase();
-        return sql.startsWith("CREATE DATABASE ");
     }
 
     @Override public void execute(Path path) {

@@ -9,3 +9,8 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
+
+/** Changes the first character of given string to upper case. */
+export function capitalize(word: string) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+}

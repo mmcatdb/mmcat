@@ -61,7 +61,8 @@ public class CsvProvider {
         char separator,
         boolean hasHeader,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {}
 
 }

@@ -97,11 +97,3 @@ export class QueryPartDescription {
         );
     }
 }
-
-type QueryStructure = {
-    name: string;
-    isArray: boolean;
-    children: Map<string, QueryStructure>;
-    /** If null, this is the root of the tree. */
-    parent?: QueryStructure;
-};

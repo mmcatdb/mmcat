@@ -1,10 +1,9 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
+import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.Query;
-import cz.matfyz.server.entity.datasource.DatasourceDetail;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.QueryRepository;
@@ -47,20 +46,6 @@ public class QueryController {
         final var result = service.executeQuery(data.categoryId, data.queryString);
 
         return new QueryResult(result.toJsonArray());
-    }
-
-    public record QueryDescription(
-        List<QueryPartDescription> parts
-    ) {}
-
-    public record QueryPartDescription(
-        DatasourceDetail datasource,
-        String content,
-        String structure
-    ) {
-        public QueryPartDescription(DatasourceDetail datasource, QueryStatement query) {
-            this(datasource, query.content().toString(), query.structure().toString());
-        }
     }
 
     @PostMapping("/queries/describe")
