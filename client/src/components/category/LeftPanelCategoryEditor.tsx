@@ -10,17 +10,17 @@ import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
 
-type StateDispatchProps = Readonly<{
+type StateDispatchProps = {
     /** The current state of the category editor. */
     state: EditCategoryState;
     /** The dispatch function for updating the editor state. */
     dispatch: EditCategoryDispatch;
-}>;
+};
 
-type LeftPanelEditorProps = StateDispatchProps & Readonly<{
+type LeftPanelEditorProps = StateDispatchProps & {
     /** Optional CSS class for custom styling. */
     className?: string;
-}>;
+};
 
 /**
  * Renders the left panel for editing a category, dynamically displaying content based on the current mode.
@@ -31,10 +31,10 @@ export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPane
     // Add keyboard shortcuts for Ctrl+O (Create Object) and Ctrl+M (Create Morphism)
     useEffect(() => {
         // Only handle shortcuts in default mode to avoid conflicts with input fields
-        if (state.leftPanelMode !== LeftPanelMode.default) 
+        if (state.leftPanelMode !== LeftPanelMode.default)
             return;
 
-        const handleKeyDown = (event: KeyboardEvent) => {
+        function handleKeyDown(event: KeyboardEvent) {
             // Check for Ctrl key (or Cmd on Mac) and the specific key
             if (event.ctrlKey || event.metaKey) {
                 if (event.key === 'o' || event.key === 'O') {
@@ -46,7 +46,7 @@ export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPane
                     dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism });
                 }
             }
-        };
+        }
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
@@ -75,52 +75,50 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     const { hasUnsavedChanges, isSaving, handleSave } = useSave();
     const category = state.evocat.category;
 
-    return (
-        <>
-            <h3 className='text-lg font-semibold py-2 text-default-800 truncate max-w-[180px]'>
-                {category.label}
-            </h3>
+    return (<>
+        <h3 className='text-lg font-semibold py-2 text-default-800 truncate max-w-[180px]'>
+            {category.label}
+        </h3>
 
-            <Button
-                title='Create object (Ctrl+O)'
-                onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}
-                color='default'
-            >
+        <Button
+            title='Create object (Ctrl+O)'
+            onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}
+            color='default'
+        >
                 Create object
-            </Button>
+        </Button>
 
-            <Button
-                title='Create morphism (Ctrl+M)'
-                onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
-                color='default'
-            >
+        <Button
+            title='Create morphism (Ctrl+M)'
+            onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
+            color='default'
+        >
                 Create Morphism
-            </Button>
+        </Button>
 
-            {hasUnsavedChanges && (
-                <div className='mt-4 animate-fade-in'>
-                    <div className='flex flex-col gap-2 p-3 bg-warning-100 rounded-lg border border-warning-300'>
-                        <div className='flex items-center gap-2 text-warning-800'>
-                            <ExclamationTriangleIcon className='h-4 w-4 flex-shrink-0' />
-                            <span className='text-sm font-medium'>You have unsaved changes.</span>
-                        </div>
-                        <Button 
-                            variant='solid'
-                            color='warning'
-                            size='sm'
-                            fullWidth
-                            onClick={() => handleSave()}
-                            isLoading={isSaving}
-                            startContent={isSaving ? null : <FaSave className='h-3.5 w-3.5' />}
-                            className='shadow-sm hover:shadow-md transition-shadow'
-                        >
-                            {isSaving ? 'Saving...' : 'Save Changes'}
-                        </Button>
+        {hasUnsavedChanges && (
+            <div className='mt-4 animate-fade-in'>
+                <div className='flex flex-col gap-2 p-3 bg-warning-100 rounded-lg border border-warning-300'>
+                    <div className='flex items-center gap-2 text-warning-800'>
+                        <ExclamationTriangleIcon className='h-4 w-4 flex-shrink-0' />
+                        <span className='text-sm font-medium'>You have unsaved changes.</span>
                     </div>
+                    <Button
+                        variant='solid'
+                        color='warning'
+                        size='sm'
+                        fullWidth
+                        onClick={() => handleSave()}
+                        isLoading={isSaving}
+                        startContent={isSaving ? null : <FaSave className='h-3.5 w-3.5' />}
+                        className='shadow-sm hover:shadow-md transition-shadow'
+                    >
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </Button>
                 </div>
-            )}
-        </>
-    );
+            </div>
+        )}
+    </>);
 }
 
 type EditorFormProps = {
@@ -146,31 +144,29 @@ function EditorForm({
     placeholder,
 }: EditorFormProps) {
     // Handles Enter key press to trigger form submission and Escape for cancel.
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') 
+    function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Enter')
             onSubmit();
-        if (event.key === 'Escape') 
+        if (event.key === 'Escape')
             onCancel();
-    };
+    }
 
-    return (
-        <>
-            <Input
-                label='Label'
-                value={label}
-                onChange={e => setLabel(e.target.value)}
-                onKeyDown={handleKeyDown}
-                ref={inputRef}
-                placeholder={placeholder}
-            />
-            <div className='grid grid-cols-2 gap-2'>
-                <Button onClick={onCancel}>Cancel</Button>
-                <Button color='primary' onClick={onSubmit} isDisabled={isSubmitDisabled}>
+    return (<>
+        <Input
+            label='Label'
+            value={label}
+            onChange={e => setLabel(e.target.value)}
+            onKeyDown={handleKeyDown}
+            ref={inputRef}
+            placeholder={placeholder}
+        />
+        <div className='grid grid-cols-2 gap-2'>
+            <Button onClick={onCancel}>Cancel</Button>
+            <Button color='primary' onClick={onSubmit} isDisabled={isSubmitDisabled}>
                     Add
-                </Button>
-            </div>
-        </>
-    );
+            </Button>
+        </div>
+    </>);
 }
 
 /**
@@ -186,16 +182,17 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     }, []);
 
     // Calculate position for the new object
-    const getNewObjectPosition = () => {
+    function getNewObjectPosition() {
         const nodes = state.graph.nodes.values().toArray();
         const index = nodes.length % 9; // Reset to 0 after 9 objects
         const gridSize = 3; // 3x3
         const spacing = 20;
+
         return {
             x: ((index % gridSize) * spacing) - spacing,
             y: (Math.floor(index / gridSize) * spacing) - spacing,
         };
-    };
+    }
 
     function createObjex() {
         state.evocat.createObjex({
@@ -206,20 +203,18 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         dispatch({ type: 'createObjex', graph });
     }
 
-    return (
-        <>
-            <h3 className='text-lg font-semibold py-2'>Create object</h3>
-            <EditorForm
-                label={label}
-                setLabel={setLabel}
-                onSubmit={createObjex}
-                onCancel={() => resetToDefaultMode(dispatch)}
-                inputRef={inputRef}
-                isSubmitDisabled={false} // Label is optional
-                placeholder='Enter object label (optional)'
-            />
-        </>
-    );
+    return (<>
+        <h3 className='text-lg font-semibold py-2'>Create object</h3>
+        <EditorForm
+            label={label}
+            setLabel={setLabel}
+            onSubmit={createObjex}
+            onCancel={() => resetToDefaultMode(dispatch)}
+            inputRef={inputRef}
+            isSubmitDisabled={false} // Label is optional
+            placeholder='Enter object label (optional)'
+        />
+    </>);
 }
 
 /**
@@ -250,17 +245,17 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
 
     // Auto-focus the input field when two nodes are selected
     useEffect(() => {
-        if (isValidSelection && inputRef.current) 
+        if (isValidSelection && inputRef.current)
             inputRef.current.focus();
     }, [ isValidSelection ]);
 
     function createMorphism() {
-        if (!isValidSelection) 
+        if (!isValidSelection)
             return;
 
         const domId = Number(selectedNodes[0]);
         const codId = Number(selectedNodes[1]);
-        if (isNaN(domId) || isNaN(codId)) 
+        if (isNaN(domId) || isNaN(codId))
             return;
 
         const domKey = Key.createNew(domId);

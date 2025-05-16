@@ -23,19 +23,12 @@ export function SchemaCategoriesTable({ categories, onDeleteCategory }: SchemaCa
         direction: 'ascending',
     });
 
-    /**
-     * Updates the sort descriptor when the user changes sorting.
-     */
-    const handleSortChange = (newSortDescriptor: SortDescriptor) => {
-        setSortDescriptor(newSortDescriptor);
-    };
-
     return (
         <CategoriesTable
             categories={sortedCategories}
             onDeleteCategory={onDeleteCategory}
             sortDescriptor={sortDescriptor}
-            onSortChange={handleSortChange}
+            onSortChange={setSortDescriptor}
         />
     );
 }
@@ -136,7 +129,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
             isOpen={!!rawDeletingCategory}
             onClose={() => setDeletingCategoryId(undefined)}
             onConfirm={() => {
-                void confirmDelete(); 
+                void confirmDelete();
             }}
             isFetching={isDeleting}
             title='Confirm Deletion?'

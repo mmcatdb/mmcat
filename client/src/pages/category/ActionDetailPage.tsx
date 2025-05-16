@@ -14,9 +14,6 @@ export function ActionDetailPage() {
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ isDeleting, setIsDeleting ] = useState(false);
 
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
-
     async function confirmDelete() {
         setIsDeleting(true);
         const result = await api.actions.deleteAction({ id: action.id });
@@ -36,9 +33,9 @@ export function ActionDetailPage() {
         const response = await api.jobs.createRun({ actionId });
         setIsCreatingRun(false);
 
-        if (!response.status) 
+        if (!response.status)
             toast.error('Error creating run');
-        else 
+        else
             toast.success('Run created successfully.');
             // console.log('New Run:', response.data);
     }
@@ -59,7 +56,7 @@ export function ActionDetailPage() {
                 <Button
                     color='danger'
                     variant='flat'
-                    onPress={openModal}
+                    onPress={() => setIsModalOpen(true)}
                     isDisabled={isDeleting}
                 >
                     Delete
@@ -69,7 +66,7 @@ export function ActionDetailPage() {
                     variant='solid'
                     isDisabled={isCreatingRun}
                     onPress={() => {
-                        void handleCreateRun(action.id); 
+                        void handleCreateRun(action.id);
                     }}
                 >
                     {isCreatingRun ? 'Creating...' : 'Create Run'}
@@ -78,9 +75,9 @@ export function ActionDetailPage() {
 
             <ConfirmationModal
                 isOpen={isModalOpen}
-                onClose={closeModal}
+                onClose={() => setIsModalOpen(false)}
                 onConfirm={() => {
-                    void confirmDelete(); 
+                    void confirmDelete();
                 }}
                 title='Confirm Deletion?'
                 message='This will permanently delete the action.'

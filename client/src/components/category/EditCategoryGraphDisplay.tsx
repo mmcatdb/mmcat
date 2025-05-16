@@ -9,12 +9,12 @@ import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import clsx from 'clsx';
 import { usePreferences } from '../PreferencesProvider';
 
-type EditCategoryGraphDisplayProps = Readonly<{
+type EditCategoryGraphDisplayProps = {
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
     options?: GraphOptions;
     className?: string;
-}>;
+};
 
 /**
  * Renders an interactive graph for editing a category.
@@ -68,10 +68,10 @@ export function EditCategoryGraphDisplay({ state, dispatch, options, className }
     );
 }
 
-type CanvasDisplayProps = Readonly<{
+type CanvasDisplayProps = {
     children: ReactNode;
     className?: string;
-}>;
+};
 
 /**
  * Renders the canvas for the graph, handling mouse interactions and styling.
@@ -103,11 +103,11 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
  * Includes the: node data, current editor state, and dispatch
  * function for performing updates.
  */
-type NodeDisplayProps = Readonly<{
+type NodeDisplayProps = {
     node: CategoryNode;
     state: EditCategoryState;
     dispatch: EditCategoryDispatch;
-}>;
+};
 
 /**
  * Renders a single node in the graph with interactive selection and drag behavior.
@@ -169,7 +169,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
     );
 }
 
-type EdgeDisplayProps = Readonly<{
+type EdgeDisplayProps = {
     /** The edge data, including schema and metadata. */
     edge: CategoryEdge;
     /** The curvature factor for bundled edges to avoid overlap. */
@@ -178,7 +178,7 @@ type EdgeDisplayProps = Readonly<{
     state: EditCategoryState;
     /** The dispatch function to handle edge interactions like selection. */
     dispatch: EditCategoryDispatch;
-}>;
+};
 
 /**
  * Renders a single edge in the graph with interactive selection and curvature.

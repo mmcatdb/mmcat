@@ -25,15 +25,15 @@ export function useBannerState(page: string) {
         setIsVisible(!isBannerDismissed(page));
     }, [ page ]);
 
-    const dismissBanner = () => {
+    function dismissBanner() {
         setBannerDismissed(page, true);
         setIsVisible(false);
-    };
+    }
 
-    const restoreBanner = () => {
+    function restoreBanner() {
         setBannerDismissed(page, false);
         setIsVisible(true);
-    };
+    }
 
     return { isVisible, dismissBanner, restoreBanner };
 }

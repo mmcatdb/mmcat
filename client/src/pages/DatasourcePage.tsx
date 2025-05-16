@@ -15,9 +15,9 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { InfoBanner } from '@/components/common';
 
 export function DatasourceDetailPage() {
-    return (<>
+    return (
         <DatasourceDisplay />
-    </>);
+    );
 }
 
 DatasourceDetailPage.loader = datasourceLoader;
@@ -51,7 +51,7 @@ export function DatasourceInCategoryPage() {
         }
         // navigate(`/schema-categories/${categoryId}/mappings/new`, {
         //     state: { datasourceId: datasource.id },   // pass datasource ID for new mapping creation
-            
+
         // });
         navigate(`/schema-categories/${categoryId}/mappings/new`, {
             state: {
@@ -171,7 +171,7 @@ function DatasourceDisplay() {
         }
     }
 
-    const renderSettingsView = (settings: Settings) => {
+    function renderSettingsView(settings: Settings) {
         return (
             <div className='space-y-4'>
                 {Object.entries(settings).map(([ key, value ]) => (
@@ -180,8 +180,8 @@ function DatasourceDisplay() {
                             {key.replace(/([A-Z])/g, ' $1').trim()}
                         </span>
                         <span className='flex-1 text-default-800 break-all'>
-                            {typeof value === 'object' 
-                                ? JSON.stringify(value) 
+                            {typeof value === 'object'
+                                ? JSON.stringify(value)
                                 : key.toLowerCase().includes('password')
                                     ? '••••••••'
                                     : String(value)}
@@ -190,7 +190,7 @@ function DatasourceDisplay() {
                 ))}
             </div>
         );
-    };
+    }
 
     return (
         <div className='pt-4'>
@@ -223,23 +223,21 @@ function DatasourceDisplay() {
 
             {!isEditing ? (
                 // View Mode
-                <>
-                    <div className='mb-6'>
-                        <div className='flex justify-between items-center mb-3'>
-                            <h2 className='text-lg font-semibold'>Connection Settings</h2>
-                            <Button
-                                onClick={() => setIsEditing(true)}
-                                color='primary'
-                                size='sm'
-                            >
-                                Edit Settings
-                            </Button>
-                        </div>
-                        <div className='p-4 rounded-lg bg-default-50'>
-                            {renderSettingsView(datasource.settings)}
-                        </div>
+                <div className='mb-6'>
+                    <div className='flex justify-between items-center mb-3'>
+                        <h2 className='text-lg font-semibold'>Connection Settings</h2>
+                        <Button
+                            onClick={() => setIsEditing(true)}
+                            color='primary'
+                            size='sm'
+                        >
+                            Edit Settings
+                        </Button>
                     </div>
-                </>
+                    <div className='p-4 rounded-lg bg-default-50'>
+                        {renderSettingsView(datasource.settings)}
+                    </div>
+                </div>
             ) : (
                 // Edit Mode
                 <div className='p-6 rounded-lg border border-blue-200 bg-default-50 mb-6'>
@@ -306,8 +304,8 @@ export function DatasourceDetailInfoBanner({ className, dismissBanner }: Datasou
         // <div className={cn('relative', className)}>
         //     <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button 
-                onClick={dismissBanner} 
+            <button
+                onClick={dismissBanner}
                 className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
             >
                 <HiXMark className='w-5 h-5' />

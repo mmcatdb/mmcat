@@ -4,14 +4,14 @@ import { type Dispatch } from 'react';
 import { Button } from '@nextui-org/react';
 import { FaXmark } from 'react-icons/fa6';
 
-type SelectionCardProps = Readonly<{
+type SelectionCardProps = {
     /** The current selection state of nodes and edges. */
     selection: FreeSelection;
     /** The graph containing node and edge data. */
     graph: CategoryGraph;
     /** Dispatch function for updating selection state. */
     dispatch: Dispatch<FreeSelectionAction>;
-}>;
+};
 
 export function SelectionCard({ selection, graph, dispatch }: SelectionCardProps) {
     const { nodeIds, edgeIds } = selection;

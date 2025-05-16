@@ -11,7 +11,7 @@ import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '
 import clsx from 'clsx';
 import { usePreferences } from '../PreferencesProvider';
 
-type EditMappingGraphDisplayProps = Readonly<{
+type EditMappingGraphDisplayProps = {
     /** The current state of the mapping editor. */
     state: EditMappingState;
     /** Dispatch function for updating the editor state. */
@@ -20,7 +20,7 @@ type EditMappingGraphDisplayProps = Readonly<{
     options?: GraphOptions;
     /** Optional CSS class for styling the canvas. */
     className?: string;
-}>;
+};
 
 /**
  * Renders a graph-based UI for editing mappings, including nodes, edges, and selection.
@@ -85,11 +85,11 @@ export function EditMappingGraphDisplay({ state, dispatch, options, className }:
     );
 }
 
-type CanvasDisplayProps = Readonly<{
+type CanvasDisplayProps = {
     /** The content to render inside the canvas. */
     children: ReactNode;
     className?: string;
-}>;
+};
 
 /**
  * Renders the graph canvas with drag-and-drop support.
@@ -111,7 +111,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     );
 }
 
-type NodeDisplayProps = Readonly<{
+type NodeDisplayProps = {
     /** The node to render. */
     node: CategoryNode;
     /** The current editor state. */
@@ -120,7 +120,7 @@ type NodeDisplayProps = Readonly<{
     dispatch: EditMappingDispatch;
     /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
-}>;
+};
 
 /**
  * Renders a single node with selection and drag behavior.
@@ -257,7 +257,7 @@ const pathClasses: Record<PathCount, string | undefined> = {
     [PathCount.Many]: 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)] shadow-red-400',
 };
 
-type EdgeDisplayProps = Readonly<{
+type EdgeDisplayProps = {
     /** The edge to render. */
     edge: CategoryEdge;
     /** The degree offset for bundled edges. */
@@ -268,7 +268,7 @@ type EdgeDisplayProps = Readonly<{
     dispatch: EditMappingDispatch;
     /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
-}>;
+};
 
 /**
  * Renders a single edge with selection and path-based styling.

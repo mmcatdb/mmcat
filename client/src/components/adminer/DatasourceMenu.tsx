@@ -11,7 +11,7 @@ type DatasourceMenuProps = Readonly<{
 
 export function DatasourceMenu({ dispatch, datasourceId, datasources }: DatasourceMenuProps) {
     const sources = datasources
-        .filter((item) =>
+        .filter(item =>
             item.type === DatasourceType.postgresql ||
             item.type === DatasourceType.mongodb ||
             item.type === DatasourceType.neo4j,
@@ -26,7 +26,7 @@ export function DatasourceMenu({ dispatch, datasourceId, datasources }: Datasour
                 selectedKeys={ datasourceId ? [ datasourceId ] : [] }
             >
                 {sources
-                    .map((item) => (
+                    .map(item => (
                         <SelectItem
                             key={item.id}
                             onPress={() => dispatch({ type:'datasource', newDatasource: item })}

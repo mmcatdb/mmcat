@@ -10,7 +10,7 @@ import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { type CategoryGraph } from '../category/categoryGraph';
 import { getPathSignature } from '../graph/graphUtils';
 
-type MappingEditorProps = Readonly<{
+type MappingEditorProps = {
     /** The schema category being edited. */
     category: Category;
     /** The initial mapping to edit. */
@@ -21,7 +21,7 @@ type MappingEditorProps = Readonly<{
     onSave?: (mapping: Mapping, kindName: string) => void;
     /** Name of the datasource for which the mapping is created. */
     datasourceLabel: string;
-}>;
+};
 
 /**
  * Renders the mapping editor with a graph display and panels for root selection and access path building.
@@ -61,7 +61,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
 
                     {/* Show datasource info */}
                     <div className='pt-2 pb-6 text-sm text-default-600'>
-                        For datasource 
+                        For datasource
                         {datasourceLabel ?? mapping.datasourceId}
                     </div>
 
@@ -143,7 +143,7 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
     return (
         <div className='space-y-4'>
             <h3 className='text-lg font-semibold'>Select Root Node</h3>
-            
+
             {selectedNode ? (
                 <div className='bg-default-100 rounded-lg p-3'>
                     <div className='flex items-center justify-between'>
@@ -186,10 +186,10 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
     );
 }
 
-type StateDispatchProps = Readonly<{
+type StateDispatchProps = {
     state: EditMappingState;
     dispatch: React.Dispatch<EditMappingAction>;
-}>;
+};
 
 /**
  * Renders a card for building and displaying the access path.
@@ -212,15 +212,15 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     }
 
     function handleDeleteSubpath(index: number) {
-        dispatch({ 
-            type: 'remove-from-access-path', 
-            subpathIndex: index, 
+        dispatch({
+            type: 'remove-from-access-path',
+            subpathIndex: index,
         });
     }
 
     function renderAccessPath() {
         const root = mapping.accessPath;
-        
+
         return (
             <div className='text-sm text-default-800'>
                 <div>{root.name.toString()}: {'{'}</div>
@@ -270,7 +270,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     return (
         <div className='space-y-4'>
             <h3 className='text-lg font-semibold'>Access Path</h3>
-            
+
             <div className='bg-default-100 rounded-lg p-3'>
                 <div className='overflow-x-auto'>
                     {renderAccessPath()}
@@ -278,23 +278,21 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
 
                 {selectionType === SelectionType.Path && (
                     <div className='mt-3'>
-                        {selection instanceof PathSelection && !selection.isEmpty ? (
-                            <>
-                                <p className='text-default-800 truncate'>
-                                    Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}
-                                </p>
-                                <div className='overflow-x-auto whitespace-nowrap text-sm text-default-600 mb-2'>       
-                                    Path: {getPathSignature(state.graph, selection).toString()}
-                                </div>
-                                <Button 
-                                    fullWidth 
-                                    color='primary' 
-                                    onPress={handleConfirmPath}
-                                >
-                                    Add to Path
-                                </Button>
-                            </>
-                        ) : (
+                        {selection instanceof PathSelection && !selection.isEmpty ? (<>
+                            <p className='text-default-800 truncate'>
+                                Selected: {state.graph.nodes.get(selection.lastNodeId)?.metadata.label}
+                            </p>
+                            <div className='overflow-x-auto whitespace-nowrap text-sm text-default-600 mb-2'>
+                                Path: {getPathSignature(state.graph, selection).toString()}
+                            </div>
+                            <Button
+                                fullWidth
+                                color='primary'
+                                onPress={handleConfirmPath}
+                            >
+                                Add to Path
+                            </Button>
+                        </>) : (
                             <p className='text-sm text-default-500'>Select a path in the graph</p>
                         )}
                     </div>

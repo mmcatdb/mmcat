@@ -22,7 +22,7 @@ type EditorSidebarState = {
 
 export function CategoryEditorPage() {
     const loaderData = useLoaderData() as Awaited<ReturnType<typeof categoryEditorLoader>>;
-    
+
     // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
     const evocatRef = useRef<Evocat>();
     if (!evocatRef.current) {
@@ -40,12 +40,12 @@ export function CategoryEditorPage() {
         right: true,
     });
 
-    const toggleSidebar = (side: keyof EditorSidebarState) => {
+    function toggleSidebar(side: keyof EditorSidebarState) {
         setSidebarState(prev => ({
             ...prev,
             [side]: !prev[side], // toggle the specified sidebar
         }));
-    };
+    }
 
     // Ctrl+S to save
     useEffect(() => {

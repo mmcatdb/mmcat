@@ -43,7 +43,7 @@ export function NewMappingPage() {
 
     const initialMapping = Mapping.fromServer(initialMappingData);
 
-    const handleSaveMapping = async (mapping: Mapping, finalKindName: string) => {
+    async function handleSaveMapping(mapping: Mapping, finalKindName: string) {
         const mappingInit: MappingInit = {
             categoryId: mapping.categoryId,
             datasourceId: mapping.datasourceId,
@@ -61,7 +61,7 @@ export function NewMappingPage() {
         else {
             toast.error('Failed to create mapping');
         }
-    };
+    }
 
     return (
         <MappingEditor

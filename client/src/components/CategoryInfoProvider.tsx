@@ -11,10 +11,10 @@ type CategoryInfoContext = {
  */
 export const CategoryInfoContext = createContext<CategoryInfoContext | undefined>(undefined);
 
-type CategoryInfoProviderProps = Readonly<{
+type CategoryInfoProviderProps = {
     children: ReactNode;
     category: SchemaCategoryInfo;
-}>;
+};
 
 /**
  * Provides category information to child components via context.

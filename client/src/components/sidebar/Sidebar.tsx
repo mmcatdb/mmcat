@@ -121,15 +121,11 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
     const { preferences, setPreferences } = usePreferences();
     const { showTableIDs } = preferences;
 
-    const handleChange = (isChecked: boolean) => {
-        setPreferences({ ...preferences, showTableIDs: isChecked });
-    };
-
     return (
         <div className={className}>
             <Switch
                 isSelected={showTableIDs}
-                onChange={e => handleChange(e.target.checked)}
+                onChange={e => setPreferences({ ...preferences, showTableIDs: e.target.checked })}
                 size='sm'
             >
                 <p className='text-small'>Show Table IDs</p>
@@ -271,44 +267,37 @@ function generalSidebarItems(): SidebarItem[] {
  * Generates sidebar items for category-specific navigation.
  */
 function categorySidebarItems(categoryId: string): SidebarItem[] {
-    return [
-        {
-            type: 'separator',
-            label: 'Schema Category',
-            collapsedLabel: 'SC',
-        },
-        {
-            type: 'normal',
-            label: 'Overview',
-            route: routes.category.index.resolve({ categoryId }),
-            iconName: SidebarIconKey.Overview,
-        },
-        {
-            type: 'normal',
-            label: 'Editor',
-            route: routes.category.editor.resolve({ categoryId }),
-            iconName: SidebarIconKey.Editor,
-        },
-        {
-            type: 'normal',
-            label: 'Datasources',
-            route: routes.category.datasources.resolve({ categoryId }),
-            iconName: SidebarIconKey.Datasources,
-            match: [ routes.category.datasource.path ],
-        },
-        {
-            type: 'normal',
-            label: 'Actions',
-            route: routes.category.actions.resolve({ categoryId }),
-            iconName: SidebarIconKey.Rocket,
-            match: [ routes.category.action.path, routes.category.addAction.path ],
-        },
-        {
-            type: 'normal',
-            label: 'Jobs',
-            route: routes.category.jobs.resolve({ categoryId }),
-            iconName: SidebarIconKey.PlayCircle,
-            match: [ routes.category.job.path ],
-        },
-    ];
+    return [ {
+        type: 'separator',
+        label: 'Schema Category',
+        collapsedLabel: 'SC',
+    }, {
+        type: 'normal',
+        label: 'Overview',
+        route: routes.category.index.resolve({ categoryId }),
+        iconName: SidebarIconKey.Overview,
+    }, {
+        type: 'normal',
+        label: 'Editor',
+        route: routes.category.editor.resolve({ categoryId }),
+        iconName: SidebarIconKey.Editor,
+    }, {
+        type: 'normal',
+        label: 'Datasources',
+        route: routes.category.datasources.resolve({ categoryId }),
+        iconName: SidebarIconKey.Datasources,
+        match: [ routes.category.datasource.path ],
+    }, {
+        type: 'normal',
+        label: 'Actions',
+        route: routes.category.actions.resolve({ categoryId }),
+        iconName: SidebarIconKey.Rocket,
+        match: [ routes.category.action.path, routes.category.addAction.path ],
+    }, {
+        type: 'normal',
+        label: 'Jobs',
+        route: routes.category.jobs.resolve({ categoryId }),
+        iconName: SidebarIconKey.PlayCircle,
+        match: [ routes.category.job.path ],
+    } ];
 }

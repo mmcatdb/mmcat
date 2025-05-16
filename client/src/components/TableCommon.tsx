@@ -50,17 +50,7 @@ type ConfirmationModalProps = {
 /*
  * Modal for confirming actions.
  */
-export function ConfirmationModal({
-    isOpen,
-    onClose,
-    onConfirm,
-    isFetching,
-    title,
-    message,
-    confirmButtonText = 'Confirm',
-    cancelButtonText = 'Cancel',
-    confirmButtonColor,
-}: ConfirmationModalProps) {
+export function ConfirmationModal({ isOpen, onClose, onConfirm, isFetching, title, message, confirmButtonText = 'Confirm', cancelButtonText = 'Cancel', confirmButtonColor }: ConfirmationModalProps) {
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalContent>
@@ -94,12 +84,7 @@ type EmptyStateProps = {
  * @param message - The message to display in the empty state.
  * @param buttonText - The text for the button.
  */
-export function EmptyState({
-    message,
-    buttonText,
-    onButtonClick,
-    buttonClassName = 'px-4 py-2',
-}: EmptyStateProps) {
+export function EmptyState({ message, buttonText, onButtonClick, buttonClassName = 'px-4 py-2' }: EmptyStateProps) {
     return (
         <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
             <p className='text-lg mb-4'>{message}</p>

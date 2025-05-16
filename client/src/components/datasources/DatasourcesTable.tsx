@@ -54,19 +54,12 @@ export function DatasourcesTable({ datasources, deleteDatasource, datasourcesWit
         direction: 'ascending',
     });
 
-    /**
-     * Updates the sort descriptor when the user changes sorting.
-     */
-    function handleSortChange(newSortDescriptor: SortDescriptor) {
-        setSortDescriptor(newSortDescriptor);
-    }
-
     return (
         <DatasourceTable
             datasources={sortedDatasources}
             deleteDatasource={deleteDatasource}
             sortDescriptor={sortDescriptor}
-            onSortChange={handleSortChange}
+            onSortChange={setSortDescriptor}
             datasourcesWithMappings={datasourcesWithMappings}
         />
     );
@@ -93,15 +86,15 @@ function useDatasourceSelection(datasources: Datasource[], deleteDatasource: (id
     /**
      * Initiates deletion by opening the confirmation modal.
      */
-    const handleDeleteClick = (id: string) => {
+    function handleDeleteClick(id: string) {
         setSelectedDatasourceId(id);
         setModalOpen(true);
-    };
+    }
 
     /**
      * Confirms deletion and notifies the user.
      */
-    const confirmDelete = () => {
+    function confirmDelete() {
         if (selectedDatasourceId && selectedDatasource) {
             setIsDeleting(true);
             try {
@@ -117,15 +110,15 @@ function useDatasourceSelection(datasources: Datasource[], deleteDatasource: (id
         }
         setModalOpen(false);
         setSelectedDatasourceId(undefined);
-    };
+    }
 
     /**
      * Closes the modal and clears selection.
      */
-    const closeModal = () => {
+    function closeModal() {
         setSelectedDatasourceId(undefined);
         setModalOpen(false);
-    };
+    }
 
     return {
         isModalOpen,
@@ -255,9 +248,9 @@ function DatasourceTable({
                                         color='danger'
                                         variant='light'
                                         onPress={() => {
-                                            if (!hasMappings) 
+                                            if (!hasMappings)
                                                 handleDeleteClick(datasource.id);
-        
+
                                         }}
                                         title={
                                             hasMappings

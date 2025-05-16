@@ -4,10 +4,10 @@ import { capitalize, cn } from '../utils';
 import { Fragment } from 'react/jsx-runtime';
 import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
 
-type QueryTreeDisplayProps = Readonly<{
+type QueryTreeDisplayProps = {
     tree: QueryNode;
     datasources: Datasource[];
-}>;
+};
 
 export function QueryTreeDisplay({ tree, datasources }: QueryTreeDisplayProps) {
     return (
@@ -26,10 +26,10 @@ const displays = {
     [QueryNodeType.Union]: UnionNodeDisplay,
 } as const;
 
-type NodeDisplayProps<TNode extends QueryNode> = Readonly<{
+type NodeDisplayProps<TNode extends QueryNode> = {
     node: TNode;
     datasources: Datasource[];
-}>;
+};
 
 function nodeDisplay(node: QueryNode, datasources: Datasource[]) {
     const Display = displays[node.type];
@@ -129,7 +129,7 @@ function JoinNodeDisplay({ node, datasources }: NodeDisplayProps<JoinNode>) {
     );
 }
 
-function JoinCandidateDisplay({ candidate }: Readonly<{ candidate: JoinCandidate }>) {
+function JoinCandidateDisplay({ candidate }: { candidate: JoinCandidate }) {
     return (
         <div className='spyce-y-2 font-mono'>
             <div className='flex gap-2 leading-5'>

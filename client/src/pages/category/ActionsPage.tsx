@@ -1,4 +1,4 @@
-import { Button, type SortDescriptor, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@nextui-org/react';
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@nextui-org/react';
 import { Action } from '@/types/action';
 import { useState } from 'react';
 import { api } from '@/api';
@@ -119,18 +119,14 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ selectedAction, setSelectedAction ] = useState<Action>();
 
-    function handleSortChange(newSortDescriptor: SortDescriptor) {
-        setSortDescriptor(newSortDescriptor);
-    }
-
     async function createRun(actionId: string) {
         setLoadingMap(prev => ({ ...prev, [actionId]: true }));
 
         const response = await api.jobs.createRun({ actionId });
 
-        if (!response.status) 
+        if (!response.status)
             toast.error('Error creating run');
-        else 
+        else
             toast.success('Run created successfully.');
             // console.log('New Run:', response.data);
 
@@ -168,7 +164,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         <Table
             aria-label='Actions table'
             sortDescriptor={sortDescriptor}
-            onSortChange={handleSortChange}
+            onSortChange={setSortDescriptor}
             onRowAction={handleRowAction}
         >
             <TableHeader>
@@ -212,7 +208,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                     variant='flat'
                                     isDisabled={loadingMap[action.id]}
                                     onPress={() => {
-                                        void createRun(action.id); 
+                                        void createRun(action.id);
                                     }}
                                 >
                                     {loadingMap[action.id] ? 'Creating...' : 'Create Run'}

@@ -8,17 +8,17 @@ import { type FreeSelectionAction } from '../graph/FreeSelection';
 import { SelectionCard } from './SelectionCard';
 import { Cardinality, type Min } from '@/types/schema';
 
-type StateDispatchProps = Readonly<{
+type StateDispatchProps = {
     /** The current state of the category editor. */
     state: EditCategoryState;
     /** The dispatch function for updating the editor state. */
     dispatch: EditCategoryDispatch;
-}>;
+};
 
-type RightPanelEditorProps = StateDispatchProps & Readonly<{
+type RightPanelEditorProps = StateDispatchProps & {
     /** Optional class name for additional styling. */
     className?: string;
-}>;
+};
 
 /**
  * Renders the right panel for editing a category, dynamically displaying content based on the current selection and mode.
@@ -35,26 +35,17 @@ export function RightPanelCategoryEditor({ state, dispatch, className }: RightPa
 }
 
 /**
- * Mapping of right panel modes to their respective display components.
- */
-const components: Record<RightPanelMode, (props: StateDispatchProps) => JSX.Element> = {
-    [RightPanelMode.default]: DefaultDisplay,
-    [RightPanelMode.updateObjex]: UpdateObjexDisplay,
-    [RightPanelMode.updateMorphism]: UpdateMorphismDisplay,
-};
-
-/**
  * Determines the appropriate display component based on the current selection.
  *
  * @param state - The current editor state.
  */
 function getRightPanelComponent(state: EditCategoryState) {
-    if (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0) 
+    if (state.selection.nodeIds.size === 1 && state.selection.edgeIds.size === 0)
         return UpdateObjexDisplay;
-    
-    if (state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 1) 
+
+    if (state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 1)
         return UpdateMorphismDisplay;
-    
+
     return DefaultDisplay;
 }
 
@@ -97,18 +88,16 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
     const { hasSelection } = useSelection(state);
 
-    return (
-        <>
-            {hasSelection ? (
-                <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />
-            ) : (
-                <div className='p-4 text-default-500 text-center'>
-                    <h3 className='text-lg font-semibold'>No Selection</h3>
-                    <p>Select an object or morphism to edit.</p>
-                </div>
-            )}
-        </>
-    );
+    return (<>
+        {hasSelection ? (
+            <SelectionCard selection={state.selection} graph={state.graph} dispatch={freeSelectionDispatch} />
+        ) : (
+            <div className='p-4 text-default-500 text-center'>
+                <h3 className='text-lg font-semibold'>No Selection</h3>
+                <p>Select an object or morphism to edit.</p>
+            </div>
+        )}
+    </>);
 }
 
 type EditorFormProps = {
@@ -126,17 +115,15 @@ type EditorFormProps = {
  * Reusable form component for editing objects and morphisms with consistent button behavior.
  */
 function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFormProps) {
-    return (
-        <>
-            {children}
-            <div className='grid grid-cols-2 gap-2'>
-                <Button onClick={onCancel}>Cancel</Button>
-                <Button color='primary' onClick={onSubmit} isDisabled={isSubmitDisabled}>
+    return (<>
+        {children}
+        <div className='grid grid-cols-2 gap-2'>
+            <Button onClick={onCancel}>Cancel</Button>
+            <Button color='primary' onClick={onSubmit} isDisabled={isSubmitDisabled}>
                     Apply
-                </Button>
-            </div>
-        </>
-    );
+            </Button>
+        </div>
+    </>);
 }
 
 /**
@@ -168,7 +155,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
      * Updates the schema object with new label and position, then refreshes the graph.
      */
     function handleApply() {
-        if (!selectedNode || !label || !hasChanges) 
+        if (!selectedNode || !label || !hasChanges)
             return;
         state.evocat.updateObjex(selectedNode.schema.key, {
             label,
@@ -178,14 +165,14 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         dispatch({ type: 'rightPanelMode', mode: RightPanelMode.updateObjex, graph });
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    function handleKeyDown(e: React.KeyboardEvent) {
         if (e.key === 'Enter' && hasChanges) {
             e.preventDefault();
             handleApply();
         }
-    };
+    }
 
-    if (!selectedNode) 
+    if (!selectedNode)
         return <div className='p-4 text-danger-500'>Error: No object selected</div>;
 
     return (
@@ -196,9 +183,9 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
                 <strong>Key:</strong> {selectedNode.schema.key.toString()}
             </p>
 
-            <EditorForm 
-                onSubmit={handleApply} 
-                onCancel={() => resetToDefaultMode(dispatch)} 
+            <EditorForm
+                onSubmit={handleApply}
+                onCancel={() => resetToDefaultMode(dispatch)}
                 isSubmitDisabled={!hasChanges || !label}
             >
                 <Input
@@ -255,19 +242,19 @@ export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
      * Updates the morphism and refreshes the graph.
      */
     function handleApply() {
-        if (!selectedMorphism || !hasChanges) 
+        if (!selectedMorphism || !hasChanges)
             return;
-        
-        state.evocat.updateMorphism(selectedMorphism.schema, { 
+
+        state.evocat.updateMorphism(selectedMorphism.schema, {
             min: minCardinality,
             label: label !== selectedMorphism.metadata.label ? label : undefined,
         });
-        
+
         const graph = categoryToGraph(state.evocat.category);
-        dispatch({ 
-            type: 'rightPanelMode', 
-            mode: RightPanelMode.updateMorphism, 
-            graph, 
+        dispatch({
+            type: 'rightPanelMode',
+            mode: RightPanelMode.updateMorphism,
+            graph,
         });
     }
 
@@ -275,20 +262,20 @@ export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         resetToDefaultMode(dispatch);
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    function handleKeyDown(e: React.KeyboardEvent) {
         if (e.key === 'Enter' && hasChanges) {
             e.preventDefault();
             handleApply();
         }
-    };
+    }
 
-    if (!selectedMorphism) 
+    if (!selectedMorphism)
         return <div className='p-4 text-danger-500'>Error: No morphism selected</div>;
 
     return (
         <div className='p-3 flex flex-col gap-3'>
             <h3 className='text-lg font-semibold'>Update Morphism</h3>
-            
+
             <Input
                 label='Label'
                 value={label}
@@ -297,11 +284,11 @@ export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
                 placeholder='No morphism label'
                 className='max-w-xs'
             />
-            
+
             <p className='text-default-600'>
                 <strong>Signature:</strong> {selectedMorphism.schema.signature.toString()}
             </p>
-            
+
             <EditorForm
                 onSubmit={handleApply}
                 onCancel={handleCancel}

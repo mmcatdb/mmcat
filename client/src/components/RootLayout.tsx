@@ -92,9 +92,9 @@ export default function ScrollToTop() {
             // Target the scrollable container in RootLayout, without this it won't work
             // because the scrollable container is not the whole window
             const scrollable = document.querySelector('.overflow-y-auto');
-            if (scrollable) 
+            if (scrollable)
                 scrollable.scrollTop = 0;
-      
+
         }, 0);
 
         return () => clearTimeout(timer);
@@ -118,18 +118,18 @@ function Breadcrumbs() {
 
     const breadcrumbs: BreadcrumbData[] = useMemo(() => {
         return matches
-            .filter((match): match is BreadcrumbMatch<unknown> => 
+            .filter((match): match is BreadcrumbMatch<unknown> =>
                 !!(match.handle && typeof match.handle === 'object' && 'breadcrumb' in match.handle))
             .map(match => ({
                 path: match.pathname,
-                label: typeof match.handle.breadcrumb === 'function' 
-                    ? match.handle.breadcrumb(match.data) 
+                label: typeof match.handle.breadcrumb === 'function'
+                    ? match.handle.breadcrumb(match.data)
                     : match.handle.breadcrumb,
             }));
     }, [ matches ]);
 
     return (
-        <NextUIBreadcrumbs 
+        <NextUIBreadcrumbs
             separator={
                 <span className='mx-1 text-default-400 select-none'>/</span>
             }
@@ -144,8 +144,8 @@ function Breadcrumbs() {
                             className={cn(
                                 'truncate max-w-[160px]',
                                 'hover:text-default-800 focus-visible:outline-none',
-                                isCurrent 
-                                    ? 'text-foreground font-semibold' 
+                                isCurrent
+                                    ? 'text-foreground font-semibold'
                                     : 'text-default-800 hover:text-default-700',
                             )}
                             title={crumb.label}
@@ -215,14 +215,10 @@ function HelpDropdown() {
     );
 }
 
-type ThemeToggleProps = Readonly<{
-    className?: string;
-}>;
-
 /**
  * A button to toggle between light and dark themes.
  */
-export function ThemeToggle({ className }: ThemeToggleProps) {
+export function ThemeToggle({ className }: { className?: string }) {
     const { preferences, setPreferences } = usePreferences();
     const { theme } = preferences;
     const nextValue = theme === 'light' ? 'dark' : 'light';

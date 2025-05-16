@@ -149,16 +149,14 @@ function initializeSettings(type: DatasourceType, currentSettings: Settings): Se
  * Reusable component for modal submit and cancel buttons.
  */
 function FormButtons({ onSubmit, onCancel, isSubmitting }: FormButtonsProps) {
-    return (
-        <>
-            <Button color='danger' variant='light' onPress={onCancel} isDisabled={isSubmitting}>
+    return (<>
+        <Button color='danger' variant='light' onPress={onCancel} isDisabled={isSubmitting}>
                 Close
-            </Button>
-            <Button color='primary' onPress={onSubmit} isLoading={isSubmitting}>
+        </Button>
+        <Button color='primary' onPress={onSubmit} isLoading={isSubmitting}>
                 Submit
-            </Button>
-        </>
-    );
+        </Button>
+    </>);
 }
 
 /**
@@ -183,9 +181,9 @@ export function DatasourceModal({
 
     // Reset form when modal closes
     useEffect(() => {
-        if (!isOpen) 
+        if (!isOpen)
             resetForm();
-        
+
     }, [ isOpen, resetForm ]);
 
     return (
@@ -244,9 +242,9 @@ function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatas
             selectedKeys={datasourceType ? new Set([ datasourceType ]) : new Set()}
             onSelectionChange={e => {
                 const selectedType = Array.from(e as Set<DatasourceType>)[0];
-                if (selectedType) 
+                if (selectedType)
                     setDatasourceType(selectedType, {});
-                
+
             }}
         >
             {item => (
@@ -263,69 +261,67 @@ function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatas
  */
 export function DatasourceSpecificFields({ datasourceType, settings, handleSettingsChange }: DatasourceSpecificFieldsProps) {
     if ([ DatasourceType.mongodb, DatasourceType.postgresql, DatasourceType.neo4j ].includes(datasourceType)) {
-        return (
-            <>
+        return (<>
+            <Input
+                label='Host'
+                value={settings.host ?? ''}
+                onChange={e => handleSettingsChange('host', e.target.value)}
+                fullWidth
+                required
+            />
+            <Input
+                label='Port'
+                value={settings.port != null ? String(settings.port) : ''}
+                type='number'
+                onChange={e => handleSettingsChange('port', Number(e.target.value))}
+                fullWidth
+                required
+            />
+            <Input
+                label='Database'
+                value={settings.database ?? ''}
+                onChange={e => handleSettingsChange('database', e.target.value)}
+                fullWidth
+                required
+            />
+            <Input
+                label='Username'
+                value={settings.username ?? ''}
+                onChange={e => handleSettingsChange('username', e.target.value)}
+                fullWidth
+                required
+            />
+            <Input
+                label='Password'
+                type='password'
+                value={settings.password ?? ''}
+                onChange={e => handleSettingsChange('password', e.target.value)}
+                fullWidth
+                required
+            />
+            {datasourceType === DatasourceType.mongodb && (
                 <Input
-                    label='Host'
-                    value={settings.host ?? ''}
-                    onChange={e => handleSettingsChange('host', e.target.value)}
+                    label='Authentication Database'
+                    value={settings.authenticationDatabase ?? ''}
+                    onChange={e => handleSettingsChange('authenticationDatabase', e.target.value)}
                     fullWidth
                     required
                 />
-                <Input
-                    label='Port'
-                    value={settings.port != null ? String(settings.port) : ''}
-                    type='number'
-                    onChange={e => handleSettingsChange('port', Number(e.target.value))}
-                    fullWidth
-                    required
-                />
-                <Input
-                    label='Database'
-                    value={settings.database ?? ''}
-                    onChange={e => handleSettingsChange('database', e.target.value)}
-                    fullWidth
-                    required
-                />
-                <Input
-                    label='Username'
-                    value={settings.username ?? ''}
-                    onChange={e => handleSettingsChange('username', e.target.value)}
-                    fullWidth
-                    required
-                />
-                <Input
-                    label='Password'
-                    type='password'
-                    value={settings.password ?? ''}
-                    onChange={e => handleSettingsChange('password', e.target.value)}
-                    fullWidth
-                    required
-                />
-                {datasourceType === DatasourceType.mongodb && (
-                    <Input
-                        label='Authentication Database'
-                        value={settings.authenticationDatabase ?? ''}
-                        onChange={e => handleSettingsChange('authenticationDatabase', e.target.value)}
-                        fullWidth
-                        required
-                    />
-                )}
-                <Checkbox
-                    isSelected={settings.isWritable ?? false}
-                    onChange={() => handleSettingsChange('isWritable', !(settings.isWritable ?? false))}
-                >
-                    Is Writable?
-                </Checkbox>
+            )}
+            <Checkbox
+                isSelected={settings.isWritable ?? false}
+                onChange={() => handleSettingsChange('isWritable', !(settings.isWritable ?? false))}
+            >
+                Is Writable?
+            </Checkbox>
 
-                <Checkbox
-                    isSelected={settings.isQueryable ?? false}
-                    onChange={() => handleSettingsChange('isQueryable', !(settings.isQueryable ?? false))}
-                >
-                    Is Queryable?
-                </Checkbox>
-            </>
-        );
+            <Checkbox
+                isSelected={settings.isQueryable ?? false}
+                onChange={() => handleSettingsChange('isQueryable', !(settings.isQueryable ?? false))}
+            >
+                Is Queryable?
+            </Checkbox>
+        </>);
     }
 
     if ([ DatasourceType.csv, DatasourceType.json, DatasourceType.jsonld ].includes(datasourceType)) {
@@ -337,35 +333,33 @@ export function DatasourceSpecificFields({ datasourceType, settings, handleSetti
                 fullWidth
                 required
             />
-            {datasourceType === DatasourceType.csv && (
-                <>
-                    <Input
-                        label='Separator'
-                        value={settings.separator ?? ''}
-                        maxLength={1}
-                        onChange={e => handleSettingsChange('separator', e.target.value)}
-                        fullWidth
-                        required
-                    />
-                    <Checkbox
-                        isSelected={settings.hasHeader ?? false}
-                        onChange={() => handleSettingsChange('hasHeader', !(settings.hasHeader ?? false))}
-                    >
-                            Has Header?
-                    </Checkbox>
-                </>
-            )}
+            {datasourceType === DatasourceType.csv && (<>
+                <Input
+                    label='Separator'
+                    value={settings.separator ?? ''}
+                    maxLength={1}
+                    onChange={e => handleSettingsChange('separator', e.target.value)}
+                    fullWidth
+                    required
+                />
+                <Checkbox
+                    isSelected={settings.hasHeader ?? false}
+                    onChange={() => handleSettingsChange('hasHeader', !(settings.hasHeader ?? false))}
+                >
+                        Has Header?
+                </Checkbox>
+            </>)}
             <Checkbox
                 isSelected={settings.isWritable ?? false}
                 onChange={() => handleSettingsChange('isWritable', !(settings.isWritable ?? false))}
             >
-                    Is Writable?
+                Is Writable?
             </Checkbox>
             <Checkbox
                 isSelected={settings.isQueryable ?? false}
                 onChange={() => handleSettingsChange('isQueryable', !(settings.isQueryable ?? false))}
             >
-                    Is Queryable?
+                Is Queryable?
             </Checkbox>
         </>);
     }

@@ -62,7 +62,7 @@ export const PreferencesContext = createContext<PreferencesContext | undefined>(
 /**
  * Provides user preferences to child components via context, with local storage persistence.
  */
-export function PreferencesProvider({ children }: Readonly<{ children: ReactNode }>) {
+export function PreferencesProvider({ children }: { children: ReactNode }) {
     const [ preferences, setPreferences ] = useState(defaultPreferences);
 
     const setPreferencesWithStorage = useCallback((preferences: Preferences) => {

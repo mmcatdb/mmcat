@@ -9,7 +9,7 @@ const instance = createAxiosInstance(BACKEND_API_URL);
 function GET<T>(action: string, params = {}): PullResult<T> {
     return promiseToResponse<T>(instance.get(action, {
         params,
-        paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'repeat' }),
+        paramsSerializer: p => qs.stringify(p, { arrayFormat: 'repeat' }),
     }));
 }
 

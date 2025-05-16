@@ -23,175 +23,132 @@ import { QueryingPage } from '@/pages/QueryingPage';
 /**
  * Creates the application's routing configuration.
  */
-export const router = createBrowserRouter([
-    {
-        path: routes.home.path,
-        id: routes.home.id,
-        Component: RootLayout,
-        ErrorBoundary: ErrorPage,
-        children: [
-            {
+export const router = createBrowserRouter([ {
+    path: routes.home.path,
+    id: routes.home.id,
+    Component: RootLayout,
+    ErrorBoundary: ErrorPage,
+    children: [ {
+        index: true,
+        Component: Home,
+    }, {
+        path: routes.datasources.path,
+        handle: { breadcrumb: 'Datasources' },
+        children: [ {
+            index: true,
+            loader: DatasourcesPage.loader,
+            Component: DatasourcesPage,
+        }, {
+            path: ':id',
+            loader: DatasourceDetailPage.loader,
+            Component: DatasourceDetailPage,
+            handle: { breadcrumb: (data: DatasourceLoaderData) => data.datasource.label },
+        } ],
+    }, {
+        path: routes.adminer,
+        loader: AdminerPage.loader,
+        Component: AdminerPage,
+        handle: { breadcrumb: 'Adminer' },
+    }, {
+        path: routes.categories,
+        Component: SchemaCategoriesPage,
+        handle: { breadcrumb: 'Schema Categories' },
+        children: [ {
+            index: true,
+            Component: CategoriesPage,
+            loader: CategoriesPage.loader,
+        }, {
+            path: routes.category.editor.path,
+            loader: CategoryPage.loader,
+            Component: CategoryPage,
+            handle: { breadcrumb: (data: CategoryLoaderData) => data.category.label },
+            children: [ {
                 index: true,
-                Component: Home,
-            },
-            {
-                path: routes.datasources.path,
+                id: routes.category.index.id,
+                loader: CategoryOverviewPage.loader,
+                Component: CategoryOverviewPage,
+            }, {
+                id: routes.category.editor.id,
+                path: routes.category.editor.path,
+                loader: CategoryEditorPage.loader,
+                Component: CategoryEditorPage,
+                handle: { breadcrumb: 'Editor' },
+            }, {
+                id: routes.category.datasources.id,
+                path: routes.category.datasources.path,
                 handle: { breadcrumb: 'Datasources' },
-                children: [
-                    {
-                        index: true,
-                        loader: DatasourcesPage.loader,
-                        Component: DatasourcesPage,
-                    },
-                    {
-                        path: ':id',
-                        loader: DatasourceDetailPage.loader,
-                        Component: DatasourceDetailPage,
-                        handle: {
-                            breadcrumb: (data: DatasourceLoaderData) => data.datasource.label,
-                        },
-                    },
-                ],
-            },
-            {
-                path: routes.adminer,
-                loader: AdminerPage.loader,
-                Component: AdminerPage,
-                handle: { breadcrumb: 'Adminer' },
-            },
-            {
-                path: routes.categories,
-                Component: SchemaCategoriesPage,
-                handle: { breadcrumb: 'Schema Categories' },
-                children: [
-                    {
-                        index: true,
-                        Component: CategoriesPage,
-                        loader: CategoriesPage.loader,
-                    },
-                    {
-                        path: routes.category.editor.path,
-                        loader: CategoryPage.loader,
-                        Component: CategoryPage,
-                        handle: {
-                            breadcrumb: (data: CategoryLoaderData) => data.category.label,
-                        },
-                        children: [
-                            {
-                                index: true,
-                                id: routes.category.index.id,
-                                loader: CategoryOverviewPage.loader,
-                                Component: CategoryOverviewPage,
-                            },
-                            {
-                                id: routes.category.editor.id,
-                                path: routes.category.editor.path,
-                                loader: CategoryEditorPage.loader,
-                                Component: CategoryEditorPage,
-                                handle: { breadcrumb: 'Editor' },
-                            },
-                            {
-                                id: routes.category.datasources.id,
-                                path: routes.category.datasources.path,
-                                handle: { breadcrumb: 'Datasources' },
-                                children: [
-                                    {
-                                        index: true,
-                                        loader: DatasourcesInCategoryPage.loader,
-                                        Component: DatasourcesInCategoryPage,
-                                    },
-                                    {
-                                        path: ':id',
-                                        loader: DatasourceInCategoryPage.loader,
-                                        Component: DatasourceInCategoryPage,
-                                        handle: {
-                                            breadcrumb: (data: DatasourceLoaderData) => data.datasource.label,
-                                        },
-                                    },
-                                ],
-                            },
-                            {
-                                id: routes.category.newMapping.id,
-                                path: routes.category.newMapping.path,
-                                loader: NewMappingPage.loader,
-                                Component: NewMappingPage,
-                                handle: { breadcrumb: 'New Mapping' },
-                            },
-                            {
-                                id: routes.category.mapping.id,
-                                path: routes.category.mapping.path,
-                                loader: MappingPage.loader,
-                                Component: MappingPage,
-                                handle: {
-                                    breadcrumb: (data: MappingLoaderData) => data.mapping.kindName,
-                                },
-                            },
-                            {
-                                id: routes.category.actions.id,
-                                path: routes.category.actions.path,
-                                handle: { breadcrumb: 'Actions' },
-                                children: [
-                                    {
-                                        index: true,
-                                        loader: ActionsPage.loader,
-                                        Component: ActionsPage,
-                                    },
-                                    {
-                                        id: 'add-action',
-                                        path: 'add',
-                                        Component: AddActionPage,
-                                        handle: { breadcrumb: 'Add' },
-                                    },
-                                    {
-                                        id: 'action',
-                                        path: ':actionId',
-                                        loader: ActionDetailPage.loader,
-                                        Component: ActionDetailPage,
-                                        handle: {
-                                            breadcrumb: (data: ActionLoaderData) => data.action.label,
-                                        },
-                                    },
-                                ],
-                            },
-                            {
-                                id: routes.category.jobs.id,
-                                path: routes.category.jobs.path,
-                                handle: { breadcrumb: 'Jobs' },
-                                children: [
-                                    {
-                                        index: true,
-                                        Component: JobsPage,
-                                    },
-                                    {
-                                        path: ':jobId',
-                                        Component: JobPage,
-                                        handle: { breadcrumb: 'Job Details' },
-                                    },
-                                ],
-                            },
-                            {
-                                id: routes.category.querying.id,
-                                path: routes.category.querying.path,
-                                Component: QueryingPage,
-                                loader: QueryingPage.loader,
-                                handle: { breadcrumb: 'Querying' },
-                            },
-                        ],
-                    },
-                ],
-            },
-        ],
-    },
+                children: [ {
+                    index: true,
+                    loader: DatasourcesInCategoryPage.loader,
+                    Component: DatasourcesInCategoryPage,
+                }, {
+                    path: ':id',
+                    loader: DatasourceInCategoryPage.loader,
+                    Component: DatasourceInCategoryPage,
+                    handle: { breadcrumb: (data: DatasourceLoaderData) => data.datasource.label },
+                } ],
+            }, {
+                id: routes.category.newMapping.id,
+                path: routes.category.newMapping.path,
+                loader: NewMappingPage.loader,
+                Component: NewMappingPage,
+                handle: { breadcrumb: 'New Mapping' },
+            }, {
+                id: routes.category.mapping.id,
+                path: routes.category.mapping.path,
+                loader: MappingPage.loader,
+                Component: MappingPage,
+                handle: { breadcrumb: (data: MappingLoaderData) => data.mapping.kindName },
+            }, {
+                id: routes.category.actions.id,
+                path: routes.category.actions.path,
+                handle: { breadcrumb: 'Actions' },
+                children: [ {
+                    index: true,
+                    loader: ActionsPage.loader,
+                    Component: ActionsPage,
+                },{
+                    id: 'add-action',
+                    path: 'add',
+                    Component: AddActionPage,
+                    handle: { breadcrumb: 'Add' },
+                },{
+                    id: 'action',
+                    path: ':actionId',
+                    loader: ActionDetailPage.loader,
+                    Component: ActionDetailPage,
+                    handle: { breadcrumb: (data: ActionLoaderData) => data.action.label },
+                } ],
+            }, {
+                id: routes.category.jobs.id,
+                path: routes.category.jobs.path,
+                handle: { breadcrumb: 'Jobs' },
+                children: [ {
+                    index: true,
+                    Component: JobsPage,
+                }, {
+                    path: ':jobId',
+                    Component: JobPage,
+                    handle: { breadcrumb: 'Job Details' },
+                } ],
+            }, {
+                id: routes.category.querying.id,
+                path: routes.category.querying.path,
+                Component: QueryingPage,
+                loader: QueryingPage.loader,
+                handle: { breadcrumb: 'Querying' },
+            } ],
+        } ],
+    } ],
+}, {
     // Catch-all route for 404 errors
-    {
-        path: '*',
-        loader: () => {
-            throw new Response('Not Found', { status: 404, statusText: 'Not Found' });
-        },
-        element: <ErrorPage />,
-        ErrorBoundary: ErrorPage,
+    path: '*',
+    loader: () => {
+        throw new Response('Not Found', { status: 404, statusText: 'Not Found' });
     },
-], {
+    element: <ErrorPage />,
+    ErrorBoundary: ErrorPage,
+} ], {
     future: {
         v7_relativeSplatPath: true,
         v7_fetcherPersist: true,

@@ -128,11 +128,11 @@ export class GraphEngine {
         }
         else {
             // console.log('CREATE canvas ref');
+            const c = new AbortController();
 
-            const wheel = (e: WheelEvent) => this.handleCanvasWheel(e);
-            ref.addEventListener('wheel', wheel, { passive: false });
+            ref.addEventListener('wheel', (e: WheelEvent) => this.handleCanvasWheel(e), { signal: c.signal, passive: false });
 
-            const cleanup = () => ref.removeEventListener('wheel', wheel);
+            const cleanup = () => c.abort();
             this.canvasConnection = { ref, cleanup };
 
             if (!this.isCanvasMeasured) {
