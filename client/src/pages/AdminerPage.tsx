@@ -10,17 +10,10 @@ import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
-export async function adminerLoader(): Promise<Datasource[]> {
-    const response = await api.datasources.getAllDatasources({});
-
-    if (!response.status)
-        throw new Error('Failed to load datasources');
-
-    return response.data;
-}
-
+// Work of other colleague, left here for future merge
+// Add back: find all "// Work of other colleague, left here for future merge" and uncomment the content below it
 export function AdminerPage() {
-    const allDatasources = useLoaderData() as Datasource[];
+    const { datasources: allDatasources } = useLoaderData() as AdminerLoaderData;
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
@@ -42,7 +35,10 @@ export function AdminerPage() {
     }, [ state.datasourceId, allDatasources ]);
 
     return (
-        <div>
+        <div className='pt-4'>
+            <h1 className='text-xl font-bold mb-2'>Adminer for Multi-Model Data</h1>
+            <p className='text-muted-foreground mb-2'>Adminer for MM-cat is a tool designed to extend the functionality of MM-cat by enabling users to browse, display, and edit data across multiple database systems, including PostgreSQL, MongoDB, and Neo4j.</p>
+            <p className='text-muted-foreground italic text-default-500'>Note: This page is a separate tool and was developed by my colleague. It is not part of my bachelor thesis implementation.</p>
             <div className='mt-5 flex flex-wrap gap-3 items-center'>
 
                 {allDatasources ? (
@@ -72,4 +68,21 @@ export function AdminerPage() {
             )}
         </div>
     );
+}
+
+AdminerPage.loader = adminerLoader;
+
+type AdminerLoaderData = {
+    datasources: Datasource[];
+};
+
+async function adminerLoader(): Promise<AdminerLoaderData> {
+    const response = await api.datasources.getAllDatasources({});
+
+    if (!response.status)
+        throw new Error('Failed to load datasources');
+
+    return {
+        datasources: response.data,
+    };
 }

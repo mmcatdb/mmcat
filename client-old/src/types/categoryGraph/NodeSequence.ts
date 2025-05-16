@@ -119,7 +119,7 @@ export class NodeSequence {
         if (!edge.getSourceNode(direction).equals(this.lastNode))
             return false;
 
-        if (!edge.isTraversible(direction))
+        if (!edge.isTraversable(direction))
             return false;
 
         // The edge wasn't filtered out during the pathMarker algorithm so we can add it.

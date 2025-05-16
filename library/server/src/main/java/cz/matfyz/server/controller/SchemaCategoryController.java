@@ -11,6 +11,7 @@ import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,9 +66,25 @@ public class SchemaCategoryController {
         return repository.find(id);
     }
 
+    public record SchemaCategoryStats(
+        int objects,
+        int mappings,
+        int jobs
+    ) {}
+
+    @GetMapping("/schema-categories/{id}/stats")
+    public SchemaCategoryStats getCategoryStats(@PathVariable Id id) {
+        return repository.findStats(id);
+    }
+
     @PostMapping("/schema-categories/{id}/updates")
     public SchemaCategoryWrapper updateCategory(@PathVariable Id id, @RequestBody SchemaEvolutionInit update) {
         return service.update(id, update);
+    }
+
+    @DeleteMapping("/schema-categories/{id}")
+    public void deleteCategory(@PathVariable Id id) {
+        repository.delete(id);
     }
 
 }

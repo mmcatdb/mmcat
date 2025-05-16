@@ -1,4 +1,4 @@
-import { MetadataMorphism, type MetadataMorphismFromServer, Category } from '@/types/schema';
+import { MetadataMorphism, type MetadataMorphismFromServer, type Category } from '@/types/schema';
 import { type MMO, type MMOFromServer, MMOType } from './mmo';
 import { Signature } from '@/types/identifiers';
 

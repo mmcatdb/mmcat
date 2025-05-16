@@ -2,78 +2,37 @@ import { useEffect, useState } from 'react';
 import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
 import { DatasourceModal } from '@/components/datasources/DatasourceModal';
 import { api } from '@/api';
-import type { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
-import { Outlet } from 'react-router-dom';
 import { EmptyState } from '@/components/TableCommon';
-import { Button } from '@nextui-org/react';
-import { AddIcon } from '@/components/icons/PlusIcon';
-import { ErrorPage, LoadingPage } from './errorPages';
+import { Button, Tooltip } from '@nextui-org/react';
+import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
+import { HiXMark } from 'react-icons/hi2';
+import { GoDotFill } from 'react-icons/go';
+import { useBannerState } from '@/types/utils/useBannerState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { InfoBanner } from '@/components/common';
+import { FaPlus } from 'react-icons/fa';
 
 export function DatasourcesPage() {
-    return (
-        <div>
-            <Outlet />
-        </div>
-    );
-}
+    const data = useLoaderData() as DatasourcesLoaderData;
+    const [ datasources, setDatasources ] = useState(data.datasources);
+    const [ isModalOpen, setIsModalOpen ] = useState(false);
+    const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasources-page');
+    const location = useLocation();
+    const navigate = useNavigate();
 
-export function DatasourcesPageOverview() {
-    const {
-        datasources,
-        loading,
-        error,
-        isModalOpen,
-        setModalOpen,
-        addDatasource,
-        deleteDatasource,
-    } = useDatasources();
-
-    if (loading)
-        return <LoadingPage />;
-
-    // TODO: ReloadPage
-    if (error)
-        return <ErrorPage />;
-
-    return (
-        <DatasourcesPageOverviewUI
-            datasources={datasources}
-            loading={loading}
-            error={error}
-            isModalOpen={isModalOpen}
-            onAddDatasource={addDatasource}
-            onDeleteDatasource={deleteDatasource}
-            onOpenModal={() => setModalOpen(true)}
-            onCloseModal={() => setModalOpen(false)}
-        />
-    );
-}
-
-function useDatasources() {
-    const [ datasources, setDatasources ] = useState<Datasource[]>([]);
-    const [ loading, setLoading ] = useState<boolean>(true);
-    const [ error, setError ] = useState<boolean>(false);
-    const [ isModalOpen, setModalOpen ] = useState(false);
-
+    // Open modal if navigated with state.openModal
     useEffect(() => {
-        const fetchDatasources = async () => {
-            setLoading(true);
-            const response = await api.datasources.getAllDatasources({});
-            
-            if (response.status && response.data)
-                setDatasources(response.data);
-            else
-                setError(true);
-            
-            setLoading(false);
-        };
+        if (location.state?.openModal) {
+            setIsModalOpen(true);
+            // Clear state to prevent re-opening on refresh
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [ location, navigate ]);
 
-        fetchDatasources();
-    }, []);
-
-    function addDatasource(newDatasource: Datasource) {
-        setDatasources((prevDatasources) => [ ...prevDatasources, newDatasource ]);
+    function onDatasourceCreated(newDatasource: Datasource) {
+        setDatasources(prev => [ ...prev, newDatasource ]);
     }
 
     async function deleteDatasource(id: string) {
@@ -84,80 +43,121 @@ function useDatasources() {
             return;
         }
 
-        setDatasources((prevDatasources) =>
-            prevDatasources.filter((datasource) => datasource.id !== id),
-        );
+        setDatasources(prev => prev.filter(datasource => datasource.id !== id));
     }
 
-    return {
-        datasources,
-        loading,
-        error,
-        isModalOpen,
-        setModalOpen,
-        addDatasource,
-        deleteDatasource,
-    };
-}
-
-type DatasourcesPageOverviewProps = {
-    datasources: Datasource[];
-    loading: boolean;
-    error: boolean;
-    isModalOpen: boolean;
-    onAddDatasource: (newDatasource: Datasource) => void;
-    onDeleteDatasource: (id: string) => void;
-    onOpenModal: () => void;
-    onCloseModal: () => void;
-};
-
-function DatasourcesPageOverviewUI({
-    datasources,
-    loading,
-    error,
-    isModalOpen,
-    onAddDatasource,
-    onDeleteDatasource,
-    onOpenModal,
-    onCloseModal,
-}: DatasourcesPageOverviewProps) {
     return (
-        <div>
-            <div className='flex items-center justify-between'>
-                <h1>Datasources</h1>
-                <Button 
-                    onPress={onOpenModal}
-                    color='primary' 
-                    startContent={<AddIcon />}
+        <div className='pt-4'>
+            {/* Header Section */}
+            <div className='flex items-center justify-between mb-4'>
+                <div className='flex items-center gap-2'>
+                    <h1 className='text-xl font-semibold'>Datasources</h1>
+                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                        <button
+                            onClick={isVisible ? dismissBanner : restoreBanner}
+                            className='text-primary-500 hover:text-primary-700 transition'
+                        >
+                            <IoInformationCircleOutline className='w-6 h-6' />
+                        </button>
+                    </Tooltip>
+                </div>
+                <Button
+                    onPress={() => setIsModalOpen(true)}
+                    color='primary'
+                    startContent={<FaPlus className='w-3 h-3' />}
                 >
                     Add Datasource
                 </Button>
             </div>
 
-            <div className='mt-5'>
-                {loading ? (
-                    <LoadingPage />
-                ) : datasources.length > 0 ? (
-                    <DatasourcesTable
-                        datasources={datasources}
-                        loading={loading}
-                        error={error}
-                        onDeleteDatasource={onDeleteDatasource}
-                    />
-                ) : (
-                    <EmptyState
-                        message='No datasources available.'
-                        buttonText='+ Add Datasource'
-                        onButtonClick={onOpenModal}
-                    />
-                )}
-            </div>
+            {isVisible && <DatasourcesInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
-            <DatasourceModal 
-                isOpen={isModalOpen} 
-                onClose={onCloseModal}
-                onDatasourceCreated={onAddDatasource}
+            {/* Table Section */}
+            {datasources.length > 0 ? (
+                <DatasourcesTable 
+                    datasources={datasources} 
+                    deleteDatasource={id => {
+                        void deleteDatasource(id); 
+                    }}
+                    datasourcesWithMappings={data.datasourcesWithMappings}
+                />
+            ) : (
+                <EmptyState
+                    message='No datasources available. Create one to get started.'
+                    buttonText='+ Add Datasource'
+                    onButtonClick={() => setIsModalOpen(true)}
+                />
+            )}
+
+            <DatasourceModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onDatasourceCreated={onDatasourceCreated}
             />
         </div>
+    );
+}
+
+DatasourcesPage.loader = datasourcesLoader;
+
+export type DatasourcesLoaderData = {
+    datasources: Datasource[];
+    datasourcesWithMappings: string[]; // IDs of datasources with mappings
+};
+
+async function datasourcesLoader(): Promise<DatasourcesLoaderData> {
+    const [ datasourcesResponse, mappingsResponse ] = await Promise.all([
+        api.datasources.getAllDatasources({}),
+        api.mappings.getAllMappings({}),
+    ]);
+    
+    if (!datasourcesResponse.status || !mappingsResponse.status)
+        throw new Error('Failed to load datasources');
+
+    const datasourceIdsWithMappings = new Set(
+        mappingsResponse.data.map(m => m.datasourceId),
+    );
+
+    return {
+        datasources: datasourcesResponse.data.map(Datasource.fromServer),
+        datasourcesWithMappings: Array.from(datasourceIdsWithMappings),
+    };
+}
+
+type DatasourcesInfoBannerProps = {
+    className?: string;
+    dismissBanner: () => void;
+};
+
+export function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBannerProps) {
+    return (
+        <InfoBanner className={className} dismissBanner={dismissBanner}>
+            <button 
+                onClick={dismissBanner}
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
+
+            <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
+            <p className='text-sm'>
+                A <strong>Datasource</strong> represents where your data is stored. You can <strong>import from</strong> or <strong>export to</strong> different sources, including databases and files.
+            </p>
+
+            <ul className='mt-3 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Databases:</strong> MongoDB, PostgreSQL, Neo4j.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Files:</strong> CSV, JSON, JSON-LD.
+                </li>
+            </ul>
+
+            <p className='text-sm mt-3'>
+                Click <strong>&quot;+ Add Datasource&quot;</strong> to connect a new source. Once added, it will appear in the table below.
+            </p>
+        </InfoBanner>
     );
 }

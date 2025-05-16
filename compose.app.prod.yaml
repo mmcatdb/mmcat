@@ -15,17 +15,17 @@ services:
         volumes:
             - .uploads:/app/uploads
 
-    # client:
-    #     container_name: "mmcat-client"
-    #     restart: always
-    #     build:
-    #         # Sets source directory for all COPY, ADD, etc. commands in the Dockerfile
-    #         context: client
-    #         # Path to the dockerfile
-    #         dockerfile: docker/prod/Dockerfile
-    #     ports:
-    #         # Map localhost port to 80 in docker
-    #         - ${CLIENT_PORT}:80
+    client:
+        container_name: "mmcat-client"
+        restart: always
+        build:
+            # Sets source directory for all COPY, ADD, etc. commands in the Dockerfile
+            context: client
+            # Path to the dockerfile
+            dockerfile: docker/prod/Dockerfile
+        ports:
+            # Map localhost port to 80 in docker
+            - ${CLIENT_PORT}:80
 
     client-old:
         container_name: "mmcat-client-old"

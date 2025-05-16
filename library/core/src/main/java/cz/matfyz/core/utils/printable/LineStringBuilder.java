@@ -45,18 +45,18 @@ class LineStringBuilder implements Printer {
         return this;
     }
 
-    public LineStringBuilder append(String str) {
-        stack.push(str);
+    public LineStringBuilder append(String string) {
+        stack.push(string);
         return this;
     }
 
-    public LineStringBuilder append(int i) {
-        stack.push(Integer.toString(i));
+    public LineStringBuilder append(int integer) {
+        stack.push(Integer.toString(integer));
         return this;
     }
 
-    public LineStringBuilder append(Object obj) {
-        stack.push(obj.toString());
+    public LineStringBuilder append(Object object) {
+        stack.push(object.toString());
         return this;
     }
 
@@ -65,10 +65,10 @@ class LineStringBuilder implements Printer {
         return this;
     }
 
-    public LineStringBuilder remove(int i) {
-        while (i > 0) {
+    public LineStringBuilder remove(int index) {
+        while (index > 0) {
             stack.pop();
-            i--;
+            index--;
         }
         return this;
     }
@@ -91,7 +91,7 @@ class LineStringBuilder implements Printer {
         return trimmedBuilder.toString();
     }
 
-    private String trimRight(String input) {
+    private static String trimRight(String input) {
         if (input.length() == 0)
             return input;
 

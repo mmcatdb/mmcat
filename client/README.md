@@ -1,4 +1,4 @@
-# mmcat-client-old
+# mmcat-client
 
 A frontend application for the MM-cat tool. It is based on [React](https://react.dev/?uwu=true) ([Vite](https://vitejs.dev/)) + TypeScript + Options API.
 

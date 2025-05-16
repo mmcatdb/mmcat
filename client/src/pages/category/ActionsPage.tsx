@@ -1,100 +1,106 @@
-import { Button, type SortDescriptor, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
-import { Action, ActionType, type JobPayload } from '@/types/action';
-import { useEffect, useState } from 'react';
+import { Button, type SortDescriptor, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@nextui-org/react';
+import { Action } from '@/types/action';
+import { useState } from 'react';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
-import { LoadingPage, ReloadPage } from '../errorPages';
 import { ConfirmationModal, EmptyState, useSortableData } from '@/components/TableCommon';
-import { AddIcon } from '@/components/icons/PlusIcon';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { Link, Outlet, type Params, useLoaderData, useNavigate } from 'react-router-dom';
-import { TrashIcon } from '@heroicons/react/24/outline'; 
-import { cn } from '@/components/utils';
+import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
+import { TrashIcon } from '@heroicons/react/24/outline';
+import { HiXMark } from 'react-icons/hi2';
+import { GoDotFill } from 'react-icons/go';
+import { useBannerState } from '@/types/utils/useBannerState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { routes } from '@/routes/routes';
+import { FaPlus } from 'react-icons/fa';
+import { InfoBanner } from '@/components/common';
 
 export function ActionsPage() {
-    return (
-        <div>
-            <Outlet />
-        </div>
-    );
-}
-
-export function ActionsPageOverview() {
-    const [ actions, setActions ] = useState<Action[]>([]);
-    const [ loading, setLoading ] = useState(false);
-    const [ error, setError ] = useState(false);
+    const data = useLoaderData() as ActionsLoaderData;
+    const [ actions, setActions ] = useState<Action[]>(data.actions);
     const { category } = useCategoryInfo();
-
-    async function fetchActions() {
-        setLoading(true);
-        setError(false);
-
-        const response = await api.actions.getAllActionsInCategory({
-            categoryId: category.id,
-        });
-        setLoading(false);
-
-        if (!response.status) {
-            setError(true);
-            return;
-        }
-            
-        const actionsFromServer = response.data.map(Action.fromServer);
-        setActions(actionsFromServer);
-    }
-
-    useEffect(() => {
-        void fetchActions();
-    }, [ category.id ]);
+    const { isVisible, dismissBanner, restoreBanner } = useBannerState('actions-page');
+    const navigate = useNavigate();
 
     async function deleteAction(actionId: string) {
         const result = await api.actions.deleteAction({ id: actionId });
-
         if (!result.status) {
             toast.error('Error deleting action');
             return;
         }
-        
-        setActions((prev) => prev.filter((action) => action.id !== actionId));
+
+        setActions(prev => prev.filter(action => action.id !== actionId));
         toast.success('Action deleted successfully');
     }
 
-    const navigate = useNavigate();
-
-    if (loading)
-        return <LoadingPage />;
-
-    if (error) 
-        return <ReloadPage onReload={fetchActions} title='Actions' message='Failed to load actions.'/>;
-
     return (
-        <div>
+        <div className='pt-4'>
+            {/* Header with Info Icon */}
             <div className='flex items-center justify-between mb-4'>
-                <h1 className='text-xl font-semibold'>Actions</h1>
+                <div className='flex items-center gap-2'>
+                    <h1 className='text-xl font-semibold'>Actions</h1>
+                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                        <button
+                            onClick={isVisible ? dismissBanner : restoreBanner}
+                            className='text-primary-500 hover:text-primary-700 transition'
+                        >
+                            <IoInformationCircleOutline className='w-6 h-6' />
+                        </button>
+                    </Tooltip>
+                </div>
+
                 <Button
-                    onPress={() => navigate(`/category/${category.id}/actions/add`)}
+                    onPress={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
                     color='primary'
-                    startContent={<AddIcon />}
-                    isDisabled={loading}
+                    startContent={<FaPlus />}
+                    size='sm'
                 >
                     Add Action
                 </Button>
             </div>
 
+            {/* Info Banner Below Header (Appears When Open) */}
+            {isVisible && <ActionInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+
+            {/* Actions Table or Empty State */}
             <div>
                 {actions.length > 0 ? (
-                    <ActionsTable actions={actions} onDeleteAction={deleteAction} />
+                    <ActionsTable
+                        actions={actions}
+                        onDeleteAction={id => {
+                            void deleteAction(id);
+                        }}
+                    />
                 ) : (
                     <EmptyState
                         message='No actions available.'
                         buttonText='+ Add Action'
-                        onButtonClick={() => navigate(`/category/${category.id}/actions/add`)}
+                        onButtonClick={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
                     />
                 )}
             </div>
         </div>
     );
+}
+
+ActionsPage.loader = actionsLoader;
+
+export type ActionsLoaderData = {
+    actions: Action[];
+};
+
+async function actionsLoader({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<ActionsLoaderData> {
+    if (!categoryId)
+        throw new Error('Action ID is required');
+
+    const response = await api.actions.getAllActionsInCategory({ categoryId });
+    if (!response.status)
+        throw new Error('Failed to load actions');
+
+    return {
+        actions: response.data.map(Action.fromServer),
+    };
 }
 
 type ActionsTableProps = {
@@ -103,7 +109,7 @@ type ActionsTableProps = {
 };
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
-    const { theme, showTableIDs } = usePreferences().preferences;
+    const { showTableIDs } = usePreferences().preferences;
     const { sortedData: sortedActions, sortDescriptor, setSortDescriptor } = useSortableData(actions, {
         column: 'label',
         direction: 'ascending',
@@ -111,33 +117,31 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     const [ loadingMap, setLoadingMap ] = useState<Record<string, boolean>>({});
     const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
-    const [ selectedAction, setSelectedAction ] = useState<Action | null>(null);
+    const [ selectedAction, setSelectedAction ] = useState<Action>();
 
     function handleSortChange(newSortDescriptor: SortDescriptor) {
         setSortDescriptor(newSortDescriptor);
     }
 
     async function createRun(actionId: string) {
-        setLoadingMap((prev) => ({ ...prev, [actionId]: true }));
+        setLoadingMap(prev => ({ ...prev, [actionId]: true }));
 
         const response = await api.jobs.createRun({ actionId });
 
-        if (!response.status) {
+        if (!response.status) 
             toast.error('Error creating run');
-        }
-        else {
+        else 
             toast.success('Run created successfully.');
-            console.log('New Run:', response.data);
-        }
+            // console.log('New Run:', response.data);
 
-        setLoadingMap((prev) => ({ ...prev, [actionId]: false }));
+        setLoadingMap(prev => ({ ...prev, [actionId]: false }));
     }
 
     const navigate = useNavigate();
 
     function handleRowAction(key: React.Key) {
         if (category.id) {
-            navigate(`/category/${category.id}/actions/${key}`, {
+            navigate(routes.category.actions.resolve({ categoryId: category.id }) + `/${key}`, {
                 state: { sortDescriptor },
             });
         }
@@ -149,276 +153,134 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     }
 
     function closeModal() {
-        setSelectedAction(null);
+        setSelectedAction(undefined);
         setIsModalOpen(false);
     }
 
     function confirmDelete() {
-        if (selectedAction) 
+        if (selectedAction)
             onDeleteAction(selectedAction.id);
-        
+
         closeModal();
     }
 
-    return (
-        <>
-            <Table
-                aria-label='Actions table'
-                sortDescriptor={sortDescriptor}
-                onSortChange={handleSortChange}
-                onRowAction={handleRowAction}
-            >
-                <TableHeader>
-                    {[
-                        ...(showTableIDs
-                            ? [
-                                <TableColumn key='id' allowsSorting>
+    return (<>
+        <Table
+            aria-label='Actions table'
+            sortDescriptor={sortDescriptor}
+            onSortChange={handleSortChange}
+            onRowAction={handleRowAction}
+        >
+            <TableHeader>
+                {[
+                    ...(showTableIDs
+                        ? [
+                            <TableColumn key='id' allowsSorting>
                                 ID
-                                </TableColumn>,
-                            ]
-                            : []),
-                        <TableColumn key='label' allowsSorting>
+                            </TableColumn>,
+                        ]
+                        : []),
+                    <TableColumn key='label' allowsSorting>
                         Label
-                        </TableColumn>,
-                        <TableColumn key='actions'>Actions</TableColumn>,
-                    ]}
-                </TableHeader>
-                <TableBody emptyContent={'No mappings to display.'}>
-                    {sortedActions.map((action) => (
-                        <TableRow
-                            key={action.id}
-                            className={cn('cursor-pointer',
-                                theme === 'dark' ? 'hover:bg-zinc-800 focus:bg-zinc-700' : 'hover:bg-zinc-100 focus:bg-zinc-200',
-                            )}
-                        >
-                            {[
-                                ...(showTableIDs
-                                    ? [ <TableCell key='id'>{action.id}</TableCell> ]
-                                    : []),
-                                <TableCell key='label'>{action.label}</TableCell>,
-                                <TableCell key='actions' className='flex items-center space-x-2'>
-                                    <Button
-                                        isIconOnly
-                                        aria-label='Delete action'
-                                        color='danger'
-                                        variant='light'
-                                        onPress={() => openModal(action)}
-                                    >
-                                        <TrashIcon className='w-5 h-5' />
-                                    </Button>
-                                    <Button
-                                        color='primary'
-                                        variant='bordered'
-                                        isDisabled={loadingMap[action.id]}
-                                        onPress={() => createRun(action.id)}
-                                    >
-                                        {loadingMap[action.id] ? 'Creating...' : 'Create Run'}
-                                    </Button>
-                                </TableCell>,
-                            ]}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableColumn>,
+                    <TableColumn key='actions'>Actions</TableColumn>,
+                ]}
+            </TableHeader>
+            <TableBody emptyContent={'No mappings to display.'}>
+                {sortedActions.map(action => (
+                    <TableRow
+                        key={action.id}
+                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
+                    >
+                        {[
+                            ...(showTableIDs
+                                ? [ <TableCell key='id'>{action.id}</TableCell> ]
+                                : []),
+                            <TableCell key='label'>{action.label}</TableCell>,
+                            <TableCell key='actions' className='flex items-center space-x-2'>
+                                <Button
+                                    isIconOnly
+                                    aria-label='Delete action'
+                                    color='danger'
+                                    variant='light'
+                                    onPress={() => openModal(action)}
+                                >
+                                    <TrashIcon className='w-5 h-5' />
+                                </Button>
+                                <Button
+                                    color='primary'
+                                    variant='flat'
+                                    isDisabled={loadingMap[action.id]}
+                                    onPress={() => {
+                                        void createRun(action.id); 
+                                    }}
+                                >
+                                    {loadingMap[action.id] ? 'Creating...' : 'Create Run'}
+                                </Button>
+                            </TableCell>,
+                        ]}
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
 
-            {selectedAction && (
-                <ConfirmationModal
-                    isOpen={isModalOpen}
-                    onClose={closeModal}
-                    title='Confirm Deletion'
-                    message={`Are you sure you want to delete the action "${selectedAction.label}"?`}
-                    confirmButtonText='Delete'
-                    confirmButtonColor='danger'
-                    cancelButtonText='Cancel'
-                    onConfirm={confirmDelete}
-                />
-            )}
-        </>
-    );
-}
-
-export type ActionLoaderData = {
-    action: Action;
-};
-
-export async function actionLoader({ params: { actionId } }: { params: Params<'actionId'> }): Promise<ActionLoaderData> {
-    if (!actionId) 
-        throw new Error('Action ID is required');
-    
-    const response = await api.actions.getAction({ id: actionId });
-
-    if (!response.status) 
-        throw new Error('Failed to load action');
-    
-    return {
-        action: Action.fromServer(response.data),
-    };
-}
-
-export function ActionDetailPage() {
-    const { action } = useLoaderData() as ActionLoaderData;
-    const navigate = useNavigate();
-    const [ isCreatingRun, setIsCreatingRun ] = useState<boolean>(false);
-    const [ isModalOpen, setIsModalOpen ] = useState(false);
-    const [ isDeleting, setIsDeleting ] = useState(false);
-
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
-
-    async function confirmDelete() {
-        setIsDeleting(true);
-        const result = await api.actions.deleteAction({ id: action.id });
-        setIsDeleting(false);
-
-        if (!result.status) {
-            toast.error('Error deleting action');
-            return;
-        }
-
-        toast.success('Action deleted successfully');
-        navigate(-1);
-    }
-
-    async function handleCreateRun(actionId: string) {
-        setIsCreatingRun(true);
-        const response = await api.jobs.createRun({ actionId });
-        setIsCreatingRun(false);
-
-        if (!response.status) {
-            toast.error('Error creating run');
-        }
-        else {
-            toast.success('Run created successfully.');
-            console.log('New Run:', response.data);
-        }
-    }
-
-    return (
-        <div>
-            <h1 className='text-2xl font-bold mb-4'>{action.label}</h1>
-            <p className='mb-4'>
-                <strong>ID:</strong> {action.id}
-            </p>
-
-            <div className='mb-6'>
-                <h2 className='text-xl font-semibold mb-2'>Steps</h2>
-                <StepsTable payloads={action.payloads} categoryId={action.categoryId} />
-            </div>
-
-            <div className='flex space-x-4'>
-                <Button
-                    color='primary'
-                    variant='bordered'
-                    isDisabled={isCreatingRun}
-                    onPress={() => handleCreateRun(action.id)}
-                >
-                    {isCreatingRun ? 'Creating...' : 'Create Run'}
-                </Button>
-                <Button
-                    color='danger'
-                    variant='bordered'
-                    onPress={openModal}
-                    isDisabled={isDeleting}
-                >
-                    Delete
-                </Button>
-            </div>
-
+        {selectedAction && (
             <ConfirmationModal
                 isOpen={isModalOpen}
                 onClose={closeModal}
-                onConfirm={confirmDelete}
-                title='Confirm Deletion?'
-                message='This will permanently delete the action.'
-                confirmButtonText='Yes, Delete'
-                cancelButtonText='Cancel'
+                title='Confirm Deletion'
+                message={`Are you sure you want to delete the action "${selectedAction.label}"?`}
+                confirmButtonText='Delete'
                 confirmButtonColor='danger'
+                cancelButtonText='Cancel'
+                onConfirm={confirmDelete}
             />
-        </div>
-    );
+        )}
+    </>);
 }
 
-type StepsTableProps = {
-    payloads: JobPayload[];
-    categoryId: string;
-}
+type ActionInfoBannerProps = {
+    className?: string;
+    dismissBanner: () => void;
+};
 
-function StepsTable({ payloads, categoryId }: StepsTableProps) {
-    if (!payloads || payloads.length === 0) 
-        return <p className='text-gray-500'>No steps available.</p>;
-    
+export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerProps) {
     return (
-        <Table aria-label='Steps table'>
-            <TableHeader>
-                <TableColumn>Index</TableColumn>
-                <TableColumn>Type</TableColumn>
-                <TableColumn>Datasource</TableColumn>
-                <TableColumn>Mappings</TableColumn>
-            </TableHeader>
-            <TableBody>
-                {payloads.map((payload, index) => {
-                    const datasourceElement = renderDatasourceElement({ payload, categoryId });
-                    const mappings = renderMappings(payload);
+        <InfoBanner className={className} dismissBanner={dismissBanner}>
+            <button
+                onClick={dismissBanner}
+                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
+            >
+                <HiXMark className='w-5 h-5' />
+            </button>
 
-                    return (
-                        <TableRow key={index}>
-                            <TableCell>{index}</TableCell>
-                            <TableCell>{payload.type}</TableCell>
-                            <TableCell>{datasourceElement}</TableCell>
-                            <TableCell>{mappings}</TableCell>
-                        </TableRow>
-                    );
-                })}
-            </TableBody>
-        </Table>
+            <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
+
+            {/* Info Content */}
+            <p className='text-sm'>
+                    An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
+                    Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
+                    For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
+            </p>
+
+            <ul className='mt-3 text-sm space-y-2'>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Action:</strong> Spawns jobs (e.g., exporting data to PostgreSQL).
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Job:</strong> A single execution of a transformation algorithm.
+                </li>
+                <li className='flex items-center gap-2'>
+                    <GoDotFill className='text-primary-500' />
+                    <strong>Run:</strong> A collection of multiple Job executions (similar to a CI/CD pipeline).
+                </li>
+            </ul>
+
+            <p className='text-sm mt-3'>
+                    Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
+            </p>
+        </InfoBanner>
     );
-}
-
-type renderDatasourceElementProps = {
-    payload: JobPayload;
-    categoryId: string;
-}
-
-function renderDatasourceElement({ payload, categoryId }: renderDatasourceElementProps) {
-    if (payload.type === ActionType.ModelToCategory || payload.type === ActionType.CategoryToModel) {
-        if (payload.datasource) {
-            return (
-                <Link
-                    to={`/category/${categoryId}/datasources/${payload.datasource.id}`}
-                    className='text-blue-500 hover:underline'
-                >
-                    {payload.datasource.label}
-                </Link>
-            );
-        }
-        return <span>N/A</span>;
-    }
-
-    if (payload.type === ActionType.RSDToCategory) {
-        return (
-            <div className='space-y-1'>
-                {payload.datasources?.map((ds) => (
-                    <Link
-                        key={ds.id}
-                        to={`/category/${categoryId}/datasources/${ds.id}`}
-                        className='text-blue-500 hover:underline'
-                    >
-                        {ds.label}
-                    </Link>
-                )) || <span>N/A</span>}
-            </div>
-        );
-    }
-
-    return <span>N/A</span>;
-}
-
-function renderMappings(payload : JobPayload) {
-    if (
-        payload.type === ActionType.ModelToCategory ||
-        payload.type === ActionType.CategoryToModel
-    ) 
-        return payload.mappings?.map((m) => m.kindName).join(', ') || 'N/A';
-    
-    return 'N/A';
 }
