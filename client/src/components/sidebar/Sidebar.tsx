@@ -258,13 +258,12 @@ function generalSidebarItems(): SidebarItem[] {
             iconName: SidebarIconKey.Datasources,
             match: [ routes.datasourceRoutes.datasource.path ],
         },
-        // Work of other colleague, left here for future merge
-        // {
-        //     type: 'normal',
-        //     label: 'Adminer',
-        //     route: `${routes.adminer}?reload=true`,
-        //     iconName: 'codeBracketSquare',
-        // },
+        {
+            type: 'normal',
+            label: 'Adminer',
+            route: `${routes.adminer}?reload=true`,
+            iconName: SidebarIconKey.CodeBracketSquare,
+        },
     ];
 }
 

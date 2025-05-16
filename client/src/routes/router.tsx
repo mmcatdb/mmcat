@@ -6,7 +6,7 @@ import { ErrorPage } from '@/pages/errorPages';
 import { CategoryPage, type CategoryLoaderData } from '@/pages/CategoryPage';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
 import { type DatasourceLoaderData, DatasourceDetailPage, DatasourceInCategoryPage } from '@/pages/DatasourcePage';
-// import { AdminerPage } from '@/pages/AdminerPage';
+import { AdminerPage } from '@/pages/AdminerPage';
 import { CategoriesPage, SchemaCategoriesPage } from '@/pages/CategoriesPage';
 import { RootLayout } from '@/components/RootLayout';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategoryPage';
@@ -53,13 +53,12 @@ export const router = createBrowserRouter([
                     },
                 ],
             },
-            // Work of other colleague, left here for future merge
-            // {
-            //     path: routes.adminer,
-            //     loader: AdminerPage.loader,
-            //     Component: AdminerPage,
-            //     handle: { breadcrumb: 'Adminer' },
-            // },
+            {
+                path: routes.adminer,
+                loader: AdminerPage.loader,
+                Component: AdminerPage,
+                handle: { breadcrumb: 'Adminer' },
+            },
             {
                 path: routes.categories,
                 Component: SchemaCategoriesPage,

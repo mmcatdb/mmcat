@@ -10,8 +10,6 @@ import { reducer } from '@/components/adminer/reducer';
 import { api } from '@/api';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
-// Work of other colleague, left here for future merge
-// Add back: find all "// Work of other colleague, left here for future merge" and uncomment the content below it
 export function AdminerPage() {
     const { datasources: allDatasources } = useLoaderData() as AdminerLoaderData;
     const [ searchParams, setSearchParams ] = useSearchParams();

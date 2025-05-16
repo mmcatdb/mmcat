@@ -33,21 +33,20 @@ class ParametrizedRoute<TParam extends string = never, TQuery extends string = n
  * Base route for schema category related paths.
  */
 const categoryIndex = new ParametrizedRoute<'categoryId'>('/schema-categories/:categoryId', 'category');
-  
+
 /**
  * Base route for datasources related paths.
  */
 const datasourcesIndex = new ParametrizedRoute('/datasources', 'datasources');
-  
+
 export const routes = {
     home: new ParametrizedRoute('/', 'home'),
     // Static routes
     categories: '/schema-categories',
     about: '/about',
     datasources: datasourcesIndex,
-    // Work of other colleague, left here for future merge
-    // adminer: '/adminer',
-    
+    adminer: '/adminer',
+
     // Nested and dynamic routes
     category: {
         index: categoryIndex,
