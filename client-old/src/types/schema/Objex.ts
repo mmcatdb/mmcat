@@ -1,11 +1,11 @@
 import type { Position } from 'cytoscape';
-import { idsAreEqual, Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer } from '../identifiers';
+import { idsAreEqual, Key, ObjexIds, SignatureId, type KeyFromServer, type ObjexIdsFromServer, type SignatureIdFromServer } from '../identifiers';
 import { SchemaCategoryInvalidError } from './Error';
 import { isPositionEqual, type Graph } from '../categoryGraph';
 
 export type SchemaObjexFromServer = {
     key: KeyFromServer;
-    ids?: ObjectIdsFromServer;
+    ids?: ObjexIdsFromServer;
     superId: SignatureIdFromServer;
 };
 
@@ -18,35 +18,35 @@ export type MetadataObjexFromServer = {
 export class SchemaObjex {
     private constructor(
         readonly key: Key,
-        readonly ids: ObjectIds | undefined,
+        readonly ids: ObjexIds | undefined,
         readonly superId: SignatureId,
         private _isNew: boolean,
     ) {}
 
     static fromServer(schema: SchemaObjexFromServer): SchemaObjex {
-        const object = new SchemaObjex(
+        const objex = new SchemaObjex(
             Key.fromServer(schema.key),
-            schema.ids ? ObjectIds.fromServer(schema.ids) : undefined,
+            schema.ids ? ObjexIds.fromServer(schema.ids) : undefined,
             SignatureId.fromServer(schema.superId),
             false,
         );
 
-        return object;
+        return objex;
     }
 
-    static createNew(key: Key, def: Omit<ObjectDefinition, 'label'>): SchemaObjex {
-        const object = new SchemaObjex(
+    static createNew(key: Key, def: Omit<ObjexDefinition, 'label'>): SchemaObjex {
+        const objex = new SchemaObjex(
             key,
             def.ids,
             def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             true,
         );
 
-        return object;
+        return objex;
     }
 
     /** If there is nothing to update, undefined will be returned. */
-    update({ ids }: { ids?: ObjectIds | null }): SchemaObjex | undefined {
+    update({ ids }: { ids?: ObjexIds | null }): SchemaObjex | undefined {
         if (ids === null && this.ids)
             return SchemaObjex.createNew(this.key, {});
 
@@ -60,9 +60,9 @@ export class SchemaObjex {
         return this._isNew;
     }
 
-    get idsChecked(): ObjectIds {
+    get idsChecked(): ObjexIds {
         if (!this.ids)
-            throw new SchemaCategoryInvalidError(`Object: ${this.key.toString()} doesn't have ids.`);
+            throw new SchemaCategoryInvalidError(`Objex: ${this.key.toString()} doesn't have ids.`);
 
         return this.ids;
     }
@@ -80,9 +80,9 @@ export class SchemaObjex {
     }
 }
 
-export type ObjectDefinition = {
+export type ObjexDefinition = {
     label: string;
-    ids?: ObjectIds;
+    ids?: ObjexIds;
 };
 
 export class MetadataObjex {

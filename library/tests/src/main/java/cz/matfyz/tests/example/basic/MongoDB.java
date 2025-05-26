@@ -63,20 +63,20 @@ public abstract class MongoDB {
     }
 
     public static void addAddress(InstanceBuilder builder, int orderIndex, String uniqueId, @Nullable String streetValue, @Nullable String cityValue, @Nullable String zipValue) {
-        final var address = builder.valueObject(Schema.address, uniqueId);
+        final var address = builder.valueObjex(Schema.address, uniqueId);
         builder.morphism(Schema.orderToAddress,
             builder.getRow(Schema.order, orderIndex),
             address
         );
 
         if (streetValue != null)
-            builder.morphism(Schema.addressToStreet, address, builder.valueObject(Schema.street, streetValue));
+            builder.morphism(Schema.addressToStreet, address, builder.valueObjex(Schema.street, streetValue));
 
         if (cityValue != null)
-            builder.morphism(Schema.addressToCity, address, builder.valueObject(Schema.city, cityValue));
+            builder.morphism(Schema.addressToCity, address, builder.valueObjex(Schema.city, cityValue));
 
         if (zipValue != null)
-            builder.morphism(Schema.addressToZip, address, builder.valueObject(Schema.zip, zipValue));
+            builder.morphism(Schema.addressToZip, address, builder.valueObjex(Schema.zip, zipValue));
     }
 
     public static TestMapping tag(SchemaCategory schema) {
@@ -95,7 +95,7 @@ public abstract class MongoDB {
 
         for (String value : messageValues) {
             builder.morphism(Schema.tagToOrder,
-                builder.valueObject(Schema.tag, value),
+                builder.valueObjex(Schema.tag, value),
                 order
             );
         }
@@ -128,11 +128,11 @@ public abstract class MongoDB {
         final var product = builder.getRow(Schema.product, productIndex);
         final var idValue = product.superId.getValue(Schema.productToId.signature());
 
-        final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).object(Schema.item);
+        final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).objex(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);
         builder.morphism(Schema.itemToProduct, item, product);
         builder.morphism(Schema.itemToQuantity, item,
-            builder.valueObject(Schema.quantity, quantityValue)
+            builder.valueObjex(Schema.quantity, quantityValue)
         );
     }
 
@@ -160,15 +160,15 @@ public abstract class MongoDB {
         final var contact = builder
             .value(Schema.contactToNumber, numberValue)
             .value(Schema.contactToType, typeValue)
-            .object(Schema.contact);
+            .objex(Schema.contact);
 
         builder.morphism(Schema.contactToOrder, contact, order);
 
         builder.morphism(Schema.contactToType, contact,
-            builder.valueObject(Schema.type, typeValue)
+            builder.valueObjex(Schema.type, typeValue)
         );
         builder.morphism(Schema.contactToValue, contact,
-            builder.valueObject(Schema.value, valueValue)
+            builder.valueObjex(Schema.value, valueValue)
         );
     }
 
@@ -188,9 +188,9 @@ public abstract class MongoDB {
     public static void addCustomer(InstanceBuilder builder, int orderIndex, String name) {
         final var order = builder.getRow(Schema.order, orderIndex);
 
-        final var customer = builder.value(Schema.customerToName, name).object(Schema.customer);
+        final var customer = builder.value(Schema.customerToName, name).objex(Schema.customer);
         builder.morphism(Schema.customerToName, customer,
-            builder.valueObject(Schema.name, name)
+            builder.valueObjex(Schema.name, name)
         );
 
         builder.morphism(Schema.orderToCustomer, order, customer);
@@ -219,18 +219,18 @@ public abstract class MongoDB {
         final var note = builder
             .value(Schema.noteToNumber, numberValue)
             .value(Schema.noteToLocale, localeValue)
-            .object(Schema.note);
+            .objex(Schema.note);
 
         builder.morphism(Schema.noteToOrder, note, order);
         builder.morphism(Schema.noteToLocale, note,
-            builder.valueObject(Schema.locale, localeValue)
+            builder.valueObjex(Schema.locale, localeValue)
         );
 
-        final var data = builder.valueObject(Schema.data, uniqueId);
+        final var data = builder.valueObjex(Schema.data, uniqueId);
         builder.morphism(Schema.noteToData, note, data);
 
-        builder.morphism(Schema.dataToSubject, data, builder.valueObject(Schema.subject, subjectValue));
-        builder.morphism(Schema.dataToContent, data, builder.valueObject(Schema.content, contentValue));
+        builder.morphism(Schema.dataToSubject, data, builder.valueObjex(Schema.subject, subjectValue));
+        builder.morphism(Schema.dataToContent, data, builder.valueObjex(Schema.content, contentValue));
     }
 
 }

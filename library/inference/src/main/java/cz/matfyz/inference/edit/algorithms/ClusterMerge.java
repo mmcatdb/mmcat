@@ -1,7 +1,7 @@
 package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -13,7 +13,7 @@ import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,12 +132,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         traverseAndBuild(data.clusterKeys.get(RND_CLUSTER_IDX), clusterRootKey);
         addSchemaPart(oldClusterNames, clusterRootKey);
 
-        findMorphismsAndObjectsToDelete(clusterRootKey);
-        InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
+        findMorphismsAndObjexesToDelete(clusterRootKey);
+        InferenceEditorUtils.removeMorphismsAndObjexes(newSchema, signaturesToDelete, keysToDelete);
 
-        // finally add the _type and _value object
-        addTypeObjectAndMorphism();
-        addValueObjectAndMorphism();
+        // finally add the _type and _value objexes
+        addTypeObjexAndMorphism();
+        addValueObjexAndMorphism();
     }
 
     private Key findClusterRootKey(SchemaCategory schema) {
@@ -154,7 +154,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private List<String> getOldClusterNames() {
         return data.clusterKeys.stream()
-            .map(key -> newMetadata.getObject(key).label)
+            .map(key -> newMetadata.getObjex(key).label)
             .toList();
     }
 
@@ -247,33 +247,33 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return lcp;
     }
 
-    private void traverseAndPerform(Key startKey, Key clusterRootKey, Consumer<SchemaObject> objectConsumer, Consumer<SchemaMorphism> morphismConsumer) {
+    private void traverseAndPerform(Key startKey, Key clusterRootKey, Consumer<SchemaObjex> objexConsumer, Consumer<SchemaMorphism> morphismConsumer) {
         Set<Key> visited = new HashSet<>();
-        Queue<SchemaObject> queue = new LinkedList<>();
-        SchemaObject startObject = newSchema.getObject(startKey);
+        Queue<SchemaObjex> queue = new LinkedList<>();
+        SchemaObjex startObjex = newSchema.getObjex(startKey);
 
-        queue.add(startObject);
+        queue.add(startObjex);
         visited.add(startKey);
-        objectConsumer.accept(startObject);
+        objexConsumer.accept(startObjex);
 
         while (!queue.isEmpty()) {
-            SchemaObject currentObject = queue.poll();
+            SchemaObjex currentObjex = queue.poll();
             for (SchemaMorphism morphism : newSchema.allMorphisms()) {
-                if (morphism.dom().equals(currentObject)) {
-                    SchemaObject targetObject = morphism.cod();
-                    if (visited.add(targetObject.key())) {
-                        queue.add(targetObject);
-                        objectConsumer.accept(targetObject);
+                if (morphism.dom().equals(currentObjex)) {
+                    SchemaObjex targetObjex = morphism.cod();
+                    if (visited.add(targetObjex.key())) {
+                        queue.add(targetObjex);
+                        objexConsumer.accept(targetObjex);
                     }
                     morphismConsumer.accept(morphism);
                 }
-                if (morphism.cod().equals(currentObject) &&
+                if (morphism.cod().equals(currentObjex) &&
                     !morphism.cod().key().equals(startKey) &&
                     !morphism.dom().key().equals(clusterRootKey)) {
-                    SchemaObject sourceObject = morphism.dom();
-                    if (visited.add(sourceObject.key())) {
-                        queue.add(sourceObject);
-                        objectConsumer.accept(sourceObject);
+                    SchemaObjex sourceObjex = morphism.dom();
+                    if (visited.add(sourceObjex.key())) {
+                        queue.add(sourceObjex);
+                        objexConsumer.accept(sourceObjex);
                     }
                     morphismConsumer.accept(morphism);
                 }
@@ -286,9 +286,9 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         newMetadataPart = MetadataCategory.createEmpty(newSchemaPart);
 
         traverseAndPerform(startKey, clusterRootKey,
-            newObject -> {
-                newSchemaPart.addObject(newObject);
-                newMetadataPart.setObject(newObject, newMetadata.getObject(newObject));
+            newObjex -> {
+                newSchemaPart.addObjex(newObjex);
+                newMetadataPart.setObjex(newObjex, newMetadata.getObjex(newObjex));
             },
             newMorphism -> {
                 newSchemaPart.addMorphism(newMorphism);
@@ -299,29 +299,29 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private void traverseAndFind(Key startKey, Key clusterRootKey) {
         traverseAndPerform(startKey, clusterRootKey,
-            object -> keysToDelete.add(object.key()),
+            objex -> keysToDelete.add(objex.key()),
             morphism -> signaturesToDelete.add(morphism.signature())
         );
     }
 
     private void addSchemaPart(List<String> oldClusterNames, Key clusterRootKey) {
-        final Map<Key, Key> mapOldNewKey = addObjects(oldClusterNames);
+        final Map<Key, Key> mapOldNewKey = addObjexes(oldClusterNames);
         addMorphisms(mapOldNewKey, clusterRootKey);
     }
 
-    private Map<Key, Key> addObjects(List<String> oldClusterNames) {
+    private Map<Key, Key> addObjexes(List<String> oldClusterNames) {
         final Map<Key, Key> mapOldNewKey = new HashMap<>();
-        for (final SchemaObject object : newSchemaPart.allObjects()) {
-            final var mo = newMetadataPart.getObject(object);
+        for (final SchemaObjex objex : newSchemaPart.allObjexes()) {
+            final var mo = newMetadataPart.getObjex(objex);
             Key newKey;
             if (oldClusterNames.contains(mo.label)) {
-                newKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createGenerated(), newClusterName);
+                newKey = InferenceEditorUtils.createAndAddObjex(newSchema, newMetadata, ObjexIds.createGenerated(), newClusterName);
                 newClusterKey = newKey;
             } else {
-                newKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, object.ids(), mo.label);
+                newKey = InferenceEditorUtils.createAndAddObjex(newSchema, newMetadata, objex.ids(), mo.label);
             }
 
-            mapOldNewKey.put(object.key(), newKey);
+            mapOldNewKey.put(objex.key(), newKey);
         }
 
         return mapOldNewKey;
@@ -329,34 +329,34 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private void addMorphisms(Map<Key, Key> mapOldNewKey, Key clusterRootKey) {
         for (final SchemaMorphism morphism : newSchemaPart.allMorphisms()) {
-            final SchemaObject dom = newSchema.getObject(mapOldNewKey.get(morphism.dom().key()));
-            final Signature newSig = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, newSchema.getObject(mapOldNewKey.get(morphism.cod().key())));
+            final SchemaObjex dom = newSchema.getObjex(mapOldNewKey.get(morphism.dom().key()));
+            final Signature newSig = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, newSchema.getObjex(mapOldNewKey.get(morphism.cod().key())));
             mapOldNewSignature.put(morphism.signature(), newSig);
         }
-        this.newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(clusterRootKey), false, null).dual();
+        this.newClusterSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObjex(newClusterKey), newSchema.getObjex(clusterRootKey), false, null).dual();
     }
 
-    private void findMorphismsAndObjectsToDelete(Key clusterRootKey) {
+    private void findMorphismsAndObjexesToDelete(Key clusterRootKey) {
         for (final Key key : data.clusterKeys)
             traverseAndFind(key, clusterRootKey);
 
         for (final SchemaMorphism morphism : newSchema.allMorphisms()) {
             if (morphism.dom().key().equals(clusterRootKey) && data.clusterKeys.contains(morphism.cod().key())) {
-                final var codMetadata = newMetadata.getObject(morphism.cod());
+                final var codMetadata = newMetadata.getObjex(morphism.cod());
                 mapOldClusterNameSignature.put(codMetadata.label, morphism.signature());
                 signaturesToDelete.add(morphism.signature());
             }
         }
     }
 
-    private void addTypeObjectAndMorphism() {
-        final Key typeKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), TYPE_LABEL);
-        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(typeKey));
+    private void addTypeObjexAndMorphism() {
+        final Key typeKey = InferenceEditorUtils.createAndAddObjex(newSchema, newMetadata, ObjexIds.createValue(), TYPE_LABEL);
+        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObjex(newClusterKey), newSchema.getObjex(typeKey));
     }
 
-    private void addValueObjectAndMorphism() {
-        final Key valueKey = InferenceEditorUtils.createAndAddObject(newSchema, newMetadata, ObjectIds.createValue(), VALUE_LABEL);
-        this.newValueSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObject(newClusterKey), newSchema.getObject(valueKey));
+    private void addValueObjexAndMorphism() {
+        final Key valueKey = InferenceEditorUtils.createAndAddObjex(newSchema, newMetadata, ObjexIds.createValue(), VALUE_LABEL);
+        this.newValueSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, newSchema.getObjex(newClusterKey), newSchema.getObjex(valueKey));
     }
 
     /**
@@ -375,8 +375,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     private Mapping findClusterMapping(List<Mapping> mappings) {
         for (final Mapping mapping : mappings) {
             // just try if any of the old signatures is in the mapping, then all of them should be there
-            final var randomClusterObject = oldMetadata.getObject(data.clusterKeys.get(RND_CLUSTER_IDX));
-            final var signature = mapOldClusterNameSignature.get(randomClusterObject.label);
+            final var randomClusterObjex = oldMetadata.getObjex(data.clusterKeys.get(RND_CLUSTER_IDX));
+            final var signature = mapOldClusterNameSignature.get(randomClusterObjex.label);
             if (mapping.accessPath().getSubpathBySignature(signature) != null)
                 return mapping;
         }
@@ -390,8 +390,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     private ComplexProperty changeComplexProperties(ComplexProperty clusterComplexProperty) {
-        final var randomClusterObject = oldMetadata.getObject(data.clusterKeys.get(RND_CLUSTER_IDX));
-        final var signature = mapOldClusterNameSignature.get(randomClusterObject.label);
+        final var randomClusterObjex = oldMetadata.getObjex(data.clusterKeys.get(RND_CLUSTER_IDX));
+        final var signature = mapOldClusterNameSignature.get(randomClusterObjex.label);
         final AccessPath firstClusterAccessPath = clusterComplexProperty.getSubpathBySignature(signature);
 
         return getNewComplexProperty(firstClusterAccessPath, clusterComplexProperty);
@@ -471,7 +471,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
         Signature complexPropertySignature = mapOldNewSignature.get(original.signature());
         if (complexPropertySignature == null)
-            // Meaning the original was an array object and so the signature was dual.
+            // Meaning the original was an array and so the signature was dual.
             complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
 
         return new ComplexProperty(original.name(), complexPropertySignature, newSubpaths);

@@ -58,7 +58,7 @@ export const router = createBrowserRouter([ {
             Component: CategoriesPage,
             loader: CategoriesPage.loader,
         }, {
-            path: routes.category.editor.path,
+            path: routes.category.index.path,
             loader: CategoryPage.loader,
             Component: CategoryPage,
             handle: { breadcrumb: (data: CategoryLoaderData) => data.category.label },

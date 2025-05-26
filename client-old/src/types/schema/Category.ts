@@ -16,12 +16,12 @@ export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
 };
 
 export type SerializedSchema = {
-    objects: SchemaObjexFromServer[];
+    objexes: SchemaObjexFromServer[];
     morphisms: SchemaMorphismFromServer[];
 };
 
 export type SerializedMetadata = {
-    objects: MetadataObjexFromServer[];
+    objexes: MetadataObjexFromServer[];
     morphisms: MetadataMorphismFromServer[];
 };
 
@@ -36,16 +36,16 @@ export class Category implements Entity {
         readonly label: string,
         readonly versionId: VersionId,
         readonly systemVersionId: VersionId,
-        objects: VersionedSchemaObjex[],
+        objexes: VersionedSchemaObjex[],
         morphisms: VersionedSchemaMorphism[],
         logicalModels: LogicalModel[],
     ) {
-        objects.forEach(object => {
-            if (!object.current)
+        objexes.forEach(objex => {
+            if (!objex.current)
                 return;
 
-            this.objects.set(object.key, object);
-            this.keysProvider.add(object.key);
+            this.objexes.set(objex.key, objex);
+            this.keysProvider.add(objex.key);
         });
 
         morphisms.forEach(morphism => {
@@ -56,7 +56,7 @@ export class Category implements Entity {
             this.signatureProvider.add(morphism.signature);
         });
 
-        this.groups = createGroups(logicalModels, objects, morphisms);
+        this.groups = createGroups(logicalModels, objexes, morphisms);
         this.groups.forEach(group => {
             group.mappings.forEach(mapping => {
                 mapping.properties.forEach(property => {
@@ -68,10 +68,10 @@ export class Category implements Entity {
     }
 
     static fromServer(input: SchemaCategoryFromServer, logicalModels: LogicalModel[]): Category {
-        const objectMetadata = new Map<KeyFromServer, MetadataObjexFromServer>(
-            input.metadata.objects.map(o => [ o.key, o ]),
+        const objexMetadata = new Map<KeyFromServer, MetadataObjexFromServer>(
+            input.metadata.objexes.map(o => [ o.key, o ]),
         );
-        const objects = input.schema.objects.map(o => VersionedSchemaObjex.fromServer(o, objectMetadata.get(o.key)!));
+        const objexes = input.schema.objexes.map(o => VersionedSchemaObjex.fromServer(o, objexMetadata.get(o.key)!));
 
         const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
             input.metadata.morphisms.map(m => [ m.signature, m ]),
@@ -83,7 +83,7 @@ export class Category implements Entity {
             input.label,
             input.version,
             input.systemVersion,
-            objects,
+            objexes,
             morphisms,
             logicalModels,
         );
@@ -93,28 +93,28 @@ export class Category implements Entity {
         return this.fromServer({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata }, []);
     }
 
-    private objects = new ComparableMap<Key, number, VersionedSchemaObjex>(key => key.value);
+    private objexes = new ComparableMap<Key, number, VersionedSchemaObjex>(key => key.value);
     private morphisms = new ComparableMap<Signature, string, VersionedSchemaMorphism>(signature => signature.value);
 
     createObjex(): VersionedSchemaObjex {
         const key = this.keysProvider.createAndAdd();
-        return this.getObject(key);
+        return this.getObjex(key);
     }
 
-    getObject(key: Key): VersionedSchemaObjex {
-        let object = this.objects.get(key);
+    getObjex(key: Key): VersionedSchemaObjex {
+        let objex = this.objexes.get(key);
 
-        if (!object) {
-            object = VersionedSchemaObjex.create(key, this._graph);
-            this.objects.set(key, object);
+        if (!objex) {
+            objex = VersionedSchemaObjex.create(key, this._graph);
+            this.objexes.set(key, objex);
             this.keysProvider.add(key);
         }
 
-        return object;
+        return objex;
     }
 
-    getObjects(): VersionedSchemaObjex[] {
-        return [ ...this.objects.values() ];
+    getObjexes(): VersionedSchemaObjex[] {
+        return [ ...this.objexes.values() ];
     }
 
     createMorphism(): VersionedSchemaMorphism {
@@ -147,18 +147,18 @@ export class Category implements Entity {
     set graph(newGraph: Graph | undefined) {
         this._graph = newGraph;
         if (!newGraph) {
-            this.objects.forEach(object => object.graph = undefined);
+            this.objexes.forEach(objex => objex.graph = undefined);
             this.morphisms.forEach(morphism => morphism.graph = undefined);
             return;
         }
 
         newGraph.resetElements(this.groups);
         newGraph.batch(() => {
-            this.objects.forEach(object => object.graph = newGraph);
+            this.objexes.forEach(objex => objex.graph = newGraph);
             this.morphisms.forEach(morphism => morphism.graph = newGraph);
         });
 
-        // Position the object to the center of the canvas.
+        // Position the objex to the center of the canvas.
         newGraph.fixLayout();
         newGraph.layout();
         newGraph.center();
@@ -208,20 +208,20 @@ export type GroupData = {
 };
 
 type Context = {
-    objects: ComparableMap<Key, number, SchemaObjex>;
+    objexes: ComparableMap<Key, number, SchemaObjex>;
     morphisms: ComparableMap<Signature, string, SchemaMorphism>;
 };
 
-function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObjex[], morphisms: VersionedSchemaMorphism[]): GroupData[] {
+function createGroups(logicalModels: LogicalModel[], objexes: VersionedSchemaObjex[], morphisms: VersionedSchemaMorphism[]): GroupData[] {
     const context: Context = {
-        objects: new ComparableMap(key => key.value),
+        objexes: new ComparableMap(key => key.value),
         morphisms: new ComparableMap(signature => signature.value),
     };
 
-    objects
-        .map(object => object.current)
+    objexes
+        .map(objex => objex.current)
         .filter((o): o is SchemaObjex => !!o)
-        .forEach(object => context.objects.set(object.key, object));
+        .forEach(objex => context.objexes.set(objex.key, objex));
 
     morphisms
         .map(morphism => morphism.current)
@@ -238,13 +238,13 @@ function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObj
         const mappings: GroupMapping[] = [];
 
         logicalModel.mappings.forEach(mapping => {
-            const root = objects.find(object => object.key.equals(mapping.rootObjectKey));
-            const properties = [ ...getObjectsFromPath(mapping.accessPath, context).values() ]
-                .map(object => objects.find(o => o.key.equals(object.key)))
-                .filter((object): object is VersionedSchemaObjex => !!object);
+            const root = objexes.find(objex => objex.key.equals(mapping.rootObjexKey));
+            const properties = [ ...getObjexesFromPath(mapping.accessPath, context).values() ]
+                .map(objex => objexes.find(o => o.key.equals(objex.key)))
+                .filter((objex): objex is VersionedSchemaObjex => !!objex);
 
             if (!root) {
-                console.error('Root object not found for mapping', mapping);
+                console.error('Root objex not found for mapping', mapping);
                 return;
             }
 
@@ -259,40 +259,40 @@ function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObj
     });
 }
 
-function getObjectsFromPath(path: ParentProperty, context: Context): ComparableSet<SchemaObjex, number> {
-    const output: ComparableSet<SchemaObjex, number> = new ComparableSet(object => object.key.value);
+function getObjexesFromPath(path: ParentProperty, context: Context): ComparableSet<SchemaObjex, number> {
+    const output: ComparableSet<SchemaObjex, number> = new ComparableSet(objex => objex.key.value);
 
     path.subpaths.forEach(subpath => {
-        findObjectsFromSignature(subpath.signature, context).forEach(object => output.add(object));
+        findObjexesFromSignature(subpath.signature, context).forEach(objex => output.add(objex));
 
         if (subpath.name instanceof DynamicName)
-            findObjectsFromSignature(subpath.name.signature, context).forEach(object => output.add(object));
+            findObjexesFromSignature(subpath.name.signature, context).forEach(objex => output.add(objex));
 
         if (subpath instanceof ComplexProperty)
-            getObjectsFromPath(subpath, context).forEach(object => output.add(object));
+            getObjexesFromPath(subpath, context).forEach(objex => output.add(objex));
     });
 
     return output;
 }
 
-/** Finds all objects on the signature path except for the first one. */
-function findObjectsFromSignature(signature: Signature, context: Context): SchemaObjex[] {
+/** Finds all objexes on the signature path except for the first one. */
+function findObjexesFromSignature(signature: Signature, context: Context): SchemaObjex[] {
     const output: SchemaObjex[] = [];
 
     signature.toBases().forEach(rawBase => {
-        const object = findObjectFromBaseSignature(rawBase, context);
-        if (object)
-            output.push(object);
+        const objex = findObjexFromBaseSignature(rawBase, context);
+        if (objex)
+            output.push(objex);
     });
 
     return output;
 }
 
-function findObjectFromBaseSignature(rawBase: Signature, context: Context): SchemaObjex | undefined {
+function findObjexFromBaseSignature(rawBase: Signature, context: Context): SchemaObjex | undefined {
     const base = rawBase.isBaseDual ? rawBase.dual() : rawBase;
     const morphism = context.morphisms.get(base);
     if (!morphism)
         return;
 
-    return context.objects.get(rawBase.isBaseDual ? morphism.domKey : morphism.codKey);
+    return context.objexes.get(rawBase.isBaseDual ? morphism.domKey : morphism.codKey);
 }

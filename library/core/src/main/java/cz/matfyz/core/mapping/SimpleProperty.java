@@ -43,7 +43,7 @@ public class SimpleProperty extends AccessPath {
             : null;
     }
 
-    @Override public @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
 
         return morphism.dom().key().equals(key) ? this : null;

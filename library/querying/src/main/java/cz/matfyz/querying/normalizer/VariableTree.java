@@ -20,9 +20,9 @@ public class VariableTree implements Tree<VariableTree>, Printable {
     public final Variable variable;
 
     private final Map<BaseSignature, VariableTree> children = new TreeMap<>();
-    /** This property is null if and only if this object is the root. */
+    /** This property is null if and only if this node is the root. */
     private @Nullable VariableTree parent;
-    /** This property is null if and only if this object is the root. */
+    /** This property is null if and only if this node is the root. */
     public final @Nullable BaseSignature edgeFromParent;
 
     public @Nullable VariableTree getChild(BaseSignature edge) {

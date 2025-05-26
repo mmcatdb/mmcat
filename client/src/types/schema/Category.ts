@@ -24,9 +24,9 @@ export class Category implements Entity {
         );
 
         const objexMetadata = new Map<KeyFromServer, MetadataObjexFromServer>(
-            input.metadata.objects.map(metadata => [ metadata.key, metadata ]),
+            input.metadata.objexes.map(metadata => [ metadata.key, metadata ]),
         );
-        const objexes = input.schema.objects.map(schema => Objex.fromServer(category, schema, objexMetadata.get(schema.key)!));
+        const objexes = input.schema.objexes.map(schema => Objex.fromServer(category, schema, objexMetadata.get(schema.key)!));
         objexes.forEach(objex => {
             if (!objex.schema)
                 return;
@@ -99,12 +99,12 @@ export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
 };
 
 export type SerializedSchema = {
-    objects: SchemaObjexFromServer[];
+    objexes: SchemaObjexFromServer[];
     morphisms: SchemaMorphismFromServer[];
 };
 
 export type SerializedMetadata = {
-    objects: MetadataObjexFromServer[];
+    objexes: MetadataObjexFromServer[];
     morphisms: MetadataMorphismFromServer[];
 };
 
@@ -138,7 +138,7 @@ export type SchemaCategoryInit = {
 };
 
 export type SchemaCategoryStats = {
-    objects: number;
+    objexes: number;
     mappings: number;
     jobs: number;
 };

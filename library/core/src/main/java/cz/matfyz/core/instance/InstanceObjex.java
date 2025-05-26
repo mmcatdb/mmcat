@@ -1,11 +1,11 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.exception.ObjectException;
+import cz.matfyz.core.exception.ObjexException;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueSequentialGenerator;
@@ -20,15 +20,15 @@ import java.util.TreeSet;
 /**
  * Each object from instance category is modeled as a set of tuples ({@link DomainRow}).
  */
-public class InstanceObject implements Identified<InstanceObject, Key> {
+public class InstanceObjex implements Identified<InstanceObjex, Key> {
 
-    public final SchemaObject schema;
+    public final SchemaObjex schema;
 
     private final InstanceCategory instance;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
-    InstanceObject(SchemaObject schema, InstanceCategory instance) {
+    InstanceObjex(SchemaObjex schema, InstanceCategory instance) {
         this.schema = schema;
         this.instance = instance;
         this.technicalIdGenerator = UniqueSequentialGenerator.create();
@@ -121,7 +121,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         if (technicalId.isPresent())
             return getRowByTechnicalId(technicalId.get());
 
-        throw ObjectException.actualRowNotFound(superId, technicalIds);
+        throw ObjexException.actualRowNotFound(superId, technicalIds);
     }
 
     /**
@@ -176,7 +176,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     public FindSuperIdResult findMaximalSuperId(SuperIdWithValues superId, Set<DomainRow> outOriginalRows) {
         // First, we take all ids that can be created for this object, and we find those, that can be filled from the given superId.
         // Then we find the rows that correspond to them and merge their superIds to the superId.
-        // If it gets bigger, we try to generate other ids to find their objects and so on ...
+        // If it gets bigger, we try to generate other ids to find their objexes and so on ...
 
         int previousSuperIdSize = 0;
         Set<SuperIdWithValues> foundIds = new TreeSet<>();
@@ -278,7 +278,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     }
 
     @Override public boolean equals(Object other) {
-        return other instanceof InstanceObject instanceObject && instanceObject.schema.equals(schema);
+        return other instanceof InstanceObjex instanceObject && instanceObject.schema.equals(schema);
     }
 
     @Override public int hashCode() {

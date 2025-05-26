@@ -49,10 +49,10 @@ public class Signature implements Serializable, Comparable<Signature> {
         return ids.length == 0 ? createEmpty() : new Signature(ids);
     }
 
-    private static final Signature emptyObject = new Signature(new int[] {});
+    private static final Signature emptyInstance = new Signature(new int[] {});
 
     public static Signature createEmpty() {
-        return emptyObject;
+        return emptyInstance;
     }
 
     public List<BaseSignature> toBases() {

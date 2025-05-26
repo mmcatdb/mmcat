@@ -15,7 +15,7 @@ export type InferenceEdit = {
 };
 
 /**
- * Creates an inference edit object from serialized server data.
+ * Creates an inference edit from serialized server data.
  */
 export function createInferenceEditFromServer(data: SerializedInferenceEdit): InferenceEdit {
     switch (data.type) {

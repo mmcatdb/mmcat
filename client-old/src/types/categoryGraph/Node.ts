@@ -75,19 +75,19 @@ export class Node {
     private _neighbors = new ComparableMap<Signature, string, Neighbor>(signature => signature.value);
 
     private constructor(
-        readonly object: VersionedSchemaObjex,
+        readonly objex: VersionedSchemaObjex,
         public schemaObjex: SchemaObjex,
         readonly highlights: NodeHighlights,
     ) {}
 
-    static create(cytoscape: Core, object: VersionedSchemaObjex, schemaObjex: SchemaObjex, position: Position, groups: Group[]): Node {
-        // This object is shared between all placeholder nodes. And its mutated when dragged ... yes, cytoscape is a bit weird.
-        const positionObject = { ...position };
+    static create(cytoscape: Core, objex: VersionedSchemaObjex, schemaObjex: SchemaObjex, position: Position, groups: Group[]): Node {
+        // This objex is shared between all placeholder nodes. And its mutated when dragged ... yes, cytoscape is a bit weird.
+        const positionObjex = { ...position };
 
-        const highlights = new NodeHighlights(cytoscape, groups, schemaObjex.key, positionObject);
-        const node = new Node(object, schemaObjex, highlights);
+        const highlights = new NodeHighlights(cytoscape, groups, schemaObjex.key, positionObjex);
+        const node = new Node(objex, schemaObjex, highlights);
         const classes = (schemaObjex.isNew ? 'new' : '') + ' ' + (!schemaObjex.ids ? 'no-ids' : '');
-        const nodeDefinition = createNodeDefinition(schemaObjex, positionObject, node, classes);
+        const nodeDefinition = createNodeDefinition(schemaObjex, positionObjex, node, classes);
         const cytoscapeNode = cytoscape.add(nodeDefinition);
         node.setCytoscapeNode(cytoscapeNode);
 
@@ -118,7 +118,7 @@ export class Node {
     }
 
     get metadata(): MetadataObjex {
-        return this.object.metadata;
+        return this.objex.metadata;
     }
 
     get cytoscapeIdAndPosition() {
@@ -135,7 +135,7 @@ export class Node {
     addNeighbor(edge: Edge, direction: boolean): void {
         const thisNode = direction ? edge.domainNode : edge.codomainNode;
         if (!thisNode.equals(this))
-            throw new Error(`Cannot add edge with signature: ${edge.schemaMorphism.signature} and direction: ${direction} to node with key: ${this.object.key}`);
+            throw new Error(`Cannot add edge with signature: ${edge.schemaMorphism.signature} and direction: ${direction} to node with key: ${this.objex.key}`);
 
         const node = direction ? edge.codomainNode : edge.domainNode;
 
@@ -261,10 +261,10 @@ export class Node {
     ///
 }
 
-function createNodeDefinition(object: SchemaObjex, position: Position, node: Node, classes?: string): ElementDefinition {
+function createNodeDefinition(objex: SchemaObjex, position: Position, node: Node, classes?: string): ElementDefinition {
     return {
         data: {
-            id: '' + object.key.value,
+            id: '' + objex.key.value,
             label: node.label,
             schemaData: node,
         },

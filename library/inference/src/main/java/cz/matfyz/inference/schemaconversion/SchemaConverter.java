@@ -53,7 +53,7 @@ public class SchemaConverter {
     }
 
     /**
-     * Enum representing the possible labels for schema objects.
+     * Enum representing the possible labels for objexes.
      */
     public enum Label {
         IDENTIFIER,

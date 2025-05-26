@@ -2,7 +2,7 @@ package cz.matfyz.inference.schemaconversion.utils;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.List;
 
@@ -28,9 +28,9 @@ public record CategoryMappingsPair(
         final MetadataCategory mergedMetadata = MetadataCategory.createEmpty(mergedSchema);
 
         for (final CategoryMappingsPair pair : pairs) {
-            for (final SchemaObject object : pair.schema.allObjects()) {
-                mergedSchema.addObject(object);
-                mergedMetadata.setObject(object, pair.metadata.getObject(object));
+            for (final SchemaObjex objex : pair.schema.allObjexes()) {
+                mergedSchema.addObjex(objex);
+                mergedMetadata.setObjex(objex, pair.metadata.getObjex(objex));
             }
 
             for (final SchemaMorphism morphism : pair.schema.allMorphisms()) {

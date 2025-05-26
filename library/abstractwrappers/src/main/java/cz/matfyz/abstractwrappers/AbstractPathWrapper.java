@@ -38,7 +38,7 @@ public interface AbstractPathWrapper {
     boolean isInliningToManyAllowed();
 
     /**
-     * Multiple properties can be nested into an auxiliary property that does not correspond to any object in the schema category (so it is created just for the mapping).
+     * Multiple properties can be nested into an auxiliary property that does not correspond to any objex in the schema category (so it is created just for the mapping).
      * Note that this rule cannot be true unless the complex properties are also allowed.
      */
     boolean isGroupingAllowed();

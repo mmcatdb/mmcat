@@ -3,14 +3,14 @@ import { computed } from 'vue';
 import type { Edge, Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
 import type { InstanceMorphism } from '@/types/instance';
-import InstanceObjectHeaderDisplay, { type Column } from './InstanceObjectHeaderDisplay.vue';
+import InstanceObjexHeaderDisplay, { type Column } from './InstanceObjexHeaderDisplay.vue';
 
 const props = defineProps<{
     edge: Edge;
     morphism: InstanceMorphism;
 }>();
 
-const emit = defineEmits([ 'object:click' ]);
+const emit = defineEmits([ 'objex:click' ]);
 
 const columns = computed<Columns>(() => ({
     dom: props.morphism.dom.schema.superId.signatures.map(signature => defineColumn(signature, props.edge.domainNode)),
@@ -34,16 +34,16 @@ function defineColumn(signature: Signature, node: Node): Column {
     <div class="d-flex flex-column p-3">
         <table v-if="morphism.mappings.length > 0">
             <tr>
-                <InstanceObjectHeaderDisplay
+                <InstanceObjexHeaderDisplay
                     :show-technical-ids="morphism.showDomTechnicalIds"
                     :columns="columns?.dom"
-                    @object:click="(object) => emit('object:click', object)"
+                    @objex:click="(objex) => emit('objex:click', objex)"
                 />
                 <th class="gap" />
-                <InstanceObjectHeaderDisplay
+                <InstanceObjexHeaderDisplay
                     :show-technical-ids="morphism.showCodTechnicalIds"
                     :columns="columns?.cod"
-                    @object:click="(object) => emit('object:click', object)"
+                    @objex:click="(objex) => emit('objex:click', objex)"
                 />
             </tr>
             <tr

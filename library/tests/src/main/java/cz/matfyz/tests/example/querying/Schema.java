@@ -2,7 +2,7 @@ package cz.matfyz.tests.example.querying;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +21,9 @@ public class Schema {
 
     public static final String[] kindLabels = new String[] { "a", "b", "c", "d", "e", "f" };
 
-    public static final List<BuilderObject> kind = new ArrayList<>();
-    public static final List<BuilderObject> id = new ArrayList<>();
-    public static final List<BuilderObject> value = new ArrayList<>();
+    public static final List<BuilderObjex> kind = new ArrayList<>();
+    public static final List<BuilderObjex> id = new ArrayList<>();
+    public static final List<BuilderObjex> value = new ArrayList<>();
 
     public static final List<BuilderMorphism> kind_id = new ArrayList<>();
     public static final List<BuilderMorphism> kind_value = new ArrayList<>();
@@ -37,16 +37,16 @@ public class Schema {
         for (int i = 0; i < kindLabels.length; i++) {
             final String label = kindLabels[i];
             int key = (i + 1) * 10;
-            kind.add(builder.object(label, key++));
-            id.add(builder.object(label + "-id", key++));
-            value.add(builder.object(label + "-value", key++));
+            kind.add(builder.objex(label, key++));
+            id.add(builder.objex(label + "-id", key++));
+            value.add(builder.objex(label + "-value", key++));
         }
 
         // Signatures
 
         for (int i = 0; i < kindLabels.length; i++) {
             int signature = (i + 1) * 10;
-            final BuilderObject _kind = kind.get(i);
+            final BuilderObjex _kind = kind.get(i);
             final BuilderMorphism _kind_id = builder.morphism(_kind, id.get(i), signature++);
             kind_id.add(_kind_id);
             kind_value.add(builder.morphism(_kind, value.get(i), signature++));
@@ -76,28 +76,28 @@ public class Schema {
     //        v
     //       x3
     //
-    // The y objects mirror the x objects. The z0 object is the root, z2 is its id.
+    // The y objexes mirror the x objexes. The z0 objex is the root, z2 is its id.
 
-    public static final BuilderObject z0 = builder.object("z0", 100);
-    public static final BuilderObject z1 = builder.object("z1", 101);
-    public static final BuilderObject z2 = builder.object("z2", 102);
-    public static final BuilderObject z3 = builder.object("z3", 103);
+    public static final BuilderObjex z0 = builder.objex("z0", 100);
+    public static final BuilderObjex z1 = builder.objex("z1", 101);
+    public static final BuilderObjex z2 = builder.objex("z2", 102);
+    public static final BuilderObjex z3 = builder.objex("z3", 103);
 
-    public static final BuilderObject x0 = builder.object("x0", 110);
-    public static final BuilderObject x1 = builder.object("x1", 111);
-    public static final BuilderObject x2 = builder.object("x2", 112);
-    public static final BuilderObject x3 = builder.object("x3", 113);
-    public static final BuilderObject x4 = builder.object("x4", 114);
-    public static final BuilderObject x5 = builder.object("x5", 115);
-    public static final BuilderObject x6 = builder.object("x6", 116);
+    public static final BuilderObjex x0 = builder.objex("x0", 110);
+    public static final BuilderObjex x1 = builder.objex("x1", 111);
+    public static final BuilderObjex x2 = builder.objex("x2", 112);
+    public static final BuilderObjex x3 = builder.objex("x3", 113);
+    public static final BuilderObjex x4 = builder.objex("x4", 114);
+    public static final BuilderObjex x5 = builder.objex("x5", 115);
+    public static final BuilderObjex x6 = builder.objex("x6", 116);
 
-    public static final BuilderObject y0 = builder.object("y0", 120);
-    public static final BuilderObject y1 = builder.object("y1", 121);
-    public static final BuilderObject y2 = builder.object("y2", 122);
-    public static final BuilderObject y3 = builder.object("y3", 123);
-    public static final BuilderObject y4 = builder.object("y4", 124);
-    public static final BuilderObject y5 = builder.object("y5", 125);
-    public static final BuilderObject y6 = builder.object("y6", 126);
+    public static final BuilderObjex y0 = builder.objex("y0", 120);
+    public static final BuilderObjex y1 = builder.objex("y1", 121);
+    public static final BuilderObjex y2 = builder.objex("y2", 122);
+    public static final BuilderObjex y3 = builder.objex("y3", 123);
+    public static final BuilderObjex y4 = builder.objex("y4", 124);
+    public static final BuilderObjex y5 = builder.objex("y5", 125);
+    public static final BuilderObjex y6 = builder.objex("y6", 126);
 
     public static final BuilderMorphism z0_z1 = builder.morphism(z0, z1, 101);
     public static final BuilderMorphism z1_z2 = builder.morphism(z1, z2, 102);

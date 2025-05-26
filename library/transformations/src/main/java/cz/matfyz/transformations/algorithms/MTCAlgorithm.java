@@ -4,7 +4,7 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceObject;
+import cz.matfyz.core.instance.InstanceObjex;
 import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -13,7 +13,7 @@ import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.record.SimpleRecord;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueIdGenerator;
 
@@ -63,23 +63,23 @@ public class MTCAlgorithm {
     private void processRootRecord(RootRecord rootRecord, ComplexProperty rootAccessPath) {
         LOGGER.debug("Process a root record:\n{}", rootRecord);
 
-        final Deque<StackTriple> masterStack = createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath);
+        final Deque<StackTriple> masterStack = createStackWithObjex(mapping.rootObjex(), rootRecord, rootAccessPath);
 
         // processing of the tree
         while (!masterStack.isEmpty())
             processTopOfStack(masterStack);
     }
 
-    private Deque<StackTriple> createStackWithObject(SchemaObject object, RootRecord rootRecord, ComplexProperty rootAccessPath) {
-        final InstanceObject instanceObject = instance.getObject(object);
-        // If the root object has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root object always is).
-        final SuperIdWithValues superId = object.ids().isGenerated()
+    private Deque<StackTriple> createStackWithObjex(SchemaObjex objex, RootRecord rootRecord, ComplexProperty rootAccessPath) {
+        final InstanceObjex instanceObjex = instance.getObjex(objex);
+        // If the root objex has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root objex always is).
+        final SuperIdWithValues superId = objex.ids().isGenerated()
             ? SuperIdWithValues.fromEmptySignature(idGenerator.next())
-            : fetchSuperId(object.superId(), rootRecord);
+            : fetchSuperId(objex.superId(), rootRecord);
 
         final Deque<StackTriple> masterStack = new ArrayDeque<>();
 
-        final DomainRow row = instanceObject.getOrCreateRow(superId);
+        final DomainRow row = instanceObjex.getOrCreateRow(superId);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
 
         return masterStack;
@@ -102,7 +102,7 @@ public class MTCAlgorithm {
         LOGGER.debug("Process top of stack:\n{}", triple);
         final var superIds = SuperIdsFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
-        final InstanceObject childInstance = instance.getObject(triple.parentToChild.to());
+        final InstanceObjex childInstance = instance.getObjex(triple.parentToChild.to());
 
         for (final var superId : superIds) {
             DomainRow childRow = childInstance.getOrCreateRow(superId.superId());
@@ -115,22 +115,22 @@ public class MTCAlgorithm {
     }
 
     private DomainRow addRelation(SchemaPath path, DomainRow parentRow, DomainRow childRow, ComplexRecord childRecord) {
-        // First, create a domain row with technical id for each object between the domain and the codomain objects on the path of the morphism.
+        // First, create a domain row with technical id for each objex between the domain and the codomain objexes on the path of the morphism.
         var currentDomainRow = parentRow;
 
         var parentToCurrent = Signature.createEmpty();
         var currentToChild = path.signature();
 
         for (final var edge : path.edges()) {
-            final var instanceObject = edge.to();
+            final var instanceObjex = edge.to();
 
             parentToCurrent = parentToCurrent.concatenate(currentToChild.getFirst());
             currentToChild = currentToChild.cutFirst();
 
             // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
-            //if (!instanceObject.equals(morphism.cod())) {
-            final var superId = fetchSuperIdForTechnicalRow(instanceObject, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
-            currentDomainRow = InstanceObject.getOrCreateRowWithEdge(instance, superId, currentDomainRow, edge);
+            //if (!instanceObjex.equals(morphism.cod())) {
+            final var superId = fetchSuperIdForTechnicalRow(instanceObjex, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
+            currentDomainRow = InstanceObjex.getOrCreateRowWithEdge(instance, superId, currentDomainRow, edge);
             //}
             /*
             else {
@@ -142,15 +142,15 @@ public class MTCAlgorithm {
 
         return currentDomainRow;
 
-        // Now try merging them from the codomain object to the domain object (the other way should be already merged).
+        // Now try merging them from the codomain objex to the domain objex (the other way should be already merged).
         //final var merger = new Merger();
         //return merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
     }
 
-    private SuperIdWithValues fetchSuperIdForTechnicalRow(SchemaObject object, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
+    private SuperIdWithValues fetchSuperIdForTechnicalRow(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
         final var builder = new SuperIdWithValues.Builder();
 
-        for (final var signature : object.superId().signatures()) {
+        for (final var signature : objex.superId().signatures()) {
             // The value is in either the first row ...
             final var signatureInFirstRow = signature.traverseAlong(pathToParent);
             if (parentRow.hasSignature(signatureInFirstRow)) {

@@ -25,7 +25,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
     }
 
 
-    public SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Set<Tag> tags) {
+    public SchemaMorphism(Signature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
         this.signature = signature;
         this.dom = dom;
         this.cod = cod;
@@ -43,15 +43,15 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         return signature instanceof BaseSignature;
     }
 
-    private SchemaObject dom;
-    /** The domain object (i.e., the source of the arrow). */
-    public SchemaObject dom() {
+    private SchemaObjex dom;
+    /** The domain objex (i.e., the source of the arrow). */
+    public SchemaObjex dom() {
         return dom;
     }
 
-    private SchemaObject cod;
-    /** The codomain object (i.e., the target of the arrow). */
-    public SchemaObject cod() {
+    private SchemaObjex cod;
+    /** The codomain objex (i.e., the target of the arrow). */
+    public SchemaObjex cod() {
         return cod;
     }
 
@@ -74,11 +74,11 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
     /**
      * Replace old version of dom/cod by its newer version (which has the same key).
      */
-    public void updateObjex(SchemaObject object) {
-        if (this.dom.equals(object))
-            this.dom = object;
-        if (this.cod.equals(object))
-            this.cod = object;
+    public void updateObjex(SchemaObjex objex) {
+        if (this.dom.equals(objex))
+            this.dom = objex;
+        if (this.cod.equals(objex))
+            this.cod = objex;
     }
 
     // Identification

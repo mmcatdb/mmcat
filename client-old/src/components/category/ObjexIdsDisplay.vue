@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { ObjectIds } from '@/types/identifiers';
+import type { ObjexIds } from '@/types/identifiers';
 import IconMinusSquare from '@/components/icons/IconMinusSquare.vue';
 import ButtonIcon from '@/components/common/ButtonIcon.vue';
 import SignatureIdDisplay from './SignatureIdDisplay.vue';
 
-type ObjectIdsDisplayProps = {
-    ids: ObjectIds;
+type ObjexIdsDisplayProps = {
+    ids: ObjexIds;
     disabled?: boolean;
 };
 
-defineProps<ObjectIdsDisplayProps>();
+defineProps<ObjexIdsDisplayProps>();
 
 const emit = defineEmits([ 'deleteNonSignature', 'deleteSignature' ]);
 </script>

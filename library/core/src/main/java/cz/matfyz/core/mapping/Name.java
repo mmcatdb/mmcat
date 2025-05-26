@@ -95,7 +95,7 @@ public abstract class Name implements Serializable {
 
         /** The property is a root of the access path tree, the name doesn't mean anything. */
         public static final String ROOT = "root";
-        /** The property is a value in an object, the name represents its key. */
+        /** The property is a value in an objex, the name represents its key. */
         public static final String KEY = "key";
         /** The property is an element of an array, the name represents its index. */
         public static final String INDEX = "index";
@@ -103,7 +103,7 @@ public abstract class Name implements Serializable {
     }
 
     /**
-     * Name that is mapped to a key (in an object) or to an index (in an array).
+     * Name that is mapped to a key (in an objex) or to an index (in an array).
      */
     public static class DynamicName extends TypedName implements Comparable<DynamicName> {
 

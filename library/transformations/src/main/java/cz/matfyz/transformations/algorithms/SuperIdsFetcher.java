@@ -7,7 +7,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.SimpleRecord;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.transformations.exception.InvalidStateException;
@@ -20,12 +20,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SuperIdsFetcher {
     /**
-     * Fetch id-with-values for a schema object in given record / domain row.
+     * Fetch id-with-values for a schema objex in given record / domain row.
      * The output is a set of (Signature, String) for each Signature in superId and its corresponding value from record. Actually, there can be multiple values in the record, so a list of these sets is returned.
      * For further processing, the child records associated with the values are needed (if they are complex), so they are added to the output as well.
-     * @param parentRecord Record of the parent (in the access path) schema object.
-     * @param parentRow Domain row of the parent schema object.
-     * @param morphism Morphism from the parent schema object to the currently processed one.
+     * @param parentRecord Record of the parent (in the access path) schema objex.
+     * @param parentRow Domain row of the parent schema objex.
+     * @param morphism Morphism from the parent schema objex to the currently processed one.
      * @return
      */
     public static Iterable<FetchedSuperId> fetch(UniqueIdGenerator idGenerator, ComplexRecord parentRecord, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
@@ -41,7 +41,7 @@ public class SuperIdsFetcher {
     private final List<FetchedSuperId> output;
     private final DomainRow parentRow;
     private final Signature parentToChild;
-    private final SchemaObject childObject;
+    private final SchemaObjex childObjex;
     private final AccessPath childAccessPath;
 
     private SuperIdsFetcher(UniqueIdGenerator idGenerator, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
@@ -49,12 +49,12 @@ public class SuperIdsFetcher {
         this.output = new ArrayList<>();
         this.parentRow = parentRow;
         this.parentToChild = path.signature();
-        this.childObject = path.to();
+        this.childObjex = path.to();
         this.childAccessPath = childAccessPath;
     }
 
     private void process(ComplexRecord parentRecord) {
-        if (childObject.ids().isGenerated()) {
+        if (childObjex.ids().isGenerated()) {
             // If the id is generated, we have to generate it now.
             // It's not possible for any record to have any clue about the value of this id, and this is also the only id of the child row.
             if (childAccessPath instanceof ComplexProperty) {
@@ -71,8 +71,8 @@ public class SuperIdsFetcher {
                 addSimpleToOutput(idGenerator.next());
             }
         }
-        else if (childObject.ids().isValue()) {
-            // An object identified by its value has to be a simple value object.
+        else if (childObjex.ids().isValue()) {
+            // An objex identified by its value has to be a simple value objex.
             // The output will have only one tuple: (<signature>, <value>).
             if (parentRow.hasSignature(parentToChild)) {
                 // Value is in the parent domain row.
@@ -110,13 +110,13 @@ public class SuperIdsFetcher {
 
     private void processComplexRecord(ComplexRecord childRecord) {
         final var builder = new SuperIdWithValues.Builder();
-        addStringNameSignaturesToBuilder(builder, childObject.superId().signatures(), childRecord);
+        addStringNameSignaturesToBuilder(builder, childObjex.superId().signatures(), childRecord);
         output.add(new FetchedSuperId(builder.build(), childRecord));
     }
 
     private void addStringNameSignaturesToBuilder(SuperIdWithValues.Builder builder, Set<Signature> signatures, ComplexRecord childRecord) {
         for (final Signature signature : signatures) {
-            // How the signature looks like from the parent object.
+            // How the signature looks like from the parent objex.
             final var signatureInParentRow = signature.traverseThrough(parentToChild);
             if (signatureInParentRow != null) {
                 // If the value is in the parent row, we just add it and move on with our lives.

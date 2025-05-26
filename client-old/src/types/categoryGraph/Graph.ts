@@ -97,21 +97,21 @@ export class Graph {
         this.nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
-    createNode(object: VersionedSchemaObjex, schemaObjex: SchemaObjex, position: Position, groupIds: string[]): Node {
+    createNode(objex: VersionedSchemaObjex, schemaObjex: SchemaObjex, position: Position, groupIds: string[]): Node {
         const nodeGroups = groupIds.map(groupId => this.highlights.getOrCreateGroup(groupId));
-        const node = Node.create(this.cytoscape, object, schemaObjex, position, nodeGroups);
+        const node = Node.create(this.cytoscape, objex, schemaObjex, position, nodeGroups);
         this.nodes.set(schemaObjex.key, node);
 
         return node;
     }
 
-    deleteNode(object: SchemaObjex) {
-        const node = this.nodes.get(object.key);
+    deleteNode(objex: SchemaObjex) {
+        const node = this.nodes.get(objex.key);
         if (!node)
             return;
 
         node.remove();
-        this.nodes.delete(object.key);
+        this.nodes.delete(objex.key);
 
         // Only the newly created nodes can be deleted an those can't be in any datasource so we don't have to remove their datasource placeholders.
         // TODO might not be true anymore.
@@ -160,7 +160,7 @@ export class Graph {
     }
 
     layout() {
-        // TODO fix adding objects
+        // TODO fix adding objexes
         this.cytoscape.layout({
             //name: 'dagre',
             //name: 'cola',
@@ -185,7 +185,7 @@ export class Graph {
         this.nodes.forEach(node => node.isFixed = false);
 
         // A necessary workaround for the bug with nodes without placeholders. More below.
-        // Also, both parts of the workaround DO HAVE to be outside the layout function. Otherwise it causes a particularly hard to find bug (when the layout function is called from AddObject, then a new morphism is added in AddMorphism and then this function is called).
+        // Also, both parts of the workaround DO HAVE to be outside the layout function. Otherwise it causes a particularly hard to find bug (when the layout function is called from AddObjex, then a new morphism is added in AddMorphism and then this function is called).
         this.highlights.resetLayout(false);
 
         this.layout();

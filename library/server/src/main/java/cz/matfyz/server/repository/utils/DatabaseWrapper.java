@@ -81,7 +81,7 @@ public class DatabaseWrapper {
             function.execute(connection, output);
 
             if (output.isEmpty())
-                throw NotFoundException.primaryObject(type, id);
+                throw NotFoundException.primaryEntity(type, id);
 
             return output.get();
         });
@@ -188,7 +188,7 @@ public class DatabaseWrapper {
             return joinFunction.apply(input);
         }
         catch (NotFoundException e) {
-            throw e.toSecondaryObject();
+            throw e.toSecondaryEntity();
         }
     }
 

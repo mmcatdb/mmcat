@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { InstanceObject } from '@/types/instance/InstanceObject';
+import type { InstanceObjex } from '@/types/instance/InstanceObjex';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import type { Column } from './InstanceObjectHeaderDisplay.vue';
-import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';
+import type { Column } from './InstanceObjexHeaderDisplay.vue';
+import InstanceObjectHeaderDisplay from './InstanceObjexHeaderDisplay.vue';
 
 const props = defineProps<{
     node: Node;
-    object: InstanceObject;
+    objex: InstanceObjex;
 }>();
 
-const emit = defineEmits([ 'object:click' ]);
+const emit = defineEmits([ 'objex:click' ]);
 
 function defineColumn(signature: Signature, node: Node): Column {
     const neighbor = node.getNeighborNode(signature);
@@ -23,22 +23,22 @@ function defineColumn(signature: Signature, node: Node): Column {
     };
 }
 
-const showTechnicalIds = computed(() => !!props.object.rows.find(row => row.technicalIds.size > 0));
-const columns = props.object.schema.superId.signatures.map(signature => defineColumn(signature, props.node));
+const showTechnicalIds = computed(() => !!props.objex.rows.find(row => row.technicalIds.size > 0));
+const columns = props.objex.schema.superId.signatures.map(signature => defineColumn(signature, props.node));
 </script>
 
 <template>
     <div class="d-flex flex-column p-3">
-        <table v-if="object.rows.length > 0">
+        <table v-if="objex.rows.length > 0">
             <tr>
                 <InstanceObjectHeaderDisplay
                     :show-technical-ids="showTechnicalIds"
                     :columns="columns"
-                    @object:click="(object) => emit('object:click', object)"
+                    @objex:click="(objex) => emit('objex:click', objex)"
                 />
             </tr>
             <tr
-                v-for="(row, rowIndex) in object.rows"
+                v-for="(row, rowIndex) in objex.rows"
                 :key="rowIndex"
             >
                 <td v-if="showTechnicalIds">

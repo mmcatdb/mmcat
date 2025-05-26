@@ -34,11 +34,11 @@ public abstract class PostgreSQL {
     }
 
     public static void addCustomer(InstanceBuilder builder, String customerIdValue, String nameValue, String surnameValue) {
-        final var customer = builder.value(Schema.customerToCustomerId, customerIdValue).object(Schema.customer);
+        final var customer = builder.value(Schema.customerToCustomerId, customerIdValue).objex(Schema.customer);
 
-        builder.morphism(Schema.customerToCustomerId, customer, builder.valueObject(Schema.customerId, customerIdValue));
-        builder.morphism(Schema.customerToName, customer, builder.valueObject(Schema.name, nameValue));
-        builder.morphism(Schema.customerToSurname, customer, builder.valueObject(Schema.surname, surnameValue));
+        builder.morphism(Schema.customerToCustomerId, customer, builder.valueObjex(Schema.customerId, customerIdValue));
+        builder.morphism(Schema.customerToName, customer, builder.valueObjex(Schema.name, nameValue));
+        builder.morphism(Schema.customerToSurname, customer, builder.valueObjex(Schema.surname, surnameValue));
     }
 
     public static TestMapping knows(SchemaCategory schema) {
@@ -59,7 +59,7 @@ public abstract class PostgreSQL {
         final var knows = builder
             .value(Schema.knowsToCustomerA, customerA.superId.getValue(Schema.customerToCustomerId.signature()))
             .value(Schema.knowsToCustomerB, customerB.superId.getValue(Schema.customerToCustomerId.signature()))
-            .object(Schema.knows);
+            .objex(Schema.knows);
 
         builder.morphism(Schema.knowsToCustomerA, knows, customerA);
         builder.morphism(Schema.knowsToCustomerB, knows, customerB);
@@ -78,11 +78,11 @@ public abstract class PostgreSQL {
     }
 
     public static void addProduct(InstanceBuilder builder, String productIdValue, String titleValue, String productPriceValue) {
-        final var product = builder.value(Schema.productToProductId, productIdValue).object(Schema.product);
+        final var product = builder.value(Schema.productToProductId, productIdValue).objex(Schema.product);
 
-        builder.morphism(Schema.productToProductId, product, builder.valueObject(Schema.productId, productIdValue));
-        builder.morphism(Schema.productToTitle, product, builder.valueObject(Schema.title, titleValue));
-        builder.morphism(Schema.productToProductPrice, product, builder.valueObject(Schema.productPrice, productPriceValue));
+        builder.morphism(Schema.productToProductId, product, builder.valueObjex(Schema.productId, productIdValue));
+        builder.morphism(Schema.productToTitle, product, builder.valueObjex(Schema.title, titleValue));
+        builder.morphism(Schema.productToProductPrice, product, builder.valueObjex(Schema.productPrice, productPriceValue));
     }
 
     public static TestMapping orders(SchemaCategory schema) {
@@ -109,16 +109,16 @@ public abstract class PostgreSQL {
         final var order = builder
             .value(Schema.orderToOrderId, orderIdValue)
             .value(Schema.orderToProductId, product.superId.getValue(Schema.productToProductId.signature()))
-            .object(Schema.order);
+            .objex(Schema.order);
 
         builder.morphism(Schema.orderToCustomer, order, customer);
         builder.morphism(Schema.orderToProduct, order, product);
 
-        builder.morphism(Schema.orderToOrderPrice, order, builder.valueObject(Schema.orderPrice, orderPriceValue));
-        builder.morphism(Schema.orderToQuantity, order, builder.valueObject(Schema.quantity, quantityValue));
-        builder.morphism(Schema.orderToStreet, order, builder.valueObject(Schema.street, streetValue));
-        builder.morphism(Schema.orderToCity, order, builder.valueObject(Schema.city, cityValue));
-        builder.morphism(Schema.orderToPostCode, order, builder.valueObject(Schema.postCode, postCodeValue));
+        builder.morphism(Schema.orderToOrderPrice, order, builder.valueObjex(Schema.orderPrice, orderPriceValue));
+        builder.morphism(Schema.orderToQuantity, order, builder.valueObjex(Schema.quantity, quantityValue));
+        builder.morphism(Schema.orderToStreet, order, builder.valueObjex(Schema.street, streetValue));
+        builder.morphism(Schema.orderToCity, order, builder.valueObjex(Schema.city, cityValue));
+        builder.morphism(Schema.orderToPostCode, order, builder.valueObjex(Schema.postCode, postCodeValue));
     }
 
     public static TestMapping order(SchemaCategory schema) {
@@ -135,11 +135,11 @@ public abstract class PostgreSQL {
     }
 
     public static void addOrder(InstanceBuilder builder, String orderIdValue, String streetValue, String cityValue, String postCodeValue) {
-        final var order = builder.value(Schema.orderToOrderId, orderIdValue).object(Schema.order);
+        final var order = builder.value(Schema.orderToOrderId, orderIdValue).objex(Schema.order);
 
-        builder.morphism(Schema.orderToStreet, order, builder.valueObject(Schema.street, streetValue));
-        builder.morphism(Schema.orderToCity, order, builder.valueObject(Schema.city, cityValue));
-        builder.morphism(Schema.orderToPostCode, order, builder.valueObject(Schema.postCode, postCodeValue));
+        builder.morphism(Schema.orderToStreet, order, builder.valueObjex(Schema.street, streetValue));
+        builder.morphism(Schema.orderToCity, order, builder.valueObjex(Schema.city, cityValue));
+        builder.morphism(Schema.orderToPostCode, order, builder.valueObjex(Schema.postCode, postCodeValue));
     }
 
     public static TestMapping item(SchemaCategory schema) {
@@ -162,13 +162,13 @@ public abstract class PostgreSQL {
         final var item = builder
             .value(Schema.itemToProductId, product.superId.getValue(Schema.productToProductId.signature()))
             .value(Schema.itemToOrderId, order.superId.getValue(Schema.orderToOrderId.signature()))
-            .object(Schema.item);
+            .objex(Schema.item);
 
         builder.morphism(Schema.itemToProduct, item, product);
         builder.morphism(Schema.itemToOrder, item, order);
 
-        builder.morphism(Schema.itemToOrderPrice, item, builder.valueObject(Schema.orderPrice, orderPriceValue));
-        builder.morphism(Schema.itemToQuantity, item, builder.valueObject(Schema.quantity, quantityValue));
+        builder.morphism(Schema.itemToOrderPrice, item, builder.valueObjex(Schema.orderPrice, orderPriceValue));
+        builder.morphism(Schema.itemToQuantity, item, builder.valueObjex(Schema.quantity, quantityValue));
     }
 
     public static TestMapping ordered(SchemaCategory schema) {
@@ -189,7 +189,7 @@ public abstract class PostgreSQL {
         final var ordered = builder
             .value(Schema.orderedToCustomerId, customer.superId.getValue(Schema.customerToCustomerId.signature()))
             .value(Schema.orderedToOrderId, order.superId.getValue(Schema.orderToOrderId.signature()))
-            .object(Schema.ordered);
+            .objex(Schema.ordered);
 
         builder.morphism(Schema.orderedToCustomer, ordered, customer);
         builder.morphism(Schema.orderedToOrder, ordered, order);

@@ -100,16 +100,16 @@ public class SchemaConversionTests {
         final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter("person");
         final SchemaCategory schema = accessTreeToSchemaCategoryConverter.convert(root).schema();
 
-        assertEquals(5, schema.allObjects().size());
+        assertEquals(5, schema.allObjexes().size());
         assertEquals(4, schema.allMorphisms().size());
 
-        assertNotNull(schema.getObject(new Key(0)), "Key 0 should be present in the schema category");
-        assertNotNull(schema.getObject(new Key(1)), "Key 1 should be present in the schema category");
-        assertNotNull(schema.getObject(new Key(2)), "Key 2 should be present in the schema category");
-        assertNotNull(schema.getObject(new Key(3)), "Key 3 should be present in the schema category");
-        assertNotNull(schema.getObject(new Key(4)), "Key 4 should be present in the schema category");
+        assertNotNull(schema.getObjex(new Key(0)), "Key 0 should be present in the schema category");
+        assertNotNull(schema.getObjex(new Key(1)), "Key 1 should be present in the schema category");
+        assertNotNull(schema.getObjex(new Key(2)), "Key 2 should be present in the schema category");
+        assertNotNull(schema.getObjex(new Key(3)), "Key 3 should be present in the schema category");
+        assertNotNull(schema.getObjex(new Key(4)), "Key 4 should be present in the schema category");
 
-        assertNull(schema.getObject(new Key(5)), "Key 5 should not be present in the schema category");
+        assertNull(schema.getObjex(new Key(5)), "Key 5 should not be present in the schema category");
     }
 
 
@@ -133,10 +133,10 @@ public class SchemaConversionTests {
         final SchemaCategory schema = pair.schema();
         final Mapping mapping = pair.mappings().get(0);
 
-        assertEquals(10, schema.allObjects().size(), "There should be 10 Schema Objects.");
+        assertEquals(10, schema.allObjexes().size(), "There should be 10 Schema Objexes.");
         assertEquals(9, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
 
-        assertEquals(mapping.accessPath().subpaths().size(), schema.allObjects().size() - 1, "Mapping should be as long as there are Schema Objects.");
+        assertEquals(mapping.accessPath().subpaths().size(), schema.allObjexes().size() - 1, "Mapping should be as long as there are Schema Objexes.");
     }
 
     @Test
@@ -159,7 +159,7 @@ public class SchemaConversionTests {
         final SchemaCategory schema = pair.schema();
         final Mapping mapping = pair.mappings().get(0);
 
-        assertEquals(22, schema.allObjects().size(), "There should be 10 Schema Objects.");
+        assertEquals(22, schema.allObjexes().size(), "There should be 10 Schema Objexes.");
         assertEquals(21, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
 
         assertEquals(3, countComplexProperties(mapping), "There should be 3 complex properties");

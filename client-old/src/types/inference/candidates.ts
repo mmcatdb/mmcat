@@ -46,9 +46,9 @@ export type SerializedPrimaryKeyCandidate = {
 export type SerializedReferenceCandidate = {
     /** The type of the reference candidate. */
     type: string;
-    /** The referred object name. */
+    /** The referred objex name. */
     referred: string;
-    /** The referencing object name. */
+    /** The referencing objex name. */
     referencing: string;
     /** Whether the reference is weak. */
     isWeak: boolean;

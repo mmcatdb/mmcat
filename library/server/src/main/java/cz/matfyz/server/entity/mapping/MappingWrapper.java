@@ -22,7 +22,7 @@ public class MappingWrapper extends VersionedEntity {
 
     public final Id categoryId;
     public final Id datasourceId;
-    public final Key rootObjectKey;
+    public final Key rootObjexKey;
     public final List<Signature> primaryKey;
     public final String kindName;
     public final ComplexProperty accessPath;
@@ -33,7 +33,7 @@ public class MappingWrapper extends VersionedEntity {
         Version lastValid,
         Id categoryId,
         Id datasourceId,
-        Key rootObjectKey,
+        Key rootObjexKey,
         List<Signature> primaryKey,
         String kindName,
         ComplexProperty accessPath
@@ -42,20 +42,20 @@ public class MappingWrapper extends VersionedEntity {
 
         this.categoryId = categoryId;
         this.datasourceId = datasourceId;
-        this.rootObjectKey = rootObjectKey;
+        this.rootObjexKey = rootObjexKey;
         this.primaryKey = primaryKey;
         this.kindName = kindName;
         this.accessPath = accessPath;
     }
 
-    public static MappingWrapper createNew(Version version, Id categoryId, Id datasourceId, Key rootObjectKey, List<Signature> primaryKey, String kindName, ComplexProperty accessPath) {
+    public static MappingWrapper createNew(Version version, Id categoryId, Id datasourceId, Key rootObjexKey, List<Signature> primaryKey, String kindName, ComplexProperty accessPath) {
         return new MappingWrapper(
             Id.createNew(),
             version,
             version,
             categoryId,
             datasourceId,
-            rootObjectKey,
+            rootObjexKey,
             primaryKey,
             kindName,
             accessPath
@@ -67,14 +67,14 @@ public class MappingWrapper extends VersionedEntity {
             datasource,
             kindName,
             category,
-            rootObjectKey,
+            rootObjexKey,
             accessPath,
             primaryKey
         );
     }
 
     private record MappingJsonValue(
-        Key rootObjectKey,
+        Key rootObjexKey,
         List<Signature> primaryKey,
         String kindName,
         ComplexProperty accessPath
@@ -91,7 +91,7 @@ public class MappingWrapper extends VersionedEntity {
             lastValid,
             categoryId,
             datasourceId,
-            json.rootObjectKey(),
+            json.rootObjexKey(),
             json.primaryKey(),
             json.kindName(),
             json.accessPath()
@@ -100,7 +100,7 @@ public class MappingWrapper extends VersionedEntity {
 
     public String toJsonValue() throws JsonProcessingException {
         return jsonValueWriter.writeValueAsString(new MappingJsonValue(
-            rootObjectKey,
+            rootObjexKey,
             primaryKey,
             kindName,
             accessPath

@@ -4,7 +4,7 @@ import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGr
 import { Cardinality } from '@/types/schema';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ObjectIds, Type } from '@/types/identifiers';
+import { ObjexIds, Type } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 
@@ -39,38 +39,38 @@ function save() {
         if (!sourceNode || !valueNode || !sourceNode.schemaObjex.ids)
             return;
 
-        const keyObjectIds = ObjectIds.createNonSignatures(Type.Value);
-        const keyObject = evocat.createObjex({
+        const keyObjexIds = ObjexIds.createNonSignatures(Type.Value);
+        const keyObjex = evocat.createObjex({
             label: keyLabel.value,
-            ids: keyObjectIds,
+            ids: keyObjexIds,
         });
 
-        const mapObject = evocat.createObjex({
+        const mapObjex = evocat.createObjex({
             label: mapLabel.value,
         });
 
         const mapToKey = evocat.createMorphism({
-            domKey: mapObject.key,
-            codKey: keyObject.key,
+            domKey: mapObjex.key,
+            codKey: keyObjex.key,
             min: Cardinality.One,
             label: '#key',
         });
 
         const mapToSourceNode = evocat.createMorphism({
-            domKey: mapObject.key,
+            domKey: mapObjex.key,
             codKey: sourceNode.schemaObjex.key,
             min: Cardinality.One,
         });
 
         evocat.createMorphism({
-            domKey: mapObject.key,
+            domKey: mapObjex.key,
             codKey: valueNode.schemaObjex.key,
             min: Cardinality.One,
         });
 
-        evocat.updateObjex(mapObject, {
-            ids: ObjectIds.createCrossProduct([
-                { signature: mapToKey.signature, ids: keyObjectIds },
+        evocat.updateObjex(mapObjex, {
+            ids: ObjexIds.createCrossProduct([
+                { signature: mapToKey.signature, ids: keyObjexIds },
                 { signature: mapToSourceNode.signature, ids: sourceNode.schemaObjex.ids },
             ]),
         });

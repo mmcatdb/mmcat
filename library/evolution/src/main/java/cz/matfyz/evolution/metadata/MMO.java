@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = ObjectMetadata.class, name = "objectMetadata"),
+    @JsonSubTypes.Type(value = ObjexMetadata.class, name = "objexMetadata"),
     @JsonSubTypes.Type(value = MorphismMetadata.class, name = "morphismMetadata"),
 })
 public interface MMO {

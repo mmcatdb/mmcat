@@ -6,7 +6,7 @@ export type MappingFromServer = {
     id: Id;
     categoryId: Id;
     datasourceId: Id;
-    rootObjectKey: KeyFromServer;
+    rootObjexKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
     accessPath: RootPropertyFromServer;
@@ -31,7 +31,7 @@ export class Mapping implements Entity {
             input.kindName,
             input.categoryId,
             input.datasourceId,
-            Key.fromServer(input.rootObjectKey),
+            Key.fromServer(input.rootObjexKey),
             SignatureId.fromServer(input.primaryKey),
             RootProperty.fromServer(input.accessPath),
             input.version,
@@ -42,7 +42,7 @@ export class Mapping implements Entity {
 export type MappingInit = {
     categoryId: Id;
     datasourceId: Id;
-    rootObjectKey: KeyFromServer;
+    rootObjexKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
     accessPath: RootPropertyFromServer;

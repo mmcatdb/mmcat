@@ -1,7 +1,7 @@
 import type { Category } from '../../schema/Category';
 
 export enum MMOType {
-    Object = 'objectMetadata',
+    Objex = 'objexMetadata',
     Morphism = 'morphismMetadata',
 }
 

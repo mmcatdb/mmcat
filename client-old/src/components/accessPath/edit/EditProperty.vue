@@ -7,7 +7,7 @@ import type { Datasource } from '@/types/datasource';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
-import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
+import ObjexIdsDisplay from '@/components/category/ObjexIdsDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '@/components/category/SignatureDisplay.vue';
@@ -137,11 +137,11 @@ function backButton() {
                 {{ lastNode.metadata.label }}
             </ValueRow>
             <ValueRow label="Ids:">
-                <ObjectIdsDisplay
+                <ObjexIdsDisplay
                     v-if="lastNode.schemaObjex.ids"
                     :ids="lastNode.schemaObjex.ids"
                     disabled
-                    class="object-ids-display"
+                    class="objex-ids-display"
                 />
             </ValueRow>
             <ValueRow
@@ -242,7 +242,7 @@ function backButton() {
 </template>
 
 <style scoped>
-.object-ids-display {
+.objex-ids-display {
     margin-left: -6px;
 }
 </style>

@@ -19,17 +19,17 @@ public class NotFoundException extends ServerException {
         Id id
     ) implements Serializable{}
 
-    public static NotFoundException primaryObject(String type, Id id) {
-        return new NotFoundException("primaryObject", new Data(type, id));
+    public static NotFoundException primaryEntity(String type, Id id) {
+        return new NotFoundException("primaryEntity", new Data(type, id));
     }
 
-    public static NotFoundException secondaryObject(String type, Id id) {
-        return new NotFoundException("secondaryObject", new Data(type, id));
+    public static NotFoundException secondaryEntity(String type, Id id) {
+        return new NotFoundException("secondaryEntity", new Data(type, id));
     }
 
-    public NotFoundException toSecondaryObject() {
+    public NotFoundException toSecondaryEntity() {
         final var data = (Data) this.data;
-        return secondaryObject(data.type, data.id);
+        return secondaryEntity(data.type, data.id);
     }
 
 }

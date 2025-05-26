@@ -3,7 +3,7 @@ package cz.matfyz.querying.core.patterntree;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.querying.exception.GeneralException;
@@ -14,7 +14,7 @@ import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// TODO This should probably be reworked. It doesn't really make sense to break down composite signatures into base signatures, because the if an object isn't covered by a mapping, but it's in a middle of a composite morphism, it can't be extracted from the database. It needs to be filtered down the line, anyway.
+// TODO This should probably be reworked. It doesn't really make sense to break down composite signatures into base signatures, because the if an objex isn't covered by a mapping, but it's in a middle of a composite morphism, it can't be extracted from the database. It needs to be filtered down the line, anyway.
 
 /**
  * This class represents a node in the PT (pattern tree) of a specific kind.
@@ -25,23 +25,23 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
 
     public final Variable variable;
 
-    public final SchemaObject schemaObject;
-    /** This property is null if and only if this object is the root. */
+    public final SchemaObjex objex;
+    /** This property is null if and only if this node is the root. */
     private final @Nullable PatternTree parent;
-    /** This property is null if and only if this object is the root. */
+    /** This property is null if and only if this node is the root. */
     private final @Nullable SchemaEdge edgeFromParent;
 
     private final Map<BaseSignature, PatternTree> children = new TreeMap<>();
 
-    private PatternTree(SchemaObject schemaObject, Variable variable, @Nullable PatternTree parent, @Nullable SchemaEdge edgeFromParent) {
-        this.schemaObject = schemaObject;
+    private PatternTree(SchemaObjex objex, Variable variable, @Nullable PatternTree parent, @Nullable SchemaEdge edgeFromParent) {
+        this.objex = objex;
         this.variable = variable;
         this.parent = parent;
         this.edgeFromParent = edgeFromParent;
     }
 
-    public static PatternTree createRoot(SchemaObject schemaObject, Variable variable) {
-        return new PatternTree(schemaObject, variable, null, null);
+    public static PatternTree createRoot(SchemaObjex objex, Variable variable) {
+        return new PatternTree(objex, variable, null, null);
     }
 
     public PatternTree getOrCreateChild(SchemaEdge schemaEdge, Variable variable) {
@@ -110,7 +110,7 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
     }
 
     @Override public int compareTo(PatternTree other) {
-        return schemaObject.compareTo(other.schemaObject);
+        return objex.compareTo(other.objex);
     }
 
     public record SerializedPatternTree(
@@ -123,7 +123,7 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
         final var map = new TreeMap<BaseSignature, SerializedPatternTree>();
         children.entrySet().forEach(entry -> map.put(entry.getKey(), entry.getValue().serialize()));
 
-        return new SerializedPatternTree(schemaObject.key().getValue(), variable.toString(), map);
+        return new SerializedPatternTree(objex.key().getValue(), variable.toString(), map);
     }
 
 }

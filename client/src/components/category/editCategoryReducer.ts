@@ -11,9 +11,9 @@ export type EditCategoryState = {
     graph: CategoryGraph;
     /** The current selection state of nodes and edges. */
     selection: FreeSelection;
-    /** The mode of the left panel (e.g., creating objects or morphisms). */
+    /** The mode of the left panel (e.g., creating objexes or morphisms). */
     leftPanelMode: LeftPanelMode;
-    /** The mode of the right panel (e.g., updating objects or morphisms). */
+    /** The mode of the right panel (e.g., updating objexes or morphisms). */
     rightPanelMode: RightPanelMode;
 };
 
@@ -168,9 +168,9 @@ function setLeftPanel(state: EditCategoryState, { mode: leftPanelMode, graph }: 
     let newSelection = state.selection;
 
     // Clear selection when entering createMorphism mode
-    if (leftPanelMode === LeftPanelMode.createMorphism) 
+    if (leftPanelMode === LeftPanelMode.createMorphism)
         newSelection = FreeSelection.create();
-    
+
     return {
         ...state,
         graph: updatedGraph,
@@ -182,7 +182,7 @@ function setLeftPanel(state: EditCategoryState, { mode: leftPanelMode, graph }: 
 // Editor modes - Right panel
 
 /**
- * Modes for the right panel, controlling object and morphism updates.
+ * Modes for the right panel, controlling objex and morphism updates.
  */
 export enum RightPanelMode {
     default = 'default',
@@ -213,10 +213,10 @@ function setRightPanel(state: EditCategoryState, { mode: rightPanelMode, graph }
     };
 }
 
-// Operations on schema object (objex)
+// Operations on objex
 
 /**
- * Action for handling the creation of a new schema object.
+ * Action for handling the creation of a new objex.
  */
 type CreateObjexAction = {
     type: 'createObjex';
@@ -224,7 +224,7 @@ type CreateObjexAction = {
 };
 
 /**
- * Updates state after creating a new schema object, selecting it and resetting the mode.
+ * Updates state after creating a new objex, selecting it and resetting the mode.
  */
 function afterObjexCreation(state: EditCategoryState, { graph }: CreateObjexAction): EditCategoryState {
     const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
@@ -268,7 +268,7 @@ function afterMorphismCreation(state: EditCategoryState, { graph }: CreateMorphi
 // Handle selection after deletion
 
 /**
- * Action for handling the deletion of selected schema objects and morphisms.
+ * Action for handling the deletion of selected schema objexes and morphisms.
  */
 type DeleteElementsAction = {
     type: 'deleteElements';

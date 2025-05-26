@@ -9,7 +9,7 @@ import Message from './Message.vue';
  * Props passed to the component.
  */
 const props = defineProps<{
-    /** The graph object used for recursion analysis. */
+    /** The graph used for recursion analysis. */
     graph: Graph;
 }>();
 

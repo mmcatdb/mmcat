@@ -167,7 +167,7 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitObjectList(QuerycatParser.ObjectListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#object}.
+	 * Visit a parse tree produced by {@link QuerycatParser#node}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */

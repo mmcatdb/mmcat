@@ -67,7 +67,7 @@ public class SchemaCategoryController {
     }
 
     public record SchemaCategoryStats(
-        int objects,
+        int objexes,
         int mappings,
         int jobs
     ) {}

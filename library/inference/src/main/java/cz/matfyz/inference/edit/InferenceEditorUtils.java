@@ -1,24 +1,21 @@
 package cz.matfyz.inference.edit;
 
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
-import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataMorphism;
-import cz.matfyz.core.metadata.MetadataObject;
-import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataObjex;
+import cz.matfyz.core.metadata.MetadataObjex.Position;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,8 +26,8 @@ import org.apache.hadoop.yarn.webapp.NotFoundException;
 /**
  * The {@code InferenceEditorUtils} class provides utility methods for editing
  * schema categories and metadata within the inference framework. This class
- * includes methods for creating and adding objects and morphisms, removing
- * morphisms and objects, and updating mappings.
+ * includes methods for creating and adding objexes and morphisms, removing
+ * morphisms and objexes, and updating mappings.
  */
 public class InferenceEditorUtils {
 
@@ -53,8 +50,8 @@ public class InferenceEditorUtils {
      */
     private static int getNewKeyValue(SchemaCategory schema) {
         int max = 0;
-        for (SchemaObject object : schema.allObjects()) {
-            int keyVal = object.key().getValue();
+        for (SchemaObjex objex : schema.allObjexes()) {
+            int keyVal = objex.key().getValue();
             if (keyVal > max)
                 max = keyVal;
         }
@@ -64,7 +61,7 @@ public class InferenceEditorUtils {
     /**
      * Creates and adds a new morphism to the schema and metadata.
      */
-    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, boolean isDual, @Nullable Signature signature) {
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, boolean isDual, @Nullable Signature signature) {
         if (signature == null)
             signature = getNewSignatureValue(schema);
 
@@ -82,34 +79,34 @@ public class InferenceEditorUtils {
     /**
      * Creates and adds a new morphism to the schema and metadata.
      */
-    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod) {
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod) {
         return createAndAddMorphism(schema, metadata, dom, cod, false, null);
     }
 
     /**
      * Creates and adds a new morphism to the schema and metadata.
      */
-    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod, @Nullable Signature signature) {
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, @Nullable Signature signature) {
         return createAndAddMorphism(schema, metadata, dom, cod, false, signature);
     }
 
     /**
-     * Creates and adds a new object to the schema and metadata.
+     * Creates and adds a new objex to the schema and metadata.
      */
-    public static Key createAndAddObject(SchemaCategory schema, MetadataCategory metadata, ObjectIds ids, String label) {
+    public static Key createAndAddObjex(SchemaCategory schema, MetadataCategory metadata, ObjexIds ids, String label) {
         final Key key = new Key(getNewKeyValue(schema));
-        final SchemaObject object = new SchemaObject(key, ids, ids.generateDefaultSuperId());
+        final SchemaObjex objex = new SchemaObjex(key, ids, ids.generateDefaultSuperId());
 
-        schema.addObject(object);
-        metadata.setObject(object, new MetadataObject(label, Position.createDefault()));
+        schema.addObjex(objex);
+        metadata.setObjex(objex, new MetadataObjex(label, Position.createDefault()));
 
         return key;
     }
 
     /**
-     * Removes morphisms and objects from the schema based on the specified sets of signatures and keys.
+     * Removes morphisms and objexes from the schema based on the specified sets of signatures and keys.
      */
-    public static void removeMorphismsAndObjects(SchemaCategory schema, Set<Signature> signaturesToDelete, Set<Key> keysToDelete) {
+    public static void removeMorphismsAndObjexes(SchemaCategory schema, Set<Signature> signaturesToDelete, Set<Key> keysToDelete) {
         for (Signature sig : signaturesToDelete) {
             SchemaMorphism morphism = schema.getMorphism(sig);
             schema.removeMorphism(morphism);
@@ -119,40 +116,40 @@ public class InferenceEditorUtils {
     }
 
     /**
-     * Updates the schema category by deleting a specified schema object and adding a new schema object in its place.
-     * This method also updates the associated metadata for the new object based on the metadata of the deleted object.
+     * Updates the schema category by deleting a specified schema objex and adding a new schema objex in its place.
+     * This method also updates the associated metadata for the new objex based on the metadata of the deleted objex.
      */
-    public static void updateObjexes(SchemaCategory schema, MetadataCategory metadata, SchemaObject objectToDelete, SchemaObject objectToAdd) {
+    public static void updateObjexes(SchemaCategory schema, MetadataCategory metadata, SchemaObjex objexToDelete, SchemaObjex objexToAdd) {
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
-        editor.deleteObjex(objectToDelete.key());
+        editor.deleteObjex(objexToDelete.key());
 
-        MetadataObject metadataToDelete = metadata.getObject(objectToDelete);
+        MetadataObjex metadataToDelete = metadata.getObjex(objexToDelete);
 
-        schema.addObject(objectToAdd);
-        metadata.setObject(objectToAdd, new MetadataObject(metadataToDelete.label, metadataToDelete.position));
+        schema.addObjex(objexToAdd);
+        metadata.setObjex(objexToAdd, new MetadataObjex(metadataToDelete.label, metadataToDelete.position));
     }
 
     /**
-     * Updates metadata by deleting a specified metadata object and adding a new metadata object in its place with changed label.
+     * Updates metadata by deleting a specified metadata objex and adding a new metadata objex in its place with changed label.
      */
-    public static void updateMetadataObjectsLabel(SchemaObject object, MetadataCategory metadata, String newLabel) {
-        MetadataObject metadataToDelete = metadata.getObject(object);
-        metadata.setObject(object, new MetadataObject(newLabel, metadataToDelete.position));
+    public static void updateMetadataObjexesLabel(SchemaObjex objex, MetadataCategory metadata, String newLabel) {
+        MetadataObjex metadataToDelete = metadata.getObjex(objex);
+        metadata.setObjex(objex, new MetadataObjex(newLabel, metadataToDelete.position));
     }
 
     /**
      * Finds Signature for a morphism between specified domain and codomain.
      */
-    public static Signature findSignatureBetween(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {
+    public static Signature findSignatureBetween(SchemaCategory schema, SchemaObjex dom, SchemaObjex cod) {
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
                 return morphism.signature();
         }
-        throw new NotFoundException("Signature between objects: " + dom + " and " + cod + " has not been found");
+        throw new NotFoundException("Signature between objexes: " + dom + " and " + cod + " has not been found");
     }
 
     public static String findLabelFromKey(Key key, MetadataCategory metadata) {
-        return metadata.getObject(key).label;
+        return metadata.getObjex(key).label;
     }
 
     /**
@@ -183,14 +180,14 @@ public class InferenceEditorUtils {
     public static SchemaCategory createSchemaCopy(SchemaCategory original) {
         final SchemaCategory copy = new SchemaCategory();
 
-        for (final SchemaObject object : original.allObjects())
-            copy.addObject(new SchemaObject(object.key(), object.ids(), object.superId()));
+        for (final SchemaObjex objex : original.allObjexes())
+            copy.addObjex(new SchemaObjex(objex.key(), objex.ids(), objex.superId()));
 
         for (final SchemaMorphism morphism : original.allMorphisms())
             copy.addMorphism(new SchemaMorphism(
                 morphism.signature(),
-                copy.getObject(morphism.dom().key()),
-                copy.getObject(morphism.cod().key()),
+                copy.getObjex(morphism.dom().key()),
+                copy.getObjex(morphism.cod().key()),
                 morphism.min(),
                 morphism.tags()
             ));
@@ -204,9 +201,9 @@ public class InferenceEditorUtils {
     public static MetadataCategory createMetadataCopy(MetadataCategory original, SchemaCategory schema) {
         final MetadataCategory copy = MetadataCategory.createEmpty(schema);
 
-        for (final SchemaObject object : schema.allObjects()) {
-            final var mo = original.getObject(object);
-            copy.setObject(object, new MetadataObject(mo.label, mo.position));
+        for (final SchemaObjex objex : schema.allObjexes()) {
+            final var mo = original.getObjex(objex);
+            copy.setObjex(objex, new MetadataObjex(mo.label, mo.position));
         }
 
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
@@ -229,11 +226,11 @@ public class InferenceEditorUtils {
         String childName = nameParts[1];
 
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            SchemaObject dom = morphism.dom();
-            SchemaObject cod = morphism.cod();
+            SchemaObjex dom = morphism.dom();
+            SchemaObjex cod = morphism.cod();
 
-            MetadataObject metaDom = metadata.getObject(dom);
-            MetadataObject metaCod = metadata.getObject(cod);
+            MetadataObjex metaDom = metadata.getObjex(dom);
+            MetadataObjex metaCod = metadata.getObjex(cod);
 
             if (metaDom.label.equals(parentName) && metaCod.label.equals(childName))
                 return cod.key();
@@ -254,18 +251,18 @@ public class InferenceEditorUtils {
         }
 
         /**
-         * Deletes an object from the schema by its key.
+         * Deletes an objex from the schema by its key.
          */
         public void deleteObjex(Key key) {
-            final var objects = getObjects(schema);
-            if (!objects.containsKey(key))
-                throw new NotFoundException("SchemaObject with key " + key + " does not exist");
+            final var objexes = getObjexes(schema);
+            if (!objexes.containsKey(key))
+                throw new NotFoundException("SchemaObjex with key " + key + " does not exist");
 
-            objects.remove(key);
+            objexes.remove(key);
         }
 
         /**
-         * Deletes multiple objects from the schema by their keys.
+         * Deletes multiple objexes from the schema by their keys.
          */
         public void deleteObjexes(Set<Key> keys) {
             for (Key key : keys) {

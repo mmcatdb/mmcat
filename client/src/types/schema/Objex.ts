@@ -4,8 +4,8 @@ import { SchemaCategoryInvalidError } from './Error';
 import { type Morphism } from './Morphism';
 
 /**
- * An object from the {@link Category}.
- * It contains references to neighboring objects and morphisms so all graph algorithms should be implemented here.
+ * An objex from the {@link Category}.
+ * It contains references to neighboring objexes and morphisms so all graph algorithms should be implemented here.
  * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
  */
 export class Objex {
@@ -93,7 +93,7 @@ export class SchemaObjex {
 
     get idsChecked(): ObjexIds {
         if (!this.ids)
-            throw new SchemaCategoryInvalidError(`Object: ${this.key.toString()} doesn't have ids.`);
+            throw new SchemaCategoryInvalidError(`Objex: ${this.key.toString()} doesn't have ids.`);
 
         return this.ids;
     }

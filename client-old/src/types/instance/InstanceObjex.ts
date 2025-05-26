@@ -2,21 +2,21 @@ import { ComparableMap } from '@/utils/ComparableMap';
 import { Signature, type KeyFromServer, type SignatureFromServer, Key } from '../identifiers';
 import type { Category, SchemaObjex } from '../schema';
 
-export type InstanceObjectFromServer = {
+export type InstanceObjexFromServer = {
     key: KeyFromServer;
     rows: DomainRowFromServer[];
 };
 
-export class InstanceObject {
+export class InstanceObjex {
     private constructor(
         readonly schema: SchemaObjex,
         readonly rows: DomainRow[],
         readonly idToRow: Map<number, DomainRow>,
     ) {}
 
-    static fromServer(input: InstanceObjectFromServer, schema: Category): InstanceObject | undefined {
+    static fromServer(input: InstanceObjexFromServer, schema: Category): InstanceObjex | undefined {
         const key = Key.fromServer(input.key);
-        const object = schema.getObject(key).current;
+        const object = schema.getObjex(key).current;
         if (!object)
             return;
 
@@ -27,7 +27,7 @@ export class InstanceObject {
             return row;
         });
 
-        return new InstanceObject(
+        return new InstanceObjex(
             object,
             rows,
             idToRow,

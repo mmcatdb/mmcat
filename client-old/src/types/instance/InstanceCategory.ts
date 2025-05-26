@@ -1,7 +1,7 @@
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Key, Signature } from '../identifiers';
 import type { Id } from '../id';
-import { InstanceObject, type InstanceObjectFromServer } from './InstanceObject';
+import { InstanceObjex, type InstanceObjexFromServer } from './InstanceObjex';
 import { InstanceMorphism, type InstanceMorphismFromServer } from './InstanceMorphism';
 import type { Category } from '../schema';
 
@@ -9,7 +9,7 @@ export type InstanceCategoryFromServer = {
     sessionId: Id;
     categoryId: Id;
     data: {
-        objects: InstanceObjectFromServer[];
+        objexes: InstanceObjexFromServer[];
         morphisms: InstanceMorphismFromServer[];
     };
 };
@@ -17,7 +17,7 @@ export type InstanceCategoryFromServer = {
 export class InstanceCategory {
     private constructor(
         readonly schema: Category,
-        readonly objects: ComparableMap<Key, number, InstanceObject>,
+        readonly objexes: ComparableMap<Key, number, InstanceObjex>,
         readonly morphisms: ComparableMap<Signature, string, InstanceMorphism>,
     ) {}
 
@@ -28,10 +28,10 @@ export class InstanceCategory {
             new ComparableMap(signature => signature.value),
         );
 
-        for (const inputObject of input.data.objects) {
-            const object = InstanceObject.fromServer(inputObject, schema);
-            if (object)
-                instance.objects.set(object.schema.key, object);
+        for (const inputObjex of input.data.objexes) {
+            const objex = InstanceObjex.fromServer(inputObjex, schema);
+            if (objex)
+                instance.objexes.set(objex.schema.key, objex);
         }
 
         for (const inputMorphism of input.data.morphisms) {

@@ -4,9 +4,9 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.util.ArrayList;
@@ -23,13 +23,13 @@ public class InstanceBuilder {
     }
 
     private static InstanceCategory createEmptyInstance(SchemaCategory schema) {
-        final Map<Key, InstanceObject> objects = new TreeMap<>();
+        final Map<Key, InstanceObjex> objexes = new TreeMap<>();
         final Map<Signature, InstanceMorphism> morphisms = new TreeMap<>();
-        final var instance = new InstanceCategory(schema, objects, morphisms);
+        final var instance = new InstanceCategory(schema, objexes, morphisms);
 
-        for (SchemaObject schemaObject : schema.allObjects()) {
-            final InstanceObject instanceObject = new InstanceObject(schemaObject, instance);
-            objects.put(instanceObject.schema.key(), instanceObject);
+        for (final SchemaObjex schemaObjex : schema.allObjexes()) {
+            final InstanceObjex instanceObjex = new InstanceObjex(schemaObjex, instance);
+            objexes.put(instanceObjex.schema.key(), instanceObjex);
         }
 
         // The base moprhisms must be created first because the composite ones use them.
@@ -49,7 +49,7 @@ public class InstanceBuilder {
     }
 
     public InstanceBuilder technicalIdGenerator(Key key, UniqueSequentialGenerator generator) {
-        instance.getObject(key).technicalIdGenerator = generator;
+        instance.getObjex(key).technicalIdGenerator = generator;
         return this;
     }
 
@@ -71,29 +71,29 @@ public class InstanceBuilder {
         return value(morphism.signature(), value);
     }
 
-    public DomainRow object(Key key) {
-        final var instanceObject = instance.getObject(key);
+    public DomainRow objex(Key key) {
+        final var instanceObjex = instance.getObjex(key);
         final SuperIdWithValues superId = superIdBuilder.build();
 
-        var row = instanceObject.getRow(superId);
+        var row = instanceObjex.getRow(superId);
         if (row == null)
-            row = instanceObject.getOrCreateRow(superId);
+            row = instanceObjex.getOrCreateRow(superId);
 
         createdRows.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
 
         return row;
     }
 
-    public DomainRow object(BuilderObject object) {
-        return object(object.key());
+    public DomainRow objex(BuilderObjex objex) {
+        return objex(objex.key());
     }
 
-    public DomainRow valueObject(BuilderObject object, String value) {
-        return valueObject(object.key(), value);
+    public DomainRow valueObjex(BuilderObjex objex, String value) {
+        return valueObjex(objex.key(), value);
     }
 
-    public DomainRow valueObject(Key key, String value) {
-        return value(Signature.createEmpty(), value).object(key);
+    public DomainRow valueObjex(Key key, String value) {
+        return value(Signature.createEmpty(), value).objex(key);
     }
 
     // Building mapping rows
@@ -125,16 +125,16 @@ public class InstanceBuilder {
         return createdRows.get(key);
     }
 
-    public List<DomainRow> getRows(BuilderObject object) {
-        return getRows(object.key());
+    public List<DomainRow> getRows(BuilderObjex objex) {
+        return getRows(objex.key());
     }
 
     public DomainRow getRow(Key key, int index) {
         return createdRows.get(key).get(index);
     }
 
-    public DomainRow getRow(BuilderObject object, int index) {
-        return getRow(object.key(), index);
+    public DomainRow getRow(BuilderObjex objex, int index) {
+        return getRow(objex.key(), index);
     }
 
     public interface InstanceAdder {

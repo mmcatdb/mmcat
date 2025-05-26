@@ -5,10 +5,10 @@ import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.core.utils.GraphUtils.Component;
-import cz.matfyz.querying.core.ObjectColoring;
+import cz.matfyz.querying.core.ObjexColoring;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
@@ -61,7 +61,7 @@ public class PlanJoiner {
 
         // TODO there might be some joining needed for OPTIONAL joins?
 
-        final ObjectColoring coloring = ObjectColoring.create(allPatterns);
+        final ObjexColoring coloring = ObjexColoring.create(allPatterns);
         // First, we find all possible join candidates.
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
         // Then we group them by their datasource pairs. Remind you, both datasources in the pair can be the same.
@@ -81,15 +81,15 @@ public class PlanJoiner {
     /**
      * Finds all possible join candidates between the kinds in the coloring. The datasources of the kinds are not considered here.
      */
-    private List<JoinCandidate> createJoinCandidates(ObjectColoring coloring) {
+    private List<JoinCandidate> createJoinCandidates(ObjexColoring coloring) {
         final var output = new ArrayList<JoinCandidate>();
-        for (final SchemaObject object : coloring.selectMulticolorObjects()) {
-            // The set of all objects that have two or more colors.
-            final var patterns = coloring.getColors(object).stream().toArray(PatternForKind[]::new);
+        for (final SchemaObjex objex : coloring.selectMulticolorObjexes()) {
+            // The set of all objexes that have two or more colors.
+            final var patterns = coloring.getColors(objex).stream().toArray(PatternForKind[]::new);
             // We try each pair of colors.
             for (int i = 0; i < patterns.length; i++) {
                 for (int j = i + 1; j < patterns.length; j++) {
-                    final var candidate = tryCreateCandidate(object, patterns[i], patterns[j], coloring);
+                    final var candidate = tryCreateCandidate(objex, patterns[i], patterns[j], coloring);
                     if (candidate != null)
                     output.add(candidate);
                 }
@@ -102,20 +102,20 @@ public class PlanJoiner {
     // TODO This should be done by a signature, not an objex. The reason is that an objex might correspond to multiple properties of the same mapping.
     // Or, maibe we can do it via a variable? Because that one has to be unique.
 
-    private JoinCandidate tryCreateCandidate(SchemaObject object, PatternForKind pattern1, PatternForKind pattern2, ObjectColoring coloring) {
-        final var candidate1 = tryCreateIdRefCandidate(object, pattern1, pattern2, coloring);
+    private JoinCandidate tryCreateCandidate(SchemaObjex objex, PatternForKind pattern1, PatternForKind pattern2, ObjexColoring coloring) {
+        final var candidate1 = tryCreateIdRefCandidate(objex, pattern1, pattern2, coloring);
         if (candidate1 != null)
             return candidate1;
 
-        final var candidate2 = tryCreateIdRefCandidate(object, pattern2, pattern1, coloring);
+        final var candidate2 = tryCreateIdRefCandidate(objex, pattern2, pattern1, coloring);
         if (candidate2 != null)
             return candidate2;
 
-        final PatternTree patternTree1 = pattern1.getPatternTree(object);
+        final PatternTree patternTree1 = pattern1.getPatternTree(objex);
         if (patternTree1 == null)
             return null;
 
-        final PatternTree patternTree2 = pattern2.getPatternTree(object);
+        final PatternTree patternTree2 = pattern2.getPatternTree(objex);
         if (patternTree2 == null)
             return null;
 
@@ -128,29 +128,29 @@ public class PlanJoiner {
     }
 
     /**
-     * This function matches the id-ref join pattern. This means that an object (rootObject) is identified by another object (idObject). The first pattern (idPattern) has rootObject as a root object and idObject as a normal property. The second pattern (refPatterns) has the idObject as a normal property.
+     * This function matches the id-ref join pattern. This means that an objex (rootObjex) is identified by another objex (idObjex). The first pattern (idPattern) has rootObjex as a root objex and idObjex as a normal property. The second pattern (refPatterns) has the idObjex as a normal property.
      */
-    private JoinCandidate tryCreateIdRefCandidate(SchemaObject idObject, PatternForKind idPattern, PatternForKind refPattern, ObjectColoring coloring) {
-        // First, check if the idObject is an identifier of the root of the idKind.
-        final SchemaObject rootObject = idPattern.root.schemaObject;
-        if (!rootObject.ids().isSignatures())
+    private JoinCandidate tryCreateIdRefCandidate(SchemaObjex idObjex, PatternForKind idPattern, PatternForKind refPattern, ObjexColoring coloring) {
+        // First, check if the idObjex is an identifier of the root of the idKind.
+        final SchemaObjex rootObjex = idPattern.root.objex;
+        if (!rootObjex.ids().isSignatures())
             return null;
         // TODO currently, we are using only the first id for joining.
-        final SignatureId firstId = rootObject.ids().toSignatureIds().first();
+        final SignatureId firstId = rootObjex.ids().toSignatureIds().first();
         // TODO currently, we are accepting only signature ids with exactly one signature.
         if (firstId.signatures().size() != 1)
             return null;
 
         final BaseSignature fromSignature = firstId.signatures().first().getLast();
-        final SchemaObject rootIdObject = context.getSchema().getEdge(fromSignature).to();
-        if (!idObject.equals(rootIdObject))
+        final SchemaObjex rootIdObjex = context.getSchema().getEdge(fromSignature).to();
+        if (!idObjex.equals(rootIdObjex))
             return null;
 
-        final PatternTree toPatternTree = refPattern.getPatternTree(idObject);
+        final PatternTree toPatternTree = refPattern.getPatternTree(idObjex);
         if (toPatternTree == null)
             return null;
 
-        // The idObject is in fact an identifier of the root of the idPattern. We also know that both idPattern and refPattern contains the object. Therefore we can create the join candidate.
+        // The idObjex is in fact an identifier of the root of the idPattern. We also know that both idPattern and refPattern contains the objex. Therefore we can create the join candidate.
         // TODO recursion, isOptional
         return new JoinCandidate(JoinType.IdRef, idPattern, refPattern, toPatternTree.variable, 0, false);
     }

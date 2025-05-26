@@ -2,12 +2,12 @@ package cz.matfyz.evolution.category;
 
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SchemaSerializer.SerializedObject;
+import cz.matfyz.core.schema.SchemaObjex;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
 
 public record UpdateObjex(
-    SerializedObject newObject,
-    SerializedObject oldObject
+    SerializedObjex newObjex,
+    SerializedObjex oldObjex
 ) implements SMO {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
@@ -15,19 +15,19 @@ public record UpdateObjex(
     }
 
     @Override public void up(SchemaCategory schema, MetadataCategory metadataCategory) {
-        replaceObject(schema, newObject.deserialize());
+        replaceObjex(schema, newObjex.deserialize());
     }
 
     @Override public void down(SchemaCategory schema, MetadataCategory metadataCategory) {
-        replaceObject(schema, oldObject.deserialize());
+        replaceObjex(schema, oldObjex.deserialize());
     }
 
-    private void replaceObject(SchemaCategory schema, SchemaObject object) {
-        final var objects = (new SchemaEditor(schema)).getObjects();
-        // Replace the object by its newer version. The equality is determined by its key.
-        objects.put(object.key(), object);
+    private void replaceObjex(SchemaCategory schema, SchemaObjex objex) {
+        final var objexes = (new SchemaEditor(schema)).getObjexes();
+        // Replace the objex by its newer version. The equality is determined by its key.
+        objexes.put(objex.key(), objex);
 
-        schema.allMorphisms().forEach(morphism -> morphism.updateObjex(object));
+        schema.allMorphisms().forEach(morphism -> morphism.updateObjex(objex));
     }
 
 }

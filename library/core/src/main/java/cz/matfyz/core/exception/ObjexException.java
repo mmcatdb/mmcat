@@ -5,9 +5,9 @@ import cz.matfyz.core.instance.SuperIdWithValues;
 import java.io.Serializable;
 import java.util.Set;
 
-public class ObjectException extends CoreException {
+public class ObjexException extends CoreException {
 
-    private ObjectException(String name, Serializable data) {
+    private ObjexException(String name, Serializable data) {
         super("object." + name, data, null);
     }
 
@@ -16,8 +16,8 @@ public class ObjectException extends CoreException {
         Set<String> technicalIds
     ) implements Serializable {}
 
-    public static ObjectException actualRowNotFound(SuperIdWithValues superId, Set<String> technicalIds) {
-        return new ObjectException("actualRowNotFound", new RowData(superId, technicalIds));
+    public static ObjexException actualRowNotFound(SuperIdWithValues superId, Set<String> technicalIds) {
+        return new ObjexException("actualRowNotFound", new RowData(superId, technicalIds));
     }
 
 }

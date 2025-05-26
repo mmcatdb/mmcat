@@ -2,7 +2,7 @@
 import { computed, ref, shallowRef } from 'vue';
 import { GraphRootProperty, GraphSimpleProperty, GraphComplexProperty } from '@/types/accessPath/graph';
 import type { GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph/compositeTypes';
-import { SignatureId, SpecialName, StaticName } from '@/types/identifiers';
+import { SpecialName, StaticName } from '@/types/identifiers';
 import { type Node, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat } from '@/utils/injects';
@@ -12,7 +12,7 @@ import NodeInput from '@/components/input/NodeInput.vue';
 import type { Datasource } from '@/types/datasource';
 
 /**
- * Extracts the graph object from Evocat.
+ * Extracts the graph from Evocat.
  */
 const { graph } = $(useEvocat());
 

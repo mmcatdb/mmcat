@@ -4,7 +4,6 @@ import { GraphRootProperty } from '@/types/accessPath/graph';
 import type { SignatureId } from '@/types/identifiers';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat, useSchemaCategoryId } from '@/utils/injects';
-import ValueRow from '@/components/layout/page/ValueRow.vue';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
 import type { Datasource } from '@/types/datasource';
@@ -12,7 +11,7 @@ import type { Datasource } from '@/types/datasource';
 const categoryId = useSchemaCategoryId();
 
 /**
- * Extracts the graph object from Evocat.
+ * Extracts the graph from Evocat.
  */
 const { graph } = $(useEvocat());
 
@@ -108,7 +107,7 @@ async function loadSelectedMapping(mapping: Mapping) {
     originalGraphProperty.value?.unhighlightPath();
     originalGraphProperty.value?.node.removeRoot();
     originalMapping.value = mapping;
-    const node = graph.getNode(mapping.rootObjectKey) || null;
+    const node = graph.getNode(mapping.rootObjexKey) || null;
 
     originalGraphProperty.value = GraphRootProperty.fromRootProperty(
         mapping.accessPath, 
@@ -153,7 +152,7 @@ function undoAccessPath() {
 /**
  * Emits the finish event to create a mapping with the given primary key and selected mapping kind name.
  */
-function createMapping(primaryKey: SignatureId, rootProperty: GraphRootProperty, kindName: String) {
+function createMapping(primaryKey: SignatureId, rootProperty: GraphRootProperty, kindName: string) {
     emit('finish', primaryKey, accessPath.value, kindName);
 }
 
@@ -230,7 +229,7 @@ function cancel() {
                 :datasource="selectedDatasource"
                 :root-property="accessPath"
                 @finish="createMapping"
-                @update:rootProperty="updateRootProperty"
+                @update:root-property="updateRootProperty"
                 @cancel="cancel"
             />
         </div>

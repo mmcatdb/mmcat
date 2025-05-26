@@ -100,8 +100,8 @@ public class SchemaCategoryRepository {
     public SchemaCategoryStats findStats(Id id) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
-                WITH objects_count AS (
-                    SELECT jsonb_array_length(schema_category.json_value->'schema'->'objects') AS objects
+                WITH objexes_count AS (
+                    SELECT jsonb_array_length(schema_category.json_value->'schema'->'objexes') AS objexes
                     FROM schema_category
                     WHERE schema_category.id = ?
                 ),
@@ -117,10 +117,10 @@ public class SchemaCategoryRepository {
                     WHERE run.category_id = ?
                 )
                 SELECT
-                    objects_count.objects,
+                    objexes_count.objexes,
                     mappings_count.mappings,
                     jobs_count.jobs
-                FROM objects_count, mappings_count, jobs_count;
+                FROM objexes_count, mappings_count, jobs_count;
                 """);
             setId(statement, 1, id);
             setId(statement, 2, id);
@@ -128,10 +128,10 @@ public class SchemaCategoryRepository {
             final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                final var objects = resultSet.getInt("objects");
+                final var objexes = resultSet.getInt("objexes");
                 final var mappings = resultSet.getInt("mappings");
                 final var jobs = resultSet.getInt("jobs");
-                output.set(new SchemaCategoryStats(objects, mappings, jobs));
+                output.set(new SchemaCategoryStats(objexes, mappings, jobs));
             }
         });
     }

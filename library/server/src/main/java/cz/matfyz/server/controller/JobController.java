@@ -1,7 +1,7 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.controller.ActionController.JobPayloadDetail;

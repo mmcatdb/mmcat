@@ -62,7 +62,7 @@ public abstract class AccessPath implements Printable {
      */
     protected abstract @Nullable List<AccessPath> getPropertyPathInternal(Signature signature);
 
-    public abstract @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
+    public abstract @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema);
 
     /**
      * Creates copy of this property but with a new name and signature.

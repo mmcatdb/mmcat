@@ -1,14 +1,14 @@
 package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.PrimaryKeyCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * The {@code PrimaryKeyMerge} class implements an algorithm for merging primary keys
  * within a schema. It extends the {@link InferenceEditAlgorithm} and provides
- * functionality to modify schema objects and mappings based on primary key rules.
+ * functionality to modify objexes and mappings based on primary key rules.
  */
 public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
@@ -85,7 +85,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
     /**
      * Applies the primary key merging algorithm to the schema category.
-     * It modifies the schema based on primary key rules and removes unnecessary objects and morphisms.
+     * It modifies the schema based on primary key rules and removes unnecessary objexes and morphisms.
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Primary Key Edit on Schema Category...");
@@ -98,11 +98,11 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         this.primaryKeyRoot = findPrimaryKeyRoot(newSchema);
         final Signature primaryKeySignature = findPKSignature();
 
-        final SchemaObject pkRootObject = newSchema.getObject(primaryKeyRoot);
+        final SchemaObjex pkRootObjex = newSchema.getObjex(primaryKeyRoot);
 
         if (primaryKeyRoot.equals(data.primaryKeyIdentified)) { // update PK identification for the PK's parent
-            final SchemaObject updatedPkRootObject = updateSchemaObjectIds(pkRootObject, primaryKeySignature);
-            InferenceEditorUtils.updateObjexes(newSchema, newMetadata, pkRootObject, updatedPkRootObject);
+            final SchemaObjex updatedPkRootObjex = updateSchemaObjexIds(pkRootObjex, primaryKeySignature);
+            InferenceEditorUtils.updateObjexes(newSchema, newMetadata, pkRootObjex, updatedPkRootObjex);
         }
     }
 
@@ -130,16 +130,16 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Primary Key Signature has not been found");
     }
 
-    private SchemaObject updateSchemaObjectIds(SchemaObject schemaObject, Signature signature) {
+    private SchemaObjex updateSchemaObjexIds(SchemaObjex schemaObjex, Signature signature) {
         final SortedSet<SignatureId> signatureSet = new TreeSet<>(Set.of(new SignatureId(signature)));
-        final ObjectIds updatedIds = schemaObject.ids().isSignatures()
-            ? new ObjectIds(addSignatureToSet(schemaObject.ids(), signature))
-            : new ObjectIds(signatureSet);
+        final ObjexIds updatedIds = schemaObjex.ids().isSignatures()
+            ? new ObjexIds(addSignatureToSet(schemaObjex.ids(), signature))
+            : new ObjexIds(signatureSet);
 
-        return new SchemaObject(schemaObject.key(), updatedIds, updatedIds.generateDefaultSuperId());
+        return new SchemaObjex(schemaObjex.key(), updatedIds, updatedIds.generateDefaultSuperId());
     }
 
-    private SortedSet<SignatureId> addSignatureToSet(ObjectIds ids, Signature signature) {
+    private SortedSet<SignatureId> addSignatureToSet(ObjexIds ids, Signature signature) {
         final SortedSet<SignatureId> signatureIds = new TreeSet<>(ids.toSignatureIds());
         signatureIds.add(new SignatureId(signature));
         return signatureIds;
@@ -159,14 +159,14 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
     private Mapping findPrimaryKeyMapping(List<Mapping> mappings) {
         for (final Mapping mapping : mappings) {
-            if (mapping.rootObject().key().equals(primaryKeyRoot))
+            if (mapping.rootObjex().key().equals(primaryKeyRoot))
                 return mapping;
         }
-        throw new NotFoundException("Mapping for object identified with PK has not been found.");
+        throw new NotFoundException("Mapping for objex identified with PK has not been found.");
     }
 
     private Mapping updatePrimaryKeyMapping(Mapping mapping) {
-        return Mapping.create(mapping.datasource(), mapping.kindName(), newSchema, mapping.rootObject().key(), mapping.accessPath());
+        return Mapping.create(mapping.datasource(), mapping.kindName(), newSchema, mapping.rootObjex().key(), mapping.accessPath());
     }
 
 }

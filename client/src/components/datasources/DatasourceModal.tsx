@@ -134,7 +134,6 @@ function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasou
  *
  * @param type - The selected datasource type.
  * @param currentSettings - The current settings to merge with defaults.
- * @returns Initialized settings object.
  */
 function initializeSettings(type: DatasourceType, currentSettings: Settings): Settings {
     const isDatabaseType = [ DatasourceType.mongodb, DatasourceType.postgresql, DatasourceType.neo4j ].includes(type);

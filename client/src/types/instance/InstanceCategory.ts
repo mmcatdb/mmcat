@@ -9,7 +9,7 @@ export type InstanceCategoryFromServer = {
     sessionId: Id;
     categoryId: Id;
     instance: {
-        objects: InstanceObjexFromServer[];
+        objexes: InstanceObjexFromServer[];
         morphisms: InstanceMorphismFromServer[];
     };
 };
@@ -28,7 +28,7 @@ export class InstanceCategory {
             new ComparableMap(signature => signature.value),
         );
 
-        for (const inputObjex of input.instance.objects) {
+        for (const inputObjex of input.instance.objexes) {
             const objex = InstanceObjex.fromServer(inputObjex, schema);
             if (objex)
                 instance.objexes.set(objex.schema.key, objex);

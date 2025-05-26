@@ -16,11 +16,11 @@ import java.util.TreeSet;
 public class InstanceSerializer {
 
     public record SerializedInstance(
-        List<SerializedInstanceObject> objects,
+        List<SerializedInstanceObjex> objexes,
         List<SerializedInstanceMorphism> morphisms
     ) implements Serializable {}
 
-    public record SerializedInstanceObject(
+    public record SerializedInstanceObjex(
         Key key,
         List<SerializedDomainRow> rows,
         SerializedUniqueSequentialGenerator technicalIdGenerator
@@ -50,8 +50,8 @@ public class InstanceSerializer {
     }
 
     private SerializedInstance serializeInstance(InstanceCategory instance) {
-        final List<SerializedInstanceObject> objects = instance.allObjects().stream()
-            .map(this::serializeObject)
+        final List<SerializedInstanceObjex> objexes = instance.allObjexes().stream()
+            .map(this::serializeObjex)
             .toList();
 
         final List<SerializedInstanceMorphism> morphisms = instance.allMorphisms().stream()
@@ -59,19 +59,19 @@ public class InstanceSerializer {
             .toList();
 
         return new SerializedInstance(
-            objects,
+            objexes,
             morphisms
         );
     }
 
-    private SerializedInstanceObject serializeObject(InstanceObject object) {
+    private SerializedInstanceObjex serializeObjex(InstanceObjex objex) {
         final Map<DomainRow, Integer> rowToId = new TreeMap<>();
-        keyToRowToId.put(object.schema.key(), rowToId);
+        keyToRowToId.put(objex.schema.key(), rowToId);
 
         int lastId = 0;
         final List<SerializedDomainRow> rows = new ArrayList<>();
 
-        for (final DomainRow row : object.allRowsToSet()) {
+        for (final DomainRow row : objex.allRowsToSet()) {
             final var rowWrapper = new SerializedDomainRow(
                 lastId++,
                 row.superId,
@@ -82,10 +82,10 @@ public class InstanceSerializer {
             rows.add(rowWrapper);
         }
 
-        return new SerializedInstanceObject(
-            object.schema.key(),
+        return new SerializedInstanceObjex(
+            objex.schema.key(),
             rows,
-            object.technicalIdGenerator.serialize()
+            objex.technicalIdGenerator.serialize()
         );
     }
 
@@ -115,8 +115,8 @@ public class InstanceSerializer {
     private InstanceCategory deserializeInstance(SerializedInstance serializedInstance, SchemaCategory schema) {
         final var instance = new InstanceBuilder(schema).build();
 
-        for (final SerializedInstanceObject serializedObject : serializedInstance.objects)
-            deserializeObject(serializedObject, instance);
+        for (final SerializedInstanceObjex serializedObjex : serializedInstance.objexes)
+            deserializeObjex(serializedObjex, instance);
 
         for (final SerializedInstanceMorphism serializedMorphism : serializedInstance.morphisms)
             deserializeMorphism(serializedMorphism, instance);
@@ -124,14 +124,14 @@ public class InstanceSerializer {
         return instance;
     }
 
-    private void deserializeObject(SerializedInstanceObject serializedObject, InstanceCategory instance) {
-        final var object = instance.getObject(serializedObject.key);
-        object.technicalIdGenerator = UniqueSequentialGenerator.deserialize(serializedObject.technicalIdGenerator);
+    private void deserializeObjex(SerializedInstanceObjex serializedObjex, InstanceCategory instance) {
+        final var objex = instance.getObjex(serializedObjex.key);
+        objex.technicalIdGenerator = UniqueSequentialGenerator.deserialize(serializedObjex.technicalIdGenerator);
 
         final Map<Integer, DomainRow> idToRow = new TreeMap<>();
-        keyToIdToRow.put(serializedObject.key, idToRow);
+        keyToIdToRow.put(serializedObjex.key, idToRow);
 
-        for (final var serializedRow : serializedObject.rows) {
+        for (final var serializedRow : serializedObjex.rows) {
             final var row = new DomainRow(
                 serializedRow.superId,
                 new TreeSet<>(serializedRow.technicalIds),
@@ -139,8 +139,8 @@ public class InstanceSerializer {
             );
 
             idToRow.put(serializedRow.id, row);
-            final var ids = row.superId.findAllIds(object.schema.ids()).foundIds();
-            object.setRow(row, ids);
+            final var ids = row.superId.findAllIds(objex.schema.ids()).foundIds();
+            objex.setRow(row, ids);
         }
     }
 

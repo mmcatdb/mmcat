@@ -15,10 +15,10 @@ public record CreateMorphism(
     }
 
     @Override public void up(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
-        final var objects = (new SchemaEditor(schemaCategory)).getObjects();
-        final var morphismWithObjects = schema.deserialize(objects::get);
+        final var objexes = (new SchemaEditor(schemaCategory)).getObjexes();
+        final var morphismWithObjexes = schema.deserialize(objexes::get);
 
-        (new SchemaEditor(schemaCategory)).getMorphisms().put(morphismWithObjects.signature(), morphismWithObjects);
+        (new SchemaEditor(schemaCategory)).getMorphisms().put(morphismWithObjexes.signature(), morphismWithObjexes);
     }
 
     @Override public void down(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {

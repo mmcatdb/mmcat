@@ -31,9 +31,9 @@ export class Evocat {
     }
 
     async update(api: UpdateApi) {
-        const updateObject = this.getUpdateObject();
+        const edit = this.getEdit();
 
-        const result = await api(updateObject);
+        const result = await api(edit);
         if (!result.status)
             return;
 
@@ -45,7 +45,7 @@ export class Evocat {
         smo.up(this._category);
     }
 
-    private getUpdateObject(): SchemaUpdateInit {
+    private getEdit(): SchemaUpdateInit {
         const schemaOperations = this.uncommitedOperations.collectAndReset();
         const schemaToServer = schemaOperations.map(operation => operation.toServer());
 
@@ -175,7 +175,7 @@ export class Evocat {
     }
 
     /**
-     * Creates a completely new schema object with a key that has never been seen before.
+     * Creates a completely new objex with a key that has never been seen before.
      */
     createObjex(def: ObjexDefinition) {
         const key = this._category.createKey();

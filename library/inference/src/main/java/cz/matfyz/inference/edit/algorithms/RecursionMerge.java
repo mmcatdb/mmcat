@@ -4,7 +4,7 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.inference.edit.DfsFinder;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
@@ -64,7 +64,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     public static final String RECURSIVE_MARKER = "@";
 
     public List<PatternSegment> adjustedPattern;
-    public Map<PatternSegment, Set<SchemaObject>> mapPatternObjects = new HashMap<>();
+    public Map<PatternSegment, Set<SchemaObjex>> mapPatternObjexes = new HashMap<>();
 
     public RecursionMerge(Data data) {
         this.data = data;
@@ -73,7 +73,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     /*
      * Applies the primary key merging algorithm to the schema category.
      * Assumptions: Morphisms in the pattern are only among the elements of the pattern.
-     * Pattern always starts and ends in the same object (however the occurrence does not have to end in this object).
+     * Pattern always starts and ends in the same objex (however the occurrence does not have to end in this objex).
      * For now, we assume that the pattern needs to occur at least once in its full length to count as a full match.
      */
     @Override protected void innerCategoryEdit() {
@@ -81,12 +81,12 @@ public class RecursionMerge extends InferenceEditAlgorithm {
 
         adjustPattern();
 
-        List<List<SchemaObject>> occurences = findAdjustedPatternOccurences();
+        List<List<SchemaObjex>> occurences = findAdjustedPatternOccurences();
 
         bridgeOccurences(occurences);
 
-        findMorphismsAndObjectsToDelete(occurences);
-        InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
+        findMorphismsAndObjexesToDelete(occurences);
+        InferenceEditorUtils.removeMorphismsAndObjexes(newSchema, signaturesToDelete, keysToDelete);
 
         createRecursiveMorphisms(occurences);
     }
@@ -116,21 +116,21 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         adjustedPattern = newPattern;
     }
 
-    private List<List<SchemaObject>> findAdjustedPatternOccurences() {
+    private List<List<SchemaObjex>> findAdjustedPatternOccurences() {
         final DfsFinder dfsFinder = new DfsFinder(this);
         dfsFinder.findOccurrencesInAllNodes();
         return dfsFinder.getResult();
     }
 
-    public boolean containsRecursiveAlready(Set<SchemaObject> recursiveNodes, String currentNodeLabel) {
-        for (final SchemaObject object : recursiveNodes)
-            if (newMetadata.getObject(object).label.equals(currentNodeLabel))
+    public boolean containsRecursiveAlready(Set<SchemaObjex> recursiveNodes, String currentNodeLabel) {
+        for (final SchemaObjex objex : recursiveNodes)
+            if (newMetadata.getObjex(objex).label.equals(currentNodeLabel))
                 return true;
 
         return false;
     }
 
-    public @Nullable SchemaObject findNextNode(SchemaCategory schema, SchemaObject currentNode, PatternSegment currentSegment) {
+    public @Nullable SchemaObjex findNextNode(SchemaCategory schema, SchemaObjex currentNode, PatternSegment currentSegment) {
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
             if (currentSegment.direction().equals(FORWARD) && morphism.dom().equals(currentNode))
                 return morphism.cod();
@@ -144,18 +144,18 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return null;
     }
 
-    private void bridgeOccurences(List<List<SchemaObject>> occurences) {
-        for (List<SchemaObject> occurence : occurences) {
-            SchemaObject firstInPattern = occurence.get(0);
-            SchemaObject oneBeforeLastOccurence = occurence.get(occurence.size() - 2);
-            SchemaObject lastOccurence = occurence.get(occurence.size() - 1);
+    private void bridgeOccurences(List<List<SchemaObjex>> occurences) {
+        for (List<SchemaObjex> occurence : occurences) {
+            SchemaObjex firstInPattern = occurence.get(0);
+            SchemaObjex oneBeforeLastOccurence = occurence.get(occurence.size() - 2);
+            SchemaObjex lastOccurence = occurence.get(occurence.size() - 1);
 
             List<SchemaMorphism> otherMorphisms = findOtherMorphisms(lastOccurence, oneBeforeLastOccurence);
             createNewOtherMorphisms(lastOccurence, firstInPattern, otherMorphisms);
         }
     }
 
-    private List<SchemaMorphism> findOtherMorphisms(SchemaObject node, SchemaObject previous) {
+    private List<SchemaMorphism> findOtherMorphisms(SchemaObjex node, SchemaObjex previous) {
         List<SchemaMorphism> morphisms = new ArrayList<>();
         for (SchemaMorphism morphism : newSchema.allMorphisms()) {
             if ((morphism.cod().equals(node) && !morphism.dom().equals(previous)) ||
@@ -166,13 +166,13 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return morphisms;
     }
 
-    private void createNewOtherMorphisms(SchemaObject lastOccurence, SchemaObject firstInPattern, List<SchemaMorphism> otherMorphisms) {
+    private void createNewOtherMorphisms(SchemaObjex lastOccurence, SchemaObjex firstInPattern, List<SchemaMorphism> otherMorphisms) {
         if (otherMorphisms == null)
             return;
 
         for (SchemaMorphism morphism : otherMorphisms) {
-            SchemaObject dom = firstInPattern;
-            SchemaObject cod = morphism.cod();
+            SchemaObjex dom = firstInPattern;
+            SchemaObjex cod = morphism.cod();
             if (!morphism.dom().equals(lastOccurence)) {
                 dom = morphism.dom();
                 cod = firstInPattern;
@@ -181,41 +181,41 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         }
     }
 
-    private void findMorphismsAndObjectsToDelete(List<List<SchemaObject>> occurences) {
-        for (List<SchemaObject> occurence : occurences) {
+    private void findMorphismsAndObjexesToDelete(List<List<SchemaObjex>> occurences) {
+        for (List<SchemaObjex> occurence : occurences) {
             for (int i = adjustedPattern.size() - 1; i < occurence.size(); i++) {
-                SchemaObject schemaObject = occurence.get(i);
-                keysToDelete.add(schemaObject.key());
-                signaturesToDelete.addAll(findSignaturesForObject(schemaObject));
+                SchemaObjex objex = occurence.get(i);
+                keysToDelete.add(objex.key());
+                signaturesToDelete.addAll(findSignaturesForObjex(objex));
             }
         }
     }
 
-    private List<Signature> findSignaturesForObject(SchemaObject schemaObject) {
+    private List<Signature> findSignaturesForObjex(SchemaObjex objex) {
         return newSchema.allMorphisms().stream()
-            .filter(morphism -> morphism.dom().equals(schemaObject) || morphism.cod().equals(schemaObject))
+            .filter(morphism -> morphism.dom().equals(objex) || morphism.cod().equals(objex))
             .map(SchemaMorphism::signature)
             .toList();
     }
 
-    private void createRecursiveMorphisms(List<List<SchemaObject>> occurences) {
-        for (List<SchemaObject> occurence : occurences) {
-            SchemaObject firstInPattern = occurence.get(0);
-            SchemaObject oneBeforeLastInPattern = occurence.get(adjustedPattern.size() - 2);
+    private void createRecursiveMorphisms(List<List<SchemaObjex>> occurences) {
+        for (List<SchemaObjex> occurence : occurences) {
+            SchemaObjex firstInPattern = occurence.get(0);
+            SchemaObjex oneBeforeLastInPattern = occurence.get(adjustedPattern.size() - 2);
             InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, oneBeforeLastInPattern, firstInPattern);
         }
 
         createRepetitiveMorphisms(occurences);
     }
 
-    private void createRepetitiveMorphisms(List<List<SchemaObject>> occurences) {
+    private void createRepetitiveMorphisms(List<List<SchemaObjex>> occurences) {
         for (PatternSegment segment : adjustedPattern) {
             if (!isRepetitive(segment))
                 continue;
 
-            for (SchemaObject object : mapPatternObjects.get(segment))
-                if (!keysToDelete.contains(object.key()) && inAnyOccurence(occurences, object))
-                    InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, object, object);
+            for (SchemaObjex objex : mapPatternObjexes.get(segment))
+                if (!keysToDelete.contains(objex.key()) && inAnyOccurence(occurences, objex))
+                    InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, objex, objex);
         }
     }
 
@@ -223,10 +223,10 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return segment.direction().contains(RECURSIVE_MARKER);
     }
 
-    private boolean inAnyOccurence(List<List<SchemaObject>> occurences, SchemaObject schemaObjectToFind) {
-        for (List<SchemaObject> occurence : occurences)
-            for (SchemaObject schemaObject : occurence)
-                if (schemaObject.equals(schemaObjectToFind))
+    private boolean inAnyOccurence(List<List<SchemaObjex>> occurences, SchemaObjex objexToFind) {
+        for (List<SchemaObjex> occurence : occurences)
+            for (SchemaObjex objex : occurence)
+                if (objex.equals(objexToFind))
                     return true;
 
         return false;

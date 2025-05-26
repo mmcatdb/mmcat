@@ -19,11 +19,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-@JsonSerialize(using = ObjectIds.Serializer.class)
-@JsonDeserialize(using = ObjectIds.Deserializer.class)
-public class ObjectIds implements Serializable {
+@JsonSerialize(using = ObjexIds.Serializer.class)
+@JsonDeserialize(using = ObjexIds.Deserializer.class)
+public class ObjexIds implements Serializable {
     public enum Type {
-        // This set of signatures points to other value/generated identified objects, which form a composite identifier
+        // This set of signatures points to other value/generated identified objexes, which form a composite identifier
         // (or simple, if there is just a single signature)
         /** A set of signatures. */
         Signatures,
@@ -42,33 +42,33 @@ public class ObjectIds implements Serializable {
         return isSignatures() ? new TreeSet<>(signatureIds) : new TreeSet<>(Set.of(SignatureId.createEmpty()));
     }
 
-    public ObjectIds(Set<SignatureId> signatureIds) {
+    public ObjexIds(Set<SignatureId> signatureIds) {
         this(new TreeSet<>(signatureIds));
     }
 
     // There must be at least one signature
-    public ObjectIds(SignatureId... signatureIds) {
+    public ObjexIds(SignatureId... signatureIds) {
         this(new TreeSet<>(List.of(signatureIds)));
     }
 
-    public ObjectIds(Signature... signatures) {
+    public ObjexIds(Signature... signatures) {
         this(new TreeSet<>(List.of(new SignatureId(signatures))));
     }
 
-    public static ObjectIds createValue() {
-        return new ObjectIds(Type.Value);
+    public static ObjexIds createValue() {
+        return new ObjexIds(Type.Value);
     }
 
-    public static ObjectIds createGenerated() {
-        return new ObjectIds(Type.Generated);
+    public static ObjexIds createGenerated() {
+        return new ObjexIds(Type.Generated);
     }
 
-    private ObjectIds(SortedSet<SignatureId> signatures) {
+    private ObjexIds(SortedSet<SignatureId> signatures) {
         this.signatureIds = signatures;
         this.type = Type.Signatures;
     }
 
-    private ObjectIds(Type type) {
+    private ObjexIds(Type type) {
         assert type != Type.Signatures;
 
         this.signatureIds = null;
@@ -115,17 +115,17 @@ public class ObjectIds implements Serializable {
         return builder.toString();
     }
 
-    public static class Serializer extends StdSerializer<ObjectIds> {
+    public static class Serializer extends StdSerializer<ObjexIds> {
 
         public Serializer() {
             this(null);
         }
 
-        public Serializer(Class<ObjectIds> t) {
+        public Serializer(Class<ObjexIds> t) {
             super(t);
         }
 
-        @Override public void serialize(ObjectIds ids, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(ObjexIds ids, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writeStringField("type", ids.type.name());
 
@@ -142,7 +142,7 @@ public class ObjectIds implements Serializable {
 
     }
 
-    public static class Deserializer extends StdDeserializer<ObjectIds> {
+    public static class Deserializer extends StdDeserializer<ObjexIds> {
 
         public Deserializer() {
             this(null);
@@ -154,7 +154,7 @@ public class ObjectIds implements Serializable {
 
         private static final ObjectReader signatureIdsJsonReader = new ObjectMapper().readerFor(SignatureId[].class);
 
-        @Override public ObjectIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public ObjexIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Type type = Type.valueOf(node.get("type").asText());
@@ -162,7 +162,7 @@ public class ObjectIds implements Serializable {
                 ? signatureIdsJsonReader.readValue(node.get("signatureIds"))
                 : null;
 
-            return type == Type.Signatures ? new ObjectIds(signatureIds) : new ObjectIds(type);
+            return type == Type.Signatures ? new ObjexIds(signatureIds) : new ObjexIds(type);
         }
 
     }

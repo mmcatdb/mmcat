@@ -6,7 +6,7 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceObject;
+import cz.matfyz.core.instance.InstanceObjex;
 import cz.matfyz.core.instance.InstanceBuilder.InstanceAdder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
@@ -73,21 +73,21 @@ public class MTCAlgorithmTestBase {
         LOGGER.debug("ACTUAL:\n{}", actualInstance);
         LOGGER.debug("EXPECTED:\n{}", expectedInstance);
 
-        assertEquals(expectedInstance.allObjects(), actualInstance.allObjects(), "Test objects differ from the expected objects.");
+        assertEquals(expectedInstance.allObjexes(), actualInstance.allObjexes(), "Test objexes differ from the expected objexes.");
         assertEquals(expectedInstance.allMorphisms(), actualInstance.allMorphisms(), "Test morphisms differ from the expected morphisms.");
 
-        for (final var expectedObject : expectedInstance.allObjects()) {
-            final var object = actualInstance.getObject(expectedObject.schema.key());
+        for (final var expectedObjex : expectedInstance.allObjexes()) {
+            final var objex = actualInstance.getObjex(expectedObjex.schema.key());
 
-            final var expectedString = expectedObject.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObject)).toList();
-            final var string = object.allRowsToSet().stream().map(row -> rowToMappingsString(row, object)).toList();
+            final var expectedString = expectedObjex.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObjex)).toList();
+            final var string = objex.allRowsToSet().stream().map(row -> rowToMappingsString(row, objex)).toList();
 
             assertEquals(expectedString, string);
         }
     }
 
-    private static String rowToMappingsString(DomainRow row, InstanceObject object) {
-        String output = "\n[row] (" + object.schema.key() + ") "  + row;
+    private static String rowToMappingsString(DomainRow row, InstanceObjex objex) {
+        String output = "\n[row] (" + objex.schema.key() + ") "  + row;
 
         for (final var mappingsOfType : row.getAllMappingsFrom()) {
             output += "\n\tmappings [" + mappingsOfType.morphism().schema.signature() + "]->(" + mappingsOfType.morphism().schema.cod().key() + "):";

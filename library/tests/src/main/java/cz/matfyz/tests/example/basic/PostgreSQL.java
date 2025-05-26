@@ -31,8 +31,8 @@ public abstract class PostgreSQL {
 
     public static void addOrder(InstanceBuilder builder, String numberValue) {
         builder.morphism(Schema.orderToNumber,
-            builder.value(Schema.orderToNumber, numberValue).object(Schema.order),
-            builder.valueObject(Schema.number, numberValue)
+            builder.value(Schema.orderToNumber, numberValue).objex(Schema.order),
+            builder.valueObjex(Schema.number, numberValue)
         );
     }
 
@@ -49,16 +49,16 @@ public abstract class PostgreSQL {
     }
 
     public static void addProduct(InstanceBuilder builder, @Nullable String idValue, @Nullable String labelValue, @Nullable String priceValue) {
-        final var product = builder.value(Schema.productToId, idValue).object(Schema.product);
+        final var product = builder.value(Schema.productToId, idValue).objex(Schema.product);
 
         if (idValue != null)
-            builder.morphism(Schema.productToId, product, builder.valueObject(Schema.id, idValue));
+            builder.morphism(Schema.productToId, product, builder.valueObjex(Schema.id, idValue));
 
         if (labelValue != null)
-            builder.morphism(Schema.productToLabel, product, builder.valueObject(Schema.label, labelValue));
+            builder.morphism(Schema.productToLabel, product, builder.valueObjex(Schema.label, labelValue));
 
         if (priceValue != null)
-            builder.morphism(Schema.productToPrice, product, builder.valueObject(Schema.price, priceValue));
+            builder.morphism(Schema.productToPrice, product, builder.valueObjex(Schema.price, priceValue));
     }
 
     public static TestMapping item(SchemaCategory schema) {
@@ -80,10 +80,10 @@ public abstract class PostgreSQL {
         final var product = builder.getRow(Schema.product, productIndex);
         final var idValue = product.superId.getValue(Schema.productToId.signature());
 
-        final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).object(Schema.item);
+        final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).objex(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);
         builder.morphism(Schema.itemToProduct, item, product);
-        builder.morphism(Schema.itemToQuantity, item, builder.valueObject(Schema.quantity, quantityValue));
+        builder.morphism(Schema.itemToQuantity, item, builder.valueObjex(Schema.quantity, quantityValue));
     }
 
     public static TestMapping dynamic(SchemaCategory schema) {
@@ -102,9 +102,9 @@ public abstract class PostgreSQL {
 
     public static void addDynamic(InstanceBuilder builder, int index) {
         final var idValue =  "id-" + index;
-        final var dynamic = builder.value(Schema.dynamicToId, idValue).object(Schema.dynamic);
-        builder.morphism(Schema.dynamicToId, dynamic, builder.valueObject(Schema.dId, idValue));
-        builder.morphism(Schema.dynamicToLabel, dynamic, builder.valueObject(Schema.dLabel, "label-" + index));
+        final var dynamic = builder.value(Schema.dynamicToId, idValue).objex(Schema.dynamic);
+        builder.morphism(Schema.dynamicToId, dynamic, builder.valueObjex(Schema.dId, idValue));
+        builder.morphism(Schema.dynamicToLabel, dynamic, builder.valueObjex(Schema.dLabel, "label-" + index));
 
         addPrefix(builder, index, "a");
         addPrefix(builder, index, "b");
@@ -122,13 +122,13 @@ public abstract class PostgreSQL {
         final var prefix = builder
             .value(Schema.prefixToId, dynamic.superId.getValue(Schema.dynamicToId.signature()))
             .value(Schema.prefixToType, typeValue)
-            .object(Schema.prefix);
+            .objex(Schema.prefix);
 
         builder.morphism(Schema.prefixToType, prefix,
-            builder.valueObject(Schema.prefixType, typeValue)
+            builder.valueObjex(Schema.prefixType, typeValue)
         );
         builder.morphism(Schema.prefixToValue, prefix,
-            builder.valueObject(Schema.prefixValue, prefixValue)
+            builder.valueObjex(Schema.prefixValue, prefixValue)
         );
         builder.morphism(Schema.prefixToDynamic, prefix, dynamic);
     }
@@ -141,13 +141,13 @@ public abstract class PostgreSQL {
         final var prefiy = builder
             .value(Schema.prefiyToId, dynamic.superId.getValue(Schema.dynamicToId.signature()))
             .value(Schema.prefiyToType, typeValue)
-            .object(Schema.prefiy);
+            .objex(Schema.prefiy);
 
         builder.morphism(Schema.prefiyToType, prefiy,
-            builder.valueObject(Schema.prefiyType, typeValue)
+            builder.valueObjex(Schema.prefiyType, typeValue)
         );
         builder.morphism(Schema.prefiyToValue, prefiy,
-            builder.valueObject(Schema.prefiyValue, prefiyValue)
+            builder.valueObjex(Schema.prefiyValue, prefiyValue)
         );
         builder.morphism(Schema.prefiyToDynamic, prefiy, dynamic);
     }
@@ -160,13 +160,13 @@ public abstract class PostgreSQL {
         final var catchAll = builder
             .value(Schema.catchAllToId, dynamic.superId.getValue(Schema.dynamicToId.signature()))
             .value(Schema.catchAllToType, typeValue)
-            .object(Schema.catchAll);
+            .objex(Schema.catchAll);
 
         builder.morphism(Schema.catchAllToType, catchAll,
-            builder.valueObject(Schema.catchAllType, typeValue)
+            builder.valueObjex(Schema.catchAllType, typeValue)
         );
         builder.morphism(Schema.catchAllToValue, catchAll,
-            builder.valueObject(Schema.catchAllValue, catchAllValue)
+            builder.valueObjex(Schema.catchAllValue, catchAllValue)
         );
         builder.morphism(Schema.catchAllToDynamic, catchAll, dynamic);
     }

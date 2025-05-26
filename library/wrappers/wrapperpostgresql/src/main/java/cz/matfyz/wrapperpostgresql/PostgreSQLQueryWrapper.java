@@ -109,7 +109,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
             joinedKinds.add(newKind);
 
-            // TODO there shouldn't be a null for the schema object key ...
+            // TODO there shouldn't be a null for the schema objex key ...
             final String fromProjection = getPropertyName(new Property(join.from(), join.fromPath(), null));
             final String toProjection = getPropertyName(new Property(join.to(), join.toPath(), null));
             final String condition = fromProjection + " = " + toProjection;

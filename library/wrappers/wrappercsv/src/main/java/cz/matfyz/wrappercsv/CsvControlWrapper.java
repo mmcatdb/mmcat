@@ -42,7 +42,7 @@ public class CsvControlWrapper extends BaseControlWrapper {
     /**
      * Executes a collection of statements. This method is currently not implemented.
      *
-     * @param statement a collection of {@link AbstractStatement} objects to be executed.
+     * @param statement a collection of {@link AbstractStatement} statements to be executed.
      * @throws ExecuteException always thrown as this method is not implemented.
      */
     @Override public void execute(Collection<AbstractStatement> statement) throws ExecuteException {

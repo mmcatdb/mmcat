@@ -2,7 +2,7 @@ package cz.matfyz.querying.core.patterntree;
 
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,19 +18,19 @@ public class PatternForKind implements Comparable<PatternForKind> {
     public final PatternTree root;
 
     private final Map<Variable, PatternTree> variableToPatternTree = new TreeMap<>();
-    private final Map<SchemaObject, PatternTree> schemaObjectToPatternTree = new TreeMap<>();
+    private final Map<SchemaObjex, PatternTree> schemaObjexToPatternTree = new TreeMap<>();
 
     public PatternForKind(Mapping kind, PatternTree root) {
         this.kind = kind;
         this.root = root;
 
-        addObject(this.root);
+        addObjex(this.root);
     }
 
-    private void addObject(PatternTree patternTree) {
+    private void addObjex(PatternTree patternTree) {
         variableToPatternTree.put(patternTree.variable, patternTree);
-        schemaObjectToPatternTree.put(patternTree.schemaObject, patternTree);
-        patternTree.children().forEach(this::addObject);
+        schemaObjexToPatternTree.put(patternTree.objex, patternTree);
+        patternTree.children().forEach(this::addObjex);
     }
 
     @Override public int compareTo(PatternForKind other) {
@@ -41,8 +41,8 @@ public class PatternForKind implements Comparable<PatternForKind> {
         return variableToPatternTree.get(variable);
     }
 
-    public PatternTree getPatternTree(SchemaObject object) {
-        return schemaObjectToPatternTree.get(object);
+    public PatternTree getPatternTree(SchemaObjex objex) {
+        return schemaObjexToPatternTree.get(objex);
     }
 
     @Override public String toString() {

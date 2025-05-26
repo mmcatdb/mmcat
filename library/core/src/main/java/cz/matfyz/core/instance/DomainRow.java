@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An instance of this class represents a tuple from the {@link InstanceObject}.
+ * An instance of this class represents a tuple from the {@link InstanceObjex}.
  * The tuple is made of pairs (signature, value) for each signature in the superid. This structure is implemented by a map.
  * Each value is unique among all the values associated with the same signature.
  */

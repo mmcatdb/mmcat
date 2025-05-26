@@ -1,6 +1,6 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 
@@ -83,7 +83,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return builder.build();
     }
 
-    public SuperIdWithValues findFirstId(ObjectIds ids) {
+    public SuperIdWithValues findFirstId(ObjexIds ids) {
         for (var id : ids.toSignatureIds())
             if (containsId(id))
                 return findId(id);
@@ -98,7 +98,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
      * @param signatureIds The ids we want to find.
      * @return A set of found ids and also not found ids.
      */
-    public FindIdsResult findAllIds(ObjectIds ids) {
+    public FindIdsResult findAllIds(ObjexIds ids) {
         return findAllSignatureIds(ids.toSignatureIds());
     }
 

@@ -31,7 +31,7 @@ public abstract class BaseQueryWrapper {
 
     protected List<Projection> projections = new ArrayList<>();
 
-    // TODO there should be some check if the projection isn't already defined. Probably by its variable? Or by the corresponding schema object?
+    // TODO there should be some check if the projection isn't already defined. Probably by its variable? Or by the corresponding objex?
     public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
         projections.add(new Projection(property, structure, isOptional));
     }

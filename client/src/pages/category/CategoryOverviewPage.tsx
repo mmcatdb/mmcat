@@ -11,9 +11,9 @@ export function CategoryOverviewPage() {
     const { stats } = useLoaderData() as CategoryLoaderData;
     const { category } = useCategoryInfo();
 
-    if (!category) 
+    if (!category)
         return <div className='p-6'>Category information not available.</div>;
-    
+
 
     const categoryId = category.id;
 
@@ -24,7 +24,7 @@ export function CategoryOverviewPage() {
 
             {/* Overview Cards */}
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-                <OverviewCard title='Total Objects' value={stats.objects} />
+                <OverviewCard title='Total Objects' value={stats.objexes} />
                 <OverviewCard title='Total Mappings' value={stats.mappings} />
                 <OverviewCard title='Jobs' value={stats.jobs} />
                 <OverviewCard title='System Version ID' value={category.systemVersionId || 'N/A'} />
@@ -139,10 +139,10 @@ function FeatureCard({ icon, title, description, linkText, linkTo }: FeatureCard
             {icon}
             <h3 className='mt-4 font-semibold text-lg'>{title}</h3>
             <p className='text-default-600 mb-4'>{description}</p>
-            <Button 
-                as={Link} 
-                to={linkTo} 
-                variant='ghost' 
+            <Button
+                as={Link}
+                to={linkTo}
+                variant='ghost'
                 className='mt-auto'
             >
                 {linkText}

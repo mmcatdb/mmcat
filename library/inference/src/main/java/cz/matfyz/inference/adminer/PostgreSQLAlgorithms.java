@@ -20,7 +20,7 @@ public final class PostgreSQLAlgorithms {
     /**
      * Retrieves all property names for a given kind.
      *
-     * @param stmt     The {@link Statement} object used to execute the query.
+     * @param stmt     The {@link Statement} statement used to execute the query.
      * @param kindName The name of the kind whose property names are being retrieved.
      * @return A {@link Set} of property names for the specified kind.
      * @throws PullForestException if an error occurs during database access.
@@ -58,15 +58,15 @@ public final class PostgreSQLAlgorithms {
     /**
      * Retrieves foreign key relationships from the database for the specified kind.
      *
-     * @param stmt       The {@link Statement} object used to execute the SQL query.
-     * @param keys       A {@link List} of {@link Reference} objects to which the results will be added.
+     * @param stmt       The {@link Statement} statement used to execute the SQL query.
+     * @param keys       A {@link List} of {@link Reference} references to which the results will be added.
      * @param kindName   The name of the kind for which foreign key relationships are to be retrieved.
      * @param outgoing   A boolean flag indicating the direction of the foreign key relationship:
      *                   <ul>
      *                       <li><code>true</code> for outgoing foreign keys (keys where the kind references other kinds).</li>
      *                       <li><code>false</code> for incoming foreign keys (keys where other kinds reference the kind).</li>
      *                   </ul>
-     * @return           A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
+     * @return           A {@link List} of {@link Reference} references representing the foreign key relationships for the specified kind.
      * @throws SQLException if an error occurs during database access.
      */
     private static List<Reference> getReferences(Statement stmt, List<Reference> references, String datasourceId, String kindName, boolean outgoing) throws SQLException {
@@ -109,10 +109,10 @@ public final class PostgreSQLAlgorithms {
     /**
      * Retrieves references for the specified kind.
      *
-     * @param stmt         The {@link Statement} object used to execute the SQL query.
+     * @param stmt         The {@link Statement} statement used to execute the SQL query.
      * @param datasourceId ID of the datasource.
      * @param kindName     The name of the kind for which foreign key relationships are to be retrieved.
-     * @return             A {@link List} of {@link Reference} objects representing the foreign key relationships for the specified kind.
+     * @return             A {@link List} of {@link Reference} references representing the foreign key relationships for the specified kind.
      * @throws PullForestException if an error occurs during database access.
      */
     public static List<Reference> getReferences(Statement stmt, String datasourceId, String kindName) {

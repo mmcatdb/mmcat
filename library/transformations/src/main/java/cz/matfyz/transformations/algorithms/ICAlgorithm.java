@@ -10,7 +10,7 @@ import cz.matfyz.core.mapping.IdentifierStructure;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.Name.StringName;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.Collection;
@@ -31,14 +31,14 @@ public class ICAlgorithm {
     }
 
     private final Mapping mapping;
-    private final Map<SchemaObject, Mapping> mappingsByObjects;
+    private final Map<SchemaObjex, Mapping> mappingsByObjexes;
     private final AbstractICWrapper wrapper;
 
     private ICAlgorithm(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
         this.mapping = mapping;
         this.wrapper = wrapper;
-        this.mappingsByObjects = new TreeMap<>();
-        allMappings.forEach(m -> mappingsByObjects.put(m.rootObject(), m));
+        this.mappingsByObjexes = new TreeMap<>();
+        allMappings.forEach(m -> mappingsByObjexes.put(m.rootObjex(), m));
     }
 
     private final Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
@@ -70,7 +70,7 @@ public class ICAlgorithm {
         final var output = new TreeSet<String>();
 
         for (Signature signature : primaryKey) {
-            // The empty signature does mean the object is identified by its value, i.e., there is no scecial primary key
+            // The empty signature does mean the objex is identified by its value, i.e., there is no scecial primary key
             if (signature.isEmpty())
                 continue;
 
@@ -93,14 +93,14 @@ public class ICAlgorithm {
         //final var newSignatureFromLastMapping = signatureFromLastMapping.concatenate(path.signature());
 
         for (final var baseSignature : path.signature().toBases()) {
-            final var object = mapping.category().getEdge(baseSignature).to();
-            final var objectMapping = mappingsByObjects.get(object);
+            final var objex = mapping.category().getEdge(baseSignature).to();
+            final var objexMapping = mappingsByObjexes.get(objex);
 
-            if (objectMapping == null) {
+            if (objexMapping == null) {
                 signatureFromLastMapping = signatureFromLastMapping.concatenate(baseSignature);
             }
             else {
-                lastMapping = objectMapping;
+                lastMapping = objexMapping;
                 signatureFromLastMapping = Signature.createEmpty();
             }
         }

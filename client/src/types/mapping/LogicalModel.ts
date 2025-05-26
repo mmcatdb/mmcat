@@ -68,7 +68,7 @@ function createGroups(logicalModels: LogicalModel[], context: CategoryContext): 
         logicalModel.mappings.forEach(mapping => {
             const root = context.objexes.get(mapping.rootObjexKey);
             if (!root) {
-                console.error('Root object not found for mapping', mapping);
+                console.error('Root objex not found for mapping', mapping);
                 return;
             }
 
@@ -103,7 +103,7 @@ function getObjexesFromPath(path: ParentProperty, context: CategoryContext): Com
     return output;
 }
 
-/** Finds all objects on the signature path except for the first one. */
+/** Finds all objexes on the signature path except for the first one. */
 function findObjexesFromSignature(signature: Signature, context: CategoryContext): Objex[] {
     const output: Objex[] = [];
 

@@ -18,9 +18,9 @@ public class TermTree<TEdge> implements ParserNode, Tree<TermTree<TEdge>>, Print
     /** If this is root or inner node, this property has to be a Variable. */
     public final Term term;
     public final List<TermTree<TEdge>> children = new ArrayList<>();
-    /** This property is null if and only if this object is the root. */
+    /** This property is null if and only if this node is the root. */
     private @Nullable TermTree<TEdge> parent;
-    /** This property is null if and only if this object is the root. */
+    /** This property is null if and only if this node is the root. */
     public final @Nullable TEdge edgeFromParent;
 
     @Override public List<TermTree<TEdge>> children() {

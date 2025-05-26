@@ -13,6 +13,7 @@ import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { InfoBanner } from '@/components/common';
+import { routes } from '@/routes/routes';
 
 export function DatasourceDetailPage() {
     return (
@@ -49,11 +50,8 @@ export function DatasourceInCategoryPage() {
             console.error('Category ID is missing');
             return;
         }
-        // navigate(`/schema-categories/${categoryId}/mappings/new`, {
-        //     state: { datasourceId: datasource.id },   // pass datasource ID for new mapping creation
 
-        // });
-        navigate(`/schema-categories/${categoryId}/mappings/new`, {
+        navigate(routes.category.newMapping.resolve({ categoryId }), {
             state: {
                 datasourceId: datasource.id,       // Pass datasource ID for new mapping creation
                 datasourceLabel: datasource.label, // Add datasource label

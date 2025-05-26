@@ -3,7 +3,7 @@ package cz.matfyz.tests.example.queryevolution;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
@@ -17,26 +17,26 @@ public class Schema {
     // Keys
 
     // Version 1
-    public static final BuilderObject customer =        builder.object("Customer", 1);
-    public static final BuilderObject customerId =      builder.object("id", 2);
-    public static final BuilderObject name =            builder.object("name", 3);
-    public static final BuilderObject surname =         builder.object("surname", 4);
-    public static final BuilderObject knows =           builder.object("knows", 5);
-    public static final BuilderObject order =           builder.object("Order", 6);
-    public static final BuilderObject orderId =         builder.object("oid", 7);
-    public static final BuilderObject street =          builder.object("street", 8);
-    public static final BuilderObject city =            builder.object("city", 9);
-    public static final BuilderObject postCode =        builder.object("postCode", 10);
-    public static final BuilderObject orderPrice =      builder.object("price", 11);
-    public static final BuilderObject quantity =        builder.object("quantity", 12);
-    public static final BuilderObject product =         builder.object("Product", 13);
-    public static final BuilderObject productId =       builder.object("pid", 14);
-    public static final BuilderObject title =           builder.object("title", 15);
-    public static final BuilderObject productPrice =    builder.object("price", 16);
+    public static final BuilderObjex customer =        builder.objex("Customer", 1);
+    public static final BuilderObjex customerId =      builder.objex("id", 2);
+    public static final BuilderObjex name =            builder.objex("name", 3);
+    public static final BuilderObjex surname =         builder.objex("surname", 4);
+    public static final BuilderObjex knows =           builder.objex("knows", 5);
+    public static final BuilderObjex order =           builder.objex("Order", 6);
+    public static final BuilderObjex orderId =         builder.objex("oid", 7);
+    public static final BuilderObjex street =          builder.objex("street", 8);
+    public static final BuilderObjex city =            builder.objex("city", 9);
+    public static final BuilderObjex postCode =        builder.objex("postCode", 10);
+    public static final BuilderObjex orderPrice =      builder.objex("price", 11);
+    public static final BuilderObjex quantity =        builder.objex("quantity", 12);
+    public static final BuilderObjex product =         builder.objex("Product", 13);
+    public static final BuilderObjex productId =       builder.objex("pid", 14);
+    public static final BuilderObjex title =           builder.objex("title", 15);
+    public static final BuilderObjex productPrice =    builder.objex("price", 16);
 
     // Version 2
-    public static final BuilderObject item =            builder.object("Item", 17);
-    public static final BuilderObject ordered =         builder.object("Ordered", 18);
+    public static final BuilderObjex item =            builder.objex("Item", 17);
+    public static final BuilderObjex ordered =         builder.objex("Ordered", 18);
 
     // Signatures
 

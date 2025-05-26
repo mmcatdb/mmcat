@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import SignatureIdDisplay from '@/components/category/SignatureIdDisplay.vue';
-import type { ObjectIds, SignatureId } from '@/types/identifiers';
+import type { ObjexIds, SignatureId } from '@/types/identifiers';
 import { ref, watch } from 'vue';
 
 type PrimaryKeyInputProps = {
-    ids: ObjectIds;
+    ids: ObjexIds;
     modelValue: SignatureId;
 };
 

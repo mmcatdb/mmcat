@@ -4,7 +4,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -12,12 +12,12 @@ import java.util.TreeMap;
 public class MetadataCategory {
 
     final SchemaCategory schema;
-    private final Map<Key, MetadataObject> objects;
+    private final Map<Key, MetadataObjex> objexes;
     private final Map<Signature, MetadataMorphism> morphisms;
 
-    MetadataCategory(SchemaCategory schema, Map<Key, MetadataObject> objects, Map<Signature, MetadataMorphism> morphisms) {
+    MetadataCategory(SchemaCategory schema, Map<Key, MetadataObjex> objexes, Map<Signature, MetadataMorphism> morphisms) {
         this.schema = schema;
-        this.objects = objects;
+        this.objexes = objexes;
         this.morphisms = morphisms;
     }
 
@@ -25,12 +25,12 @@ public class MetadataCategory {
         return new MetadataCategory(schema, new TreeMap<>(), new TreeMap<>());
     }
 
-    public MetadataObject getObject(SchemaObject object) {
-        return objects.get(object.key());
+    public MetadataObjex getObjex(SchemaObjex objex) {
+        return objexes.get(objex.key());
     }
 
-    public MetadataObject getObject(Key key) {
-        return objects.get(key);
+    public MetadataObjex getObjex(Key key) {
+        return objexes.get(key);
     }
 
     public MetadataMorphism getMorphism(SchemaMorphism morphism) {
@@ -41,8 +41,8 @@ public class MetadataCategory {
         return morphisms.get(signature);
     }
 
-    public void setObject(SchemaObject object, MetadataObject metadataObject) {
-        objects.put(object.key(), metadataObject);
+    public void setObjex(SchemaObjex objex, MetadataObjex metadataObjex) {
+        objexes.put(objex.key(), metadataObjex);
     }
 
     public void setMorphism(SchemaMorphism morphism, MetadataMorphism metadataMorphism) {
@@ -51,8 +51,8 @@ public class MetadataCategory {
 
     public abstract static class Editor {
 
-        protected static Map<Key, MetadataObject> getObjects(MetadataCategory metadata) {
-            return metadata.objects;
+        protected static Map<Key, MetadataObjex> getObjexes(MetadataCategory metadata) {
+            return metadata.objexes;
         }
 
         protected static Map<Signature, MetadataMorphism> getMorphisms(MetadataCategory metadata) {

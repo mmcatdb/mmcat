@@ -28,7 +28,7 @@ type LeftPanelEditorProps = StateDispatchProps & {
 export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPanelEditorProps) {
     const Component = components[state.leftPanelMode];
 
-    // Add keyboard shortcuts for Ctrl+O (Create Object) and Ctrl+M (Create Morphism)
+    // Add keyboard shortcuts for Ctrl+O (Create Objex) and Ctrl+M (Create Morphism)
     useEffect(() => {
         // Only handle shortcuts in default mode to avoid conflicts with input fields
         if (state.leftPanelMode !== LeftPanelMode.default)
@@ -69,7 +69,7 @@ const components: Record<LeftPanelMode, (props: StateDispatchProps) => JSX.Eleme
 };
 
 /**
- * Displays the default mode of the left panel, offering options to create objects or morphisms.
+ * Displays the default mode of the left panel, offering options to create objexes or morphisms.
  */
 function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
     const { hasUnsavedChanges, isSaving, handleSave } = useSave();
@@ -85,7 +85,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}
             color='default'
         >
-                Create object
+            Create object
         </Button>
 
         <Button
@@ -93,7 +93,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
             color='default'
         >
-                Create Morphism
+            Create Morphism
         </Button>
 
         {hasUnsavedChanges && (
@@ -132,7 +132,7 @@ type EditorFormProps = {
 };
 
 /**
- * Reusable form component for creating objects and morphisms with consistent input and button behavior.
+ * Reusable form component for creating objexes and morphisms with consistent input and button behavior.
  */
 function EditorForm({
     label,
@@ -170,7 +170,7 @@ function EditorForm({
 }
 
 /**
- * Renders a form to create a new schema object (objex) with a label and fixed position.
+ * Renders a form to create a new objex with a label and fixed position.
  */
 function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const [ label, setLabel ] = useState('');
@@ -181,10 +181,10 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         inputRef.current?.focus();
     }, []);
 
-    // Calculate position for the new object
-    function getNewObjectPosition() {
+    // Calculate position for the new objex
+    function getNewObjexPosition() {
         const nodes = state.graph.nodes.values().toArray();
-        const index = nodes.length % 9; // Reset to 0 after 9 objects
+        const index = nodes.length % 9; // Reset to 0 after 9 objexes
         const gridSize = 3; // 3x3
         const spacing = 20;
 
@@ -197,7 +197,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     function createObjex() {
         state.evocat.createObjex({
             label: label,
-            position: toPosition(getNewObjectPosition()),
+            position: toPosition(getNewObjexPosition()),
         });
         const graph = categoryToGraph(state.evocat.category);
         dispatch({ type: 'createObjex', graph });
@@ -278,7 +278,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
 
         <div>
             <p className='pb-2'>
-                    Domain object:{' '}
+                Domain object:{' '}
                 <span
                     className={cn('font-semibold', !domainNode && 'font-bold text-danger-500')}
                 >
@@ -287,7 +287,7 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
             </p>
 
             <p className='pb-2'>
-                    Codomain object:{' '}
+                Codomain object:{' '}
                 <span
                     className={cn(
                         'font-semibold',

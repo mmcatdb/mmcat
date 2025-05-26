@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 import { Edge, SelectionType, type Node, Graph } from '@/types/categoryGraph';
-import InstanceObjectDisplay from './InstanceObjectDisplay.vue';
+import InstanceObjexDisplay from './InstanceObjexDisplay.vue';
 import type { Category, SchemaObjex } from '@/types/schema';
 import InstanceMorphismDisplay from './InstanceMorphismDisplay.vue';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from './EvocatDisplay.vue';
-import { InstanceCategory, type InstanceMorphism, type InstanceObject } from '@/types/instance';
+import { InstanceCategory, type InstanceMorphism, type InstanceObjex } from '@/types/instance';
 import API from '@/utils/api';
 
 const evocat = shallowRef<Evocat>();
@@ -36,7 +36,7 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
 type Selected = {
     type: 'node';
     node: Node;
-    object: InstanceObject;
+    objex: InstanceObjex;
 } | {
     type: 'edge';
     edge: Edge;
@@ -54,8 +54,8 @@ function unselect() {
     selected.value = undefined;
 }
 
-function objectClicked(object: SchemaObjex) {
-    const newNode = evocat.value?.graph?.getNode(object.key);
+function objexClicked(objex: SchemaObjex) {
+    const newNode = evocat.value?.graph?.getNode(objex.key);
     if (newNode)
         selectNode(newNode);
 }
@@ -67,11 +67,11 @@ function selectNode(node: Node) {
     if (isSameNode)
         return;
 
-    const object = instance.value?.objects.get(node.schemaObjex.key);
-    if (!object)
+    const objex = instance.value?.objexes.get(node.schemaObjex.key);
+    if (!objex)
         return;
 
-    selected.value = { type: 'node', node, object };
+    selected.value = { type: 'node', node, objex };
     node.select({ type: SelectionType.Root, level: 0 });
 }
 
@@ -95,19 +95,19 @@ function selectEdge(edge: Edge) {
 <template>
     <div class="divide">
         <EvocatDisplay @evocat-created="evocatCreated" />
-        <InstanceObjectDisplay
+        <InstanceObjexDisplay
             v-if="selected?.type === 'node'"
             :key="selected.node.schemaObjex.key.value"
             :node="selected.node"
-            :object="selected.object"
-            @object:click="objectClicked"
+            :objex="selected.objex"
+            @objex:click="objexClicked"
         />
         <InstanceMorphismDisplay
             v-if="selected?.type === 'edge'"
             :key="selected.edge.schemaMorphism.signature.value"
             :edge="selected.edge"
             :morphism="selected.morphism"
-            @object:click="objectClicked"
+            @objex:click="objexClicked"
         />
         <div
             v-if="error"

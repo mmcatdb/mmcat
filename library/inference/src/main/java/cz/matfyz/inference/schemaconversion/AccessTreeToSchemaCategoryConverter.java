@@ -2,15 +2,14 @@ package cz.matfyz.inference.schemaconversion;
 
 import java.util.Set;
 
-import cz.matfyz.core.identifiers.ObjectIds;
-import cz.matfyz.core.identifiers.SignatureId;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataMorphism;
-import cz.matfyz.core.metadata.MetadataObject;
-import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataObjex;
+import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.SchemaWithMetadata;
@@ -18,7 +17,7 @@ import cz.matfyz.inference.schemaconversion.utils.SchemaWithMetadata;
 /**
  * The {@code AccessTreeToSchemaCategoryConverter} class is responsible for converting an access tree structure
  * (represented by {@link AccessTreeNode}) into a schema category and associated metadata.
- * This class builds the schema and metadata objects based on the provided access tree.
+ * This class builds the schema and metadata objexes based on the provided access tree.
  */
 public class AccessTreeToSchemaCategoryConverter {
 
@@ -45,48 +44,48 @@ public class AccessTreeToSchemaCategoryConverter {
      */
     private void buildSchemaCategory(AccessTreeNode currentNode) {
         final var isRoot = currentNode.getType() == AccessTreeNode.Type.ROOT;
-        final var object = createSchemaObject(currentNode, isRoot);
+        final var objex = createSchemaObjex(currentNode, isRoot);
 
         if (!isRoot)
-            createSchemaMorphism(currentNode, object);
+            createSchemaMorphism(currentNode, objex);
 
         for (AccessTreeNode childNode : currentNode.getChildren())
             buildSchemaCategory(childNode);
     }
 
     /**
-     * Creates a schema object from the provided access tree node and adds it to the schema.
+     * Creates a schema objex from the provided access tree node and adds it to the schema.
      */
-    private SchemaObject createSchemaObject(AccessTreeNode node, boolean isRoot) {
+    private SchemaObjex createSchemaObjex(AccessTreeNode node, boolean isRoot) {
         final var ids = isRoot || !node.getChildren().isEmpty()
-            ? ObjectIds.createGenerated()
-            : ObjectIds.createValue();
+            ? ObjexIds.createGenerated()
+            : ObjexIds.createValue();
 
-        final SchemaObject object = new SchemaObject(node.key, ids, ids.generateDefaultSuperId());
-        schema.addObject(object);
+        final SchemaObjex objex = new SchemaObjex(node.key, ids, ids.generateDefaultSuperId());
+        schema.addObjex(objex);
 
         final var label = isRoot ? kindName : node.name;
-        metadata.setObject(object, new MetadataObject(label, Position.createDefault()));
+        metadata.setObjex(objex, new MetadataObjex(label, Position.createDefault()));
 
-        return object;
+        return objex;
     }
 
-    private void createSchemaMorphism(AccessTreeNode node, SchemaObject schemaObject) {
-        final var parentObject = schema.getObject(node.getParentKey());
+    private void createSchemaMorphism(AccessTreeNode node, SchemaObjex objex) {
+        final var parentObjex = schema.getObjex(node.getParentKey());
 
-        if (parentObject == null)
-            throw new RuntimeException("Error while creating morphism. Domain is null and codomain is " + schemaObject.key());
+        if (parentObjex == null)
+            throw new RuntimeException("Error while creating morphism. Domain is null and codomain is " + objex.key());
 
-        SchemaObject dom = parentObject;
-        SchemaObject cod = schemaObject;
+        SchemaObjex dom = parentObjex;
+        SchemaObjex cod = objex;
 
         if (node.isArrayType) {
-            dom = schemaObject;
-            cod = parentObject;
+            dom = objex;
+            cod = parentObjex;
         }
 
-        final SchemaMorphism sm = new SchemaMorphism(node.signature, dom, cod, node.min, Set.of());
-        schema.addMorphism(sm);
-        metadata.setMorphism(sm, new MetadataMorphism(node.label));
+        final SchemaMorphism morphism = new SchemaMorphism(node.signature, dom, cod, node.min, Set.of());
+        schema.addMorphism(morphism);
+        metadata.setMorphism(morphism, new MetadataMorphism(node.label));
     }
 }

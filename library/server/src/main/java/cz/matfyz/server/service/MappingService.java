@@ -31,7 +31,7 @@ public class MappingService {
     public MappingWrapper create(MappingInit init) {
         final var category = categoryRepository.find(init.categoryId());
         final var newVersion = category.systemVersion().generateNext();
-        final var mapping = MappingWrapper.createNew(newVersion, init.categoryId(), init.datasourceId(), init.rootObjectKey(), init.primaryKey(), init.kindName(), init.accessPath());
+        final var mapping = MappingWrapper.createNew(newVersion, init.categoryId(), init.datasourceId(), init.rootObjexKey(), init.primaryKey(), init.kindName(), init.accessPath());
         // FIXME Add some data to the evolution.
         final var evolution = MappingEvolution.createNew(category.id(), newVersion, mapping.id(), null);
 

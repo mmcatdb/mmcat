@@ -17,9 +17,9 @@ public interface AbstractICWrapper {
 
     record AttributePair(String referencing, String referenced) implements Comparable<AttributePair> {
 
-        @Override public int compareTo(AttributePair object) {
-            int firstResult = referencing.compareTo(object.referencing);
-            return firstResult != 0 ? firstResult : referenced.compareTo(object.referenced);
+        @Override public int compareTo(AttributePair pair) {
+            int firstResult = referencing.compareTo(pair.referencing);
+            return firstResult != 0 ? firstResult : referenced.compareTo(pair.referenced);
         }
 
     }

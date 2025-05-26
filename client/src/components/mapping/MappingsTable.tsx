@@ -101,7 +101,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                     <TableColumn key='version' allowsSorting allowsResizing>
                         Version
                     </TableColumn>,
-                    <TableColumn key='rootObject'>
+                    <TableColumn key='rootObjex'>
                         Root object
                     </TableColumn>,
                     <TableColumn key='primaryKey'>
@@ -130,7 +130,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                     {mapping.version}
                                 </span>
                             </TableCell>,
-                            <TableCell key='rootObject'>
+                            <TableCell key='rootObjex'>
                                 {mapping.rootObjexKey.value}
                             </TableCell>,
                             <TableCell key='primaryKey'>

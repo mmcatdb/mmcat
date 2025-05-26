@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { Node } from '@/types/categoryGraph';
 import { computed, shallowRef, watch } from 'vue';
-import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
+import ObjexIdsDisplay from '@/components/category/ObjexIdsDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ButtonIcon from '@/components/common/ButtonIcon.vue';
 import IdInput from './IdInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useEvocat } from '@/utils/injects';
-import { ObjectIds, idsAreEqual } from '@/types/identifiers/ObjectIds';
+import { ObjexIds, idsAreEqual } from '@/types/identifiers/ObjexIds';
 
 const { evocat } = $(useEvocat());
 
@@ -21,7 +21,7 @@ const props = defineProps<UpdateObjexProps>();
 const emit = defineEmits([ 'save', 'cancel', 'update' ]);
 
 const label = shallowRef(props.node.metadata.label);
-const changed = computed(() => label.value !== props.node.metadata.label || !idsAreEqual(objectIds.value, props.node.schemaObjex.ids) || addingId.value);
+const changed = computed(() => label.value !== props.node.metadata.label || !idsAreEqual(objexIds.value, props.node.schemaObjex.ids) || addingId.value);
 const isNew = computed(() => props.node.schemaObjex.isNew);
 
 defineExpose({ changed });
@@ -29,7 +29,7 @@ defineExpose({ changed });
 function save() {
     evocat.updateObjex(props.node.schemaObjex, {
         label: label.value.trim(),
-        ids: objectIds.value ?? null,
+        ids: objexIds.value ?? null,
     });
     emit('save');
 }
@@ -50,9 +50,9 @@ function deleteFunction() {
 }
 
 const addingId = shallowRef(false);
-const objectIds = shallowRef(props.node.schemaObjex.ids);
+const objexIds = shallowRef(props.node.schemaObjex.ids);
 
-watch(objectIds, () => addingId.value = false);
+watch(objexIds, () => addingId.value = false);
 
 function startAddingId() {
     addingId.value = true;
@@ -63,15 +63,15 @@ function cancelAddingId() {
 }
 
 function deleteSignatureId(index: number) {
-    if (!objectIds.value?.isSignatures)
+    if (!objexIds.value?.isSignatures)
         return;
 
-    const newIds = objectIds.value.signatureIds.filter((_, i) => i !== index);
-    objectIds.value = newIds.length > 0 ? ObjectIds.createSignatures(newIds) : undefined;
+    const newIds = objexIds.value.signatureIds.filter((_, i) => i !== index);
+    objexIds.value = newIds.length > 0 ? ObjexIds.createSignatures(newIds) : undefined;
 }
 
 function deleteNonSignatureId() {
-    objectIds.value = undefined;
+    objexIds.value = undefined;
 }
 </script>
 
@@ -89,16 +89,16 @@ function deleteNonSignatureId() {
                 {{ node.schemaObjex.key.toString() }}
             </ValueRow>
             <ValueRow label="Ids:">
-                <ObjectIdsDisplay
-                    v-if="objectIds"
-                    :ids="objectIds"
+                <ObjexIdsDisplay
+                    v-if="objexIds"
+                    :ids="objexIds"
                     :disabled="addingId"
-                    class="object-ids-display"
+                    class="objex-ids-display"
                     @delete-signature="deleteSignatureId"
                     @delete-non-signature="deleteNonSignatureId"
                 />
                 <ButtonIcon
-                    v-if="!addingId && isNew && (!objectIds || objectIds.isSignatures)"
+                    v-if="!addingId && isNew && (!objexIds || objexIds.isSignatures)"
                     @click="startAddingId"
                 >
                     <IconPlusSquare />
@@ -110,7 +110,7 @@ function deleteNonSignatureId() {
             class="editor"
         >
             <IdInput
-                v-model="objectIds"
+                v-model="objexIds"
                 :node="node"
                 @cancel="cancelAddingId"
             />
@@ -138,7 +138,7 @@ function deleteNonSignatureId() {
 </template>
 
 <style scoped>
-.object-ids-display {
+.objex-ids-display {
     margin-left: -6px;
 }
 </style>

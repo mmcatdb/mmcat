@@ -6,6 +6,7 @@ import { type KeyFromServer, type SignatureIdFromServer } from '@/types/identifi
 import { toast } from 'react-toastify';
 import { useState } from 'react';
 import { Category } from '@/types/schema';
+import { routes } from '@/routes/routes';
 
 /**
  * Page for adding a new mapping.
@@ -31,7 +32,7 @@ export function NewMappingPage() {
         kindName,
         categoryId: category.id,
         datasourceId: datasourceId,
-        rootObjectKey: 0 as KeyFromServer,
+        rootObjexKey: 0 as KeyFromServer,
         primaryKey: [ 'EMPTY' ] as SignatureIdFromServer,
         accessPath: {
             name: { value: 'root' },
@@ -47,7 +48,7 @@ export function NewMappingPage() {
         const mappingInit: MappingInit = {
             categoryId: mapping.categoryId,
             datasourceId: mapping.datasourceId,
-            rootObjectKey: mapping.rootObjexKey.toServer(),
+            rootObjexKey: mapping.rootObjexKey.toServer(),
             primaryKey: mapping.primaryKey.toServer(),
             kindName: finalKindName,
             accessPath: mapping.accessPath.toServer(),
@@ -56,7 +57,7 @@ export function NewMappingPage() {
         const response = await api.mappings.createMapping({}, mappingInit);
         if (response.status) {
             toast.success('Mapping created successfully!');
-            navigate(`/schema-categories/${category.id}/datasources/${mapping.datasourceId}`);
+            navigate(routes.category.datasource.resolve({ categoryId: category.id, datasourceId: mapping.datasourceId }));
         }
         else {
             toast.error('Failed to create mapping');

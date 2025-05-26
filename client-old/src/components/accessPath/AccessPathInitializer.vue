@@ -82,7 +82,7 @@ async function createMapping(primaryKey: SignatureId, accessPath: GraphRootPrope
     const result = await API.mappings.createMapping({}, {
         categoryId,
         datasourceId: selectedDatasource.value.id,
-        rootObjectKey: accessPath.node.schemaObjex.key.toServer(),
+        rootObjexKey: accessPath.node.schemaObjex.key.toServer(),
         primaryKey: new SignatureId(primaryKey.signatures).toServer(),
         kindName,
         accessPath: accessPath.toServer(),

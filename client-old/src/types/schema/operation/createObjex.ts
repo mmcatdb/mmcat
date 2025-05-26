@@ -31,10 +31,10 @@ export class CreateObjex implements SMO<SMOType.CreateObjex> {
     }
 
     up(category: Category): void {
-        category.getObject(this.schema.key).current = this.schema;
+        category.getObjex(this.schema.key).current = this.schema;
     }
 
     down(category: Category): void {
-        category.getObject(this.schema.key).current = undefined;
+        category.getObjex(this.schema.key).current = undefined;
     }
 }

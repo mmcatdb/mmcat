@@ -125,7 +125,7 @@ function revertEdit(edit: InferenceEdit) {
 
 onMounted(() => {
     props.graph.listen()?.onNode('dragfreeon', node => {
-        emit('update-position', node.object.key, { ...node.cytoscapeIdAndPosition.position });
+        emit('update-position', node.objex.key, { ...node.cytoscapeIdAndPosition.position });
     });
 });
 </script>

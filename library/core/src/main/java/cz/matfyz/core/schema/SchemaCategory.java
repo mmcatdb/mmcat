@@ -15,15 +15,15 @@ import java.util.TreeMap;
 
 public class SchemaCategory {
 
-    private final Map<Key, SchemaObject> objects = new TreeMap<>();
+    private final Map<Key, SchemaObjex> objexes = new TreeMap<>();
     private final Map<Signature, SchemaMorphism> morphisms = new TreeMap<>();
 
-    public SchemaObject getObject(Key key) {
-        return objects.get(key);
+    public SchemaObjex getObjex(Key key) {
+        return objexes.get(key);
     }
 
-    public SchemaObject addObject(SchemaObject object) {
-        return objects.put(object.key(), object);
+    public SchemaObjex addObjex(SchemaObjex objex) {
+        return objexes.put(objex.key(), objex);
     }
 
     public SchemaMorphism addMorphism(SchemaMorphism morphism) {
@@ -62,11 +62,11 @@ public class SchemaCategory {
             return direction ? morphism.signature() : morphism.signature().dual();
         }
 
-        public SchemaObject from() {
+        public SchemaObjex from() {
             return direction ? morphism.dom() : morphism.cod();
         }
 
-        public SchemaObject to() {
+        public SchemaObjex to() {
             return direction ? morphism.cod() : morphism.dom();
         }
 
@@ -86,11 +86,11 @@ public class SchemaCategory {
         List<SchemaEdge> edges,
         Signature signature
     ) {
-        public SchemaObject from() {
+        public SchemaObjex from() {
             return edges.get(0).from();
         }
 
-        public SchemaObject to() {
+        public SchemaObjex to() {
             return edges.get(edges.size() - 1).to();
         }
 
@@ -118,16 +118,16 @@ public class SchemaCategory {
         return new SchemaPath(list, signature);
     }
 
-    public Collection<SchemaObject> allObjects() {
-        return objects.values();
+    public Collection<SchemaObjex> allObjexes() {
+        return objexes.values();
     }
 
     public Collection<SchemaMorphism> allMorphisms() {
         return morphisms.values();
     }
 
-    public boolean hasObject(Key key) {
-        return objects.containsKey(key);
+    public boolean hasObjex(Key key) {
+        return objexes.containsKey(key);
     }
 
     public boolean hasMorphism(Signature signature) {
@@ -138,8 +138,8 @@ public class SchemaCategory {
         return hasMorphism(base.toNonDual());
     }
 
-    /** Returns whether the object (corresponding to the given key) appears in any inner node of the (composite) morphism (corresponding to the given signature). */
-    public boolean morphismContainsObject(Signature signature, Key key) {
+    /** Returns whether the objex (corresponding to the given key) appears in any inner node of the (composite) morphism (corresponding to the given signature). */
+    public boolean morphismContainsObjex(Signature signature, Key key) {
         return signature
             .cutLast().toBases().stream()
             .anyMatch(base -> getEdge(base).to().key().equals(key));
@@ -150,8 +150,8 @@ public class SchemaCategory {
 
         final Signature lastSignature = bases[0];
         SchemaMorphism lastMorphism = this.getMorphism(lastSignature);
-        final SchemaObject dom = lastMorphism.dom();
-        SchemaObject cod = lastMorphism.cod();
+        final SchemaObjex dom = lastMorphism.dom();
+        SchemaObjex cod = lastMorphism.cod();
         Min min = lastMorphism.min();
 
         for (final var base : bases) {
@@ -165,8 +165,8 @@ public class SchemaCategory {
 
     public abstract static class Editor {
 
-        protected static Map<Key, SchemaObject> getObjects(SchemaCategory category) {
-            return category.objects;
+        protected static Map<Key, SchemaObjex> getObjexes(SchemaCategory category) {
+            return category.objexes;
         }
 
         protected static Map<Signature, SchemaMorphism> getMorphisms(SchemaCategory category) {

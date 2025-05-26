@@ -2,12 +2,12 @@ package cz.matfyz.inference.schemaconversion;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.metadata.MetadataCategory;
-import cz.matfyz.core.metadata.MetadataObject;
-import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataObjex;
+import cz.matfyz.core.metadata.MetadataObjex.Position;
 
 import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
@@ -20,9 +20,8 @@ import java.awt.Dimension;
 import java.util.*;
 
 /**
- * The {@code Layout} class provides functionality for applying various graph layout algorithms
- * from the JUNG library to a schema category. This includes methods for calculating positions
- * of schema objects within a graph based on the chosen layout type.
+ * The {@code Layout} class provides functionality for applying various graph layout algorithms from the JUNG library to a schema category.
+ * This includes methods for calculating positions of schema objexes within a graph based on the chosen layout type.
  */
 public class Layout {
 
@@ -36,17 +35,17 @@ public class Layout {
     private Layout() {}
 
     /**
-     * Updates objects positions in the given schema category.
+     * Updates positions of objexes in the given schema category.
      */
     public static void updatePositions(SchemaCategory schema, MetadataCategory metadata, Map<Key, Position> positionsMap) {
         for (Map.Entry<Key, Position> entry : positionsMap.entrySet()) {
             final var key = entry.getKey();
             final var position = entry.getValue();
 
-            final var object = schema.getObject(key);
-            final var metadataObject = metadata.getObject(key);
-            final var updatedMetadata = new MetadataObject(metadataObject.label, position);
-            metadata.setObject(object, updatedMetadata);
+            final var objex = schema.getObjex(key);
+            final var metadataObjex = metadata.getObjex(key);
+            final var updatedMetadata = new MetadataObjex(metadataObjex.label, position);
+            metadata.setObjex(objex, updatedMetadata);
         }
     }
 
@@ -54,21 +53,21 @@ public class Layout {
      * Applies a layout to the metadata of the given schema category based on the specified layout type.
      */
     public static void applyToMetadata(SchemaCategory schema, MetadataCategory metadata, LayoutType layoutType) {
-        final var positions = computeObjectsLayout(schema, layoutType);
+        final var positions = computeObjexesLayout(schema, layoutType);
 
-        for (final SchemaObject object : schema.allObjects()) {
-            final var position = positions.get(object.key());
-            final var mo = metadata.getObject(object);
-            metadata.setObject(object, new MetadataObject(mo.label, position));
+        for (final SchemaObjex objex : schema.allObjexes()) {
+            final var position = positions.get(objex.key());
+            final var mo = metadata.getObjex(objex);
+            metadata.setObjex(objex, new MetadataObjex(mo.label, position));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<Key, Position> computeObjectsLayout(SchemaCategory schema, LayoutType layoutType) {
-        List<DirectedSparseGraph<SchemaObject, SchemaMorphism>> subgraphs = partitionIntoSubgraphs(schema);
+    private static Map<Key, Position> computeObjexesLayout(SchemaCategory schema, LayoutType layoutType) {
+        List<DirectedSparseGraph<SchemaObjex, SchemaMorphism>> subgraphs = partitionIntoSubgraphs(schema);
         final var positions = new HashMap<Key, Position>();
 
-        int canvasSize = calculateCanvasSize(schema.allObjects().size());
+        int canvasSize = calculateCanvasSize(schema.allObjexes().size());
         int subgraphSize = calculateSubgraphSize(canvasSize, subgraphs.size());
         int subgraphSpacing = subgraphSize + SUBGRAPH_PADDING;
         int subgraphCountPerRow = calculateSubgraphCountPerRow(subgraphs.size());
@@ -77,8 +76,8 @@ public class Layout {
         int currentYOffset = subgraphSpacing / 2;
 
         for (int i = 0; i < subgraphs.size(); i++) {
-            DirectedSparseGraph<SchemaObject, SchemaMorphism> subgraph = subgraphs.get(i);
-            AbstractLayout<SchemaObject, SchemaMorphism> layout = createLayout(subgraph, layoutType);
+            DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph = subgraphs.get(i);
+            AbstractLayout<SchemaObjex, SchemaMorphism> layout = createLayout(subgraph, layoutType);
 
             layout.setSize(new Dimension(subgraphSize, subgraphSize));
             layout.initialize();
@@ -115,36 +114,36 @@ public class Layout {
         return subgraphCountPerRow;
     }
 
-    private static void runInitialLayoutSteps(FRLayout<SchemaObject, SchemaMorphism> layout) {
+    private static void runInitialLayoutSteps(FRLayout<SchemaObjex, SchemaMorphism> layout) {
         for (int j = 0; j < INITIAL_STEPS; j++) {
             layout.step();
         }
     }
 
-    private static void storeSubgraphPositions(DirectedSparseGraph<SchemaObject, SchemaMorphism> subgraph,
-                                               AbstractLayout<SchemaObject, SchemaMorphism> layout,
+    private static void storeSubgraphPositions(DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph,
+                                               AbstractLayout<SchemaObjex, SchemaMorphism> layout,
                                                Map<Key, Position> positions,
                                                int xOffset,
                                                int yOffset) {
-        for (SchemaObject node : subgraph.getVertices()) {
+        for (SchemaObjex node : subgraph.getVertices()) {
             double x = layout.getX(node) + xOffset;
             double y = layout.getY(node) + yOffset;
             positions.put(node.key(), new Position(x, y));
         }
     }
 
-    private static List<DirectedSparseGraph<SchemaObject, SchemaMorphism>> partitionIntoSubgraphs(SchemaCategory schema) {
-        List<DirectedSparseGraph<SchemaObject, SchemaMorphism>> subgraphs = new ArrayList<>();
-        Set<SchemaObject> visited = new HashSet<>();
+    private static List<DirectedSparseGraph<SchemaObjex, SchemaMorphism>> partitionIntoSubgraphs(SchemaCategory schema) {
+        List<DirectedSparseGraph<SchemaObjex, SchemaMorphism>> subgraphs = new ArrayList<>();
+        Set<SchemaObjex> visited = new HashSet<>();
 
-        for (SchemaObject object : schema.allObjects()) {
-            if (!visited.contains(object)) {
-                DirectedSparseGraph<SchemaObject, SchemaMorphism> subgraph = new DirectedSparseGraph<>();
-                Queue<SchemaObject> queue = new LinkedList<>();
-                queue.add(object);
+        for (final SchemaObjex objex : schema.allObjexes()) {
+            if (!visited.contains(objex)) {
+                DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph = new DirectedSparseGraph<>();
+                Queue<SchemaObjex> queue = new LinkedList<>();
+                queue.add(objex);
 
                 while (!queue.isEmpty()) {
-                    SchemaObject current = queue.poll();
+                    SchemaObjex current = queue.poll();
                     if (!visited.contains(current)) {
                         visited.add(current);
                         subgraph.addVertex(current);
@@ -152,7 +151,7 @@ public class Layout {
                         for (SchemaMorphism morphism : schema.allMorphisms()) {
                             if (morphism.dom().equals(current) || morphism.cod().equals(current)) {
                                 subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
-                                SchemaObject next = morphism.dom().equals(current) ? morphism.cod() : morphism.dom();
+                                SchemaObjex next = morphism.dom().equals(current) ? morphism.cod() : morphism.dom();
                                 if (!visited.contains(next)) {
                                     queue.add(next);
                                 }
@@ -166,7 +165,7 @@ public class Layout {
         return subgraphs;
     }
 
-    private static AbstractLayout<SchemaObject, SchemaMorphism> createLayout(DirectedSparseGraph<SchemaObject, SchemaMorphism> graph, LayoutType layoutType) {
+    private static AbstractLayout<SchemaObjex, SchemaMorphism> createLayout(DirectedSparseGraph<SchemaObjex, SchemaMorphism> graph, LayoutType layoutType) {
         switch (layoutType) {
             case CIRCLE:
                 return new CircleLayout<>(graph);

@@ -212,7 +212,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     /**
      * Creates a PostgreSQL WHERE clause from a list of filters.
      *
-     * @param filters The list of {@link AdminerFilter} objects representing filter conditions.
+     * @param filters The list of {@link AdminerFilter} filters representing filter conditions.
      * @return A {@link String} containing the WHERE clause, or an empty string if no filters are provided.
      */
     private String createWhereClause(List<AdminerFilter> filters) {
@@ -262,7 +262,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      * @param kindName The name of the kind to query.
      * @param limit    The maximum number of rows to return.
      * @param offset   The starting position of the result set.
-     * @param filter   A list of {@link AdminerFilter} objects representing filter conditions (optional).
+     * @param filter   A list of {@link AdminerFilter} filters representing filter conditions (optional).
      * @return A {@link TableResponse} containing the kind data, total row count, and column names.
      * @throws PullForestException if an error occurs during database access.
      */
@@ -316,7 +316,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      *
      * @param datasourceId ID of the datasource.
      * @param kindName     The name of the kind for which references are being retrieved.
-     * @return A {@link List} of {@link Reference} objects representing the references of the kind.
+     * @return A {@link List} of {@link Reference} references representing the references of the kind.
      * @throws PullForestException if an error occurs during database access.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {

@@ -73,7 +73,7 @@ public class ICAlgorithmTestBase {
         System.out.println("\n[Actual]:");
         System.out.println(result);
 
-        Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
+        Assertions.assertTrue(resultsEquals(expectedResult, result), "Test constraints differ from the expected constraints.");
     }
 
     private static boolean resultsEquals(List<String> result1, List<String> result2) {

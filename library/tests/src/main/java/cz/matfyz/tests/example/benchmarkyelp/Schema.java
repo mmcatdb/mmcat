@@ -4,7 +4,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 
 public abstract class Schema {
 
@@ -14,32 +14,32 @@ public abstract class Schema {
 
     // Keys
 
-    public static final BuilderObject business =            builder.object("business");
-    public static final BuilderObject businessId =          builder.object("businessId");
-    public static final BuilderObject businessName =        builder.object("businessName");
-    public static final BuilderObject businessCity =        builder.object("businessCity");
-    public static final BuilderObject businessState =       builder.object("businessState");
-    public static final BuilderObject businessStars =       builder.object("businessStars");
-    public static final BuilderObject businessReviewCount = builder.object("businessReviewCount");
-    public static final BuilderObject businessIsOpen =      builder.object("businessIsOpen");
-    public static final BuilderObject businessCategory =    builder.object("businessCategory");
+    public static final BuilderObjex business =            builder.objex("business");
+    public static final BuilderObjex businessId =          builder.objex("businessId");
+    public static final BuilderObjex businessName =        builder.objex("businessName");
+    public static final BuilderObjex businessCity =        builder.objex("businessCity");
+    public static final BuilderObjex businessState =       builder.objex("businessState");
+    public static final BuilderObjex businessStars =       builder.objex("businessStars");
+    public static final BuilderObjex businessReviewCount = builder.objex("businessReviewCount");
+    public static final BuilderObjex businessIsOpen =      builder.objex("businessIsOpen");
+    public static final BuilderObjex businessCategory =    builder.objex("businessCategory");
 
-    public static final BuilderObject user =                builder.object("user");
-    public static final BuilderObject userId =              builder.object("userId");
-    public static final BuilderObject userName =            builder.object("userName");
-    public static final BuilderObject userReviewCount =     builder.object("userReviewCount");
-    public static final BuilderObject userYelpingSince =    builder.object("userYelpingSince");
-    public static final BuilderObject userUseful =          builder.object("userUseful");
-    public static final BuilderObject userFunny =           builder.object("userFunny");
-    public static final BuilderObject userCool =            builder.object("userCool");
+    public static final BuilderObjex user =                builder.objex("user");
+    public static final BuilderObjex userId =              builder.objex("userId");
+    public static final BuilderObjex userName =            builder.objex("userName");
+    public static final BuilderObjex userReviewCount =     builder.objex("userReviewCount");
+    public static final BuilderObjex userYelpingSince =    builder.objex("userYelpingSince");
+    public static final BuilderObjex userUseful =          builder.objex("userUseful");
+    public static final BuilderObjex userFunny =           builder.objex("userFunny");
+    public static final BuilderObjex userCool =            builder.objex("userCool");
 
-    public static final BuilderObject review =              builder.object("review");
-    public static final BuilderObject reviewId =            builder.object("reviewId");
-    public static final BuilderObject reviewStars =         builder.object("reviewStars");
-    public static final BuilderObject reviewDate =          builder.object("reviewDate");
-    public static final BuilderObject reviewUseful =        builder.object("reviewUseful");
-    public static final BuilderObject reviewFunny =         builder.object("reviewFunny");
-    public static final BuilderObject reviewCool =          builder.object("reviewCool");
+    public static final BuilderObjex review =              builder.objex("review");
+    public static final BuilderObjex reviewId =            builder.objex("reviewId");
+    public static final BuilderObjex reviewStars =         builder.objex("reviewStars");
+    public static final BuilderObjex reviewDate =          builder.objex("reviewDate");
+    public static final BuilderObjex reviewUseful =        builder.objex("reviewUseful");
+    public static final BuilderObjex reviewFunny =         builder.objex("reviewFunny");
+    public static final BuilderObjex reviewCool =          builder.objex("reviewCool");
 
     // Morphisms
 

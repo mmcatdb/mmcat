@@ -1,11 +1,11 @@
 package cz.matfyz.core.metadata;
 
-public class MetadataObject {
+public class MetadataObjex {
 
     public final String label;
     public final Position position;
 
-    public MetadataObject(String label, Position position) {
+    public MetadataObjex(String label, Position position) {
         this.label = label;
         this.position = position;
     }

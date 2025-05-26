@@ -22,12 +22,12 @@ public record UpdateMorphism(
     }
 
     private void replaceMorphism(SchemaCategory schema, SerializedMorphism morphism) {
-        final var objects = (new SchemaEditor(schema)).getObjects();
-        final var morphismWithObjects = morphism.deserialize(objects::get);
+        final var objexes = (new SchemaEditor(schema)).getObjexes();
+        final var morphismWithObjexes = morphism.deserialize(objexes::get);
 
         final var morphisms = (new SchemaEditor(schema)).getMorphisms();
         // Replace the morphism by its newer version. The equality is determined by its signature.
-        morphisms.put(morphismWithObjects.signature(), morphismWithObjects);
+        morphisms.put(morphismWithObjexes.signature(), morphismWithObjexes);
     }
 
 }

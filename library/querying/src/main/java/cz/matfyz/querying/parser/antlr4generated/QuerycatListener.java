@@ -268,12 +268,12 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitObjectList(QuerycatParser.ObjectListContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#object}.
+	 * Enter a parse tree produced by {@link QuerycatParser#node}.
 	 * @param ctx the parse tree
 	 */
 	void enterObject(QuerycatParser.ObjectContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#object}.
+	 * Exit a parse tree produced by {@link QuerycatParser#node}.
 	 * @param ctx the parse tree
 	 */
 	void exitObject(QuerycatParser.ObjectContext ctx);

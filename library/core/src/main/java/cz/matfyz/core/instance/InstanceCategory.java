@@ -6,7 +6,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,21 +14,21 @@ import java.util.Map;
 public class InstanceCategory {
 
     private final SchemaCategory schema;
-    private final Map<Key, InstanceObject> objects;
+    private final Map<Key, InstanceObjex> objexes;
     private final Map<Signature, InstanceMorphism> morphisms;
 
-    InstanceCategory(SchemaCategory schema, Map<Key, InstanceObject> objects, Map<Signature, InstanceMorphism> morphisms) {
+    InstanceCategory(SchemaCategory schema, Map<Key, InstanceObjex> objexes, Map<Signature, InstanceMorphism> morphisms) {
         this.schema = schema;
-        this.objects = objects;
+        this.objexes = objexes;
         this.morphisms = morphisms;
     }
 
-    public InstanceObject getObject(Key key) {
-        return objects.get(key);
+    public InstanceObjex getObjex(Key key) {
+        return objexes.get(key);
     }
 
-    public InstanceObject getObject(SchemaObject schemaObject) {
-        return this.getObject(schemaObject.key());
+    public InstanceObjex getObjex(SchemaObjex schemaObjex) {
+        return this.getObjex(schemaObjex.key());
     }
 
     public InstanceMorphism getMorphism(Signature signature) {
@@ -54,8 +54,8 @@ public class InstanceCategory {
         return this.getMorphism(schemaMorphism.signature());
     }
 
-    public Collection<InstanceObject> allObjects() {
-        return schema.allObjects().stream().map(this::getObject).toList();
+    public Collection<InstanceObjex> allObjexes() {
+        return schema.allObjexes().stream().map(this::getObjex).toList();
     }
 
     public Collection<InstanceMorphism> allMorphisms() {
@@ -63,8 +63,8 @@ public class InstanceCategory {
     }
 
     public void createReferences() {
-        for (final var object : objects.values())
-            for (final var signature : object.schema.superId().signatures())
+        for (final var objex : objexes.values())
+            for (final var signature : objex.schema.superId().signatures())
                 createReferencesForSignature(signature);
     }
 
@@ -85,7 +85,7 @@ public class InstanceCategory {
             if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;
 
-            getObject(currentTarget).addReferenceToRow(signatureInTarget, pathFromTarget, signature);
+            getObjex(currentTarget).addReferenceToRow(signatureInTarget, pathFromTarget, signature);
         }
     }
 
@@ -93,14 +93,14 @@ public class InstanceCategory {
         StringBuilder builder = new StringBuilder();
 
         builder.append("Keys: ");
-        for (Key key : objects.keySet())
+        for (Key key : objexes.keySet())
             builder.append(key).append(", ");
         builder.append("\n\n");
 
-        builder.append("Objects (showing only non-empty):\n");
-        for (InstanceObject object : objects.values())
-            if (!object.isEmpty())
-                builder.append(object).append("\n");
+        builder.append("Objexes (showing only non-empty):\n");
+        for (InstanceObjex objex : objexes.values())
+            if (!objex.isEmpty())
+                builder.append(objex).append("\n");
         builder.append("\n");
 
         builder.append("Signatures: ");
@@ -119,7 +119,7 @@ public class InstanceCategory {
 
     @Override public boolean equals(Object object) {
         return object instanceof InstanceCategory category
-            && objects.equals(category.objects)
+            && objexes.equals(category.objexes)
             && morphisms.equals(category.morphisms);
     }
 

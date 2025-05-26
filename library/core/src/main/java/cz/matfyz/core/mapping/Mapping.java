@@ -4,7 +4,7 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -16,20 +16,20 @@ public class Mapping implements Comparable<Mapping> {
         this.datasource = datasource;
         this.kindName = kindName;
         this.category = category;
-        this.rootObject = category.getObject(rootKey);
+        this.rootObjex = category.getObjex(rootKey);
         this.accessPath = accessPath;
         this.primaryKey = primaryKey;
     }
 
     public static Mapping create(Datasource datasource, String kindName, SchemaCategory category, Key rootKey, ComplexProperty accessPath) {
-        final var rootObject = category.getObject(rootKey);
+        final var rootObjex = category.getObjex(rootKey);
 
-        return new Mapping(datasource, kindName, category, rootKey, accessPath, defaultPrimaryKey(rootObject));
+        return new Mapping(datasource, kindName, category, rootKey, accessPath, defaultPrimaryKey(rootObjex));
     }
 
-    private static List<Signature> defaultPrimaryKey(SchemaObject object) {
-        return object.ids().isSignatures()
-            ? object.ids().toSignatureIds().first().signatures().stream().toList()
+    private static List<Signature> defaultPrimaryKey(SchemaObjex objex) {
+        return objex.ids().isSignatures()
+            ? objex.ids().toSignatureIds().first().signatures().stream().toList()
             : List.of(Signature.createEmpty());
     }
 
@@ -52,9 +52,9 @@ public class Mapping implements Comparable<Mapping> {
         return category;
     }
 
-    private final SchemaObject rootObject;
-    public SchemaObject rootObject() {
-        return rootObject;
+    private final SchemaObjex rootObjex;
+    public SchemaObjex rootObjex() {
+        return rootObjex;
     }
 
     private final ComplexProperty accessPath;
@@ -70,7 +70,7 @@ public class Mapping implements Comparable<Mapping> {
     // Updating
 
     public Mapping withSchema(SchemaCategory category, ComplexProperty accessPath, Collection<Signature> primaryKey) {
-        return new Mapping(datasource, kindName, category, rootObject.key(), accessPath, primaryKey);
+        return new Mapping(datasource, kindName, category, rootObjex.key(), accessPath, primaryKey);
     }
 
     // Identification
@@ -96,7 +96,7 @@ public class Mapping implements Comparable<Mapping> {
     }
 
     public record SerializedMapping(
-        Key rootObjectKey,
+        Key rootObjexKey,
         List<Signature> primaryKey,
         String kindName,
         ComplexProperty accessPath
@@ -104,7 +104,7 @@ public class Mapping implements Comparable<Mapping> {
 
         public static SerializedMapping fromMapping(Mapping mapping) {
             return new SerializedMapping(
-                mapping.rootObject().key(),
+                mapping.rootObjex().key(),
                 mapping.primaryKey().stream().toList(),
                 mapping.kindName(),
                 mapping.accessPath()
@@ -116,7 +116,7 @@ public class Mapping implements Comparable<Mapping> {
                 datasource,
                 kindName,
                 category,
-                rootObjectKey,
+                rootObjexKey,
                 accessPath,
                 primaryKey
             );

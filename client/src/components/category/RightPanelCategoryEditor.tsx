@@ -112,7 +112,7 @@ type EditorFormProps = {
 };
 
 /**
- * Reusable form component for editing objects and morphisms with consistent button behavior.
+ * Reusable form component for editing objexes and morphisms with consistent button behavior.
  */
 function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFormProps) {
     return (<>
@@ -127,7 +127,7 @@ function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFo
 }
 
 /**
- * Renders a form to update a selected schema object's label and position.
+ * Renders a form to update a selected objex's label and position.
  */
 function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     const { selectedNode } = useSelection(state);
@@ -152,7 +152,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
     }, [ selectedNode ]);
 
     /**
-     * Updates the schema object with new label and position, then refreshes the graph.
+     * Updates the objex with new label and position, then refreshes the graph.
      */
     function handleApply() {
         if (!selectedNode || !label || !hasChanges)

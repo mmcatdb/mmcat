@@ -6,7 +6,7 @@ import { shallowRef, ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { Datasource } from '@/types/datasource';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ObjectIds, SignatureId, SignatureIdFactory, SpecialName, StaticName } from '@/types/identifiers';
+import { ObjexIds, SignatureId, SignatureIdFactory, SpecialName, StaticName } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 import EditProperty from './EditProperty.vue';
@@ -77,7 +77,7 @@ type ShortcutConfig = {
 };
 
 /**
- * Extracts the graph object from Evocat.
+ * Extracts the graph from Evocat.
  */
 const { graph } = $(useEvocat());
 
@@ -158,9 +158,9 @@ function handleKeyDown(event: KeyboardEvent) {
 }
 
 /**
- * Returns the primary key of the given object IDs.
+ * Returns the primary key of the given objex IDs.
  */
-function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
+function getInitialPrimaryKey(ids?: ObjexIds): SignatureId {
     if (!ids)
         return SignatureIdFactory.createEmpty();
 

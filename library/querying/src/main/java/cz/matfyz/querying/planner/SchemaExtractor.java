@@ -7,7 +7,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.QueryContext;
@@ -23,7 +23,7 @@ import java.util.Queue;
 import java.util.TreeMap;
 
 /**
- * This class extract a subset of schema category based on the query pattern. It also modifies mappings by discarding unnecessary objects.
+ * This class extract a subset of schema category based on the query pattern. It also modifies mappings by discarding unnecessary objexes.
  */
 public class SchemaExtractor {
 
@@ -70,7 +70,7 @@ public class SchemaExtractor {
         return patterns;
     }
 
-    // The schema category of all objects and morphisms that are reachable from the pattern plus those that are needed to identify the objects.
+    // The schema category of all objexes and morphisms that are reachable from the pattern plus those that are needed to identify the objexes.
     private SchemaCategory newSchema;
     private Queue<SchemaMorphism> morphismQueue;
 
@@ -78,7 +78,7 @@ public class SchemaExtractor {
         newSchema = new SchemaCategory();
         morphismQueue = new ArrayDeque<>(patternMorphisms);
 
-        // We have to use queue because the morphisms need to add objects which need to add their ids which consist of objects and morphisms ... so we have to break the chain somewhere.
+        // We have to use queue because the morphisms need to add objexes which need to add their ids which consist of objexes and morphisms ... so we have to break the chain somewhere.
         while (!morphismQueue.isEmpty())
             addMorphism(morphismQueue.poll());
     }
@@ -89,16 +89,16 @@ public class SchemaExtractor {
             return;
 
         newSchema.addMorphism(morphism);
-        addObject(morphism.dom());
-        addObject(morphism.cod());
+        addObjex(morphism.dom());
+        addObjex(morphism.cod());
     }
 
-    private void addObject(SchemaObject object) {
-        if (newSchema.hasObject(object.key()))
+    private void addObjex(SchemaObjex objex) {
+        if (newSchema.hasObjex(objex.key()))
             return;
 
-        newSchema.addObject(object);
-        object.ids().toSignatureIds()
+        newSchema.addObjex(objex);
+        objex.ids().toSignatureIds()
             .stream().flatMap(id -> id.signatures().stream())
             .flatMap(signature -> signature.toBases().stream())
             // We don't have to worry about duals here because ids can't contain them (ids have to have cardinality at most 1).
@@ -107,13 +107,13 @@ public class SchemaExtractor {
 
     private List<PatternForKind> createPatternsForKinds() {
         return kinds.stream()
-            .filter(kind -> newSchema.hasObject(kind.rootObject().key()))
+            .filter(kind -> newSchema.hasObjex(kind.rootObjex().key()))
             .map(kind -> {
-                final var rootObject = kind.rootObject();
+                final var rootObjex = kind.rootObjex();
                 // TODO really?
                 // The root has to be variable.
-                final var rootVariable = getOrCreateVariableForObjex(rootObject);
-                final var rootNode = PatternTree.createRoot(rootObject, rootVariable);
+                final var rootVariable = getOrCreateVariableForObjex(rootObjex);
+                final var rootNode = PatternTree.createRoot(rootObjex, rootVariable);
                 processComplexProperty(rootNode, kind.accessPath());
 
                 return new PatternForKind(kind, rootNode);
@@ -147,7 +147,7 @@ public class SchemaExtractor {
      * The created variable is a variable only - it isn't added to the variable tree.
      * TODO This last line is sus. Investigate.
      */
-    private Variable getOrCreateVariableForObjex(SchemaObject objex) {
+    private Variable getOrCreateVariableForObjex(SchemaObjex objex) {
         final Variable foundVariable = keyToVariable.get(objex.key());
         if (foundVariable != null)
             return foundVariable;

@@ -2,13 +2,12 @@ package cz.matfyz.core.schema;
 
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.SignatureId;
 
-public class SchemaObject implements Identified<SchemaObject, Key> {
+public class SchemaObjex implements Identified<SchemaObjex, Key> {
 
-
-    public SchemaObject(Key key, ObjectIds ids, SignatureId superId) {
+    public SchemaObjex(Key key, ObjexIds ids, SignatureId superId) {
         this.key = key;
         this.ids = ids;
         this.superId = superId;
@@ -20,9 +19,9 @@ public class SchemaObject implements Identified<SchemaObject, Key> {
         return key;
     }
 
-    private final ObjectIds ids;
+    private final ObjexIds ids;
     /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key). */
-    public ObjectIds ids() {
+    public ObjexIds ids() {
         return ids;
     }
 
@@ -39,7 +38,7 @@ public class SchemaObject implements Identified<SchemaObject, Key> {
     }
 
     @Override public boolean equals(Object other) {
-        return other instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
+        return other instanceof SchemaObjex schemaObject && key.equals(schemaObject.key);
     }
 
     @Override public int hashCode() {

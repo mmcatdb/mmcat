@@ -28,7 +28,7 @@ export type CategoryEdge = Edge & {
 
 /**
  * Converts a category into a graph structure suitable for rendering in React.
- * Creates immutable node and edge maps from the category's objects and morphisms.
+ * Creates immutable node and edge maps from the category's objexes and morphisms.
  *
  * @param category - The category to transform into a graph.
  * @returns A CategoryGraph containing nodes and edges.
@@ -44,8 +44,7 @@ export function categoryToGraph(category: Category): CategoryGraph {
 }
 
 /**
- * Maps the object components of a category into graph nodes.
- * Schema objet = Objex
+ * Maps the objex components of a category into graph nodes.
  */
 function mapCategoryToNodes(category: Category): CategoryNode[] {
     return category.getObjexes().map(objex => {

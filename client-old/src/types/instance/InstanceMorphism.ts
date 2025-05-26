@@ -1,7 +1,7 @@
 import { Signature, type SignatureFromServer } from '../identifiers';
 import type { SchemaMorphism } from '../schema';
 import type { InstanceCategory } from './InstanceCategory';
-import type { DomainRow, InstanceObject } from './InstanceObject';
+import type { DomainRow, InstanceObjex } from './InstanceObjex';
 
 export type InstanceMorphismFromServer = {
     signature: SignatureFromServer;
@@ -11,8 +11,8 @@ export type InstanceMorphismFromServer = {
 export class InstanceMorphism {
     private constructor(
         readonly schema: SchemaMorphism,
-        readonly dom: InstanceObject,
-        readonly cod: InstanceObject,
+        readonly dom: InstanceObjex,
+        readonly cod: InstanceObjex,
         readonly mappings: MappingRow[],
     ) {}
 
@@ -22,8 +22,8 @@ export class InstanceMorphism {
         if (!morphism)
             return;
 
-        const dom = instance.objects.get(morphism.domKey);
-        const cod = instance.objects.get(morphism.codKey);
+        const dom = instance.objexes.get(morphism.domKey);
+        const cod = instance.objexes.get(morphism.codKey);
         if (!dom || !cod)
             return;
 

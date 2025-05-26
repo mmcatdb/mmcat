@@ -9,7 +9,7 @@ import NodeInput from '@/components/input/NodeInput.vue';
  * Props passed to the component.
  */
 const props = defineProps<{
-    /** The graph object used in the NodeInput component. */
+    /** The graph used in the NodeInput component. */
     graph: Graph;
 }>();
 

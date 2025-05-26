@@ -457,7 +457,7 @@ class MTCAlgorithmTests {
             .run();
     }
 
-    // TODO This test probably don't bring anything new as it just maps one value to another. However, an object with multiple identifiers from which one is an EMPTY signature, might be more interesting.
+    // TODO This test probably don't bring anything new as it just maps one value to another. However, an objex with multiple identifiers from which one is an EMPTY signature, might be more interesting.
 
     // @Test
     // void selfIdentifierTest() {

@@ -170,13 +170,13 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override public @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
         if (morphism.dom().key().equals(key))
             return this;
 
         for (final var subpath : subpaths()) {
-            final var subProperty = subpath.tryGetSubpathForObject(key, schema);
+            final var subProperty = subpath.tryGetSubpathForObjex(key, schema);
             if (subProperty != null)
                 return subProperty;
         }

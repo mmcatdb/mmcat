@@ -26,9 +26,9 @@ public class ExpressionTree implements Printable {
     }
 
     private final Map<String, ExpressionTree> children = new TreeMap<>();
-    /** This property is null if and only if this object is the root. */
+    /** This property is null if and only if this node is the root. */
     private @Nullable ExpressionTree parent;
-    /** This property is null if and only if this object is the root. */
+    /** This property is null if and only if this node is the root. */
     public final @Nullable String edgeFromParent;
 
     public @Nullable ExpressionTree getChild(String edge) {

@@ -11,7 +11,7 @@ import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * The {@code ReferenceMerge} class implements an algorithm for merging references
  * within a schema. It extends the {@link InferenceEditAlgorithm} and provides functionality
- * to modify schema objects and mappings based on reference merging rules.
+ * to modify objexes and mappings based on reference merging rules.
  */
 public class ReferenceMerge extends InferenceEditAlgorithm {
 
@@ -106,28 +106,28 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
 
         final Key referenceParentKey = getReferenceParentKey(newSchema, newMetadata);
 
-        SchemaObject dom = newSchema.getObject(referenceParentKey);
-        final SchemaObject cod = newSchema.getObject(data.referencedKey);
+        SchemaObjex dom = newSchema.getObjex(referenceParentKey);
+        final SchemaObjex cod = newSchema.getObjex(data.referencedKey);
 
         if (referenceIsArray) {
-            this.parentReferenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema, newSchema.getObject(data.referencingKey), dom);
-            dom = newSchema.getObject(data.referencingKey);
+            this.parentReferenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema, newSchema.getObjex(data.referencingKey), dom);
+            dom = newSchema.getObjex(data.referencingKey);
 
-            InferenceEditorUtils.updateMetadataObjectsLabel(dom, newMetadata, ARRAY_LABEL);
+            InferenceEditorUtils.updateMetadataObjexesLabel(dom, newMetadata, ARRAY_LABEL);
 
             this.referenceSignature = findReferenceSignatureWithValueKey(data.referencingKey);
         } else {
-            this.referenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema, dom, newSchema.getObject(data.referencingKey));
+            this.referenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema, dom, newSchema.getObjex(data.referencingKey));
             keysToDelete.add(data.referencingKey);
         }
         InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, cod, this.referenceSignature);
 
-        InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
+        InferenceEditorUtils.removeMorphismsAndObjexes(newSchema, signaturesToDelete, keysToDelete);
     }
 
     private boolean isReferenceArray(SchemaCategory schema, MetadataCategory metadata) {
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
-            if (morphism.dom().key().equals(data.referencingKey) && metadata.getObject(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL))
+            if (morphism.dom().key().equals(data.referencingKey) && metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL))
                 return true;
         }
         return false;
@@ -138,8 +138,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             for (final SchemaMorphism morphism : schema.allMorphisms()) {
                 if (
                     morphism.dom().key().equals(data.referencingKey) && (
-                        !metadata.getObject(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL) ||
-                        !metadata.getObject(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL)
+                        !metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL) ||
+                        !metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL)
                     )
                 )
                     return morphism.cod().key();
@@ -159,12 +159,12 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     private Signature findReferenceSignatureWithValueKey(Key key) {
         final Key valueKey = getValueKey(key);
         keysToDelete.add(valueKey);
-        return InferenceEditorUtils.findSignatureBetween(newSchema, newSchema.getObject(data.referencingKey), newSchema.getObject(valueKey));
+        return InferenceEditorUtils.findSignatureBetween(newSchema, newSchema.getObjex(data.referencingKey), newSchema.getObjex(valueKey));
     }
 
     private Key getValueKey(Key key) {
         for (final SchemaMorphism morphism : newSchema.allMorphisms())
-            if (morphism.dom().key().equals(key) && newMetadata.getObject(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL))
+            if (morphism.dom().key().equals(key) && newMetadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL))
                 return morphism.cod().key();
 
         throw new NotFoundException("Index key has not been found");

@@ -17,10 +17,6 @@ public class QueryContext {
         this.variables = variables;
     }
 
-    // public List<Variable> getVariablesForObjex(SchemaObject objex) {
-    //     return objexToVariables.get(objex);
-    // }
-
     // Schema category
 
     // TODO - should be unique per nested clause. However, the variables probably should be as well, so ...

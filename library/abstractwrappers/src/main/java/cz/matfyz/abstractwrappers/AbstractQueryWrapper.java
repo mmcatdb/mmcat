@@ -6,7 +6,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.io.Serializable;
 import java.util.List;
@@ -59,29 +59,29 @@ public interface AbstractQueryWrapper {
         public final Mapping mapping;
         public final @Nullable Property parent;
         public final Signature path;
-        public final SchemaObject schemaObject;
+        public final SchemaObjex schemaObjex;
 
         public Property(Mapping mapping, Signature path, @Nullable Property parent) {
             this.mapping = mapping;
             this.path = path;
             this.parent = parent;
-            this.schemaObject = findSchemaObject();
+            this.schemaObjex = findSchemaObjex();
         }
 
-        private SchemaObject findSchemaObject() {
+        private SchemaObjex findSchemaObjex() {
             if (!path.isEmpty())
                 return mapping.category().getEdge(path.getLast()).to();
 
             return parent == null
-                ? mapping.rootObject()
-                : parent.schemaObject;
+                ? mapping.rootObjex()
+                : parent.schemaObjex;
         }
 
         @Override public int compareTo(Property other) {
             final int mappingComparison = mapping.compareTo(other.mapping);
             return mappingComparison != 0
                 ? mappingComparison
-                : schemaObject.compareTo(other.schemaObject);
+                : schemaObjex.compareTo(other.schemaObjex);
         }
 
         @Override public boolean equals(Object other) {

@@ -12,7 +12,7 @@ import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
-import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.metadata.MetadataSerializer;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.CandidatesSerializer;

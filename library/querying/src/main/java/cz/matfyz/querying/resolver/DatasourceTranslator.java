@@ -117,27 +117,27 @@ public class DatasourceTranslator {
     }
 
     private record StackItem(
-        PatternTree object,
+        PatternTree node,
         /** The closest parent property that has to be preserved in the property tree. */
         @Nullable Property preservedParent,
-        /** Path from the `parent` to the currently processed `object`. If the parent is null, the path is from the root of the kind instead. */
+        /** Path from the `parent` to the currently processed `node`. If the parent is null, the path is from the root of the kind instead. */
         Signature pathFromParent
     ) {}
 
     private PatternForKind pattern;
-    private Set<PatternTree> preservedObjects;
+    private Set<PatternTree> preservedNodes;
     private Deque<StackItem> stack;
 
     private void processKind(PatternForKind kind) {
         this.pattern = kind;
-        preservedObjects = findPreservedObjects(kind.root);
+        preservedNodes = findPreservedNodes(kind.root);
         // TODO This is just a temporary fix.
         final Set<Signature> availablePaths = new TreeSet<>();
         availablePaths.add(Signature.createEmpty());
         addAllSubpathSignatures(availablePaths, kind.kind.accessPath(), Signature.createEmpty());
 
-        preservedObjects = preservedObjects.stream()
-            .filter(object -> availablePaths.contains(object.computePathFromRoot()))
+        preservedNodes = preservedNodes.stream()
+            .filter(node -> availablePaths.contains(node.computePathFromRoot()))
             .collect(Collectors.toSet());
 
         stack = new ArrayDeque<>();
@@ -160,24 +160,24 @@ public class DatasourceTranslator {
 
     private void processStackItem(StackItem item) {
         LOGGER.debug("processStackItem:\n{}", item);
-        if (!item.object.isTerminal()) {
+        if (!item.node.isTerminal()) {
             processInnerItem(item);
             return;
         }
 
-        final var objectProperty = wrapperContext.createProperty(pattern.kind, item);
+        final var node = wrapperContext.createProperty(pattern.kind, item);
 
         // TODO isOptional is not supported yet.
-        final var structure = wrapperContext.findOrCreateStructure(objectProperty);
-        wrapper.addProjection(objectProperty, structure, false);
-        LOGGER.debug("addProjection:\n{}\n{}", objectProperty, structure);
+        final var structure = wrapperContext.findOrCreateStructure(node);
+        wrapper.addProjection(node, structure, false);
+        LOGGER.debug("addProjection:\n{}\n{}", node, structure);
     }
 
     private void processInnerItem(StackItem item) {
         Property preservedParent;
         Signature pathFromParent;
 
-        final var isNewParent = preservedObjects.contains(item.object);
+        final var isNewParent = preservedNodes.contains(item.node);
         if (isNewParent) {
             preservedParent = wrapperContext.createProperty(pattern.kind, item);
             pathFromParent = Signature.createEmpty();
@@ -190,7 +190,7 @@ public class DatasourceTranslator {
         LOGGER.debug("preservedParent:\n{}", preservedParent);
         LOGGER.debug("pathFromParent:\n{}", pathFromParent);
 
-        for (final var child : item.object.children()) {
+        for (final var child : item.node.children()) {
             final var childItem = new StackItem(
                 child,
                 preservedParent,
@@ -217,8 +217,8 @@ public class DatasourceTranslator {
 
         Property createProperty(Mapping kind, StackItem item) {
             final var property = new Property(kind, item.pathFromParent, item.preservedParent);
-            propertyToVariable.put(property, item.object.variable);
-            variableToProperty.put(item.object.variable, property);
+            propertyToVariable.put(property, item.node.variable);
+            variableToProperty.put(item.node.variable, property);
 
             return property;
         }
@@ -260,37 +260,36 @@ public class DatasourceTranslator {
         }
     }
 
-
     /**
      * Finds all nodes that should be preserved in the property tree. Root is ommited because it's always preserved. The leaves as well. So only the child nodes of array edges with multiple preserved leaves are explicitly preserved.
      * Also finds all nodes specified as variables by the user - these should be preserved by default.
      */
-    private static Set<PatternTree> findPreservedObjects(PatternTree root) {
-        // We start in the root. Whenever we find an object with multiple children, we add the last child of an array edge to the output.
+    private static Set<PatternTree> findPreservedNodes(PatternTree root) {
+        // We start in the root. Whenever we find an node with multiple children, we add the last child of an array edge to the output.
         final Set<PatternTree> output = new TreeSet<>();
-        final var rootObject = new PreservedStackObject(root, null);
+        final var rootNode = new PreservedStackNode(root, null);
 
-        GraphUtils.forEachDFS(rootObject, stackObject -> {
-            final var object = stackObject.object;
-            final var lastChildOfArray = object.isChildOfArray() ? object : stackObject.lastChildOfArray;
+        GraphUtils.forEachDFS(rootNode, stackNode -> {
+            final var node = stackNode.node;
+            final var lastChildOfArray = node.isChildOfArray() ? node : stackNode.lastChildOfArray;
 
-            // All original objects are added.
-            if (object.variable.isOriginal())
-                output.add(object);
+            // All original nodes are added.
+            if (node.variable.isOriginal())
+                output.add(node);
 
-            // If the object has multiple children, the last child of array has to be preserved (if it isn't null ofc).
-            if (object.children().size() > 1 && lastChildOfArray != null)
+            // If the node has multiple children, the last child of array has to be preserved (if it isn't null ofc).
+            if (node.children().size() > 1 && lastChildOfArray != null)
                 output.add(lastChildOfArray);
 
-            return object.children().stream()
-                .map(child -> new PreservedStackObject(child, lastChildOfArray))
+            return node.children().stream()
+                .map(child -> new PreservedStackNode(child, lastChildOfArray))
                 .toList();
         });
 
         return output;
     }
 
-    private record PreservedStackObject(PatternTree object, @Nullable PatternTree lastChildOfArray) {}
+    private record PreservedStackNode(PatternTree node, @Nullable PatternTree lastChildOfArray) {}
 
     private void processJoinCandidate(JoinCandidate candidate) {
         final var fromPath = candidate.from().getPatternTree(candidate.variable()).computePathFromRoot();

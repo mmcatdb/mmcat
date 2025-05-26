@@ -14,11 +14,11 @@ defineProps<{
     columns: Column[];
 }>();
 
-const emit = defineEmits([ 'object:click' ]);
+const emit = defineEmits([ 'objex:click' ]);
 
 function columnClicked(column: Column) {
     if (column.isClickable)
-        emit('object:click', column.schemaObjex);
+        emit('objex:click', column.schemaObjex);
 }
 </script>
 
