@@ -31,8 +31,7 @@ public class ResultStructureComputer {
     // E.g., we might want to add something like logging later, which would be inpossible for nulls.
 
     public static ComputationTform run(ResultStructure inputStructure, Computation computation, boolean isFilter) {
-        final var outputStructure = inputStructure.copy();
-        return new ResultStructureComputer(outputStructure).run(computation, isFilter);
+        return new ResultStructureComputer(inputStructure).run(computation, isFilter);
     }
 
     /** The copy of the original structure. It might change during the algorithm because as we go throught new arguments, we might need to resolve them first. */

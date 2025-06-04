@@ -14,11 +14,14 @@ public class Datasources {
     private TestDatasource<MongoDBControlWrapper> mongoDB;
 
     public TestDatasource<MongoDBControlWrapper> mongoDB() {
-        if (mongoDB == null)
+        if (mongoDB == null) {
             mongoDB = createNewMongoDB()
                 .addMapping(MongoDB.business(schema))
                 .addMapping(MongoDB.user(schema))
                 .addMapping(MongoDB.review(schema));
+
+            Schema.collectStatsToCache(mongoDB); // FIXME: this is a temporary implementation
+        }
 
         return mongoDB;
     }
