@@ -25,6 +25,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+/**
+ * Immutable.
+ */
 @JsonSerialize(using = SuperIdWithValues.Serializer.class)
 @JsonDeserialize(using = SuperIdWithValues.Deserializer.class)
 public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithValues> {

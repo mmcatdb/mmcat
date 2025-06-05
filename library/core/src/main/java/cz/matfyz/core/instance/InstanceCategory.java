@@ -23,6 +23,10 @@ public class InstanceCategory {
         this.morphisms = morphisms;
     }
 
+    public SchemaCategory schema() {
+        return schema;
+    }
+
     public InstanceObjex getObjex(Key key) {
         return objexes.get(key);
     }
@@ -121,6 +125,18 @@ public class InstanceCategory {
         return object instanceof InstanceCategory category
             && objexes.equals(category.objexes)
             && morphisms.equals(category.morphisms);
+    }
+
+    public abstract static class Editor {
+
+        protected static Map<Key, InstanceObjex> getObjexes(InstanceCategory category) {
+            return category.objexes;
+        }
+
+        protected static Map<Signature, InstanceMorphism> getMorphisms(InstanceCategory category) {
+            return category.morphisms;
+        }
+
     }
 
 }

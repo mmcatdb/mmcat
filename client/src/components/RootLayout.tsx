@@ -82,7 +82,7 @@ function CommonNavbar() {
 /**
  * Resets scroll position on route changes.
  */
-export default function ScrollToTop() {
+function ScrollToTop() {
     const { pathname } = useLocation();
 
     useEffect(() => {

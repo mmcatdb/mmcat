@@ -25,14 +25,14 @@ public class DomainRow implements Comparable<DomainRow> {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
-    // The tuples that holds the value of this row.
+    /** The tuples that holds the value of this row. */
     public final SuperIdWithValues superId;
-    // All technical ids under which is this row known.
+    /** All technical ids under which is this row known. */
     public final Set<String> technicalIds;
     public final Set<Signature> pendingReferences;
     // Various ids that can be constructed from this row.
 
-    // -1 means that the row is not yet serialized
+    /** An ugly hack. A value of -1 means that the row is not yet serialized. */
     public int serializationId;
 
     public DomainRow(SuperIdWithValues superId, Set<String> technicalIds, Set<Signature> pendingReferences) {

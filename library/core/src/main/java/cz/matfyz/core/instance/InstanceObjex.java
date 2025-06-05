@@ -28,13 +28,11 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
-    InstanceObjex(SchemaObjex schema, InstanceCategory instance) {
+    public InstanceObjex(SchemaObjex schema, InstanceCategory instance) {
         this.schema = schema;
         this.instance = instance;
         this.technicalIdGenerator = UniqueSequentialGenerator.create();
     }
-
-
 
     public boolean isEmpty() {
         return domain.isEmpty() && domainByTechnicalIds.isEmpty();
@@ -269,6 +267,42 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
             return signatureInOther.compareTo(reference.signatureInOther);
         }
 
+    }
+
+    public void copyRowsFrom(InstanceObjex source) {
+        // The output rows should be unique, so we have to keep them somewhere. And no, we can't use a set because it can't be queried for keys.
+        final var uniqueRows = new TreeMap<DomainRow, DomainRow>();
+
+        // TODO Use functions above to insert rows.
+        // FIXME This is not correct (yet), because it doesn't use correct ids (the ids do have to change because the morphisms that form them have to change).
+
+        // TODO How to copy signature ids?
+        for (final var domainEntry : source.domain.entrySet()) {
+            final SignatureId id = domainEntry.getKey();
+            final Map<SuperIdWithValues, DomainRow> sourceRows = domainEntry.getValue();
+            final Map<SuperIdWithValues, DomainRow> targetRows = new TreeMap<>();
+
+            for (final DomainRow sourceRow : sourceRows.values()) {
+                // TODO Pending references (probably should be empty, but we should check it).
+                final DomainRow targetRow = new DomainRow(sourceRow.superId, sourceRow.technicalIds, Set.of());
+
+                final DomainRow uniqueRow = uniqueRows.computeIfAbsent(targetRow, row -> row);
+                targetRows.put(uniqueRow.superId, uniqueRow);
+            }
+
+            if (!targetRows.isEmpty()) {
+                domain.put(id, targetRows);
+            }
+        }
+
+        for (final var technicalIdEntry : source.domainByTechnicalIds.entrySet()) {
+            final String technicalId = technicalIdEntry.getKey();
+            final DomainRow sourceRow = technicalIdEntry.getValue();
+            final DomainRow targetRow = new DomainRow(sourceRow.superId, sourceRow.technicalIds, Set.of());
+
+            final DomainRow uniqueRow = uniqueRows.computeIfAbsent(targetRow, row -> row);
+            domainByTechnicalIds.put(technicalId, uniqueRow);
+        }
     }
 
     // Identification
