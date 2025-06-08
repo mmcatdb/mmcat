@@ -27,23 +27,14 @@ public class DomainRow implements Comparable<DomainRow> {
 
     /** The tuples that holds the value of this row. */
     public final SuperIdValues values;
-    /** All technical ids under which is this row known. */
+    /** All technical ids under which is this row known. Immutable. */
     public final Set<String> technicalIds;
     public final Set<Signature> pendingReferences;
-    // Various ids that can be constructed from this row.
-
-    /** An ugly hack. A value of -1 means that the row is not yet serialized. */
-    public int serializationId;
 
     public DomainRow(SuperIdValues values, Set<String> technicalIds, Set<Signature> pendingReferences) {
-        this(values, technicalIds, pendingReferences, -1);
-    }
-
-    public DomainRow(SuperIdValues values, Set<String> technicalIds, Set<Signature> pendingReferences, int serializationId) {
         this.values = values;
         this.technicalIds = technicalIds;
         this.pendingReferences = pendingReferences;
-        this.serializationId = serializationId;
     }
 
     public boolean hasSignature(Signature signature) {

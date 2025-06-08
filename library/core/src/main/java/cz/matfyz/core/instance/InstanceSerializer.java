@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -134,7 +135,7 @@ public class InstanceSerializer {
         for (final var serializedRow : serializedObjex.rows) {
             final var row = new DomainRow(
                 serializedRow.values,
-                new TreeSet<>(serializedRow.technicalIds),
+                Set.of(serializedRow.technicalIds.toArray(String[]::new)),
                 new TreeSet<>(serializedRow.pendingReferences)
             );
 

@@ -31,6 +31,15 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
         return superId;
     }
 
+    /**
+     * There are two types of objexes - entites and properties.
+     * Entities have outgoing morphisms, properties do not.
+     * Entities have either signature identifier(s) or a generated identifier. Properties are identified by their value.
+     */
+    public boolean isEntity() {
+        return !ids.isValue();
+    }
+
     // Identification
 
     @Override public Key identifier() {

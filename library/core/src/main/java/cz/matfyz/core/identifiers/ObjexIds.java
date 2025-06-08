@@ -23,14 +23,22 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonDeserialize(using = ObjexIds.Deserializer.class)
 public class ObjexIds implements Serializable {
     public enum Type {
-        // This set of signatures points to other value/generated identified objexes, which form a composite identifier
-        // (or simple, if there is just a single signature)
-        /** A set of signatures. */
+        /**
+         * A set of signatures. If there is just one, it's a simple identifier, otherwise it's a composite identifier.
+         * The identifier are the values of the objexes to which the signatures point.
+         * The objex has to be an entity.
+         */
         Signatures,
-        /** A simple string value. */
-        Value,
-        /** A simple string value that should be generated automatically. */
+        /**
+         * A simple value which we don't know so it has to be generated.
+         * The objex has to be an entity.
+         */
         Generated,
+        /**
+         * A simple value.
+         * The objex has to be a property.
+         */
+        Value,
     }
 
     private final Type type;

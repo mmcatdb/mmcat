@@ -25,7 +25,15 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
     public final SchemaObjex schema;
 
     private final InstanceCategory instance;
+    /**
+     * All rows in the domain of this object.
+     * The first map is indexed by the different identifiers the object can have (they have to be signatureIds).
+     * The second map is the actual rows, indexed by actual values of these identifiers.
+     */
     private final Map<SignatureId, Map<SuperIdValues, DomainRow>> domain = new TreeMap<>();
+    /**
+     * A technical id is a unique identifier that is used when the object does not have any other identifiers (or we don't know their values).
+     */
     private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
     public InstanceObjex(SchemaObjex schema, InstanceCategory instance) {

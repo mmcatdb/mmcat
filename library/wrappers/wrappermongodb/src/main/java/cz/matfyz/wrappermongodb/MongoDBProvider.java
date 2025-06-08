@@ -24,6 +24,8 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         if (mongoClient == null)
             mongoClient = MongoClients.create(settings.createConnectionString());
 
+        System.out.println("\nMONGO\n" + settings.createConnectionString() + "\n");
+
         return mongoClient.getDatabase(settings.database);
     }
 

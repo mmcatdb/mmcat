@@ -6,7 +6,6 @@ import cz.matfyz.core.identifiers.SignatureId;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -24,6 +23,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Immutable.
@@ -46,16 +46,12 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return tuples.get(signature);
     }
 
-    private SignatureId cachedId;
+    private @Nullable SignatureId cachedId;
 
     public SignatureId id() {
         if (cachedId == null)
             cachedId = new SignatureId(tuples.keySet());
         return cachedId;
-    }
-
-    public Collection<String> values() {
-        return tuples.values();
     }
 
     public int size() {
@@ -131,10 +127,6 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
 
     public static SuperIdValues fromEmptySignature(String value) {
         return new Builder().add(Signature.createEmpty(), value).build();
-    }
-
-    public static SuperIdValues createEmpty() {
-        return new Builder().build();
     }
 
     private SuperIdValues(Map<Signature, String> map) {
