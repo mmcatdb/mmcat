@@ -95,7 +95,7 @@ public class InferenceEditorUtils {
      */
     public static Key createAndAddObjex(SchemaCategory schema, MetadataCategory metadata, ObjexIds ids, String label) {
         final Key key = new Key(getNewKeyValue(schema));
-        final SchemaObjex objex = new SchemaObjex(key, ids, ids.generateDefaultSuperId());
+        final SchemaObjex objex = new SchemaObjex(key, ids);
 
         schema.addObjex(objex);
         metadata.setObjex(objex, new MetadataObjex(label, Position.createDefault()));
@@ -181,7 +181,7 @@ public class InferenceEditorUtils {
         final SchemaCategory copy = new SchemaCategory();
 
         for (final SchemaObjex objex : original.allObjexes())
-            copy.addObjex(new SchemaObjex(objex.key(), objex.ids(), objex.superId()));
+            copy.addObjex(new SchemaObjex(objex.key(), objex.ids()));
 
         for (final SchemaMorphism morphism : original.allMorphisms())
             copy.addMorphism(new SchemaMorphism(

@@ -42,7 +42,7 @@ class Merger {
             // TODO make more effective:
             // - only those that are needed
             // - set, not a queue, so the same rows won't be repeated
-            addReferenceJob(job.superId, job.technicalIds, job.instanceObjex);
+            addReferenceJob(job.values, job.technicalIds, job.instanceObjex);
         }
 
         while (!referenceJobs.isEmpty()) {
@@ -54,56 +54,56 @@ class Merger {
     /**
      * Merges the row and then iterativelly merges rows from other instance objexes that might be affected.
      *
-     * @param superId The super id must contain at least one id.
+     * @param values The super id must contain at least one id.
      */
-    public DomainRow merge(SuperIdWithValues superId, InstanceObjex instanceObjex) {
-        addMergeJob(superId, Set.of(), instanceObjex);
+    public DomainRow merge(SuperIdValues values, InstanceObjex instanceObjex) {
+        addMergeJob(values, Set.of(), instanceObjex);
         processQueues();
 
-        return instanceObjex.getActualRow(superId, Set.of());
+        return instanceObjex.getActualRow(values, Set.of());
     }
 
     /**
-     * @param superId SuperId of the new row we want to create.
+     * @param values SuperId values of the new row we want to create.
      * @param parent Parent row to which we should connect the new row.
      * @param edge Edge from parent to the new row.
      * @return
      */
-    public DomainRow merge(SuperIdWithValues superId, DomainRow parent, SchemaEdge edge) {
+    public DomainRow merge(SuperIdValues values, DomainRow parent, SchemaEdge edge) {
         final InstanceObjex childObjex = instance.getObjex(edge.to());
 
-        // First, we try to find the row by the superId.
-        final var currentRow = childObjex.getRow(superId);
+        // First, we try to find the row by the superId values.
+        final var currentRow = childObjex.getRow(values);
         if (currentRow != null)
-            return addToRowAndConnect(currentRow, superId, parent, edge, childObjex);
+            return addToRowAndConnect(currentRow, values, parent, edge, childObjex);
 
         // Then we try to find it by the connection.
         if (!edge.isArray()) {
             final var mapping = parent.getMappingsForEdge(edge).stream().findFirst();
             if (mapping.isPresent())
-                return addToRow(mapping.get().codomainRow(), superId, childObjex);
+                return addToRow(mapping.get().codomainRow(), values, childObjex);
         }
 
         // No such row exists yet, so we have to create it. It also cannot be merged so we are not doing that.
-        final var newRow = childObjex.createRow(superId);
+        final var newRow = childObjex.createRow(values);
         createMappingForEdge(edge, parent, newRow);
 
-        addReferenceJob(newRow.superId, newRow.technicalIds, childObjex);
+        addReferenceJob(newRow.values, newRow.technicalIds, childObjex);
         processQueues();
 
         return newRow;
     }
 
-    private DomainRow addToRowAndConnect(DomainRow currentRow, SuperIdWithValues superId, DomainRow parent, SchemaEdge edge, InstanceObjex childObjex) {
+    private DomainRow addToRowAndConnect(DomainRow currentRow, SuperIdValues values, DomainRow parent, SchemaEdge edge, InstanceObjex childObjex) {
         // TODO more effective search, e.g., map.
         for (final var codomainRow : parent.getCodomainForEdge(edge))
             if (codomainRow.equals(currentRow))
-                return addToRow(currentRow, superId, childObjex); // The connection already exists so we just have to add to the superId.
+                return addToRow(currentRow, values, childObjex); // The connection already exists so we just have to add to the values.
 
         // The connection does not exist yet, so we create it and then merge it.
         // TODO optimization - merging with the knowledge of the connection, so we would not have create it, then delete it and then create it for the new row.
         createMappingForEdge(edge, parent, currentRow);
-        return addToRow(currentRow, superId, childObjex);
+        return addToRow(currentRow, values, childObjex);
     }
 
     private void createMappingForEdge(SchemaEdge edge, DomainRow domainRow, DomainRow codomainRow) {
@@ -115,14 +115,14 @@ class Merger {
     }
 
     /**
-     * Add information from the superId to the existing row.
+     * Add information from the superId values to the existing row.
      */
-    private DomainRow addToRow(DomainRow currentRow, SuperIdWithValues superId, InstanceObjex objex) {
-        final var newSuperId = SuperIdWithValues.merge(currentRow.superId, superId);
-        if (newSuperId.size() == currentRow.superId.size())
-            return currentRow; // The row already contains everything from the merging superId.
+    private DomainRow addToRow(DomainRow currentRow, SuperIdValues values, InstanceObjex objex) {
+        final var newValues = SuperIdValues.merge(currentRow.values, values);
+        if (newValues.size() == currentRow.values.size())
+            return currentRow; // The row already contains everything from the merging values.
 
-        return merge(superId, objex);
+        return merge(values, objex);
     }
 
     /*
@@ -142,29 +142,29 @@ class Merger {
     }
     */
 
-    private void addMergeJob(SuperIdWithValues superId, Set<String> technicalId, InstanceObjex instanceObjex) {
-        jobs.add(new MergeRowsJob(this, superId, technicalId, instanceObjex));
+    private void addMergeJob(SuperIdValues values, Set<String> technicalId, InstanceObjex instanceObjex) {
+        jobs.add(new MergeRowsJob(this, values, technicalId, instanceObjex));
     }
 
     // private void addMergeJob(Set<DomainRow> rows, InstanceObjex instanceObjex) {
     //     jobs.add(new MergeRowsJob(this, InstanceObjex.mergeSuperIds(rows), InstanceObjex.mergeTechnicalIds(rows), instanceObjex));
     // }
 
-    private void addReferenceJob(SuperIdWithValues superId, Set<String> technicalIds, InstanceObjex instanceObjex) {
-        referenceJobs.add(new ReferenceJob(this, superId, technicalIds, instanceObjex));
+    private void addReferenceJob(SuperIdValues values, Set<String> technicalIds, InstanceObjex instanceObjex) {
+        referenceJobs.add(new ReferenceJob(this, values, technicalIds, instanceObjex));
     }
 
     private class MergeRowsJob {
 
         private final Merger merger;
 
-        SuperIdWithValues superId;
+        SuperIdValues values;
         Set<String> technicalIds;
         InstanceObjex instanceObjex;
 
-        MergeRowsJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObjex instanceObjex) {
+        MergeRowsJob(Merger merger, SuperIdValues values, Set<String> technicalIds, InstanceObjex instanceObjex) {
             this.merger = merger;
-            this.superId = superId;
+            this.values = values;
             this.technicalIds = technicalIds;
             this.instanceObjex = instanceObjex;
         }
@@ -172,13 +172,13 @@ class Merger {
         public void process() {
             Set<DomainRow> originalRows = new TreeSet<>();
 
-            // Iteratively get all rows that are identified by the superId (while expanding the superId).
+            // Iteratively get all rows that are identified by the superId values (while expanding the superId values).
             // Also get all technical ids.
-            final var superIdOfTechnicalRows = instanceObjex.findTechnicalSuperId(technicalIds, originalRows);
-            superId = SuperIdWithValues.merge(superId, superIdOfTechnicalRows);
+            final var valuesOfTechnicalRows = instanceObjex.findTechnicalSuperIdValues(technicalIds, originalRows);
+            values = SuperIdValues.merge(values, valuesOfTechnicalRows);
 
-            final var result = instanceObjex.findMaximalSuperId(superId, originalRows);
-            final var maximalSuperId = result.superId();
+            final var result = instanceObjex.findMaximalSuperIdValues(values, originalRows);
+            final var maximalSuperIdValues = result.values();
             final var maximalTechnicalId = mergeTechnicalIds(originalRows);
 
             if (originalRows.size() == 1)
@@ -186,11 +186,11 @@ class Merger {
 
             // Create new Row that contains the unified superId and put it to all possible ids.
             // This also deletes the old ones.
-            final var newRow = instanceObjex.createRow(maximalSuperId, maximalTechnicalId, result.foundIds());
+            final var newRow = instanceObjex.createRow(maximalSuperIdValues, maximalTechnicalId, result.foundIds());
 
             // Get all morphisms from and to the original rows and put the new one instead of them.
             // Detect all morphisms that have maximal cardinality ONE and merge their rows. This can cause a chain reaction.
-            // This steps is done by combining the rows' superIds and then calling merge.
+            // This steps is done by combining the rows' superId values and then calling merge.
             mergeMappings(originalRows, newRow);
         }
 
@@ -262,19 +262,19 @@ class Merger {
 
         private final Merger merger;
 
-        final SuperIdWithValues superId;
-        final Set<String> technicalIds; // The rows have to have at least some values in superId but it does not have to be a valid id ...
+        final SuperIdValues values;
+        final Set<String> technicalIds; // The rows have to have at least some values in superId values but it does not have to be a valid id ...
         final InstanceObjex instanceObjex;
 
-        ReferenceJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObjex instanceObjex) {
+        ReferenceJob(Merger merger, SuperIdValues values, Set<String> technicalIds, InstanceObjex instanceObjex) {
             this.merger = merger;
-            this.superId = superId;
+            this.values = values;
             this.technicalIds = technicalIds;
             this.instanceObjex = instanceObjex;
         }
 
         public void process() {
-            final var referencingRow = instanceObjex.getActualRow(superId, technicalIds);
+            final var referencingRow = instanceObjex.getActualRow(values, technicalIds);
 
             for (final var pair : referencingRow.getAndRemovePendingReferencePairs())
                 for (final var reference : instanceObjex.getReferencesForSignature(pair.signature()))
@@ -289,8 +289,8 @@ class Merger {
                     continue; // The row already has the value.
 
                 // Add value to the targetRow.
-                final var builder = new SuperIdWithValues.Builder();
-                builder.add(targetRow.superId);
+                final var builder = new SuperIdValues.Builder();
+                builder.add(targetRow.values);
                 builder.add(reference.signatureInOther, value);
 
                 merger.addMergeJob(builder.build(), targetRow.technicalIds, instanceObjex);

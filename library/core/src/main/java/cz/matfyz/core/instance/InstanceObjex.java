@@ -25,7 +25,7 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
     public final SchemaObjex schema;
 
     private final InstanceCategory instance;
-    private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
+    private final Map<SignatureId, Map<SuperIdValues, DomainRow>> domain = new TreeMap<>();
     private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
     public InstanceObjex(SchemaObjex schema, InstanceCategory instance) {
@@ -39,8 +39,8 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
     }
 
     // TODO rozlišit id od superId
-    private DomainRow getRowById(SuperIdWithValues id) {
-        Map<SuperIdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
+    private DomainRow getRowById(SuperIdValues id) {
+        Map<SuperIdValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
         return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
     }
 
@@ -48,9 +48,9 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         return domainByTechnicalIds.get(technicalId);
     }
 
-    public void setRow(DomainRow row, Collection<SuperIdWithValues> ids) {
+    public void setRow(DomainRow row, Collection<SuperIdValues> ids) {
         for (var id : ids) {
-            Map<SuperIdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
+            Map<SuperIdValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
             if (rowsWithSameTypeId == null) {
                 rowsWithSameTypeId = new TreeMap<>();
                 domain.put(id.id(), rowsWithSameTypeId);
@@ -62,40 +62,40 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
             domainByTechnicalIds.put(technicalId, row);
     }
 
-    public DomainRow getOrCreateRow(SuperIdWithValues superId) {
+    public DomainRow getOrCreateRow(SuperIdValues values) {
         // If the superId doesn't contain any id, we have to create a technical one.
-        if (superId.findFirstId(schema.ids()) == null)
-            return createRow(superId, Set.of(generateTechnicalId()), Set.of());
+        if (values.findFirstId(schema.ids()) == null)
+            return createRow(values, Set.of(generateTechnicalId()), Set.of());
 
         final var merger = new Merger(instance);
-        return merger.merge(superId, this);
+        return merger.merge(values, this);
     }
 
-    public static DomainRow getOrCreateRowWithEdge(InstanceCategory instance, SuperIdWithValues superId, DomainRow parent, SchemaEdge edgeFromParent) {
+    public static DomainRow getOrCreateRowWithEdge(InstanceCategory instance, SuperIdValues values, DomainRow parent, SchemaEdge edgeFromParent) {
         final var merger = new Merger(instance);
-        return merger.merge(superId, parent, edgeFromParent);
+        return merger.merge(values, parent, edgeFromParent);
     }
 
-    DomainRow createRow(SuperIdWithValues superId) {
-        Set<String> technicalIds = superId.findFirstId(schema.ids()) == null
+    DomainRow createRow(SuperIdValues values) {
+        Set<String> technicalIds = values.findFirstId(schema.ids()) == null
             ? Set.of(generateTechnicalId())
             : Set.of();
-        final var ids = superId.findAllIds(schema.ids()).foundIds();
+        final var ids = values.findAllIds(schema.ids()).foundIds();
 
-        return createRow(superId, technicalIds, ids);
+        return createRow(values, technicalIds, ids);
     }
 
-    DomainRow createRow(SuperIdWithValues superId, Set<String> technicalIds, Set<SuperIdWithValues> allIds) {
+    DomainRow createRow(SuperIdValues values, Set<String> technicalIds, Set<SuperIdValues> allIds) {
         // TODO this can be optimized - we can discard the references that were referenced in all merged rows.
         // However, it might be quite rare, so the overhead caused by finding such ids would be greater than the savings.
-        final var row = new DomainRow(superId, technicalIds, referencesToRows.keySet());
+        final var row = new DomainRow(values, technicalIds, referencesToRows.keySet());
         setRow(row, allIds);
 
         return row;
     }
 
-    public DomainRow getRow(SuperIdWithValues superId) {
-        for (final var id : superId.findAllIds(schema.ids()).foundIds()) {
+    public DomainRow getRow(SuperIdValues values) {
+        for (final var id : values.findAllIds(schema.ids()).foundIds()) {
             final var row = getRowById(id);
             if (row != null)
                 return row;
@@ -108,9 +108,9 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
     /**
      * Returns the most recent row for the superId or technicalIds.
      */
-    public DomainRow getActualRow(SuperIdWithValues superId, Set<String> technicalIds) {
+    public DomainRow getActualRow(SuperIdValues values, Set<String> technicalIds) {
         // Simply find the first id of all possible ids (any of them should point to the same row).
-        var foundId = superId.findFirstId(schema.ids());
+        var foundId = values.findFirstId(schema.ids());
         if (foundId != null)
             return getRowById(foundId);
 
@@ -119,14 +119,14 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         if (technicalId.isPresent())
             return getRowByTechnicalId(technicalId.get());
 
-        throw ObjexException.actualRowNotFound(superId, technicalIds);
+        throw ObjexException.actualRowNotFound(values, technicalIds);
     }
 
     /**
      * Returns the most recent value of the row (possibly the inpuct object).
      */
     public DomainRow getActualRow(DomainRow row) {
-        return getActualRow(row.superId, row.technicalIds);
+        return getActualRow(row.values, row.technicalIds);
     }
 
     /** The package access is just for serialization. */
@@ -150,40 +150,36 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         return output;
     }
 
-    public SuperIdWithValues findTechnicalSuperId(Set<String> technicalIds, Set<DomainRow> outOriginalRows) {
-        final var builder = new SuperIdWithValues.Builder();
+    public SuperIdValues findTechnicalSuperIdValues(Set<String> technicalIds, Set<DomainRow> outOriginalRows) {
+        final var builder = new SuperIdValues.Builder();
 
         for (final var technicalId : technicalIds) {
             final var row = getRowByTechnicalId(technicalId);
             if (!outOriginalRows.contains(row)) {
                 outOriginalRows.add(row);
-                builder.add(row.superId);
+                builder.add(row.values);
             }
         }
 
         return builder.build();
     }
 
-    public record FindSuperIdResult(SuperIdWithValues superId, Set<SuperIdWithValues> foundIds) {}
+    public record FindSuperIdResult(SuperIdValues values, Set<SuperIdValues> foundIds) {}
 
-    /**
-     * Iteratively get all rows that are identified by the superId (while expanding the superId).
-     * @param superId
-     * @return
-     */
-    public FindSuperIdResult findMaximalSuperId(SuperIdWithValues superId, Set<DomainRow> outOriginalRows) {
+    /** Iteratively get all rows that are identified by the values (while expanding the values). */
+    public FindSuperIdResult findMaximalSuperIdValues(SuperIdValues values, Set<DomainRow> outOriginalRows) {
         // First, we take all ids that can be created for this object, and we find those, that can be filled from the given superId.
         // Then we find the rows that correspond to them and merge their superIds to the superId.
         // If it gets bigger, we try to generate other ids to find their objexes and so on ...
 
         int previousSuperIdSize = 0;
-        Set<SuperIdWithValues> foundIds = new TreeSet<>();
+        Set<SuperIdValues> foundIds = new TreeSet<>();
         Set<SignatureId> notFoundIds = schema.ids().toSignatureIds();
 
-        while (previousSuperIdSize < superId.size()) {
-            previousSuperIdSize = superId.size();
+        while (previousSuperIdSize < values.size()) {
+            previousSuperIdSize = values.size();
 
-            final var result = superId.findAllSignatureIds(notFoundIds);
+            final var result = values.findAllSignatureIds(notFoundIds);
             foundIds.addAll(result.foundIds());
             notFoundIds = result.notFoundIds();
 
@@ -191,20 +187,20 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
             if (foundRows.isEmpty())
                 break; // We have not found anything new.
 
-            superId = SuperIdWithValues.merge(superId, mergeSuperIds(foundRows));
+            values = SuperIdValues.merge(values, mergeSuperIdValues(foundRows));
         }
 
-        return new FindSuperIdResult(superId, foundIds);
+        return new FindSuperIdResult(values, foundIds);
     }
 
-    private static SuperIdWithValues mergeSuperIds(Collection<DomainRow> rows) {
-        final var builder = new SuperIdWithValues.Builder();
-        rows.forEach(row -> builder.add(row.superId));
+    private static SuperIdValues mergeSuperIdValues(Collection<DomainRow> rows) {
+        final var builder = new SuperIdValues.Builder();
+        rows.forEach(row -> builder.add(row.values));
 
         return builder.build();
     }
 
-    private Set<DomainRow> findNewRows(Set<SuperIdWithValues> foundIds, Set<DomainRow> outOriginalRows) {
+    private Set<DomainRow> findNewRows(Set<SuperIdValues> foundIds, Set<DomainRow> outOriginalRows) {
         final var output = new TreeSet<DomainRow>();
 
         for (var id : foundIds) {
@@ -279,15 +275,15 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         // TODO How to copy signature ids?
         for (final var domainEntry : source.domain.entrySet()) {
             final SignatureId id = domainEntry.getKey();
-            final Map<SuperIdWithValues, DomainRow> sourceRows = domainEntry.getValue();
-            final Map<SuperIdWithValues, DomainRow> targetRows = new TreeMap<>();
+            final Map<SuperIdValues, DomainRow> sourceRows = domainEntry.getValue();
+            final Map<SuperIdValues, DomainRow> targetRows = new TreeMap<>();
 
             for (final DomainRow sourceRow : sourceRows.values()) {
                 // TODO Pending references (probably should be empty, but we should check it).
-                final DomainRow targetRow = new DomainRow(sourceRow.superId, sourceRow.technicalIds, Set.of());
+                final DomainRow targetRow = new DomainRow(sourceRow.values, sourceRow.technicalIds, Set.of());
 
                 final DomainRow uniqueRow = uniqueRows.computeIfAbsent(targetRow, row -> row);
-                targetRows.put(uniqueRow.superId, uniqueRow);
+                targetRows.put(uniqueRow.values, uniqueRow);
             }
 
             if (!targetRows.isEmpty()) {
@@ -298,7 +294,7 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         for (final var technicalIdEntry : source.domainByTechnicalIds.entrySet()) {
             final String technicalId = technicalIdEntry.getKey();
             final DomainRow sourceRow = technicalIdEntry.getValue();
-            final DomainRow targetRow = new DomainRow(sourceRow.superId, sourceRow.technicalIds, Set.of());
+            final DomainRow targetRow = new DomainRow(sourceRow.values, sourceRow.technicalIds, Set.of());
 
             final DomainRow uniqueRow = uniqueRows.computeIfAbsent(targetRow, row -> row);
             domainByTechnicalIds.put(technicalId, uniqueRow);

@@ -136,7 +136,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             ? new ObjexIds(addSignatureToSet(schemaObjex.ids(), signature))
             : new ObjexIds(signatureSet);
 
-        return new SchemaObjex(schemaObjex.key(), updatedIds, updatedIds.generateDefaultSuperId());
+        return new SchemaObjex(schemaObjex.key(), updatedIds);
     }
 
     private SortedSet<SignatureId> addSignatureToSet(ObjexIds ids, Signature signature) {

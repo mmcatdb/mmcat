@@ -61,7 +61,7 @@ public class AccessTreeToSchemaCategoryConverter {
             ? ObjexIds.createGenerated()
             : ObjexIds.createValue();
 
-        final SchemaObjex objex = new SchemaObjex(node.key, ids, ids.generateDefaultSuperId());
+        final SchemaObjex objex = new SchemaObjex(node.key, ids);
         schema.addObjex(objex);
 
         final var label = isRoot ? kindName : node.name;

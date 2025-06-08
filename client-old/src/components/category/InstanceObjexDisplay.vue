@@ -48,7 +48,7 @@ const columns = props.objex.schema.superId.signatures.map(signature => defineCol
                     v-for="(column, columnIndex) in columns"
                     :key="columnIndex"
                 >
-                    {{ row.superId.tuples.get(column.signature) }}
+                    {{ row.values.tuples.get(column.signature) }}
                 </td>
             </tr>
         </table>

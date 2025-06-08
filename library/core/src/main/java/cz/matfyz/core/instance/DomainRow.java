@@ -26,7 +26,7 @@ public class DomainRow implements Comparable<DomainRow> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
     /** The tuples that holds the value of this row. */
-    public final SuperIdWithValues superId;
+    public final SuperIdValues values;
     /** All technical ids under which is this row known. */
     public final Set<String> technicalIds;
     public final Set<Signature> pendingReferences;
@@ -35,27 +35,27 @@ public class DomainRow implements Comparable<DomainRow> {
     /** An ugly hack. A value of -1 means that the row is not yet serialized. */
     public int serializationId;
 
-    public DomainRow(SuperIdWithValues superId, Set<String> technicalIds, Set<Signature> pendingReferences) {
-        this(superId, technicalIds, pendingReferences, -1);
+    public DomainRow(SuperIdValues values, Set<String> technicalIds, Set<Signature> pendingReferences) {
+        this(values, technicalIds, pendingReferences, -1);
     }
 
-    public DomainRow(SuperIdWithValues superId, Set<String> technicalIds, Set<Signature> pendingReferences, int serializationId) {
-        this.superId = superId;
+    public DomainRow(SuperIdValues values, Set<String> technicalIds, Set<Signature> pendingReferences, int serializationId) {
+        this.values = values;
         this.technicalIds = technicalIds;
         this.pendingReferences = pendingReferences;
         this.serializationId = serializationId;
     }
 
     public boolean hasSignature(Signature signature) {
-        return superId.hasSignature(signature);
+        return values.hasSignature(signature);
     }
 
     public Set<Signature> signatures() {
-        return superId.signatures();
+        return values.signatures();
     }
 
     public String getValue(Signature signature) {
-        return superId.getValue(signature);
+        return values.getValue(signature);
     }
 
     public record MappingsFor(InstanceMorphism morphism, Set<MappingRow> mappings) {
@@ -126,9 +126,9 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     @Override public int compareTo(DomainRow row) {
-        final var superIdComparison = superId.compareTo(row.superId);
-        if (superIdComparison != 0)
-            return superIdComparison;
+        final var valuesComparison = values.compareTo(row.values);
+        if (valuesComparison != 0)
+            return valuesComparison;
 
         for (final var technicalId : technicalIds)
             if (row.technicalIds.contains(technicalId))
@@ -139,7 +139,7 @@ public class DomainRow implements Comparable<DomainRow> {
 
     @Override public String toString() {
         final var builder = new StringBuilder();
-        builder.append(superId.toString());
+        builder.append(values.toString());
         if (!technicalIds.isEmpty()) {
             builder.append("[");
             var notFirst = false;
@@ -157,7 +157,7 @@ public class DomainRow implements Comparable<DomainRow> {
 
     // TODO change equals and compareTo to do == first
     @Override public boolean equals(Object object) {
-        return object instanceof DomainRow row && superId.equals(row.superId);
+        return object instanceof DomainRow row && values.equals(row.values);
     }
 
 }

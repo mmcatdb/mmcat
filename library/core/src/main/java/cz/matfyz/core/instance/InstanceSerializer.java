@@ -28,7 +28,7 @@ public class InstanceSerializer {
 
     public record SerializedDomainRow(
         int id,
-        SuperIdWithValues superId,
+        SuperIdValues values,
         List<String> technicalIds,
         List<Signature> pendingReferences
     ) {}
@@ -74,7 +74,7 @@ public class InstanceSerializer {
         for (final DomainRow row : objex.allRowsToSet()) {
             final var rowWrapper = new SerializedDomainRow(
                 lastId++,
-                row.superId,
+                row.values,
                 row.technicalIds.stream().toList(),
                 row.pendingReferences.stream().toList()
             );
@@ -133,13 +133,13 @@ public class InstanceSerializer {
 
         for (final var serializedRow : serializedObjex.rows) {
             final var row = new DomainRow(
-                serializedRow.superId,
+                serializedRow.values,
                 new TreeSet<>(serializedRow.technicalIds),
                 new TreeSet<>(serializedRow.pendingReferences)
             );
 
             idToRow.put(serializedRow.id, row);
-            final var ids = row.superId.findAllIds(objex.schema.ids()).foundIds();
+            final var ids = row.values.findAllIds(objex.schema.ids()).foundIds();
             objex.setRow(row, ids);
         }
     }

@@ -16,8 +16,8 @@ public class InvalidStateException extends TransformationException {
         return new InvalidStateException("simpleRecordIsNotValue", simpleRecord);
     }
 
-    public static InvalidStateException superIdHasArrayValue() {
-        return new InvalidStateException("superIdHasArrayValue", null);
+    public static InvalidStateException superIdValuesHasArrayValue() {
+        return new InvalidStateException("superIdValuesHasArrayValue", null);
     }
 
     public static InvalidStateException dynamicNameNotFound(DynamicName dynamicName) {

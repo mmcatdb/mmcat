@@ -37,20 +37,20 @@ export class InstanceObjex {
 
 export type DomainRowFromServer = {
     id: number;
-    superId: SuperIdWithValuesFromServer;
+    values: SuperIdValuesFromServer;
     technicalIds: string[];
     pendingReferences: Signature[];
 };
 
 export class DomainRow {
     private constructor(
-        readonly superId: SuperIdWithValues,
+        readonly values: SuperIdValues,
         readonly technicalIds: Set<string>,
     ) {}
 
     static fromServer(input: DomainRowFromServer) {
         return new DomainRow(
-            SuperIdWithValues.fromServer(input.superId),
+            SuperIdValues.fromServer(input.values),
             new Set(input.technicalIds),
         );
     }
@@ -65,17 +65,17 @@ type SingatureValueTupleFromServer = {
     value: string;
 };
 
-type SuperIdWithValuesFromServer = SingatureValueTupleFromServer[];
+type SuperIdValuesFromServer = SingatureValueTupleFromServer[];
 
-export class SuperIdWithValues {
+export class SuperIdValues {
     private constructor(
         readonly tuples: ComparableMap<Signature, string, string>,
     ) {}
 
-    static fromServer(input: SuperIdWithValuesFromServer): SuperIdWithValues {
+    static fromServer(input: SuperIdValuesFromServer): SuperIdValues {
         const tuples = new ComparableMap<Signature, string, string>(signature => signature.value);
         input.forEach(tuple => tuples.set(Signature.fromServer(tuple.signature), tuple.value));
 
-        return new SuperIdWithValues(tuples);
+        return new SuperIdValues(tuples);
     }
 }

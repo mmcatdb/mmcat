@@ -3,7 +3,6 @@ package cz.matfyz.core.schema;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 
@@ -47,23 +46,20 @@ public class SchemaSerializer {
 
     public record SerializedObjex(
         Key key,
-        ObjexIds ids,
-        SignatureId superId
+        ObjexIds ids
     ) {
 
         public static SerializedObjex serialize(SchemaObjex objex) {
             return new SerializedObjex(
                 objex.key(),
-                objex.ids(),
-                objex.superId()
+                objex.ids()
             );
         }
 
         public SchemaObjex deserialize() {
             return new SchemaObjex(
                 key,
-                ids,
-                superId
+                ids
             );
         }
 

@@ -57,7 +57,7 @@ function defineColumn(signature: Signature, node: Node): Column {
                     v-for="(column, columnIndex) in columns.dom"
                     :key="columnIndex"
                 >
-                    {{ mapping.dom.superId.tuples.get(column.signature) }}
+                    {{ mapping.dom.values.tuples.get(column.signature) }}
                 </td>
                 <td class="gap">
                     &lt;--&gt;
@@ -69,7 +69,7 @@ function defineColumn(signature: Signature, node: Node): Column {
                     v-for="(column, columnIndex) in columns.cod"
                     :key="columnIndex"
                 >
-                    {{ mapping.cod.superId.tuples.get(column.signature) }}
+                    {{ mapping.cod.values.tuples.get(column.signature) }}
                 </td>
             </tr>
         </table>

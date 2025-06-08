@@ -3,7 +3,6 @@ package cz.matfyz.server.example.common;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataObjex;
@@ -57,7 +56,7 @@ public abstract class SchemaBase {
 
     private SerializedObjex getOldObjex(Key key) {
         final var objex = newSchema.getObjex(key);
-        return new SerializedObjex(key, objex.ids(), objex.superId());
+        return new SerializedObjex(key, objex.ids());
     }
 
     protected SchemaEvolutionInit innerCreateNewUpdate() {
@@ -89,11 +88,8 @@ public abstract class SchemaBase {
         final ObjexIds ids = !objex.ids().isSignatures()
                 ? objex.ids()
                 : null;
-        final SignatureId superId = ids != null
-            ? ids.generateDefaultSuperId()
-            : new SignatureId();
 
-        final var schema = new SerializedObjex(key, ids, superId);
+        final var schema = new SerializedObjex(key, ids);
         final var metadata = new SerializedMetadataObjex(key, builderObjex.label(), createPosition(x, y));
         addSchemaOperation(new CreateObjex(schema, metadata));
         addMetadataOperation(new ObjexMetadata(metadata, null));
@@ -106,7 +102,7 @@ public abstract class SchemaBase {
     protected void addIds(BuilderObjex builderObjex) {
         final var key = builderObjex.key();
         final var objex = originalSchema.getObjex(key);
-        final var newObjex = new SerializedObjex(key, objex.ids(), objex.superId());
+        final var newObjex = new SerializedObjex(key, objex.ids());
         final var oldObjex = getOldObjex(key);
 
         addSchemaOperation(new UpdateObjex(newObjex, oldObjex));
@@ -114,7 +110,7 @@ public abstract class SchemaBase {
 
     protected void editIds(BuilderObjex builderObjex, ObjexIds ids) {
         final var key = builderObjex.key();
-        final var newObjex = new SerializedObjex(key, ids, ids.generateDefaultSuperId());
+        final var newObjex = new SerializedObjex(key, ids);
         final var oldObjex = getOldObjex(key);
 
         addSchemaOperation(new UpdateObjex(newObjex, oldObjex));

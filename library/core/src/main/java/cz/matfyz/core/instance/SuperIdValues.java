@@ -28,9 +28,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 /**
  * Immutable.
  */
-@JsonSerialize(using = SuperIdWithValues.Serializer.class)
-@JsonDeserialize(using = SuperIdWithValues.Deserializer.class)
-public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithValues> {
+@JsonSerialize(using = SuperIdValues.Serializer.class)
+@JsonDeserialize(using = SuperIdValues.Deserializer.class)
+public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
 
     private final Map<Signature, String> tuples;
 
@@ -73,7 +73,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return true;
     }
 
-    public SuperIdWithValues findId(SignatureId id) {
+    public SuperIdValues findId(SignatureId id) {
         var builder = new Builder();
 
         for (var signature : id.signatures()) {
@@ -86,7 +86,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return builder.build();
     }
 
-    public SuperIdWithValues findFirstId(ObjexIds ids) {
+    public SuperIdValues findFirstId(ObjexIds ids) {
         for (var id : ids.toSignatureIds())
             if (containsId(id))
                 return findId(id);
@@ -94,7 +94,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return null;
     }
 
-    public record FindIdsResult(Set<SuperIdWithValues> foundIds, Set<SignatureId> notFoundIds) {}
+    public record FindIdsResult(Set<SuperIdValues> foundIds, Set<SignatureId> notFoundIds) {}
 
     /**
      * Returns all ids that are contained there as a subset.
@@ -106,7 +106,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
     }
 
     public FindIdsResult findAllSignatureIds(Set<SignatureId> ids) {
-        final var foundIds = new TreeSet<SuperIdWithValues>();
+        final var foundIds = new TreeSet<SuperIdValues>();
         final var notFoundIds = new TreeSet<SignatureId>();
 
         for (SignatureId id : ids) {
@@ -121,7 +121,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return new FindIdsResult(foundIds, notFoundIds);
     }
 
-    public static SuperIdWithValues merge(SuperIdWithValues... ids) {
+    public static SuperIdValues merge(SuperIdValues... ids) {
         var builder = new Builder();
         for (var id : ids)
             builder.add(id);
@@ -129,15 +129,15 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return builder.build();
     }
 
-    public static SuperIdWithValues fromEmptySignature(String value) {
+    public static SuperIdValues fromEmptySignature(String value) {
         return new Builder().add(Signature.createEmpty(), value).build();
     }
 
-    public static SuperIdWithValues createEmpty() {
+    public static SuperIdValues createEmpty() {
         return new Builder().build();
     }
 
-    private SuperIdWithValues(Map<Signature, String> map) {
+    private SuperIdValues(Map<Signature, String> map) {
         this.tuples = map;
     }
 
@@ -150,15 +150,15 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
             return this;
         }
 
-        public Builder add(SuperIdWithValues idWithValues) {
+        public Builder add(SuperIdValues idWithValues) {
             for (var tuple : idWithValues.tuples.entrySet())
                 map.put(tuple.getKey(), tuple.getValue());
 
             return this;
         }
 
-        public SuperIdWithValues build() {
-            var output = new SuperIdWithValues(map);
+        public SuperIdValues build() {
+            var output = new SuperIdValues(map);
             map = new TreeMap<>();
             return output;
         }
@@ -166,7 +166,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
     }
 
     @Override public boolean equals(Object object) {
-        if (!(object instanceof SuperIdWithValues idWithValues))
+        if (!(object instanceof SuperIdValues idWithValues))
             return false;
 
         return Objects.equals(this.tuples, idWithValues.tuples);
@@ -178,7 +178,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return hash;
     }
 
-    @Override public int compareTo(SuperIdWithValues idWithValues) {
+    @Override public int compareTo(SuperIdValues idWithValues) {
         int idCompareResult = id().compareTo(idWithValues.id());
         if (idCompareResult != 0)
             return idCompareResult;
@@ -210,19 +210,19 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return builder.toString();
     }
 
-    public static class Serializer extends StdSerializer<SuperIdWithValues> {
+    public static class Serializer extends StdSerializer<SuperIdValues> {
 
         public Serializer() {
             this(null);
         }
 
-        public Serializer(Class<SuperIdWithValues> t) {
+        public Serializer(Class<SuperIdValues> t) {
             super(t);
         }
 
-        @Override public void serialize(SuperIdWithValues superId, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(SuperIdValues values, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
-            for (final var entry : superId.tuples.entrySet()) {
+            for (final var entry : values.tuples.entrySet()) {
                 generator.writeStartObject();
                 generator.writePOJOField("signature", entry.getKey());
                 generator.writeStringField("value", entry.getValue());
@@ -233,7 +233,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
 
     }
 
-    public static class Deserializer extends StdDeserializer<SuperIdWithValues> {
+    public static class Deserializer extends StdDeserializer<SuperIdValues> {
 
         public Deserializer() {
             this(null);
@@ -245,7 +245,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
 
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
 
-        @Override public SuperIdWithValues deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public SuperIdValues deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
             final Map<Signature, String> tuples = new TreeMap<>();
 
@@ -257,7 +257,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
                 tuples.put(signature, value);
             }
 
-            return new SuperIdWithValues(tuples);
+            return new SuperIdValues(tuples);
         }
 
     }

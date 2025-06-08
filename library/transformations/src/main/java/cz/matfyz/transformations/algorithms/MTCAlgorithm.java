@@ -5,7 +5,7 @@ import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceObjex;
-import cz.matfyz.core.instance.SuperIdWithValues;
+import cz.matfyz.core.instance.SuperIdValues;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
@@ -73,21 +73,21 @@ public class MTCAlgorithm {
     private Deque<StackTriple> createStackWithObjex(SchemaObjex objex, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         final InstanceObjex instanceObjex = instance.getObjex(objex);
         // If the root objex has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root objex always is).
-        final SuperIdWithValues superId = objex.ids().isGenerated()
-            ? SuperIdWithValues.fromEmptySignature(idGenerator.next())
-            : fetchSuperId(objex.superId(), rootRecord);
+        final SuperIdValues values = objex.ids().isGenerated()
+            ? SuperIdValues.fromEmptySignature(idGenerator.next())
+            : fetchSuperIdValues(objex.superId(), rootRecord);
 
         final Deque<StackTriple> masterStack = new ArrayDeque<>();
 
-        final DomainRow row = instanceObjex.getOrCreateRow(superId);
+        final DomainRow row = instanceObjex.getOrCreateRow(values);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
 
         return masterStack;
     }
 
     // Fetch id-with-values for given root record.
-    private static SuperIdWithValues fetchSuperId(SignatureId superId, RootRecord rootRecord) {
-        final var builder = new SuperIdWithValues.Builder();
+    private static SuperIdValues fetchSuperIdValues(SignatureId superId, RootRecord rootRecord) {
+        final var builder = new SuperIdValues.Builder();
 
         for (final Signature signature : superId.signatures()) {
             for (final SimpleRecord<?> simpleRecord : rootRecord.findSimpleRecords(signature))
@@ -100,17 +100,17 @@ public class MTCAlgorithm {
     private void processTopOfStack(Deque<StackTriple> masterStack) {
         final StackTriple triple = masterStack.pop();
         LOGGER.debug("Process top of stack:\n{}", triple);
-        final var superIds = SuperIdsFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
+        final var valuesList = SuperIdValuesFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
         final InstanceObjex childInstance = instance.getObjex(triple.parentToChild.to());
 
-        for (final var superId : superIds) {
-            DomainRow childRow = childInstance.getOrCreateRow(superId.superId());
+        for (final var values : valuesList) {
+            DomainRow childRow = childInstance.getOrCreateRow(values.superId());
             childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
 
             //childInstance.merge(childRow);
 
-            addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, superId.childRecord());
+            addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, values.childRecord());
         }
     }
 
@@ -129,8 +129,8 @@ public class MTCAlgorithm {
 
             // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
             //if (!instanceObjex.equals(morphism.cod())) {
-            final var superId = fetchSuperIdForTechnicalRow(instanceObjex, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
-            currentDomainRow = InstanceObjex.getOrCreateRowWithEdge(instance, superId, currentDomainRow, edge);
+            final var values = fetchSuperIdForTechnicalRow(instanceObjex, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
+            currentDomainRow = InstanceObjex.getOrCreateRowWithEdge(instance, values, currentDomainRow, edge);
             //}
             /*
             else {
@@ -147,8 +147,8 @@ public class MTCAlgorithm {
         //return merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
     }
 
-    private SuperIdWithValues fetchSuperIdForTechnicalRow(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
-        final var builder = new SuperIdWithValues.Builder();
+    private SuperIdValues fetchSuperIdForTechnicalRow(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
+        final var builder = new SuperIdValues.Builder();
 
         for (final var signature : objex.superId().signatures()) {
             // The value is in either the first row ...

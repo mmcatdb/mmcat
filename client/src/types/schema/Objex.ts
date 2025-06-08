@@ -1,4 +1,4 @@
-import { idsAreEqual, Key, ObjexIds, SignatureId, type KeyFromServer, type ObjexIdsFromServer, type SignatureIdFromServer } from '../identifiers';
+import { idsAreEqual, Key, ObjexIds, type KeyFromServer, type ObjexIdsFromServer } from '../identifiers';
 import { type Category } from './Category';
 import { SchemaCategoryInvalidError } from './Error';
 import { type Morphism } from './Morphism';
@@ -44,7 +44,6 @@ export class Objex {
 export type SchemaObjexFromServer = {
     key: KeyFromServer;
     ids?: ObjexIdsFromServer;
-    superId: SignatureIdFromServer;
 };
 
 /**
@@ -54,7 +53,6 @@ export class SchemaObjex {
     private constructor(
         readonly key: Key,
         readonly ids: ObjexIds | undefined,
-        readonly superId: SignatureId,
         private _isNew: boolean,
     ) {}
 
@@ -62,7 +60,6 @@ export class SchemaObjex {
         return new SchemaObjex(
             Key.fromServer(schema.key),
             schema.ids ? ObjexIds.fromServer(schema.ids) : undefined,
-            SignatureId.fromServer(schema.superId),
             false,
         );
     }
@@ -71,7 +68,6 @@ export class SchemaObjex {
         return new SchemaObjex(
             key,
             def.ids,
-            def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             true,
         );
     }
@@ -102,7 +98,6 @@ export class SchemaObjex {
         return {
             key: this.key.toServer(),
             ids: this.ids?.toServer(),
-            superId: this.superId.toServer(),
         };
     }
 

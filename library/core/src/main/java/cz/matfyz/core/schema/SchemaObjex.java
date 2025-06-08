@@ -7,10 +7,10 @@ import cz.matfyz.core.identifiers.SignatureId;
 
 public class SchemaObjex implements Identified<SchemaObjex, Key> {
 
-    public SchemaObjex(Key key, ObjexIds ids, SignatureId superId) {
+    public SchemaObjex(Key key, ObjexIds ids) {
         this.key = key;
         this.ids = ids;
-        this.superId = superId;
+        this.superId = ids.generateDefaultSuperId();
     }
 
     private final Key key;

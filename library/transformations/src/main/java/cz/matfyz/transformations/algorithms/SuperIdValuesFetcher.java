@@ -2,7 +2,7 @@ package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.DomainRow;
-import cz.matfyz.core.instance.SuperIdWithValues;
+import cz.matfyz.core.instance.SuperIdValues;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.record.ComplexRecord;
@@ -18,7 +18,7 @@ import java.util.Set;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class SuperIdsFetcher {
+public class SuperIdValuesFetcher {
     /**
      * Fetch id-with-values for a schema objex in given record / domain row.
      * The output is a set of (Signature, String) for each Signature in superId and its corresponding value from record. Actually, there can be multiple values in the record, so a list of these sets is returned.
@@ -28,23 +28,23 @@ public class SuperIdsFetcher {
      * @param morphism Morphism from the parent schema objex to the currently processed one.
      * @return
      */
-    public static Iterable<FetchedSuperId> fetch(UniqueIdGenerator idGenerator, ComplexRecord parentRecord, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
-        final var fetcher = new SuperIdsFetcher(idGenerator, parentRow, path, childAccessPath);
+    public static Iterable<FetchedSuperIdValues> fetch(UniqueIdGenerator idGenerator, ComplexRecord parentRecord, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
+        final var fetcher = new SuperIdValuesFetcher(idGenerator, parentRow, path, childAccessPath);
         fetcher.process(parentRecord);
 
         return fetcher.output;
     }
 
-    public record FetchedSuperId(SuperIdWithValues superId, ComplexRecord childRecord) {}
+    public record FetchedSuperIdValues(SuperIdValues superId, ComplexRecord childRecord) {}
 
     private final UniqueIdGenerator idGenerator;
-    private final List<FetchedSuperId> output;
+    private final List<FetchedSuperIdValues> output;
     private final DomainRow parentRow;
     private final Signature parentToChild;
     private final SchemaObjex childObjex;
     private final AccessPath childAccessPath;
 
-    private SuperIdsFetcher(UniqueIdGenerator idGenerator, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
+    private SuperIdValuesFetcher(UniqueIdGenerator idGenerator, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
         this.idGenerator = idGenerator;
         this.output = new ArrayList<>();
         this.parentRow = parentRow;
@@ -103,18 +103,18 @@ public class SuperIdsFetcher {
     }
 
     private void addSimpleWithChildRecordToOutput(String value, ComplexRecord childRecord) {
-        final var builder = new SuperIdWithValues.Builder();
+        final var builder = new SuperIdValues.Builder();
         builder.add(Signature.createEmpty(), value);
-        output.add(new FetchedSuperId(builder.build(), childRecord));
+        output.add(new FetchedSuperIdValues(builder.build(), childRecord));
     }
 
     private void processComplexRecord(ComplexRecord childRecord) {
-        final var builder = new SuperIdWithValues.Builder();
+        final var builder = new SuperIdValues.Builder();
         addStringNameSignaturesToBuilder(builder, childObjex.superId().signatures(), childRecord);
-        output.add(new FetchedSuperId(builder.build(), childRecord));
+        output.add(new FetchedSuperIdValues(builder.build(), childRecord));
     }
 
-    private void addStringNameSignaturesToBuilder(SuperIdWithValues.Builder builder, Set<Signature> signatures, ComplexRecord childRecord) {
+    private void addStringNameSignaturesToBuilder(SuperIdValues.Builder builder, Set<Signature> signatures, ComplexRecord childRecord) {
         for (final Signature signature : signatures) {
             // How the signature looks like from the parent objex.
             final var signatureInParentRow = signature.traverseThrough(parentToChild);
@@ -129,7 +129,7 @@ public class SuperIdsFetcher {
                 continue;
 
             if (simpleRecords.size() != 1)
-                throw InvalidStateException.superIdHasArrayValue();
+                throw InvalidStateException.superIdValuesHasArrayValue();
 
             builder.add(signature, simpleRecords.get(0).getValue().toString());
         }
