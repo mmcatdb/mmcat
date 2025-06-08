@@ -10,9 +10,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class InstanceSerializer {
 
@@ -30,7 +31,7 @@ public class InstanceSerializer {
     public record SerializedDomainRow(
         int id,
         SuperIdValues values,
-        List<String> technicalIds,
+        @Nullable Integer technicalId,
         List<Signature> pendingReferences
     ) {}
 
@@ -76,7 +77,7 @@ public class InstanceSerializer {
             final var rowWrapper = new SerializedDomainRow(
                 lastId++,
                 row.values,
-                row.technicalIds.stream().toList(),
+                row.technicalId,
                 row.pendingReferences.stream().toList()
             );
             rowToId.put(row, rowWrapper.id());
@@ -135,7 +136,7 @@ public class InstanceSerializer {
         for (final var serializedRow : serializedObjex.rows) {
             final var row = new DomainRow(
                 serializedRow.values,
-                Set.of(serializedRow.technicalIds.toArray(String[]::new)),
+                serializedRow.technicalId,
                 new TreeSet<>(serializedRow.pendingReferences)
             );
 

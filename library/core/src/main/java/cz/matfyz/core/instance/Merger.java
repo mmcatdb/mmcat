@@ -1,6 +1,6 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.instance.InstanceObjex.ReferenceToRow;
+import cz.matfyz.core.instance.InstanceObjex.Reference;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 
 import java.util.ArrayDeque;
@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ class Merger {
             // TODO make more effective:
             // - only those that are needed
             // - set, not a queue, so the same rows won't be repeated
-            addReferenceJob(job.values, job.technicalIds, job.instanceObjex);
+            addReferenceJob(job.values, job.technicalId, job.instanceObjex);
         }
 
         while (!referenceJobs.isEmpty()) {
@@ -57,10 +58,10 @@ class Merger {
      * @param values The super id must contain at least one id.
      */
     public DomainRow merge(SuperIdValues values, InstanceObjex instanceObjex) {
-        addMergeJob(values, Set.of(), instanceObjex);
+        addMergeJob(values, null, instanceObjex);
         processQueues();
 
-        return instanceObjex.getActualRow(values, Set.of());
+        return instanceObjex.getActualRow(values, null);
     }
 
     /**
@@ -88,7 +89,7 @@ class Merger {
         final var newRow = childObjex.createRow(values);
         createMappingForEdge(edge, parent, newRow);
 
-        addReferenceJob(newRow.values, newRow.technicalIds, childObjex);
+        addReferenceJob(newRow.values, newRow.technicalId, childObjex);
         processQueues();
 
         return newRow;
@@ -125,33 +126,12 @@ class Merger {
         return merge(values, objex);
     }
 
-    /*
-    public DomainRow mergeAlongMorphism(DomainRow domainRow, InstanceMorphism morphism) {
-        // Get all mappings from the domain row for this morphism.
-        var mappingsFromRow = domainRow.getMappingsFromForMorphism(morphism);
-        if (morphism.isArray() || mappingsFromRow.size() <= 1)
-            return domainRow; // There is nothing to merge
-
-        // Create a new job that merges all these rows.
-        var codomainRows = new TreeSet<>(mappingsFromRow.stream().map(MappingRow::codomainRow).toList());
-
-        addMergeJob(codomainRows, morphism.cod());
-        processQueues();
-
-        return morphism.dom().getActualRow(domainRow);
-    }
-    */
-
-    private void addMergeJob(SuperIdValues values, Set<String> technicalId, InstanceObjex instanceObjex) {
+    private void addMergeJob(SuperIdValues values, @Nullable Integer technicalId, InstanceObjex instanceObjex) {
         jobs.add(new MergeRowsJob(this, values, technicalId, instanceObjex));
     }
 
-    // private void addMergeJob(Set<DomainRow> rows, InstanceObjex instanceObjex) {
-    //     jobs.add(new MergeRowsJob(this, InstanceObjex.mergeSuperIds(rows), InstanceObjex.mergeTechnicalIds(rows), instanceObjex));
-    // }
-
-    private void addReferenceJob(SuperIdValues values, Set<String> technicalIds, InstanceObjex instanceObjex) {
-        referenceJobs.add(new ReferenceJob(this, values, technicalIds, instanceObjex));
+    private void addReferenceJob(SuperIdValues values, @Nullable Integer technicalId, InstanceObjex instanceObjex) {
+        referenceJobs.add(new ReferenceJob(this, values, technicalId, instanceObjex));
     }
 
     private class MergeRowsJob {
@@ -159,13 +139,13 @@ class Merger {
         private final Merger merger;
 
         SuperIdValues values;
-        Set<String> technicalIds;
+        @Nullable Integer technicalId;
         InstanceObjex instanceObjex;
 
-        MergeRowsJob(Merger merger, SuperIdValues values, Set<String> technicalIds, InstanceObjex instanceObjex) {
+        MergeRowsJob(Merger merger, SuperIdValues values, @Nullable Integer technicalId, InstanceObjex instanceObjex) {
             this.merger = merger;
             this.values = values;
-            this.technicalIds = technicalIds;
+            this.technicalId = technicalId;
             this.instanceObjex = instanceObjex;
         }
 
@@ -174,19 +154,29 @@ class Merger {
 
             // Iteratively get all rows that are identified by the superId values (while expanding the superId values).
             // Also get all technical ids.
-            final var valuesOfTechnicalRows = instanceObjex.findTechnicalSuperIdValues(technicalIds, originalRows);
-            values = SuperIdValues.merge(values, valuesOfTechnicalRows);
+            if (technicalId != null) {
+                final var technicalRow = instanceObjex.getRowByTechnicalId(technicalId);
+                originalRows.add(technicalRow);
+                values = SuperIdValues.merge(values, technicalRow.values);
+            }
 
             final var result = instanceObjex.findMaximalSuperIdValues(values, originalRows);
             final var maximalSuperIdValues = result.values();
-            final var maximalTechnicalId = mergeTechnicalIds(originalRows);
+            final var allTechnicalIds = mergeTechnicalIds(originalRows);
 
             if (originalRows.size() == 1)
                 return; // No merging is required
 
             // Create new Row that contains the unified superId and put it to all possible ids.
             // This also deletes the old ones.
-            final var newRow = instanceObjex.createRow(maximalSuperIdValues, maximalTechnicalId, result.foundIds());
+            final var firstTechnicalId = allTechnicalIds.isEmpty() ? null : allTechnicalIds.iterator().next();
+            final var newRow = instanceObjex.createRow(maximalSuperIdValues, firstTechnicalId, result.foundIds());
+
+            if (allTechnicalIds.size() > 1) {
+                for (final var otherId : allTechnicalIds)
+                    if (!otherId.equals(firstTechnicalId))
+                        instanceObjex.removeTechnicalId(otherId);
+            }
 
             // Get all morphisms from and to the original rows and put the new one instead of them.
             // Detect all morphisms that have maximal cardinality ONE and merge their rows. This can cause a chain reaction.
@@ -194,9 +184,11 @@ class Merger {
             mergeMappings(originalRows, newRow);
         }
 
-        private static Set<String> mergeTechnicalIds(Collection<DomainRow> rows) {
-            final var output = new TreeSet<String>();
-            rows.forEach(row -> output.addAll(row.technicalIds));
+        private static Set<Integer> mergeTechnicalIds(Collection<DomainRow> rows) {
+            final var output = new TreeSet<Integer>();
+            for (final var row : rows)
+                if (row.technicalId != null)
+                    output.add(row.technicalId);
 
             return output;
         }
@@ -242,12 +234,6 @@ class Merger {
             for (final var codomainRow : codomainRows)
                 morphism.createMapping(newRow, codomainRow);
 
-            // If there are multiple rows but the morphism allows at most one, they have to be merged as well. We do so by creating new merge job.
-            /* Commented out because morphisms from v3 cannot be arrays
-            if (!morphism.isArray() && codomainRows.size() > 1)
-                merger.addMergeJob(codomainRows, morphism.cod());
-            */
-
             // TODO Here probably should be reference jobs for the codomainRows. The newRow will reference automatically (because it is a product of merging, so a new information could have be created). The coodmainRows might need to reference as well if the following condition is met:
             // Let C \in codomainRows had a morphism to one of the original rows, O_1.
             // Another original row, O_2, had a connection to another row R.
@@ -263,37 +249,38 @@ class Merger {
         private final Merger merger;
 
         final SuperIdValues values;
-        final Set<String> technicalIds; // The rows have to have at least some values in superId values but it does not have to be a valid id ...
+        // The rows have to have at least some values directly (in the superId values) but they doesn't have to form a valid id.
+        final @Nullable Integer technicalId;
         final InstanceObjex instanceObjex;
 
-        ReferenceJob(Merger merger, SuperIdValues values, Set<String> technicalIds, InstanceObjex instanceObjex) {
+        ReferenceJob(Merger merger, SuperIdValues values, @Nullable Integer technicalId, InstanceObjex instanceObjex) {
             this.merger = merger;
             this.values = values;
-            this.technicalIds = technicalIds;
+            this.technicalId = technicalId;
             this.instanceObjex = instanceObjex;
         }
 
         public void process() {
-            final var referencingRow = instanceObjex.getActualRow(values, technicalIds);
+            final var referencingRow = instanceObjex.getActualRow(values, technicalId);
 
             for (final var pair : referencingRow.getAndRemovePendingReferencePairs())
                 for (final var reference : instanceObjex.getReferencesForSignature(pair.signature()))
                     sendReferences(referencingRow, reference, pair.value());
         }
 
-        private void sendReferences(DomainRow domainRow, ReferenceToRow reference, String value) {
-            final var targetRows = domainRow.traverseThrough(reference.path);
+        private void sendReferences(DomainRow sourceRow, Reference reference, String value) {
+            final var targetRows = sourceRow.traverseThrough(reference.path());
 
             for (final var targetRow : targetRows) {
-                if (!targetRow.hasSignature(reference.signatureInOther))
+                if (!targetRow.hasSignature(reference.signatureInOther()))
                     continue; // The row already has the value.
 
                 // Add value to the targetRow.
                 final var builder = new SuperIdValues.Builder();
                 builder.add(targetRow.values);
-                builder.add(reference.signatureInOther, value);
+                builder.add(reference.signatureInOther(), value);
 
-                merger.addMergeJob(builder.build(), targetRow.technicalIds, instanceObjex);
+                merger.addMergeJob(builder.build(), targetRow.technicalId, instanceObjex);
             }
         }
 

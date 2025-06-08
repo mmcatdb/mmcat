@@ -3,7 +3,8 @@ package cz.matfyz.core.exception;
 import cz.matfyz.core.instance.SuperIdValues;
 
 import java.io.Serializable;
-import java.util.Set;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ObjexException extends CoreException {
 
@@ -13,11 +14,11 @@ public class ObjexException extends CoreException {
 
     private record RowData(
         SuperIdValues values,
-        Set<String> technicalIds
+        @Nullable Integer technicalId
     ) implements Serializable {}
 
-    public static ObjexException actualRowNotFound(SuperIdValues values, Set<String> technicalIds) {
-        return new ObjexException("actualRowNotFound", new RowData(values, technicalIds));
+    public static ObjexException actualRowNotFound(SuperIdValues values, Integer technicalId) {
+        return new ObjexException("actualRowNotFound", new RowData(values, technicalId));
     }
 
 }

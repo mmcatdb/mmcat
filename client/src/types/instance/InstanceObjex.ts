@@ -36,25 +36,21 @@ export class InstanceObjex {
 type DomainRowFromServer = {
     id: number;
     values: SuperIdValuesFromServer;
-    technicalIds: string[];
+    technicalId: number | null;
     pendingReferences: Signature[];
 };
 
 export class DomainRow {
     private constructor(
         readonly values: SuperIdValues,
-        readonly technicalIds: Set<string>,
+        readonly technicalId: number | undefined,
     ) {}
 
     static fromServer(input: DomainRowFromServer) {
         return new DomainRow(
             SuperIdValues.fromServer(input.values),
-            new Set(input.technicalIds),
+            input.technicalId ?? undefined,
         );
-    }
-
-    get technicalIdsString(): string {
-        return [ ...this.technicalIds ].join(', ');
     }
 }
 

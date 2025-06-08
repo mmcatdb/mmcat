@@ -3,7 +3,6 @@ package cz.matfyz.core.instance;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
-import cz.matfyz.core.utils.IterableUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,6 +11,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +25,19 @@ public class DomainRow implements Comparable<DomainRow> {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
-    /** The tuples that holds the value of this row. */
+    /** The tuples that holds the value of this row. Immutable. */
     public final SuperIdValues values;
-    /** All technical ids under which is this row known. Immutable. */
-    public final Set<String> technicalIds;
+    /** If defined, the object doesn't have enough values from the superId to form a valid identifier. */
+    public final @Nullable Integer technicalId;
+    /**
+     * All signatures from the superId of this objex that point to values that are used in superIds of some other objexes.
+     * Whenever a value for one of these signatures is found, the signature should be removed from this set and the value should be propagated to the referenced objexes.
+     */
     public final Set<Signature> pendingReferences;
 
-    public DomainRow(SuperIdValues values, Set<String> technicalIds, Set<Signature> pendingReferences) {
+    public DomainRow(SuperIdValues values, @Nullable Integer technicalId, Set<Signature> pendingReferences) {
         this.values = values;
-        this.technicalIds = technicalIds;
+        this.technicalId = technicalId;
         this.pendingReferences = pendingReferences;
     }
 
@@ -107,7 +111,12 @@ public class DomainRow implements Comparable<DomainRow> {
         return currentSet;
     }
 
-    record SignatureWithValue(Signature signature, String value) {}
+    record SignatureWithValue(
+        /** A signature from this row's superId. */
+        Signature signature,
+        /** Value corresponding to the signature. */
+        String value
+    ) {}
 
     List<SignatureWithValue> getAndRemovePendingReferencePairs() {
         final var pendingSignatures = pendingReferences.stream().filter(this::hasSignature).toList();
@@ -116,32 +125,22 @@ public class DomainRow implements Comparable<DomainRow> {
         return pendingSignatures.stream().map(signature -> new SignatureWithValue(signature, getValue(signature))).toList();
     }
 
-    @Override public int compareTo(DomainRow row) {
-        final var valuesComparison = values.compareTo(row.values);
+    @Override public int compareTo(DomainRow other) {
+        final var valuesComparison = values.compareTo(other.values);
         if (valuesComparison != 0)
             return valuesComparison;
 
-        for (final var technicalId : technicalIds)
-            if (row.technicalIds.contains(technicalId))
-                return 0;
+        if (technicalId == null)
+            return technicalId == null ? 0 : 1;
 
-        return IterableUtils.compareTwoIterables(technicalIds, row.technicalIds);
+        return other.technicalId == null ? -1 : technicalId.compareTo(other.technicalId);
     }
 
     @Override public String toString() {
         final var builder = new StringBuilder();
         builder.append(values.toString());
-        if (!technicalIds.isEmpty()) {
-            builder.append("[");
-            var notFirst = false;
-            for (final var technicalId : technicalIds) {
-                if (notFirst)
-                    builder.append(", ");
-                notFirst = true;
-                builder.append(technicalId);
-            }
-            builder.append("]");
-        }
+        if (technicalId != null)
+            builder.append("#").append(technicalId);
 
         return builder.toString();
     }

@@ -35,13 +35,13 @@ function defineColumn(signature: Signature, node: Node): Column {
         <table v-if="morphism.mappings.length > 0">
             <tr>
                 <InstanceObjexHeaderDisplay
-                    :show-technical-ids="morphism.showDomTechnicalIds"
+                    :show-technical-ids="morphism.showDomTechnicalId"
                     :columns="columns?.dom"
                     @objex:click="(objex) => emit('objex:click', objex)"
                 />
                 <th class="gap" />
                 <InstanceObjexHeaderDisplay
-                    :show-technical-ids="morphism.showCodTechnicalIds"
+                    :show-technical-ids="morphism.showCodTechnicalId"
                     :columns="columns?.cod"
                     @objex:click="(objex) => emit('objex:click', objex)"
                 />
@@ -50,8 +50,8 @@ function defineColumn(signature: Signature, node: Node): Column {
                 v-for="(mapping, mappingIndex) in morphism.mappings"
                 :key="mappingIndex"
             >
-                <td v-if="morphism.showDomTechnicalIds">
-                    {{ mapping.dom.technicalIdsString }}
+                <td v-if="morphism.showDomTechnicalId">
+                    {{ mapping.dom.technicalId }}
                 </td>
                 <td
                     v-for="(column, columnIndex) in columns.dom"
@@ -62,8 +62,8 @@ function defineColumn(signature: Signature, node: Node): Column {
                 <td class="gap">
                     &lt;--&gt;
                 </td>
-                <td v-if="morphism.showCodTechnicalIds">
-                    {{ mapping.cod.technicalIdsString }}
+                <td v-if="morphism.showCodTechnicalId">
+                    {{ mapping.cod.technicalId }}
                 </td>
                 <td
                     v-for="(column, columnIndex) in columns.cod"

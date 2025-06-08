@@ -89,7 +89,7 @@ public class InstanceCategory {
             if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;
 
-            getObjex(currentTarget).addReferenceToRow(signatureInTarget, pathFromTarget, signature);
+            getObjex(currentTarget).addReference(signatureInTarget, pathFromTarget, signature);
         }
     }
 
