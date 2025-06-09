@@ -54,12 +54,13 @@ public class SchemaCategory {
      * This class represents a directed edge in the schema category. Essentially, it's either a base morphism or a dual of such.
      */
     public record SchemaEdge(
+        /** A base morphism. */
         SchemaMorphism morphism,
         /** True if the edge corresponds to the morphism. False if it corresponds to its dual. */
         boolean direction
     ) {
-        public Signature signature() {
-            return direction ? morphism.signature() : morphism.signature().dual();
+        public BaseSignature signature() {
+            return (BaseSignature) (direction ? morphism.signature() : morphism.signature().dual());
         }
 
         public SchemaObjex from() {

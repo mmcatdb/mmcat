@@ -1,16 +1,13 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.exception.ObjexException;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaObjex;
-import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -32,7 +29,7 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
      * The first map is indexed by the different identifiers the object can have (they have to be signatureIds).
      * The second map is the actual rows, indexed by actual values of these identifiers.
      */
-    private final Map<SignatureId, Map<SuperIdValues, DomainRow>> domain = new TreeMap<>();
+    final Map<SignatureId, Map<SuperIdValues, DomainRow>> domain = new TreeMap<>();
     /**
      * A technical id is a unique identifier that is used when the object does not have any other identifiers (or we don't know their values).
      */
@@ -48,61 +45,10 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         return domain.isEmpty() && domainByTechnicalIds.isEmpty();
     }
 
-    // TODO rozlišit id od superId
-    private DomainRow getRowById(SuperIdValues id) {
-        Map<SuperIdValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
-        return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
-    }
-
-    DomainRow getRowByTechnicalId(Integer technicalId) {
-        return domainByTechnicalIds.get(technicalId);
-    }
-
-    void setRow(DomainRow row, Collection<SuperIdValues> ids) {
-        for (final var id : ids) {
-            final Map<SuperIdValues, DomainRow> rowsWithSameTypeId = domain.computeIfAbsent(id.id(), i -> new TreeMap<>());
-            rowsWithSameTypeId.put(id, row);
-        }
-
-        if (row.technicalId != null)
-            domainByTechnicalIds.put(row.technicalId, row);
-    }
-
-    public DomainRow getOrCreateRow(SuperIdValues values) {
-        // If the superId doesn't contain any id, we have to create a technical one.
-        if (values.findFirstId(schema.ids()) == null)
-            return createRow(values, generateTechnicalId(), Set.of());
-
-        final var merger = new Merger(instance);
-        return merger.merge(values, this);
-    }
-
-    public static DomainRow getOrCreateRowWithEdge(InstanceCategory instance, SuperIdValues values, DomainRow parent, SchemaEdge edgeFromParent) {
-        final var merger = new Merger(instance);
-        return merger.merge(values, parent, edgeFromParent);
-    }
-
-    DomainRow createRow(SuperIdValues values) {
-        final @Nullable Integer technicalId = values.findFirstId(schema.ids()) == null
-            ? generateTechnicalId()
-            : null;
-        final var ids = values.findAllIds(schema.ids()).foundIds();
-
-        return createRow(values, technicalId, ids);
-    }
-
-    DomainRow createRow(SuperIdValues values, @Nullable Integer technicalId, Set<SuperIdValues> allIds) {
-        // TODO this can be optimized - we can discard the references that were referenced in all merged rows.
-        // However, it might be quite rare, so the overhead caused by finding such ids would be greater than the savings.
-        final var row = new DomainRow(values, technicalId, references.keySet());
-        setRow(row, allIds);
-
-        return row;
-    }
-
-    public DomainRow getRow(SuperIdValues values) {
+    /** Finds the row by any id that can be found in the given values. */
+    public @Nullable DomainRow tryFindRow(SuperIdValues values) {
         for (final var id : values.findAllIds(schema.ids()).foundIds()) {
-            final var row = getRowById(id);
+            final var row = tryFindRowById(id);
             if (row != null)
                 return row;
         }
@@ -110,31 +56,87 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         return null;
     }
 
-    // TODO fix - problém je, že getRowById může stále vracet null - tedy toto je použitelné jenom když víme, že alespoň nějaká část superId už musí být zmergovaná, a proto by se nejspíš měla používat jen ta funkce podtím
+    /** Finds the row by the given id values. The given id valus has to be an id. */
+    @Nullable DomainRow tryFindRowById(SuperIdValues idValues) {
+        final Map<SuperIdValues, DomainRow> rowsWithSameTypeId = domain.get(idValues.id());
+        return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(idValues);
+    }
+
+    // The following `create` methods don't merge the values, they just create a new row with the given values.
+    // So make sure you check that the merging is not necessary before calling them.
+    // If it is, call the `merge` methods instead.
+
     /**
-     * Returns the most recent row for the superId or technicalIds.
+     * Creates a new domain row with the given values.
+     * If the values do not contain any id, a technical id is generated and used.
      */
-    DomainRow getActualRow(SuperIdValues values, @Nullable Integer technicalId) {
-        // Simply find the first id of all possible ids (any of them should point to the same row).
-        var foundId = values.findFirstId(schema.ids());
-        if (foundId != null)
-            return getRowById(foundId);
-
-        // Then the row has to be identified by its technical ids (again, any of them will do).
-        if (technicalId != null) {
-            final var row = getRowByTechnicalId(technicalId);
-            if (row != null)
-                return row;
-        }
-
-        throw ObjexException.actualRowNotFound(values, technicalId);
+    public DomainRow createRow(SuperIdValues values) {
+        final @Nullable Integer technicalId = values.tryFindFirstId(schema.ids()) == null
+            ? generateTechnicalId()
+            : null;
+        return createRowInner(values, technicalId);
     }
 
     /**
-     * Returns the most recent value of the row (possibly the inpuct object).
+     * Doesn't check whether the techical id is necessary or not!
+     * Make sure the values contain at least one id.
      */
-    public DomainRow getActualRow(DomainRow row) {
-        return getActualRow(row.values, row.technicalId);
+    public DomainRow createRowWithValueId(SuperIdValues values) {
+        return createRowInner(values, null);
+    }
+
+    /**
+     * Creates a new domain row with the given values and a technical id.
+     * Make sure the values don't contain any id.
+     */
+    public DomainRow createRowWithTechnicalId(SuperIdValues values) {
+        return createRowInner(values, generateTechnicalId());
+    }
+
+    /**
+     * Doesn't check whether the techical id is necessary or not!
+     * Make sure you know what you are doing (and provide the technical id if it's necessary).
+     */
+    private DomainRow createRowInner(SuperIdValues values, @Nullable Integer technicalId) {
+        final var row = new DomainRow(values, technicalId, references.keySet());
+        setRow(row);
+        return row;
+    }
+
+    /**
+     * Adds the row to the domain (by all of its ids) and to the domain by technical ids.
+     */
+    void setRow(DomainRow row) {
+        final var ids = row.values.findAllIds(schema.ids()).foundIds();
+        for (final var idValues : ids) {
+            final Map<SuperIdValues, DomainRow> rowsWithSameTypeId = domain.computeIfAbsent(idValues.id(), i -> new TreeMap<>());
+            rowsWithSameTypeId.put(idValues, row);
+        }
+
+        if (row.technicalId != null)
+            domainByTechnicalIds.put(row.technicalId, row);
+    }
+
+    /**
+     * Iteratively merges the values to the row, adding all values discovered in the process. Always returns a new row.
+     * Call this if you know the values contain some new information.
+     */
+    public DomainRow mergeValues(DomainRow row, SuperIdValues values) {
+        final var merger = new InstanceMerger(instance);
+        merger.addMergeJob(this, row, values);
+        merger.processQueues();
+        return merger.getTrackedRow();
+    }
+
+    /**
+     * Propagates the references from the row to other rows. As a result of the propagation, a merging may happen, causing a new row to be created.
+     * Call this whenever a new row is created (and is not merged already).
+     */
+    public DomainRow mergeReferences(DomainRow row) {
+        final var merger = new InstanceMerger(instance);
+        merger.addReferenceJob(this, row);
+        merger.processQueues();
+        return merger.getTrackedRow();
     }
 
     /** The package access is just for serialization. */
@@ -147,8 +149,15 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         return technicalIdGenerator.next();
     }
 
-    void removeTechnicalId(Integer technicalId) {
-        domainByTechnicalIds.remove(technicalId);
+    /** Removes technical ids of deleted rows from the domain. */
+    void removeTechnicalIds(Iterable<DomainRow> rows) {
+        for (final DomainRow row : rows)
+            if (row.technicalId != null)
+                domainByTechnicalIds.remove(row.technicalId);
+    }
+
+    @Nullable DomainRow tryFindRowByTechnicalId(Integer technicalId) {
+        return domainByTechnicalIds.get(technicalId);
     }
 
     public SortedSet<DomainRow> allRowsToSet() {
@@ -162,22 +171,24 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         return output;
     }
 
-    public record FindSuperIdResult(SuperIdValues values, Set<SuperIdValues> foundIds) {}
-
-    /** Iteratively get all rows that are identified by the values (while expanding the values). */
-    public FindSuperIdResult findMaximalSuperIdValues(SuperIdValues values, Set<DomainRow> outOriginalRows) {
-        // First, we take all ids that can be created for this object, and we find those, that can be filled from the given superId.
+    /**
+     * Iteratively get all rows that are identified by the values (while expanding the values).
+     */
+    public SuperIdValues findMaximalSuperIdValues(SuperIdValues values, Set<DomainRow> outOriginalRows) {
+        // First, we take all ids that can be created for this object, and we find those that can be filled from the given superId.
         // Then we find the rows that correspond to them and merge their superIds to the superId.
         // If it gets bigger, we try to generate other ids to find their objexes and so on ...
 
-        int previousSuperIdSize = 0;
+        int previousValuesSize = 0;
         Set<SuperIdValues> foundIds = new TreeSet<>();
         Set<SignatureId> notFoundIds = schema.ids().toSignatureIds();
 
-        while (previousSuperIdSize < values.size()) {
-            previousSuperIdSize = values.size();
+        final var output = new SuperIdValues.Mutable(values);
 
-            final var result = values.findAllSignatureIds(notFoundIds);
+        while (previousValuesSize < output.size()) {
+            previousValuesSize = output.size();
+
+            final var result = output.findAllSignatureIds(notFoundIds);
             foundIds.addAll(result.foundIds());
             notFoundIds = result.notFoundIds();
 
@@ -185,24 +196,17 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
             if (foundRows.isEmpty())
                 break; // We have not found anything new.
 
-            values = SuperIdValues.merge(values, mergeSuperIdValues(foundRows));
+            foundRows.forEach(row -> output.add(row.values));
         }
 
-        return new FindSuperIdResult(values, foundIds);
-    }
-
-    private static SuperIdValues mergeSuperIdValues(Collection<DomainRow> rows) {
-        final var builder = new SuperIdValues.Builder();
-        rows.forEach(row -> builder.add(row.values));
-
-        return builder.build();
+        return output.build();
     }
 
     private Set<DomainRow> findNewRows(Set<SuperIdValues> foundIds, Set<DomainRow> outOriginalRows) {
         final var output = new TreeSet<DomainRow>();
 
-        for (var id : foundIds) {
-            var row = getRowById(id);
+        for (final var id : foundIds) {
+            var row = tryFindRowById(id);
             if (row == null || outOriginalRows.contains(row))
                 continue;
 

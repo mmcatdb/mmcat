@@ -103,9 +103,7 @@ public class SuperIdValuesFetcher {
     }
 
     private void addSimpleWithChildRecordToOutput(String value, ComplexRecord childRecord) {
-        final var builder = new SuperIdValues.Builder();
-        builder.add(Signature.createEmpty(), value);
-        output.add(new FetchedSuperIdValues(builder.build(), childRecord));
+        output.add(new FetchedSuperIdValues(SuperIdValues.fromEmptySignature(value), childRecord));
     }
 
     private void processComplexRecord(ComplexRecord childRecord) {

@@ -1,5 +1,6 @@
 package cz.matfyz.core.instance;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -53,47 +55,80 @@ public class DomainRow implements Comparable<DomainRow> {
         return values.getValue(signature);
     }
 
-    public record MappingsFor(InstanceMorphism morphism, Set<MappingRow> mappings) {
-        public MappingsFor(InstanceMorphism morphism) {
-            this(morphism, new TreeSet<>());
-        }
-    }
+    // These properties are managed by the morphisms, so they shouldn't be cloned.
 
-    // These properties are managed by the morphisms, so they should not be cloned
-    private final Map<Signature, MappingsFor> mappingsFrom = new TreeMap<>();
-    private final Map<Signature, MappingsFor> mappingsTo = new TreeMap<>();
+    /** All mappings originating in this row by the signature of the corresponding morphism. There can be at most one such morphism for each signature. */
+    private final Map<BaseSignature, MappingRow> mappingsFrom = new TreeMap<>();
+    /** All mappings ending in this row by the signature of the corresponding morphism. There can be multiple such morphisms for each signature. */
+    private final Map<BaseSignature, Set<MappingRow>> mappingsTo = new TreeMap<>();
 
     public Set<MappingRow> getMappingsForEdge(SchemaEdge edge) {
-        final var mappingsFor = (edge.direction() ? mappingsFrom : mappingsTo).get(edge.morphism().signature());
-        return mappingsFor != null ? mappingsFor.mappings : Set.of();
+        final var signature = edge.morphism().signature();
+
+        if (edge.direction()) {
+            final var mappingFrom = mappingsFrom.get(signature);
+            return mappingFrom == null ? Set.of() : Set.of(mappingFrom);
+        }
+
+        return mappingsTo.getOrDefault(signature, Set.of());
     }
 
-    public List<DomainRow> getCodomainForEdge(SchemaEdge edge) {
-        return getMappingsForEdge(edge).stream().map(mappingRow -> edge.direction() ? mappingRow.codomainRow() : mappingRow.domainRow()).toList();
+    public boolean hasMappingToOther(DomainRow other, SchemaEdge edgeToOther) {
+        final var signature = edgeToOther.morphism().signature();
+
+        if (edgeToOther.direction()) {
+            final var mappingFrom = mappingsFrom.get(signature);
+            if (mappingFrom == null)
+                return false;
+
+            return mappingFrom.codomainRow().equals(other);
+        }
+
+        final var mappings = mappingsTo.get(signature);
+        if (mappings == null)
+            return false;
+
+        for (final var mapping : mappings)
+            if (mapping.domainRow().equals(other))
+                return true;
+
+        return false;
     }
 
-    public Collection<MappingsFor> getAllMappingsFrom() {
-        return mappingsFrom.values();
+    public @Nullable MappingRow getMappingFrom(BaseSignature signature) {
+        return mappingsFrom.get(signature);
     }
 
-    void addMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
-        final var mappingsOfSameType = mappingsFrom.computeIfAbsent(morphism.schema.signature(), x -> new MappingsFor(morphism));
-        mappingsOfSameType.mappings.add(mapping);
+    public Collection<Entry<BaseSignature, MappingRow>> getAllMappingsFrom() {
+        return mappingsFrom.entrySet();
     }
 
-    void removeMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
-        final var mappingsOfSameType = mappingsFrom.get(morphism.schema.signature());
-        mappingsOfSameType.mappings.remove(mapping);
+    public Collection<Entry<BaseSignature, Set<MappingRow>>> getAllMappingsTo() {
+        return mappingsTo.entrySet();
+    }
+
+    void setMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
+        final var signature = morphism.schema.signature();
+        assert signature instanceof BaseSignature;
+
+        mappingsFrom.put((BaseSignature) signature, mapping);
+    }
+
+    void unsetMappingFrom(InstanceMorphism morphism) {
+        mappingsFrom.remove(morphism.schema.signature());
     }
 
     void addMappingTo(InstanceMorphism morphism, MappingRow mapping) {
-        final var mappingsOfSameType = mappingsTo.computeIfAbsent(morphism.schema.signature(), x -> new MappingsFor(morphism));
-        mappingsOfSameType.mappings.add(mapping);
+        final var signature = morphism.schema.signature();
+        assert signature instanceof BaseSignature;
+
+        final var mappingsOfSameType = mappingsTo.computeIfAbsent((BaseSignature) signature, x -> new TreeSet<>());
+        mappingsOfSameType.add(mapping);
     }
 
     void removeMappingTo(InstanceMorphism morphism, MappingRow mapping) {
         final var mappingsOfSameType = mappingsTo.get(morphism.schema.signature());
-        mappingsOfSameType.mappings.remove(mapping);
+        mappingsOfSameType.remove(mapping);
     }
 
     public Set<DomainRow> traverseThrough(SchemaPath path) {
@@ -103,12 +138,30 @@ public class DomainRow implements Comparable<DomainRow> {
         for (final var edge : path.edges()) {
             final var nextSet = new TreeSet<DomainRow>();
             for (final var row : currentSet)
-                nextSet.addAll(row.getCodomainForEdge(edge));
+                addCodomainOfRow(row, nextSet, edge);
 
             currentSet = nextSet;
         }
 
         return currentSet;
+    }
+
+    private void addCodomainOfRow(DomainRow row, Set<DomainRow> codomainSet, SchemaEdge edgeFromRow) {
+        final var signature = edgeFromRow.morphism().signature();
+
+        if (edgeFromRow.direction()) {
+            final var mappingFrom = row.mappingsFrom.get(signature);
+            if (mappingFrom != null)
+                codomainSet.add(mappingFrom.codomainRow());
+
+            return;
+        }
+
+        final var mappings = row.mappingsTo.get(signature);
+        if (mappings != null) {
+            for (final var mappingRow : mappings)
+                codomainSet.add(mappingRow.domainRow());
+        }
     }
 
     record SignatureWithValue(

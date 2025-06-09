@@ -32,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = SuperIdValues.Deserializer.class)
 public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
 
-    private final Map<Signature, String> tuples;
+    protected final Map<Signature, String> tuples;
 
     public boolean hasSignature(Signature signature) {
         return tuples.containsKey(signature);
@@ -82,8 +82,8 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return builder.build();
     }
 
-    public SuperIdValues findFirstId(ObjexIds ids) {
-        for (var id : ids.toSignatureIds())
+    public @Nullable SuperIdValues tryFindFirstId(ObjexIds ids) {
+        for (final var id : ids.toSignatureIds())
             if (containsId(id))
                 return findId(id);
 
@@ -101,15 +101,15 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return findAllSignatureIds(ids.toSignatureIds());
     }
 
-    public FindIdsResult findAllSignatureIds(Set<SignatureId> ids) {
+    public FindIdsResult findAllSignatureIds(Set<SignatureId> missingIds) {
         final var foundIds = new TreeSet<SuperIdValues>();
         final var notFoundIds = new TreeSet<SignatureId>();
 
-        for (SignatureId id : ids) {
-            var foundId = findId(id);
+        for (final SignatureId missingId : missingIds) {
+            final var foundId = findId(missingId);
 
             if (foundId == null)
-                notFoundIds.add(id);
+                notFoundIds.add(missingId);
             else
                 foundIds.add(foundId);
         }
@@ -117,16 +117,12 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return new FindIdsResult(foundIds, notFoundIds);
     }
 
-    public static SuperIdValues merge(SuperIdValues... ids) {
-        var builder = new Builder();
-        for (var id : ids)
-            builder.add(id);
-
-        return builder.build();
-    }
-
     public static SuperIdValues fromEmptySignature(String value) {
         return new Builder().add(Signature.createEmpty(), value).build();
+    }
+
+    public static SuperIdValues empty() {
+        return new SuperIdValues(new TreeMap<>());
     }
 
     private SuperIdValues(Map<Signature, String> map) {
@@ -157,6 +153,30 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
 
     }
 
+    public static class Mutable extends SuperIdValues {
+
+        public Mutable(@Nullable SuperIdValues input) {
+            super(input == null ? new TreeMap<>() : new TreeMap<>(input.tuples));
+        }
+
+        public Mutable add(Signature signature, String value) {
+            tuples.put(signature, value);
+            return this;
+        }
+
+        public Mutable add(SuperIdValues idWithValues) {
+            for (var tuple : idWithValues.tuples.entrySet())
+                tuples.put(tuple.getKey(), tuple.getValue());
+
+            return this;
+        }
+
+        public SuperIdValues build() {
+            return new SuperIdValues(new TreeMap<>(tuples));
+        }
+
+    }
+
     @Override public boolean equals(Object object) {
         if (!(object instanceof SuperIdValues idWithValues))
             return false;
@@ -171,12 +191,12 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
     }
 
     @Override public int compareTo(SuperIdValues idWithValues) {
-        int idCompareResult = id().compareTo(idWithValues.id());
+        final int idCompareResult = id().compareTo(idWithValues.id());
         if (idCompareResult != 0)
             return idCompareResult;
 
-        for (Signature signature : signatures()) {
-            int signatureCompareResult = tuples.get(signature).compareTo(idWithValues.tuples.get(signature));
+        for (final Signature signature : signatures()) {
+            final int signatureCompareResult = tuples.get(signature).compareTo(idWithValues.tuples.get(signature));
             if (signatureCompareResult != 0)
                 return signatureCompareResult;
         }

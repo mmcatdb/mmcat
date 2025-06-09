@@ -141,8 +141,7 @@ public class InstanceSerializer {
             );
 
             idToRow.put(serializedRow.id, row);
-            final var ids = row.values.findAllIds(objex.schema.ids()).foundIds();
-            objex.setRow(row, ids);
+            objex.setRow(row);
         }
     }
 
@@ -155,7 +154,6 @@ public class InstanceSerializer {
         for (final var serializedMapping : serializedMorphism.mappings) {
             final var domRow = domIdToRow.get(serializedMapping.dom);
             final var codRow = codIdToRow.get(serializedMapping.cod);
-
             morphism.createMapping(domRow, codRow);
         }
     }

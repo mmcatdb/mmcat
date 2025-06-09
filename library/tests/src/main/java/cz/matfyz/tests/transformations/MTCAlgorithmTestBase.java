@@ -79,20 +79,21 @@ public class MTCAlgorithmTestBase {
         for (final var expectedObjex : expectedInstance.allObjexes()) {
             final var objex = actualInstance.getObjex(expectedObjex.schema.key());
 
-            final var expectedString = expectedObjex.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObjex)).toList();
-            final var string = objex.allRowsToSet().stream().map(row -> rowToMappingsString(row, objex)).toList();
+            final var expectedString = expectedObjex.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObjex, schema)).toList();
+            final var string = objex.allRowsToSet().stream().map(row -> rowToMappingsString(row, objex, schema)).toList();
 
             assertEquals(expectedString, string);
         }
     }
 
-    private static String rowToMappingsString(DomainRow row, InstanceObjex objex) {
+    private static String rowToMappingsString(DomainRow row, InstanceObjex objex, SchemaCategory schema) {
         String output = "\n[row] (" + objex.schema.key() + ") "  + row;
 
-        for (final var mappingsOfType : row.getAllMappingsFrom()) {
-            output += "\n\tmappings [" + mappingsOfType.morphism().schema.signature() + "]->(" + mappingsOfType.morphism().schema.cod().key() + "):";
-            for (final var m : mappingsOfType.mappings())
-                output += "\n\t\t" + m.codomainRow();
+        for (final var entry : row.getAllMappingsFrom()) {
+            final var signature = entry.getKey();
+            final var codObjex = schema.getMorphism(signature).cod();
+
+            output += "\n\tmappings [" + entry.getKey() + "]->(" + codObjex.key() + "): " + entry.getValue().codomainRow();
         }
 
         return output + "\n";
