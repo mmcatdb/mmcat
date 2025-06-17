@@ -5,15 +5,16 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
-public abstract class MongoDB {
+public abstract class PostgreSQL {
 
-    private MongoDB() {}
+    private PostgreSQL() {}
 
-    public static final Datasource datasource = new Datasource(DatasourceType.mongodb, "mongodb");
+    public static final Datasource datasource = new Datasource(DatasourceType.postgresql, "postgresql");
 
     public static final String businessKind = "business";
     public static final String userKind = "user";
     public static final String reviewKind = "review";
+    public static final String isFriendKind = "is_friend";
 
     public static TestMapping business(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
@@ -27,7 +28,6 @@ public abstract class MongoDB {
                 b.simple("stars", Schema.businessToStars),
                 b.simple("review_count", Schema.businessToRevCnt),
                 b.simple("is_open", Schema.businessToIsOpen)
-                // b.simple("categories", Schema.businessToCtgry) // TODO: data needs to be modified from csv to JSON array
             )
         );
     }
@@ -43,8 +43,19 @@ public abstract class MongoDB {
                 b.simple("yelping_since", Schema.userToYelpingSince),
                 b.simple("useful", Schema.userToUseful),
                 b.simple("funny", Schema.userToFunny),
-                b.simple("cool", Schema.userToCool),
-                b.simple("friends", Schema.userToFriend.dual().concatenate(Schema.userToId.signature()))
+                b.simple("cool", Schema.userToCool)
+            )
+        );
+    }
+
+    // TODO: check that this works
+    public static TestMapping isFriend(SchemaCategory schema) {
+        return new TestMapping(datasource, schema,
+            Schema.user,
+            isFriendKind,
+            b -> b.root(
+                b.simple("user_id", Schema.userToId),
+                b.simple("friend_id", Schema.userToFriend.signature().concatenate(Schema.userToId.signature()))
             )
         );
     }

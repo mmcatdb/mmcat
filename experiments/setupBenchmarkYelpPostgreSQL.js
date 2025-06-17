@@ -1,0 +1,167 @@
+#!/usr/bin/env node
+
+import { createReadStream } from 'fs'
+import { stderr } from 'process'
+import { createInterface } from 'readline'
+
+const users = new Set()
+
+const initString = `
+DROP TABLE IF EXISTS "is_friend";
+DROP TABLE IF EXISTS "review";
+DROP TABLE IF EXISTS "business";
+DROP TABLE IF EXISTS "yelp_user";
+
+CREATE TABLE "business" (
+    "business_id" TEXT PRIMARY KEY,
+    "name" TEXT,
+    "city" TEXT,
+    "state" TEXT,
+    "stars" TEXT,
+    "review_count" TEXT,
+    "is_open" TEXT
+);
+
+CREATE TABLE "yelp_user" (
+    "user_id" TEXT PRIMARY KEY,
+    "name" TEXT,
+    "review_count" TEXT,
+    "yelping_since" TEXT,
+    "useful" TEXT,
+    "funny" TEXT,
+    "cool" TEXT
+);
+
+CREATE TABLE "is_friend" (
+    "user_id" TEXT,
+    "friend_id" TEXT,
+    PRIMARY KEY ("user_id", "friend_id"),
+    CONSTRAINT fk_uid FOREIGN KEY ("user_id") REFERENCES "yelp_user" ("user_id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_fid FOREIGN KEY ("friend_id") REFERENCES "yelp_user" ("user_id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE "review" (
+    "review_id" TEXT PRIMARY KEY,
+    "user_id" TEXT,
+    "business_id" TEXT,
+    "stars" TEXT,
+    "date" TEXT,
+    "useful" TEXT,
+    "funny" TEXT,
+    "cool" TEXT,
+    CONSTRAINT fk_uid FOREIGN KEY ("user_id") REFERENCES "yelp_user" ("user_id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_bid FOREIGN KEY ("business_id") REFERENCES "business" ("business_id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+`
+
+/** @param {string} str */
+function sanitize(str) {
+    return str.replaceAll("'", "''")
+}
+
+/** @param {string} line */
+function business(line) {
+    const jsonObject = JSON.parse(line)
+    return `('${jsonObject.business_id}','${sanitize(jsonObject.name)}','${sanitize(jsonObject.city)}','${jsonObject.state}','${jsonObject.stars}','${jsonObject.review_count}','${jsonObject.is_open}')`
+}
+
+/** @param {string} line */
+function yelp_user(line) {
+    const jsonObject = JSON.parse(line)
+
+    users.add(jsonObject.user_id)
+
+    return `('${jsonObject.user_id}','${sanitize(jsonObject.name)}','${jsonObject.review_count}','${jsonObject.yelping_since}','${jsonObject.useful}','${jsonObject.funny}','${jsonObject.cool}')`
+}
+
+/** @param {string} line */
+function review(line) {
+    const jsonObject = JSON.parse(line)
+
+    if (users.has(jsonObject.user_id)) {
+        return `('${jsonObject.review_id}','${jsonObject.user_id}','${jsonObject.business_id}','${jsonObject.stars}','${jsonObject.date}','${jsonObject.useful}','${jsonObject.funny}','${jsonObject.cool}')`
+    } else {
+        return `('${jsonObject.review_id}',NULL,'${jsonObject.business_id}','${jsonObject.stars}','${jsonObject.date}','${jsonObject.useful}','${jsonObject.funny}','${jsonObject.cool}')`
+    }
+}
+
+/** @param {string} line */
+function is_friend(line) {
+    const jsonObject = JSON.parse(line)
+    const friends = jsonObject.friends.split(', ')
+
+    if (friends.length == 1 && friends[0].length == 0) return ''
+
+    return friends.filter(fid => users.has(fid)).map(fid => `('${fid}','${jsonObject.user_id}')`).join(',')
+}
+
+const businessFn = process.argv[2]
+const userFn = process.argv[3]
+const reviewFn = process.argv[4]
+const isFriendFn = userFn
+
+
+async function writeToTableFromFile(table, filename) {
+    let fn = null
+    if (table == 'business') fn = business
+    if (table == 'yelp_user') fn = yelp_user
+    if (table == 'is_friend') fn = is_friend
+    if (table == 'review') fn = review
+
+    const fileStream = createReadStream(filename);
+
+    const rl = createInterface({
+        input: fileStream,
+        crlfDelay: Infinity
+    });
+
+    const MAX_ROWS = 100000
+    let buffer = []
+
+    const clearBuffer = async () => {
+        process.stdout.write(`INSERT INTO "${table}" VALUES `)
+
+        let first = true
+
+        for (const row of buffer) {
+            if (!first) process.stdout.write(',')
+            process.stdout.write(row)
+            first = false
+        }
+
+        if (!process.stdout.write(';\n')) {
+            const p = new Promise((resolve, reject) => {
+                process.stdout.once('drain', resolve)
+            });
+
+            await p
+        }
+
+        buffer = []
+    }
+
+    for await (const line of rl) {
+        const row = fn(line)
+        if (row == '') continue
+        if (buffer.length == MAX_ROWS) {
+            await clearBuffer()
+        }
+        buffer.push(row)
+    }
+
+    await clearBuffer()
+
+    rl.close()
+}
+
+console.log(initString)
+
+await writeToTableFromFile('business', businessFn)
+await writeToTableFromFile('yelp_user', userFn)
+await writeToTableFromFile('review', reviewFn)
+// await writeToTableFromFile('is_friend', isFriendFn)
+
+// FIXME: loading takes too long, probably due to integrity constraints; this could be sped up using
+// https://stackoverflow.com/questions/38112379/disable-postgresql-foreign-key-checks-for-migrations
+// but for that the user needs admin privileges
+// deferring does not do much, maybe if it was also parallelized

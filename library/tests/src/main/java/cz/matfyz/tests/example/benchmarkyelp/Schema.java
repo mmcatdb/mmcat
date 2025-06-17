@@ -56,7 +56,7 @@ public abstract class Schema {
     public static final BuilderMorphism businessToStars =   builder.morphism(business, businessStars);
     public static final BuilderMorphism businessToRevCnt =  builder.morphism(business, businessReviewCount);
     public static final BuilderMorphism businessToIsOpen =  builder.morphism(business, businessIsOpen);
-    public static final BuilderMorphism businessToCtgry =   builder.morphism(businessCategory, business);
+    public static final BuilderMorphism businessToCtgry =   builder.morphism(businessCategory, business); // not used for now
 
     public static final BuilderMorphism userToId =          builder.morphism(user, userId);
     public static final BuilderMorphism userToName =        builder.morphism(user, userName);

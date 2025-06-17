@@ -87,15 +87,15 @@ class BenchmarkTests {
                 ?business
                     bid ?bid ;
                     name ?name ;
-                    orders ?orders .
+                    orders ?reviews .
 
             }
             WHERE {
                 ?business 1 ?bid .
                 ?business 2 ?name .
-                ?business 6 ?orders .
+                ?business 6 ?reviews .
 
-                FILTER(?orders <= "100")
+                FILTER(?reviews <= "100")
             }
         """;
 
