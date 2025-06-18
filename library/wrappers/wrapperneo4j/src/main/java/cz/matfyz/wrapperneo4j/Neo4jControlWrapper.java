@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
@@ -103,6 +104,10 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
 
     @Override public AbstractInferenceWrapper getInferenceWrapper() {
         throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
+    }
+
+    @Override public CollectorWrapper getCollectorWrapper() {
+        throw new UnsupportedOperationException("Collector wrapper for this datasource is not integrated yet.");
     }
 
 }

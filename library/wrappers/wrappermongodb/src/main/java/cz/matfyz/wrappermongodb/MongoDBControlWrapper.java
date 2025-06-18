@@ -3,8 +3,10 @@ package cz.matfyz.wrappermongodb;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.collector.AbstractWrapper.ConnectionData;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
+import cz.matfyz.wrappermongodb.collector.MongoWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +49,7 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
 
     @Override public void execute(Path path) {
         try {
-            // Unfortunatelly, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
+            // Unfortunately, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
             String[] command = { "mongosh", provider.settings.createConnectionString(), path.toString() };
 
             Runtime runtime = Runtime.getRuntime();
@@ -93,4 +95,13 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
         return new MongoDBInferenceWrapper(provider, getSparkSettings());
     }
 
+    @Override public MongoWrapper getCollectorWrapper() {
+        return new MongoWrapper(new ConnectionData(
+            provider.settings.host(),
+            Integer.parseInt(provider.settings.port()),
+            getType().name(),
+            provider.settings.database(),
+            provider.settings.username(),
+            provider.settings.password()));
+    }
 }

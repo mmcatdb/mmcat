@@ -5,11 +5,9 @@ import java.util.TreeMap;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 
+// TODO: unused; you may remove this once youre sure there is nothing useful in here
+
 public abstract class CostData {
-    // TODO Aspects:
-    // 1. Query time (for a single DBMS or perhaps more generally)
-    // 2. Network transfer time (some multiple of estimated result size)
-    // 3. Result parsing from transfer time (some multiple of estimated result size)
 
     public abstract int estimateResultSize();
 

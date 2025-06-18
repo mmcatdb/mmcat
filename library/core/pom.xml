@@ -36,6 +36,16 @@
             <artifactId>fastutil</artifactId>
             <version>${fastutil.version}</version>
         </dependency>
+        <dependency> <!-- TODO: if you reposition ConsumedResult, then remove this dependency -->
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.12.10</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

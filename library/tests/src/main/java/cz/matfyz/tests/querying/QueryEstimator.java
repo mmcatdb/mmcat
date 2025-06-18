@@ -86,7 +86,7 @@ public class QueryEstimator<TWrapper extends AbstractControlWrapper> {
             if (optimize)
                 planned = QueryOptimizer.run(planned);
 
-            int costOverNet = QueryCostEstimator.run(planned);
+            long costOverNet = QueryCostEstimator.run(planned);
 
             final var serialized = QueryPlanDescriptor.run(planned);
 

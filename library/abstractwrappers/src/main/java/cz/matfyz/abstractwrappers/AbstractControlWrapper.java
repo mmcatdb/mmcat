@@ -1,5 +1,6 @@
 package cz.matfyz.abstractwrappers;
 
+import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.nio.file.Path;
@@ -29,4 +30,5 @@ public interface AbstractControlWrapper {
 
     AbstractInferenceWrapper getInferenceWrapper();
 
+    CollectorWrapper getCollectorWrapper();
 }

@@ -1,14 +1,8 @@
 package cz.matfyz.tests.benchmark;
 
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
-import cz.matfyz.core.querying.Computation.Operator;
-import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.tests.example.benchmarkyelp.Datasources;
-import cz.matfyz.tests.example.common.TestDatasource;
-import cz.matfyz.tests.querying.QueryCustomTreeTest;
 import cz.matfyz.tests.querying.QueryEstimator;
-import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +10,6 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +30,7 @@ class BenchmarkTests {
     @BeforeAll
     static void setup() {
         // datasources.mongoDB().setup();
-        setupMongoDB();
+        // setupMongoDB();
     }
 
     static void setupMongoDB() {
@@ -80,33 +73,34 @@ class BenchmarkTests {
 
     @Test
     void costEstimationBasic() {
-        final var testDatasource = datasources.mongoDB();
+        // TODO: add multiple datasources
+        final var testDatasource = datasources.postgreSQL();
 
         final var query = """
             SELECT {
                 ?business
-                    bid ?bid ;
+                    bid ?business_id ;
                     name ?name ;
-                    orders ?reviews .
+                    orders ?review_count .
 
             }
             WHERE {
-                ?business 1 ?bid .
+                ?business 1 ?business_id .
                 ?business 2 ?name .
-                ?business 6 ?reviews .
+                ?business 6 ?review_count .
 
-                FILTER(?reviews <= "100")
+                FILTER(?review_count >= "100")
             }
         """;
 
-        new QueryEstimator<MongoDBControlWrapper>(
+        new QueryEstimator<>(
             datasources,
             testDatasource,
             query,
             false
         ).run();
 
-        new QueryEstimator<MongoDBControlWrapper>(
+        new QueryEstimator<>(
             datasources,
             testDatasource,
             query,

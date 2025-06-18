@@ -34,20 +34,21 @@ import org.slf4j.LoggerFactory;
 
 /*
  * This class translates the query part of a specific DatasourceNode.
+ * TODO if this is useless then remove it too
  */
 public class DatasourceTranslatorForCost {
 
 
 
     public record Projection(Property property, ResultStructure structure, boolean isOptional) {}
-    public record ReturnValue(ArrayList<Projection> projections, DatasourceContext wrapperContext) {}
+    public record ProjectionsAndContext(ArrayList<Projection> projections, DatasourceContext wrapperContext) {}
 
 
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceTranslatorForCost.class);
 
-    public static ReturnValue run(QueryContext context, DatasourceNode datasourceNode) {
+    public static ProjectionsAndContext run(QueryContext context, DatasourceNode datasourceNode) {
         return new DatasourceTranslatorForCost(context, datasourceNode).run();
     }
 
@@ -63,7 +64,7 @@ public class DatasourceTranslatorForCost {
         this.datasourceNode = datasourceNode;
     }
 
-    private ReturnValue run() {
+    private ProjectionsAndContext run() {
         this.wrapper = context.getProvider().getControlWrapper(datasourceNode.datasource).getQueryWrapper();
 
         wrapperContext = new DatasourceContext(context, datasourceNode.rootVariable);
@@ -76,7 +77,7 @@ public class DatasourceTranslatorForCost {
         for (final Computation filter : datasourceNode.filters)
             processFilter(filter);
 
-        return new ReturnValue(projections, wrapperContext);
+        return new ProjectionsAndContext(projections, wrapperContext);
     }
 
     private void processFilter(Computation filter) {

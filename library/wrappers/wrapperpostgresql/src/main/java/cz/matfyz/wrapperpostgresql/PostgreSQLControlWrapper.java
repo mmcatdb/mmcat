@@ -4,8 +4,10 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.collector.AbstractWrapper.ConnectionData;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
+import cz.matfyz.wrapperpostgresql.collector.PostgresWrapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -98,4 +100,13 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
         throw new UnsupportedOperationException("PostgreSQLControlWrapper.getInferenceWrapper not implemented.");
     }
 
+    @Override public PostgresWrapper getCollectorWrapper() {
+        return new PostgresWrapper(new ConnectionData(
+            provider.settings.host(),
+            Integer.parseInt(provider.settings.port()),
+            getType().name(),
+            provider.settings.database(),
+            provider.settings.username(),
+            provider.settings.password()));
+    }
 }
