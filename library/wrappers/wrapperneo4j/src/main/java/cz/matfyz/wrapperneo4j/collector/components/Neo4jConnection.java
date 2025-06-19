@@ -1,10 +1,10 @@
-package cz.cuni.matfyz.collector.wrappers.neo4j.components;
+package cz.matfyz.wrapperneo4j.collector.components;
 
 import cz.matfyz.abstractwrappers.collector.components.AbstractConnection;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
 
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
-import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jResources;
+import cz.matfyz.wrapperneo4j.collector.Neo4jResources;
 import org.neo4j.driver.*;
 import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.summary.ResultSummary;
@@ -73,7 +73,8 @@ public class Neo4jConnection extends AbstractConnection<Result, String, ResultSu
      */
     @Override
     public void close() {
-        _planSession.close();
-        _querySession.close();
+        // _planSession.close();
+        // _querySession.close();
+        _neo4jDriver.close();
     }
 }

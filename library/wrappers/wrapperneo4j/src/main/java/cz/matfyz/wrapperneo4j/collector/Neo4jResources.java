@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.collector.wrappers.neo4j;
+package cz.matfyz.wrapperneo4j.collector;
 
 import java.util.List;
 

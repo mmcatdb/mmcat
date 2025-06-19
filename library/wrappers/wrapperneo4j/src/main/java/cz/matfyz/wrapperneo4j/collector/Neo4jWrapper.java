@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.collector.wrappers.neo4j;
+package cz.matfyz.wrapperneo4j.collector;
 
 import cz.matfyz.abstractwrappers.collector.AbstractWrapper;
 import cz.matfyz.abstractwrappers.collector.components.AbstractExplainPlanParser;
@@ -6,10 +6,10 @@ import cz.matfyz.abstractwrappers.collector.components.AbstractQueryResultParser
 import cz.matfyz.abstractwrappers.collector.components.ExecutionContext;
 import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
 import cz.matfyz.abstractwrappers.exception.collector.DataCollectException;
-import cz.cuni.matfyz.collector.wrappers.neo4j.components.Neo4jConnection;
-import cz.cuni.matfyz.collector.wrappers.neo4j.components.Neo4jDataCollector;
-import cz.cuni.matfyz.collector.wrappers.neo4j.components.Neo4jExplainPlanParser;
-import cz.cuni.matfyz.collector.wrappers.neo4j.components.Neo4jQueryResultParser;
+import cz.matfyz.wrapperneo4j.collector.components.Neo4jConnection;
+import cz.matfyz.wrapperneo4j.collector.components.Neo4jDataCollector;
+import cz.matfyz.wrapperneo4j.collector.components.Neo4jExplainPlanParser;
+import cz.matfyz.wrapperneo4j.collector.components.Neo4jQueryResultParser;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;

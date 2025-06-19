@@ -1,11 +1,10 @@
-package cz.cuni.matfyz.collector.wrappers.neo4j.components;
+package cz.matfyz.wrapperneo4j.collector.components;
 
 import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.abstractwrappers.collector.components.AbstractExplainPlanParser;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 import org.neo4j.driver.summary.Plan;
-import org.neo4j.driver.summary.ProfiledPlan;
 import org.neo4j.driver.summary.ResultSummary;
 
 import java.util.concurrent.TimeUnit;

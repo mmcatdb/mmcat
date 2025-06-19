@@ -1,8 +1,8 @@
-package cz.cuni.matfyz.collector.wrappers.neo4j.components;
+package cz.matfyz.wrapperneo4j.collector.components;
 
 import cz.matfyz.abstractwrappers.collector.components.AbstractQueryResultParser;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
-import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jResources;
+import cz.matfyz.wrapperneo4j.collector.Neo4jResources;
 import cz.matfyz.core.collector.queryresult.CachedResult;
 import cz.matfyz.core.collector.queryresult.ConsumedResult;
 import org.neo4j.driver.Record;
