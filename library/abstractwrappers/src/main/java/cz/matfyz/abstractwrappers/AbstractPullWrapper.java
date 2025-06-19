@@ -15,6 +15,10 @@ import java.util.List;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * This wrapper reads ('pulls') data from a datasource.
+ * Processing of the data is then passed to other wrappers.
+ */
 public interface AbstractPullWrapper {
 
     ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException;

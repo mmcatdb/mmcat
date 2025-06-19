@@ -14,8 +14,9 @@ import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This wrapper reads ('pulls') data from a datasource.
- * Processing of the data is then passed to other wrappers.
+ * This wrapper tracks supported query operations of an underlying DBMS and
+ * translates queries from the unified representation into its domain(or
+ * datasource)-specific language (DSL).
  */
 public interface AbstractQueryWrapper {
 
