@@ -1,14 +1,12 @@
 import { Select, SelectItem } from '@nextui-org/react';
 import { type Datasource, DatasourceType } from '@/types/datasource';
 
-/**
- * @param setDatasource Function for updating 'datasource' parameter
- * @param datasource The selected datasource
- * @param datasources All active datasources
- */
 type DatasourceMenuProps = Readonly<{
+    /** Function for updating 'datasource' parameter. */
     setDatasource: React.Dispatch<React.SetStateAction<Datasource | undefined>>;
+    /** The selected datasource. */
     datasource: Datasource | undefined;
+    /** All active datasources. */
     datasources: Datasource[];
 }>;
 

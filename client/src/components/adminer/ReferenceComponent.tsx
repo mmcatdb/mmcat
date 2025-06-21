@@ -7,20 +7,18 @@ import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-/**
- * @param references The references to create links for
- * @param data The displayeddata
- * @param propertyName The name of the property to create links for
- * @param kind Name of current kind
- * @param datasourceId The id of the current datasource
- * @param datasources All active datasources
- */
 type ReferenceComponentProps = Readonly<{
+    /** The references to create links for. */
     references: KindReference[];
+    /** The displayeddata. */
     data: Record<string, string> | GraphResponseData;
+    /** The name of the property to create links for. */
     propertyName: string;
+    /** Name of current kind. */
     kind: string;
+    /** The id of the current datasource. */
     datasourceId: Id;
+    /** All active datasources. */
     datasources: Datasource[];
 }>;
 
@@ -53,45 +51,43 @@ export function ReferenceComponent({ references, data, propertyName, kind, datas
     const alwaysVisibleLinks = compressedLinks.slice(0, visibleCount);
     const hiddenLinks = compressedLinks.slice(visibleCount);
 
-    return (
-        <>
-            {alwaysVisibleLinks.map(([ link, ref, duplicatedKind ]) => (
-                <LinkComponent
-                    key={link}
-                    index={link}
-                    reference={ref}
-                    kind={kind}
-                    datasourceId={datasourceId}
-                    datasources={datasources}
-                    link={link}
-                    kindDuplicated={duplicatedKind}
-                />
-            ))}
+    return (<>
+        {alwaysVisibleLinks.map(([ link, ref, duplicatedKind ]) => (
+            <LinkComponent
+                key={link}
+                index={link}
+                reference={ref}
+                kind={kind}
+                datasourceId={datasourceId}
+                datasources={datasources}
+                link={link}
+                kindDuplicated={duplicatedKind}
+            />
+        ))}
 
-            {visible && hiddenLinks.map(([ link, ref, duplicatedKind ]) => (
-                <LinkComponent
-                    key={link}
-                    index={link}
-                    reference={ref}
-                    kind={kind}
-                    datasourceId={datasourceId}
-                    datasources={datasources}
-                    link={link}
-                    kindDuplicated={duplicatedKind}
-                />
-            ))}
+        {visible && hiddenLinks.map(([ link, ref, duplicatedKind ]) => (
+            <LinkComponent
+                key={link}
+                index={link}
+                reference={ref}
+                kind={kind}
+                datasourceId={datasourceId}
+                datasources={datasources}
+                link={link}
+                kindDuplicated={duplicatedKind}
+            />
+        ))}
 
-            {hiddenLinks.length > 0 && (
-                <Button
-                    className='m-1 h-5 px-1 min-w-5'
-                    variant='solid'
-                    onPress={() => setVisible(!visible)}
-                >
-                    {visible ? '-' : '+'}
-                </Button>
-            )}
-        </>
-    );
+        {hiddenLinks.length > 0 && (
+            <Button
+                className='m-1 h-5 px-1 min-w-5'
+                variant='solid'
+                onPress={() => setVisible(!visible)}
+            >
+                {visible ? '-' : '+'}
+            </Button>
+        )}
+    </>);
 }
 
 function compareReferences(a: KindReference, b: KindReference, kind: string, datasourceId: Id): number {
@@ -124,7 +120,7 @@ function getCompressedLinks(links: [string, KindReference][]): [string, KindRefe
     return links.map((current, index) => {
         const [ currentLink, currentRef ] = current;
 
-        const kindDuplicated = links.some(([ _, ref ], i) =>
+        const kindDuplicated = links.some(([ , ref ], i) =>
             i !== index &&
             ref.datasourceId === currentRef.datasourceId &&
             ref.kindName === currentRef.kindName,

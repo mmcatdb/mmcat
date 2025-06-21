@@ -21,12 +21,10 @@ import type { DataResponse } from '@/types/adminer/DataResponse';
 import type { AdminerFilterQueryState, KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 
-/**
- * @param datasource The selected datasource
- * @param datasources All active datasources
- */
 type AdminerFilterQueryPageProps = Readonly<{
+    /** The selected datasource. */
     datasource: Datasource;
+    /** All active datasources. */
     datasources: Datasource[];
 }>;
 
@@ -84,51 +82,47 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
             setKindReferences(computeKindReferences(references, state.datasourceId, state.kindName));
     }, [ references, state.datasourceId, state.kindName ]);
 
-    return (
-        <>
-            <div className={clsx(
-                'grid grid-flow-col grid-rows-2 border-b px-0 py-1 gap-2',
-                theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
-            )}>
-                <div className='flex items-start'>
-                    <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
+    return (<>
+        <div className={clsx(
+            'grid grid-flow-col grid-rows-2 border-b px-0 py-1 gap-2',
+            theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+        )}>
+            <div className='flex items-start'>
+                <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
 
-                    {state.kindName !== undefined && (
-                        <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
-                    )}
-                </div>
-
-                {datasource && state.kindName && state.pagination.itemCount !== undefined && state.pagination.itemCount > 0 && (
-                    <div className='inline-flex gap-2 items-center self-end'>
-                        {state.view !== View.graph && (
-                            <>
-                                <Pagination
-                                    size='sm'
-                                    total={state.pagination.totalPages}
-                                    page={state.pagination.currentPage}
-                                    onChange={page => dispatch({ type: 'page', newCurrentPage: page, newOffset: state.active.limit * (page - 1) })}
-                                    color='primary'
-                                />
-                                <p className='min-w-36'>Number of rows: {state.pagination.itemCount}</p>
-                            </>
-                        )}
-
-                        {fetchedData && (
-                            <ExportComponent data={fetchedData}/>
-                        )}
-                    </div>
+                {state.kindName !== undefined && (
+                    <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
                 )}
-
-                <div className='row-span-2 justify-self-end'>
-                    {datasource && state.kindName && (
-                        <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
-                    )}
-                </div>
             </div>
 
-            <DataComponent state={state} fetchedData={fetchedData} datasources={datasources} kindReferences={kindReferences} error={error} loading={loading || referencesLoading} />
-        </>
-    );
+            {datasource && state.kindName && state.pagination.itemCount !== undefined && state.pagination.itemCount > 0 && (
+                <div className='inline-flex gap-2 items-center self-end'>
+                    {state.view !== View.graph && (<>
+                        <Pagination
+                            size='sm'
+                            total={state.pagination.totalPages}
+                            page={state.pagination.currentPage}
+                            onChange={page => dispatch({ type: 'page', newCurrentPage: page, newOffset: state.active.limit * (page - 1) })}
+                            color='primary'
+                        />
+                        <p className='min-w-36'>Number of rows: {state.pagination.itemCount}</p>
+                    </>)}
+
+                    {fetchedData && (
+                        <ExportComponent data={fetchedData}/>
+                    )}
+                </div>
+            )}
+
+            <div className='row-span-2 justify-self-end'>
+                {datasource && state.kindName && (
+                    <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
+                )}
+            </div>
+        </div>
+
+        <DataComponent state={state} fetchedData={fetchedData} datasources={datasources} kindReferences={kindReferences} error={error} loading={loading || referencesLoading} />
+    </>);
 }
 
 type DataComponentProps = Readonly<{
@@ -170,9 +164,7 @@ function DataComponent({ state, fetchedData, datasources, kindReferences, error,
         );
     }
 
-    return (
-        <></>
-    );
+    return null;
 }
 
 function areEqualURLParams(first: URLSearchParams, second: URLSearchParams) {

@@ -7,16 +7,14 @@ import type { Id } from '@/types/id';
 
 export const UNLABELED = '#unlabeled';
 
-/**
- * @param datasourceId The id of the current datasource
- * @param kind Name of selected kind
- * @param showUnlabeled If 'true', additional kind name for unlabeled nodes from Neo4j is added
- * @param dispatch A function for state updating
- */
 type KindMenuProps = Readonly<{
+    /** The id of the current datasource. */
     datasourceId: Id;
+    /** Name of selected kind. */
     kind: string | undefined;
+    /** If 'true', additional kind name for unlabeled nodes from Neo4j is added. */
     showUnlabeled: boolean;
+    /** A function for state updating. */
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 

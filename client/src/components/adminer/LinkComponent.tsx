@@ -8,22 +8,20 @@ import type { Datasource } from '@/types/datasource/Datasource';
 
 const NAME_LENGTH = 2;
 
-/**
- * @param index The id of the current link
- * @param reference The reference to create the link for
- * @param kind Name of current kind
- * @param datasourceId The id of the current datasource
- * @param datasources All active datasources
- * @param link The URL parameters to be added to the link
- * @param kindDuplicated 'true' if there exist another link that points to the same kind
- */
 type LinkComponentProps = Readonly<{
+    /** The id of the current link. */
     index: string;
+    /** The reference to create the link for. */
     reference: KindReference;
+    /** Name of current kind. */
     kind: string;
+    /** The id of the current datasource. */
     datasourceId: Id;
+    /** All active datasources. */
     datasources: Datasource[];
+    /** The URL parameters to be added to the link. */
     link: string;
+    /** 'true' if there exist another link that points to the same kind. */
     kindDuplicated: boolean;
 }>;
 

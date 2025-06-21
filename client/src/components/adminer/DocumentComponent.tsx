@@ -6,20 +6,18 @@ import type { Datasource } from '@/types/datasource/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-/**
- * @param valueKey The name of the property
- * @param value The value the for given property
- * @param kindReferences References from and to the current kind
- * @param kindName Name of the current kind
- * @param datasourceId The id of selected datasource
- * @param datasources All active datasources
- */
 type DocumentComponentProps = Readonly<{
+    /** The name of the property. */
     valueKey: string | undefined;
+    /** The value the for given property. */
     value: unknown;
+    /** References from and to the current kind. */
     kindReferences: KindReference[];
+    /** Name of the current kind. */
     kind: string;
+    /** The id of selected datasource. */
     datasourceId: Id;
+    /** All active datasources. */
     datasources: Datasource[];
 }>;
 

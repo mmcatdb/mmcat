@@ -7,18 +7,16 @@ import type { TableResponse, GraphResponse } from '@/types/adminer/DataResponse'
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-/**
- * @param data The data to display
- * @param kindReferences References from and to the current kind
- * @param kind Name of the current kind
- * @param datasourceId The id of selected datasource
- * @param datasources All active datasources
- */
 type DatabaseTableProps = Readonly<{
+    /** The data to display. */
     data: TableResponse | GraphResponse;
+    /** References from and to the current kind. */
     kindReferences: KindReference[];
+    /** Name of the current kind. */
     kind: string;
+    /** The id of selected datasource. */
     datasourceId: Id;
+    /** All active datasources. */
     datasources: Datasource[];
 }>;
 
@@ -36,21 +34,18 @@ export function DatabaseTable({ data, kindReferences, kind, datasourceId, dataso
     if (tableData === undefined || tableData.data.length === 0 || tableData.metadata.itemCount === 0)
         return <p>No rows to display.</p>;
 
-    return (
-        <>
-            {tableData && columnNames && (
-                <Table isStriped isCompact aria-label='Table'>
-                    <TableHeader>
-                        {columnNames.map((columnName, index) => (
-                            <TableColumn key={index}>{columnName}</TableColumn>
-                        ))}
-                    </TableHeader>
-                    {TableBodyComponent({ tableBodyData: tableData.data, columnNames: columnNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
-                </Table>
-            )
-            }
-        </>
-    );
+    return (<>
+        {tableData && columnNames && (
+            <Table isStriped isCompact aria-label='Table'>
+                <TableHeader>
+                    {columnNames.map((columnName, index) => (
+                        <TableColumn key={index}>{columnName}</TableColumn>
+                    ))}
+                </TableHeader>
+                {TableBodyComponent({ tableBodyData: tableData.data, columnNames: columnNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
+            </Table>
+        )}
+    </>);
 }
 
 type TableBodyComponentProps = Readonly<{

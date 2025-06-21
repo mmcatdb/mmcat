@@ -5,16 +5,14 @@ import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 import type { DatasourceType } from '@/types/datasource';
 
-/**
- * @param filter The filter to be updated
- * @param datasourceType The type of selected datasource
- * @param propertyNames Names of properties
- * @param dispatch A function for state updating
- */
 type PropertyFilterFormProps = Readonly<{
+    /** The filter to be updated. */
     filter: PropertyFilter;
+    /** The type of selected datasource. */
     datasourceType: DatasourceType;
+    /** Names of properties. */
     propertyNames: string[] | undefined;
+    /** A function for state updating. */
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 

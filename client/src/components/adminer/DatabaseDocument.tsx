@@ -7,18 +7,16 @@ import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataRespon
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-/**
- * @param data The data to display
- * @param kindReferences References from and to the current kind
- * @param kind Name of the current kind
- * @param datasourceId The id of selected datasource
- * @param datasources All active datasources
- */
 type DatabaseDocumentProps = Readonly<{
+    /** The data to display. */
     data: DocumentResponse | GraphResponse;
+    /** References from and to the current kind. */
     kindReferences: KindReference[];
+    /** Name of the current kind. */
     kind: string;
+    /** The id of selected datasource. */
     datasourceId: Id;
+    /** All active datasources. */
     datasources: Datasource[];
 }>;
 

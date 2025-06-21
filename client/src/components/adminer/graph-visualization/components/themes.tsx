@@ -96,15 +96,10 @@ const themes = {
 };
 
 /**
- * Get Theme provider for Arc components, default is LIGHT theme
- * @param children
- * @param theme if provided used as theme instead of default LIGHT
- * @constructor
+ * Get Theme provider for Arc components, default is LIGHT theme.
  */
-export const ArcThemeProvider = ({
-    children,
-    theme,
-}: {
-    children: JSX.Element;
-    theme?: 'light' | 'dark';
-}) => <ThemeProvider theme={themes[theme ?? 'dark']}>{children}</ThemeProvider>;
+export function ArcThemeProvider({ children, theme }: { children: JSX.Element, theme?: 'light' | 'dark' }) {
+    return (
+        <ThemeProvider theme={themes[theme ?? 'dark']}>{children}</ThemeProvider>
+    );
+}

@@ -103,8 +103,8 @@ async function getAllMappings(): Promise<MappingFromServer[]> {
 // FIXME This shouldn't be done on the "from server" types.
 function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
     return mappings.flatMap((mapping: MappingFromServer) => {
-        let fromSubpath: ComplexPropertyFromServer | null = null;
-        let toSubpath: ComplexPropertyFromServer | null = null;
+        let fromSubpath: ComplexPropertyFromServer | undefined = undefined;
+        let toSubpath: ComplexPropertyFromServer | undefined = undefined;
         const allSubpaths: ChildPropertyFromServer[] = [];
 
         for (let subpath of mapping.accessPath.subpaths) {
@@ -166,7 +166,7 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
             });
         }
 
-        if (fromSubpath != null || toSubpath != null) {
+        if (fromSubpath ?? toSubpath) {
             // Maapping with prefixed names
             newMappings.push({
                 categoryId: mapping.categoryId,

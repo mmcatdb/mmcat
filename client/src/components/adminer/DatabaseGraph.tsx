@@ -6,12 +6,10 @@ import { GraphVisualizer } from '@/components/adminer/graph-visualization/GraphV
 import type { BasicNode, BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 import type { GraphNode, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 
-/**
- * @param data The data to display
- * @param kindName Name of the current kind
- */
 type DatabaseTableProps = Readonly<{
+    /** The data to display. */
     data: GraphResponse;
+    /** Name of the current kind. */
     kind: string;
 }>;
 

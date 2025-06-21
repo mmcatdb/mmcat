@@ -31,12 +31,10 @@ const EXAMPLE_QUERY: Record<DatasourceType, string> = {
     [DatasourceType.jsonld]: '',
 };
 
-/**
- * @param datasource The selected datasource
- * @param datasources All active datasources
- */
 type AdminerCustomQueryPageProps = Readonly<{
+    /** The selected datasource */
     datasource: Datasource;
+    /** All active datasources */
     datasources: Datasource[];
 }>;
 
@@ -101,78 +99,76 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
         return createExtensions(datasource.type, customKeymap);
     }, [ datasource.type, execute ]);
 
-    return (
-        <>
-            <div className='mt-1'>
-                <CodeMirror
-                    value={query}
-                    onChange={onQueryChange}
-                    extensions={extensions}
-                    basicSetup={false}
-                    theme={theme === 'light' ? materialLight : materialDark}
-                    minHeight='105.97px'
-                />
+    return (<>
+        <div className='mt-1'>
+            <CodeMirror
+                value={query}
+                onChange={onQueryChange}
+                extensions={extensions}
+                basicSetup={false}
+                theme={theme === 'light' ? materialLight : materialDark}
+                minHeight='105.97px'
+            />
 
-                <Button
-                    className='mt-1 items-center gap-1 min-w-40'
-                    size='sm'
-                    color='primary'
-                    onPress={execute}
-                >
+            <Button
+                className='mt-1 items-center gap-1 min-w-40'
+                size='sm'
+                color='primary'
+                onPress={execute}
+            >
                     EXECUTE QUERY
-                </Button>
+            </Button>
 
-                <Button
-                    className='ml-2 mt-1 items-center gap-1 min-w-40'
-                    size='sm'
-                    onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
-                >
+            <Button
+                className='ml-2 mt-1 items-center gap-1 min-w-40'
+                size='sm'
+                onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
+            >
                     SHOW QUERY EXAMPLE
-                </Button>
+            </Button>
 
-                {AVAILABLE_VIEWS[datasource.type].length > 1 && (
-                    <Select
-                        items={AVAILABLE_VIEWS[datasource.type].entries()}
-                        label='View'
-                        labelPlacement='outside-left'
-                        classNames={
-                            { label:'sr-only' }
-                        }
-                        size='sm'
-                        placeholder='Select view'
-                        className='ml-1 max-w-xs align-middle'
-                        selectedKeys={[ view ]}
-                    >
-                        {AVAILABLE_VIEWS[datasource.type].map(v => (
-                            <SelectItem
-                                key={v}
-                                onPress={() => setView(v)}
-                            >
-                                {v}
-                            </SelectItem>
-                        ))}
-                    </Select>
-                )}
+            {AVAILABLE_VIEWS[datasource.type].length > 1 && (
+                <Select
+                    items={AVAILABLE_VIEWS[datasource.type].entries()}
+                    label='View'
+                    labelPlacement='outside-left'
+                    classNames={
+                        { label:'sr-only' }
+                    }
+                    size='sm'
+                    placeholder='Select view'
+                    className='ml-1 max-w-xs align-middle'
+                    selectedKeys={[ view ]}
+                >
+                    {AVAILABLE_VIEWS[datasource.type].map(v => (
+                        <SelectItem
+                            key={v}
+                            onPress={() => setView(v)}
+                        >
+                            {v}
+                        </SelectItem>
+                    ))}
+                </Select>
+            )}
 
-                {queryResult && 'data' in queryResult && (
-                    <span className='ml-2'>
-                        <ExportComponent data={queryResult}/>
-                    </span>
-                )}
-            </div>
+            {queryResult && 'data' in queryResult && (
+                <span className='ml-2'>
+                    <ExportComponent data={queryResult}/>
+                </span>
+            )}
+        </div>
 
-            <div className='flex grow min-h-0 mt-2'>
-                {queryResult && 'message' in queryResult && (<>
-                    {queryResult.message}
-                </>)}
+        <div className='flex grow min-h-0 mt-2'>
+            {queryResult && 'message' in queryResult && (<>
+                {queryResult.message}
+            </>)}
 
-                {queryResult && 'data' in queryResult && (
-                    <DatabaseView view={AVAILABLE_VIEWS[datasource.type].length === 1 ? AVAILABLE_VIEWS[datasource.type][0] : view} data={queryResult} kindReferences={[]} kindName={''} datasourceId={datasource.id} datasources={datasources} />
-                )}
+            {queryResult && 'data' in queryResult && (
+                <DatabaseView view={AVAILABLE_VIEWS[datasource.type].length === 1 ? AVAILABLE_VIEWS[datasource.type][0] : view} data={queryResult} kindReferences={[]} kindName={''} datasourceId={datasource.id} datasources={datasources} />
+            )}
 
-            </div>
-        </>
-    );
+        </div>
+    </>);
 }
 
 function createExtensions(datasourceType: DatasourceType | undefined, customKeymap: KeyBinding[] = []): Extension[] {
