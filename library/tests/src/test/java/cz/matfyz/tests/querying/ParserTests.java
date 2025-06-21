@@ -1,7 +1,7 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.querying.parsing.Query;
-import cz.matfyz.querying.parsing.QueryParser;
+import cz.matfyz.querying.parser.ParsedQuery;
+import cz.matfyz.querying.parser.QueryParser;
 
 import java.util.stream.Stream;
 
@@ -25,9 +25,9 @@ class ParserTests {
     void parserTest(String queryString) {
         LOGGER.info("Parsing query:\n{}", queryString);
         Assertions.assertDoesNotThrow(() -> {
-            final Query query = QueryParser.parse(queryString);
-            LOGGER.info("Parsed query:\n{}", query);
-            final String printedQuery = QueryParser.write(query);
+            final ParsedQuery parsed = QueryParser.parse(queryString);
+            LOGGER.info("Parsed query:\n{}", parsed);
+            final String printedQuery = QueryParser.write(parsed);
             LOGGER.info("Printed query:\n{}", printedQuery);
         });
     }

@@ -34,9 +34,9 @@ const category = useSchemaCategoryInfo();
             </ValueRow>
             <ValueRow label="Root object:">
                 <!--
-                    TODO - load whole schema category and display the object name that corresponds to this key
+                    TODO - load whole schema category and display the objex's name that corresponds to this key
                 -->
-                {{ mapping.rootObjectKey }}
+                {{ mapping.rootObjexKey }}
             </ValueRow>
             <ValueRow label="Primary key:">
                 <SignatureIdDisplay

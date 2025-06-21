@@ -7,7 +7,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 
 import java.util.Collection;
 
@@ -43,8 +43,8 @@ public class TestMapping {
         this(datasource, schema, rootKey, kindName, pathCreator, null);
     }
 
-    public TestMapping(Datasource datasource, SchemaCategory schema, BuilderObject rootObject, String kindName, AccessPathCreator pathCreator) {
-        this(datasource, schema, rootObject.key(), kindName, pathCreator, null);
+    public TestMapping(Datasource datasource, SchemaCategory schema, BuilderObjex rootObjex, String kindName, AccessPathCreator pathCreator) {
+        this(datasource, schema, rootObjex.key(), kindName, pathCreator, null);
     }
 
     private @Nullable ComplexProperty accessPath;

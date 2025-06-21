@@ -2,6 +2,7 @@ package cz.matfyz.core.instance;
 
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaMorphism;
 
 import java.util.SortedSet;
@@ -31,28 +32,37 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
         return this.schema.isBase();
     }
 
-    public void createMapping(DomainRow domainRow, DomainRow codomainRow) {
+    public MappingRow createMapping(DomainRow domainRow, DomainRow codomainRow) {
         final var mapping = new MappingRow(domainRow, codomainRow);
-
         addMapping(mapping);
-
-        // TODO shouldn't there be a merge?
+        return mapping;
     }
 
-    // TODO potentially dangerous function, left for testing purposes.
-    public void addMapping(MappingRow mapping) {
+    public static MappingRow createMappingForEdge(InstanceCategory instance, SchemaEdge edge, DomainRow fromRow, DomainRow toRow) {
+        final InstanceMorphism morphism = instance.getMorphism(edge.morphism());
+
+        if (!edge.direction()) {
+            var swap = fromRow;
+            fromRow = toRow;
+            toRow = swap;
+        }
+
+        return morphism.createMapping(fromRow, toRow);
+    }
+
+    private void addMapping(MappingRow mapping) {
         mappings.add(mapping);
-        mapping.domainRow().addMappingFrom(this, mapping);
+        mapping.domainRow().setMappingFrom(this, mapping);
         mapping.codomainRow().addMappingTo(this, mapping);
     }
 
-    public void removeMapping(MappingRow mapping) {
+    void removeMapping(MappingRow mapping) {
         mappings.remove(mapping);
-        mapping.domainRow().removeMappingFrom(this, mapping);
+        mapping.domainRow().unsetMappingFrom(this);
         mapping.codomainRow().removeMappingTo(this, mapping);
     }
 
-    public SortedSet<MappingRow> allMappings() {
+    SortedSet<MappingRow> allMappings() {
         return mappings;
     }
 

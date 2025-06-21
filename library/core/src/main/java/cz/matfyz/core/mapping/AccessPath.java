@@ -3,6 +3,7 @@ package cz.matfyz.core.mapping;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.printable.*;
 
@@ -61,7 +62,7 @@ public abstract class AccessPath implements Printable {
      */
     protected abstract @Nullable List<AccessPath> getPropertyPathInternal(Signature signature);
 
-    public abstract @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
+    public abstract @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema);
 
     /**
      * Creates copy of this property but with a new name and signature.

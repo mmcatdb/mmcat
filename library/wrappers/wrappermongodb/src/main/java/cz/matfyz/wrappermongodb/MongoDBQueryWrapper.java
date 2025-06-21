@@ -6,15 +6,16 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.StaticName;
-import cz.matfyz.core.querying.QueryStructure;
+import cz.matfyz.core.querying.Computation.Operator;
+import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.core.mapping.Name.StringName;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.mongodb.client.model.Aggregates;
+import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.conversions.Bson;
@@ -31,34 +32,74 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
-    @Override protected Map<ComparisonOperator, String> defineComparisonOperators() {
-        final var output = new TreeMap<ComparisonOperator, String>();
-        output.put(ComparisonOperator.Equal, "$eq");
-        output.put(ComparisonOperator.NotEqual, "$ne");
-        output.put(ComparisonOperator.Less, "$lt");
-        output.put(ComparisonOperator.LessOrEqual, "$lte");
-        output.put(ComparisonOperator.Greater, "$gt");
-        output.put(ComparisonOperator.GreaterOrEqual, "$gte");
-        return output;
-    }
+    private static final Operators operators = new Operators();
 
-    @Override protected Map<AggregationOperator, String> defineAggregationOperators() {
-        // TODO fix
-        return new TreeMap<>();
+    static {
+
+        operators.define(Operator.Equal, "$eq");
+        operators.define(Operator.NotEqual, "$ne");
+        operators.define(Operator.Less, "$lt");
+        operators.define(Operator.LessOrEqual, "$lte");
+        operators.define(Operator.Greater, "$gt");
+        operators.define(Operator.GreaterOrEqual, "$gte");
+
+        // TODO aggregation operators
+
+        operators.define(Operator.In, "$in");
+        operators.define(Operator.NotIn, "$nin");
+
     }
 
     public QueryStatement createDSLStatement() {
         // Mongo doesn't allow joins so there is only one mapping.
         final Mapping mapping = projections.getFirst().property().mapping;
         final String collectionName = mapping.kindName();
+        final var pipeline = new ArrayList<Bson>();
+
+        final var filtersDocument = new BsonDocument();
+        for (final var filter : filters)
+            addFilter(filtersDocument, filter);
+        pipeline.add(Aggregates.match(filtersDocument));
+
         final Bson projection = createProjections();
-        final var pipeline = List.of(
-            Aggregates.project(projection)
-        );
+        pipeline.add(Aggregates.project(projection));
 
         final var content = new MongoDBQuery(collectionName, pipeline);
 
         return new QueryStatement(content, context.rootStructure());
+    }
+
+    private void addFilter(BsonDocument filtersDocument, Filter filter) {
+        if (filter instanceof BinaryFilter)
+            throw new UnsupportedOperationException("Mongo does not support filters comparing two variables.");
+
+        Property property;
+        final var filterCondition = new BsonDocument();
+
+        if (filter instanceof UnaryFilter unaryFilter) {
+            property = unaryFilter.property();
+
+            final var constant = new BsonString(unaryFilter.constant().value());
+
+            final var operator = operators.stringify(unaryFilter.operator());
+            filterCondition.put(operator, constant);
+        }
+        else if (filter instanceof SetFilter setFilter) {
+            property = setFilter.property();
+
+            final var constants = new BsonArray();
+            for (final var constant : setFilter.set())
+            constants.add(new BsonString(constant.value()));
+
+            final var operator = operators.stringify(setFilter.operator());
+            filterCondition.put(operator, constants);
+        }
+        else {
+            throw new UnsupportedOperationException("Mongo does not support filter type \"" + filter.getClass().getSimpleName() + "\".");
+        }
+
+        final var propertyPath = getPropertyName(property);
+        filtersDocument.put(propertyPath, filterCondition);
     }
 
     private Bson createProjections() {
@@ -69,12 +110,22 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         return output;
     }
 
-    // This class is a little more complicated than it seems. The problem is that we have to match the query structure of the projection to the access path of the property. The matching points are the array query structures.
-    // The reason is that we have to use a special mongo syntax for them (see the example below). Therefore, we can't just use the whole access path from the root to the property. We have to split it by the array query structures.
+    private static String getPropertyName(Property property) {
+        return property.mapping.accessPath().getPropertyPath(property.path).stream().map(accPath -> {
+            final var name = accPath.name();
+            if (!(name instanceof StringName stringName))
+                throw new UnsupportedOperationException("Only string names are supported.");
+
+            return stringName.value;
+        }).collect(Collectors.joining("."));
+    }
+
+    // This class is a little more complicated than it seems. The problem is that we have to match the result structure of the projection to the access path of the property. The matching points are the array result structures.
+    // The reason is that we have to use a special mongo syntax for them (see the example below). Therefore, we can't just use the whole access path from the root to the property. We have to split it by the array result structures.
     // The complications came from the two facts:
-    //  - The access path can have more properties than the query structure (because of auxiliary properties).
+    //  - The access path can have more properties than the result structure (because of auxiliary properties).
     //      - This should be ok since we jsut traverse them as we go.
-    //  - The access path can have less properties than the query structure (because it can use composite signatures).
+    //  - The access path can have less properties than the result structure (because it can use composite signatures).
     private static class Projector {
 
         public static void createProjection(AbstractWrapperContext context, BsonDocument root, Projection projection) {
@@ -91,9 +142,9 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
 
         private void run(Projection projection) {
             lastAccessPath = projection.property().mapping.accessPath();
-            final QueryStructure structure = projection.structure();
+            final ResultStructure structure = projection.structure();
 
-            for (final QueryStructure step : structure.getPathFromRoot()) {
+            for (final ResultStructure step : structure.getPathFromRoot()) {
                 traverseAccessPath(step);
                 traverseStructure(step);
             }
@@ -101,13 +152,13 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
             traverseAccessPath(structure);
 
             // Now we can finish the projection.
-            currentDocument.put(structure.name, new BsonString("$" + getNameInMongo()));
+            currentDocument.put(structure.name, new BsonString("$" + createNameInMongo()));
         }
 
         /** If we are in the map, we will need to use the $$this variable in the $map function. */
         private boolean isInMap = false;
 
-        private void traverseStructure(QueryStructure structure) {
+        private void traverseStructure(ResultStructure structure) {
             // If it isn't array, we just continue to the document (or create a new one).
             if (!structure.isArray) {
                 traverseSimpleStructure(structure);
@@ -120,13 +171,13 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
                 emptyLastPathBuffer();
             }
             else {
-                currentDocument = createMapOperator(currentDocument, structure.name, getNameInMongo());
+                currentDocument = createMapOperator(currentDocument, structure.name, createNameInMongo());
             }
 
             isInMap = true;
         }
 
-        private void traverseSimpleStructure(QueryStructure structure) {
+        private void traverseSimpleStructure(ResultStructure structure) {
             if (currentDocument.containsKey(structure.name)) {
                 currentDocument = currentDocument.getDocument(structure.name);
                 return;
@@ -151,12 +202,12 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
             return child;
         }
 
-        /** Path since the last split by the last array query structure. */
+        /** Path since the last split by the last array result structure. */
         private AccessPath lastAccessPath;
         /** Signature from the lastAccessPath to the current object. */
         private Signature fromLastPath = Signature.createEmpty();
 
-        private void traverseAccessPath(QueryStructure structure) {
+        private void traverseAccessPath(ResultStructure structure) {
             final var property = context.getProperty(structure);
             fromLastPath = fromLastPath.concatenate(property.path);
         }
@@ -174,18 +225,18 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         }
 
         /** Returns a name in mongo that references the current object. */
-        private String getNameInMongo() {
+        private String createNameInMongo() {
             final String output = emptyLastPathBuffer().stream()
                 .map(accessPath -> {
-                    if (!(accessPath.name() instanceof StaticName staticName))
+                    if (!(accessPath.name() instanceof StringName stringName))
                         throw new UnsupportedOperationException("Only static names are supported.");
 
-                    return staticName.getStringName();
+                    return stringName.value;
                 })
                 .collect(Collectors.joining("."));
 
-            // If we are in the $map function, we can use "$$this" variable to reference the current object. So it's like if the object's name was "$this". The think is that once we are in a map, we are always in a map (either in the original or in its children).
-            // We tested that this works even with nested maps (i.e., the "$$this" variable can be reused). It should be also always valid (unless someone uses "$this" as a field name in the access path, but would be just so unbelievably stupid).
+            // If we are in the $map function, we can use "$$this" variable to reference the current object. So it's like if the object's name was "$this". The thing is that once we are in a map, we are always in a map (either in the original or in its children).
+            // We tested that this works even with nested maps (i.e., the "$$this" variable can be reused). It should be also always valid (unless someone uses "$this" as a field name in the access path, but that would be just so unbelievably stupid.
             return isInMap
                 ? "$this." + output
                 : output;

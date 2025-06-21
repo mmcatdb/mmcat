@@ -11,7 +11,7 @@ import java.util.List;
 public record MappingInit(
     Id categoryId,
     Id datasourceId,
-    Key rootObjectKey,
+    Key rootObjexKey,
     List<Signature> primaryKey,
     String kindName,
     ComplexProperty accessPath
@@ -21,7 +21,7 @@ public record MappingInit(
         return new MappingInit(
             categoryId,
             datasourceId,
-            mapping.rootObject().key(),
+            mapping.rootObjex().key(),
             mapping.primaryKey().stream().toList(),
             mapping.kindName(),
             mapping.accessPath()

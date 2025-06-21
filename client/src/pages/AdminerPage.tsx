@@ -2,7 +2,6 @@ import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, ButtonGroup } from '@nextui-org/react';
-import { ErrorPage } from '@/pages/errorPages';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { AdminerCustomQueryPage } from '@/components/adminer/AdminerCustomQueryPage';
 import { AdminerFilterQueryPage } from '@/components/adminer/AdminerFilterQueryPage';
@@ -13,32 +12,13 @@ import { api } from '@/api';
 import { QueryType } from '@/types/adminer/QueryType';
 import type { Datasource } from '@/types/datasource';
 
-type FetchDatasourcesResult = {
-    allDatasources: Datasource[];
-    error: false;
-} | {
-    allDatasources: undefined;
-    error: true;
-};
-
-/**
- * Loader for Adminer that fetches all datasources from server
- */
-export async function adminerLoader(): Promise<FetchDatasourcesResult> {
-    const response = await api.datasources.getAllDatasources({});
-
-    if (!response.status)
-        return { allDatasources: undefined, error: true };
-
-    return { allDatasources: response.data, error: false };
-}
 
 /**
  * Main page of Adminer, data visualization and browsing tool
  */
 export function AdminerPage() {
     const { theme } = usePreferences().preferences;
-    const { allDatasources, error } = useLoaderData() as FetchDatasourcesResult;
+    const { datasources } = useLoaderData() as AdminerLoaderData;
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ datasource, setDatasource ] = useState<Datasource>();
     const [ selectedQueryType, setSelectedQueryType ] = useState<QueryType>();
@@ -49,13 +29,10 @@ export function AdminerPage() {
 
         const datasourceIdParam = searchParams.get('datasourceId');
         if (datasourceIdParam !== datasource?.id)
-            setDatasource(allDatasources?.find(source => source.id === datasourceIdParam));
+            setDatasource(datasources?.find(source => source.id === datasourceIdParam));
 
         setSelectedQueryType(getQueryTypeFromURLParams(searchParams));
     }, [ searchParams ]);
-
-    if (error)
-        return <ErrorPage />;
 
     return (
         <>
@@ -63,7 +40,7 @@ export function AdminerPage() {
                 'flex items-center w-full h-10 border-b px-0',
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}>
-                <DatasourceMenu setDatasource={setDatasource} datasource={datasource} datasources={allDatasources}/>
+                <DatasourceMenu setDatasource={setDatasource} datasource={datasource} datasources={datasources}/>
 
                 {datasource && (
                     <>
@@ -90,11 +67,28 @@ export function AdminerPage() {
 
             {datasource && (
                 selectedQueryType === QueryType.custom ? (
-                    <AdminerCustomQueryPage datasource={datasource} datasources={allDatasources} />
+                    <AdminerCustomQueryPage datasource={datasource} datasources={datasources} />
                 ) : (
-                    <AdminerFilterQueryPage datasource={datasource} datasources={allDatasources} />
+                    <AdminerFilterQueryPage datasource={datasource} datasources={datasources} />
                 )
             )}
         </>
     );
+}
+
+AdminerPage.loader = adminerLoader;
+
+type AdminerLoaderData = {
+    datasources: Datasource[];
+};
+
+async function adminerLoader(): Promise<AdminerLoaderData> {
+    const response = await api.datasources.getAllDatasources({});
+
+    if (!response.status)
+        throw new Error('Failed to load datasources');
+
+    return {
+        datasources: response.data,
+    };
 }

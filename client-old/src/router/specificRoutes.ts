@@ -60,6 +60,10 @@ commonRoutes.datasource,
     name: 'savedQueries',
     component: () => import('@/views/category/SavedQueriesView.vue'),
 }, {
+    path: 'files',
+    name: 'files',
+    component: () => import('@/views/category/FilesView.vue'),
+}, {
     path: '404',
     name: 'specificNotFound',
     component: () => import('@/views/common/PageNotFoundView.vue'),

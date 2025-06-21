@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api';
 import { Signature } from '@/types/identifiers/Signature';
-import type { NameFromServer, StaticNameFromServer } from '@/types/identifiers/Name';
+import { nameFromServer, StringName, type NameFromServer } from '@/types/identifiers/Name';
 import type { SignatureIdFromServer } from '@/types/identifiers/SignatureId';
 import type { AdminerReferenceKind, AdminerReferences } from '@/types/adminer/AdminerReferences';
-import type { ChildPropertyFromServer, ComplexPropertyFromServer, RootPropertyFromServer, SimplePropertyFromServer } from '@/types/accessPath/serverTypes';
+import type { ChildPropertyFromServer, ComplexPropertyFromServer } from '@/types/mapping/ComplexProperty';
+import type { RootPropertyFromServer } from '@/types/mapping/RootProperty';
+import type { SimplePropertyFromServer } from '@/types/mapping/SimpleProperty';
 import type { SchemaCategoryFromServer } from '@/types/schema';
 import type { MappingFromServer, MappingInit } from '@/types/mapping';
 import type { Id } from '@/types/id';
@@ -20,7 +22,7 @@ export function useFetchReferences(datasourceId?: Id, kindName?: string) {
     const [ references, setReferences ] = useState<AdminerReferences>([]);
 
     useEffect(() => {
-        (async () => {
+        void (async () => {
             setLoading(true);
 
             try {
@@ -98,6 +100,7 @@ async function getAllMappings(): Promise<MappingFromServer[]> {
     return mappingResponse.data;
 }
 
+// FIXME This shouldn't be done on the "from server" types.
 function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
     return mappings.flatMap((mapping: MappingFromServer) => {
         let fromSubpath: ComplexPropertyFromServer | null = null;
@@ -105,8 +108,10 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
         const allSubpaths: ChildPropertyFromServer[] = [];
 
         for (let subpath of mapping.accessPath.subpaths) {
-            if (subpath.name && (subpath.name as StaticNameFromServer).type === 'STATIC') {
-                const nameValue = (subpath.name as StaticNameFromServer).value;
+            const name = nameFromServer(subpath.name);
+            if (name instanceof StringName) {
+                const nameValue = name.value;
+                // FIXME use typed name
                 if (nameValue.startsWith(FROM_PREFIX)) {
                     fromSubpath = subpath as ComplexPropertyFromServer;
                     subpath = prefixSubpathNames(subpath, 'from', 0);
@@ -126,13 +131,13 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
         const newMappings: MappingInit[] = [];
 
         if (fromSubpath) {
-            const kindName = (fromSubpath.name as StaticNameFromServer).value;
+            const kindName = (fromSubpath.name as { value: string }).value;
 
             // Mapping for kind that is used as a start node of a relationship kind
             newMappings.push({
                 categoryId: mapping.categoryId,
                 datasourceId: mapping.datasourceId,
-                rootObjectKey: mapping.rootObjectKey,
+                rootObjexKey: mapping.rootObjexKey,
                 primaryKey: mapping.primaryKey,
                 kindName: kindName.startsWith(FROM_PREFIX) ? kindName.substring(FROM_PREFIX.length) : kindName,
                 accessPath: {
@@ -144,13 +149,13 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
         }
 
         if (toSubpath) {
-            const kindName = (toSubpath.name as StaticNameFromServer).value;
+            const kindName = (toSubpath.name as { value: string }).value;
 
             // Mapping for kind that is used as an end node of a relationship kind
             newMappings.push({
                 categoryId: mapping.categoryId,
                 datasourceId: mapping.datasourceId,
-                rootObjectKey: mapping.rootObjectKey,
+                rootObjexKey: mapping.rootObjexKey,
                 primaryKey: mapping.primaryKey,
                 kindName: kindName.startsWith(TO_PREFIX) ? kindName.substring(TO_PREFIX.length) : kindName,
                 accessPath: {
@@ -162,11 +167,11 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
         }
 
         if (fromSubpath != null || toSubpath != null) {
-            // Maapping with prefxed names
+            // Maapping with prefixed names
             newMappings.push({
                 categoryId: mapping.categoryId,
                 datasourceId: mapping.datasourceId,
-                rootObjectKey: mapping.rootObjectKey,
+                rootObjexKey: mapping.rootObjexKey,
                 primaryKey: mapping.primaryKey,
                 kindName: mapping.kindName,
                 accessPath: {
@@ -190,7 +195,7 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
 function prefixSubpathNames(subpath: ChildPropertyFromServer, prefix: string, level: number): ChildPropertyFromServer {
     let prefixedName: NameFromServer = subpath.name;
     if ('value' in subpath.name && level > 0)
-        prefixedName = { value: `${prefix}.${subpath.name.value}`, type: subpath.name.type };
+        prefixedName = { value: `${prefix}.${subpath.name.value}` };
 
     if ('subpaths' in subpath) {
         return {
@@ -231,7 +236,7 @@ async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryFrom
 }
 
 /**
-* Returns a set of objects with name and signature of each object in the given access path.
+* Returns a set of objects with name and signature of each objex in the given access path.
 */
 function getPropertiesFromAccessPath(
     accessPath: RootPropertyFromServer | ChildPropertyFromServer,
@@ -251,9 +256,9 @@ function getPropertiesFromAccessPath(
 /**
 * Returns the last base of a given signature.
 */
-function getLastBase(signature: string): string {
-    const signatureFromServer: Signature = Signature.fromServer(signature);
-    const lastBase = signatureFromServer.getLastBase();
+function getLastBase(signatureFromServer: string): string {
+    const signature: Signature = Signature.fromServer(signatureFromServer);
+    const lastBase = signature.tryGetLastBase();
     return lastBase!.last.toString();
 }
 
@@ -320,7 +325,7 @@ function getKeyProperties(properties: SimplePropertyFromServer[], keySignature: 
 }
 
 function getPropertyName(property: SimplePropertyFromServer): string {
-    return (property.name as StaticNameFromServer).value;
+    return (property.name as { value: string }).value;
 }
 
 function getKindReference(mapping: MappingInit, propertyName: string): AdminerReferenceKind {

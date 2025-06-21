@@ -14,7 +14,8 @@ public class JsonLdProvider {
     public record JsonLdSettings(
         String url,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {}
 
 }

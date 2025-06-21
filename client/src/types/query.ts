@@ -1,5 +1,6 @@
-import { Datasource, type DatasourceFromServer } from './datasource';
+import { type DatasourceFromServer } from './datasource';
 import type { Entity, Id, VersionId } from './id';
+import { type SignatureFromServer } from './identifiers';
 
 export type QueryFromServer = {
     id: Id;
@@ -60,40 +61,102 @@ export type QueryEvolutionError = {
     data: unknown;
 };
 
-export type QueryDescriptionFromServer = {
-    parts: QueryPartDescriptionFromServer[];
+export type QueryDescription = {
+    planned: QueryPlanDescription;
+    optimized: QueryPlanDescription;
 };
 
-export class QueryDescription {
-    private constructor(
-        readonly parts: QueryPartDescription[],
-    ) {}
+export type QueryPlanDescription = {
+    parts: QueryPartDescription[];
+    tree: QueryNode;
+};
 
-    static fromServer(input: QueryDescriptionFromServer): QueryDescription {
-        return new QueryDescription(
-            input.parts.map(QueryPartDescription.fromServer),
-        );
-    }
-}
-
-type QueryPartDescriptionFromServer = {
+type QueryPartDescription = {
     datasource: DatasourceFromServer;
+    structure: ResultStructure;
     content: string;
-    structure: string;
 };
 
-export class QueryPartDescription {
-    private constructor(
-        readonly datasource: Datasource,
-        readonly content: string,
-        readonly structure: string,
-    ) {}
+type ResultStructure = {
+    name: string;
+    isArray: boolean;
+    children: Map<string, ResultStructure>;
+    /** If null, this is the root of the tree. */
+    parent: ResultStructure | null;
+    signatureFromParent: SignatureFromServer | null;
+};
 
-    static fromServer(input: QueryPartDescriptionFromServer): QueryPartDescription {
-        return new QueryPartDescription(
-            Datasource.fromServer(input.datasource),
-            input.content,
-            input.structure,
-        );
-    }
+export enum QueryNodeType {
+    Datasource = 'datasource',
+    Join = 'join',
+    Filter = 'filter',
+    Minus = 'minus',
+    Optional = 'optional',
+    Union = 'union',
 }
+
+export type QueryNode = DatasourceNode | JoinNode | FilterNode | MinusNode | OptionalNode | UnionNode;
+
+type TypedNode<TType extends QueryNodeType, TData extends object> = {
+    type: TType;
+} & TData;
+
+type TODO = any;
+
+export type DatasourceNode = TypedNode<QueryNodeType.Datasource, {
+    datasourceIdentifier: string;
+    kinds: Record<string, PatternTree>;
+    joinCandidates: JoinCandidate[];
+    filters: Filter[];
+    rootVariable: TODO;
+}>;
+
+export type PatternTree = {
+    objexKey: number;
+    term: string;
+    children: Record<SignatureFromServer, PatternTree>;
+};
+
+export type JoinNode = TypedNode<QueryNodeType.Join, {
+    fromChild: QueryNode;
+    toChild: QueryNode;
+    candidate: JoinCandidate;
+}>;
+
+export type JoinCandidate = {
+    type: JoinType;
+    fromKind: string;
+    toKind: string;
+    variable: TODO;
+    fromPath: SignatureFromServer;
+    toPath: SignatureFromServer;
+    recursion: number;
+    isOptional: boolean;
+}
+
+enum JoinType {
+    IdRef = 'IdRef',
+    Value = 'Value',
+}
+
+export type FilterNode = TypedNode<QueryNodeType.Filter, {
+    child: QueryNode;
+    filter: Filter;
+}>;
+
+// TODO
+type Filter = string;
+
+export type MinusNode = TypedNode<QueryNodeType.Minus, {
+    primaryChild: QueryNode;
+    minusChild: QueryNode;
+}>;
+
+export type OptionalNode = TypedNode<QueryNodeType.Optional, {
+    primaryChild: QueryNode;
+    optionalChild: QueryNode;
+}>;
+
+export type UnionNode = TypedNode<QueryNodeType.Union, {
+    children: QueryNode[];
+}>;

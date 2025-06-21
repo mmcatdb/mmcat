@@ -3,7 +3,7 @@ package cz.matfyz.querying.core;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
-import cz.matfyz.querying.core.patterntree.PatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,8 +33,8 @@ public class MorphismColoring implements Printable {
         return coloring;
     }
 
-    private void colorMorphisms(PatternForKind pattern, PatternObject object) {
-        for (final var child : object.children()) {
+    private void colorMorphisms(PatternForKind pattern, PatternTree node) {
+        for (final var child : node.children()) {
             morphismToColors
                 .computeIfAbsent(child.signatureFromParent(), x -> new TreeSet<>())
                 .add(pattern);
@@ -57,21 +57,21 @@ public class MorphismColoring implements Printable {
      * Finds the lowest number of colors assigned to any of the morphisms (with at least one color) in the mapping.
      * If all morphisms have zero colors, 0 is returned.
      */
-    private int computePatternCost(PatternObject object) {
-        final int min = computePatternCostRecursive(object);
+    private int computePatternCost(PatternTree node) {
+        final int min = computePatternCostRecursive(node);
 
         return min == Integer.MAX_VALUE ? 0 : min;
     }
 
-    private int computePatternCostRecursive(PatternObject object) {
+    private int computePatternCostRecursive(PatternTree node) {
         int min = Integer.MAX_VALUE;
-        if (object.signatureFromParent() != null) {
-            final var objectColors = morphismToColors.get(object.signatureFromParent());
-            if (objectColors != null)
-                min = objectColors.size();
+        if (node.signatureFromParent() != null) {
+            final var nodeColors = morphismToColors.get(node.signatureFromParent());
+            if (nodeColors != null)
+                min = nodeColors.size();
         }
 
-        for (final var child : object.children())
+        for (final var child : node.children())
             min = Math.min(min, computePatternCostRecursive(child));
 
         return min;

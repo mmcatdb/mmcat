@@ -6,25 +6,18 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.category.Composite;
 import cz.matfyz.evolution.category.CreateMorphism;
-import cz.matfyz.evolution.category.CreateObject;
+import cz.matfyz.evolution.category.CreateObjex;
 import cz.matfyz.evolution.category.DeleteMorphism;
-import cz.matfyz.evolution.category.DeleteObject;
+import cz.matfyz.evolution.category.DeleteObjex;
 import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
 import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
 import cz.matfyz.evolution.category.UpdateMorphism;
-import cz.matfyz.evolution.category.UpdateObject;
+import cz.matfyz.evolution.category.UpdateObjex;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
-import cz.matfyz.querying.parsing.Filter.ConditionFilter;
-import cz.matfyz.querying.core.QueryContext;
-import cz.matfyz.querying.parsing.Query;
-import cz.matfyz.querying.parsing.QueryParser;
-import cz.matfyz.querying.parsing.SelectClause;
-import cz.matfyz.querying.parsing.Term;
-import cz.matfyz.querying.parsing.TermTree;
-import cz.matfyz.querying.parsing.WhereClause;
-import cz.matfyz.querying.parsing.Filter.ValueFilter;
-import cz.matfyz.querying.parsing.WhereClause.Type;
+import cz.matfyz.querying.parser.ParsedQuery;
+import cz.matfyz.querying.parser.TermTree;
+import cz.matfyz.querying.parser.Filter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,20 +54,28 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         }
     }
 
-    private Query query;
+    private ParsedQuery query;
     private List<TermTree<String>> selectTermTrees;
     private List<TermTree<Signature>> whereTermTrees;
-    private List<ConditionFilter> conditionFilters;
-    private List<ValueFilter> valueFilters;
+    private List<Filter> filters;
 
     private List<QueryEvolutionError> errors = new ArrayList<>();
 
     private QueryEvolutionResult innerRun(String prevContent) throws Exception {
+        // FIXME This is not going to work. The reason is that the query algorithm changed
+        // from parsing -> extracting -> ...
+        // to parsing -> normalizing -> extracting -> ...
+        // I.e., now the query is normalized before mapping to the schema.
+        // We want to do it this way, because the normalization is needed only for querying, not for evolution. In fact, we can't even use the normalized query for evolution, because we want to preserve the original query as much as possible.
+        // So, the whole evolution process should work with the original AST, not with the normalized one.
+
+        /*
+        TODO
         query = QueryParser.parse(prevContent);
-        selectTermTrees = new ArrayList<>(query.select.originalTermTrees);
-        whereTermTrees = new ArrayList<>(query.where.originalTermTrees);
-        conditionFilters = new ArrayList<>(query.where.conditionFilters);
-        valueFilters = new ArrayList<>(query.where.valueFilters);
+
+        selectTermTrees = new ArrayList<>(query.select.termTrees);
+        whereTermTrees = new ArrayList<>(query.where.termTrees);
+        filters = new ArrayList<>(query.where.filters);
 
         for (final var update : updates) {
             LOGGER.info("Executing update from: " + update.getPrevVersion());
@@ -84,15 +85,14 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
             }
         }
 
-        final Query updatedQuery = new Query(
+        final ParsedQuery updatedQuery = new ParsedQuery(
             new SelectClause(selectTermTrees),
             new WhereClause(
                 Type.Where,
                 List.of(),
                 new Term.Builder(),
                 whereTermTrees,
-                conditionFilters,
-                valueFilters
+                filters,
             ),
             new QueryContext()
         );
@@ -100,6 +100,11 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         final String newContent = QueryParser.write(updatedQuery);
 
         return new QueryEvolutionResult(newContent, errors);
+        */
+
+        errors.add(new QueryEvolutionError(ErrorType.UpdateError, "Query AST processing changed", null));
+
+        return new QueryEvolutionResult(prevContent, errors);
     }
 
     @Override public Void visit(Composite operation) {
@@ -112,7 +117,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return null;
     }
 
-    @Override public Void visit(CreateObject operation) {
+    @Override public Void visit(CreateObjex operation) {
         /* This function is intentionally empty. */
         return null;
     }
@@ -141,26 +146,29 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return null;
     }
 
-    @Override public Void visit(DeleteObject operation) {
-        final @Nullable Term termToDelete = query.context.getTerm(operation.schema().deserialize());
-        if (termToDelete == null)
-            return null;
+    @Override public Void visit(DeleteObjex operation) {
+        /*
+        TODO
+        final List<Term> termsToDelete = query.context.getTermsForObject(operation.schema().deserialize());
 
-        final var whereDeletor = new SubtreeDeletor<Signature>(tree -> tree.term.equals(termToDelete));
-        whereTermTrees = whereTermTrees.stream()
-            .map(whereDeletor::run)
-            .filter(Objects::nonNull)
-            .toList();
+        for (final var termToDelete : termsToDelete) {
+            final var whereDeletor = new SubtreeDeletor<Signature>(tree -> tree.term.equals(termToDelete));
+            whereTermTrees = whereTermTrees.stream()
+                .map(whereDeletor::run)
+                .filter(Objects::nonNull)
+                .toList();
 
-        final var selectDeletor = new SubtreeDeletor<String>(tree -> tree.term.equals(termToDelete));
-        selectTermTrees = selectTermTrees.stream()
-            .map(selectDeletor::run)
-            .filter(Objects::nonNull)
-            .toList();
+            final var selectDeletor = new SubtreeDeletor<String>(tree -> tree.term.equals(termToDelete));
+            selectTermTrees = selectTermTrees.stream()
+                .map(selectDeletor::run)
+                .filter(Objects::nonNull)
+                .toList();
 
-        final boolean isSomethingChanged = !whereDeletor.deleted.isEmpty() || !selectDeletor.deleted.isEmpty();
-        if (isSomethingChanged)
-            errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete object " + operation.schema().key(), null));
+            final boolean isSomethingChanged = !whereDeletor.deleted.isEmpty() || !selectDeletor.deleted.isEmpty();
+            if (isSomethingChanged)
+                errors.add(new QueryEvolutionError(ErrorType.UpdateWarning, "Query was changed because of delete object " + operation.schema().key(), null));
+        }
+        */
 
         return null;
     }
@@ -197,8 +205,8 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
                 return input;
 
             final TermTree<TEdge> output = input.parent() == null
-                ? TermTree.root(input.term.asVariable())
-                : TermTree.child(input.term, input.edgeFromParent);
+                ? TermTree.createRoot(input.term)
+                : TermTree.createChild(input.term, input.edgeFromParent);
 
             newChildren.forEach(output::addChild);
 
@@ -217,7 +225,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return null;
     }
 
-    @Override public Void visit(UpdateObject operation) {
+    @Override public Void visit(UpdateObjex operation) {
         errors.add(new QueryEvolutionError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }

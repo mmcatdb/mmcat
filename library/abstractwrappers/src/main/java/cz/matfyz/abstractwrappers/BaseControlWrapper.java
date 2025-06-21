@@ -7,7 +7,6 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;

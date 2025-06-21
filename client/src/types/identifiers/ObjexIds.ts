@@ -50,7 +50,7 @@ export class ObjexIds {
     private static combineCrossProductIds(current: SignatureId[], signature: Signature, ids: ObjexIds): SignatureId[] {
         const newSignatureIds = ids.isSignatures
             ? ids._signatureIds.map(id => id.signatures)
-            : [ [ Signature.empty ] ];
+            : [ [ Signature.empty() ] ];
 
         const concatenatedSignatureIds = newSignatureIds.map(signatureId => signatureId.map(s => signature.concatenate(s)));
 

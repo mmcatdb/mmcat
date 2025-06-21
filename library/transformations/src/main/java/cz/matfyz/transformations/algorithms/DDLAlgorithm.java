@@ -10,9 +10,9 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.transformations.exception.InvalidStateException;
@@ -86,24 +86,24 @@ public class DDLAlgorithm {
     }
 
     private Set<String> getPropertyNames(AccessPath property) {
-        if (property.name() instanceof final StaticName staticName)
-            return Set.of(staticName.getStringName());
+        if (property.name() instanceof final StringName stringName)
+            return Set.of(stringName.value);
 
         final var dynamicName = (DynamicName) property.name();
         final var replacement = replacedNames.get(dynamicName);
         final var namePath = mapping.category().getPath(replacement.valueToName());
 
-        final var schemaObject = mapping.category().getPath(property.signature()).to();
-        final var objectRows = instance.getObject(schemaObject).allRowsToSet();
+        final var schemaObjex = mapping.category().getPath(property.signature()).to();
+        final var objexRows = instance.getObjex(schemaObjex).allRowsToSet();
         final var names = new TreeSet<String>();
 
-        objectRows.forEach(row -> names.add(getDynamicNameValue(dynamicName, namePath, row)));
+        objexRows.forEach(row -> names.add(getDynamicNameValue(dynamicName, namePath, row)));
 
         return names;
     }
 
-    public static String getDynamicNameValue(DynamicName dynamicName, SchemaPath namePath, DomainRow objectRow) {
-        final var nameRowSet = objectRow.traverseThrough(namePath);
+    public static String getDynamicNameValue(DynamicName dynamicName, SchemaPath namePath, DomainRow objexRow) {
+        final var nameRowSet = objexRow.traverseThrough(namePath);
 
         if (nameRowSet.isEmpty())
             throw InvalidStateException.dynamicNameNotFound(dynamicName);

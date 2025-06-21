@@ -1,89 +1,108 @@
 import { Signature, type SignatureFromServer } from './Signature';
 
-export type NameFromServer = StaticNameFromServer | DynamicNameFromServer;
+export type NameFromServer = StringNameFromServer | TypedNameFromServer | DynamicNameFromServer;
 
 export function nameFromServer(input: NameFromServer): Name {
-    return 'signature' in  input
-        ? DynamicName.fromServer(input)
-        : StaticName.fromServer(input);
+    if ('value' in input)
+        return StringName.fromServer(input);
+    if (!('signature' in input))
+        return TypedName.fromServer(input);
+    return DynamicName.fromServer(input);
 }
 
-export type Name = StaticName | DynamicName;
+export type Name = StringName | TypedName;
 
-export type StaticNameFromServer = { value: string, type: 'STATIC' | 'ANONYMOUS' };
+type StringNameFromServer = {
+    value: string;
+};
 
-export class StaticName {
-    readonly value: string;
-    readonly _isAnonymous: boolean;
+export class StringName {
+    constructor(
+        readonly value: string,
+    ) {}
 
-    private constructor(value: string, anonymous = false) {
-        this.value = value;
-        this._isAnonymous = anonymous;
+    static fromServer(input: StringNameFromServer): StringName {
+        return new StringName(input.value);
     }
 
-    static fromString(value: string): StaticName {
-        return new StaticName(value);
-    }
-
-    static copy(name: StaticName): StaticName {
-        return name._isAnonymous ? StaticName.anonymous : new StaticName(name.value);
-    }
-
-    copy(): StaticName {
-        return this._isAnonymous ? StaticName.anonymous : new StaticName(this.value);
-    }
-
-    static _anonymousInstance = new StaticName('', true);
-
-    static get anonymous(): StaticName {
-        return this._anonymousInstance;
-    }
-
-    get isAnonymous(): boolean {
-        return this._isAnonymous;
+    toServer(): StringNameFromServer {
+        return {
+            value: this.value,
+        };
     }
 
     equals(other: Name | undefined): boolean {
-        return other instanceof StaticName
-            && other._isAnonymous === this._isAnonymous
-            && other.value === this.value;
+        return other instanceof StringName && other.value === this.value;
     }
 
     toString(): string {
-        return this._isAnonymous ? '_' : this.value;
-    }
-
-    static fromServer(input: StaticNameFromServer): StaticName {
-        return new StaticName(input.value, input.type === 'ANONYMOUS');
-    }
-
-    toServer(): StaticNameFromServer {
-        return {
-            value: this.value,
-            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC',
-        };
+        return this.value;
     }
 }
 
-export type DynamicNameFromServer = { signature: SignatureFromServer };
+type TypedNameFromServer = {
+    type: string;
+};
 
-export class DynamicName {
-    readonly signature: Signature;
+export class TypedName {
+    constructor(
+        readonly type: string,
+    ) {}
 
-    private constructor(signature: Signature) {
-        this.signature = signature;
+    static fromServer(input: TypedNameFromServer): TypedName {
+        return new TypedName(input.type);
     }
 
-    static fromSignature(signature: Signature) {
-        return new DynamicName(signature);
+    toServer(): TypedNameFromServer {
+        return {
+            type: this.type,
+        };
     }
 
-    static copy(name: DynamicName): DynamicName {
-        return new DynamicName(name.signature.copy());
+    equals(other: Name): boolean {
+        return other instanceof TypedName && this.type === other.type && !(other instanceof DynamicName);
     }
 
-    copy(): DynamicName {
-        return new DynamicName(this.signature.copy());
+    toString(): string {
+        return `<${this.type}>`;
+    }
+
+    /** The property is a root of the access path tree, the name doesn't mean anything. */
+    public static readonly ROOT = 'root';
+    /** The property is a value in an object, the name represents its key. */
+    public static readonly KEY = 'key';
+    /** The property is an element of an array, the name represents its index. */
+    public static readonly INDEX = 'index';
+}
+
+type DynamicNameFromServer = TypedNameFromServer & {
+    signature: SignatureFromServer;
+    pattern?: string;
+};
+
+export class DynamicName extends TypedName {
+    constructor(
+        type: string,
+        readonly signature: Signature,
+        readonly pattern?: string,
+    ) {
+        super(type);
+    }
+
+    static fromServer(input: DynamicNameFromServer): DynamicName {
+        return new DynamicName(
+            input.type,
+            Signature.fromServer(input.signature),
+            input.pattern,
+        );
+    }
+
+    toServer(): DynamicNameFromServer {
+        return {
+            type: this.type,
+            signature: this.signature.toServer(),
+            pattern: this.pattern,
+        };
     }
 
     equals(other: Name): boolean {
@@ -91,16 +110,7 @@ export class DynamicName {
     }
 
     toString(): string {
-        return `<${this.signature.toString()}>`;
-    }
-
-    static fromServer(input: DynamicNameFromServer): DynamicName {
-        return new DynamicName(Signature.fromServer(input.signature));
-    }
-
-    toServer(): DynamicNameFromServer {
-        return {
-            signature: this.signature.toServer(),
-        };
+        const patternString = this.pattern == null ? '' : ` (${this.pattern})`;
+        return `<${this.type}${patternString}: ${this.signature.toString()}>`;
     }
 }

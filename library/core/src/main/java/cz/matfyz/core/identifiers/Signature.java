@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -48,10 +49,10 @@ public class Signature implements Serializable, Comparable<Signature> {
         return ids.length == 0 ? createEmpty() : new Signature(ids);
     }
 
-    private static final Signature emptyObject = new Signature(new int[] {});
+    private static final Signature emptyInstance = new Signature(new int[] {});
 
     public static Signature createEmpty() {
-        return emptyObject;
+        return emptyInstance;
     }
 
     public List<BaseSignature> toBases() {
@@ -103,6 +104,15 @@ public class Signature implements Serializable, Comparable<Signature> {
     public static Signature concatenate(Collection<? extends Signature> signatures) {
         final var signatureIds = signatures.stream().map(signature -> signature.ids).toList();
         return createComposite(ArrayUtils.concatenate(signatureIds));
+    }
+
+    @SafeVarargs
+    public static Signature concatenate(Stream<? extends Signature>... streams) {
+        final var ids = new ArrayList<int[]>();
+        for (final var stream : streams)
+            stream.forEach(signatures -> ids.add(signatures.ids));
+
+        return createComposite(ArrayUtils.concatenate(ids));
     }
 
     public boolean hasPrefix(Signature other) {

@@ -9,7 +9,7 @@ import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.PatternSegment;
 import cz.matfyz.inference.edit.algorithms.ClusterMerge;
@@ -30,10 +30,10 @@ class SchemaCategoryInferenceEditorTests {
     @Test
     void testReferenceMergeEditArray() {
         final SchemaBuilder sbA = new SchemaBuilder();
-        final var app =             sbA.object("app", 0);
-        final var name =            sbA.object("name", 1);
-        final var reviewsA =        sbA.object("reviews", 2);
-        final var index =           sbA.object("_index", 3);
+        final var app =             sbA.objex("app", 0);
+        final var name =            sbA.objex("name", 1);
+        final var reviewsA =        sbA.objex("reviews", 2);
+        final var index =           sbA.objex("_index", 3);
         final var appToName =       sbA.morphism(app, name, 1);
         final var reviewsAToApp =   sbA.morphism(reviewsA, app, 2);
         final var reviewsAToIndex = sbA.morphism(reviewsA, index, 3);
@@ -58,8 +58,8 @@ class SchemaCategoryInferenceEditorTests {
 
         // Setup B
         final SchemaBuilder sbB = new SchemaBuilder();
-        final var reviewsB =        sbB.object("reviews", 4);
-        final var text =            sbB.object("text", 5);
+        final var reviewsB =        sbB.objex("reviews", 4);
+        final var text =            sbB.objex("text", 5);
         final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
         final SchemaCategory schemaB = sbB.build();
 
@@ -89,12 +89,12 @@ class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testReferenceMergeEditObject() {
+    void testReferenceMergeEditObjex() {
         // Setup A
         final SchemaBuilder sbA = new SchemaBuilder();
-        final var app =             sbA.object("app", 0);
-        final var name =            sbA.object("name", 1);
-        final var reviewsA =        sbA.object("reviews", 2);
+        final var app =             sbA.objex("app", 0);
+        final var name =            sbA.objex("name", 1);
+        final var reviewsA =        sbA.objex("reviews", 2);
         final var appToName =       sbA.morphism(app, name, 1);
         final var appToReviewsA =   sbA.morphism(app, reviewsA, 2);
         final SchemaCategory schemaA = sbA.build();
@@ -116,8 +116,8 @@ class SchemaCategoryInferenceEditorTests {
 
         // Setup B
         final SchemaBuilder sbB = new SchemaBuilder();
-        final var reviewsB =        sbB.object("reviews", 4);
-        final var text =            sbB.object("text", 5);
+        final var reviewsB =        sbB.objex("reviews", 4);
+        final var text =            sbB.objex("text", 5);
         final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
         final SchemaCategory schemaB = sbB.build();
 
@@ -150,9 +150,9 @@ class SchemaCategoryInferenceEditorTests {
     void testPrimaryKeyMergeEdit() {
         // Setup A
         final SchemaBuilder sbA = new SchemaBuilder();
-        final var app =         sbA.object("app", 0);
-        final var appIdA =      sbA.object("app_id", 1);
-        final var name =        sbA.object("name", 2);
+        final var app =         sbA.objex("app", 0);
+        final var appIdA =      sbA.objex("app_id", 1);
+        final var name =        sbA.objex("name", 2);
         final var appToAppIdA = sbA.morphism(app, appIdA, 1);
         final var appToName =   sbA.morphism(app, name, 2);
         final SchemaCategory schemaA = sbA.build();
@@ -174,9 +174,9 @@ class SchemaCategoryInferenceEditorTests {
 
         // Setup B
         final SchemaBuilder sbB = new SchemaBuilder();
-        final var reviews =         sbB.object("reviews", 3);
-        final var appIdB =          sbB.object("app_id", 4);
-        final var text =            sbB.object("text", 5);
+        final var reviews =         sbB.objex("reviews", 3);
+        final var appIdB =          sbB.objex("app_id", 4);
+        final var text =            sbB.objex("text", 5);
         final var reviewsToAppIdB = sbB.morphism(reviews, appIdB, 3);
         final var reviewsToText =   sbB.morphism(reviews, text, 4);
         final SchemaCategory schemaB = sbB.build();
@@ -209,16 +209,16 @@ class SchemaCategoryInferenceEditorTests {
     void testClusterComplexEdit() {
         final var builder = new SchemaBuilder();
 
-        final var world =       builder.object("world", 0);
-        final var continent =   builder.object("continent", 1);
-        final var country1 =    builder.object("country_1", 2);
-        final var o3 =          builder.object("a", 3);
-        final var o4 =          builder.object("b", 4);
-        final var o5 =          builder.object("c", 5);
-        final var country2 =    builder.object("country_2", 6);
-        final var o7 =          builder.object("a", 7);
-        final var o8 =          builder.object("b", 8);
-        final var o9 =          builder.object("c", 9);
+        final var world =       builder.objex("world", 0);
+        final var continent =   builder.objex("continent", 1);
+        final var country1 =    builder.objex("country_1", 2);
+        final var o3 =          builder.objex("a", 3);
+        final var o4 =          builder.objex("b", 4);
+        final var o5 =          builder.objex("c", 5);
+        final var country2 =    builder.objex("country_2", 6);
+        final var o7 =          builder.objex("a", 7);
+        final var o8 =          builder.objex("b", 8);
+        final var o9 =          builder.objex("c", 9);
 
         final var worldToContinent =        builder.morphism(world, continent, 1);
         final var continentToCountry1 =     builder.morphism(continent, country1, 2);
@@ -275,14 +275,14 @@ class SchemaCategoryInferenceEditorTests {
     void testClusterIntermediateEdit() {
         final var builder = new SchemaBuilder();
 
-        final var user =            builder.object("user", 0);
-        final var name =            builder.object("name", 1);
-        final var compliment1 =     builder.object("compliment_cute", 2);
-        final var rating1 =         builder.object("rating", 3);
-        final var comments1 =       builder.object("comments", 4);
-        final var compliment2 =     builder.object("compliment_funny", 5);
-        final var rating2 =         builder.object("rating", 6);
-        final var comments2 =       builder.object("comments", 7);
+        final var user =            builder.objex("user", 0);
+        final var name =            builder.objex("name", 1);
+        final var compliment1 =     builder.objex("compliment_cute", 2);
+        final var rating1 =         builder.objex("rating", 3);
+        final var comments1 =       builder.objex("comments", 4);
+        final var compliment2 =     builder.objex("compliment_funny", 5);
+        final var rating2 =         builder.objex("rating", 6);
+        final var comments2 =       builder.objex("comments", 7);
 
         final var userToName =              builder.morphism(user, name, 1);
         final var userToCompliment1 =       builder.morphism(user, compliment1, 2);
@@ -333,10 +333,10 @@ class SchemaCategoryInferenceEditorTests {
     void testClusterSimpleEdit() {
         final var builder = new SchemaBuilder();
 
-        final var user =            builder.object("user", 0);
-        final var name =            builder.object("name", 1);
-        final var compliment1 =     builder.object("compliment_cute", 2);
-        final var compliment2 =     builder.object("compliment_funny", 3);
+        final var user =            builder.objex("user", 0);
+        final var name =            builder.objex("name", 1);
+        final var compliment1 =     builder.objex("compliment_cute", 2);
+        final var compliment2 =     builder.objex("compliment_funny", 3);
 
         final var userToName =              builder.morphism(user, name, 1);
         final var userToCompliment1 =       builder.morphism(user, compliment1, 2);
@@ -379,18 +379,18 @@ class SchemaCategoryInferenceEditorTests {
     void testRecursionEdit() {
         final var builder = new SchemaBuilder();
 
-        final var o0 =  builder.object("B", 0);
-        final var o1 =  builder.object("A", 1);
-        final var o2 =  builder.object("A", 2);
-        final var o3 =  builder.object("B", 3);
-        //final var o4 =  builder.object("B", 4);
-        final var o5 =  builder.object("B", 5);
-        final var o6 =  builder.object("A", 6);
-        //final var o7 =  builder.object("A", 7);
-        final var o8 =  builder.object("B", 8);
-        //final var o9 =  builder.object("B", 9);
-        //final var o10 = builder.object("A", 10);
-        //final var o11 = builder.object("B", 11);
+        final var o0 =  builder.objex("B", 0);
+        final var o1 =  builder.objex("A", 1);
+        final var o2 =  builder.objex("A", 2);
+        final var o3 =  builder.objex("B", 3);
+        //final var o4 =  builder.objex("B", 4);
+        final var o5 =  builder.objex("B", 5);
+        final var o6 =  builder.objex("A", 6);
+        //final var o7 =  builder.objex("A", 7);
+        final var o8 =  builder.objex("B", 8);
+        //final var o9 =  builder.objex("B", 9);
+        //final var o10 = builder.objex("A", 10);
+        //final var o11 = builder.objex("B", 11);
 
         builder.morphism(o0, o1, 1);
         builder.morphism(o0, o2, 2);
@@ -423,18 +423,18 @@ class SchemaCategoryInferenceEditorTests {
     void testRecursionEdit2() {
         final var builder = new SchemaBuilder();
 
-        final var id =  builder.object("_id", 0);
-        final var o1 =  builder.object("A", 1);
-        final var o2 =  builder.object("B", 2);
-        final var o3 =  builder.object("B", 3);
-        final var o4 =  builder.object("A", 4);
-        final var o5 =  builder.object("A", 5);
-        final var o6 =  builder.object("A", 6);
-        final var o7 =  builder.object("B", 7);
-        final var o8 =  builder.object("B", 8);
-        final var o9 =  builder.object("A", 9);
-        final var o10 = builder.object("B", 10);
-        final var o11 = builder.object("A", 11);
+        final var id =  builder.objex("_id", 0);
+        final var o1 =  builder.objex("A", 1);
+        final var o2 =  builder.objex("B", 2);
+        final var o3 =  builder.objex("B", 3);
+        final var o4 =  builder.objex("A", 4);
+        final var o5 =  builder.objex("A", 5);
+        final var o6 =  builder.objex("A", 6);
+        final var o7 =  builder.objex("B", 7);
+        final var o8 =  builder.objex("B", 8);
+        final var o9 =  builder.objex("A", 9);
+        final var o10 = builder.objex("B", 10);
+        final var o11 = builder.objex("A", 11);
 
         builder.morphism(id, o1, 1);
         builder.morphism(id, o2, 2);
@@ -463,8 +463,8 @@ class SchemaCategoryInferenceEditorTests {
     private SchemaCategory mergeSchemas(SchemaCategory... schemas) {
         final SchemaCategory output = new SchemaCategory();
         for (final SchemaCategory schema : schemas) {
-            for (final SchemaObject object : schema.allObjects())
-                schema.addObject(object);
+            for (final SchemaObjex objex : schema.allObjexes())
+                schema.addObjex(objex);
 
             for (final SchemaMorphism morphism : schema.allMorphisms())
                 schema.addMorphism(morphism);
@@ -476,11 +476,11 @@ class SchemaCategoryInferenceEditorTests {
     private MetadataCategory mergeMetadatas(SchemaCategory schema, MetadataCategory... metadatas) {
         final MetadataCategory output = MetadataCategory.createEmpty(schema);
 
-        for (final SchemaObject object : schema.allObjects()) {
+        for (final SchemaObjex objex : schema.allObjexes()) {
             for (final MetadataCategory metadata : metadatas) {
-                final var mo = metadata.getObject(object);
+                final var mo = metadata.getObjex(objex);
                 if (mo != null) {
-                    output.setObject(object, mo);
+                    output.setObjex(objex, mo);
                     break;
                 }
             }
@@ -514,10 +514,10 @@ class SchemaCategoryInferenceEditorTests {
     }
 
     private void printCategory(SchemaCategory schema, MetadataCategory metadata) {
-        System.out.println("Objects: ");
-        for (SchemaObject o : schema.allObjects()) {
-            final var mo = metadata.getObject(o);
-            System.out.println("Object: " + o + " label: " + mo.label);
+        System.out.println("Objexes: ");
+        for (SchemaObjex o : schema.allObjexes()) {
+            final var mo = metadata.getObjex(o);
+            System.out.println("Objex: " + o + " label: " + mo.label);
         }
 
         for (SchemaMorphism m : schema.allMorphisms()) {

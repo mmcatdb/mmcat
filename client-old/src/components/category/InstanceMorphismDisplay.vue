@@ -3,14 +3,14 @@ import { computed } from 'vue';
 import type { Edge, Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
 import type { InstanceMorphism } from '@/types/instance';
-import InstanceObjectHeaderDisplay, { type Column } from './InstanceObjectHeaderDisplay.vue';
+import InstanceObjexHeaderDisplay, { type Column } from './InstanceObjexHeaderDisplay.vue';
 
 const props = defineProps<{
     edge: Edge;
     morphism: InstanceMorphism;
 }>();
 
-const emit = defineEmits([ 'object:click' ]);
+const emit = defineEmits([ 'objex:click' ]);
 
 const columns = computed<Columns>(() => ({
     dom: props.morphism.dom.schema.superId.signatures.map(signature => defineColumn(signature, props.edge.domainNode)),
@@ -23,7 +23,7 @@ function defineColumn(signature: Signature, node: Node): Column {
     const neighbor = node.getNeighborNode(signature);
     return {
         signature,
-        schemaObject: neighbor?.schemaObject,
+        schemaObjex: neighbor?.schemaObjex,
         metadata: neighbor?.metadata,
         isClickable: !signature.equals(Signature.empty),
     };
@@ -34,42 +34,42 @@ function defineColumn(signature: Signature, node: Node): Column {
     <div class="d-flex flex-column p-3">
         <table v-if="morphism.mappings.length > 0">
             <tr>
-                <InstanceObjectHeaderDisplay
-                    :show-technical-ids="morphism.showDomTechnicalIds"
+                <InstanceObjexHeaderDisplay
+                    :show-technical-ids="morphism.showDomTechnicalId"
                     :columns="columns?.dom"
-                    @object:click="(object) => emit('object:click', object)"
+                    @objex:click="(objex) => emit('objex:click', objex)"
                 />
                 <th class="gap" />
-                <InstanceObjectHeaderDisplay
-                    :show-technical-ids="morphism.showCodTechnicalIds"
+                <InstanceObjexHeaderDisplay
+                    :show-technical-ids="morphism.showCodTechnicalId"
                     :columns="columns?.cod"
-                    @object:click="(object) => emit('object:click', object)"
+                    @objex:click="(objex) => emit('objex:click', objex)"
                 />
             </tr>
             <tr
                 v-for="(mapping, mappingIndex) in morphism.mappings"
                 :key="mappingIndex"
             >
-                <td v-if="morphism.showDomTechnicalIds">
-                    {{ mapping.dom.technicalIdsString }}
+                <td v-if="morphism.showDomTechnicalId">
+                    {{ mapping.dom.technicalId }}
                 </td>
                 <td
                     v-for="(column, columnIndex) in columns.dom"
                     :key="columnIndex"
                 >
-                    {{ mapping.dom.superId.tuples.get(column.signature) }}
+                    {{ mapping.dom.values.tuples.get(column.signature) }}
                 </td>
                 <td class="gap">
                     &lt;--&gt;
                 </td>
-                <td v-if="morphism.showCodTechnicalIds">
-                    {{ mapping.cod.technicalIdsString }}
+                <td v-if="morphism.showCodTechnicalId">
+                    {{ mapping.cod.technicalId }}
                 </td>
                 <td
                     v-for="(column, columnIndex) in columns.cod"
                     :key="columnIndex"
                 >
-                    {{ mapping.cod.superId.tuples.get(column.signature) }}
+                    {{ mapping.cod.values.tuples.get(column.signature) }}
                 </td>
             </tr>
         </table>

@@ -1,14 +1,14 @@
 import { IndentedStringBuilder } from '@/utils/string';
-import { Signature, StaticName } from '@/types/identifiers';
+import { type Name, nameFromServer, Signature } from '@/types/identifiers';
 import { subpathFromFromServer, type ChildProperty } from './compositeTypes';
-import type { RootPropertyFromServer } from '../serverTypes';
+import type { ComplexPropertyFromServer } from '../serverTypes';
 
 export class RootProperty {
-    name: StaticName;
+    name: Name;
     _subpaths: ChildProperty[];
     _signature = Signature.empty;
 
-    constructor(name: StaticName, subpaths: ChildProperty[] = []) {
+    constructor(name: Name, subpaths: ChildProperty[] = []) {
         this.name = name;
         this._subpaths = [ ...subpaths ];
     }
@@ -25,8 +25,8 @@ export class RootProperty {
         return this._subpaths;
     }
 
-    static fromServer(input: RootPropertyFromServer): RootProperty {
-        const property = new RootProperty(StaticName.fromServer(input.name));
+    static fromServer(input: ComplexPropertyFromServer): RootProperty {
+        const property = new RootProperty(nameFromServer(input.name));
 
         property._subpaths = input.subpaths.map(subpath => subpathFromFromServer(subpath, property));
 
@@ -36,18 +36,17 @@ export class RootProperty {
     toString(level = 0): string {
         const builder = new IndentedStringBuilder(level);
 
-        builder.appendIntendedLine(this.name + ': ');
-        builder.append('{\n');
+        builder.appendIndentedLine('{\n');
 
         const subpathsAsString = this.subpaths.map(path => path.toString(level + 1)).join(',\n');
         builder.append(subpathsAsString);
 
-        builder.appendIntendedLine('}');
+        builder.appendIndentedLine('}');
 
         return builder.toString();
     }
 
-    toServer(): RootPropertyFromServer {
+    toServer(): ComplexPropertyFromServer {
         return {
             name: this.name.toServer(),
             signature: this._signature.toServer(),

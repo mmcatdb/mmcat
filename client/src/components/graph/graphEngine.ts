@@ -1,17 +1,13 @@
 import { type Dispatch, type MouseEvent as ReactMouseEvent } from 'react';
-import { computeCoordinates, computeEdgePath, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getEdgeDegree, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
+import { computeCoordinates, computeEdgeSvg, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getEdgeDegree, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
 
-export type GraphInput = {
-    nodes: Node[];
-    edges: Edge[];
+export type Graph = {
+    nodes: Map<string, Node>;
+    edges: EdgeMap;
 };
 
 /** User preferences. */
 type FullGraphOptions = {
-    /** In px. Used for determining the initial coordinates. */
-    initialWidth: number;
-    /** In px. Used for determining the initial coordinates. */
-    initialHeight: number;
     /** If true, the nodes can be moved to only discrete coordinates. */
     snapToGrid: boolean;
     /** All positions will be rounded to multiples of this size. In the relative units. */
@@ -29,24 +25,24 @@ export const defaultGraphOptions: FullGraphOptions = {
     // At least some threshold is needed to prevent accidental dragging.
     // There is no such thing for selection, because we want to start selecting immediately. This allows us to clear selection by clicking on the canvas.
     nodeDraggingThreshold: 2,
-    initialWidth: 1200,
-    initialHeight: 600,
 };
 
-/** Commont type for all events the graph can emit. */
-export type GraphAction = {
-    type: 'graph';
-} & ({
-    operation: 'move';
+/** Common type for all events the graph can emit. */
+export type GraphEvent = GraphMoveEvent | GraphSelectEvent;
+
+export type GraphMoveEvent = {
+    type: 'move';
     nodeId: string;
     position: Position;
-} | {
-    operation: 'select';
+};
+
+export type GraphSelectEvent = {
+    type: 'select';
     nodeIds: string[];
     edgeIds: string[];
     /** A special key like ctrl or shift was held during the event. */
     isSpecialKey: boolean;
-});
+}
 
 /** The internal state of the graph engine that is propagated to the UI. */
 export type ReactiveGraphState = {
@@ -55,30 +51,36 @@ export type ReactiveGraphState = {
     select?: SelectState;
 };
 
-export function createInitialGraphState(graph: GraphInput, options: GraphOptions = {}): ReactiveGraphState {
-    const fullOptions = { ...defaultGraphOptions, ...options };
-    const coordinates = computeCoordinates(graph.nodes, fullOptions.initialWidth, fullOptions.initialHeight);
-
-    return { coordinates };
+export function createInitialGraphState(graph: Graph): ReactiveGraphState {
+    return {
+        // These values really don't matter, because they will be recomputed after the first render.
+        // We just want to select something that won't break the svg path computations.
+        coordinates: computeCoordinates(graph.nodes.values().toArray(), 1000, 1000),
+    };
 }
 
+type EdgeRef = {
+    path?: SVGPathElement;
+    label?: SVGTextElement;
+};
+
 export class GraphEngine {
-    private nodeMap: Map<string, Node>;
-    private edgeMap: EdgeMap;
+    private nodes: Map<string, Node>;
+    private edges: EdgeMap;
 
     constructor(
-        input: GraphInput,
-        private readonly dispatch: Dispatch<GraphAction>,
+        input: Graph,
+        private readonly dispatch: Dispatch<GraphEvent>,
         /** A local copy of the state. Contains only those properties that should be reactive (i.e., the UI should change when they change). */
         private state: ReactiveGraphState,
         /** Any change to the state should be immediatelly propagated up. */
         private readonly propagateState: Dispatch<ReactiveGraphState>,
         private readonly options: FullGraphOptions,
     ) {
-        console.log('CREATE Graph Engine');
+        // console.log('CREATE Graph Engine');
 
-        this.nodeMap = new Map(input.nodes.map(node => [ node.id, { ...node } ]));
-        this.edgeMap = new EdgeMap(input.edges.map(edge => ({ ...edge })));
+        this.nodes = input.nodes;
+        this.edges = input.edges;
     }
 
     /**
@@ -91,31 +93,28 @@ export class GraphEngine {
 
     /** Use this for the engine to start listening to events. Returns a cleanup function. */
     setup(): () => void {
-        console.log('SETUP graph engine');
+        // console.log('SETUP graph engine');
+        const c = new AbortController();
 
         // The event is throttled because we don't need to update the state that often.
-        const mousemove = throttle((e: MouseEvent) => this.handleGlobalMousemove(e));
-        document.addEventListener('mousemove', mousemove);
-
-        const mouseup = (e: MouseEvent) => this.handleGlobalMouseup(e);
-        document.addEventListener('mouseup', mouseup);
+        document.addEventListener('mousemove', throttle((e: MouseEvent) => this.handleGlobalMousemove(e)), { signal: c.signal });
+        document.addEventListener('mouseup', (e: MouseEvent) => this.handleGlobalMouseup(e), { signal: c.signal });
 
         return () => {
-            console.log('CLEANUP graph engine');
-
-            document.removeEventListener('mousemove', mousemove);
-            document.removeEventListener('mouseup', mouseup);
+            // console.log('CLEANUP graph engine');
+            c.abort();
         };
     }
 
-    update(input: GraphInput) {
-        console.log('UPDATE graph engine');
+    update(input: Graph) {
+        // console.log('UPDATE graph engine');
 
-        this.nodeMap = new Map(input.nodes.map(node => [ node.id, { ...node } ]));
-        this.edgeMap = new EdgeMap(input.edges.map(edge => ({ ...edge })));
+        this.nodes = input.nodes;
+        this.edges = input.edges;
     }
 
     private canvasConnection?: HTMLConnection;
+    private isCanvasMeasured = false;
 
     get canvas(): HTMLElement {
         return this.canvasConnection!.ref;
@@ -123,18 +122,24 @@ export class GraphEngine {
 
     setCanvasRef(ref: HTMLElement | null) {
         if (!ref) {
-            console.log('DELETE canvas ref');
+            // console.log('DELETE canvas ref');
             this.canvasConnection?.cleanup();
             this.canvasConnection = undefined;
         }
         else {
-            console.log('CREATE canvas ref');
+            // console.log('CREATE canvas ref');
+            const c = new AbortController();
 
-            const wheel = (e: WheelEvent) => this.handleCanvasWheel(e);
-            ref.addEventListener('wheel', wheel, { passive: false });
+            ref.addEventListener('wheel', (e: WheelEvent) => this.handleCanvasWheel(e), { signal: c.signal, passive: false });
 
-            const cleanup = () => ref.removeEventListener('wheel', wheel);
+            const cleanup = () => c.abort();
             this.canvasConnection = { ref, cleanup };
+
+            if (!this.isCanvasMeasured) {
+                this.isCanvasMeasured = true;
+                const { width, height } = ref.getBoundingClientRect();
+                this.updateState({ coordinates: computeCoordinates(this.nodes.values().toArray(), width, height) });
+            }
         }
     }
 
@@ -142,11 +147,11 @@ export class GraphEngine {
 
     setNodeRef(nodeId: string, ref: HTMLElement | null) {
         if (!ref) {
-            console.log('DELETE node ref');
+            // console.log('DELETE node ref');
             this.nodeRefs.delete(nodeId);
         }
         else {
-            console.log('CREATE node ref');
+            // console.log('CREATE node ref');
             this.nodeRefs.set(nodeId, ref);
         }
     }
@@ -160,19 +165,19 @@ export class GraphEngine {
 
         Object.assign(ref.style, computeNodeStyle(node, this.state.coordinates));
 
-        const { from, to } = this.edgeMap.getEdgesForNode(node.id);
+        const { from, to } = this.edges.getEdgesForNode(node.id);
         EdgeMap.bundleEdges([ ...from, ...to ]).forEach(bundle => bundle.forEach((edge, index) => this.propagateEdge(edge, index, bundle.length)));
     }
 
-    private readonly edgeRefs = new Map<string, SVGPathElement>();
+    private readonly edgeRefs = new Map<string, EdgeRef>();
 
-    setEdgeRef(edgeId: string, ref: SVGPathElement | null) {
+    setEdgeRef(edgeId: string, ref: EdgeRef | null) {
         if (!ref) {
-            console.log('DELETE edge ref');
+            // console.log('DELETE edge ref');
             this.edgeRefs.delete(edgeId);
         }
         else {
-            console.log('CREATE edge ref');
+            // console.log('CREATE edge ref');
             this.edgeRefs.set(edgeId, ref);
         }
     }
@@ -184,22 +189,26 @@ export class GraphEngine {
             return;
         }
 
-        const from = this.nodeMap.get(edge.from)!;
-        const to = this.nodeMap.get(edge.to)!;
+        const from = this.nodes.get(edge.from)!;
+        const to = this.nodes.get(edge.to)!;
 
-        const path = computeEdgePath(from, to, getEdgeDegree(edge, index, total), this.state.coordinates);
-        ref.setAttribute('d', path);
+        const svg = computeEdgeSvg(from, to, edge.label, getEdgeDegree(edge, index, total), this.state.coordinates);
+        ref.path?.setAttribute('d', svg.path);
+
+        // ref.label?.setAttribute('x', svg.label?.x ?? '0');
+        // ref.label?.setAttribute('y', svg.label?.y ?? '0');
+        ref.label?.setAttribute('transform', svg.label?.transform ?? '');
     }
 
     private selectionBoxRef?: HTMLElement;
 
     setSelectionBoxRef(ref: HTMLElement | null) {
         if (!ref) {
-            console.log('DELETE selection box ref');
+            // console.log('DELETE selection box ref');
             this.selectionBoxRef = undefined;
         }
         else {
-            console.log('CREATE selection box ref');
+            // console.log('CREATE selection box ref');
             this.selectionBoxRef = ref;
         }
     }
@@ -280,13 +289,11 @@ export class GraphEngine {
         const mouseOffset = getMouseOffset(event, this.canvas);
         const initial = offsetToPosition(mouseOffset, this.state.coordinates);
 
-        const node = this.nodeMap.get(nodeId)!;
-
-        const nodePosition = node.position;
+        const { x, y } = this.nodes.get(nodeId)!;
         const mouseDelta = this.options.snapToGrid
         // When snapping, we want to keep the mouse in the center of the node. However, this might change in the future if we introduce larger notes for which it would be unintuitive.
             ? { x: 0, y: 0 }
-            : { x: nodePosition.x - initial.x, y: nodePosition.y - initial.y };
+            : { x: x - initial.x, y: y - initial.y };
 
         if (this.options.nodeDraggingThreshold)
             this.startDragging = { nodeId, initial, mouseDelta };
@@ -322,8 +329,10 @@ export class GraphEngine {
         this.startDragging = undefined;
         this.updateState({ drag: { type: 'node', nodeId, mouseDelta } });
 
-        const node = this.nodeMap.get(nodeId)!;
-        node.position = this.calculateNewNodePosition(mousePosition, mouseDelta);
+        const node = this.nodes.get(nodeId)!;
+        const { x, y } = this.calculateNewNodePosition(mousePosition, mouseDelta);
+        node.x = x;
+        node.y = y;
         this.propagateNode(node);
     }
 
@@ -336,8 +345,10 @@ export class GraphEngine {
             const mousePosition = getMousePosition(event, this.canvas, this.state.coordinates);
             const mouseDelta = drag.mouseDelta;
 
-            const node = this.nodeMap.get(nodeId)!;
-            node.position = this.calculateNewNodePosition(mousePosition, mouseDelta);
+            const node = this.nodes.get(nodeId)!;
+            const { x, y } = this.calculateNewNodePosition(mousePosition, mouseDelta);
+            node.x = x;
+            node.y = y;
             this.propagateNode(node);
 
             return;
@@ -391,8 +402,8 @@ export class GraphEngine {
 
             event.stopPropagation();
             if (drag.type === 'node') {
-                const node = this.nodeMap.get(drag.nodeId)!;
-                this.dispatch({ type: 'graph', operation: 'move', nodeId: node.id, position: node.position });
+                const node = this.nodes.get(drag.nodeId)!;
+                this.dispatch({ type: 'move', nodeId: node.id, position: { x: node.x, y: node.y } });
             }
 
             this.updateState({ drag: undefined });
@@ -406,22 +417,23 @@ export class GraphEngine {
             event.stopPropagation();
             this.updateState({ select: undefined });
 
-            const nodeIds = [ ...this.nodeMap.values() ]
-                .filter(node => isPointInBox(node.position, select.initial, select.current))
-                .map(node => node.id);
+            const nodeIds = this.nodes.values()
+                .filter(node => isPointInBox(node, select.initial, select.current))
+                .map(node => node.id)
+                .toArray();
 
-
-            const edgeIds = [ ...this.edgeMap.values() ]
+            const edgeIds = this.edges.values()
                 .filter(edge => {
-                    const from = this.nodeMap.get(edge.from)!;
-                    const to = this.nodeMap.get(edge.to)!;
-                    return isEdgeInBox(from.position, to.position, select.initial, select.current);
+                    const from = this.nodes.get(edge.from)!;
+                    const to = this.nodes.get(edge.to)!;
+                    return isEdgeInBox(from, to, select.initial, select.current);
                 })
-                .map(edge => edge.id);
+                .map(edge => edge.id)
+                .toArray();
 
             const isSpecialKey = event.shiftKey || event.ctrlKey;
 
-            this.dispatch({ type: 'graph', operation: 'select', nodeIds, edgeIds, isSpecialKey });
+            this.dispatch({ type: 'select', nodeIds, edgeIds, isSpecialKey });
         }
     }
 }

@@ -6,9 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.mapping.AccessPathBuilder;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -45,16 +46,16 @@ class JsonTests {
 
     @Test
     void name() {
-        final var anonymous1 = StaticName.createAnonymous();
-        fullTest(anonymous1);
-
-        final var static1 = new StaticName("Static name");
+        final var static1 = new StringName("Static name");
         fullTest(static1);
 
-        final var dynamic1 = new DynamicName(Signature.createBase(69), null);
+        final var special1 = new TypedName(TypedName.ROOT);
+        fullTest(special1);
+
+        final var dynamic1 = new DynamicName(TypedName.INDEX, Signature.createBase(69), null);
         fullTest(dynamic1);
 
-        final var dynamic2 = new DynamicName(Signature.createBase(69), "*xxx*");
+        final var dynamic2 = new DynamicName(TypedName.KEY, Signature.createBase(69), "*xxx*");
         fullTest(dynamic2);
     }
 
@@ -75,7 +76,7 @@ class JsonTests {
             complex,
             builder.auxiliary("auxiliary"),
             builder.complex("dynamic", Signature.createBase(4).concatenate(Signature.createBase(5)),
-                builder.simple(Signature.createBase(6), Signature.createBase(7))
+                builder.simple(Signature.createBase(6), true, Signature.createBase(7))
             )
         );
         fullTest(path);

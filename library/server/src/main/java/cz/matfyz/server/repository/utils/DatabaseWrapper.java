@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class DatabaseWrapper {
 
-    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
 
     @Autowired
@@ -54,6 +53,7 @@ public class DatabaseWrapper {
                 properties.username(),
                 properties.password(),
                 true,
+                true,
                 true
             ));
 
@@ -81,7 +81,7 @@ public class DatabaseWrapper {
             function.execute(connection, output);
 
             if (output.isEmpty())
-                throw NotFoundException.primaryObject(type, id);
+                throw NotFoundException.primaryEntity(type, id);
 
             return output.get();
         });
@@ -188,7 +188,7 @@ public class DatabaseWrapper {
             return joinFunction.apply(input);
         }
         catch (NotFoundException e) {
-            throw e.toSecondaryObject();
+            throw e.toSecondaryEntity();
         }
     }
 

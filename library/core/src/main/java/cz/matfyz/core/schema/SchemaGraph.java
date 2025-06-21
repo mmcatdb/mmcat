@@ -17,11 +17,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SchemaGraph {
 
-    private final Map<SchemaObject, Node> nodes = new TreeMap<>();
+    private final Map<SchemaObjex, Node> nodes = new TreeMap<>();
     private final Set<Edge> edges = new TreeSet<>();
 
     /**
-     * Creates a graph from all given morphisms (objects are automatically defined by the morphisms).
+     * Creates a graph from all given morphisms (objexes are automatically defined by the morphisms).
      */
     public SchemaGraph(Collection<SchemaMorphism> morphisms) {
         morphisms.forEach(m -> {
@@ -36,10 +36,10 @@ public class SchemaGraph {
 
     private SchemaGraph copy() {
         final var copy = new SchemaGraph();
-        nodes.keySet().forEach(object -> copy.nodes.put(object, new Node(object)));
+        nodes.keySet().forEach(objex -> copy.nodes.put(objex, new Node(objex)));
         edges.forEach(edge -> {
-            var domCopy = copy.nodes.get(edge.source.object);
-            var codCopy = copy.nodes.get(edge.target.object);
+            var domCopy = copy.nodes.get(edge.source.objex);
+            var codCopy = copy.nodes.get(edge.target.objex);
             var edgeCopy = Edge.create(edge.morphism, domCopy, codCopy);
             copy.edges.add(edgeCopy);
         });
@@ -48,12 +48,12 @@ public class SchemaGraph {
     }
 
     /**
-     * If either object cannot be found or there is no path, null is returned.
+     * If neither objex cannot be found or there is no path, null is returned.
      */
     @Nullable
-    public List<Signature> findPath(SchemaObject sourceObject, SchemaObject targetObject) {
-        final var source = nodes.get(sourceObject);
-        final var target = nodes.get(targetObject);
+    public List<Signature> findPath(SchemaObjex sourceObjex, SchemaObjex targetObjex) {
+        final var source = nodes.get(sourceObjex);
+        final var target = nodes.get(targetObjex);
         if (source == null || target == null)
             return null;
 
@@ -63,10 +63,10 @@ public class SchemaGraph {
     /**
      * Root is a node to which lead zero edges.
      */
-    public List<SchemaObject> findRoots() {
+    public List<SchemaObjex> findRoots() {
         return nodes.values().stream()
             .filter(node -> node.edges.stream().allMatch(edge -> edge.source == node))
-            .map(node -> node.object).toList();
+            .map(node -> node.objex).toList();
     }
 
     /**
@@ -134,25 +134,25 @@ public class SchemaGraph {
     }
 
     /**
-     * Returns all morphisms that originates in the given object.
+     * Returns all morphisms that originates in the given objex.
      */
-    public List<SchemaMorphism> getChildren(SchemaObject object) {
-        final var node = nodes.get(object);
+    public List<SchemaMorphism> getChildren(SchemaObjex objex) {
+        final var node = nodes.get(objex);
         return node == null
             ? List.of()
             : node.edges.stream().filter(edge -> edge.source == node).map(edge -> edge.morphism).toList();
     }
 
     private static class Node implements Comparable<Node> {
-        final SchemaObject object;
+        final SchemaObjex objex;
         final Set<Edge> edges = new TreeSet<>();
 
-        Node(SchemaObject object) {
-            this.object = object;
+        Node(SchemaObjex objex) {
+            this.objex = objex;
         }
 
         @Override public int compareTo(Node other) {
-            return object.compareTo(other.object);
+            return objex.compareTo(other.objex);
         }
     }
 

@@ -81,6 +81,6 @@ export class SignatureIdFactory {
     }
 
     static createEmpty(): SignatureId {
-        return new SignatureId([ Signature.empty ]);
+        return new SignatureId([ Signature.empty() ]);
     }
 }

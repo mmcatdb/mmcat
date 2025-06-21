@@ -1,8 +1,8 @@
 package cz.matfyz.tests.querying;
 
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.querying.QueryStructure;
-import cz.matfyz.querying.algorithms.queryresult.TformingQueryStructure;
+import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.querying.resolver.queryresult.TformingResultStructure;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -13,24 +13,24 @@ class ProjectionTests {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionTests.class);
 
-    // TODO fix the default values in the query structures. They should not be needed for this test, however.
+    // TODO fix the default values in the result structures. They should not be needed for this test, however.
     private static final Signature signature = Signature.createEmpty();
 
     @Test
     void onlyRootList() {
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
+                new ResultStructure("A[]", true, null)
             )
             .output(
-                new TformingQueryStructure("A[]", "A[]", null)
+                new TformingResultStructure("A[]", "A[]", null)
             )
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                output.add
             """)
             .data("""
             [ "aaa", "bbb" ]
@@ -43,25 +43,25 @@ class ProjectionTests {
 
     @Test
     void listWithMap() {
-        final var output = new TformingQueryStructure("A[]", "A[]", null);
-        output.children.add(new TformingQueryStructure("B", "B", null));
+        final var output = new TformingResultStructure("A[]", "A[]", null);
+        output.children.add(new TformingResultStructure("B", "B", null));
 
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
-                    .addChild(new QueryStructure("B", false, null), signature)
+                new ResultStructure("A[]", true, null)
+                    .addChild(new ResultStructure("B", false, null), signature)
                     .parent()
             )
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(B)
-                T.map(B)
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(B)
+                map.traverse(B)
+                output.add
             """)
             .data("""
             [ { "B": "aaa" }, { "B": "bbb" } ]
@@ -74,25 +74,25 @@ class ProjectionTests {
 
     @Test
     void rename() {
-        final var output = new TformingQueryStructure("A[]", "C[]", null);
-        output.children.add(new TformingQueryStructure("B", "D", null));
+        final var output = new TformingResultStructure("A[]", "C[]", null);
+        output.children.add(new TformingResultStructure("B", "D", null));
 
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
-                    .addChild(new QueryStructure("B", false, null), signature)
+                new ResultStructure("A[]", true, null)
+                    .addChild(new ResultStructure("B", false, null), signature)
                     .parent()
             )
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(D)
-                T.map(B)
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(D)
+                map.traverse(B)
+                output.add
             """)
             .data("""
             [ { "B": "aaa" }, { "B": "bbb" } ]
@@ -105,19 +105,19 @@ class ProjectionTests {
 
     @Test
     void renameNestedLists() {
-        final var output = new TformingQueryStructure("A[]", "E[]", null);
-        final var b = new TformingQueryStructure("B[]", "F[]", null);
+        final var output = new TformingResultStructure("A[]", "E[]", null);
+        final var b = new TformingResultStructure("B[]", "F[]", null);
         output.children.add(b);
-        final var c = new TformingQueryStructure("C[]", "G[]", null);
+        final var c = new TformingResultStructure("C[]", "G[]", null);
         b.children.add(c);
-        c.children.add(new TformingQueryStructure("D", "H", null));
+        c.children.add(new TformingResultStructure("D", "H", null));
 
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
-                .addChild(new QueryStructure("B[]", true, null), signature)
-                    .addChild(new QueryStructure("C[]", true, null), signature)
-                        .addChild(new QueryStructure("D", false, null), signature)
+                new ResultStructure("A[]", true, null)
+                .addChild(new ResultStructure("B[]", true, null), signature)
+                    .addChild(new ResultStructure("C[]", true, null), signature)
+                        .addChild(new ResultStructure("D", false, null), signature)
                         .parent()
                     .parent()
                 .parent()
@@ -125,25 +125,25 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(F[])
-                C.list
-                T.map(B[])
-                T.list
-                W.list
-                C.map
-                W.map(G[])
-                C.list
-                T.map(C[])
-                T.list
-                W.list
-                C.map
-                W.map(H)
-                T.map(D)
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(F[])
+                list.create
+                map.traverse(B[])
+                list.traverse
+                list.write
+                map.create
+                map.write(G[])
+                list.create
+                map.traverse(C[])
+                list.traverse
+                list.write
+                map.create
+                map.write(H)
+                map.traverse(D)
+                output.add
             """)
             .data("""
             [ {
@@ -180,45 +180,45 @@ class ProjectionTests {
 
     @Test
     void newRoot() {
-        final var output = new TformingQueryStructure("C", "C[]", null);
-        output.children.add(new TformingQueryStructure("D", "D", null));
-        output.children.add(new TformingQueryStructure("E", "E", null));
+        final var output = new TformingResultStructure("C", "C[]", null);
+        output.children.add(new TformingResultStructure("D", "D", null));
+        output.children.add(new TformingResultStructure("E", "E", null));
 
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
-                    .addChild(new QueryStructure("B[]", true, null), signature)
-                        .addChild(new QueryStructure("C", false, null), signature)
+                new ResultStructure("A[]", true, null)
+                    .addChild(new ResultStructure("B[]", true, null), signature)
+                        .addChild(new ResultStructure("C", false, null), signature)
                         .parent()
                     .parent()
-                    .addChild(new QueryStructure("D", false, null), signature)
+                    .addChild(new ResultStructure("D", false, null), signature)
                     .parent()
-                    .addChild(new QueryStructure("E", false, null), signature)
+                    .addChild(new ResultStructure("E", false, null), signature)
                     .parent()
             )
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                T.map(B[])
-                T.list
-                T.map(C)
-                W.list
-                C.map:
-                --- W.map(D)
-                    T.up
-                    T.up
-                    T.up
-                    T.map(D)
-                    C.leaf
+                list.create
+                list.traverse
+                map.traverse(B[])
+                list.traverse
+                map.traverse(C)
+                list.write
+                map.create:
+                --- map.write(D)
+                    parent.traverse
+                    parent.traverse
+                    parent.traverse
+                    map.traverse(D)
+                    output.add
 
-                --- W.map(E)
-                    T.up
-                    T.up
-                    T.up
-                    T.map(E)
-                    C.leaf
+                --- map.write(E)
+                    parent.traverse
+                    parent.traverse
+                    parent.traverse
+                    map.traverse(E)
+                    output.add
             """)
             .data("""
             [ {
@@ -251,35 +251,35 @@ class ProjectionTests {
 
     @Test
     void newRootWithList() {
-        final var output = new TformingQueryStructure("C", "C[]", null);
-        output.children.add(new TformingQueryStructure("F", "F[]", null));
+        final var output = new TformingResultStructure("C", "C[]", null);
+        output.children.add(new TformingResultStructure("F", "F[]", null));
 
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
-                    .addChild(new QueryStructure("C", false, null), signature)
+                new ResultStructure("A[]", true, null)
+                    .addChild(new ResultStructure("C", false, null), signature)
                     .parent()
-                    .addChild(new QueryStructure("D[]", true, null), signature)
-                        .addChild(new QueryStructure("F", false, null), signature)
+                    .addChild(new ResultStructure("D[]", true, null), signature)
+                        .addChild(new ResultStructure("F", false, null), signature)
                         .parent()
                     .parent()
             )
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                T.map(C)
-                W.list
-                C.map
-                W.map(F[])
-                C.list
-                T.up
-                T.map(D[])
-                T.list
-                T.map(F)
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                map.traverse(C)
+                list.write
+                map.create
+                map.write(F[])
+                list.create
+                parent.traverse
+                map.traverse(D[])
+                list.traverse
+                map.traverse(F)
+                list.write
+                output.add
             """)
             .data("""
             [ {
@@ -302,17 +302,17 @@ class ProjectionTests {
 
     @Test
     void shortenList() {
-        final var output = new TformingQueryStructure("A[]", "A[]", null);
-        final var b = new TformingQueryStructure("B[]", "B[]", null);
+        final var output = new TformingResultStructure("A[]", "A[]", null);
+        final var b = new TformingResultStructure("B[]", "B[]", null);
         output.children.add(b);
-        b.children.add(new TformingQueryStructure("D", "D[]", null));
+        b.children.add(new TformingResultStructure("D", "D[]", null));
 
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
-                    .addChild(new QueryStructure("B[]", true, null), signature)
-                        .addChild(new QueryStructure("C[]", true, null), signature)
-                            .addChild(new QueryStructure("D", false, null), signature)
+                new ResultStructure("A[]", true, null)
+                    .addChild(new ResultStructure("B[]", true, null), signature)
+                        .addChild(new ResultStructure("C[]", true, null), signature)
+                            .addChild(new ResultStructure("D", false, null), signature)
                             .parent()
                         .parent()
                     .parent()
@@ -320,23 +320,23 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(B[])
-                C.list
-                T.map(B[])
-                T.list
-                W.list
-                C.map
-                W.map(D[])
-                C.list
-                T.map(C[])
-                T.list
-                T.map(D)
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(B[])
+                list.create
+                map.traverse(B[])
+                list.traverse
+                list.write
+                map.create
+                map.write(D[])
+                list.create
+                map.traverse(C[])
+                list.traverse
+                map.traverse(D)
+                list.write
+                output.add
             """)
             .data("""
             [ {
@@ -373,15 +373,15 @@ class ProjectionTests {
 
     @Test
     void shortenListFromRoot() {
-        final var output = new TformingQueryStructure("A[]", "A[]", null);
-        output.children.add(new TformingQueryStructure("D", "D[]", null));
+        final var output = new TformingResultStructure("A[]", "A[]", null);
+        output.children.add(new TformingResultStructure("D", "D[]", null));
 
         new ProjectionTestBase()
             .input(
-                new QueryStructure("A[]", true, null)
-                    .addChild(new QueryStructure("B[]", true, null), signature)
-                        .addChild(new QueryStructure("C[]", true, null), signature)
-                            .addChild(new QueryStructure("D", false, null), signature)
+                new ResultStructure("A[]", true, null)
+                    .addChild(new ResultStructure("B[]", true, null), signature)
+                        .addChild(new ResultStructure("C[]", true, null), signature)
+                            .addChild(new ResultStructure("D", false, null), signature)
                             .parent()
                         .parent()
                     .parent()
@@ -389,19 +389,19 @@ class ProjectionTests {
             .output(output)
             .expectedTform("""
             root
-                C.list
-                T.list
-                W.list
-                C.map
-                W.map(D[])
-                C.list
-                T.map(B[])
-                T.list
-                T.map(C[])
-                T.list
-                T.map(D)
-                W.list
-                C.leaf
+                list.create
+                list.traverse
+                list.write
+                map.create
+                map.write(D[])
+                list.create
+                map.traverse(B[])
+                list.traverse
+                map.traverse(C[])
+                list.traverse
+                map.traverse(D)
+                list.write
+                output.add
             """)
             .data("""
             [ {

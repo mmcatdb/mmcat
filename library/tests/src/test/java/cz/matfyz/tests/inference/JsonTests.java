@@ -34,7 +34,7 @@ class JsonTests {
     void testServerUrl() throws Exception {
         @SuppressWarnings("deprecation")
         URL url = new URL("https://data.mmcatdb.com/yelp_business_sample.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
 
         final List<String> fileNames = List.of(jsonProvider.getJsonFileNames());
@@ -49,7 +49,7 @@ class JsonTests {
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
         URL url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
         final var inferenceWrapper = setup(jsonProvider);
 
@@ -62,7 +62,7 @@ class JsonTests {
     @Test
     void testLoadDocumentsFromArrayJson() throws Exception {
         String jsonArray = "[{\"key1\":\"value1\"},{\"key2\":\"value2\"}]";
-        JsonSettings settings = new JsonSettings("", false, false);
+        JsonSettings settings = new JsonSettings("", false, false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, jsonArray);
 
         final var inferenceWrapper = setup(jsonProvider);
@@ -77,7 +77,7 @@ class JsonTests {
     @Test
     void testLoadDocumentsFromObjectJson() throws Exception {
         String jsonObject = "{\"key\":\"value\"}";
-        JsonSettings settings = new JsonSettings("", false, false);
+        JsonSettings settings = new JsonSettings("", false, false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, jsonObject);
 
         final var inferenceWrapper = setup(jsonProvider);
@@ -92,7 +92,7 @@ class JsonTests {
     @Test
     void testLoadDocumentsWithMalformedJson() throws Exception {
         String malformedJson = "{\"key\":\"value\"}\n{\"malformedJson\"";
-        JsonSettings settings = new JsonSettings("", false, false);
+        JsonSettings settings = new JsonSettings("", false, false, false);
         JsonProvider jsonProvider = new StringJsonProvider(settings, malformedJson);
 
         final var inferenceWrapper = setup(jsonProvider);

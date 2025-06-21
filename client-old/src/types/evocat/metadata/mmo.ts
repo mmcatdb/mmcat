@@ -1,7 +1,7 @@
-import type { SchemaCategory } from '../../schema/SchemaCategory';
+import type { Category } from '../../schema/Category';
 
 export enum MMOType {
-    Object = 'objectMetadata',
+    Objex = 'objexMetadata',
     Morphism = 'morphismMetadata',
 }
 
@@ -12,6 +12,6 @@ export type MMOFromServer<T extends MMOType = MMOType> = {
 export interface MMO<T extends MMOType = MMOType> {
     readonly type: T;
     toServer(): MMOFromServer<T>;
-    up(category: SchemaCategory): void;
-    down(category: SchemaCategory): void;
+    up(category: Category): void;
+    down(category: Category): void;
 }

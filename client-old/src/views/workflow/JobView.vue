@@ -63,7 +63,7 @@ async function updateJob(newJob: Job) {
     />
     <Teleport to="#app-left-bar-content">
         <button
-            class="mt-4 order-2"
+            class="mt-4 order-2 primary"
             :disabled="job?.state !== JobState.Finished"
             @click="emit('continue')"
         >

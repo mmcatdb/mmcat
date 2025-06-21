@@ -42,8 +42,8 @@ function save() {
         return;
 
     evocat.createMorphism({
-        domKey: node1.schemaObject.key,
-        codKey: node2.schemaObject.key,
+        domKey: node1.schemaObjex.key,
+        codKey: node2.schemaObjex.key,
         min: min.value,
         label: label.value,
     });

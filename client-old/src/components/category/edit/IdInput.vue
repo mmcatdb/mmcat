@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Node } from '@/types/categoryGraph';
-import { ObjectIds, SignatureId, Type } from '@/types/identifiers';
+import { ObjexIds, SignatureId, Type } from '@/types/identifiers';
 import { shallowRef, watch } from 'vue';
 import AddSimpleId from './AddSimpleId.vue';
 import AddComplexId from './AddComplexId.vue';
@@ -19,13 +19,13 @@ enum State {
 
 type IdInputProps = {
     node: Node;
-    modelValue: ObjectIds | undefined;
+    modelValue: ObjexIds | undefined;
 };
 
 const props = defineProps<IdInputProps>();
 const innerValue = shallowRef(props.modelValue);
 
-watch(() => props.modelValue, (newValue: ObjectIds | undefined) => {
+watch(() => props.modelValue, (newValue: ObjexIds | undefined) => {
     if (innerValue.value !== newValue)
         innerValue.value = newValue;
 });
@@ -36,7 +36,7 @@ const emit = defineEmits([ 'save', 'cancel', 'update:modelValue' ]);
 
 function addSignatureId(signatureId: SignatureId) {
     const currentIds = innerValue.value?.signatureIds ?? [];
-    innerValue.value = ObjectIds.createSignatures([ ...currentIds, signatureId ]);
+    innerValue.value = ObjexIds.createSignatures([ ...currentIds, signatureId ]);
 
     emit('update:modelValue', innerValue.value);
 }
@@ -54,19 +54,19 @@ function selectComplex() {
 }
 
 function selectValue() {
-    innerValue.value = ObjectIds.createNonSignatures(Type.Value);
+    innerValue.value = ObjexIds.createNonSignatures(Type.Value);
     emit('update:modelValue', innerValue.value);
 }
 
 function selectGenerated() {
-    innerValue.value = ObjectIds.createNonSignatures(Type.Generated);
+    innerValue.value = ObjexIds.createNonSignatures(Type.Generated);
     emit('update:modelValue', innerValue.value);
 }
 </script>
 
 <template>
     <template v-if="state === State.SelectType">
-        <h2>{{ node.schemaObject.ids ? 'Add Id' : 'Create Id' }}</h2>
+        <h2>{{ node.schemaObjex.ids ? 'Add Id' : 'Create Id' }}</h2>
         <div class="button-row">
             <button @click="selectSimple">
                 Simple
@@ -74,7 +74,7 @@ function selectGenerated() {
             <button @click="selectComplex">
                 Complex
             </button>
-            <template v-if="!node.schemaObject.ids">
+            <template v-if="!node.schemaObjex.ids">
                 <button @click="selectValue">
                     Value
                 </button>

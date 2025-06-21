@@ -5,11 +5,11 @@ import cz.matfyz.core.rsd.Char;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 /**
- * The {@code DefaultLocalReductionFunction} class implements the {@code AbstractRSDsReductionFunction}
- * interface to provide a default reduction operation for merging two {@code RecordSchemaDescription} objects.
+ * The {@link DefaultLocalReductionFunction} class implements the {@link AbstractRSDsReductionFunction}
+ * interface to provide a default reduction operation for merging two {@link RecordSchemaDescription} RSDs.
  * This reduction function combines two RSDs by aggregating various attributes and merging their children lists.
  *
- * <p>The reduction operation computes a new {@code RecordSchemaDescription} that:
+ * <p>The reduction operation computes a new {@link RecordSchemaDescription} that:
  * <ul>
  *     <li>Combines the names of the RSDs.</li>
  *     <li>Aggregates the total and first share values.</li>
@@ -23,7 +23,7 @@ import cz.matfyz.core.rsd.RecordSchemaDescription;
 public class DefaultLocalReductionFunction implements AbstractRSDsReductionFunction {
 
     /**
-     * Merges two {@code RecordSchemaDescription} objects into a single {@code RecordSchemaDescription}.
+     * Merges two {@link RecordSchemaDescription} RSDs into a single {@link RecordSchemaDescription}.
      * The resulting RSD aggregates properties from both input RSDs.
      */
     @Override

@@ -3,8 +3,8 @@ import { type MMO, type MMOFromServer, MMOType } from './mmo';
 import { Key } from '@/types/identifiers';
 
 export type ObjexMetadataFromServer = MMOFromServer<MMOType.Objex> & {
-    newObject?: MetadataObjexFromServer;
-    oldObject?: MetadataObjexFromServer;
+    newObjex?: MetadataObjexFromServer;
+    oldObjex?: MetadataObjexFromServer;
 };
 
 export class ObjexMetadata implements MMO<MMOType.Objex> {
@@ -17,14 +17,14 @@ export class ObjexMetadata implements MMO<MMOType.Objex> {
     ) {}
 
     static fromServer(input: ObjexMetadataFromServer): ObjexMetadata {
-        const keyFromServer = input.newObject?.key ?? input.oldObject?.key;
+        const keyFromServer = input.newObjex?.key ?? input.oldObjex?.key;
         if (!keyFromServer)
-            throw new Error('ObjectMetadata must have at least one object.');
+            throw new Error('ObjexMetadata must have at least one objex.');
 
         return new ObjexMetadata(
             Key.fromServer(keyFromServer),
-            input.newObject && MetadataObjex.fromServer(input.newObject),
-            input.oldObject && MetadataObjex.fromServer(input.oldObject),
+            input.newObjex && MetadataObjex.fromServer(input.newObjex),
+            input.oldObjex && MetadataObjex.fromServer(input.oldObjex),
         );
     }
 
@@ -39,18 +39,16 @@ export class ObjexMetadata implements MMO<MMOType.Objex> {
     toServer(): ObjexMetadataFromServer {
         return {
             type: MMOType.Objex,
-            newObject: this.newObjex?.toServer(this.key),
-            oldObject: this.oldObjex?.toServer(this.key),
+            newObjex: this.newObjex?.toServer(this.key),
+            oldObjex: this.oldObjex?.toServer(this.key),
         };
     }
 
     up(category: Category): void {
-        // category.getObject(this.key).current = this.newObject;
-        console.log('up', category);
+        // category.getObjex(this.key).current = this.newObjex;
     }
 
     down(category: Category): void {
-        // category.getObject(this.key).current = this.oldObject;
-        console.log('down', category);
+        // category.getObjex(this.key).current = this.oldObjex;
     }
 }

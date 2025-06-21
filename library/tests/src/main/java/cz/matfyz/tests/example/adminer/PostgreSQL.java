@@ -31,12 +31,12 @@ public abstract class PostgreSQL {
     }
 
     public static void addUser(InstanceBuilder builder, String userIdValue, String nameValue, String createdAtValue, String fansValue) {
-        final var user = builder.value(Schema.userToUserId, userIdValue).object(Schema.user);
+        final var user = builder.value(Schema.userToUserId, userIdValue).objex(Schema.user);
 
-        builder.morphism(Schema.userToUserId, user, builder.valueObject(Schema.userId, userIdValue));
-        builder.morphism(Schema.userToName, user, builder.valueObject(Schema.name, nameValue));
-        builder.morphism(Schema.userToCreatedAt, user, builder.valueObject(Schema.createdAt, createdAtValue));
-        builder.morphism(Schema.userToFans, user, builder.valueObject(Schema.fans, fansValue));
+        builder.morphism(Schema.userToUserId, user, builder.valueObjex(Schema.userId, userIdValue));
+        builder.morphism(Schema.userToName, user, builder.valueObjex(Schema.name, nameValue));
+        builder.morphism(Schema.userToCreatedAt, user, builder.valueObjex(Schema.createdAt, createdAtValue));
+        builder.morphism(Schema.userToFans, user, builder.valueObjex(Schema.fans, fansValue));
     }
 
     public static TestMapping comment(SchemaCategory schema) {
@@ -58,14 +58,14 @@ public abstract class PostgreSQL {
         final var user = builder.getRow(Schema.user, userIndex);
         final var business = builder.getRow(Schema.business, businessIndex);
 
-        final var comment = builder.value(Schema.commentToCommentId, commentIdValue).object(Schema.comment);
+        final var comment = builder.value(Schema.commentToCommentId, commentIdValue).objex(Schema.comment);
 
-        builder.morphism(Schema.commentToCommentId, comment, builder.valueObject(Schema.commentId, commentIdValue));
+        builder.morphism(Schema.commentToCommentId, comment, builder.valueObjex(Schema.commentId, commentIdValue));
         builder.morphism(Schema.commentToBusiness, comment, business);
         builder.morphism(Schema.commentToUser, comment, user);
-        builder.morphism(Schema.commentToDate, comment, builder.valueObject(Schema.date, dateValue));
-        builder.morphism(Schema.commentToText, comment, builder.valueObject(Schema.text, textValue));
-        builder.morphism(Schema.commentToStars, comment, builder.valueObject(Schema.stars, starsValue));
+        builder.morphism(Schema.commentToDate, comment, builder.valueObjex(Schema.date, dateValue));
+        builder.morphism(Schema.commentToText, comment, builder.valueObjex(Schema.text, textValue));
+        builder.morphism(Schema.commentToStars, comment, builder.valueObjex(Schema.stars, starsValue));
     }
 
     public static TestMapping businessHours(SchemaCategory schema) {
@@ -83,11 +83,11 @@ public abstract class PostgreSQL {
     public static void addBusinessHours(InstanceBuilder builder, String businessHoursIdValue, int businessIndex, String hoursValue) {
         final var business = builder.getRow(Schema.business, businessIndex);
 
-        final var businessHours = builder.value(Schema.businessHoursToBusinessHoursId, businessHoursIdValue).object(Schema.businessHours);
+        final var businessHours = builder.value(Schema.businessHoursToBusinessHoursId, businessHoursIdValue).objex(Schema.businessHours);
 
-        builder.morphism(Schema.businessHoursToBusinessHoursId, businessHours, builder.valueObject(Schema.businessHoursId, businessHoursIdValue));
+        builder.morphism(Schema.businessHoursToBusinessHoursId, businessHours, builder.valueObjex(Schema.businessHoursId, businessHoursIdValue));
         builder.morphism(Schema.businessHoursToBusiness, businessHours, business);
-        builder.morphism(Schema.businessHoursToHours, businessHours, builder.valueObject(Schema.hours, hoursValue));
+        builder.morphism(Schema.businessHoursToHours, businessHours, builder.valueObjex(Schema.hours, hoursValue));
     }
 
 }

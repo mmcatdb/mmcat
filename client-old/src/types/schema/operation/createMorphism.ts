@@ -1,42 +1,40 @@
-import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaMorphism, type SchemaMorphismFromServer } from '../SchemaMorphism';
+import type { Category } from '../Category';
+import { MetadataMorphism, type MetadataMorphismFromServer, SchemaMorphism, type SchemaMorphismFromServer } from '../Morphism';
 import { type SMO, type SMOFromServer, SMOType } from './smo';
 
 export type CreateMorphismFromServer = SMOFromServer<SMOType.CreateMorphism> & {
-    morphism: SchemaMorphismFromServer;
+    schema: SchemaMorphismFromServer;
+    metadata: MetadataMorphismFromServer;
 };
 
 export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
     readonly type = SMOType.CreateMorphism;
 
-    private constructor(
-        readonly morphism: SchemaMorphism,
+    constructor(
+        readonly schema: SchemaMorphism,
+        readonly metadata: MetadataMorphism,
     ) {}
 
     static fromServer(input: CreateMorphismFromServer): CreateMorphism {
         return new CreateMorphism(
-            SchemaMorphism.fromServer(input.morphism),
-        );
-    }
-
-    static create(morphism: SchemaMorphism): CreateMorphism {
-        return new CreateMorphism(
-            morphism,
+            SchemaMorphism.fromServer(input.schema),
+            MetadataMorphism.fromServer(input.metadata),
         );
     }
 
     toServer(): CreateMorphismFromServer {
         return {
             type: SMOType.CreateMorphism,
-            morphism: this.morphism.toServer(),
+            schema: this.schema.toServer(),
+            metadata: this.metadata.toServer(this.schema.signature),
         };
     }
 
-    up(category: SchemaCategory): void {
-        category.getMorphism(this.morphism.signature).current = this.morphism;
+    up(category: Category): void {
+        category.getMorphism(this.schema.signature).current = this.schema;
     }
 
-    down(category: SchemaCategory): void {
-        category.getMorphism(this.morphism.signature).current = undefined;
+    down(category: Category): void {
+        category.getMorphism(this.schema.signature).current = undefined;
     }
 }

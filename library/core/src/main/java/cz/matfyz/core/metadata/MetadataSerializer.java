@@ -2,7 +2,7 @@ package cz.matfyz.core.metadata;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.schema.SchemaCategory;
 
 import java.io.Serializable;
@@ -12,18 +12,18 @@ import java.util.TreeMap;
 public class MetadataSerializer {
 
     public record SerializedMetadata(
-        List<SerializedMetadataObject> objects,
+        List<SerializedMetadataObjex> objexes,
         List<SerializedMetadataMorphism> morphisms
     ) implements Serializable {}
 
-    public record SerializedMetadataObject(
+    public record SerializedMetadataObjex(
         Key key,
         String label,
         Position position
     ) {
 
-        public MetadataObject deserialize() {
-            return new MetadataObject(label, position);
+        public MetadataObjex deserialize() {
+            return new MetadataObjex(label, position);
         }
 
     }
@@ -40,11 +40,11 @@ public class MetadataSerializer {
     }
 
     public static SerializedMetadata serialize(MetadataCategory metadata) {
-        final List<SerializedMetadataObject> objects = metadata.schema.allObjects().stream()
-            .map(object -> {
-                final var mo = metadata.getObject(object);
-                return new SerializedMetadataObject(
-                    object.key(),
+        final List<SerializedMetadataObjex> objexes = metadata.schema.allObjexes().stream()
+            .map(objex -> {
+                final var mo = metadata.getObjex(objex);
+                return new SerializedMetadataObjex(
+                    objex.key(),
                     mo.label,
                     mo.position
                 );
@@ -62,19 +62,19 @@ public class MetadataSerializer {
             .toList();
 
         return new SerializedMetadata(
-            objects,
+            objexes,
             morphisms
         );
     }
 
     public static MetadataCategory deserialize(SerializedMetadata serializedMetadata, SchemaCategory schemaCategory) {
-        final var objects = new TreeMap<Key, MetadataObject>();
-        serializedMetadata.objects.stream().forEach(so -> objects.put(so.key, so.deserialize()));
+        final var objexes = new TreeMap<Key, MetadataObjex>();
+        serializedMetadata.objexes.stream().forEach(so -> objexes.put(so.key, so.deserialize()));
 
         final var morphisms = new TreeMap<Signature, MetadataMorphism>();
         serializedMetadata.morphisms.stream().forEach(sm -> morphisms.put(sm.signature, sm.deserialize()));
 
-        return new MetadataCategory(schemaCategory, objects, morphisms);
+        return new MetadataCategory(schemaCategory, objexes, morphisms);
     }
 
 }

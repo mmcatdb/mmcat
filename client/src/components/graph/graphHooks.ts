@@ -1,6 +1,6 @@
 import { createContext, type MouseEvent, useCallback, useContext, useMemo, useRef } from 'react';
-import { type ReactiveGraphState, type GraphEngine, type GraphInput } from './graphEngine';
-import { computeEdgePath, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
+import { type ReactiveGraphState, type GraphEngine, type Graph } from './graphEngine';
+import { computeEdgeSvg, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
 
 type GraphContext = {
     engine: GraphEngine;
@@ -47,10 +47,11 @@ export function useNode(node: Node) {
 
     const nodeId = node.id;
     const setNodeRef = useCallback((element: HTMLElement | null) => {
-        if (ref.current !== element)
-            engine.setNodeRef(nodeId, element);
+        if (ref.current === element)
+            return;
 
         ref.current = element;
+        engine.setNodeRef(nodeId, element);
     }, [ engine, nodeId ]);
 
     const onMouseDown = useCallback((e: MouseEvent<HTMLElement>) => engine.handleNodeMousedown(e, nodeId), [ engine, nodeId ]);
@@ -72,30 +73,51 @@ export function useNode(node: Node) {
     };
 }
 
-export function useEdge(edge: Edge, degree: number, graph: GraphInput) {
+export function useEdge(edge: Edge, degree: number, graph: Graph) {
     const { state, engine } = useGraphContext();
-    const ref = useRef<SVGPathElement | null>(null);
+    const pathRef = useRef<SVGPathElement | null>(null);
+    const labelRef = useRef<SVGTextElement | null>(null);
 
     const edgeId = edge.id;
-    const setEdgeRef = useCallback((element: SVGPathElement | null) => {
-        if (ref.current !== element)
-            engine.setEdgeRef(edgeId, element);
+    const setEdgeRef = useMemo(() => ({
+        path: (element: SVGPathElement | null) => {
+            if (pathRef.current === element)
+                return;
 
-        ref.current = element;
-    }, [ engine, edgeId ]);
+            pathRef.current = element;
+            engine.setEdgeRef(edgeId, computeEdgeRef(element, labelRef.current));
+        },
+        label: (element: SVGTextElement | null) => {
+            if (labelRef.current === element)
+                return;
+
+            labelRef.current = element;
+            engine.setEdgeRef(edgeId, computeEdgeRef(pathRef.current, element));
+        },
+    }), [ engine, edgeId ]);
 
     const nodes = graph.nodes;
     const cache = useMemo(() => ({
-        from: nodes.find(node => node.id === edge.from)!,
-        to: nodes.find(node => node.id === edge.to)!,
+        from: nodes.get(edge.from)!,
+        to: nodes.get(edge.to)!,
     }), [ edge, nodes ]);
 
     const isHoverAllowed = !state.drag && !state.select;
 
     return {
         setEdgeRef,
-        path: computeEdgePath(cache.from, cache.to, degree, state.coordinates),
+        svg: computeEdgeSvg(cache.from, cache.to, edge.label, degree, state.coordinates),
         isHoverAllowed,
+    };
+}
+
+function computeEdgeRef(path: SVGPathElement | null, label: SVGTextElement | null) {
+    if (!path && !label)
+        return null;
+
+    return {
+        path: path ?? undefined,
+        label: label ?? undefined,
     };
 }
 
@@ -104,10 +126,11 @@ export function useSelectionBox() {
     const ref = useRef<HTMLElement | null>(null);
 
     const setSelectionBoxRef = useCallback((element: HTMLElement | null) => {
-        if (ref.current !== element)
-            engine.setSelectionBoxRef(element);
+        if (ref.current === element)
+            return;
 
         ref.current = element;
+        engine.setSelectionBoxRef(element);
     }, [ engine ]);
 
     return {

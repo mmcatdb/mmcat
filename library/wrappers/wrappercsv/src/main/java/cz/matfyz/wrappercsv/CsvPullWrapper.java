@@ -4,10 +4,10 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
-import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.querying.QueryResult;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 
 /**
  * A pull wrapper implementation for CSV files that implements the {@link AbstractPullWrapper} interface.
@@ -90,7 +90,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         // If no header is provided, we have to hope the columns are in the correct order ...
         final var builder = CsvSchema.builder();
         path.subpaths().stream()
-            .map(property -> ((StaticName) property.name()).getStringName())
+            .map(property -> ((StringName) property.name()).value)
             .forEach(builder::addColumn);
 
         return builder.build();

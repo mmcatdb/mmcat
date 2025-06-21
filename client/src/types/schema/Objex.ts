@@ -1,11 +1,11 @@
-import { idsAreEqual, Key, ObjexIds, SignatureId, type KeyFromServer, type ObjexIdsFromServer, type SignatureIdFromServer } from '../identifiers';
+import { idsAreEqual, Key, ObjexIds, type KeyFromServer, type ObjexIdsFromServer } from '../identifiers';
 import { type Category } from './Category';
 import { SchemaCategoryInvalidError } from './Error';
 import { type Morphism } from './Morphism';
 
 /**
- * An object from the {@link Category}.
- * It contains references to neighbouring objects and morphisms so all graph algorithms should be implemented here.
+ * An objex from the {@link Category}.
+ * It contains references to neighboring objexes and morphisms so all graph algorithms should be implemented here.
  * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
  */
 export class Objex {
@@ -35,13 +35,8 @@ export class Objex {
         return this.key.equals(other.key);
     }
 
-    private readonly groupIds = new Set<string>();
-
-    addGroup(id: string) {
-        this.groupIds.add(id);
-    }
-
-    findNeighbourMorphisms(): Morphism[] {
+    // TODO This should be probably optimized by keeping a list of neighbors.
+    findNeighborMorphisms(): Morphism[] {
         return [ ...this.category.morphisms.values() ].filter(morphism => morphism.from.key.equals(this.key) || morphism.to.key.equals(this.key));
     }
 }
@@ -49,7 +44,6 @@ export class Objex {
 export type SchemaObjexFromServer = {
     key: KeyFromServer;
     ids?: ObjexIdsFromServer;
-    superId: SignatureIdFromServer;
 };
 
 /**
@@ -59,7 +53,6 @@ export class SchemaObjex {
     private constructor(
         readonly key: Key,
         readonly ids: ObjexIds | undefined,
-        readonly superId: SignatureId,
         private _isNew: boolean,
     ) {}
 
@@ -67,7 +60,6 @@ export class SchemaObjex {
         return new SchemaObjex(
             Key.fromServer(schema.key),
             schema.ids ? ObjexIds.fromServer(schema.ids) : undefined,
-            SignatureId.fromServer(schema.superId),
             false,
         );
     }
@@ -76,7 +68,6 @@ export class SchemaObjex {
         return new SchemaObjex(
             key,
             def.ids,
-            def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             true,
         );
     }
@@ -98,7 +89,7 @@ export class SchemaObjex {
 
     get idsChecked(): ObjexIds {
         if (!this.ids)
-            throw new SchemaCategoryInvalidError(`Object: ${this.key.toString()} doesn't have ids.`);
+            throw new SchemaCategoryInvalidError(`Objex: ${this.key.toString()} doesn't have ids.`);
 
         return this.ids;
     }
@@ -107,7 +98,6 @@ export class SchemaObjex {
         return {
             key: this.key.toServer(),
             ids: this.ids?.toServer(),
-            superId: this.superId.toServer(),
         };
     }
 

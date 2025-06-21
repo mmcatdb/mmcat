@@ -1,5 +1,5 @@
 import { RootProperty } from '@/types/accessPath/basic';
-import type { RootPropertyFromServer } from './accessPath/serverTypes';
+import type { ComplexPropertyFromServer } from './accessPath/serverTypes';
 import type { Entity, Id, VersionId } from './id';
 import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from './identifiers';
 
@@ -7,10 +7,10 @@ export type MappingFromServer = {
     id: Id;
     categoryId: Id;
     datasourceId: Id;
-    rootObjectKey: KeyFromServer;
+    rootObjexKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
-    accessPath: RootPropertyFromServer;
+    accessPath: ComplexPropertyFromServer;
     version: VersionId;
 };
 
@@ -20,7 +20,7 @@ export class Mapping implements Entity {
         public readonly kindName: string,
         public readonly categoryId: Id,
         public readonly datasourceId: Id,
-        public readonly rootObjectKey: Key,
+        public readonly rootObjexKey: Key,
         public readonly primaryKey: SignatureId,
         public readonly accessPath: RootProperty,
         public readonly version: VersionId,
@@ -32,7 +32,7 @@ export class Mapping implements Entity {
             input.kindName,
             input.categoryId,
             input.datasourceId,
-            Key.fromServer(input.rootObjectKey),
+            Key.fromServer(input.rootObjexKey),
             SignatureId.fromServer(input.primaryKey),
             RootProperty.fromServer(input.accessPath),
             input.version,
@@ -43,10 +43,10 @@ export class Mapping implements Entity {
 export type MappingInit = {
     categoryId: Id;
     datasourceId: Id;
-    rootObjectKey: KeyFromServer;
+    rootObjexKey: KeyFromServer;
     primaryKey: SignatureIdFromServer;
     kindName: string;
-    accessPath: RootPropertyFromServer;
+    accessPath: ComplexPropertyFromServer;
 };
 
 export type MappingInfoFromServer = {

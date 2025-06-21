@@ -10,14 +10,14 @@ import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.algorithms.PrimaryKeyMerge;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingsPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.tests.example.common.SparkProvider;
-import cz.matfyz.transformations.processes.DatabaseToInstance;
+import cz.matfyz.transformations.DatabaseToInstance;
 import cz.matfyz.wrapperjson.JsonControlWrapper;
 import cz.matfyz.wrapperjson.JsonProvider;
 import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
@@ -36,7 +36,7 @@ class DataGenerationTests {
     @Test
     void testArray() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleYelpSimpleArray.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
         final var control = new JsonControlWrapper(jsonProvider).enableSpark(sparkProvider.getSettings());
 
@@ -63,7 +63,7 @@ class DataGenerationTests {
     void testMergeKinds() throws Exception {
         final Path relativePath = Paths.get("src/test/resources/yelpTwoKinds");
         final var url = relativePath.toUri().toURL();
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
         final var control = new JsonControlWrapper(jsonProvider).enableSpark(sparkProvider.getSettings());
 
@@ -103,7 +103,7 @@ class DataGenerationTests {
 
         final ComplexProperty newComplexProperty = builder.complex(mappingBusiness.kindName(), mappingBusiness.accessPath().signature(), mappingBusiness.accessPath(), mappingCheckin.accessPath());
 
-        final Mapping finalMapping = Mapping.create(provider.getDatasources().stream().findFirst().get(), mappingBusiness.kindName(), schema, mappingBusiness.rootObject().key(), newComplexProperty);
+        final Mapping finalMapping = Mapping.create(provider.getDatasources().stream().findFirst().get(), mappingBusiness.kindName(), schema, mappingBusiness.rootObjex().key(), newComplexProperty);
         System.out.println("Mapping C:\n" + finalMapping.accessPath());
 
         final AbstractPullWrapper pullWrapper = control.getPullWrapper();
@@ -115,8 +115,8 @@ class DataGenerationTests {
 
     private Key getKeyFromNames(SchemaCategory schema, MetadataCategory metadata, String name, String domainNameToFind) throws Exception {
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
-            final String domainName = metadata.getObject(morphism.dom().key()).label;
-            final String codomainName = metadata.getObject(morphism.cod().key()).label;
+            final String domainName = metadata.getObjex(morphism.dom().key()).label;
+            final String codomainName = metadata.getObjex(morphism.cod().key()).label;
 
             if (domainNameToFind != null) {
                 if (domainName.equals(domainNameToFind) && codomainName.equals(name))
@@ -145,9 +145,9 @@ class DataGenerationTests {
     }
 
     private void printCategory(SchemaCategory schema, MetadataCategory metadata) {
-        System.out.println("Objects: ");
-        for (SchemaObject o : schema.allObjects()) {
-            final var mo = metadata.getObject(o);
+        System.out.println("Objexes: ");
+        for (SchemaObjex o : schema.allObjexes()) {
+            final var mo = metadata.getObjex(o);
             System.out.println("    " + o + " (" + mo.label + ")");
         }
 

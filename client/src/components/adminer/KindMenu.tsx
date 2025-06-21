@@ -20,7 +20,10 @@ type KindMenuProps = Readonly<{
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
 }>;
 
-type KindLabelValues = {label: string, value: string }[];
+type Option = {
+    label: string;
+    value: string;
+};
 
 /**
  * Component for selecting kind
@@ -32,7 +35,7 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
     const { fetchedData, loading, error } = useFetchData(fetchFunction);
 
     const selectItems = useMemo(() => {
-        const items: KindLabelValues = [];
+        const items: Option[] = [];
 
         if (fetchedData && fetchedData.data.length > 0) {
             fetchedData.data.forEach(name => (

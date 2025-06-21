@@ -1,6 +1,6 @@
-import { type Category, type ObjexDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism, isPositionEqual } from '@/types/schema';
+import { type Category, type ObjexDefinition, SchemaObjex, type MorphismDefinition, SchemaMorphism, MetadataObjex, MetadataMorphism, isPositionEqual, type Position } from '@/types/schema';
 import type { Result } from '../api/result';
-import { CreateMorphism, CreateObjex, Composite, DeleteMorphism, DeleteObjex, type SMO, UpdateMorphism, UpdateObjex } from '../schema/operation';
+import { CreateMorphism, CreateObjex, Composite, DeleteMorphism, DeleteObjex, type SMO, UpdateMorphism, UpdateObjex } from './schema';
 import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
 import type { MMO } from './metadata/mmo';
 import { MorphismMetadata } from './metadata/morphismMetadata';
@@ -31,9 +31,9 @@ export class Evocat {
     }
 
     async update(api: UpdateApi) {
-        const updateObject = this.getUpdateObject();
+        const edit = this.getEdit();
 
-        const result = await api(updateObject);
+        const result = await api(edit);
         if (!result.status)
             return;
 
@@ -45,7 +45,7 @@ export class Evocat {
         smo.up(this._category);
     }
 
-    private getUpdateObject(): SchemaUpdateInit {
+    private getEdit(): SchemaUpdateInit {
         const schemaOperations = this.uncommitedOperations.collectAndReset();
         const schemaToServer = schemaOperations.map(operation => operation.toServer());
 
@@ -175,7 +175,7 @@ export class Evocat {
     }
 
     /**
-     * Creates a completely new schema object with a key that has never been seen before.
+     * Creates a completely new objex with a key that has never been seen before.
      */
     createObjex(def: ObjexDefinition) {
         const key = this._category.createKey();
@@ -188,27 +188,34 @@ export class Evocat {
 
     deleteObjex(key: Key) {
         const objex = this._category.getObjex(key);
-        objex.findNeighbourMorphisms().forEach(morphism => this.deleteMorphism(morphism.signature));
+        objex.findNeighborMorphisms().forEach(morphism => this.deleteMorphism(morphism.signature));
 
         const { schema, metadata } = objex;
         const operation = new DeleteObjex(schema, metadata);
         this.addOperation(operation);
     }
 
-    updateObjex(oldSchemaObjex: SchemaObjex, update: {
+    updateObjex(key: Key, update: {
         label?: string;
         ids?: ObjexIds | null;
+        position?: Position;
     }) {
-        const newSchemaObjex = oldSchemaObjex.update(update);
-        if (newSchemaObjex) {
-            const operation = UpdateObjex.create(newSchemaObjex, oldSchemaObjex);
+        const objex = this._category.getObjex(key);
+        const { schema, metadata } = objex;
+
+        const newSchema = schema.update(update);
+        if (newSchema) {
+            const operation = UpdateObjex.create(newSchema, schema);
             this.addOperation(operation);
         }
 
-        // FIXME
-        const objex = this._category.getObjex(oldSchemaObjex.key);
-        if (update.label && update.label !== objex.metadata.label)
-            objex.metadata = new MetadataObjex(update.label, objex.metadata.position);
+        const newLabel = update.label ?? metadata.label;
+        const newPosition = update.position ?? metadata.position;
+        const doUpdateMetadata = (newLabel !== metadata.label) || !isPositionEqual(newPosition, metadata.position);
+        if (doUpdateMetadata)
+            objex.metadata = new MetadataObjex(newLabel, newPosition);
+
+        // TODO Something here? Or is this enough?
     }
 
     createMorphism(def: MorphismDefinition) {
@@ -269,5 +276,9 @@ class SmoContext {
         this.levels = [ [] ];
 
         return smo;
+    }
+
+    hasUnsavedChanges() {
+        return this.levels.some(level => level.length > 0);
     }
 }

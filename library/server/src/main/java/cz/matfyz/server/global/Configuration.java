@@ -38,4 +38,9 @@ public class Configuration {
         String checkpoint
     ) {}
 
+    @ConfigurationProperties("uploads")
+    public record UploadsProperties(
+        String folder
+    ) {}
+
 }

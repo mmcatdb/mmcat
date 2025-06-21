@@ -13,15 +13,15 @@ import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.querying.QueryStructure;
-import cz.matfyz.core.querying.queryresult.QueryResult;
-import cz.matfyz.core.querying.queryresult.ResultLeaf;
-import cz.matfyz.core.querying.queryresult.ResultList;
-import cz.matfyz.core.querying.queryresult.ResultMap;
-import cz.matfyz.core.querying.queryresult.ResultNode;
+import cz.matfyz.core.querying.LeafResult;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.MapResult;
+import cz.matfyz.core.querying.QueryResult;
+import cz.matfyz.core.querying.ResultNode;
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
@@ -165,7 +165,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public QueryResult executeQuery(QueryStatement query) {
-        final var output = new ArrayList<ResultMap>();
+        final var output = new ArrayList<MapResult>();
 
         try (
             var iterator = getDocumentIterator(query.content());
@@ -175,7 +175,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 output.add(getResultFromDocument(document, query.structure()));
             }
 
-            final var dataResult = new ResultList(output);
+            final var dataResult = new ListResult(output);
 
             return new QueryResult(dataResult, query.structure());
         }
@@ -184,41 +184,41 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    private ResultMap getResultFromDocument(Document document, QueryStructure structure) {
+    private MapResult getResultFromDocument(Document document, ResultStructure structure) {
         final var output = new TreeMap<String, ResultNode>();
 
         for (final var child : structure.children())
             output.put(child.name, getResultFromChild(document, child));
 
-        return new ResultMap(output);
+        return new MapResult(output);
     }
 
-    private ResultNode getResultFromChild(Document document, QueryStructure child) {
+    private ResultNode getResultFromChild(Document document, ResultStructure child) {
         if (child.isLeaf()) {
             // This child is a leaf - it's value has to be either a string or an array of strings.
             if (child.isArray) {
-                final List<ResultLeaf> childList = ((ArrayList<String>) document.get(child.name))
+                final List<LeafResult> childList = ((ArrayList<String>) document.get(child.name))
                     .stream()
-                    .map(childString -> new ResultLeaf(childString))
+                    .map(childString -> new LeafResult(childString))
                     .toList();
 
-                return new ResultList(childList);
+                return new ListResult(childList);
             }
             else {
                 final var childString = document.get(child.name, String.class);
 
-                return new ResultLeaf(childString);
+                return new LeafResult(childString);
             }
         }
         else {
             if (child.isArray) {
                 // An array of arrays is not supported yet.
-                final List<ResultMap> childList = ((ArrayList<Document>) document.get(child.name))
+                final List<MapResult> childList = ((ArrayList<Document>) document.get(child.name))
                     .stream()
                     .map(childDocument -> getResultFromDocument(childDocument, child))
                     .toList();
 
-                return new ResultList(childList);
+                return new ListResult(childList);
             }
             else {
                 final var childDocument = document.get(child.name, Document.class);

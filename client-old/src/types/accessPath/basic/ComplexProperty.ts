@@ -1,4 +1,4 @@
-import { DynamicName, nameFromServer, Signature, StaticName, type Name } from '@/types/identifiers';
+import { nameFromServer, Signature, type Name } from '@/types/identifiers';
 import { IndentedStringBuilder } from '@/utils/string';
 import type { ComplexPropertyFromServer } from '../serverTypes';
 import { subpathFromFromServer, type ChildProperty, type ParentProperty } from './compositeTypes';
@@ -10,12 +10,6 @@ export class ComplexProperty {
         readonly parent: ParentProperty | undefined,
         readonly _subpaths: ChildProperty[],
     ) {}
-
-    static copy(property: ComplexProperty): ComplexProperty {
-        const name = property.name instanceof DynamicName ? DynamicName.copy(property.name) : StaticName.copy(property.name);
-
-        return new ComplexProperty(name, property.signature.copy(), property.parent, [ ...property.subpaths ]);
-    }
 
     get isAuxiliary(): boolean {
         return this._signature.isEmpty;
@@ -32,7 +26,7 @@ export class ComplexProperty {
     toString(level = 0): string {
         const builder = new IndentedStringBuilder(level);
 
-        builder.appendIntendedLine(this.name + ': ');
+        builder.appendIndentedLine(this.name + ': ');
         if (!this.isAuxiliary)
             builder.append(this.signature + ' ');
         builder.append('{\n');
@@ -40,7 +34,7 @@ export class ComplexProperty {
         const subpathsAsString = this.subpaths.map(path => path.toString(level + 1)).join(',\n');
         builder.append(subpathsAsString);
 
-        builder.appendIntendedLine('}');
+        builder.appendIndentedLine('}');
 
         return builder.toString();
     }

@@ -2,13 +2,13 @@ package cz.matfyz.core.schema;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataMorphism;
-import cz.matfyz.core.metadata.MetadataObject;
-import cz.matfyz.core.metadata.MetadataObject.Position;
+import cz.matfyz.core.metadata.MetadataObjex;
+import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.utils.SequenceGenerator;
@@ -24,33 +24,27 @@ import java.util.stream.Stream;
 
 public class SchemaBuilder {
 
-    // Schema object
+    // Schema objex
 
-    public static class BuilderObject implements Comparable<BuilderObject> {
+    public static class BuilderObjex implements Comparable<BuilderObjex> {
 
         private final Key key;
         private final String label;
         // These needs to be updated later, because the morphisms might not be defined yet.
-        ObjectIds ids;
-        SignatureId superId;
+        ObjexIds ids;
 
-        public BuilderObject(Key key, String label, ObjectIds ids) {
+        public BuilderObjex(Key key, String label, ObjexIds ids) {
             this.key = key;
             this.label = label;
             this.ids = ids;
-            this.superId = ids.generateDefaultSuperId();
         }
 
         public Key key() {
             return key;
         }
 
-        public ObjectIds ids() {
+        public ObjexIds ids() {
             return ids;
-        }
-
-        public SignatureId superId() {
-            return superId;
         }
 
         public String label() {
@@ -63,20 +57,20 @@ public class SchemaBuilder {
             return position;
         }
 
-        public BuilderObject position(Position position) {
+        public BuilderObjex position(Position position) {
             this.position = position;
             return this;
         }
 
-        @Override public int compareTo(BuilderObject other) {
+        @Override public int compareTo(BuilderObjex other) {
             return key.compareTo(other.key);
         }
 
     }
 
     private SequenceGenerator keyGenerator = new SequenceGenerator(1);
-    private Map<Key, BuilderObject> objectsByKey = new TreeMap<>();
-    private Map<String, BuilderObject> objectsByLabel = new TreeMap<>();
+    private Map<Key, BuilderObjex> objexesByKey = new TreeMap<>();
+    private Map<String, BuilderObjex> objexesByLabel = new TreeMap<>();
 
     private boolean nextIdsIsGenerated = false;
     public SchemaBuilder generatedIds() {
@@ -84,23 +78,23 @@ public class SchemaBuilder {
         return this;
     }
 
-    public BuilderObject object(String label) {
-        return object(label, new Key(keyGenerator.next()));
+    public BuilderObjex objex(String label) {
+        return objex(label, new Key(keyGenerator.next()));
     }
 
-    public BuilderObject object(String label, int key) {
-        return object(label, new Key(keyGenerator.next(key)));
+    public BuilderObjex objex(String label, int key) {
+        return objex(label, new Key(keyGenerator.next(key)));
     }
 
-    private BuilderObject object(String label, Key key) {
-        final var ids = nextIdsIsGenerated ? ObjectIds.createGenerated() : ObjectIds.createValue();
-        final var object = new BuilderObject(key, label, ids);
-        objectsByKey.put(object.key(), object);
-        objectsByLabel.put(object.label(), object);
+    private BuilderObjex objex(String label, Key key) {
+        final var ids = nextIdsIsGenerated ? ObjexIds.createGenerated() : ObjexIds.createValue();
+        final var objex = new BuilderObjex(key, label, ids);
+        objexesByKey.put(objex.key(), objex);
+        objexesByLabel.put(objex.label(), objex);
 
         nextIdsIsGenerated = false;
 
-        return object;
+        return objex;
     }
 
     // Schema morphism
@@ -108,8 +102,8 @@ public class SchemaBuilder {
     public record BuilderMorphism(
         Signature signature,
         String label,
-        BuilderObject dom,
-        BuilderObject cod,
+        BuilderObjex dom,
+        BuilderObjex cod,
         Min min,
         Set<Tag> tags
     ) implements Comparable<BuilderMorphism> {
@@ -144,26 +138,28 @@ public class SchemaBuilder {
     }
 
     private Min nextMin = Min.ONE;
+    /** @see SchemaMorphism.Min */
     public SchemaBuilder min(Min nextMin) {
         this.nextMin = nextMin;
         return this;
     }
 
     private Set<Tag> nextTags = Set.of();
+    /** @see SchemaMorphism.Tag */
     public SchemaBuilder tags(Tag... nextTags) {
         this.nextTags = Set.of(nextTags);
         return this;
     }
 
-    public BuilderMorphism morphism(BuilderObject dom, BuilderObject cod) {
+    public BuilderMorphism morphism(BuilderObjex dom, BuilderObjex cod) {
         return morphism(dom, cod, Signature.createBase(signatureGenerator.next()));
     }
 
-    public BuilderMorphism morphism(BuilderObject dom, BuilderObject cod, int signature) {
+    public BuilderMorphism morphism(BuilderObjex dom, BuilderObjex cod, int signature) {
         return morphism(dom, cod, Signature.createBase(signatureGenerator.next(signature)));
     }
 
-    private BuilderMorphism morphism(BuilderObject dom, BuilderObject cod, BaseSignature signature) {
+    private BuilderMorphism morphism(BuilderObjex dom, BuilderObjex cod, BaseSignature signature) {
         final var morphism = new BuilderMorphism(signature, nextLabel, dom, cod, nextMin, nextTags);
         morphismsBySignature.put(morphism.signature(), morphism);
         morphismsByLabel.put(morphism.label(), morphism);
@@ -215,20 +211,19 @@ public class SchemaBuilder {
         return Signature.concatenate(signatures);
     }
 
-    // Objects ids - they need to be defined when the morphisms are already here.
+    // Objexes' ids - they need to be defined when the morphisms are already here.
 
-    public SchemaBuilder ids(BuilderObject object, BuilderMorphism... morphisms) {
+    public SchemaBuilder ids(BuilderObjex objexes, BuilderMorphism... morphisms) {
         final var id = new SignatureId(Stream.of(morphisms).map(m -> m.signature()).toArray(Signature[]::new));
-        object.ids = new ObjectIds(Set.of(id));
-        object.superId = object.ids.generateDefaultSuperId();
+        objexes.ids = new ObjexIds(Set.of(id));
 
         return this;
     }
 
-    private Set<BuilderObject> objectsToSkip = new TreeSet<>();
+    private Set<BuilderObjex> objexesToSkip = new TreeSet<>();
 
-    public SchemaBuilder skip(BuilderObject... objects) {
-        objectsToSkip.addAll(List.of(objects));
+    public SchemaBuilder skip(BuilderObjex... objexes) {
+        objexesToSkip.addAll(List.of(objexes));
 
         return this;
     }
@@ -244,28 +239,28 @@ public class SchemaBuilder {
     public SchemaCategory build() {
         final var schema = new SchemaCategory();
 
-        objectsByKey.values().forEach(o -> {
-            if (objectsToSkip.contains(o))
+        objexesByKey.values().forEach(o -> {
+            if (objexesToSkip.contains(o))
                 return;
 
-            final var object = new SchemaObject(o.key, o.ids, o.superId);
-            schema.addObject(object);
+            final var objex = new SchemaObjex(o.key, o.ids);
+            schema.addObjex(objex);
         });
 
         morphismsBySignature.values().forEach(m -> {
-            if (morphismsToSkip.contains(m) || objectsToSkip.contains(m.dom) || objectsToSkip.contains(m.cod))
+            if (morphismsToSkip.contains(m) || objexesToSkip.contains(m.dom) || objexesToSkip.contains(m.cod))
                 return;
 
             if (!(m.signature instanceof BaseSignature))
                 return;
 
-            final var dom = schema.getObject(m.domKey());
-            final var cod = schema.getObject(m.codKey());
+            final var dom = schema.getObjex(m.domKey());
+            final var cod = schema.getObjex(m.codKey());
             final var morphism = new SchemaMorphism(m.signature, dom, cod, m.min, m.tags);
             schema.addMorphism(morphism);
         });
 
-        objectsToSkip.clear();
+        objexesToSkip.clear();
         morphismsToSkip.clear();
 
         return schema;
@@ -274,9 +269,9 @@ public class SchemaBuilder {
     public MetadataCategory buildMetadata(SchemaCategory schema) {
         final var metadata = MetadataCategory.createEmpty(schema);
 
-        schema.allObjects().forEach(object -> {
-            final var builderObject = objectsByKey.get(object.key());
-            metadata.setObject(object, new MetadataObject(builderObject.label(), builderObject.position()));
+        schema.allObjexes().forEach(objex -> {
+            final var builderObjex = objexesByKey.get(objex.key());
+            metadata.setObjex(objex, new MetadataObjex(builderObjex.label(), builderObjex.position()));
         });
 
         schema.allMorphisms().forEach(morphism -> {

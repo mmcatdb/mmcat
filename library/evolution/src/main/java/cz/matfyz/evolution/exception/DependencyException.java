@@ -18,8 +18,8 @@ public class DependencyException extends EvolutionException {
         super("dependency", new DependencyData(type, entity, dependencies), null);
     }
 
-    public static DependencyException objectOnMorphisms(Key key, List<Signature> signatures) {
-        return new DependencyException("objectOnMorphisms", key, signatures);
+    public static DependencyException objexOnMorphisms(Key key, List<Signature> signatures) {
+        return new DependencyException("objexOnMorphisms", key, signatures);
     }
 
 }

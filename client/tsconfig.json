@@ -29,8 +29,8 @@
         /* Linting */
         "strict": true,
         "noFallthroughCasesInSwitch": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        // "noUnusedLocals": true,
+        // "noUnusedParameters": true,
         "forceConsistentCasingInFileNames": true,
 
         "paths": {

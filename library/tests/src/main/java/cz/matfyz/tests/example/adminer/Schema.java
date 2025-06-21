@@ -3,7 +3,7 @@ package cz.matfyz.tests.example.adminer;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 
@@ -15,33 +15,33 @@ public class Schema {
 
     // Keys
 
-    public static final BuilderObject user =            builder.object("user", 1);
-    public static final BuilderObject userId =          builder.object("user_id", 2);
-    public static final BuilderObject name =            builder.object("name", 3);
-    public static final BuilderObject createdAt =       builder.object("created_at", 4);
-    public static final BuilderObject fans =            builder.object("fans", 5);
+    public static final BuilderObjex user =            builder.objex("user", 1);
+    public static final BuilderObjex userId =          builder.objex("user_id", 2);
+    public static final BuilderObjex name =            builder.objex("name", 3);
+    public static final BuilderObjex createdAt =       builder.objex("created_at", 4);
+    public static final BuilderObjex fans =            builder.objex("fans", 5);
 
-    public static final BuilderObject comment =         builder.object("comment", 6);
-    public static final BuilderObject commentId =       builder.object("comment_id", 7);
-    public static final BuilderObject businessId =      builder.object("business_id", 8);
-    public static final BuilderObject date =            builder.object("date", 9);
-    public static final BuilderObject text =            builder.object("text", 10);
-    public static final BuilderObject stars =           builder.object("stars", 11);
+    public static final BuilderObjex comment =         builder.objex("comment", 6);
+    public static final BuilderObjex commentId =       builder.objex("comment_id", 7);
+    public static final BuilderObjex businessId =      builder.objex("business_id", 8);
+    public static final BuilderObjex date =            builder.objex("date", 9);
+    public static final BuilderObjex text =            builder.objex("text", 10);
+    public static final BuilderObjex stars =           builder.objex("stars", 11);
 
-    public static final BuilderObject businessHours =   builder.object("business_hours", 12);
-    public static final BuilderObject businessHoursId = builder.object("business_hours_id", 13);
-    public static final BuilderObject hours =           builder.object("hours", 14);
+    public static final BuilderObjex businessHours =   builder.objex("business_hours", 12);
+    public static final BuilderObjex businessHoursId = builder.objex("business_hours_id", 13);
+    public static final BuilderObjex hours =           builder.objex("hours", 14);
 
-    public static final BuilderObject business =        builder.object("business", 15);
-    public static final BuilderObject city =            builder.object("city", 16);
-    public static final BuilderObject state =           builder.object("state", 17);
-    public static final BuilderObject dates =           builder.object("dates", 18);
-    public static final BuilderObject attributes =      builder.generatedIds().object("attributes", 19);
-    public static final BuilderObject wifi =            builder.object("wifi", 20);
-    public static final BuilderObject outdoorSeating =  builder.object("outdoor_seating", 21);
+    public static final BuilderObjex business =        builder.objex("business", 15);
+    public static final BuilderObjex city =            builder.objex("city", 16);
+    public static final BuilderObjex state =           builder.objex("state", 17);
+    public static final BuilderObjex dates =           builder.objex("dates", 18);
+    public static final BuilderObjex attributes =      builder.generatedIds().objex("attributes", 19);
+    public static final BuilderObjex wifi =            builder.objex("wifi", 20);
+    public static final BuilderObjex outdoorSeating =  builder.objex("outdoor_seating", 21);
 
-    public static final BuilderObject friend =          builder.object("FRIEND", 22);
-    public static final BuilderObject since =           builder.object("since", 23);
+    public static final BuilderObjex friend =          builder.objex("FRIEND", 22);
+    public static final BuilderObjex since =           builder.objex("since", 23);
 
     // Signatures
 
@@ -81,12 +81,18 @@ public class Schema {
     public static final BuilderMorphism frientToFromUserId =                builder.composite(friendToFromUser, userToUserId);
     public static final BuilderMorphism frientToToUserId =                  builder.composite(friendToToUser, userToUserId);
 
-    private static final SchemaBuilder ids = builder
-        .ids(user, userToUserId)
-        .ids(comment, commentToCommentId)
-        .ids(business, businessToBusinessId)
-        .ids(businessHours, businessHoursToBusinessHoursId)
-        .ids(friend, frientToFromUserId, frientToToUserId);
+    // Ids
+
+    static {
+
+        builder
+            .ids(user, userToUserId)
+            .ids(comment, commentToCommentId)
+            .ids(business, businessToBusinessId)
+            .ids(businessHours, businessHoursToBusinessHoursId)
+            .ids(friend, frientToFromUserId, frientToToUserId);
+
+    }
 
     /**
      * Create new full schema category.

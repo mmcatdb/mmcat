@@ -1,18 +1,20 @@
 package cz.matfyz.tests.querying;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
-import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.algorithms.QueryToInstance;
+import cz.matfyz.querying.QueryToInstance;
+import cz.matfyz.querying.core.QueryDescription.QueryPlanDescription;
 import cz.matfyz.tests.example.common.TestDatasource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +49,14 @@ public class QueryTestBase {
         return this;
     }
 
+    private Predicate<QueryPlanDescription> restrictQueryTree;
+
+    public QueryTestBase restrictQueryTree(Predicate<QueryPlanDescription> restrictionFunction) {
+        this.restrictQueryTree = restrictionFunction;
+
+        return this;
+    }
+
     private List<TestDatasource<?>> datasources = new ArrayList<>();
 
     public QueryTestBase addDatasource(TestDatasource<?> datasource) {
@@ -60,13 +70,20 @@ public class QueryTestBase {
         final var kinds = defineKinds(provider);
         final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds);
 
-        final ResultList result = queryToInstance.execute();
-        final var jsonResults = result.toJsonArray();
-        LOGGER.info("\n{}", jsonResults);
+        if (restrictQueryTree != null) {
+            final var description = queryToInstance.describe();
+            assertTrue(restrictQueryTree.test(description.optimized()), "Query tree restriction was not satisfied.");
+        }
 
-        final JsonNode jsonResult = parseJsonResult(jsonResults);
-        final JsonNode expectedResult = parseExpectedResult(expectedJson);
-        assertEquals(expectedResult, jsonResult);
+        if (expectedJson != null) {
+            final ListResult result = queryToInstance.execute();
+            final var jsonResults = result.toJsonArray();
+            LOGGER.info("\n{}", jsonResults);
+
+            final JsonNode jsonResult = parseJsonResult(jsonResults);
+            final JsonNode expectedResult = parseExpectedResult(expectedJson);
+            assertEquals(expectedResult, jsonResult);
+        }
     }
 
     private List<Mapping> defineKinds(DefaultControlWrapperProvider provider) {
@@ -100,6 +117,21 @@ public class QueryTestBase {
         catch (Exception e) {
             fail(e);
             return null;
+        }
+    }
+
+    public void describe() {
+        final var provider = new DefaultControlWrapperProvider();
+        final var kinds = defineKinds(provider);
+        final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds);
+
+        final var description = queryToInstance.describe();
+
+        try {
+            LOGGER.info("\n{}", mapper.writeValueAsString(description));
+        }
+        catch (Exception e) {
+            fail(e);
         }
     }
 

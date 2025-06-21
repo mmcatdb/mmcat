@@ -17,101 +17,101 @@ class SchemaSetup extends SchemaBase {
 
     @Override protected void createOperations() {
         // User
-        addObject(Schema.user, 3.5, 4);
+        addObjex(Schema.user, 3.5, 4);
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.userId, 5, 3);
+            addObjex(Schema.userId, 5, 3);
             addMorphism(Schema.userToUserId);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.name, 4, 3);
+            addObjex(Schema.name, 4, 3);
             addMorphism(Schema.userToName);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.createdAt, 3, 3);
+            addObjex(Schema.createdAt, 3, 3);
             addMorphism(Schema.userToCreatedAt);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.fans, 2, 3);
+            addObjex(Schema.fans, 2, 3);
             addMorphism(Schema.userToFans);
         });
         addIds(Schema.user);
 
         // Comment
-        addObject(Schema.comment, 0.5, 5);
+        addObjex(Schema.comment, 0.5, 5);
         addMorphism(Schema.commentToUser);
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.commentId, 1, 6);
+            addObjex(Schema.commentId, 1, 6);
             addMorphism(Schema.commentToCommentId);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.date, 0, 6);
+            addObjex(Schema.date, 0, 6);
             addMorphism(Schema.commentToDate);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.text, -1, 6);
+            addObjex(Schema.text, -1, 6);
             addMorphism(Schema.commentToText);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.stars, 2, 6);
+            addObjex(Schema.stars, 2, 6);
             addMorphism(Schema.commentToStars);
         });
         addIds(Schema.comment);
 
         // Business
-        addObject(Schema.business, -3.5, 3);
+        addObjex(Schema.business, -3.5, 3);
         addMorphism(Schema.commentToBusiness);
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.businessId, -2, 1);
+            addObjex(Schema.businessId, -2, 1);
             addMorphism(Schema.businessToBusinessId);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.city, -3, 1);
+            addObjex(Schema.city, -3, 1);
             addMorphism(Schema.businessToCity);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.state, -4, 1);
+            addObjex(Schema.state, -4, 1);
             addMorphism(Schema.businessToState);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.dates, -5, 1);
+            addObjex(Schema.dates, -5, 1);
             addMorphism(Schema.businessToDates);
         });
         addIds(Schema.business);
 
         // Attributes
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.attributes, -6, 1);
+            addObjex(Schema.attributes, -6, 1);
             addMorphism(Schema.businessToAttributes);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.wifi, -5.5, 0);
+            addObjex(Schema.wifi, -5.5, 0);
             addMorphism(Schema.attributesToWifi);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.outdoorSeating, -6.5, 0);
+            addObjex(Schema.outdoorSeating, -6.5, 0);
             addMorphism(Schema.attributesToOutdoorSeating);
         });
         addIds(Schema.attributes);
 
         // Business Hours
-        addObject(Schema.businessHours, 2, 1);
+        addObjex(Schema.businessHours, 2, 1);
         addMorphism(Schema.businessHoursToBusiness);
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.businessHoursId, 1.5, 0);
+            addObjex(Schema.businessHoursId, 1.5, 0);
             addMorphism(Schema.businessHoursToBusinessHoursId);
         });
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.hours, 2.5, 0);
+            addObjex(Schema.hours, 2.5, 0);
             addMorphism(Schema.businessHoursToHours);
         });
         addIds(Schema.businessHours);
 
         // Friend
-        addObject(Schema.friend, 5, 6);
+        addObjex(Schema.friend, 5, 6);
         addMorphism(Schema.friendToFromUser);
         addMorphism(Schema.friendToToUser);
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.since, 7, 3);
+            addObjex(Schema.since, 7, 3);
             addMorphism(Schema.friendToSince);
         });
         addIds(Schema.friend);

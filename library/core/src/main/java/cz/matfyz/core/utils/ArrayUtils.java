@@ -55,9 +55,9 @@ public class ArrayUtils {
     /**
      *
      * @param <T> Comparable type
-     * @param source Sorted objects
-     * @param filter Also sorted objects
-     * @return A copy of source array without all the objects that are in the filter array
+     * @param source Sorted items
+     * @param filter Also sorted items
+     * @return A copy of source array without all the items that are in the filter array
      */
     public static <T extends Comparable<T>> List<T> filterSorted(Iterable<T> source, Iterable<T> filter) {
         final var output = new ArrayList<T>();
@@ -65,27 +65,27 @@ public class ArrayUtils {
         final var sourceIterator = source.iterator();
         final var filterIterator = filter.iterator();
 
-        T sourceObject = sourceIterator.hasNext() ? sourceIterator.next() : null;
-        T filterObject = filterIterator.hasNext() ? filterIterator.next() : null;
+        T sourceItem = sourceIterator.hasNext() ? sourceIterator.next() : null;
+        T filterItem = filterIterator.hasNext() ? filterIterator.next() : null;
 
-        while (sourceObject != null && filterObject != null) {
-            final var comparison = sourceObject.compareTo(filterObject);
+        while (sourceItem != null && filterItem != null) {
+            final var comparison = sourceItem.compareTo(filterItem);
 
             if (comparison < 0) {
-                output.add(sourceObject);
-                sourceObject = sourceIterator.hasNext() ? sourceIterator.next() : null;
+                output.add(sourceItem);
+                sourceItem = sourceIterator.hasNext() ? sourceIterator.next() : null;
             }
             else if (comparison > 0) {
-                filterObject = filterIterator.hasNext() ? filterIterator.next() : null;
+                filterItem = filterIterator.hasNext() ? filterIterator.next() : null;
             }
             else {
-                sourceObject = sourceIterator.hasNext() ? sourceIterator.next() : null;
-                filterObject = filterIterator.hasNext() ? filterIterator.next() : null;
+                sourceItem = sourceIterator.hasNext() ? sourceIterator.next() : null;
+                filterItem = filterIterator.hasNext() ? filterIterator.next() : null;
             }
         }
 
-        if (sourceObject != null) {
-            output.add(sourceObject);
+        if (sourceItem != null) {
+            output.add(sourceItem);
 
             while (sourceIterator.hasNext())
                output.add(sourceIterator.next());
@@ -96,8 +96,8 @@ public class ArrayUtils {
 
     public static <T> int indexOf(Iterable<T> source, Predicate<T> predicate) {
         int index = 0;
-        for (final T object : source) {
-            if (predicate.test(object))
+        for (final T item : source) {
+            if (predicate.test(item))
                 return index;
 
             index++;

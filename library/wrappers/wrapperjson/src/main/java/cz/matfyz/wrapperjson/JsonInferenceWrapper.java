@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.spark.SparkUnsupportedOperationException;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bson.Document;
@@ -71,7 +70,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     /**
-     * Loads documents from the JSON file and parses them into a list of BSON {@link Document} objects. Parses both JSON file types - array of json documents as well as newline delimited documents.
+     * Loads documents from the JSON file and parses them into a list of BSON {@link Document} documents. Parses both JSON file types - array of json documents as well as newline delimited documents.
      */
     public JavaRDD<Document> loadDocuments() {
         List<Document> documents = new ArrayList<>();

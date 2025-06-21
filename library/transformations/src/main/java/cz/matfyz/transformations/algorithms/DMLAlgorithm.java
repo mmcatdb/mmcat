@@ -6,12 +6,12 @@ import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.core.instance.InstanceObject;
+import cz.matfyz.core.instance.InstanceObjex;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 
 import java.util.ArrayDeque;
@@ -50,8 +50,8 @@ public class DMLAlgorithm {
     }
 
     private List<AbstractStatement> run() {
-        final InstanceObject instanceObject = instance.getObject(mapping.rootObject());
-        final Set<DomainRow> domainRows = instanceObject.allRowsToSet();
+        final InstanceObjex instanceObjex = instance.getObjex(mapping.rootObjex());
+        final Set<DomainRow> domainRows = instanceObjex.allRowsToSet();
         final Deque<DMLStackTriple> masterStack = new ArrayDeque<>();
         final List<AbstractStatement> output = new ArrayList<>();
 
@@ -94,8 +94,8 @@ public class DMLAlgorithm {
         for (final AccessPath subpath : path.subpaths()) {
             if (subpath instanceof ComplexProperty complexSubpath && complexSubpath.isAuxiliary()) {
                 // Auxiliary properties can't have dynamic names.
-                final var staticName = (StaticName) complexSubpath.name();
-                final String newPrefix = DMLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                final var stringName = (StringName) complexSubpath.name();
+                final String newPrefix = DMLAlgorithm.concatenatePaths(prefix, stringName.value);
                 output.addAll(collectNameValuePairs(complexSubpath, row, newPrefix));
                 continue;
             }
@@ -106,28 +106,28 @@ public class DMLAlgorithm {
                 final var replacement = replacedNames.get(dynamicName);
                 final var namePath = mapping.category().getPath(replacement.valueToName());
 
-                for (final DomainRow objectRow : row.traverseThrough(schemaPath)) {
-                    final var suffix = DDLAlgorithm.getDynamicNameValue(dynamicName, namePath, objectRow);
+                for (final DomainRow objexRow : row.traverseThrough(schemaPath)) {
+                    final var suffix = DDLAlgorithm.getDynamicNameValue(dynamicName, namePath, objexRow);
                     final String name = DMLAlgorithm.concatenatePaths(prefix, suffix);
-                    output.add(createNameValuePair(subpath, objectRow, name));
+                    output.add(createNameValuePair(subpath, objexRow, name));
                 }
                 continue;
             }
 
             // Now we know it's a normal property with a static name. It might be an array tho.
-            final var staticName = (StaticName) subpath.name();
+            final var stringName = (StringName) subpath.name();
 
             int index = 0;
-            for (final DomainRow objectRow : row.traverseThrough(schemaPath)) {
-                final var suffix = staticName.getStringName() + (schemaPath.isArray() ? "[" + index + "]" : "");
+            for (final DomainRow objexRow : row.traverseThrough(schemaPath)) {
+                final var suffix = stringName.value + (schemaPath.isArray() ? "[" + index + "]" : "");
                 final String name = DMLAlgorithm.concatenatePaths(prefix, suffix);
-                output.add(createNameValuePair(subpath, objectRow, name));
+                output.add(createNameValuePair(subpath, objexRow, name));
                 index++;
             }
 
             // If it's an array but there aren't any items in it, we return a simple pair with 'null' value.
             if (schemaPath.isArray() && index == 0) {
-                final String name = DMLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                final String name = DMLAlgorithm.concatenatePaths(prefix, stringName.value);
                 output.add(new NameValuePair(name, null));
             }
 
@@ -142,10 +142,10 @@ public class DMLAlgorithm {
         return path1 + (path1.equals(AbstractDDLWrapper.EMPTY_NAME) ? "" : AbstractDDLWrapper.PATH_SEPARATOR) + path2;
     }
 
-    private NameValuePair createNameValuePair(AccessPath objectPath, DomainRow objectRow, String name) {
-        return objectPath instanceof final ComplexProperty complexPath
-            ? new NameValuePair(name, objectRow, complexPath)
-            : new NameValuePair(name, objectRow.getValue(Signature.createEmpty()));
+    private NameValuePair createNameValuePair(AccessPath objexPath, DomainRow objexRow, String name) {
+        return objexPath instanceof final ComplexProperty complexPath
+            ? new NameValuePair(name, objexRow, complexPath)
+            : new NameValuePair(name, objexRow.getValue(Signature.createEmpty()));
     }
 
     private record NameValuePair(

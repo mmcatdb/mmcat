@@ -1,10 +1,21 @@
 package cz.matfyz.abstractwrappers;
 
+import cz.matfyz.core.mapping.ComplexProperty;
+
+/**
+ * Defines which operations are allowed for an access path for the specific database system.
+ * Also can be used to check whether a given access path is valid.
+ */
 public interface AbstractPathWrapper {
 
-    void addProperty(String path);
+    // TODO Create a base check method that will use all of these "isAllowed" methods for a simple basic check. Then use the specific implementation for more detailed rules.
+    // TODO Use some basic constraint for characters in the names of properties (although this probably needs to be specifc for each database system).
+    // TODO Also check for uniqueness of the names.
 
-    boolean check();
+    /**
+     * Check whether the access path is valid.
+     */
+    boolean isPathValid(ComplexProperty accessPath);
 
     /**
      * A property of the access path can have a signature of a base morphism with cardinality "something to 1".
@@ -27,16 +38,10 @@ public interface AbstractPathWrapper {
     boolean isInliningToManyAllowed();
 
     /**
-     * Multiple properties can be nested into an auxiliary property that does not correspond to any object in the schema category (so it is created just for the mapping).
+     * Multiple properties can be nested into an auxiliary property that does not correspond to any objex in the schema category (so it is created just for the mapping).
      * Note that this rule cannot be true unless the complex properties are also allowed.
      */
     boolean isGroupingAllowed();
-
-    /**
-     * Properties can be anonymous, meaning they have "no name". This is the case for, e.g., property representing elements in an array.
-     * Note that the root property of an access path can be anonymous regardless of this rule (although it might be worthy to investigate if that makes sense).
-     */
-    boolean isAnonymousNamingAllowed();
 
     /**
      * References for the IC algorithm can be made.

@@ -4,7 +4,6 @@ import { GraphRootProperty } from '@/types/accessPath/graph';
 import type { SignatureId } from '@/types/identifiers';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { useEvocat, useSchemaCategoryId } from '@/utils/injects';
-import ValueRow from '@/components/layout/page/ValueRow.vue';
 import API from '@/utils/api';
 import { Mapping } from '@/types/mapping';
 import type { Datasource } from '@/types/datasource';
@@ -12,7 +11,7 @@ import type { Datasource } from '@/types/datasource';
 const categoryId = useSchemaCategoryId();
 
 /**
- * Extracts the graph object from Evocat.
+ * Extracts the graph from Evocat.
  */
 const { graph } = $(useEvocat());
 
@@ -108,7 +107,7 @@ async function loadSelectedMapping(mapping: Mapping) {
     originalGraphProperty.value?.unhighlightPath();
     originalGraphProperty.value?.node.removeRoot();
     originalMapping.value = mapping;
-    const node = graph.getNode(mapping.rootObjectKey) || null;
+    const node = graph.getNode(mapping.rootObjexKey) || null;
 
     originalGraphProperty.value = GraphRootProperty.fromRootProperty(
         mapping.accessPath, 
@@ -153,8 +152,8 @@ function undoAccessPath() {
 /**
  * Emits the finish event to create a mapping with the given primary key and selected mapping kind name.
  */
-function createMapping(primaryKey: SignatureId) {
-    emit('finish', primaryKey, accessPath.value, selectedMapping.value?.kindName);
+function createMapping(primaryKey: SignatureId, rootProperty: GraphRootProperty, kindName: string) {
+    emit('finish', primaryKey, accessPath.value, kindName);
 }
 
 /**
@@ -175,10 +174,14 @@ function cancel() {
                 v-if="props.datasources.length && !mappingConfirmed"
                 class="editor"
             >
-                <ValueRow label="Datasource:">
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 8px;">
+                    <div>
+                        Datasource:
+                    </div>
                     <select 
                         v-model="selectedDatasource"
                         :disabled="mappingConfirmed"
+                        style="width: 200px;"
                     >
                         <option 
                             v-for="datasource in datasourcesWithMappings" 
@@ -188,11 +191,14 @@ function cancel() {
                             {{ datasource.label }}
                         </option>
                     </select>
-                </ValueRow>
-                <ValueRow label="Kind:">
+
+                    <div>
+                        Kind:
+                    </div>
                     <select 
                         v-model="selectedMapping"
                         :disabled="mappingConfirmed"
+                        style="width: 200px;"
                     >
                         <option 
                             v-for="mapping in mappings" 
@@ -202,7 +208,8 @@ function cancel() {
                             {{ mapping.kindName }}
                         </option>
                     </select>
-                </ValueRow>         
+                </div>
+
                 <div class="button-row">
                     <button
                         :disabled="isConfirmDisabled"
@@ -222,7 +229,7 @@ function cancel() {
                 :datasource="selectedDatasource"
                 :root-property="accessPath"
                 @finish="createMapping"
-                @update:rootProperty="updateRootProperty"
+                @update:root-property="updateRootProperty"
                 @cancel="cancel"
             />
         </div>

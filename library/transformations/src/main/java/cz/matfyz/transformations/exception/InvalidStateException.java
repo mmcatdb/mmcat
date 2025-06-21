@@ -1,6 +1,6 @@
 package cz.matfyz.transformations.exception;
 
-import cz.matfyz.core.mapping.DynamicName;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.record.SimpleRecord;
 
@@ -16,8 +16,8 @@ public class InvalidStateException extends TransformationException {
         return new InvalidStateException("simpleRecordIsNotValue", simpleRecord);
     }
 
-    public static InvalidStateException superIdHasArrayValue() {
-        return new InvalidStateException("superIdHasArrayValue", null);
+    public static InvalidStateException superIdValuesHasArrayValue() {
+        return new InvalidStateException("superIdValuesHasArrayValue", null);
     }
 
     public static InvalidStateException dynamicNameNotFound(DynamicName dynamicName) {

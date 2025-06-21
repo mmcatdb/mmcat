@@ -37,7 +37,7 @@ export type SerializedPrimaryKeyCandidate = {
     /** The hierarchical name of the candidate. */
     hierarchicalName: string;
     /** Whether the candidate is selected. */
-    selected: boolean;
+    isSelected: boolean;
 };
 
 /**
@@ -46,14 +46,14 @@ export type SerializedPrimaryKeyCandidate = {
 export type SerializedReferenceCandidate = {
     /** The type of the reference candidate. */
     type: string;
-    /** The referred object name. */
+    /** The referred objex name. */
     referred: string;
-    /** The referencing object name. */
+    /** The referencing objex name. */
     referencing: string;
     /** Whether the reference is weak. */
-    weak: boolean;
+    isWeak: boolean;
     /** Whether the candidate is selected. */
-    selected: boolean;
+    isSelected: boolean;
 };
 
 /**
@@ -63,14 +63,14 @@ export class PrimaryKeyCandidate {
     constructor(
         public type: string,
         public hierarchicalName: string,
-        public selected: boolean,
+        public isSelected: boolean,
     ) {}
 
     static fromServer(input: SerializedPrimaryKeyCandidate): PrimaryKeyCandidate {
         return new PrimaryKeyCandidate(
             input.type,
             input.hierarchicalName,
-            input.selected,
+            input.isSelected,
         );
     }
 }
@@ -83,8 +83,8 @@ export class ReferenceCandidate {
         public type: string,
         public referred: string,
         public referencing: string,
-        public weak: boolean,
-        public selected: boolean,
+        public isWeak: boolean,
+        public isSelected: boolean,
     ) {}
 
     static fromServer(input: SerializedReferenceCandidate): ReferenceCandidate {
@@ -92,8 +92,8 @@ export class ReferenceCandidate {
             input.type,
             input.referred,
             input.referencing,
-            input.weak,
-            input.selected,
+            input.isWeak,
+            input.isSelected,
         );
     }
 }

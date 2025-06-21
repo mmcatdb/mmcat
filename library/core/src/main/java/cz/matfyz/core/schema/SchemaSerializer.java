@@ -1,9 +1,8 @@
 package cz.matfyz.core.schema;
 
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 
@@ -14,13 +13,13 @@ import java.util.Set;
 public class SchemaSerializer {
 
     public record SerializedSchema(
-        List<SerializedObject> objects,
+        List<SerializedObjex> objexes,
         List<SerializedMorphism> morphisms
     ) implements Serializable {}
 
     public static SerializedSchema serialize(SchemaCategory schema) {
-        final List<SerializedObject> objects = schema.allObjects().stream()
-            .map(SerializedObject::serialize)
+        final List<SerializedObjex> objexes = schema.allObjexes().stream()
+            .map(SerializedObjex::serialize)
             .toList();
 
         final List<SerializedMorphism> morphisms = schema.allMorphisms().stream()
@@ -28,7 +27,7 @@ public class SchemaSerializer {
             .toList();
 
         return new SerializedSchema(
-            objects,
+            objexes,
             morphisms
         );
     }
@@ -36,34 +35,31 @@ public class SchemaSerializer {
     public static SchemaCategory deserialize(SerializedSchema serializedSchema) {
         final var schema = new SchemaCategory();
 
-        for (final var serializedObject : serializedSchema.objects)
-            schema.addObject(serializedObject.deserialize());
+        for (final var serializedObjex : serializedSchema.objexes)
+            schema.addObjex(serializedObjex.deserialize());
 
         for (final var serializedMorphism : serializedSchema.morphisms)
-            schema.addMorphism(serializedMorphism.deserialize(schema::getObject));
+            schema.addMorphism(serializedMorphism.deserialize(schema::getObjex));
 
         return schema;
     }
 
-    public record SerializedObject(
+    public record SerializedObjex(
         Key key,
-        ObjectIds ids,
-        SignatureId superId
+        ObjexIds ids
     ) {
 
-        public static SerializedObject serialize(SchemaObject object) {
-            return new SerializedObject(
-                object.key(),
-                object.ids(),
-                object.superId()
+        public static SerializedObjex serialize(SchemaObjex objex) {
+            return new SerializedObjex(
+                objex.key(),
+                objex.ids()
             );
         }
 
-        public SchemaObject deserialize() {
-            return new SchemaObject(
+        public SchemaObjex deserialize() {
+            return new SchemaObjex(
                 key,
-                ids,
-                superId
+                ids
             );
         }
 
@@ -87,15 +83,15 @@ public class SchemaSerializer {
             );
         }
 
-        public interface SchemaObjectProvider {
-            SchemaObject getObject(Key key);
+        public interface SchemaObjexProvider {
+            SchemaObjex getObjex(Key key);
         }
 
-        public SchemaMorphism deserialize(SchemaObjectProvider provider) {
+        public SchemaMorphism deserialize(SchemaObjexProvider provider) {
             return new SchemaMorphism(
                 signature,
-                provider.getObject(domKey),
-                provider.getObject(codKey),
+                provider.getObjex(domKey),
+                provider.getObjex(codKey),
                 min,
                 tags
             );

@@ -4,9 +4,7 @@ export type StringLike = string | string[] | number;
 
 export type Empty = Record<string, never>;
 
-export type UrlParams = {
-    [ key: string ]: StringLike;
-} | Empty;
+export type UrlParams = Record<string, StringLike> | Empty;
 
 export type Url<U extends UrlParams> = (urlParams: U) => string;
 

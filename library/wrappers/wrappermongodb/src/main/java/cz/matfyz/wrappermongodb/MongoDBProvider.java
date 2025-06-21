@@ -24,6 +24,8 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         if (mongoClient == null)
             mongoClient = MongoClients.create(settings.createConnectionString());
 
+        System.out.println("\nMONGO\n" + settings.createConnectionString() + "\n");
+
         return mongoClient.getDatabase(settings.database);
     }
 
@@ -52,7 +54,8 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         @Nullable String username,
         @Nullable String password,
         boolean isWritable,
-        boolean isQueryable
+        boolean isQueryable,
+        boolean isClonable
     ) {
 
         public String createConnectionString() {

@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import cz.matfyz.core.querying.QueryStructure;
-import cz.matfyz.core.querying.queryresult.*;
-import cz.matfyz.querying.algorithms.queryresult.*;
-import cz.matfyz.querying.algorithms.queryresult.TformStep.TformRoot;
+import cz.matfyz.core.querying.LeafResult;
+import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.MapResult;
+import cz.matfyz.core.querying.ResultNode;
+import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.querying.resolver.queryresult.*;
+import cz.matfyz.querying.resolver.queryresult.TformStep.TformRoot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +20,16 @@ public class ProjectionTestBase {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionTestBase.class);
 
-    private QueryStructure input;
+    private ResultStructure input;
 
-    public ProjectionTestBase input(QueryStructure input) {
+    public ProjectionTestBase input(ResultStructure input) {
         this.input = input;
         return this;
     }
 
-    private TformingQueryStructure output;
+    private TformingResultStructure output;
 
-    public ProjectionTestBase output(TformingQueryStructure output) {
+    public ProjectionTestBase output(TformingResultStructure output) {
         this.output = output;
         return this;
     }
@@ -52,34 +55,34 @@ public class ProjectionTestBase {
         return this;
     }
 
-    private ResultList data;
-    private ResultList expectedData;
+    private ListResult data;
+    private ListResult expectedData;
 
     public void run() {
-        final TformRoot actualTform = QueryStructureTformer.run(input, output);
+        final TformRoot actualTform = ResultStructureTformer.run(input, output);
         assertEquals(expectedTform, actualTform.toString());
 
-        assertDoesNotThrow(() -> data = (ResultList) ResultNode.JsonBuilder.fromJson(dataRaw));
-        assertDoesNotThrow(() -> expectedData = (ResultList) ResultNode.JsonBuilder.fromJson(expectedDataRaw));
+        assertDoesNotThrow(() -> data = (ListResult) ResultNode.JsonBuilder.fromJson(dataRaw));
+        assertDoesNotThrow(() -> expectedData = (ListResult) ResultNode.JsonBuilder.fromJson(expectedDataRaw));
 
         final var context = new TformContext(data);
         actualTform.apply(context);
-        final ResultList actualData = (ResultList) context.getOutput();
+        final ListResult actualData = (ListResult) context.getOutput();
         compareNode(expectedData, actualData);
     }
 
     private void compareNode(ResultNode expected, ResultNode actual) {
-        if (expected instanceof ResultList expectedList && actual instanceof ResultList actualList) {
+        if (expected instanceof ListResult expectedList && actual instanceof ListResult actualList) {
             compareList(expectedList, actualList);
             return;
         }
 
-        if (expected instanceof ResultMap expectedMap && actual instanceof ResultMap actualMap) {
+        if (expected instanceof MapResult expectedMap && actual instanceof MapResult actualMap) {
             compareMap(expectedMap, actualMap);
             return;
         }
 
-        if (expected instanceof ResultLeaf expectedLeaf && actual instanceof ResultLeaf actualLeaf) {
+        if (expected instanceof LeafResult expectedLeaf && actual instanceof LeafResult actualLeaf) {
             compareLeaf(expectedLeaf, actualLeaf);
             return;
         }
@@ -87,21 +90,21 @@ public class ProjectionTestBase {
         fail("Cannot compare " + expected.getClass() + " and " + actual.getClass());
     }
 
-    private void compareList(ResultList expected, ResultList actual) {
+    private void compareList(ListResult expected, ListResult actual) {
         assertEquals(expected.children().size(), actual.children().size());
 
         for (int i = 0; i < expected.children().size(); i++)
             compareNode(expected.children().get(i), actual.children().get(i));
     }
 
-    private void compareMap(ResultMap expected, ResultMap actual) {
+    private void compareMap(MapResult expected, MapResult actual) {
         assertEquals(expected.children().size(), actual.children().size());
 
         for (final var entry : expected.children().entrySet())
             compareNode(entry.getValue(), actual.children().get(entry.getKey()));
     }
 
-    private void compareLeaf(ResultLeaf expected, ResultLeaf actual) {
+    private void compareLeaf(LeafResult expected, LeafResult actual) {
         assertEquals(expected.value, actual.value);
     }
 }

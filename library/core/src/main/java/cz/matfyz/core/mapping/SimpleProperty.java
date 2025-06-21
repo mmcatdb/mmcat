@@ -3,6 +3,7 @@ package cz.matfyz.core.mapping;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
+import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.utils.printable.*;
@@ -42,7 +43,7 @@ public class SimpleProperty extends AccessPath {
             : null;
     }
 
-    @Override public @Nullable AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
 
         return morphism.dom().key().equals(key) ? this : null;

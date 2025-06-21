@@ -6,13 +6,19 @@ type CategoryInfoContext = {
     setCategory: (category: SchemaCategoryInfo) => void;
 };
 
+/**
+ * Context for providing category information to child components.
+ */
 export const CategoryInfoContext = createContext<CategoryInfoContext | undefined>(undefined);
 
-type CategoryInfoProviderProps = Readonly<{
+type CategoryInfoProviderProps = {
     children: ReactNode;
     category: SchemaCategoryInfo;
-}>;
+};
 
+/**
+ * Provides category information to child components via context.
+ */
 export function CategoryInfoProvider({ children, category: inputCategory }: CategoryInfoProviderProps) {
     const [ category, setCategory ] = useState(inputCategory);
 

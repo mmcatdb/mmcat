@@ -12,6 +12,8 @@ services:
                 databasePassword: ${DATABASE_PASSWORD}
         expose:
             - "${SERVER_PORT}"
+        volumes:
+            - .uploads:/app/uploads
 
     client:
         container_name: "mmcat-client"

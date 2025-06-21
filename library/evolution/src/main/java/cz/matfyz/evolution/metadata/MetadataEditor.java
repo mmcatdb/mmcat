@@ -4,7 +4,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataMorphism;
-import cz.matfyz.core.metadata.MetadataObject;
+import cz.matfyz.core.metadata.MetadataObjex;
 
 import java.util.Map;
 
@@ -17,8 +17,8 @@ public class MetadataEditor extends MetadataCategory.Editor {
         this.metadata = metadata;
     }
 
-    public Map<Key, MetadataObject> getObjects() {
-        return getObjects(metadata);
+    public Map<Key, MetadataObjex> getObjexes() {
+        return getObjexes(metadata);
     }
 
     public Map<Signature, MetadataMorphism> getMorphisms() {

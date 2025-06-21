@@ -1,6 +1,6 @@
 package cz.matfyz.inference.edit;
 
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.inference.edit.algorithms.RecursionMerge;
 import cz.matfyz.core.schema.SchemaMorphism;
 
@@ -20,10 +20,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class DfsFinder {
 
     private RecursionMerge recursionMerge;
-    private List<SchemaObject> currentPath;
-    private List<List<SchemaObject>> result;
-    private final Set<SchemaObject> recursiveNodes;
-    private final Set<SchemaObject> visitedNodes = new HashSet<>();
+    private List<SchemaObjex> currentPath;
+    private List<List<SchemaObjex>> result;
+    private final Set<SchemaObjex> recursiveNodes;
+    private final Set<SchemaObjex> visitedNodes = new HashSet<>();
 
     public DfsFinder(RecursionMerge recursionMerge) {
         this.recursionMerge = recursionMerge;
@@ -32,34 +32,34 @@ public class DfsFinder {
         this.recursiveNodes = new HashSet<>();
     }
 
-    public List<List<SchemaObject>> getResult() {
+    public List<List<SchemaObjex>> getResult() {
         return result;
     }
 
     /**
-     * Initiates the search for occurrences starting from all schema objects in the schema.
+     * Initiates the search for occurrences starting from all objexes in the schema.
      */
     public void findOccurrencesInAllNodes() {
-        for (SchemaObject node : recursionMerge.newSchema.allObjects()) {
+        for (SchemaObjex node : recursionMerge.newSchema.allObjexes()) {
             findOccurrences(node);
         }
         result = cleanOccurrences(result);
     }
 
     /**
-     * Initiates the search for occurrences starting from the specified schema object.
+     * Initiates the search for occurrences starting from the specified objexes.
      */
-    public void findOccurrences(SchemaObject startNode) {
+    public void findOccurrences(SchemaObjex startNode) {
         dfsFind(startNode, 0);
     }
 
-    private void dfsFind(SchemaObject currentNode, int patternIndex) {
+    private void dfsFind(SchemaObjex currentNode, int patternIndex) {
         if (currentNode == null || patternIndex >= recursionMerge.adjustedPattern.size() || visitedNodes.contains(currentNode))
             return;
         visitedNodes.add(currentNode);
 
         PatternSegment currentSegment = recursionMerge.adjustedPattern.get(patternIndex);
-        final var currentNodeLabel = recursionMerge.newMetadata.getObject(currentNode).label;
+        final var currentNodeLabel = recursionMerge.newMetadata.getObjex(currentNode).label;
 
         if (!currentNodeLabel.equals(currentSegment.nodeName())) {
             if (foundFullMatch()) {
@@ -70,7 +70,7 @@ public class DfsFinder {
         }
 
         currentPath.add(currentNode);
-        updatePatternObjects(currentSegment, currentNode);
+        updatePatternObjexes(currentSegment, currentNode);
 
         if (patternIndex == recursionMerge.adjustedPattern.size() - 1) {
             handleFullMatch(currentNode);
@@ -83,35 +83,35 @@ public class DfsFinder {
             currentPath.remove(currentPath.size() - 1);
     }
 
-    private void updatePatternObjects(PatternSegment currentSegment, SchemaObject currentNode) {
-        final Set<SchemaObject> objects = recursionMerge.mapPatternObjects
+    private void updatePatternObjexes(PatternSegment currentSegment, SchemaObjex currentNode) {
+        final Set<SchemaObjex> objexes = recursionMerge.mapPatternObjexes
             .getOrDefault(currentSegment, new HashSet<>());
-        objects.add(currentNode);
-        recursionMerge.mapPatternObjects.put(currentSegment, objects);
+        objexes.add(currentNode);
+        recursionMerge.mapPatternObjexes.put(currentSegment, objexes);
     }
 
-    private void handleFullMatch(SchemaObject currentNode) {
-        final @Nullable SchemaObject nextNode = recursionMerge.findNextNode(recursionMerge.newSchema, currentNode, recursionMerge.adjustedPattern.get(0));
+    private void handleFullMatch(SchemaObjex currentNode) {
+        final @Nullable SchemaObjex nextNode = recursionMerge.findNextNode(recursionMerge.newSchema, currentNode, recursionMerge.adjustedPattern.get(0));
         if (nextNode != null)
             dfsFind(nextNode, 1); // Continue DFS
     }
 
-    private void processDirection(SchemaObject currentNode, int patternIndex, PatternSegment currentSegment) {
+    private void processDirection(SchemaObjex currentNode, int patternIndex, PatternSegment currentSegment) {
         if (currentSegment.direction().equals(RecursionMerge.FORWARD) || currentSegment.direction().equals(RecursionMerge.RECURSIVE_FORWARD))
             processForward(currentNode, patternIndex, currentSegment);
         else if (currentSegment.direction().equals(RecursionMerge.BACKWARD) || currentSegment.direction().equals(RecursionMerge.RECURSIVE_BACKWARD))
             processBackward(currentNode, patternIndex, currentSegment);
     }
 
-    private void processForward(SchemaObject currentNode, int patternIndex, PatternSegment currentSegment) {
+    private void processForward(SchemaObjex currentNode, int patternIndex, PatternSegment currentSegment) {
         List<SchemaMorphism> morphismsToProcess = findOutgoingMorphisms(currentNode);
-        final var currentNodeLabel = recursionMerge.newMetadata.getObject(currentNode).label;
+        final var currentNodeLabel = recursionMerge.newMetadata.getObjex(currentNode).label;
 
         if (currentSegment.direction().equals(RecursionMerge.RECURSIVE_FORWARD))
             recursiveNodes.add(currentNode);
 
         for (final SchemaMorphism morphism : morphismsToProcess) {
-            final int nextIndex = currentSegment.direction().equals(RecursionMerge.RECURSIVE_FORWARD) && recursionMerge.newMetadata.getObject(morphism.cod()).label.equals(currentNodeLabel)
+            final int nextIndex = currentSegment.direction().equals(RecursionMerge.RECURSIVE_FORWARD) && recursionMerge.newMetadata.getObjex(morphism.cod()).label.equals(currentNodeLabel)
                 ? patternIndex
                 : patternIndex + 1;
 
@@ -119,12 +119,12 @@ public class DfsFinder {
         }
     }
 
-    private void processBackward(SchemaObject currentNode, int patternIndex, PatternSegment currentSegment) {
+    private void processBackward(SchemaObjex currentNode, int patternIndex, PatternSegment currentSegment) {
         List<SchemaMorphism> morphismsToProcess = findIncomingMorphisms(currentNode);
-        final var currentNodeLabel = recursionMerge.newMetadata.getObject(currentNode).label;
+        final var currentNodeLabel = recursionMerge.newMetadata.getObjex(currentNode).label;
 
         for (SchemaMorphism morphism : morphismsToProcess) {
-            final int nextIndex = currentSegment.direction().equals(RecursionMerge.RECURSIVE_BACKWARD) && recursionMerge.newMetadata.getObject(morphism.dom()).label.equals(currentNodeLabel)
+            final int nextIndex = currentSegment.direction().equals(RecursionMerge.RECURSIVE_BACKWARD) && recursionMerge.newMetadata.getObjex(morphism.dom()).label.equals(currentNodeLabel)
                 ? patternIndex
                 : patternIndex + 1;
 
@@ -136,7 +136,7 @@ public class DfsFinder {
         return currentPath.size() >= recursionMerge.adjustedPattern.size() && containsPatternSequence(currentPath);
     }
 
-    private boolean containsPatternSequence(List<SchemaObject> list) {
+    private boolean containsPatternSequence(List<SchemaObjex> list) {
         if (recursionMerge.adjustedPattern.size() > list.size())
             return false;
 
@@ -144,7 +144,7 @@ public class DfsFinder {
             boolean foundSublist = true;
 
             for (int j = 0; j < recursionMerge.adjustedPattern.size(); j++) {
-                if (!recursionMerge.newMetadata.getObject(list.get(i + j)).label.equals(recursionMerge.adjustedPattern.get(j).nodeName())) {
+                if (!recursionMerge.newMetadata.getObjex(list.get(i + j)).label.equals(recursionMerge.adjustedPattern.get(j).nodeName())) {
                     foundSublist = false;
                     break;
                 }
@@ -156,27 +156,27 @@ public class DfsFinder {
         return false;
     }
 
-    private List<SchemaMorphism> findOutgoingMorphisms(SchemaObject node) {
+    private List<SchemaMorphism> findOutgoingMorphisms(SchemaObjex node) {
         return recursionMerge.newSchema.allMorphisms().stream()
             .filter(morphism -> morphism.dom().equals(node))
             .toList();
     }
 
-    private List<SchemaMorphism> findIncomingMorphisms(SchemaObject node) {
+    private List<SchemaMorphism> findIncomingMorphisms(SchemaObjex node) {
         return recursionMerge.newSchema.allMorphisms().stream()
             .filter(morphism -> morphism.cod().equals(node))
             .toList();
     }
 
-    private static List<List<SchemaObject>> cleanOccurrences(List<List<SchemaObject>> listOfLists) {
-        final List<List<SchemaObject>> result = new ArrayList<>();
+    private static List<List<SchemaObjex>> cleanOccurrences(List<List<SchemaObjex>> listOfLists) {
+        final List<List<SchemaObjex>> result = new ArrayList<>();
 
         for (int i = 0; i < listOfLists.size(); i++) {
-            final List<SchemaObject> currentList = listOfLists.get(i);
+            final List<SchemaObjex> currentList = listOfLists.get(i);
             boolean isMergedOrSubsequence = false;
 
             for (int j = 0; j < result.size(); j++) {
-                final List<SchemaObject> existingList = result.get(j);
+                final List<SchemaObjex> existingList = result.get(j);
 
                 if (isSublist(existingList, currentList)) {
                     isMergedOrSubsequence = true;
@@ -186,7 +186,7 @@ public class DfsFinder {
                     isMergedOrSubsequence = true;
                     break;
                 } else if (canMerge(existingList, currentList)) {
-                    List<SchemaObject> mergedList = mergeLists(existingList, currentList);
+                    List<SchemaObjex> mergedList = mergeLists(existingList, currentList);
                     result.set(j, mergedList);
                     isMergedOrSubsequence = true;
                     break;
@@ -200,11 +200,11 @@ public class DfsFinder {
         return result;
     }
 
-    private static boolean isSublist(List<SchemaObject> list, List<SchemaObject> sublist) {
+    private static boolean isSublist(List<SchemaObjex> list, List<SchemaObjex> sublist) {
         return Collections.indexOfSubList(list, sublist) != -1;
     }
 
-    private static boolean canMerge(List<SchemaObject> list1, List<SchemaObject> list2) {
+    private static boolean canMerge(List<SchemaObjex> list1, List<SchemaObjex> list2) {
         int overlapSize = Math.min(list1.size(), list2.size());
 
         for (int i = 1; i <= overlapSize; i++)
@@ -214,14 +214,14 @@ public class DfsFinder {
         return false;
     }
 
-    private static List<SchemaObject> mergeLists(List<SchemaObject> list1, List<SchemaObject> list2) {
+    private static List<SchemaObjex> mergeLists(List<SchemaObjex> list1, List<SchemaObjex> list2) {
         int overlapSize = 0;
 
         for (int i = 1; i <= Math.min(list1.size(), list2.size()); i++)
             if (list1.subList(list1.size() - i, list1.size()).equals(list2.subList(0, i)))
                 overlapSize = i;
 
-        List<SchemaObject> mergedList = new ArrayList<>(list1);
+        List<SchemaObjex> mergedList = new ArrayList<>(list1);
         mergedList.addAll(list2.subList(overlapSize, list2.size()));
 
         return mergedList;

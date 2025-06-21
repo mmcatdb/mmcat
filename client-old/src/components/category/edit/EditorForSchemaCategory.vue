@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Edge, SelectionType, type Node } from '@/types/categoryGraph';
 import { onMounted, onUnmounted, ref, shallowRef } from 'vue';
-import AddObject from './AddObject.vue';
+import AddObjex from './AddObjex.vue';
 import AddMorphism from './AddMorphism.vue';
 import AddComplexStructure from './AddComplexStructure.vue';
-import UpdateObject from './UpdateObject.vue';
+import UpdateObjex from './UpdateObjex.vue';
 import UpdateMorphism from './UpdateMorphism.vue';
 import Divider from '@/components/layout/Divider.vue';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
@@ -15,10 +15,10 @@ const { evocat, graph } = $(useEvocat());
 
 enum State {
     Default,
-    AddObject,
+    AddObjex,
     AddMorphism,
     AddComplexStructure,
-    UpdateObject,
+    UpdateObjex,
     UpdateMorphism,
     EditGroup,
 }
@@ -27,16 +27,16 @@ type GenericStateValue<State, Value> = { type: State } & Value;
 
 type StateValue =
     GenericStateValue<State.Default, unknown> |
-    GenericStateValue<State.AddObject, unknown> |
+    GenericStateValue<State.AddObjex, unknown> |
     GenericStateValue<State.AddMorphism, unknown> |
     GenericStateValue<State.AddComplexStructure, unknown> |
-    GenericStateValue<State.UpdateObject, { node: Node }> |
+    GenericStateValue<State.UpdateObjex, { node: Node }> |
     GenericStateValue<State.UpdateMorphism, { edge: Edge }> |
     GenericStateValue<State.EditGroup, { nodes: Node[] }>;
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
-const editedObject = ref<InstanceType<typeof UpdateObject>>();
+const editedObjex = ref<InstanceType<typeof UpdateObjex>>();
 const editedMorphism = ref<InstanceType<typeof UpdateMorphism>>();
 
 const listener = graph.listen();
@@ -51,8 +51,8 @@ onUnmounted(() => {
     listener.close();
 });
 
-function addObjectClicked() {
-    state.value = { type: State.AddObject };
+function addObjexClicked() {
+    state.value = { type: State.AddObjex };
 }
 
 function addMorphismClicked() {
@@ -64,7 +64,7 @@ function addComplexStructureClicked() {
 }
 
 function setStateToDefault() {
-    if (state.value.type === State.UpdateObject)
+    if (state.value.type === State.UpdateObjex)
         state.value.node.unselect();
 
     if (state.value.type === State.UpdateMorphism)
@@ -86,7 +86,7 @@ function onNodeTapHandler(node: Node) {
                 node.unselect();
 
                 if (state.value.nodes.length === 1) {
-                    state.value = { type: State.UpdateObject, node: state.value.nodes[0] };
+                    state.value = { type: State.UpdateObjex, node: state.value.nodes[0] };
                     return;
                 }
             }
@@ -100,16 +100,16 @@ function onNodeTapHandler(node: Node) {
             // Disband the group and then proceed in the same way as if the node was clicked.
             state.value.nodes.forEach(n => n.unselect());
             node.select({ type: SelectionType.Root, level: 0 });
-            state.value = { type: State.UpdateObject, node };
+            state.value = { type: State.UpdateObjex, node };
             return;
         }
     }
 
-    if (state.value.type !== State.Default && state.value.type !== State.UpdateObject)
+    if (state.value.type !== State.Default && state.value.type !== State.UpdateObjex)
         return;
 
-    if (state.value.type === State.UpdateObject) {
-        if (editedObject.value?.changed) {
+    if (state.value.type === State.UpdateObjex) {
+        if (editedObjex.value?.changed) {
             return;
         }
         else if (state.value.node.equals(node)) {
@@ -129,12 +129,12 @@ function onNodeTapHandler(node: Node) {
     }
 
     node.select({ type: SelectionType.Root, level: 0 });
-    state.value = { type: State.UpdateObject, node };
+    state.value = { type: State.UpdateObjex, node };
 }
 
 function onEdgeTapHandler(edge: Edge) {
-    if (state.value.type === State.UpdateObject) {
-        if (editedObject.value?.changed)
+    if (state.value.type === State.UpdateObjex) {
+        if (editedObjex.value?.changed)
             return;
 
         state.value.node.unselect();
@@ -159,8 +159,8 @@ function onEdgeTapHandler(edge: Edge) {
 }
 
 function onCanvasTapHandler() {
-    if (state.value.type === State.UpdateObject) {
-        if (editedObject.value?.changed)
+    if (state.value.type === State.UpdateObjex) {
+        if (editedObjex.value?.changed)
             return;
         setStateToDefault();
     }
@@ -186,7 +186,7 @@ async function save() {
             v-if="state.type === State.Default"
             class="options"
         >
-            <button @click="addObjectClicked">
+            <button @click="addObjexClicked">
                 Add object
             </button>
             <button @click="addMorphismClicked">
@@ -210,8 +210,8 @@ async function save() {
                 Save
             </button>
         </div>
-        <template v-else-if="state.type === State.AddObject">
-            <AddObject
+        <template v-else-if="state.type === State.AddObjex">
+            <AddObjex
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />
@@ -228,10 +228,10 @@ async function save() {
                 @cancel="setStateToDefault"
             />
         </template>
-        <template v-else-if="state.type === State.UpdateObject">
-            <UpdateObject
-                ref="editedObject"
-                :key="state.node.schemaObject.key.value"
+        <template v-else-if="state.type === State.UpdateObjex">
+            <UpdateObjex
+                ref="editedObjex"
+                :key="state.node.schemaObjex.key.value"
                 :node="state.node"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"

@@ -4,13 +4,11 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
-import cz.matfyz.querying.algorithms.QueryToInstance;
-import cz.matfyz.server.controller.QueryController.QueryPartDescription;
-import cz.matfyz.server.controller.DatasourceController;
-import cz.matfyz.server.controller.QueryController.QueryDescription;
+import cz.matfyz.querying.QueryToInstance;
+import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.server.controller.QueryController.QueryInit;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.Query;
@@ -52,10 +50,7 @@ public class QueryService {
     @Autowired
     private SchemaCategoryRepository categoryRepository;
 
-    @Autowired
-    private DatasourceController datasourceController;
-
-    public ResultList executeQuery(Id categoryId, String queryString) {
+    public ListResult executeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
         final var datasources = getDatasources(categoryWrapper.id(), category);
@@ -68,15 +63,7 @@ public class QueryService {
         final var category = categoryWrapper.toSchemaCategory();
         final var datasources = getDatasources(categoryWrapper.id(), category);
 
-        final var rawDescriptions = new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).describe();
-
-        final var parts = rawDescriptions.parts().stream().map(description -> {
-            final var wrapper = datasources.datasourceWrappers.get(new Id(description.datasourceIdentifier()));
-            final var datasourceDetail = datasourceController.datasourceToDetail(wrapper);
-            return new QueryPartDescription(datasourceDetail, description.query());
-        }).toList();
-
-        return new QueryDescription(parts);
+        return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).describe();
     }
 
     private record KindsAndDatasources(
@@ -109,6 +96,10 @@ public class QueryService {
             .findAllInCategory(categoryId)
             .forEach(wrapper -> {
                 final var datasource = datasources.get(wrapper.datasourceId);
+                if (datasource == null)
+                    // The datasource isn't queryable so it was discarded in the previous step.
+                    return;
+
                 kinds.add(wrapper.toMapping(datasource, category));
             });
 

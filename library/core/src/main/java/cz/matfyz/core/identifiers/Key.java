@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * This class represents a 'key' of an object as is described in the paper. It's basically just a number with extra steps.
+ * This class represents a 'key' of a {@link cz.matfyz.core.schema.SchemaObjex} as is described in the paper. It's basically just a number with extra steps.
  */
 @JsonSerialize(using = Key.Serializer.class)
 @JsonDeserialize(using = Key.Deserializer.class)

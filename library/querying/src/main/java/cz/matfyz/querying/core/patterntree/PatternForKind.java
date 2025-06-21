@@ -1,7 +1,8 @@
 package cz.matfyz.querying.core.patterntree;
 
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.querying.Variable;
+import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -9,33 +10,39 @@ import java.util.TreeMap;
 /**
  * This class represents part of a query pattern that is mapped to a particular kind.
  * It's also mapped to a schema category.
- * Because each kind has a mappings which is a tree, this class also contains a root of a tree.
+ * Because each kind has a mapping which is a tree, this class also contains a root of a tree.
  */
 public class PatternForKind implements Comparable<PatternForKind> {
 
     public final Mapping kind;
-    public final PatternObject root;
+    public final PatternTree root;
 
-    private final Map<SchemaObject, PatternObject> schemaObjectToPatternObject = new TreeMap<>();
+    private final Map<Variable, PatternTree> variableToPatternTree = new TreeMap<>();
+    private final Map<SchemaObjex, PatternTree> schemaObjexToPatternTree = new TreeMap<>();
 
-    public PatternForKind(Mapping kind, PatternObject root) {
+    public PatternForKind(Mapping kind, PatternTree root) {
         this.kind = kind;
         this.root = root;
 
-        addObject(this.root);
+        addObjex(this.root);
     }
 
-    private void addObject(PatternObject patternObject) {
-        schemaObjectToPatternObject.put(patternObject.schemaObject, patternObject);
-        patternObject.children().forEach(this::addObject);
+    private void addObjex(PatternTree patternTree) {
+        variableToPatternTree.put(patternTree.variable, patternTree);
+        schemaObjexToPatternTree.put(patternTree.objex, patternTree);
+        patternTree.children().forEach(this::addObjex);
     }
 
     @Override public int compareTo(PatternForKind other) {
         return this.kind.compareTo(other.kind);
     }
 
-    public PatternObject getPatternObject(SchemaObject object) {
-        return schemaObjectToPatternObject.get(object);
+    public PatternTree getPatternTree(Variable variable) {
+        return variableToPatternTree.get(variable);
+    }
+
+    public PatternTree getPatternTree(SchemaObjex objex) {
+        return schemaObjexToPatternTree.get(objex);
     }
 
     @Override public String toString() {

@@ -9,7 +9,7 @@ import Message from './Message.vue';
  * Props passed to the component.
  */
 const props = defineProps<{
-    /** The graph object used for recursion analysis. */
+    /** The graph used for recursion analysis. */
     graph: Graph;
 }>();
 
@@ -176,12 +176,20 @@ function onEdgeTapHandler(edge: Edge) {
             :show="showWarning"
             :message="warningMessage"
         />
-        <h2>Find Recursion</h2>
+        <h3>
+            Find Recursion
+        </h3>
+        
+        <p>
+            Define a recursive pattern in the graph by selecting nodes and edges that form the recursion structure.
+        </p>
+
         <ValueContainer>
             <ValueRow label="Recursive pattern:"> 
                 {{ selectedNodeLabels }}
             </ValueRow>
         </ValueContainer>
+
         <div class="button-row">
             <button
                 :disabled="!nodesSelected || confirmClicked"

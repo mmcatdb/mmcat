@@ -6,7 +6,7 @@ import MinimumInput from './MinimumInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
-import { ObjectIds, Type } from '@/types/identifiers';
+import { ObjexIds, Type } from '@/types/identifiers';
 import { useEvocat } from '@/utils/injects';
 
 const { evocat, graph } = $(useEvocat());
@@ -23,14 +23,14 @@ function save() {
         if (!node.value)
             return;
 
-        const object = evocat.createObject({
+        const objex = evocat.createObjex({
             label: label.value,
-            ids: ObjectIds.createNonSignatures(Type.Value),
+            ids: ObjexIds.createNonSignatures(Type.Value),
         });
 
         evocat.createMorphism({
-            domKey: node.value.schemaObject.key,
-            codKey: object.key,
+            domKey: node.value.schemaObjex.key,
+            codKey: objex.key,
             min: min.value,
         });
     });
