@@ -21,12 +21,12 @@ import type { DataResponse } from '@/types/adminer/DataResponse';
 import type { AdminerFilterQueryState, KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
 
-type AdminerFilterQueryPageProps = Readonly<{
+type AdminerFilterQueryPageProps = {
     /** The selected datasource. */
     datasource: Datasource;
     /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
 /**
  * Component for fetching the data using filer query
@@ -125,14 +125,14 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     </>);
 }
 
-type DataComponentProps = Readonly<{
+type DataComponentProps = {
     state: AdminerFilterQueryState;
     fetchedData: DataResponse | undefined;
     datasources: Datasource[];
     kindReferences: KindReference[];
     error: string | undefined;
     loading: boolean;
-}>;
+};
 
 function DataComponent({ state, fetchedData, datasources, kindReferences, error, loading }: DataComponentProps) {
     if (state.kindName && error) {

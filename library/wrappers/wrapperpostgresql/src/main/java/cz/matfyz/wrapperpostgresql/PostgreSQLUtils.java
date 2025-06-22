@@ -22,7 +22,6 @@ public class PostgreSQLUtils {
      *                       <li><code>true</code> for outgoing foreign keys (keys where the kind references other kinds).</li>
      *                       <li><code>false</code> for incoming foreign keys (keys where other kinds reference the kind).</li>
      *                   </ul>
-     * @throws SQLException if an error occurs during database access.
      */
     private static List<Reference> getReferences(Statement stmt, List<Reference> references, String datasourceId, String kindName, boolean outgoing) throws SQLException {
         String referencedKind = outgoing ? "kcu" : "ccu";
@@ -63,8 +62,6 @@ public class PostgreSQLUtils {
 
     /**
      * Retrieves references for the specified kind.
-     *
-     * @throws PullForestException if an error occurs during database access.
      */
     public static List<Reference> getReferences(Statement stmt, String datasourceId, String kindName) {
         try {

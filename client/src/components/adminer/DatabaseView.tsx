@@ -7,7 +7,7 @@ import type { Id } from '@/types/id';
 import type { DataResponse, DocumentResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 
-type DatabaseViewProps = Readonly<{
+type DatabaseViewProps = {
     /** The selected view. */
     view: View;
     /** The data to display. */
@@ -20,7 +20,7 @@ type DatabaseViewProps = Readonly<{
     datasourceId: Id;
     /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
 /**
  * Component that returns view based on the value of variable 'view'

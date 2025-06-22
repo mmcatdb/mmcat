@@ -2,6 +2,9 @@ import { calculateDefaultNodeColors } from '@neo4j-devtools/word-color';
 import { type RelationshipModel } from './Relationship';
 import { type NodeModel } from './Node';
 
+export const NODE_CLASS = 'svg-node';
+export const RELATIONSHIP_CLASS = 'svg-relationship';
+
 export class Selector {
     tag = '';
     classes: string[] = [];
@@ -51,9 +54,7 @@ class StyleRule {
             return false;
 
         for (const selectorClass of this.selector.classes) {
-            if (
-                selectorClass != null && selector.classes.indexOf(selectorClass) === -1
-            )
+            if (selectorClass != null && selector.classes.indexOf(selectorClass) === -1)
                 return false;
         }
         return true;
@@ -68,137 +69,90 @@ class StyleRule {
 }
 
 const DEFAULT_STYLE: Record<string, Record<string, string>> = {
-    node: {
-        diameter: '50px',
-        color: '#A5ABB6',
-        'border-color': '#9AA1AC',
-        'border-width': '2px',
-        'text-color-internal': '#FFFFFF',
-        'font-size': '10px',
-    },
-    relationship: {
-        color: '#A5ABB6',
+    [RELATIONSHIP_CLASS]: {
+        'color': '#A5ABB6',
         'shaft-width': '1px',
-        'font-size': '8px',
-        padding: '3px',
-        'text-color-external': '#000000',
+        'padding': '3px',
         'text-color-internal': '#FFFFFF',
-        caption: '<type>',
+        'caption': '<type>',
     },
 };
-type DefaultSizeType = { diameter: string }
-const DEFAULT_SIZES: DefaultSizeType[] = [
-    {
-        diameter: '10px',
-    },
-    {
-        diameter: '20px',
-    },
-    {
-        diameter: '50px',
-    },
-    {
-        diameter: '65px',
-    },
-    {
-        diameter: '80px',
-    },
-];
-type DefaultArrayWidthType = { 'shaft-width': string }
-const DEFAULT_ARRAY_WIDTHS: DefaultArrayWidthType[] = [
-    {
-        'shaft-width': '1px',
-    },
-    {
-        'shaft-width': '2px',
-    },
-    {
-        'shaft-width': '3px',
-    },
-    {
-        'shaft-width': '5px',
-    },
-    {
-        'shaft-width': '8px',
-    },
-    {
-        'shaft-width': '13px',
-    },
-    {
-        'shaft-width': '25px',
-    },
-    {
-        'shaft-width': '38px',
-    },
-];
+
+type DefaultArrayWidthType = { 'shaft-width': string };
+
+const DEFAULT_ARRAY_WIDTHS: DefaultArrayWidthType[] = [ {
+    'shaft-width': '1px',
+}, {
+    'shaft-width': '2px',
+}, {
+    'shaft-width': '3px',
+}, {
+    'shaft-width': '5px',
+}, {
+    'shaft-width': '8px',
+}, {
+    'shaft-width': '13px',
+}, {
+    'shaft-width': '25px',
+}, {
+    'shaft-width': '38px',
+} ];
 
 type DefaultColorType = {
-  color: string;
-  'border-color': string;
-  'text-color-internal': string;
-}
-const DEFAULT_COLORS: DefaultColorType[] = [
-    {
-        color: '#604A0E',
-        'border-color': '#423204',
-        'text-color-internal': '#FFFFFF',
-    },
-    {
-        color: '#C990C0',
-        'border-color': '#b261a5',
-        'text-color-internal': '#FFFFFF',
-    },
-    {
-        color: '#F79767',
-        'border-color': '#f36924',
-        'text-color-internal': '#FFFFFF',
-    },
-    {
-        color: '#57C7E3',
-        'border-color': '#23b3d7',
-        'text-color-internal': '#2A2C34',
-    },
-    {
-        color: '#F16667',
-        'border-color': '#eb2728',
-        'text-color-internal': '#FFFFFF',
-    },
-    {
-        color: '#D9C8AE',
-        'border-color': '#c0a378',
-        'text-color-internal': '#2A2C34',
-    },
-    {
-        color: '#8DCC93',
-        'border-color': '#5db665',
-        'text-color-internal': '#2A2C34',
-    },
-    {
-        color: '#ECB5C9',
-        'border-color': '#da7298',
-        'text-color-internal': '#2A2C34',
-    },
-    {
-        color: '#4C8EDA',
-        'border-color': '#2870c2',
-        'text-color-internal': '#FFFFFF',
-    },
-    {
-        color: '#FFC454',
-        'border-color': '#d7a013',
-        'text-color-internal': '#2A2C34',
-    },
-    {
-        color: '#DA7194',
-        'border-color': '#cc3c6c',
-        'text-color-internal': '#FFFFFF',
-    },
-    {
-        color: '#569480',
-        'border-color': '#447666',
-        'text-color-internal': '#FFFFFF',
-    },
-];
+    'color': string;
+    'border-color': string;
+    'text-color-internal': string;
+};
+
+const DEFAULT_COLORS: DefaultColorType[] = [ {
+    'color': '#604A0E',
+    'border-color': '#423204',
+    'text-color-internal': '#FFFFFF',
+}, {
+    'color': '#C990C0',
+    'border-color': '#b261a5',
+    'text-color-internal': '#FFFFFF',
+}, {
+    'color': '#F79767',
+    'border-color': '#f36924',
+    'text-color-internal': '#FFFFFF',
+}, {
+    'color': '#57C7E3',
+    'border-color': '#23b3d7',
+    'text-color-internal': '#2A2C34',
+}, {
+    'color': '#F16667',
+    'border-color': '#eb2728',
+    'text-color-internal': '#FFFFFF',
+}, {
+    'color': '#D9C8AE',
+    'border-color': '#c0a378',
+    'text-color-internal': '#2A2C34',
+}, {
+    'color': '#8DCC93',
+    'border-color': '#5db665',
+    'text-color-internal': '#2A2C34',
+}, {
+    'color': '#ECB5C9',
+    'border-color': '#da7298',
+    'text-color-internal': '#2A2C34',
+}, {
+    'color': '#4C8EDA',
+    'border-color': '#2870c2',
+    'text-color-internal': '#FFFFFF',
+}, {
+    'color': '#FFC454',
+    'border-color': '#d7a013',
+    'text-color-internal': '#2A2C34',
+}, {
+    'color': '#DA7194',
+    'border-color': '#cc3c6c',
+    'text-color-internal': '#FFFFFF',
+}, {
+    'color': '#569480',
+    'border-color': '#447666',
+    'text-color-internal': '#FFFFFF',
+} ];
 
 export class GraphStyleModel {
     rules: StyleRule[];
@@ -220,12 +174,12 @@ export class GraphStyleModel {
 
     nodeSelector(node: { labels: null | string[] } = { labels: null }): Selector {
         const classes = node.labels ?? [];
-        return new Selector('node', classes);
+        return new Selector(NODE_CLASS, classes);
     }
 
     relationshipSelector(rel: { type: null | string } = { type: null }): Selector {
         const classes = rel.type != null ? [ rel.type ] : [];
-        return new Selector('relationship', classes);
+        return new Selector(RELATIONSHIP_CLASS, classes);
     }
 
     findRule(selector: Selector, rules: StyleRule[]): StyleRule | undefined {
@@ -450,10 +404,6 @@ export class GraphStyleModel {
             this.rules.push(new StyleRule(this.parseSelector(key), props));
         }
     };
-
-    defaultSizes(): DefaultSizeType[] {
-        return DEFAULT_SIZES;
-    }
 
     defaultArrayWidths(): DefaultArrayWidthType[] {
         return DEFAULT_ARRAY_WIDTHS;

@@ -1,12 +1,13 @@
 import { type JSX, Component } from 'react';
-import { DefaultDetailsPane } from './DefaultPanelContent/DefaultDetailsPane';
+import { DefaultDetailsPane } from './DefaultDetailsPane';
 import { NodeInspectorDrawer } from './NodeInspectorDrawer';
-import { PaneContainer, StyledNodeInspectorTopMenuChevron } from './styled';
 import { type GraphStyleModel } from '../../types/GraphStyle';
 import { type VizItem } from '../../types/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { type GraphResponse } from '@/types/adminer/DataResponse';
+import { type KindReference } from '@/types/adminer/AdminerReferences';
+import { type Datasource } from '@/types/datasource';
 
 type NodeInspectorPanelProps = {
     graphStyle: GraphStyleModel;
@@ -41,17 +42,17 @@ export class NodeInspectorPanel extends Component<NodeInspectorPanelProps, NodeI
         const shownEl = (hoveredItem && relevantItems.includes(hoveredItem.type)) ? hoveredItem : selectedItem;
 
         return (<>
-            <StyledNodeInspectorTopMenuChevron
-                expanded={expanded}
+            <button
+                className='absolute z-20 right-2 top-2 size-8 p-1 bg-default-50'
                 onClick={() => this.setState({ expanded: !expanded })}
                 title={expanded ? 'Collapse the node properties display' : 'Expand the node properties display'}
                 aria-label={expanded ? 'Collapse the node properties display' : 'Expand the node properties display'}
             >
                 {expanded ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </StyledNodeInspectorTopMenuChevron>
+            </button>
 
             <NodeInspectorDrawer isOpen={expanded}>
-                <PaneContainer>
+                <div className='w-80 h-full flex flex-col p-4'>
                     {shownEl.type === 'node' || shownEl.type === 'relationship' ? (
                         <DefaultDetailsPane
                             vizItem={shownEl}
@@ -60,14 +61,18 @@ export class NodeInspectorPanel extends Component<NodeInspectorPanelProps, NodeI
                     ) : (
                         <DatabaseDocument
                             data={this.props.data}
-                            kindReferences={[]}
-                            kind={''}
-                            datasourceId={''}
-                            datasources={[]}
+                            kindReferences={EMPTY_REFERENCES}
+                            kind=''
+                            datasourceId=''
+                            datasources={EMPTY_DATASOURCES}
                         />
                     )}
-                </PaneContainer>
+                </div>
             </NodeInspectorDrawer>
         </>);
     }
 }
+
+// FIXME Use real values? Or edit the database document to not require these?
+const EMPTY_REFERENCES: KindReference[] = [];
+const EMPTY_DATASOURCES: Datasource[] = [];

@@ -115,7 +115,6 @@ class SchemaSetup extends SchemaBase {
             addMorphism(Schema.friendToSince);
         });
         addIds(Schema.friend);
-
     }
 
 }

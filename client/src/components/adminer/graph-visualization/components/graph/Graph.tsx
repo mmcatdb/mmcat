@@ -1,33 +1,32 @@
 import { Component, createRef, type RefObject, type JSX } from 'react';
 import { type GraphModel } from '@/components/adminer/graph-visualization/types/Graph';
-import { GraphEventHandlerModel, type GraphInteractionCallBack } from './GraphEventHandlerModel';
+import { GraphEventHandlerModel } from './GraphEventHandlerModel';
 import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
 import { type GetNodeNeighborsFn, type VizItem, type ZoomLimitsReached, ZoomType, type BasicNode, type BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 import { createGraph } from '@/components/adminer/graph-visualization/utils/mapper';
-import { Visualization } from './visualization/Visualization';
-import { StyledSvgWrapper, StyledZoomButton, StyledZoomHolder } from './styled';
+import { Visualization } from './Visualization';
 import { ResizeObserver } from '@juggle/resize-observer';
 import { ZoomInIcon, ZoomOutIcon, ZoomToFitIcon } from '@/components/adminer/graph-visualization/components/Icons';
+import { twJoin } from 'tailwind-merge';
 
 export type GraphProps = {
-  isFullscreen: boolean;
-  relationships: BasicRelationship[];
-  nodes: BasicNode[];
-  getNodeNeighbors: GetNodeNeighborsFn;
-  onItemMouseOver: (item: VizItem) => void;
-  onItemSelect: (item: VizItem) => void;
-  graphStyle: GraphStyleModel;
-  styleVersion: number;
-  setGraph: (graph: GraphModel) => void;
-  initialZoomToFit?: boolean;
-  onGraphInteraction?: GraphInteractionCallBack;
-}
+    isFullscreen: boolean;
+    relationships: BasicRelationship[];
+    nodes: BasicNode[];
+    getNodeNeighbors: GetNodeNeighborsFn;
+    onItemMouseOver: (item: VizItem) => void;
+    onItemSelect: (item: VizItem) => void;
+    graphStyle: GraphStyleModel;
+    styleVersion: number;
+    setGraph: (graph: GraphModel) => void;
+    initialZoomToFit?: boolean;
+};
 
 type GraphState = {
-  zoomInLimitReached: boolean;
-  zoomOutLimitReached: boolean;
-  displayingWheelZoomInfoMessage: boolean;
-}
+    zoomInLimitReached: boolean;
+    zoomOutLimitReached: boolean;
+    displayingWheelZoomInfoMessage: boolean;
+};
 
 export class Graph extends Component<GraphProps, GraphState> {
     svgElement: RefObject<SVGSVGElement>;
@@ -57,7 +56,6 @@ export class Graph extends Component<GraphProps, GraphState> {
             initialZoomToFit,
             isFullscreen,
             nodes,
-            onGraphInteraction,
             onItemMouseOver,
             onItemSelect,
             relationships,
@@ -89,7 +87,6 @@ export class Graph extends Component<GraphProps, GraphState> {
             getNodeNeighbors,
             onItemMouseOver,
             onItemSelect,
-            onGraphInteraction,
         );
         graphEventHandler.bindEventHandlers();
 
@@ -130,7 +127,7 @@ export class Graph extends Component<GraphProps, GraphState> {
     handleZoomEvent = (limitsReached: ZoomLimitsReached): void => {
         if (
             limitsReached.zoomInLimitReached !== this.state.zoomInLimitReached ||
-      limitsReached.zoomOutLimitReached !== this.state.zoomOutLimitReached
+            limitsReached.zoomOutLimitReached !== this.state.zoomOutLimitReached
         ) {
             this.setState({
                 zoomInLimitReached: limitsReached.zoomInLimitReached,
@@ -139,51 +136,50 @@ export class Graph extends Component<GraphProps, GraphState> {
         }
     };
 
-    zoomInClicked = (): void => {
-        this.visualization?.zoomByType(ZoomType.IN);
-    };
-
-    zoomOutClicked = (): void => {
-        this.visualization?.zoomByType(ZoomType.OUT);
-    };
-
-    zoomToFitClicked = (): void => {
-        this.visualization?.zoomByType(ZoomType.FIT);
-    };
-
     render(): JSX.Element {
         const { isFullscreen } = this.props;
         const { zoomInLimitReached, zoomOutLimitReached } = this.state;
 
         return (
-            <StyledSvgWrapper ref={this.wrapperElement}>
-                <svg className='neod3viz' ref={this.svgElement} />
+            <div ref={this.wrapperElement} className='relative h-full leading-0'>
+                <svg className='size-full' ref={this.svgElement} />
 
-                <StyledZoomHolder isFullscreen={isFullscreen}>
-                    <StyledZoomButton
-                        aria-label={'zoom-in'}
-                        className={'zoom-in'}
+                <div className={twJoin('bottom-2 left-2 flex flex-col bg-default-50', isFullscreen ? 'fixed' : 'absolute')}>
+                    <ZoomButton
+                        aria-label='zoom-in'
+                        onClick={() => this.visualization?.zoomByType(ZoomType.IN)}
                         disabled={zoomInLimitReached}
-                        onClick={this.zoomInClicked}
                     >
                         <ZoomInIcon large={isFullscreen} />
-                    </StyledZoomButton>
-                    <StyledZoomButton
-                        aria-label={'zoom-out'}
-                        className={'zoom-out'}
+                    </ZoomButton>
+                    <ZoomButton
+                        aria-label='zoom-out'
+                        onClick={() => this.visualization?.zoomByType(ZoomType.OUT)}
                         disabled={zoomOutLimitReached}
-                        onClick={this.zoomOutClicked}
                     >
                         <ZoomOutIcon large={isFullscreen} />
-                    </StyledZoomButton>
-                    <StyledZoomButton
-                        aria-label={'zoom-to-fit'}
-                        onClick={this.zoomToFitClicked}
+                    </ZoomButton>
+                    <ZoomButton
+                        aria-label='zoom-to-fit'
+                        onClick={() => this.visualization?.zoomByType(ZoomType.FIT)}
                     >
                         <ZoomToFitIcon large={isFullscreen} />
-                    </StyledZoomButton>
-                </StyledZoomHolder>
-            </StyledSvgWrapper>
+                    </ZoomButton>
+                </div>
+            </div>
         );
     }
+}
+
+type ZoomButtonProps = {
+    'aria-label': string;
+    onClick: () => void;
+    disabled?: boolean;
+    children: JSX.Element;
+};
+
+function ZoomButton(props: ZoomButtonProps) {
+    return (
+        <button {...props} className='p-2 hover:enabled:bg-default-300 active:enabled:bg-default-200 disabled:opacity-30' />
+    );
 }

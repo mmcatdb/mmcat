@@ -7,7 +7,7 @@ import type { Id } from '@/types/id';
 
 export const UNLABELED = '#unlabeled';
 
-type KindMenuProps = Readonly<{
+type KindMenuProps = {
     /** The id of the current datasource. */
     datasourceId: Id;
     /** Name of selected kind. */
@@ -16,7 +16,7 @@ type KindMenuProps = Readonly<{
     showUnlabeled: boolean;
     /** A function for state updating. */
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
-}>;
+};
 
 type Option = {
     label: string;

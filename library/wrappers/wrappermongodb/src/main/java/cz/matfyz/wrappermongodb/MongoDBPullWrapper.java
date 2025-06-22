@@ -26,7 +26,6 @@ import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -230,8 +229,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves a list of kind names with support for pagination.
-     *
-     * @throws PullForestException if an error occurs while querying the database.
      */
     @Override public KindNamesResponse getKindNames(String limit, String offsetString) {
         try {
@@ -262,8 +259,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     /**
      * Creates a MongoDB filter based on a list of filters.
-     *
-     * @throws UnsupportedOperationException if an unsupported operator is encountered.
      */
     private Bson createFilter(List<AdminerFilter> filters) {
         List<Bson> filterList = new ArrayList<>();
@@ -274,17 +269,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             var columnValue = filter.propertyValue();
 
             Object value;
-            if ("_id".equals(columnName)) {
+            if ("_id".equals(columnName))
                 value = new ObjectId(columnValue);
-            } else if (BOOLEAN_PATTERN.matcher(columnValue).matches()) {
+            else if (BOOLEAN_PATTERN.matcher(columnValue).matches())
                 value = Boolean.parseBoolean(columnValue);
-            } else if (NUMBER_PATTERN.matcher(columnValue).matches()) {
-                value = columnValue.contains(".")
-                    ? Double.parseDouble(columnValue)
-                    : Long.parseLong(columnValue);
-            } else {
+            else if (NUMBER_PATTERN.matcher(columnValue).matches())
+                value = columnValue.contains(".") ? Double.parseDouble(columnValue) : Long.parseLong(columnValue);
+            else
                 value = columnValue;
-            }
 
             BiFunction<String, Object, Bson> filterFunction = OPERATORS.get(operator);
             filterList.add(filterFunction.apply(columnName, value));
@@ -298,15 +290,11 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves documents from a collection based on kind name, pagination parameters and optional filters.
-     *
-     * @throws PullForestException if an error occurs while querying the database.
      */
     @Override public DocumentResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
         KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
-
-        if (filters == null){
+        if (filters == null)
             return getQueryResult(kindNameQuery);
-        }
 
         return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
@@ -324,7 +312,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
      */
     @Override public DocumentResponse getQueryResult(QueryContent query) {
         try {
-            if (query instanceof final StringQuery stringQuery){
+            if (query instanceof final StringQuery stringQuery) {
                 Document parsedQuery = Document.parse(stringQuery.content);
                 Document result = provider.getDatabase().runCommand(parsedQuery);
 
@@ -366,15 +354,13 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
             return new DocumentResponse(data, itemCount, propertyNames);
         }
-        catch (Exception e){
+        catch (Exception e) {
             throw PullForestException.innerException(e);
         }
     }
 
     /**
      * Parses a string into a list of strings.
-     *
-     * @throws InvalidParameterException if the input is not properly enclosed.
      */
     private static List<String> parseStringToList(String value) {
         return Arrays.stream(value.split(","))

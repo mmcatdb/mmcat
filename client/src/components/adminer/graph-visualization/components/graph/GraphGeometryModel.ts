@@ -4,6 +4,8 @@ import { type GraphModel } from '@/components/adminer/graph-visualization/types/
 import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
 import { type NodeCaptionLine, type NodeModel } from '@/components/adminer/graph-visualization/types/Node';
 import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
+import { NODE_CAPTION_FONT_SIZE_PX } from './renderers';
+import { NODE_RADIUS } from '../../utils/constants';
 
 export class GraphGeometryModel {
     relationshipRouting: PairwiseArcsRelationshipRouting;
@@ -31,20 +33,12 @@ export class GraphGeometryModel {
         });
     }
 
-    setNodeRadii(nodes: NodeModel[]): void {
-        nodes.forEach(node => {
-            node.radius = parseFloat(this.style.forNode(node).get('diameter')) / 2;
-        });
-    }
-
     onGraphChange(
         graph: GraphModel,
         options = { updateNodes: true, updateRelationships: true },
     ): void {
-        if (options.updateNodes) {
-            this.setNodeRadii(graph.nodes());
+        if (options.updateNodes)
             this.formatNodeCaptions(graph.nodes());
-        }
 
         if (options.updateRelationships) {
             this.formatRelationshipCaptions(graph.relationships());
@@ -65,11 +59,9 @@ const fitCaptionIntoCircle = (
     canvas2DContext: CanvasRenderingContext2D,
 ): NodeCaptionLine[] => {
     const fontFamily = 'sans-serif';
-    const fontSize = parseFloat(style.forNode(node).get('font-size'));
+    const fontSize = NODE_CAPTION_FONT_SIZE_PX;
     // Roughly calculate max text length the circle can fit by radius and font size
-    const maxCaptionTextLength = Math.floor(
-        (Math.pow(node.radius, 2) * Math.PI) / Math.pow(fontSize, 2),
-    );
+    const maxCaptionTextLength = Math.floor((Math.pow(NODE_RADIUS, 2) * Math.PI) / Math.pow(fontSize, 2));
     const template = style.forNode(node).get('caption');
     const nodeText = style.interpolate(template, node);
     const captionText = nodeText.length > maxCaptionTextLength
@@ -88,7 +80,7 @@ const fitCaptionIntoCircle = (
         const chordCentreDistance = lineIndex < lineCount / 2
             ? baseline - fontSize / 2
             : baseline + fontSize / 2;
-        const maxLineWidth = Math.sqrt(Math.pow(node.radius, 2) - Math.pow(chordCentreDistance, 2)) * 2;
+        const maxLineWidth = Math.sqrt(Math.pow(NODE_RADIUS, 2) - Math.pow(chordCentreDistance, 2)) * 2;
         return {
             node,
             text: '',
@@ -136,7 +128,7 @@ const fitCaptionIntoCircle = (
     }
 
     let consumedWords = 0;
-    const maxLines = (node.radius * 2) / fontSize;
+    const maxLines = (NODE_RADIUS * 2) / fontSize;
 
     let lines = [ emptyLine(1, 0) ];
     // Typesetting for finding suitable lines to fit words

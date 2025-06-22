@@ -1,16 +1,10 @@
 import { ChevronRightIcon as ChevronRightIconSolid, ChevronLeftIcon as ChevronLeftIconSolid, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/solid';
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 
 const SMALL_SIZE = 15;
 
 export const ChevronRightIcon = () => <ChevronRightIconSolid />;
 
 export const ChevronLeftIcon = () => <ChevronLeftIconSolid />;
-
-type WidthProps = { width?: number }
-export const CopyIcon = ({ width = SMALL_SIZE }: WidthProps) => (
-    <DocumentDuplicateIcon width={width} height={width} />
-);
 
 const ZOOM_ICONS_DEFAULT_SIZE_IN_PX = SMALL_SIZE;
 const ZOOM_ICONS_LARGE_SCALE_FACTOR = 1.2;

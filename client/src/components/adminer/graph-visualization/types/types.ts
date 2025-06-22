@@ -38,25 +38,11 @@ export type VizItemProperty = {
 };
 
 
-export type VizItem =
-    | NodeItem
-    | ContextMenuItem
-    | RelationshipItem
-    | CanvasItem
-    | StatusItem;
+export type VizItem = NodeItem | RelationshipItem | CanvasItem | StatusItem;
 
 export type NodeItem = {
     type: 'node';
     item: Pick<NodeModel, 'id' | 'elementId' | 'labels' | 'propertyList'>;
-};
-
-type ContextMenuItem = {
-    type: 'context-menu-item';
-    item: {
-        label: string;
-        content: string;
-        selection: string;
-    };
 };
 
 type StatusItem = {

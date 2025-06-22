@@ -182,7 +182,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent={'No mappings to display.'}>
+            <TableBody emptyContent='No mappings to display.'>
                 {sortedActions.map(action => (
                     <TableRow
                         key={action.id}

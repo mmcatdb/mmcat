@@ -6,7 +6,7 @@ import { PropertyFilterForm } from '@/components/adminer/PropertyFilterForm';
 import type { AdminerFilterQueryStateAction, AdminerFilterQueryState } from '@/components/adminer/adminerReducer';
 import type { DatasourceType } from '@/types/datasource/Datasource';
 
-type FilterFormProps = Readonly<{
+type FilterFormProps = {
     /** A state that stores data selected by user. */
     state: AdminerFilterQueryState;
     /** The type of selected datasource. */
@@ -15,7 +15,7 @@ type FilterFormProps = Readonly<{
     propertyNames: string[] | undefined;
     /** A function for state updating. */
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
-}>;
+};
 
 /**
  * Component for getting filters from user

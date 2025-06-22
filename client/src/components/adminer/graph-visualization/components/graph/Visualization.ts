@@ -4,15 +4,18 @@ import { type D3ZoomEvent, type ZoomBehavior, zoom as d3Zoom, zoomIdentity } fro
 import { ZOOM_FIT_PADDING_PERCENT, ZOOM_MAX_SCALE, ZOOM_MIN_SCALE } from '@/components/adminer/graph-visualization/utils/constants';
 import { type GraphModel } from '@/components/adminer/graph-visualization/types/Graph';
 import { GraphGeometryModel } from './GraphGeometryModel';
-import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
+import { NODE_CLASS, RELATIONSHIP_CLASS, type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
 import { type NodeModel } from '@/components/adminer/graph-visualization/types/Node';
 import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
 import { ForceSimulation } from './ForceSimulation';
 import { nodeEventHandlers, relationshipEventHandlers } from './mouseEventHandlers';
-import { nodeRenderer, relationshipRenderer } from './renderers';
+import { NODE_HOVER_CLASS, nodeRenderer, relationshipRenderer } from './renderers';
 import { type ZoomLimitsReached, ZoomType } from '@/components/adminer/graph-visualization/types/types';
+import { twJoin } from 'tailwind-merge';
 
-type MeasureSizeFn = () => { width: number, height: number }
+export const SELECTED_CLASS = 'svg-selected';
+
+type MeasureSizeFunction = () => { width: number, height: number }
 
 export class Visualization {
     private readonly root: Selection<SVGElement, unknown, BaseType, unknown>;
@@ -33,7 +36,7 @@ export class Visualization {
 
     constructor(
         element: SVGElement,
-        private measureSize: MeasureSizeFn,
+        private measureSize: MeasureSizeFunction,
         onZoomEvent: (limitsReached: ZoomLimitsReached) => void,
         private graph: GraphModel,
         public style: GraphStyleModel,
@@ -120,24 +123,16 @@ export class Visualization {
         this.geometry.onTick(this.graph);
 
         const nodeGroups = this.container
-            .selectAll<SVGGElement, NodeModel>('g.node')
+            .selectAll<SVGGElement, NodeModel>(`g.${NODE_CLASS}`)
             .attr('transform', d => `translate(${d.x},${d.y})`);
 
         nodeRenderer.forEach(renderer => nodeGroups.call(renderer.onTick, this));
 
         const relationshipGroups = this.container
-            .selectAll<SVGGElement, RelationshipModel>('g.relationship')
-            .attr(
-                'transform',
-                d =>
-                    `translate(${d.source.x} ${d.source.y}) rotate(${
-                        d.naturalAngle + 180
-                    })`,
-            );
+            .selectAll<SVGGElement, RelationshipModel>(`g.${RELATIONSHIP_CLASS}`)
+            .attr('transform', d => `translate(${d.source.x} ${d.source.y}) rotate(${d.naturalAngle + 180})`);
 
-        relationshipRenderer.forEach(renderer =>
-            relationshipGroups.call(renderer.onTick, this),
-        );
+        relationshipRenderer.forEach(renderer => relationshipGroups.call(renderer.onTick, this));
     }
 
     private updateNodes() {
@@ -149,16 +144,15 @@ export class Visualization {
 
         const nodeGroups = this.container
             .select('g.layer.nodes')
-            .selectAll<SVGGElement, NodeModel>('g.node')
+            .selectAll<SVGGElement, NodeModel>(`g.${NODE_CLASS}`)
             .data(nodes, d => d.id)
             .join('g')
-            .attr('class', 'node')
+            .attr('class', d => twJoin(NODE_CLASS, 'cursor-pointer', NODE_HOVER_CLASS, d.selected && SELECTED_CLASS))
             .attr('aria-label', d => `graph-node${d.id}`)
             .call(nodeEventHandlers, this.trigger, this.forceSimulation.simulation);
 
-        nodeRenderer.forEach(renderer =>
-            nodeGroups.call(renderer.onGraphChange, this),
-        );
+        console.log('UPDATE NODES');
+        nodeRenderer.forEach(renderer => nodeGroups.call(renderer.onGraphChange, this));
 
         this.forceSimulation.updateNodes(this.graph);
         this.forceSimulation.updateRelationships(this.graph);
@@ -173,10 +167,10 @@ export class Visualization {
 
         const relationshipGroups = this.container
             .select('g.layer.relationships')
-            .selectAll<SVGGElement, RelationshipModel>('g.relationship')
+            .selectAll<SVGGElement, RelationshipModel>(`g.${RELATIONSHIP_CLASS}`)
             .data(relationships, d => d.id)
             .join('g')
-            .attr('class', 'relationship')
+            .attr('class', d => twJoin(RELATIONSHIP_CLASS, 'cursor-pointer', d.selected && SELECTED_CLASS))
             .call(relationshipEventHandlers, this.trigger);
 
         relationshipRenderer.forEach(renderer =>
@@ -308,17 +302,15 @@ export class Visualization {
     }
 
     update(options: {
-    updateNodes: boolean;
-    updateRelationships: boolean;
-    restartSimulation?: boolean;
-  }): void {
+        updateNodes: boolean;
+        updateRelationships: boolean;
+        restartSimulation?: boolean;
+    }): void {
         if (options.updateNodes)
             this.updateNodes();
 
-
         if (options.updateRelationships)
             this.updateRelationships();
-
 
         if (options.restartSimulation ?? true)
             this.forceSimulation.restart();

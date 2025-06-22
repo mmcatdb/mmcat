@@ -7,7 +7,7 @@ import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataRespon
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-type DatabaseDocumentProps = Readonly<{
+type DatabaseDocumentProps = {
     /** The data to display. */
     data: DocumentResponse | GraphResponse;
     /** References from and to the current kind. */
@@ -18,7 +18,7 @@ type DatabaseDocumentProps = Readonly<{
     datasourceId: Id;
     /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
 /**
  * Component for displaying data in document

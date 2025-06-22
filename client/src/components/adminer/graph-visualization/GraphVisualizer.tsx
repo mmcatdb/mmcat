@@ -3,49 +3,46 @@ import { Component } from 'react';
 import { Graph } from './components/graph/Graph';
 import { GraphStyleModel } from './types/GraphStyle';
 import { type GraphModel } from './types/Graph';
-import { type GraphInteractionCallBack } from './components/graph/GraphEventHandlerModel';
 import { type GetNodeNeighborsFn, type VizItem, type BasicNode, type BasicNodesAndRels, type BasicRelationship } from './types/types';
 import { debounce } from './utils/debounce';
-import { StyledFullSizeContainer } from './VisualizationView.styled';
 import { type GraphResponse } from '@/types/adminer/DataResponse';
 import { NodeInspectorPanel } from './components/panel/NodeInspectorPanel';
 
 const DEFAULT_MAX_NEIGHBORS = 100;
 
 type GraphVisualizerDefaultProps = {
-  maxNeighbors: number;
-  isFullscreen: boolean;
-  setGraph: (graph: GraphModel) => void;
-  initialZoomToFit?: boolean;
-  useGeneratedDefaultColors: boolean;
-}
+    maxNeighbors: number;
+    isFullscreen: boolean;
+    setGraph: (graph: GraphModel) => void;
+    initialZoomToFit?: boolean;
+    useGeneratedDefaultColors: boolean;
+};
 
 type GraphVisualizerProps = GraphVisualizerDefaultProps & {
-  relationships: BasicRelationship[];
-  nodes: BasicNode[];
-  maxNeighbors?: number;
-  getNeighbors?: (
-    id: string,
-    currentNeighborIds: string[] | undefined
-  ) => Promise<BasicNodesAndRels & { allNeighborsCount: number }>;
-  isFullscreen?: boolean;
-  setGraph?: (graph: GraphModel) => void;
-  nodeLimitHit?: boolean;
-  onGraphInteraction?: GraphInteractionCallBack;
-  useGeneratedDefaultColors?: boolean;
-  fetchedData: GraphResponse;
-}
+    relationships: BasicRelationship[];
+    nodes: BasicNode[];
+    maxNeighbors?: number;
+    getNeighbors?: (
+        id: string,
+        currentNeighborIds: string[] | undefined
+    ) => Promise<BasicNodesAndRels & { allNeighborsCount: number }>;
+    isFullscreen?: boolean;
+    setGraph?: (graph: GraphModel) => void;
+    nodeLimitHit?: boolean;
+    useGeneratedDefaultColors?: boolean;
+    fetchedData: GraphResponse;
+};
 
 type GraphVisualizerState = {
-  graphStyle: GraphStyleModel;
-  hoveredItem: VizItem;
-  nodes: BasicNode[];
-  relationships: BasicRelationship[];
-  selectedItem: VizItem;
-  styleVersion: number;
-  freezeLegend: boolean;
-  expanded: boolean;
-}
+    graphStyle: GraphStyleModel;
+    hoveredItem: VizItem;
+    nodes: BasicNode[];
+    relationships: BasicRelationship[];
+    selectedItem: VizItem;
+    styleVersion: number;
+    freezeLegend: boolean;
+    expanded: boolean;
+};
 
 export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisualizerState> {
     static defaultProps: GraphVisualizerDefaultProps = {
@@ -138,7 +135,7 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
             : this.state.graphStyle;
 
         return (
-            <StyledFullSizeContainer id='svg-vis'>
+            <div className='relative h-full'>
                 <Graph
                     isFullscreen={this.props.isFullscreen}
                     relationships={this.props.relationships}
@@ -150,7 +147,6 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
                     styleVersion={this.state.styleVersion} // cheap way for child to check style updates
                     setGraph={this.props.setGraph}
                     initialZoomToFit={this.props.initialZoomToFit}
-                    onGraphInteraction={this.props.onGraphInteraction}
                 />
                 <NodeInspectorPanel
                     graphStyle={graphStyle}
@@ -158,7 +154,7 @@ export class GraphVisualizer extends Component<GraphVisualizerProps, GraphVisual
                     selectedItem={this.state.selectedItem}
                     data={this.props.fetchedData}
                 />
-            </StyledFullSizeContainer>
+            </div>
         );
     }
 }

@@ -10,12 +10,6 @@ public class IterableUtils {
 
     /**
      * Iterate through two iterables and call action on values with same indices. Returns if both of the iterables have same length.
-     * @param <T1>
-     * @param <T2>
-     * @param a
-     * @param b
-     * @param action
-     * @return
      */
     public static <T1, T2> boolean iterateTwo(Iterable<T1> a, Iterable<T2> b, BiConsumer<T1, T2> action) {
         Iterator<T1> iteratorA = a.iterator();
@@ -30,12 +24,7 @@ public class IterableUtils {
     /**
      * Iterate through two iterables and call function on values with same indices. If the function returns false, the iteration is stopped.
      * Returns if both of the iterables have same length and if the function didn't return false.
-     * @param <T1>
-     * @param <T2>
-     * @param a
-     * @param b
-     * @param continueFunction
-     * @return
+
      */
     public static <T1, T2> boolean iterateTwo(Iterable<T1> a, Iterable<T2> b, BiPredicate<T1, T2> continueFunction) {
         Iterator<T1> iteratorA = a.iterator();

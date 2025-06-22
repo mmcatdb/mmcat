@@ -26,7 +26,6 @@ public class SuperIdValuesFetcher {
      * @param parentRecord Record of the parent (in the access path) schema objex.
      * @param parentRow Domain row of the parent schema objex.
      * @param morphism Morphism from the parent schema objex to the currently processed one.
-     * @return
      */
     public static Iterable<FetchedSuperIdValues> fetch(UniqueIdGenerator idGenerator, ComplexRecord parentRecord, DomainRow parentRow, SchemaPath path, AccessPath childAccessPath) {
         final var fetcher = new SuperIdValuesFetcher(idGenerator, parentRow, path, childAccessPath);

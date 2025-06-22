@@ -89,9 +89,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             AdminerFilter filter = filters.get(i);
             String propertyName = filter.propertyName();
 
-            if (i != 0) {
+            if (i != 0)
                 whereClause.append(" AND ");
-            }
 
             Double doubleValue = this.parseNumeric(filter.propertyValue());
 
@@ -112,9 +111,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      * @return the parsed {@code Double} value if valid, or {@code null} if the input is {@code null} or not a valid number
      */
     private Double parseNumeric(String str) {
-        if (str == null) {
+        if (str == null)
             return null;
-        }
 
         try {
             return Double.parseDouble(str);
@@ -126,9 +124,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     private static void appendPropertyName(StringBuilder whereClause, String propertyName, Double doubleValue) {
         whereClause.append(propertyName);
 
-        if (doubleValue != null) {
+        if (doubleValue != null)
             whereClause.append("::NUMERIC");
-        }
     }
 
     private static void appendOperator(StringBuilder whereClause, String operator) {
@@ -146,8 +143,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 .append(")");
         } else if (!UNARY_OPERATORS.contains(operator)) {
             if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
-                whereClause
-                    .append(doubleValue);
+                whereClause.append(doubleValue);
             } else {
                 whereClause
                     .append("'")
@@ -268,14 +264,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves a list of kind names from the database.
-     *
-     * @throws PullForestException if an error occurs during database access.
      */
     @Override public KindNamesResponse getKindNames(String limit, String offset) {
-        try(
+        try (
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
-        ){
+        ) {
             final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' LIMIT " + limit + " OFFSET " + offset + ";";
             ResultSet resultSet = stmt.executeQuery(query);
             List<String> data = new ArrayList<>();
@@ -294,29 +288,23 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves data for a specific kind with pagination and optional filtering.
-     *
-     * @throws PullForestException if an error occurs during database access.
      */
     @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
         KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
-
-        if (filters == null){
+        if (filters == null)
             return getQueryResult(kindNameQuery);
-        }
 
         return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
 
     /**
      * Retrieves a list of references for a specified kind.
-     *
-     * @throws PullForestException if an error occurs during database access.
      */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
-        try(
+        try (
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
-        ){
+        ) {
             return PostgreSQLUtils.getReferences(stmt, datasourceId, kindName);
         }
         catch (Exception e) {
@@ -328,9 +316,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      * Retrieves the result of the given query.
      */
     @Override public TableResponse getQueryResult(QueryContent query) {
-        try(
+        try (
             Connection connection = provider.getConnection();
-        ){
+        ) {
             List<List<String>> data = new ArrayList<>();
 
             PreparedStatement stmt = prepareStatement(connection, query, false);
@@ -340,18 +328,16 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             int columnCount = metaData.getColumnCount();
 
             List<String> propertyNames = new ArrayList<>();
-            for (int i = 1; i <= columnCount; i++) {
+            for (int i = 1; i <= columnCount; i++)
                 propertyNames.add(metaData.getColumnName(i));
-            }
 
             long itemCount = 0;
 
             while (resultSet.next()) {
                 List<String> item = new ArrayList<>();
 
-                for (int i = 1; i <= columnCount; i++) {
+                for (int i = 1; i <= columnCount; i++)
                     item.add(resultSet.getString(i));
-                }
 
                 data.add(item);
                 itemCount++;

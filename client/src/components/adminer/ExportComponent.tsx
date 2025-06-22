@@ -1,10 +1,10 @@
 import { Button } from '@nextui-org/react';
 import type { DataResponse } from '@/types/adminer/DataResponse';
 
-type ExportComponentProps = Readonly<{
+type ExportComponentProps = {
     /** The data to export. */
     data: DataResponse;
-}>;
+};
 
 /**
  * Component for exporting the data into JSON file

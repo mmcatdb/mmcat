@@ -7,7 +7,7 @@ import type { TableResponse, GraphResponse } from '@/types/adminer/DataResponse'
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-type DatabaseTableProps = Readonly<{
+type DatabaseTableProps = {
     /** The data to display. */
     data: TableResponse | GraphResponse;
     /** References from and to the current kind. */
@@ -18,7 +18,7 @@ type DatabaseTableProps = Readonly<{
     datasourceId: Id;
     /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
 /**
  * Component for displaying data in table
@@ -48,18 +48,18 @@ export function DatabaseTable({ data, kindReferences, kind, datasourceId, dataso
     </>);
 }
 
-type TableBodyComponentProps = Readonly<{
+type TableBodyComponentProps = {
     tableBodyData: string[][];
     columnNames: string[];
     references: KindReference[];
     kind: string;
     datasourceId: Id;
     datasources: Datasource[];
-}>;
+};
 
 function TableBodyComponent({ tableBodyData, columnNames, references, kind, datasourceId, datasources }: TableBodyComponentProps ) {
     return (
-        <TableBody emptyContent={'No rows to display.'}>
+        <TableBody emptyContent='No rows to display.'>
             {tableBodyData.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                     {row.map((cellItem, cellIndex) => (

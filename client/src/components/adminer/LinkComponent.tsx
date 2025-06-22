@@ -8,7 +8,7 @@ import type { Datasource } from '@/types/datasource/Datasource';
 
 const NAME_LENGTH = 2;
 
-type LinkComponentProps = Readonly<{
+type LinkComponentProps = {
     /** The id of the current link. */
     index: string;
     /** The reference to create the link for. */
@@ -23,7 +23,7 @@ type LinkComponentProps = Readonly<{
     link: string;
     /** 'true' if there exist another link that points to the same kind. */
     kindDuplicated: boolean;
-}>;
+};
 
 /**
  * Component that returns a link with tooltip

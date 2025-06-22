@@ -244,7 +244,6 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     /**
      * Auto-generated, constants doesn't have any special meaning.
-     * @return
      */
     @Override public int hashCode() {
         int hash = 7;

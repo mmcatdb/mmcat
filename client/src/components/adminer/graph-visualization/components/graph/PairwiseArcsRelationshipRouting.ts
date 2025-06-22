@@ -5,6 +5,8 @@ import { ArcArrow } from '@/components/adminer/graph-visualization/utils/ArcArro
 import { LoopArrow } from '@/components/adminer/graph-visualization/utils/LoopArrow';
 import { StraightArrow } from '@/components/adminer/graph-visualization/utils/StraightArrow';
 import { measureText } from '@/components/adminer/graph-visualization/utils/textMeasurement';
+import { RELATIONSHIP_TYPE_FONT_SIZE_PX } from './renderers';
+import { NODE_RADIUS } from '../../utils/constants';
 
 export class PairwiseArcsRelationshipRouting {
     style: GraphStyleModel;
@@ -19,9 +21,7 @@ export class PairwiseArcsRelationshipRouting {
         caption: string,
     ): number {
         const fontFamily = 'sans-serif';
-        const padding = parseFloat(
-            this.style.forRelationship(relationship).get('padding'),
-        );
+        const padding = parseFloat(this.style.forRelationship(relationship).get('padding'));
         const canvas2DContext = this.canvas.getContext('2d');
         return (
             measureText(
@@ -40,7 +40,7 @@ export class PairwiseArcsRelationshipRouting {
 
     measureRelationshipCaptions(relationships: RelationshipModel[]): void {
         relationships.forEach(relationship => {
-            relationship.captionHeight = parseFloat(this.style.forRelationship(relationship).get('font-size'));
+            relationship.captionHeight = RELATIONSHIP_TYPE_FONT_SIZE_PX;
             relationship.captionLength = this.measureRelationshipCaption(relationship, relationship.caption);
             relationship.captionLayout = (this.captionFitsInsideArrowShaftWidth(relationship) && !relationship.isLoop()) ? 'internal' : 'external';
         });
@@ -161,7 +161,7 @@ export class PairwiseArcsRelationshipRouting {
 
                 if (nodePair.isLoop()) {
                     relationship.arrow = new LoopArrow(
-                        relationship.source.radius,
+                        NODE_RADIUS,
                         40,
                         defaultDeflectionStep,
                         shaftWidth,
@@ -173,8 +173,8 @@ export class PairwiseArcsRelationshipRouting {
                 else {
                     if (i === middleRelationshipIndex) {
                         relationship.arrow = new StraightArrow(
-                            relationship.source.radius,
-                            relationship.target.radius,
+                            NODE_RADIUS,
+                            NODE_RADIUS,
                             relationship.centreDistance,
                             shaftWidth,
                             headWidth,
@@ -188,8 +188,8 @@ export class PairwiseArcsRelationshipRouting {
                             deflection *= -1;
 
                         relationship.arrow = new ArcArrow(
-                            relationship.source.radius,
-                            relationship.target.radius,
+                            NODE_RADIUS,
+                            NODE_RADIUS,
                             relationship.centreDistance,
                             deflection,
                             shaftWidth,

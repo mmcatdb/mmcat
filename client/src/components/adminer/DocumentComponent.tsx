@@ -6,7 +6,7 @@ import type { Datasource } from '@/types/datasource/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-type DocumentComponentProps = Readonly<{
+type DocumentComponentProps = {
     /** The name of the property. */
     valueKey: string | undefined;
     /** The value the for given property. */
@@ -19,7 +19,7 @@ type DocumentComponentProps = Readonly<{
     datasourceId: Id;
     /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
 /**
  * Component for displaying data recursively in a JSON-like structure

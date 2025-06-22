@@ -112,7 +112,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                     </TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent={'No mappings to display.'}>
+            <TableBody emptyContent='No mappings to display.'>
                 {sortedMappings.map(mapping => (
                     <TableRow
                         key={mapping.id}

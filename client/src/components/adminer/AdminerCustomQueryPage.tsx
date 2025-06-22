@@ -21,6 +21,7 @@ import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { View } from '@/types/adminer/View';
 import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
 import type { DataResponse, ErrorResponse } from '@/types/adminer/DataResponse';
+import { type KindReference } from '@/types/adminer/AdminerReferences';
 
 const EXAMPLE_QUERY: Record<DatasourceType, string> = {
     [DatasourceType.neo4j]: 'MATCH (u)-[friend:FRIEND]->(f) WHERE f.id = \'user_005\' RETURN u, friend, f;',
@@ -31,12 +32,12 @@ const EXAMPLE_QUERY: Record<DatasourceType, string> = {
     [DatasourceType.jsonld]: '',
 };
 
-type AdminerCustomQueryPageProps = Readonly<{
-    /** The selected datasource */
+type AdminerCustomQueryPageProps = {
+    /** The selected datasource. */
     datasource: Datasource;
-    /** All active datasources */
+    /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
 /**
  * Component for fetching the data using custom query
@@ -164,12 +165,21 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
             </>)}
 
             {queryResult && 'data' in queryResult && (
-                <DatabaseView view={AVAILABLE_VIEWS[datasource.type].length === 1 ? AVAILABLE_VIEWS[datasource.type][0] : view} data={queryResult} kindReferences={[]} kindName={''} datasourceId={datasource.id} datasources={datasources} />
+                <DatabaseView
+                    view={AVAILABLE_VIEWS[datasource.type].length === 1 ? AVAILABLE_VIEWS[datasource.type][0] : view}
+                    data={queryResult}
+                    kindReferences={EMPTY_REFERENCES}
+                    kindName=''
+                    datasourceId={datasource.id}
+                    datasources={datasources}
+                />
             )}
-
         </div>
     </>);
 }
+
+// FIXME Use real values? Or edit the database document to not require these?
+const EMPTY_REFERENCES: KindReference[] = [];
 
 function createExtensions(datasourceType: DatasourceType | undefined, customKeymap: KeyBinding[] = []): Extension[] {
     const keymaps: KeyBinding[] = [

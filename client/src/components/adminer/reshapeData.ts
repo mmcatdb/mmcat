@@ -10,7 +10,7 @@ export function getTableFromGraphData(graphData: GraphResponse): { tableData: Ta
 
     const fetchedPropertyNames: string[] = graphData.metadata.propertyNames;
 
-    if (graphData.data.relationships.length === 0){
+    if (graphData.data.relationships.length === 0) {
         modifiedData.metadata.propertyNames = [ ID, LABELS ];
 
         for (const propertyName of fetchedPropertyNames) {
@@ -51,7 +51,7 @@ export function getDocumentFromGraphData(graphData: GraphResponse): DocumentResp
 
     const fetchedPropertyNames = graphData.metadata.propertyNames;
 
-    if (graphData.data.relationships.length === 0){
+    if (graphData.data.relationships.length === 0) {
         modifiedData.metadata.propertyNames = [ ID ];
 
         for (const propertyName of fetchedPropertyNames) {
@@ -156,7 +156,7 @@ function getPropertyValue(property: string, relationship: GraphRelationshipWithN
         return relationship.id;
 
 
-    if (property.startsWith(FROM_NODE_PREFIX)){
+    if (property.startsWith(FROM_NODE_PREFIX)) {
         const propertyName = property.substring(FROM_NODE_PREFIX.length);
 
         if (propertyName === ID)
@@ -166,7 +166,7 @@ function getPropertyValue(property: string, relationship: GraphRelationshipWithN
 
     }
 
-    if (property.startsWith(TO_NODE_PREFIX)){
+    if (property.startsWith(TO_NODE_PREFIX)) {
         const propertyName = property.substring(TO_NODE_PREFIX.length);
 
         if (propertyName === ID)

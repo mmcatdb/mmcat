@@ -3,9 +3,9 @@ import { type Visualization } from './Visualization';
 
 const noOp = () => undefined;
 type RendererEventHandler<Datum> = (
-  selection: Selection<SVGGElement, Datum, BaseType, unknown>,
-  style: Visualization
-) => void
+    selection: Selection<SVGGElement, Datum, BaseType, unknown>,
+    style: Visualization
+) => void;
 
 export class Renderer<Datum> {
     onGraphChange: RendererEventHandler<Datum>;
@@ -17,10 +17,10 @@ export class Renderer<Datum> {
         onTick = noOp,
         name,
     }: {
-    onGraphChange?: RendererEventHandler<Datum>;
-    onTick?: RendererEventHandler<Datum>;
-    name: string;
-  }) {
+        onGraphChange?: RendererEventHandler<Datum>;
+        onTick?: RendererEventHandler<Datum>;
+        name: string;
+    }) {
         this.onGraphChange = onGraphChange;
         this.onTick = onTick;
         this.name = name;

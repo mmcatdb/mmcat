@@ -12,7 +12,6 @@ import { api } from '@/api';
 import { QueryType } from '@/types/adminer/QueryType';
 import type { Datasource } from '@/types/datasource';
 
-
 /**
  * Main page of Adminer, data visualization and browsing tool
  */
@@ -35,34 +34,32 @@ export function AdminerPage() {
     }, [ searchParams ]);
 
     return (
-        <>
+        <div className='h-full px-8 flex flex-col'>
             <div className={clsx(
                 'flex items-center w-full h-10 border-b px-0',
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}>
                 <DatasourceMenu setDatasource={setDatasource} datasource={datasource} datasources={datasources}/>
 
-                {datasource && (
-                    <>
-                        <ButtonGroup
-                            className='mx-2'
-                        >
-                            {Object.values(QueryType).map(queryType => (
-                                <Button
-                                    size='sm'
-                                    variant={queryType === selectedQueryType ? 'solid' : 'ghost'}
-                                    key={queryType}
-                                    onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
-                                >
-                                    {queryType}
-                                </Button>
-                            ),
-                            )}
-                        </ButtonGroup>
+                {datasource && (<>
+                    <ButtonGroup
+                        className='mx-2'
+                    >
+                        {Object.values(QueryType).map(queryType => (
+                            <Button
+                                size='sm'
+                                variant={queryType === selectedQueryType ? 'solid' : 'ghost'}
+                                key={queryType}
+                                onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
+                            >
+                                {queryType}
+                            </Button>
+                        ),
+                        )}
+                    </ButtonGroup>
 
-                        <LinkLengthSwitch/>
-                    </>
-                )}
+                    <LinkLengthSwitch/>
+                </>)}
             </div>
 
             {datasource && (
@@ -72,7 +69,7 @@ export function AdminerPage() {
                     <AdminerFilterQueryPage datasource={datasource} datasources={datasources} />
                 )
             )}
-        </>
+        </div>
     );
 }
 

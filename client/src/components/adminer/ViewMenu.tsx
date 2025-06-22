@@ -4,14 +4,14 @@ import type { DatasourceType } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 
-type ViewMenuProps = Readonly<{
+type ViewMenuProps = {
     /** The type of selected datasource. */
     datasourceType: DatasourceType;
     /** Current view. */
     view: View;
     /** A function for state updating. */
     dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
-}>;
+};
 
 /**
  * Component for selecting view

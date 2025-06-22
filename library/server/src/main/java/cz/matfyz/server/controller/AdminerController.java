@@ -10,12 +10,10 @@ import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.adminer.KindNamesResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,21 +36,14 @@ public class AdminerController {
      * @param db The ID of the datasource.
      * @param limit The maximum number of kind names to return. Defaults to 50.
      * @param offset The offset from which to start retrieving kind names. Defaults to 0.
-     * @return A {@link KindNamesResponse} containing the kind names.
-     * @throws ResponseStatusException if the datasource is not found.
      */
     @GetMapping(value = "/adminer/{db}")
     public KindNamesResponse getKindNames(
         @PathVariable Id db,
-        @RequestParam(required = false, defaultValue = "50") String limit,
-        @RequestParam(required = false, defaultValue = "0") String offset
-        ) {
+        @RequestParam(defaultValue = "50") String limit,
+        @RequestParam(defaultValue = "0") String offset
+    ) {
         final var datasource = datasourceRepository.find(db);
-
-        if (datasource == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
         return pullWrapper.getKindNames(limit, offset);
@@ -66,23 +57,16 @@ public class AdminerController {
      * @param filters A JSON array string representing the filters to apply.
      * @param limit The maximum number of records to return. Defaults to 50.
      * @param offset The offset from which to start retrieving records. Defaults to 0.
-     * @return A {@link DataResponse} containing the data.
-     * @throws ResponseStatusException if the datasource is not found.
-     * @throws IllegalArgumentException if the filter format is invalid.
      */
     @GetMapping(value = "/adminer/{db}/kind")
     public DataResponse getKind(
         @PathVariable Id db,
-        @RequestParam(required = false, defaultValue = "") String kindName,
-        @RequestParam(required = false, defaultValue = "") String filters,
-        @RequestParam(required = false, defaultValue = "50") String limit,
-        @RequestParam(required = false, defaultValue = "0") String offset
-        ) {
+        @RequestParam String kindName,
+        @RequestParam(defaultValue = "") String filters,
+        @RequestParam(defaultValue = "50") String limit,
+        @RequestParam(defaultValue = "0") String offset
+    ) {
         final var datasource = datasourceRepository.find(db);
-
-        if (datasource == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
 
         List<AdminerFilter> filterList = new ArrayList<>();
 
@@ -93,9 +77,8 @@ public class AdminerController {
                     .readValue(filters);
 
                 for (AdminerFilter filter : allFilters) {
-                    if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty()) {
+                    if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty())
                         filterList.add(filter);
-                    }
                 }
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Invalid filter format.");
@@ -112,20 +95,10 @@ public class AdminerController {
      *
      * @param db The ID of the datasource.
      * @param kindName The name of the kind for which to retrieve references.
-     * @return A {@link List} of {@link Reference} representing the relationships.
-     * @throws ResponseStatusException if the datasource is not found.
      */
     @GetMapping(value = "/adminer/{db}/references")
-    public List<Reference> getReferences(
-        @PathVariable Id db,
-        @RequestParam(required = true) String kindName
-        ) {
+    public List<Reference> getReferences(@PathVariable Id db, @RequestParam String kindName) {
         final var datasource = datasourceRepository.find(db);
-
-        if (datasource == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
         return pullWrapper.getReferences(db.toString(), kindName);
@@ -136,20 +109,10 @@ public class AdminerController {
      *
      * @param db The ID of the datasource.
      * @param query The query to be executed.
-     * @return A {@link DataResponse} containing the result of the query.
-     * @throws ResponseStatusException if the datasource is not found.
      */
     @GetMapping(value = "/adminer/{db}/query")
-    public DataResponse getQueryResult(
-        @PathVariable Id db,
-        @RequestParam(required = true) String query
-        ) {
+    public DataResponse getQueryResult(@PathVariable Id db, @RequestParam String query) {
         final var datasource = datasourceRepository.find(db);
-
-        if (datasource == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
         return pullWrapper.getQueryResult(new StringQuery(query));

@@ -135,7 +135,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
      *
      * @param statement the query statement to execute.
      * @return nothing, as this method always throws an exception.
-     * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
     @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
@@ -153,7 +152,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("CsvPullWrapper.getReferences not implemented.");
     }
 
-    @Override public DataResponse getQueryResult(QueryContent query){
+    @Override public DataResponse getQueryResult(QueryContent query) {
         throw new UnsupportedOperationException("CsvPullWrapper.getQueryResult not implemented.");
     }
 

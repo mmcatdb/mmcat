@@ -128,7 +128,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("DummyPullWrapper.getReferences not implemented.");
     }
 
-    @Override public DataResponse getQueryResult(QueryContent query){
+    @Override public DataResponse getQueryResult(QueryContent query) {
         throw new UnsupportedOperationException("DummyPullWrapper.getQueryResult not implemented.");
     }
 

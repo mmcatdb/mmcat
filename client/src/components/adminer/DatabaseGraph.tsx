@@ -1,24 +1,19 @@
 import { useMemo } from 'react';
-import { usePreferences } from '@/components/PreferencesProvider';
-import { ArcThemeProvider } from '@/components/adminer/graph-visualization/components/themes';
-import { StyledVisContainer } from '@/components/adminer/graph-visualization/VisualizationView.styled';
 import { GraphVisualizer } from '@/components/adminer/graph-visualization/GraphVisualizer';
 import type { BasicNode, BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 import type { GraphNode, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 
-type DatabaseTableProps = Readonly<{
+type DatabaseTableProps = {
     /** The data to display. */
     data: GraphResponse;
     /** Name of the current kind. */
     kind: string;
-}>;
+};
 
 /**
  * Component for displaying data in graph
  */
 export function DatabaseGraph({ data, kind }: DatabaseTableProps ) {
-    const { theme } = usePreferences().preferences;
-
     const graph = useMemo(() => {
         if (!data.data)
             return;
@@ -37,15 +32,11 @@ export function DatabaseGraph({ data, kind }: DatabaseTableProps ) {
 
     return (
         <div className='grow text-left'>
-            <ArcThemeProvider theme={theme}>
-                <StyledVisContainer isFullscreen={false}>
-                    <GraphVisualizer
-                        nodes={graph.nodes}
-                        relationships={graph.relationships}
-                        fetchedData={data}
-                    />
-                </StyledVisContainer>
-            </ArcThemeProvider>
+            <GraphVisualizer
+                nodes={graph.nodes}
+                relationships={graph.relationships}
+                fetchedData={data}
+            />
         </div>
     );
 }

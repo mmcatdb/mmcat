@@ -19,7 +19,6 @@ export class NodeModel {
     isRelationship = false;
 
     // Visualisation properties
-    radius: number;
     caption: NodeCaptionLine[];
     selected: boolean;
     expanded: boolean;
@@ -48,7 +47,6 @@ export class NodeModel {
         }));
 
         // Initialise visualisation items
-        this.radius = 0;
         this.caption = [];
         this.selected = false;
         this.expanded = false;

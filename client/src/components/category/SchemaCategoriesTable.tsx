@@ -96,7 +96,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent={'No rows to display.'}>
+            <TableBody emptyContent='No rows to display.'>
                 {categories.map(category => (
                     <TableRow
                         key={category.id}

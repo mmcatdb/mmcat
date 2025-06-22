@@ -159,9 +159,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @return the parsed {@code Double} value if valid, or {@code null} if the input is {@code null} or not a valid number
      */
     private Double parseNumeric(String str) {
-        if (str == null) {
+        if (str == null)
             return null;
-        }
 
         try {
             return Double.parseDouble(str);
@@ -173,13 +172,11 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     private void appendLabelsWhereClause(StringBuilder whereClause, String alias, String propertyName, String operator, String propertyValue, Double doubleValue) {
         String function = this.getLabelFunction(propertyName);
 
-        if (propertyName.startsWith(Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.LABELS)){
+        if (propertyName.startsWith(Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.LABELS))
             alias = "from_node";
-        }
 
-        if (propertyName.startsWith(Neo4jUtils.TO_NODE_PREFIX + Neo4jUtils.LABELS)){
+        if (propertyName.startsWith(Neo4jUtils.TO_NODE_PREFIX + Neo4jUtils.LABELS))
             alias = "to_node";
-        }
 
         boolean isQuantifier = QUANTIFIERS.contains(function);
 
@@ -187,43 +184,37 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             .append(function)
             .append("(");
 
-        if (isQuantifier){
+        if (isQuantifier)
             whereClause.append("label IN ");
-        }
 
         whereClause
             .append("labels(")
             .append(alias)
             .append(")");
 
-        if (isQuantifier){
+        if (isQuantifier)
             whereClause.append(" WHERE label ");
-        } else {
+        else
             whereClause.append(")");
-        }
 
         operator = OPERATORS.get(operator);
 
         appendOperator(whereClause, operator);
         appendPropertyValue(whereClause, propertyValue, operator, doubleValue);
 
-        if (isQuantifier) {
+        if (isQuantifier)
             whereClause.append(")");
-        }
     }
 
     /**
      * Retrieves the Neo4j function associated with the specified property name.
-     *
-     * @throws InvalidParameterException If no function is mapped to the given property name.
      */
     private String getLabelFunction(String propertyName) {
         String nodeFunction = Neo4jUtils.NODE_LABEL_FUNCTIONS.get(propertyName);
-        String function =  nodeFunction != null ? nodeFunction : Neo4jUtils.RELATIONSHIP_LABEL_FUNCTIONS.get(propertyName);
+        String function = nodeFunction != null ? nodeFunction : Neo4jUtils.RELATIONSHIP_LABEL_FUNCTIONS.get(propertyName);
 
-        if (function == null) {
+        if (function == null)
             throw new InvalidParameterException("No function mapped for given property name.");
-        }
 
         return function;
     }
@@ -234,9 +225,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             return;
         }
 
-        if (doubleValue != null) {
+        if (doubleValue != null)
             whereClause.append("toFloat(");
-        }
 
         if (alias != null
             && !propertyName.contains(Neo4jUtils.FROM_NODE_PREFIX)
@@ -245,11 +235,11 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 .append(".");
         }
 
-        if (propertyName.startsWith(Neo4jUtils.FROM_NODE_PREFIX)){
+        if (propertyName.startsWith(Neo4jUtils.FROM_NODE_PREFIX)) {
             whereClause.append("from_node.")
                 .append(propertyName.substring(Neo4jUtils.FROM_NODE_PREFIX.length()));
         }
-        else if (propertyName.startsWith(Neo4jUtils.TO_NODE_PREFIX)){
+        else if (propertyName.startsWith(Neo4jUtils.TO_NODE_PREFIX)) {
             whereClause.append("to_node.")
                 .append(propertyName.substring(Neo4jUtils.TO_NODE_PREFIX.length()));
         }
@@ -257,9 +247,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             whereClause.append(propertyName);
         }
 
-        if (doubleValue != null) {
+        if (doubleValue != null)
             whereClause.append(")");
-        }
     }
 
     private static void appendIdPropertyName(StringBuilder whereClause, String alias, String propertyName) {
@@ -268,20 +257,17 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         whereClause.append("elementId(");
 
-        if (startNodeId) {
+        if (startNodeId)
             whereClause.append("startNode(");
-        } else if (endNodeId) {
+        else if (endNodeId)
             whereClause.append("endNode(");
-        }
 
-        whereClause
-            .append(alias);
+        whereClause.append(alias);
 
         if (startNodeId || endNodeId)
             whereClause.append(")");
 
-        whereClause
-            .append(") ");
+        whereClause.append(") ");
     }
 
     private static void appendOperator(StringBuilder whereClause, String operator) {
@@ -299,8 +285,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 .append("]");
         } else if (!UNARY_OPERATORS.contains(operator)) {
             if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
-                whereClause
-                    .append(doubleValue);
+                whereClause.append(doubleValue);
             } else {
                 whereClause
                     .append("'")
@@ -371,7 +356,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     private static @Nullable ComplexProperty findSubpathByPrefix(ComplexProperty path, String namePrefix) {
         for (final var subpath : path.subpaths()) {
             if (
-                (subpath.name() instanceof final StringName stringName)
+                subpath.name() instanceof final StringName stringName
                 && stringName.value.startsWith(namePrefix)
                 && subpath instanceof final ComplexProperty complexSubpath
             )
@@ -539,7 +524,9 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         final var builder = new ListResult.TableBuilder();
         builder.addColumns(columns);
 
-        try (Session session = provider.getSession()) {
+        try (
+            Session session = provider.getSession()
+        ) {
             session.executeRead(tx -> {
                 final var query = new Query(statement.content().toString());
                 tx.run(query).forEachRemaining(result -> {
@@ -562,8 +549,6 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     /**
      * Retrieves a list of distinct kind names (labels and relationship types).
-     *
-     * @throws PullForestException if an error occurs during database access.
      */
     @Override public KindNamesResponse getKindNames(String limit, String offset) {
         try (Session session = provider.getSession()) {
@@ -583,22 +568,18 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             return new KindNamesResponse(data);
         }
-        catch (Exception e){
+        catch (Exception e) {
             throw PullForestException.innerException(e);
         }
     }
 
     /**
      * Retrieves data of the specified kind from the graph with optional filtering.
-     *
-     * @throws PullForestException if an error occurs during query execution.
      */
     @Override public GraphResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
         KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
-
-        if (filters == null){
+        if (filters == null)
             return getQueryResult(kindNameQuery);
-        }
 
         return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
@@ -617,20 +598,18 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
                 List<String> startNodeLabels = reference.get("startNodeLabels").asList(Value::asString);
 
-                for (String startNodeLabel: startNodeLabels) {
+                for (String startNodeLabel: startNodeLabels)
                     references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, Neo4jUtils.FROM_NODE_PREFIX + Neo4jUtils.ID), new ReferenceKind(datasourceId, startNodeLabel, Neo4jUtils.ID)));
-                }
 
                 List<String> endNodeLabels = reference.get("endNodeLabels").asList(Value::asString);
 
-                for (String endNodeLabel: endNodeLabels) {
+                for (String endNodeLabel: endNodeLabels)
                     references.add(new Reference(new ReferenceKind(datasourceId, relationshipType, Neo4jUtils.TO_NODE_PREFIX + Neo4jUtils.ID), new ReferenceKind(datasourceId, endNodeLabel, Neo4jUtils.ID)));
-                }
             }
 
             return references;
         }
-        catch (Exception e){
+        catch (Exception e) {
             throw PullForestException.innerException(e);
         }
     }
@@ -651,24 +630,19 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 tx.run(finalQuery).stream()
                     .flatMap(rec -> rec.values().stream())
                     .forEach(element -> {
-                        if (element.hasType(TypeSystem.getDefault().NODE())) {
+                        if (element.hasType(TypeSystem.getDefault().NODE()))
                             nodes.add(Neo4jUtils.getNodeProperties(element, propertyNames));
-                        } else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
+                        else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP()))
                             relationships.add(Neo4jUtils.getRelationshipProperties(element, propertyNames));
-                        }
                     });
 
                 return new GraphData(nodes, relationships);
             });
 
             Result countQueryResult = session.run(new Query(getQueryString(query, true)));
-            long itemCount = 0;
-
-            if (query instanceof StringQuery) {
-                itemCount = data.relationships().isEmpty() ? data.nodes().size() : data.relationships().size();
-            } else {
-                itemCount = countQueryResult.next().get("recordCount").asLong();
-            }
+            final long itemCount = query instanceof StringQuery
+                ? data.relationships().isEmpty() ? data.nodes().size() : data.relationships().size()
+                : countQueryResult.next().get("recordCount").asLong();
 
             return new GraphResponse(data, itemCount, propertyNames);
         } catch (Exception e) {
@@ -698,18 +672,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     private String getQueryString(QueryContent query, boolean countQuery) {
         if (query instanceof StringQuery stringQuery)
             return stringQuery.content;
-
-        if (query instanceof KindNameFilterQuery knfQuery) {
-            String kindName = knfQuery.kindNameQuery.kindName;
-
-            return createQueryString(kindName, query, countQuery);
-        }
-
-        if (query instanceof KindNameQuery knQuery){
-            String kindName = knQuery.kindName;
-
-            return createQueryString(kindName, query, countQuery);
-        }
+        if (query instanceof KindNameFilterQuery knfQuery)
+            return createQueryString(knfQuery.kindNameQuery.kindName, query, countQuery);
+        if (query instanceof KindNameQuery knQuery)
+            return createQueryString(knQuery.kindName, query, countQuery);
 
         throw PullForestException.invalidQuery(this, query);
     }

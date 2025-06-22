@@ -7,7 +7,7 @@ import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-type ReferenceComponentProps = Readonly<{
+type ReferenceComponentProps = {
     /** The references to create links for. */
     references: KindReference[];
     /** The displayeddata. */
@@ -20,7 +20,7 @@ type ReferenceComponentProps = Readonly<{
     datasourceId: Id;
     /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
 /**
  * Component for displaying references
