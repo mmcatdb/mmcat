@@ -113,5 +113,4 @@ export class DynamicName extends TypedName {
         const patternString = this.pattern == null ? '' : ` (${this.pattern})`;
         return `<${this.type}${patternString}: ${this.signature.toString()}>`;
     }
-
 }

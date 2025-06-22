@@ -1,88 +1,74 @@
-import { useEffect } from 'react';
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Link } from '@nextui-org/react';
-import { getHrefFromReference } from '@/components/adminer/URLParamsState';
+import { useMemo } from 'react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
+import { DocumentComponent } from '@/components/adminer/DocumentComponent';
+import { getTableFromGraphData } from '@/components/adminer/reshapeData';
 import type { Datasource } from '@/types/datasource/Datasource';
-import type { TableResponse, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
-import type { AdminerReferences } from '@/types/adminer/AdminerReferences';
+import type { TableResponse, GraphResponse } from '@/types/adminer/DataResponse';
+import type { KindReference } from '@/types/adminer/AdminerReferences';
+import type { Id } from '@/types/id';
 
-function formatCellValue(value: unknown): string {
-    return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-}
-
-function getLinkReferences(references: AdminerReferences, referencedProperty: string): AdminerReferences {
-    return Object.values(references).filter(ref => ref.referencedProperty === referencedProperty);
-}
-
-type DatabaseTableProps = Readonly<{
-    fetchedData: TableResponse | GraphResponse;
-    setItemCount: (itemCount: number) => void;
-    references: AdminerReferences | undefined;
+type DatabaseTableProps = {
+    /** The data to display. */
+    data: TableResponse | GraphResponse;
+    /** References from and to the current kind. */
+    kindReferences: KindReference[];
+    /** Name of the current kind. */
+    kind: string;
+    /** The id of selected datasource. */
+    datasourceId: Id;
+    /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
-export function DatabaseTable({ fetchedData, setItemCount, references, datasources }: DatabaseTableProps ) {
-    useEffect(() => {
-        const count = fetchedData?.metadata.itemCount;
-        count ? setItemCount(count) : setItemCount(0);
-    }, [ fetchedData ]);
+/**
+ * Component for displaying data in table
+ */
+export function DatabaseTable({ data, kindReferences, kind, datasourceId, datasources }: DatabaseTableProps ) {
+    const { tableData, columnNames } = useMemo(() => {
+        if (data.type === 'graph')
+            return getTableFromGraphData(data);
 
-    if (fetchedData === undefined || fetchedData.data.length === 0)
+        return { tableData: data, columnNames: data.metadata.propertyNames };
+    }, [ data ]);
+
+    if (tableData === undefined || tableData.data.length === 0 || tableData.metadata.itemCount === 0)
         return <p>No rows to display.</p>;
 
-    // If the data are for graph database, we want to display just properties in the table view
-    if (fetchedData.data.every((item: Record<string, string> | GraphResponseData) => 'properties' in item)){
-        const modifiedData = { metadata: fetchedData.metadata, data: [] } as TableResponse;
+    return (<>
+        {tableData && columnNames && (
+            <Table isStriped isCompact aria-label='Table'>
+                <TableHeader>
+                    {columnNames.map((columnName, index) => (
+                        <TableColumn key={index}>{columnName}</TableColumn>
+                    ))}
+                </TableHeader>
+                {TableBodyComponent({ tableBodyData: tableData.data, columnNames: columnNames, references: kindReferences, kind: kind, datasourceId: datasourceId, datasources: datasources })}
+            </Table>
+        )}
+    </>);
+}
 
-        for (const element of fetchedData.data)
-            modifiedData.data.push(element.properties as Record<string, string>);
+type TableBodyComponentProps = {
+    tableBodyData: string[][];
+    columnNames: string[];
+    references: KindReference[];
+    kind: string;
+    datasourceId: Id;
+    datasources: Datasource[];
+};
 
-        fetchedData = modifiedData;
-    }
-
-    const keys: string[] = typeof fetchedData.data[0] === 'object' ? Object.keys(fetchedData.data[0]) : [ 'Value' ];
-    const columns: string[] = fetchedData.data.length > 0 ? keys : [];
-    const referencedProperties: string[] = references ? Object.values(references).map(ref => ref.referencedProperty) : [];
-
+function TableBodyComponent({ tableBodyData, columnNames, references, kind, datasourceId, datasources }: TableBodyComponentProps ) {
     return (
-        <div>
-            {fetchedData && (
-                <Table isStriped isCompact aria-label='Table'>
-                    <TableHeader>
-                        {columns.map(column => (
-                            <TableColumn key={column}>{column}</TableColumn>
-                        ))}
-                    </TableHeader>
-                    <TableBody emptyContent={'No rows to display.'}>
-                        {fetchedData.data.map((item, index) => (
-                            <TableRow key={index}>
-                                {item && typeof item === 'object' && !Array.isArray(item)
-                                    ? columns.map(column => (
-                                        <TableCell key={column}>
-                                            {references && referencedProperties.includes(column) ? (
-                                                getLinkReferences(references, column).map((ref, index) => (
-                                                    <Link
-                                                        key={index}
-                                                        href={getHrefFromReference(ref, item, column, datasources)}
-                                                        underline='hover'
-                                                        className='mr-2'
-                                                    >
-                                                        {formatCellValue(item[column])}
-                                                    </Link>
-                                                ))
-                                            ) : (
-                                                formatCellValue(item[column])
-                                            )}
-                                        </TableCell>
-                                    ))
-                                    : <TableCell>
-                                        {formatCellValue(item)}
-                                    </TableCell>}
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            )
-            }
-        </div>
+        <TableBody emptyContent='No rows to display.'>
+            {tableBodyData.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                    {row.map((cellItem, cellIndex) => (
+                        <TableCell key={cellIndex}>
+                            <DocumentComponent valueKey={columnNames[cellIndex]} value={cellItem} kindReferences={references} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
+                        </TableCell>
+                    ))}
+                </TableRow>
+            ))}
+        </TableBody>
     );
 }

@@ -1,22 +1,54 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Spinner, Select, SelectItem } from '@nextui-org/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { api } from '@/api';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 import type { Id } from '@/types/id';
 
-type KindMenuProps = Readonly<{
-    datasourceId: Id;
-    kind: string | undefined;
-    showUnlabeled: boolean;
-    dispatch: React.Dispatch<AdminerStateAction>;
-}>;
+export const UNLABELED = '#unlabeled';
 
+type KindMenuProps = {
+    /** The id of the current datasource. */
+    datasourceId: Id;
+    /** Name of selected kind. */
+    kind: string | undefined;
+    /** If 'true', additional kind name for unlabeled nodes from Neo4j is added. */
+    showUnlabeled: boolean;
+    /** A function for state updating. */
+    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
+};
+
+type Option = {
+    label: string;
+    value: string;
+};
+
+/**
+ * Component for selecting kind
+ */
 export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMenuProps) {
     const fetchFunction = useCallback(() => {
         return api.adminer.getKindNames({ datasourceId });
     }, [ datasourceId ]);
     const { fetchedData, loading, error } = useFetchData(fetchFunction);
+
+    const selectItems = useMemo(() => {
+        const items: Option[] = [];
+
+        if (fetchedData && fetchedData.data.length > 0) {
+            fetchedData.data.forEach(name => (
+                items.push({ label: name, value: name })
+            ));
+
+            if (showUnlabeled)
+                items.push({ label: UNLABELED, value: UNLABELED });
+        }
+
+        return items;
+    }, [ fetchedData, showUnlabeled ]);
+
+    if (error)
+        return <p className='ml-1 mt-1'>{error}</p>;
 
     if (loading) {
         return (
@@ -26,38 +58,30 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
         );
     }
 
-    if (error)
-        return <p>{error}</p>;
+    if (!fetchedData || fetchedData.data.length === 0)
+        return <span>No kinds to display.</span>;
 
     return (
-        fetchedData && fetchedData.data.length > 0 ? (
-            <Select
-                label='Kind'
-                placeholder='Select kind'
-                className='max-w-xs'
-                selectedKeys={ kind ? [ kind ] : undefined }
-            >
-                {fetchedData.data.map((name, index) => (
-                    <SelectItem
-                        key={name}
-                        onPress={() => dispatch({ type: 'kind', newKind: name })}
-                    >
-                        {name}
-                    </SelectItem>
-                // FIXME
-                )) as any}
-
-                {showUnlabeled && (<SelectItem
-                    key='unlabeled'
-                    onPress={() => dispatch({ type: 'kind', newKind: 'unlabeled' })}
+        <Select
+            items={selectItems}
+            aria-label='Kind'
+            labelPlacement='outside-left'
+            classNames={
+                { label:'sr-only' }
+            }
+            size='sm'
+            placeholder='Select kind'
+            className='max-w-xs px-0'
+            selectedKeys={ kind ? [ kind ] : undefined }
+        >
+            {item => (
+                <SelectItem
+                    key={item.value}
+                    onPress={() => dispatch({ type: 'kind', newKind: item.value })}
                 >
-                    Unlabeled
+                    {item.label}
                 </SelectItem>
-                )}
-
-            </Select>
-        ) : (
-            <span>No kinds to display.</span>
-        )
+            )}
+        </Select>
     );
 }

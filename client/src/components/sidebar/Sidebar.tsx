@@ -240,27 +240,23 @@ function SidebarItemDisplay({ item }: {
  * Generates sidebar items for general navigation (no schema category context).
  */
 function generalSidebarItems(): SidebarItem[] {
-    return [
-        {
-            type: 'normal',
-            label: 'Schema categories',
-            route: routes.categories,
-            iconName: SidebarIconKey.SchemaCategory,
-        },
-        {
-            type: 'normal',
-            label: 'Datasources',
-            route: routes.datasources.path,
-            iconName: SidebarIconKey.Datasources,
-            match: [ routes.datasourceRoutes.datasource.path ],
-        },
-        {
-            type: 'normal',
-            label: 'Adminer',
-            route: `${routes.adminer}?reload=true`,
-            iconName: SidebarIconKey.CodeBracketSquare,
-        },
-    ];
+    return [ {
+        type: 'normal',
+        label: 'Schema categories',
+        route: routes.categories,
+        iconName: SidebarIconKey.SchemaCategory,
+    }, {
+        type: 'normal',
+        label: 'Datasources',
+        route: routes.datasources.path,
+        iconName: SidebarIconKey.Datasources,
+        match: [ routes.datasourceRoutes.datasource.path ],
+    }, {
+        type: 'normal',
+        label: 'Adminer',
+        route: `${routes.adminer}?reload=true`,
+        iconName: SidebarIconKey.CodeBracketSquare,
+    } ];
 }
 
 /**

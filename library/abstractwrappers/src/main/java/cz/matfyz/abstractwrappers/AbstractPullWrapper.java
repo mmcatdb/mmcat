@@ -3,13 +3,13 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
-import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.KindNamesResponse;
+import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
-import cz.matfyz.core.record.AdminerFilter;
 
 import java.util.List;
 
@@ -26,9 +26,9 @@ public interface AbstractPullWrapper {
      *
      * @param limit  the maximum number of records to return.
      * @param offset the starting position of records.
-     * @return a {@link KindNameResponse} containing the list of kind names and related metadata.
+     * @return a {@link KindNamesResponse} containing the list of kind names and related metadata.
      */
-    KindNameResponse getKindNames(String limit, String offset);
+    KindNamesResponse getKindNames(String limit, String offset);
 
     /**
      * Retrieves data for a specific kind with pagination support and optional filters.
@@ -48,5 +48,13 @@ public interface AbstractPullWrapper {
      * @return A {@link List} of {@link Reference} references representing the foreign key relationships.
      */
     List<Reference> getReferences(String datasourceId, String kindName);
+
+    /**
+     * Retrieves the result of the given query.
+     *
+     * @param query the custom query.
+     * @return a {@link DataResponse} containing the data result of custom query.
+     */
+    DataResponse getQueryResult(QueryContent query);
 
 }

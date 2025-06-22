@@ -6,16 +6,16 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.KindNameResponse;
+import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
@@ -139,7 +139,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 
-    @Override public KindNameResponse getKindNames(String limit, String offset) {
+    @Override public KindNamesResponse getKindNames(String limit, String offset) {
         throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
     }
 
@@ -149,6 +149,10 @@ public class JsonPullWrapper implements AbstractPullWrapper {
 
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         throw new UnsupportedOperationException("JsonPullWrapper.getReferences not implemented.");
+    }
+
+    @Override public DataResponse getQueryResult(QueryContent query) {
+        throw new UnsupportedOperationException("JsonPullWrapper.getQueryResult not implemented.");
     }
 
 }

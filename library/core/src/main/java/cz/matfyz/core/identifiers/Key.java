@@ -47,7 +47,6 @@ public class Key implements Serializable, Comparable<Key> {
 
     /**
      * Auto-generated, constants doesn't have any special meaning.
-     * @return
      */
     @Override public int hashCode() {
         int hash = 7;

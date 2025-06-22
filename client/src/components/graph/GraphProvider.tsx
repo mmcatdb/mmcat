@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useMemo, useState, type Dispatch, useRef } f
 import { createInitialGraphState, defaultGraphOptions, GraphEngine, type GraphOptions, type Graph, type ReactiveGraphState, type GraphEvent } from './graphEngine';
 import { graphContext } from './graphHooks';
 
-type GraphProviderProps = Readonly<{
+type GraphProviderProps = {
     /** The public graph that the graph exposes. Its updates are reflected in the graph display. */
     graph: Graph;
     /** Event handler for things like position change or select. */
@@ -10,7 +10,7 @@ type GraphProviderProps = Readonly<{
     /** User preferences. The graph engine is restarted whenever they change, so make sure they are constant or at least memoized! */
     options?: GraphOptions;
     children: ReactNode;
-}>;
+};
 
 export function GraphProvider({ graph, dispatch, options, children }: GraphProviderProps) {
     const { state, engine } = useGraphEngine(graph, dispatch, options);

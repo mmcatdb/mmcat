@@ -46,9 +46,11 @@ export class MorphismMetadata implements MMO<MMOType.Morphism> {
 
     up(category: Category): void {
         // category.getMorphism(this.signature).current = this.newMorphism;
+        console.log('up', category);
     }
 
     down(category: Category): void {
         // category.getMorphism(this.signature).current = this.oldMorphism;
+        console.log('down', category);
     }
 }

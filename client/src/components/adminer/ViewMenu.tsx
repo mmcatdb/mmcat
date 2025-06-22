@@ -1,15 +1,21 @@
-import { Select, SelectItem } from '@nextui-org/react';
+import { Button, ButtonGroup } from '@nextui-org/react';
 import { AVAILABLE_VIEWS } from './Views';
 import type { DatasourceType } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
+import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 
-type ViewMenuProps = Readonly<{
+type ViewMenuProps = {
+    /** The type of selected datasource. */
     datasourceType: DatasourceType;
+    /** Current view. */
     view: View;
-    dispatch: React.Dispatch<AdminerStateAction>;
-}>;
+    /** A function for state updating. */
+    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
+};
 
+/**
+ * Component for selecting view
+ */
 export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
     const availableViews = AVAILABLE_VIEWS[datasourceType];
 
@@ -17,20 +23,21 @@ export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
         return null;
 
     return (
-        <Select
-            label='View'
-            placeholder='Select datasource'
-            className='max-w-xs'
-            defaultSelectedKeys={[ view ]}
+        <ButtonGroup
+            size='sm'
+            className='max-w-m mx-2'
         >
-            {availableViews.map(view => (
-                <SelectItem
-                    key={view}
-                    onPress={() => dispatch({ type:'view', newView: view })}
+            {availableViews.map(availableView => (
+                <Button
+                    size='sm'
+                    variant={availableView === view ? 'solid' : 'ghost'}
+                    key={availableView}
+                    onPress={() => dispatch({ type:'view', newView: availableView })}
                 >
-                    {view}
-                </SelectItem>
-            ))}
-        </Select>
+                    {availableView}
+                </Button>
+            ),
+            )}
+        </ButtonGroup>
     );
 }

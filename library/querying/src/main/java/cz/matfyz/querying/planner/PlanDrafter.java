@@ -23,7 +23,6 @@ public class PlanDrafter {
 
     /**
      * @param allPatterns All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
-     * @return
      */
     public static List<Set<PatternForKind>> run(List<PatternForKind> allPatterns) {
         return new PlanDrafter(allPatterns).run();

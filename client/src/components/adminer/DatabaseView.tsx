@@ -1,116 +1,58 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Spinner, Pagination } from '@nextui-org/react';
-import { FilterForm } from '@/components/adminer/FilterForm';
 import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
+import { DatabaseGraph } from '@/components/adminer/DatabaseGraph';
 import { View } from '@/types/adminer/View';
-import { api } from '@/api';
-import { useFetchReferences } from './useFetchReferences';
-import { useFetchData } from './useFetchData';
+import type { Datasource } from '@/types/datasource';
 import type { Id } from '@/types/id';
-import type { AdminerState, AdminerStateAction, KindFilterState } from '@/types/adminer/Reducer';
-import type { FetchKindParams } from '@/types/adminer/FetchParams';
-import type { GraphResponse, DataResponse, TableResponse, DocumentResponse } from '@/types/adminer/DataResponse';
-import type { Datasource } from '@/types/datasource/Datasource';
+import type { DataResponse, DocumentResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
+import type { KindReference } from '@/types/adminer/AdminerReferences';
 
-function getUrlParams(offset: number, active: KindFilterState, datasourceId?: Id, kindName?: string) {
-    const filterExist = active.filters?.some(filter => {
-        return filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0;
-    });
-
-    const urlParams: FetchKindParams = { datasourceId: datasourceId!, kindName: kindName!, queryParams: { limit: active.limit, offset: offset } };
-
-    if (active.filters && filterExist) {
-        const queryFilters = `${active.filters
-            .map(
-                filter =>
-                    filter.propertyName.length > 0 && filter.operator && filter.propertyValue.length > 0 ? `(${filter.propertyName},${filter.operator},${filter.propertyValue.replace(/,/g, ';')})` : '',
-            )
-            .join('')}`;
-        urlParams.queryParams.filters = queryFilters;
-    }
-
-    return urlParams;
-}
-
-type DatabaseViewProps = Readonly<{
-    state: AdminerState;
+type DatabaseViewProps = {
+    /** The selected view. */
+    view: View;
+    /** The data to display. */
+    data: DataResponse;
+    /** References from and to the current kind. */
+    kindReferences: KindReference[];
+    /** Name of the current kind. */
+    kindName: string;
+    /** The id of selected datasource. */
+    datasourceId: Id;
+    /** All active datasources. */
     datasources: Datasource[];
-    dispatch: React.Dispatch<AdminerStateAction>;
-}>;
+};
 
-export function DatabaseView({ state, datasources, dispatch }: DatabaseViewProps) {
-    const { references, referencesLoading } = useFetchReferences(state);
-
-    const [ currentPage, setCurrentPage ] = useState(1);
-    const [ offset, setOffset ] = useState(0);
-    const [ itemCount, setItemCount ] = useState<number>();
-    const [ totalPages, setTotalPages ] = useState(1);
-
-    useEffect(() => {
-        if (itemCount)
-            setTotalPages(Math.ceil(itemCount / state.active.limit));
-
-        if (currentPage > totalPages) {
-            setCurrentPage(totalPages);
-            setOffset(state.active.limit * (totalPages - 1));
-        }
-    }, [ itemCount, offset, currentPage, totalPages, state.active.limit ]);
-
-    const urlParams = useMemo(() => {
-        return getUrlParams(offset, state.active, state.datasourceId, state.kindName);
-    }, [ state.active, state.datasourceId, state.kindName, offset ]);
-
-    const fetchFunction = useCallback(() => {
-        return api.adminer.getKind({ datasourceId: urlParams.datasourceId, kindName: urlParams.kindName }, urlParams.queryParams);
-    }, [ urlParams ]);
-
-    const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);
-
-    useEffect(() => {
-        setItemCount(undefined);
-        setTotalPages(1);
-        setCurrentPage(1);
-        setOffset(0);
-    }, [ state.active, state.datasourceId, state.kindName, state.view ]);
-
-    if (!fetchedData || loading || referencesLoading) {
+/**
+ * Component that returns view based on the value of variable 'view'
+ */
+export function DatabaseView({ view, data, kindReferences, kindName, datasourceId, datasources }: DatabaseViewProps) {
+    switch (view) {
+    case View.table:
         return (
-            <div className='h-10 flex items-center justify-center'>
-                <Spinner />
-            </div>
+            <DatabaseTable
+                data={data as TableResponse | GraphResponse}
+                kindReferences={kindReferences}
+                kind={kindName}
+                datasourceId={datasourceId}
+                datasources={datasources}
+            />
+        );
+    case View.document:
+        return (
+            <DatabaseDocument
+                data={data as DocumentResponse | GraphResponse}
+                kindReferences={kindReferences}
+                kind={kindName}
+                datasourceId={datasourceId}
+                datasources={datasources}
+            />
+        );
+    case View.graph:
+        return (
+            <DatabaseGraph
+                data={data as GraphResponse}
+                kind={kindName}
+            />
         );
     }
-
-    if (error)
-        return <p>{error}</p>;
-
-    return (
-        <div>
-            <div className='mb-5'>
-                <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
-            </div>
-
-            {state.view === View.table ? (
-                <DatabaseTable fetchedData={fetchedData as TableResponse | GraphResponse} setItemCount={setItemCount} references={references} datasources={datasources}/>
-            ) : (
-                <DatabaseDocument fetchedData={fetchedData as DocumentResponse | GraphResponse} setItemCount={setItemCount} references={references} datasources={datasources}/>
-            )}
-
-            {itemCount !== undefined && itemCount > 0 && (
-                <div className='mt-5 inline-flex gap-3 items-center'>
-                    <Pagination
-                        total={totalPages}
-                        page={currentPage}
-                        onChange={page => {
-                            setCurrentPage(page);
-                            setOffset(state.active.limit * (page - 1));
-                        }}
-                        color='primary'
-                    />
-                    <p>Number of rows: {itemCount}</p>
-                </div>
-            )}
-        </div>
-    );
 }

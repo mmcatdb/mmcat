@@ -9,7 +9,7 @@ import { BookOpenIcon } from '@heroicons/react/24/solid';
 import { FaDatabase, FaPlus, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const EXAMPLE_SCHEMAS = [ 'basic' ] as const;
+const EXAMPLE_SCHEMAS = [ 'basic', 'adminer' ] as const;
 
 export function Home() {
     const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>();
@@ -67,7 +67,7 @@ export function Home() {
                 isCreatingSchema={isCreatingSchema}
                 isCreatingExampleSchema={isCreatingExampleSchema}
                 onCreateSchema={(name, isExample) => {
-                    void handleCreateSchema(name, isExample); 
+                    void handleCreateSchema(name, isExample);
                 }}
                 fetchCategories={fetchCategories}
             />
@@ -210,9 +210,9 @@ function SchemaCategoriesSection({
                     </p>
                 </div>
                 <div className='flex flex-wrap gap-3'>
-                    <Button 
-                        onPress={onOpenModal} 
-                        isLoading={isCreatingSchema} 
+                    <Button
+                        onPress={onOpenModal}
+                        isLoading={isCreatingSchema}
                         color='primary'
                         startContent={<FaPlus className='w-4 h-4' />}
                     >
@@ -227,7 +227,7 @@ function SchemaCategoriesSection({
                             variant='flat'
                             startContent={<FaPlus className='w-4 h-4' />}
                         >
-                            Example Schema
+                            Example Schema ({example})
                         </Button>
                     ))}
                 </div>
@@ -236,7 +236,7 @@ function SchemaCategoriesSection({
             {!categories ? (
                 <div className='flex flex-col items-center justify-center py-12 gap-4'>
                     <p className='text-default-400'>Failed to load schemas</p>
-                    <Button 
+                    <Button
                         onPress={handleReload}
                         isLoading={isReloading}
                         color='primary'
@@ -253,9 +253,9 @@ function SchemaCategoriesSection({
             ) : (<>
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                     {(showAllCategories ? categories : categories.slice(0, 6)).map(category => (
-                        <Card 
-                            key={category.id} 
-                            isPressable 
+                        <Card
+                            key={category.id}
+                            isPressable
                             isHoverable
                             className='p-6 hover:border-primary-300 transition-all'
                             shadow='sm'
@@ -271,8 +271,8 @@ function SchemaCategoriesSection({
                 </div>
                 {categories.length > 6 && (
                     <div className='flex justify-center'>
-                        <Button 
-                            variant='light' 
+                        <Button
+                            variant='light'
                             onPress={() => setShowAllCategories(!showAllCategories)}
                             className='text-primary-600'
                         >
@@ -365,7 +365,7 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
     }
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key === 'Enter') 
+        if (e.key === 'Enter')
             handleSubmit();
     }
 
@@ -384,6 +384,7 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
                         label='Schema Name'
                         value={label}
                         onChange={e => setLabel(e.target.value)}
+                        fullWidth
                         onKeyDown={handleKeyDown}
                         classNames={{
                             input: 'text-lg',
@@ -394,9 +395,9 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
                     <Button variant='light' onPress={handleClose}>
                         Cancel
                     </Button>
-                    <Button 
-                        color='primary' 
-                        onPress={handleSubmit} 
+                    <Button
+                        color='primary'
+                        onPress={handleSubmit}
                         isLoading={isSubmitting}
                         isDisabled={!label.trim()}
                     >

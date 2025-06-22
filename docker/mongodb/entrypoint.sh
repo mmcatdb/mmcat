@@ -9,6 +9,7 @@ db.createUser({
     pwd: "${EXAMPLE_PASSWORD}",
     roles: [
         { role: "readWrite", db: "${EXAMPLE_DATABASE_BASIC}" },
+        { role: "readWrite", db: "${EXAMPLE_DATABASE_ADMINER}" },
         { role: "readWrite", db: "${EXAMPLE_DATABASE_QUERY_EVOLUTION}" },
         { role: "readWrite", db: "${EXAMPLE_DATABASE_INFERENCE}" },
         { role: "readWrite", db: "${BENCHMARK_DATABASE_YELP}" },
@@ -18,6 +19,8 @@ db.createUser({
 db.auth("${EXAMPLE_USERNAME}", "${EXAMPLE_PASSWORD}");
 use ${EXAMPLE_DATABASE_BASIC};
 load('setupMongodbBasic.js');
+use ${EXAMPLE_DATABASE_ADMINER};
+load('setupMongodbAdminer.js');
 use ${EXAMPLE_DATABASE_QUERY_EVOLUTION};
 load('setupMongodbQueryEvolution.js');
 use ${EXAMPLE_DATABASE_INFERENCE};

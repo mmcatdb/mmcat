@@ -20,7 +20,7 @@ export function RootLayout() {
     const location = useLocation(); // Get current route
 
     // A workaround to detect if we are on the editor page and adjust the layout accordingly.
-    const isEditorPage = location.pathname.includes('/editor') || location.pathname.includes('/mappings');
+    const isFullPage = location.pathname.includes('/editor') || location.pathname.includes('/mappings') || location.pathname.includes('/adminer');
 
     return (<>
         <ScrollToTop />
@@ -33,10 +33,10 @@ export function RootLayout() {
                 )}>
                     <CommonNavbar />
                     <main className='flex-grow relative'>
-                        <div className={cn('absolute inset-0', isEditorPage ? 'overflow-hidden flex-grow h-full' : 'overflow-y-auto')}>
+                        <div className={cn('absolute inset-0', isFullPage ? 'overflow-hidden flex-grow h-full' : 'overflow-y-auto')}>
                             <div className={cn(
                                 'relative flex-grow mx-auto',
-                                isEditorPage ? 'h-full' : 'max-w-5xl p-6 overflow-y-auto',
+                                isFullPage ? 'h-full' : 'max-w-5xl p-6 overflow-y-auto',
                             )}>
                                 <Outlet />
                             </div>

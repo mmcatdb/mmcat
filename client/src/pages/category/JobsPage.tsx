@@ -61,13 +61,11 @@ export function JobsPage() {
 
     if (error) {
         return <ReloadPage onReload={() => {
-            void fetchJobs(); 
+            void fetchJobs();
         }} />;
     }
 
-    const classNameTH = cn(
-        'px-4 py-3 text-left font-semibold bg-default-100 border-b border-default-300 text-default-800',
-    );
+    const classNameTH = 'px-4 py-3 text-left font-semibold bg-default-100 border-b border-default-300 text-default-800';
 
     return (<>
         <div className='flex items-center gap-2 mb-4 pt-4'>
@@ -161,9 +159,15 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
 
     return (
         <tr className='hover:bg-default-100'>
-            {showTableIDs && <td className={'px-4 py-2'}>{runId}</td>}
-            <td className={'px-4 py-2'}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
-            <td className={'px-4 py-2'}>
+            {showTableIDs && (
+                <td className='px-4 py-2'>
+                    {runId}
+                </td>
+            )}
+            <td className='px-4 py-2'>
+                {newestJobs[0]?.runLabel || `Run ${runId}`}
+            </td>
+            <td className='px-4 py-2'>
                 <div className='flex  gap-2'>
                     {newestJobs.map(job => (
                         <Tooltip
@@ -255,7 +259,7 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
                         onClick={() => categoryId && navigate(routes.category.actions.resolve({ categoryId }))}
                         className='text-primary-500 hover:underline'
                     >
-                            Actions page
+                        Actions page
                     </button>.</span>
                 </li>
             </ul>

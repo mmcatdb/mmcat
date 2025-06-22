@@ -11,8 +11,15 @@ type FetchResult<T> = {
     fetchedData: undefined;
     loading: true;
     error: string;
+} | {
+    fetchedData: undefined;
+    loading: false;
+    error: undefined;
 };
 
+/**
+ * Fetches all data
+ */
 export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<T> {
     const [ result, setResult ] = useState<FetchResult<T>>({
         fetchedData: undefined,
@@ -29,6 +36,15 @@ export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<
             });
 
             const response = await fetchFunction();
+
+            if (!response.status && !response.error) {
+                setResult({
+                    fetchedData: undefined,
+                    loading: false,
+                    error: undefined,
+                });
+                return;
+            }
 
             if (!response.status) {
                 setResult({

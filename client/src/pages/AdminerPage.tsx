@@ -1,68 +1,73 @@
-import { useEffect, useReducer, useState, useMemo } from 'react';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
-import { Spinner } from '@nextui-org/react';
-import { getStateFromURLParams, getURLParamsFromState } from '@/components/adminer/URLParamsState';
+import { Button, ButtonGroup } from '@nextui-org/react';
+import { usePreferences } from '@/components/PreferencesProvider';
+import { AdminerCustomQueryPage } from '@/components/adminer/AdminerCustomQueryPage';
+import { AdminerFilterQueryPage } from '@/components/adminer/AdminerFilterQueryPage';
+import { getAdminerURLParams, getInitURLParams, getQueryTypeFromURLParams } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
-import { KindMenu } from '@/components/adminer/KindMenu';
-import { ViewMenu } from '@/components/adminer/ViewMenu';
-import { DatabaseView } from '@/components/adminer/DatabaseView';
-import { reducer } from '@/components/adminer/reducer';
+import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
 import { api } from '@/api';
-import { type Datasource, DatasourceType } from '@/types/datasource';
+import { QueryType } from '@/types/adminer/QueryType';
+import type { Datasource } from '@/types/datasource';
 
+/**
+ * Main page of Adminer, data visualization and browsing tool
+ */
 export function AdminerPage() {
-    const { datasources: allDatasources } = useLoaderData() as AdminerLoaderData;
+    const { theme } = usePreferences().preferences;
+    const { datasources } = useLoaderData() as AdminerLoaderData;
     const [ searchParams, setSearchParams ] = useSearchParams();
-    const [ state, dispatch ] = useReducer(reducer, searchParams, getStateFromURLParams);
     const [ datasource, setDatasource ] = useState<Datasource>();
+    const [ selectedQueryType, setSelectedQueryType ] = useState<QueryType>();
 
     useEffect(() => {
         if (searchParams.get('reload') === 'true')
-            dispatch({ type:'initialize' });
+            window.history.replaceState({}, '', '?' + getInitURLParams(searchParams));
+
+        const datasourceIdParam = searchParams.get('datasourceId');
+        if (datasourceIdParam !== datasource?.id)
+            setDatasource(datasources?.find(source => source.id === datasourceIdParam));
+
+        setSelectedQueryType(getQueryTypeFromURLParams(searchParams));
     }, [ searchParams ]);
 
-    useEffect(() => {
-        const params = getURLParamsFromState(state);
-
-        if (params !== searchParams)
-            setSearchParams(params);
-    }, [ state ]);
-
-    useMemo(() => {
-        setDatasource(allDatasources?.find(source => source.id === state.datasourceId));
-    }, [ state.datasourceId, allDatasources ]);
-
     return (
-        <div className='pt-4'>
-            <h1 className='text-xl font-bold mb-2'>Adminer for Multi-Model Data</h1>
-            <p className='text-muted-foreground mb-2'>Adminer for MM-cat is a tool designed to extend the functionality of MM-cat by enabling users to browse, display, and edit data across multiple database systems, including PostgreSQL, MongoDB, and Neo4j.</p>
-            <p className='text-muted-foreground italic text-default-500'>Note: This page is a separate tool and was developed by my colleague. It is not part of my bachelor thesis implementation.</p>
-            <div className='mt-5 flex flex-wrap gap-3 items-center'>
+        <div className='h-full px-8 flex flex-col'>
+            <div className={clsx(
+                'flex items-center w-full h-10 border-b px-0',
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+            )}>
+                <DatasourceMenu setDatasource={setDatasource} datasource={datasource} datasources={datasources}/>
 
-                {allDatasources ? (
-                    <DatasourceMenu dispatch={dispatch} datasourceId={state.datasourceId} datasources={allDatasources}/>
-                ) : (
-                    <div className='h-10 flex items-center justify-center'>
-                        <Spinner />
-                    </div>
-                )}
-
-                {datasource &&
-                (
-                    <>
-                        <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
-
-                        {state.kindName !== undefined && (
-                            <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
+                {datasource && (<>
+                    <ButtonGroup
+                        className='mx-2'
+                    >
+                        {Object.values(QueryType).map(queryType => (
+                            <Button
+                                size='sm'
+                                variant={queryType === selectedQueryType ? 'solid' : 'ghost'}
+                                key={queryType}
+                                onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
+                            >
+                                {queryType}
+                            </Button>
+                        ),
                         )}
-                    </>
-                )}
+                    </ButtonGroup>
+
+                    <LinkLengthSwitch/>
+                </>)}
             </div>
 
-            {datasource && state.kindName && typeof state.kindName === 'string' &&(
-                <div className='mt-5'>
-                    <DatabaseView state={state} datasources={allDatasources} dispatch={dispatch}/>
-                </div>
+            {datasource && (
+                selectedQueryType === QueryType.custom ? (
+                    <AdminerCustomQueryPage datasource={datasource} datasources={datasources} />
+                ) : (
+                    <AdminerFilterQueryPage datasource={datasource} datasources={datasources} />
+                )
             )}
         </div>
     );

@@ -1,21 +1,25 @@
 package cz.matfyz.core.adminer;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Represents a table response.
  */
 public class TableResponse extends DataResponse {
-    private List<Map<String, String>> data;
+    private List<List<String>> data;
+    private static final String TYPE = "table";
 
-    public TableResponse(List<Map<String, String>> data, int itemCount, Set<String> propertyNames){
+    public TableResponse(List<List<String>> data, long itemCount, List<String> propertyNames) {
         super(itemCount, propertyNames);
         this.data = data;
     }
 
-    public List<Map<String, String>> getData() {
+    public List<List<String>> getData() {
         return data;
     }
+
+    @Override public String getType() {
+        return TYPE;
+    }
+
 }
