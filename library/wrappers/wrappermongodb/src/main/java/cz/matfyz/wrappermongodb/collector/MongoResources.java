@@ -54,7 +54,7 @@ public class MongoResources {
         pipeline.add(new Document("$group", groupCommand));
 
         command.put("pipeline", pipeline);
-        
+
         return command;
     }
 

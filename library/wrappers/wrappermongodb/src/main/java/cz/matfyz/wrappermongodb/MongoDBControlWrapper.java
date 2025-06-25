@@ -3,10 +3,9 @@ package cz.matfyz.wrappermongodb;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.collector.AbstractWrapper.ConnectionData;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.wrappermongodb.collector.MongoWrapper;
+import cz.matfyz.wrappermongodb.collector.MongoDBCollectorWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 public class MongoDBControlWrapper extends BaseControlWrapper {
 
-    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBControlWrapper.class);
 
     @Override protected DatasourceType getType() {
@@ -95,13 +93,7 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
         return new MongoDBInferenceWrapper(provider, getSparkSettings());
     }
 
-    @Override public MongoWrapper getCollectorWrapper() {
-        return new MongoWrapper(new ConnectionData(
-            provider.settings.host(),
-            Integer.parseInt(provider.settings.port()),
-            getType().name(),
-            provider.settings.database(),
-            provider.settings.username(),
-            provider.settings.password()));
+    @Override public MongoDBCollectorWrapper getCollectorWrapper() {
+        return new MongoDBCollectorWrapper(provider);
     }
 }

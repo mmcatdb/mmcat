@@ -3,19 +3,12 @@ package cz.matfyz.wrapperpostgresql.collector.components;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.abstractwrappers.collector.components.AbstractExplainPlanParser;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
-import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 
 import java.util.List;
 import java.util.Map;
 
-public class PostgresExplainPlanParser extends AbstractExplainPlanParser<String> {
-
-
-    public PostgresExplainPlanParser(WrapperExceptionsFactory exceptionsFactory) {
-        super(exceptionsFactory);
-    }
+public class PostgresExplainPlanParser {
 
     /**
      * Method which saves the execution time of query to model
@@ -56,7 +49,7 @@ public class PostgresExplainPlanParser extends AbstractExplainPlanParser<String>
      * @param root root of the explain tree
      * @param model model to save data
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     private void _parseTree(Map<String, Object> root, DataModel model) {
         if (root.containsKey("Execution Time")) {
             _saveExecTime(root, model);
@@ -71,7 +64,7 @@ public class PostgresExplainPlanParser extends AbstractExplainPlanParser<String>
      * @param root actual node of explain tree to be parsed
      * @param model model to save important data
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     private void _parseSubTree(Map<String, Object> root, DataModel model) {
         if (root.get("Node Type") instanceof String nodeType) {
             if (nodeType.contains("Seq Scan")) {
@@ -97,15 +90,14 @@ public class PostgresExplainPlanParser extends AbstractExplainPlanParser<String>
      * @param explainTree explain tree to be parsed
      * @throws ParseException when JsonProcessingException occurs during the process
      */
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     public void parsePlan(String explainTree, DataModel model) throws ParseException {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            List result = objectMapper.readValue(explainTree, List.class);
+            List<?> result = objectMapper.readValue(explainTree, List.class);
 
-            for (Object plan: result) {
+            for (Object plan : result) {
                 if (plan instanceof Map root) {
                     _parseTree(root, model);
                 }
@@ -114,6 +106,5 @@ public class PostgresExplainPlanParser extends AbstractExplainPlanParser<String>
             throw new ParseException(e);
         }
     }
-
 
 }

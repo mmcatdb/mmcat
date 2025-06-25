@@ -2,6 +2,7 @@ package cz.matfyz.tests.benchmark;
 
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.tests.example.benchmarkyelp.Datasources;
+import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.tests.querying.QueryEstimator;
 
 import java.io.BufferedReader;
@@ -10,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,7 +76,10 @@ class BenchmarkTests {
     @Test
     void costEstimationBasic() {
         // TODO: add multiple datasources
-        final var testDatasource = datasources.postgreSQL();
+        final List<TestDatasource<?>> testDatasources = List.of(
+            datasources.postgreSQL()
+            // datasources.mongoDB()
+        );
 
         final var query = """
             SELECT {
@@ -89,20 +94,20 @@ class BenchmarkTests {
                 ?business 2 ?name .
                 ?business 6 ?review_count .
 
-                FILTER(?review_count >= "100")
+                FILTER(?review_count >= "1000")
             }
         """;
 
-        new QueryEstimator<>(
+        new QueryEstimator(
             datasources,
-            testDatasource,
+            testDatasources,
             query,
             false
         ).run();
 
-        new QueryEstimator<>(
+        new QueryEstimator(
             datasources,
-            testDatasource,
+            testDatasources,
             query,
             true
         ).run();

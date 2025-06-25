@@ -1,17 +1,12 @@
 package cz.matfyz.wrappermongodb.collector.components;
 
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.abstractwrappers.collector.components.AbstractExplainPlanParser;
+import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
-import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperUnsupportedOperationException;
 import org.bson.Document;
 
-public class MongoExplainPlanParser extends AbstractExplainPlanParser<Document> {
-
-    public MongoExplainPlanParser(WrapperExceptionsFactory exceptionsFactory) {
-        super(exceptionsFactory);
-    }
+public class MongoExplainPlanParser {
 
     /**
      * Method which parses collection name of query
@@ -26,7 +21,7 @@ public class MongoExplainPlanParser extends AbstractExplainPlanParser<Document> 
         }
 
         if (command.containsKey("aggregate")) {
-            throw getExceptionsFactory().unsupportedOperation("aggregate");
+            throw MongoExceptionsFactory.getExceptionsFactory().unsupportedOperation("aggregate");
         }
     }
 
@@ -64,7 +59,6 @@ public class MongoExplainPlanParser extends AbstractExplainPlanParser<Document> 
      * @param plan plan to be parsed
      * @throws ParseException is thrown some parsing problem occur
      */
-    @Override
     public void parsePlan(Document plan, DataModel model) throws ParseException, WrapperUnsupportedOperationException {
         _parseTableNames(model, plan.get("command", Document.class));
         _parseExecutionStats(model, plan.get("executionStats", Document.class));

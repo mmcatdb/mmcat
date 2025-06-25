@@ -1,6 +1,6 @@
 package cz.matfyz.abstractwrappers;
 
-public interface AbstractDatasourceProvider {
+public interface AbstractDatasourceProvider extends AutoCloseable {
 
     // Once created, the datasource connection should be stable, even if the credentials change. However, if the host or port changes, we have to obviously create a new connection.
     // We can therefore distinguish two types of changes: stable (credentials, label, ...) and unstable (host, port, ...). However, each datasource is different - e.g., PostgreSQL creates a new connection for each query, while MongoDB uses connection pooling. So, for each datasource, we have to decide separately.
@@ -13,11 +13,11 @@ public interface AbstractDatasourceProvider {
     /**
      * Returns whether the provider can still be used with the new settings. I.e., whether the change from the current settings to the new settings is stable.
      */
-    public abstract boolean isStillValid(Object newSettings);
+    public boolean isStillValid(Object newSettings);
 
     /**
      * If the provider is no longer needed, we should close it to free up the resources.
      */
-    public abstract void close();
+    // public abstract void close(); <- Already implemented in AutoCloseable
 
 }

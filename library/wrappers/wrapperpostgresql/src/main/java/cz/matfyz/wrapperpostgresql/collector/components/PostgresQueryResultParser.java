@@ -1,20 +1,15 @@
 package cz.matfyz.wrapperpostgresql.collector.components;
 
-import cz.matfyz.abstractwrappers.collector.components.AbstractQueryResultParser;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
-import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 import cz.matfyz.core.collector.queryresult.CachedResult;
 import cz.matfyz.core.collector.queryresult.ConsumedResult;
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultSet> {
-
-    public PostgresQueryResultParser(WrapperExceptionsFactory exceptionsFactory) {
-        super(exceptionsFactory);
-    }
+public class PostgresQueryResultParser {
 
     /**
      * Method which adds values to cached result and parse correctly parse them using metaData
@@ -66,7 +61,6 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
      * @return instance of CachedResult
      * @throws ParseException when SQLException occurs during the process
      */
-    @Override
     public CachedResult parseResultAndCache(ResultSet resultSet) throws ParseException {
         try {
             var builder = new CachedResult.Builder();
@@ -77,7 +71,7 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
             }
             return builder.toResult();
         } catch (SQLException e) {
-            throw getExceptionsFactory().cacheResultFailed(e);
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().cacheResultFailed(e);
         }
     }
 
@@ -87,7 +81,6 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
      * @return instance of ConsumedResult
      * @throws ParseException when SQLException occur during the process
      */
-    @Override
     public ConsumedResult parseResultAndConsume(ResultSet resultSet) throws ParseException {
         try {
             var builder = new ConsumedResult.Builder();
@@ -98,7 +91,7 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
             }
             return builder.toResult();
         } catch (SQLException e) {
-            throw getExceptionsFactory().consumeResultFailed(e);
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().consumeResultFailed(e);
         }
     }
 }

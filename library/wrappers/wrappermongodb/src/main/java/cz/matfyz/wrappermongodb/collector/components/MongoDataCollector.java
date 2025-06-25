@@ -1,14 +1,15 @@
 package cz.matfyz.wrappermongodb.collector.components;
 
-import cz.matfyz.abstractwrappers.collector.components.AbstractDataCollector;
-import cz.matfyz.abstractwrappers.collector.components.AbstractQueryResultParser;
-import cz.matfyz.abstractwrappers.collector.components.ExecutionContext;
 import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
 import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.MongoResources;
+import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.core.collector.queryresult.CachedResult;
 import cz.matfyz.core.collector.queryresult.ConsumedResult;
 import cz.matfyz.abstractwrappers.exception.collector.DataCollectException;
+import cz.matfyz.abstractwrappers.exception.collector.ParseException;
+import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
+
 import org.bson.Document;
 
 import java.util.*;
@@ -16,14 +17,44 @@ import java.util.*;
 /**
  * Class which is responsible for collecting all the statistical data for mongodb wrapper after query is evaluated
  */
-public class MongoDataCollector extends AbstractDataCollector<Document, Document, Document> {
+public class MongoDataCollector {
+    private final MongoConnection _connection;
+    private final MongoQueryResultParser _resultParser;
+
+    protected final String _databaseName;
+    protected final DataModel _model;
+
+
+    protected CachedResult executeQuery(Document query) throws DataCollectException {
+        try {
+            return _resultParser.parseResultAndCache(_connection.executeQuery(query));
+        } catch (QueryExecutionException | ParseException e) {
+            throw MongoExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
+        }
+    }
+
+    protected ConsumedResult executeQueryAndConsume(Document query) throws DataCollectException {
+        try {
+            return _resultParser.parseResultAndConsume(_connection.executeQuery(query));
+        } catch (QueryExecutionException | ParseException e) {
+            throw MongoExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
+        }
+    }
+
+
+
+
 
     public MongoDataCollector(
-            ExecutionContext<Document, Document, Document> context,
-            AbstractQueryResultParser<Document> resultParser,
+            DataModel dataModel,
+            MongoConnection connection,
+            MongoQueryResultParser resultParser,
             String databaseName
     ) throws ConnectionException {
-        super(databaseName, context, resultParser);
+        _databaseName = databaseName;
+        _model = dataModel;
+        _connection = connection;
+        _resultParser = resultParser;
     }
 
     // Save Dataset data
@@ -43,7 +74,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         CachedResult stats = executeQuery(MongoResources.getServerStatsCommand());
 
         if (stats.next()) {
-            long size = stats.getDocument("wiredTiger").get("cache", Document.class).getLong("maximum bytes configured");
+            long size = new Document(stats.getMap("wiredTiger")).get("cache", Document.class).getLong("maximum bytes configured");
             _model.setDatabaseCacheSize(size);
         }
     }
@@ -144,7 +175,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         CachedResult result = executeQuery(MongoResources.getCollectionInfoCommand(collectionName));
         if (result.next()) {
             if (result.containsCol("options")) {
-                boolean isRequired = _isRequiredField(result.getDocument("options"), columnName);
+                boolean isRequired = _isRequiredField(new Document(result.getMap("options")), columnName);
                 _model.setColumnMandatory(collectionName, columnName, isRequired);
             } else {
                 boolean isRequired = "_id".equals(columnName);
@@ -166,7 +197,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         while (result.next()) {
             int count = result.getInt("count");
-            String type = result.getDocument("_id").getString("fieldType");
+            String type = new Document(result.getMap("_id")).getString("fieldType");
             types.add(Map.entry(type, count));
             maxCount += count;
         }
@@ -243,7 +274,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     private void _collectIndexSizesData(String collectionName, String indexName) throws DataCollectException {
         CachedResult stats = executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
         if (stats.next()) {
-            int size = stats.getDocument("indexSizes").getInteger(indexName);
+            int size = new Document(stats.getMap("indexSizes")).getInteger(indexName);
             _model.setIndexByteSize(indexName, size);
             _model.setIndexSizeInPages(indexName, (long)Math.ceil((double)size / _model.getPageSize()));
         }
@@ -270,7 +301,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         for (String collectionName : _model.getTableNames()) {
             return collectionName;
         }
-        throw getExceptionsFactory(MongoExceptionsFactory.class).collectionNotParsed();
+        throw MongoExceptionsFactory.getExceptionsFactory().collectionNotParsed();
     }
 
     //Save Result data
@@ -313,7 +344,6 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      *  Public method which collects all the statistical data for result
      * @param result result of main query
      */
-    @Override
     public void collectData(ConsumedResult result) throws DataCollectException {
         String collName = _getCollectionName();
         _collectPageSize();

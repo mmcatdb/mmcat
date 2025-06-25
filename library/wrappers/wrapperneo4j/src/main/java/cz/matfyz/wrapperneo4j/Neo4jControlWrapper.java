@@ -5,10 +5,10 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.collector.AbstractWrapper.ConnectionData;
+import cz.matfyz.abstractwrappers.collector.AbstractCollectorWrapper.ConnectionData;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.wrapperneo4j.collector.Neo4jWrapper;
+import cz.matfyz.wrapperneo4j.collector.Neo4jCollectorWrapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -107,8 +107,8 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
         throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
     }
 
-    @Override public Neo4jWrapper getCollectorWrapper() {
-        return new Neo4jWrapper(new ConnectionData(
+    @Override public Neo4jCollectorWrapper getCollectorWrapper() {
+        return new Neo4jCollectorWrapper(new ConnectionData(
             provider.settings.host(),
             Integer.parseInt(provider.settings.port()),
             getType().name(),

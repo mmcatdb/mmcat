@@ -4,7 +4,7 @@ package cz.matfyz.wrapperpostgresql.collector;
 /**
  * Class which hold all queries used for gathering statistics data
  */
-public abstract class PostgresResources {
+public abstract class PostgreSQLResources {
     public static final String SYSTEM_NAME = "PostgreSQL";
 
     public static String getExplainPlanQuery(String query) {

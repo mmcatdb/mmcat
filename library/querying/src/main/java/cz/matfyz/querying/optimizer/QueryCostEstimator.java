@@ -40,11 +40,13 @@ public class QueryCostEstimator implements QueryVisitor<DataModel> {
     public DataModel visit(DatasourceNode node) {
         try {
             final var query = DatasourceTranslator.run(plan.context, node);
+
+            
+
             final var collector = plan.context.getProvider().getControlWrapper(node.datasource).getCollectorWrapper();
-            final var dataModel = collector.executeQuery(query.content().toString());
+            final var dataModel = collector.executeQuery(query.content());
 
-
-            final var stat = dataModel.getSomeStatistic();
+            final var stat = dataModel.toResult().resultData().resultTable().getSizeInBytes();
 
             costsOverNet.add(stat);
             return dataModel;

@@ -1,7 +1,5 @@
 package cz.matfyz.core.collector.queryresult;
 
-import org.bson.Document;
-
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
@@ -173,17 +171,16 @@ public class CachedResult {
     }
 
     /**
-     * Mathod which tries to get value from selected column as org.bson.Document
+     * Mathod which tries to get value from selected column as a Map
      * @param colName inputted column
-     * @return value as Document
+     * @return value as a Map
      */
-    public Document getDocument(String colName) {
+    public Map<String, Object> getMap(String colName) {
         Object value = _get(colName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to Document");
         } else if (value instanceof Map<?, ?> mapValue) {
-            Map<String, Object> stringMap = _parseToStringMap(mapValue);
-            return new Document(stringMap);
+            return _parseToStringMap(mapValue);
         } else {
             throw new ClassCastException();
         }

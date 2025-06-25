@@ -6,6 +6,8 @@ import { createInterface } from 'readline'
 
 const users = new Set()
 
+// FIXME: proper datatypes (not just text, because that messes up cost estimation)
+
 const initString = `
 DROP TABLE IF EXISTS "is_friend";
 DROP TABLE IF EXISTS "review";
@@ -13,42 +15,42 @@ DROP TABLE IF EXISTS "business";
 DROP TABLE IF EXISTS "yelp_user";
 
 CREATE TABLE "business" (
-    "business_id" TEXT PRIMARY KEY,
+    "business_id" CHAR(22) PRIMARY KEY,
     "name" TEXT,
     "city" TEXT,
     "state" TEXT,
-    "stars" TEXT,
-    "review_count" TEXT,
-    "is_open" TEXT
+    "stars" INTEGER,
+    "review_count" INTEGER,
+    "is_open" INTEGER
 );
 
 CREATE TABLE "yelp_user" (
-    "user_id" TEXT PRIMARY KEY,
+    "user_id" CHAR(22) PRIMARY KEY,
     "name" TEXT,
-    "review_count" TEXT,
+    "review_count" INTEGER,
     "yelping_since" TEXT,
-    "useful" TEXT,
-    "funny" TEXT,
-    "cool" TEXT
+    "useful" INTEGER,
+    "funny" INTEGER,
+    "cool" INTEGER
 );
 
 CREATE TABLE "is_friend" (
-    "user_id" TEXT,
-    "friend_id" TEXT,
+    "user_id" CHAR(22),
+    "friend_id" CHAR(22),
     PRIMARY KEY ("user_id", "friend_id"),
     CONSTRAINT fk_uid FOREIGN KEY ("user_id") REFERENCES "yelp_user" ("user_id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_fid FOREIGN KEY ("friend_id") REFERENCES "yelp_user" ("user_id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE "review" (
-    "review_id" TEXT PRIMARY KEY,
-    "user_id" TEXT,
-    "business_id" TEXT,
-    "stars" TEXT,
+    "review_id" CHAR(22) PRIMARY KEY,
+    "user_id" CHAR(22),
+    "business_id" CHAR(22),
+    "stars" INTEGER,
     "date" TEXT,
-    "useful" TEXT,
-    "funny" TEXT,
-    "cool" TEXT,
+    "useful" INTEGER,
+    "funny" INTEGER,
+    "cool" INTEGER,
     CONSTRAINT fk_uid FOREIGN KEY ("user_id") REFERENCES "yelp_user" ("user_id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_bid FOREIGN KEY ("business_id") REFERENCES "business" ("business_id") ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -62,7 +64,7 @@ function sanitize(str) {
 /** @param {string} line */
 function business(line) {
     const jsonObject = JSON.parse(line)
-    return `('${jsonObject.business_id}','${sanitize(jsonObject.name)}','${sanitize(jsonObject.city)}','${jsonObject.state}','${jsonObject.stars}','${jsonObject.review_count}','${jsonObject.is_open}')`
+    return `('${jsonObject.business_id}','${sanitize(jsonObject.name)}','${sanitize(jsonObject.city)}','${jsonObject.state}',${jsonObject.stars},${jsonObject.review_count},${jsonObject.is_open})`
 }
 
 /** @param {string} line */
@@ -71,7 +73,7 @@ function yelp_user(line) {
 
     users.add(jsonObject.user_id)
 
-    return `('${jsonObject.user_id}','${sanitize(jsonObject.name)}','${jsonObject.review_count}','${jsonObject.yelping_since}','${jsonObject.useful}','${jsonObject.funny}','${jsonObject.cool}')`
+    return `('${jsonObject.user_id}','${sanitize(jsonObject.name)}',${jsonObject.review_count},'${jsonObject.yelping_since}',${jsonObject.useful},${jsonObject.funny},${jsonObject.cool})`
 }
 
 /** @param {string} line */
@@ -79,9 +81,9 @@ function review(line) {
     const jsonObject = JSON.parse(line)
 
     if (users.has(jsonObject.user_id)) {
-        return `('${jsonObject.review_id}','${jsonObject.user_id}','${jsonObject.business_id}','${jsonObject.stars}','${jsonObject.date}','${jsonObject.useful}','${jsonObject.funny}','${jsonObject.cool}')`
+        return `('${jsonObject.review_id}','${jsonObject.user_id}','${jsonObject.business_id}',${jsonObject.stars},'${jsonObject.date}',${jsonObject.useful},${jsonObject.funny},${jsonObject.cool})`
     } else {
-        return `('${jsonObject.review_id}',NULL,'${jsonObject.business_id}','${jsonObject.stars}','${jsonObject.date}','${jsonObject.useful}','${jsonObject.funny}','${jsonObject.cool}')`
+        return `('${jsonObject.review_id}',NULL,'${jsonObject.business_id}',${jsonObject.stars},'${jsonObject.date}',${jsonObject.useful},${jsonObject.funny},${jsonObject.cool})`
     }
 }
 

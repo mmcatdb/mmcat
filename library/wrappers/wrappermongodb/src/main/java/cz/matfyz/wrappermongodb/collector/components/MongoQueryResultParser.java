@@ -1,11 +1,9 @@
 package cz.matfyz.wrappermongodb.collector.components;
 
 
-import cz.matfyz.abstractwrappers.collector.components.AbstractQueryResultParser;
-
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
-import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
+import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.MongoResources;
 import cz.matfyz.core.collector.queryresult.CachedResult;
 import cz.matfyz.core.collector.queryresult.ConsumedResult;
@@ -15,7 +13,7 @@ import org.bson.RawBsonDocument;
 
 import java.util.List;
 
-public class MongoQueryResultParser extends AbstractQueryResultParser<Document> {
+public class MongoQueryResultParser {
 
     private MongoConnection _connection = null;
 
@@ -27,10 +25,6 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
     public void removeConnection() {
         if (_connection != null)
             _connection = null;
-    }
-
-    public MongoQueryResultParser(WrapperExceptionsFactory exceptionsFactory) {
-        super(exceptionsFactory);
     }
 
     // Parse Result
@@ -46,7 +40,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
         else if (value.isBinary())
             return "binData";
         else if (value.isBoolean())
-            return  "bool";
+            return "bool";
         else if (value.isDateTime())
             return "date";
         else if (value.isDecimal128())
@@ -99,7 +93,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
 
         if (collectionName != null) {
             long cursorId = cursor.getLong("id");
-            if (cursorId != 0 && _connection != null && _connection.isOpen()) {
+            if (cursorId != 0 && _connection != null) {
                 Document result = _connection.executeQuery(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
                 _cacheCursorResult(result.get("cursor", Document.class), builder);
             }
@@ -112,7 +106,6 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
      * @return parsed CachedResult instance
      * @throws ParseException is there to implements the abstract method
      */
-    @Override
     public CachedResult parseResultAndCache(Document result) throws ParseException {
         try {
             CachedResult.Builder builder = new CachedResult.Builder();
@@ -127,7 +120,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
             }
             return builder.toResult();
         } catch (QueryExecutionException e) {
-            throw getExceptionsFactory().cacheResultFailed(e);
+            throw MongoExceptionsFactory.getExceptionsFactory().cacheResultFailed(e);
         }
     }
 
@@ -172,7 +165,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
 
         if (collectionName != null) {
             long cursorId = cursor.getLong("id");
-            if (cursorId != 0 && _connection != null && _connection.isOpen()) {
+            if (cursorId != 0 && _connection != null) {
                 Document result = _connection.executeQuery(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
                 _consumeCursorResult(result.get("cursor", Document.class), builder);
             }
@@ -185,7 +178,6 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
      * @return instance of ConsumedResult
      * @throws ParseException is there to implement abstract method
      */
-    @Override
     public ConsumedResult parseResultAndConsume(Document result) throws ParseException {
         try {
             ConsumedResult.Builder builder = new ConsumedResult.Builder();
@@ -199,7 +191,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
             }
             return builder.toResult();
         } catch (QueryExecutionException e) {
-            throw getExceptionsFactory().consumeResultFailed(e);
+            throw MongoExceptionsFactory.getExceptionsFactory().consumeResultFailed(e);
         }
     }
 }

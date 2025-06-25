@@ -1,16 +1,6 @@
 package cz.matfyz.abstractwrappers.exception.collector;
 
-// TODO: rewrite ConnectionData into ControlWrapper ... likely
-// import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.collector.AbstractWrapper;
-
 public class WrapperExceptionsFactory {
-    private final AbstractWrapper.ConnectionData _connectionData;
-
-    public WrapperExceptionsFactory(AbstractWrapper.ConnectionData connectionData) {
-        _connectionData = connectionData;
-    }
-
 
     //region ConnectionExceptions initialization
     public ConnectionException connectionIsNull() {
@@ -93,13 +83,7 @@ public class WrapperExceptionsFactory {
         private final StringBuilder _messageBuilder;
 
         public Message(String content) {
-            _messageBuilder = new StringBuilder()
-                    .append("Wrapper(system: ")
-                    .append(_connectionData.systemName())
-                    .append(", database: ")
-                    .append(_connectionData.databaseName())
-                    .append(") ")
-                    .append(content);
+            _messageBuilder = new StringBuilder().append(content);
         }
 
         public Message(String content, Throwable cause) {
@@ -112,7 +96,5 @@ public class WrapperExceptionsFactory {
         public String toString() {
             return _messageBuilder.append(".").toString();
         }
-
-
     }
 }

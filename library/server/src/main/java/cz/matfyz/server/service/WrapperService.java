@@ -75,7 +75,7 @@ public class WrapperService {
         DatasourceWrapper datasource,
         Class<TSettings> clazz,
         CreateProviderFunction<TProvider, TSettings> create
-    ) throws JsonProcessingException {
+    ) throws Exception {
         final TSettings settings = mapper.treeToValue(datasource.settings, clazz);
 
         // First, we try to get the provider from the cache. If it's there and still valid, we return it.

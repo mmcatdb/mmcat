@@ -4,7 +4,7 @@ import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.abstractwrappers.collector.components.*;
 import cz.matfyz.abstractwrappers.exception.collector.*;
 
-public abstract class AbstractWrapper<TResult, TQuery, TPlan> extends AbstractComponent implements CollectorWrapper, AutoCloseable {
+public abstract class AbstractCollectorWrapper<TResult, TQuery, TPlan> extends AbstractComponent implements CollectorWrapper, AutoCloseable {
 
     protected final ConnectionData _connectionData;
 
@@ -12,15 +12,15 @@ public abstract class AbstractWrapper<TResult, TQuery, TPlan> extends AbstractCo
 
     protected AbstractExplainPlanParser<TPlan> _explainPlanParser;
 
-    public AbstractWrapper(ConnectionData connectionData, WrapperExceptionsFactory exceptionsFactory) {
+    public AbstractCollectorWrapper(ConnectionData connectionData, WrapperExceptionsFactory exceptionsFactory) {
         super(exceptionsFactory);
         _connectionData = connectionData;
         _resultParser = createResultParser();
         _explainPlanParser = createExplainPlanParser();
     }
 
-    public AbstractWrapper(ConnectionData connectionData) {
-        super(new WrapperExceptionsFactory(connectionData));
+    public AbstractCollectorWrapper(ConnectionData connectionData) {
+        super(new WrapperExceptionsFactory());
         _connectionData = connectionData;
         _resultParser = createResultParser();
         _explainPlanParser = createExplainPlanParser();

@@ -1,6 +1,5 @@
 package cz.matfyz.wrappermongodb.collector;
 
-import cz.matfyz.abstractwrappers.collector.AbstractWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.DataCollectException;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
@@ -8,10 +7,6 @@ import cz.matfyz.wrappermongodb.collector.queryparser.CommandBuilder;
 
 public class
 MongoExceptionsFactory extends WrapperExceptionsFactory {
-    public MongoExceptionsFactory(AbstractWrapper.ConnectionData connectionData) {
-        super(connectionData);
-    }
-
     //region ParseException initialization
     public ParseException documentKeyNotFound(String key) {
         var message = new Message("key '" + key + "' was not present in document").toString();
@@ -72,4 +67,6 @@ MongoExceptionsFactory extends WrapperExceptionsFactory {
         var message = new Message("no collection was parsed from explain plan").toString();
         return new DataCollectException(message);
     }
+
+    public static MongoExceptionsFactory getExceptionsFactory() { return new MongoExceptionsFactory(); }
 }

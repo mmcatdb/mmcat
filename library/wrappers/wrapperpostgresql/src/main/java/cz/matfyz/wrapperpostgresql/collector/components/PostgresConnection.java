@@ -1,34 +1,33 @@
 package cz.matfyz.wrapperpostgresql.collector.components;
 
-import cz.matfyz.abstractwrappers.collector.components.AbstractConnection;
+import cz.matfyz.abstractwrappers.collector.components.AbstractConnection.ResultWithPlan;
 import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
-import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
-import cz.matfyz.wrapperpostgresql.collector.PostgresResources;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLResources;
 
 import java.sql.*;
 
 /**
  * Class representing connection to PostgreSQL database and enables to evaluate queries
  */
-public class PostgresConnection extends AbstractConnection<ResultSet, String, String> {
+public class PostgresConnection implements AutoCloseable {
     private final Connection _connection;
     private final Statement _statement;
-    public PostgresConnection(String link, WrapperExceptionsFactory exceptionsFactory) throws ConnectionException {
-        super(exceptionsFactory);
+    public PostgresConnection(PostgreSQLProvider provider) throws ConnectionException {
         try {
-            _connection = DriverManager.getConnection(link);
+            _connection = provider.getConnection();
             _connection.setReadOnly(true);
             _statement = _connection.createStatement();
         } catch (SQLException e) {
-            throw exceptionsFactory.connectionNotInitialized(e);
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().connectionNotInitialized(e);
         }
     }
 
-    @Override
     public ResultWithPlan<ResultSet, String> executeWithExplain(String query) throws QueryExecutionException {
         try {
-            ResultSet planResult = _statement.executeQuery(PostgresResources.getExplainPlanQuery(query));
+            ResultSet planResult = _statement.executeQuery(PostgreSQLResources.getExplainPlanQuery(query));
             String plan = null;
             if (planResult.next()) {
                 plan = planResult.getString("QUERY PLAN");
@@ -36,7 +35,7 @@ public class PostgresConnection extends AbstractConnection<ResultSet, String, St
             ResultSet result = _statement.executeQuery(query);
             return new ResultWithPlan<>(result, plan);
         } catch (SQLException e) {
-            throw getExceptionsFactory().queryExecutionWithExplainFailed(e);
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().queryExecutionWithExplainFailed(e);
         }
     }
 
@@ -46,21 +45,11 @@ public class PostgresConnection extends AbstractConnection<ResultSet, String, St
      * @return instance of CachedResult
      * @throws QueryExecutionException when SQLException or ParseException occur during the process
      */
-    @Override
     public ResultSet executeQuery(String query) throws QueryExecutionException {
         try {
             return _statement.executeQuery(query);
         } catch (SQLException e) {
-            throw getExceptionsFactory().queryExecutionFailed(e);
-        }
-    }
-
-    @Override
-    public boolean isOpen() {
-        try {
-            return !_statement.isClosed();
-        } catch (SQLException e) {
-            return false;
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().queryExecutionFailed(e);
         }
     }
 
