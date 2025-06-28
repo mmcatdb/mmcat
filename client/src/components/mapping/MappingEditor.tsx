@@ -55,7 +55,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
     return (
         <div className='relative flex h-[calc(100vh-40px)]'>
             {/* Left Panel - Form Controls */}
-            <div className='w-80 bg-content1 border-r-1 border-default-200 p-4 flex flex-col'>
+            <div className='w-80 bg-content1 border-r border-default-200 p-4 flex flex-col'>
                 <div className=''>
                     <h2 className='text-xl font-semibold'>Create Mapping</h2>
 
@@ -91,7 +91,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                 </div>
 
                 {/* Fixed footer with buttons */}
-                <div className='pt-4 border-t-1 border-default-100'>
+                <div className='pt-4 border-t border-default-100'>
                     <div className='flex gap-3 justify-end'>
                         <Button
                             color='danger'
@@ -117,7 +117,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
             </div>
 
             {/* Main Graph Area */}
-            <EditMappingGraphDisplay state={state} dispatch={dispatch} className='flex-grow' />
+            <EditMappingGraphDisplay state={state} dispatch={dispatch} className='grow' />
         </div>
     );
 }

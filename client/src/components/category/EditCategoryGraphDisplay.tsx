@@ -1,13 +1,12 @@
 import { type ReactNode, type MouseEvent, useCallback } from 'react';
-import { cn } from '../utils';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { type EditCategoryDispatch, type EditCategoryState, LeftPanelMode } from './editCategoryReducer';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
-import clsx from 'clsx';
 import { usePreferences } from '../PreferencesProvider';
+import { twJoin, twMerge } from 'tailwind-merge';
 
 type EditCategoryGraphDisplayProps = {
     state: EditCategoryState;
@@ -78,16 +77,13 @@ type CanvasDisplayProps = {
  */
 function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     const { setCanvasRef, onMouseDown, isDragging } = useCanvas();
-    const { theme } = usePreferences().preferences;
 
     return (
         <div
             ref={setCanvasRef}
-            className={cn(
-                'relative bg-canvas-light overflow-hidden',
+            className={twMerge('relative bg-canvas overflow-hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-default',
                 className,
-                theme === 'dark' && 'bg-canvas-dark',
             )}
             onMouseDown={onMouseDown}
         >
@@ -142,13 +138,11 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
         <div
             ref={setNodeRef}
             style={style}
-            className={cn('absolute w-0 h-0 select-none z-10', isDragging && 'z-20')}
+            className={twJoin('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
         >
             <div
-                className={cn(
-                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
-                    isHoverAllowed &&
-                        'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
+                className={twMerge('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
+                    isHoverAllowed && 'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
                     isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
                     isSelected && 'bg-primary-200 border-primary-500',
                     theme === 'dark' && !isSelected && 'bg-default-50 border-default-900',
@@ -205,14 +199,14 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
             d={svg.path}
             stroke={isSelected ? 'hsl(var(--heroui-primary))' : 'hsl(var(--heroui-default-500))'}
             strokeWidth='4'
-            className={cn(isHoverAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]')}
+            className={isHoverAllowed ? 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]' : undefined}
             markerEnd='url(#arrow)'
         />
 
         <text
             ref={setEdgeRef.label}
             transform={svg.label?.transform}
-            className={clsx('font-medium', !svg.label && 'hidden')}
+            className={twJoin('font-medium', !svg.label && 'hidden')}
             fill='currentColor'
             textAnchor='middle'
         >

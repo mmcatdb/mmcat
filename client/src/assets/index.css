@@ -1,34 +1,85 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-.main-scroller:not(:has(.main-scroller)) {
-    overflow: auto;
-    scrollbar-gutter: stable;
+/* This makes the dark mode work by class, not by `prefers-color-scheme`. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-    &:not(.main-scroller-no-center) {
-        scrollbar-gutter: stable both-edges;
+@plugin './hero.ts';
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+
+@theme {
+    --text-xs: 0.625rem; /* 10px */
+    --text-sm: 0.75rem; /* 12px */
+    --text-base: 0.875rem; /* 14px */
+    --text-lg: 1rem; /* 16px */
+    --text-xl: 1.25rem; /* 20px */
+    --text-2xl: 1.5rem; /* 24px */
+    --text-3xl: 1.75rem; /* 28px */
+    --text-4xl: 2rem; /* 32px */
+    --text-5xl: 2.25rem; /* 36px */
+    --text-6xl: 2.5rem; /* 40px */
+}
+
+:root {
+    --mm-canvas-color: #e4e4e7;
+}
+
+:root.dark {
+    --mm-canvas-color: #060606;
+}
+
+@theme inline {
+    --color-canvas: var(--mm-canvas-color);
+}
+
+/*
+    TODO replace this with a Tailwind CSS v4 compatible version
+
+    The default border color has changed to `currentcolor` in Tailwind CSS v4,
+    so we've added these compatibility styles to make sure everything still
+    looks the same as it did with Tailwind CSS v3.
+
+    If we ever want to remove these styles, we need to add an explicit border
+    color utility to any element that depends on these defaults.
+*/
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentcolor);
     }
+}
 
-    height: 100%;
+@utility hide-scrollbar {
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+
+    &::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+}
+
+@utility path-shadow {
+    &:hover {
+        filter: drop-shadow(0px 0px 5px rgba(103, 232, 249, 1));
+    }
+}
+
+@utility path-shadow-green {
+    filter: drop-shadow(0px 0px 5px rgba(74, 222, 128, 1));
 }
 
 @layer utilities {
-    .hide-scrollbar {
-        -ms-overflow-style: none; /* Internet Explorer 10+ */
-        scrollbar-width: none; /* Firefox */
+    .main-scroller:not(:has(.main-scroller)) {
+        overflow: auto;
+        scrollbar-gutter: stable;
 
-        &::-webkit-scrollbar {
-            display: none; /* Safari and Chrome */
+        &:not(.main-scroller-no-center) {
+            scrollbar-gutter: stable both-edges;
         }
-    }
 
-    .path-shadow:hover {
-        filter: drop-shadow(0px 0px 5px rgba(103, 232, 249, 1));
-    }
-
-    .path-shadow-green {
-        filter: drop-shadow(0px 0px 5px rgba(74, 222, 128, 1));
+        height: 100%;
     }
 }
 

@@ -3,7 +3,7 @@ import { type NodeItem, type RelationshipItem } from '@/components/adminer/graph
 import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
 import { PropertiesTable } from '@/components/adminer/graph-visualization/components/panel/PropertiesTable';
 import { CopyToClipboardButton } from '@/components/CopyToClipboardButton';
-import { capitalize } from '@/components/utils';
+import { capitalize } from '@/types/utils/common';
 
 const DETAILS_PANE_STEP_SIZE = 1000;
 

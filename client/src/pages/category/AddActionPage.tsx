@@ -282,7 +282,7 @@ function StepForm({ step, type, datasources, logicalModels, updateStep, removeSt
         rsdToCategoryStep.type = type;
 
         return (
-            <div className='mb-4 p-2 border rounded flex justify-between items-center'>
+            <div className='mb-4 p-2 border rounded-sm flex justify-between items-center'>
                 <Select
                     label='Datasources'
                     selectedKeys={new Set(rsdToCategoryStep.datasourceIds)}

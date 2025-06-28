@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Spinner, Pagination } from '@heroui/react';
@@ -20,6 +19,7 @@ import type { QueryParams } from '@/types/api/routes';
 import type { DataResponse } from '@/types/adminer/DataResponse';
 import type { AdminerFilterQueryState, KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
+import { twJoin } from 'tailwind-merge';
 
 type AdminerFilterQueryPageProps = {
     /** The selected datasource. */
@@ -83,8 +83,7 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     }, [ references, state.datasourceId, state.kindName ]);
 
     return (<>
-        <div className={clsx(
-            'grid grid-flow-col grid-rows-2 border-b px-0 py-1 gap-2',
+        <div className={twJoin('grid grid-flow-col grid-rows-2 border-b px-0 py-1 gap-2',
             theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
         )}>
             <div className='flex items-start'>

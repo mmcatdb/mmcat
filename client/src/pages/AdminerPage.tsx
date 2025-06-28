@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, ButtonGroup } from '@heroui/react';
@@ -11,6 +10,7 @@ import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
 import { api } from '@/api';
 import { QueryType } from '@/types/adminer/QueryType';
 import type { Datasource } from '@/types/datasource';
+import { twJoin } from 'tailwind-merge';
 
 /**
  * Main page of Adminer, data visualization and browsing tool
@@ -35,8 +35,7 @@ export function AdminerPage() {
 
     return (
         <div className='h-full px-8 flex flex-col'>
-            <div className={clsx(
-                'flex items-center w-full h-10 border-b px-0',
+            <div className={twJoin('flex items-center w-full h-10 border-b px-0',
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}>
                 <DatasourceMenu setDatasource={setDatasource} datasource={datasource} datasources={datasources}/>

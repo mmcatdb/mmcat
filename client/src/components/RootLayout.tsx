@@ -5,11 +5,11 @@ import { usePreferences } from './PreferencesProvider';
 import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
-import { cn } from './utils';
 import { useLocation } from 'react-router-dom';
 import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
+import { twJoin, twMerge } from 'tailwind-merge';
 
 /**
  * The main layout of the application.
@@ -24,20 +24,14 @@ export function RootLayout() {
 
     return (<>
         <ScrollToTop />
-        <div className={cn('h-screen overflow-hidden text-foreground bg-background')}>
+        <div className='h-screen overflow-hidden text-foreground bg-background'>
             <div className='flex h-full'>
                 <Sidebar />
-                <div className={cn(
-                    'flex flex-col flex-grow transition-all duration-300',
-                    isCollapsed ? 'ml-16' : 'ml-64',
-                )}>
+                <div className={twJoin('flex flex-col grow transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-64')}>
                     <CommonNavbar />
-                    <main className='flex-grow relative'>
-                        <div className={cn('absolute inset-0', isFullPage ? 'overflow-hidden flex-grow h-full' : 'overflow-y-auto')}>
-                            <div className={cn(
-                                'relative flex-grow mx-auto',
-                                isFullPage ? 'h-full' : 'max-w-5xl p-6 overflow-y-auto',
-                            )}>
+                    <main className='grow relative'>
+                        <div className={twJoin('absolute inset-0', isFullPage ? 'grow h-full overflow-hidden' : 'overflow-y-auto')}>
+                            <div className={twJoin('relative grow mx-auto', isFullPage ? 'h-full' : 'max-w-5xl p-6 overflow-y-auto')}>
                                 <Outlet />
                             </div>
                         </div>
@@ -141,12 +135,8 @@ function Breadcrumbs() {
                     <BreadcrumbItem key={crumb.path} isCurrent={isCurrent}>
                         <Link
                             to={crumb.path}
-                            className={cn(
-                                'truncate max-w-[160px]',
-                                'hover:text-default-800 focus-visible:outline-none',
-                                isCurrent
-                                    ? 'text-foreground font-semibold'
-                                    : 'text-default-800 hover:text-default-700',
+                            className={twJoin('truncate max-w-[160px] focus-visible:outline-hidden',
+                                isCurrent ? 'font-semibold text-foreground hover:text-default-800' : 'text-default-800 hover:text-default-700',
                             )}
                             title={crumb.label}
                         >
@@ -231,7 +221,7 @@ export function ThemeToggle({ className }: { className?: string }) {
                 aria-label={label}
                 onPress={() => setPreferences({ ...preferences, theme: nextValue })}
                 variant='light'
-                className={cn('w-6 h-6 min-w-6 p-0', className)}
+                className={twMerge('w-6 h-6 min-w-6 p-0', className)}
             >
                 {theme === 'dark' ? (
                     <MdOutlineDarkMode size={18} />

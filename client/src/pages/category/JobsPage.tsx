@@ -7,7 +7,6 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
 import { getJobStateIcon } from '@/components/icons/Icons';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { cn } from '@/components/utils';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
@@ -84,11 +83,7 @@ export function JobsPage() {
 
         {/* No HeroUI table here, because of grouping functionality. */}
         {Object.entries(groupedJobs).length > 0 ? (
-            <table
-                className={cn(
-                    'w-full border-collapse rounded-xl overflow-hidden shadow-sm  bg-default-50',
-                )}
-            >
+            <table className='w-full border-collapse rounded-xl overflow-hidden shadow-xs  bg-default-50'>
                 <thead>
                     <tr>
                         {showTableIDs && <th className={classNameTH}>Run ID</th>}
@@ -138,7 +133,9 @@ function groupJobsByRunId(jobs: Job[]) {
         const runId = job.runId;
         if (!acc[runId])
             acc[runId] = [];
+
         acc[runId].push(job);
+
         return acc;
     }, {} as Record<string, Job[]>);
 }
@@ -153,6 +150,7 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
             const existing = acc[job.index];
             if (!existing || new Date(job.createdAt) > new Date(existing.createdAt))
                 acc[job.index] = job;
+
             return acc;
         }, {} as Record<number, Job>),
     );

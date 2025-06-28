@@ -84,7 +84,7 @@ export function Home() {
 function HeaderSection() {
     return (
         <div className='space-y-6 text-center md:text-left'>
-            <h1 className='text-5xl font-bold text-primary-600 bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
+            <h1 className='text-5xl font-bold text-primary-600 bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                 MM-cat
             </h1>
             <p className='text-default-600 text-xl mx-auto'>
@@ -109,7 +109,7 @@ function GettingStartedSection({
     return (
         <div className='space-y-8'>
             <div className='text-center'>
-                <h2 className='text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
+                <h2 className='text-3xl font-bold bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                     Get Started in 3 Steps
                 </h2>
                 <p className='text-default-500 mt-2 max-w-2xl mx-auto'>
@@ -202,7 +202,7 @@ function SchemaCategoriesSection({
         <div className='space-y-8'>
             <div className='flex flex-col md:flex-row md:items-end justify-between gap-4'>
                 <div className='mt-5'>
-                    <h2 className='text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
+                    <h2 className='text-3xl font-bold bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                         Your Schema Categories
                     </h2>
                     <p className='text-default-500'>
@@ -227,7 +227,7 @@ function SchemaCategoriesSection({
                             variant='flat'
                             startContent={<FaPlus className='w-4 h-4' />}
                         >
-                            Example Schema ({example})
+                            Example ({example})
                         </Button>
                     ))}
                 </div>
@@ -312,7 +312,7 @@ function FeatureCard({
         <Card className='p-6 h-full flex flex-col'>
             <CardBody className='flex flex-col gap-4 h-full p-0'>
                 <div className='flex justify-center'>{icon}</div>
-                <div className='flex flex-col items-center text-center flex-grow min-h-[120px]'>
+                <div className='flex flex-col items-center text-center grow min-h-[120px]'>
                     <h3 className='text-xl font-semibold text-default-800'>
                         <span>{title}</span>
                     </h3>

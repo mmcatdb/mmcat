@@ -88,3 +88,8 @@ export function toPosition(value: FormPosition): Position {
 export function compareStringsAscii(a: string, b: string): number {
     return a < b ? -1 : (a > b ? 1 : 0);
 }
+
+/** Changes the first character of given string to upper case. */
+export function capitalize(word: string) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+}

@@ -117,7 +117,7 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
                 color='primary'
                 onPress={execute}
             >
-                    EXECUTE QUERY
+                Execute query
             </Button>
 
             <Button
@@ -125,7 +125,7 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
                 size='sm'
                 onPress={() => onQueryChange(EXAMPLE_QUERY[datasource.type])}
             >
-                    SHOW QUERY EXAMPLE
+                Show query example
             </Button>
 
             {AVAILABLE_VIEWS[datasource.type].length > 1 && (

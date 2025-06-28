@@ -1,5 +1,4 @@
 import { type ReactNode, type MouseEvent, useCallback, useMemo } from 'react';
-import { cn } from '../utils';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
@@ -8,8 +7,8 @@ import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph'
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
 import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '../graph/graphSelection';
-import clsx from 'clsx';
 import { usePreferences } from '../PreferencesProvider';
+import { twJoin, twMerge } from 'tailwind-merge';
 
 type EditMappingGraphDisplayProps = {
     /** The current state of the mapping editor. */
@@ -96,13 +95,13 @@ type CanvasDisplayProps = {
  */
 function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     const { setCanvasRef, onMouseDown, isDragging } = useCanvas();
-    const { theme } = usePreferences().preferences;
 
     return (
         <div
             ref={setCanvasRef}
-            className={cn('relative bg-canvas-light overflow-hidden', isDragging ? 'cursor-grabbing' : 'cursor-default', className,
-                theme === 'dark' && 'bg-default-100',
+            className={twMerge('relative bg-canvas overflow-hidden',
+                isDragging ? 'cursor-grabbing' : 'cursor-default',
+                className,
             )}
             onMouseDown={onMouseDown}
         >
@@ -173,25 +172,24 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
         <div
             ref={setNodeRef}
             style={style}
-            className={cn('absolute w-0 h-0 select-none z-10', isDragging && 'z-20')}
+            className={twJoin('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
         >
             <div
-                className={cn(
+                className={twMerge(
                     'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2',
                     // Root node styling.
-                    isRoot && [
-                        'bg-success border-success-700',
-                    ],
+                    isRoot && 'bg-success border-success-700',
                     // Normal styling only applied if not root.
                     !isRoot && [
                         'border-default-600 bg-background',
-                        isHoverAllowed && isSelectionAllowed &&
-                            'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
+                        isHoverAllowed && isSelectionAllowed && 'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
                         isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
                         isSelected && 'bg-primary-200 border-primary-500',
-                        theme === 'dark' && !isSelected && 'bg-default-200 border-default-900',
-                        theme === 'dark' && isSelected && 'bg-primary-400 border-primary-600',
-                        theme === 'dark' && isHoverAllowed && isSelectionAllowed && 'active:bg-primary-500 active:border-default-900',
+                        theme === 'dark' && [
+                            !isSelected && 'bg-default-200 border-default-900',
+                            isSelected && 'bg-primary-400 border-primary-600',
+                            isHoverAllowed && isSelectionAllowed && 'active:bg-primary-500 active:border-default-900',
+                        ],
                         pathNode && pathClasses[pathNode.pathCount],
                     ],
                 )}
@@ -200,8 +198,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
             />
 
             <div className='w-fit h-0'>
-                <span className={cn(
-                    'relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]',
+                <span className={twMerge('relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]',
                     isRoot && 'text-success-600 font-bold',
                 )}>
                     {isRoot && 'root:'} {node.metadata.label}
@@ -303,9 +300,11 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
             d={svg.path}
             stroke={isSelected ? 'hsl(var(--heroui-primary))' : 'hsl(var(--heroui-default-500))'}
             strokeWidth='4'
-            className={cn('text-zinc-600',
-                isHoverAllowed && isSelectionAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]',
-                pathEdge && isSelectionAllowed && 'path-shadow-green',
+            className={twMerge('text-zinc-600',
+                isSelectionAllowed && [
+                    isHoverAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]',
+                    pathEdge && 'path-shadow-green',
+                ],
             )}
             markerEnd='url(#arrow)'
         />
@@ -313,7 +312,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
         <text
             ref={setEdgeRef.label}
             transform={svg.label?.transform}
-            className={clsx('font-medium', !svg.label && 'hidden')}
+            className={twJoin('font-medium', !svg.label && 'hidden')}
             fill='currentColor'
             textAnchor='middle'
         >

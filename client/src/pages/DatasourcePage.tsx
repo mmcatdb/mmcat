@@ -295,8 +295,6 @@ type DatasourceDetailInfoBannerProps = {
 
 export function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
     return (
-        // <div className={cn('relative', className)}>
-        //     <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
         <InfoBanner className={className} dismissBanner={dismissBanner}>
             <button
                 onClick={dismissBanner}

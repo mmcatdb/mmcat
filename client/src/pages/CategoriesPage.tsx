@@ -126,7 +126,7 @@ export function CategoriesPage() {
             {isVisible && <SchemaCategoryInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
             {/* Action Bar (Search + Buttons) */}
-            <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-sm mb-4'>
+            <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-xs mb-4'>
                 {/* Search Input */}
                 <Input
                     type='text'

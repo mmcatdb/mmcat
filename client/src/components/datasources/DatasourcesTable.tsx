@@ -7,7 +7,6 @@ import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
-import { cn } from '../utils';
 
 type DatasourcesTableProps = {
     /** List of datasources to display. */
@@ -205,17 +204,11 @@ function DatasourceTable({
                 {[
                     ...(showTableIDs
                         ? [
-                            <TableColumn key='id' allowsSorting>
-                                      ID
-                            </TableColumn>,
+                            <TableColumn key='id' allowsSorting>ID</TableColumn>,
                         ]
                         : []),
-                    <TableColumn key='label' allowsSorting>
-                            Label
-                    </TableColumn>,
-                    <TableColumn key='type' allowsSorting>
-                            Type
-                    </TableColumn>,
+                    <TableColumn key='label' allowsSorting>Label</TableColumn>,
+                    <TableColumn key='type' allowsSorting>Type</TableColumn>,
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
@@ -223,24 +216,14 @@ function DatasourceTable({
                 {datasources.map(datasource => {
                     const hasMappings = datasourcesWithMappings.includes(datasource.id);
                     return (
-                        <TableRow
-                            key={datasource.id}
-                            className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
-                        >
+                        <TableRow key={datasource.id} className='cursor-pointer hover:bg-default-100 focus:bg-default-200'>
                             {[
                                 ...(showTableIDs
                                     ? [ <TableCell key='id'>{datasource.id}</TableCell> ]
                                     : []),
                                 <TableCell key='label'>{datasource.label}</TableCell>,
                                 <TableCell key='type'>{datasource.type}</TableCell>,
-                                <TableCell
-                                    key='actions'
-                                    title={
-                                        hasMappings
-                                            ? 'Delete disabled - datasource has active mappings'
-                                            : 'Delete datasource'
-                                    }
-                                >
+                                <TableCell key='actions' title='Delete datasource'>
                                     <Button
                                         isIconOnly
                                         aria-label='Delete'
@@ -251,14 +234,8 @@ function DatasourceTable({
                                                 handleDeleteClick(datasource.id);
 
                                         }}
-                                        title={
-                                            hasMappings
-                                                ? 'Delete disabled - datasource has active mappings'
-                                                : 'Delete datasource'
-                                        }
-                                        className={cn(
-                                            hasMappings && 'opacity-50 pointer-events-auto cursor-not-allowed',
-                                        )}
+                                        title='Delete datasource'
+                                        disabled={hasMappings}
                                     >
                                         <TrashIcon className='w-5 h-5' />
                                     </Button>
