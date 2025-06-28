@@ -1,4 +1,4 @@
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
 import { Action, ActionType, type JobPayload } from '@/types/action';
 import { useState } from 'react';
 import { api } from '@/api';

@@ -1,4 +1,4 @@
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { Tooltip } from '@/components/common';
 import { BsWindowSidebar } from 'react-icons/bs';

@@ -1,4 +1,4 @@
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import type { DataResponse } from '@/types/adminer/DataResponse';
 
 type ExportComponentProps = {

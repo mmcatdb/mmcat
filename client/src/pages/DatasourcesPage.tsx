@@ -5,7 +5,7 @@ import { api } from '@/api';
 import { Datasource } from '@/types/datasource';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
-import { Button, Tooltip } from '@nextui-org/react';
+import { Button, Tooltip } from '@heroui/react';
 import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
@@ -74,10 +74,10 @@ export function DatasourcesPage() {
 
             {/* Table Section */}
             {datasources.length > 0 ? (
-                <DatasourcesTable 
-                    datasources={datasources} 
+                <DatasourcesTable
+                    datasources={datasources}
                     deleteDatasource={id => {
-                        void deleteDatasource(id); 
+                        void deleteDatasource(id);
                     }}
                     datasourcesWithMappings={data.datasourcesWithMappings}
                 />
@@ -110,7 +110,7 @@ async function datasourcesLoader(): Promise<DatasourcesLoaderData> {
         api.datasources.getAllDatasources({}),
         api.mappings.getAllMappings({}),
     ]);
-    
+
     if (!datasourcesResponse.status || !mappingsResponse.status)
         throw new Error('Failed to load datasources');
 
@@ -132,7 +132,7 @@ type DatasourcesInfoBannerProps = {
 export function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button 
+            <button
                 onClick={dismissBanner}
                 className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
             >

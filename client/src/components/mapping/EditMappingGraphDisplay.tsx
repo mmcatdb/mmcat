@@ -301,7 +301,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
             ref={setEdgeRef.path}
             onClick={onClick}
             d={svg.path}
-            stroke={isSelected ? 'hsl(var(--nextui-primary))' : 'hsl(var(--nextui-default-500))'}
+            stroke={isSelected ? 'hsl(var(--heroui-primary))' : 'hsl(var(--heroui-default-500))'}
             strokeWidth='4'
             className={cn('text-zinc-600',
                 isHoverAllowed && isSelectionAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]',

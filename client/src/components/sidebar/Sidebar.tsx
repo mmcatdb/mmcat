@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, matchPath, useParams } from 'react-router-dom';
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@nextui-org/react';
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@heroui/react';
 import { routes } from '@/routes/routes';
 import { SidebarIconKey, sidebarIconMap } from '@/components/icons/Icons';
 import { usePreferences } from '../PreferencesProvider';

@@ -2,7 +2,7 @@ import { api } from '@/api';
 import { Job, JobState } from '@/types/job';
 import { type Dispatch, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { getJobStateTextStyle } from '@/components/icons/Icons';
 import { cn } from '@/components/utils';

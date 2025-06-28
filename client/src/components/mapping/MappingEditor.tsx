@@ -4,7 +4,7 @@ import { type Category } from '@/types/schema';
 import { type Dispatch, useCallback, useReducer } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
 import { type Mapping } from '@/types/mapping';
-import { Button, Input } from '@nextui-org/react';
+import { Button, Input } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { type CategoryGraph } from '../category/categoryGraph';

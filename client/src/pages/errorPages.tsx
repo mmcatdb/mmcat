@@ -1,5 +1,5 @@
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
-import { Button, Spinner } from '@nextui-org/react';
+import { Button, Spinner } from '@heroui/react';
 import { cn } from '@/components/utils';
 
 type RouteError = {

@@ -2,7 +2,7 @@ import { api } from '@/api';
 import { Job } from '@/types/job';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Chip, Tooltip } from '@nextui-org/react';
+import { Chip, Tooltip } from '@heroui/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
 import { getJobStateIcon } from '@/components/icons/Icons';
@@ -82,7 +82,7 @@ export function JobsPage() {
 
         {isVisible && <JobInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
-        {/* no NextUI (HeroUI) table here, because of grouping functionality */}
+        {/* No HeroUI table here, because of grouping functionality. */}
         {Object.entries(groupedJobs).length > 0 ? (
             <table
                 className={cn(

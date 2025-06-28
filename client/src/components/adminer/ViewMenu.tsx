@@ -1,4 +1,4 @@
-import { Button, ButtonGroup } from '@nextui-org/react';
+import { Button, ButtonGroup } from '@heroui/react';
 import { AVAILABLE_VIEWS } from './Views';
 import type { DatasourceType } from '@/types/datasource';
 import type { View } from '@/types/adminer/View';

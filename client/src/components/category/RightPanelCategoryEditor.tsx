@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Input, Radio, RadioGroup } from '@nextui-org/react';
+import { Button, Input, Radio, RadioGroup } from '@heroui/react';
 import { RightPanelMode, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
 import { cn } from '../utils';
 import { type FormPosition, toFormNumber, toNumber, toPosition } from '@/types/utils/common';

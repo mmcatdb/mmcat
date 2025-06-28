@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Button, Navbar, Breadcrumbs as NextUIBreadcrumbs, BreadcrumbItem, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react';
+import { Button, Navbar, Breadcrumbs as HeroUIBreadcrumbs, BreadcrumbItem, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences } from './PreferencesProvider';
 import { Tooltip } from './common';
@@ -129,7 +129,7 @@ function Breadcrumbs() {
     }, [ matches ]);
 
     return (
-        <NextUIBreadcrumbs
+        <HeroUIBreadcrumbs
             separator={
                 <span className='mx-1 text-default-400 select-none'>/</span>
             }
@@ -155,7 +155,7 @@ function Breadcrumbs() {
                     </BreadcrumbItem>
                 );
             })}
-        </NextUIBreadcrumbs>
+        </HeroUIBreadcrumbs>
     );
 }
 

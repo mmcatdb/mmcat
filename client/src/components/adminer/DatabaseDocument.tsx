@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Divider } from '@nextui-org/react';
+import { Divider } from '@heroui/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { getDocumentFromGraphData } from '@/components/adminer/reshapeData';
 import type { Datasource } from '@/types/datasource/Datasource';

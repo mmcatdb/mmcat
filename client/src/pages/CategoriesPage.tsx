@@ -3,7 +3,7 @@ import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTab
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, Input, Tooltip } from '@nextui-org/react';
+import { Button, Input, Tooltip } from '@heroui/react';
 import { AddSchemaModal } from './Home';
 import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
@@ -94,7 +94,7 @@ export function CategoriesPage() {
                         </button>
                     </Tooltip>
                 </div>
-                
+
                 <div className='flex gap-2'>
                     <Button
                         onPress={() => setIsModalOpen(true)}
@@ -109,7 +109,7 @@ export function CategoriesPage() {
                         <Button
                             key={example}
                             onPress={() => {
-                                void createSchema(example, true); 
+                                void createSchema(example, true);
                             }}
                             isLoading={isCreatingExampleSchema}
                             color='secondary'

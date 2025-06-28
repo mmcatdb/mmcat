@@ -1,10 +1,9 @@
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
-import { type SortDescriptor } from '@react-types/shared';
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, type SortDescriptor } from '@heroui/react';
 import { useState, useMemo } from 'react';
 
 /**
- * Hook to manage sorting of data for NextUI tables.
- * using SortDescriptor for NextUI's 2.0 Table onSortChange()
+ * Hook to manage sorting of data for HeroUI tables.
+ * Using SortDescriptor for HeroUI's 2.0 Table onSortChange()
  */
 export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescriptor) {
     const [ sortDescriptor, setSortDescriptor ] = useState<SortDescriptor>(initialSortDescriptor);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { LinkComponent } from '@/components/adminer/LinkComponent';
 import { getHrefFromReference } from '@/components/adminer/URLParamsState';
 import type { Datasource } from '@/types/datasource/Datasource';

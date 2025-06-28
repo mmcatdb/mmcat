@@ -2,7 +2,7 @@ import { api } from '@/api';
 import { type Id } from '@/types/id';
 import { Session } from '@/types/job';
 import cookies from '@/types/utils/cookies';
-import { Button, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Button, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useCategoryInfo } from './CategoryInfoProvider';
 
@@ -88,7 +88,6 @@ export function SessionSelect() {
                     </SelectItem>
                 ))}
             </Select>
-
             <Button onClick={createSession}>
                 New session
             </Button>

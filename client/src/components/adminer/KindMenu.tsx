@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Spinner, Select, SelectItem } from '@nextui-org/react';
+import { Spinner, Select, SelectItem } from '@heroui/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { api } from '@/api';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';

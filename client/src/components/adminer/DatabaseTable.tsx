@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@heroui/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { getTableFromGraphData } from '@/components/adminer/reshapeData';
 import type { Datasource } from '@/types/datasource/Datasource';

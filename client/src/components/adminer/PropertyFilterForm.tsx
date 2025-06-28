@@ -1,4 +1,4 @@
-import { Input, Select, SelectItem, Button, Autocomplete, AutocompleteItem } from '@nextui-org/react';
+import { Input, Select, SelectItem, Button, Autocomplete, AutocompleteItem } from '@heroui/react';
 import { IoTrashBin } from 'react-icons/io5';
 import { OPERATOR_MAPPING, UNARY_OPERATORS, type Operator } from '@/types/adminer/Operators';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
@@ -50,7 +50,7 @@ export function PropertyFilterForm({ filter, datasourceType, propertyNames, disp
                 required
             >
                 {operators ? Object.entries(operators).map(([ key, label ]) => (
-                    <SelectItem key={key} value={key}>
+                    <SelectItem key={key}>
                         {label}
                     </SelectItem>
                 )) : []}

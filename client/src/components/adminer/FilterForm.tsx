@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, Input } from '@nextui-org/react';
+import { Button, Input } from '@heroui/react';
 import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 import { PropertyFilterForm } from '@/components/adminer/PropertyFilterForm';

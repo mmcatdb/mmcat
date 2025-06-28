@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { ReferenceComponent } from '@/components/adminer/ReferenceComponent';
 import type { Datasource } from '@/types/datasource/Datasource';

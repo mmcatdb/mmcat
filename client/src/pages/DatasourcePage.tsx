@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { type Params, useLoaderData, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type Settings } from '@/types/datasource';
-import { Button, Input, Tooltip } from '@nextui-org/react';
+import { Button, Input, Tooltip } from '@heroui/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
@@ -203,9 +203,7 @@ function DatasourceDisplay() {
                     </button>
                 </Tooltip>
             </div>
-
             {isVisible && <DatasourceDetailInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
-
             <div className='mb-6 p-4 bg-default-50 rounded-lg'>
                 <div className='flex gap-8'>
                     <div>
@@ -218,7 +216,6 @@ function DatasourceDisplay() {
                     </div>
                 </div>
             </div>
-
             {!isEditing ? (
                 // View Mode
                 <div className='mb-6'>
@@ -270,7 +267,6 @@ function DatasourceDisplay() {
                     </form>
                 </div>
             )}
-
             <div>
                 <Button
                     size='sm'
@@ -308,7 +304,6 @@ export function DatasourceDetailInfoBanner({ className, dismissBanner }: Datasou
             >
                 <HiXMark className='w-5 h-5' />
             </button>
-
             <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
             <ul className='mt-2 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>

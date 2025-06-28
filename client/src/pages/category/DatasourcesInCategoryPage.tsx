@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/TableCommon';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
 import { RiMapPin2Line } from 'react-icons/ri';
-import { Button, Tooltip } from '@nextui-org/react';
+import { Button, Tooltip } from '@heroui/react';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
@@ -72,21 +72,21 @@ export function DatasourcesInCategoryPage() {
                         <p className='text-default-500 mt-2'>
                             To add a mapping, follow these quick steps:
                         </p>
-    
+
                         <div className='mt-4 text-default-600 text-sm space-y-2 flex flex-col items-center'>
                             <div className='flex items-center gap-2'>
                                 <FaMagnifyingGlass />
-                                <span className='font-bold'> Check:</span> 
+                                <span className='font-bold'> Check:</span>
                                 <em>Other Datasources Table</em>
                             </div>
                             <div className='flex items-center gap-2'>
                                 <RiMapPin2Line />
-                                <span className='font-bold'> Select:</span> 
+                                <span className='font-bold'> Select:</span>
                                 Your desired datasource
                             </div>
                             <div className='flex items-center gap-2'>
                                 <FaPlus />
-                                <span className='font-bold'> Click on:</span> 
+                                <span className='font-bold'> Click on:</span>
                                 <span className='text-default-600 font-medium'>+ Add Mapping</span>
                             </div>
                         </div>
@@ -148,7 +148,7 @@ async function datasourcesInCategoryLoader({ params: { categoryId } }: { params:
         api.datasources.getAllDatasources({}),
         api.mappings.getAllMappings({}), // Get ALL mappings to check for datasources used elsewhere
     ]);
-    
+
     if (!inCategoryResponse.status || !allResponse.status || !allMappingsResponse.status)
         throw new Error('Failed to load datasources in category');
 
@@ -176,8 +176,8 @@ type MappingInfoBannerProps = {
 export function MappingInfoBanner({ className, dismissBanner }: MappingInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button 
-                onClick={dismissBanner} 
+            <button
+                onClick={dismissBanner}
                 className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
             >
                 <HiXMark className='w-5 h-5' />
@@ -186,12 +186,12 @@ export function MappingInfoBanner({ className, dismissBanner }: MappingInfoBanne
             <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>
 
             <p className='text-sm'>
-                Before creating a <strong>Mapping</strong>, you need to connect a <strong>Data Source</strong>.  
-                A Data Source represents where your data is stored, such as a database, or file.  
+                Before creating a <strong>Mapping</strong>, you need to connect a <strong>Data Source</strong>.
+                A Data Source represents where your data is stored, such as a database, or file.
             </p>
 
             <p className='text-sm mt-2'>
-                Once a Data Source is connected, you can create a <em>Mapping</em> on a <em>Schema Category</em>, linking the source to the <em>Conceptual Schema</em>.  
+                Once a Data Source is connected, you can create a <em>Mapping</em> on a <em>Schema Category</em>, linking the source to the <em>Conceptual Schema</em>.
                 A <strong>Mapping</strong> defines how data is structured and stored, using a <em>JSON-like access path</em> to describe relationships between objects.
             </p>
 

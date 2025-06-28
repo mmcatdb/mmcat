@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Spinner, Pagination } from '@nextui-org/react';
+import { Spinner, Pagination } from '@heroui/react';
 import { api } from '@/api';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { getFilterQueryStateFromURLParams, getFiltersURLParam, getURLParamsFromFilterQueryState } from '@/components/adminer/URLParamsState';

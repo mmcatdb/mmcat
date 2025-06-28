@@ -9,7 +9,7 @@ import { lintKeymap } from '@codemirror/lint';
 import { materialLight, materialDark } from '@uiw/codemirror-theme-material';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
 import { javascript } from '@codemirror/lang-javascript';
-import { Button, Select, SelectItem } from '@nextui-org/react';
+import { Button, Select, SelectItem } from '@heroui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { usePreferences } from '@/components/PreferencesProvider';

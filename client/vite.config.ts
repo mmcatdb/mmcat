@@ -16,7 +16,6 @@ export default defineConfig(({ mode }) => {
                     data: {
                         app_version: process.env.npm_package_version,
                         head: defineHead(env),
-                        abc: 'aaaaa',
                     },
                 },
             }),

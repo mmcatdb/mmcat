@@ -1,4 +1,4 @@
-import { Button, Input, Select, SelectItem } from '@nextui-org/react';
+import { Button, Input, Select, SelectItem } from '@heroui/react';
 import { useEffect, useState } from 'react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
@@ -41,7 +41,7 @@ export function AddActionPage() {
             setDatasources(datasourcesFromServer.map(Datasource.fromServer));
         }
 
-        fetchDatasourcesAndMappings();
+        void fetchDatasourcesAndMappings();
     }, [ category.id ]);
 
     function addStep() {
@@ -74,11 +74,11 @@ export function AddActionPage() {
 
         // Validate that each step has at least one datasource selected
         const hasInvalidSteps = steps.some(step => {
-            if (step.type === ActionType.ModelToCategory || step.type === ActionType.CategoryToModel) 
+            if (step.type === ActionType.ModelToCategory || step.type === ActionType.CategoryToModel)
                 return !step.datasourceId;
-            else if (step.type === ActionType.RSDToCategory) 
+            else if (step.type === ActionType.RSDToCategory)
                 return step.datasourceIds.length === 0;
-            
+
             return true;
         });
 
@@ -97,7 +97,7 @@ export function AddActionPage() {
                 payloads: steps,
             };
             const response = await api.actions.createAction({}, newAction);
-            if (!response.status) 
+            if (!response.status)
                 throw new Error('Failed to create action');
 
             toast.success('Action created successfully.');
@@ -161,7 +161,7 @@ export function AddActionPage() {
                 <Button
                     color='primary'
                     onPress={() => {
-                        void handleSubmit(); 
+                        void handleSubmit();
                     }}
                     isLoading={loading}
                 >

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Tooltip } from '@nextui-org/react';
+import { Tooltip } from '@heroui/react';
 import { routes } from '@/routes/routes';
 import { usePreferences } from '@/components/PreferencesProvider';
 import type { KindReference } from '@/types/adminer/AdminerReferences';

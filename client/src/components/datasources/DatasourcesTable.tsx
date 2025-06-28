@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button, type SortDescriptor } from '@heroui/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/datasource';
 import { useNavigate, useParams } from 'react-router-dom';
-import { type SortDescriptor } from '@react-types/shared';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
 import { routes } from '@/routes/routes';
