@@ -99,7 +99,7 @@ async function actionsLoader({ params: { categoryId } }: { params: Params<'categ
         throw new Error('Failed to load actions');
 
     return {
-        actions: response.data.map(Action.fromServer),
+        actions: response.data.map(Action.fromResponse),
     };
 }
 

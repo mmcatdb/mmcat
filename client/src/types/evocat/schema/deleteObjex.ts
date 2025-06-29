@@ -1,9 +1,9 @@
-import { type Category, MetadataObjex, type MetadataObjexFromServer, Objex, SchemaObjex, type SchemaObjexFromServer } from '@/types/schema';
-import { type SMO, type SMOFromServer, SMOType } from './smo';
+import { type Category, MetadataObjex, type MetadataObjexResponse, Objex, SchemaObjex, type SchemaObjexResponse } from '@/types/schema';
+import { type SMO, type SMOResponse, SMOType } from './smo';
 
-export type DeleteObjexFromServer = SMOFromServer<SMOType.DeleteObjex> & {
-    schema: SchemaObjexFromServer;
-    metadata: MetadataObjexFromServer;
+export type DeleteObjexResponse = SMOResponse<SMOType.DeleteObjex> & {
+    schema: SchemaObjexResponse;
+    metadata: MetadataObjexResponse;
 };
 
 export class DeleteObjex implements SMO<SMOType.DeleteObjex> {
@@ -14,14 +14,14 @@ export class DeleteObjex implements SMO<SMOType.DeleteObjex> {
         readonly metadata: MetadataObjex,
     ) {}
 
-    static fromServer(input: DeleteObjexFromServer): DeleteObjex {
+    static fromResponse(input: DeleteObjexResponse): DeleteObjex {
         return new DeleteObjex(
-            SchemaObjex.fromServer(input.schema),
-            MetadataObjex.fromServer(input.metadata),
+            SchemaObjex.fromResponse(input.schema),
+            MetadataObjex.fromResponse(input.metadata),
         );
     }
 
-    toServer(): DeleteObjexFromServer {
+    toServer(): DeleteObjexResponse {
         return {
             type: SMOType.DeleteObjex,
             schema: this.schema.toServer(),

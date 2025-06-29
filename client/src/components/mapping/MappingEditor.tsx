@@ -1,7 +1,7 @@
-import { EditMappingGraphDisplay } from './EditMappingGraphDisplay';
-import { createInitialState, type EditMappingAction, editMappingReducer, type EditMappingState, EditorPhase } from './editMappingReducer';
+import { MappingEditorGraph } from './MappingEditorGraph';
+import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch } from './useMappingEditor';
 import { type Category } from '@/types/schema';
-import { type Dispatch, useCallback, useReducer } from 'react';
+import { type Dispatch, useCallback } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
 import { type Mapping } from '@/types/mapping';
 import { Button, Input } from '@heroui/react';
@@ -11,7 +11,7 @@ import { type CategoryGraph } from '../category/categoryGraph';
 import { getPathSignature } from '../graph/graphUtils';
 
 type MappingEditorProps = {
-    /** The schema category being edited. */
+    /** The schema category to which the mapping belongs. */
     category: Category;
     /** The initial mapping to edit. */
     mapping: Mapping;
@@ -27,7 +27,8 @@ type MappingEditorProps = {
  * Renders the mapping editor with a graph display and panels for root selection and access path building.
  */
 export function MappingEditor({ category, mapping, kindName, setKindName, onSave, datasourceLabel }: MappingEditorProps) {
-    const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
+    const { state, dispatch } = useMappingEditor(category, mapping);
+
     const navigate = useNavigate();
 
     const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => {
@@ -36,8 +37,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
 
     function handleSetRoot() {
         if (state.selection instanceof FreeSelection && !state.selection.isEmpty) {
-            const rootNodeId = state.selection.nodeIds.values().next().value;
-            // @ts-expect-error FIXME
+            const rootNodeId = state.selection.nodeIds.values().next().value!;
             dispatch({ type: 'set-root', rootNodeId });
         }
     }
@@ -117,7 +117,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
             </div>
 
             {/* Main Graph Area */}
-            <EditMappingGraphDisplay state={state} dispatch={dispatch} className='grow' />
+            <MappingEditorGraph state={state} dispatch={dispatch} className='grow' />
         </div>
     );
 }
@@ -187,8 +187,8 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
 }
 
 type StateDispatchProps = {
-    state: EditMappingState;
-    dispatch: React.Dispatch<EditMappingAction>;
+    state: MappingEditorState;
+    dispatch: MappingEditorDispatch;
 };
 
 /**

@@ -1,8 +1,8 @@
 import { type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { MappingEditor } from '@/components/mapping/MappingEditor';
-import { Mapping, type MappingFromServer, type MappingInit } from '@/types/mapping';
-import { type KeyFromServer, type SignatureIdFromServer } from '@/types/identifiers';
+import { Mapping, type MappingResponse, type MappingInit } from '@/types/mapping';
+import { type KeyResponse, type SignatureIdResponse } from '@/types/identifiers';
 import { toast } from 'react-toastify';
 import { useState } from 'react';
 import { Category } from '@/types/schema';
@@ -27,13 +27,13 @@ export function NewMappingPage() {
         return null;
     }
 
-    const initialMappingData: MappingFromServer = {
+    const initialMappingData: MappingResponse = {
         id: '',
         kindName,
         categoryId: category.id,
         datasourceId: datasourceId,
-        rootObjexKey: 0 as KeyFromServer,
-        primaryKey: [ 'EMPTY' ] as SignatureIdFromServer,
+        rootObjexKey: 0 as KeyResponse,
+        primaryKey: [ 'EMPTY' ] as SignatureIdResponse,
         accessPath: {
             name: { value: 'root' },
             signature: 'EMPTY',
@@ -42,7 +42,7 @@ export function NewMappingPage() {
         version: '',
     };
 
-    const initialMapping = Mapping.fromServer(initialMappingData);
+    const initialMapping = Mapping.fromResponse(initialMappingData);
 
     async function handleSaveMapping(mapping: Mapping, finalKindName: string) {
         const mappingInit: MappingInit = {
@@ -91,5 +91,5 @@ async function newMappingLoader({ params: { categoryId } }: { params: Params<'ca
     if (!categoryResponse.status)
         throw new Error('Failed to load category');
 
-    return { category: Category.fromServer(categoryResponse.data) };
+    return { category: Category.fromResponse(categoryResponse.data) };
 }

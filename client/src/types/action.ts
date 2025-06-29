@@ -1,12 +1,12 @@
 import type { Entity, Id, VersionId } from './id';
-import {  Datasource, type DatasourceFromServer } from './datasource';
-import { MappingInfo, type MappingInfoFromServer } from './mapping';
+import {  Datasource, type DatasourceResponse } from './datasource';
+import { MappingInfo, type MappingInfoResponse } from './mapping';
 
-export type ActionFromServer = {
+export type ActionResponse = {
     id: Id;
     categoryId: Id;
     label: string;
-    payloads: JobPayloadFromServer[];
+    payloads: JobPayloadResponse[];
 };
 
 export class Action implements Entity {
@@ -17,12 +17,12 @@ export class Action implements Entity {
         public readonly payloads: JobPayload[],
     ) {}
 
-    static fromServer(input: ActionFromServer): Action {
+    static fromResponse(input: ActionResponse): Action {
         return new Action(
             input.id,
             input.categoryId,
             input.label,
-            input.payloads.map(jobPayloadFromServer),
+            input.payloads.map(jobPayloadFromResponse),
         );
     }
 }
@@ -66,20 +66,20 @@ export type JobPayload =
     | RSDToCategoryPayload
     ;
 
-export type JobPayloadFromServer<T extends ActionType = ActionType> = {
+export type JobPayloadResponse<T extends ActionType = ActionType> = {
     type: T;
 };
 
-export function jobPayloadFromServer(input: JobPayloadFromServer): JobPayload {
+export function jobPayloadFromResponse(input: JobPayloadResponse): JobPayload {
     switch (input.type) {
     case ActionType.ModelToCategory:
-        return ModelToCategoryPayload.fromServer(input as ModelToCategoryPayloadFromServer);
+        return ModelToCategoryPayload.fromResponse(input as ModelToCategoryPayloadResponse);
     case ActionType.CategoryToModel:
-        return CategoryToModelPayload.fromServer(input as CategoryToModelPayloadFromServer);
+        return CategoryToModelPayload.fromResponse(input as CategoryToModelPayloadResponse);
     case ActionType.UpdateSchema:
-        return UpdateSchemaPayload.fromServer(input as UpdateSchemaPayloadFromServer);
+        return UpdateSchemaPayload.fromResponse(input as UpdateSchemaPayloadResponse);
     case ActionType.RSDToCategory:
-        return RSDToCategoryPayload.fromServer(input as RSDToCategoryPayloadFromServer);
+        return RSDToCategoryPayload.fromResponse(input as RSDToCategoryPayloadResponse);
     }
 }
 
@@ -93,9 +93,9 @@ export type JobPayloadInit = {
     datasourceIds: Id[];
 };
 
-type ModelToCategoryPayloadFromServer = JobPayloadFromServer<ActionType.ModelToCategory> & {
-    datasource: DatasourceFromServer;
-    mappings: MappingInfoFromServer[];
+type ModelToCategoryPayloadResponse = JobPayloadResponse<ActionType.ModelToCategory> & {
+    datasource: DatasourceResponse;
+    mappings: MappingInfoResponse[];
 };
 
 class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategory> {
@@ -106,17 +106,17 @@ class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategor
         readonly mappings: MappingInfo[],
     ) {}
 
-    static fromServer(input: ModelToCategoryPayloadFromServer): ModelToCategoryPayload {
+    static fromResponse(input: ModelToCategoryPayloadResponse): ModelToCategoryPayload {
         return new ModelToCategoryPayload(
-            Datasource.fromServer(input.datasource),
-            input.mappings.map(MappingInfo.fromServer),
+            Datasource.fromResponse(input.datasource),
+            input.mappings.map(MappingInfo.fromResponse),
         );
     }
 }
 
-type CategoryToModelPayloadFromServer = JobPayloadFromServer<ActionType.CategoryToModel> & {
-    datasource: DatasourceFromServer;
-    mappings: MappingInfoFromServer[];
+type CategoryToModelPayloadResponse = JobPayloadResponse<ActionType.CategoryToModel> & {
+    datasource: DatasourceResponse;
+    mappings: MappingInfoResponse[];
 };
 
 class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToModel> {
@@ -127,15 +127,15 @@ class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToMode
         readonly mappings: MappingInfo[],
     ) {}
 
-    static fromServer(input: CategoryToModelPayloadFromServer): CategoryToModelPayload {
+    static fromResponse(input: CategoryToModelPayloadResponse): CategoryToModelPayload {
         return new CategoryToModelPayload(
-            Datasource.fromServer(input.datasource),
-            input.mappings.map(MappingInfo.fromServer),
+            Datasource.fromResponse(input.datasource),
+            input.mappings.map(MappingInfo.fromResponse),
         );
     }
 }
 
-type UpdateSchemaPayloadFromServer = JobPayloadFromServer<ActionType.UpdateSchema> & {
+type UpdateSchemaPayloadResponse = JobPayloadResponse<ActionType.UpdateSchema> & {
     prevVersion: VersionId;
     nextVersion: VersionId;
 };
@@ -148,7 +148,7 @@ class UpdateSchemaPayload implements JobPayloadType<ActionType.UpdateSchema> {
         readonly nextVersion: VersionId,
     ) {}
 
-    static fromServer(input: UpdateSchemaPayloadFromServer): UpdateSchemaPayload {
+    static fromResponse(input: UpdateSchemaPayloadResponse): UpdateSchemaPayload {
         return new UpdateSchemaPayload(
             input.prevVersion,
             input.nextVersion,
@@ -156,8 +156,8 @@ class UpdateSchemaPayload implements JobPayloadType<ActionType.UpdateSchema> {
     }
 }
 
-type RSDToCategoryPayloadFromServer = JobPayloadFromServer<ActionType.RSDToCategory> & {
-    datasources: DatasourceFromServer[];
+type RSDToCategoryPayloadResponse = JobPayloadResponse<ActionType.RSDToCategory> & {
+    datasources: DatasourceResponse[];
 };
 
 class RSDToCategoryPayload implements JobPayloadType<ActionType.RSDToCategory> {
@@ -169,8 +169,8 @@ class RSDToCategoryPayload implements JobPayloadType<ActionType.RSDToCategory> {
 
     }
 
-    static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
-        return new RSDToCategoryPayload(input.datasources.map(Datasource.fromServer));
+    static fromResponse(input: RSDToCategoryPayloadResponse): RSDToCategoryPayload {
+        return new RSDToCategoryPayload(input.datasources.map(Datasource.fromResponse));
     }
 }
 

@@ -105,7 +105,7 @@ async function actionLoader({ params: { actionId } }: { params: Params<'actionId
         throw new Error('Failed to load action');
 
     return {
-        action: Action.fromServer(response.data),
+        action: Action.fromResponse(response.data),
     };
 }
 

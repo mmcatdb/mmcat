@@ -1,11 +1,11 @@
-export type KeyFromServer = number;
+export type KeyResponse = number;
 
 export class Key {
     private constructor(
         public readonly value: number,
     ) {}
 
-    static fromServer(input: KeyFromServer): Key {
+    static fromResponse(input: KeyResponse): Key {
         return new Key(input);
     }
 
@@ -13,7 +13,7 @@ export class Key {
         return new Key(value);
     }
 
-    public toServer(): KeyFromServer {
+    public toServer(): KeyResponse {
         return this.value;
     }
 

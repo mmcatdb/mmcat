@@ -1,13 +1,13 @@
 import type { Entity, Id, VersionId } from '../id';
-import type { MMOFromServer } from '../evocat/metadata/mmo';
-import { type SMO, type SMOFromServer, smoFromServer } from '../evocat/schema';
+import type { MMOResponse } from '../evocat/metadata/mmo';
+import { type SMO, type SMOResponse, smoFromResponse } from '../evocat/schema';
 
-export type SchemaUpdateFromServer = {
+export type SchemaUpdateResponse = {
     id: Id;
     categoryId: Id;
     prevVersion: VersionId;
     nextVersion: VersionId;
-    schema: SMOFromServer[];
+    schema: SMOResponse[];
 };
 
 export class SchemaUpdate implements Entity {
@@ -19,19 +19,19 @@ export class SchemaUpdate implements Entity {
         readonly schema: SMO[],
     ) {}
 
-    static fromServer(input: SchemaUpdateFromServer): SchemaUpdate {
+    static fromResponse(input: SchemaUpdateResponse): SchemaUpdate {
         return new SchemaUpdate(
             input.id,
             input.categoryId,
             input.prevVersion,
             input.nextVersion,
-            input.schema.map(smoFromServer),
+            input.schema.map(smoFromResponse),
         );
     }
 }
 
 export type SchemaUpdateInit = {
     readonly prevVersion: VersionId;
-    readonly schema: SMOFromServer[];
-    readonly metadata: MMOFromServer[];
+    readonly schema: SMOResponse[];
+    readonly metadata: MMOResponse[];
 };

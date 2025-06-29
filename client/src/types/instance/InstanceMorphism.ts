@@ -1,11 +1,11 @@
-import { Signature, type SignatureFromServer } from '../identifiers';
+import { Signature, type SignatureResponse } from '../identifiers';
 import type { SchemaMorphism } from '../schema';
 import type { InstanceCategory } from './InstanceCategory';
 import type { DomainRow, InstanceObjex } from './InstanceObjex';
 
-export type InstanceMorphismFromServer = {
-    signature: SignatureFromServer;
-    mappings: MappingRowFromServer[];
+export type InstanceMorphismResponse = {
+    signature: SignatureResponse;
+    mappings: MappingRowResponse[];
 };
 
 export class InstanceMorphism {
@@ -16,8 +16,8 @@ export class InstanceMorphism {
         readonly mappings: MappingRow[],
     ) {}
 
-    static fromServer(input: InstanceMorphismFromServer, instance: InstanceCategory): InstanceMorphism | undefined {
-        const signature = Signature.fromServer(input.signature);
+    static fromResponse(input: InstanceMorphismResponse, instance: InstanceCategory): InstanceMorphism | undefined {
+        const signature = Signature.fromResponse(input.signature);
         const schemaMorphism = instance.schema.getMorphism(signature).schema;
         if (!schemaMorphism)
             return;
@@ -52,7 +52,7 @@ export class InstanceMorphism {
     }
 }
 
-export type MappingRowFromServer = {
+export type MappingRowResponse = {
     dom: number;
     cod: number;
 };

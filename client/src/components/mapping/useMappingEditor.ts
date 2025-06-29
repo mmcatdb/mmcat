@@ -1,4 +1,4 @@
-import { type Dispatch } from 'react';
+import { useReducer, type Dispatch } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SelectionType, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
 import { type CategoryEdge, type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
@@ -6,12 +6,19 @@ import { type Category } from '@/types/schema';
 import { type Mapping, SimpleProperty, RootProperty } from '@/types/mapping';
 import { Key, Signature, StringName, TypedName } from '@/types/identifiers';
 
+export function useMappingEditor(category: Category, mapping: Mapping) {
+    const [ state, dispatch ] = useReducer(mappingEditorReducer, { category, mapping }, createInitialState);
+
+    return { state, dispatch };
+}
+
+
 export enum EditorPhase {
     SelectRoot = 'select-root',
     BuildPath = 'build-path',
 }
 
-export type EditMappingState = {
+export type MappingEditorState = {
     category: Category;
     graph: CategoryGraph;
     mapping: Mapping;
@@ -24,7 +31,7 @@ export type EditMappingState = {
 /**
  * Creates the initial state for the mapping editor.
  */
-export function createInitialState({ category, mapping }: { category: Category, mapping: Mapping }): EditMappingState {
+function createInitialState({ category, mapping }: { category: Category, mapping: Mapping }): MappingEditorState {
     return {
         category,
         // Convert category to graph for visualization
@@ -37,12 +44,9 @@ export function createInitialState({ category, mapping }: { category: Category, 
     };
 }
 
-/**
- * Type for the dispatch function used in the mapping editor.
- */
-export type EditMappingDispatch = Dispatch<EditMappingAction>;
+export type MappingEditorDispatch = Dispatch<MappingEditorAction>;
 
-export type EditMappingAction =
+type MappingEditorAction =
     | GraphAction
     | SelectAction
     | SequenceAction
@@ -52,10 +56,7 @@ export type EditMappingAction =
     | { type: 'append-to-access-path', nodeId: string }
     | { type: 'remove-from-access-path', subpathIndex: number };
 
-/**
- * Reduces the editor state based on the provided action.
- */
-export function editMappingReducer(state: EditMappingState, action: EditMappingAction): EditMappingState {
+export function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAction): MappingEditorState {
     // console.log('REDUCE', action, state);
 
     switch (action.type) {
@@ -93,7 +94,7 @@ type GraphAction = { type: 'graph', event: GraphEvent };
 /**
  * Handles graph-related actions (e.g., node movement, selection).
  */
-function graph(state: EditMappingState, { event }: GraphAction): EditMappingState {
+function graph(state: MappingEditorState, { event }: GraphAction): MappingEditorState {
     switch (event.type) {
     case 'move':
         // Node movement doesn’t update state in mapping editor (handled by graph engine)
@@ -151,7 +152,7 @@ type SelectAction = { type: 'select' } & FreeSelectionAction;
 /**
  * Handles free selection actions (e.g., node selection).
  */
-function select(state: EditMappingState, action: SelectAction): EditMappingState {
+function select(state: MappingEditorState, action: SelectAction): MappingEditorState {
     if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot)
         return state;
     const updatedSelection = state.selection.updateFromAction(action);
@@ -169,7 +170,7 @@ type SequenceAction = { type: 'sequence' } & SequenceSelectionAction;
 /**
  * Handles sequence selection actions.
  */
-function sequence(state: EditMappingState, action: SequenceAction): EditMappingState {
+function sequence(state: MappingEditorState, action: SequenceAction): MappingEditorState {
     if (!(state.selection instanceof SequenceSelection))
         return state;
     return { ...state, selection: state.selection.updateFromAction(action) };
@@ -180,7 +181,7 @@ type PathAction = { type: 'path' } & PathSelectionAction;
 /**
  * Handles path selection actions.
  */
-function path(state: EditMappingState, action: PathAction): EditMappingState {
+function path(state: MappingEditorState, action: PathAction): MappingEditorState {
     if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath)
         return state;
     return { ...state, selection: state.selection.updateFromAction(action) };
@@ -194,7 +195,7 @@ type TempSelectionTypeAction = { type: 'selection-type', selectionType: Selectio
 /**
  * Sets the root node in the mapping editor state.
  */
-function root(state: EditMappingState, rootNodeId: string): EditMappingState {
+function root(state: MappingEditorState, rootNodeId: string): MappingEditorState {
     const rootNode = state.graph.nodes.get(rootNodeId);
     if (!rootNode)
         return state;
@@ -209,7 +210,7 @@ function root(state: EditMappingState, rootNodeId: string): EditMappingState {
         mapping: {
             ...state.mapping,
             accessPath: newAccessPath,
-            rootObjexKey: Key.fromServer(Number(rootNodeId)),
+            rootObjexKey: Key.fromResponse(Number(rootNodeId)),
         },
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
@@ -221,12 +222,12 @@ function root(state: EditMappingState, rootNodeId: string): EditMappingState {
 /**
  * Appends a node to the access path in the mapping editor state.
  */
-function appendToAccessPath(state: EditMappingState, nodeId: string): EditMappingState {
-    if (!(state.selection instanceof PathSelection)) 
+function appendToAccessPath(state: MappingEditorState, nodeId: string): MappingEditorState {
+    if (!(state.selection instanceof PathSelection))
         return state;
 
     const newNode = state.graph.nodes.get(nodeId);
-    if (!newNode) 
+    if (!newNode)
         return state;
 
     const signatures = state.selection.edgeIds.map((edgeId, index) => {
@@ -262,15 +263,15 @@ function appendToAccessPath(state: EditMappingState, nodeId: string): EditMappin
 /**
  * Removes a subpath from the access path in the mapping editor state.
  */
-function removeFromAccessPath(state: EditMappingState, subpathIndex: number): EditMappingState {
+function removeFromAccessPath(state: MappingEditorState, subpathIndex: number): MappingEditorState {
     const newSubpaths = [ ...state.mapping.accessPath.subpaths ];
     newSubpaths.splice(subpathIndex, 1);
-    
+
     const newAccessPath = new RootProperty(
         state.mapping.accessPath.name,
         newSubpaths,
     );
-    
+
     return {
         ...state,
         mapping: {

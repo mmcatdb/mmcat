@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Input } from '@heroui/react';
-import { LeftPanelMode, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
+import { LeftPanelMode, type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { toPosition } from '@/types/utils/common';
 import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers';
@@ -12,9 +12,9 @@ import { twMerge } from 'tailwind-merge';
 
 type StateDispatchProps = {
     /** The current state of the category editor. */
-    state: EditCategoryState;
+    state: CategoryEditorState;
     /** The dispatch function for updating the editor state. */
-    dispatch: EditCategoryDispatch;
+    dispatch: CategoryEditorDispatch;
 };
 
 type LeftPanelEditorProps = StateDispatchProps & {
@@ -220,7 +220,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
 /**
  * Hook to extract and validate selected nodes for morphism creation.
  */
-function useMorphismSelection(state: EditCategoryState) {
+function useMorphismSelection(state: CategoryEditorState) {
     const selectedNodes = Array.from(state.selection.nodeIds);
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
     const domainNode = state.graph.nodes.get(selectedNodes[0]);
@@ -231,7 +231,7 @@ function useMorphismSelection(state: EditCategoryState) {
 /**
  * Resets the left panel to its default mode.
  */
-function resetToDefaultMode(dispatch: EditCategoryDispatch) {
+function resetToDefaultMode(dispatch: CategoryEditorDispatch) {
     dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.default });
 }
 

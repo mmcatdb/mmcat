@@ -1,4 +1,4 @@
-import { idsAreEqual, Key, ObjexIds, type KeyFromServer, type ObjexIdsFromServer } from '../identifiers';
+import { idsAreEqual, Key, ObjexIds, type KeyResponse, type ObjexIdsResponse } from '../identifiers';
 import { type Category } from './Category';
 import { SchemaCategoryInvalidError } from './Error';
 import { type Morphism } from './Morphism';
@@ -21,13 +21,13 @@ export class Objex {
         this.originalMetadata = metadata;
     }
 
-    static fromServer(category: Category, schema: SchemaObjexFromServer, metadata: MetadataObjexFromServer): Objex {
-        const schemaObjex = SchemaObjex.fromServer(schema);
+    static fromResponse(category: Category, schema: SchemaObjexResponse, metadata: MetadataObjexResponse): Objex {
+        const schemaObjex = SchemaObjex.fromResponse(schema);
 
         return new Objex(
             category,
             schemaObjex,
-            MetadataObjex.fromServer(metadata),
+            MetadataObjex.fromResponse(metadata),
         );
     }
 
@@ -41,9 +41,9 @@ export class Objex {
     }
 }
 
-export type SchemaObjexFromServer = {
-    key: KeyFromServer;
-    ids?: ObjexIdsFromServer;
+export type SchemaObjexResponse = {
+    key: KeyResponse;
+    ids?: ObjexIdsResponse;
 };
 
 /**
@@ -56,10 +56,10 @@ export class SchemaObjex {
         private _isNew: boolean,
     ) {}
 
-    static fromServer(schema: SchemaObjexFromServer): SchemaObjex {
+    static fromResponse(schema: SchemaObjexResponse): SchemaObjex {
         return new SchemaObjex(
-            Key.fromServer(schema.key),
-            schema.ids ? ObjexIds.fromServer(schema.ids) : undefined,
+            Key.fromResponse(schema.key),
+            schema.ids ? ObjexIds.fromResponse(schema.ids) : undefined,
             false,
         );
     }
@@ -94,7 +94,7 @@ export class SchemaObjex {
         return this.ids;
     }
 
-    toServer(): SchemaObjexFromServer {
+    toServer(): SchemaObjexResponse {
         return {
             key: this.key.toServer(),
             ids: this.ids?.toServer(),
@@ -112,8 +112,8 @@ export type ObjexDefinition = {
     ids?: ObjexIds;
 };
 
-export type MetadataObjexFromServer = {
-    key: KeyFromServer;
+export type MetadataObjexResponse = {
+    key: KeyResponse;
     label: string;
     position: Position;
 };
@@ -136,14 +136,14 @@ export class MetadataObjex {
         readonly position: Position,
     ) {}
 
-    static fromServer(input: MetadataObjexFromServer): MetadataObjex {
+    static fromResponse(input: MetadataObjexResponse): MetadataObjex {
         return new MetadataObjex(
             input.label,
             input.position,
         );
     }
 
-    toServer(key: Key): MetadataObjexFromServer {
+    toServer(key: Key): MetadataObjexResponse {
         return {
             key: key.toServer(),
             label: this.label,

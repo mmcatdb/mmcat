@@ -24,7 +24,7 @@ export function SessionSelect() {
             return;
         }
 
-        const fetchedSession = response.data.map(Session.fromServer).sort((a, b) => +a.createdAt - +b.createdAt);
+        const fetchedSession = response.data.map(Session.fromResponse).sort((a, b) => +a.createdAt - +b.createdAt);
         setSessions(fetchedSession);
 
         const cookieId = cookies.get(SESSION_COOKIE_NAME);
@@ -51,7 +51,7 @@ export function SessionSelect() {
             return;
         }
 
-        const session = Session.fromServer(result.data);
+        const session = Session.fromResponse(result.data);
         setSessions([ session, ...sessions ]);
         setSelected(session);
         cookies.set(SESSION_COOKIE_NAME, session.id);

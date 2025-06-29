@@ -36,7 +36,7 @@ async function datasourceLoader({ params: { id } }: { params: Params<'id'> }): P
         throw new Error('Failed to load datasource info');
 
     return {
-        datasource: Datasource.fromServer(response.data),
+        datasource: Datasource.fromResponse(response.data),
     };
 }
 
@@ -107,8 +107,8 @@ async function datasourceInCategoryLoader({ params: { categoryId, id } }: { para
         throw new Error('Failed to load datasource or mappings');
 
     return {
-        datasource: Datasource.fromServer(datasourceResponse.data),
-        mappings: mappingsResponse.data.map(Mapping.fromServer),
+        datasource: Datasource.fromResponse(datasourceResponse.data),
+        mappings: mappingsResponse.data.map(Mapping.fromResponse),
     };
 }
 
@@ -118,7 +118,7 @@ function DatasourceDisplay() {
     const [ datasource, setDatasource ] = useState<Datasource>(initialDatasource);
     const [ formValues, setFormValues ] = useState<Settings>(initialDatasource.settings);
     const [ isConfigurationShown, setIsConfigurationShown ] = useState(false);
-    const [ isEditing, setIsEditing ] = useState(false);
+    const [ isUpdating, setIsUpdating ] = useState(false);
     const [ isSaving, setIsSaving ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasource-detail-page');
 
@@ -136,13 +136,13 @@ function DatasourceDisplay() {
         setDatasource(prev => ({ ...prev, label: newLabel } as Datasource));
     }
 
-    function cancelEditing() {
+    function cancelUpdating() {
         if (initialDatasource) {
             // revert to initial values
             setFormValues(initialDatasource.settings);
             setDatasource(initialDatasource);
         }
-        setIsEditing(false);
+        setIsUpdating(false);
     }
 
     async function handleSaveChanges() {
@@ -155,7 +155,7 @@ function DatasourceDisplay() {
             { label: datasource.label, settings: formValues },
         );
         setIsSaving(false);
-        setIsEditing(false);
+        setIsUpdating(false);
 
         if (updatedDatasource.status) {
             setDatasource(updatedDatasource.data);
@@ -216,13 +216,13 @@ function DatasourceDisplay() {
                     </div>
                 </div>
             </div>
-            {!isEditing ? (
+            {!isUpdating ? (
                 // View Mode
                 <div className='mb-6'>
                     <div className='flex justify-between items-center mb-3'>
                         <h2 className='text-lg font-semibold'>Connection Settings</h2>
                         <Button
-                            onClick={() => setIsEditing(true)}
+                            onClick={() => setIsUpdating(true)}
                             color='primary'
                             size='sm'
                         >
@@ -260,7 +260,7 @@ function DatasourceDisplay() {
                             >
                                 Save
                             </Button>
-                            <Button variant='flat' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
+                            <Button variant='flat' onClick={cancelUpdating} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>
                         </div>

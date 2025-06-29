@@ -1,9 +1,9 @@
-import { type Category, MetadataMorphism, type MetadataMorphismFromServer, Morphism, SchemaMorphism, type SchemaMorphismFromServer } from '@/types/schema';
-import { type SMO, type SMOFromServer, SMOType } from './smo';
+import { type Category, MetadataMorphism, type MetadataMorphismResponse, Morphism, SchemaMorphism, type SchemaMorphismResponse } from '@/types/schema';
+import { type SMO, type SMOResponse, SMOType } from './smo';
 
-export type CreateMorphismFromServer = SMOFromServer<SMOType.CreateMorphism> & {
-    schema: SchemaMorphismFromServer;
-    metadata: MetadataMorphismFromServer;
+export type CreateMorphismResponse = SMOResponse<SMOType.CreateMorphism> & {
+    schema: SchemaMorphismResponse;
+    metadata: MetadataMorphismResponse;
 };
 
 export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
@@ -14,14 +14,14 @@ export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
         readonly metadata: MetadataMorphism,
     ) {}
 
-    static fromServer(input: CreateMorphismFromServer): CreateMorphism {
+    static fromResponse(input: CreateMorphismResponse): CreateMorphism {
         return new CreateMorphism(
-            SchemaMorphism.fromServer(input.schema),
-            MetadataMorphism.fromServer(input.metadata),
+            SchemaMorphism.fromResponse(input.schema),
+            MetadataMorphism.fromResponse(input.metadata),
         );
     }
 
-    toServer(): CreateMorphismFromServer {
+    toServer(): CreateMorphismResponse {
         return {
             type: SMOType.CreateMorphism,
             schema: this.schema.toServer(),

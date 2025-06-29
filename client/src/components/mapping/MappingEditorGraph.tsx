@@ -2,7 +2,7 @@ import { type ReactNode, type MouseEvent, useCallback, useMemo } from 'react';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
-import { EditorPhase, type EditMappingDispatch, type EditMappingState } from './editMappingReducer';
+import { EditorPhase, type MappingEditorDispatch, type MappingEditorState } from './useMappingEditor';
 import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
@@ -10,11 +10,11 @@ import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '
 import { usePreferences } from '../PreferencesProvider';
 import { twJoin, twMerge } from 'tailwind-merge';
 
-type EditMappingGraphDisplayProps = {
+type MapppingEditorGraphProps = {
     /** The current state of the mapping editor. */
-    state: EditMappingState;
+    state: MappingEditorState;
     /** Dispatch function for updating the editor state. */
-    dispatch: EditMappingDispatch;
+    dispatch: MappingEditorDispatch;
     /** Optional graph rendering options. */
     options?: GraphOptions;
     /** Optional CSS class for styling the canvas. */
@@ -24,7 +24,7 @@ type EditMappingGraphDisplayProps = {
 /**
  * Renders a graph-based UI for editing mappings, including nodes, edges, and selection.
  */
-export function EditMappingGraphDisplay({ state, dispatch, options, className }: EditMappingGraphDisplayProps) {
+export function MappingEditorGraph({ state, dispatch, options, className }: MapppingEditorGraphProps) {
     // Memoize graph dispatch to forward graph events to the reducer
     const graphDispatch = useCallback((event: GraphEvent) => dispatch({ type: 'graph', event }), [ dispatch ]);
 
@@ -114,9 +114,9 @@ type NodeDisplayProps = {
     /** The node to render. */
     node: CategoryNode;
     /** The current editor state. */
-    state: EditMappingState;
+    state: MappingEditorState;
     /** Dispatch function for updating the editor state. */
-    dispatch: EditMappingDispatch;
+    dispatch: MappingEditorDispatch;
     /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
 };
@@ -211,7 +211,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
 /**
  * Checks if a node is selected based on the editor state.
  */
-function isNodeSelected({ selection, selectionType }: EditMappingState, node: CategoryNode): boolean {
+function isNodeSelected({ selection, selectionType }: MappingEditorState, node: CategoryNode): boolean {
     if (selectionType === SelectionType.None)
         return false;
 
@@ -226,7 +226,7 @@ function isNodeSelected({ selection, selectionType }: EditMappingState, node: Ca
 /**
  * Determines if a node can be selected based on the editor state and path graph.
  */
-function isNodeSelectionAllowed({ selection, selectionType, editorPhase }: EditMappingState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
+function isNodeSelectionAllowed({ selection, selectionType, editorPhase }: MappingEditorState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
     if (selectionType === SelectionType.None)
         return false;
 
@@ -260,9 +260,9 @@ type EdgeDisplayProps = {
     /** The degree offset for bundled edges. */
     degree: number;
     /** The current editor state. */
-    state: EditMappingState;
+    state: MappingEditorState;
     /** Dispatch function for updating the editor state. */
-    dispatch: EditMappingDispatch;
+    dispatch: MappingEditorDispatch;
     /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
 };
@@ -324,7 +324,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
 /**
  * Checks if an edge is selected based on the editor state.
  */
-function isEdgeSelected(state: EditMappingState, edge: CategoryEdge): boolean {
+function isEdgeSelected(state: MappingEditorState, edge: CategoryEdge): boolean {
     if (state.selectionType === SelectionType.None || state.selectionType === SelectionType.Path)
         return false;
 
@@ -337,7 +337,7 @@ function isEdgeSelected(state: EditMappingState, edge: CategoryEdge): boolean {
 /**
  * Determines if an edge can be selected based on the editor state and path graph.
  */
-function isEdgeSelectionAllowed({ selection, selectionType }: EditMappingState, edge: CategoryEdge, pathGraph: PathGraph | undefined): boolean {
+function isEdgeSelectionAllowed({ selection, selectionType }: MappingEditorState, edge: CategoryEdge, pathGraph: PathGraph | undefined): boolean {
     if (selectionType === SelectionType.None)
         return false;
 

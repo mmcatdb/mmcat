@@ -26,7 +26,7 @@ export function Home() {
     async function fetchCategories() {
         const result = await api.schemas.getAllCategoryInfos({});
         if (result.status)
-            setCategories(result.data.map(SchemaCategoryInfo.fromServer));
+            setCategories(result.data.map(SchemaCategoryInfo.fromResponse));
     }
 
     const handleCreateSchema = useCallback(async (name: string, isExample = false) => {
@@ -43,7 +43,7 @@ export function Home() {
             return;
         }
 
-        const newCategory = SchemaCategoryInfo.fromServer(response.data);
+        const newCategory = SchemaCategoryInfo.fromResponse(response.data);
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${name}' created successfully!`);

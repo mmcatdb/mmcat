@@ -1,15 +1,15 @@
-import { RootProperty, type RootPropertyFromServer } from '@/types/mapping';
+import { RootProperty, type RootPropertyResponse } from '@/types/mapping';
 import type { Entity, Id, VersionId } from '../id';
-import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from '../identifiers';
+import { Key, SignatureId, type KeyResponse, type SignatureIdResponse } from '../identifiers';
 
-export type MappingFromServer = {
+export type MappingResponse = {
     id: Id;
     categoryId: Id;
     datasourceId: Id;
-    rootObjexKey: KeyFromServer;
-    primaryKey: SignatureIdFromServer;
+    rootObjexKey: KeyResponse;
+    primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyFromServer;
+    accessPath: RootPropertyResponse;
     version: VersionId;
 };
 
@@ -25,15 +25,15 @@ export class Mapping implements Entity {
         public readonly version: VersionId,
     ) {}
 
-    static fromServer(input: MappingFromServer): Mapping {
+    static fromResponse(input: MappingResponse): Mapping {
         return new Mapping(
             input.id,
             input.kindName,
             input.categoryId,
             input.datasourceId,
-            Key.fromServer(input.rootObjexKey),
-            SignatureId.fromServer(input.primaryKey),
-            RootProperty.fromServer(input.accessPath),
+            Key.fromResponse(input.rootObjexKey),
+            SignatureId.fromResponse(input.primaryKey),
+            RootProperty.fromResponse(input.accessPath),
             input.version,
         );
     }
@@ -42,13 +42,13 @@ export class Mapping implements Entity {
 export type MappingInit = {
     categoryId: Id;
     datasourceId: Id;
-    rootObjexKey: KeyFromServer;
-    primaryKey: SignatureIdFromServer;
+    rootObjexKey: KeyResponse;
+    primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyFromServer;
+    accessPath: RootPropertyResponse;
 };
 
-export type MappingInfoFromServer = {
+export type MappingInfoResponse = {
     id: Id;
     kindName: string;
     version: VersionId;
@@ -61,7 +61,7 @@ export class MappingInfo implements Entity {
         public readonly version: VersionId,
     ) {}
 
-    static fromServer(input: MappingInfoFromServer): MappingInfo {
+    static fromResponse(input: MappingInfoResponse): MappingInfo {
         return new MappingInfo(
             input.id,
             input.kindName,

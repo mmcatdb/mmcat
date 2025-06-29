@@ -1,9 +1,9 @@
-import { type Category, MetadataObjex, type MetadataObjexFromServer, Objex, SchemaObjex, type SchemaObjexFromServer } from '@/types/schema';
-import { type SMO, type SMOFromServer, SMOType } from './smo';
+import { type Category, MetadataObjex, type MetadataObjexResponse, Objex, SchemaObjex, type SchemaObjexResponse } from '@/types/schema';
+import { type SMO, type SMOResponse, SMOType } from './smo';
 
-export type CreateObjexFromServer = SMOFromServer<SMOType.CreateObjex> & {
-    schema: SchemaObjexFromServer;
-    metadata: MetadataObjexFromServer;
+export type CreateObjexResponse = SMOResponse<SMOType.CreateObjex> & {
+    schema: SchemaObjexResponse;
+    metadata: MetadataObjexResponse;
 };
 
 export class CreateObjex implements SMO<SMOType.CreateObjex> {
@@ -14,14 +14,14 @@ export class CreateObjex implements SMO<SMOType.CreateObjex> {
         readonly metadata: MetadataObjex,
     ) {}
 
-    static fromServer(input: CreateObjexFromServer): CreateObjex {
+    static fromResponse(input: CreateObjexResponse): CreateObjex {
         return new CreateObjex(
-            SchemaObjex.fromServer(input.schema),
-            MetadataObjex.fromServer(input.metadata),
+            SchemaObjex.fromResponse(input.schema),
+            MetadataObjex.fromResponse(input.metadata),
         );
     }
 
-    toServer(): CreateObjexFromServer {
+    toServer(): CreateObjexResponse {
         return {
             type: SMOType.CreateObjex,
             schema: this.schema.toServer(),

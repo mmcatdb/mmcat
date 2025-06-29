@@ -1,10 +1,10 @@
 import { ComparableMap } from '@/types/utils/ComparableMap';
-import { Signature, type KeyFromServer, type SignatureFromServer, Key } from '../identifiers';
+import { Signature, type KeyResponse, type SignatureResponse, Key } from '../identifiers';
 import type { Category, SchemaObjex } from '../schema';
 
-export type InstanceObjexFromServer = {
-    key: KeyFromServer;
-    rows: DomainRowFromServer[];
+export type InstanceObjexResponse = {
+    key: KeyResponse;
+    rows: DomainRowResponse[];
 };
 
 export class InstanceObjex {
@@ -14,13 +14,13 @@ export class InstanceObjex {
         readonly idToRow: Map<number, DomainRow>,
     ) {}
 
-    static fromServer(input: InstanceObjexFromServer, schema: Category): InstanceObjex | undefined {
-        const key = Key.fromServer(input.key);
+    static fromResponse(input: InstanceObjexResponse, schema: Category): InstanceObjex | undefined {
+        const key = Key.fromResponse(input.key);
         const schemaObjex = schema.getObjex(key).schema;
 
         const idToRow = new Map<number, DomainRow>();
         const rows = input.rows.map(inputRow => {
-            const row = DomainRow.fromServer(inputRow);
+            const row = DomainRow.fromResponse(inputRow);
             idToRow.set(inputRow.id, row);
             return row;
         });
@@ -33,9 +33,9 @@ export class InstanceObjex {
     }
 }
 
-type DomainRowFromServer = {
+type DomainRowResponse = {
     id: number;
-    values: SuperIdValuesFromServer;
+    values: SuperIdValuesResponse;
     technicalId: number | null;
     pendingReferences: Signature[];
 };
@@ -46,29 +46,29 @@ export class DomainRow {
         readonly technicalId: number | undefined,
     ) {}
 
-    static fromServer(input: DomainRowFromServer) {
+    static fromResponse(input: DomainRowResponse) {
         return new DomainRow(
-            SuperIdValues.fromServer(input.values),
+            SuperIdValues.fromResponse(input.values),
             input.technicalId ?? undefined,
         );
     }
 }
 
-type SingatureValueTupleFromServer = {
-    signature: SignatureFromServer;
+type SingatureValueTupleResponse = {
+    signature: SignatureResponse;
     value: string;
 };
 
-type SuperIdValuesFromServer = SingatureValueTupleFromServer[];
+type SuperIdValuesResponse = SingatureValueTupleResponse[];
 
 export class SuperIdValues {
     private constructor(
         readonly tuples: ComparableMap<Signature, string, string>,
     ) {}
 
-    static fromServer(input: SuperIdValuesFromServer): SuperIdValues {
+    static fromResponse(input: SuperIdValuesResponse): SuperIdValues {
         const tuples = new ComparableMap<Signature, string, string>(signature => signature.value);
-        input.forEach(tuple => tuples.set(Signature.fromServer(tuple.signature), tuple.value));
+        input.forEach(tuple => tuples.set(Signature.fromResponse(tuple.signature), tuple.value));
 
         return new SuperIdValues(tuples);
     }

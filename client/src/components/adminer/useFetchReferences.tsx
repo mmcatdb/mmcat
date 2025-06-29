@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api';
 import { Signature } from '@/types/identifiers/Signature';
-import { nameFromServer, StringName, type NameFromServer } from '@/types/identifiers/Name';
-import type { SignatureIdFromServer } from '@/types/identifiers/SignatureId';
+import { nameFromResponse, StringName, type NameResponse } from '@/types/identifiers/Name';
+import type { SignatureIdResponse } from '@/types/identifiers/SignatureId';
 import type { AdminerReferenceKind, AdminerReferences } from '@/types/adminer/AdminerReferences';
-import type { ChildPropertyFromServer, ComplexPropertyFromServer } from '@/types/mapping/ComplexProperty';
-import type { RootPropertyFromServer } from '@/types/mapping/RootProperty';
-import type { SimplePropertyFromServer } from '@/types/mapping/SimpleProperty';
-import type { SchemaCategoryFromServer } from '@/types/schema';
-import type { MappingFromServer, MappingInit } from '@/types/mapping';
+import type { ChildPropertyResponse, ComplexPropertyResponse } from '@/types/mapping/ComplexProperty';
+import type { RootPropertyResponse } from '@/types/mapping/RootProperty';
+import type { SimplePropertyResponse } from '@/types/mapping/SimpleProperty';
+import type { SchemaCategoryResponse } from '@/types/schema';
+import type { MappingResponse, MappingInit } from '@/types/mapping';
 import type { Id } from '@/types/id';
 
 const FROM_PREFIX = '_from.';
@@ -82,7 +82,7 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
         const schemaCategoryMappings = mappings.filter(mapping =>
             mapping.categoryId === schemaCategory.id);
 
-        const mappingPathProperties = getPropertiesFromAccessPath(kindMapping.accessPath, new Set<SimplePropertyFromServer>());
+        const mappingPathProperties = getPropertiesFromAccessPath(kindMapping.accessPath, new Set<SimplePropertyResponse>());
 
         for (const mapping of schemaCategoryMappings)
             addMappingReferences(references, primaryKeys, mapping, kindMapping, mappingPathProperties);
@@ -91,7 +91,7 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
     return references;
 }
 
-async function getAllMappings(): Promise<MappingFromServer[]> {
+async function getAllMappings(): Promise<MappingResponse[]> {
     const mappingResponse = await api.mappings.getAllMappings({});
 
     if (!mappingResponse.status)
@@ -101,23 +101,23 @@ async function getAllMappings(): Promise<MappingFromServer[]> {
 }
 
 // FIXME This shouldn't be done on the "from server" types.
-function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
-    return mappings.flatMap((mapping: MappingFromServer) => {
-        let fromSubpath: ComplexPropertyFromServer | undefined = undefined;
-        let toSubpath: ComplexPropertyFromServer | undefined = undefined;
-        const allSubpaths: ChildPropertyFromServer[] = [];
+function extractAllKindMappings(mappings: MappingResponse[]): MappingInit[] {
+    return mappings.flatMap((mapping: MappingResponse) => {
+        let fromSubpath: ComplexPropertyResponse | undefined = undefined;
+        let toSubpath: ComplexPropertyResponse | undefined = undefined;
+        const allSubpaths: ChildPropertyResponse[] = [];
 
         for (let subpath of mapping.accessPath.subpaths) {
-            const name = nameFromServer(subpath.name);
+            const name = nameFromResponse(subpath.name);
             if (name instanceof StringName) {
                 const nameValue = name.value;
                 // FIXME use typed name
                 if (nameValue.startsWith(FROM_PREFIX)) {
-                    fromSubpath = subpath as ComplexPropertyFromServer;
+                    fromSubpath = subpath as ComplexPropertyResponse;
                     subpath = prefixSubpathNames(subpath, 'from', 0);
                 }
                 else if (nameValue.startsWith(TO_PREFIX)) {
-                    toSubpath = subpath as ComplexPropertyFromServer;
+                    toSubpath = subpath as ComplexPropertyResponse;
                     subpath = prefixSubpathNames(subpath, 'to', 0);
                 }
 
@@ -192,8 +192,8 @@ function extractAllKindMappings(mappings: MappingFromServer[]): MappingInit[] {
 /**
 * Adds given prefix to all names in access path of a relationship kind excluding names of node kinds.
 */
-function prefixSubpathNames(subpath: ChildPropertyFromServer, prefix: string, level: number): ChildPropertyFromServer {
-    let prefixedName: NameFromServer = subpath.name;
+function prefixSubpathNames(subpath: ChildPropertyResponse, prefix: string, level: number): ChildPropertyResponse {
+    let prefixedName: NameResponse = subpath.name;
     if ('value' in subpath.name && level > 0)
         prefixedName = { value: `${prefix}.${subpath.name.value}` };
 
@@ -212,8 +212,8 @@ function prefixSubpathNames(subpath: ChildPropertyFromServer, prefix: string, le
     }
 }
 
-function getAllPrimaryKeys(kindMappings: MappingInit[]): SignatureIdFromServer {
-    const primaryKeys: SignatureIdFromServer = [];
+function getAllPrimaryKeys(kindMappings: MappingInit[]): SignatureIdResponse {
+    const primaryKeys: SignatureIdResponse = [];
 
     for (const mapping of kindMappings) {
         for (const key of mapping.primaryKey) {
@@ -226,7 +226,7 @@ function getAllPrimaryKeys(kindMappings: MappingInit[]): SignatureIdFromServer {
     return primaryKeys;
 }
 
-async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryFromServer> {
+async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryResponse> {
     const schemaCategoryResponse = await api.schemas.getCategory({ id: categoryId });
 
     if (!schemaCategoryResponse.status)
@@ -239,9 +239,9 @@ async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryFrom
 * Returns a set of objects with name and signature of each objex in the given access path.
 */
 function getPropertiesFromAccessPath(
-    accessPath: RootPropertyFromServer | ChildPropertyFromServer,
-    properties: Set<SimplePropertyFromServer>,
-): Set<SimplePropertyFromServer>{
+    accessPath: RootPropertyResponse | ChildPropertyResponse,
+    properties: Set<SimplePropertyResponse>,
+): Set<SimplePropertyResponse>{
     if ('signature' in accessPath && accessPath.signature !== 'EMPTY')
         properties.add({ name: accessPath.name, signature: getLastBase(accessPath.signature) });
 
@@ -256,8 +256,8 @@ function getPropertiesFromAccessPath(
 /**
 * Returns the last base of a given signature.
 */
-function getLastBase(signatureFromServer: string): string {
-    const signature: Signature = Signature.fromServer(signatureFromServer);
+function getLastBase(signatureResponse: string): string {
+    const signature: Signature = Signature.fromResponse(signatureResponse);
     const lastBase = signature.tryGetLastBase();
     return lastBase!.last.toString();
 }
@@ -268,12 +268,12 @@ function getLastBase(signatureFromServer: string): string {
 */
 function addMappingReferences(
     references: AdminerReferences,
-    primaryKeys: SignatureIdFromServer,
+    primaryKeys: SignatureIdResponse,
     anotherKindMapping: MappingInit,
     givenKindMapping: MappingInit,
-    givenKindProperties: Set<SimplePropertyFromServer>,
+    givenKindProperties: Set<SimplePropertyResponse>,
 ): AdminerReferences {
-    const anotherKindProperties = getPropertiesFromAccessPath(anotherKindMapping.accessPath, new Set<SimplePropertyFromServer>());
+    const anotherKindProperties = getPropertiesFromAccessPath(anotherKindMapping.accessPath, new Set<SimplePropertyResponse>());
     const anotherKindPropertiesArray = Array.from(anotherKindProperties);
     const givenKindPropertiesArray = Array.from(givenKindProperties);
 
@@ -284,11 +284,11 @@ function addMappingReferences(
 
 function addReferences(
     references: AdminerReferences,
-    primaryKeys: SignatureIdFromServer,
+    primaryKeys: SignatureIdResponse,
     fromKindMapping: MappingInit,
-    fromKindProperties: SimplePropertyFromServer[],
+    fromKindProperties: SimplePropertyResponse[],
     toKindMapping: MappingInit,
-    toKindProperties: SimplePropertyFromServer[],
+    toKindProperties: SimplePropertyResponse[],
 ) {
     for (const keySignature of primaryKeys) {
         // Name of properties that are primary keys in the given kind
@@ -319,12 +319,12 @@ function addReferences(
     }
 }
 
-function getKeyProperties(properties: SimplePropertyFromServer[], keySignature: string): SimplePropertyFromServer[] {
+function getKeyProperties(properties: SimplePropertyResponse[], keySignature: string): SimplePropertyResponse[] {
     return properties
         .filter(property => property.signature === keySignature && 'value' in property.name);
 }
 
-function getPropertyName(property: SimplePropertyFromServer): string {
+function getPropertyName(property: SimplePropertyResponse): string {
     return (property.name as { value: string }).value;
 }
 

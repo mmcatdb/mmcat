@@ -1,19 +1,19 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
-import type { MappingFromServer, MappingInit } from '@/types/mapping';
+import type { MappingResponse, MappingInit } from '@/types/mapping';
 import { type Id } from '@/types/id';
 
 const mappings = {
-    getMapping: GET<{ id: StringLike }, MappingFromServer>(
+    getMapping: GET<{ id: StringLike }, MappingResponse>(
         u => `/mappings/${u.id}`,
     ),
-    getAllMappings: GET<Empty, MappingFromServer[]>(
+    getAllMappings: GET<Empty, MappingResponse[]>(
         () => `/mappings/all`,
     ),
-    getAllMappingsInCategory: GET<Empty, MappingFromServer[], { categoryId: Id, datasourceId?: Id }>(
+    getAllMappingsInCategory: GET<Empty, MappingResponse[], { categoryId: Id, datasourceId?: Id }>(
         () => `/mappings`,
     ),
-    createMapping: POST<Empty, MappingFromServer, MappingInit>(
+    createMapping: POST<Empty, MappingResponse, MappingInit>(
         () => `/mappings`,
     ),
 };

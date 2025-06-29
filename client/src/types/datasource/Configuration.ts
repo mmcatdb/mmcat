@@ -1,4 +1,4 @@
-export type DatasourceConfigurationFromServer = {
+export type DatasourceConfigurationResponse = {
     isPropertyToOneAllowed: boolean;
     isPropertyToManyAllowed: boolean;
     isInliningToOneAllowed: boolean;
@@ -19,7 +19,7 @@ export class DatasourceConfiguration {
     readonly isComplexPropertyAllowed: boolean;
     readonly isSchemaless: boolean;
 
-    constructor(input: DatasourceConfigurationFromServer) {
+    constructor(input: DatasourceConfigurationResponse) {
         this.isPropertyToOneAllowed = input.isPropertyToOneAllowed;
         this.isPropertyToManyAllowed = input.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = input.isInliningToOneAllowed;

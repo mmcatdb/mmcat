@@ -2,15 +2,15 @@ import { type ReactNode, type MouseEvent, useCallback } from 'react';
 import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
-import { type EditCategoryDispatch, type EditCategoryState, LeftPanelMode } from './editCategoryReducer';
+import { type CategoryEditorDispatch, type CategoryEditorState, LeftPanelMode } from './useCategoryEditor';
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { usePreferences } from '../PreferencesProvider';
 import { twJoin, twMerge } from 'tailwind-merge';
 
-type EditCategoryGraphDisplayProps = {
-    state: EditCategoryState;
-    dispatch: EditCategoryDispatch;
+type CategoryEditorGraphProps = {
+    state: CategoryEditorState;
+    dispatch: CategoryEditorDispatch;
     options?: GraphOptions;
     className?: string;
 };
@@ -19,7 +19,7 @@ type EditCategoryGraphDisplayProps = {
  * Renders an interactive graph for editing a category.
  * Manages nodes, edges, and selection box rendering within a canvas.
  */
-export function EditCategoryGraphDisplay({ state, dispatch, options, className }: EditCategoryGraphDisplayProps) {
+export function CategoryEditorGraph({ state, dispatch, options, className }: CategoryEditorGraphProps) {
     // Memoize dispatch to prevent unnecessary re-renders
     const graphDispatch = useCallback((event: GraphEvent) => dispatch({ type: 'graph', event }), [ dispatch ]);
 
@@ -101,8 +101,8 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
  */
 type NodeDisplayProps = {
     node: CategoryNode;
-    state: EditCategoryState;
-    dispatch: EditCategoryDispatch;
+    state: CategoryEditorState;
+    dispatch: CategoryEditorDispatch;
 };
 
 /**
@@ -169,9 +169,9 @@ type EdgeDisplayProps = {
     /** The curvature factor for bundled edges to avoid overlap. */
     degree: number;
     /** The current state of the category graph for selection and rendering. */
-    state: EditCategoryState;
+    state: CategoryEditorState;
     /** The dispatch function to handle edge interactions like selection. */
-    dispatch: EditCategoryDispatch;
+    dispatch: CategoryEditorDispatch;
 };
 
 /**

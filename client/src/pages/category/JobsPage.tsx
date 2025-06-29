@@ -35,8 +35,8 @@ export function JobsPage() {
 
         setError(false);
 
-        const jobsFromServer = response.data.map(job => Job.fromServer(job, category));
-        const grouped = groupJobsByRunId(jobsFromServer);
+        const jobsResponse = response.data.map(job => Job.fromResponse(job, category));
+        const grouped = groupJobsByRunId(jobsResponse);
 
         // Compare states and update if needed
         setGroupedJobs(rawPrev => {

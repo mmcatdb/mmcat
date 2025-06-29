@@ -1,24 +1,24 @@
-import { type NameFromServer, nameFromServer, Signature, type SignatureFromServer, type Name } from '@/types/identifiers';
+import { type NameResponse, nameFromResponse, Signature, type SignatureResponse, type Name } from '@/types/identifiers';
 import { print, type Printable, type Printer } from '@/types/utils/string';
-import { SimpleProperty, type SimplePropertyFromServer } from './SimpleProperty';
+import { SimpleProperty, type SimplePropertyResponse } from './SimpleProperty';
 import { type RootProperty } from './RootProperty';
 
-export type ComplexPropertyFromServer = {
-    name: NameFromServer;
-    signature: SignatureFromServer;
-    subpaths: ChildPropertyFromServer[];
+export type ComplexPropertyResponse = {
+    name: NameResponse;
+    signature: SignatureResponse;
+    subpaths: ChildPropertyResponse[];
 };
 
-export type ChildPropertyFromServer = ComplexPropertyFromServer | SimplePropertyFromServer;
+export type ChildPropertyResponse = ComplexPropertyResponse | SimplePropertyResponse;
 
 export type ChildProperty = ComplexProperty | SimpleProperty;
 
 export type ParentProperty = RootProperty | ComplexProperty;
 
-export function subpathFromFromServer(input: ChildPropertyFromServer, parent: ParentProperty): ChildProperty {
+export function subpathFromResponse(input: ChildPropertyResponse, parent: ParentProperty): ChildProperty {
     return 'subpaths' in input
-        ? ComplexProperty.fromServer(input, parent)
-        : SimpleProperty.fromServer(input, parent);
+        ? ComplexProperty.fromResponse(input, parent)
+        : SimpleProperty.fromResponse(input, parent);
 }
 
 export class ComplexProperty implements Printable {
@@ -33,21 +33,21 @@ export class ComplexProperty implements Printable {
         return this.signature.isEmpty;
     }
 
-    static fromServer(input: ComplexPropertyFromServer, parent: ParentProperty): ComplexProperty {
+    static fromResponse(input: ComplexPropertyResponse, parent: ParentProperty): ComplexProperty {
         const subpaths: ChildProperty[] = [];
         const property = new ComplexProperty(
-            nameFromServer(input.name),
-            Signature.fromServer(input.signature),
+            nameFromResponse(input.name),
+            Signature.fromResponse(input.signature),
             parent,
             subpaths,
         );
 
-        input.subpaths.map(subpath => subpathFromFromServer(subpath, property)).forEach(subpath => subpaths.push(subpath));
+        input.subpaths.map(subpath => subpathFromResponse(subpath, property)).forEach(subpath => subpaths.push(subpath));
 
         return property;
     }
 
-    toServer(): ComplexPropertyFromServer {
+    toServer(): ComplexPropertyResponse {
         return {
             name: this.name.toServer(),
             signature: this.signature.toServer(),

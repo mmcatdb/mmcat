@@ -1,4 +1,4 @@
-import { Key, Signature, type KeyFromServer, type SignatureFromServer } from '../identifiers';
+import { Key, Signature, type KeyResponse, type SignatureResponse } from '../identifiers';
 import { isArrayEqual } from '@/types/utils/common';
 import { type Objex } from './Objex';
 import { type Category } from './Category';
@@ -23,13 +23,13 @@ export class Morphism {
         this.originalMetadata = metadata;
     }
 
-    static fromServer(category: Category, schema: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer): Morphism {
-        const schemaMorphism = SchemaMorphism.fromServer(schema);
+    static fromResponse(category: Category, schema: SchemaMorphismResponse, metadata: MetadataMorphismResponse): Morphism {
+        const schemaMorphism = SchemaMorphism.fromResponse(schema);
 
         return new Morphism(
             category,
             schemaMorphism,
-            MetadataMorphism.fromServer(metadata),
+            MetadataMorphism.fromResponse(metadata),
             category.getObjex(schemaMorphism.domKey),
             category.getObjex(schemaMorphism.codKey),
         );
@@ -40,10 +40,10 @@ export class Morphism {
     }
 }
 
-export type SchemaMorphismFromServer = {
-    signature: SignatureFromServer;
-    domKey: KeyFromServer;
-    codKey: KeyFromServer;
+export type SchemaMorphismResponse = {
+    signature: SignatureResponse;
+    domKey: KeyResponse;
+    codKey: KeyResponse;
     min: Min;
     tags?: Tag[];
 };
@@ -75,11 +75,11 @@ export class SchemaMorphism {
         private _isNew: boolean,
     ) {}
 
-    static fromServer(schema: SchemaMorphismFromServer): SchemaMorphism {
+    static fromResponse(schema: SchemaMorphismResponse): SchemaMorphism {
         return new SchemaMorphism(
-            Signature.fromServer(schema.signature),
-            Key.fromServer(schema.domKey),
-            Key.fromServer(schema.codKey),
+            Signature.fromResponse(schema.signature),
+            Key.fromResponse(schema.domKey),
+            Key.fromResponse(schema.codKey),
             schema.min,
             schema.tags ? schema.tags : [],
             false,
@@ -120,7 +120,7 @@ export class SchemaMorphism {
         });
     }
 
-    toServer(): SchemaMorphismFromServer {
+    toServer(): SchemaMorphismResponse {
         return {
             signature: this.signature.toServer(),
             domKey: this.domKey.toServer(),
@@ -156,8 +156,8 @@ export type MorphismDefinition = {
     tags?: Tag[];
 };
 
-export type MetadataMorphismFromServer = {
-    signature: SignatureFromServer;
+export type MetadataMorphismResponse = {
+    signature: SignatureResponse;
     label: string;
 };
 
@@ -169,13 +169,13 @@ export class MetadataMorphism {
         readonly label: string,
     ) {}
 
-    static fromServer(input: MetadataMorphismFromServer): MetadataMorphism {
+    static fromResponse(input: MetadataMorphismResponse): MetadataMorphism {
         return new MetadataMorphism(
             input.label,
         );
     }
 
-    toServer(signature: Signature): MetadataMorphismFromServer {
+    toServer(signature: Signature): MetadataMorphismResponse {
         return {
             signature: signature.toServer(),
             label: this.label,

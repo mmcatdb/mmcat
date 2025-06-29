@@ -1,8 +1,8 @@
-import { type DatasourceFromServer } from './datasource';
+import { type DatasourceResponse } from './datasource';
 import type { Entity, Id, VersionId } from './id';
-import { type SignatureFromServer } from './identifiers';
+import { type SignatureResponse } from './identifiers';
 
-export type QueryFromServer = {
+export type QueryResponse = {
     id: Id;
     version: VersionId;
     lastValid: VersionId;
@@ -23,7 +23,7 @@ export class Query implements Entity {
         readonly errors: QueryEvolutionError[],
     ) {}
 
-    static fromServer(input: QueryFromServer): Query {
+    static fromResponse(input: QueryResponse): Query {
         return new Query(
             input.id,
             input.version,
@@ -72,7 +72,7 @@ export type QueryPlanDescription = {
 };
 
 type QueryPartDescription = {
-    datasource: DatasourceFromServer;
+    datasource: DatasourceResponse;
     structure: ResultStructure;
     content: string;
 };
@@ -83,7 +83,7 @@ type ResultStructure = {
     children: Map<string, ResultStructure>;
     /** If null, this is the root of the tree. */
     parent: ResultStructure | null;
-    signatureFromParent: SignatureFromServer | null;
+    signatureFromParent: SignatureResponse | null;
 };
 
 export enum QueryNodeType {
@@ -114,7 +114,7 @@ export type DatasourceNode = TypedNode<QueryNodeType.Datasource, {
 export type PatternTree = {
     objexKey: number;
     term: string;
-    children: Record<SignatureFromServer, PatternTree>;
+    children: Record<SignatureResponse, PatternTree>;
 };
 
 export type JoinNode = TypedNode<QueryNodeType.Join, {
@@ -128,8 +128,8 @@ export type JoinCandidate = {
     fromKind: string;
     toKind: string;
     variable: TODO;
-    fromPath: SignatureFromServer;
-    toPath: SignatureFromServer;
+    fromPath: SignatureResponse;
+    toPath: SignatureResponse;
     recursion: number;
     isOptional: boolean;
 }

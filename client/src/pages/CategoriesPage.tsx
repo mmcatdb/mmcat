@@ -65,7 +65,7 @@ export function CategoriesPage() {
             return;
         }
 
-        const newCategory = SchemaCategoryInfo.fromServer(response.data);
+        const newCategory = SchemaCategoryInfo.fromResponse(response.data);
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
@@ -191,7 +191,7 @@ async function categoriesLoader(): Promise<CategoriesLoaderData> {
         throw new Error('Failed to load schema categories');
 
     return {
-        categories: response.data.map(SchemaCategoryInfo.fromServer),
+        categories: response.data.map(SchemaCategoryInfo.fromResponse),
     };
 }
 

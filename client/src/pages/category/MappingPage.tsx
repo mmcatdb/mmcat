@@ -14,10 +14,7 @@ export function MappingPage() {
 
             <div className='mt-4 p-4 bg-slate-500'>
                 <p>
-                Some text.
-                </p>
-                <p>
-                category 1: {category.label}
+                category: {category.label}
                 </p>
             </div>
 
@@ -53,7 +50,7 @@ async function mappingLoader({ params: { categoryId, mappingId } }: { params: Pa
         throw new Error('Failed to load mapping');
 
     return {
-        category: Category.fromServer(categoryResponse.data),
-        mapping: Mapping.fromServer(mappingResponse.data),
+        category: Category.fromResponse(categoryResponse.data),
+        mapping: Mapping.fromResponse(mappingResponse.data),
     };
 }

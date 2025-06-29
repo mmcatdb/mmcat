@@ -8,7 +8,7 @@ import { ErrorPage } from '@/pages/errorPages';
 import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES } from '@/types/action';
 import { Datasource } from '@/types/datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { type LogicalModel, logicalModelsFromServer } from '@/types/mapping';
+import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
 
 export function AddActionPage() {
     const [ label, setLabel ] = useState('');
@@ -26,19 +26,17 @@ export function AddActionPage() {
 
     useEffect(() => {
         async function fetchDatasourcesAndMappings() {
-            const dsResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
+            const datasourcesResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
             const mappingsResponse = await api.mappings.getAllMappingsInCategory({}, { categoryId: category.id });
 
-            if (!dsResponse.status ||  !mappingsResponse.status) {
+            if (!datasourcesResponse.status ||  !mappingsResponse.status) {
                 toast.error('Error fetching data from server.');
                 setError(true);
                 return;
             }
-            const datasourcesFromServer = dsResponse.data;
-            const mappingsFromServer = mappingsResponse.data;
 
-            setLogicalModels(logicalModelsFromServer(datasourcesFromServer, mappingsFromServer));
-            setDatasources(datasourcesFromServer.map(Datasource.fromServer));
+            setLogicalModels(logicalModelsFromResponse(datasourcesResponse.data, mappingsResponse.data));
+            setDatasources(datasourcesResponse.data.map(Datasource.fromResponse));
         }
 
         void fetchDatasourcesAndMappings();

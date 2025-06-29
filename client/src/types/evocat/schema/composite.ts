@@ -1,10 +1,10 @@
-import { smoFromServer } from '.';
+import { smoFromResponse } from '.';
 import type { Category } from '@/types/schema';
-import { type SMO, type SMOFromServer, SMOType } from './smo';
+import { type SMO, type SMOResponse, SMOType } from './smo';
 
-export type CompositeFromServer = SMOFromServer<SMOType.Composite> & {
+export type CompositeResponse = SMOResponse<SMOType.Composite> & {
     name: string;
-    children: SMOFromServer[];
+    children: SMOResponse[];
 };
 
 export class Composite implements SMO<SMOType.Composite> {
@@ -15,14 +15,14 @@ export class Composite implements SMO<SMOType.Composite> {
         readonly children: SMO[],
     ) {}
 
-    static fromServer(input: CompositeFromServer): Composite {
+    static fromResponse(input: CompositeResponse): Composite {
         return new Composite(
             input.name,
-            input.children.map(smoFromServer),
+            input.children.map(smoFromResponse),
         );
     }
 
-    toServer(): CompositeFromServer {
+    toServer(): CompositeResponse {
         return {
             type: SMOType.Composite,
             name: this.name,

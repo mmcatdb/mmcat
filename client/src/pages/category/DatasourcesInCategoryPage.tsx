@@ -152,10 +152,10 @@ async function datasourcesInCategoryLoader({ params: { categoryId } }: { params:
     if (!inCategoryResponse.status || !allResponse.status || !allMappingsResponse.status)
         throw new Error('Failed to load datasources in category');
 
-    const datasourcesIn = inCategoryResponse.data.map(Datasource.fromServer);
+    const datasourcesIn = inCategoryResponse.data.map(Datasource.fromResponse);
     const datasourcesNotIn = allResponse.data
         .filter(ds => !datasourcesIn.some(inCategory => inCategory.id === ds.id))
-        .map(Datasource.fromServer);
+        .map(Datasource.fromResponse);
 
     const allDatasourcesWithMappings = Array.from(
         new Set(allMappingsResponse.data.map(m => m.datasourceId)),

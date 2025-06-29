@@ -34,7 +34,7 @@ export function JobPage() {
         }
 
         setError(false);
-        const newJob = Job.fromServer(response.data, category);
+        const newJob = Job.fromResponse(response.data, category);
         setJob(newJob);
 
         if (TERMINAL_STATES.includes(newJob.state) && intervalRef.current)
@@ -114,7 +114,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
             return;
         }
 
-        setJob(Job.fromServer(result.data, category));
+        setJob(Job.fromResponse(result.data, category));
     }
 
     async function handleDisableJob() {
@@ -124,7 +124,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
             return;
         }
 
-        setJob(Job.fromServer(result.data, category));
+        setJob(Job.fromResponse(result.data, category));
     }
 
     async function handleRestartJob() {
@@ -134,7 +134,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
             return;
         }
 
-        const newJob = Job.fromServer(result.data, category);
+        const newJob = Job.fromResponse(result.data, category);
         navigate(routes.category.job.resolve({ categoryId: category.id, jobId: newJob.id }));
     }
 

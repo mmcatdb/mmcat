@@ -1,9 +1,9 @@
-import { type Category, SchemaMorphism, type SchemaMorphismFromServer } from '@/types/schema';
-import { type SMO, type SMOFromServer, SMOType } from './smo';
+import { type Category, SchemaMorphism, type SchemaMorphismResponse } from '@/types/schema';
+import { type SMO, type SMOResponse, SMOType } from './smo';
 
-export type UpdateMorphismFromServer = SMOFromServer<SMOType.UpdateMorphism> & {
-    newMorphism: SchemaMorphismFromServer;
-    oldMorphism: SchemaMorphismFromServer;
+export type UpdateMorphismResponse = SMOResponse<SMOType.UpdateMorphism> & {
+    newMorphism: SchemaMorphismResponse;
+    oldMorphism: SchemaMorphismResponse;
 };
 
 export class UpdateMorphism implements SMO<SMOType.UpdateMorphism> {
@@ -14,16 +14,16 @@ export class UpdateMorphism implements SMO<SMOType.UpdateMorphism> {
         readonly oldMorphism: SchemaMorphism,
     ) {}
 
-    static fromServer(input: UpdateMorphismFromServer): UpdateMorphism {
+    static fromResponse(input: UpdateMorphismResponse): UpdateMorphism {
         return new UpdateMorphism(
-            SchemaMorphism.fromServer(input.newMorphism),
-            SchemaMorphism.fromServer(input.oldMorphism),
+            SchemaMorphism.fromResponse(input.newMorphism),
+            SchemaMorphism.fromResponse(input.oldMorphism),
         );
     }
 
     static create(newMorphism: SchemaMorphism, oldMorphism: SchemaMorphism): UpdateMorphism {
         if (!newMorphism.signature.equals(oldMorphism.signature))
-            throw new Error('Cannot edit morphism\'s signature.');
+            throw new Error('Cannot update morphism\'s signature.');
 
         return new UpdateMorphism(
             newMorphism,
@@ -31,7 +31,7 @@ export class UpdateMorphism implements SMO<SMOType.UpdateMorphism> {
         );
     }
 
-    toServer(): UpdateMorphismFromServer {
+    toServer(): UpdateMorphismResponse {
         return {
             type: SMOType.UpdateMorphism,
             newMorphism: this.newMorphism.toServer(),

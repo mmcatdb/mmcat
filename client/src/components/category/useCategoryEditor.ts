@@ -1,10 +1,34 @@
-import { type Dispatch } from 'react';
+import { useReducer, useRef, type Dispatch } from 'react';
 import { FreeSelection, type FreeSelectionAction } from '../graph/graphSelection';
 import { type CategoryGraph, categoryToGraph } from './categoryGraph';
-import { type Evocat } from '@/types/evocat/Evocat';
+import { Evocat } from '@/types/evocat/Evocat';
 import { type GraphEvent } from '../graph/graphEngine';
+import { SchemaUpdate, type SchemaUpdateResponse } from '@/types/schema/SchemaUpdate';
+import { useLoaderData } from 'react-router-dom';
+import { Category, type SchemaCategoryResponse } from '@/types/schema';
+import { useDeleteHandlers } from './useDeleteHandlers';
 
-export type EditCategoryState = {
+export function useCategoryEditor() {
+    const loaderData = useLoaderData() as {
+        category: SchemaCategoryResponse;
+        updates: SchemaUpdateResponse[];
+    };
+
+    // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
+    const evocatRef = useRef<Evocat>();
+    if (!evocatRef.current) {
+        const updates = loaderData.updates.map(SchemaUpdate.fromResponse);
+        const category = Category.fromResponse(loaderData.category);
+        evocatRef.current = new Evocat(category, updates);
+    }
+
+    const [ state, dispatch ] = useReducer(categoryEditorReducer, evocatRef.current, createInitialState);
+    useDeleteHandlers(state, dispatch);
+
+    return { state, dispatch };
+}
+
+export type CategoryEditorState = {
     /** Immutable category data model. */
     evocat: Evocat;
     /** The graph representation of the category for rendering. */
@@ -18,9 +42,9 @@ export type EditCategoryState = {
 };
 
 /**
- * Initializes the state for editing a category, setting up the graph and default modes.
+ * Initializes the state for updating a category, setting up the graph and default modes.
  */
-export function createInitialState(evocat: Evocat): EditCategoryState {
+function createInitialState(evocat: Evocat): CategoryEditorState {
     return {
         evocat,
         graph: categoryToGraph(evocat.category),
@@ -30,15 +54,9 @@ export function createInitialState(evocat: Evocat): EditCategoryState {
     };
 }
 
-/**
- * Type alias for the dispatch function handling category edit actions.
- */
-export type EditCategoryDispatch = Dispatch<EditCategoryAction>;
+export type CategoryEditorDispatch = Dispatch<CategoryEditorAction>;
 
-/**
- * Union type of all possible actions for editing the category state.
- */
-type EditCategoryAction =
+type CategoryEditorAction =
     | GraphAction
     | SelectAction
     | LeftPanelAction
@@ -47,10 +65,7 @@ type EditCategoryAction =
     | CreateMorphismAction
     | DeleteElementsAction;
 
-/**
- * Reducer changing the category state based on the provided action, handling graph updates, selections, and mode changes.
- */
-export function editCategoryReducer(state: EditCategoryState, action: EditCategoryAction): EditCategoryState {
+function categoryEditorReducer(state: CategoryEditorState, action: CategoryEditorAction): CategoryEditorState {
     // console.log('REDUCE', state.leftPanelMode, action, state);
 
     switch (action.type) {
@@ -77,7 +92,7 @@ type GraphAction = {
 /**
  * Processes graph-related events, such as moving nodes or updating selections.
  */
-function graph(state: EditCategoryState, { event }: GraphAction): EditCategoryState {
+function graph(state: CategoryEditorState, { event }: GraphAction): CategoryEditorState {
     switch (event.type) {
     case 'move': {
         const node = state.graph.nodes.get(event.nodeId);
@@ -120,7 +135,7 @@ type SelectAction = {
  * @param action - The selection action to apply.
  * @returns The updated state with new selection.
  */
-function select(state: EditCategoryState, action: SelectAction): EditCategoryState {
+function select(state: CategoryEditorState, action: SelectAction): CategoryEditorState {
     const newSelection = state.selection.updateFromAction(action);
 
     // Restrict selection during morphism creation to max 2 nodes and no edges
@@ -151,7 +166,7 @@ export enum LeftPanelMode {
     createMorphism = 'createMorphism',
 }
 
-export type LeftPanelAction = {
+type LeftPanelAction = {
     /** The type of action, indicating a left panel mode change. */
     type: 'leftPanelMode';
     /** The new mode for the left panel. */
@@ -163,7 +178,7 @@ export type LeftPanelAction = {
 /**
  * Updates the left panel mode and synchronizes the graph and selection state.
  */
-function setLeftPanel(state: EditCategoryState, { mode: leftPanelMode, graph }: LeftPanelAction): EditCategoryState {
+function setLeftPanel(state: CategoryEditorState, { mode: leftPanelMode, graph }: LeftPanelAction): CategoryEditorState {
     const updatedGraph = graph ?? state.graph;
     let newSelection = state.selection;
 
@@ -193,7 +208,7 @@ export enum RightPanelMode {
 /**
  * Action to update the right panel's mode and optionally the graph state.
  */
-export type RightPanelAction = {
+type RightPanelAction = {
     type: 'rightPanelMode';
     mode: RightPanelMode;
     graph?: CategoryGraph;
@@ -202,7 +217,7 @@ export type RightPanelAction = {
 /**
  * Updates the right panel mode and synchronizes the graph and selection state.
  */
-function setRightPanel(state: EditCategoryState, { mode: rightPanelMode, graph }: RightPanelAction): EditCategoryState {
+function setRightPanel(state: CategoryEditorState, { mode: rightPanelMode, graph }: RightPanelAction): CategoryEditorState {
     const updatedGraph = graph ?? state.graph;
 
     return {
@@ -226,7 +241,7 @@ type CreateObjexAction = {
 /**
  * Updates state after creating a new objex, selecting it and resetting the mode.
  */
-function afterObjexCreation(state: EditCategoryState, { graph }: CreateObjexAction): EditCategoryState {
+function afterObjexCreation(state: CategoryEditorState, { graph }: CreateObjexAction): CategoryEditorState {
     const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
 
     return {
@@ -252,7 +267,7 @@ type CreateMorphismAction = {
 /**
  * Updates state after creating a new morphism, selecting it and resetting the mode.
  */
-function afterMorphismCreation(state: EditCategoryState, { graph }: CreateMorphismAction): EditCategoryState {
+function afterMorphismCreation(state: CategoryEditorState, { graph }: CreateMorphismAction): CategoryEditorState {
     const latestMorphism = Array.from(state.evocat.category.morphisms.values()).pop();
 
     return {
@@ -278,7 +293,7 @@ type DeleteElementsAction = {
 /**
  * Updates state after deleting elements, synchronizing the selection with the new graph.
  */
-function afterElementsDeletion(state: EditCategoryState, { graph }: DeleteElementsAction): EditCategoryState {
+function afterElementsDeletion(state: CategoryEditorState, { graph }: DeleteElementsAction): CategoryEditorState {
     return {
         ...state,
         graph,

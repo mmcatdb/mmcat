@@ -1,12 +1,12 @@
 import type { Entity, Id } from '../id';
-import { DatasourceConfiguration, type DatasourceConfigurationFromServer } from './Configuration';
+import { DatasourceConfiguration, type DatasourceConfigurationResponse } from './Configuration';
 
-export type DatasourceFromServer = {
+export type DatasourceResponse = {
     id: Id;
     type: DatasourceType;
     label: string;
     settings: Settings;
-    configuration: DatasourceConfigurationFromServer;
+    configuration: DatasourceConfigurationResponse;
 };
 
 export class Datasource implements Entity {
@@ -18,7 +18,7 @@ export class Datasource implements Entity {
         public readonly configuration: DatasourceConfiguration,
     ) {}
 
-    static fromServer(input: DatasourceFromServer): Datasource {
+    static fromResponse(input: DatasourceResponse): Datasource {
         return new Datasource(
             input.id,
             input.type,

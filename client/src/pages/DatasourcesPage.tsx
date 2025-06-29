@@ -119,7 +119,7 @@ async function datasourcesLoader(): Promise<DatasourcesLoaderData> {
     );
 
     return {
-        datasources: datasourcesResponse.data.map(Datasource.fromServer),
+        datasources: datasourcesResponse.data.map(Datasource.fromResponse),
         datasourcesWithMappings: Array.from(datasourceIdsWithMappings),
     };
 }
