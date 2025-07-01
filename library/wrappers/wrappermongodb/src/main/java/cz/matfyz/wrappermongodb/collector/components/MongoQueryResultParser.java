@@ -14,6 +14,8 @@ import org.bson.RawBsonDocument;
 
 import java.util.List;
 
+import com.mongodb.client.AggregateIterable;
+
 public class MongoQueryResultParser {
 
     private MongoConnection connection = null;
@@ -144,7 +146,7 @@ public class MongoQueryResultParser {
      * @param batch fetched documents
      * @param builder builder responsible for building the result
      */
-    private void consumeDocumentsToResult(List<Document> batch, ConsumedResult.Builder builder) {
+    private void consumeDocumentsToResult(Iterable<Document> batch, ConsumedResult.Builder builder) {
         for (Document document : batch) {
             builder.addRecord();
             RawBsonDocument sizeDoc = RawBsonDocument.parse(document.toJson());
@@ -194,5 +196,15 @@ public class MongoQueryResultParser {
         } catch (QueryExecutionException e) {
             throw MongoExceptionsFactory.getExceptionsFactory().consumeResultFailed(e);
         }
+    }
+
+
+
+    public ConsumedResult parseResultAndConsume(AggregateIterable<Document> result) {
+        ConsumedResult.Builder builder = new ConsumedResult.Builder();
+
+        consumeDocumentsToResult(result, builder);
+
+        return builder.toResult();
     }
 }

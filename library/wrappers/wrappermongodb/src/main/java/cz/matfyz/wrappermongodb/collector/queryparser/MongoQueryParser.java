@@ -1,7 +1,6 @@
 package cz.matfyz.wrappermongodb.collector.queryparser;
 
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
-import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import org.bson.Document;
 
 
@@ -10,19 +9,13 @@ import org.bson.Document;
  */
 public class MongoQueryParser {
 
-    private final MongoExceptionsFactory _exceptionsFactory;
-
-    public MongoQueryParser(MongoExceptionsFactory exceptionsFactory) {
-        _exceptionsFactory = exceptionsFactory;
-    }
-
     /**
      * Method which will split query into tokens for easier parsing
      * @param query inputted query
      * @return instance of parsed tokens
      * @throws ParseException when some problem occur during parsing process
      */
-    private QueryTokens _splitToTokens(String query) throws ParseException {
+    private QueryTokens splitToTokens(String query) throws ParseException {
         StringBuilder buffer = new StringBuilder();
         QueryTokens.Builder tokensBuilder = new QueryTokens.Builder();
 
@@ -58,8 +51,8 @@ public class MongoQueryParser {
      * @throws ParseException when some ParseException occur during parsing process
      */
     public Document parseQueryToCommand(String query) throws ParseException {
-        QueryTokens tokens = _splitToTokens(query);
-        CommandBuilder commandBuilder = new CommandBuilder(tokens.collectionName, _exceptionsFactory);
+        QueryTokens tokens = splitToTokens(query);
+        CommandBuilder commandBuilder = new CommandBuilder(tokens.collectionName);
 
         while(tokens.moveNext()) {
             commandBuilder.updateWithFunction(tokens.getActualFunction());

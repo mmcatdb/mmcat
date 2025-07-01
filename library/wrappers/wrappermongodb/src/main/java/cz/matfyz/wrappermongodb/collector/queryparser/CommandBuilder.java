@@ -27,18 +27,15 @@ public class CommandBuilder {
     private final Document command;
 
     /** Field which stores last returnType */
-    private ReturnType _returnType;
+    private ReturnType returnType;
 
     /** Field which stores on which mongodb document collection is this command built */
     private final String collectionName;
 
-    private final MongoExceptionsFactory exceptionsFactory;
-
-    public CommandBuilder(String collectionName, MongoExceptionsFactory exceptionsFactory) {
+    public CommandBuilder(String collectionName) {
         this.collectionName = collectionName;
         command = new Document();
-        _returnType = ReturnType.Collection;
-        this.exceptionsFactory = exceptionsFactory;
+        returnType = ReturnType.Collection;
     }
 
     /**
@@ -64,7 +61,7 @@ public class CommandBuilder {
         for (var entry : options.entrySet()) {
 
             if ("find".equals(functionName) && FIND_NOT_SUPPORTED_OPTIONS.contains(entry.getKey()))
-                throw exceptionsFactory.invalidMethodOption("explain", "find", _returnType);
+                throw MongoExceptionsFactory.getExceptionsFactory().invalidMethodOption("explain", "find", returnType);
             command.put(entry.getKey(), entry.getValue());
         }
     }
@@ -108,7 +105,7 @@ public class CommandBuilder {
                 updateWithOptions(function.name, function.args.getDocument(1));
                 break;
             default:
-                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
         }
     }
 
@@ -132,9 +129,9 @@ public class CommandBuilder {
                 updateWithOptions(function.name, function.args.getDocument(1));
                 break;
             default:
-                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
         }
-        _returnType = ReturnType.Cursor;
+        returnType = ReturnType.Cursor;
     }
 
     /**
@@ -160,9 +157,9 @@ public class CommandBuilder {
                 updateWithOptions(function.name, function.args.getDocument(2));
                 break;
             default:
-                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
         }
-        _returnType = ReturnType.Cursor;
+        returnType = ReturnType.Cursor;
     }
 
     /**
@@ -190,10 +187,10 @@ public class CommandBuilder {
                 updateWithOptions(function.name, function.args.getDocument(2));
                 break;
             default:
-                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
         }
 
-        _returnType = ReturnType.None;
+        returnType = ReturnType.None;
     }
 
     /**
@@ -206,9 +203,9 @@ public class CommandBuilder {
         if ("find".equals(function.name))
             updateWithCollectionFind(function);
         else if ("aggregate".equals(function.name) || "count".equals(function.name) || "distinct".equals(function.name))
-            throw exceptionsFactory.notSupportedMethod("aggregate", _returnType);
+            throw MongoExceptionsFactory.getExceptionsFactory().notSupportedMethod("aggregate", returnType);
         else
-            throw exceptionsFactory.invalidMethod(function.name, _returnType);
+            throw MongoExceptionsFactory.getExceptionsFactory().invalidMethod(function.name, returnType);
     }
 
     /**
@@ -217,7 +214,7 @@ public class CommandBuilder {
      * @throws ParseException throws when function does not exist or cannot be called on lastly returned type or some problems with arguments occur
      */
     public void updateWithFunction(FunctionItem function) throws ParseException {
-        switch (_returnType) {
+        switch (returnType) {
             case Collection:
                 updateWithCollectionFunction(function);
                 break;
@@ -240,8 +237,8 @@ public class CommandBuilder {
         else if (function.args.size() == 1)
             command.put(function.name, function.args.getBoolean(0));
         else
-            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
-        _returnType = ReturnType.Cursor;
+            throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
+        returnType = ReturnType.Cursor;
     }
 
     /**
@@ -253,8 +250,8 @@ public class CommandBuilder {
         if (function.args.size() == 1)
             command.put(function.name, function.args.getInteger(0));
         else
-            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
-        _returnType = ReturnType.Cursor;
+            throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
+        returnType = ReturnType.Cursor;
     }
 
     /**
@@ -266,8 +263,8 @@ public class CommandBuilder {
         if (function.args.size() == 1)
             command.put(function.name, function.args.getDocument(0));
         else
-            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
-        _returnType = ReturnType.Cursor;
+            throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
+        returnType = ReturnType.Cursor;
     }
 
     /**
@@ -279,8 +276,8 @@ public class CommandBuilder {
         if (function.args.size() == 1)
             command.put(function.name, function.args.getString(0));
         else
-            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
-        _returnType = ReturnType.Cursor;
+            throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
+        returnType = ReturnType.Cursor;
     }
 
     /**
@@ -297,9 +294,9 @@ public class CommandBuilder {
                 command.put("hint", function.args.getString(0));
             }
         } else {
-            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
         }
-        _returnType = ReturnType.Cursor;
+        returnType = ReturnType.Cursor;
     }
 
     /**
@@ -319,13 +316,13 @@ public class CommandBuilder {
                     command.put("query", filterDoc);
                 }
             } else {
-                throw exceptionsFactory.invalidCountUsage();
+                throw MongoExceptionsFactory.getExceptionsFactory().invalidCountUsage();
             }
 
         } else {
-            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw MongoExceptionsFactory.getExceptionsFactory().invalidNumberOfArgumentsInMethod(function.name, returnType);
         }
-        _returnType = ReturnType.None;
+        returnType = ReturnType.None;
     }
 
     /**
@@ -351,9 +348,9 @@ public class CommandBuilder {
                 updateWithCursorHint(function);
                 break;
             case "count":
-                throw exceptionsFactory.notSupportedMethod("count", _returnType);
+                throw MongoExceptionsFactory.getExceptionsFactory().notSupportedMethod("count", returnType);
             default:
-                throw exceptionsFactory.invalidMethod(function.name, _returnType);
+                throw MongoExceptionsFactory.getExceptionsFactory().invalidMethod(function.name, returnType);
         }
     }
 }

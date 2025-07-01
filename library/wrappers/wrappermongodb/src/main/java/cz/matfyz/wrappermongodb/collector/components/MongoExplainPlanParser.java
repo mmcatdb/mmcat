@@ -13,15 +13,14 @@ public class MongoExplainPlanParser {
      * @param command node of explain result
      */
     private void parseTableNames(DataModel model, Document command) throws WrapperUnsupportedOperationException {
+        String collectionName = null;
         if (command.containsKey("find")) {
-            String collectionName = command.getString("find");
-            if (collectionName != null)
-                model.addTable(collectionName);
+            collectionName = command.getString("find");
+        } else if (command.containsKey("aggregate")) {
+            collectionName = command.getString("aggregate");
         }
 
-        // if (command.containsKey("aggregate")) {
-        //     throw MongoExceptionsFactory.getExceptionsFactory().unsupportedOperation("aggregate");
-        // }
+        model.addTable(collectionName);
     }
 
     /**
@@ -48,7 +47,7 @@ public class MongoExplainPlanParser {
      */
     private void parseExecutionStats(DataModel model, Document node) throws ParseException {
         if (node.getBoolean("executionSuccess")) {
-            model.executionTimeMillis = Double.valueOf(node.getInteger("executionTimeMillis"));
+            model.executionTimeMillis = Double.valueOf(node.getInteger("executionTimeMillis")); // TODO: change to getDouble?
         }
     }
 
@@ -64,7 +63,7 @@ public class MongoExplainPlanParser {
         parseStage(
                 model,
                 plan.get("queryPlanner", Document.class)
-                        .get("winningPlan", Document.class)
+                    .get("winningPlan", Document.class)
         );
     }
 }

@@ -3,9 +3,7 @@ package cz.matfyz.wrappermongodb.collector.components;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 
-import cz.matfyz.core.collector.ResultWithPlan;
 import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
-import cz.matfyz.wrappermongodb.collector.MongoResources;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
 import org.bson.Document;
 
@@ -21,16 +19,6 @@ public record MongoConnection(MongoDatabase database) {
             return database.runCommand(query);
         } catch (MongoException e) {
             throw MongoExceptionsFactory.getExceptionsFactory().queryExecutionFailed(e);
-        }
-    }
-
-    public ResultWithPlan<Document, Document> executeWithExplain(Document query) throws QueryExecutionException {
-        try {
-            Document result = database.runCommand(query);
-            Document plan = database.runCommand(MongoResources.getExplainCommand(query));
-            return new ResultWithPlan<>(result, plan);
-        } catch (MongoException e) {
-            throw MongoExceptionsFactory.getExceptionsFactory().queryExecutionWithExplainFailed(e);
         }
     }
 }

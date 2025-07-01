@@ -76,10 +76,9 @@ class BenchmarkTests {
 
     @Test
     void costEstimationBasic() {
-        // TODO: add multiple datasources
         final List<TestDatasource<?>> testDatasources = List.of(
-            datasources.postgreSQL()
-            // datasources.mongoDB()
+            datasources.postgreSQL(),
+            datasources.mongoDB()
         );
 
         final var query = """

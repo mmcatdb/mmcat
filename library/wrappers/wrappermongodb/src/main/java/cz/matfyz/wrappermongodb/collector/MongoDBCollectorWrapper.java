@@ -9,7 +9,6 @@ import cz.matfyz.wrappermongodb.collector.components.MongoConnection;
 import cz.matfyz.wrappermongodb.collector.components.MongoDataCollector;
 import cz.matfyz.wrappermongodb.collector.components.MongoExplainPlanParser;
 import cz.matfyz.wrappermongodb.collector.components.MongoQueryResultParser;
-import cz.matfyz.wrappermongodb.collector.queryparser.MongoQueryParser;
 
 import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
 
@@ -25,13 +24,13 @@ public final class MongoDBCollectorWrapper implements CollectorWrapper {
 
     private final MongoDBProvider provider;
 
-    private final MongoQueryParser queryParser;
+    // private final MongoQueryParser queryParser;
 
     public MongoDBCollectorWrapper(MongoDBProvider provider) {
         this.provider = provider;
         resultParser = new MongoQueryResultParser();
         explainPlanParser = new MongoExplainPlanParser();
-        queryParser = new MongoQueryParser(MongoExceptionsFactory.getExceptionsFactory());
+        // queryParser = new MongoQueryParser();
     }
 
     @Override
@@ -44,13 +43,15 @@ public final class MongoDBCollectorWrapper implements CollectorWrapper {
 
         resultParser.setConnection(connection);
 
-        // BsonDocument a = mongoQuery.pipeline.get(0).toBsonDocument(); // TODO change parsing - how to convert to document from bson?
+        final var queryResult = connection.database().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline);
+        final var queryPlan = queryResult.explain();
 
-        var inputQuery = queryParser.parseQueryToCommand(mongoQuery.toString());
-        var explainResult = connection.executeWithExplain(inputQuery);
 
-        var mainResult = resultParser.parseResultAndConsume(explainResult.result());
-        explainPlanParser.parsePlan(explainResult.plan(), dataModel);
+        // var inputQuery = queryParser.parseQueryToCommand(mongoQuery.toString());
+        // var explainResult = connection.executeWithExplain(inputQuery);
+
+        var mainResult = resultParser.parseResultAndConsume(queryResult);
+        explainPlanParser.parsePlan(queryPlan, dataModel);
 
         try {
             var dataCollector = new MongoDataCollector(dataModel, connection, resultParser, provider.settings.database());
