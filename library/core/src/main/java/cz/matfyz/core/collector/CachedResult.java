@@ -1,4 +1,4 @@
-package cz.matfyz.core.collector.queryresult;
+package cz.matfyz.core.collector;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -10,14 +10,14 @@ import java.util.Map.Entry;
 public class CachedResult {
 
     /** List of Maps, which contains all data fetched from native results */
-    private final List<Map<String, Object>> _records;
+    private final List<Map<String, Object>> records;
 
     /** Private pointer, which points to actual record when iterating over result */
-    private int _cursor;
+    private int cursor;
 
     private CachedResult(List<Map<String, Object>> records) {
-        _records = records;
-        _cursor = -1;
+        this.records = records;
+        cursor = -1;
     }
 
     /**
@@ -25,14 +25,14 @@ public class CachedResult {
      * @return true if there exists next result
      */
     public boolean next() {
-        _cursor++;
-        return _cursor < _records.size();
+        cursor++;
+        return cursor < records.size();
     }
 
     /**
-     * Method for repointing _cursor to beginning so the result can be iterated again
+     * Method for repointing cursor to beginning so the result can be iterated again
      */
-    public void refresh() { _cursor = -1; }
+    public void refresh() { cursor = -1; }
 
     /**
      * Method for checking of this collection of records have column of this columnName
@@ -40,16 +40,16 @@ public class CachedResult {
      * @return true if this column exists
      */
     public boolean containsCol(String colName) {
-        return _records.get(_cursor).containsKey(colName);
+        return records.get(cursor).containsKey(colName);
     }
 
     /**
-     * Private method used for getting value of column from actual record which is pointed by _cursor
+     * Private method used for getting value of column from actual record which is pointed by cursor
      * @param colName inputted columnName
      * @return instance of Object which is selected value or null this value do not exist
      */
-    private Object _get(String colName) {
-        return _records.get(_cursor).getOrDefault(colName, null);
+    private Object get(String colName) {
+        return records.get(cursor).getOrDefault(colName, null);
     }
 
     /**
@@ -59,7 +59,7 @@ public class CachedResult {
      * @throws ClassCastException when gathered value cannot be parsed or is null
      */
     public int getInt(String colName) {
-        Object value = _get(colName);
+        Object value = get(colName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to int");
         }
@@ -88,7 +88,7 @@ public class CachedResult {
      * @return converted string value
      */
     public String getString(String colName) {
-        return (String)_get(colName);
+        return (String)get(colName);
     }
 
     /**
@@ -98,7 +98,7 @@ public class CachedResult {
      * @throws ClassCastException when value do not exist or can't be converted
      */
     public double getDouble(String colName) {
-        Object value = _get(colName);
+        Object value = get(colName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to double");
         }
@@ -120,7 +120,7 @@ public class CachedResult {
      * @throws ClassCastException when value can't be parsed to boolean or value do not exist
      */
     public boolean getBoolean(String colName) {
-        Object value = _get(colName);
+        Object value = get(colName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to boolean");
         } else if (value instanceof Boolean booleanValue) {
@@ -139,7 +139,7 @@ public class CachedResult {
      * @throws ClassCastException when value can't be parsed to long or value do not exist
      */
     public long getLong(String colName) {
-        Object value = _get(colName);
+        Object value = get(colName);
         if (value == null) {
             throw  new ClassCastException("Cannot cast null to long");
         } else if (value instanceof Long longValue) {
@@ -160,7 +160,7 @@ public class CachedResult {
      * @param objectMap inputted object map
      * @return parsed string, object map
      */
-    private Map<String, Object> _parseToStringMap(Map<?, ?> objectMap) {
+    private Map<String, Object> parseToStringMap(Map<?, ?> objectMap) {
         Map<String, Object> stringMap = new HashMap<>();
         for (Entry<?, ?> entry : objectMap.entrySet()) {
             if (entry.getKey() instanceof String strValue) {
@@ -176,11 +176,11 @@ public class CachedResult {
      * @return value as a Map
      */
     public Map<String, Object> getMap(String colName) {
-        Object value = _get(colName);
+        Object value = get(colName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to Document");
         } else if (value instanceof Map<?, ?> mapValue) {
-            return _parseToStringMap(mapValue);
+            return parseToStringMap(mapValue);
         } else {
             throw new ClassCastException();
         }
@@ -193,7 +193,7 @@ public class CachedResult {
      * @return converted list
      * @param <T> class type
      */
-    private <T> List<T> _convertList(List<?> listValue, Class<T> clazz) {
+    private <T> List<T> convertList(List<?> listValue, Class<T> clazz) {
         List<T> convertedList = new ArrayList<>();
         for (Object item : listValue) {
             convertedList.add(clazz.cast(item));
@@ -210,9 +210,9 @@ public class CachedResult {
      * @throws ClassCastException when list cannot be converted
      */
     public <T> List<T> getList(String columnName, Class<T> clazz) {
-        Object value = _get(columnName);
+        Object value = get(columnName);
         if (value instanceof List<?> listValue) {
-            return _convertList(listValue, clazz);
+            return convertList(listValue, clazz);
         }
         throw new ClassCastException();
     }
@@ -222,25 +222,25 @@ public class CachedResult {
      * @return record count
      */
     public int getRowCount() {
-        return _records.size();
+        return records.size();
     }
 
     /**
      * Builder class which represents builder responsible for building CachedResult and filling it with all records
      */
     public static class Builder {
-        private final List<Map<String, Object>> _records;
+        private final List<Map<String, Object>> records;
 
 
         public Builder() {
-            _records = new ArrayList<>();
+            records = new ArrayList<>();
         }
 
         /**
          * Method which will add new empty record
          */
         public void addEmptyRecord() {
-            _records.add(new LinkedHashMap<>());
+            records.add(new LinkedHashMap<>());
         }
 
         /**
@@ -249,8 +249,8 @@ public class CachedResult {
          * @param value inputted value
          */
         public void toLastRecordAddValue(String colName, Object value) {
-            int lastInx = _records.size() - 1;
-            _records.get(lastInx).put(colName, value);
+            int lastInx = records.size() - 1;
+            records.get(lastInx).put(colName, value);
         }
 
         /**
@@ -258,7 +258,7 @@ public class CachedResult {
          * @return built result
          */
         public CachedResult toResult() {
-            return new CachedResult(_records);
+            return new CachedResult(records);
         }
     }
 }

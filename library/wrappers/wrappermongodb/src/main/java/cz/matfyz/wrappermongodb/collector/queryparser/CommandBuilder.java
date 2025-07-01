@@ -24,21 +24,21 @@ public class CommandBuilder {
     /**
      * Field which stores actual command, that is incrementally built during while process
      */
-    private final Document _command;
+    private final Document command;
 
     /** Field which stores last returnType */
     private ReturnType _returnType;
 
     /** Field which stores on which mongodb document collection is this command built */
-    private final String _collectionName;
+    private final String collectionName;
 
-    private final MongoExceptionsFactory _exceptionsFactory;
+    private final MongoExceptionsFactory exceptionsFactory;
 
     public CommandBuilder(String collectionName, MongoExceptionsFactory exceptionsFactory) {
-        _collectionName = collectionName;
-        _command = new Document();
+        this.collectionName = collectionName;
+        command = new Document();
         _returnType = ReturnType.Collection;
-        _exceptionsFactory = exceptionsFactory;
+        this.exceptionsFactory = exceptionsFactory;
     }
 
     /**
@@ -46,7 +46,7 @@ public class CommandBuilder {
      * @return the final command as Document
      */
     public Document build() {
-        return _command;
+        return command;
     }
 
     /**
@@ -60,12 +60,12 @@ public class CommandBuilder {
      * @param options instance of Document which represents the inputted options
      * @throws ParseException when invalid option is used in options object which we do not support
      */
-    private void _updateWithOptions(String functionName, Document options) throws ParseException {
+    private void updateWithOptions(String functionName, Document options) throws ParseException {
         for (var entry : options.entrySet()) {
 
             if ("find".equals(functionName) && FIND_NOT_SUPPORTED_OPTIONS.contains(entry.getKey()))
-                throw _exceptionsFactory.invalidMethodOption("explain", "find", _returnType);
-            _command.put(entry.getKey(), entry.getValue());
+                throw exceptionsFactory.invalidMethodOption("explain", "find", _returnType);
+            command.put(entry.getKey(), entry.getValue());
         }
     }
 
@@ -74,9 +74,9 @@ public class CommandBuilder {
      * @param keyName name which will be used as a key name in document command
      * @param documentValue instance of document to be set as value
      */
-    private void _updateWithDocumentValue(String keyName, Document documentValue) {
+    private void updateWithDocumentValue(String keyName, Document documentValue) {
         if (!documentValue.isEmpty())
-            _command.put(keyName, documentValue);
+            command.put(keyName, documentValue);
     }
 
     /**
@@ -84,9 +84,9 @@ public class CommandBuilder {
      * @param keyName name which will be used as a key name in document command
      * @param arrayDocValue instance of list to be used as newly added value
      */
-    private void _updateWithDocumentListValue(String keyName, List<Document> arrayDocValue) {
+    private void updateWithDocumentListValue(String keyName, List<Document> arrayDocValue) {
         if (!arrayDocValue.isEmpty())
-            _command.put(keyName, arrayDocValue);
+            command.put(keyName, arrayDocValue);
     }
 
     /**
@@ -95,20 +95,20 @@ public class CommandBuilder {
      * @param function inputted function to update command
      * @throws ParseException when function is called with incorrect count of parameters or some values cannot be parsed
      */
-    private void _updateWithCollectionCount(FunctionItem function) throws ParseException {
-        _command.put("count", _collectionName);
+    private void updateWithCollectionCount(FunctionItem function) throws ParseException {
+        command.put("count", collectionName);
         switch (function.args.size()) {
             case 0:
                 break;
             case 1:
-                _updateWithDocumentValue("query", function.args.getDocument(0));
+                updateWithDocumentValue("query", function.args.getDocument(0));
                 break;
             case 2:
-                _updateWithDocumentValue("query", function.args.getDocument(0));
-                _updateWithOptions(function.name, function.args.getDocument(1));
+                updateWithDocumentValue("query", function.args.getDocument(0));
+                updateWithOptions(function.name, function.args.getDocument(1));
                 break;
             default:
-                throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         }
     }
 
@@ -118,21 +118,21 @@ public class CommandBuilder {
      * @param function inputted function to update command
      * @throws ParseException when function is called with incorrect count of parameters or some values cannot be parsed
      */
-    private void _updateWithCollectionAggregate(FunctionItem function) throws ParseException {
-        _command.put("aggregate", _collectionName);
-        _command.put("cursor", new Document());
+    private void updateWithCollectionAggregate(FunctionItem function) throws ParseException {
+        command.put("aggregate", collectionName);
+        command.put("cursor", new Document());
         switch (function.args.size()) {
             case 0:
                 break;
             case 1:
-                _updateWithDocumentListValue("pipeline", function.args.getDocumentList(0));
+                updateWithDocumentListValue("pipeline", function.args.getDocumentList(0));
                 break;
             case 2:
-                _updateWithDocumentListValue("pipeline", function.args.getDocumentList(0));
-                _updateWithOptions(function.name, function.args.getDocument(1));
+                updateWithDocumentListValue("pipeline", function.args.getDocumentList(0));
+                updateWithOptions(function.name, function.args.getDocument(1));
                 break;
             default:
-                throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         }
         _returnType = ReturnType.Cursor;
     }
@@ -142,25 +142,25 @@ public class CommandBuilder {
      * @param function inputted function to update command
      * @throws ParseException when function is called with incorrect count of parameters or some values cannot be parsed
      */
-    private void _updateWithCollectionFind(FunctionItem function) throws ParseException {
-        _command.put("find", _collectionName);
+    private void updateWithCollectionFind(FunctionItem function) throws ParseException {
+        command.put("find", collectionName);
         switch (function.args.size()) {
             case 0:
                 break;
             case 1:
-                _updateWithDocumentValue("filter", function.args.getDocument(0));
+                updateWithDocumentValue("filter", function.args.getDocument(0));
                 break;
             case 2:
-                _updateWithDocumentValue("filter", function.args.getDocument(0));
-                _updateWithDocumentValue("projection", function.args.getDocument(1));
+                updateWithDocumentValue("filter", function.args.getDocument(0));
+                updateWithDocumentValue("projection", function.args.getDocument(1));
                 break;
             case 3:
-                _updateWithDocumentValue("filter", function.args.getDocument(0));
-                _updateWithDocumentValue("projection", function.args.getDocument(1));
-                _updateWithOptions(function.name, function.args.getDocument(2));
+                updateWithDocumentValue("filter", function.args.getDocument(0));
+                updateWithDocumentValue("projection", function.args.getDocument(1));
+                updateWithOptions(function.name, function.args.getDocument(2));
                 break;
             default:
-                throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         }
         _returnType = ReturnType.Cursor;
     }
@@ -171,26 +171,26 @@ public class CommandBuilder {
      * @param function inputted function to update command
      * @throws ParseException when function is called with incorrect count of parameters or some values cannot be parsed
      */
-    private void _updateWithCollectionDistinct(FunctionItem function) throws ParseException {
-        _command.put("distinct", _collectionName);
+    private void updateWithCollectionDistinct(FunctionItem function) throws ParseException {
+        command.put("distinct", collectionName);
 
         switch (function.args.size()) {
             case 0:
                 break;
             case 1:
-                _command.put("key", function.args.getString(0));
+                command.put("key", function.args.getString(0));
                 break;
             case 2:
-                _command.put("key", function.args.getString(0));
-                _updateWithDocumentValue("query", function.args.getDocument(1));
+                command.put("key", function.args.getString(0));
+                updateWithDocumentValue("query", function.args.getDocument(1));
                 break;
             case 3:
-                _command.put("key", function.args.getString(0));
-                _updateWithDocumentValue("query", function.args.getDocument(1));
-                _updateWithOptions(function.name, function.args.getDocument(2));
+                command.put("key", function.args.getString(0));
+                updateWithDocumentValue("query", function.args.getDocument(1));
+                updateWithOptions(function.name, function.args.getDocument(2));
                 break;
             default:
-                throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+                throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         }
 
         _returnType = ReturnType.None;
@@ -202,13 +202,13 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function of nonexistent name or function our system do not support was used
      */
-    private void _updateWithCollectionFunction(FunctionItem function) throws ParseException {
+    private void updateWithCollectionFunction(FunctionItem function) throws ParseException {
         if ("find".equals(function.name))
-            _updateWithCollectionFind(function);
+            updateWithCollectionFind(function);
         else if ("aggregate".equals(function.name) || "count".equals(function.name) || "distinct".equals(function.name))
-            throw _exceptionsFactory.notSupportedMethod("aggregate", _returnType);
+            throw exceptionsFactory.notSupportedMethod("aggregate", _returnType);
         else
-            throw _exceptionsFactory.invalidMethod(function.name, _returnType);
+            throw exceptionsFactory.invalidMethod(function.name, _returnType);
     }
 
     /**
@@ -219,10 +219,10 @@ public class CommandBuilder {
     public void updateWithFunction(FunctionItem function) throws ParseException {
         switch (_returnType) {
             case Collection:
-                _updateWithCollectionFunction(function);
+                updateWithCollectionFunction(function);
                 break;
             case Cursor:
-                _updateWithCursorFunction(function);
+                updateWithCursorFunction(function);
                 break;
             case None:
                 throw new ParseException("You are calling function on unsupported type. You can call specific functions on cursor or collection.");
@@ -234,13 +234,13 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function has invalid number of arguments
      */
-    private void _updateWithCursorFlagMethod(FunctionItem function) throws ParseException {
+    private void updateWithCursorFlagMethod(FunctionItem function) throws ParseException {
         if (function.args.size() == 0)
-            _command.put(function.name, true);
+            command.put(function.name, true);
         else if (function.args.size() == 1)
-            _command.put(function.name, function.args.getBoolean(0));
+            command.put(function.name, function.args.getBoolean(0));
         else
-            throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         _returnType = ReturnType.Cursor;
     }
 
@@ -249,11 +249,11 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function is called with invalid number of arguments, or some of the arguments couldn't be parsed
      */
-    private void _updateWithCursorIntegerMethod(FunctionItem function) throws ParseException {
+    private void updateWithCursorIntegerMethod(FunctionItem function) throws ParseException {
         if (function.args.size() == 1)
-            _command.put(function.name, function.args.getInteger(0));
+            command.put(function.name, function.args.getInteger(0));
         else
-            throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         _returnType = ReturnType.Cursor;
     }
 
@@ -262,11 +262,11 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function is called with invalid number of arguments, or some of the arguments couldn't be parsed
      */
-    private void _updateWithCursorDocumentMethod(FunctionItem function) throws ParseException {
+    private void updateWithCursorDocumentMethod(FunctionItem function) throws ParseException {
         if (function.args.size() == 1)
-            _command.put(function.name, function.args.getDocument(0));
+            command.put(function.name, function.args.getDocument(0));
         else
-            throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         _returnType = ReturnType.Cursor;
     }
 
@@ -275,11 +275,11 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function is called with invalid number of arguments, or some of the arguments couldn't be parsed
      */
-    private void _updateWithCursorStringMethod(FunctionItem function) throws ParseException {
+    private void updateWithCursorStringMethod(FunctionItem function) throws ParseException {
         if (function.args.size() == 1)
-            _command.put(function.name, function.args.getString(0));
+            command.put(function.name, function.args.getString(0));
         else
-            throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         _returnType = ReturnType.Cursor;
     }
 
@@ -288,16 +288,16 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function is called with invalid number of arguments, or some of the arguments couldn't be parsed
      */
-    private void _updateWithCursorHint(FunctionItem function) throws ParseException {
+    private void updateWithCursorHint(FunctionItem function) throws ParseException {
         if (function.args.size() == 1) {
             try {
                 Document hintDocument = function.args.getDocument(0);
-                _command.put("hint", hintDocument);
+                command.put("hint", hintDocument);
             } catch (ParseException e) {
-                _command.put("hint", function.args.getString(0));
+                command.put("hint", function.args.getString(0));
             }
         } else {
-            throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         }
         _returnType = ReturnType.Cursor;
     }
@@ -308,22 +308,22 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function is called with invalid number of arguments, or some of the arguments couldn't be parsed
      */
-    private void _updateWithCursorCount(FunctionItem function) throws ParseException {
+    private void updateWithCursorCount(FunctionItem function) throws ParseException {
         if (function.args.size() == 0) {
-            if (_command.containsKey("find")) {
-                _command.remove("find");
-                _command.put("count", _collectionName);
-                if (_command.containsKey("filter")) {
-                    Document filterDoc = _command.get("filter", Document.class);
-                    _command.remove("filter");
-                    _command.put("query", filterDoc);
+            if (command.containsKey("find")) {
+                command.remove("find");
+                command.put("count", collectionName);
+                if (command.containsKey("filter")) {
+                    Document filterDoc = command.get("filter", Document.class);
+                    command.remove("filter");
+                    command.put("query", filterDoc);
                 }
             } else {
-                throw _exceptionsFactory.invalidCountUsage();
+                throw exceptionsFactory.invalidCountUsage();
             }
 
         } else {
-            throw _exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
+            throw exceptionsFactory.invalidNumberOfArgumentsInMethod(function.name, _returnType);
         }
         _returnType = ReturnType.None;
     }
@@ -333,27 +333,27 @@ public class CommandBuilder {
      * @param function inputted function
      * @throws ParseException when function does not exist or is not supported
      */
-    private void _updateWithCursorFunction(FunctionItem function) throws ParseException {
+    private void updateWithCursorFunction(FunctionItem function) throws ParseException {
         switch(function.name) {
             case "allowDiskUse", "allowPartialResults", "noCursorTimeout", "returnKey", "showRecordId", "tailable":
-                _updateWithCursorFlagMethod(function);
+                updateWithCursorFlagMethod(function);
                 break;
             case "batchSize", "limit", "maxTimeMS", "skip":
-                _updateWithCursorIntegerMethod(function);
+                updateWithCursorIntegerMethod(function);
                 break;
             case "collation", "max", "min", "sort":
-                _updateWithCursorDocumentMethod(function);
+                updateWithCursorDocumentMethod(function);
                 break;
             case "comment", "readConcern":
-                _updateWithCursorStringMethod(function);
+                updateWithCursorStringMethod(function);
                 break;
             case "hint":
-                _updateWithCursorHint(function);
+                updateWithCursorHint(function);
                 break;
             case "count":
-                throw _exceptionsFactory.notSupportedMethod("count", _returnType);
+                throw exceptionsFactory.notSupportedMethod("count", _returnType);
             default:
-                throw _exceptionsFactory.invalidMethod(function.name, _returnType);
+                throw exceptionsFactory.invalidMethod(function.name, _returnType);
         }
     }
 }

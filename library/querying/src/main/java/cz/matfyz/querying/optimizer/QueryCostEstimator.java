@@ -41,14 +41,12 @@ public class QueryCostEstimator implements QueryVisitor<DataModel> {
         try {
             final var query = DatasourceTranslator.run(plan.context, node);
 
-            
-
             final var collector = plan.context.getProvider().getControlWrapper(node.datasource).getCollectorWrapper();
             final var dataModel = collector.executeQuery(query.content());
 
-            final var stat = dataModel.toResult().resultData().resultTable().getSizeInBytes();
+            final var statistic = dataModel.resultTable.sizeInBytes;
+            costsOverNet.add(statistic);
 
-            costsOverNet.add(stat);
             return dataModel;
         } catch (WrapperException e) {
             throw QueryException.message("Something went wrong: " + e.getMessage());

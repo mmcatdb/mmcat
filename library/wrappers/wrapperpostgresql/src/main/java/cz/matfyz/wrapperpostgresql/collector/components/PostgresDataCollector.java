@@ -3,12 +3,13 @@ package cz.matfyz.wrapperpostgresql.collector.components;
 import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
 import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
 import cz.matfyz.wrapperpostgresql.collector.PostgreSQLResources;
-import cz.matfyz.core.collector.queryresult.ConsumedResult;
 import cz.matfyz.abstractwrappers.exception.collector.DataCollectException;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
+import cz.matfyz.core.collector.CachedResult;
+import cz.matfyz.core.collector.ConsumedResult;
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.core.collector.queryresult.CachedResult;
+import cz.matfyz.core.collector.DataModel.TableData;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,11 +18,11 @@ import java.util.Set;
  * Class which is responsible for collecting all statistical data and save them to data model
  */
 public class PostgresDataCollector {
-    private final PostgresConnection _connection;
-    private final PostgresQueryResultParser _resultParser;
+    private final PostgresConnection connection;
+    private final PostgresQueryResultParser resultParser;
 
-    protected final String _databaseName;
-    protected final DataModel _model;
+    protected final String databaseName;
+    protected final DataModel model;
 
 
     public PostgresDataCollector(
@@ -30,15 +31,15 @@ public class PostgresDataCollector {
             PostgresConnection connection,
             PostgresQueryResultParser resultParser
     ) throws ConnectionException {
-        _databaseName = databaseName;
-        _model = dataModel;
-        _connection = connection;
-        _resultParser = resultParser;
+        this.databaseName = databaseName;
+        this.model = dataModel;
+        this.connection = connection;
+        this.resultParser = resultParser;
     }
 
     protected CachedResult executeQuery(String query) throws DataCollectException {
         try {
-            return _resultParser.parseResultAndCache(_connection.executeQuery(query));
+            return resultParser.parseResultAndCache(connection.executeQuery(query));
         } catch (QueryExecutionException | ParseException e) {
             throw PostgreSQLExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
         }
@@ -46,7 +47,7 @@ public class PostgresDataCollector {
 
     protected ConsumedResult executeQueryAndConsume(String query) throws DataCollectException {
         try {
-            return _resultParser.parseResultAndConsume(_connection.executeQuery(query));
+            return resultParser.parseResultAndConsume(connection.executeQuery(query));
         } catch (QueryExecutionException | ParseException e) {
             throw PostgreSQLExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
         }
@@ -58,11 +59,11 @@ public class PostgresDataCollector {
      * Method which saves page size to model
      * @throws DataCollectException when help query fails
      */
-    private void _collectPageSize() throws DataCollectException {
+    private void collectPageSize() throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getPageSizeQuery());
         if (result.next()) {
             int pageSize = result.getInt("current_setting");
-            _model.setPageSize(pageSize);
+            model.databasePageSize = pageSize;
         }
     }
 
@@ -70,11 +71,11 @@ public class PostgresDataCollector {
      * Method which counts and saves dataset size in pages to model
      * @param size byte size of dataset
      */
-    private void _collectDatabaseSizeInPages(long size) {
-        int pageSize = _model.getPageSize();
+    private void collectDatabaseSizeInPages(long size) {
+        int pageSize = model.databasePageSize;
         if (pageSize > 0) {
             long sizeInPages = (long) Math.ceil((double)size / (double)pageSize);
-            _model.setDatabaseSizeInPages(sizeInPages);
+            model.databaseSizeInPages = sizeInPages;
         }
     }
 
@@ -82,12 +83,12 @@ public class PostgresDataCollector {
      * Method which saves sizes of dataset to model
      * @throws DataCollectException when help query fails
      */
-    private void _collectDatabaseDataSizes() throws DataCollectException {
-        CachedResult result = executeQuery(PostgreSQLResources.getDatasetSizeQuery(_databaseName));
+    private void collectDatabaseDataSizes() throws DataCollectException {
+        CachedResult result = executeQuery(PostgreSQLResources.getDatasetSizeQuery(databaseName));
         if (result.next()) {
             long dataSetSize = result.getLong("pg_database_size");
-            _model.setDatabaseByteSize(dataSetSize);
-            _collectDatabaseSizeInPages(dataSetSize);
+            model.databaseSizeInBytes = dataSetSize;
+            collectDatabaseSizeInPages(dataSetSize);
         }
     }
 
@@ -95,11 +96,11 @@ public class PostgresDataCollector {
      * Method which saves size of caches used by postgres and save it to model
      * @throws DataCollectException when help query fails
      */
-    private void _collectDatabaseCacheSize() throws DataCollectException {
+    private void collectDatabaseCacheSize() throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getCacheSizeQuery());
         if (result.next()) {
             long size = result.getLong("shared_buffers");
-            _model.setDatabaseCacheSize(size);
+            model.databaseCacheSize = size;
         }
     }
 
@@ -107,10 +108,10 @@ public class PostgresDataCollector {
      * Method to save all dataset data to model
      * @throws DataCollectException when some of the help queries failed
      */
-    private void _collectDatabaseData() throws DataCollectException {
-        _collectPageSize();
-        _collectDatabaseDataSizes();
-        _collectDatabaseCacheSize();
+    private void collectDatabaseData() throws DataCollectException {
+        collectPageSize();
+        collectDatabaseDataSizes();
+        collectDatabaseCacheSize();
     }
 
     //Saving of columns data
@@ -121,13 +122,13 @@ public class PostgresDataCollector {
      * @param colName select column
      * @throws DataCollectException when help query fails
      */
-    private void _collectNumericDataForCol(String tableName, String colName, String typeName) throws DataCollectException {
+    private void collectNumericDataForCol(String tableName, String colName, String typeName) throws DataCollectException {
         CachedResult res = executeQuery(PostgreSQLResources.getColDataQuery(tableName, colName));
         if (res.next()) {
             double ratio = res.getDouble("n_distinct");
             int size = res.getInt("avg_width");
-            _model.setColumnDistinctRatio(tableName, colName, ratio);
-            _model.setColumnTypeByteSize(tableName, colName, typeName, size);
+            model.getTable(tableName, true).getColumn(colName, true).distinctRatio = ratio;
+            model.getTable(tableName, true).getColumn(colName, true).getColumnType(typeName, true).byteSize = size;
         }
 
     }
@@ -138,14 +139,14 @@ public class PostgresDataCollector {
      * @param colName to select column
      * @throws DataCollectException when help query fails
      */
-    private void _collectTypeAndMandatoryForCol(String tableName, String colName) throws DataCollectException {
+    private void collectTypeAndMandatoryForCol(String tableName, String colName) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getColTypeAndMandatoryQuery(tableName, colName));
         if (result.next()) {
             String type = result.getString("typname");
-            _collectNumericDataForCol(tableName, colName, type);
+            collectNumericDataForCol(tableName, colName, type);
 
             boolean mandatory = result.getBoolean("attnotnull");
-            _model.setColumnMandatory(tableName, colName, mandatory);
+            model.getTable(tableName, true).getColumn(colName, true).mandatory = mandatory;
         }
     }
 
@@ -155,7 +156,7 @@ public class PostgresDataCollector {
      * @return set of column names
      * @throws DataCollectException when help query fails
      */
-    private Set<String> _getColumnNames(String tableName) throws DataCollectException {
+    private Set<String> getColumnNames(String tableName) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getColNamesForTableQuery(tableName));
         Set<String> names = new HashSet<>();
 
@@ -171,9 +172,9 @@ public class PostgresDataCollector {
      * @param tableName to specify table
      * @throws DataCollectException when some of the help queries fails
      */
-    private void _collectColumnData(String tableName) throws DataCollectException {
-        for (String columnName: _getColumnNames(tableName)) {
-            _collectTypeAndMandatoryForCol(tableName, columnName);
+    private void collectColumnData(String tableName, TableData table) throws DataCollectException {
+        for (String columnName: getColumnNames(tableName)) {
+            collectTypeAndMandatoryForCol(tableName, columnName);
         }
     }
 
@@ -184,11 +185,10 @@ public class PostgresDataCollector {
      * @param tableName to specify table
      * @throws DataCollectException when help query fails
      */
-    private void _collectTableRowCount(String tableName) throws DataCollectException {
+    private void collectTableRowCount(String tableName, TableData table) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getRowCountForTableQuery(tableName));
         if (result.next()) {
-            long rowCount = result.getLong("reltuples");
-            _model.setTableRowCount(tableName, rowCount);
+            table.rowCount = result.getLong("reltuples");
         }
     }
 
@@ -197,11 +197,10 @@ public class PostgresDataCollector {
      * @param tableName to specify table
      * @throws DataCollectException when help query fails
      */
-    private void _collectTableConstraintCount(String tableName) throws DataCollectException {
+    private void collectTableConstraintCount(String tableName, TableData table) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getConstraintsCountForTableQuery(tableName));
         if (result.next()) {
-            int count = result.getInt("relchecks");
-            _model.setTableConstraintCount(tableName, count);
+            table.constraintCount = result.getLong("relchecks");
         }
     }
 
@@ -211,11 +210,10 @@ public class PostgresDataCollector {
      * @param tableName identify table
      * @throws DataCollectException when help query fails
      */
-    private void _collectTableSizeInPages(String tableName) throws DataCollectException {
+    private void collectTableSizeInPages(String tableName, TableData table) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getTableSizeInPagesQuery(tableName));
         if (result.next()) {
-            long sizeInPages = result.getLong("relpages");
-            _model.setTableSizeInPages(tableName, sizeInPages);
+            table.sizeInPages = result.getLong("relpages");
         }
     }
 
@@ -225,11 +223,11 @@ public class PostgresDataCollector {
      * @param tableName specifies table
      * @throws DataCollectException when help query fails
      */
-    private void _collectTableSize(String tableName) throws DataCollectException {
+    private void collectTableSize(String tableName, TableData table) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getTableSizeQuery(tableName));
         if (result.next()) {
             long size = result.getLong("pg_total_relation_size");
-            _model.setTableByteSize(tableName, size);
+            table.sizeInBytes = size;
         }
     }
 
@@ -237,13 +235,14 @@ public class PostgresDataCollector {
      * Method for saving all table data
      * @throws DataCollectException when some of the help queries fails
      */
-    private void _collectTableData() throws DataCollectException {
-        for (String tableName : _model.getTableNames()) {
-            _collectTableRowCount(tableName);
-            _collectTableConstraintCount(tableName);
-            _collectTableSizeInPages(tableName);
-            _collectTableSize(tableName);
-            _collectColumnData(tableName);
+    private void collectTableData() throws DataCollectException {
+        for (String tableName : model.databaseTables.keySet()) {
+            final var table = model.getTable(tableName, true);
+            collectTableRowCount(tableName, table);
+            collectTableConstraintCount(tableName, table);
+            collectTableSizeInPages(tableName, table);
+            collectTableSize(tableName, table);
+            collectColumnData(tableName, table);
         }
     }
 
@@ -255,11 +254,11 @@ public class PostgresDataCollector {
      * @param indexName identify index
      * @throws DataCollectException when help query fails
      */
-    private void _collectIndexTableName(String indexName) throws DataCollectException {
+    private void collectIndexTableName(String indexName) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getTableNameForIndexQuery(indexName));
         if (result.next()) {
             String tableName = result.getString("tablename");
-            _model.addTable(tableName);
+            model.addTable(tableName);
         }
     }
 
@@ -269,11 +268,11 @@ public class PostgresDataCollector {
      * @param indexName index identifier
      * @throws DataCollectException when help query fails
      */
-    private void _collectIndexRowCount(String indexName) throws DataCollectException {
+    private void collectIndexRowCount(String indexName) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getRowCountForTableQuery(indexName));
         if (result.next()) {
             long rowCount = result.getLong("reltuples");
-            _model.setIndexRowCount(indexName, rowCount);
+            model.getIndex(indexName, true).rowCount = rowCount;
         }
     }
 
@@ -283,11 +282,11 @@ public class PostgresDataCollector {
      * @param indexName to specify index
      * @throws DataCollectException when help query fails
      */
-    private void _collectIndexSizeInPages(String indexName) throws DataCollectException {
+    private void collectIndexSizeInPages(String indexName) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getTableSizeInPagesQuery(indexName));
         if (result.next()) {
             long sizeInPages = result.getLong("relpages");
-            _model.setIndexSizeInPages(indexName, sizeInPages);
+            model.getIndex(indexName, true).sizeInPages = sizeInPages;
         }
     }
 
@@ -297,11 +296,11 @@ public class PostgresDataCollector {
      * @param indexName to specify index
      * @throws DataCollectException when help query fails
      */
-    private void _collectIndexSize(String indexName) throws DataCollectException {
+    private void collectIndexSize(String indexName) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getTableSizeQuery(indexName));
         if (result.next()) {
             long size = result.getLong("pg_total_relation_size");
-            _model.setIndexByteSize(indexName, size);
+            model.getIndex(indexName, true).sizeInBytes = size;
         }
     }
 
@@ -309,12 +308,12 @@ public class PostgresDataCollector {
      * Method for saving all index data
      * @throws DataCollectException when some of the help queries fails
      */
-    private void _collectIndexData() throws DataCollectException {
-        for (String indexName: _model.getIndexNames()) {
-            _collectIndexTableName(indexName);
-            _collectIndexRowCount(indexName);
-            _collectIndexSizeInPages(indexName);
-            _collectIndexSize(indexName);
+    private void collectIndexData() throws DataCollectException {
+        for (String indexName: model.databaseIndexes.keySet()) {
+            collectIndexTableName(indexName);
+            collectIndexRowCount(indexName);
+            collectIndexSizeInPages(indexName);
+            collectIndexSize(indexName);
         }
     }
 
@@ -326,11 +325,11 @@ public class PostgresDataCollector {
      * @return corresponding table name
      * @throws DataCollectException when no table for some column was found
      */
-    private String _getTableNameForColumn(String columnName, String columnType) throws DataCollectException {
+    private String getTableNameForColumn(String columnName, String columnType) throws DataCollectException {
         CachedResult result = executeQuery(PostgreSQLResources.getTableNameForColumnQuery(columnName, columnType));
         while (result.next()) {
             String tableName = result.getString("relname");
-            if (_model.getTableNames().contains(tableName)) {
+            if (model.databaseTables.keySet().contains(tableName)) {
                 return tableName;
             }
         }
@@ -342,30 +341,30 @@ public class PostgresDataCollector {
      * @param mainResult main result for which we want to save stats
      * @throws DataCollectException when no table for some column was found
      */
-    private void _collectResultData(ConsumedResult mainResult) throws DataCollectException {
+    private void collectResultData(ConsumedResult mainResult) throws DataCollectException {
         long rowCount = mainResult.getRowCount();
-        _model.setResultRowCount(rowCount);
+        model.resultTable.rowCount = rowCount;
 
         long sizeInBytes = 0;
         double colSize = 0;
         for (String columnName : mainResult.getColumnNames()) {
             colSize = 0;
             for (String colType : mainResult.getColumnTypes(columnName)) {
-                String tableName = _getTableNameForColumn(columnName, colType);
-                int typeSize = _model.getColumnTypeByteSize(tableName, columnName, colType);
-                _model.setResultColumnTypeByteSize(columnName, colType, typeSize);
+                String tableName = getTableNameForColumn(columnName, colType);
+                int typeSize = model.getTable(tableName, false).getColumn(columnName, false).getColumnType(colType, false).byteSize;
+                model.resultTable.getColumn(columnName, true).getColumnType(colType, true).byteSize = typeSize;
                 double ratio = mainResult.getColumnTypeRatio(columnName, colType);
-                _model.setResultColumnTypeRatio(columnName, colType, ratio);
+                model.resultTable.getColumn(columnName, true).getColumnType(colType, true).ratio = ratio;
                 colSize += typeSize * ratio;
             }
             sizeInBytes += Math.round(colSize);
         }
         sizeInBytes *= rowCount;
-        _model.setResultByteSize(sizeInBytes);
+        model.resultTable.sizeInBytes = (sizeInBytes);
 
-        int pageSize = _model.getPageSize();
+        int pageSize = model.databasePageSize;
         if (pageSize > 0)
-            _model.setResultSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));
+            model.resultTable.sizeInPages = (long)Math.ceil((double) sizeInBytes / pageSize);
     }
 
     /**
@@ -374,10 +373,10 @@ public class PostgresDataCollector {
      * @throws DataCollectException when some help queries failed
      */
     public void collectData(ConsumedResult result) throws DataCollectException {
-        _collectDatabaseData();
-        _collectIndexData();
-        _collectTableData();
-        _collectResultData(result);
+        collectDatabaseData();
+        collectIndexData();
+        collectTableData();
+        collectResultData(result);
     }
 
 }

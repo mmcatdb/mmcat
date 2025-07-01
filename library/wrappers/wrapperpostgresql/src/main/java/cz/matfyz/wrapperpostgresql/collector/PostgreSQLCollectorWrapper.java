@@ -17,19 +17,19 @@ public class PostgreSQLCollectorWrapper implements CollectorWrapper {
 
     protected final PostgreSQLProvider provider;
 
-    protected final PostgresQueryResultParser _resultParser;
+    protected final PostgresQueryResultParser resultParser;
 
-    protected final PostgresExplainPlanParser _explainPlanParser;
+    protected final PostgresExplainPlanParser explainPlanParser;
 
     public PostgreSQLCollectorWrapper(PostgreSQLProvider provider) {
         this.provider = provider;
-        _resultParser = new PostgresQueryResultParser();
-        _explainPlanParser = new PostgresExplainPlanParser();
+        resultParser = new PostgresQueryResultParser();
+        explainPlanParser = new PostgresExplainPlanParser();
     }
 
     public final DataModel executeQuery(QueryContent query) throws WrapperException {
         final var stringQuery = query.toString();
-        final var dataModel = DataModel.CreateForQuery(stringQuery, "PostgreSQL", provider.settings.database());
+        final var dataModel = new DataModel("PostgreSQL", stringQuery);
 
         try (
             final var connection = new PostgresConnection(provider);
@@ -37,11 +37,11 @@ public class PostgreSQLCollectorWrapper implements CollectorWrapper {
             final var inputQuery = stringQuery;
             final var explainResult = connection.executeWithExplain(inputQuery);
 
-            final var mainResult = _resultParser.parseResultAndConsume(explainResult.result());
-            _explainPlanParser.parsePlan(explainResult.plan(), dataModel);
+            final var mainResult = resultParser.parseResultAndConsume(explainResult.result());
+            explainPlanParser.parsePlan(explainResult.plan(), dataModel);
 
 
-            final var dataCollector = new PostgresDataCollector(provider.settings.database(), dataModel, connection, _resultParser);
+            final var dataCollector = new PostgresDataCollector(provider.settings.database(), dataModel, connection, resultParser);
             dataCollector.collectData(mainResult);
             return dataModel;
         } catch (ConnectionException e) {

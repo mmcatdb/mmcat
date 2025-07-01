@@ -5,7 +5,6 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.collector.AbstractCollectorWrapper.ConnectionData;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.wrapperneo4j.collector.Neo4jCollectorWrapper;
@@ -108,13 +107,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
     }
 
     @Override public Neo4jCollectorWrapper getCollectorWrapper() {
-        return new Neo4jCollectorWrapper(new ConnectionData(
-            provider.settings.host(),
-            Integer.parseInt(provider.settings.port()),
-            getType().name(),
-            provider.settings.database(),
-            provider.settings.username(),
-            provider.settings.password()));
+        return new Neo4jCollectorWrapper(provider);
     }
 
 }

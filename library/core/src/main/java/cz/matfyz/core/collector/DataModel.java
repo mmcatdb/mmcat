@@ -1,64 +1,124 @@
 package cz.matfyz.core.collector;
 
-import java.util.Set;
+import java.io.Serializable;
+import java.util.HashMap;
 
 public class DataModel {
 
-    public static DataModel CreateForQuery(String query, String databaseName, String datasetName) {
-        return new DataModel(query, databaseName, datasetName);
+    public String databaseID; // TODO: how to identify an underlying system within mmcat? simply dbType, e.g. MongoDB, or some other way?
+    public String query; // TODO: change to querycontent, but we don't have the right dependencies (it would have to be in AbstractWrappers), maybe Object or Serializable if we need it would be enough, but id
+
+    /** Field containing size of dataset in bytes */
+    public Long databaseSizeInBytes;
+    /** Field containing size of dataset in pages (virtual disk block size) */
+    public Long databaseSizeInPages;
+    /** Field containing size of page in bytes */
+    public Integer databasePageSize;
+    /** Field containing size of caches in bytes which could be used for query caching */
+    public Long databaseCacheSize;
+
+    public final HashMap<String, TableData> databaseTables = new HashMap<>();
+    public final HashMap<String, IndexData> databaseIndexes = new HashMap<>();
+
+    public Double executionTimeMillis = null;
+    public final TableData resultTable = new TableData();
+
+    public DataModel(String databaseID, String query) {
+        this.databaseID = databaseID;
+        this.query = query;
     }
 
-    private final QueryData _query;
 
-    public DataModel(String query, String databaseName, String datasetName) {
-        _query = new QueryData(query, databaseName, datasetName);
+
+    public TableData getTable(String tableName, boolean createIfNotExist) throws IllegalArgumentException {
+        if (!databaseTables.containsKey(tableName) && !createIfNotExist) {
+            throw new IllegalArgumentException("Table '" + tableName + "' does not exists in DataModel");
+        } else if (!databaseTables.containsKey(tableName)) {
+            databaseTables.put(tableName, new TableData());
+        }
+        return databaseTables.get(tableName);
     }
 
-    //ResultData
-    public void setResultExecutionTime(double time) { _query.resultData().setExecutionTime(time); }
-
-    public void setResultByteSize(long size) { _query.resultData().resultTable().getSizeInBytes(size); }
-
-    public void setResultSizeInPages(long size) { _query.resultData().resultTable().setSizeInPages(size); }
-
-    public void setResultRowCount(long count) { _query.resultData().resultTable().setRowCount(count); }
-
-    //DatasetData
-    public void setDatabaseByteSize(long size) { _query.databaseData().setDatabaseSizeInBytes(size); }
-    public void setDatabaseSizeInPages(long size) { _query.databaseData().setDatabaseSizeInPages(size); }
-    public void setDatabaseCacheSize(long size) { _query.databaseData().setDatabaseCacheSize(size); }
-    public void setPageSize(int size) { _query.databaseData().setDatabasePageSize(size); }
-    public int getPageSize() { return _query.databaseData().getDatabasePageSize(); }
-
-    //TableData
-    public void setTableByteSize(String tableName, long size) { _query.databaseData().getTable(tableName, true).getSizeInBytes(size); }
-    public void setTableSizeInPages(String tableName, long size) { _query.databaseData().getTable(tableName, true).setSizeInPages(size); }
-    public void setTableRowCount(String tableName, long count) { _query.databaseData().getTable(tableName, true).setRowCount(count); }
-    public void setTableConstraintCount(String tableName, int count) { _query.databaseData().getTable(tableName, true).setConstraintCount(count); }
-    public void addTable(String tableName) { _query.databaseData().addTable(tableName); }
-    public Set<String> getTableNames() { return _query.databaseData().getTableNames(); }
-
-    //IndexData
-    public void setIndexByteSize(String indexName, long size) { _query.databaseData().getIndex(indexName, true).setSizeInBytes(size); }
-    public void setIndexSizeInPages(String indexName, long size) { _query.databaseData().getIndex(indexName, true).setSizeInPages(size); }
-    public void setIndexRowCount(String indexName, long count) { _query.databaseData().getIndex(indexName, true).setRowCount(count); }
-    public void addIndex(String indexName) { _query.databaseData().addIndex(indexName); }
-    public Set<String> getIndexNames() { return _query.databaseData().getIndexNames(); }
-
-    //ColumnData
-    public void setColumnMandatory(String tableName, String columnName, boolean mandatory) { _query.databaseData().getTable(tableName, true).getColumn(columnName, true).setMandatory(mandatory); }
-    public void setColumnDistinctRatio(String tableName, String columnName, double ratio) { _query.databaseData().getTable(tableName, true).getColumn(columnName, true).setDistinctRatio(ratio); }
-    public int getColumnMaxByteSize(String tableName, String columnName) { return _query.databaseData().getTable(tableName, false).getColumn(columnName, false).getMaxByteSize(); }
-
-    //ColumnTypeData
-    public void setColumnTypeByteSize(String tableName, String columnName, String typeName, int size) { _query.databaseData().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size); }
-    public void setResultColumnTypeByteSize(String columnName, String typeName, int size) { _query.resultData().resultTable().getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size);}
-    public void setColumnTypeRatio(String tableName, String columnName, String typeName, double ratio) { _query.databaseData().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
-    public void setResultColumnTypeRatio(String columnName, String typeName, double ratio) { _query.resultData().resultTable().getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
-    public void addColumnType(String tableName, String columnName, String typeName) { _query.databaseData().getTable(tableName, true).getColumn(columnName, true).addType(typeName); }
-    public int getColumnTypeByteSize(String tableName, String columnName, String typeName) { return _query.databaseData().getTable(tableName, false).getColumn(columnName, false).getColumnType(typeName, false).getByteSize(); }
-
-    public QueryData toResult() {
-        return _query;
+    public IndexData getIndex(String inxName, boolean createIfNotExist) {
+        if (!databaseIndexes.containsKey(inxName) && !createIfNotExist) {
+            throw new IllegalArgumentException("Index '" + inxName + "' does not exists in DataModel");
+        } else if (!databaseIndexes.containsKey(inxName)) {
+            databaseIndexes.put(inxName, new IndexData());
+        }
+        return databaseIndexes.get(inxName);
     }
+
+    public void addTable(String tableName) {
+        if (!databaseTables.containsKey(tableName)) databaseTables.put(tableName, new TableData());
+    }
+
+    public void addIndex(String inxName) {
+        if(!databaseIndexes.containsKey(inxName)) databaseIndexes.put(inxName, new IndexData());
+    }
+
+    /** Class holding statistical data about table */
+    public static class TableData implements Serializable {
+
+        /** Field containing size of table in bytes */
+        public Long sizeInBytes;
+        /** Field containing size of table in pages */
+        public Long sizeInPages;
+        /** Field containing row count of table */
+        public Long rowCount;
+        /** Field containing number of constraints defined over table */
+        public Long constraintCount;
+
+        public final HashMap<String, ColumnData> _columns = new HashMap<>();
+
+        public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException {
+            if (!_columns.containsKey(columnName) && createIfNotExist) {
+                _columns.put(columnName, new ColumnData());
+            } else if (!_columns.containsKey(columnName) && !createIfNotExist) {
+                throw new IllegalArgumentException("Column '" + columnName + "' does not exist");
+            }
+            return _columns.get(columnName);
+        }
+    }
+
+
+    /** Class responsible for representing collected statistical data about individual columns */
+    public static class ColumnData implements Serializable {
+
+        /** Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values. */
+        public Double distinctRatio;
+        /** Field holding information if column is mandatory to be set for entity in database. */
+        public Boolean mandatory;
+        /** Field holding dominant data type of column. */
+        public final HashMap<String, ColumnType> types = new HashMap<>();
+
+        public int getMaxByteSize() {
+            return types.values().stream().map(ct -> ct.byteSize).max(Integer::compareTo).orElse(0);
+        }
+
+        public void addType(String columnType) {
+            if (!types.containsKey(columnType)) types.put(columnType, new ColumnType());
+        }
+
+        public ColumnType getColumnType(String columnType, boolean createNew) {
+            if (!types.containsKey(columnType) && createNew) {
+                types.put(columnType, new ColumnType());
+            } else if (!types.containsKey(columnType) && !createNew) {
+                throw new IllegalArgumentException("Column '" + columnType + "' does not exists in DataModel");
+            }
+            return types.get(columnType);
+        }
+    }
+
+    public static class ColumnType {
+        public Integer byteSize;
+        public Double ratio;
+    }
+
+    public static class IndexData implements Serializable {
+        public Long sizeInBytes;
+        public Long sizeInPages;
+        public Long rowCount;
+    }
+
+    // TODO: maybe later make a method to convert the data into an immutable (perhaps structured) record
 }

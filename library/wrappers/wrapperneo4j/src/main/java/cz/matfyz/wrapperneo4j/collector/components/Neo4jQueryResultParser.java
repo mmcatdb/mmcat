@@ -1,10 +1,9 @@
 package cz.matfyz.wrapperneo4j.collector.components;
 
-import cz.matfyz.abstractwrappers.collector.components.AbstractQueryResultParser;
-import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
+import cz.matfyz.core.collector.CachedResult;
+import cz.matfyz.core.collector.ConsumedResult;
 import cz.matfyz.wrapperneo4j.collector.Neo4jResources;
-import cz.matfyz.core.collector.queryresult.CachedResult;
-import cz.matfyz.core.collector.queryresult.ConsumedResult;
+
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Value;
@@ -17,18 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
-
-    public Neo4jQueryResultParser(WrapperExceptionsFactory exceptionsFactory) {
-        super(exceptionsFactory);
-    }
+public class Neo4jQueryResultParser {
 
     /**
      * Method which parse node to map
      * @param node node to be parsed
      * @return parsed map
      */
-    private Set<Map.Entry<String, PropertyData>> _parseNodeToMap(Node node) {
+    private Set<Map.Entry<String, PropertyData>> parseNodeToMap(Node node) {
         var map = new HashMap<String, PropertyData>();
         for (String colName : node.keys()) {
             PropertyData data = PropertyData.fromValue(node.get(colName));
@@ -43,7 +38,7 @@ public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
      * @param relation edge to be parsed
      * @return parsed map
      */
-    private Set<Map.Entry<String, PropertyData>> _parseRelationToMap(Relationship relation) {
+    private Set<Map.Entry<String, PropertyData>> parseRelationToMap(Relationship relation) {
         var map = new HashMap<String, PropertyData>();
         for (String colName : relation.keys()) {
             PropertyData data = PropertyData.fromValue(relation.get(colName));
@@ -59,16 +54,16 @@ public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
      * @param builder builder to add records and then build CachedResult
      * @param record is native record from result
      */
-    private void _addDataToBuilder(CachedResult.Builder builder, org.neo4j.driver.Record record) {
+    private void addDataToBuilder(CachedResult.Builder builder, org.neo4j.driver.Record record) {
         for (Pair<String, Value> pair : record.fields()) {
             if (pair.value() instanceof NodeValue nodeValue) {
-                for (Map.Entry<String, PropertyData> entry : _parseNodeToMap(nodeValue.asNode())) {
+                for (Map.Entry<String, PropertyData> entry : parseNodeToMap(nodeValue.asNode())) {
                     PropertyData propData = entry.getValue();
                     builder.toLastRecordAddValue(entry.getKey(), propData.getValue());
                 }
             }
             else if (pair.value() instanceof RelationshipValue relationshipValue) {
-                for (Map.Entry<String, PropertyData> entry : _parseRelationToMap(relationshipValue.asRelationship())) {
+                for (Map.Entry<String, PropertyData> entry : parseRelationToMap(relationshipValue.asRelationship())) {
                     PropertyData propData = entry.getValue();
                     builder.toLastRecordAddValue(entry.getKey(), propData.getValue());
                 }
@@ -87,13 +82,12 @@ public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
      * @param result result of some query
      * @return instance of CachedResult
      */
-    @Override
     public CachedResult parseResultAndCache(Result result) {
         var builder = new CachedResult.Builder();
         while (result.hasNext()) {
             var record = result.next();
             builder.addEmptyRecord();
-            _addDataToBuilder(builder, record);
+            addDataToBuilder(builder, record);
         }
         return builder.toResult();
     }
@@ -105,17 +99,17 @@ public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
      * @param builder builder which consumes the data from result
      * @param record native record from result
      */
-    private void _consumeDataToBuilder(ConsumedResult.Builder builder, Record record) {
+    private void consumeDataToBuilder(ConsumedResult.Builder builder, Record record) {
         for (Pair<String, Value> pair : record.fields()) {
             if (pair.value() instanceof NodeValue nodeValue) {
-                for (Map.Entry<String, PropertyData> entry : _parseNodeToMap(nodeValue.asNode())) {
+                for (Map.Entry<String, PropertyData> entry : parseNodeToMap(nodeValue.asNode())) {
                     PropertyData propData = entry.getValue();
                     builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
                     builder.addColumnType(entry.getKey(), propData.getType());
                 }
             }
             else if (pair.value() instanceof RelationshipValue relationshipValue) {
-                for (Map.Entry<String, PropertyData> entry : _parseRelationToMap(relationshipValue.asRelationship())) {
+                for (Map.Entry<String, PropertyData> entry : parseRelationToMap(relationshipValue.asRelationship())) {
                     PropertyData propData = entry.getValue();
                     builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
                     builder.addColumnType(entry.getKey(), propData.getType());
@@ -136,13 +130,12 @@ public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
      * @param result is native result of some query
      * @return instance of ConsumedResult
      */
-    @Override
     public ConsumedResult parseResultAndConsume(Result result) {
         var builder = new ConsumedResult.Builder();
         while(result.hasNext()) {
             var record = result.next();
             builder.addRecord();
-            _consumeDataToBuilder(builder, record);
+            consumeDataToBuilder(builder, record);
         }
         return builder.toResult();
     }
@@ -151,19 +144,19 @@ public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
      * Class which represents properties of entities from neo4j graph
      */
     private static class PropertyData {
-        private final Object _value;
-        private final String _type;
+        private final Object value;
+        private final String type;
 
         private PropertyData(Object value, String type) {
-            _value = value;
-            _type = type;
+            this.value = value;
+            this.type = type;
         }
 
         public Object getValue() {
-            return _value;
+            return value;
         }
         public String getType() {
-            return _type;
+            return type;
         }
 
         /**

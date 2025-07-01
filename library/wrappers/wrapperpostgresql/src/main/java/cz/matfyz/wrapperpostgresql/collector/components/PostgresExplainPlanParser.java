@@ -15,10 +15,10 @@ public class PostgresExplainPlanParser {
      * @param root explain trees root
      * @param model model to save data
      */
-    private void _saveExecTime(Map<String, Object> root, DataModel model) {
+    private void saveExecTime(Map<String, Object> root, DataModel model) {
         Object result = root.get("Execution Time");
         if (result instanceof Double time) {
-            model.setResultExecutionTime(time);
+            model.executionTimeMillis = time;
         }
     }
 
@@ -27,7 +27,7 @@ public class PostgresExplainPlanParser {
      * @param node explain trees node
      * @param model model to save data
      */
-    private void _parseTableName(Map<String, Object> node, DataModel model) {
+    private void parseTableName(Map<String, Object> node, DataModel model) {
         if (node.get("Relation Name") instanceof String tableName) {
             model.addTable(tableName);
         }
@@ -38,7 +38,7 @@ public class PostgresExplainPlanParser {
      * @param node explain trees node
      * @param model model to save data
      */
-    private void _parseIndexName(Map<String, Object> node, DataModel model) {
+    private void parseIndexName(Map<String, Object> node, DataModel model) {
         if (node.get("Index Name") instanceof String relName) {
             model.addIndex(relName);
         }
@@ -50,12 +50,12 @@ public class PostgresExplainPlanParser {
      * @param model model to save data
      */
     @SuppressWarnings({"unchecked"})
-    private void _parseTree(Map<String, Object> root, DataModel model) {
+    private void parseTree(Map<String, Object> root, DataModel model) {
         if (root.containsKey("Execution Time")) {
-            _saveExecTime(root, model);
+            saveExecTime(root, model);
         }
         if (root.containsKey("Plan") && root.get("Plan") instanceof Map node) {
-            _parseSubTree(node, model);
+            parseSubTree(node, model);
         }
     }
 
@@ -65,18 +65,18 @@ public class PostgresExplainPlanParser {
      * @param model model to save important data
      */
     @SuppressWarnings({"unchecked"})
-    private void _parseSubTree(Map<String, Object> root, DataModel model) {
+    private void parseSubTree(Map<String, Object> root, DataModel model) {
         if (root.get("Node Type") instanceof String nodeType) {
             if (nodeType.contains("Seq Scan")) {
-                _parseTableName(root, model);
+                parseTableName(root, model);
             } else if (nodeType.contains("Index Scan")) {
-                _parseIndexName(root, model);
+                parseIndexName(root, model);
             }
 
             if (root.containsKey("Plans") && root.get("Plans") instanceof List list) {
                 for(Object o: list) {
                     if (o instanceof Map node) {
-                        _parseSubTree(node, model);
+                        parseSubTree(node, model);
                     }
                 }
             }
@@ -99,7 +99,7 @@ public class PostgresExplainPlanParser {
 
             for (Object plan : result) {
                 if (plan instanceof Map root) {
-                    _parseTree(root, model);
+                    parseTree(root, model);
                 }
             }
         } catch (JsonProcessingException e) {

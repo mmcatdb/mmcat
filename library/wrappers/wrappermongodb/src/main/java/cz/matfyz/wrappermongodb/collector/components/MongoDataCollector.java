@@ -3,9 +3,9 @@ package cz.matfyz.wrappermongodb.collector.components;
 import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
 import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.MongoResources;
+import cz.matfyz.core.collector.CachedResult;
+import cz.matfyz.core.collector.ConsumedResult;
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.core.collector.queryresult.CachedResult;
-import cz.matfyz.core.collector.queryresult.ConsumedResult;
 import cz.matfyz.abstractwrappers.exception.collector.DataCollectException;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
@@ -18,16 +18,16 @@ import java.util.*;
  * Class which is responsible for collecting all the statistical data for mongodb wrapper after query is evaluated
  */
 public class MongoDataCollector {
-    private final MongoConnection _connection;
-    private final MongoQueryResultParser _resultParser;
+    private final MongoConnection connection;
+    private final MongoQueryResultParser resultParser;
 
-    protected final String _databaseName;
-    protected final DataModel _model;
+    protected final String databaseName;
+    protected final DataModel model;
 
 
     protected CachedResult executeQuery(Document query) throws DataCollectException {
         try {
-            return _resultParser.parseResultAndCache(_connection.executeQuery(query));
+            return resultParser.parseResultAndCache(connection.executeQuery(query));
         } catch (QueryExecutionException | ParseException e) {
             throw MongoExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
         }
@@ -35,7 +35,7 @@ public class MongoDataCollector {
 
     protected ConsumedResult executeQueryAndConsume(Document query) throws DataCollectException {
         try {
-            return _resultParser.parseResultAndConsume(_connection.executeQuery(query));
+            return resultParser.parseResultAndConsume(connection.executeQuery(query));
         } catch (QueryExecutionException | ParseException e) {
             throw MongoExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
         }
@@ -51,10 +51,10 @@ public class MongoDataCollector {
             MongoQueryResultParser resultParser,
             String databaseName
     ) throws ConnectionException {
-        _databaseName = databaseName;
-        _model = dataModel;
-        _connection = connection;
-        _resultParser = resultParser;
+        this.databaseName = databaseName;
+        this.model = dataModel;
+        this.connection = connection;
+        this.resultParser = resultParser;
     }
 
     // Save Dataset data
@@ -62,20 +62,20 @@ public class MongoDataCollector {
     /**
      * Method which will save page size
      */
-    private void _collectPageSize() {
-        _model.setPageSize(MongoResources.DefaultSizes.PAGE_SIZE);
+    private void collectPageSize() {
+        model.databasePageSize = MongoResources.DefaultSizes.PAGE_SIZE;
     }
 
     /**
      * Method which will save cache size of dataset
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectCacheDatabaseSize() throws DataCollectException {
+    private void collectCacheDatabaseSize() throws DataCollectException {
         CachedResult stats = executeQuery(MongoResources.getServerStatsCommand());
 
         if (stats.next()) {
             long size = new Document(stats.getMap("wiredTiger")).get("cache", Document.class).getLong("maximum bytes configured");
-            _model.setDatabaseCacheSize(size);
+            model.databaseCacheSize = size;
         }
     }
 
@@ -83,16 +83,16 @@ public class MongoDataCollector {
      * Method which will save all dataset data wrapper gathers
      * @throws DataCollectException when some QueryExecutionException occur during running help queries
      */
-    private void _collectDatabaseData() throws DataCollectException {
+    private void collectDatabaseData() throws DataCollectException {
         CachedResult stats = executeQuery(MongoResources.getDatasetStatsCommand());
 
         if (stats.next()) {
             long size = stats.getLong("storageSize");
-            _model.setDatabaseByteSize(size);
-            long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
-            _model.setDatabaseSizeInPages(sizeInPages);
+            model.databaseSizeInBytes = size;
+            long sizeInPages = (long) Math.ceil((double)size / model.databasePageSize);
+            model.databaseSizeInPages = sizeInPages;
         }
-        _collectCacheDatabaseSize();
+        collectCacheDatabaseSize();
     }
 
 
@@ -106,11 +106,11 @@ public class MongoDataCollector {
      * @param columnType data type of column
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectStringObjectColumnByteSize(String collectionName, String columnName, String columnType) throws DataCollectException {
+    private void collectStringObjectColumnByteSize(String collectionName, String columnName, String columnType) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getAvgObjectStringSizeCommand(collectionName, columnName, columnType));
         if (result.next()) {
             int avgByteSize = (int)Math.round(result.getDouble("avg"));
-            _model.setColumnTypeByteSize(collectionName, columnName, columnType, avgByteSize);
+            model.getTable(collectionName, true).getColumn(columnName, true).getColumnType(columnType, true).byteSize = avgByteSize;
         }
     }
 
@@ -120,11 +120,10 @@ public class MongoDataCollector {
      * @param columnName used column name
      * @param columnType data type of column
      */
-    private void _collectNumberColumnByteSize(String collectionName, String columnName, String columnType) {
+    private void collectNumberColumnByteSize(String collectionName, String columnName, String columnType) {
         Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(columnType);
-        if (size != null) {
-            _model.setColumnTypeByteSize(collectionName, columnName, columnType, size);
-        }
+        if (size == null) return;
+        model.getTable(collectionName, true).getColumn(columnName, true).getColumnType(columnType, true).byteSize = size;
     }
 
     /**
@@ -134,11 +133,11 @@ public class MongoDataCollector {
      * @param columnType data type of column
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnByteSize(String collectionName, String columnName, String columnType) throws DataCollectException {
+    private void collectColumnByteSize(String collectionName, String columnName, String columnType) throws DataCollectException {
         if ("string".equals(columnType) || "object".equals(columnType) || "binData".equals(columnType)) {
-            _collectStringObjectColumnByteSize(collectionName, columnName, columnType);
+            collectStringObjectColumnByteSize(collectionName, columnName, columnType);
         } else
-            _collectNumberColumnByteSize(collectionName, columnName, columnType);
+            collectNumberColumnByteSize(collectionName, columnName, columnType);
     }
 
     /**
@@ -148,7 +147,7 @@ public class MongoDataCollector {
      * @return true if field is required
      */
 
-    private boolean _isRequiredField(Document options, String columnName) {
+    private boolean isRequiredField(Document options, String columnName) {
         if ("_id".equals(columnName))
             return true;
 
@@ -171,16 +170,16 @@ public class MongoDataCollector {
      * @param columnName used column name
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnMandatory(String collectionName, String columnName) throws DataCollectException {
+    private void collectColumnMandatory(String collectionName, String columnName) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getCollectionInfoCommand(collectionName));
         if (result.next()) {
+            boolean isRequired = false;
             if (result.containsCol("options")) {
-                boolean isRequired = _isRequiredField(new Document(result.getMap("options")), columnName);
-                _model.setColumnMandatory(collectionName, columnName, isRequired);
+                isRequired = isRequiredField(new Document(result.getMap("options")), columnName);
             } else {
-                boolean isRequired = "_id".equals(columnName);
-                _model.setColumnMandatory(collectionName, columnName, isRequired);
+                isRequired = "_id".equals(columnName);
             }
+            model.getTable(collectionName, true).getColumn(columnName, true).mandatory = isRequired;
         }
     }
 
@@ -190,7 +189,7 @@ public class MongoDataCollector {
      * @param columnName used column name
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnType(String collectionName, String columnName) throws DataCollectException {
+    private void collectColumnType(String collectionName, String columnName) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getFieldTypeCommand(collectionName, columnName));
         List<Map.Entry<String, Integer>> types = new ArrayList<>();
         int maxCount = 0;
@@ -203,7 +202,7 @@ public class MongoDataCollector {
         }
 
         for (var entry : types) {
-            _collectColumnByteSize(collectionName, columnName, entry.getKey());
+            collectColumnByteSize(collectionName, columnName, entry.getKey());
         }
     }
 
@@ -212,15 +211,15 @@ public class MongoDataCollector {
      * @param collectionName collection used for query
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnData(String collectionName) throws DataCollectException {
+    private void collectColumnData(String collectionName) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getFieldsInCollectionCommand(collectionName));
 
         if (result.next()) {
             List<String> fieldNames = result.getList("allKeys", String.class);
 
             for (String fieldName : fieldNames) {
-                _collectColumnType(collectionName, fieldName);
-                _collectColumnMandatory(collectionName, fieldName);
+                collectColumnType(collectionName, fieldName);
+                collectColumnMandatory(collectionName, fieldName);
             }
         }
     }
@@ -232,20 +231,22 @@ public class MongoDataCollector {
      * @param collectionName collection used in query
      * @throws DataCollectException some QueryExecutionException occur during running help query
      */
-    private void _collectTableData(String collectionName) throws DataCollectException {
+    private void collectTableData(String collectionName) throws DataCollectException {
         CachedResult stats = executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
 
         if (stats.next()) {
-            long size = stats.getLong("storageSize");
-            _model.setTableByteSize(collectionName, size);
-            long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
-            _model.setTableSizeInPages(collectionName, sizeInPages);
+            final long size = stats.getLong("storageSize");
+            final var table = model.getTable(collectionName, true);
+            table.sizeInBytes = size;
 
-            long rowCount = stats.getLong("count");
-            _model.setTableRowCount(collectionName, rowCount);
+            final long sizeInPages = (long) Math.ceil((double)size / model.databasePageSize);
+            table.sizeInPages = sizeInPages;
+
+            final long rowCount = stats.getLong("count");
+            table.rowCount = rowCount;
         }
 
-        _collectColumnData(collectionName);
+        collectColumnData(collectionName);
     }
 
     // Save Index Data
@@ -256,12 +257,12 @@ public class MongoDataCollector {
      * @param indexName used index
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectIndexRowCount(String collectionName, String indexName) throws DataCollectException {
+    private void collectIndexRowCount(String collectionName, String indexName) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getIndexRowCountCommand(collectionName, indexName));
 
         if (result.next()) {
             long count = result.getLong("n");
-            _model.setIndexRowCount(indexName, count);
+            model.getIndex(indexName, true).rowCount = count;
         }
     }
 
@@ -271,12 +272,12 @@ public class MongoDataCollector {
      * @param indexName used index
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectIndexSizesData(String collectionName, String indexName) throws DataCollectException {
+    private void collectIndexSizesData(String collectionName, String indexName) throws DataCollectException {
         CachedResult stats = executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
         if (stats.next()) {
-            int size = new Document(stats.getMap("indexSizes")).getInteger(indexName);
-            _model.setIndexByteSize(indexName, size);
-            _model.setIndexSizeInPages(indexName, (long)Math.ceil((double)size / _model.getPageSize()));
+            long size = new Document(stats.getMap("indexSizes")).getLong(indexName);
+            model.getIndex(indexName, true).sizeInBytes = size;
+            model.getIndex(indexName, true).sizeInPages = (long)Math.ceil((double)size / model.databasePageSize);
         }
     }
 
@@ -285,10 +286,10 @@ public class MongoDataCollector {
      * @param collectionName used collection
      * @throws DataCollectException when some QueryExecutionException occur during running help queries
      */
-    private void _collectIndexesData(String collectionName) throws DataCollectException {
-        for (String indexName : _model.getIndexNames()) {
-            _collectIndexSizesData(collectionName, indexName);
-            _collectIndexRowCount(collectionName, indexName);
+    private void collectIndexesData(String collectionName) throws DataCollectException {
+        for (String indexName : model.databaseIndexes.keySet()) {
+            collectIndexSizesData(collectionName, indexName);
+            collectIndexRowCount(collectionName, indexName);
         }
     }
 
@@ -297,8 +298,8 @@ public class MongoDataCollector {
      * @return collection name
      * @throws DataCollectException when no such collection was parsed from query
      */
-    private String _getCollectionName() throws DataCollectException {
-        for (String collectionName : _model.getTableNames()) {
+    private String getCollectionName() throws DataCollectException {
+        for (String collectionName : model.databaseTables.keySet()) {
             return collectionName;
         }
         throw MongoExceptionsFactory.getExceptionsFactory().collectionNotParsed();
@@ -310,15 +311,15 @@ public class MongoDataCollector {
      * Method which will save field data for field present in result
      * @param result result of executed main query
      */
-    private void _collectResultColumnData(ConsumedResult result) {
+    private void collectResultColumnData(ConsumedResult result) {
         for (String colName : result.getColumnNames()) {
             for (String colType : result.getColumnTypes(colName)) {
                 if (colType != null) {
                     Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(colType);
                     if (size != null)
-                        _model.setResultColumnTypeByteSize(colName, colType, size);
+                        model.resultTable.getColumn(colName, true).getColumnType(colType, true).byteSize = size;
                     double ratio = result.getColumnTypeRatio(colName, colType);
-                    _model.setResultColumnTypeRatio(colName, colType, ratio);
+                    model.resultTable.getColumn(colName, true).getColumnType(colType, true).ratio = ratio;
                 }
             }
         }
@@ -328,16 +329,16 @@ public class MongoDataCollector {
      * Method which saves all result data from result
      * @param result result of main query
      */
-    private void _collectResultData(ConsumedResult result) {
+    private void collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
-        _model.setResultByteSize(size);
+        model.resultTable.sizeInBytes = (size);
         long count = result.getRowCount();
-        _model.setResultRowCount(count);
+        model.resultTable.rowCount = count;
 
-        long sizeInPages = (long)Math.ceil((double) size / _model.getPageSize());
-        _model.setResultSizeInPages(sizeInPages);
+        long sizeInPages = (long)Math.ceil((double) size / model.databasePageSize);
+        model.resultTable.sizeInPages = sizeInPages;
 
-        _collectResultColumnData(result);
+        collectResultColumnData(result);
     }
 
     /**
@@ -345,11 +346,11 @@ public class MongoDataCollector {
      * @param result result of main query
      */
     public void collectData(ConsumedResult result) throws DataCollectException {
-        String collName = _getCollectionName();
-        _collectPageSize();
-        _collectDatabaseData();
-        _collectIndexesData(collName);
-        _collectTableData(collName);
-        _collectResultData(result);
+        String collName = getCollectionName();
+        collectPageSize();
+        collectDatabaseData();
+        collectIndexesData(collName);
+        collectTableData(collName);
+        collectResultData(result);
     }
 }

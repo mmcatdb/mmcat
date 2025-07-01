@@ -2,7 +2,7 @@ package cz.matfyz.abstractwrappers.exception.collector;
 
 public class WrapperExceptionsFactory {
 
-    //region ConnectionExceptions initialization
+    //region Connection
     public ConnectionException connectionIsNull() {
         var message = new Message("connection is null").toString();
         return new ConnectionException(message);
@@ -19,7 +19,7 @@ public class WrapperExceptionsFactory {
     }
     //endregion
 
-    //region QueryExecutionExceptions initialization
+    //region QueryExecution
     public QueryExecutionException queryExecutionFailed(Throwable cause) {
         var message = new Message("query execution failed", cause).toString();
         return new QueryExecutionException(message, cause);
@@ -31,7 +31,7 @@ public class WrapperExceptionsFactory {
     }
     //endregion
 
-    //region DataCollectException initialization
+    //region DataCollection
     public DataCollectException dataCollectionFailed(Throwable cause) {
         var message = new Message("collection of data failed", cause).toString();
         return new DataCollectException(message, cause);
@@ -43,7 +43,7 @@ public class WrapperExceptionsFactory {
     }
     //endregion
 
-    //region ParseExceptions initialization
+    //region ParseExceptions
     public ParseException parseInputQueryFailed(String query, Throwable cause) {
         var message = new Message("parsing of query '" + query + "' failed", cause).toString();
         return new ParseException(message, cause);
@@ -65,14 +65,14 @@ public class WrapperExceptionsFactory {
     }
     //endregion
 
-    //region WrapperExceptions initialization
+    //region Wrapper
     public WrapperException wrapperInitializationFailed(Throwable cause) {
         var message = new Message("wrapper can not be initialized", cause).toString();
         return new WrapperException(message, cause);
     }
     //endregion
 
-    //region WrapperUnsupportedOperationException initialization
+    //region Unsupported
     public WrapperUnsupportedOperationException unsupportedOperation(String operation) {
         var message = new Message("operation '" + operation + "' is not supported").toString();
         return new WrapperUnsupportedOperationException(message);
@@ -97,4 +97,6 @@ public class WrapperExceptionsFactory {
             return _messageBuilder.append(".").toString();
         }
     }
+
+    public static WrapperExceptionsFactory getExceptionsFactory() { return new WrapperExceptionsFactory(); }
 }

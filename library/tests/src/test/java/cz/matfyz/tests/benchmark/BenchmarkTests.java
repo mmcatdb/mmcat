@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -94,23 +95,25 @@ class BenchmarkTests {
                 ?business 2 ?name .
                 ?business 6 ?review_count .
 
-                FILTER(?review_count >= "1000")
+                FILTER(?review_count >= "100")
             }
         """;
 
-        new QueryEstimator(
+        final var plans1 = new QueryEstimator(
             datasources,
             testDatasources,
             query,
             false
         ).run();
 
-        new QueryEstimator(
+        final var plans2 = new QueryEstimator(
             datasources,
             testDatasources,
             query,
             true
         ).run();
 
+        final var error = plans1.get(0).cost() >= plans2.get(0).cost() ? null : "Filtering increases cost estimation";
+        assertNull(error);
     }
 }

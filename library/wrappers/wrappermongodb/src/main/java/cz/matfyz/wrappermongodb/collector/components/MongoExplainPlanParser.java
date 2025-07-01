@@ -1,7 +1,6 @@
 package cz.matfyz.wrappermongodb.collector.components;
 
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperUnsupportedOperationException;
 import org.bson.Document;
@@ -13,16 +12,16 @@ public class MongoExplainPlanParser {
      * @param model instance of DataModel where the name will be saved
      * @param command node of explain result
      */
-    private void _parseTableNames(DataModel model, Document command) throws WrapperUnsupportedOperationException {
+    private void parseTableNames(DataModel model, Document command) throws WrapperUnsupportedOperationException {
         if (command.containsKey("find")) {
             String collectionName = command.getString("find");
             if (collectionName != null)
                 model.addTable(collectionName);
         }
 
-        if (command.containsKey("aggregate")) {
-            throw MongoExceptionsFactory.getExceptionsFactory().unsupportedOperation("aggregate");
-        }
+        // if (command.containsKey("aggregate")) {
+        //     throw MongoExceptionsFactory.getExceptionsFactory().unsupportedOperation("aggregate");
+        // }
     }
 
     /**
@@ -30,7 +29,7 @@ public class MongoExplainPlanParser {
      * @param model instance of DataModel where results are saved
      * @param stage actual stage to be parsed
      */
-    private void _parseStage(DataModel model, Document stage) throws ParseException {
+    private void parseStage(DataModel model, Document stage) throws ParseException {
         if ("IXSCAN".equals(stage.getString("stage"))) {
             String indexName = stage.getString("indexName");
             if (indexName != null) {
@@ -38,7 +37,7 @@ public class MongoExplainPlanParser {
             }
         }
         if (stage.containsKey("inputStage")) {
-            _parseStage(model, stage.get("inputStage", Document.class));
+            parseStage(model, stage.get("inputStage", Document.class));
         }
     }
 
@@ -47,9 +46,9 @@ public class MongoExplainPlanParser {
      * @param model instance of DataModel where will all results be saved
      * @param node document from which the statistics will be parsed (especially the execution time)
      */
-    private void _parseExecutionStats(DataModel model, Document node) throws ParseException {
+    private void parseExecutionStats(DataModel model, Document node) throws ParseException {
         if (node.getBoolean("executionSuccess")) {
-            model.setResultExecutionTime(Double.valueOf(node.getInteger("executionTimeMillis")));
+            model.executionTimeMillis = Double.valueOf(node.getInteger("executionTimeMillis"));
         }
     }
 
@@ -60,9 +59,9 @@ public class MongoExplainPlanParser {
      * @throws ParseException is thrown some parsing problem occur
      */
     public void parsePlan(Document plan, DataModel model) throws ParseException, WrapperUnsupportedOperationException {
-        _parseTableNames(model, plan.get("command", Document.class));
-        _parseExecutionStats(model, plan.get("executionStats", Document.class));
-        _parseStage(
+        parseTableNames(model, plan.get("command", Document.class));
+        parseExecutionStats(model, plan.get("executionStats", Document.class));
+        parseStage(
                 model,
                 plan.get("queryPlanner", Document.class)
                         .get("winningPlan", Document.class)

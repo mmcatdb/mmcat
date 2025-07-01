@@ -3,10 +3,11 @@ package cz.matfyz.wrappermongodb.collector.components;
 
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
+import cz.matfyz.core.collector.CachedResult;
+import cz.matfyz.core.collector.ConsumedResult;
 import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.MongoResources;
-import cz.matfyz.core.collector.queryresult.CachedResult;
-import cz.matfyz.core.collector.queryresult.ConsumedResult;
+
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.RawBsonDocument;
@@ -15,16 +16,16 @@ import java.util.List;
 
 public class MongoQueryResultParser {
 
-    private MongoConnection _connection = null;
+    private MongoConnection connection = null;
 
     public void setConnection(MongoConnection connection) {
-        if (_connection == null)
-            _connection = connection;
+        if (connection == null)
+            this.connection = connection;
     }
 
     public void removeConnection() {
-        if (_connection != null)
-            _connection = null;
+        if (connection != null)
+            connection = null;
     }
 
     // Parse Result
@@ -34,7 +35,7 @@ public class MongoQueryResultParser {
      * @param value the BsonValue to be parsed
      * @return string representation of parsed type
      */
-    private String _parseType(BsonValue value) {
+    private String parseType(BsonValue value) {
         if (value.isArray())
             return "array";
         else if (value.isBinary())
@@ -66,7 +67,7 @@ public class MongoQueryResultParser {
      * @param batch fetched documents
      * @param builder builder responsible for building the result
      */
-    private void _addDocumentsToResult(List<Document> batch, CachedResult.Builder builder) {
+    private void addDocumentsToResult(List<Document> batch, CachedResult.Builder builder) {
         for (Document document : batch) {
             builder.addEmptyRecord();
             for (var pair : document.entrySet()) {
@@ -80,11 +81,11 @@ public class MongoQueryResultParser {
      * @param cursor cursor document from native result
      * @param builder for CachedResult used to build it
      */
-    private void _cacheCursorResult(Document cursor, CachedResult.Builder builder ) throws QueryExecutionException {
+    private void cacheCursorResult(Document cursor, CachedResult.Builder builder ) throws QueryExecutionException {
         if (cursor.containsKey("firstBatch")) {
-            _addDocumentsToResult(cursor.getList("firstBatch", Document.class), builder);
+            addDocumentsToResult(cursor.getList("firstBatch", Document.class), builder);
         } else if (cursor.containsKey("nextBatch")) {
-            _addDocumentsToResult(cursor.getList("nextBatch", Document.class), builder);
+            addDocumentsToResult(cursor.getList("nextBatch", Document.class), builder);
         } else {
             return;
         }
@@ -93,9 +94,9 @@ public class MongoQueryResultParser {
 
         if (collectionName != null) {
             long cursorId = cursor.getLong("id");
-            if (cursorId != 0 && _connection != null) {
-                Document result = _connection.executeQuery(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
-                _cacheCursorResult(result.get("cursor", Document.class), builder);
+            if (cursorId != 0 && connection != null) {
+                Document result = connection.executeQuery(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
+                cacheCursorResult(result.get("cursor", Document.class), builder);
             }
         }
     }
@@ -111,7 +112,7 @@ public class MongoQueryResultParser {
             CachedResult.Builder builder = new CachedResult.Builder();
 
             if (result.containsKey("cursor"))
-                _cacheCursorResult(result.get("cursor", Document.class), builder);
+                cacheCursorResult(result.get("cursor", Document.class), builder);
             else {
                 builder.addEmptyRecord();
                 for (var pair : result.entrySet()) {
@@ -129,10 +130,10 @@ public class MongoQueryResultParser {
      * @param document from native result
      * @param builder builder responsible for building the result
      */
-    private void _parseColumnTypes(RawBsonDocument document, ConsumedResult.Builder builder) {
+    private void parseColumnTypes(RawBsonDocument document, ConsumedResult.Builder builder) {
         for (var entry : document.entrySet()) {
             String fieldName = entry.getKey();
-            String type = _parseType(entry.getValue());
+            String type = parseType(entry.getValue());
             if (type != null)
                 builder.addColumnType(fieldName, type);
         }
@@ -143,20 +144,20 @@ public class MongoQueryResultParser {
      * @param batch fetched documents
      * @param builder builder responsible for building the result
      */
-    private void _consumeDocumentsToResult(List<Document> batch, ConsumedResult.Builder builder) {
+    private void consumeDocumentsToResult(List<Document> batch, ConsumedResult.Builder builder) {
         for (Document document : batch) {
             builder.addRecord();
             RawBsonDocument sizeDoc = RawBsonDocument.parse(document.toJson());
             builder.addByteSize(sizeDoc.getByteBuffer().remaining());
-            _parseColumnTypes(sizeDoc, builder);
+            parseColumnTypes(sizeDoc, builder);
         }
     }
 
-    private void _consumeCursorResult(Document cursor, ConsumedResult.Builder builder ) throws QueryExecutionException {
+    private void consumeCursorResult(Document cursor, ConsumedResult.Builder builder ) throws QueryExecutionException {
         if (cursor.containsKey("firstBatch")) {
-            _consumeDocumentsToResult(cursor.getList("firstBatch", Document.class), builder);
+            consumeDocumentsToResult(cursor.getList("firstBatch", Document.class), builder);
         } else if (cursor.containsKey("nextBatch")) {
-            _consumeDocumentsToResult(cursor.getList("nextBatch", Document.class), builder);
+            consumeDocumentsToResult(cursor.getList("nextBatch", Document.class), builder);
         } else {
             return;
         }
@@ -165,9 +166,9 @@ public class MongoQueryResultParser {
 
         if (collectionName != null) {
             long cursorId = cursor.getLong("id");
-            if (cursorId != 0 && _connection != null) {
-                Document result = _connection.executeQuery(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
-                _consumeCursorResult(result.get("cursor", Document.class), builder);
+            if (cursorId != 0 && connection != null) {
+                Document result = connection.executeQuery(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
+                consumeCursorResult(result.get("cursor", Document.class), builder);
             }
         }
     }
@@ -182,12 +183,12 @@ public class MongoQueryResultParser {
         try {
             ConsumedResult.Builder builder = new ConsumedResult.Builder();
             if (result.containsKey("cursor")) {
-                _consumeCursorResult(result.get("cursor", Document.class), builder);
+                consumeCursorResult(result.get("cursor", Document.class), builder);
             } else {
                 builder.addRecord();
                 RawBsonDocument sizeDoc = RawBsonDocument.parse(result.toJson());
                 builder.addByteSize(sizeDoc.getByteBuffer().remaining());
-                _parseColumnTypes(sizeDoc, builder);
+                parseColumnTypes(sizeDoc, builder);
             }
             return builder.toResult();
         } catch (QueryExecutionException e) {

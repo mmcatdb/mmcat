@@ -1,5 +1,6 @@
 package cz.matfyz.tests.querying;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -19,13 +20,11 @@ import cz.matfyz.querying.planner.PlanDrafter;
 import cz.matfyz.querying.planner.PlanJoiner;
 import cz.matfyz.querying.planner.QueryPlan;
 import cz.matfyz.querying.planner.SchemaExtractor;
-import cz.matfyz.querying.resolver.QueryPlanDescriptor;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
 public class QueryEstimator {
 
-
-    // The constructor QueryEstimator(Datasources, List<TestDatasource<PostgreSQLControlWrapper>>, String, boolean) is undefined
+    public static record EvaluatedPlan(QueryPlan plan, long cost) {}
 
     public QueryEstimator(
         Datasources datasources,
@@ -44,7 +43,7 @@ public class QueryEstimator {
     private final String queryString;
     private final boolean optimize;
 
-    public void run() {
+    public List<EvaluatedPlan> run() {
         // ! from QueryTestBase ctor and builder
         final var schema = datasources.schema;
 
@@ -63,6 +62,8 @@ public class QueryEstimator {
         final var extracted = SchemaExtractor.run(normalized.context, schema, kinds, normalized.selection);
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extracted);
 
+        final var output = new ArrayList<EvaluatedPlan>();
+
         for (final var plan : plans) {
             QueryNode currentNode = PlanJoiner.run(normalized.context, plan, normalized.selection.variables());
 
@@ -76,13 +77,11 @@ public class QueryEstimator {
 
             long costOverNet = QueryCostEstimator.run(planned);
 
-            final var serialized = QueryPlanDescriptor.run(planned);
-
-            System.out.println("Plan:");
-            System.out.println(serialized.toString());
-            System.out.println("Cost over network: " + costOverNet);
-            System.out.println("------");
+            output.add(new EvaluatedPlan(planned, costOverNet));
         }
+
+        output.sort((x, y) -> y.cost() - x.cost() >= 0 ? 1 : -1); // descending
+        return output;
     }
 
     private List<Mapping> defineKinds(DefaultControlWrapperProvider provider) {

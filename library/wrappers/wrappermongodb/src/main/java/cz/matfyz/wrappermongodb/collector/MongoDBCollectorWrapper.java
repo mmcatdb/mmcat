@@ -18,7 +18,7 @@ import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
  */
 public final class MongoDBCollectorWrapper implements CollectorWrapper {
 
-    // TODO: do these need to be persisted as state variables, or are local variables enough?
+    // TODO: do these need to be persisted as state variables, or are local variables enough? - local is ok for non-state (or just static)
     private final MongoQueryResultParser resultParser;
 
     private final MongoExplainPlanParser explainPlanParser;
@@ -39,12 +39,12 @@ public final class MongoDBCollectorWrapper implements CollectorWrapper {
         assert query instanceof MongoDBQuery;
         final var mongoQuery = (MongoDBQuery)query;
 
-        var dataModel = DataModel.CreateForQuery(mongoQuery.toString(), "MongoDB", provider.settings.database());
+        var dataModel = new DataModel("MongoDB", mongoQuery.toString());
         var connection = new MongoConnection(provider.getDatabase());
 
         resultParser.setConnection(connection);
 
-        // Bson a = mongoQuery.pipeline.get(0); // TODO change parsing - how to convert to document from bson?
+        // BsonDocument a = mongoQuery.pipeline.get(0).toBsonDocument(); // TODO change parsing - how to convert to document from bson?
 
         var inputQuery = queryParser.parseQueryToCommand(mongoQuery.toString());
         var explainResult = connection.executeWithExplain(inputQuery);
@@ -56,7 +56,7 @@ public final class MongoDBCollectorWrapper implements CollectorWrapper {
             var dataCollector = new MongoDataCollector(dataModel, connection, resultParser, provider.settings.database());
             dataCollector.collectData(mainResult);
 
-            ((MongoQueryResultParser)resultParser).removeConnection();
+            resultParser.removeConnection();
             return dataModel;
         } catch (ConnectionException e) {
             throw MongoExceptionsFactory.getExceptionsFactory().dataCollectorNotInitialized(e);

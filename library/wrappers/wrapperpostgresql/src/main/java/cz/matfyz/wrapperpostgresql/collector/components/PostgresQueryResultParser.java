@@ -1,8 +1,8 @@
 package cz.matfyz.wrapperpostgresql.collector.components;
 
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
-import cz.matfyz.core.collector.queryresult.CachedResult;
-import cz.matfyz.core.collector.queryresult.ConsumedResult;
+import cz.matfyz.core.collector.CachedResult;
+import cz.matfyz.core.collector.ConsumedResult;
 import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
 
 import java.sql.ResultSet;
@@ -18,7 +18,7 @@ public class PostgresQueryResultParser {
      * @param resultSet native result of parsed query
      * @throws SQLException when sql exception occur
      */
-    private void _addDataToBuilder(
+    private void addDataToBuilder(
             CachedResult.Builder builder,
             ResultSetMetaData metaData,
             ResultSet resultSet
@@ -46,7 +46,7 @@ public class PostgresQueryResultParser {
      * @param metaData metadata object used for getting column info
      * @throws SQLException from accessing metadata
      */
-    private void _consumeColumnDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData) throws SQLException {
+    private void consumeColumnDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData) throws SQLException {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             String columnName = metaData.getColumnName(i);
             String typeName = metaData.getColumnTypeName(i);
@@ -67,7 +67,7 @@ public class PostgresQueryResultParser {
             while (resultSet.next()) {
                 ResultSetMetaData metaData = resultSet.getMetaData();
                 builder.addEmptyRecord();
-                _addDataToBuilder(builder, metaData, resultSet);
+                addDataToBuilder(builder, metaData, resultSet);
             }
             return builder.toResult();
         } catch (SQLException e) {
@@ -87,7 +87,7 @@ public class PostgresQueryResultParser {
             ResultSetMetaData metaData = resultSet.getMetaData();
             while (resultSet.next()) {
                 builder.addRecord();
-                _consumeColumnDataToBuilder(builder, metaData);
+                consumeColumnDataToBuilder(builder, metaData);
             }
             return builder.toResult();
         } catch (SQLException e) {

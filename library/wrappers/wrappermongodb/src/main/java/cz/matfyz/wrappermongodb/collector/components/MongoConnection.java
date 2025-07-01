@@ -3,7 +3,7 @@ package cz.matfyz.wrappermongodb.collector.components;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 
-import cz.matfyz.abstractwrappers.collector.components.AbstractConnection.ResultWithPlan;
+import cz.matfyz.core.collector.ResultWithPlan;
 import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.MongoResources;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
