@@ -24,6 +24,7 @@ import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
 import cz.matfyz.querying.planner.PlanDrafter;
 import cz.matfyz.querying.planner.QueryPlan;
+import cz.matfyz.querying.planner.ResultStructureResolver;
 import cz.matfyz.querying.planner.SchemaExtractor;
 import cz.matfyz.querying.resolver.ProjectionResolver;
 import cz.matfyz.querying.resolver.SelectionResolver;
@@ -85,6 +86,7 @@ public class QueryCustomTreeTest<TWrapper extends AbstractControlWrapper> {
 
         final var queryTree = queryTreeBuilder.build(schema, datasource, plan);
         final QueryPlan planned = new QueryPlan(queryTree, normalized.context);
+        ResultStructureResolver.run(planned);
 
         final QueryPlan optimized = QueryOptimizer.run(planned);
 

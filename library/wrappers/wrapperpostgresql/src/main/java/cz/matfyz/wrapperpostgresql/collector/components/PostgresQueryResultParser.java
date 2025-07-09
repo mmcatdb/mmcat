@@ -8,6 +8,7 @@ import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.List;
 
 public class PostgresQueryResultParser {
 
@@ -46,9 +47,12 @@ public class PostgresQueryResultParser {
      * @param metaData metadata object used for getting column info
      * @throws SQLException from accessing metadata
      */
-    private void consumeColumnDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData) throws SQLException {
+    private void consumeColumnDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData, List<String> tableColumns) throws SQLException {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-            String columnName = metaData.getColumnName(i);
+
+            // String columnName = metaData.getColumnName(i); // Apparently this is a stupid implementation which just returns getColumnLabel(), so it's no use to us
+            String columnName = tableColumns.get(i - 1);
+
             String typeName = metaData.getColumnTypeName(i);
 
             builder.addColumnType(columnName, typeName);
@@ -81,13 +85,13 @@ public class PostgresQueryResultParser {
      * @return instance of ConsumedResult
      * @throws ParseException when SQLException occur during the process
      */
-    public ConsumedResult parseResultAndConsume(ResultSet resultSet) throws ParseException {
+    public ConsumedResult parseResultAndConsume(ResultSet resultSet, List<String> tableColumns) throws ParseException {
         try {
             var builder = new ConsumedResult.Builder();
             ResultSetMetaData metaData = resultSet.getMetaData();
             while (resultSet.next()) {
                 builder.addRecord();
-                consumeColumnDataToBuilder(builder, metaData);
+                consumeColumnDataToBuilder(builder, metaData, tableColumns);
             }
             return builder.toResult();
         } catch (SQLException e) {

@@ -45,14 +45,6 @@ public class PostgresDataCollector {
         }
     }
 
-    protected ConsumedResult executeQueryAndConsume(String query) throws DataCollectException {
-        try {
-            return resultParser.parseResultAndConsume(connection.executeQuery(query));
-        } catch (QueryExecutionException | ParseException e) {
-            throw PostgreSQLExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
-        }
-    }
-
     //saving of database data
 
     /**
@@ -317,25 +309,6 @@ public class PostgresDataCollector {
         }
     }
 
-
-    /**
-     * Method which gets table name for column based on its name and type
-     * @param columnName specified column name
-     * @param columnType specified type
-     * @return corresponding table name
-     * @throws DataCollectException when no table for some column was found
-     */
-    private String getTableNameForColumn(String columnName, String columnType) throws DataCollectException {
-        CachedResult result = executeQuery(PostgreSQLResources.getTableNameForColumnQuery(columnName, columnType));
-        while (result.next()) {
-            String tableName = result.getString("relname");
-            if (model.databaseTables.keySet().contains(tableName)) {
-                return tableName;
-            }
-        }
-        throw PostgreSQLExceptionsFactory.getExceptionsFactory().tableForColumnNotFound(columnName);
-    }
-
     /**
      * Method which saves statistics about the main result
      * @param mainResult main result for which we want to save stats
@@ -347,13 +320,18 @@ public class PostgresDataCollector {
 
         long sizeInBytes = 0;
         double colSize = 0;
-        for (String columnName : mainResult.getColumnNames()) {
+        for (String tableColumn : mainResult.getColumnNames()) {
             colSize = 0;
-            for (String colType : mainResult.getColumnTypes(columnName)) {
-                String tableName = getTableNameForColumn(columnName, colType);
+            for (String colType : mainResult.getColumnTypes(tableColumn)) {
+                final var splitTableColumn = tableColumn.split("\".\"");
+                String tableName = splitTableColumn[0].substring(1);
+                String columnName = splitTableColumn[1].substring(0, splitTableColumn[1].length() - 1);
+
                 int typeSize = model.getTable(tableName, false).getColumn(columnName, false).getColumnType(colType, false).byteSize;
+
+                // FIXME: this assigns a wrong column name to the resultTable (i.e. the original table name, but we probably need the one after projection)
                 model.resultTable.getColumn(columnName, true).getColumnType(colType, true).byteSize = typeSize;
-                double ratio = mainResult.getColumnTypeRatio(columnName, colType);
+                double ratio = mainResult.getColumnTypeRatio(tableColumn, colType);
                 model.resultTable.getColumn(columnName, true).getColumnType(colType, true).ratio = ratio;
                 colSize += typeSize * ratio;
             }

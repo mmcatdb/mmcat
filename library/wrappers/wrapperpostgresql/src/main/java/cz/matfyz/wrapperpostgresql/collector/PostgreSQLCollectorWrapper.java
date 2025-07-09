@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.exception.collector.*;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
+import cz.matfyz.wrapperpostgresql.PostgreSQLQuery;
 import cz.matfyz.wrapperpostgresql.collector.components.PostgresConnection;
 import cz.matfyz.wrapperpostgresql.collector.components.PostgresDataCollector;
 import cz.matfyz.wrapperpostgresql.collector.components.PostgresExplainPlanParser;
@@ -28,16 +29,17 @@ public class PostgreSQLCollectorWrapper implements CollectorWrapper {
     }
 
     public final DataModel executeQuery(QueryContent query) throws WrapperException {
-        final var stringQuery = query.toString();
-        final var dataModel = new DataModel("PostgreSQL", stringQuery);
+        assert query instanceof PostgreSQLQuery;
+        final var postgresQuery = (PostgreSQLQuery)query;
+
+        final var dataModel = new DataModel("PostgreSQL", postgresQuery.toString());
 
         try (
             final var connection = new PostgresConnection(provider);
         ) {
-            final var inputQuery = stringQuery;
-            final var explainResult = connection.executeWithExplain(inputQuery);
+            final var explainResult = connection.executeWithExplain(postgresQuery.toString());
 
-            final var mainResult = resultParser.parseResultAndConsume(explainResult.result());
+            final var mainResult = resultParser.parseResultAndConsume(explainResult.result(), postgresQuery.tableColumns);
             explainPlanParser.parsePlan(explainResult.plan(), dataModel);
 
 

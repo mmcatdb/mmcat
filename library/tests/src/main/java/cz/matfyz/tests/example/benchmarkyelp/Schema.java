@@ -49,7 +49,7 @@ public abstract class Schema {
 
     // Morphisms
 
-    public static final BuilderMorphism businessToId =      builder.morphism(business, businessId);
+    public static final BuilderMorphism businessToId =      builder.morphism(business, businessId); // 1
     public static final BuilderMorphism businessToName =    builder.morphism(business, businessName);
     public static final BuilderMorphism businessToCity =    builder.morphism(business, businessCity);
     public static final BuilderMorphism businessToState =   builder.morphism(business, businessState);
@@ -58,7 +58,7 @@ public abstract class Schema {
     public static final BuilderMorphism businessToIsOpen =  builder.morphism(business, businessIsOpen);
     public static final BuilderMorphism businessToCtgry =   builder.morphism(businessCategory, business); // not used for now
 
-    public static final BuilderMorphism userToId =          builder.morphism(user, userId);
+    public static final BuilderMorphism userToId =          builder.morphism(user, userId); // 9
     public static final BuilderMorphism userToName =        builder.morphism(user, userName);
     public static final BuilderMorphism userToReviewCount = builder.morphism(user, userReviewCount);
     public static final BuilderMorphism userToYelpingSince = builder.morphism(user, userYelpingSince);
@@ -67,7 +67,7 @@ public abstract class Schema {
     public static final BuilderMorphism userToCool =        builder.morphism(user, userCool);
     public static final BuilderMorphism userToFriend =      builder.morphism(user, user); // TODO: maybe do double morphism with #role tag?
 
-    public static final BuilderMorphism reviewToId =        builder.morphism(review, reviewId);
+    public static final BuilderMorphism reviewToId =        builder.morphism(review, reviewId); // 17
     public static final BuilderMorphism reviewToUser =      builder.morphism(review, user);
     public static final BuilderMorphism reviewToBusiness =  builder.morphism(review, business);
     public static final BuilderMorphism reviewToStars =     builder.morphism(review, reviewStars);

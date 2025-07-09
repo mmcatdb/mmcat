@@ -12,19 +12,18 @@ import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
-import cz.matfyz.querying.optimizer.QueryCostEstimator;
+import cz.matfyz.querying.optimizer.QueryCostResolver;
 import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
 import cz.matfyz.querying.planner.PlanDrafter;
 import cz.matfyz.querying.planner.PlanJoiner;
 import cz.matfyz.querying.planner.QueryPlan;
+import cz.matfyz.querying.planner.ResultStructureResolver;
 import cz.matfyz.querying.planner.SchemaExtractor;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
 public class QueryEstimator {
-
-    public static record EvaluatedPlan(QueryPlan plan, long cost) {}
 
     public QueryEstimator(
         Datasources datasources,
@@ -43,7 +42,7 @@ public class QueryEstimator {
     private final String queryString;
     private final boolean optimize;
 
-    public List<EvaluatedPlan> run() {
+    public List<QueryPlan> run() {
         // ! from QueryTestBase ctor and builder
         final var schema = datasources.schema;
 
@@ -62,7 +61,7 @@ public class QueryEstimator {
         final var extracted = SchemaExtractor.run(normalized.context, schema, kinds, normalized.selection);
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extracted);
 
-        final var output = new ArrayList<EvaluatedPlan>();
+        final var output = new ArrayList<QueryPlan>();
 
         for (final var plan : plans) {
             QueryNode currentNode = PlanJoiner.run(normalized.context, plan, normalized.selection.variables());
@@ -71,16 +70,15 @@ public class QueryEstimator {
                 currentNode = new FilterNode(currentNode, filter);
 
             QueryPlan planned = new QueryPlan(currentNode, normalized.context);
+            ResultStructureResolver.run(planned);
+            if (optimize) { planned = QueryOptimizer.run(planned); }
 
-            if (optimize)
-                planned = QueryOptimizer.run(planned);
+            QueryCostResolver.run(planned);
 
-            long costOverNet = QueryCostEstimator.run(planned);
-
-            output.add(new EvaluatedPlan(planned, costOverNet));
+            output.add(planned);
         }
 
-        output.sort((x, y) -> y.cost() - x.cost() >= 0 ? 1 : -1); // descending
+        output.sort((x, y) -> x.root.costData.total() - y.root.costData.total() >= 0 ? 1 : -1); // put lowest costs (most optimal plans) to the front
         return output;
     }
 

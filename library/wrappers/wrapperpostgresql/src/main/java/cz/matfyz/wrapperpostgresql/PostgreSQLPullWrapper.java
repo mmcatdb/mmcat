@@ -50,6 +50,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     private PreparedStatement prepareStatement(Connection connection, QueryContent query) throws SQLException {
+        if (query instanceof final PostgreSQLQuery postgreSQLQuery)
+            return connection.prepareStatement(postgreSQLQuery.queryString);
+
         if (query instanceof final StringQuery stringQuery)
             return connection.prepareStatement(stringQuery.content);
 

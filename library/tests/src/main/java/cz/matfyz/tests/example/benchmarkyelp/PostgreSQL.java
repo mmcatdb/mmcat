@@ -12,7 +12,7 @@ public abstract class PostgreSQL {
     public static final Datasource datasource = new Datasource(DatasourceType.postgresql, "postgresql");
 
     public static final String businessKind = "business";
-    public static final String userKind = "user";
+    public static final String userKind = "yelp_user";
     public static final String reviewKind = "review";
     public static final String isFriendKind = "is_friend";
 

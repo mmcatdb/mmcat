@@ -1,9 +1,12 @@
 package cz.matfyz.tests.benchmark;
 
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.optimizer.QueryDebugPrinter;
 import cz.matfyz.tests.example.benchmarkyelp.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.tests.querying.QueryEstimator;
+import cz.matfyz.tests.querying.QueryTestBase;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +14,10 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.CompactNumberFormat;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -86,15 +92,15 @@ class BenchmarkTests {
                 ?business
                     bid ?business_id ;
                     name ?name ;
-                    orders ?review_count .
+                    reviews ?reviews .
 
             }
             WHERE {
                 ?business 1 ?business_id .
                 ?business 2 ?name .
-                ?business 6 ?review_count .
+                ?business 6 ?reviews .
 
-                FILTER(?review_count >= "100")
+                FILTER(?reviews >= "100")
             }
         """;
 
@@ -112,7 +118,58 @@ class BenchmarkTests {
             true
         ).run();
 
-        final var error = plans1.get(0).cost() >= plans2.get(0).cost() ? null : "Filtering increases cost estimation";
+        NumberFormat fmt = NumberFormat.getCompactNumberInstance(Locale.US, NumberFormat.Style.SHORT);
+        final var cost1h = QueryDebugPrinter.run(plans1.get(0).root);
+        final var cost2h = QueryDebugPrinter.run(plans2.get(0).root);
+
+        final var error = plans1.get(0).root.costData.network() >= plans2.get(0).root.costData.network() ? null : "Filtering increases cost estimation";
+
         assertNull(error);
+    }
+
+    @Test
+    void costEstimationJoin() {
+        final List<TestDatasource<?>> testDatasources = List.of(
+            datasources.postgreSQL()
+            // datasources.mongoDB()
+        );
+
+        // All users which reviewed a given business
+        final var query = """
+            SELECT {
+                ?user
+                    uid ?user_id ;
+                    name ?name .
+            }
+            WHERE {
+                ?user  9 ?user_id .
+                ?user 10 ?name .
+                ?user -18/19 ?bid .
+
+                FILTER(?bid = "MTSW4McQd7CbVtyjqoe9mw")
+            }
+        """;
+
+        final var plans = new QueryEstimator(
+            datasources,
+            testDatasources,
+            query,
+            true
+        ).run();
+
+        final var cost1h = QueryDebugPrinter.run(plans.get(0).root);
+        final var cost2h = QueryDebugPrinter.run(plans.get(1).root);
+        final var error = plans.get(0).root instanceof DatasourceNode ? null : "PostgreSQL DatasourceNode expected as the best plan root";
+        assertNull(error);
+
+        // new QueryTestBase(datasources.schema)
+        //     .addDatasource(datasources.postgreSQL())
+        //     .query(query)
+        //     .expected("""
+        //         [ {
+        //             "number": "o_100"
+        //         } ]
+        //     """)
+        //     .run();
     }
 }

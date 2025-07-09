@@ -89,14 +89,14 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
     }
 
     public ResultStructure visit(MinusNode node) {
-        throw new UnsupportedOperationException("ResultStructureAssigner.visit(MinusNode) not implemented.");
+        throw new UnsupportedOperationException("ResultStructureResolver.visit(MinusNode) not implemented.");
     }
 
     public ResultStructure visit(OptionalNode node) {
-        throw new UnsupportedOperationException("ResultStructureAssigner.visit(OptionalNode) not implemented.");
+        throw new UnsupportedOperationException("ResultStructureResolver.visit(OptionalNode) not implemented.");
     }
 
     public ResultStructure visit(UnionNode node) {
-        throw new UnsupportedOperationException("ResultStructureAssigner.visit(UnionNode) not implemented.");
+        throw new UnsupportedOperationException("ResultStructureResolver.visit(UnionNode) not implemented.");
     }
 }
