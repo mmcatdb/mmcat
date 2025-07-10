@@ -22,8 +22,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -387,15 +385,13 @@ public class ComplexProperty extends AccessPath {
         public Deserializer() { this(null); }
         public Deserializer(Class<?> vc) { super(vc); }
 
-        private static final ObjectReader nameJsonReader = new ObjectMapper().readerFor(Name.class);
-        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
-        private static final ObjectReader subpathsJsonReader = new ObjectMapper().readerFor(AccessPath[].class);
-
         @Override public ComplexProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-            final Name name = nameJsonReader.readValue(node.get("name"));
-            final Signature signature = signatureJsonReader.readValue(node.get("signature"));
-            final AccessPath[] subpaths = subpathsJsonReader.readValue(node.get("subpaths"));
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
+
+            final Name name = codec.treeToValue(node.get("name"), Name.class);
+            final Signature signature = codec.treeToValue(node.get("signature"), Signature.class);
+            final AccessPath[] subpaths = codec.treeToValue(node.get("subpaths"), AccessPath[].class);
 
             return new ComplexProperty(name, signature, List.of(subpaths));
         }

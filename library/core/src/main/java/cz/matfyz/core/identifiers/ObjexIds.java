@@ -11,8 +11,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -149,14 +147,13 @@ public class ObjexIds implements Serializable {
         public Deserializer() { this(null); }
         public Deserializer(Class<?> vc) { super(vc); }
 
-        private static final ObjectReader signatureIdsJsonReader = new ObjectMapper().readerFor(SignatureId[].class);
-
         @Override public ObjexIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
 
             final Type type = Type.valueOf(node.get("type").asText());
             final SignatureId[] signatureIds = node.hasNonNull("signatureIds")
-                ? signatureIdsJsonReader.readValue(node.get("signatureIds"))
+                ? codec.treeToValue(node.get("signatureIds"), SignatureId[].class)
                 : null;
 
             return type == Type.Signatures ? new ObjexIds(signatureIds) : new ObjexIds(type);

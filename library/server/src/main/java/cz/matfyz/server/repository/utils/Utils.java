@@ -18,10 +18,6 @@ public abstract class Utils {
 
     private Utils() {}
 
-    public static Integer getIntOrNull(int input) {
-        return input == 0 ? null : input;
-    }
-
     public static @Nullable Id getId(ResultSet resultSet, String columnName) throws SQLException {
         final var idString = resultSet.getString(columnName);
         return idString == null ? null : new Id(idString);

@@ -13,8 +13,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -109,11 +107,10 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         public Deserializer() { this(null); }
         public Deserializer(Class<?> vc) { super(vc); }
 
-        private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
-
         @Override public SignatureId deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-            final Signature[] signatures = signaturesJsonReader.readValue(node);
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
+            final Signature[] signatures = codec.treeToValue(node, Signature[].class);
             return new SignatureId(signatures);
         }
     }

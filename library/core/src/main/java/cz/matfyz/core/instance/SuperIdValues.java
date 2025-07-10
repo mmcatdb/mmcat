@@ -16,8 +16,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -244,16 +242,15 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         public Deserializer() { this(null); }
         public Deserializer(Class<?> vc) { super(vc); }
 
-        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
-
         @Override public SuperIdValues deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
             final Map<Signature, String> tuples = new TreeMap<>();
 
             final var iterator = node.elements();
             while (iterator.hasNext()) {
                 final JsonNode object = iterator.next();
-                final Signature signature = signatureJsonReader.readValue(object.get("signature"));
+                final Signature signature = codec.treeToValue(object.get("signature"), Signature.class);
                 final String value = object.get("value").asText();
                 tuples.put(signature, value);
             }
