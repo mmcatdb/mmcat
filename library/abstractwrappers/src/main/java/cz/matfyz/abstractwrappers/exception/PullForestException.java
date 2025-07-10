@@ -11,10 +11,10 @@ public class PullForestException extends WrapperException {
         super("pullForest." + name, data, exception);
     }
 
-    public static PullForestException innerException(Exception exception) {
+    public static PullForestException inner(Exception exception) {
         return exception instanceof PullForestException pullForestException
             ? pullForestException
-            : new PullForestException("innerException", exception.getMessage(), exception);
+            : new PullForestException("inner", exception.getMessage(), exception);
     }
 
     private record InvalidQueryData(

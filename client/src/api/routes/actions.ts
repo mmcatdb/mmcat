@@ -1,15 +1,15 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST, DELETE } from '../routeFunctions';
-import type { ActionFromServer, ActionInit } from '@/types/action';
+import type { ActionResponse, ActionInit } from '@/types/action';
 
 const actions = {
-    getAllActionsInCategory: GET<{ categoryId: StringLike }, ActionFromServer[]>(
+    getAllActionsInCategory: GET<{ categoryId: StringLike }, ActionResponse[]>(
         u => `/schema-categories/${u.categoryId}/actions`,
     ),
-    getAction: GET<{ id: StringLike }, ActionFromServer>(
+    getAction: GET<{ id: StringLike }, ActionResponse>(
         u => `/actions/${u.id}`,
     ),
-    createAction: POST<Empty, ActionFromServer, ActionInit>(
+    createAction: POST<Empty, ActionResponse, ActionInit>(
         () => `/actions`,
     ),
     deleteAction: DELETE<{ id: StringLike }, void>(

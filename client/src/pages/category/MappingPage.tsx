@@ -14,20 +14,17 @@ export function MappingPage() {
 
             <div className='mt-4 p-4 bg-slate-500'>
                 <p>
-                Some text.
-                </p>
-                <p>
-                category 1: {category.label}
+                category: {category.label}
                 </p>
             </div>
 
             <div className='mt-4'>
-                <MappingEditor 
-                    category={category} 
-                    mapping={mapping} 
-                    kindName={''} 
-                    setKindName={(name: string) => console.log('Set kind name:', name)} 
-                    datasourceLabel='Default Datasource' 
+                <MappingEditor
+                    category={category}
+                    mapping={mapping}
+                    kindName=''
+                    setKindName={(name: string) => console.log('Set kind name:', name)}
+                    datasourceLabel='Default Datasource'
                 />
             </div>
         </div>
@@ -53,7 +50,7 @@ async function mappingLoader({ params: { categoryId, mappingId } }: { params: Pa
         throw new Error('Failed to load mapping');
 
     return {
-        category: Category.fromServer(categoryResponse.data),
-        mapping: Mapping.fromServer(mappingResponse.data),
+        category: Category.fromResponse(categoryResponse.data),
+        mapping: Mapping.fromResponse(mappingResponse.data),
     };
 }

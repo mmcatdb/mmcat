@@ -1,9 +1,9 @@
-import { type Category, SchemaObjex, type SchemaObjexFromServer } from '@/types/schema';
-import { type SMO, type SMOFromServer, SMOType } from './smo';
+import { type Category, SchemaObjex, type SchemaObjexResponse } from '@/types/schema';
+import { type SMO, type SMOResponse, SMOType } from './smo';
 
-export type UpdateObjexFromServer = SMOFromServer<SMOType.UpdateObjex> & {
-    newObjex: SchemaObjexFromServer;
-    oldObjex: SchemaObjexFromServer;
+export type UpdateObjexResponse = SMOResponse<SMOType.UpdateObjex> & {
+    newObjex: SchemaObjexResponse;
+    oldObjex: SchemaObjexResponse;
 };
 
 export class UpdateObjex implements SMO<SMOType.UpdateObjex> {
@@ -14,16 +14,16 @@ export class UpdateObjex implements SMO<SMOType.UpdateObjex> {
         readonly oldObjex: SchemaObjex,
     ) {}
 
-    static fromServer(input: UpdateObjexFromServer): UpdateObjex {
+    static fromResponse(input: UpdateObjexResponse): UpdateObjex {
         return new UpdateObjex(
-            SchemaObjex.fromServer(input.newObjex),
-            SchemaObjex.fromServer(input.oldObjex),
+            SchemaObjex.fromResponse(input.newObjex),
+            SchemaObjex.fromResponse(input.oldObjex),
         );
     }
 
     static create(newObjex: SchemaObjex, oldObjex: SchemaObjex): UpdateObjex {
         if (!newObjex.key.equals(oldObjex.key))
-            throw new Error('Cannot edit objex\'s key.');
+            throw new Error('Cannot update objex\'s key.');
 
         return new UpdateObjex(
             newObjex,
@@ -31,7 +31,7 @@ export class UpdateObjex implements SMO<SMOType.UpdateObjex> {
         );
     }
 
-    toServer(): UpdateObjexFromServer {
+    toServer(): UpdateObjexResponse {
         return {
             type: SMOType.UpdateObjex,
             newObjex: this.newObjex.toServer(),

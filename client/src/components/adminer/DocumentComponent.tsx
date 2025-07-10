@@ -1,95 +1,156 @@
-import { useState } from 'react';
-import { Button } from '@nextui-org/react';
+import { useMemo, useState } from 'react';
+import { Button } from '@heroui/react';
+import { usePreferences } from '@/components/PreferencesProvider';
+import { ReferenceComponent } from '@/components/adminer/ReferenceComponent';
+import type { Datasource } from '@/types/Datasource';
+import type { KindReference } from '@/types/adminer/AdminerReferences';
+import type { Id } from '@/types/id';
 
-type DocumentComponentProps = Readonly<{
+type DocumentComponentProps = {
+    /** The name of the property. */
+    valueKey: string | undefined;
+    /** The value the for given property. */
     value: unknown;
-    depth: number;
-}>;
+    /** References from and to the current kind. */
+    kindReferences: KindReference[];
+    /** Name of the current kind. */
+    kind: string;
+    /** The id of selected datasource. */
+    datasourceId: Id;
+    /** All active datasources. */
+    datasources: Datasource[];
+};
 
-export function DocumentComponent({ value, depth }: DocumentComponentProps) {
+/**
+ * Component for displaying data recursively in a JSON-like structure
+ */
+export function DocumentComponent({ valueKey, value, kindReferences, kind, datasourceId, datasources }: DocumentComponentProps) {
+    const { adminerShortLinks } = usePreferences().preferences;
     const [ isOpen, setIsOpen ] = useState(true);
+
+    const parsedValue = useMemo(() => {
+        return computeParsedValue(value);
+    }, [ value ]);
 
     if (!isOpen) {
         return (
             <Button
-                className='mx-2 h-5'
+                className='m-1 h-5 px-1 min-w-5'
                 variant='ghost'
                 onPress={() => setIsOpen(true)}>
-                Open
+                +
             </Button>
         );
     }
 
-    if (typeof value === 'object' && value && !Array.isArray(value)) {
-        // If value is an object, create another unordered list for its key-value pairs
-        const len = Object.entries(value).filter(([ key ]) => key !== '_id').length;
+    if (typeof parsedValue === 'object' && parsedValue && !Array.isArray(parsedValue)) {
+        // If parsedValue is an object, create another unordered list for its key-value pairs
         return (
-            <span>
+            <span className='group'>
                 {'{'}
 
-                {/* If length is 1, just render a single line, otherwise render the entire list */}
-                {len === 1 ? (
-                    <span className='mx-3'>
-                        <strong className='mr-3'>{Object.keys(value)[0]}:</strong>
-                        <DocumentComponent value={Object.values(value)[0] as unknown} depth={depth + 1} />
-                    </span>
-                ) : (
-                    <ul>
-                        {Object.entries(value)
-                            .filter(([ key ]) => key !== '_id')
-                            .map(([ key, val ]) => (
-                                <li className='ps-8' key={key}>
+                <ul>
+                    {Object.entries(parsedValue)
+                        .map(([ key, val ]) => (
+                            <li className='ps-8' key={key}>
+                                <span className='text-secondary-600'>
                                     <strong className='mr-3'>{key}:</strong>
-                                    <DocumentComponent value={val as unknown} depth={depth + 1} />
-                                </li>
-                            ))}
-                    </ul>
-                )}
+                                </span>
+                                <DocumentComponent valueKey={key} value={val as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                            </li>
+                        ))}
+                </ul>
 
                 {'}'}
 
                 <Button
-                    className='mx-2 h-5'
+                    className='m-1 h-5 px-1 min-w-5 opacity-0 group-hover:opacity-100'
                     variant='ghost'
                     onPress={() => setIsOpen(false)}>
-                    Close
+                    -
                 </Button>
             </span>
         );
     }
 
-    if (Array.isArray(value)) {
-        // If value is an array, create a list for each item
-        const len = value.length;
+    if (Array.isArray(parsedValue)) {
+        // If parsedValue is an array, create a list for each item
         return (
-            <span>
-                {'{'}
+            <span className='group'>
+                {'['}
 
-                {/* If length is 1, just render a single line, otherwise render the entire list */}
-                {len === 1 ? (
-                    <span className='mx-3'>
-                        <DocumentComponent value={value[0] as unknown} depth={depth + 1} />
-                    </span>
-                ) : (
+                <div className='ml-4'>
                     <ul>
-                        {value.map((item, index) => (
-                            <li className='ps-8' key={index}><DocumentComponent value={item as unknown} depth={depth + 1} /></li>
+                        {parsedValue.map((item, index) => (
+                            <li className='ps-4' key={index}>
+                                <DocumentComponent valueKey={undefined} value={item as unknown} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                                {(index != parsedValue.length - 1) && ',' }
+                            </li>
                         ))}
                     </ul>
-                )}
+                </div>
 
-                {'}'}
+                {']'}
 
                 <Button
-                    className='mx-2 h-5'
+                    className='m-1 h-5 px-1 min-w-5 opacity-0 group-hover:opacity-100'
                     variant='ghost'
                     onPress={() => setIsOpen(false)}>
-                    Close
+                    -
                 </Button>
             </span>
         );
     }
 
     // For primitive values (string, number, etc.), return them as a string
-    return <span>{String(value)}</span>;
+    return (
+        <span>
+            <span className={getColor(String(parsedValue))}>
+                {parsedValue === null ? '' : String(parsedValue)}
+            </span>
+            {valueKey
+                && kindReferences.length > 0
+                && kindReferences.some(ref => ref.fromProperty === valueKey)
+                && (
+                    adminerShortLinks ? (
+                        <span className='ps-4'>
+                            <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                        </span>
+                    ) : (
+                        <div className='ps-4'>
+                            <ReferenceComponent references={kindReferences} data={({ [valueKey]: parsedValue as string })} propertyName={valueKey} kind={kind} datasourceId={datasourceId} datasources={datasources} />
+                        </div>
+                    )
+                )}
+        </span>
+    );
+}
+
+function getColor(value: string): string {
+    const patterns = {
+        boolean: /^(true|false)$/i,
+        number: /^-?\d+(\.\d+)?$/,
+        elementId: /^\d+:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}):\d+$/,
+    };
+
+    if (patterns.elementId.test(value))
+        return 'text-secondary-600';
+
+    if (patterns.boolean.test(value))
+        return 'text-danger-400';
+
+    if (patterns.number.test(value))
+        return 'text-success-600';
+
+    return 'text-foreground';
+}
+
+function computeParsedValue(value: unknown): unknown {
+    try {
+        return JSON.parse(value as string);
+    }
+    catch {
+        // The value cannot be parsed to JSON
+        return value;
+    }
 }

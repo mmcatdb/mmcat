@@ -1,12 +1,12 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.service.MappingService;
 import cz.matfyz.tests.example.queryevolution.MongoDB;
 import cz.matfyz.tests.example.queryevolution.PostgreSQL;
-import cz.matfyz.server.example.common.MappingWrapperBuilder;
+import cz.matfyz.server.example.common.MappingEntityBuilder;
 
 import java.util.List;
 
@@ -19,8 +19,8 @@ class MappingSetup {
     @Autowired
     private MappingService mappingService;
 
-    List<MappingWrapper> createMappings(List<DatasourceWrapper> datasources, SchemaCategoryWrapper schemaWrapper, int version) {
-        final var builder = new MappingWrapperBuilder(datasources, schemaWrapper);
+    List<MappingEntity> createMappings(List<DatasourceEntity> datasources, SchemaCategoryEntity schemaEntity, int version) {
+        final var builder = new MappingEntityBuilder(datasources, schemaEntity);
 
         if (version == 3) {
             return builder

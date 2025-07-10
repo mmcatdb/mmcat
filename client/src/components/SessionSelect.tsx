@@ -2,7 +2,7 @@ import { api } from '@/api';
 import { type Id } from '@/types/id';
 import { Session } from '@/types/job';
 import cookies from '@/types/utils/cookies';
-import { Button, Select, SelectItem, type SharedSelection } from '@nextui-org/react';
+import { Button, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useCategoryInfo } from './CategoryInfoProvider';
 
@@ -24,7 +24,7 @@ export function SessionSelect() {
             return;
         }
 
-        const fetchedSession = response.data.map(Session.fromServer).sort((a, b) => +a.createdAt - +b.createdAt);
+        const fetchedSession = response.data.map(Session.fromResponse).sort((a, b) => +a.createdAt - +b.createdAt);
         setSessions(fetchedSession);
 
         const cookieId = cookies.get(SESSION_COOKIE_NAME);
@@ -51,7 +51,7 @@ export function SessionSelect() {
             return;
         }
 
-        const session = Session.fromServer(result.data);
+        const session = Session.fromResponse(result.data);
         setSessions([ session, ...sessions ]);
         setSelected(session);
         cookies.set(SESSION_COOKIE_NAME, session.id);
@@ -88,7 +88,6 @@ export function SessionSelect() {
                     </SelectItem>
                 ))}
             </Select>
-
             <Button onClick={createSession}>
                 New session
             </Button>

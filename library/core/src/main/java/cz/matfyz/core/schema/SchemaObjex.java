@@ -7,10 +7,10 @@ import cz.matfyz.core.identifiers.SignatureId;
 
 public class SchemaObjex implements Identified<SchemaObjex, Key> {
 
-    public SchemaObjex(Key key, ObjexIds ids, SignatureId superId) {
+    public SchemaObjex(Key key, ObjexIds ids) {
         this.key = key;
         this.ids = ids;
-        this.superId = superId;
+        this.superId = ids.generateDefaultSuperId();
     }
 
     private final Key key;
@@ -29,6 +29,15 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
     /** A union of all ids (super key). */
     public SignatureId superId() {
         return superId;
+    }
+
+    /**
+     * There are two types of objexes - entites and properties.
+     * Entities have outgoing morphisms, properties do not.
+     * Entities have either signature identifier(s) or a generated identifier. Properties are identified by their value.
+     */
+    public boolean isEntity() {
+        return !ids.isValue();
     }
 
     // Identification

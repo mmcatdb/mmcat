@@ -6,7 +6,7 @@ import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.file.File;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.FileRepository;
@@ -58,13 +58,13 @@ public class FileService {
     }
 
     public File executeDML(File file, String mode, String newDBName) {
-        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(file.datasourceId);
-        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
+        final DatasourceEntity datasourceEntity = datasourceRepository.find(file.datasourceId);
+        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceEntity);
         final Path filePath = Paths.get(File.getFilePath(file, uploads));
 
         switch (mode) {
             case "create_new_and_execute":
-                executeWithNewDatabase(filePath, control, datasourceWrapper, newDBName);
+                executeWithNewDatabase(filePath, control, datasourceEntity, newDBName);
                 break;
             case "delete_and_execute":
                 executeWithDelete(filePath, control, file);
@@ -78,27 +78,27 @@ public class FileService {
         return file;
     }
 
-    private void executeWithNewDatabase(Path filePath, AbstractControlWrapper oldControl, DatasourceWrapper datasourceWrapper, String newDBName) {
+    private void executeWithNewDatabase(Path filePath, AbstractControlWrapper oldControl, DatasourceEntity datasourceEntity, String newDBName) {
         LOGGER.info("Creating new database and executing models...");
 
         final AbstractDDLWrapper oldDDLWrapper = oldControl.getDDLWrapper();
         // Here similarly as for "database" field. I am in trouble if the field names change
-        final AbstractStatement creationStatement = oldDDLWrapper.createCreationStatement(newDBName, datasourceWrapper.settings.get("username").asText());
+        final AbstractStatement creationStatement = oldDDLWrapper.createCreationStatement(newDBName, datasourceEntity.settings.get("username").asText());
 
         // this could be only executed if the datasource isClonable (which in most cases mean that the current user has admin privileges)
         oldControl.execute(Collections.singletonList(creationStatement));
 
         // This approach is ok for MongoDB, PostgreSQL and Neo4j, since their settings all have the "database" field
         // (will it be ok on other DBs?)
-        ObjectNode newSettings = datasourceWrapper.settings.put("database", newDBName);
-        DatasourceInit newDataSourceInit = new DatasourceInit(datasourceWrapper.label, datasourceWrapper.type, newSettings);
-        final DatasourceWrapper newDatasourceWrapper = DatasourceWrapper.createNew(newDataSourceInit);
-        final AbstractControlWrapper newControl = wrapperService.getControlWrapper(newDatasourceWrapper);
+        final ObjectNode newSettings = datasourceEntity.settings.put("database", newDBName);
+        final DatasourceInit newDataSourceInit = new DatasourceInit(datasourceEntity.label, datasourceEntity.type, newSettings);
+        final DatasourceEntity newDatasourceEntity = DatasourceEntity.createNew(newDataSourceInit);
+        final AbstractControlWrapper newControl = wrapperService.getControlWrapper(newDatasourceEntity);
 
         newControl.execute(filePath);
         LOGGER.info("... models executed");
 
-        datasourceRepository.save(newDatasourceWrapper);
+        datasourceRepository.save(newDatasourceEntity);
     }
 
     private void executeWithDelete(Path filePath, AbstractControlWrapper control, File file) {

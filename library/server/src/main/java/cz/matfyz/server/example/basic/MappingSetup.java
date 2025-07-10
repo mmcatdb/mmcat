@@ -1,13 +1,13 @@
 package cz.matfyz.server.example.basic;
 
-import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.service.MappingService;
 import cz.matfyz.tests.example.basic.MongoDB;
 import cz.matfyz.tests.example.basic.Neo4j;
 import cz.matfyz.tests.example.basic.PostgreSQL;
-import cz.matfyz.server.example.common.MappingWrapperBuilder;
+import cz.matfyz.server.example.common.MappingEntityBuilder;
 
 import java.util.List;
 
@@ -20,8 +20,8 @@ class MappingSetup {
     @Autowired
     private MappingService mappingService;
 
-    List<MappingWrapper> createMappings(List<DatasourceWrapper> datasources, SchemaCategoryWrapper schemaWrapper) {
-        return new MappingWrapperBuilder(datasources, schemaWrapper)
+    List<MappingEntity> createMappings(List<DatasourceEntity> datasources, SchemaCategoryEntity schemaEntity) {
+        return new MappingEntityBuilder(datasources, schemaEntity)
             .add(0, PostgreSQL::order)
             .add(0, PostgreSQL::product)
             .add(0, PostgreSQL::item)

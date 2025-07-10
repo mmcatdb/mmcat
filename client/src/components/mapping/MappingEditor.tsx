@@ -1,17 +1,17 @@
-import { EditMappingGraphDisplay } from './EditMappingGraphDisplay';
-import { createInitialState, type EditMappingAction, editMappingReducer, type EditMappingState, EditorPhase } from './editMappingReducer';
+import { MappingEditorGraph } from './MappingEditorGraph';
+import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch } from './useMappingEditor';
 import { type Category } from '@/types/schema';
-import { type Dispatch, useCallback, useReducer } from 'react';
+import { type Dispatch, useCallback } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
 import { type Mapping } from '@/types/mapping';
-import { Button, Input } from '@nextui-org/react';
+import { Button, Input } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { type CategoryGraph } from '../category/categoryGraph';
 import { getPathSignature } from '../graph/graphUtils';
 
 type MappingEditorProps = {
-    /** The schema category being edited. */
+    /** The schema category to which the mapping belongs. */
     category: Category;
     /** The initial mapping to edit. */
     mapping: Mapping;
@@ -27,7 +27,8 @@ type MappingEditorProps = {
  * Renders the mapping editor with a graph display and panels for root selection and access path building.
  */
 export function MappingEditor({ category, mapping, kindName, setKindName, onSave, datasourceLabel }: MappingEditorProps) {
-    const [ state, dispatch ] = useReducer(editMappingReducer, { category, mapping }, createInitialState);
+    const { state, dispatch } = useMappingEditor(category, mapping);
+
     const navigate = useNavigate();
 
     const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => {
@@ -36,15 +37,15 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
 
     function handleSetRoot() {
         if (state.selection instanceof FreeSelection && !state.selection.isEmpty) {
-            const rootNodeId = state.selection.nodeIds.values().next().value;
-            // @ts-expect-error FIXME
+            const rootNodeId = state.selection.nodeIds.values().next().value!;
             dispatch({ type: 'set-root', rootNodeId });
         }
     }
 
     function handleSave() {
         if (onSave)
-            onSave(state.mapping, kindName);
+            // FIXME
+            onSave(state.form, kindName);
         navigate(-1);
     }
 
@@ -55,7 +56,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
     return (
         <div className='relative flex h-[calc(100vh-40px)]'>
             {/* Left Panel - Form Controls */}
-            <div className='w-80 bg-content1 border-r-1 border-default-200 p-4 flex flex-col'>
+            <div className='w-80 bg-content1 border-r border-default-200 p-4 flex flex-col'>
                 <div className=''>
                     <h2 className='text-xl font-semibold'>Create Mapping</h2>
 
@@ -91,7 +92,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                 </div>
 
                 {/* Fixed footer with buttons */}
-                <div className='pt-4 border-t-1 border-default-100'>
+                <div className='pt-4 border-t border-default-100'>
                     <div className='flex gap-3 justify-end'>
                         <Button
                             color='danger'
@@ -117,7 +118,7 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
             </div>
 
             {/* Main Graph Area */}
-            <EditMappingGraphDisplay state={state} dispatch={dispatch} className='flex-grow' />
+            <MappingEditorGraph state={state} dispatch={dispatch} className='grow' />
         </div>
     );
 }
@@ -187,15 +188,15 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
 }
 
 type StateDispatchProps = {
-    state: EditMappingState;
-    dispatch: React.Dispatch<EditMappingAction>;
+    state: MappingEditorState;
+    dispatch: MappingEditorDispatch;
 };
 
 /**
  * Renders a card for building and displaying the access path.
  */
 function AccessPathCard({ state, dispatch }: StateDispatchProps) {
-    const { mapping, selection, selectionType } = state;
+    const { form, selection, selectionType } = state;
 
     function handleAddSubpath() {
         // Switch to path selection mode when + is clicked
@@ -219,7 +220,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     }
 
     function renderAccessPath() {
-        const root = mapping.accessPath;
+        const root = form.accessPath;
 
         return (
             <div className='text-sm text-default-800'>

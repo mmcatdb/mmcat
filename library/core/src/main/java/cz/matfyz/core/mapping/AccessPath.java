@@ -14,8 +14,6 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -74,27 +72,21 @@ public abstract class AccessPath implements Printable {
         return object instanceof AccessPath path && name.equals(path.name);
     }
 
+    // #region Serialization
+
     public static class Deserializer extends StdDeserializer<AccessPath> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        private static final ObjectReader simplePropertyJsonReader = new ObjectMapper().readerFor(SimpleProperty.class);
-        private static final ObjectReader complexPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         @Override public AccessPath deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
             return node.has("subpaths")
-                ? complexPropertyJsonReader.readValue(node)
-                : simplePropertyJsonReader.readValue(node);
+                ? codec.treeToValue(node, ComplexProperty.class)
+                : codec.treeToValue(node, SimpleProperty.class);
         }
-
     }
+
+    // #endregion
 
 }

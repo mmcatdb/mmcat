@@ -1,5 +1,5 @@
-import { Datasource, type DatasourceType, type DatasourceFromServer } from '../datasource';
-import { ComplexProperty, Mapping, type MappingFromServer, type ParentProperty } from '@/types/mapping';
+import { type DatasourceResponse, type DatasourceType, Datasource } from '../Datasource';
+import { ComplexProperty, Mapping, type MappingResponse, type ParentProperty } from '@/types/mapping';
 import { DynamicName, type Key, type Signature } from '../identifiers';
 import { type Objex, type Morphism } from '@/types/schema';
 import { type ComparableMap } from '@/types/utils/ComparableMap';
@@ -7,13 +7,13 @@ import { ComparableSet } from '@/types/utils/ComparableSet';
 import { type Category } from '../schema';
 
 export type LogicalModel = {
-    datasource: Datasource;
+    datasource: DatasourceResponse;
     mappings: Mapping[];
 };
 
-export function logicalModelsFromServer(datasources: DatasourceFromServer[], mappings: MappingFromServer[]): LogicalModel[] {
-    const allDatasources = datasources.map(Datasource.fromServer);
-    const allMappings = mappings.map(Mapping.fromServer);
+export function logicalModelsFromResponse(datasources: DatasourceResponse[], mappings: MappingResponse[]): LogicalModel[] {
+    const allDatasources = datasources.map(Datasource.fromResponse);
+    const allMappings = mappings.map(Mapping.fromResponse);
 
     return allDatasources.map(datasource => ({
         datasource,

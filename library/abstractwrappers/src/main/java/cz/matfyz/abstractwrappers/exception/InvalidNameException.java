@@ -2,28 +2,29 @@ package cz.matfyz.abstractwrappers.exception;
 
 import java.io.Serializable;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class InvalidNameException extends WrapperException {
 
     private record InvalidNameData(
-        String type,
         String value,
         boolean isNull
     ) implements Serializable {}
 
-    protected InvalidNameException(String type, String value) {
-        super("invalidName", new InvalidNameData(type, value == null ? "" : value, value == null), null);
+    protected InvalidNameException(String name, @Nullable String value) {
+        super("invalidName." + name, new InvalidNameData(value == null ? "" : value, value == null), null);
     }
 
-    public static InvalidNameException kind(String name) {
-        return new InvalidNameException("kind", name);
+    public static InvalidNameException kind(@Nullable String value) {
+        return new InvalidNameException("kind", value);
     }
 
-    public static InvalidNameException property(String name) {
-        return new InvalidNameException("property", name);
+    public static InvalidNameException property(@Nullable String value) {
+        return new InvalidNameException("property", value);
     }
 
-    public static InvalidNameException node(String name) {
-        return new InvalidNameException("node", name);
+    public static InvalidNameException node(@Nullable String value) {
+        return new InvalidNameException("node", value);
     }
 
 }

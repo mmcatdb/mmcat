@@ -32,13 +32,11 @@ public class SchemaBuilder {
         private final String label;
         // These needs to be updated later, because the morphisms might not be defined yet.
         ObjexIds ids;
-        SignatureId superId;
 
         public BuilderObjex(Key key, String label, ObjexIds ids) {
             this.key = key;
             this.label = label;
             this.ids = ids;
-            this.superId = ids.generateDefaultSuperId();
         }
 
         public Key key() {
@@ -47,10 +45,6 @@ public class SchemaBuilder {
 
         public ObjexIds ids() {
             return ids;
-        }
-
-        public SignatureId superId() {
-            return superId;
         }
 
         public String label() {
@@ -222,7 +216,6 @@ public class SchemaBuilder {
     public SchemaBuilder ids(BuilderObjex objexes, BuilderMorphism... morphisms) {
         final var id = new SignatureId(Stream.of(morphisms).map(m -> m.signature()).toArray(Signature[]::new));
         objexes.ids = new ObjexIds(Set.of(id));
-        objexes.superId = objexes.ids.generateDefaultSuperId();
 
         return this;
     }
@@ -250,7 +243,7 @@ public class SchemaBuilder {
             if (objexesToSkip.contains(o))
                 return;
 
-            final var objex = new SchemaObjex(o.key, o.ids, o.superId);
+            final var objex = new SchemaObjex(o.key, o.ids);
             schema.addObjex(objex);
         });
 

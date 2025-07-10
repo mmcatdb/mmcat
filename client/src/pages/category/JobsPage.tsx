@@ -2,12 +2,11 @@ import { api } from '@/api';
 import { Job } from '@/types/job';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Chip, Tooltip } from '@nextui-org/react';
+import { Chip, Tooltip } from '@heroui/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
 import { getJobStateIcon } from '@/components/icons/Icons';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { cn } from '@/components/utils';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
@@ -36,8 +35,8 @@ export function JobsPage() {
 
         setError(false);
 
-        const jobsFromServer = response.data.map(job => Job.fromServer(job, category));
-        const grouped = groupJobsByRunId(jobsFromServer);
+        const jobsResponse = response.data.map(job => Job.fromResponse(job, category));
+        const grouped = groupJobsByRunId(jobsResponse);
 
         // Compare states and update if needed
         setGroupedJobs(rawPrev => {
@@ -61,13 +60,11 @@ export function JobsPage() {
 
     if (error) {
         return <ReloadPage onReload={() => {
-            void fetchJobs(); 
+            void fetchJobs();
         }} />;
     }
 
-    const classNameTH = cn(
-        'px-4 py-3 text-left font-semibold bg-default-100 border-b border-default-300 text-default-800',
-    );
+    const classNameTH = 'px-4 py-3 text-left font-semibold bg-default-100 border-b border-default-300 text-default-800';
 
     return (<>
         <div className='flex items-center gap-2 mb-4 pt-4'>
@@ -84,13 +81,9 @@ export function JobsPage() {
 
         {isVisible && <JobInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
-        {/* no NextUI (HeroUI) table here, because of grouping functionality */}
+        {/* No HeroUI table here, because of grouping functionality. */}
         {Object.entries(groupedJobs).length > 0 ? (
-            <table
-                className={cn(
-                    'w-full border-collapse rounded-xl overflow-hidden shadow-sm  bg-default-50',
-                )}
-            >
+            <table className='w-full border-collapse rounded-xl overflow-hidden shadow-xs  bg-default-50'>
                 <thead>
                     <tr>
                         {showTableIDs && <th className={classNameTH}>Run ID</th>}
@@ -140,7 +133,9 @@ function groupJobsByRunId(jobs: Job[]) {
         const runId = job.runId;
         if (!acc[runId])
             acc[runId] = [];
+
         acc[runId].push(job);
+
         return acc;
     }, {} as Record<string, Job[]>);
 }
@@ -155,15 +150,22 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
             const existing = acc[job.index];
             if (!existing || new Date(job.createdAt) > new Date(existing.createdAt))
                 acc[job.index] = job;
+
             return acc;
         }, {} as Record<number, Job>),
     );
 
     return (
         <tr className='hover:bg-default-100'>
-            {showTableIDs && <td className={'px-4 py-2'}>{runId}</td>}
-            <td className={'px-4 py-2'}>{newestJobs[0]?.runLabel || `Run ${runId}`}</td>
-            <td className={'px-4 py-2'}>
+            {showTableIDs && (
+                <td className='px-4 py-2'>
+                    {runId}
+                </td>
+            )}
+            <td className='px-4 py-2'>
+                {newestJobs[0]?.runLabel || `Run ${runId}`}
+            </td>
+            <td className='px-4 py-2'>
                 <div className='flex  gap-2'>
                     {newestJobs.map(job => (
                         <Tooltip
@@ -255,7 +257,7 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
                         onClick={() => categoryId && navigate(routes.category.actions.resolve({ categoryId }))}
                         className='text-primary-500 hover:underline'
                     >
-                            Actions page
+                        Actions page
                     </button>.</span>
                 </li>
             </ul>

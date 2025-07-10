@@ -6,7 +6,7 @@ enum SignatureType {
 
 const SEPARATOR = '.';
 
-export type SignatureFromServer = string;
+export type SignatureResponse = string;
 
 function determineType(idsLength: number) {
     if (idsLength === 0)
@@ -25,7 +25,7 @@ export class Signature {
         this.value = this.toValue();
     }
 
-    static fromServer(input: SignatureFromServer): Signature {
+    static fromResponse(input: SignatureResponse): Signature {
         if (input === 'EMPTY')
             return Signature.empty();
 
@@ -125,7 +125,7 @@ export class Signature {
         return this.value === other.value;
     }
 
-    toServer(): SignatureFromServer {
+    toServer(): SignatureResponse {
         return this.value;
     }
 }

@@ -1,6 +1,6 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.server.entity.InstanceCategoryWrapper;
+import cz.matfyz.server.entity.InstanceCategoryEntity;
 import cz.matfyz.server.global.RequestContext;
 import cz.matfyz.server.repository.InstanceCategoryRepository;
 
@@ -18,7 +18,7 @@ public class InstanceCategoryController {
     private InstanceCategoryRepository repository;
 
     @GetMapping("/instances")
-    public InstanceCategoryWrapper getInstanceCategory() {
+    public InstanceCategoryEntity getInstanceCategory() {
         return repository.find(request.getSessionId());
     }
 

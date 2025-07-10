@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class InstanceSerializer {
 
     public record SerializedInstance(
@@ -28,8 +30,8 @@ public class InstanceSerializer {
 
     public record SerializedDomainRow(
         int id,
-        SuperIdWithValues superId,
-        List<String> technicalIds,
+        SuperIdValues values,
+        @Nullable Integer technicalId,
         List<Signature> pendingReferences
     ) {}
 
@@ -74,8 +76,8 @@ public class InstanceSerializer {
         for (final DomainRow row : objex.allRowsToSet()) {
             final var rowWrapper = new SerializedDomainRow(
                 lastId++,
-                row.superId,
-                row.technicalIds.stream().toList(),
+                row.values,
+                row.technicalId,
                 row.pendingReferences.stream().toList()
             );
             rowToId.put(row, rowWrapper.id());
@@ -133,14 +135,13 @@ public class InstanceSerializer {
 
         for (final var serializedRow : serializedObjex.rows) {
             final var row = new DomainRow(
-                serializedRow.superId,
-                new TreeSet<>(serializedRow.technicalIds),
+                serializedRow.values,
+                serializedRow.technicalId,
                 new TreeSet<>(serializedRow.pendingReferences)
             );
 
             idToRow.put(serializedRow.id, row);
-            final var ids = row.superId.findAllIds(objex.schema.ids()).foundIds();
-            objex.setRow(row, ids);
+            objex.setRow(row);
         }
     }
 
@@ -153,7 +154,6 @@ public class InstanceSerializer {
         for (final var serializedMapping : serializedMorphism.mappings) {
             final var domRow = domIdToRow.get(serializedMapping.dom);
             final var codRow = codIdToRow.get(serializedMapping.cod);
-
             morphism.createMapping(domRow, codRow);
         }
     }

@@ -10,13 +10,13 @@ export enum SMOType {
     Composite = 'composite',
 }
 
-export type SMOFromServer<T extends SMOType = SMOType> = {
+export type SMOResponse<T extends SMOType = SMOType> = {
     type: T;
 };
 
 export type SMO<T extends SMOType = SMOType> = {
     readonly type: T;
-    toServer(): SMOFromServer<T>;
+    toServer(): SMOResponse<T>;
     up(category: Category): void;
     down(category: Category): void;
 }

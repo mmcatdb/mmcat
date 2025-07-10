@@ -3,7 +3,7 @@ import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTab
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, Input, Tooltip } from '@nextui-org/react';
+import { Button, Input, Tooltip } from '@heroui/react';
 import { AddSchemaModal } from './Home';
 import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
@@ -65,7 +65,7 @@ export function CategoriesPage() {
             return;
         }
 
-        const newCategory = SchemaCategoryInfo.fromServer(response.data);
+        const newCategory = SchemaCategoryInfo.fromResponse(response.data);
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
@@ -94,7 +94,7 @@ export function CategoriesPage() {
                         </button>
                     </Tooltip>
                 </div>
-                
+
                 <div className='flex gap-2'>
                     <Button
                         onPress={() => setIsModalOpen(true)}
@@ -109,7 +109,7 @@ export function CategoriesPage() {
                         <Button
                             key={example}
                             onPress={() => {
-                                void createSchema(example, true); 
+                                void createSchema(example, true);
                             }}
                             isLoading={isCreatingExampleSchema}
                             color='secondary'
@@ -126,7 +126,7 @@ export function CategoriesPage() {
             {isVisible && <SchemaCategoryInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
             {/* Action Bar (Search + Buttons) */}
-            <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-sm mb-4'>
+            <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-xs mb-4'>
                 {/* Search Input */}
                 <Input
                     type='text'
@@ -191,7 +191,7 @@ async function categoriesLoader(): Promise<CategoriesLoaderData> {
         throw new Error('Failed to load schema categories');
 
     return {
-        categories: response.data.map(SchemaCategoryInfo.fromServer),
+        categories: response.data.map(SchemaCategoryInfo.fromResponse),
     };
 }
 

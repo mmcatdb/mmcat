@@ -1,18 +1,18 @@
-import { Signature, type SignatureFromServer } from './Signature';
+import { Signature, type SignatureResponse } from './Signature';
 
-export type NameFromServer = StringNameFromServer | TypedNameFromServer | DynamicNameFromServer;
+export type NameResponse = StringNameResponse | TypedNameResponse | DynamicNameResponse;
 
-export function nameFromServer(input: NameFromServer): Name {
+export function nameFromResponse(input: NameResponse): Name {
     if ('value' in input)
-        return StringName.fromServer(input);
+        return StringName.fromResponse(input);
     if (!('signature' in input))
-        return TypedName.fromServer(input);
-    return DynamicName.fromServer(input);
+        return TypedName.fromResponse(input);
+    return DynamicName.fromResponse(input);
 }
 
 export type Name = StringName | TypedName;
 
-type StringNameFromServer = {
+type StringNameResponse = {
     value: string;
 };
 
@@ -21,11 +21,11 @@ export class StringName {
         readonly value: string,
     ) {}
 
-    static fromServer(input: StringNameFromServer): StringName {
+    static fromResponse(input: StringNameResponse): StringName {
         return new StringName(input.value);
     }
 
-    toServer(): StringNameFromServer {
+    toServer(): StringNameResponse {
         return {
             value: this.value,
         };
@@ -40,7 +40,7 @@ export class StringName {
     }
 }
 
-type TypedNameFromServer = {
+type TypedNameResponse = {
     type: string;
 };
 
@@ -49,11 +49,11 @@ export class TypedName {
         readonly type: string,
     ) {}
 
-    static fromServer(input: TypedNameFromServer): TypedName {
+    static fromResponse(input: TypedNameResponse): TypedName {
         return new TypedName(input.type);
     }
 
-    toServer(): TypedNameFromServer {
+    toServer(): TypedNameResponse {
         return {
             type: this.type,
         };
@@ -75,8 +75,8 @@ export class TypedName {
     public static readonly INDEX = 'index';
 }
 
-type DynamicNameFromServer = TypedNameFromServer & {
-    signature: SignatureFromServer;
+type DynamicNameResponse = TypedNameResponse & {
+    signature: SignatureResponse;
     pattern?: string;
 };
 
@@ -89,15 +89,15 @@ export class DynamicName extends TypedName {
         super(type);
     }
 
-    static fromServer(input: DynamicNameFromServer): DynamicName {
+    static fromResponse(input: DynamicNameResponse): DynamicName {
         return new DynamicName(
             input.type,
-            Signature.fromServer(input.signature),
+            Signature.fromResponse(input.signature),
             input.pattern,
         );
     }
 
-    toServer(): DynamicNameFromServer {
+    toServer(): DynamicNameResponse {
         return {
             type: this.type,
             signature: this.signature.toServer(),
@@ -113,5 +113,4 @@ export class DynamicName extends TypedName {
         const patternString = this.pattern == null ? '' : ` (${this.pattern})`;
         return `<${this.type}${patternString}: ${this.signature.toString()}>`;
     }
-
 }

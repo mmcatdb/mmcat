@@ -82,15 +82,11 @@ public class ListResult extends ResultNode {
         return children.stream().map(Object::toString).toList();
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<ListResult> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<ListResult> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<ListResult> t) { super(t); }
 
         @Override public void serialize(ListResult result, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
@@ -98,8 +94,9 @@ public class ListResult extends ResultNode {
                 generator.writeObject(child);
             generator.writeEndArray();
         }
-
     }
+
+    // #endregion
 
     public static class Builder<T extends ResultNode> implements NodeBuilder {
 

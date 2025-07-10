@@ -3,10 +3,12 @@ package cz.matfyz.wrappermongodb;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.querycontent.KindNameFilterQuery;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
+import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DocumentResponse;
-import cz.matfyz.core.adminer.KindNameResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -19,25 +21,21 @@ import cz.matfyz.core.querying.MapResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.ResultNode;
 import cz.matfyz.core.querying.ResultStructure;
-import cz.matfyz.core.record.AdminerFilter;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
-import cz.matfyz.inference.adminer.MongoDBAlgorithms;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
+import java.util.regex.Pattern;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Filters;
 
 import org.bson.Document;
@@ -56,7 +54,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private MongoCursor<Document> getDocumentIterator(QueryContent query) {
         if (query instanceof final KindNameQuery kindNameQuery)
-            return getDocumentIteratorFromKindName(kindNameQuery);
+            return getDocumentIteratorFromKindName(kindNameQuery, null);
+
+        if (query instanceof final KindNameFilterQuery kindNameFilterQuery)
+            return getDocumentIteratorFromKindName(kindNameFilterQuery.kindNameQuery, kindNameFilterQuery.getFilters());
 
         if (query instanceof final MongoDBQuery mongoQuery)
             return provider.getDatabase().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline).iterator();
@@ -64,8 +65,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         throw PullForestException.invalidQuery(this, query);
     }
 
-    private MongoCursor<Document> getDocumentIteratorFromKindName(KindNameQuery query) {
+    private MongoCursor<Document> getDocumentIteratorFromKindName(KindNameQuery query, @Nullable List<AdminerFilter> filters) {
         var find = provider.getDatabase().getCollection(query.kindName).find();
+        if (filters != null && !filters.isEmpty())
+            find = find.filter(createFilter(filters));
         if (query.hasOffset())
             find = find.skip(query.getOffset());
         if (query.hasLimit())
@@ -93,7 +96,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return forest;
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -174,7 +177,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return new QueryResult(dataResult, query.structure());
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -222,124 +225,137 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    /**
-     * Retrieves a list of kind names with support for pagination.
-     *
-     * @param limit The maximum number of results to return.
-     * @param offsetString The number of results to skip.
-     * @return A {@link KindNameResponse} containing the list of collection names.
-     * @throws PullForestException if an error occurs while querying the database.
-     */
-    @Override public KindNameResponse getKindNames(String limit, String offsetString) {
-        try {
-            MongoIterable<String> kindNames = provider.getDatabase().listCollectionNames();
-            List<String> data = new ArrayList<>();
-
-            int lim = Integer.parseInt(limit);
-            int offset = Integer.parseInt(offsetString);
-
-            int index = 0;
-            int count = 0;
-
-            for (String kindName : kindNames) {
-                if (index >= offset && count < lim) {
-                    data.add(kindName);
-                    count++;
-                }
-
-                index++;
-            }
-
-            return new KindNameResponse(data);
-        }
-        catch (Exception e) {
-			throw PullForestException.innerException(e);
-		}
+    @Override public List<String> getKindNames() {
+        return provider.getDatabase().listCollectionNames().into(new ArrayList<>());
     }
 
     /**
      * Creates a MongoDB filter based on a list of filters.
-     *
-     * @param filters The list of filters to apply.
-     * @return A {@link Bson} filter object.
-     * @throws UnsupportedOperationException if an unsupported operator is encountered.
      */
     private Bson createFilter(List<AdminerFilter> filters) {
         List<Bson> filterList = new ArrayList<>();
 
         for (AdminerFilter filter : filters) {
-            var columnName = filter.columnName();
+            var columnName = filter.propertyName();
             var operator = filter.operator();
-            var columnValue = filter.columnValue();
-            var value = "_id".equals(columnName) ? new ObjectId(columnValue) : columnValue;
+            var columnValue = filter.propertyValue();
 
-            BiFunction<String, Object, Bson> filterFunction = MongoDBAlgorithms.OPERATORS.get(operator);
+            Object value;
+            if ("_id".equals(columnName))
+                value = new ObjectId(columnValue);
+            else if (BOOLEAN_PATTERN.matcher(columnValue).matches())
+                value = Boolean.parseBoolean(columnValue);
+            else if (NUMBER_PATTERN.matcher(columnValue).matches())
+                value = columnValue.contains(".") ? Double.parseDouble(columnValue) : Long.parseLong(columnValue);
+            else
+                value = columnValue;
+
+            BiFunction<String, Object, Bson> filterFunction = OPERATORS.get(operator);
             filterList.add(filterFunction.apply(columnName, value));
         }
 
         return Filters.and(filterList);
     }
 
-    /**
-     * Retrieves documents from a collection based on filters, pagination parameters and kind name.
-     *
-     * @param kindName The name of the kind to query.
-     * @param limit The maximum number of results to return.
-     * @param offsetString The number of results to skip.
-     * @param filters The list of filters to apply (optional).
-     * @return A {@link DocumentResponse} containing the retrieved documents, item count, and property names.
-     * @throws PullForestException if an error occurs while querying the database.
-     */
-    @Override public DocumentResponse getKind(String kindName, String limit, String offsetString, @Nullable List<AdminerFilter> filters){
+    private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+(\\.\\d+)?$");
+
+    @Override public DocumentResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filters) {
+        KindNameQuery kindNameQuery = new KindNameQuery(kindName, limit, offset);
+        if (filters == null)
+            return getQueryResult(kindNameQuery);
+
+        return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
+    }
+
+    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
+        // No foreign keys can be fetched right from MongoDB
+        return new ArrayList<>();
+    }
+
+    @Override public DocumentResponse getQueryResult(QueryContent query) {
         try {
-            List<Map<String, Object>> data = new ArrayList<>();
-            MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
-            FindIterable<Document> documents = filters == null ? collection.find() : collection.find(createFilter(filters));
+            if (query instanceof final StringQuery stringQuery) {
+                Document parsedQuery = Document.parse(stringQuery.content);
+                Document result = provider.getDatabase().runCommand(parsedQuery);
 
-            int lim = Integer.parseInt(limit);
-            int offset = Integer.parseInt(offsetString);
+                Document cursor = (Document) result.get("cursor");
+                List<Document> documents = (List<Document>) cursor.get("firstBatch");
+                long itemCount = documents.size();
 
-            int itemCount = 0;
-            int count = 0;
-
-            for (Document document : documents) {
-                if (itemCount >= offset && count < lim) {
-                    Map<String, Object> item = new HashMap<>();
-
-                    document.forEach((key, value) -> {
-                        if (value instanceof String stringValue) {
-                            item.put(key, stringValue.replace("\"", ""));
-                        } else {
-                            item.put(key, value);
-                        }
-                    });
-
-                    data.add(item);
-                    count++;
+                List<String> propertyNames = new ArrayList<>();
+                if (parsedQuery.containsKey("find")) {
+                    String kindName = parsedQuery.getString("find");
+                    MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
+                    propertyNames = MongoDBUtils.getPropertyNames(collection);
                 }
+
+                return new DocumentResponse(documents, itemCount, propertyNames);
+            }
+
+            List<Document> data = new ArrayList<>();
+            MongoCursor<Document> iterator = getDocumentIterator(query);
+            long itemCount = 0;
+
+            while (iterator.hasNext()) {
+                data.add(iterator.next());
 
                 itemCount++;
             }
 
-            Set<String> propertyNames = MongoDBAlgorithms.getPropertyNames(collection);
+            List<String> propertyNames;
+            if (query instanceof final KindNameQuery knQuery) {
+                MongoCollection<Document> collection = provider.getDatabase().getCollection(knQuery.kindName);
+                propertyNames = MongoDBUtils.getPropertyNames(collection);
+            }
+            else if (query instanceof final KindNameFilterQuery knfQuery) {
+                MongoCollection<Document> collection = provider.getDatabase().getCollection(knfQuery.kindNameQuery.kindName);
+                propertyNames = MongoDBUtils.getPropertyNames(collection);
+            }
+            else
+                throw PullForestException.invalidQuery(this, query);
 
             return new DocumentResponse(data, itemCount, propertyNames);
         }
-        catch (Exception e){
-            throw PullForestException.innerException(e);
+        catch (Exception e) {
+            throw PullForestException.inner(e);
         }
     }
 
     /**
-     * Unsupported method for fetching foreign keys in MongoDB.
-     *
-     * @param datasourceId ID of the datasource.
-     * @param kindName     The name of the kind.
-     * @throws UnsupportedOperationException as this operation is not implemented.
+     * Parses a string into a list of strings.
      */
-    @Override public List<Reference> getReferences(String datasourceId, String kindName) {
-        // TODO
-        throw new UnsupportedOperationException("MongoDBPullWrapper.getReferences not implemented.");
+    private static List<String> parseStringToList(String value) {
+        return Arrays.stream(value.split(","))
+            .map(String::trim)
+            .map(str -> str.substring(1, str.length() - 1))
+            .toList();
     }
+
+    /**
+     * Defines a mapping between operator names and their corresponding MongoDB filter functions.
+     */
+    private static Map<String, BiFunction<String, Object, Bson>> defineOperators() {
+        final var ops = new TreeMap<String, BiFunction<String, Object, Bson>>();
+
+        ops.put("Equal", Filters::eq);
+        ops.put("NotEqual", Filters::ne);
+        ops.put("Less", Filters::lt);
+        ops.put("LessOrEqual", Filters::lte);
+        ops.put("Greater", Filters::gt);
+        ops.put("GreaterOrEqual", Filters::gte);
+
+        ops.put("In", (column, value) -> Filters.in(column, parseStringToList((String) value)));
+        ops.put("NotIn", (column, value) -> Filters.nin(column, parseStringToList((String) value)));
+
+        ops.put("MatchRegEx", (column, value) -> Filters.regex(column, (String) value));
+
+        return ops;
+    }
+
+    /**
+     * A map of operator names to MongoDB filter functions.
+     */
+    private static final Map<String, BiFunction<String, Object, Bson>> OPERATORS = defineOperators();
 
 }

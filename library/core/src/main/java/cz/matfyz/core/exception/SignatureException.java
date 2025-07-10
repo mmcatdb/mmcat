@@ -2,8 +2,8 @@ package cz.matfyz.core.exception;
 
 public class SignatureException extends CoreException {
 
-    private SignatureException(String type, String value) {
-        super("signature." + type, value, null);
+    private SignatureException(String name, String value) {
+        super("signature." + name, value, null);
     }
 
     public static SignatureException invalid(String value) {

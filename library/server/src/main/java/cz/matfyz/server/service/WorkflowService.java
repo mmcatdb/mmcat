@@ -75,7 +75,7 @@ public class WorkflowService {
                 // There should be only the initial mappings in the category at this point.
                 final var inputMappingIds = mappingRepository
                     .findAllInCategory(workflow.categoryId).stream()
-                    .map(wrapper -> wrapper.id()).toList();
+                    .map(entity -> entity.id()).toList();
 
                 workflow.jobId = null;
                 workflow.data = new InferenceWorkflowData(

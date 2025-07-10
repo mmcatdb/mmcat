@@ -14,7 +14,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.evolution.SchemaEvolution;
 import cz.matfyz.server.global.RequestContext;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
 
@@ -39,18 +39,18 @@ public class SchemaCategoryService {
     @Autowired
     private JobService jobService;
 
-    public SchemaCategoryWrapper create(String label) {
+    public SchemaCategoryEntity create(String label) {
         final String finalLabel = findUniqueLabel(label);
 
         final var schema = new SchemaCategory();
         final var metadata = MetadataCategory.createEmpty(schema);
-        final var wrapper = SchemaCategoryWrapper.createNew(finalLabel, schema, metadata);
+        final var entity = SchemaCategoryEntity.createNew(finalLabel, schema, metadata);
 
-        repository.save(wrapper);
-        final var session = jobService.createSession(wrapper.id());
+        repository.save(entity);
+        final var session = jobService.createSession(entity.id());
         request.setup(session.id());
 
-        return wrapper;
+        return entity;
     }
 
     private String findUniqueLabel(String label) {
@@ -74,28 +74,28 @@ public class SchemaCategoryService {
         List<MMO> metadata
     ) {}
 
-    public SchemaCategoryWrapper update(Id id, SchemaEvolutionInit evolutionInit) {
-        final SchemaCategoryWrapper wrapper = repository.find(id);
-        if (!evolutionInit.prevVersion().equals(wrapper.version()))
-            throw VersionException.mismatch(evolutionInit.prevVersion(), wrapper.version());
+    public SchemaCategoryEntity update(Id id, SchemaEvolutionInit evolutionInit) {
+        final SchemaCategoryEntity categoryEntity = repository.find(id);
+        if (!evolutionInit.prevVersion().equals(categoryEntity.version()))
+            throw VersionException.mismatch(evolutionInit.prevVersion(), categoryEntity.version());
 
-        final var newVersion = wrapper.systemVersion.generateNext();
+        final var newVersion = categoryEntity.systemVersion.generateNext();
         final var evolution = SchemaEvolution.createFromInit(id, newVersion, evolutionInit);
 
         final SchemaEvolutionAlgorithm schemaAlgorithm = evolution.toSchemaAlgorithm(evolutionInit.prevVersion());
-        final SchemaCategory schema = wrapper.toSchemaCategory();
+        final SchemaCategory schema = categoryEntity.toSchemaCategory();
         final MetadataEvolutionAlgorithm metadataAlgorithm = evolution.toMetadataAlgorithm(evolutionInit.prevVersion());
-        final MetadataCategory metadata = wrapper.toMetadataCategory(schema);
+        final MetadataCategory metadata = categoryEntity.toMetadataCategory(schema);
         schemaAlgorithm.up(schema, metadata);
 
         metadataAlgorithm.up(metadata);
 
-        wrapper.updateVersion(newVersion, wrapper.systemVersion);
-        wrapper.systemVersion = newVersion;
-        wrapper.schema = SchemaSerializer.serialize(schema);
-        wrapper.metadata = MetadataSerializer.serialize(metadata);
+        categoryEntity.updateVersion(newVersion, categoryEntity.systemVersion);
+        categoryEntity.systemVersion = newVersion;
+        categoryEntity.schema = SchemaSerializer.serialize(schema);
+        categoryEntity.metadata = MetadataSerializer.serialize(metadata);
 
-        repository.save(wrapper);
+        repository.save(categoryEntity);
         evolutionRepository.create(evolution);
 
         jobService.createRun(
@@ -104,7 +104,7 @@ public class SchemaCategoryService {
             List.of(new UpdateSchemaPayload(evolutionInit.prevVersion(), evolution.version))
         );
 
-        return wrapper;
+        return categoryEntity;
     }
 
 }

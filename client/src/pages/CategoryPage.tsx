@@ -37,7 +37,7 @@ async function categoryLoader({ params: { categoryId } }: { params: Params<'cate
             if (!response.status)
                 throw new Error('Failed to load category info');
 
-            return SchemaCategoryInfo.fromServer(response.data);
+            return SchemaCategoryInfo.fromResponse(response.data);
         }),
     };
 }

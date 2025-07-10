@@ -1,7 +1,7 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { DELETE, GET, POST, PUT } from '../routeFunctions';
 import type { Id } from '@/types/id';
-import type { QueryDescription, QueryFromServer, QueryInit, QueryEdit } from '@/types/query';
+import type { QueryDescription, QueryResponse, QueryInit, QueryEdit } from '@/types/query';
 
 export type QueryInput = {
     categoryId: Id;
@@ -19,19 +19,19 @@ const queries = {
     describe: POST<Empty, QueryDescription, QueryInput>(
         () => `/queries/describe`,
     ),
-    getQueriesInCategory: GET<{ categoryId: StringLike }, QueryFromServer[]>(
+    getQueriesInCategory: GET<{ categoryId: StringLike }, QueryResponse[]>(
         u => `/schema-categories/${u.categoryId}/queries`,
     ),
-    getQuery: GET<{ queryId: StringLike }, QueryFromServer>(
+    getQuery: GET<{ queryId: StringLike }, QueryResponse>(
         u => `queries/${u.queryId}`,
     ),
-    createQuery: POST<Empty, QueryFromServer, QueryInit>(
+    createQuery: POST<Empty, QueryResponse, QueryInit>(
         () => `/queries`,
     ),
     deleteQuery: DELETE<{ queryId: StringLike }, void>(
         u => `/queries/${u.queryId}`,
     ),
-    updateQuery: PUT<{ queryId: StringLike }, QueryFromServer, QueryEdit>(
+    updateQuery: PUT<{ queryId: StringLike }, QueryResponse, QueryEdit>(
         u => `/queries/${u.queryId}`,
     ),
 };

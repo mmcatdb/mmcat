@@ -1,10 +1,12 @@
 package cz.matfyz.abstractwrappers.querycontent;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class KindNameQuery implements QueryContent {
 
     public final String kindName;
 
-    private final Integer offset;
+    private final @Nullable Integer offset;
 
     public int getOffset() {
         return offset;
@@ -14,7 +16,7 @@ public class KindNameQuery implements QueryContent {
         return offset != null;
     }
 
-    private final Integer limit;
+    private final @Nullable Integer limit;
 
     public int getLimit() {
         return limit;
@@ -24,7 +26,7 @@ public class KindNameQuery implements QueryContent {
         return limit != null;
     }
 
-    public KindNameQuery(String kindName, Integer limit, Integer offset) {
+    public KindNameQuery(String kindName, @Nullable Integer limit, @Nullable Integer offset) {
         this.kindName = kindName;
         this.limit = limit;
         this.offset = offset;

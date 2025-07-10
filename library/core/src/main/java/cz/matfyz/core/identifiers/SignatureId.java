@@ -13,8 +13,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -90,15 +88,11 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         return builder.toString();
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<SignatureId> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<SignatureId> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<SignatureId> t) { super(t); }
 
         @Override public void serialize(SignatureId signatureId, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
@@ -107,29 +101,20 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
 
             generator.writeEndArray();
         }
-
     }
 
     public static class Deserializer extends StdDeserializer<SignatureId> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         @Override public SignatureId deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final Signature[] signatures = signaturesJsonReader.readValue(node);
-
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
+            final Signature[] signatures = codec.treeToValue(node, Signature[].class);
             return new SignatureId(signatures);
         }
-
     }
+
+    // #endregion
 
 }

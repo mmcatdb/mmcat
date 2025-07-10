@@ -42,6 +42,8 @@ public abstract class NamedException extends RuntimeException {
         return name + " (" + dataString + ")";
     }
 
+    // #region Serialization
+
     public record SerializedException(
         String name,
         @Nullable Serializable data
@@ -52,20 +54,14 @@ public abstract class NamedException extends RuntimeException {
     }
 
     public static class Serializer extends StdSerializer<NamedException> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<NamedException> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<NamedException> t) { super(t); }
 
         @Override public void serialize(NamedException exception, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            final var serializedException = exception.toSerializedException();
-            generator.writePOJO(serializedException);
+            generator.writePOJO(exception.toSerializedException());
         }
-
     }
+
+    // #endregion
 
 }

@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.example.common.DatasourceSettings;
 import cz.matfyz.server.global.Configuration.SetupProperties;
@@ -27,13 +27,13 @@ class DatasourceSetup {
         this.repository = repository;
     }
 
-    List<DatasourceWrapper> createDatasources() {
+    List<DatasourceEntity> createDatasources() {
         final List<DatasourceInit> inits = new ArrayList<>();
 
         inits.add(settings.createPostgreSQL("PostgreSQL"));
         inits.add(settings.createMongoDB("MongoDB"));
 
-        final List<DatasourceWrapper> existingDatasources = repository.findAll();
+        final List<DatasourceEntity> existingDatasources = repository.findAll();
 
         return inits.stream()
             .map(init -> {

@@ -1,5 +1,5 @@
 import { Signature } from './Signature';
-import { SignatureId, SignatureIdFactory, type SignatureIdFromServer } from './SignatureId';
+import { SignatureId, SignatureIdFactory, type SignatureIdResponse } from './SignatureId';
 
 export enum Type {
     Signatures = 'Signatures',
@@ -9,9 +9,9 @@ export enum Type {
 
 export type NonSignaturesType = Type.Value | Type.Generated;
 
-export type ObjexIdsFromServer = {
+export type ObjexIdsResponse = {
     type: Type;
-    signatureIds?: SignatureIdFromServer[];
+    signatureIds?: SignatureIdResponse[];
 };
 
 export class ObjexIds {
@@ -57,13 +57,13 @@ export class ObjexIds {
         return current.flatMap(currentId => concatenatedSignatureIds.map(signatureId => new SignatureId([ ...currentId.signatures, ...signatureId ])));
     }
 
-    static fromServer(input: ObjexIdsFromServer): ObjexIds {
+    static fromResponse(input: ObjexIdsResponse): ObjexIds {
         const type = input.type;
-        const signatureIds = input.signatureIds?.map(SignatureId.fromServer);
+        const signatureIds = input.signatureIds?.map(SignatureId.fromResponse);
         return new ObjexIds(type, signatureIds);
     }
 
-    toServer(): ObjexIdsFromServer {
+    toServer(): ObjexIdsResponse {
         return {
             type: this.type,
             signatureIds: this.type === Type.Signatures ? this._signatureIds.map(id => id.toServer()) : undefined,

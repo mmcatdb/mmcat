@@ -1,6 +1,6 @@
-import { Signature, type SignatureFromServer } from './Signature';
+import { Signature, type SignatureResponse } from './Signature';
 
-export type SignatureIdFromServer = SignatureFromServer[];
+export type SignatureIdResponse = SignatureResponse[];
 
 export class SignatureId {
     private _signatures: Signature[]; // TODO make set?
@@ -13,8 +13,8 @@ export class SignatureId {
         return this._signatures;
     }
 
-    static fromServer(input: SignatureIdFromServer): SignatureId {
-        return new SignatureId(input.map(Signature.fromServer));
+    static fromResponse(input: SignatureIdResponse): SignatureId {
+        return new SignatureId(input.map(Signature.fromResponse));
     }
 
     equals(other: SignatureId): boolean {
@@ -46,7 +46,7 @@ export class SignatureId {
         return new SignatureId(union);
     }
 
-    toServer(): SignatureIdFromServer {
+    toServer(): SignatureIdResponse {
         return this._signatures.map(signature => signature.toServer());
     }
 }

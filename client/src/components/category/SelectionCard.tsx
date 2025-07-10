@@ -1,7 +1,7 @@
 import { type CategoryGraph } from './categoryGraph';
 import { type FreeSelectionAction, type FreeSelection } from '../graph/graphSelection';
 import { type Dispatch } from 'react';
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { FaXmark } from 'react-icons/fa6';
 
 type SelectionCardProps = {

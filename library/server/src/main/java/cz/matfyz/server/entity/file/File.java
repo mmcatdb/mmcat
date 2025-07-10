@@ -135,7 +135,9 @@ public class File extends Entity {
         StringBuilder preview = new StringBuilder();
         int linesRead = 0;
 
-        try (var reader = Files.newBufferedReader(Paths.get(filePath))) {
+        try (
+            var reader = Files.newBufferedReader(Paths.get(filePath))
+        ) {
             String line;
             while ((line = reader.readLine()) != null && linesRead < PREVIEW_LIMIT) {
                 preview.append(line).append("\n");

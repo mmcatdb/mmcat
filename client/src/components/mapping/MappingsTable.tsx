@@ -1,7 +1,6 @@
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, type SortDescriptor } from '@heroui/react';
 import { usePreferences } from '../PreferencesProvider';
 import { useSortableData } from '../TableCommon';
-import { type SortDescriptor } from '@react-types/shared';
 import type { Mapping } from '@/types/mapping';
 import { useCategoryInfo } from '../CategoryInfoProvider';
 import { AccessPathTooltip } from './AccessPathTooltip';
@@ -112,7 +111,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                     </TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent={'No mappings to display.'}>
+            <TableBody emptyContent='No mappings to display.'>
                 {sortedMappings.map(mapping => (
                     <TableRow
                         key={mapping.id}

@@ -75,10 +75,10 @@ public abstract class PostgreSQL {
 
     public static void addItem(InstanceBuilder builder, int orderIndex, int productIndex, String quantityValue) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        final var numberValue = order.superId.getValue(Schema.orderToNumber.signature());
+        final var numberValue = order.values.getValue(Schema.orderToNumber.signature());
 
         final var product = builder.getRow(Schema.product, productIndex);
-        final var idValue = product.superId.getValue(Schema.productToId.signature());
+        final var idValue = product.values.getValue(Schema.productToId.signature());
 
         final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).objex(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);
@@ -120,7 +120,7 @@ public abstract class PostgreSQL {
         final var typeValue = "px_" + value;
         final var prefixValue = "px-" + value + "-" + index;
         final var prefix = builder
-            .value(Schema.prefixToId, dynamic.superId.getValue(Schema.dynamicToId.signature()))
+            .value(Schema.prefixToId, dynamic.values.getValue(Schema.dynamicToId.signature()))
             .value(Schema.prefixToType, typeValue)
             .objex(Schema.prefix);
 
@@ -139,7 +139,7 @@ public abstract class PostgreSQL {
         final var typeValue = "py_" + value;
         final var prefiyValue = "py-" + value + "-" + index;
         final var prefiy = builder
-            .value(Schema.prefiyToId, dynamic.superId.getValue(Schema.dynamicToId.signature()))
+            .value(Schema.prefiyToId, dynamic.values.getValue(Schema.dynamicToId.signature()))
             .value(Schema.prefiyToType, typeValue)
             .objex(Schema.prefiy);
 
@@ -158,7 +158,7 @@ public abstract class PostgreSQL {
         final var typeValue = "catch_all_" + value;
         final var catchAllValue = "catch-all-" + value + "-" + index;
         final var catchAll = builder
-            .value(Schema.catchAllToId, dynamic.superId.getValue(Schema.dynamicToId.signature()))
+            .value(Schema.catchAllToId, dynamic.values.getValue(Schema.dynamicToId.signature()))
             .value(Schema.catchAllToType, typeValue)
             .objex(Schema.catchAll);
 

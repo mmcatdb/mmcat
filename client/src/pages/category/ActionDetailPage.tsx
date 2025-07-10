@@ -1,4 +1,4 @@
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
 import { Action, ActionType, type JobPayload } from '@/types/action';
 import { useState } from 'react';
 import { api } from '@/api';
@@ -105,7 +105,7 @@ async function actionLoader({ params: { actionId } }: { params: Params<'actionId
         throw new Error('Failed to load action');
 
     return {
-        action: Action.fromServer(response.data),
+        action: Action.fromResponse(response.data),
     };
 }
 

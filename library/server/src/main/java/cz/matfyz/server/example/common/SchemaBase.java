@@ -3,7 +3,6 @@ package cz.matfyz.server.example.common;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataObjex;
@@ -22,7 +21,7 @@ import cz.matfyz.evolution.category.UpdateObjex;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MorphismMetadata;
 import cz.matfyz.evolution.metadata.ObjexMetadata;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.ArrayList;
@@ -37,8 +36,8 @@ public abstract class SchemaBase {
 
     private static final double POSITION_UNIT = 125;
 
-    // The wrapper is needed for updates (if the schema isn't created from scratch, we need the previous data).
-    private final SchemaCategoryWrapper wrapper;
+    // The entity is needed for updates (if the schema isn't created from scratch, we need the previous data).
+    private final SchemaCategoryEntity entity;
 
     /** The example schema category from which we take inspiration for objexes and morphisms in the new one. */
     private final SchemaCategory originalSchema;
@@ -48,8 +47,8 @@ public abstract class SchemaBase {
     private final SchemaCategory newSchema;
     private final MetadataCategory newMetadata;
 
-    protected SchemaBase(SchemaCategoryWrapper wrapper, SchemaCategory schema) {
-        this.wrapper = wrapper;
+    protected SchemaBase(SchemaCategoryEntity entity, SchemaCategory schema) {
+        this.entity = entity;
         this.originalSchema = schema;
         this.newSchema = new SchemaCategory();
         this.newMetadata = MetadataCategory.createEmpty(newSchema);
@@ -57,13 +56,13 @@ public abstract class SchemaBase {
 
     private SerializedObjex getOldObjex(Key key) {
         final var objex = newSchema.getObjex(key);
-        return new SerializedObjex(key, objex.ids(), objex.superId());
+        return new SerializedObjex(key, objex.ids());
     }
 
     protected SchemaEvolutionInit innerCreateNewUpdate() {
         createOperations();
 
-        return new SchemaEvolutionInit(wrapper.version(), schemaOperations, metadataOperations);
+        return new SchemaEvolutionInit(entity.version(), schemaOperations, metadataOperations);
     }
 
     protected abstract void createOperations();
@@ -88,12 +87,10 @@ public abstract class SchemaBase {
         // Signature ids can't be defined yet because there are no morphisms. Even in the composite operations the ids are defined later.
         final ObjexIds ids = !objex.ids().isSignatures()
                 ? objex.ids()
-                : null;
-        final SignatureId superId = ids != null
-            ? ids.generateDefaultSuperId()
-            : new SignatureId();
+                // However, ids can't be null in any case, so we create a generated one.
+                : ObjexIds.createGenerated();
 
-        final var schema = new SerializedObjex(key, ids, superId);
+        final var schema = new SerializedObjex(key, ids);
         final var metadata = new SerializedMetadataObjex(key, builderObjex.label(), createPosition(x, y));
         addSchemaOperation(new CreateObjex(schema, metadata));
         addMetadataOperation(new ObjexMetadata(metadata, null));
@@ -106,7 +103,7 @@ public abstract class SchemaBase {
     protected void addIds(BuilderObjex builderObjex) {
         final var key = builderObjex.key();
         final var objex = originalSchema.getObjex(key);
-        final var newObjex = new SerializedObjex(key, objex.ids(), objex.superId());
+        final var newObjex = new SerializedObjex(key, objex.ids());
         final var oldObjex = getOldObjex(key);
 
         addSchemaOperation(new UpdateObjex(newObjex, oldObjex));
@@ -114,7 +111,7 @@ public abstract class SchemaBase {
 
     protected void editIds(BuilderObjex builderObjex, ObjexIds ids) {
         final var key = builderObjex.key();
-        final var newObjex = new SerializedObjex(key, ids, ids.generateDefaultSuperId());
+        final var newObjex = new SerializedObjex(key, ids);
         final var oldObjex = getOldObjex(key);
 
         addSchemaOperation(new UpdateObjex(newObjex, oldObjex));

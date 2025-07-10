@@ -62,15 +62,11 @@ public class MapResult extends ResultNode {
         return Printer.print(this);
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<MapResult> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<MapResult> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<MapResult> t) { super(t); }
 
         @Override public void serialize(MapResult result, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
@@ -78,8 +74,9 @@ public class MapResult extends ResultNode {
                 generator.writePOJOField(child.getKey(), child.getValue());
             generator.writeEndObject();
         }
-
     }
+
+    // #endregion
 
     public static class Builder implements NodeBuilder {
 

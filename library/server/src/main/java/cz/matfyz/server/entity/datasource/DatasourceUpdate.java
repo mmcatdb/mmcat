@@ -8,12 +8,12 @@ public record DatasourceUpdate(
 ) {
 
     public boolean hasPassword() {
-        return this.settings.has(DatasourceWrapper.PASSWORD_FIELD_NAME);
+        return this.settings.has(DatasourceEntity.PASSWORD_FIELD_NAME);
     }
 
-    public void trySetPasswordFrom(DatasourceWrapper datasource) {
-        if (datasource.settings.has(DatasourceWrapper.PASSWORD_FIELD_NAME))
-            this.settings.set(DatasourceWrapper.PASSWORD_FIELD_NAME, datasource.settings.get(DatasourceWrapper.PASSWORD_FIELD_NAME));
+    public void trySetPasswordFrom(DatasourceEntity datasource) {
+        if (datasource.settings.has(DatasourceEntity.PASSWORD_FIELD_NAME))
+            this.settings.set(DatasourceEntity.PASSWORD_FIELD_NAME, datasource.settings.get(DatasourceEntity.PASSWORD_FIELD_NAME));
     }
 
 }

@@ -1,8 +1,8 @@
 import { UniqueIdProvider } from '@/types/utils/UniqueIdProvider';
 import type { Entity, Id, VersionId } from '../id';
-import { Key, type KeyFromServer, Signature, type SignatureFromServer } from '../identifiers';
-import { type MetadataMorphismFromServer, type SchemaMorphismFromServer, Morphism } from './Morphism';
-import { type MetadataObjexFromServer, type SchemaObjexFromServer, Objex } from './Objex';
+import { Key, type KeyResponse, Signature, type SignatureResponse } from '../identifiers';
+import { type MetadataMorphismResponse, type SchemaMorphismResponse, Morphism } from './Morphism';
+import { type MetadataObjexResponse, type SchemaObjexResponse, Objex } from './Objex';
 import { ComparableMap } from '@/types/utils/ComparableMap';
 
 /**
@@ -16,17 +16,17 @@ export class Category implements Entity {
         readonly versionId: VersionId,
     ) {}
 
-    static fromServer(input: SchemaCategoryFromServer): Category {
+    static fromResponse(input: SchemaCategoryResponse): Category {
         const category = new Category(
             input.id,
             input.label,
             input.version,
         );
 
-        const objexMetadata = new Map<KeyFromServer, MetadataObjexFromServer>(
+        const objexMetadata = new Map<KeyResponse, MetadataObjexResponse>(
             input.metadata.objexes.map(metadata => [ metadata.key, metadata ]),
         );
-        const objexes = input.schema.objexes.map(schema => Objex.fromServer(category, schema, objexMetadata.get(schema.key)!));
+        const objexes = input.schema.objexes.map(schema => Objex.fromResponse(category, schema, objexMetadata.get(schema.key)!));
         objexes.forEach(objex => {
             if (!objex.schema)
                 return;
@@ -35,10 +35,10 @@ export class Category implements Entity {
             category.keyProvider.add(objex.key);
         });
 
-        const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
+        const morphismMetadata = new Map<SignatureResponse, MetadataMorphismResponse>(
             input.metadata.morphisms.map(metadata => [ metadata.signature, metadata ]),
         );
-        const morphisms = input.schema.morphisms.map(schema => Morphism.fromServer(category, schema, morphismMetadata.get(schema.signature)!));
+        const morphisms = input.schema.morphisms.map(schema => Morphism.fromResponse(category, schema, morphismMetadata.get(schema.signature)!));
         morphisms.forEach(morphism => {
             if (!morphism.schema)
                 return;
@@ -50,8 +50,8 @@ export class Category implements Entity {
         return category;
     }
 
-    static fromServerWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): Category {
-        return this.fromServer({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata });
+    static fromResponseWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): Category {
+        return this.fromResponse({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata });
     }
 
     private keyProvider = new UniqueIdProvider<Key>({
@@ -93,22 +93,22 @@ export class Category implements Entity {
     }
 }
 
-export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
+export type SchemaCategoryResponse = SchemaCategoryInfoResponse & {
     schema: SerializedSchema;
     metadata: SerializedMetadata;
 };
 
 export type SerializedSchema = {
-    objexes: SchemaObjexFromServer[];
-    morphisms: SchemaMorphismFromServer[];
+    objexes: SchemaObjexResponse[];
+    morphisms: SchemaMorphismResponse[];
 };
 
 export type SerializedMetadata = {
-    objexes: MetadataObjexFromServer[];
-    morphisms: MetadataMorphismFromServer[];
+    objexes: MetadataObjexResponse[];
+    morphisms: MetadataMorphismResponse[];
 };
 
-export type SchemaCategoryInfoFromServer = {
+export type SchemaCategoryInfoResponse = {
     id: Id;
     label: string;
     version: VersionId;
@@ -123,7 +123,7 @@ export class SchemaCategoryInfo implements Entity {
         public readonly systemVersionId: VersionId,
     ) {}
 
-    static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
+    static fromResponse(input: SchemaCategoryInfoResponse): SchemaCategoryInfo {
         return new SchemaCategoryInfo(
             input.id,
             input.label,

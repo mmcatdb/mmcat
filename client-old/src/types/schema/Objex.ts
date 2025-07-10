@@ -6,7 +6,6 @@ import { isPositionEqual, type Graph } from '../categoryGraph';
 export type SchemaObjexFromServer = {
     key: KeyFromServer;
     ids?: ObjexIdsFromServer;
-    superId: SignatureIdFromServer;
 };
 
 export type MetadataObjexFromServer = {
@@ -16,18 +15,20 @@ export type MetadataObjexFromServer = {
 };
 
 export class SchemaObjex {
+    public readonly superId: SignatureId;
+
     private constructor(
         readonly key: Key,
         readonly ids: ObjexIds | undefined,
-        readonly superId: SignatureId,
         private _isNew: boolean,
-    ) {}
+    ) {
+        this.superId = ids?.generateDefaultSuperId() ?? SignatureId.union([]);
+    }
 
     static fromServer(schema: SchemaObjexFromServer): SchemaObjex {
         const objex = new SchemaObjex(
             Key.fromServer(schema.key),
             schema.ids ? ObjexIds.fromServer(schema.ids) : undefined,
-            SignatureId.fromServer(schema.superId),
             false,
         );
 
@@ -38,7 +39,6 @@ export class SchemaObjex {
         const objex = new SchemaObjex(
             key,
             def.ids,
-            def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             true,
         );
 
@@ -71,7 +71,6 @@ export class SchemaObjex {
         return {
             key: this.key.toServer(),
             ids: this.ids?.toServer(),
-            superId: this.superId.toServer(),
         };
     }
 

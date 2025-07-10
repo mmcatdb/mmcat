@@ -5,13 +5,13 @@ export enum MMOType {
     Morphism = 'morphismMetadata',
 }
 
-export type MMOFromServer<T extends MMOType = MMOType> = {
+export type MMOResponse<T extends MMOType = MMOType> = {
     type: T;
 };
 
 export type MMO<T extends MMOType = MMOType> = {
     readonly type: T;
-    toServer(): MMOFromServer<T>;
+    toServer(): MMOResponse<T>;
     up(category: Category): void;
     down(category: Category): void;
 }

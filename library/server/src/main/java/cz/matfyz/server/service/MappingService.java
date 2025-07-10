@@ -1,9 +1,9 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.entity.evolution.MappingEvolution;
 import cz.matfyz.server.entity.mapping.MappingInit;
-import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.entity.mapping.MappingEntity;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.QueryRepository;
@@ -28,10 +28,10 @@ public class MappingService {
     @Autowired
     private QueryRepository queryRepository;
 
-    public MappingWrapper create(MappingInit init) {
+    public MappingEntity create(MappingInit init) {
         final var category = categoryRepository.find(init.categoryId());
         final var newVersion = category.systemVersion().generateNext();
-        final var mapping = MappingWrapper.createNew(newVersion, init.categoryId(), init.datasourceId(), init.rootObjexKey(), init.primaryKey(), init.kindName(), init.accessPath());
+        final var mapping = MappingEntity.createNew(newVersion, init.categoryId(), init.datasourceId(), init.rootObjexKey(), init.primaryKey(), init.kindName(), init.accessPath());
         // FIXME Add some data to the evolution.
         final var evolution = MappingEvolution.createNew(category.id(), newVersion, mapping.id(), null);
 
@@ -44,7 +44,7 @@ public class MappingService {
     }
 
     // FIXME Define mapping edit ...
-    public void update(MappingWrapper mapping, Object edit) {
+    public void update(MappingEntity mapping, Object edit) {
         final var category = categoryRepository.find(mapping.categoryId);
 
         final var newVersion = category.systemVersion().generateNext();
@@ -60,7 +60,7 @@ public class MappingService {
     }
 
     // TODO Probably should be moved to dedicated service once we have orm.
-    private void propagateEvolution(SchemaCategoryWrapper category, MappingEvolution evolution) {
+    private void propagateEvolution(SchemaCategoryEntity category, MappingEvolution evolution) {
         final var oldVersion = category.systemVersion;
 
         category.systemVersion = evolution.version;

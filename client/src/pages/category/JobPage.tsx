@@ -2,14 +2,14 @@ import { api } from '@/api';
 import { Job, JobState } from '@/types/job';
 import { type Dispatch, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { getJobStateTextStyle } from '@/components/icons/Icons';
-import { cn } from '@/components/utils';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
 import { type SchemaCategoryInfo } from '@/types/schema';
 import { LoadingPage, ReloadPage } from '../errorPages';
+import { twMerge } from 'tailwind-merge';
 
 /** In milliseconds. */
 const REFRESH_INTERVAL_MS = 1000;
@@ -34,7 +34,7 @@ export function JobPage() {
         }
 
         setError(false);
-        const newJob = Job.fromServer(response.data, category);
+        const newJob = Job.fromResponse(response.data, category);
         setJob(newJob);
 
         if (TERMINAL_STATES.includes(newJob.state) && intervalRef.current)
@@ -69,9 +69,7 @@ export function JobPage() {
         <div className='p-4'>
             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
 
-            <div
-                className='border rounded-lg p-4 border-default-300 bg-default-50'
-            >
+            <div className='border rounded-lg p-4 border-default-300 bg-default-50'>
                 <p className='mb-1'>
                     <strong>ID:</strong> {job.id}
                 </p>
@@ -83,12 +81,7 @@ export function JobPage() {
                 </p>
                 <p className='mb-1'>
                     <strong>State:</strong>
-                    <span
-                        className={cn(
-                            'm-2 px-3 py-1 rounded-full font-semibold',
-                            getJobStateTextStyle(job.state),
-                        )}
-                    >
+                    <span className={twMerge('m-2 px-3 py-1 rounded-full font-semibold', getJobStateTextStyle(job.state))}>
                         {job.state}
                     </span>
                 </p>
@@ -121,7 +114,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
             return;
         }
 
-        setJob(Job.fromServer(result.data, category));
+        setJob(Job.fromResponse(result.data, category));
     }
 
     async function handleDisableJob() {
@@ -131,7 +124,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
             return;
         }
 
-        setJob(Job.fromServer(result.data, category));
+        setJob(Job.fromResponse(result.data, category));
     }
 
     async function handleRestartJob() {
@@ -141,7 +134,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
             return;
         }
 
-        const newJob = Job.fromServer(result.data, category);
+        const newJob = Job.fromResponse(result.data, category);
         navigate(routes.category.job.resolve({ categoryId: category.id, jobId: newJob.id }));
     }
 

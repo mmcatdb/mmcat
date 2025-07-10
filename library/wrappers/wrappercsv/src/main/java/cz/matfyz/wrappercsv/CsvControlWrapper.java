@@ -44,7 +44,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
      * Executes a collection of statements. This method is currently not implemented.
      *
      * @param statement a collection of {@link AbstractStatement} statements to be executed.
-     * @throws ExecuteException always thrown as this method is not implemented.
      */
     @Override public void execute(Collection<AbstractStatement> statement) throws ExecuteException {
         throw new UnsupportedOperationException("CsvControlWrapper.execute not implemented.");
@@ -54,7 +53,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
      * Executes a script from the specified file path. This method is currently not implemented.
      *
      * @param path the file path to the script to be executed.
-     * @throws ExecuteException always thrown as this method is not implemented.
      */
     @Override public void execute(Path path) throws ExecuteException {
         throw new UnsupportedOperationException("CsvControlWrapper.execute not implemented.");
@@ -62,8 +60,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Returns a Data Definition Language (DDL) wrapper for CSV.
-     *
-     * @return an instance of {@link CsvDDLWrapper}.
      */
     @Override public CsvDDLWrapper getDDLWrapper() {
         return new CsvDDLWrapper();
@@ -71,8 +67,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Returns an Integrity Constraint (IC) wrapper. This implementation returns an empty wrapper.
-     *
-     * @return an instance of {@link AbstractICWrapper} that is empty.
      */
     @Override public AbstractICWrapper getICWrapper() {
         return AbstractICWrapper.createEmpty();
@@ -80,8 +74,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Returns a Data Manipulation Language (DML) wrapper for CSV.
-     *
-     * @return an instance of {@link CsvDMLWrapper}.
      */
     @Override public CsvDMLWrapper getDMLWrapper() {
         return new CsvDMLWrapper();
@@ -89,8 +81,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Returns a pull wrapper for CSV which provides functionalities to pull data from the source.
-     *
-     * @return an instance of {@link CsvPullWrapper}.
      */
     @Override public CsvPullWrapper getPullWrapper() {
         return new CsvPullWrapper(provider);
@@ -98,8 +88,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Returns a path wrapper for CSV that handles file path operations.
-     *
-     * @return an instance of {@link CsvPathWrapper}.
      */
     @Override public CsvPathWrapper getPathWrapper() {
         return new CsvPathWrapper();
@@ -107,9 +95,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Returns a query wrapper for executing queries. This method is currently not implemented.
-     *
-     * @return nothing, as this method always throws an exception.
-     * @throws UnsupportedOperationException always thrown as this method is not implemented.
      */
     @Override public AbstractQueryWrapper getQueryWrapper() {
         throw new UnsupportedOperationException("CsvControlWrapper.getQueryWrapper not implemented.");
@@ -117,9 +102,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Returns an inference wrapper for CSV that provides functionalities for data inference using Spark.
-     *
-     * @param sparkSettings the settings for Spark to be used in the inference process.
-     * @return an instance of {@link CsvInferenceWrapper}.
      */
     @Override public CsvInferenceWrapper getInferenceWrapper() {
         return new CsvInferenceWrapper(provider, getSparkSettings());

@@ -23,7 +23,7 @@ function defineColumn(signature: Signature, node: Node): Column {
     };
 }
 
-const showTechnicalIds = computed(() => !!props.objex.rows.find(row => row.technicalIds.size > 0));
+const showTechnicalIds = computed(() => !!props.objex.rows.find(row => row.technicalId !== undefined));
 const columns = props.objex.schema.superId.signatures.map(signature => defineColumn(signature, props.node));
 </script>
 
@@ -42,13 +42,13 @@ const columns = props.objex.schema.superId.signatures.map(signature => defineCol
                 :key="rowIndex"
             >
                 <td v-if="showTechnicalIds">
-                    {{ row.technicalIdsString }}
+                    {{ row.technicalId }}
                 </td>
                 <td
                     v-for="(column, columnIndex) in columns"
                     :key="columnIndex"
                 >
-                    {{ row.superId.tuples.get(column.signature) }}
+                    {{ row.values.tuples.get(column.signature) }}
                 </td>
             </tr>
         </table>

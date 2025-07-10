@@ -1,6 +1,6 @@
-import type { DatasourceConfiguration } from '../datasource';
 import type { Signature } from '../identifiers';
 import { Cardinality, type Objex, type Max, type Min, type Morphism } from '.';
+import { type DatasourceSpecs } from '../Datasource';
 
 /**
  * Nodes and edges correspond to the objexes and morphisms from the category.
@@ -308,10 +308,10 @@ class PathMarker {
 
 export type FilterFunction = (segment: PathSegment) => boolean;
 
-export function createDefaultFilter(configuration: DatasourceConfiguration): FilterFunction {
+export function createDefaultFilter(specs: DatasourceSpecs): FilterFunction {
     return (segment: PathSegment) => segment.prevSegment
-        ? (segment.fullPath.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed)
-        : (segment.fullPath.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed);
+        ? (segment.fullPath.max === Cardinality.One ? specs.isPropertyToOneAllowed : specs.isPropertyToManyAllowed)
+        : (segment.fullPath.max === Cardinality.One ? specs.isInliningToOneAllowed : specs.isInliningToManyAllowed);
 }
 
 export function computePathToNode(pathNode: PathNode): { nodeIds: string[], edgeIds: string[] } {

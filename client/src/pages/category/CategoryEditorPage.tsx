@@ -1,19 +1,16 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/api';
-import { Category, isPositionEqual } from '@/types/schema';
-import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
-import { type Params, useLoaderData } from 'react-router-dom';
-import { EditCategoryGraphDisplay } from '@/components/category/EditCategoryGraphDisplay';
+import { isPositionEqual } from '@/types/schema';
+import { type Params } from 'react-router-dom';
+import { CategoryEditorGraph } from '@/components/category/CategoryEditorGraph';
 import { FaTrash } from 'react-icons/fa6';
-import { createInitialState, type EditCategoryDispatch, editCategoryReducer, type EditCategoryState } from '@/components/category/editCategoryReducer';
-import { Evocat } from '@/types/evocat/Evocat';
+import { type CategoryEditorDispatch, type CategoryEditorState, useCategoryEditor } from '@/components/category/useCategoryEditor';
 import { LeftPanelCategoryEditor } from '@/components/category/LeftPanelCategoryEditor';
 import { RightPanelCategoryEditor } from '@/components/category/RightPanelCategoryEditor';
-import { cn } from '@/components/utils';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
-import { useDeleteHandlers } from '@/components/category/useDeleteHandlers';
 import { categoryToGraph } from '@/components/category/categoryGraph';
 import { SaveProvider, SaveButton } from '@/components/category/SaveContext';
+import { twJoin } from 'tailwind-merge';
 
 type EditorSidebarState = {
     left: boolean;
@@ -21,19 +18,7 @@ type EditorSidebarState = {
 };
 
 export function CategoryEditorPage() {
-    const loaderData = useLoaderData() as Awaited<ReturnType<typeof categoryEditorLoader>>;
-
-    // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
-    const evocatRef = useRef<Evocat>();
-    if (!evocatRef.current) {
-        const updates = loaderData.updates.map(SchemaUpdate.fromServer);
-        const category = Category.fromServer(loaderData.category);
-
-        evocatRef.current = new Evocat(category, updates);
-    }
-
-    const [ state, dispatch ] = useReducer(editCategoryReducer, evocatRef.current, createInitialState);
-    useDeleteHandlers(state, dispatch);
+    const { state, dispatch } = useCategoryEditor();
 
     const [ sidebarState, setSidebarState ] = useState<EditorSidebarState>({
         left: true,
@@ -84,7 +69,7 @@ export function CategoryEditorPage() {
                             }}
                             disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
                             title='Delete selected elements (Delete)'
-                            className={`p-1 transition rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-danger-300 ${
+                            className={`p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300 ${
                                 state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
                                     ? 'text-danger-400 opacity-50 cursor-not-allowed'
                                     : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer'
@@ -110,19 +95,19 @@ export function CategoryEditorPage() {
 
                 </div>
 
-                <div className='relative flex flex-grow'>
+                <div className='relative flex grow'>
                     {/* Left Sidebar */}
-                    <div className={cn(`transition-all duration-300 ${sidebarState.left ? 'w-56' : 'w-0'} overflow-hidden bg-default-50`)}>
+                    <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.left ? 'w-56' : 'w-0')}>
                         {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
                     </div>
 
                     {/* Main Canvas */}
-                    <div className='flex-grow relative'>
-                        <EditCategoryGraphDisplay state={state} dispatch={dispatch} className={cn('w-full h-full', sidebarState.left)} />
+                    <div className='grow relative'>
+                        <CategoryEditorGraph state={state} dispatch={dispatch} className='w-full h-full' />
                     </div>
 
                     {/* Right Sidebar */}
-                    <div className={`transition-all duration-300 ${sidebarState.right ? 'w-60' : 'w-0'} overflow-hidden bg-default-50`}>
+                    <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.right ? 'w-60' : 'w-0')}>
                         {sidebarState.right && <RightPanelCategoryEditor state={state} dispatch={dispatch} />}
                     </div>
                 </div>
@@ -155,7 +140,7 @@ async function categoryEditorLoader({ params: { categoryId } }: { params: Params
     };
 }
 
-function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategoryDispatch) {
+function deleteSelectedElements(state: CategoryEditorState, dispatch: CategoryEditorDispatch) {
     // Delete all selected morphisms
     for (const edgeId of state.selection.edgeIds) {
         const morphism = state.graph.edges.get(edgeId);
@@ -178,7 +163,7 @@ function deleteSelectedElements(state: EditCategoryState, dispatch: EditCategory
 /*
  * Function to detect unsaved changes: node movement, schema updates
  */
-export function detectUnsavedChanges(state: EditCategoryState) {
+export function detectUnsavedChanges(state: CategoryEditorState) {
     const evocat = state.evocat;
     const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();
     const hasMovedNodes = evocat.category.getObjexes().some(objex =>

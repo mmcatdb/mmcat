@@ -5,7 +5,7 @@ import { api } from '@/api';
 import { Category } from '@/types/schema';
 import { onSuccess } from '@/types/api/result';
 import { detectUnsavedChanges } from '@/pages/category/CategoryEditorPage';
-import { type EditCategoryState } from './editCategoryReducer';
+import { type CategoryEditorState } from './useCategoryEditor';
 
 type SaveState = {
     /** Whether there are unsaved changes */
@@ -21,7 +21,7 @@ const SaveContext = createContext<SaveState | undefined>(undefined);
 type SaveProviderProps = {
     children: React.ReactNode;
     /** Category state to monitor for unsaved changes */
-    categoryState?: EditCategoryState;
+    categoryState?: CategoryEditorState;
 };
 
 /**
@@ -37,7 +37,7 @@ export function SaveProvider({ children, categoryState }: SaveProviderProps) {
             let unsaved = false;
 
             // Category changes
-            if (categoryState) 
+            if (categoryState)
                 unsaved = unsaved || detectUnsavedChanges(categoryState);
 
             setHasUnsavedChanges(unsaved);
@@ -50,7 +50,7 @@ export function SaveProvider({ children, categoryState }: SaveProviderProps) {
 
     // Unified save handler
     async function handleSave() {
-        if (isSaving) 
+        if (isSaving)
             return;
 
         setIsSaving(true);
@@ -67,7 +67,7 @@ export function SaveProvider({ children, categoryState }: SaveProviderProps) {
                             typeof response.error === 'string' ? response.error : 'Failed to save category',
                         );
                     }
-                    return onSuccess(response, fromServer => Category.fromServer(fromServer));
+                    return onSuccess(response, response => Category.fromResponse(response));
                 });
             }
 
@@ -92,9 +92,9 @@ export function SaveProvider({ children, categoryState }: SaveProviderProps) {
 
 export function useSave() {
     const context = useContext(SaveContext);
-    if (!context) 
+    if (!context)
         throw new Error('useSave must be used within a SaveProvider');
-  
+
     return context;
 }
 
@@ -107,7 +107,7 @@ export function SaveButton() {
             id='save-button'
             className='flex items-center gap-1 text-default-600 hover:text-default-800 cursor-pointer relative'
             onClick={() => {
-                void handleSave(); 
+                void handleSave();
             }}
             title='Save Changes (Ctrl+S)'
         >

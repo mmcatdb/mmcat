@@ -4,8 +4,9 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.core.instance.InstanceMorphism;
 import cz.matfyz.core.instance.InstanceObjex;
-import cz.matfyz.core.instance.SuperIdWithValues;
+import cz.matfyz.core.instance.SuperIdValues;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
@@ -14,6 +15,7 @@ import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.record.SimpleRecord;
 import cz.matfyz.core.schema.SchemaObjex;
+import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueIdGenerator;
 
@@ -25,6 +27,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+// FIXME This is still not right.
+// Now that there is only one technical id per row, it might happen that a row is replaced (in the domain) while we still have a reference to the now non-existing row (e.g., on the stack above).
+// A working solution might be to first create all the rows and then merge them all at once.
+// Merging this way might be even quite efficient - we could first merge all rows, then all mappings, then propagate the references, and then continue with a new iteration.
 
 public class MTCAlgorithm {
 
@@ -73,21 +80,21 @@ public class MTCAlgorithm {
     private Deque<StackTriple> createStackWithObjex(SchemaObjex objex, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         final InstanceObjex instanceObjex = instance.getObjex(objex);
         // If the root objex has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root objex always is).
-        final SuperIdWithValues superId = objex.ids().isGenerated()
-            ? SuperIdWithValues.fromEmptySignature(idGenerator.next())
-            : fetchSuperId(objex.superId(), rootRecord);
+        final SuperIdValues values = objex.ids().isGenerated()
+            ? SuperIdValues.fromEmptySignature(idGenerator.next())
+            : fetchSuperIdValues(objex.superId(), rootRecord);
 
         final Deque<StackTriple> masterStack = new ArrayDeque<>();
 
-        final DomainRow row = instanceObjex.getOrCreateRow(superId);
+        final DomainRow row = addRow(instanceObjex, values);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
 
         return masterStack;
     }
 
     // Fetch id-with-values for given root record.
-    private static SuperIdWithValues fetchSuperId(SignatureId superId, RootRecord rootRecord) {
-        final var builder = new SuperIdWithValues.Builder();
+    private static SuperIdValues fetchSuperIdValues(SignatureId superId, RootRecord rootRecord) {
+        final var builder = new SuperIdValues.Builder();
 
         for (final Signature signature : superId.signatures()) {
             for (final SimpleRecord<?> simpleRecord : rootRecord.findSimpleRecords(signature))
@@ -100,18 +107,39 @@ public class MTCAlgorithm {
     private void processTopOfStack(Deque<StackTriple> masterStack) {
         final StackTriple triple = masterStack.pop();
         LOGGER.debug("Process top of stack:\n{}", triple);
-        final var superIds = SuperIdsFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
+        final var fetchedList = SuperIdValuesFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
         final InstanceObjex childInstance = instance.getObjex(triple.parentToChild.to());
 
-        for (final var superId : superIds) {
-            DomainRow childRow = childInstance.getOrCreateRow(superId.superId());
+        for (final var fetched : fetchedList) {
+            DomainRow childRow = addRow(childInstance, fetched.superId());
             childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
 
-            //childInstance.merge(childRow);
-
-            addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, superId.childRecord());
+            addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, fetched.childRecord());
         }
+    }
+
+    private DomainRow addRow(InstanceObjex objex, SuperIdValues values) {
+        if (values.tryFindFirstId(objex.schema.ids()) == null)
+            // The superId doesn't contain any id, we have to create a technical one.
+            return objex.createRowWithTechnicalId(values);
+
+        final var currentRow = objex.tryFindRow(values);
+        if (currentRow != null)
+            // The row already exists, so we just add the values to it.
+            return addValuesToRow(objex, currentRow, values);
+
+        final var newRow = objex.createRowWithValueId(values);
+        return objex.mergeReferences(newRow);
+    }
+
+    public DomainRow addValuesToRow(InstanceObjex objex, DomainRow row, SuperIdValues values) {
+        final boolean isNew = values.signatures().stream().anyMatch(signature -> !row.hasSignature(signature));
+        if (!isNew)
+            // If the row already contains all the values, we can simply return it.
+            return row;
+
+        return objex.mergeValues(row, values);
     }
 
     private DomainRow addRelation(SchemaPath path, DomainRow parentRow, DomainRow childRow, ComplexRecord childRecord) {
@@ -122,15 +150,15 @@ public class MTCAlgorithm {
         var currentToChild = path.signature();
 
         for (final var edge : path.edges()) {
-            final var instanceObjex = edge.to();
+            final var toObjex = edge.to();
 
             parentToCurrent = parentToCurrent.concatenate(currentToChild.getFirst());
             currentToChild = currentToChild.cutFirst();
 
             // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
-            //if (!instanceObjex.equals(morphism.cod())) {
-            final var superId = fetchSuperIdForTechnicalRow(instanceObjex, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
-            currentDomainRow = InstanceObjex.getOrCreateRowWithEdge(instance, superId, currentDomainRow, edge);
+            //if (!toObjex.equals(morphism.cod())) {
+            final var values = fetchSuperIdForRelation(toObjex, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
+            currentDomainRow = addEdge(edge, currentDomainRow, values);
             //}
             /*
             else {
@@ -147,8 +175,38 @@ public class MTCAlgorithm {
         //return merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
     }
 
-    private SuperIdWithValues fetchSuperIdForTechnicalRow(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
-        final var builder = new SuperIdWithValues.Builder();
+    private DomainRow addEdge(SchemaEdge edgeToObjex, DomainRow fromRow, SuperIdValues values) {
+        final var instanceObjex = instance.getObjex(edgeToObjex.to());
+
+        // First, we try to find it by the connection.
+        if (edgeToObjex.direction()) {
+            // The edge doesn't go against the morphism so there can be at most one mapping.
+            final var mapping = fromRow.getMappingFrom(edgeToObjex.signature());
+            if (mapping != null)
+                return addValuesToRow(instanceObjex, mapping.codomainRow(), values);
+        }
+
+        // Then we try to find the row by the superId values.
+        final var currentRow = instanceObjex.tryFindRow(values);
+        if (currentRow != null) {
+            if (!fromRow.hasMappingToOther(currentRow, edgeToObjex)) {
+                // The connection does not exist yet, so we create it and then merge it.
+                // TODO optimization - merging with the knowledge of the connection, so we would not have create it, then delete it and then create it for the new row.
+                InstanceMorphism.createMappingForEdge(instance, edgeToObjex, fromRow, currentRow);
+            }
+
+            return addValuesToRow(instanceObjex, currentRow, values);
+        }
+
+        // No such row exists yet, so we have to create it. It also don't have to be merged so we are not doing that.
+        final var newRow = instanceObjex.createRow(values);
+        InstanceMorphism.createMappingForEdge(instance, edgeToObjex, fromRow, newRow);
+
+        return instanceObjex.mergeReferences(newRow);
+    }
+
+    private SuperIdValues fetchSuperIdForRelation(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
+        final var builder = new SuperIdValues.Builder();
 
         for (final var signature : objex.superId().signatures()) {
             // The value is in either the first row ...

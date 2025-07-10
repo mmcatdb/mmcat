@@ -1,4 +1,4 @@
-import { Button, Input, Select, SelectItem } from '@nextui-org/react';
+import { Button, Input, Select, SelectItem } from '@heroui/react';
 import { useEffect, useState } from 'react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { ErrorPage } from '@/pages/errorPages';
 import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES } from '@/types/action';
-import { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { type LogicalModel, logicalModelsFromServer } from '@/types/mapping';
+import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
 
 export function AddActionPage() {
     const [ label, setLabel ] = useState('');
@@ -26,22 +26,20 @@ export function AddActionPage() {
 
     useEffect(() => {
         async function fetchDatasourcesAndMappings() {
-            const dsResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
+            const datasourcesResponse = await api.datasources.getAllDatasources({}, { categoryId: category.id });
             const mappingsResponse = await api.mappings.getAllMappingsInCategory({}, { categoryId: category.id });
 
-            if (!dsResponse.status ||  !mappingsResponse.status) {
+            if (!datasourcesResponse.status ||  !mappingsResponse.status) {
                 toast.error('Error fetching data from server.');
                 setError(true);
                 return;
             }
-            const datasourcesFromServer = dsResponse.data;
-            const mappingsFromServer = mappingsResponse.data;
 
-            setLogicalModels(logicalModelsFromServer(datasourcesFromServer, mappingsFromServer));
-            setDatasources(datasourcesFromServer.map(Datasource.fromServer));
+            setLogicalModels(logicalModelsFromResponse(datasourcesResponse.data, mappingsResponse.data));
+            setDatasources(datasourcesResponse.data.map(Datasource.fromResponse));
         }
 
-        fetchDatasourcesAndMappings();
+        void fetchDatasourcesAndMappings();
     }, [ category.id ]);
 
     function addStep() {
@@ -74,11 +72,11 @@ export function AddActionPage() {
 
         // Validate that each step has at least one datasource selected
         const hasInvalidSteps = steps.some(step => {
-            if (step.type === ActionType.ModelToCategory || step.type === ActionType.CategoryToModel) 
+            if (step.type === ActionType.ModelToCategory || step.type === ActionType.CategoryToModel)
                 return !step.datasourceId;
-            else if (step.type === ActionType.RSDToCategory) 
+            else if (step.type === ActionType.RSDToCategory)
                 return step.datasourceIds.length === 0;
-            
+
             return true;
         });
 
@@ -97,7 +95,7 @@ export function AddActionPage() {
                 payloads: steps,
             };
             const response = await api.actions.createAction({}, newAction);
-            if (!response.status) 
+            if (!response.status)
                 throw new Error('Failed to create action');
 
             toast.success('Action created successfully.');
@@ -161,7 +159,7 @@ export function AddActionPage() {
                 <Button
                     color='primary'
                     onPress={() => {
-                        void handleSubmit(); 
+                        void handleSubmit();
                     }}
                     isLoading={loading}
                 >
@@ -189,7 +187,7 @@ function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) 
                 setActionType(selectedType);
             }}
         >
-            {item => <SelectItem key={item.value}>{item.label}</SelectItem>}
+            {item => <SelectItem key={item.type}>{item.label}</SelectItem>}
         </Select>
     );
 }
@@ -282,7 +280,7 @@ function StepForm({ step, type, datasources, logicalModels, updateStep, removeSt
         rsdToCategoryStep.type = type;
 
         return (
-            <div className='mb-4 p-2 border rounded flex justify-between items-center'>
+            <div className='mb-4 p-2 border rounded-sm flex justify-between items-center'>
                 <Select
                     label='Datasources'
                     selectedKeys={new Set(rsdToCategoryStep.datasourceIds)}

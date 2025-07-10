@@ -23,6 +23,10 @@ public class InstanceCategory {
         this.morphisms = morphisms;
     }
 
+    public SchemaCategory schema() {
+        return schema;
+    }
+
     public InstanceObjex getObjex(Key key) {
         return objexes.get(key);
     }
@@ -72,12 +76,12 @@ public class InstanceCategory {
         if (!signature.isComposite())
             return;
 
-        final var baseSignatures = signature.toBases();
+        final var bases = signature.toBases();
         var signatureToTarget = Signature.createEmpty();
 
-        for (int i = 0; i < baseSignatures.size() - 1; i++) {
-            final var currentBase = baseSignatures.get(i);
-            final var signatureInTarget = Signature.concatenate(baseSignatures.subList(i + 1, baseSignatures.size()));
+        for (int i = 0; i < bases.size() - 1; i++) {
+            final var currentBase = bases.get(i);
+            final var signatureInTarget = Signature.concatenate(bases.subList(i + 1, bases.size()));
             signatureToTarget = signatureToTarget.concatenate(currentBase);
 
             final var pathFromTarget = schema.getPath(signatureToTarget.dual());
@@ -85,7 +89,7 @@ public class InstanceCategory {
             if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;
 
-            getObjex(currentTarget).addReferenceToRow(signatureInTarget, pathFromTarget, signature);
+            getObjex(currentTarget).addReference(signatureInTarget, pathFromTarget, signature);
         }
     }
 
@@ -121,6 +125,18 @@ public class InstanceCategory {
         return object instanceof InstanceCategory category
             && objexes.equals(category.objexes)
             && morphisms.equals(category.morphisms);
+    }
+
+    public abstract static class Editor {
+
+        protected static Map<Key, InstanceObjex> getObjexes(InstanceCategory category) {
+            return category.objexes;
+        }
+
+        protected static Map<Signature, InstanceMorphism> getMorphisms(InstanceCategory category) {
+            return category.morphisms;
+        }
+
     }
 
 }

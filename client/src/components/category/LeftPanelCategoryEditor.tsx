@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Input } from '@nextui-org/react';
-import { LeftPanelMode, type EditCategoryDispatch, type EditCategoryState } from './editCategoryReducer';
-import { cn } from '../utils';
+import { Button, Input } from '@heroui/react';
+import { LeftPanelMode, type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { toPosition } from '@/types/utils/common';
 import { Cardinality } from '@/types/schema/Morphism';
 import { Key } from '@/types/identifiers';
@@ -9,12 +8,13 @@ import { categoryToGraph } from './categoryGraph';
 import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
+import { twMerge } from 'tailwind-merge';
 
 type StateDispatchProps = {
     /** The current state of the category editor. */
-    state: EditCategoryState;
+    state: CategoryEditorState;
     /** The dispatch function for updating the editor state. */
-    dispatch: EditCategoryDispatch;
+    dispatch: CategoryEditorDispatch;
 };
 
 type LeftPanelEditorProps = StateDispatchProps & {
@@ -53,7 +53,7 @@ export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPane
     }, [ state.leftPanelMode, dispatch ]);
 
     return (
-        <div className={cn('p-3 flex flex-col gap-3', className)}>
+        <div className={twMerge('p-3 flex flex-col gap-3', className)}>
             <Component state={state} dispatch={dispatch} />
         </div>
     );
@@ -100,7 +100,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             <div className='mt-4 animate-fade-in'>
                 <div className='flex flex-col gap-2 p-3 bg-warning-100 rounded-lg border border-warning-300'>
                     <div className='flex items-center gap-2 text-warning-800'>
-                        <ExclamationTriangleIcon className='h-4 w-4 flex-shrink-0' />
+                        <ExclamationTriangleIcon className='h-4 w-4 shrink-0' />
                         <span className='text-sm font-medium'>You have unsaved changes.</span>
                     </div>
                     <Button
@@ -111,7 +111,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
                         onClick={() => handleSave()}
                         isLoading={isSaving}
                         startContent={isSaving ? null : <FaSave className='h-3.5 w-3.5' />}
-                        className='shadow-sm hover:shadow-md transition-shadow'
+                        className='shadow-xs hover:shadow-md transition-shadow'
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
                     </Button>
@@ -220,7 +220,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
 /**
  * Hook to extract and validate selected nodes for morphism creation.
  */
-function useMorphismSelection(state: EditCategoryState) {
+function useMorphismSelection(state: CategoryEditorState) {
     const selectedNodes = Array.from(state.selection.nodeIds);
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
     const domainNode = state.graph.nodes.get(selectedNodes[0]);
@@ -231,7 +231,7 @@ function useMorphismSelection(state: EditCategoryState) {
 /**
  * Resets the left panel to its default mode.
  */
-function resetToDefaultMode(dispatch: EditCategoryDispatch) {
+function resetToDefaultMode(dispatch: CategoryEditorDispatch) {
     dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.default });
 }
 
@@ -279,21 +279,14 @@ export function CreateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         <div>
             <p className='pb-2'>
                 Domain object:{' '}
-                <span
-                    className={cn('font-semibold', !domainNode && 'font-bold text-danger-500')}
-                >
+                <span className={domainNode ? 'font-semibold' : 'font-bold text-danger-500'}>
                     {domainNode?.metadata.label ?? 'Select first node'}
                 </span>
             </p>
 
             <p className='pb-2'>
                 Codomain object:{' '}
-                <span
-                    className={cn(
-                        'font-semibold',
-                        domainNode && !codomainNode && 'font-bold text-danger-500',
-                    )}
-                >
+                <span className={(!domainNode || codomainNode) ? 'font-semibold' : 'font-bold text-danger-500'}>
                     {codomainNode?.metadata.label ?? (domainNode ? 'Select second node' : 'Select first node first')}
                 </span>
             </p>

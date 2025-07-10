@@ -4,7 +4,7 @@ import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.entity.mapping.MappingEntity;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
@@ -22,7 +22,7 @@ public class MappingRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    private static MappingWrapper fromResultSet(ResultSet resultSet) throws SQLException, JsonProcessingException {
+    private static MappingEntity fromResultSet(ResultSet resultSet) throws SQLException, JsonProcessingException {
         final Id id = getId(resultSet, "id");
         final Version version = Version.fromString(resultSet.getString("version"));
         final Version lastValid = Version.fromString(resultSet.getString("last_valid"));
@@ -30,10 +30,10 @@ public class MappingRepository {
         final Id datasourceId = getId(resultSet, "datasource_id");
         final String jsonValue = resultSet.getString("json_value");
 
-        return MappingWrapper.fromJsonValue(id, version, lastValid, categoryId, datasourceId, jsonValue);
+        return MappingEntity.fromJsonValue(id, version, lastValid, categoryId, datasourceId, jsonValue);
     }
 
-    public MappingWrapper find(Id id) {
+    public MappingEntity find(Id id) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
@@ -54,7 +54,7 @@ public class MappingRepository {
         }, "Mapping", id);
     }
 
-    public List<MappingWrapper> findAll() {
+    public List<MappingEntity> findAll() {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
@@ -74,11 +74,11 @@ public class MappingRepository {
         });
     }
 
-    public List<MappingWrapper> findAllInCategory(Id categoryId) {
+    public List<MappingEntity> findAllInCategory(Id categoryId) {
         return findAllInCategory(categoryId, null);
     }
 
-    public List<MappingWrapper> findAllInCategory(Id categoryId, @Nullable Id datasourceId) {
+    public List<MappingEntity> findAllInCategory(Id categoryId, @Nullable Id datasourceId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
@@ -103,7 +103,7 @@ public class MappingRepository {
         });
     }
 
-    public void save(MappingWrapper wrapper) {
+    public void save(MappingEntity entity) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO mapping (id, version, last_valid, category_id, datasource_id, json_value)
@@ -113,12 +113,12 @@ public class MappingRepository {
                     last_valid = EXCLUDED.last_valid,
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, wrapper.id());
-            statement.setString(2, wrapper.version().toString());
-            statement.setString(3, wrapper.lastValid().toString());
-            setId(statement, 4, wrapper.categoryId);
-            setId(statement, 5, wrapper.datasourceId);
-            statement.setString(6, wrapper.toJsonValue());
+            setId(statement, 1, entity.id());
+            statement.setString(2, entity.version().toString());
+            statement.setString(3, entity.lastValid().toString());
+            setId(statement, 4, entity.categoryId);
+            setId(statement, 5, entity.datasourceId);
+            statement.setString(6, entity.toJsonValue());
             executeChecked(statement);
         });
     }

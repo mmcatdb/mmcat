@@ -1,8 +1,8 @@
-import { type JobPayload, jobPayloadFromServer, type JobPayloadFromServer, type JobPayloadInit } from './action';
+import { type JobPayload, jobPayloadFromResponse, type JobPayloadResponse, type JobPayloadInit } from './action';
 import type { Entity, Id } from './id';
 import type { SchemaCategoryInfo } from './schema';
 
-type JobInfoFromServer = {
+type JobInfoResponse = {
     id: Id;
     label: string;
     createdAt: string;
@@ -19,23 +19,23 @@ export class JobInfo {
         public readonly state: JobState,
     ) {}
 
-    static fromServer(input: JobInfoFromServer): JobInfo {
+    static fromResponse(input: JobInfoResponse): JobInfo {
         return new JobInfo(
             input.id,
             input.label,
             new Date(input.createdAt),
-            jobPayloadFromServer(input.payload),
+            jobPayloadFromResponse(input.payload),
             input.state,
         );
     }
 }
 
-export type RunFromServer = {
+export type RunResponse = {
     id: Id;
     categoryId: Id;
     actionId?: Id;
     label: string;
-    jobs: JobInfoFromServer[];
+    jobs: JobInfoResponse[];
 };
 
 export class Run implements Entity {
@@ -47,21 +47,21 @@ export class Run implements Entity {
         public readonly jobs: JobInfo[],
     ) {}
 
-    static fromServer(input: RunFromServer): Run {
+    static fromResponse(input: RunResponse): Run {
         return new Run(
             input.id,
             input.categoryId,
             input.actionId,
             input.label,
-            input.jobs.map(JobInfo.fromServer),
+            input.jobs.map(JobInfo.fromResponse),
         );
     }
 }
 
-export type JobFromServer = Omit<JobInfoFromServer, 'payload'> & {
+export type JobResponse = Omit<JobInfoResponse, 'payload'> & {
     index: number;
-    payload: JobPayloadFromServer;
-    data?: JobDataFromServer;
+    payload: JobPayloadResponse;
+    data?: JobDataResponse;
     error?: JobError;
     runId: Id;
     categoryId: Id;
@@ -85,14 +85,14 @@ export class Job implements Entity {
         public readonly actionId: Id | undefined,
     ) {}
 
-    static fromServer(input: JobFromServer, info: SchemaCategoryInfo): Job {
+    static fromResponse(input: JobResponse, info: SchemaCategoryInfo): Job {
         return new Job(
             input.id,
             input.index,
             input.label,
             input.state,
-            jobPayloadFromServer(input.payload),
-            input.data && jobDataFromServer(input.data, info),
+            jobPayloadFromResponse(input.payload),
+            input.data && jobDataFromResponse(input.data, info),
             input.error,
             new Date(input.createdAt),
             input.runId,
@@ -126,11 +126,12 @@ export enum JobDataType {
     Inference = 'Inference',
 }
 
-type JobDataFromServer = ModelJobData;
+type JobDataResponse = ModelJobData;
 
 type JobData = ModelJobData;
 
-function jobDataFromServer(input: JobDataFromServer, info: SchemaCategoryInfo): JobData {
+function jobDataFromResponse(input: JobDataResponse, info: SchemaCategoryInfo): JobData {
+    console.log('Job data from server', info);
     switch (input.type) {
     case JobDataType.Model:
         return input;
@@ -142,7 +143,7 @@ export type ModelJobData = {
     value: string;
 };
 
-export type SessionFromServer = {
+export type SessionResponse = {
     id: Id;
     categoryId: Id;
     createdAt: string;
@@ -155,7 +156,7 @@ export class Session implements Entity {
         public readonly createdAt: Date,
     ) {}
 
-    static fromServer(input: SessionFromServer): Session {
+    static fromResponse(input: SessionResponse): Session {
         return new Session(
             input.id,
             input.categoryId,

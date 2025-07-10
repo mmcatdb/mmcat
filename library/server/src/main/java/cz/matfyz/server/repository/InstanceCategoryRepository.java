@@ -3,7 +3,7 @@ package cz.matfyz.server.repository;
 import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.InstanceCategoryWrapper;
+import cz.matfyz.server.entity.InstanceCategoryEntity;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -16,7 +16,7 @@ public class InstanceCategoryRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public @Nullable InstanceCategoryWrapper find(Id sessionId) {
+    public @Nullable InstanceCategoryEntity find(Id sessionId) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
@@ -36,12 +36,12 @@ public class InstanceCategoryRepository {
                 }
 
                 final var schemaCategoryId = getId(resultSet, "category_id");
-                output.set(InstanceCategoryWrapper.fromJsonValue(schemaCategoryId, sessionId, instanceData));
+                output.set(InstanceCategoryEntity.fromJsonValue(schemaCategoryId, sessionId, instanceData));
             }
         });
     }
 
-    public void save(InstanceCategoryWrapper wrapper) {
+    public void save(InstanceCategoryEntity entity) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 UPDATE session
@@ -49,8 +49,8 @@ public class InstanceCategoryRepository {
                 WHERE id = ?;
                 """
             );
-            statement.setString(1, wrapper.toJsonValue());
-            setId(statement, 2, wrapper.sessionId());
+            statement.setString(1, entity.toJsonValue());
+            setId(statement, 2, entity.sessionId());
             executeChecked(statement);
         });
     }

@@ -1,10 +1,9 @@
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@nextui-org/react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button, type SortDescriptor } from '@heroui/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { SchemaCategoryInfo } from '@/types/schema';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';
-import { type SortDescriptor } from '@react-types/shared';
 import { useMemo, useState } from 'react';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
@@ -34,10 +33,10 @@ export function SchemaCategoriesTable({ categories, onDeleteCategory }: SchemaCa
 }
 
 type CategoriesTableProps = {
-  categories: SchemaCategoryInfo[];
-  onDeleteCategory: (id: Id) => void;
-  sortDescriptor: SortDescriptor;
-  onSortChange: (sortDescriptor: SortDescriptor) => void;
+    categories: SchemaCategoryInfo[];
+    onDeleteCategory: (id: Id) => void;
+    sortDescriptor: SortDescriptor;
+    onSortChange: (sortDescriptor: SortDescriptor) => void;
 };
 
 function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortChange }: CategoriesTableProps) {
@@ -96,7 +95,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent={'No rows to display.'}>
+            <TableBody emptyContent='No rows to display.'>
                 {categories.map(category => (
                     <TableRow
                         key={category.id}

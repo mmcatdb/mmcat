@@ -1,10 +1,10 @@
-import { MetadataObjex, type MetadataObjexFromServer, type Category } from '@/types/schema';
-import { type MMO, type MMOFromServer, MMOType } from './mmo';
+import { MetadataObjex, type MetadataObjexResponse, type Category } from '@/types/schema';
+import { type MMO, type MMOResponse, MMOType } from './mmo';
 import { Key } from '@/types/identifiers';
 
-export type ObjexMetadataFromServer = MMOFromServer<MMOType.Objex> & {
-    newObjex?: MetadataObjexFromServer;
-    oldObjex?: MetadataObjexFromServer;
+export type ObjexMetadataResponse = MMOResponse<MMOType.Objex> & {
+    newObjex?: MetadataObjexResponse;
+    oldObjex?: MetadataObjexResponse;
 };
 
 export class ObjexMetadata implements MMO<MMOType.Objex> {
@@ -16,15 +16,15 @@ export class ObjexMetadata implements MMO<MMOType.Objex> {
         readonly oldObjex?: MetadataObjex,
     ) {}
 
-    static fromServer(input: ObjexMetadataFromServer): ObjexMetadata {
-        const keyFromServer = input.newObjex?.key ?? input.oldObjex?.key;
-        if (!keyFromServer)
+    static fromResponse(input: ObjexMetadataResponse): ObjexMetadata {
+        const keyResponse = input.newObjex?.key ?? input.oldObjex?.key;
+        if (!keyResponse)
             throw new Error('ObjexMetadata must have at least one objex.');
 
         return new ObjexMetadata(
-            Key.fromServer(keyFromServer),
-            input.newObjex && MetadataObjex.fromServer(input.newObjex),
-            input.oldObjex && MetadataObjex.fromServer(input.oldObjex),
+            Key.fromResponse(keyResponse),
+            input.newObjex && MetadataObjex.fromResponse(input.newObjex),
+            input.oldObjex && MetadataObjex.fromResponse(input.oldObjex),
         );
     }
 
@@ -36,7 +36,7 @@ export class ObjexMetadata implements MMO<MMOType.Objex> {
         );
     }
 
-    toServer(): ObjexMetadataFromServer {
+    toServer(): ObjexMetadataResponse {
         return {
             type: MMOType.Objex,
             newObjex: this.newObjex?.toServer(this.key),

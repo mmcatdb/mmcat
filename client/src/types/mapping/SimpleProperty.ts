@@ -1,10 +1,10 @@
 import { print, type Printable, type Printer } from '@/types/utils/string';
-import { type NameFromServer, nameFromServer, Signature, type SignatureFromServer, type Name } from '@/types/identifiers';
+import { type NameResponse, nameFromResponse, Signature, type SignatureResponse, type Name } from '@/types/identifiers';
 import { type ParentProperty } from './ComplexProperty';
 
-export type SimplePropertyFromServer = {
-    name: NameFromServer;
-    signature: SignatureFromServer;
+export type SimplePropertyResponse = {
+    name: NameResponse;
+    signature: SignatureResponse;
 };
 
 export class SimpleProperty implements Printable {
@@ -14,15 +14,15 @@ export class SimpleProperty implements Printable {
         readonly parent: ParentProperty | undefined,
     ) {}
 
-    static fromServer(input: SimplePropertyFromServer, parent: ParentProperty): SimpleProperty {
+    static fromResponse(input: SimplePropertyResponse, parent: ParentProperty): SimpleProperty {
         return new SimpleProperty(
-            nameFromServer(input.name),
-            Signature.fromServer(input.signature),
+            nameFromResponse(input.name),
+            Signature.fromResponse(input.signature),
             parent,
         );
     }
 
-    toServer(): SimplePropertyFromServer {
+    toServer(): SimplePropertyResponse {
         return {
             name: this.name.toServer(),
             signature: this.signature.toServer(),

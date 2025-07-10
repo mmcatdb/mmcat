@@ -1,4 +1,4 @@
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@nextui-org/react';
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@heroui/react';
 import { Action } from '@/types/action';
 import { useState } from 'react';
 import { api } from '@/api';
@@ -99,7 +99,7 @@ async function actionsLoader({ params: { categoryId } }: { params: Params<'categ
         throw new Error('Failed to load actions');
 
     return {
-        actions: response.data.map(Action.fromServer),
+        actions: response.data.map(Action.fromResponse),
     };
 }
 
@@ -182,7 +182,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent={'No mappings to display.'}>
+            <TableBody emptyContent='No mappings to display.'>
                 {sortedActions.map(action => (
                     <TableRow
                         key={action.id}

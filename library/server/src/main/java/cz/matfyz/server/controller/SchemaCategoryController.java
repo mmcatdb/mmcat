@@ -3,7 +3,7 @@ package cz.matfyz.server.controller;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
 import cz.matfyz.server.service.SchemaCategoryService;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
@@ -36,8 +36,8 @@ public class SchemaCategoryController {
         Version systemVersion
     ) implements IEntity {
 
-        public static SchemaCategoryInfo fromWrapper(SchemaCategoryWrapper wrapper) {
-            return new SchemaCategoryInfo(wrapper.id(), wrapper.version(), wrapper.lastValid(), wrapper.label, wrapper.systemVersion());
+        public static SchemaCategoryInfo fromEntity(SchemaCategoryEntity categoryEntity) {
+            return new SchemaCategoryInfo(categoryEntity.id(), categoryEntity.version(), categoryEntity.lastValid(), categoryEntity.label, categoryEntity.systemVersion());
         }
 
     }
@@ -53,7 +53,7 @@ public class SchemaCategoryController {
 
     @PostMapping("/schema-categories")
     public SchemaCategoryInfo createNewCategory(@RequestBody SchemaCategoryInit init) {
-        return SchemaCategoryInfo.fromWrapper(service.create(init.label));
+        return SchemaCategoryInfo.fromEntity(service.create(init.label));
     }
 
     @GetMapping("/schema-categories/{id}/info")
@@ -62,7 +62,7 @@ public class SchemaCategoryController {
     }
 
     @GetMapping("/schema-categories/{id}")
-    public SchemaCategoryWrapper getCategory(@PathVariable Id id) {
+    public SchemaCategoryEntity getCategory(@PathVariable Id id) {
         return repository.find(id);
     }
 
@@ -78,7 +78,7 @@ public class SchemaCategoryController {
     }
 
     @PostMapping("/schema-categories/{id}/updates")
-    public SchemaCategoryWrapper updateCategory(@PathVariable Id id, @RequestBody SchemaEvolutionInit update) {
+    public SchemaCategoryEntity updateCategory(@PathVariable Id id, @RequestBody SchemaEvolutionInit update) {
         return service.update(id, update);
     }
 

@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
-import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
+import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.service.SchemaCategoryService;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.queryevolution.Schema;
@@ -28,16 +28,16 @@ public class ExampleSetup {
     @Qualifier("queryEvolutionQuerySetup")
     private QuerySetup querySetup;
 
-    public SchemaCategoryWrapper setup(int version) {
-        SchemaCategoryWrapper schema = createSchemaCategory();
-        final List<DatasourceWrapper> datasources = datasourceSetup.createDatasources();
+    public SchemaCategoryEntity setup(int version) {
+        SchemaCategoryEntity schema = createSchemaCategory();
+        final List<DatasourceEntity> datasources = datasourceSetup.createDatasources();
 
         querySetup.createQueries(schema.id());
 
         if (version > 1)
             schema = updateSchemaCategory(schema);
 
-        final List<MappingWrapper> mappings = mappingSetup.createMappings(datasources, schema, version);
+        final List<MappingEntity> mappings = mappingSetup.createMappings(datasources, schema, version);
 
         // // TODO jobs
 
@@ -47,17 +47,17 @@ public class ExampleSetup {
     @Autowired
     private SchemaCategoryService schemaService;
 
-    private SchemaCategoryWrapper createSchemaCategory() {
-        final SchemaCategoryWrapper schemaWrapper = schemaService.create(Schema.schemaLabel);
+    private SchemaCategoryEntity createSchemaCategory() {
+        final SchemaCategoryEntity schemaEntity = schemaService.create(Schema.schemaLabel);
 
-        final SchemaEvolutionInit schemaUpdate = SchemaSetup.createNewUpdate(schemaWrapper, 1);
+        final SchemaEvolutionInit schemaUpdate = SchemaSetup.createNewUpdate(schemaEntity, 1);
 
-        return schemaService.update(schemaWrapper.id(), schemaUpdate);
+        return schemaService.update(schemaEntity.id(), schemaUpdate);
     }
 
-    private SchemaCategoryWrapper updateSchemaCategory(SchemaCategoryWrapper wrapper) {
-        final SchemaEvolutionInit schemaUpdate = SchemaSetup.createNewUpdate(wrapper, 2);
-        return schemaService.update(wrapper.id(), schemaUpdate);
+    private SchemaCategoryEntity updateSchemaCategory(SchemaCategoryEntity entity) {
+        final SchemaEvolutionInit schemaUpdate = SchemaSetup.createNewUpdate(entity, 2);
+        return schemaService.update(entity.id(), schemaUpdate);
     }
 
 }

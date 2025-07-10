@@ -11,8 +11,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -22,20 +20,15 @@ public abstract class Name implements Serializable {
 
     protected Name() {}
 
+    // #region Serialization
+
     public static class Deserializer extends StdDeserializer<Name> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         @Override public Name deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
+            final var codec = parser.getCodec();
+            final JsonNode node = codec.readTree(parser);
 
             if (node.has("value"))
                 return new StringName(node.get("value").asText());
@@ -44,13 +37,14 @@ public abstract class Name implements Serializable {
             if (!node.has("signature"))
                 return new TypedName(node.get("type").asText());
 
-            final Signature signature = signatureJsonReader.readValue(node.get("signature"));
+            final Signature signature = codec.treeToValue(node.get("signature"), Signature.class);
             final @Nullable String pattern = node.hasNonNull("pattern") ? node.get("pattern").asText() : null;
 
             return new DynamicName(type, signature, pattern);
         }
-
     }
+
+    // #endregion
 
     /**
      * A normal string name.

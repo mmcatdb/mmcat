@@ -1,14 +1,7 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select, SelectItem, Checkbox } from '@nextui-org/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select, SelectItem, Checkbox } from '@heroui/react';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/api';
-import {
-    DATASOURCE_TYPES,
-    DatasourceType,
-    type Settings,
-    validateSettings,
-    type DatasourceInit,
-    type Datasource,
-} from '@/types/datasource';
+import { Datasource, DatasourceType, type DatasourceSettings, validateSettings, type DatasourceInit, DATASOURCE_TYPES } from '@/types/Datasource';
 import { toast } from 'react-toastify';
 
 type DatasourceModalProps = {
@@ -24,16 +17,16 @@ type SelectDatasourceTypeProps = {
     /** The currently selected datasource type. */
     datasourceType: DatasourceType | '';
     /** Function to update the datasource type and settings. */
-    setDatasourceType: (type: DatasourceType, prevSettings: Settings) => void;
+    setDatasourceType: (type: DatasourceType, prevSettings: DatasourceSettings) => void;
 };
 
 type DatasourceSpecificFieldsProps = {
     /** The selected datasource type. */
     datasourceType: DatasourceType;
     /** The current settings for the datasource. */
-    settings: Settings;
+    settings: DatasourceSettings;
     /** Function to update settings fields. */
-    handleSettingsChange: (field: keyof Settings, value: unknown) => void;
+    handleSettingsChange: (field: keyof DatasourceSettings, value: unknown) => void;
 };
 
 type FormButtonsProps = {
@@ -52,7 +45,7 @@ type FormButtonsProps = {
 function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasource: Datasource) => void) {
     const [ datasourceType, setDatasourceType ] = useState<DatasourceType | ''>('');
     const [ datasourceName, setDatasourceLabel ] = useState('');
-    const [ settings, setSettings ] = useState<Settings>({});
+    const [ settings, setSettings ] = useState<DatasourceSettings>({});
     const [ isCreatingDatasource, setIsCreatingDatasource ] = useState<boolean>(false);
 
     /**
@@ -67,7 +60,7 @@ function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasou
     /**
      * Updates a settings field.
      */
-    const handleSettingsChange = useCallback((field: keyof Settings, value: unknown) => {
+    const handleSettingsChange = useCallback((field: keyof DatasourceSettings, value: unknown) => {
         setSettings(prevSettings => ({
             ...prevSettings,
             [field]: value,
@@ -78,7 +71,7 @@ function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasou
      * Updates the datasource type and initializes settings.
      */
     const handleSetDatasourceType = useCallback(
-        (type: DatasourceType, prevSettings: Settings) => {
+        (type: DatasourceType, prevSettings: DatasourceSettings) => {
             setDatasourceType(type);
             setSettings(initializeSettings(type, prevSettings));
         },
@@ -105,7 +98,7 @@ function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasou
         const createdDatasource = await api.datasources.createDatasource({}, newDatasource);
 
         if (createdDatasource.status && createdDatasource.data) {
-            onDatasourceCreated(createdDatasource.data);
+            onDatasourceCreated(Datasource.fromResponse(createdDatasource.data));
             resetForm();
             onClose();
             toast.success('Datasource created.');
@@ -135,7 +128,7 @@ function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasou
  * @param type - The selected datasource type.
  * @param currentSettings - The current settings to merge with defaults.
  */
-function initializeSettings(type: DatasourceType, currentSettings: Settings): Settings {
+function initializeSettings(type: DatasourceType, currentSettings: DatasourceSettings): DatasourceSettings {
     const isDatabaseType = [ DatasourceType.mongodb, DatasourceType.postgresql, DatasourceType.neo4j ].includes(type);
     return {
         ...currentSettings,
@@ -235,7 +228,7 @@ export function DatasourceModal({
 function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatasourceTypeProps) {
     return (
         <Select
-            items={DATASOURCE_TYPES}
+            items={datasourceOptions}
             label='Type'
             placeholder='Select a Type'
             selectedKeys={datasourceType ? new Set([ datasourceType ]) : new Set()}
@@ -243,17 +236,21 @@ function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatas
                 const selectedType = Array.from(e as Set<DatasourceType>)[0];
                 if (selectedType)
                     setDatasourceType(selectedType, {});
-
             }}
         >
             {item => (
-                <SelectItem key={item.type}>
+                <SelectItem key={item.value}>
                     {item.label}
                 </SelectItem>
             )}
         </Select>
     );
 }
+
+const datasourceOptions = Object.values(DATASOURCE_TYPES).map(def => ({
+    value: def.type,
+    label: def.label,
+}));
 
 /**
  * Renders type-specific fields for configuring the datasource.

@@ -1,16 +1,16 @@
 import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Key, Signature } from '../identifiers';
 import type { Id } from '../id';
-import { InstanceObjex, type InstanceObjexFromServer } from './InstanceObjex';
-import { InstanceMorphism, type InstanceMorphismFromServer } from './InstanceMorphism';
+import { InstanceObjex, type InstanceObjexResponse } from './InstanceObjex';
+import { InstanceMorphism, type InstanceMorphismResponse } from './InstanceMorphism';
 import type { Category } from '../schema';
 
-export type InstanceCategoryFromServer = {
+export type InstanceCategoryResponse = {
     sessionId: Id;
     categoryId: Id;
     instance: {
-        objexes: InstanceObjexFromServer[];
-        morphisms: InstanceMorphismFromServer[];
+        objexes: InstanceObjexResponse[];
+        morphisms: InstanceMorphismResponse[];
     };
 };
 
@@ -21,7 +21,7 @@ export class InstanceCategory {
         readonly morphisms: ComparableMap<Signature, string, InstanceMorphism>,
     ) {}
 
-    static fromServer(input: InstanceCategoryFromServer, schema: Category): InstanceCategory {
+    static fromResponse(input: InstanceCategoryResponse, schema: Category): InstanceCategory {
         const instance = new InstanceCategory(
             schema,
             new ComparableMap(key => key.value),
@@ -29,13 +29,13 @@ export class InstanceCategory {
         );
 
         for (const inputObjex of input.instance.objexes) {
-            const objex = InstanceObjex.fromServer(inputObjex, schema);
+            const objex = InstanceObjex.fromResponse(inputObjex, schema);
             if (objex)
                 instance.objexes.set(objex.schema.key, objex);
         }
 
         for (const inputMorphism of input.instance.morphisms) {
-            const morphism = InstanceMorphism.fromServer(inputMorphism, instance);
+            const morphism = InstanceMorphism.fromResponse(inputMorphism, instance);
             if (morphism)
                 instance.morphisms.set(morphism.schema.signature, morphism);
         }

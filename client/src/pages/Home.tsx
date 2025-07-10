@@ -3,13 +3,13 @@ import { CustomLink } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Card, CardBody } from '@nextui-org/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Card, CardBody } from '@heroui/react';
 import { toast } from 'react-toastify';
 import { BookOpenIcon } from '@heroicons/react/24/solid';
 import { FaDatabase, FaPlus, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const EXAMPLE_SCHEMAS = [ 'basic' ] as const;
+const EXAMPLE_SCHEMAS = [ 'basic', 'adminer' ] as const;
 
 export function Home() {
     const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>();
@@ -26,7 +26,7 @@ export function Home() {
     async function fetchCategories() {
         const result = await api.schemas.getAllCategoryInfos({});
         if (result.status)
-            setCategories(result.data.map(SchemaCategoryInfo.fromServer));
+            setCategories(result.data.map(SchemaCategoryInfo.fromResponse));
     }
 
     const handleCreateSchema = useCallback(async (name: string, isExample = false) => {
@@ -43,7 +43,7 @@ export function Home() {
             return;
         }
 
-        const newCategory = SchemaCategoryInfo.fromServer(response.data);
+        const newCategory = SchemaCategoryInfo.fromResponse(response.data);
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${name}' created successfully!`);
@@ -67,7 +67,7 @@ export function Home() {
                 isCreatingSchema={isCreatingSchema}
                 isCreatingExampleSchema={isCreatingExampleSchema}
                 onCreateSchema={(name, isExample) => {
-                    void handleCreateSchema(name, isExample); 
+                    void handleCreateSchema(name, isExample);
                 }}
                 fetchCategories={fetchCategories}
             />
@@ -84,7 +84,7 @@ export function Home() {
 function HeaderSection() {
     return (
         <div className='space-y-6 text-center md:text-left'>
-            <h1 className='text-5xl font-bold text-primary-600 bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
+            <h1 className='text-5xl font-bold text-primary-600 bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                 MM-cat
             </h1>
             <p className='text-default-600 text-xl mx-auto'>
@@ -109,7 +109,7 @@ function GettingStartedSection({
     return (
         <div className='space-y-8'>
             <div className='text-center'>
-                <h2 className='text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
+                <h2 className='text-3xl font-bold bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                     Get Started in 3 Steps
                 </h2>
                 <p className='text-default-500 mt-2 max-w-2xl mx-auto'>
@@ -202,7 +202,7 @@ function SchemaCategoriesSection({
         <div className='space-y-8'>
             <div className='flex flex-col md:flex-row md:items-end justify-between gap-4'>
                 <div className='mt-5'>
-                    <h2 className='text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
+                    <h2 className='text-3xl font-bold bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                         Your Schema Categories
                     </h2>
                     <p className='text-default-500'>
@@ -210,9 +210,9 @@ function SchemaCategoriesSection({
                     </p>
                 </div>
                 <div className='flex flex-wrap gap-3'>
-                    <Button 
-                        onPress={onOpenModal} 
-                        isLoading={isCreatingSchema} 
+                    <Button
+                        onPress={onOpenModal}
+                        isLoading={isCreatingSchema}
                         color='primary'
                         startContent={<FaPlus className='w-4 h-4' />}
                     >
@@ -227,7 +227,7 @@ function SchemaCategoriesSection({
                             variant='flat'
                             startContent={<FaPlus className='w-4 h-4' />}
                         >
-                            Example Schema
+                            Example ({example})
                         </Button>
                     ))}
                 </div>
@@ -236,7 +236,7 @@ function SchemaCategoriesSection({
             {!categories ? (
                 <div className='flex flex-col items-center justify-center py-12 gap-4'>
                     <p className='text-default-400'>Failed to load schemas</p>
-                    <Button 
+                    <Button
                         onPress={handleReload}
                         isLoading={isReloading}
                         color='primary'
@@ -253,9 +253,9 @@ function SchemaCategoriesSection({
             ) : (<>
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                     {(showAllCategories ? categories : categories.slice(0, 6)).map(category => (
-                        <Card 
-                            key={category.id} 
-                            isPressable 
+                        <Card
+                            key={category.id}
+                            isPressable
                             isHoverable
                             className='p-6 hover:border-primary-300 transition-all'
                             shadow='sm'
@@ -271,8 +271,8 @@ function SchemaCategoriesSection({
                 </div>
                 {categories.length > 6 && (
                     <div className='flex justify-center'>
-                        <Button 
-                            variant='light' 
+                        <Button
+                            variant='light'
                             onPress={() => setShowAllCategories(!showAllCategories)}
                             className='text-primary-600'
                         >
@@ -312,7 +312,7 @@ function FeatureCard({
         <Card className='p-6 h-full flex flex-col'>
             <CardBody className='flex flex-col gap-4 h-full p-0'>
                 <div className='flex justify-center'>{icon}</div>
-                <div className='flex flex-col items-center text-center flex-grow min-h-[120px]'>
+                <div className='flex flex-col items-center text-center grow min-h-[120px]'>
                     <h3 className='text-xl font-semibold text-default-800'>
                         <span>{title}</span>
                     </h3>
@@ -365,7 +365,7 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
     }
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key === 'Enter') 
+        if (e.key === 'Enter')
             handleSubmit();
     }
 
@@ -384,6 +384,7 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
                         label='Schema Name'
                         value={label}
                         onChange={e => setLabel(e.target.value)}
+                        fullWidth
                         onKeyDown={handleKeyDown}
                         classNames={{
                             input: 'text-lg',
@@ -394,9 +395,9 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
                     <Button variant='light' onPress={handleClose}>
                         Cancel
                     </Button>
-                    <Button 
-                        color='primary' 
-                        onPress={handleSubmit} 
+                    <Button
+                        color='primary'
+                        onPress={handleSubmit}
                         isLoading={isSubmitting}
                         isDisabled={!label.trim()}
                     >

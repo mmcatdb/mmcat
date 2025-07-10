@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { type Params, useLoaderData, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/api';
-import { Datasource, type Settings } from '@/types/datasource';
-import { Button, Input, Tooltip } from '@nextui-org/react';
+import { Datasource, type DatasourceSettings } from '@/types/Datasource';
+import { Button, Input, Tooltip } from '@heroui/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
@@ -36,7 +36,7 @@ async function datasourceLoader({ params: { id } }: { params: Params<'id'> }): P
         throw new Error('Failed to load datasource info');
 
     return {
-        datasource: Datasource.fromServer(response.data),
+        datasource: Datasource.fromResponse(response.data),
     };
 }
 
@@ -107,8 +107,8 @@ async function datasourceInCategoryLoader({ params: { categoryId, id } }: { para
         throw new Error('Failed to load datasource or mappings');
 
     return {
-        datasource: Datasource.fromServer(datasourceResponse.data),
-        mappings: mappingsResponse.data.map(Mapping.fromServer),
+        datasource: Datasource.fromResponse(datasourceResponse.data),
+        mappings: mappingsResponse.data.map(Mapping.fromResponse),
     };
 }
 
@@ -116,16 +116,16 @@ function DatasourceDisplay() {
     const { datasource: initialDatasource } = useLoaderData() as DatasourceLoaderData | DatasourceInCategoryLoaderData;
 
     const [ datasource, setDatasource ] = useState<Datasource>(initialDatasource);
-    const [ formValues, setFormValues ] = useState<Settings>(initialDatasource.settings);
-    const [ isConfigurationShown, setIsConfigurationShown ] = useState(false);
-    const [ isEditing, setIsEditing ] = useState(false);
+    const [ formValues, setFormValues ] = useState<DatasourceSettings>(initialDatasource.settings);
+    const [ isSpecsShown, setIsSpecsShown ] = useState(false);
+    const [ isUpdating, setIsUpdating ] = useState(false);
     const [ isSaving, setIsSaving ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasource-detail-page');
 
     const navigate = useNavigate();
     const location = useLocation();
 
-    function handleInputChange(field: keyof Settings, value: unknown) {
+    function handleInputChange(field: keyof DatasourceSettings, value: unknown) {
         if (!formValues)
             return;
 
@@ -133,16 +133,17 @@ function DatasourceDisplay() {
     }
 
     function handleLabelChange(newLabel: string) {
+        // FIXME This should be in the form.
         setDatasource(prev => ({ ...prev, label: newLabel } as Datasource));
     }
 
-    function cancelEditing() {
+    function cancelUpdating() {
         if (initialDatasource) {
             // revert to initial values
             setFormValues(initialDatasource.settings);
             setDatasource(initialDatasource);
         }
-        setIsEditing(false);
+        setIsUpdating(false);
     }
 
     async function handleSaveChanges() {
@@ -155,10 +156,10 @@ function DatasourceDisplay() {
             { label: datasource.label, settings: formValues },
         );
         setIsSaving(false);
-        setIsEditing(false);
+        setIsUpdating(false);
 
         if (updatedDatasource.status) {
-            setDatasource(updatedDatasource.data);
+            setDatasource(Datasource.fromResponse(updatedDatasource.data));
             toast.success('Datasource updated successfully!');
             // navigate only if label has changed
             if (datasource.label !== initialDatasource.label)
@@ -169,7 +170,7 @@ function DatasourceDisplay() {
         }
     }
 
-    function renderSettingsView(settings: Settings) {
+    function renderSettingsView(settings: DatasourceSettings) {
         return (
             <div className='space-y-4'>
                 {Object.entries(settings).map(([ key, value ]) => (
@@ -203,9 +204,7 @@ function DatasourceDisplay() {
                     </button>
                 </Tooltip>
             </div>
-
             {isVisible && <DatasourceDetailInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
-
             <div className='mb-6 p-4 bg-default-50 rounded-lg'>
                 <div className='flex gap-8'>
                     <div>
@@ -218,14 +217,13 @@ function DatasourceDisplay() {
                     </div>
                 </div>
             </div>
-
-            {!isEditing ? (
+            {!isUpdating ? (
                 // View Mode
                 <div className='mb-6'>
                     <div className='flex justify-between items-center mb-3'>
                         <h2 className='text-lg font-semibold'>Connection Settings</h2>
                         <Button
-                            onClick={() => setIsEditing(true)}
+                            onClick={() => setIsUpdating(true)}
                             color='primary'
                             size='sm'
                         >
@@ -263,27 +261,26 @@ function DatasourceDisplay() {
                             >
                                 Save
                             </Button>
-                            <Button variant='flat' onClick={cancelEditing} isDisabled={isSaving} className='px-6'>
+                            <Button variant='flat' onClick={cancelUpdating} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>
                         </div>
                     </form>
                 </div>
             )}
-
             <div>
                 <Button
                     size='sm'
                     variant='solid'
-                    onPress={() => setIsConfigurationShown(prev => !prev)}
+                    onPress={() => setIsSpecsShown(prev => !prev)}
                     className='mb-2'
                 >
-                    {isConfigurationShown ? 'Hide Configuration' : 'Show Configuration'}
+                    {isSpecsShown ? 'Hide specs' : 'Show specs'}
                 </Button>
-                {isConfigurationShown && (
+                {isSpecsShown && (
                     <div className='p-4 rounded-md bg-default-50'>
                         <pre className='text-sm text-default-600 overflow-x-auto'>
-                            {JSON.stringify(datasource?.configuration, null, 2)}
+                            {JSON.stringify(datasource.specs, null, 4)}
                         </pre>
                     </div>
                 )}
@@ -299,8 +296,6 @@ type DatasourceDetailInfoBannerProps = {
 
 export function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
     return (
-        // <div className={cn('relative', className)}>
-        //     <div className={cn('relative bg-default-50 text-default-900 p-4 rounded-lg border border-default-300')}>
         <InfoBanner className={className} dismissBanner={dismissBanner}>
             <button
                 onClick={dismissBanner}
@@ -308,7 +303,6 @@ export function DatasourceDetailInfoBanner({ className, dismissBanner }: Datasou
             >
                 <HiXMark className='w-5 h-5' />
             </button>
-
             <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
             <ul className='mt-2 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>

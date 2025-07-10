@@ -1,34 +1,34 @@
-import { SMOType, type SMOFromServer, type SMO } from './smo';
-import { CreateObjex, type CreateObjexFromServer } from './createObjex';
-import { DeleteObjex, type DeleteObjexFromServer } from './deleteObjex';
-import { UpdateObjex, type UpdateObjexFromServer } from './updateObjex';
-import { CreateMorphism, type CreateMorphismFromServer } from './createMorphism';
-import { DeleteMorphism, type DeleteMorphismFromServer } from './deleteMorphism';
-import { UpdateMorphism, type UpdateMorphismFromServer } from './updateMorphism';
-import { Composite, type CompositeFromServer } from './composite';
+import { SMOType, type SMOResponse, type SMO } from './smo';
+import { CreateObjex, type CreateObjexResponse } from './createObjex';
+import { DeleteObjex, type DeleteObjexResponse } from './deleteObjex';
+import { UpdateObjex, type UpdateObjexResponse } from './updateObjex';
+import { CreateMorphism, type CreateMorphismResponse } from './createMorphism';
+import { DeleteMorphism, type DeleteMorphismResponse } from './deleteMorphism';
+import { UpdateMorphism, type UpdateMorphismResponse } from './updateMorphism';
+import { Composite, type CompositeResponse } from './composite';
 
-export function smoFromServer(input: SMOFromServer): SMO {
+export function smoFromResponse(input: SMOResponse): SMO {
     switch (input.type) {
     case SMOType.CreateObjex:
-        return CreateObjex.fromServer(input as CreateObjexFromServer);
+        return CreateObjex.fromResponse(input as CreateObjexResponse);
     case SMOType.DeleteObjex:
-        return DeleteObjex.fromServer(input as DeleteObjexFromServer);
+        return DeleteObjex.fromResponse(input as DeleteObjexResponse);
     case SMOType.UpdateObjex:
-        return UpdateObjex.fromServer(input as UpdateObjexFromServer);
+        return UpdateObjex.fromResponse(input as UpdateObjexResponse);
     case SMOType.CreateMorphism:
-        return CreateMorphism.fromServer(input as CreateMorphismFromServer);
+        return CreateMorphism.fromResponse(input as CreateMorphismResponse);
     case SMOType.DeleteMorphism:
-        return DeleteMorphism.fromServer(input as DeleteMorphismFromServer);
+        return DeleteMorphism.fromResponse(input as DeleteMorphismResponse);
     case SMOType.UpdateMorphism:
-        return UpdateMorphism.fromServer(input as UpdateMorphismFromServer);
+        return UpdateMorphism.fromResponse(input as UpdateMorphismResponse);
     case SMOType.Composite:
-        return Composite.fromServer(input as CompositeFromServer);
+        return Composite.fromResponse(input as CompositeResponse);
     }
 }
 
 export {
     type SMO,
-    type SMOFromServer,
+    type SMOResponse,
     CreateObjex,
     DeleteObjex,
     UpdateObjex,

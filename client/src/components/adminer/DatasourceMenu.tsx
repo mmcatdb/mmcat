@@ -1,44 +1,51 @@
-import { Select, SelectItem } from '@nextui-org/react';
-import { type Datasource, DatasourceType } from '@/types/datasource';
-import type { AdminerStateAction } from '@/types/adminer/Reducer';
-import type { Id } from '@/types/id';
+import { Select, SelectItem } from '@heroui/react';
+import { type Datasource, DatasourceType } from '@/types/Datasource';
 
-type DatasourceMenuProps = Readonly<{
-    dispatch: React.Dispatch<AdminerStateAction>;
-    datasourceId: Id | undefined;
+type DatasourceMenuProps = {
+    /** Function for updating 'datasource' parameter. */
+    setDatasource: React.Dispatch<React.SetStateAction<Datasource | undefined>>;
+    /** The selected datasource. */
+    datasource: Datasource | undefined;
+    /** All active datasources. */
     datasources: Datasource[];
-}>;
+};
 
-export function DatasourceMenu({ dispatch, datasourceId, datasources }: DatasourceMenuProps) {
+/**
+ * Component for selecting the datasource to fetch the data from
+ */
+export function DatasourceMenu({ setDatasource, datasource, datasources }: DatasourceMenuProps) {
     const sources = datasources
         .filter(item =>
-            item.type === DatasourceType.postgresql ||
-            item.type === DatasourceType.mongodb ||
-            item.type === DatasourceType.neo4j,
+            [ DatasourceType.postgresql, DatasourceType.mongodb, DatasourceType.neo4j ].includes(item.type),
         );
 
-    if (sources.length > 0) {
+    if (sources.length === 0) {
         return (
-            <Select
-                label='Datasource'
-                placeholder='Select datasource'
-                className='max-w-xs'
-                selectedKeys={ datasourceId ? [ datasourceId ] : [] }
-            >
-                {sources
-                    .map(item => (
-                        <SelectItem
-                            key={item.id}
-                            onPress={() => dispatch({ type:'datasource', newDatasource: item })}
-                        >
-                            {item.label}
-                        </SelectItem>
-                    ))}
-            </Select>
+            <p>No datasources to display.</p>
         );
     }
 
     return (
-        <p>No datasources to display.</p>
+        <Select
+            items={sources}
+            aria-label='Datasource'
+            labelPlacement='outside-left'
+            classNames={
+                { label:'sr-only' }
+            }
+            size='sm'
+            placeholder='Select datasource'
+            className='max-w-xs'
+            selectedKeys={ datasource?.id ? [ datasource.id ] : [] }
+        >
+            {item => (
+                <SelectItem
+                    key={item.id}
+                    onPress={() => setDatasource(item)}
+                >
+                    {item.label}
+                </SelectItem>
+            )}
+        </Select>
     );
 }

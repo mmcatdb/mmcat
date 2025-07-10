@@ -43,12 +43,12 @@ export class InstanceMorphism {
         );
     }
 
-    get showDomTechnicalIds(): boolean {
-        return !!this.mappings.find(mapping => mapping.dom.technicalIds.size > 0);
+    get showDomTechnicalId(): boolean {
+        return !!this.mappings.find(mapping => mapping.dom.technicalId !== undefined);
     }
 
-    get showCodTechnicalIds(): boolean {
-        return !!this.mappings.find(mapping => mapping.cod.technicalIds.size > 0);
+    get showCodTechnicalId(): boolean {
+        return !!this.mappings.find(mapping => mapping.cod.technicalId !== undefined);
     }
 }
 

@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.inference;
 
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.example.common.DatasourceSettings;
 import cz.matfyz.server.global.Configuration.SetupProperties;
@@ -24,12 +24,12 @@ class DatasourceSetup {
         this.datasourceService = datasourceService;
     }
 
-    DatasourceWrapper createDatasource() {
+    DatasourceEntity createDatasource() {
         DatasourceInit init = settings.createMongoDB("MongoDB - Inference");
         return datasourceService.create(init);
     }
 
-    List<DatasourceWrapper> createDatasourceForMapping() {
+    List<DatasourceEntity> createDatasourceForMapping() {
         throw new NotImplementedException("DatasourceSetup.createDatasourceForMapping() in inference is not implemented");
     }
 

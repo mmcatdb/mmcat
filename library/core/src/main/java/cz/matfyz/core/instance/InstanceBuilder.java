@@ -59,10 +59,10 @@ public class InstanceBuilder {
 
     // Building domain rows
 
-    private final SuperIdWithValues.Builder superIdBuilder = new SuperIdWithValues.Builder();
+    private final SuperIdValues.Builder valuesBuilder = new SuperIdValues.Builder();
 
     public InstanceBuilder value(Signature signature, String value) {
-        superIdBuilder.add(signature, value);
+        valuesBuilder.add(signature, value);
 
         return this;
     }
@@ -73,12 +73,9 @@ public class InstanceBuilder {
 
     public DomainRow objex(Key key) {
         final var instanceObjex = instance.getObjex(key);
-        final SuperIdWithValues superId = superIdBuilder.build();
+        final SuperIdValues values = valuesBuilder.build();
 
-        var row = instanceObjex.getRow(superId);
-        if (row == null)
-            row = instanceObjex.getOrCreateRow(superId);
-
+        final var row = instanceObjex.createRow(values);
         createdRows.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
 
         return row;
@@ -99,10 +96,7 @@ public class InstanceBuilder {
     // Building mapping rows
 
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {
-        var row = new MappingRow(domainRow, codomainRow);
-        instance.getMorphism(signature).addMapping(row);
-
-        return row;
+        return instance.getMorphism(signature).createMapping(domainRow, codomainRow);
     }
 
     public MappingRow morphism(BuilderMorphism morphism, DomainRow domainRow, DomainRow codomainRow) {
