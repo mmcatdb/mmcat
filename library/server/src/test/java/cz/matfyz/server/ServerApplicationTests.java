@@ -13,7 +13,7 @@ import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.entity.mapping.MappingEntity;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
@@ -102,13 +102,13 @@ class ServerApplicationTests {
     }
 
     private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id datasourceId, int records) throws Exception {
-        final var datasourceWrapper = datasourceRepository.find(datasourceId);
-        final var mappingWrapper = mappingRepository.find(mappingId);
+        final var datasourceEntity = datasourceRepository.find(datasourceId);
+        final var mappingEntity = mappingRepository.find(mappingId);
 
-        final var datasource = datasourceWrapper.toDatasource();
-        final var mapping = createMapping(mappingWrapper, datasource);
+        final var datasource = datasourceEntity.toDatasource();
+        final var mapping = createMapping(mappingEntity, datasource);
 
-        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceEntity).getPullWrapper();
 
         final var newInstance = new DatabaseToInstance()
             .input(mapping, instance, pullWrapper, new KindNameQuery(mapping.kindName(), records, null))
@@ -128,13 +128,13 @@ class ServerApplicationTests {
      * @deprecated This doesn't work as intended anymore. The reason is that now, all mappings are processed at once. Therefore this method does the same thing (export all mappings) for each mapping.
      */
     private void exportMapping(InstanceCategory instance, Id mappingId, Id datasourceId) throws Exception {
-        final var datasourceWrapper = datasourceRepository.find(datasourceId);
-        final var mappingWrapper = mappingRepository.find(mappingId);
+        final var datasourceEntity = datasourceRepository.find(datasourceId);
+        final var mappingEntity = mappingRepository.find(mappingId);
 
-        final var datasource = datasourceWrapper.toDatasource();
-        final var mapping = createMapping(mappingWrapper, datasource);
+        final var datasource = datasourceEntity.toDatasource();
+        final var mapping = createMapping(mappingEntity, datasource);
 
-        final var control = wrapperService.getControlWrapper(datasourceWrapper);
+        final var control = wrapperService.getControlWrapper(datasourceEntity);
         final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
         final AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
         final AbstractICWrapper icWrapper = control.getICWrapper();
@@ -151,11 +151,11 @@ class ServerApplicationTests {
         Statistics.reset();
     }
 
-    private Mapping createMapping(MappingWrapper wrapper, Datasource datasource) {
-        final var categoryWrapper = categoryRepository.find(wrapper.categoryId);
-        final var category = categoryWrapper.toSchemaCategory();
+    private Mapping createMapping(MappingEntity entity, Datasource datasource) {
+        final var categoryEntity = categoryRepository.find(entity.categoryId);
+        final var category = categoryEntity.toSchemaCategory();
 
-        return wrapper.toMapping(datasource, category);
+        return entity.toMapping(datasource, category);
     }
 
 }

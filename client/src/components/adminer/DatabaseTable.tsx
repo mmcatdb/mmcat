@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@heroui/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { getTableFromGraphData } from '@/components/adminer/reshapeData';
-import type { Datasource } from '@/types/datasource/Datasource';
+import type { Datasource } from '@/types/Datasource';
 import type { TableResponse, GraphResponse } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';

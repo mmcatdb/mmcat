@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button, type SortDescriptor } from '@heroui/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import type { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/Datasource';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePreferences } from '../PreferencesProvider';
 import { ConfirmationModal, useSortableData } from '../TableCommon';

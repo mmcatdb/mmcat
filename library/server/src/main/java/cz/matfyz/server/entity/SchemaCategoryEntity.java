@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class SchemaCategoryWrapper extends VersionedEntity {
+public class SchemaCategoryEntity extends VersionedEntity {
 
     public final String label;
     /** The current version of the whole project. */
@@ -24,7 +24,7 @@ public class SchemaCategoryWrapper extends VersionedEntity {
     public SerializedSchema schema;
     public SerializedMetadata metadata;
 
-    private SchemaCategoryWrapper(Id id, Version version, Version lastValid, String label, Version systemVersion, SerializedSchema schema, SerializedMetadata metadata) {
+    private SchemaCategoryEntity(Id id, Version version, Version lastValid, String label, Version systemVersion, SerializedSchema schema, SerializedMetadata metadata) {
         super(id, version, lastValid);
         this.label = label;
         this.systemVersion = systemVersion;
@@ -32,9 +32,9 @@ public class SchemaCategoryWrapper extends VersionedEntity {
         this.metadata = metadata;
     }
 
-    public static SchemaCategoryWrapper createNew(String label, SchemaCategory category, MetadataCategory metadata) {
+    public static SchemaCategoryEntity createNew(String label, SchemaCategory category, MetadataCategory metadata) {
         final var newVersion = Version.generateInitial();
-        return new SchemaCategoryWrapper(
+        return new SchemaCategoryEntity(
             Id.createNew(),
             newVersion,
             newVersion,
@@ -73,9 +73,9 @@ public class SchemaCategoryWrapper extends VersionedEntity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static SchemaCategoryWrapper fromJsonValue(Id id, Version version, Version lastValid, String label, Version systemVersion, String jsonValue) throws JsonProcessingException {
+    public static SchemaCategoryEntity fromJsonValue(Id id, Version version, Version lastValid, String label, Version systemVersion, String jsonValue) throws JsonProcessingException {
         final JsonValue json = jsonValueReader.readValue(jsonValue);
-        return new SchemaCategoryWrapper(
+        return new SchemaCategoryEntity(
             id,
             version,
             lastValid,

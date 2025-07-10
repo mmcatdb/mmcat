@@ -6,7 +6,7 @@ import cz.matfyz.evolution.Version;
 import cz.matfyz.server.controller.SchemaCategoryController.SchemaCategoryInfo;
 import cz.matfyz.server.controller.SchemaCategoryController.SchemaCategoryStats;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
@@ -71,7 +71,7 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public SchemaCategoryWrapper find(Id id) {
+    public SchemaCategoryEntity find(Id id) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
@@ -92,7 +92,7 @@ public class SchemaCategoryRepository {
                 final var label = resultSet.getString("label");
                 final var systemVersion = Version.fromString(resultSet.getString("system_version"));
                 final var jsonValue = resultSet.getString("json_value");
-                output.set(SchemaCategoryWrapper.fromJsonValue(id, version, lastValid, label, systemVersion, jsonValue));
+                output.set(SchemaCategoryEntity.fromJsonValue(id, version, lastValid, label, systemVersion, jsonValue));
             }
         });
     }
@@ -136,7 +136,7 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public void save(SchemaCategoryWrapper wrapper) {
+    public void save(SchemaCategoryEntity entity) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO schema_category (id, version, last_valid, label, system_version, updated_AT, json_value)
@@ -149,12 +149,12 @@ public class SchemaCategoryRepository {
                     updated_at = EXCLUDED.updated_at,
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, wrapper.id());
-            statement.setString(2, wrapper.version().toString());
-            statement.setString(3, wrapper.lastValid().toString());
-            statement.setString(4, wrapper.label);
-            statement.setString(5, wrapper.systemVersion().toString());
-            statement.setString(6, wrapper.toJsonValue());
+            setId(statement, 1, entity.id());
+            statement.setString(2, entity.version().toString());
+            statement.setString(3, entity.lastValid().toString());
+            statement.setString(4, entity.label);
+            statement.setString(5, entity.systemVersion().toString());
+            statement.setString(6, entity.toJsonValue());
             executeChecked(statement);
         });
     }

@@ -3,7 +3,7 @@ import { IoTrashBin } from 'react-icons/io5';
 import { OPERATOR_MAPPING, UNARY_OPERATORS, type Operator } from '@/types/adminer/Operators';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
-import type { DatasourceType } from '@/types/datasource';
+import type { DatasourceType } from '@/types/Datasource';
 
 type PropertyFilterFormProps = {
     /** The filter to be updated. */

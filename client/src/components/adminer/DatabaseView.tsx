@@ -2,7 +2,7 @@ import { DatabaseTable } from '@/components/adminer/DatabaseTable';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { DatabaseGraph } from '@/components/adminer/DatabaseGraph';
 import { View } from '@/types/adminer/View';
-import type { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/Datasource';
 import type { Id } from '@/types/id';
 import type { DataResponse, DocumentResponse, GraphResponse, TableResponse } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';

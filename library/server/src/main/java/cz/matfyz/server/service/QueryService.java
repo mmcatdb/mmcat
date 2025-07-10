@@ -12,8 +12,8 @@ import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.server.controller.QueryController.QueryInit;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.Query;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.EvolutionRepository;
@@ -51,24 +51,24 @@ public class QueryService {
     private SchemaCategoryRepository categoryRepository;
 
     public ListResult executeQuery(Id categoryId, String queryString) {
-        final var categoryWrapper = categoryRepository.find(categoryId);
-        final var category = categoryWrapper.toSchemaCategory();
-        final var datasources = getDatasources(categoryWrapper.id(), category);
+        final var categoryEntity = categoryRepository.find(categoryId);
+        final var category = categoryEntity.toSchemaCategory();
+        final var datasources = getDatasources(categoryEntity.id(), category);
 
         return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).execute();
     }
 
     public QueryDescription describeQuery(Id categoryId, String queryString) {
-        final var categoryWrapper = categoryRepository.find(categoryId);
-        final var category = categoryWrapper.toSchemaCategory();
-        final var datasources = getDatasources(categoryWrapper.id(), category);
+        final var categoryEntity = categoryRepository.find(categoryId);
+        final var category = categoryEntity.toSchemaCategory();
+        final var datasources = getDatasources(categoryEntity.id(), category);
 
         return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).describe();
     }
 
     private record KindsAndDatasources(
         List<Mapping> kinds,
-        Map<Id, DatasourceWrapper> datasourceWrappers,
+        Map<Id, DatasourceEntity> datasourceEntities,
         ControlWrapperProvider provider
     ) {}
 
@@ -76,17 +76,17 @@ public class QueryService {
         final var provider = new DefaultControlWrapperProvider();
 
         final Map<Id, Datasource> datasources = new TreeMap<>();
-        final Map<Id, DatasourceWrapper> datasourceWrappers = new TreeMap<>();
+        final Map<Id, DatasourceEntity> datasourceEntities = new TreeMap<>();
         datasourceRepository
             .findAllInCategory(categoryId)
-            .forEach(wrapper -> {
-                final var control = wrapperService.getControlWrapper(wrapper);
+            .forEach(entity -> {
+                final var control = wrapperService.getControlWrapper(entity);
                 if (!control.isQueryable())
                     return;
 
-                final var datasource = wrapper.toDatasource();
-                datasources.put(wrapper.id(), datasource);
-                datasourceWrappers.put(wrapper.id(), wrapper);
+                final var datasource = entity.toDatasource();
+                datasources.put(entity.id(), datasource);
+                datasourceEntities.put(entity.id(), entity);
                 provider.setControlWrapper(datasource, control);
             });
 
@@ -94,16 +94,16 @@ public class QueryService {
         final List<Mapping> kinds = new ArrayList<>();
         mappingRepository
             .findAllInCategory(categoryId)
-            .forEach(wrapper -> {
-                final var datasource = datasources.get(wrapper.datasourceId);
+            .forEach(entity -> {
+                final var datasource = datasources.get(entity.datasourceId);
                 if (datasource == null)
                     // The datasource isn't queryable so it was discarded in the previous step.
                     return;
 
-                kinds.add(wrapper.toMapping(datasource, category));
+                kinds.add(entity.toMapping(datasource, category));
             });
 
-       return new KindsAndDatasources(kinds, datasourceWrappers, provider);
+       return new KindsAndDatasources(kinds, datasourceEntities, provider);
     }
 
     public Query create(QueryInit init) {
@@ -137,7 +137,7 @@ public class QueryService {
         propagateEvolution(category, evolution);
     }
 
-    private void propagateEvolution(SchemaCategoryWrapper category, QueryEvolution evolution) {
+    private void propagateEvolution(SchemaCategoryEntity category, QueryEvolution evolution) {
         final var oldVersion = category.systemVersion;
 
         category.systemVersion = evolution.version;

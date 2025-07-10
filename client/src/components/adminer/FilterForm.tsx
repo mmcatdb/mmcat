@@ -4,7 +4,7 @@ import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 import { PropertyFilterForm } from '@/components/adminer/PropertyFilterForm';
 import type { AdminerFilterQueryStateAction, AdminerFilterQueryState } from '@/components/adminer/adminerReducer';
-import type { DatasourceType } from '@/types/datasource/Datasource';
+import type { DatasourceType } from '@/types/Datasource';
 
 type FilterFormProps = {
     /** A state that stores data selected by user. */

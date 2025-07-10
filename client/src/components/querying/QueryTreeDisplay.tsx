@@ -1,4 +1,4 @@
-import { type Datasource } from '@/types/datasource';
+import { type Datasource } from '@/types/Datasource';
 import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, QueryNodeType, type UnionNode, type QueryNode, type PatternTree, type JoinCandidate } from '@/types/query';
 import { capitalize } from '@/types/utils/common';
 import { Fragment } from 'react/jsx-runtime';

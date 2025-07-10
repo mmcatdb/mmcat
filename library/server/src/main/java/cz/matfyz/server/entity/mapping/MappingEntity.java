@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class MappingWrapper extends VersionedEntity {
+public class MappingEntity extends VersionedEntity {
 
     public final Id categoryId;
     public final Id datasourceId;
@@ -27,7 +27,7 @@ public class MappingWrapper extends VersionedEntity {
     public final String kindName;
     public final ComplexProperty accessPath;
 
-    private MappingWrapper(
+    private MappingEntity(
         Id id,
         Version version,
         Version lastValid,
@@ -48,8 +48,8 @@ public class MappingWrapper extends VersionedEntity {
         this.accessPath = accessPath;
     }
 
-    public static MappingWrapper createNew(Version version, Id categoryId, Id datasourceId, Key rootObjexKey, List<Signature> primaryKey, String kindName, ComplexProperty accessPath) {
-        return new MappingWrapper(
+    public static MappingEntity createNew(Version version, Id categoryId, Id datasourceId, Key rootObjexKey, List<Signature> primaryKey, String kindName, ComplexProperty accessPath) {
+        return new MappingEntity(
             Id.createNew(),
             version,
             version,
@@ -83,9 +83,9 @@ public class MappingWrapper extends VersionedEntity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(MappingJsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(MappingJsonValue.class);
 
-    public static MappingWrapper fromJsonValue(Id id, Version version, Version lastValid, Id categoryId, Id datasourceId, String jsonValue) throws JsonProcessingException {
+    public static MappingEntity fromJsonValue(Id id, Version version, Version lastValid, Id categoryId, Id datasourceId, String jsonValue) throws JsonProcessingException {
         final MappingJsonValue json = jsonValueReader.readValue(jsonValue);
-        return new MappingWrapper(
+        return new MappingEntity(
             id,
             version,
             lastValid,

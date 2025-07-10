@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class DatasourceWrapper extends Entity {
+public class DatasourceEntity extends Entity {
 
     public static final String PASSWORD_FIELD_NAME = "password";
 
@@ -19,15 +19,15 @@ public class DatasourceWrapper extends Entity {
     public final DatasourceType type;
     public ObjectNode settings;
 
-    private DatasourceWrapper(Id id, String label, DatasourceType type, ObjectNode settings) {
+    private DatasourceEntity(Id id, String label, DatasourceType type, ObjectNode settings) {
         super(id);
         this.label = label;
         this.type = type;
         this.settings = settings;
     }
 
-    public static DatasourceWrapper createNew(DatasourceInit init) {
-        return new DatasourceWrapper(
+    public static DatasourceEntity createNew(DatasourceInit init) {
+        return new DatasourceEntity(
             Id.createNew(),
             init.label(),
             init.type(),
@@ -66,9 +66,9 @@ public class DatasourceWrapper extends Entity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static DatasourceWrapper fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
+    public static DatasourceEntity fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
         final JsonValue json = jsonValueReader.readValue(jsonValue);
-        return new DatasourceWrapper(
+        return new DatasourceEntity(
             id,
             json.label(),
             json.type(),

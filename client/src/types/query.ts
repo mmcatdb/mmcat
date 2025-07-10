@@ -1,4 +1,4 @@
-import { type DatasourceResponse } from './datasource';
+import { type DatasourceResponse } from './Datasource';
 import type { Entity, Id, VersionId } from './id';
 import { type SignatureResponse } from './identifiers';
 

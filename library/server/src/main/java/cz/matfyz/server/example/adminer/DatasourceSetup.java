@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.adminer;
 
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.example.common.DatasourceSettings;
 import cz.matfyz.server.global.Configuration.SetupProperties;
@@ -25,7 +25,7 @@ class DatasourceSetup {
         this.datasourceService = datasourceService;
     }
 
-    List<DatasourceWrapper> createDatasources() {
+    List<DatasourceEntity> createDatasources() {
         final List<DatasourceInit> inits = new ArrayList<>();
 
         inits.add(settings.createPostgreSQL("PostgreSQL - Adminer"));

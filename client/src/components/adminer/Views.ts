@@ -1,5 +1,5 @@
 import { View } from '@/types/adminer/View';
-import { DatasourceType } from '@/types/datasource';
+import { DatasourceType } from '@/types/Datasource';
 
 export const AVAILABLE_VIEWS: Record<DatasourceType, View[]> = {
     [DatasourceType.neo4j]: [ View.table, View.document, View.graph ],

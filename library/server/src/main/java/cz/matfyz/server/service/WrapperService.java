@@ -3,7 +3,7 @@ package cz.matfyz.server.service;
 import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.exception.DatasourceException;
 import cz.matfyz.wrapperjsonld.JsonLdControlWrapper;
 import cz.matfyz.wrapperjsonld.JsonLdProvider;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WrapperService {
 
-    public BaseControlWrapper getControlWrapper(DatasourceWrapper datasource) {
+    public BaseControlWrapper getControlWrapper(DatasourceEntity datasource) {
         try {
             return switch (datasource.type) {
                 case mongodb -> new MongoDBControlWrapper(getProvider(
@@ -72,7 +72,7 @@ public class WrapperService {
 
     @SuppressWarnings("unchecked")
     private <TProvider extends AbstractDatasourceProvider, TSettings> TProvider getProvider(
-        DatasourceWrapper datasource,
+        DatasourceEntity datasource,
         Class<TSettings> clazz,
         CreateProviderFunction<TProvider, TSettings> create
     ) throws JsonProcessingException {
@@ -101,7 +101,7 @@ public class WrapperService {
 
     // JsonLd
 
-    private JsonLdControlWrapper getJsonLdControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+    private JsonLdControlWrapper getJsonLdControlWrapper(DatasourceEntity datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, JsonLdSettings.class);
         final var provider = new JsonLdProvider(settings);
 
@@ -110,7 +110,7 @@ public class WrapperService {
 
     // Json
 
-    private JsonControlWrapper getJsonControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+    private JsonControlWrapper getJsonControlWrapper(DatasourceEntity datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, JsonSettings.class);
         final var provider = new JsonProvider(settings);
 
@@ -119,7 +119,7 @@ public class WrapperService {
 
     // Csv
 
-    private CsvControlWrapper getCsvControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+    private CsvControlWrapper getCsvControlWrapper(DatasourceEntity datasource) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(datasource.settings, CsvSettings.class);
         final var provider = new CsvProvider(settings);
 

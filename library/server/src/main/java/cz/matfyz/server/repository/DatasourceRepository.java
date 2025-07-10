@@ -5,7 +5,7 @@ import static cz.matfyz.server.repository.utils.Utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
@@ -21,14 +21,14 @@ public class DatasourceRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    private static DatasourceWrapper fromResultSet(ResultSet resultSet) throws SQLException, JsonProcessingException {
+    private static DatasourceEntity fromResultSet(ResultSet resultSet) throws SQLException, JsonProcessingException {
         final Id id = getId(resultSet, "id");
         final String jsonValue = resultSet.getString("json_value");
 
-        return DatasourceWrapper.fromJsonValue(id, jsonValue);
+        return DatasourceEntity.fromJsonValue(id, jsonValue);
     }
 
-    public DatasourceWrapper find(Id id) {
+    public DatasourceEntity find(Id id) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("SELECT * FROM datasource WHERE id = ?;");
             setId(statement, 1, id);
@@ -40,7 +40,7 @@ public class DatasourceRepository {
         "Datasource", id);
     }
 
-    public List<DatasourceWrapper> findAll() {
+    public List<DatasourceEntity> findAll() {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("SELECT * FROM datasource ORDER BY id;");
             final var resultSet = statement.executeQuery();
@@ -50,7 +50,7 @@ public class DatasourceRepository {
         });
     }
 
-    public List<DatasourceWrapper> findAllInCategory(Id categoryId) {
+    public List<DatasourceEntity> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
@@ -69,7 +69,7 @@ public class DatasourceRepository {
         });
     }
 
-    public void save(DatasourceWrapper datasource) {
+    public void save(DatasourceEntity datasource) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO datasource (id, json_value)

@@ -1,5 +1,5 @@
 import type { Entity, Id, VersionId } from './id';
-import {  Datasource, type DatasourceResponse } from './datasource';
+import { Datasource } from './Datasource';
 import { MappingInfo, type MappingInfoResponse } from './mapping';
 
 export type ActionResponse = {
@@ -40,20 +40,16 @@ export enum ActionType {
     RSDToCategory = 'RSDToCategory'
 }
 
-export const ACTION_TYPES = [
-    {
-        label: 'Model to Category',
-        value: ActionType.ModelToCategory,
-    },
-    {
-        label: 'Category to Model',
-        value: ActionType.CategoryToModel,
-    },
-    {
-        label: 'RSD to Category',
-        value: ActionType.RSDToCategory,
-    },
-];
+export const ACTION_TYPES = [ {
+    type: ActionType.ModelToCategory,
+    label: 'Model to Category',
+}, {
+    type: ActionType.CategoryToModel,
+    label: 'Category to Model',
+}, {
+    type: ActionType.RSDToCategory,
+    label: 'RSD to Category',
+} ];
 
 type JobPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
@@ -94,7 +90,7 @@ export type JobPayloadInit = {
 };
 
 type ModelToCategoryPayloadResponse = JobPayloadResponse<ActionType.ModelToCategory> & {
-    datasource: DatasourceResponse;
+    datasource: Datasource;
     mappings: MappingInfoResponse[];
 };
 
@@ -115,7 +111,7 @@ class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategor
 }
 
 type CategoryToModelPayloadResponse = JobPayloadResponse<ActionType.CategoryToModel> & {
-    datasource: DatasourceResponse;
+    datasource: Datasource;
     mappings: MappingInfoResponse[];
 };
 
@@ -157,7 +153,7 @@ class UpdateSchemaPayload implements JobPayloadType<ActionType.UpdateSchema> {
 }
 
 type RSDToCategoryPayloadResponse = JobPayloadResponse<ActionType.RSDToCategory> & {
-    datasources: DatasourceResponse[];
+    datasources: Datasource[];
 };
 
 class RSDToCategoryPayload implements JobPayloadType<ActionType.RSDToCategory> {

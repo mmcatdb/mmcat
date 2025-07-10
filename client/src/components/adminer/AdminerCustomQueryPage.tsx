@@ -19,7 +19,7 @@ import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { View } from '@/types/adminer/View';
-import { DatasourceType, type Datasource } from '@/types/datasource/Datasource';
+import { DatasourceType, type Datasource } from '@/types/Datasource';
 import type { DataResponse, ErrorResponse } from '@/types/adminer/DataResponse';
 import { type KindReference } from '@/types/adminer/AdminerReferences';
 

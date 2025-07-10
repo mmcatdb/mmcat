@@ -9,7 +9,7 @@ import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
 import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
 import { api } from '@/api';
 import { QueryType } from '@/types/adminer/QueryType';
-import type { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/Datasource';
 import { twJoin } from 'tailwind-merge';
 
 /**
@@ -85,6 +85,6 @@ async function adminerLoader(): Promise<AdminerLoaderData> {
         throw new Error('Failed to load datasources');
 
     return {
-        datasources: response.data,
+        datasources: response.data.map(Datasource.fromResponse),
     };
 }

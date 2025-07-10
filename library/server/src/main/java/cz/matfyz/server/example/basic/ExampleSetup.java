@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.basic;
 
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
-import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
+import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.service.SchemaCategoryService;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.basic.Schema;
@@ -24,10 +24,10 @@ public class ExampleSetup {
     @Qualifier("basicMappingSetup")
     private MappingSetup mappingSetup;
 
-    public SchemaCategoryWrapper setup() {
-        final SchemaCategoryWrapper schema = createSchemaCategory();
-        final List<DatasourceWrapper> datasources = datasourceSetup.createDatasources();
-        final List<MappingWrapper> mappings = mappingSetup.createMappings(datasources, schema);
+    public SchemaCategoryEntity setup() {
+        final SchemaCategoryEntity schema = createSchemaCategory();
+        final List<DatasourceEntity> datasources = datasourceSetup.createDatasources();
+        final List<MappingEntity> mappings = mappingSetup.createMappings(datasources, schema);
 
         // TODO jobs
 
@@ -37,12 +37,12 @@ public class ExampleSetup {
     @Autowired
     private SchemaCategoryService schemaService;
 
-    private SchemaCategoryWrapper createSchemaCategory() {
-        final SchemaCategoryWrapper schemaWrapper = schemaService.create(Schema.schemaLabel);
+    private SchemaCategoryEntity createSchemaCategory() {
+        final SchemaCategoryEntity schemaEntity = schemaService.create(Schema.schemaLabel);
 
-        final SchemaEvolutionInit schemaUpdate = SchemaSetup.createNewUpdate(schemaWrapper);
+        final SchemaEvolutionInit schemaUpdate = SchemaSetup.createNewUpdate(schemaEntity);
 
-        return schemaService.update(schemaWrapper.id(), schemaUpdate);
+        return schemaService.update(schemaEntity.id(), schemaUpdate);
     }
 
 }

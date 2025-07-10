@@ -32,13 +32,13 @@ import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.InstanceCategoryWrapper;
+import cz.matfyz.server.entity.InstanceCategoryEntity;
 import cz.matfyz.server.entity.Query;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
 import cz.matfyz.server.entity.file.File;
 import cz.matfyz.server.entity.job.Job;
@@ -46,7 +46,7 @@ import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
 import cz.matfyz.server.entity.job.data.ModelJobData;
 import cz.matfyz.server.entity.mapping.MappingInit;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.global.Configuration.ServerProperties;
 import cz.matfyz.server.global.Configuration.SparkProperties;
@@ -197,20 +197,20 @@ public class JobExecutorService {
             throw SessionException.runNotInSession(run.id());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
-        final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
+        final @Nullable InstanceCategoryEntity instanceEntity = instanceRepository.find(run.sessionId);
 
-        InstanceCategory instance = instanceWrapper != null
-            ? instanceWrapper.toInstanceCategory(schema)
+        InstanceCategory instance = instanceEntity != null
+            ? instanceEntity.toInstanceCategory(schema)
             : new InstanceBuilder(schema).build();
 
-        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
-        final Datasource datasource = datasourceWrapper.toDatasource();
+        final DatasourceEntity datasourceEntity = datasourceRepository.find(payload.datasourceId());
+        final Datasource datasource = datasourceEntity.toDatasource();
         final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
-            .filter(wrapper -> payload.mappingIds().isEmpty() || payload.mappingIds().contains(wrapper.id()))
-            .map(wrapper -> wrapper.toMapping(datasource, schema))
+            .filter(entity -> payload.mappingIds().isEmpty() || payload.mappingIds().contains(entity.id()))
+            .map(entity -> entity.toMapping(datasource, schema))
             .toList();
 
-        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceWrapper).getPullWrapper();
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceEntity).getPullWrapper();
 
         for (final Mapping mapping : mappings)
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
@@ -224,20 +224,20 @@ public class JobExecutorService {
             throw SessionException.runNotInSession(run.id());
 
         final SchemaCategory schema = schemaRepository.find(run.categoryId).toSchemaCategory();
-        final @Nullable InstanceCategoryWrapper instanceWrapper = instanceRepository.find(run.sessionId);
+        final @Nullable InstanceCategoryEntity instanceEntity = instanceRepository.find(run.sessionId);
 
-        final InstanceCategory instance = instanceWrapper != null
-            ? instanceWrapper.toInstanceCategory(schema)
+        final InstanceCategory instance = instanceEntity != null
+            ? instanceEntity.toInstanceCategory(schema)
             : new InstanceBuilder(schema).build();
 
-        final DatasourceWrapper datasourceWrapper = datasourceRepository.find(payload.datasourceId());
-        final Datasource datasource = datasourceWrapper.toDatasource();
+        final DatasourceEntity datasourceEntity = datasourceRepository.find(payload.datasourceId());
+        final Datasource datasource = datasourceEntity.toDatasource();
         final List<Mapping> mappings = mappingRepository.findAllInCategory(run.categoryId, payload.datasourceId()).stream()
-            .filter(wrapper -> payload.mappingIds().isEmpty() || payload.mappingIds().contains(wrapper.id()))
-            .map(wrapper -> wrapper.toMapping(datasource, schema))
+            .filter(entity -> payload.mappingIds().isEmpty() || payload.mappingIds().contains(entity.id()))
+            .map(entity -> entity.toMapping(datasource, schema))
             .toList();
 
-        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceWrapper);
+        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasourceEntity);
 
         final var result = new InstanceToDatabase()
             .input(
@@ -266,7 +266,7 @@ public class JobExecutorService {
 
         final var resultString = result.statementsAsString();
 
-        final File file = fileService.create(job.id(), datasourceWrapper.id(), run.categoryId, run.label, executed, datasource.type, resultString);
+        final File file = fileService.create(job.id(), datasourceEntity.id(), run.categoryId, run.label, executed, datasource.type, resultString);
 
         // Instead of the result we are saving only the id of the file, where the result is saved
         job.data = new ModelJobData(file.id().toString());
@@ -299,7 +299,7 @@ public class JobExecutorService {
     }
 
     private QueryEvolver createQueryEvolver(Id categoryId, Version prevVersion, Version nextVersion) {
-        final SchemaCategoryWrapper wrapper = schemaRepository.find(categoryId);
+        final SchemaCategoryEntity categoryEntity = schemaRepository.find(categoryId);
         final List<SchemaEvolutionAlgorithm> updates = evolutionRepository
             .findAllSchemaEvolutions(categoryId).stream()
             // TODO Check if the version comparison is correct (with respect to the previous algorithm)
@@ -308,12 +308,12 @@ public class JobExecutorService {
             .map(u -> u.toSchemaAlgorithm(prevVersion)).toList();
             // .map(SchemaUpdate::toEvolution).toList();
 
-        final SchemaCategory prevSchema = wrapper.toSchemaCategory();
-        final MetadataCategory prevMetadata = wrapper.toMetadataCategory(prevSchema);
-        final SchemaCategory nextSchema = wrapper.toSchemaCategory();
-        final MetadataCategory nextMetadata = wrapper.toMetadataCategory(nextSchema);
-        SchemaEvolutionAlgorithm.setToVersion(prevSchema, prevMetadata, updates, wrapper.version(), prevVersion);
-        SchemaEvolutionAlgorithm.setToVersion(nextSchema, nextMetadata, updates, wrapper.version(), nextVersion);
+        final SchemaCategory prevSchema = categoryEntity.toSchemaCategory();
+        final MetadataCategory prevMetadata = categoryEntity.toMetadataCategory(prevSchema);
+        final SchemaCategory nextSchema = categoryEntity.toSchemaCategory();
+        final MetadataCategory nextMetadata = categoryEntity.toMetadataCategory(nextSchema);
+        SchemaEvolutionAlgorithm.setToVersion(prevSchema, prevMetadata, updates, categoryEntity.version(), prevVersion);
+        SchemaEvolutionAlgorithm.setToVersion(nextSchema, nextMetadata, updates, categoryEntity.version(), nextVersion);
 
         return new QueryEvolver(prevSchema, nextSchema, updates);
     }
@@ -324,9 +324,9 @@ public class JobExecutorService {
         final List<Datasource> datasources = new ArrayList<>();
         final var provider = new DefaultControlWrapperProvider();
         payload.datasourceIds().forEach(id -> {
-            final var datasourceWrapper = datasourceRepository.find(id);
-            final var datasource = datasourceWrapper.toDatasource();
-            final var control = wrapperService.getControlWrapper(datasourceWrapper).enableSpark(sparkSettings);
+            final var datasourceEntity = datasourceRepository.find(id);
+            final var datasource = datasourceEntity.toDatasource();
+            final var control = wrapperService.getControlWrapper(datasourceEntity).enableSpark(sparkSettings);
             datasources.add(datasource);
             provider.setControlWrapper(datasource, control);
         });
@@ -363,8 +363,8 @@ public class JobExecutorService {
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
 
         final var mappings = data.datasources().stream().flatMap(serializedDatasource -> {
-            final var datasourceWrapper = datasourceRepository.find(new Id(serializedDatasource.datasourceId()));
-            final var datasource = datasourceWrapper.toDatasource();
+            final var datasourceEntity = datasourceRepository.find(new Id(serializedDatasource.datasourceId()));
+            final var datasource = datasourceEntity.toDatasource();
             return serializedDatasource.mappings().stream().map(serializedMapping -> serializedMapping.toMapping(datasource, schema));
         }).toList();
 
@@ -432,18 +432,18 @@ public class JobExecutorService {
     }
 
     private void finishRSDToCategoryProcessing(JobWithRun job, SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings) {
-        final var categoryWrapper = schemaRepository.find(job.run().categoryId);
+        final var categoryEntity = schemaRepository.find(job.run().categoryId);
 
-        final var version = categoryWrapper.systemVersion().generateNext();
-        categoryWrapper.update(version, schema, metadata);
-        schemaRepository.save(categoryWrapper);
+        final var version = categoryEntity.systemVersion().generateNext();
+        categoryEntity.update(version, schema, metadata);
+        schemaRepository.save(categoryEntity);
 
         final RSDToCategoryPayload payload = (RSDToCategoryPayload) job.job().payload;
-        final Map<Id, DatasourceWrapper> datasourceWrappers = new TreeMap<>();
-        payload.datasourceIds().stream().map(datasourceRepository::find).forEach(dw -> datasourceWrappers.put(dw.id(), dw));
+        final Map<Id, DatasourceEntity> datasourceEntities = new TreeMap<>();
+        payload.datasourceIds().stream().map(datasourceRepository::find).forEach(dw -> datasourceEntities.put(dw.id(), dw));
 
         for (final Mapping mapping : mappings) {
-            final MappingInit init = MappingInit.fromMapping(mapping, categoryWrapper.id(), new Id(mapping.datasource().identifier));
+            final MappingInit init = MappingInit.fromMapping(mapping, categoryEntity.id(), new Id(mapping.datasource().identifier));
             mappingService.create(init);
         }
 

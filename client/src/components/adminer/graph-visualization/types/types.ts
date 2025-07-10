@@ -37,7 +37,6 @@ export type VizItemProperty = {
     value: string;
 };
 
-
 export type VizItem = NodeItem | RelationshipItem | CanvasItem | StatusItem;
 
 export type NodeItem = {

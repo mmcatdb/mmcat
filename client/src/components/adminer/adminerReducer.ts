@@ -2,7 +2,7 @@ import { getNewView } from './Views';
 import { View } from '@/types/adminer/View';
 import { Operator, UNARY_OPERATORS } from '@/types/adminer/Operators';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
-import type { Datasource } from '@/types/datasource';
+import type { Datasource } from '@/types/Datasource';
 import type { Id } from '@/types/id';
 
 export const DEFAULT_LIMIT = 50;

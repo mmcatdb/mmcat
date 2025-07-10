@@ -13,7 +13,7 @@ import { useFetchReferences } from '@/components/adminer/useFetchReferences';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { DatabaseView } from '@/components/adminer/DatabaseView';
 import { View } from '@/types/adminer/View';
-import { type Datasource, DatasourceType } from '@/types/datasource';
+import { type Datasource, DatasourceType } from '@/types/Datasource';
 import type { Id } from '@/types/id';
 import type { QueryParams } from '@/types/api/routes';
 import type { DataResponse } from '@/types/adminer/DataResponse';

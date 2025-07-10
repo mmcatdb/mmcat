@@ -1,6 +1,6 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST, PUT, DELETE } from '../routeFunctions';
-import type { DatasourceInit, DatasourceUpdate, DatasourceResponse } from '@/types/datasource';
+import type { DatasourceInit, DatasourceUpdate, DatasourceResponse } from '@/types/Datasource';
 import type { Id } from '@/types/id';
 
 const datasources = {

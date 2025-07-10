@@ -2,7 +2,7 @@ import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
 import { View } from '@/types/adminer/View';
 import { Operator } from '@/types/adminer/Operators';
 import { QueryType } from '@/types/adminer/QueryType';
-import type { Datasource } from '@/types/datasource/Datasource';
+import type { Datasource } from '@/types/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import { getInitPaginationState, type PaginationState, type ActiveAdminerState, type AdminerFilterQueryState, type KindFilterState, DEFAULT_LIMIT, DEFAULT_OFFSET } from '@/components/adminer/adminerReducer';

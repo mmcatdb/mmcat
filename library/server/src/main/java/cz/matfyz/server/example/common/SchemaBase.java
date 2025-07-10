@@ -21,7 +21,7 @@ import cz.matfyz.evolution.category.UpdateObjex;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MorphismMetadata;
 import cz.matfyz.evolution.metadata.ObjexMetadata;
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.ArrayList;
@@ -36,8 +36,8 @@ public abstract class SchemaBase {
 
     private static final double POSITION_UNIT = 125;
 
-    // The wrapper is needed for updates (if the schema isn't created from scratch, we need the previous data).
-    private final SchemaCategoryWrapper wrapper;
+    // The entity is needed for updates (if the schema isn't created from scratch, we need the previous data).
+    private final SchemaCategoryEntity entity;
 
     /** The example schema category from which we take inspiration for objexes and morphisms in the new one. */
     private final SchemaCategory originalSchema;
@@ -47,8 +47,8 @@ public abstract class SchemaBase {
     private final SchemaCategory newSchema;
     private final MetadataCategory newMetadata;
 
-    protected SchemaBase(SchemaCategoryWrapper wrapper, SchemaCategory schema) {
-        this.wrapper = wrapper;
+    protected SchemaBase(SchemaCategoryEntity entity, SchemaCategory schema) {
+        this.entity = entity;
         this.originalSchema = schema;
         this.newSchema = new SchemaCategory();
         this.newMetadata = MetadataCategory.createEmpty(newSchema);
@@ -62,7 +62,7 @@ public abstract class SchemaBase {
     protected SchemaEvolutionInit innerCreateNewUpdate() {
         createOperations();
 
-        return new SchemaEvolutionInit(wrapper.version(), schemaOperations, metadataOperations);
+        return new SchemaEvolutionInit(entity.version(), schemaOperations, metadataOperations);
     }
 
     protected abstract void createOperations();

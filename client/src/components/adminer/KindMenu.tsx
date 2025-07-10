@@ -19,8 +19,8 @@ type KindMenuProps = {
 };
 
 type Option = {
-    label: string;
     value: string;
+    label: string;
 };
 
 /**

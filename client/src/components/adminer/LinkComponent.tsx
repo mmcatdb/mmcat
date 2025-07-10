@@ -4,7 +4,7 @@ import { routes } from '@/routes/routes';
 import { usePreferences } from '@/components/PreferencesProvider';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
-import type { Datasource } from '@/types/datasource/Datasource';
+import type { Datasource } from '@/types/Datasource';
 
 const NAME_LENGTH = 2;
 

@@ -1,4 +1,4 @@
-import { Datasource, type DatasourceType, type DatasourceResponse } from '../datasource';
+import { type DatasourceResponse, type DatasourceType, Datasource } from '../Datasource';
 import { ComplexProperty, Mapping, type MappingResponse, type ParentProperty } from '@/types/mapping';
 import { DynamicName, type Key, type Signature } from '../identifiers';
 import { type Objex, type Morphism } from '@/types/schema';
@@ -7,7 +7,7 @@ import { ComparableSet } from '@/types/utils/ComparableSet';
 import { type Category } from '../schema';
 
 export type LogicalModel = {
-    datasource: Datasource;
+    datasource: DatasourceResponse;
     mappings: Mapping[];
 };
 

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@heroui/react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { ReferenceComponent } from '@/components/adminer/ReferenceComponent';
-import type { Datasource } from '@/types/datasource/Datasource';
+import type { Datasource } from '@/types/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 

@@ -1,4 +1,4 @@
-import { DatasourceType } from '../datasource/Datasource';
+import { DatasourceType } from '../Datasource';
 
 export enum Operator {
     Equal = 'Equal',

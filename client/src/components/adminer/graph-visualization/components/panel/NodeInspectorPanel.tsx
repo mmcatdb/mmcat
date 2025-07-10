@@ -7,7 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
 import { type GraphResponse } from '@/types/adminer/DataResponse';
 import { type KindReference } from '@/types/adminer/AdminerReferences';
-import { type Datasource } from '@/types/datasource';
+import { type Datasource } from '@/types/Datasource';
 
 type NodeInspectorPanelProps = {
     graphStyle: GraphStyleModel;

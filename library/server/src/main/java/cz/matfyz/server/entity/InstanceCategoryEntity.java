@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public record InstanceCategoryWrapper(
+public record InstanceCategoryEntity(
     Id sessionId,
     Id categoryId,
     SerializedInstance data
@@ -24,13 +24,13 @@ public record InstanceCategoryWrapper(
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(SerializedInstance.class);
 
-    public static InstanceCategoryWrapper fromJsonValue(Id sessionId, Id categoryId, String jsonValue) throws JsonProcessingException {
+    public static InstanceCategoryEntity fromJsonValue(Id sessionId, Id categoryId, String jsonValue) throws JsonProcessingException {
         final SerializedInstance data = jsonValueReader.readValue(jsonValue);
-        return new InstanceCategoryWrapper(sessionId, categoryId, data);
+        return new InstanceCategoryEntity(sessionId, categoryId, data);
     }
 
-    public static InstanceCategoryWrapper fromInstanceCategory(Id sessionId, Id categoryId, InstanceCategory instance) {
-        return new InstanceCategoryWrapper(
+    public static InstanceCategoryEntity fromInstanceCategory(Id sessionId, Id categoryId, InstanceCategory instance) {
+        return new InstanceCategoryEntity(
             sessionId,
             categoryId,
             InstanceSerializer.serialize(instance)

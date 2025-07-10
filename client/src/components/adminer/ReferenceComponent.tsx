@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@heroui/react';
 import { LinkComponent } from '@/components/adminer/LinkComponent';
 import { getHrefFromReference } from '@/components/adminer/URLParamsState';
-import type { Datasource } from '@/types/datasource/Datasource';
+import type { Datasource } from '@/types/Datasource';
 import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';

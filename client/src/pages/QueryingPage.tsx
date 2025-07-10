@@ -1,6 +1,6 @@
 import { api } from '@/api';
 import { QueryTreeDisplay } from '@/components/querying/QueryTreeDisplay';
-import { type Datasource } from '@/types/datasource';
+import { type Datasource } from '@/types/Datasource';
 import { type QueryDescription } from '@/types/query';
 import { Button, Textarea } from '@heroui/react';
 import { useState } from 'react';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { type Params, useLoaderData, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/api';
-import { Datasource, type Settings } from '@/types/datasource';
+import { Datasource, type DatasourceSettings } from '@/types/Datasource';
 import { Button, Input, Tooltip } from '@heroui/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
@@ -116,8 +116,8 @@ function DatasourceDisplay() {
     const { datasource: initialDatasource } = useLoaderData() as DatasourceLoaderData | DatasourceInCategoryLoaderData;
 
     const [ datasource, setDatasource ] = useState<Datasource>(initialDatasource);
-    const [ formValues, setFormValues ] = useState<Settings>(initialDatasource.settings);
-    const [ isConfigurationShown, setIsConfigurationShown ] = useState(false);
+    const [ formValues, setFormValues ] = useState<DatasourceSettings>(initialDatasource.settings);
+    const [ isSpecsShown, setIsSpecsShown ] = useState(false);
     const [ isUpdating, setIsUpdating ] = useState(false);
     const [ isSaving, setIsSaving ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasource-detail-page');
@@ -125,7 +125,7 @@ function DatasourceDisplay() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    function handleInputChange(field: keyof Settings, value: unknown) {
+    function handleInputChange(field: keyof DatasourceSettings, value: unknown) {
         if (!formValues)
             return;
 
@@ -133,6 +133,7 @@ function DatasourceDisplay() {
     }
 
     function handleLabelChange(newLabel: string) {
+        // FIXME This should be in the form.
         setDatasource(prev => ({ ...prev, label: newLabel } as Datasource));
     }
 
@@ -158,7 +159,7 @@ function DatasourceDisplay() {
         setIsUpdating(false);
 
         if (updatedDatasource.status) {
-            setDatasource(updatedDatasource.data);
+            setDatasource(Datasource.fromResponse(updatedDatasource.data));
             toast.success('Datasource updated successfully!');
             // navigate only if label has changed
             if (datasource.label !== initialDatasource.label)
@@ -169,7 +170,7 @@ function DatasourceDisplay() {
         }
     }
 
-    function renderSettingsView(settings: Settings) {
+    function renderSettingsView(settings: DatasourceSettings) {
         return (
             <div className='space-y-4'>
                 {Object.entries(settings).map(([ key, value ]) => (
@@ -271,15 +272,15 @@ function DatasourceDisplay() {
                 <Button
                     size='sm'
                     variant='solid'
-                    onPress={() => setIsConfigurationShown(prev => !prev)}
+                    onPress={() => setIsSpecsShown(prev => !prev)}
                     className='mb-2'
                 >
-                    {isConfigurationShown ? 'Hide Configuration' : 'Show Configuration'}
+                    {isSpecsShown ? 'Hide specs' : 'Show specs'}
                 </Button>
-                {isConfigurationShown && (
+                {isSpecsShown && (
                     <div className='p-4 rounded-md bg-default-50'>
                         <pre className='text-sm text-default-600 overflow-x-auto'>
-                            {JSON.stringify(datasource?.configuration, null, 2)}
+                            {JSON.stringify(datasource.specs, null, 4)}
                         </pre>
                     </div>
                 )}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
 import { DatasourceModal } from '@/components/datasources/DatasourceModal';
 import { api } from '@/api';
-import { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/Datasource';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { Button, Tooltip } from '@heroui/react';

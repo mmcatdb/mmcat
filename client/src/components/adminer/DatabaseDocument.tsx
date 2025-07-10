@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Divider } from '@heroui/react';
 import { DocumentComponent } from '@/components/adminer/DocumentComponent';
 import { getDocumentFromGraphData } from '@/components/adminer/reshapeData';
-import type { Datasource } from '@/types/datasource/Datasource';
+import type { Datasource } from '@/types/Datasource';
 import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';

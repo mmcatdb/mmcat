@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { ErrorPage } from '@/pages/errorPages';
 import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES } from '@/types/action';
-import { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
 
@@ -187,7 +187,7 @@ function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) 
                 setActionType(selectedType);
             }}
         >
-            {item => <SelectItem key={item.value}>{item.label}</SelectItem>}
+            {item => <SelectItem key={item.type}>{item.label}</SelectItem>}
         </Select>
     );
 }

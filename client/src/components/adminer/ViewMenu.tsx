@@ -1,6 +1,6 @@
 import { Button, ButtonGroup } from '@heroui/react';
 import { AVAILABLE_VIEWS } from './Views';
-import type { DatasourceType } from '@/types/datasource';
+import type { DatasourceType } from '@/types/Datasource';
 import type { View } from '@/types/adminer/View';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 

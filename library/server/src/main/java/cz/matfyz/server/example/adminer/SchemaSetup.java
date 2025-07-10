@@ -1,18 +1,18 @@
 package cz.matfyz.server.example.adminer;
 
-import cz.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.example.common.SchemaBase;
 import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.adminer.Schema;
 
 class SchemaSetup extends SchemaBase {
 
-    private SchemaSetup(SchemaCategoryWrapper wrapper) {
-        super(wrapper, Schema.newSchema());
+    private SchemaSetup(SchemaCategoryEntity entity) {
+        super(entity, Schema.newSchema());
     }
 
-    static SchemaEvolutionInit createNewUpdate(SchemaCategoryWrapper wrapper) {
-        return new SchemaSetup(wrapper).innerCreateNewUpdate();
+    static SchemaEvolutionInit createNewUpdate(SchemaCategoryEntity entity) {
+        return new SchemaSetup(entity).innerCreateNewUpdate();
     }
 
     @Override protected void createOperations() {

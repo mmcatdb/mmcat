@@ -1,5 +1,5 @@
 import { Select, SelectItem } from '@heroui/react';
-import { type Datasource, DatasourceType } from '@/types/datasource';
+import { type Datasource, DatasourceType } from '@/types/Datasource';
 
 type DatasourceMenuProps = {
     /** Function for updating 'datasource' parameter. */
