@@ -8,9 +8,10 @@ import java.util.List;
 
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.ReferenceKind;
+import cz.matfyz.core.adminer.Reference.ReferenceKind;
 
 public class PostgreSQLUtils {
+
     private PostgreSQLUtils() {}
 
     /**
@@ -72,7 +73,7 @@ public class PostgreSQLUtils {
             return foreignKeys;
         }
         catch (SQLException e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 

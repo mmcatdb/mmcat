@@ -7,7 +7,6 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.KindNamesResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,54 +30,49 @@ public class AdminerController {
     private WrapperService wrapperService;
 
     /**
-     * Retrieves the available kind names from a given datasource.
-     *
-     * @param db The ID of the datasource.
-     * @param limit The maximum number of kind names to return. Defaults to 50.
-     * @param offset The offset from which to start retrieving kind names. Defaults to 0.
+     * Retrieves the available kind names from the given datasource.
      */
-    @GetMapping(value = "/adminer/{db}")
-    public KindNamesResponse getKindNames(
-        @PathVariable Id db,
-        @RequestParam(defaultValue = "50") String limit,
-        @RequestParam(defaultValue = "0") String offset
-    ) {
-        final var datasource = datasourceRepository.find(db);
+    @GetMapping(value = "/adminer/{datasourceId}")
+    public List<String> getKindNames(@PathVariable Id datasourceId) {
+        final var datasource = datasourceRepository.find(datasourceId);
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getKindNames(limit, offset);
+        return pullWrapper.getKindNames();
     }
 
     /**
      * Retrieves the data from a specific kind with optional filtering.
      *
-     * @param db The ID of the datasource.
+     * @param datasourceId The ID of the datasource.
      * @param kindName The name of the kind.
      * @param filters A JSON array string representing the filters to apply.
      * @param limit The maximum number of records to return. Defaults to 50.
      * @param offset The offset from which to start retrieving records. Defaults to 0.
      */
-    @GetMapping(value = "/adminer/{db}/kind")
-    public DataResponse getKind(
-        @PathVariable Id db,
+    @GetMapping(value = "/adminer/{datasourceId}/kind")
+    public DataResponse getRecords(
+        @PathVariable Id datasourceId,
         @RequestParam String kindName,
-        @RequestParam(defaultValue = "") String filters,
-        @RequestParam(defaultValue = "50") String limit,
-        @RequestParam(defaultValue = "0") String offset
+        @RequestParam(defaultValue = "") String filtersString,
+        @RequestParam(defaultValue = "50") String limitString,
+        @RequestParam(defaultValue = "0") String offsetString
     ) {
-        final var datasource = datasourceRepository.find(db);
+        final int limit = Integer.parseInt(limitString);
+        final int offset = Integer.parseInt(offsetString);
 
-        List<AdminerFilter> filterList = new ArrayList<>();
+        final var datasource = datasourceRepository.find(datasourceId);
 
-        if (!filters.isEmpty() && !filters.equals("[]")) {
+        List<AdminerFilter> filters = new ArrayList<>();
+
+        if (!filtersString.isEmpty() && !filtersString.equals("[]")) {
             try {
                 List<AdminerFilter> allFilters = new ObjectMapper()
                     .readerForListOf(AdminerFilter.class)
-                    .readValue(filters);
+                    .readValue(filtersString);
 
                 for (AdminerFilter filter : allFilters) {
                     if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty())
-                        filterList.add(filter);
+                        filters.add(filter);
                 }
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Invalid filter format.");
@@ -87,32 +81,32 @@ public class AdminerController {
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getKind(kindName, limit, offset, filterList);
+        return pullWrapper.getRecords(kindName, limit, offset, filters);
     }
 
     /**
-     * Retrieves the references (foreign key-like relationships) for a given kind in the specified datasource.
+     * Retrieves the references (foreign key-like relationships) for the given kind in the specified datasource.
      *
-     * @param db The ID of the datasource.
+     * @param datasourceId The ID of the datasource.
      * @param kindName The name of the kind for which to retrieve references.
      */
-    @GetMapping(value = "/adminer/{db}/references")
-    public List<Reference> getReferences(@PathVariable Id db, @RequestParam String kindName) {
-        final var datasource = datasourceRepository.find(db);
+    @GetMapping(value = "/adminer/{datasourceId}/references")
+    public List<Reference> getReferences(@PathVariable Id datasourceId, @RequestParam String kindName) {
+        final var datasource = datasourceRepository.find(datasourceId);
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getReferences(db.toString(), kindName);
+        return pullWrapper.getReferences(datasourceId.toString(), kindName);
     }
 
     /**
      * Executes a custom query string on the specified datasource and returns the result.
      *
-     * @param db The ID of the datasource.
+     * @param datasourceId The ID of the datasource.
      * @param query The query to be executed.
      */
-    @GetMapping(value = "/adminer/{db}/query")
-    public DataResponse getQueryResult(@PathVariable Id db, @RequestParam String query) {
-        final var datasource = datasourceRepository.find(db);
+    @GetMapping(value = "/adminer/{datasourceId}/query")
+    public DataResponse getQueryResult(@PathVariable Id datasourceId, @RequestParam String query) {
+        final var datasource = datasourceRepository.find(datasourceId);
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
         return pullWrapper.getQueryResult(new StringQuery(query));

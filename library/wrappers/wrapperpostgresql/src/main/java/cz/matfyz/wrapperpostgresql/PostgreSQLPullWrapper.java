@@ -8,7 +8,6 @@ import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
-import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.TableResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
@@ -167,7 +166,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             }
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -242,7 +241,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         ) {
             LOGGER.info("Execute PostgreSQL query:\n{}", statement);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (
+                ResultSet resultSet = statement.executeQuery()
+            ) {
                 final var builder = new ListResult.TableBuilder();
                 builder.addColumns(columns);
 
@@ -258,48 +259,37 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             }
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
-    /**
-     * Retrieves a list of kind names from the database.
-     */
-    @Override public KindNamesResponse getKindNames(String limit, String offset) {
+    @Override public List<String> getKindNames() {
         try (
             Connection connection = provider.getConnection();
             Statement stmt = connection.createStatement();
         ) {
-            final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' LIMIT " + limit + " OFFSET " + offset + ";";
-            ResultSet resultSet = stmt.executeQuery(query);
-            List<String> data = new ArrayList<>();
+            final String query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public';";
+            final ResultSet resultSet = stmt.executeQuery(query);
+            final List<String> output = new ArrayList<>();
 
-            while (resultSet.next()) {
-                String kindName = resultSet.getString(1);
-                data.add(kindName);
-            }
+            while (resultSet.next())
+                output.add(resultSet.getString(1));
 
-            return new KindNamesResponse(data);
+            return output;
         }
         catch (Exception e) {
-			throw PullForestException.innerException(e);
+			throw PullForestException.inner(e);
 		}
     }
 
-    /**
-     * Retrieves data for a specific kind with pagination and optional filtering.
-     */
-    @Override public TableResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
-        KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
+    @Override public TableResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filters) {
+        KindNameQuery kindNameQuery = new KindNameQuery(kindName, limit, offset);
         if (filters == null)
             return getQueryResult(kindNameQuery);
 
         return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
 
-    /**
-     * Retrieves a list of references for a specified kind.
-     */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         try (
             Connection connection = provider.getConnection();
@@ -308,13 +298,10 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             return PostgreSQLUtils.getReferences(stmt, datasourceId, kindName);
         }
         catch (Exception e) {
-			throw PullForestException.innerException(e);
+			throw PullForestException.inner(e);
 		}
     }
 
-    /**
-     * Retrieves the result of the given query.
-     */
     @Override public TableResponse getQueryResult(QueryContent query) {
         try (
             Connection connection = provider.getConnection();
@@ -353,7 +340,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             return new TableResponse(data, itemCount, propertyNames);
         }
         catch (Exception e) {
-			throw PullForestException.innerException(e);
+			throw PullForestException.inner(e);
 		}
     }
 

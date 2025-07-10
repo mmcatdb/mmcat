@@ -44,7 +44,8 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
 
     function handleSave() {
         if (onSave)
-            onSave(state.mapping, kindName);
+            // FIXME
+            onSave(state.form, kindName);
         navigate(-1);
     }
 
@@ -195,7 +196,7 @@ type StateDispatchProps = {
  * Renders a card for building and displaying the access path.
  */
 function AccessPathCard({ state, dispatch }: StateDispatchProps) {
-    const { mapping, selection, selectionType } = state;
+    const { form, selection, selectionType } = state;
 
     function handleAddSubpath() {
         // Switch to path selection mode when + is clicked
@@ -219,7 +220,7 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
     }
 
     function renderAccessPath() {
-        const root = mapping.accessPath;
+        const root = form.accessPath;
 
         return (
             <div className='text-sm text-default-800'>

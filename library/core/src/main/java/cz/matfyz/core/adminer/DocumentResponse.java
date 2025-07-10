@@ -8,6 +8,7 @@ import org.bson.Document;
  * Represents a document response.
  */
 public class DocumentResponse extends DataResponse {
+
     private List<Document> data;
     private static final String TYPE = "document";
 

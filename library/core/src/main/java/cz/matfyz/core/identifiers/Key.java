@@ -54,40 +54,29 @@ public class Key implements Serializable, Comparable<Key> {
         return hash;
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<Key> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<Key> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<Key> t) { super(t); }
 
         @Override public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeNumber(key.value);
         }
-
     }
 
     public static class Deserializer extends StdDeserializer<Key> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         @Override public Key deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-
             final int value = node.has("value") ? node.get("value").asInt() : node.asInt();
             return new Key(value);
         }
-
     }
+
+    // #endregion
 
     public static class KeyGenerator {
 

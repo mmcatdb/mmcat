@@ -33,7 +33,7 @@ class JsonTests {
     @Test
     void testServerUrl() throws Exception {
         @SuppressWarnings("deprecation")
-        URL url = new URL("https://data.mmcatdb.com/yelp_business_sample.json");
+        final URL url = new URL("https://data.mmcatdb.com/yelp_business_sample.json");
         final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
 
@@ -41,14 +41,16 @@ class JsonTests {
 
         assertEquals("yelp_business_sample", fileNames.get(0));
 
-        try (InputStream inputStream = jsonProvider.getInputStream()) {
+        try (
+            InputStream inputStream = jsonProvider.getInputStream()
+        ) {
             assertNotNull(inputStream);
         }
     }
 
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
-        URL url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
+        final URL url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
         final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
         final var inferenceWrapper = setup(jsonProvider);

@@ -12,7 +12,6 @@ import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
@@ -80,7 +79,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
                 forest.addRecord(createRecord(columns, reader.nextValue()));
             }
         } catch (IOException e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
 
         return forest;
@@ -130,22 +129,16 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         return rootRecord;
     }
 
-    /**
-     * Executes a query statement. This method is currently not implemented.
-     *
-     * @param statement the query statement to execute.
-     * @return nothing, as this method always throws an exception.
-     */
     @Override public QueryResult executeQuery(QueryStatement statement) {
-        throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
+        throw new UnsupportedOperationException("CsvPullWrapper.executeQuery not implemented.");
     }
 
-    @Override public KindNamesResponse getKindNames(String limit, String offset) {
+    @Override public List<String> getKindNames() {
         throw new UnsupportedOperationException("CsvPullWrapper.getKindNames not implemented.");
     }
 
-    @Override public DataResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
-        throw new UnsupportedOperationException("CsvPullWrapper.getKind not implemented.");
+    @Override public DataResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filter) {
+        throw new UnsupportedOperationException("CsvPullWrapper.getRecords not implemented.");
     }
 
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {

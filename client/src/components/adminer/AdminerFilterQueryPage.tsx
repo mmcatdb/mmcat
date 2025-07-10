@@ -67,7 +67,7 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
             });
         }
 
-        return api.adminer.getKind({ datasourceId: state.datasourceId }, getQueryParams(state.kindName, state.active));
+        return api.adminer.getRecords({ datasourceId: state.datasourceId }, getQueryParams(state.kindName, state.active));
     }, [ searchParams, state.datasourceId, state.kindName, state.active ]);
 
     const { fetchedData, loading, error } = useFetchData<DataResponse>(fetchFunction);

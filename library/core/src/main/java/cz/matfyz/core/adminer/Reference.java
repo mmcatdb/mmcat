@@ -6,4 +6,15 @@ package cz.matfyz.core.adminer;
 public record Reference(
     ReferenceKind from,
     ReferenceKind to
-) {}
+) {
+
+    /**
+     * Represents a kind that is included in the reference.
+     */
+    public record ReferenceKind(
+        String datasourceId,
+        String kindName,
+        String property
+    ) {}
+
+}

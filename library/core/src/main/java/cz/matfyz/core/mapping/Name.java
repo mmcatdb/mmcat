@@ -22,21 +22,16 @@ public abstract class Name implements Serializable {
 
     protected Name() {}
 
+    // #region Serialization
+
     public static class Deserializer extends StdDeserializer<Name> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
 
         @Override public Name deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-
             if (node.has("value"))
                 return new StringName(node.get("value").asText());
 
@@ -49,8 +44,9 @@ public abstract class Name implements Serializable {
 
             return new DynamicName(type, signature, pattern);
         }
-
     }
+
+    // #endregion
 
     /**
      * A normal string name.

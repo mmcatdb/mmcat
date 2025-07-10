@@ -9,13 +9,12 @@ import java.util.List;
 public class DependencyException extends EvolutionException {
 
     private record DependencyData(
-        String type,
         Object entity,
         Object dependencies
     ) implements Serializable {}
 
-    protected DependencyException(String type, Object entity, Object dependencies) {
-        super("dependency", new DependencyData(type, entity, dependencies), null);
+    protected DependencyException(String name, Object entity, Object dependencies) {
+        super("dependency." + name, new DependencyData(entity, dependencies), null);
     }
 
     public static DependencyException objexOnMorphisms(Key key, List<Signature> signatures) {

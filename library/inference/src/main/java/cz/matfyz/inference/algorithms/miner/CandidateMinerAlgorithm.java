@@ -48,8 +48,8 @@ public class CandidateMinerAlgorithm implements Serializable {
     private JavaRDD<PropertyHeuristics> collectAllHeuristics(List<AbstractInferenceWrapper> wrappers, List<AbstractInferenceWrapper> sessionWrappers) {
         JavaRDD<PropertyHeuristics> all = null;
 
-        for (AbstractInferenceWrapper wrapper : wrappers) {
-            for (String kindName : wrapper.getKindNames()) {
+        for (final AbstractInferenceWrapper wrapper : wrappers) {
+            for (final String kindName : wrapper.getKindNames()) {
                 AbstractInferenceWrapper w = wrapper.copyForKind(kindName);
                 sessionWrappers.add(w);
                 w.startSession();

@@ -9,7 +9,6 @@ import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
@@ -50,10 +49,12 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      * Pulls a forest of records from a JSON file based on a complex property path and query content.
      */
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) {
-        try (InputStream inputStream = provider.getInputStream()) {
+        try (
+            InputStream inputStream = provider.getInputStream()
+        ) {
             return processJsonStream(inputStream, path);
         } catch (IOException e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -132,18 +133,15 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         addKeysToRecord(childRecord, complexProperty, value);
     }
 
-    /**
-     * Executes a query statement. This method is currently not implemented.
-     */
     @Override public QueryResult executeQuery(QueryStatement statement) {
-        throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
+        throw new UnsupportedOperationException("JsonPullWrapper.executeQuery not implemented.");
     }
 
-    @Override public KindNamesResponse getKindNames(String limit, String offset) {
+    @Override public List<String> getKindNames() {
         throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
     }
 
-    @Override public DataResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
+    @Override public DataResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filter) {
         throw new UnsupportedOperationException("JsonPullWrapper.getRow not implemented.");
     }
 

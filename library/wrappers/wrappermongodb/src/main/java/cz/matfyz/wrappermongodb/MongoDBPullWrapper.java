@@ -9,7 +9,6 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DocumentResponse;
-import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -37,7 +36,6 @@ import java.util.regex.Pattern;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Filters;
 
 import org.bson.Document;
@@ -98,7 +96,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return forest;
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -179,7 +177,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return new QueryResult(dataResult, query.structure());
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -227,34 +225,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    /**
-     * Retrieves a list of kind names with support for pagination.
-     */
-    @Override public KindNamesResponse getKindNames(String limit, String offsetString) {
-        try {
-            MongoIterable<String> kindNames = provider.getDatabase().listCollectionNames();
-            List<String> data = new ArrayList<>();
-
-            int lim = Integer.parseInt(limit);
-            int offset = Integer.parseInt(offsetString);
-
-            int index = 0;
-            int count = 0;
-
-            for (String kindName : kindNames) {
-                if (index >= offset && count < lim) {
-                    data.add(kindName);
-                    count++;
-                }
-
-                index++;
-            }
-
-            return new KindNamesResponse(data);
-        }
-        catch (Exception e) {
-			throw PullForestException.innerException(e);
-		}
+    @Override public List<String> getKindNames() {
+        return provider.getDatabase().listCollectionNames().into(new ArrayList<>());
     }
 
     /**
@@ -288,28 +260,19 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+(\\.\\d+)?$");
 
-    /**
-     * Retrieves documents from a collection based on kind name, pagination parameters and optional filters.
-     */
-    @Override public DocumentResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
-        KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
+    @Override public DocumentResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filters) {
+        KindNameQuery kindNameQuery = new KindNameQuery(kindName, limit, offset);
         if (filters == null)
             return getQueryResult(kindNameQuery);
 
         return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
 
-    /**
-     * Retrieves a list of references for a specified kind.
-     */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
         // No foreign keys can be fetched right from MongoDB
         return new ArrayList<>();
     }
 
-    /**
-     * Retrieves the result of the given query.
-     */
     @Override public DocumentResponse getQueryResult(QueryContent query) {
         try {
             if (query instanceof final StringQuery stringQuery) {
@@ -355,7 +318,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return new DocumentResponse(data, itemCount, propertyNames);
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 

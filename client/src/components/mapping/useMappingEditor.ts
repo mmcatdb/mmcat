@@ -4,14 +4,18 @@ import { type CategoryEdge, type CategoryGraph, categoryToGraph } from '../categ
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
 import { type Mapping, SimpleProperty, RootProperty } from '@/types/mapping';
-import { Key, Signature, StringName, TypedName } from '@/types/identifiers';
+import { Key, Signature, type SignatureId, StringName, TypedName } from '@/types/identifiers';
+import { type Id } from '@/types/id';
 
-export function useMappingEditor(category: Category, mapping: Mapping) {
-    const [ state, dispatch ] = useReducer(mappingEditorReducer, { category, mapping }, createInitialState);
+type MappingEditorInput = Mapping | {
+    datasourceId: Id;
+};
+
+export function useMappingEditor(category: Category, input: MappingEditorInput) {
+    const [ state, dispatch ] = useReducer(mappingEditorReducer, { category, input }, createInitialState);
 
     return { state, dispatch };
 }
-
 
 export enum EditorPhase {
     SelectRoot = 'select-root',
@@ -19,26 +23,44 @@ export enum EditorPhase {
 }
 
 export type MappingEditorState = {
+    original?: Mapping;
     category: Category;
     graph: CategoryGraph;
-    mapping: Mapping;
+    form: MappingEditorFormState;
     selectionType: SelectionType;
     selection: FreeSelection | SequenceSelection | PathSelection;
     editorPhase: EditorPhase;
     rootNodeId: string | null;
 };
 
+type MappingEditorFormState = {
+    datasourceId: Id;
+    kindName: string;
+    rootObjexKey: Key | undefined;
+    primaryKey: SignatureId | undefined;
+    accessPath: RootProperty;
+}
+
 /**
  * Creates the initial state for the mapping editor.
  */
-function createInitialState({ category, mapping }: { category: Category, mapping: Mapping }): MappingEditorState {
+function createInitialState({ category, input }: { category: Category, input: MappingEditorInput }): MappingEditorState {
+    const original = 'id' in input ? input : undefined;
+
     return {
+        original,
         category,
         // Convert category to graph for visualization
         graph: categoryToGraph(category),
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
-        mapping,
+        form: {
+            datasourceId: input.datasourceId,
+            kindName: original?.kindName ?? '',
+            rootObjexKey: original?.rootObjexKey,
+            primaryKey: original?.primaryKey,
+            accessPath: original?.accessPath ?? new RootProperty(new TypedName(TypedName.ROOT), []),
+        },
         editorPhase: EditorPhase.SelectRoot,
         rootNodeId: null,
     };
@@ -75,7 +97,7 @@ export function mappingEditorReducer(state: MappingEditorState, action: MappingE
         if (selectionType === SelectionType.Sequence)
             return { ...state, selectionType, selection: SequenceSelection.create() };
         if (selectionType === SelectionType.Path)
-            return { ...state, selectionType, selection: PathSelection.create([ state.mapping.rootObjexKey.toString() ]) };
+            return { ...state, selectionType, selection: PathSelection.create([ state.form.rootObjexKey.toString() ]) };
         return { ...state, selectionType: action.selectionType };
     }
     case 'set-root': {
@@ -200,16 +222,10 @@ function root(state: MappingEditorState, rootNodeId: string): MappingEditorState
     if (!rootNode)
         return state;
 
-    const newAccessPath = new RootProperty(
-        new TypedName(TypedName.ROOT),
-        [],
-    );
-
     return {
         ...state,
-        mapping: {
-            ...state.mapping,
-            accessPath: newAccessPath,
+        form: {
+            ...state.form,
             rootObjexKey: Key.fromResponse(Number(rootNodeId)),
         },
         selectionType: SelectionType.Free,
@@ -241,18 +257,18 @@ function appendToAccessPath(state: MappingEditorState, nodeId: string): MappingE
     const newSubpath = new SimpleProperty(
         new StringName(newNode.metadata.label),
         signature,
-        state.mapping.accessPath,
+        state.form.accessPath,
     );
 
-    const newAccessPath = new RootProperty(state.mapping.accessPath.name, [
-        ...state.mapping.accessPath.subpaths,
+    const newAccessPath = new RootProperty(state.form.accessPath.name, [
+        ...state.form.accessPath.subpaths,
         newSubpath,
     ]);
 
     return {
         ...state,
-        mapping: {
-            ...state.mapping,
+        form: {
+            ...state.form,
             accessPath: newAccessPath,
         },
         selectionType: SelectionType.Free,
@@ -264,19 +280,10 @@ function appendToAccessPath(state: MappingEditorState, nodeId: string): MappingE
  * Removes a subpath from the access path in the mapping editor state.
  */
 function removeFromAccessPath(state: MappingEditorState, subpathIndex: number): MappingEditorState {
-    const newSubpaths = [ ...state.mapping.accessPath.subpaths ];
-    newSubpaths.splice(subpathIndex, 1);
+    const newSubpaths = [ ...state.form.accessPath.subpaths ].toSpliced(subpathIndex, 1);
+    const newAccessPath = new RootProperty(state.form.accessPath.name, newSubpaths);
 
-    const newAccessPath = new RootProperty(
-        state.mapping.accessPath.name,
-        newSubpaths,
-    );
-
-    return {
-        ...state,
-        mapping: {
-            ...state.mapping,
-            accessPath: newAccessPath,
-        },
-    };
+    return { ...state, form: { ...state.form,
+        accessPath: newAccessPath,
+    } };
 }

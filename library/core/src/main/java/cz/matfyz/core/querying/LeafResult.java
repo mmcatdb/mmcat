@@ -26,20 +26,17 @@ public class LeafResult extends ResultNode {
         return Printer.print(this);
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<LeafResult> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<LeafResult> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<LeafResult> t) { super(t); }
 
         @Override public void serialize(LeafResult result, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(result.value);
         }
-
     }
+
+    // #endregion
 
 }

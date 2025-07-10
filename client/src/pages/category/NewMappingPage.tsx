@@ -31,7 +31,7 @@ export function NewMappingPage() {
         id: '',
         kindName,
         categoryId: category.id,
-        datasourceId: datasourceId,
+        datasourceId,
         rootObjexKey: 0 as KeyResponse,
         primaryKey: [ 'EMPTY' ] as SignatureIdResponse,
         accessPath: {

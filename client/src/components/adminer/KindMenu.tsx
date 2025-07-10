@@ -27,16 +27,15 @@ type Option = {
  * Component for selecting kind
  */
 export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMenuProps) {
-    const fetchFunction = useCallback(() => {
-        return api.adminer.getKindNames({ datasourceId });
-    }, [ datasourceId ]);
+    const fetchFunction = useCallback(() => api.adminer.getKindNames({ datasourceId }), [ datasourceId ]);
+
     const { fetchedData, loading, error } = useFetchData(fetchFunction);
 
     const selectItems = useMemo(() => {
         const items: Option[] = [];
 
-        if (fetchedData && fetchedData.data.length > 0) {
-            fetchedData.data.forEach(name => (
+        if (fetchedData && fetchedData.length > 0) {
+            fetchedData.forEach(name => (
                 items.push({ label: name, value: name })
             ));
 
@@ -58,7 +57,7 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
         );
     }
 
-    if (!fetchedData || fetchedData.data.length === 0)
+    if (!fetchedData || fetchedData.length === 0)
         return <span>No kinds to display.</span>;
 
     return (

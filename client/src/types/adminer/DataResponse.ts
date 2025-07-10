@@ -1,9 +1,5 @@
 export type DataResponse = TableResponse | DocumentResponse | GraphResponse;
 
-export type KindNameResponse = {
-    data: string[];
-}
-
 export type TableResponse = {
     type: 'table';
     metadata: {

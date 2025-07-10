@@ -74,27 +74,23 @@ public abstract class AccessPath implements Printable {
         return object instanceof AccessPath path && name.equals(path.name);
     }
 
+    // #region Serialization
+
     public static class Deserializer extends StdDeserializer<AccessPath> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         private static final ObjectReader simplePropertyJsonReader = new ObjectMapper().readerFor(SimpleProperty.class);
         private static final ObjectReader complexPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
 
         @Override public AccessPath deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-
             return node.has("subpaths")
                 ? complexPropertyJsonReader.readValue(node)
                 : simplePropertyJsonReader.readValue(node);
         }
-
     }
+
+    // #endregion
 
 }

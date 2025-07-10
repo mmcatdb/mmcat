@@ -6,8 +6,8 @@ import java.io.Serializable;
 
 public class VersionException extends EvolutionException {
 
-    protected VersionException(String type, Serializable value) {
-        super("version." + type, value, null);
+    protected VersionException(String name, Serializable value) {
+        super("version." + name, value, null);
     }
 
     public static VersionException parse(String value) {

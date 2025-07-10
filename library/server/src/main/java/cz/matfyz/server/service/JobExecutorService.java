@@ -150,7 +150,7 @@ public class JobExecutorService {
         final var job = jobWithRun.job();
 
         if (job.state != Job.State.Ready) {
-            LOGGER.info("Job { id: {}, name: '{}' } is not ready.", job.id(), job.label);
+            LOGGER.warn("Job { id: {}, name: '{}' } is not ready.", job.id(), job.label);
             return;
         }
 
@@ -160,13 +160,13 @@ public class JobExecutorService {
 
         try {
             processJobByType(run, job);
-            LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id(), job.label);
             if (job.payload instanceof RSDToCategoryPayload) {
                 job.state = Job.State.Waiting;
             } else {
                 job.state = Job.State.Finished;
             }
             repository.save(job);
+            LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id(), job.label);
         }
         catch (Exception e) {
             final NamedException finalException = e instanceof NamedException namedException ? namedException : new OtherException(e);

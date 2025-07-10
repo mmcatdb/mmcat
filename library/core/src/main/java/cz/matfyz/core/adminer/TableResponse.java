@@ -6,6 +6,7 @@ import java.util.List;
  * Represents a table response.
  */
 public class TableResponse extends DataResponse {
+
     private List<List<String>> data;
     private static final String TYPE = "table";
 

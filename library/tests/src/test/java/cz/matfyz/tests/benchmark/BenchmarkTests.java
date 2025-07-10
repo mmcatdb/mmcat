@@ -39,11 +39,11 @@ class BenchmarkTests {
             final var url = ClassLoader.getSystemResource("setupBenchmarkYelp.sh");
             path = Paths.get(url.toURI()).toAbsolutePath();
 
-            Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(new String[] { path.toString() });
+            final Runtime runtime = Runtime.getRuntime();
+            final Process process = runtime.exec(new String[] { path.toString() });
             process.waitFor();
 
-            BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            final BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
         }
         catch (URISyntaxException e) {
@@ -60,7 +60,7 @@ class BenchmarkTests {
 
     @Test
     void yelpIsLoaded() {
-        var kindNames = datasources.mongoDB().wrapper.getPullWrapper().getKindNames("10", "0").data();
+        final var kindNames = datasources.mongoDB().wrapper.getPullWrapper().getKindNames();
 
         assertEquals(3, kindNames.size());
         assertTrue(kindNames.contains("business"));

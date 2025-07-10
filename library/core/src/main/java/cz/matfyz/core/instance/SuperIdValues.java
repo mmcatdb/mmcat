@@ -222,15 +222,11 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return builder.toString();
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<SuperIdValues> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<SuperIdValues> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<SuperIdValues> t) { super(t); }
 
         @Override public void serialize(SuperIdValues values, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
@@ -242,18 +238,11 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
             }
             generator.writeEndArray();
         }
-
     }
 
     public static class Deserializer extends StdDeserializer<SuperIdValues> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
 
@@ -271,7 +260,8 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
 
             return new SuperIdValues(tuples);
         }
-
     }
+
+    // #endregion
 
 }

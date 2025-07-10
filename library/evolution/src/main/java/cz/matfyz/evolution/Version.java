@@ -113,38 +113,27 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         return value.hashCode();
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<Version> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<Version> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<Version> t) { super(t); }
 
         @Override public void serialize(Version id, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(id.value);
         }
-
     }
 
     public static class Deserializer extends StdDeserializer<Version> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         @Override public Version deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-
             return Version.fromString(node.asText());
         }
-
     }
+
+    // #endregion
 
 }

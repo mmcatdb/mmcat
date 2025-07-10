@@ -123,15 +123,11 @@ public class ObjexIds implements Serializable {
         return builder.toString();
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<ObjexIds> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<ObjexIds> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<ObjexIds> t) { super(t); }
 
         @Override public void serialize(ObjexIds ids, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
@@ -147,18 +143,11 @@ public class ObjexIds implements Serializable {
 
             generator.writeEndObject();
         }
-
     }
 
     public static class Deserializer extends StdDeserializer<ObjexIds> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         private static final ObjectReader signatureIdsJsonReader = new ObjectMapper().readerFor(SignatureId[].class);
 
@@ -172,7 +161,8 @@ public class ObjexIds implements Serializable {
 
             return type == Type.Signatures ? new ObjexIds(signatureIds) : new ObjexIds(type);
         }
-
     }
+
+    // #endregion
 
 }

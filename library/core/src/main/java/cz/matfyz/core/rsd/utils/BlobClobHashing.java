@@ -10,7 +10,9 @@ import java.sql.Clob;
 public class BlobClobHashing {
 
     public static String blobToHash(Blob blob) {
-         try (InputStream is = blob.getBinaryStream()) {
+         try (
+            InputStream is = blob.getBinaryStream()
+        ) {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int nRead;
             byte[] data = new byte[16384];

@@ -12,9 +12,8 @@ import cz.matfyz.core.adminer.GraphResponse;
 import cz.matfyz.core.adminer.GraphResponse.GraphData;
 import cz.matfyz.core.adminer.GraphResponse.GraphNode;
 import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
-import cz.matfyz.core.adminer.KindNamesResponse;
+import cz.matfyz.core.adminer.Reference.ReferenceKind;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.ReferenceKind;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.ListResult;
@@ -335,7 +334,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             return innerPullForest(path, query);
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -543,52 +542,47 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             return new QueryResult(builder.build(), statement.structure());
         } catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
-    /**
-     * Retrieves a list of distinct kind names (labels and relationship types).
-     */
-    @Override public KindNamesResponse getKindNames(String limit, String offset) {
-        try (Session session = provider.getSession()) {
-            List<String> data = new ArrayList<>();
+    @Override public List<String> getKindNames() {
+        try (
+            Session session = provider.getSession()
+        ) {
+            final List<String> output = new ArrayList<>();
 
-            Result labelQueryResult = session.run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label SKIP " + offset + " LIMIT " + limit + ";");
+            final Result labelQueryResult = session.run("MATCH (n) UNWIND labels(n) AS label RETURN DISTINCT label;");
             while (labelQueryResult.hasNext()) {
-                Record labelQueryRecord = labelQueryResult.next();
-                data.add(labelQueryRecord.get("label").asString());
+                final Record labelQueryRecord = labelQueryResult.next();
+                output.add(labelQueryRecord.get("label").asString());
             }
 
-            Result typeQueryResult = session.run("MATCH (n)-[r]-(m) UNWIND type(r) AS relationshipType RETURN DISTINCT relationshipType SKIP " + offset + " LIMIT " + limit + ";");
+            final Result typeQueryResult = session.run("MATCH (n)-[r]-(m) UNWIND type(r) AS relationshipType RETURN DISTINCT relationshipType;");
             while (typeQueryResult.hasNext()) {
-                Record typeQueryRecord = typeQueryResult.next();
-                data.add(typeQueryRecord.get("relationshipType").asString());
+                final Record typeQueryRecord = typeQueryResult.next();
+                output.add(typeQueryRecord.get("relationshipType").asString());
             }
 
-            return new KindNamesResponse(data);
+            return output;
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
-    /**
-     * Retrieves data of the specified kind from the graph with optional filtering.
-     */
-    @Override public GraphResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filters) {
-        KindNameQuery kindNameQuery = new KindNameQuery(kindName, Integer.parseInt(limit), Integer.parseInt(offset));
+    @Override public GraphResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filters) {
+        KindNameQuery kindNameQuery = new KindNameQuery(kindName, limit, offset);
         if (filters == null)
             return getQueryResult(kindNameQuery);
 
         return getQueryResult(new KindNameFilterQuery(kindNameQuery, filters));
     }
 
-    /**
-     * Retrieves a list of references for a specified kind.
-     */
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {
-        try (Session session = provider.getSession()) {
+        try (
+            Session session = provider.getSession()
+        ) {
             List<Reference> references = new ArrayList<>();
 
             Result result = session.run("MATCH (a)-[r]->(b) RETURN DISTINCT labels(a) as startNodeLabels, type(r) as relationshipType, labels(b) as endNodeLabels;");
@@ -610,15 +604,14 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             return references;
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
-    /**
-     * Retrieves the result of the given query.
-     */
     @Override public GraphResponse getQueryResult(QueryContent query) {
-        try (Session session = provider.getSession()) {
+        try (
+            Session session = provider.getSession()
+        ) {
             List<String> propertyNames = getPropertyNames(query, session);
 
             GraphData data = session.executeRead(tx -> {
@@ -646,7 +639,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             return new GraphResponse(data, itemCount, propertyNames);
         } catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 

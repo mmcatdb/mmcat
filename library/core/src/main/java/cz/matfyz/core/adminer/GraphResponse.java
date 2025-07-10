@@ -7,6 +7,7 @@ import java.util.Map;
  * Represents a graph response.
  */
 public class GraphResponse extends DataResponse {
+
     private GraphData data;
     private static final String TYPE = "graph";
 

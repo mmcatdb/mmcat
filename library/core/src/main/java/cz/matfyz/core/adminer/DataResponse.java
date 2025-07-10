@@ -6,6 +6,7 @@ import java.util.List;
  * Represents a generic data response.
  */
 public abstract class DataResponse {
+
     private Metadata metadata;
 
     protected DataResponse(long itemCount, List<String> propertyNames) {

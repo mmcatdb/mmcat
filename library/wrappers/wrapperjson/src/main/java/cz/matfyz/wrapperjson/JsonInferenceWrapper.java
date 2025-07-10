@@ -89,7 +89,9 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
                         documents.add(Document.parse(node.toString()));
                     }
                 } else {
-                    try (BufferedReader lineReader = new BufferedReader(new InputStreamReader(provider.getInputStream()))) {
+                    try (
+                        BufferedReader lineReader = new BufferedReader(new InputStreamReader(provider.getInputStream()))
+                    ) {
                         lineReader.lines().forEach(line -> {
                             if (!line.trim().isEmpty()) {
                                 try {

@@ -59,6 +59,7 @@ public abstract class AbstractInferenceWrapper {
 
     public abstract JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs();
 
+    // FIXME This is already defined on AbstractPullWrapper. Unify this.
     public abstract List<String> getKindNames();
 
     public record SparkSettings(

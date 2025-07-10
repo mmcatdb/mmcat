@@ -1,7 +1,7 @@
 package cz.matfyz.core.exception;
 
 /**
- * A wrapper class for all exceptions other than ours (i.e., other than those that extend the NamedException).
+ * A wrapper class for all exceptions other than ours (i.e., other than those that extend the {@link NamedException}).
  */
 public class OtherException extends NamedException {
 

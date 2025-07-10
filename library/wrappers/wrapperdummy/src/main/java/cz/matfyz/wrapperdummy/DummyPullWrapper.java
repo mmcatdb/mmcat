@@ -8,7 +8,6 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
-import cz.matfyz.core.adminer.KindNamesResponse;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name.DynamicName;
@@ -38,7 +37,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
             return innerPullForest(path, stringQuery);
         }
         catch (Exception e) {
-            throw PullForestException.innerException(e);
+            throw PullForestException.inner(e);
         }
     }
 
@@ -112,16 +111,15 @@ public class DummyPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public QueryResult executeQuery(QueryStatement statement) {
-        // TODO
         throw new UnsupportedOperationException("DummyPullWrapper.executeQuery not implemented.");
     }
 
-    @Override public KindNamesResponse getKindNames(String limit, String offset) {
+    @Override public List<String> getKindNames() {
         throw new UnsupportedOperationException("DummyPullWrapper.getKindNames not implemented.");
     }
 
-    @Override public DataResponse getKind(String kindName, String limit, String offset, @Nullable List<AdminerFilter> filter) {
-        throw new UnsupportedOperationException("DummyPullWrapper.getKind not implemented.");
+    @Override public DataResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filter) {
+        throw new UnsupportedOperationException("DummyPullWrapper.getRecords not implemented.");
     }
 
     @Override public List<Reference> getReferences(String datasourceId, String kindName) {

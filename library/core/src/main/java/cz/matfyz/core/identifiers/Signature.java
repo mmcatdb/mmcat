@@ -313,39 +313,28 @@ public class Signature implements Serializable, Comparable<Signature> {
         return createComposite(output.stream().mapToInt(Integer::intValue).toArray());
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<Signature> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<Signature> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<Signature> t) { super(t); }
 
         @Override public void serialize(Signature signature, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(signature.toString());
         }
-
     }
 
     public static class Deserializer extends StdDeserializer<Signature> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         @Override public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-
             return Signature.fromString(node.asText());
         }
-
     }
+
+    // #endregion
 
     public static class SignatureGenerator {
 

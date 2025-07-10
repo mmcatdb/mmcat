@@ -61,15 +61,11 @@ public class SimpleProperty extends AccessPath {
         return Printer.print(this);
     }
 
+    // #region Serialization
+
     public static class Serializer extends StdSerializer<SimpleProperty> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<SimpleProperty> t) {
-            super(t);
-        }
+        public Serializer() { this(null); }
+        public Serializer(Class<SimpleProperty> t) { super(t); }
 
         @Override public void serialize(SimpleProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
@@ -77,31 +73,24 @@ public class SimpleProperty extends AccessPath {
             generator.writePOJOField("signature", property.signature);
             generator.writeEndObject();
         }
-
     }
 
     public static class Deserializer extends StdDeserializer<SimpleProperty> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+        public Deserializer() { this(null); }
+        public Deserializer(Class<?> vc) { super(vc); }
 
         private static final ObjectReader nameJsonReader = new ObjectMapper().readerFor(Name.class);
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
 
         @Override public SimpleProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-
             final Name name = nameJsonReader.readValue(node.get("name"));
             final Signature signature = signatureJsonReader.readValue(node.get("signature"));
 
             return new SimpleProperty(name, signature);
         }
-
     }
+
+    // #endregion
 
 }
