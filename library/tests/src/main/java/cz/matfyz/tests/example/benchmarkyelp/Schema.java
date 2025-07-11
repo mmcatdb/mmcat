@@ -1,16 +1,10 @@
 package cz.matfyz.tests.example.benchmarkyelp;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.optimizer.CostData;
-import cz.matfyz.tests.example.common.TestDatasource;
-import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
-
-import java.util.TreeMap;
 
 public abstract class Schema {
 
@@ -100,43 +94,4 @@ public abstract class Schema {
 
     private Schema() {}
 
-    public static void collectStatsToCache(TestDatasource<MongoDBControlWrapper> mongoDb) { // kindName, Key or morphism Signature?
-
-        final var fields = new TreeMap<Property, CostData>();
-
-        final var mapping = mongoDb.mappings.stream().filter(m -> m.kindName() == "business").findFirst().get();
-
-        {
-            final var property = new Property(mapping, businessToId.signature(), null);
-            final var costData = new CostData.ScalarCostData();
-            costData.avgLength = "qhDdDeI3K4jy2KyzwFN53w".length();
-
-            fields.put(property , costData);
-        }
-        {
-            final var property = new Property(mapping, businessToName.signature(), null);
-            final var costData = new CostData.ScalarCostData();
-            costData.avgLength = 10; // just a guess
-
-            fields.put(property , costData);
-        }
-        {
-            final var property = new Property(mapping, businessToRevCnt.signature(), null);
-            final var costData = new CostData.ScalarCostData();
-            costData.avgLength = 2;
-            costData.minValue = 0;
-            costData.maxValue = 7568;
-
-            fields.put(property , costData);
-        }
-
-        final var cacheEntry = new CostData.CacheEntry(150346, fields);
-        CostData.cacheByKind.put(mapping.kindName(), cacheEntry);
-
-        // db.business.countDocuments() == 150346 &&
-        // db.user.countDocuments() == 1987897 &&
-        // db.review.countDocuments() == 6990280
-
-        // db.business.aggregate([ { $group: { _id: null, maxValue: { $max: "$review_count" } } } ])
-    }
 }
