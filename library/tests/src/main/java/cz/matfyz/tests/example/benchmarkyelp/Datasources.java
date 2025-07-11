@@ -21,8 +21,6 @@ public class Datasources {
                 .addMapping(MongoDB.business(schema))
                 .addMapping(MongoDB.user(schema))
                 .addMapping(MongoDB.review(schema));
-
-            Schema.collectStatsToCache(mongoDB); // FIXME: this is a temporary implementation
         }
 
         return mongoDB;

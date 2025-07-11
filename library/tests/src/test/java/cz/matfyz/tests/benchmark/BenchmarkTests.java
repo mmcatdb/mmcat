@@ -122,19 +122,20 @@ class BenchmarkTests {
         final var cost1h = QueryDebugPrinter.run(plans1.get(0).root);
         final var cost2h = QueryDebugPrinter.run(plans2.get(0).root);
 
-        final var error = plans1.get(0).root.costData.network() >= plans2.get(0).root.costData.network() ? null : "Filtering increases cost estimation";
-
+        final var error = plans1.get(0).root.costData.network() >= plans2.get(0).root.costData.network()
+            ? null : "Filtering increases cost estimation";
         assertNull(error);
     }
 
     @Test
     void costEstimationJoin() {
         final List<TestDatasource<?>> testDatasources = List.of(
-            datasources.postgreSQL()
-            // datasources.mongoDB()
+            datasources.postgreSQL(),
+            datasources.mongoDB()
         );
 
         // All users which reviewed a given business
+        // (theoretically the filter should be the commented GROUPBY HAVING, but that is not implemented yet, and this seems to work anyways)
         final var query = """
             SELECT {
                 ?user
@@ -144,11 +145,11 @@ class BenchmarkTests {
             WHERE {
                 ?user  9 ?user_id .
                 ?user 10 ?name .
-                ?user -18/19 ?business_id .
+                ?user -18/19/1 ?business_id .
 
-                # FILTER(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
-                GROUP BY ?user
-                HAVING(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
+                FILTER(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
+                # GROUP BY ?user
+                # HAVING(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
             }
         """;
 
@@ -161,16 +162,15 @@ class BenchmarkTests {
 
         final var cost1h = QueryDebugPrinter.run(plans.get(0).root);
         final var cost2h = QueryDebugPrinter.run(plans.get(1).root);
-        final var error = plans.get(0).root instanceof DatasourceNode ? null : "PostgreSQL DatasourceNode expected as the best plan root";
+        final var error = plans.get(0).root instanceof DatasourceNode
+            ? null : "PostgreSQL DatasourceNode expected as the best plan root";
         assertNull(error);
 
         // new QueryTestBase(datasources.schema)
         //     .addDatasource(datasources.postgreSQL())
         //     .query(query)
         //     .expected("""
-        //         [ {
-        //             "number": "o_100"
-        //         } ]
+        //         [ { "test": "" } ]
         //     """)
         //     .run();
     }
