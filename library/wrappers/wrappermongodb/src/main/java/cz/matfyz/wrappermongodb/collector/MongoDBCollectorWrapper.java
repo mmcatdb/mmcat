@@ -17,20 +17,19 @@ import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
  */
 public final class MongoDBCollectorWrapper implements CollectorWrapper {
 
+    private final MongoDBProvider provider;
+    private final String datasourceIdentifier;
+
     // TODO: do these need to be persisted as state variables, or are local variables enough? - local is ok for non-state (or just static)
     private final MongoQueryResultParser resultParser;
 
     private final MongoExplainPlanParser explainPlanParser;
 
-    private final MongoDBProvider provider;
-
-    // private final MongoQueryParser queryParser;
-
-    public MongoDBCollectorWrapper(MongoDBProvider provider) {
+    public MongoDBCollectorWrapper(MongoDBProvider provider, String datasourceIdentifier) {
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
         resultParser = new MongoQueryResultParser();
         explainPlanParser = new MongoExplainPlanParser();
-        // queryParser = new MongoQueryParser();
     }
 
     @Override
@@ -38,7 +37,7 @@ public final class MongoDBCollectorWrapper implements CollectorWrapper {
         assert query instanceof MongoDBQuery;
         final var mongoQuery = (MongoDBQuery)query;
 
-        var dataModel = new DataModel("MongoDB", mongoQuery.toString());
+        var dataModel = new DataModel(datasourceIdentifier, mongoQuery.toString());
         var connection = new MongoConnection(provider.getDatabase());
 
         resultParser.setConnection(connection);

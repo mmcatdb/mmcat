@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 public class PostgreSQLControlWrapper extends BaseControlWrapper {
 
-    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLControlWrapper.class);
 
     @Override protected DatasourceType getType() {
@@ -29,10 +28,12 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
     }
 
     private final PostgreSQLProvider provider;
+    private final String datasourceIdentifier;
 
-    public PostgreSQLControlWrapper(PostgreSQLProvider provider) {
+    public PostgreSQLControlWrapper(PostgreSQLProvider provider, String datasourceIdentifier) {
         super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
@@ -100,6 +101,6 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
     }
 
     @Override public PostgreSQLCollectorWrapper getCollectorWrapper() {
-        return new PostgreSQLCollectorWrapper(provider);
+        return new PostgreSQLCollectorWrapper(provider, datasourceIdentifier);
     }
 }

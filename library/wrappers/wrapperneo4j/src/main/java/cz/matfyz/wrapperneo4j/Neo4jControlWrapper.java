@@ -33,10 +33,12 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
     static final String TO_NODE_PROPERTY_PREFIX = "_to.";
 
     private final Neo4jProvider provider;
+    private final String datasourceIdentifier;
 
-    public Neo4jControlWrapper(Neo4jProvider provider) {
+    public Neo4jControlWrapper(Neo4jProvider provider, String datasourceIdentifier) {
         super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
@@ -107,7 +109,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
     }
 
     @Override public Neo4jCollectorWrapper getCollectorWrapper() {
-        return new Neo4jCollectorWrapper(provider);
+        return new Neo4jCollectorWrapper(provider, datasourceIdentifier);
     }
 
 }

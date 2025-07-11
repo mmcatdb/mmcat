@@ -18,13 +18,15 @@ import cz.matfyz.wrapperneo4j.collector.components.Neo4jQueryResultParser;
 public class Neo4jCollectorWrapper implements CollectorWrapper {
 
     private final Neo4jProvider provider;
+    private final String datasourceIdentifier;
 
     protected Neo4jQueryResultParser resultParser;
 
     protected Neo4jExplainPlanParser explainPlanParser;
 
-    public Neo4jCollectorWrapper(Neo4jProvider provider) {
+    public Neo4jCollectorWrapper(Neo4jProvider provider, String datasourceIdentifier) {
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
         resultParser = new Neo4jQueryResultParser();
         explainPlanParser = new Neo4jExplainPlanParser();
 
@@ -33,7 +35,7 @@ public class Neo4jCollectorWrapper implements CollectorWrapper {
 
     public final DataModel executeQuery(QueryContent query) throws WrapperException {
         final String queryString = query.toString();
-        final DataModel dataModel = new DataModel("Neo4j", queryString);
+        final DataModel dataModel = new DataModel(datasourceIdentifier, queryString);
 
         try (final var connection = new Neo4jConnection(provider)) {
             final var inputQuery = queryString;

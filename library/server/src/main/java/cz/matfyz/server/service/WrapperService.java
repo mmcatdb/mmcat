@@ -41,17 +41,17 @@ public class WrapperService {
                     datasource,
                     MongoDBSettings.class,
                     MongoDBProvider::new
-                ));
+                ), datasource.stringIdentifier());
                 case postgresql -> new PostgreSQLControlWrapper(getProvider(
                     datasource,
                     PostgreSQLSettings.class,
                     PostgreSQLProvider::new
-                ));
+                ), datasource.stringIdentifier());
                 case neo4j -> new Neo4jControlWrapper(getProvider(
                     datasource,
                     Neo4jSettings.class,
                     Neo4jProvider::new
-                ));
+                ), datasource.stringIdentifier());
                 case jsonld -> getJsonLdControlWrapper(datasource);
                 case json -> getJsonControlWrapper(datasource);
                 case csv -> getCsvControlWrapper(datasource);

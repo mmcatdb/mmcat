@@ -27,10 +27,12 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
     }
 
     private final MongoDBProvider provider;
+    private final String datasourceIdentifier;
 
-    public MongoDBControlWrapper(MongoDBProvider provider) {
+    public MongoDBControlWrapper(MongoDBProvider provider, String datasourceIdentifier) {
         super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
@@ -94,6 +96,6 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
     }
 
     @Override public MongoDBCollectorWrapper getCollectorWrapper() {
-        return new MongoDBCollectorWrapper(provider);
+        return new MongoDBCollectorWrapper(provider, datasourceIdentifier);
     }
 }

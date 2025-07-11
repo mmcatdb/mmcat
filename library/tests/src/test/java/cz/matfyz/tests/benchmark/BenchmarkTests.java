@@ -144,9 +144,11 @@ class BenchmarkTests {
             WHERE {
                 ?user  9 ?user_id .
                 ?user 10 ?name .
-                ?user -18/19 ?bid .
+                ?user -18/19 ?business_id .
 
-                FILTER(?bid = "MTSW4McQd7CbVtyjqoe9mw")
+                # FILTER(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
+                GROUP BY ?user
+                HAVING(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
             }
         """;
 

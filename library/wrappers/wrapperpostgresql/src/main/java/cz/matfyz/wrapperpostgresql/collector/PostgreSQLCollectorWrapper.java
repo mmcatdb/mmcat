@@ -17,13 +17,15 @@ import cz.matfyz.wrapperpostgresql.collector.components.PostgresQueryResultParse
 public class PostgreSQLCollectorWrapper implements CollectorWrapper {
 
     protected final PostgreSQLProvider provider;
+    private final String datasourceIdentifier;
 
     protected final PostgresQueryResultParser resultParser;
 
     protected final PostgresExplainPlanParser explainPlanParser;
 
-    public PostgreSQLCollectorWrapper(PostgreSQLProvider provider) {
+    public PostgreSQLCollectorWrapper(PostgreSQLProvider provider, String datasourceIdentifier) {
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
         resultParser = new PostgresQueryResultParser();
         explainPlanParser = new PostgresExplainPlanParser();
     }
@@ -32,7 +34,7 @@ public class PostgreSQLCollectorWrapper implements CollectorWrapper {
         assert query instanceof PostgreSQLQuery;
         final var postgresQuery = (PostgreSQLQuery)query;
 
-        final var dataModel = new DataModel("PostgreSQL", postgresQuery.toString());
+        final var dataModel = new DataModel(datasourceIdentifier, postgresQuery.toString());
 
         try (
             final var connection = new PostgresConnection(provider);
