@@ -2,3 +2,4 @@
 .env
 /data
 .uploads/
+.idea
