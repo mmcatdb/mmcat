@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useState } from 'react';
 import { CustomLink } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
@@ -128,7 +128,7 @@ function GettingStartedSection({
                     buttonText='Connect Now'
                     buttonVariant='solid'
                     buttonColor='primary'
-                    buttonAction={() => navigate(routes.datasources.path, { state: { openModal: true } })}
+                    buttonAction={() => navigate(routes.datasources.list.path, { state: { openModal: true } })}
                 />
                 <FeatureCard
                     icon={
@@ -155,11 +155,12 @@ function GettingStartedSection({
                     buttonText='Explore'
                     buttonVariant='solid'
                     buttonColor='success'
-                    buttonAction={() =>
-                        categories && categories.length > 0
-                            ? navigate(routes.category.editor.resolve({ categoryId: categories[0].id }))
-                            : toast.error('No schema categories available. Please create one first.')
-                    }
+                    buttonAction={() => {
+                        if (categories && categories.length > 0)
+                            navigate(routes.category.editor.resolve({ categoryId: categories[0].id }));
+                        else
+                            toast.error('No schema categories available. Please create one first.');
+                    }}
                     isDisabled={!categories || categories.length === 0}
                 />
             </div>
@@ -286,7 +287,7 @@ function SchemaCategoriesSection({
 }
 
 type FeatureCardProps = {
-    icon: React.ReactNode;
+    icon: ReactNode;
     title: string;
     description: string;
     buttonText?: string;
@@ -364,7 +365,7 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
         onClose();
     }
 
-    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         if (e.key === 'Enter')
             handleSubmit();
     }

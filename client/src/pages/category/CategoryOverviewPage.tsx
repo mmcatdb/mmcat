@@ -6,6 +6,7 @@ import { api } from '@/api';
 import { type SchemaCategoryStats } from '@/types/schema';
 import { routes } from '@/routes/routes';
 import { FaDatabase, FaPlus, FaPlay, FaSearch, FaEdit } from 'react-icons/fa';
+import { type ReactNode } from 'react';
 
 export function CategoryOverviewPage() {
     const { stats } = useLoaderData() as CategoryLoaderData;
@@ -70,14 +71,14 @@ export function CategoryOverviewPage() {
                         title='Manage Datasources'
                         description='Link databases and define mappings.'
                         linkText='View Datasources'
-                        linkTo={routes.category.datasources.resolve({ categoryId })}
+                        linkTo={routes.category.datasources.list.resolve({ categoryId })}
                     />
                     <FeatureCard
                         icon={<FaPlus className='w-12 h-12 mx-auto text-success-500' />}
                         title='Manage Actions'
                         description='Set up data transformation actions and create runs.'
                         linkText='Manage Actions'
-                        linkTo={routes.category.actions.resolve({ categoryId })}
+                        linkTo={routes.category.actions.list.resolve({ categoryId })}
                     />
                     <FeatureCard
                         icon={<FaPlay className='w-12 h-12 mx-auto text-warning-500' />}
@@ -126,7 +127,7 @@ function OverviewCard({ title, value }: { title: string, value: number | string 
 }
 
 type FeatureCardProps = {
-    icon: React.ReactNode;
+    icon: ReactNode;
     title: string;
     description: string;
     linkText: string;

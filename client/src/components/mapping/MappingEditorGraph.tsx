@@ -132,7 +132,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
     const isSelectionAllowed = isNodeSelectionAllowed(state, node, pathGraph);
 
     const pathNode = pathGraph?.nodes.get(node.id);
-    const isRoot = node.id === state.rootNodeId;
+    const isRoot = node.id === state.form.rootObjexKey?.toString();
 
     const { theme } = usePreferences().preferences;
 

@@ -1,68 +1,103 @@
-import { useReducer, type Dispatch } from 'react';
+import { useEffect, useReducer, useState, type Dispatch } from 'react';
 import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SelectionType, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
 import { type CategoryEdge, type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
-import { type Mapping, SimpleProperty, RootProperty } from '@/types/mapping';
-import { Key, Signature, type SignatureId, StringName, TypedName } from '@/types/identifiers';
+import { Mapping, SimpleProperty, RootProperty, type MappingInit, type MappingEdit } from '@/types/mapping';
+import { type Key, Signature, type SignatureId, StringName, TypedName } from '@/types/identifiers';
+import { type Datasource } from '@/types/Datasource';
+import { api } from '@/api';
 import { type Id } from '@/types/id';
+import { toast } from 'react-toastify';
 
-type MappingEditorInput = Mapping | {
-    datasourceId: Id;
+export type MappingEditorInput = {
+    /** The existing mapping to edit (or undefined if it's a new mapping). */
+    mapping: Mapping | undefined;
+    datasource: Datasource;
 };
 
-export function useMappingEditor(category: Category, input: MappingEditorInput) {
+export function useMappingEditor(category: Category, input: MappingEditorInput, onSave?: (mapping: Mapping) => void) {
     const [ state, dispatch ] = useReducer(mappingEditorReducer, { category, input }, createInitialState);
 
-    return { state, dispatch };
+    const [ isFetching, setIsFetching ] = useState(false);
+
+    async function saveMapping(data: MappingEditorSync) {
+        setIsFetching(true);
+        const request = 'init' in data
+            ? api.mappings.createMapping({}, data.init)
+            : api.mappings.updateMapping({ id: data.mappingId }, data.edit);
+        const response = await request;
+        setIsFetching(false);
+
+        if (!response.status) {
+            toast.error('Failed to save mapping');
+            return;
+        }
+
+        toast.success('Mapping saved successfully!');
+        onSave?.(Mapping.fromResponse(response.data));
+    }
+
+    useEffect(() => {
+        if (state.sync)
+            void saveMapping(state.sync);
+    }, [ state.sync ]);
+
+    return { state, dispatch, isFetching };
 }
 
 export enum EditorPhase {
-    SelectRoot = 'select-root',
-    BuildPath = 'build-path',
+    SelectRoot = 'selectRoot',
+    BuildPath = 'buildPath',
 }
 
 export type MappingEditorState = {
     original?: Mapping;
+    datasource: Datasource;
     category: Category;
     graph: CategoryGraph;
     form: MappingEditorFormState;
+    sync?: MappingEditorSync;
     selectionType: SelectionType;
     selection: FreeSelection | SequenceSelection | PathSelection;
     editorPhase: EditorPhase;
-    rootNodeId: string | null;
 };
 
 type MappingEditorFormState = {
-    datasourceId: Id;
     kindName: string;
     rootObjexKey: Key | undefined;
     primaryKey: SignatureId | undefined;
     accessPath: RootProperty;
-}
+};
+
+type MappingEditorSync = {
+    init: MappingInit;
+} | {
+    mappingId: Id;
+    edit: MappingEdit;
+};
 
 /**
  * Creates the initial state for the mapping editor.
  */
 function createInitialState({ category, input }: { category: Category, input: MappingEditorInput }): MappingEditorState {
-    const original = 'id' in input ? input : undefined;
+    const original = input.mapping;
 
     return {
         original,
+        datasource: input.datasource,
         category,
         // Convert category to graph for visualization
         graph: categoryToGraph(category),
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         form: {
-            datasourceId: input.datasourceId,
             kindName: original?.kindName ?? '',
             rootObjexKey: original?.rootObjexKey,
             primaryKey: original?.primaryKey,
             accessPath: original?.accessPath ?? new RootProperty(new TypedName(TypedName.ROOT), []),
         },
         editorPhase: EditorPhase.SelectRoot,
-        rootNodeId: null,
     };
 }
 
@@ -73,10 +108,13 @@ type MappingEditorAction =
     | SelectAction
     | SequenceAction
     | PathAction
-    | TempSelectionTypeAction
-    | { type: 'set-root', rootNodeId: string }
+    | SetRootAction
+    | { type: 'kindName', value: string }
+    // FIXME allow nested paths
+    | { type: 'add-subpath'}
     | { type: 'append-to-access-path', nodeId: string }
-    | { type: 'remove-from-access-path', subpathIndex: number };
+    | { type: 'remove-from-access-path', subpathIndex: number }
+    | { type: 'sync' };
 
 export function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAction): MappingEditorState {
     // console.log('REDUCE', action, state);
@@ -90,24 +128,27 @@ export function mappingEditorReducer(state: MappingEditorState, action: MappingE
         return sequence(state, action);
     case 'path':
         return path(state, action);
-    case 'selection-type': {
-        const { selectionType } = action;
-        if (selectionType === SelectionType.Free)
-            return { ...state, selectionType, selection: FreeSelection.create() };
-        if (selectionType === SelectionType.Sequence)
-            return { ...state, selectionType, selection: SequenceSelection.create() };
-        if (selectionType === SelectionType.Path)
-            return { ...state, selectionType, selection: PathSelection.create([ state.form.rootObjexKey.toString() ]) };
-        return { ...state, selectionType: action.selectionType };
+    case 'set-root':
+        return root(state, action);
+    case 'kindName':
+        return { ...state, form: { ...state.form, kindName: action.value } };
+    case 'add-subpath': {
+        if (!state.form.rootObjexKey)
+            return state;
+
+        return { ...state, selectionType: SelectionType.Path, selection: PathSelection.create([ state.form.rootObjexKey.toString() ]) };
     }
-    case 'set-root': {
-        return root(state, action.rootNodeId);
-    }
-    case 'append-to-access-path': {
+    case 'append-to-access-path':
         return appendToAccessPath(state, action.nodeId);
-    }
     case 'remove-from-access-path':
         return removeFromAccessPath(state, action.subpathIndex);
+    case 'sync': {
+        if (!state.sync)
+            return state;
+
+        const sync = state.original ? { mappingId: state.original.id, edit: createMappingEdit(state) } : { init: createMappingInit(state) };
+        return { ...state, sync };
+    }
     }
 }
 
@@ -209,29 +250,24 @@ function path(state: MappingEditorState, action: PathAction): MappingEditorState
     return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
-/**
- * Action for changing the selection type.
- */
-type TempSelectionTypeAction = { type: 'selection-type', selectionType: SelectionType };
+type SetRootAction = {
+    type: 'set-root';
+    key: Key;
+};
 
 /**
  * Sets the root node in the mapping editor state.
  */
-function root(state: MappingEditorState, rootNodeId: string): MappingEditorState {
-    const rootNode = state.graph.nodes.get(rootNodeId);
-    if (!rootNode)
-        return state;
-
+function root(state: MappingEditorState, action: SetRootAction): MappingEditorState {
     return {
         ...state,
         form: {
             ...state.form,
-            rootObjexKey: Key.fromResponse(Number(rootNodeId)),
+            rootObjexKey: action.key,
         },
         selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         editorPhase: EditorPhase.BuildPath,
-        rootNodeId: rootNodeId,
     };
 }
 
@@ -286,4 +322,27 @@ function removeFromAccessPath(state: MappingEditorState, subpathIndex: number): 
     return { ...state, form: { ...state.form,
         accessPath: newAccessPath,
     } };
+}
+
+function createMappingInit(state: MappingEditorState): MappingInit {
+    if (!state.form.rootObjexKey)
+        throw new Error('Root object key must be set before syncing mapping');
+
+    return {
+        categoryId: state.category.id,
+        datasourceId: state.datasource.id,
+        rootObjexKey: state.form.rootObjexKey.toServer(),
+        ...createMappingEdit(state),
+    };
+}
+
+function createMappingEdit(state: MappingEditorState): MappingEdit {
+    if (!state.form.primaryKey)
+        throw new Error('Primary key must be set before syncing mapping');
+
+    return {
+        primaryKey: state.form.primaryKey.toServer(),
+        kindName: state.form.kindName,
+        accessPath: state.form.accessPath.toServer(),
+    };
 }

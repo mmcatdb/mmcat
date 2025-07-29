@@ -6,7 +6,7 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
 import { ConfirmationModal, EmptyState, useSortableData } from '@/components/TableCommon';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
+import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
@@ -21,7 +21,6 @@ export function ActionsPage() {
     const [ actions, setActions ] = useState<Action[]>(data.actions);
     const { category } = useCategoryInfo();
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('actions-page');
-    const navigate = useNavigate();
 
     async function deleteAction(actionId: string) {
         const result = await api.actions.deleteAction({ id: actionId });
@@ -50,14 +49,15 @@ export function ActionsPage() {
                     </Tooltip>
                 </div>
 
-                <Button
-                    onPress={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
-                    color='primary'
-                    startContent={<FaPlus />}
-                    size='sm'
-                >
-                    Add Action
-                </Button>
+                <Link to={routes.category.actions.new.resolve({ categoryId: category.id })}>
+                    <Button
+                        color='primary'
+                        startContent={<FaPlus />}
+                        size='sm'
+                    >
+                        Add Action
+                    </Button>
+                </Link>
             </div>
 
             {/* Info Banner Below Header (Appears When Open) */}
@@ -76,7 +76,7 @@ export function ActionsPage() {
                     <EmptyState
                         message='No actions available.'
                         buttonText='+ Add Action'
-                        onButtonClick={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
+                        to={routes.category.actions.new.resolve({ categoryId: category.id })}
                     />
                 )}
             </div>
@@ -137,7 +137,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
 
     function handleRowAction(key: React.Key) {
         if (category.id) {
-            navigate(routes.category.actions.resolve({ categoryId: category.id }) + `/${key}`, {
+            navigate(routes.category.actions.detail.resolve({ categoryId: category.id, actionId: String(key) }), {
                 state: { sortDescriptor },
             });
         }

@@ -32,14 +32,14 @@ export const router = createBrowserRouter([ {
         index: true,
         Component: Home,
     }, {
-        path: routes.datasources.path,
+        path: routes.datasources.list.path,
         handle: { breadcrumb: 'Datasources' },
         children: [ {
             index: true,
             loader: DatasourcesPage.loader,
             Component: DatasourcesPage,
         }, {
-            path: ':id',
+            path: routes.datasources.detail.path,
             loader: DatasourceDetailPage.loader,
             Component: DatasourceDetailPage,
             handle: { breadcrumb: (data: DatasourceLoaderData) => data.datasource.label },
@@ -74,25 +74,26 @@ export const router = createBrowserRouter([ {
                 Component: CategoryEditorPage,
                 handle: { breadcrumb: 'Editor' },
             }, {
-                id: routes.category.datasources.id,
-                path: routes.category.datasources.path,
+                id: routes.category.datasources.list.id,
+                path: routes.category.datasources.list.path,
                 handle: { breadcrumb: 'Datasources' },
                 children: [ {
                     index: true,
                     loader: DatasourcesInCategoryPage.loader,
                     Component: DatasourcesInCategoryPage,
                 }, {
-                    path: ':id',
+                    path: routes.category.datasources.detail.path,
                     loader: DatasourceInCategoryPage.loader,
                     Component: DatasourceInCategoryPage,
                     handle: { breadcrumb: (data: DatasourceLoaderData) => data.datasource.label },
+                }, {
+                    id: routes.category.datasources.newMapping.id,
+                    path: routes.category.datasources.newMapping.path,
+                    loader: NewMappingPage.loader,
+                    Component: NewMappingPage,
+                    // TODO
+                    handle: { breadcrumb: 'New Mapping' },
                 } ],
-            }, {
-                id: routes.category.newMapping.id,
-                path: routes.category.newMapping.path,
-                loader: NewMappingPage.loader,
-                Component: NewMappingPage,
-                handle: { breadcrumb: 'New Mapping' },
             }, {
                 id: routes.category.mapping.id,
                 path: routes.category.mapping.path,
@@ -100,24 +101,24 @@ export const router = createBrowserRouter([ {
                 Component: MappingPage,
                 handle: { breadcrumb: (data: MappingLoaderData) => data.mapping.kindName },
             }, {
-                id: routes.category.actions.id,
-                path: routes.category.actions.path,
+                id: routes.category.actions.list.id,
+                path: routes.category.actions.list.path,
                 handle: { breadcrumb: 'Actions' },
                 children: [ {
                     index: true,
                     loader: ActionsPage.loader,
                     Component: ActionsPage,
-                },{
-                    id: 'add-action',
-                    path: 'add',
-                    Component: AddActionPage,
-                    handle: { breadcrumb: 'Add' },
-                },{
+                }, {
                     id: 'action',
-                    path: ':actionId',
+                    path: routes.category.actions.detail.path,
                     loader: ActionDetailPage.loader,
                     Component: ActionDetailPage,
                     handle: { breadcrumb: (data: ActionLoaderData) => data.action.label },
+                }, {
+                    id: 'add-action',
+                    path: routes.category.actions.new.path,
+                    Component: AddActionPage,
+                    handle: { breadcrumb: 'Add' },
                 } ],
             }, {
                 id: routes.category.jobs.id,
@@ -127,7 +128,7 @@ export const router = createBrowserRouter([ {
                     index: true,
                     Component: JobsPage,
                 }, {
-                    path: ':jobId',
+                    path: routes.category.job.path,
                     Component: JobPage,
                     handle: { breadcrumb: 'Job Details' },
                 } ],

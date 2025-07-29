@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { type Dispatch, useEffect } from 'react';
 import { Button, Input } from '@heroui/react';
 import { FaSave, FaPlusCircle } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
@@ -14,7 +14,7 @@ type FilterFormProps = {
     /** Names of properties. */
     propertyNames: string[] | undefined;
     /** A function for state updating. */
-    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
+    dispatch: Dispatch<AdminerFilterQueryStateAction>;
 };
 
 /**

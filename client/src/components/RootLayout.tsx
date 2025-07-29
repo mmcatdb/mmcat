@@ -4,12 +4,13 @@ import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences } from './PreferencesProvider';
 import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
-import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
+import { Link, matchPath, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
+import { routes } from '@/routes/routes';
 
 /**
  * The main layout of the application.
@@ -20,7 +21,7 @@ export function RootLayout() {
     const location = useLocation(); // Get current route
 
     // A workaround to detect if we are on the editor page and adjust the layout accordingly.
-    const isFullPage = location.pathname.includes('/editor') || location.pathname.includes('/mappings') || location.pathname.includes('/adminer');
+    const isFullPage = useMemo(() => fullPageRoutes.some(route => matchPath(route, location.pathname)), [ location.pathname ]);
 
     return (<>
         <ScrollToTop />
@@ -41,6 +42,13 @@ export function RootLayout() {
         </div>
     </>);
 }
+
+const fullPageRoutes = [
+    routes.category.editor.path,
+    routes.category.datasources.newMapping.path,
+    routes.category.mapping.path,
+    routes.adminer,
+];
 
 function CommonNavbar() {
     return (

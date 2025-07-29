@@ -1,5 +1,7 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, type SortDescriptor } from '@heroui/react';
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Hook to manage sorting of data for HeroUI tables.
@@ -73,26 +75,40 @@ export function ConfirmationModal({ isOpen, onClose, onConfirm, isFetching, titl
 type EmptyStateProps = {
     message: string;
     buttonText: string;
-    onButtonClick: () => void;
     className?: string;
     buttonClassName?: string;
-};
+} & ({
+    to: string;
+} | {
+    onClick: () => void;
+});
 
 /**
  * A placeholder for empty states in tables.
- * @param message - The message to display in the empty state.
- * @param buttonText - The text for the button.
  */
-export function EmptyState({ message, buttonText, onButtonClick, buttonClassName = 'px-4 py-2' }: EmptyStateProps) {
+export function EmptyState({ message, buttonText, buttonClassName, ...action }: EmptyStateProps) {
+    const innerButton = (
+        <Button
+            className={twMerge('px-4 py-2', buttonClassName)}
+            onPress={'onClick' in action ? action.onClick : undefined}
+        >
+            {buttonText}
+        </Button>
+    );
+
     return (
         <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
             <p className='text-lg mb-4'>{message}</p>
-            <Button
-                className={buttonClassName}
-                onClick={onButtonClick}
-            >
-                {buttonText}
-            </Button>
+
+            {'to' in action ? (
+                <Link to={action.to}>
+                    {innerButton}
+                </Link>
+            ) : (
+                <span>
+                    {innerButton}
+                </span>
+            )}
         </div>
     );
 }

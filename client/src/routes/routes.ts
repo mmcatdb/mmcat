@@ -42,28 +42,30 @@ const datasourcesIndex = new ParametrizedRoute('/datasources', 'datasources');
 export const routes = {
     home: new ParametrizedRoute('/', 'home'),
     // Static routes
-    categories: '/schema-categories',
     about: '/about',
-    datasources: datasourcesIndex,
     adminer: '/adminer',
-
+    categories: '/schema-categories',
     // Nested and dynamic routes
     category: {
         index: categoryIndex,
         editor: categoryIndex.child('/editor', 'editor'),
-        datasources: categoryIndex.child('/datasources', 'datasources'),
-        datasource: categoryIndex.child<'categoryId' | 'datasourceId'>('/datasources/:datasourceId', 'datasource'),
+        datasources: {
+            list: categoryIndex.child('/datasources', 'datasources'),
+            detail: categoryIndex.child<'categoryId' | 'datasourceId'>('/datasources/:datasourceId', 'datasource'),
+            newMapping: categoryIndex.child<'categoryId' | 'datasourceId'>('/datasources/:datasourceId/new-mapping', 'new-mapping'),
+        },
         mapping: categoryIndex.child<'categoryId' | 'mappingId'>('/mappings/:mappingId', 'mappings'),
-        newMapping: categoryIndex.child<'categoryId'>('/mappings/new', 'new-mapping'),
         querying: categoryIndex.child('/querying', 'querying'),
-        actions: categoryIndex.child('/actions', 'actions'),
-        action: categoryIndex.child<'categoryId' | 'actionId'>('/actions/:actionId', 'action'),
-        addAction: categoryIndex.child('/actions/add', 'add-action'),
+        actions: {
+            list: categoryIndex.child('/actions', 'actions'),
+            detail: categoryIndex.child<'categoryId' | 'actionId'>('/actions/:actionId', 'action'),
+            new: categoryIndex.child('/actions/new', 'add-action'),
+        },
         jobs: categoryIndex.child('/jobs', 'jobs'),
         job: categoryIndex.child<'categoryId' | 'jobId'>('/jobs/:jobId', 'job'),
     },
-    datasourceRoutes: {
-        index: datasourcesIndex,
-        datasource: datasourcesIndex.child<'id'>('/:id', 'datasource'),
+    datasources: {
+        list: datasourcesIndex,
+        detail: datasourcesIndex.child<'id'>('/:id', 'datasource'),
     },
 } as const;

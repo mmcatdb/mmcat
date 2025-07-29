@@ -117,7 +117,7 @@ export function DatasourcesInCategoryPage() {
                     <EmptyState
                         message='No other datasources available.'
                         buttonText='+ Add Datasource'
-                        onButtonClick={() => setIsModalOpen(true)}
+                        onClick={() => setIsModalOpen(true)}
                     />
                 )}
             </div>

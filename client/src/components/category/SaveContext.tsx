@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { FaSave, FaSpinner } from 'react-icons/fa';
 import { api } from '@/api';
@@ -19,7 +19,7 @@ type SaveState = {
 const SaveContext = createContext<SaveState | undefined>(undefined);
 
 type SaveProviderProps = {
-    children: React.ReactNode;
+    children: ReactNode;
     /** Category state to monitor for unsaved changes */
     categoryState?: CategoryEditorState;
 };

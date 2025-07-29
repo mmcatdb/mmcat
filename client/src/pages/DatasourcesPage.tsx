@@ -76,16 +76,14 @@ export function DatasourcesPage() {
             {datasources.length > 0 ? (
                 <DatasourcesTable
                     datasources={datasources}
-                    deleteDatasource={id => {
-                        void deleteDatasource(id);
-                    }}
+                    deleteDatasource={id => void deleteDatasource(id)}
                     datasourcesWithMappings={data.datasourcesWithMappings}
                 />
             ) : (
                 <EmptyState
                     message='No datasources available. Create one to get started.'
                     buttonText='+ Add Datasource'
-                    onButtonClick={() => setIsModalOpen(true)}
+                    onClick={() => setIsModalOpen(true)}
                 />
             )}
 

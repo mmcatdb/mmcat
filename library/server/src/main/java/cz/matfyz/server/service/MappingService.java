@@ -1,9 +1,10 @@
 package cz.matfyz.server.service;
 
+import cz.matfyz.server.controller.MappingController.MappingEdit;
+import cz.matfyz.server.controller.MappingController.MappingInit;
+import cz.matfyz.server.entity.MappingEntity;
 import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.entity.evolution.MappingEvolution;
-import cz.matfyz.server.entity.mapping.MappingInit;
-import cz.matfyz.server.entity.mapping.MappingEntity;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.QueryRepository;
@@ -43,15 +44,17 @@ public class MappingService {
         return mapping;
     }
 
-    // FIXME Define mapping edit ...
-    public void update(MappingEntity mapping, Object edit) {
+    public void update(MappingEntity mapping, MappingEdit edit) {
         final var category = categoryRepository.find(mapping.categoryId);
 
         final var newVersion = category.systemVersion().generateNext();
         final var evolution = MappingEvolution.createNew(category.id(), newVersion, mapping.id(), edit);
 
         mapping.updateVersion(newVersion, category.systemVersion());
-        // FIXME Update the mapping.
+
+        mapping.primaryKey = edit.primaryKey();
+        mapping.kindName = edit.kindName();
+        mapping.accessPath = edit.accessPath();
 
         repository.save(mapping);
         evolutionRepository.create(evolution);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useState } from 'react';
 import { Button, Input, Radio, RadioGroup } from '@heroui/react';
 import { RightPanelMode, type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { type FormPosition, toFormNumber, toNumber, toPosition } from '@/types/utils/common';
@@ -102,7 +102,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
 type EditorFormProps = {
     /** Additional form fields or content. */
-    children: React.ReactNode;
+    children: ReactNode;
     /** Function to call when submitting the form. */
     onSubmit: () => void;
     /** Function to call when canceling the form. */
@@ -118,9 +118,9 @@ function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFo
     return (<>
         {children}
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={onCancel}>Cancel</Button>
-            <Button color='primary' onClick={onSubmit} isDisabled={isSubmitDisabled}>
-                    Apply
+            <Button onPress={onCancel}>Cancel</Button>
+            <Button color='primary' onPress={onSubmit} isDisabled={isSubmitDisabled}>
+                Apply
             </Button>
         </div>
     </>);
@@ -165,7 +165,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         dispatch({ type: 'rightPanelMode', mode: RightPanelMode.updateObjex, graph });
     }
 
-    function handleKeyDown(e: React.KeyboardEvent) {
+    function handleKeyDown(e: KeyboardEvent) {
         if (e.key === 'Enter' && hasChanges) {
             e.preventDefault();
             handleApply();
@@ -262,7 +262,7 @@ export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         resetToDefaultMode(dispatch);
     }
 
-    function handleKeyDown(e: React.KeyboardEvent) {
+    function handleKeyDown(e: KeyboardEvent) {
         if (e.key === 'Enter' && hasChanges) {
             e.preventDefault();
             handleApply();

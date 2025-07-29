@@ -1,4 +1,4 @@
-package cz.matfyz.server.entity.mapping;
+package cz.matfyz.server.entity;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.Key;
@@ -7,8 +7,6 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.Version;
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.VersionedEntity;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,9 +21,9 @@ public class MappingEntity extends VersionedEntity {
     public final Id categoryId;
     public final Id datasourceId;
     public final Key rootObjexKey;
-    public final List<Signature> primaryKey;
-    public final String kindName;
-    public final ComplexProperty accessPath;
+    public List<Signature> primaryKey;
+    public String kindName;
+    public ComplexProperty accessPath;
 
     private MappingEntity(
         Id id,

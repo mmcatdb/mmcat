@@ -69,11 +69,11 @@ export function CategoryEditorPage() {
                             }}
                             disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
                             title='Delete selected elements (Delete)'
-                            className={`p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300 ${
+                            className={twJoin('p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300',
                                 state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
                                     ? 'text-danger-400 opacity-50 cursor-not-allowed'
-                                    : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer'
-                            }`}
+                                    : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer',
+                            )}
                         >
                             <FaTrash size={16} aria-hidden='true' />
                         </button>

@@ -44,7 +44,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
     const navigate = useNavigate();
 
     function handleRowAction(key: React.Key) {
-        navigate(routes.categories + `/${key}`);
+        navigate(routes.category.index.resolve({ categoryId: String(key) }));
     }
 
     const [ deletingCategoryId, setDeletingCategoryId ] = useState<Id>();

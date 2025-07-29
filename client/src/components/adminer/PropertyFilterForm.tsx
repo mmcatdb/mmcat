@@ -4,6 +4,7 @@ import { OPERATOR_MAPPING, UNARY_OPERATORS, type Operator } from '@/types/admine
 import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 import type { DatasourceType } from '@/types/Datasource';
+import { type Dispatch } from 'react';
 
 type PropertyFilterFormProps = {
     /** The filter to be updated. */
@@ -13,7 +14,7 @@ type PropertyFilterFormProps = {
     /** Names of properties. */
     propertyNames: string[] | undefined;
     /** A function for state updating. */
-    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
+    dispatch: Dispatch<AdminerFilterQueryStateAction>;
 };
 
 /**

@@ -1,11 +1,11 @@
 import { api } from '@/api';
 import { Job } from '@/types/job';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Chip, Tooltip } from '@heroui/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
-import { getJobStateIcon } from '@/components/icons/Icons';
+import { JobStateIcon } from './JobPage';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
@@ -24,7 +24,6 @@ export function JobsPage() {
     const [ groupedJobs, setGroupedJobs ] = useState<Record<string, Job[]>>();
     const [ error, setError ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('jobs-page');
-    const navigate = useNavigate();
 
     async function fetchJobs() {
         const response = await api.jobs.getAllJobsInCategory({ categoryId: category.id });
@@ -59,9 +58,9 @@ export function JobsPage() {
         return <LoadingPage />;
 
     if (error) {
-        return <ReloadPage onReload={() => {
-            void fetchJobs();
-        }} />;
+        return (
+            <ReloadPage onReload={() => void fetchJobs()} />
+        );
     }
 
     const classNameTH = 'px-4 py-3 text-left font-semibold bg-default-100 border-b border-default-300 text-default-800';
@@ -103,7 +102,7 @@ export function JobsPage() {
             <EmptyState
                 message='No runs available yet. First create an Action.'
                 buttonText='Go to Actions Page'
-                onButtonClick={() => navigate(routes.category.actions.resolve({ categoryId: category.id }))}
+                to={routes.category.actions.list.resolve({ categoryId: category.id })}
             />
         )}
     </>);
@@ -141,7 +140,6 @@ function groupJobsByRunId(jobs: Job[]) {
 }
 
 function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
-    const navigate = useNavigate();
     const { showTableIDs } = usePreferences().preferences;
 
     // Keep only the most recent job per index
@@ -188,12 +186,9 @@ function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
                             }
                             placement='top'
                         >
-                            <div
-                                onClick={() => navigate(`${job.id}`)}
-                                className='cursor-pointer'
-                            >
-                                {getJobStateIcon(job.state)}
-                            </div>
+                            <Link to={routes.category.job.resolve({ categoryId: job.categoryId, jobId: job.id })}>
+                                <JobStateIcon state={job.state} />
+                            </Link>
                         </Tooltip>
                     ))}
                 </div>
@@ -208,8 +203,7 @@ type JobInfoBannerProps = {
 };
 
 export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) {
-    const navigate = useNavigate();
-    const { categoryId } = useParams();
+    const { category } = useCategoryInfo();
 
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
@@ -249,16 +243,22 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
             <ul className='space-y-1 text-sm'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <span><strong>Manage Jobs:</strong> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.</span>
+                    <strong>Manage Jobs:</strong> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <span><strong>Create a New Run & Jobs:</strong> Go to the <button
-                        onClick={() => categoryId && navigate(routes.category.actions.resolve({ categoryId }))}
-                        className='text-primary-500 hover:underline'
-                    >
-                        Actions page
-                    </button>.</span>
+
+                    <strong>Create a New Run & Jobs:</strong>
+                    Go to the
+                    <span>
+                        <Link
+                            to={routes.category.actions.list.resolve({ categoryId: category.id })}
+                            className='text-primary-500 hover:underline'
+                        >
+                            Actions page
+                        </Link>
+                        .
+                    </span>
                 </li>
             </ul>
         </InfoBanner>

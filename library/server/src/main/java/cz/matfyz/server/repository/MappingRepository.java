@@ -4,7 +4,7 @@ import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.MappingEntity;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;

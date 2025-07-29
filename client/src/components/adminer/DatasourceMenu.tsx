@@ -1,9 +1,10 @@
 import { Select, SelectItem } from '@heroui/react';
 import { type Datasource, DatasourceType } from '@/types/Datasource';
+import { type Dispatch, type SetStateAction } from 'react';
 
 type DatasourceMenuProps = {
     /** Function for updating 'datasource' parameter. */
-    setDatasource: React.Dispatch<React.SetStateAction<Datasource | undefined>>;
+    setDatasource: Dispatch<SetStateAction<Datasource | undefined>>;
     /** The selected datasource. */
     datasource: Datasource | undefined;
     /** All active datasources. */

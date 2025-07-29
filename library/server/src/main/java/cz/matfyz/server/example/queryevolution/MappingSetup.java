@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.MappingEntity;
 import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.service.MappingService;

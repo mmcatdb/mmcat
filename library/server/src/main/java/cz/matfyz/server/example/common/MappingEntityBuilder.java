@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.common;
 
+import cz.matfyz.server.controller.MappingController.MappingInit;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingInit;
-import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.MappingEntity;
 import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.tests.example.common.TestMapping;

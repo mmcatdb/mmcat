@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type Params, useLoaderData, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type DatasourceSettings } from '@/types/Datasource';
 import { Button, Input, Tooltip } from '@heroui/react';
@@ -14,6 +14,7 @@ import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { InfoBanner } from '@/components/common';
 import { routes } from '@/routes/routes';
+import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 
 export function DatasourceDetailPage() {
     return (
@@ -27,11 +28,11 @@ export type DatasourceLoaderData = {
     datasource: Datasource;
 };
 
-async function datasourceLoader({ params: { id } }: { params: Params<'id'> }): Promise<DatasourceLoaderData> {
-    if (!id)
+async function datasourceLoader({ params: { datasourceId } }: { params: Params<'datasourceId'> }): Promise<DatasourceLoaderData> {
+    if (!datasourceId)
         throw new Error('Datasource ID is required');
 
-    const response = await api.datasources.getDatasource({ id });
+    const response = await api.datasources.getDatasource({ id: datasourceId });
     if (!response.status)
         throw new Error('Failed to load datasource info');
 
@@ -42,22 +43,7 @@ async function datasourceLoader({ params: { id } }: { params: Params<'id'> }): P
 
 export function DatasourceInCategoryPage() {
     const { datasource, mappings } = useLoaderData() as DatasourceInCategoryLoaderData;
-    const { categoryId } = useParams<{ categoryId: string }>();
-    const navigate = useNavigate();
-
-    function handleCreateMapping() {
-        if (!categoryId) {
-            console.error('Category ID is missing');
-            return;
-        }
-
-        navigate(routes.category.newMapping.resolve({ categoryId }), {
-            state: {
-                datasourceId: datasource.id,       // Pass datasource ID for new mapping creation
-                datasourceLabel: datasource.label, // Add datasource label
-            },
-        });
-    }
+    const { category } = useCategoryInfo();
 
     return (
         <div>
@@ -66,21 +52,23 @@ export function DatasourceInCategoryPage() {
             <div className='mt-6'>
                 <div className='flex justify-between items-center pb-6'>
                     <p className='text-xl'>Mappings Table</p>
-                    <Button
-                        color='primary'
-                        onPress={handleCreateMapping}
-                        size='sm'
-                    >
+                    <Link to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}>
+                        <Button
+                            color='primary'
+                            size='sm'
+                        >
                         + Add Mapping
-                    </Button>
+                        </Button>
+                    </Link>
                 </div>
+
                 {mappings.length > 0 ? (
                     <MappingsTable mappings={mappings} />
                 ) : (
                     <EmptyState
                         message='This datasource does not have a mapping yet.'
                         buttonText='+ Add Mapping'
-                        onButtonClick={handleCreateMapping}
+                        to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
                     />
                 )}
             </div>
@@ -95,13 +83,13 @@ export type DatasourceInCategoryLoaderData = {
     mappings: Mapping[];
 };
 
-async function datasourceInCategoryLoader({ params: { categoryId, id } }: { params: Params<'categoryId' | 'id'> }): Promise<DatasourceInCategoryLoaderData> {
-    if (!categoryId || !id)
+async function datasourceInCategoryLoader({ params: { categoryId, datasourceId } }: { params: Params<'categoryId' | 'datasourceId'> }): Promise<DatasourceInCategoryLoaderData> {
+    if (!categoryId || !datasourceId)
         throw new Error('Datasource ID is required');
 
     const [ datasourceResponse, mappingsResponse ] = await Promise.all([
-        api.datasources.getDatasource({ id }),
-        api.mappings.getAllMappingsInCategory({}, { categoryId: categoryId, datasourceId: id }),
+        api.datasources.getDatasource({ id: datasourceId }),
+        api.mappings.getAllMappingsInCategory({}, { categoryId, datasourceId }),
     ]);
     if (!datasourceResponse.status || !mappingsResponse.status)
         throw new Error('Failed to load datasource or mappings');
@@ -223,7 +211,7 @@ function DatasourceDisplay() {
                     <div className='flex justify-between items-center mb-3'>
                         <h2 className='text-lg font-semibold'>Connection Settings</h2>
                         <Button
-                            onClick={() => setIsUpdating(true)}
+                            onPress={() => setIsUpdating(true)}
                             color='primary'
                             size='sm'
                         >
@@ -255,13 +243,13 @@ function DatasourceDisplay() {
                         <div className='flex gap-2 mt-6'>
                             <Button
                                 color='primary'
-                                onClick={handleSaveChanges}
+                                onPress={handleSaveChanges}
                                 isLoading={isSaving}
                                 className='px-6'
                             >
                                 Save
                             </Button>
-                            <Button variant='flat' onClick={cancelUpdating} isDisabled={isSaving} className='px-6'>
+                            <Button variant='flat' onPress={cancelUpdating} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>
                         </div>

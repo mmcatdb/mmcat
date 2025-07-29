@@ -88,7 +88,7 @@ export function SessionSelect() {
                     </SelectItem>
                 ))}
             </Select>
-            <Button onClick={createSession}>
+            <Button onPress={createSession}>
                 New session
             </Button>
         </div>

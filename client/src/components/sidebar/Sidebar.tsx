@@ -1,13 +1,18 @@
-import { useState } from 'react';
-import { Link, matchPath, useParams } from 'react-router-dom';
+import { type FunctionComponent, type SVGProps, useState } from 'react';
+import { Link, matchPath, useLocation, useParams } from 'react-router-dom';
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@heroui/react';
 import { routes } from '@/routes/routes';
-import { SidebarIconKey, sidebarIconMap } from '@/components/icons/Icons';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggle';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { PiCat } from 'react-icons/pi';
 import { twJoin } from 'tailwind-merge';
+import { CodeBracketSquareIcon as CodeBracketSquareIconOutline, RocketLaunchIcon as RocketLaunchIconOutline, PlayCircleIcon as PlayCircleIconOutline } from '@heroicons/react/24/outline';
+import { CodeBracketSquareIcon as CodeBracketSquareIconSolid, RocketLaunchIcon as RocketLaunchIconSolid, PlayCircleIcon as PlayCircleIconSolid } from '@heroicons/react/24/solid';
+import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
+import { HiOutlinePencilSquare, HiPencilSquare } from 'react-icons/hi2';
+import { HiDatabase, HiOutlineDatabase } from 'react-icons/hi';
+import { BiCategory, BiSolidCategory } from 'react-icons/bi';
 
 /**
  * Type for navigation items in the sidebar.
@@ -15,8 +20,9 @@ import { twJoin } from 'tailwind-merge';
 type NormalSidebarItem = {
     type: 'normal';
     label: string;
+    solidIcon: FunctionComponent<SVGProps<SVGSVGElement>>;
+    outlineIcon: FunctionComponent<SVGProps<SVGSVGElement>>;
     route: string;
-    iconName: keyof typeof sidebarIconMap;
     match?: string[];
 };
 
@@ -162,26 +168,20 @@ function SidebarItemDisplay({ item }: {
     item : SidebarItem;
 }) {
     const { theme, isCollapsed } = usePreferences().preferences;
+    const location = useLocation();
 
     switch (item.type) {
     case 'separator':
         return (
-            <p
-                key={`separator-${item.label}`}
-                className={`font-semibold px-4 py-3 whitespace-nowrap overflow-hidden`}
-            >
+            <p key={`separator-${item.label}`} className='font-semibold px-4 py-3 whitespace-nowrap overflow-hidden'>
                 {isCollapsed ? item.collapsedLabel : item.label}
             </p>
         );
 
     case 'normal': {
-        // Get clean pathname without query params
-        const currentPathWithoutQuery = new URL(window.location.href).pathname;
-        const itemRouteWithoutQuery = new URL(item.route, window.location.origin).pathname;
+        const isActive = !!matchPath(item.route, location.pathname) || !!item.match?.some(path => matchPath(path, location.pathname));
 
-        const isMatched = item.match?.some(path => matchPath(path, currentPathWithoutQuery));
-        const isActive = currentPathWithoutQuery === itemRouteWithoutQuery || isMatched;
-        const icon = sidebarIconMap[item.iconName];
+        const Icon = isActive ? item.solidIcon : item.outlineIcon;
 
         const linkContent = (
             <Link
@@ -192,13 +192,9 @@ function SidebarItemDisplay({ item }: {
                     theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100', // needs to be defined via 'theme ===' not via default colors (HeroUI does not have good contrast in dark mode or light mode)
                 )}
             >
-                <span className='shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
+                <Icon className='shrink-0 mr-2 w-6 h-6' />
 
-                <span
-                    className={`ml-2 whitespace-nowrap overflow-hidden ${
-                        isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
-                    }`}
-                >
+                <span className={twJoin('ml-2 whitespace-nowrap overflow-hidden', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100')}>
                     {item.label}
                 </span>
             </Link>
@@ -225,19 +221,22 @@ function generalSidebarItems(): SidebarItem[] {
     return [ {
         type: 'normal',
         label: 'Schema categories',
+        solidIcon: BiSolidCategory,
+        outlineIcon: BiCategory,
         route: routes.categories,
-        iconName: SidebarIconKey.SchemaCategory,
     }, {
         type: 'normal',
         label: 'Datasources',
-        route: routes.datasources.path,
-        iconName: SidebarIconKey.Datasources,
-        match: [ routes.datasourceRoutes.datasource.path ],
+        solidIcon: HiDatabase,
+        outlineIcon: HiOutlineDatabase,
+        route: routes.datasources.list.path,
+        match: [ routes.datasources.detail.path ],
     }, {
         type: 'normal',
         label: 'Adminer',
+        solidIcon: CodeBracketSquareIconSolid,
+        outlineIcon: CodeBracketSquareIconOutline,
         route: `${routes.adminer}?reload=true`,
-        iconName: SidebarIconKey.CodeBracketSquare,
     } ];
 }
 
@@ -252,30 +251,35 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
     }, {
         type: 'normal',
         label: 'Overview',
+        solidIcon: MdDashboard,
+        outlineIcon: MdOutlineDashboard,
         route: routes.category.index.resolve({ categoryId }),
-        iconName: SidebarIconKey.Overview,
     }, {
         type: 'normal',
         label: 'Editor',
+        solidIcon: HiPencilSquare,
+        outlineIcon: HiOutlinePencilSquare,
         route: routes.category.editor.resolve({ categoryId }),
-        iconName: SidebarIconKey.Editor,
     }, {
         type: 'normal',
         label: 'Datasources',
-        route: routes.category.datasources.resolve({ categoryId }),
-        iconName: SidebarIconKey.Datasources,
-        match: [ routes.category.datasource.path ],
+        solidIcon: HiDatabase,
+        outlineIcon: HiOutlineDatabase,
+        route: routes.category.datasources.list.resolve({ categoryId }),
+        match: [ routes.category.datasources.detail.path ],
     }, {
         type: 'normal',
         label: 'Actions',
-        route: routes.category.actions.resolve({ categoryId }),
-        iconName: SidebarIconKey.Rocket,
-        match: [ routes.category.action.path, routes.category.addAction.path ],
+        solidIcon: RocketLaunchIconSolid,
+        outlineIcon: RocketLaunchIconOutline,
+        route: routes.category.actions.list.resolve({ categoryId }),
+        match: [ routes.category.actions.list.path, routes.category.actions.new.path ],
     }, {
         type: 'normal',
         label: 'Jobs',
+        solidIcon: PlayCircleIconSolid,
+        outlineIcon: PlayCircleIconOutline,
         route: routes.category.jobs.resolve({ categoryId }),
-        iconName: SidebarIconKey.PlayCircle,
         match: [ routes.category.job.path ],
     } ];
 }

@@ -36,7 +36,7 @@ export function CustomLink({ className, isDisabled, ...rest }: LinkProps & { isD
 type PortalProps = {
     children?: ReactNode;
     to: string;
-}
+};
 
 export function Portal({ children, to }: PortalProps) {
     const [ target, setTarget ] = useState(document.getElementById(to));

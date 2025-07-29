@@ -7,7 +7,6 @@ import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.entity.datasource.DatasourceUpdate;
 import cz.matfyz.server.entity.datasource.DatasourceResponse;
 import cz.matfyz.server.service.DatasourceService;
-import cz.matfyz.server.service.WrapperService;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +42,12 @@ public class DatasourceController {
     @GetMapping("/datasources/{id}")
     public DatasourceResponse getDatasource(@PathVariable Id id) {
         final DatasourceEntity datasource = repository.find(id);
+        return DatasourceResponse.fromEntity(datasource);
+    }
+
+    @GetMapping("/datasources/for-mapping")
+    public DatasourceResponse getDatasourceForMapping(@RequestParam Id mappingId) {
+        final DatasourceEntity datasource = repository.findByMappingId(mappingId);
         return DatasourceResponse.fromEntity(datasource);
     }
 

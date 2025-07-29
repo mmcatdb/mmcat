@@ -3,6 +3,7 @@ import { AVAILABLE_VIEWS } from './Views';
 import type { DatasourceType } from '@/types/Datasource';
 import type { View } from '@/types/adminer/View';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
+import { type Dispatch } from 'react';
 
 type ViewMenuProps = {
     /** The type of selected datasource. */
@@ -10,7 +11,7 @@ type ViewMenuProps = {
     /** Current view. */
     view: View;
     /** A function for state updating. */
-    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
+    dispatch: Dispatch<AdminerFilterQueryStateAction>;
 };
 
 /**

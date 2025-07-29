@@ -10,6 +10,9 @@ const datasources = {
     getDatasource: GET<{ id: StringLike }, DatasourceResponse>(
         u => `/datasources/${u.id}`,
     ),
+    getDatasourceForMapping: GET<Empty, DatasourceResponse, { mappingId: Id }>(
+        () => `/datasources/for-mapping`,
+    ),
     createDatasource: POST<Empty, DatasourceResponse, DatasourceInit>(
         () => `/datasources`,
     ),

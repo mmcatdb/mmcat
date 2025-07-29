@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { type Dispatch, useCallback, useMemo } from 'react';
 import { Spinner, Select, SelectItem } from '@heroui/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { api } from '@/api';
@@ -15,7 +15,7 @@ type KindMenuProps = {
     /** If 'true', additional kind name for unlabeled nodes from Neo4j is added. */
     showUnlabeled: boolean;
     /** A function for state updating. */
-    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
+    dispatch: Dispatch<AdminerFilterQueryStateAction>;
 };
 
 type Option = {

@@ -1,11 +1,9 @@
 import { MappingEditorGraph } from './MappingEditorGraph';
-import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch } from './useMappingEditor';
+import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch, type MappingEditorInput } from './useMappingEditor';
 import { type Category } from '@/types/schema';
-import { type Dispatch, useCallback } from 'react';
-import { FreeSelection, type FreeSelectionAction, PathSelection, SelectionType } from '../graph/graphSelection';
+import { type FreeSelection, PathSelection, SelectionType } from '../graph/graphSelection';
 import { type Mapping } from '@/types/mapping';
 import { Button, Input } from '@heroui/react';
-import { useNavigate } from 'react-router-dom';
 import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { type CategoryGraph } from '../category/categoryGraph';
 import { getPathSignature } from '../graph/graphUtils';
@@ -13,45 +11,17 @@ import { getPathSignature } from '../graph/graphUtils';
 type MappingEditorProps = {
     /** The schema category to which the mapping belongs. */
     category: Category;
-    /** The initial mapping to edit. */
-    mapping: Mapping;
-    kindName: string;
-    setKindName: (name: string) => void;
+    input: MappingEditorInput;
     /** Optional callback to handle saving the mapping. */
-    onSave?: (mapping: Mapping, kindName: string) => void;
-    /** Name of the datasource for which the mapping is created. */
-    datasourceLabel: string;
+    onSave?: (mapping: Mapping) => void;
+    onCancel?: () => void;
 };
 
 /**
  * Renders the mapping editor with a graph display and panels for root selection and access path building.
  */
-export function MappingEditor({ category, mapping, kindName, setKindName, onSave, datasourceLabel }: MappingEditorProps) {
-    const { state, dispatch } = useMappingEditor(category, mapping);
-
-    const navigate = useNavigate();
-
-    const freeSelectionDispatch = useCallback((action: FreeSelectionAction) => {
-        dispatch({ type: 'select', ...action });
-    }, [ dispatch ]);
-
-    function handleSetRoot() {
-        if (state.selection instanceof FreeSelection && !state.selection.isEmpty) {
-            const rootNodeId = state.selection.nodeIds.values().next().value!;
-            dispatch({ type: 'set-root', rootNodeId });
-        }
-    }
-
-    function handleSave() {
-        if (onSave)
-            // FIXME
-            onSave(state.form, kindName);
-        navigate(-1);
-    }
-
-    function handleCancel() {
-        navigate(-1);
-    }
+export function MappingEditor({ category, input, onSave, onCancel }: MappingEditorProps) {
+    const { state, dispatch, isFetching } = useMappingEditor(category, input, onSave);
 
     return (
         <div className='relative flex h-[calc(100vh-40px)]'>
@@ -63,13 +33,13 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                     {/* Show datasource info */}
                     <div className='pt-2 pb-6 text-sm text-default-600'>
                         For datasource
-                        {datasourceLabel ?? mapping.datasourceId}
+                        {input.datasource.label}
                     </div>
 
                     <Input
                         label='Kind Name'
-                        value={kindName}
-                        onChange={e => setKindName(e.target.value)}
+                        value={state.form.kindName}
+                        onChange={e => dispatch({ type: 'kindName', value: e.target.value })}
                         placeholder='Enter Kind Name'
                         fullWidth
                         autoFocus
@@ -80,11 +50,9 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                 <div className='flex-1 overflow-y-auto py-2 mt-3'>
                     {state.editorPhase === EditorPhase.SelectRoot ? (
                         <RootSelectionPanel
-                            // @ts-expect-error FIXME
-                            selection={state.selection}
+                            selection={state.selection as FreeSelection}
                             graph={state.graph}
-                            dispatch={freeSelectionDispatch}
-                            onConfirm={handleSetRoot}
+                            dispatch={dispatch}
                         />
                     ) : (
                         <AccessPathCard state={state} dispatch={dispatch} />
@@ -94,22 +62,26 @@ export function MappingEditor({ category, mapping, kindName, setKindName, onSave
                 {/* Fixed footer with buttons */}
                 <div className='pt-4 border-t border-default-100'>
                     <div className='flex gap-3 justify-end'>
-                        <Button
-                            color='danger'
-                            variant='flat'
-                            onPress={handleCancel}
-                            startContent={<XMarkIcon className='h-4 w-4' />}
-                            size='sm'
-                        >
+                        {onCancel && (
+                            <Button
+                                color='danger'
+                                variant='flat'
+                                onPress={onCancel}
+                                startContent={<XMarkIcon className='h-4 w-4' />}
+                                size='sm'
+                            >
                             Discard
-                        </Button>
+                            </Button>
+                        )}
+
                         <Button
                             color='success'
                             variant='solid'
-                            onPress={handleSave}
+                            onPress={() => dispatch({ type: 'sync' })}
                             startContent={<CheckCircleIcon className='h-4 w-4' />}
                             size='sm'
-                            isDisabled={!state.rootNodeId}
+                            isDisabled={!state.form.rootObjexKey}
+                            isLoading={isFetching}
                         >
                             Create Mapping
                         </Button>
@@ -127,19 +99,24 @@ type RootSelectionPanelProps = {
     /** The current selection state. */
     selection: FreeSelection;
     graph: CategoryGraph;
-    /** Dispatch function for selection actions. */
-    dispatch: Dispatch<FreeSelectionAction>;
-    /** Callback to confirm the root node. */
-    onConfirm: () => void;
+    dispatch: MappingEditorDispatch;
 };
 
 /**
  * Renders a panel for selecting the root node during the SelectRoot phase.
  */
-function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelectionPanelProps) {
+function RootSelectionPanel({ selection, graph, dispatch }: RootSelectionPanelProps) {
     const selectedNode = selection.nodeIds.size > 0
         ? graph.nodes.get([ ...selection.nodeIds ][0])
         : null;
+
+    function setRoot() {
+        if (!selection.isEmpty) {
+            const rootNodeId = selection.nodeIds.values().next().value!;
+            const rootNode = graph.nodes.get(rootNodeId)!;
+            dispatch({ type: 'set-root', key: rootNode.schema.key });
+        }
+    }
 
     return (
         <div className='space-y-4'>
@@ -156,7 +133,7 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
                             isIconOnly
                             size='sm'
                             variant='light'
-                            onClick={() => dispatch({ operation: 'clear', range: 'nodes' })}
+                            onPress={() => dispatch({ type: 'select', operation: 'clear', range: 'nodes' })}
                         >
                             <XMarkIcon className='h-4 w-4' />
                         </Button>
@@ -165,7 +142,7 @@ function RootSelectionPanel({ selection, graph, dispatch, onConfirm }: RootSelec
                         fullWidth
                         color='primary'
                         className='mt-3'
-                        onPress={onConfirm}
+                        onPress={setRoot}
                     >
                         Confirm Root Selection
                     </Button>
@@ -200,15 +177,13 @@ function AccessPathCard({ state, dispatch }: StateDispatchProps) {
 
     function handleAddSubpath() {
         // Switch to path selection mode when + is clicked
-        dispatch({ type: 'selection-type', selectionType: SelectionType.Path });
+        dispatch({ type: 'add-subpath' });
     }
 
     function handleConfirmPath() {
         if (selection instanceof PathSelection && !selection.isEmpty) {
             const newNodeId = selection.lastNodeId;
             dispatch({ type: 'append-to-access-path', nodeId: newNodeId });
-            // Reset to free selection after adding
-            dispatch({ type: 'selection-type', selectionType: SelectionType.Free });
         }
     }
 

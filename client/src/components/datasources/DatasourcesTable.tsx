@@ -143,7 +143,7 @@ function navigateToDatasource(
     sortDescriptor: SortDescriptor,
 ) {
     const path = categoryId
-        ? routes.category.datasources.resolve({ categoryId }) + `/${datasourceId}`
+        ? routes.category.datasources.list.resolve({ categoryId }) + `/${datasourceId}`
         : `/datasources/${datasourceId}`;
     navigate(path, { state: { sortDescriptor } });
 }
@@ -151,7 +151,6 @@ function navigateToDatasource(
 /**
  * Reusable component to render the deletion confirmation modal.
  *
- * @param props - The modal component props.
  * @returns A React component rendering the confirmation modal.
  */
 function ConfirmationModalWrapper({ isOpen, datasource, onConfirm, onClose, isDeleting }: ConfirmationModalWrapperProps) {
