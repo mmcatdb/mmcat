@@ -12,6 +12,7 @@ import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.resolver.queryresult.TformStep.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,28 +55,49 @@ public class ResultStructureMerger {
         this.matchVar = matchVar;
     }
 
-    public record MergeTform(TformRoot sourceTform, TformRoot targetTform, ResultStructure newStructure) {
+    public record MergeTform(TformRoot sourceTform, TformRoot targetTform, TformRoot targetIdsTform, ResultStructure newStructure, Map<String, MapResult> index, Set<String> targetIds) {
 
         public QueryResult apply(ListResult source, ListResult target) {
-            // First create the index.
-            sourceTform.apply(new TformContext(source));
+            applySource(source);
+            return applyTarget(target);
+        }
 
-            // Then then merge the source to the target and remove the target identifiers.
+        /** Creates the index. */
+        public void applySource(ListResult source) {
+            sourceTform.apply(new TformContext(source));
+        }
+
+        /** Returns ids of source data. Requires calling applySource() first. */
+        public Set<String> getSourceIds() {
+            return index.keySet();
+        }
+
+        /** Returns ids of target data. */
+        public Set<String> getTargetIds(ListResult target) {
+            targetIdsTform.apply(new TformContext(target));
+            return targetIds;
+        }
+
+        /** Merges the source to the target and remove the target identifiers, then merges with source. */
+        public QueryResult applyTarget(ListResult target) {
             targetTform.apply(new TformContext(target));
 
             return new QueryResult(target, newStructure);
         }
-
     }
 
     private MergeTform run() {
         final Map<String, MapResult> index = new TreeMap<>();
+        final Set<String> targetIds = new HashSet<>();
 
         final var sourceTform = createSourceTform(index);
 
+        // needs to be done before modifying target ResultStructure
+        final var targetIdsTform = createTargetIdsTform(targetIds);
+
         final var targetTform = createTargetTform(index);
 
-        return new MergeTform(sourceTform, targetTform, targetRoot);
+        return new MergeTform(sourceTform, targetTform, targetIdsTform, targetRoot, index, targetIds);
     }
 
     private TformRoot createSourceTform(Map<String, MapResult> index) {
@@ -109,6 +131,26 @@ public class ResultStructureMerger {
 
         final var mergeTform = merge(sourceRoot, join);
         current.addChildOrRoot(mergeTform);
+
+        return targetTform;
+    }
+
+    private TformRoot createTargetIdsTform(Set<String> targetIds) {
+        // (same as in createTargetTform)
+        final var targetTform = new TformRoot();
+        TformStep current = targetTform.addChild(new TraverseList());
+
+        // final var record = traverseToJoin(current);
+        // current = record.current;
+        // final var join = record.join;
+
+        // final var match = targetRoot.findDescendantByVariable(matchVar);
+        // final var joinToMatch = GraphUtils.findDirectPath(join, match);
+
+        final var match = targetRoot.findDescendantByVariable(matchVar);
+        final var rootToMatch = GraphUtils.findDirectPath(targetRoot, match);
+
+        current = current.addChild(new WriteToSet(targetIds, pathToKeys(rootToMatch)));
 
         return targetTform;
     }

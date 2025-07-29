@@ -6,7 +6,6 @@ import cz.matfyz.querying.optimizer.QueryDebugPrinter;
 import cz.matfyz.tests.example.benchmarkyelp.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.tests.querying.QueryEstimator;
-import cz.matfyz.tests.querying.QueryTestBase;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,10 +13,7 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.CompactNumberFormat;
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -118,9 +114,10 @@ class BenchmarkTests {
             true
         ).run();
 
-        NumberFormat fmt = NumberFormat.getCompactNumberInstance(Locale.US, NumberFormat.Style.SHORT);
-        final var cost1h = QueryDebugPrinter.run(plans1.get(0).root);
-        final var cost2h = QueryDebugPrinter.run(plans2.get(0).root);
+        LOGGER.info("Basic cost estimation - best plans: \n" +
+            "unoptimized:\n" + QueryDebugPrinter.run(plans1.get(0).root) + "\n" + 
+            "optimized:\n" + QueryDebugPrinter.run(plans2.get(0).root)
+        );
 
         final var error = plans1.get(0).root.costData.network() >= plans2.get(0).root.costData.network()
             ? null : "Filtering increases cost estimation";
@@ -145,7 +142,7 @@ class BenchmarkTests {
             WHERE {
                 ?user  9 ?user_id .
                 ?user 10 ?name .
-                ?user -18/19/1 ?business_id .
+                ?user -19/20/1 ?business_id .
 
                 FILTER(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
                 # GROUP BY ?user
@@ -160,8 +157,10 @@ class BenchmarkTests {
             true
         ).run();
 
-        final var cost1h = QueryDebugPrinter.run(plans.get(0).root);
-        final var cost2h = QueryDebugPrinter.run(plans.get(1).root);
+        LOGGER.info("Join cost estimation - gathered Plans: \n" +
+            String.join("\n", plans.stream().map(p -> QueryDebugPrinter.run(p.root)).toList())
+        );
+
         final var error = plans.get(0).root instanceof DatasourceNode
             ? null : "PostgreSQL DatasourceNode expected as the best plan root";
         assertNull(error);

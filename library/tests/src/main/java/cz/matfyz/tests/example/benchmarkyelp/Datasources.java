@@ -35,7 +35,7 @@ public class Datasources {
             postgreSQL = createNewPostgreSQL()
                 .addMapping(PostgreSQL.business(schema))
                 .addMapping(PostgreSQL.user(schema))
-                .addMapping(PostgreSQL.isFriend(schema))
+                .addMapping(PostgreSQL.friendship(schema))
                 .addMapping(PostgreSQL.review(schema));
         }
 

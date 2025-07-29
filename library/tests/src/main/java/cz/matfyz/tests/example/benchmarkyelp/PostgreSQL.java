@@ -14,7 +14,7 @@ public abstract class PostgreSQL {
     public static final String businessKind = "business";
     public static final String userKind = "yelp_user";
     public static final String reviewKind = "review";
-    public static final String isFriendKind = "is_friend";
+    public static final String isFriendKind = "friendship";
 
     public static TestMapping business(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
@@ -48,14 +48,14 @@ public abstract class PostgreSQL {
         );
     }
 
-    // TODO: check that this works
-    public static TestMapping isFriend(SchemaCategory schema) {
+    // TODO: check that this works!
+    public static TestMapping friendship(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
             Schema.user,
             isFriendKind,
             b -> b.root(
                 b.simple("user_id", Schema.userToId),
-                b.simple("friend_id", Schema.userToFriend.signature().concatenate(Schema.userToId.signature()))
+                b.simple("friend_id", Schema.friendshipToUser1.dual().concatenate(Schema.friendshipToUser2.signature()).concatenate(Schema.userToId.signature()))
             )
         );
     }
