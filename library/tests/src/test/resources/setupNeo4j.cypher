@@ -1,5 +1,7 @@
-MATCH (a)-[r]->() DELETE a, r;
-MATCH (a) DELETE a;
+MATCH (a:Order)-[r]->() DELETE a, r;
+MATCH (a:Product)-[r]->() DELETE a, r;
+MATCH (a:Order) DELETE a;
+MATCH (a:Product) DELETE a;
 
 CREATE (a:Order { customer: 'Alice', number: 'o_100' });
 CREATE (a:Order { customer: 'Bob', number: 'o_200' });

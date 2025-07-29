@@ -9,7 +9,7 @@ const users = new Set()
 // FIXME: proper datatypes (not just text, because that messes up cost estimation)
 
 const initString = `
-DROP TABLE IF EXISTS "is_friend";
+DROP TABLE IF EXISTS "friendship";
 DROP TABLE IF EXISTS "review";
 DROP TABLE IF EXISTS "business";
 DROP TABLE IF EXISTS "yelp_user";
@@ -34,7 +34,7 @@ CREATE TABLE "yelp_user" (
     "cool" INTEGER
 );
 
-CREATE TABLE "is_friend" (
+CREATE TABLE "friendship" (
     "user_id" CHAR(22),
     "friend_id" CHAR(22),
     PRIMARY KEY ("user_id", "friend_id"),
@@ -88,7 +88,7 @@ function review(line) {
 }
 
 /** @param {string} line */
-function is_friend(line) {
+function friendship(line) {
     const jsonObject = JSON.parse(line)
     const friends = jsonObject.friends.split(', ')
 
@@ -97,17 +97,17 @@ function is_friend(line) {
     return friends.filter(fid => users.has(fid)).map(fid => `('${fid}','${jsonObject.user_id}')`).join(',')
 }
 
-const businessFn = process.argv[2]
-const userFn = process.argv[3]
-const reviewFn = process.argv[4]
-const isFriendFn = userFn
+const businessFile = process.argv[2]
+const userFile = process.argv[3]
+const reviewFile = process.argv[4]
+const friendshipFile = userFile
 
 
 async function writeToTableFromFile(table, filename) {
     let fn = null
     if (table == 'business') fn = business
     if (table == 'yelp_user') fn = yelp_user
-    if (table == 'is_friend') fn = is_friend
+    if (table == 'friendship') fn = friendship
     if (table == 'review') fn = review
 
     const fileStream = createReadStream(filename);
@@ -158,12 +158,13 @@ async function writeToTableFromFile(table, filename) {
 
 console.log(initString)
 
-await writeToTableFromFile('business', businessFn)
-await writeToTableFromFile('yelp_user', userFn)
-await writeToTableFromFile('review', reviewFn)
-// await writeToTableFromFile('is_friend', isFriendFn)
+await writeToTableFromFile('business', businessFile)
+await writeToTableFromFile('yelp_user', userFile)
+await writeToTableFromFile('review', reviewFile)
+// await writeToTableFromFile('friendship', friendFile)
 
 // FIXME: loading takes too long, probably due to integrity constraints; this could be sped up using
 // https://stackoverflow.com/questions/38112379/disable-postgresql-foreign-key-checks-for-migrations
 // but for that the user needs admin privileges
 // deferring does not do much, maybe if it was also parallelized
+// So far I have commented it out until some query using the friendship relation is needed
