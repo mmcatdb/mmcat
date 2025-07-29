@@ -57,7 +57,7 @@ public class QueryTestBase {
         return this;
     }
 
-    private List<TestDatasource<?>> datasources = new ArrayList<>();
+    private final List<TestDatasource<?>> datasources = new ArrayList<>();
 
     public QueryTestBase addDatasource(TestDatasource<?> datasource) {
         datasources.add(datasource);

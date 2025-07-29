@@ -175,12 +175,12 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         builder
             .append(" ")
             .append(operators.stringify(filter.operator()))
-            .append(" (")
+            .append(" ('")
             .append(values.get(0));
 
-        values.stream().skip(1).forEach(value -> builder.append(", ").append(value));
+        values.stream().skip(1).forEach(value -> builder.append("', '").append(value));
 
-        builder.append(")");
+        builder.append("')");
     }
 
     private static String escapeName(String name) {

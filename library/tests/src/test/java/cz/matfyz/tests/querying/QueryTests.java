@@ -4,7 +4,6 @@ import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.core.querytree.JoinNode.SerializedJoinNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 
@@ -306,10 +305,9 @@ class QueryTests {
 
     @Test
     void filterPostgreSQL() {
-        new QueryCustomTreeTest<>(
-            datasources,
-            datasources.postgreSQL(),
-            """
+        new QueryCustomTreeTest(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
                 SELECT {
                     ?order number ?number .
                 }
@@ -318,34 +316,35 @@ class QueryTests {
 
                     FILTER(?number = "o_100")
                 }
-            """,
-            (schema, datasource, plan) -> {
-                final var onlyPattern = plan.stream().findFirst().get();
+            """)
+            .queryTreeBuilder((plans) -> {
+                final var plan = plans.get(0);
+                final var pattern = plan.stream().findFirst().get();
 
                 return new DatasourceNode(
-                    datasource,
+                    pattern.kind.datasource(),
                     plan,
-                    schema,
+                    datasources.schema,
                     List.of(),
                     List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                        scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
-                    onlyPattern.root.variable
+                    pattern.root.variable
                 );
-            },
-            """
+            })
+            .expected("""
                 [ {
                     "number": "o_100"
                 } ]
-            """).run();
+            """)
+            .run();
     }
 
     @Test
     void filterMongoDB() {
-        new QueryCustomTreeTest<>(
-            datasources,
-            datasources.mongoDB(),
-            """
+        new QueryCustomTreeTest(datasources.schema)
+            .addDatasource(datasources.mongoDB())
+            .query("""
                 SELECT {
                     ?order number ?number .
                 }
@@ -354,34 +353,35 @@ class QueryTests {
 
                     FILTER(?number = "o_100")
                 }
-            """,
-            (schema, datasource, plan) -> {
-                final var onlyPattern = plan.stream().findFirst().get();
+            """)
+            .queryTreeBuilder((plans) -> {
+                final var plan = plans.get(0);
+                final var pattern = plan.stream().findFirst().get();
 
                 return new DatasourceNode(
-                    datasource,
+                    pattern.kind.datasource(),
                     plan,
-                    schema,
+                    datasources.schema,
                     List.of(),
                     List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                        scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
-                    onlyPattern.root.variable
+                    pattern.root.variable
                 );
-            },
-            """
+            })
+            .expected("""
                 [ {
                     "number": "o_100"
                 } ]
-            """).run();
+            """)
+            .run();
     }
 
     @Test
     void filterNeo4J() {
-        new QueryCustomTreeTest<>(
-            datasources,
-            datasources.neo4j(),
-            """
+        new QueryCustomTreeTest(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
                 SELECT {
                     ?order number ?number .
                 }
@@ -390,26 +390,28 @@ class QueryTests {
 
                     FILTER(?number = "o_100")
                 }
-            """,
-            (schema, datasource, plan) -> {
-                final var onlyPattern = plan.stream().findFirst().get();
+            """)
+            .queryTreeBuilder((plans) -> {
+                final var plan = plans.get(0);
+                final var pattern = plan.stream().findFirst().get();
 
                 return new DatasourceNode(
-                    datasource,
+                    pattern.kind.datasource(),
                     plan,
-                    schema,
+                    datasources.schema,
                     List.of(),
                     List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                        scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
                     ),
-                    onlyPattern.root.variable
+                    pattern.root.variable
                 );
-            },
-            """
+            })
+            .expected("""
                 [ {
                     "number": "o_100"
                 } ]
-            """).run();
+            """)
+            .run();
     }
 
     @Test
