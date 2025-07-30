@@ -19,6 +19,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.optimizer.QueryDebugPrinter;
 import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
@@ -114,6 +115,7 @@ public class QueryCustomTreeTest {
         // optimized
         LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);
         LOGGER.info("Evaluated query took {} ms", optimized.root.evaluationMillis);
+        LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
 
         return projected.data;
     }

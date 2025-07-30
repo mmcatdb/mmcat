@@ -197,6 +197,7 @@ class BenchmarkTests {
         """;
 
         new QueryTestBase(datasources.schema)
+            // .addDatasource(datasources.postgreSQL())
             .addDatasource(datasources.mongoDB())
             .query(query)
             .expected("""

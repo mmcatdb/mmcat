@@ -49,7 +49,8 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     private QueryResult timedAccept(QueryNode node) {
         final var startNanos = System.nanoTime();
         final var result = node.accept(this);
-        node.evaluationMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
+        final var nanos = (System.nanoTime() - startNanos) / 1_000_000;
+        node.evaluationMillis = (int)(nanos);
         return result;
     }
 

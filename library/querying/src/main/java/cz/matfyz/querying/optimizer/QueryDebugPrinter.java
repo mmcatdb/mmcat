@@ -11,6 +11,7 @@ import cz.matfyz.querying.core.querytree.UnionNode;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.function.Function;
 
 import scala.collection.mutable.StringBuilder;
 
@@ -18,18 +19,45 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
 
     private static final NumberFormat fmt = NumberFormat.getCompactNumberInstance(Locale.US, NumberFormat.Style.SHORT);
 
+    private final Function<QueryNode, String> detailSpecifier;
+
     private final StringBuilder stringBuilder = new StringBuilder();
     private int indent = 0;
 
-    public static String run(QueryNode node) {
-        final var qdp = new QueryDebugPrinter();
+    private QueryDebugPrinter(Function<QueryNode, String> detailSpecifier) {
+        this.detailSpecifier = detailSpecifier;
+    }
+
+    public static String run(QueryNode node, Function<QueryNode, String> detailSpecifier) {
+        final var qdp = new QueryDebugPrinter(detailSpecifier);
         final var sb = qdp.stringBuilder;
         node.accept(qdp);
         return sb.substring(0, sb.length() - 1); // remove last newline
     }
 
+    public static String run(QueryNode node) {
+        return run(node, null);
+    }
+
+    public static String estimatedCost(QueryNode node) {
+        return run(node, n -> "cost " + fmt.format(n.predictedCostData.network()));
+    }
+
+    public static String measuredCost(QueryNode node) {
+        return run(node, n -> n.evaluationMillis + " ms");
+    }
+
     private void indentAccept(QueryNode child) { indent++; child.accept(this); indent--; }
     private String indent() { return "  ".repeat(indent); }
+
+    private void appendDetail(QueryNode node) {
+        if (detailSpecifier != null) {
+            stringBuilder
+                .append("(")
+                .append(detailSpecifier.apply(node))
+                .append(")");
+        }
+    }
 
     @Override
     public Void visit(DatasourceNode node) {
@@ -37,13 +65,15 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
             .append(indent())
             .append("DATASRC[")
             .append(node.datasource.type.name())
-            .append("](cost ")
-            .append(fmt.format(node.predictedCostData.network()))
-            .append(")( ")
+            .append("]");
+        appendDetail(node);
+        stringBuilder
+            .append("( ")
             .append(String.join(
                 " JOIN ", node.kinds.stream().map(k -> k.kind.kindName()).toList()
             ))
             .append(" )\n");
+
         return null;
     }
 
@@ -51,9 +81,10 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
     public Void visit(FilterNode node) {
         stringBuilder
             .append(indent())
-            .append("FILTER(cost ")
-            .append(fmt.format(node.predictedCostData.network()))
-            .append(")(\n");
+            .append("FILTER");
+        appendDetail(node);
+        stringBuilder
+            .append("(\n");
         indentAccept(node.child());
         stringBuilder.append(indent()).append(")\n");
         return null;
@@ -63,9 +94,10 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
     public Void visit(JoinNode node) {
         stringBuilder
             .append(indent())
-            .append("JOIN(cost")
-            .append(fmt.format(node.predictedCostData.network()))
-            .append(")(\n");
+            .append("JOIN");
+        appendDetail(node);
+        stringBuilder
+            .append("(\n");
 
         stringBuilder.append(indent()).append("FROM\n");
         indentAccept(node.fromChild());
