@@ -7,6 +7,8 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
@@ -32,6 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class QueryCustomTreeTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryTestBase.class);
 
     @FunctionalInterface
     public static interface QueryTreeBuilderFunction {
@@ -85,6 +89,8 @@ public class QueryCustomTreeTest {
 
         // ! from QueryToInstance.innerExecute() (onward from here...)
 
+        final var startNanos = System.nanoTime();
+
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
         normalized.context.setProvider(provider);
@@ -99,11 +105,17 @@ public class QueryCustomTreeTest {
 
         final QueryPlan optimized = QueryOptimizer.run(planned);
 
-        // ! the rest is left unchanged
-        final QueryResult selection = SelectionResolver.run(optimized);
-        final QueryResult projection = ProjectionResolver.run(normalized.context, normalized.projection, selection);
+        final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
 
-        return projection.data;
+        // ! the rest is left unchanged
+        final QueryResult selected = SelectionResolver.run(optimized);
+        final QueryResult projected = ProjectionResolver.run(normalized.context, normalized.projection, selected);
+
+        // optimized
+        LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);
+        LOGGER.info("Evaluated query took {} ms", optimized.root.evaluationMillis);
+
+        return projected.data;
     }
 
     public void run() {

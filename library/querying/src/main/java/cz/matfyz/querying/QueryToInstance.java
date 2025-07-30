@@ -59,6 +59,8 @@ public class QueryToInstance {
     }
 
     private ListResult innerExecute() {
+        final var startNanos = System.nanoTime();
+
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
 
@@ -69,8 +71,14 @@ public class QueryToInstance {
 
         final QueryPlan optimized = QueryOptimizer.run(planned);
 
+        final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
+
         final QueryResult selected = SelectionResolver.run(optimized);
         final QueryResult projected = ProjectionResolver.run(normalized.context, normalized.projection, selected);
+
+        // optimized
+        LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);
+        LOGGER.info("Evaluated query took {} ms", optimized.root.evaluationMillis);
 
         return projected.data;
     }

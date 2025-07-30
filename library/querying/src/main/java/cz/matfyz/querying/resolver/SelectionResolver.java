@@ -43,7 +43,14 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     }
 
     private QueryResult run() {
-        return rootNode.accept(this);
+        return timedAccept(rootNode);
+    }
+
+    private QueryResult timedAccept(QueryNode node) {
+        final var startNanos = System.nanoTime();
+        final var result = node.accept(this);
+        node.evaluationMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
+        return result;
     }
 
     public QueryResult visit(DatasourceNode node) {
@@ -64,7 +71,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(FilterNode node) {
-        final var childResult = node.child().accept(this);
+        final var childResult = timedAccept(node.child());
         return node.tform.apply(childResult.data);
     }
 
@@ -75,7 +82,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         // TODO: Decide where to put the decision mechanism for whether dependent join is to be used (the condition for dependent join is: from result estimation is small and to res.est. is large)
 
         if (node.forceDepJoinFromId) {
-            final var idResult = node.fromChild().accept(this);
+            final var idResult = timedAccept(node.fromChild());
 
             node.tform.applySource(idResult.data);
             final List<Expression> operands = new ArrayList<>();
@@ -87,11 +94,11 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
             // TODO: either pass ExpressionScope from before or avoid it altogether
             selectionContext.add(new ExpressionScope().computation.create(Computation.Operator.In, operands));
 
-            final var refResult = node.toChild().accept(this);
+            final var refResult = timedAccept(node.toChild());
             return node.tform.applyTarget(refResult.data);
 
         } else if (node.forceDepJoinFromRef) {
-            final var refResult = node.toChild().accept(this);
+            final var refResult = timedAccept(node.toChild());
 
             final List<Expression> operands = new ArrayList<>();
             operands.add(node.candidate.variable());
@@ -102,12 +109,12 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
             // TODO: either pass ExpressionScope from before or avoid it altogether
             selectionContext.add(new ExpressionScope().computation.create(Computation.Operator.In, operands));
 
-            final var idResult = node.fromChild().accept(this);
+            final var idResult = timedAccept(node.fromChild());
             return node.tform.apply(idResult.data, refResult.data);
 
         } else {
-            final var idResult = node.fromChild().accept(this);
-            final var refResult = node.toChild().accept(this);
+            final var idResult = timedAccept(node.fromChild());
+            final var refResult = timedAccept(node.toChild());
 
             return node.tform.apply(idResult.data, refResult.data);
         }

@@ -38,7 +38,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
             .append("DATASRC[")
             .append(node.datasource.type.name())
             .append("](cost ")
-            .append(fmt.format(node.costData.network()))
+            .append(fmt.format(node.predictedCostData.network()))
             .append(")( ")
             .append(String.join(
                 " JOIN ", node.kinds.stream().map(k -> k.kind.kindName()).toList()
@@ -52,7 +52,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         stringBuilder
             .append(indent())
             .append("FILTER(cost ")
-            .append(fmt.format(node.costData.network()))
+            .append(fmt.format(node.predictedCostData.network()))
             .append(")(\n");
         indentAccept(node.child());
         stringBuilder.append(indent()).append(")\n");
@@ -64,7 +64,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         stringBuilder
             .append(indent())
             .append("JOIN(cost")
-            .append(fmt.format(node.costData.network()))
+            .append(fmt.format(node.predictedCostData.network()))
             .append(")(\n");
 
         stringBuilder.append(indent()).append("FROM\n");

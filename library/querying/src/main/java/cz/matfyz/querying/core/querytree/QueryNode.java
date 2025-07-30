@@ -21,7 +21,10 @@ public abstract class QueryNode implements TopDownTree<QueryNode> {
     public ResultStructure structure = null;
 
     @Nullable
-    public NodeCostData costData = null;
+    public NodeCostData predictedCostData = null;
+
+    @Nullable
+    public Integer evaluationMillis = null;
 
     public void setParent(@Nullable QueryNode parent) {
         this.parent = parent;

@@ -36,13 +36,13 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
             final var collector = plan.context.getProvider().getControlWrapper(node.datasource).getCollectorWrapper();
             final var dataModel = collector.executeQuery(query.content());
 
-            node.costData = new NodeCostData(
+            node.predictedCostData = new NodeCostData(
                 dataModel.resultTable.sizeInBytes,
                 dataModel.resultTable.sizeInBytes, // parse time is estimated as O(data size)
                 dataModel.executionTimeMillis
             );
 
-            return node.costData;
+            return node.predictedCostData;
         } catch (WrapperException e) {
             throw QueryException.message("Something went wrong: " + e.getMessage());
         }
@@ -50,8 +50,8 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
 
     @Override
     public NodeCostData visit(FilterNode node) {
-        node.costData = node.child().accept(this);
-        return node.costData;
+        node.predictedCostData = node.child().accept(this);
+        return node.predictedCostData;
     }
 
     @Override
@@ -59,13 +59,13 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
         final var from = node.fromChild().accept(this);
         final var to = node.toChild().accept(this);
 
-        node.costData = new NodeCostData(
+        node.predictedCostData = new NodeCostData(
             from.network() + to.network(),
             from.dataParse() + to.dataParse(),
             from.queryExecution() + to.queryExecution()
         );
 
-        return node.costData;
+        return node.predictedCostData;
     }
 
 

@@ -23,6 +23,10 @@ import cz.matfyz.querying.planner.ResultStructureResolver;
 import cz.matfyz.querying.planner.SchemaExtractor;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
+/**
+ * Generates possible query plans and estimates their cost (in time, size of transferred data, etc.)
+ * TODO: possibly reduce code duplication by merging / splitting some related classes
+ */
 public class QueryEstimator {
 
     public QueryEstimator(
@@ -78,7 +82,7 @@ public class QueryEstimator {
             output.add(planned);
         }
 
-        output.sort((x, y) -> x.root.costData.total() - y.root.costData.total() >= 0 ? 1 : -1); // put lowest costs (most optimal plans) to the front
+        output.sort((x, y) -> x.root.predictedCostData.total() - y.root.predictedCostData.total() >= 0 ? 1 : -1); // put lowest costs (most optimal plans) to the front
         return output;
     }
 
