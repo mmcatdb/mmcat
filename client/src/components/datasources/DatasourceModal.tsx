@@ -232,8 +232,8 @@ function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatas
             label='Type'
             placeholder='Select a Type'
             selectedKeys={datasourceType ? new Set([ datasourceType ]) : new Set()}
-            onSelectionChange={e => {
-                const selectedType = Array.from(e as Set<DatasourceType>)[0];
+            onSelectionChange={keys => {
+                const selectedType = (keys as Set<DatasourceType>).values().next().value;
                 if (selectedType)
                     setDatasourceType(selectedType, {});
             }}

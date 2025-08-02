@@ -6,7 +6,7 @@ import { EditorPhase, type MappingEditorDispatch, type MappingEditorState } from
 import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
-import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '../graph/graphSelection';
+import { FreeSelection, PathSelection, SequenceSelection } from '../graph/graphSelection';
 import { usePreferences } from '../PreferencesProvider';
 import { twJoin, twMerge } from 'tailwind-merge';
 
@@ -176,7 +176,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
         >
             <div
                 className={twMerge(
-                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2',
+                    'absolute size-8 -left-4 -top-4 rounded-full border-2',
                     // Root node styling.
                     isRoot && 'bg-success border-success-700',
                     // Normal styling only applied if not root.
@@ -211,10 +211,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
 /**
  * Checks if a node is selected based on the editor state.
  */
-function isNodeSelected({ selection, selectionType }: MappingEditorState, node: CategoryNode): boolean {
-    if (selectionType === SelectionType.None)
-        return false;
-
+function isNodeSelected({ selection }: MappingEditorState, node: CategoryNode): boolean {
     if (selection instanceof FreeSelection)
         return selection.nodeIds.has(node.id);
     if (selection instanceof SequenceSelection)
@@ -226,10 +223,7 @@ function isNodeSelected({ selection, selectionType }: MappingEditorState, node: 
 /**
  * Determines if a node can be selected based on the editor state and path graph.
  */
-function isNodeSelectionAllowed({ selection, selectionType, editorPhase }: MappingEditorState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
-    if (selectionType === SelectionType.None)
-        return false;
-
+function isNodeSelectionAllowed({ selection, editorPhase }: MappingEditorState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
     if (selection instanceof FreeSelection && editorPhase === EditorPhase.SelectRoot)
         return true;
 
@@ -283,7 +277,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
         if (!isSelectionAllowed)
             return;
 
-        if (state.selectionType === SelectionType.Free) {
+        if (state.selection instanceof FreeSelection) {
             const isSpecialKey = event.ctrlKey || event.ctrlKey;
             dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
             return;
@@ -325,7 +319,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
  * Checks if an edge is selected based on the editor state.
  */
 function isEdgeSelected(state: MappingEditorState, edge: CategoryEdge): boolean {
-    if (state.selectionType === SelectionType.None || state.selectionType === SelectionType.Path)
+    if (state.selection instanceof PathSelection)
         return false;
 
     if (state.selection instanceof FreeSelection)
@@ -337,10 +331,7 @@ function isEdgeSelected(state: MappingEditorState, edge: CategoryEdge): boolean 
 /**
  * Determines if an edge can be selected based on the editor state and path graph.
  */
-function isEdgeSelectionAllowed({ selection, selectionType }: MappingEditorState, edge: CategoryEdge, pathGraph: PathGraph | undefined): boolean {
-    if (selectionType === SelectionType.None)
-        return false;
-
+function isEdgeSelectionAllowed({ selection }: MappingEditorState, edge: CategoryEdge, pathGraph: PathGraph | undefined): boolean {
     if (selection instanceof FreeSelection)
         return true;
     if (selection instanceof SequenceSelection)

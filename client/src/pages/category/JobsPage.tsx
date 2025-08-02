@@ -73,7 +73,7 @@ export function JobsPage() {
                     onClick={isVisible ? dismissBanner : restoreBanner}
                     className='text-primary-500 hover:text-primary-700 transition'
                 >
-                    <IoInformationCircleOutline className='w-6 h-6' />
+                    <IoInformationCircleOutline className='size-6' />
                 </button>
             </Tooltip>
         </div>
@@ -211,7 +211,7 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
                 onClick={dismissBanner}
                 className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
             >
-                <HiXMark className='w-5 h-5' />
+                <HiXMark className='size-5' />
             </button>
 
             <h2 className='text-lg font-semibold mb-2'>Understanding Jobs & Runs</h2>

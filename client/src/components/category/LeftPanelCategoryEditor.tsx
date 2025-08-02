@@ -100,7 +100,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             <div className='mt-4 animate-fade-in'>
                 <div className='flex flex-col gap-2 p-3 bg-warning-100 rounded-lg border border-warning-300'>
                     <div className='flex items-center gap-2 text-warning-800'>
-                        <ExclamationTriangleIcon className='h-4 w-4 shrink-0' />
+                        <ExclamationTriangleIcon className='size-4 shrink-0' />
                         <span className='text-sm font-medium'>You have unsaved changes.</span>
                     </div>
                     <Button
@@ -110,7 +110,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
                         fullWidth
                         onPress={() => handleSave()}
                         isLoading={isSaving}
-                        startContent={isSaving ? null : <FaSave className='h-3.5 w-3.5' />}
+                        startContent={isSaving ? null : <FaSave className='size-3.5' />}
                         className='shadow-xs hover:shadow-md transition-shadow'
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}

@@ -115,7 +115,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                                     variant='light'
                                     onPress={() => setDeletingCategoryId(category.id)}
                                 >
-                                    <TrashIcon className='w-5 h-5' />
+                                    <TrashIcon className='size-5' />
                                 </Button>
                             </TableCell>,
                         ]}

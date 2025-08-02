@@ -236,7 +236,7 @@ function DatasourceTable({
                                         title='Delete datasource'
                                         disabled={hasMappings}
                                     >
-                                        <TrashIcon className='w-5 h-5' />
+                                        <TrashIcon className='size-5' />
                                     </Button>
                                 </TableCell>,
                             ]}

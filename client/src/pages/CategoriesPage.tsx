@@ -90,7 +90,7 @@ export function CategoriesPage() {
                             onClick={isVisible ? dismissBanner : restoreBanner}
                             className='text-primary-500 hover:text-primary-700 transition'
                         >
-                            <IoInformationCircleOutline className='w-6 h-6' />
+                            <IoInformationCircleOutline className='size-6' />
                         </button>
                     </Tooltip>
                 </div>
@@ -101,7 +101,7 @@ export function CategoriesPage() {
                         isLoading={isCreatingSchema}
                         color='primary'
                         // size='sm'
-                        startContent={<FaPlus className='w-3 h-3' />}
+                        startContent={<FaPlus className='size-3' />}
                     >
                         New Schema
                     </Button>
@@ -115,7 +115,7 @@ export function CategoriesPage() {
                             color='secondary'
                             variant='flat'
                             // size='sm'
-                            startContent={<FaPlus className='w-3 h-3' />}
+                            startContent={<FaPlus className='size-3' />}
                         >
                             Example
                         </Button>
@@ -134,14 +134,14 @@ export function CategoriesPage() {
                     className='w-full md:w-72'
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    startContent={<HiMiniMagnifyingGlass className='w-5 h-5 text-default-400' />}
+                    startContent={<HiMiniMagnifyingGlass className='size-5 text-default-400' />}
                     endContent={
                         searchTerm && (
                             <button
                                 onClick={() => setSearchTerm('')}
                                 className='text-default-500 hover:text-default-700 transition'
                             >
-                                <HiXMark className='w-5 h-5' />
+                                <HiXMark className='size-5' />
                             </button>
                         )
                     }
@@ -161,7 +161,7 @@ export function CategoriesPage() {
                     )
                 ) : (
                     <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
-                        <FaPlus className='w-8 h-8 mx-auto text-default-300' />
+                        <FaPlus className='size-8 mx-auto text-default-300' />
                         <p className='mt-4 text-default-500'>No schema categories yet. Create your first one to get started!</p>
                     </div>
                 )}

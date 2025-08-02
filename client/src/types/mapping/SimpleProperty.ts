@@ -1,6 +1,7 @@
 import { print, type Printable, type Printer } from '@/types/utils/string';
 import { type NameResponse, nameFromResponse, Signature, type SignatureResponse, type Name } from '@/types/identifiers';
 import { type ParentProperty } from './ComplexProperty';
+import { type AccessPath } from './AccessPath';
 
 export type SimplePropertyResponse = {
     name: NameResponse;
@@ -11,7 +12,7 @@ export class SimpleProperty implements Printable {
     public constructor(
         readonly name: Name,
         readonly signature: Signature,
-        readonly parent: ParentProperty | undefined,
+        readonly parent: ParentProperty,
     ) {}
 
     static fromResponse(input: SimplePropertyResponse, parent: ParentProperty): SimpleProperty {
@@ -35,5 +36,14 @@ export class SimpleProperty implements Printable {
 
     toString(): string {
         return print(this);
+    }
+
+    toEditable(): AccessPath {
+        return {
+            name: this.name,
+            signature: this.signature,
+            subpaths: [],
+            isRoot: false,
+        };
     }
 }

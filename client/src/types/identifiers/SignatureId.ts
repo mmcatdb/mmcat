@@ -49,6 +49,10 @@ export class SignatureId {
     toServer(): SignatureIdResponse {
         return this._signatures.map(signature => signature.toServer());
     }
+
+    toString(): string {
+        return this._signatures.map(s => s.toString()).join(', ');
+    }
 }
 
 export class SignatureIdFactory {

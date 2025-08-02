@@ -1,11 +1,11 @@
 import { Button, Input, Select, SelectItem } from '@heroui/react';
-import { useEffect, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { ErrorPage } from '@/pages/errorPages';
-import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES } from '@/types/action';
+import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES, type RSDToCategoryPayloadInit, type ModelToCategoryPayloadInit, type CategoryToModelPayloadInit } from '@/types/action';
 import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
@@ -16,10 +16,8 @@ export function AddActionPage() {
     const [ error, setError ] = useState(false);
     const { category } = useCategoryInfo();
     const navigate = useNavigate();
-    const [ type, setType ] = useState<ActionType>(ActionType.ModelToCategory); // Default preselect
-    const [ steps, setSteps ] = useState<JobPayloadInit[]>([
-        { type: ActionType.ModelToCategory, datasourceId: '', mappingIds: [] }, // Default step
-    ]);
+    const [ type, setType ] = useState(ActionType.ModelToCategory); // Default preselect
+    const [ steps, setSteps ] = useState<JobPayloadInit[]>([ getDefaultStep(type) ]);
 
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ logicalModels, setLogicalModels ] = useState<LogicalModel[]>([]);
@@ -41,6 +39,12 @@ export function AddActionPage() {
 
         void fetchDatasourcesAndMappings();
     }, [ category.id ]);
+
+    function selectType(type: ActionType) {
+        setType(type);
+        // Reset steps when type changes.
+        setSteps([ getDefaultStep(type) ]);
+    }
 
     function addStep() {
         if (!type) {
@@ -124,30 +128,46 @@ export function AddActionPage() {
                     placeholder='Enter action label'
                 />
             </div>
+
             <div className='mb-4'>
-                <SelectActionType
-                    actionType={type}
-                    setActionType={type => setType(type)}
-                />
+                <SelectActionType actionType={type} setActionType={selectType} />
             </div>
+
             <h2 className='text-lg font-semibold mb-2'>Steps</h2>
+
             <div className='mb-4'>
-                {steps.map((step, index) => (
-                    <StepForm
-                        key={index}
-                        step={step}
-                        type={type}
-                        datasources={datasources}
-                        logicalModels={logicalModels}
-                        updateStep={updatedStep => setSteps(prev => prev.map((s, i) => (i === index ? updatedStep : s)))}
-                        removeStep={() => removeStep(index)}
-                        steps={steps}
-                    />
-                ))}
+                {steps.map((step, index) => {
+                    const Component = getStepForm(step.type);
+
+                    return (
+                        <div key={index} className='p-2 border rounded-lg flex items-center gap-2 border-default-300'>
+                            <Component
+                                step={step}
+                                datasources={datasources}
+                                logicalModels={logicalModels}
+                                updateStep={updatedStep => setSteps(prev => prev.map((s, i) => (i === index ? updatedStep : s)))}
+                            />
+
+                            <Button
+                                isIconOnly
+                                aria-label='Delete step'
+                                color='danger'
+                                variant='light'
+                                onPress={() => removeStep(index)}
+                                isDisabled={steps.length === 1}
+                                className='p-1'
+                            >
+                                <TrashIcon className='size-5' />
+                            </Button>
+                        </div>
+                    );
+                })}
             </div>
+
             <Button onPress={addStep} className='mb-4'>
                 Add Step
             </Button>
+
             <div className='flex justify-end'>
                 <Button
                     onPress={() => navigate(-1)}
@@ -171,7 +191,7 @@ export function AddActionPage() {
 }
 
 type SelectActionTypeProps = {
-    actionType: ActionType | '';
+    actionType: ActionType;
     setActionType: (type: ActionType) => void;
 };
 
@@ -182,9 +202,10 @@ function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) 
             label='Action Type'
             placeholder='Select an Action Type'
             selectedKeys={actionType ? new Set([ actionType ]) : new Set()}
-            onSelectionChange={e => {
-                const selectedType = Array.from(e as Set<ActionType>)[0];
-                setActionType(selectedType);
+            onSelectionChange={keys => {
+                const type = (keys as Set<ActionType>).values().next().value;
+                if (type)
+                    setActionType(type);
             }}
         >
             {item => <SelectItem key={item.type}>{item.label}</SelectItem>}
@@ -192,126 +213,86 @@ function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) 
     );
 }
 
-type StepFormProps = {
-    step: JobPayloadInit;
-    type: ActionType | '';
+function getDefaultStep(type: ActionType): JobPayloadInit {
+    switch (type) {
+    case ActionType.ModelToCategory:
+    case ActionType.CategoryToModel:
+        return { type, datasourceId: '', mappingIds: [] };
+    case ActionType.RSDToCategory:
+        return { type, datasourceIds: [] };
+    default:
+        throw new Error(`Unsupported action type: ${type}`);
+    }
+}
+
+type StepFormProps<TStep extends JobPayloadInit = JobPayloadInit> = {
+    step: TStep;
     datasources: Datasource[];
     logicalModels: LogicalModel[];
-    updateStep: (step: JobPayloadInit) => void;
-    removeStep: () => void;
-    steps: JobPayloadInit[];
+    updateStep: (step: TStep) => void;
 };
 
-function StepForm({ step, type, datasources, logicalModels, updateStep, removeStep, steps }: StepFormProps) {
-    if (type === ActionType.ModelToCategory || type === ActionType.CategoryToModel) {
-        // narrowing ActionType
-        const modelToCategoryStep = step as {
-            type: ActionType.ModelToCategory | ActionType.CategoryToModel;
-            datasourceId: string;
-            mappingIds: string[];
-        };
-
-        modelToCategoryStep.type = type;
-        const logicalModel = logicalModels.find(m => m.datasource.id === modelToCategoryStep.datasourceId);
-
-        return (
-            <div className='mb-4 p-2 border rounded-lg flex justify-between items-center border-default-300'>
-                <Select
-                    label='Datasource'
-                    selectedKeys={
-                        modelToCategoryStep.datasourceId ? new Set([ modelToCategoryStep.datasourceId ]) : new Set()
-                    }
-                    placeholder='Select a datasource'
-                    onSelectionChange={e => {
-                        const selectedDatasourceId = Array.from(e as Set<string>)[0];
-                        updateStep({
-                            ...modelToCategoryStep,
-                            datasourceId: selectedDatasourceId,
-                            mappingIds: [],
-                        });
-                    }}
-                    className='pr-2'
-                >
-                    {datasources.map(ds => (
-                        <SelectItem key={ds.id}>{ds.label}</SelectItem>
-                    ))}
-                </Select>
-                {logicalModel && (
-                    <Select
-                        label='Mappings'
-                        selectedKeys={new Set(modelToCategoryStep.mappingIds)}
-                        placeholder='Select mappings'
-                        selectionMode='multiple'
-                        onSelectionChange={e => {
-                            const selectedMappingIds = Array.from(e as Set<string>);
-                            updateStep({
-                                ...modelToCategoryStep,
-                                mappingIds: selectedMappingIds,
-                            });
-                        }}
-                        className='pr-2'
-                    >
-                        {logicalModel.mappings.map(mapping => (
-                            <SelectItem key={mapping.id}>{mapping.kindName}</SelectItem>
-                        ))}
-                    </Select>
-                )}
-                <Button
-                    isIconOnly
-                    aria-label='Delete step'
-                    color='danger'
-                    variant='light'
-                    onPress={removeStep}
-                    isDisabled={steps.length === 1}
-                    className='p-1'
-                >
-                    <TrashIcon className='w-5 h-5' />
-                </Button>
-            </div>
-        );
+function getStepForm(type: ActionType) {
+    switch (type) {
+    case ActionType.ModelToCategory:
+    case ActionType.CategoryToModel:
+        return TransformationStepForm as FC<StepFormProps>;
+    case ActionType.RSDToCategory:
+        return InferenceStepForm as FC<StepFormProps>;
+    default:
+        throw new Error(`Unsupported action type: ${type}`);
     }
+}
 
-    if (type === ActionType.RSDToCategory) {
-        const rsdToCategoryStep = step as {
-            type: ActionType.RSDToCategory;
-            datasourceIds: string[];
-        };
+function TransformationStepForm({ step, datasources, logicalModels, updateStep }: StepFormProps<ModelToCategoryPayloadInit | CategoryToModelPayloadInit>) {
+    const logicalModel = logicalModels.find(m => m.datasource.id === step.datasourceId);
 
-        rsdToCategoryStep.type = type;
+    return (<>
+        <Select
+            label='Datasource'
+            selectedKeys={step.datasourceId ? new Set([ step.datasourceId ]) : new Set()}
+            placeholder='Select a datasource'
+            onSelectionChange={keys => {
+                const datasourceId = (keys as Set<string>).values().next().value;
+                if (!datasourceId)
+                    return;
 
-        return (
-            <div className='mb-4 p-2 border rounded-sm flex justify-between items-center'>
-                <Select
-                    label='Datasources'
-                    selectedKeys={new Set(rsdToCategoryStep.datasourceIds)}
-                    placeholder='Select datasources'
-                    onSelectionChange={e => {
-                        const selectedDatasourceIds = Array.from(e as Set<string>);
-                        updateStep({
-                            ...rsdToCategoryStep,
-                            datasourceIds: selectedDatasourceIds,
-                        });
-                    }}
-                    className='pr-2'
-                >
-                    {datasources.map(ds => (
-                        <SelectItem key={ds.id}>{ds.label}</SelectItem>
-                    ))}
-                </Select>
-                <Button
-                    isIconOnly
-                    aria-label='Delete step'
-                    color='danger'
-                    variant='light'
-                    onPress={removeStep}
-                    isDisabled={steps.length === 1}
-                    className='p-1'
-                >
-                    <TrashIcon className='w-5 h-5' />
-                </Button>
-            </div>
-        );
-    }
+                updateStep({ ...step, datasourceId, mappingIds: [] });
+            }}
+        >
+            {datasources.map(ds => <SelectItem key={ds.id}>{ds.label}</SelectItem>)}
+        </Select>
 
-    return null;
+        {logicalModel && (
+            <Select
+                label='Mappings'
+                selectedKeys={new Set(step.mappingIds)}
+                placeholder='Select mappings'
+                selectionMode='multiple'
+                onSelectionChange={keys => updateStep({ ...step, mappingIds: [ ...(keys as Set<string>) ] })}
+            >
+                {logicalModel.mappings.map(mapping => (
+                    <SelectItem key={mapping.id}>{mapping.kindName}</SelectItem>
+                ))}
+            </Select>
+        )}
+    </>);
+}
+
+function InferenceStepForm({ step, datasources, updateStep }: StepFormProps<RSDToCategoryPayloadInit>) {
+    return (
+        <Select
+            label='Datasources'
+            selectedKeys={new Set(step.datasourceIds)}
+            placeholder='Select datasources'
+            onSelectionChange={keys => {
+                updateStep({
+                    ...step,
+                    datasourceIds: [ ...(keys as Set<string>) ],
+                });
+            }}
+        >
+            {datasources.map(ds => <SelectItem key={ds.id}>{ds.label}</SelectItem>)}
+        </Select>
+    );
 }

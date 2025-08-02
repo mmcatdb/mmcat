@@ -1,14 +1,15 @@
 import { useEffect, useReducer, useState, type Dispatch } from 'react';
-import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SelectionType, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
-import { type CategoryEdge, type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
+import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
+import { type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
-import { Mapping, SimpleProperty, RootProperty, type MappingInit, type MappingEdit } from '@/types/mapping';
-import { type Key, Signature, type SignatureId, StringName, TypedName } from '@/types/identifiers';
+import { Mapping, RootProperty, type MappingInit, type MappingEdit, type AccessPath, traverseAccessPath, collectAccessPathSignature, updateAccessPath } from '@/types/mapping';
+import { type Key, type Name, type NamePath, type SignatureId, TypedName } from '@/types/identifiers';
 import { type Datasource } from '@/types/Datasource';
 import { api } from '@/api';
 import { type Id } from '@/types/id';
 import { toast } from 'react-toastify';
+import { getPathSignature } from '../graph/graphUtils';
 
 export type MappingEditorInput = {
     /** The existing mapping to edit (or undefined if it's a new mapping). */
@@ -58,16 +59,17 @@ export type MappingEditorState = {
     graph: CategoryGraph;
     form: MappingEditorFormState;
     sync?: MappingEditorSync;
-    selectionType: SelectionType;
     selection: FreeSelection | SequenceSelection | PathSelection;
     editorPhase: EditorPhase;
+    /** Path to the currently viewed / edited property. */
+    selectedPropertyPath?: NamePath;
 };
 
 type MappingEditorFormState = {
     kindName: string;
     rootObjexKey: Key | undefined;
     primaryKey: SignatureId | undefined;
-    accessPath: RootProperty;
+    accessPath: AccessPath;
 };
 
 type MappingEditorSync = {
@@ -89,13 +91,12 @@ function createInitialState({ category, input }: { category: Category, input: Ma
         category,
         // Convert category to graph for visualization
         graph: categoryToGraph(category),
-        selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         form: {
             kindName: original?.kindName ?? '',
             rootObjexKey: original?.rootObjexKey,
             primaryKey: original?.primaryKey,
-            accessPath: original?.accessPath ?? new RootProperty(new TypedName(TypedName.ROOT), []),
+            accessPath: (original?.accessPath ?? new RootProperty(new TypedName(TypedName.ROOT), [])).toEditable(),
         },
         editorPhase: EditorPhase.SelectRoot,
     };
@@ -109,14 +110,11 @@ type MappingEditorAction =
     | SequenceAction
     | PathAction
     | SetRootAction
-    | { type: 'kindName', value: string }
-    // FIXME allow nested paths
-    | { type: 'add-subpath'}
-    | { type: 'append-to-access-path', nodeId: string }
-    | { type: 'remove-from-access-path', subpathIndex: number }
+    | FormAction
+    | AccessPathAction
     | { type: 'sync' };
 
-export function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAction): MappingEditorState {
+function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAction): MappingEditorState {
     // console.log('REDUCE', action, state);
 
     switch (action.type) {
@@ -128,22 +126,14 @@ export function mappingEditorReducer(state: MappingEditorState, action: MappingE
         return sequence(state, action);
     case 'path':
         return path(state, action);
-    case 'set-root':
+    case 'setRoot':
         return root(state, action);
-    case 'kindName':
-        return { ...state, form: { ...state.form, kindName: action.value } };
-    case 'add-subpath': {
-        if (!state.form.rootObjexKey)
-            return state;
-
-        return { ...state, selectionType: SelectionType.Path, selection: PathSelection.create([ state.form.rootObjexKey.toString() ]) };
-    }
-    case 'append-to-access-path':
-        return appendToAccessPath(state, action.nodeId);
-    case 'remove-from-access-path':
-        return removeFromAccessPath(state, action.subpathIndex);
+    case 'form':
+        return form(state, action);
+    case 'accessPath':
+        return accessPath(state, action);
     case 'sync': {
-        if (!state.sync)
+        if (state.sync)
             return state;
 
         const sync = state.original ? { mappingId: state.original.id, edit: createMappingEdit(state) } : { init: createMappingInit(state) };
@@ -163,7 +153,7 @@ function graph(state: MappingEditorState, { event }: GraphAction): MappingEditor
         // Node movement doesn’t update state in mapping editor (handled by graph engine)
         return state;
     case 'select': {
-        if (state.selectionType === SelectionType.Path && state.selection instanceof PathSelection) {
+        if (state.selection instanceof PathSelection) {
             // Handle path selection
             if (state.selection.isEmpty) {
                 // Starting a new path
@@ -251,7 +241,7 @@ function path(state: MappingEditorState, action: PathAction): MappingEditorState
 }
 
 type SetRootAction = {
-    type: 'set-root';
+    type: 'setRoot';
     key: Key;
 };
 
@@ -259,69 +249,140 @@ type SetRootAction = {
  * Sets the root node in the mapping editor state.
  */
 function root(state: MappingEditorState, action: SetRootAction): MappingEditorState {
+    const rootObject = state.category.getObjex(action.key);
+    const ids = rootObject.schema.ids!.signatureIds;
+
     return {
         ...state,
         form: {
             ...state.form,
             rootObjexKey: action.key,
+            primaryKey: ids.length === 1 ? ids[0] : undefined,
         },
-        selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         editorPhase: EditorPhase.BuildPath,
     };
 }
 
-/**
- * Appends a node to the access path in the mapping editor state.
- */
-function appendToAccessPath(state: MappingEditorState, nodeId: string): MappingEditorState {
+type FormAction = {
+    type: 'form';
+} & ({
+    field: 'kindName';
+    value: string;
+} | {
+    field: 'primaryKey';
+    value: SignatureId;
+});
+
+function form(state: MappingEditorState, action: FormAction): MappingEditorState {
+    if (action.field === 'kindName')
+        return { ...state, form: { ...state.form, kindName: action.value } };
+
+    return { ...state, form: { ...state.form, primaryKey: action.value } };
+}
+
+type AccessPathAction = {
+    type: 'accessPath';
+} & ({
+    operation: 'select';
+    path: NamePath | undefined;
+} | {
+    operation: 'startPath' | 'endPath' | 'delete';
+} | {
+    operation: 'update';
+    name: Name;
+} | {
+    operation: 'addChild';
+    name: Name;
+});
+
+function accessPath(state: MappingEditorState, action: AccessPathAction): MappingEditorState {
+    if (action.operation === 'select')
+        return { ...state, selectedPropertyPath: action.path, selection: FreeSelection.create() };
+
+    if (action.operation === 'endPath')
+        return { ...state, selection: FreeSelection.create() };
+
+    if (!state.selectedPropertyPath)
+        // This should not happen.
+        return state;
+
+    const selected = traverseAccessPath(state.form.accessPath, state.selectedPropertyPath);
+
+    if (action.operation === 'startPath') {
+        const pathFromRoot = collectAccessPathSignature(state.form.accessPath, state.selectedPropertyPath);
+        const lastBase = pathFromRoot.tryGetLastBase();
+
+        // If the path has at least one base, we can find its morphism and therefore the target objex.
+        // Otherwise, it's just the root objex.
+        let objexKey = state.form.rootObjexKey!;
+        if (lastBase) {
+            const edge = state.category.getEdge(lastBase.last);
+            objexKey = edge.direction ? edge.morphism.schema.codKey : edge.morphism.schema.domKey;
+        }
+
+        return {
+            ...state,
+            selection: PathSelection.create([ objexKey.toString() ]),
+        };
+    }
+
+    if (action.operation === 'delete') {
+        if (selected.isRoot)
+            return state;
+
+        return {
+            ...state,
+            form: {
+                ...state.form,
+                accessPath: updateAccessPath(state.form.accessPath, state.selectedPropertyPath, undefined),
+            },
+            // The selected property path is no longer valid.
+            selectedPropertyPath: undefined,
+        };
+    }
+
+    if (action.operation === 'update') {
+        return {
+            ...state,
+            form: {
+                ...state.form,
+                accessPath: updateAccessPath(state.form.accessPath, state.selectedPropertyPath, {
+                    name: action.name,
+                    signature: selected.signature,
+                    subpaths: [ ...selected.subpaths ],
+                    isRoot: selected.isRoot,
+                }),
+            },
+            // The selected property path did change but we can fix it.
+            selectedPropertyPath: state.selectedPropertyPath.replaceLast(action.name),
+        };
+    }
+
+    if (action.operation !== 'addChild')
+        // This should be banned by the ts compiler. Don't know why it isn't.
+        throw new Error('Impossibruh');
+
     if (!(state.selection instanceof PathSelection))
+        // This should not happen.
         return state;
 
-    const newNode = state.graph.nodes.get(nodeId);
-    if (!newNode)
-        return state;
-
-    const signatures = state.selection.edgeIds.map((edgeId, index) => {
-        const edge: CategoryEdge = state.graph.edges.get(edgeId)!;
-        const fromNodeId = Array.from(state.selection.nodeIds)[index];
-        return edge.from === fromNodeId ? edge.schema.signature : edge.schema.signature.dual();
-    });
-
-    const signature = Signature.concatenate(...signatures);
-
-    const newSubpath = new SimpleProperty(
-        new StringName(newNode.metadata.label),
-        signature,
-        state.form.accessPath,
-    );
-
-    const newAccessPath = new RootProperty(state.form.accessPath.name, [
-        ...state.form.accessPath.subpaths,
-        newSubpath,
-    ]);
+    const pathToNewChild = state.selectedPropertyPath.append(action.name);
 
     return {
         ...state,
         form: {
             ...state.form,
-            accessPath: newAccessPath,
+            accessPath: updateAccessPath(state.form.accessPath, pathToNewChild, {
+                name: action.name,
+                signature: getPathSignature(state.graph, state.selection),
+                subpaths: [],
+                isRoot: false,
+            }),
         },
-        selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
+        // The selected property path didn't change at all, so we keep it.
     };
-}
-
-/**
- * Removes a subpath from the access path in the mapping editor state.
- */
-function removeFromAccessPath(state: MappingEditorState, subpathIndex: number): MappingEditorState {
-    const newSubpaths = [ ...state.form.accessPath.subpaths ].toSpliced(subpathIndex, 1);
-    const newAccessPath = new RootProperty(state.form.accessPath.name, newSubpaths);
-
-    return { ...state, form: { ...state.form,
-        accessPath: newAccessPath,
-    } };
 }
 
 function createMappingInit(state: MappingEditorState): MappingInit {
@@ -343,6 +404,6 @@ function createMappingEdit(state: MappingEditorState): MappingEdit {
     return {
         primaryKey: state.form.primaryKey.toServer(),
         kindName: state.form.kindName,
-        accessPath: state.form.accessPath.toServer(),
+        accessPath: RootProperty.fromEditable(state.form.accessPath).toServer(),
     };
 }

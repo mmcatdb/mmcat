@@ -57,14 +57,14 @@ export function DatasourcesPage() {
                             onClick={isVisible ? dismissBanner : restoreBanner}
                             className='text-primary-500 hover:text-primary-700 transition'
                         >
-                            <IoInformationCircleOutline className='w-6 h-6' />
+                            <IoInformationCircleOutline className='size-6' />
                         </button>
                     </Tooltip>
                 </div>
                 <Button
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
-                    startContent={<FaPlus className='w-3 h-3' />}
+                    startContent={<FaPlus className='size-3' />}
                 >
                     Add Datasource
                 </Button>
@@ -134,7 +134,7 @@ export function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesI
                 onClick={dismissBanner}
                 className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
             >
-                <HiXMark className='w-5 h-5' />
+                <HiXMark className='size-5' />
             </button>
 
             <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>

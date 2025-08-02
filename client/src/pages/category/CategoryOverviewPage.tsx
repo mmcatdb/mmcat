@@ -60,35 +60,35 @@ export function CategoryOverviewPage() {
                 <h2 className='text-2xl font-semibold'>Quick Actions</h2>
                 <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
                     <FeatureCard
-                        icon={<FaEdit className='w-12 h-12 mx-auto text-primary-500' />}
+                        icon={<FaEdit className='mx-auto size-12 text-primary-500' />}
                         title='Schema Editor'
                         description='Modify objects and relationships in the graph.'
                         linkText='Open Editor'
                         linkTo={routes.category.editor.resolve({ categoryId })}
                     />
                     <FeatureCard
-                        icon={<FaDatabase className='w-12 h-12 mx-auto text-secondary-500' />}
+                        icon={<FaDatabase className='mx-auto size-12 text-secondary-500' />}
                         title='Manage Datasources'
                         description='Link databases and define mappings.'
                         linkText='View Datasources'
                         linkTo={routes.category.datasources.list.resolve({ categoryId })}
                     />
                     <FeatureCard
-                        icon={<FaPlus className='w-12 h-12 mx-auto text-success-500' />}
+                        icon={<FaPlus className='mx-auto size-12 text-success-500' />}
                         title='Manage Actions'
                         description='Set up data transformation actions and create runs.'
                         linkText='Manage Actions'
                         linkTo={routes.category.actions.list.resolve({ categoryId })}
                     />
                     <FeatureCard
-                        icon={<FaPlay className='w-12 h-12 mx-auto text-warning-500' />}
+                        icon={<FaPlay className='mx-auto size-12 text-warning-500' />}
                         title='View Jobs'
                         description='Monitor and manage data processing jobs.'
                         linkText='View Jobs'
                         linkTo={routes.category.jobs.resolve({ categoryId })}
                     />
                     <FeatureCard
-                        icon={<FaSearch className='w-12 h-12 mx-auto text-default-500' />}
+                        icon={<FaSearch className='mx-auto size-12 text-default-500' />}
                         title='Query Data'
                         description='Explore and query data within this category.'
                         linkText='Query Data'

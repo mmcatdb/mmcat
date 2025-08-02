@@ -66,7 +66,7 @@ function CommonNavbar() {
                             isIconOnly
                             aria-label='GitHub Repository'
                             variant='light'
-                            className='w-7 h-7 min-w-6'
+                            className='size-7 min-w-6'
                             as='a'
                             href='https://github.com/mmcatdb/mmcat/tree/ui'
                             target='_blank'
@@ -74,7 +74,7 @@ function CommonNavbar() {
                             <FaGithub size={20} />
                         </Button>
                     </Tooltip>
-                    <ThemeToggle className='w-7 h-7' />
+                    <ThemeToggle className='size-7' />
                 </div>
             </div>
         </Navbar>
@@ -166,7 +166,7 @@ function HelpDropdown() {
     return (
         <Dropdown>
             <DropdownTrigger>
-                <Button isIconOnly aria-label='Help' variant='light' className='w-7 h-7 min-w-6'>
+                <Button isIconOnly aria-label='Help' variant='light' className='size-7 min-w-6'>
                     <Tooltip content='Help' placement='bottom'>
                         <span>
                             <IoHelpSharp size={18} />
@@ -229,7 +229,7 @@ export function ThemeToggle({ className }: { className?: string }) {
                 aria-label={label}
                 onPress={() => setPreferences({ ...preferences, theme: nextValue })}
                 variant='light'
-                className={twMerge('w-6 h-6 min-w-6 p-0', className)}
+                className={twMerge('size-6 min-w-6 p-0', className)}
             >
                 {theme === 'dark' ? (
                     <MdOutlineDarkMode size={18} />

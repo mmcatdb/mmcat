@@ -78,7 +78,7 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
             onClick={() => setIsSettingsOpen(true)}
             className={twJoin('flex items-center px-3 py-3 mx-2 rounded-md', theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100')}
         >
-            <Cog6ToothIcon className='w-6 h-6' />
+            <Cog6ToothIcon className='size-6' />
             {!isCollapsed && <span className='px-4'>Settings</span>}
         </button>
     );
@@ -138,8 +138,8 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
 function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
     const content = (
         <Link to={routes.home.path} className='flex items-center mb-6 mt-2 pl-5 group transition-all duration-300 ease-in-out'>
-            <div className={twJoin('shrink-0 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
-                isCollapsed ? 'w-8 h-8 text-xl' : 'w-8 h-8 text-2xl',
+            <div className={twJoin('shrink-0 size-8 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
+                isCollapsed ? 'text-xl' : 'text-2xl',
             )}>
                 <PiCat className='w-full h-full' />
             </div>
@@ -192,7 +192,7 @@ function SidebarItemDisplay({ item }: {
                     theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100', // needs to be defined via 'theme ===' not via default colors (HeroUI does not have good contrast in dark mode or light mode)
                 )}
             >
-                <Icon className='shrink-0 mr-2 w-6 h-6' />
+                <Icon className='shrink-0 mr-2 size-6' />
 
                 <span className={twJoin('ml-2 whitespace-nowrap overflow-hidden', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100')}>
                     {item.label}

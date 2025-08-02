@@ -50,7 +50,7 @@ export function DatasourcesInCategoryPage() {
                         onClick={isVisible ? dismissBanner : restoreBanner}
                         className='text-primary-500 hover:text-primary-700 transition'
                     >
-                        <IoInformationCircleOutline className='w-6 h-6' />
+                        <IoInformationCircleOutline className='size-6' />
                     </button>
                 </Tooltip>
             </div>
@@ -100,7 +100,7 @@ export function DatasourcesInCategoryPage() {
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
                     variant='flat'
-                    startContent={<FaPlus className='w-3 h-3' />}
+                    startContent={<FaPlus className='size-3' />}
                 >
                     Add Datasource
                 </Button>
@@ -180,7 +180,7 @@ export function MappingInfoBanner({ className, dismissBanner }: MappingInfoBanne
                 onClick={dismissBanner}
                 className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
             >
-                <HiXMark className='w-5 h-5' />
+                <HiXMark className='size-5' />
             </button>
 
             <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>

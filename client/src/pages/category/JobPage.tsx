@@ -173,7 +173,7 @@ export function JobStateIcon({ state }: {state: JobState }) {
     const styles = jobStateStyles[state];
     return (
         <styles.icon className={twJoin(
-            'w-8 h-8',
+            'size-8',
             styles.color,
             state === JobState.Running && 'animate-spin',
         )} />

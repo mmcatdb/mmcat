@@ -119,8 +119,8 @@ function GettingStartedSection({
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 <FeatureCard
                     icon={
-                        <div className='w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center'>
-                            <FaDatabase className='w-7 h-7 text-primary-600' />
+                        <div className='size-14 rounded-full bg-primary-100 flex items-center justify-center'>
+                            <FaDatabase className='size-7 text-primary-600' />
                         </div>
                     }
                     title='Connect Data Sources'
@@ -132,8 +132,8 @@ function GettingStartedSection({
                 />
                 <FeatureCard
                     icon={
-                        <div className='w-14 h-14 rounded-full bg-secondary-100 flex items-center justify-center'>
-                            <FaPlus className='w-7 h-7 text-secondary-600' />
+                        <div className='size-14 rounded-full bg-secondary-100 flex items-center justify-center'>
+                            <FaPlus className='size-7 text-secondary-600' />
                         </div>
                     }
                     title='Create Schema Category'
@@ -146,8 +146,8 @@ function GettingStartedSection({
                 />
                 <FeatureCard
                     icon={
-                        <div className='w-14 h-14 rounded-full bg-success-100 flex items-center justify-center'>
-                            <BookOpenIcon className='w-7 h-7 text-success-600' />
+                        <div className='size-14 rounded-full bg-success-100 flex items-center justify-center'>
+                            <BookOpenIcon className='size-7 text-success-600' />
                         </div>
                     }
                     title='Define Objects in Editor'
@@ -215,7 +215,7 @@ function SchemaCategoriesSection({
                         onPress={onOpenModal}
                         isLoading={isCreatingSchema}
                         color='primary'
-                        startContent={<FaPlus className='w-4 h-4' />}
+                        startContent={<FaPlus className='size-4' />}
                     >
                         New Schema
                     </Button>
@@ -226,7 +226,7 @@ function SchemaCategoriesSection({
                             isLoading={isCreatingExampleSchema}
                             color='secondary'
                             variant='flat'
-                            startContent={<FaPlus className='w-4 h-4' />}
+                            startContent={<FaPlus className='size-4' />}
                         >
                             Example ({example})
                         </Button>
@@ -248,7 +248,7 @@ function SchemaCategoriesSection({
                 </div>
             ) : categories.length === 0 ? (
                 <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
-                    <BookOpenIcon className='w-12 h-12 mx-auto text-default-300' />
+                    <BookOpenIcon className='mx-auto size-12 text-default-300' />
                     <p className='mt-4 text-default-500'>No schema categories yet. Create your first one to get started!</p>
                 </div>
             ) : (<>
@@ -327,7 +327,7 @@ function FeatureCard({
                             color={buttonColor}
                             variant={buttonVariant}
                             onPress={buttonAction}
-                            endContent={<FaArrowRight className='w-3 h-3' />}
+                            endContent={<FaArrowRight className='size-3' />}
                             className='w-full max-w-[200px]'
                             isLoading={isLoading}
                             isDisabled={isDisabled}

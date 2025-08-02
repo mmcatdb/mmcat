@@ -75,7 +75,7 @@ export function InfoBanner({ children, className, dismissBanner }: InfoBannerPro
                     onClick={dismissBanner}
                     className='absolute top-2 right-2 text-default-500 hover:text-foreground transition'
                 >
-                    <HiXMark className='w-5 h-5' />
+                    <HiXMark className='size-5' />
                 </button>
                 {children}
             </CardBody>

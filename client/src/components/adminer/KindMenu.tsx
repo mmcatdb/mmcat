@@ -66,12 +66,12 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
             aria-label='Kind'
             labelPlacement='outside-left'
             classNames={
-                { label:'sr-only' }
+                { label: 'sr-only' }
             }
             size='sm'
             placeholder='Select kind'
             className='max-w-xs px-0'
-            selectedKeys={ kind ? [ kind ] : undefined }
+            selectedKeys={kind ? [ kind ] : undefined}
         >
             {item => (
                 <SelectItem
