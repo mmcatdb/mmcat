@@ -15,12 +15,12 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvid
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
+import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
 import cz.matfyz.querying.optimizer.QueryDebugPrinter;
-import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
 import cz.matfyz.querying.planner.PlanDrafter;
@@ -40,7 +40,7 @@ public class QueryCustomTreeTest {
 
     @FunctionalInterface
     public static interface QueryTreeBuilderFunction {
-        QueryNode build(List<Set<PatternForKind>> draftPlans);
+        QueryNode build(List<Set<PatternForKind>> draftPlans, ExpressionScope scope);
     }
 
     private final SchemaCategory schema;
@@ -100,11 +100,12 @@ public class QueryCustomTreeTest {
         final var extracted = SchemaExtractor.run(normalized.context, schema, kinds, normalized.selection);
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extracted);
 
-        final var queryTree = queryTreeBuilder.build(plans);
-        final QueryPlan planned = new QueryPlan(queryTree, normalized.context);
+        final var queryTree = queryTreeBuilder.build(plans, normalized.selection.scope());
+        final QueryPlan planned = new QueryPlan(queryTree, normalized.context, normalized.selection.scope());
         ResultStructureResolver.run(planned);
 
-        final QueryPlan optimized = QueryOptimizer.run(planned);
+        // final QueryPlan optimized = QueryOptimizer.run(planned, cache); // Due to custom tree so far not neccessary
+        final QueryPlan optimized = planned;
 
         final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
 

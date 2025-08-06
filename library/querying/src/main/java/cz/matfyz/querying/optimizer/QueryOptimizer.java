@@ -1,22 +1,15 @@
 package cz.matfyz.querying.optimizer;
 
+import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.querying.planner.QueryPlan;
 
 public class QueryOptimizer {
 
-    public static QueryPlan run(QueryPlan plan) {
-        return new QueryOptimizer(plan).run();
-    }
-
-    private final QueryPlan queryPlan;
-
-    private QueryOptimizer(QueryPlan original) {
-        this.queryPlan = original;
-    }
-
-    private QueryPlan run() {
+    public static QueryPlan run(QueryPlan queryPlan, CollectorCache cache) {
 
         FilterDeepener.run(queryPlan);
+
+        if (cache != null) JoinDependator.run(queryPlan, cache);
 
         // TODO Other optimization techniques:
         // - Split filters to further deepen them (WARNING: reference nodes and filtered nodes may change, some checks are required)

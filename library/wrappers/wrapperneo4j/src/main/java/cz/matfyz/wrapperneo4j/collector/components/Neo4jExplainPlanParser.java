@@ -16,7 +16,7 @@ public class Neo4jExplainPlanParser {
      */
     private void parseExecutionTime(DataModel model, ResultSummary summary ) {
         long nanoseconds = summary.resultAvailableAfter(TimeUnit.NANOSECONDS);
-        model.executionTimeMillis = (double) nanoseconds / (1_000_000);
+        model.result.executionTimeMillis = (double) nanoseconds / (1_000_000);
     }
 
     /**
@@ -27,7 +27,7 @@ public class Neo4jExplainPlanParser {
     private void parseNodeTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = details.split(":")[1];
-        model.addTable(tableName);
+        model.database.addTable(tableName);
     }
 
     /**
@@ -63,7 +63,7 @@ public class Neo4jExplainPlanParser {
     private void parseRelationTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = parseRelationDetailsForLabel(details);
-        model.addTable(tableName);
+        model.database.addTable(tableName);
     }
 
     /**
@@ -102,7 +102,7 @@ public class Neo4jExplainPlanParser {
         String indexType = details[0];
         String[] indexIdentifiers = parseIndexIdentifier(details[2].split(":")[1]);
 
-        model.addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
+        model.database.addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
     }
 
     /**

@@ -58,7 +58,7 @@ public class Neo4jDataCollector {
      * Method which saves page size used by databases storage engine
      */
     private void collectPageSize() {
-        model.databasePageSize = Neo4jResources.DefaultSizes.PAGE_SIZE;
+        model.database.pageSize = Neo4jResources.DefaultSizes.PAGE_SIZE;
     }
 
     /**
@@ -119,7 +119,7 @@ public class Neo4jDataCollector {
         if (result.next()) {
             String stringSize = result.getString("value");
             if (!"No Value".equals(stringSize)) {
-                model.databaseCacheSize = parsePageCacheSize(stringSize);
+                model.database.cacheSize = parsePageCacheSize(stringSize);
             }
         }
     }
@@ -132,8 +132,8 @@ public class Neo4jDataCollector {
         CachedResult result = executeQuery(Neo4jResources.getDatabaseSizesQuery());
         if (result.next()) {
             long size = result.getLong("totalStoreSize");
-            model.databaseSizeInBytes = size;
-            model.databaseSizeInPages = (long) Math.ceil(
+            model.database.sizeInBytes = size;
+            model.database.sizeInPages = (long) Math.ceil(
                     (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
             );
         }
@@ -164,11 +164,11 @@ public class Neo4jDataCollector {
                 : executeQuery(Neo4jResources.getEdgePropertyTypeAndMandatoryQuery(label, property));
         if (result.next()) {
             boolean mandatory = result.getBoolean("mandatory");
-            model.getTable(label, true).getColumn(property, true).mandatory = mandatory;
+            model.database.getTable(label, true).getColumn(property, true).mandatory = mandatory;
 
             for (String type : result.getList("propertyTypes", String.class)) {
                 int columnSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
-                model.getTable(label, true).getColumn(property, true).getColumnType(type, true).byteSize = columnSize;
+                model.database.getTable(label, true).getColumn(property, true).getColumnType(type, true).byteSize = columnSize;
             }
         }
     }
@@ -243,7 +243,7 @@ public class Neo4jDataCollector {
         CachedResult result = executeQuery(Neo4jResources.getConstraintCountForLabelQuery(label));
         if (result.next()) {
             long count = result.getLong("count");
-            model.getTable(label, true).constraintCount = count;
+            model.database.getTable(label, true).constraintCount = count;
         }
     }
 
@@ -258,7 +258,7 @@ public class Neo4jDataCollector {
         long size = sizes.getByteSize();
         long rowCount = sizes.getCount();
 
-        final var table = model.getTable(tableName, true);
+        final var table = model.database.getTable(tableName, true);
         table.sizeInBytes = size;
         table.sizeInPages = (long)Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE);
         table.rowCount = rowCount;
@@ -283,7 +283,7 @@ public class Neo4jDataCollector {
      * @throws DataCollectException when invalid label is used
      */
     private void collectTableData() throws DataCollectException {
-        for (String label : model.databaseTables.keySet()) {
+        for (String label : model.database.tables.keySet()) {
             boolean isNode = _isNodeLabel(label);
             collectTableConstraintCount(label);
             collectTableSizes(label, isNode);
@@ -296,7 +296,7 @@ public class Neo4jDataCollector {
      * @param indexNames specify index by its name
      */
     private void collectTableNameFor(String[] indexNames) {
-        model.addTable(indexNames[1]);
+        model.database.addTable(indexNames[1]);
     }
 
     /**
@@ -312,9 +312,9 @@ public class Neo4jDataCollector {
         long size = (long) Math.ceil((double) (sizes.getByteSize()) / 3);
         long rowCount = sizes.getCount();
 
-        model.getIndex(indexName, true).rowCount = rowCount;
-        model.getIndex(indexName, true).sizeInBytes = size;
-        model.getIndex(indexName, true).sizeInPages =
+        model.database.getIndex(indexName, true).rowCount = rowCount;
+        model.database.getIndex(indexName, true).sizeInBytes = size;
+        model.database.getIndex(indexName, true).sizeInPages =
                 (long) Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE);
     }
 
@@ -323,7 +323,7 @@ public class Neo4jDataCollector {
      * @throws DataCollectException when some of the labels are invalid
      */
     private void collectIndexData() throws DataCollectException {
-        for (String inxName : model.databaseIndexes.keySet()) {
+        for (String inxName : model.database.indexes.keySet()) {
             String[] names = inxName.split(":");
 
             boolean isNode = _isNodeLabel(names[1]);
@@ -338,19 +338,19 @@ public class Neo4jDataCollector {
      */
     private void collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
-        model.resultTable.sizeInBytes = (size);
+        model.result.resultTable.sizeInBytes = (size);
 
         long count = result.getRowCount();
-        model.resultTable.rowCount = count;
+        model.result.resultTable.rowCount = count;
 
         long sizeInPages = (long) Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE);
-        model.resultTable.sizeInPages = sizeInPages;
+        model.result.resultTable.sizeInPages = sizeInPages;
 
         for (String colName : result.getColumnNames()) {
             for (String type : result.getColumnTypes(colName)) {
-                model.resultTable.getColumn(colName, true).getColumnType(type, true).byteSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
+                model.result.resultTable.getColumn(colName, true).getColumnType(type, true).byteSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
                 double ratio = result.getColumnTypeRatio(colName, type);
-                model.resultTable.getColumn(colName, true).getColumnType(type, true).ratio = ratio;
+                model.result.resultTable.getColumn(colName, true).getColumnType(type, true).ratio = ratio;
             }
         }
     }

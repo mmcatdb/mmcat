@@ -20,7 +20,7 @@ public class MongoExplainPlanParser {
             collectionName = command.getString("aggregate");
         }
 
-        model.addTable(collectionName);
+        model.database.addTable(collectionName);
     }
 
     /**
@@ -32,7 +32,7 @@ public class MongoExplainPlanParser {
         if ("IXSCAN".equals(stage.getString("stage"))) {
             String indexName = stage.getString("indexName");
             if (indexName != null) {
-                model.addIndex(indexName);
+                model.database.addIndex(indexName);
             }
         }
         if (stage.containsKey("inputStage")) {
@@ -47,7 +47,7 @@ public class MongoExplainPlanParser {
      */
     private void parseExecutionStats(DataModel model, Document node) throws ParseException {
         if (node.getBoolean("executionSuccess")) {
-            model.executionTimeMillis = Double.valueOf(node.getInteger("executionTimeMillis")); // TODO: change to getDouble?
+            model.result.executionTimeMillis = Double.valueOf(node.getInteger("executionTimeMillis")); // TODO: change to getDouble?
         }
     }
 

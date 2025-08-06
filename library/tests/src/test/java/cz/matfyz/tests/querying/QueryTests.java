@@ -2,7 +2,6 @@ package cz.matfyz.tests.querying;
 
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
@@ -20,7 +19,6 @@ class QueryTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
     private static final Datasources datasources = new Datasources();
-    private static final ExpressionScope scope = new ExpressionScope();
 
     @BeforeAll
     static void setup() {
@@ -317,7 +315,7 @@ class QueryTests {
                     FILTER(?number = "o_100")
                 }
             """)
-            .queryTreeBuilder((plans) -> {
+            .queryTreeBuilder((plans, scope) -> {
                 final var plan = plans.get(0);
                 final var pattern = plan.stream().findFirst().get();
 
@@ -354,7 +352,7 @@ class QueryTests {
                     FILTER(?number = "o_100")
                 }
             """)
-            .queryTreeBuilder((plans) -> {
+            .queryTreeBuilder((plans, scope) -> {
                 final var plan = plans.get(0);
                 final var pattern = plan.stream().findFirst().get();
 
@@ -391,7 +389,7 @@ class QueryTests {
                     FILTER(?number = "o_100")
                 }
             """)
-            .queryTreeBuilder((plans) -> {
+            .queryTreeBuilder((plans, scope) -> {
                 final var plan = plans.get(0);
                 final var pattern = plan.stream().findFirst().get();
 

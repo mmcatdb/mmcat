@@ -63,7 +63,7 @@ public class MongoDataCollector {
      * Method which will save page size
      */
     private void collectPageSize() {
-        model.databasePageSize = MongoResources.DefaultSizes.PAGE_SIZE;
+        model.database.pageSize = MongoResources.DefaultSizes.PAGE_SIZE;
     }
 
     /**
@@ -75,7 +75,7 @@ public class MongoDataCollector {
 
         if (stats.next()) {
             long size = new Document(stats.getMap("wiredTiger")).get("cache", Document.class).getLong("maximum bytes configured");
-            model.databaseCacheSize = size;
+            model.database.cacheSize = size;
         }
     }
 
@@ -88,9 +88,9 @@ public class MongoDataCollector {
 
         if (stats.next()) {
             long size = stats.getLong("storageSize");
-            model.databaseSizeInBytes = size;
-            long sizeInPages = (long) Math.ceil((double)size / model.databasePageSize);
-            model.databaseSizeInPages = sizeInPages;
+            model.database.sizeInBytes = size;
+            long sizeInPages = (long) Math.ceil((double)size / model.database.pageSize);
+            model.database.sizeInPages = sizeInPages;
         }
         collectCacheDatabaseSize();
     }
@@ -110,7 +110,7 @@ public class MongoDataCollector {
         CachedResult result = executeQuery(MongoResources.getAvgObjectStringSizeCommand(collectionName, columnName, columnType));
         if (result.next()) {
             int avgByteSize = (int)Math.round(result.getDouble("avg"));
-            model.getTable(collectionName, true).getColumn(columnName, true).getColumnType(columnType, true).byteSize = avgByteSize;
+            model.database.getTable(collectionName, true).getColumn(columnName, true).getColumnType(columnType, true).byteSize = avgByteSize;
         }
     }
 
@@ -123,7 +123,7 @@ public class MongoDataCollector {
     private void collectNumberColumnByteSize(String collectionName, String columnName, String columnType) {
         Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(columnType);
         if (size == null) return;
-        model.getTable(collectionName, true).getColumn(columnName, true).getColumnType(columnType, true).byteSize = size;
+        model.database.getTable(collectionName, true).getColumn(columnName, true).getColumnType(columnType, true).byteSize = size;
     }
 
     /**
@@ -179,7 +179,7 @@ public class MongoDataCollector {
             } else {
                 isRequired = "_id".equals(columnName);
             }
-            model.getTable(collectionName, true).getColumn(columnName, true).mandatory = isRequired;
+            model.database.getTable(collectionName, true).getColumn(columnName, true).mandatory = isRequired;
         }
     }
 
@@ -236,10 +236,10 @@ public class MongoDataCollector {
 
         if (stats.next()) {
             final long size = stats.getLong("storageSize");
-            final var table = model.getTable(collectionName, true);
+            final var table = model.database.getTable(collectionName, true);
             table.sizeInBytes = size;
 
-            final long sizeInPages = (long) Math.ceil((double)size / model.databasePageSize);
+            final long sizeInPages = (long) Math.ceil((double)size / model.database.pageSize);
             table.sizeInPages = sizeInPages;
 
             final long rowCount = stats.getLong("count");
@@ -262,7 +262,7 @@ public class MongoDataCollector {
 
         if (result.next()) {
             long count = result.getLong("n");
-            model.getIndex(indexName, true).rowCount = count;
+            model.database.getIndex(indexName, true).rowCount = count;
         }
     }
 
@@ -276,8 +276,8 @@ public class MongoDataCollector {
         CachedResult stats = executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
         if (stats.next()) {
             long size = new Document(stats.getMap("indexSizes")).getLong(indexName);
-            model.getIndex(indexName, true).sizeInBytes = size;
-            model.getIndex(indexName, true).sizeInPages = (long)Math.ceil((double)size / model.databasePageSize);
+            model.database.getIndex(indexName, true).sizeInBytes = size;
+            model.database.getIndex(indexName, true).sizeInPages = (long)Math.ceil((double)size / model.database.pageSize);
         }
     }
 
@@ -287,7 +287,7 @@ public class MongoDataCollector {
      * @throws DataCollectException when some QueryExecutionException occur during running help queries
      */
     private void collectIndexesData(String collectionName) throws DataCollectException {
-        for (String indexName : model.databaseIndexes.keySet()) {
+        for (String indexName : model.database.indexes.keySet()) {
             collectIndexSizesData(collectionName, indexName);
             collectIndexRowCount(collectionName, indexName);
         }
@@ -299,7 +299,7 @@ public class MongoDataCollector {
      * @throws DataCollectException when no such collection was parsed from query
      */
     private String getCollectionName() throws DataCollectException {
-        for (String collectionName : model.databaseTables.keySet()) {
+        for (String collectionName : model.database.tables.keySet()) {
             return collectionName;
         }
         throw MongoExceptionsFactory.getExceptionsFactory().collectionNotParsed();
@@ -317,9 +317,9 @@ public class MongoDataCollector {
                 if (colType != null) {
                     Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(colType);
                     if (size != null)
-                        model.resultTable.getColumn(colName, true).getColumnType(colType, true).byteSize = size;
+                        model.result.resultTable.getColumn(colName, true).getColumnType(colType, true).byteSize = size;
                     double ratio = result.getColumnTypeRatio(colName, colType);
-                    model.resultTable.getColumn(colName, true).getColumnType(colType, true).ratio = ratio;
+                    model.result.resultTable.getColumn(colName, true).getColumnType(colType, true).ratio = ratio;
                 }
             }
         }
@@ -331,12 +331,12 @@ public class MongoDataCollector {
      */
     private void collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
-        model.resultTable.sizeInBytes = (size);
+        model.result.resultTable.sizeInBytes = (size);
         long count = result.getRowCount();
-        model.resultTable.rowCount = count;
+        model.result.resultTable.rowCount = count;
 
-        long sizeInPages = (long)Math.ceil((double) size / model.databasePageSize);
-        model.resultTable.sizeInPages = sizeInPages;
+        long sizeInPages = (long)Math.ceil((double) size / model.database.pageSize);
+        model.result.resultTable.sizeInPages = sizeInPages;
 
         collectResultColumnData(result);
     }

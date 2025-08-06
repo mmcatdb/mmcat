@@ -281,6 +281,7 @@ public abstract class TformStep implements Printable {
     }
 
     static class WriteToList<T extends ResultNode> extends TformStep {
+        @SuppressWarnings("unchecked")
         @Override public void apply(TformContext context) {
             applyChildren(context);
             final var outputNode = (T) context.outputs.pop();
@@ -354,6 +355,7 @@ public abstract class TformStep implements Printable {
             this.pathToIdentifier = pathToIdentifier;
         }
 
+        @SuppressWarnings("unchecked")
         @Override public void apply(TformContext context) {
             final var thisNode = (T) context.inputs.peek();
             final var identifierLeaf = (LeafResult) traversePath(thisNode, pathToIdentifier);

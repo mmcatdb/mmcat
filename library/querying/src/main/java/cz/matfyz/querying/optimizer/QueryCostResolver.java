@@ -2,6 +2,7 @@ package cz.matfyz.querying.optimizer;
 
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperException;
+import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
@@ -14,16 +15,18 @@ import cz.matfyz.querying.resolver.DatasourceTranslator;
 
 public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
 
-    private QueryCostResolver(QueryPlan plan) {
+    private QueryCostResolver(QueryPlan plan, CollectorCache cache) {
         this.plan = plan;
+        this.cache = cache;
     }
 
-    public static NodeCostData run(QueryPlan plan) {
-        final var estimator = new QueryCostResolver(plan);
+    public static NodeCostData run(QueryPlan plan, CollectorCache cache) {
+        final var estimator = new QueryCostResolver(plan, cache);
         return plan.root.accept(estimator);
     }
 
     private final QueryPlan plan;
+    private final CollectorCache cache;
 
     @Override
     public NodeCostData visit(DatasourceNode node) {
@@ -36,10 +39,12 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
             final var collector = plan.context.getProvider().getControlWrapper(node.datasource).getCollectorWrapper();
             final var dataModel = collector.executeQuery(query.content());
 
+            cache.databaseData.put(dataModel.databaseID, dataModel.database);
+
             node.predictedCostData = new NodeCostData(
-                dataModel.resultTable.sizeInBytes,
-                dataModel.resultTable.sizeInBytes, // parse time is estimated as O(data size)
-                dataModel.executionTimeMillis
+                dataModel.result.resultTable.sizeInBytes,
+                dataModel.result.resultTable.sizeInBytes, // parse time is estimated as O(data size)
+                dataModel.result.executionTimeMillis
             );
 
             return node.predictedCostData;

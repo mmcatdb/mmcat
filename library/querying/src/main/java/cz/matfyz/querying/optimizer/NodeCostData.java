@@ -1,7 +1,7 @@
 package cz.matfyz.querying.optimizer;
 
 /**
-* This class contains evaluated or estimated cost data of a {@link cz.matfyz.querying.core.querytree.QueryNode}.
+* This class contains estimated *(and only estimated)* cost data of a {@link cz.matfyz.querying.core.querytree.QueryNode}.
 */
 public record NodeCostData(
    /** Cost of sending data over network */

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -57,6 +58,14 @@ public class QueryTestBase {
         return this;
     }
 
+    private CollectorCache cache;
+
+    public QueryTestBase cache(CollectorCache cache) {
+        this.cache = cache;
+
+        return this;
+    }
+
     private final List<TestDatasource<?>> datasources = new ArrayList<>();
 
     public QueryTestBase addDatasource(TestDatasource<?> datasource) {
@@ -68,7 +77,7 @@ public class QueryTestBase {
     public void run() {
         final var provider = new DefaultControlWrapperProvider();
         final var kinds = defineKinds(provider);
-        final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds);
+        final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds, cache);
 
         if (restrictQueryTree != null) {
             final var description = queryToInstance.describe();
@@ -123,7 +132,7 @@ public class QueryTestBase {
     public void describe() {
         final var provider = new DefaultControlWrapperProvider();
         final var kinds = defineKinds(provider);
-        final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds);
+        final var queryToInstance = new QueryToInstance(provider, schema, queryString, kinds, cache);
 
         final var description = queryToInstance.describe();
 

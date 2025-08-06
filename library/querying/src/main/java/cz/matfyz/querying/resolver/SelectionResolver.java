@@ -4,9 +4,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.core.querying.QueryResult;
-import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
@@ -27,23 +25,22 @@ import org.slf4j.LoggerFactory;
 // TODO: Maybe replace QueryResult for ListResult?
 public class SelectionResolver implements QueryVisitor<QueryResult> {
 
+    @SuppressWarnings({ "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(SelectionResolver.class);
 
     public static QueryResult run(QueryPlan plan) {
-        return new SelectionResolver(plan.context, plan.root).run();
+        return new SelectionResolver(plan).run();
     }
 
-    private final QueryContext context;
-    private final QueryNode rootNode;
+    private final QueryPlan plan;
     private final ArrayList<Computation> selectionContext = new ArrayList<>(); // use as a "stack", or maybe in the future as Map<Variable, IdSet>
 
-    private SelectionResolver(QueryContext context, QueryNode rootNode) {
-        this.context = context;
-        this.rootNode = rootNode;
+    private SelectionResolver(QueryPlan plan) {
+        this.plan = plan;
     }
 
     private QueryResult run() {
-        return timedAccept(rootNode);
+        return timedAccept(plan.root);
     }
 
     private QueryResult timedAccept(QueryNode node) {
@@ -55,17 +52,18 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(DatasourceNode node) {
-        final var controlWrapper = context.getProvider().getControlWrapper(node.datasource);
+        final var controlWrapper = plan.context.getProvider().getControlWrapper(node.datasource);
 
         if (selectionContext.size() > 0 &&
             controlWrapper.getQueryWrapper().isFilteringSupported()) {
-            // TODO: also check if the selection variables are in the scope of this node (example:)
-            // A JOIN (B JOIN C)  with dependent join  A->B
+            // TODO: also check if the selection variables are in the scope of this node (example:
+            // A JOIN (B JOIN C)  with dependent join  A->B)
+            // (see FilterDeepener.structureCoversVariables(), it is pretty much what we need)
             node.filters.addAll(selectionContext);
             selectionContext.removeIf(element -> true);
         }
 
-        final QueryStatement query = DatasourceTranslator.run(context, node);
+        final QueryStatement query = DatasourceTranslator.run(plan.context, node);
         final var pullWrapper = controlWrapper.getPullWrapper();
 
         return pullWrapper.executeQuery(query);
@@ -80,7 +78,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         if (node.candidate.type() == JoinType.Value)
             throw new UnsupportedOperationException("Joining by value is not implemented.");
 
-        // TODO: Decide where to put the decision mechanism for whether dependent join is to be used (the condition for dependent join is: from result estimation is small and to res.est. is large)
+        // TODO: Use collector cache to determine whether to use dependent join
 
         if (node.forceDepJoinFromId) {
             final var idResult = timedAccept(node.fromChild());
@@ -92,8 +90,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
                 operands.add(new Constant(id));
             }
 
-            // TODO: either pass ExpressionScope from before or avoid it altogether
-            selectionContext.add(new ExpressionScope().computation.create(Computation.Operator.In, operands));
+            selectionContext.add(plan.scope.computation.create(Computation.Operator.In, operands));
 
             final var refResult = timedAccept(node.toChild());
             return node.tform.applyTarget(refResult.data);
@@ -107,8 +104,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
                 operands.add(new Constant(id));
             }
 
-            // TODO: either pass ExpressionScope from before or avoid it altogether
-            selectionContext.add(new ExpressionScope().computation.create(Computation.Operator.In, operands));
+            selectionContext.add(plan.scope.computation.create(Computation.Operator.In, operands));
 
             final var idResult = timedAccept(node.fromChild());
             return node.tform.apply(idResult.data, refResult.data);

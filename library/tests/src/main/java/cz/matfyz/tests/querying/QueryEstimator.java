@@ -7,6 +7,7 @@ import java.util.Set;
 import cz.matfyz.tests.example.benchmarkyelp.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -33,17 +34,20 @@ public class QueryEstimator {
         Datasources datasources,
         List<TestDatasource<?>> testDatasources,
         String queryString,
+        CollectorCache cache,
         boolean optimize
     ) {
         this.datasources = datasources;
         this.testDatasources = testDatasources;
         this.queryString = queryString;
+        this.cache = cache;
         this.optimize = optimize;
     }
 
     private final Datasources datasources;
     private final List<TestDatasource<?>> testDatasources;
     private final String queryString;
+    private final CollectorCache cache;
     private final boolean optimize;
 
     public List<QueryPlan> run() {
@@ -73,11 +77,11 @@ public class QueryEstimator {
             for (final var filter : normalized.selection.filters())
                 currentNode = new FilterNode(currentNode, filter);
 
-            QueryPlan planned = new QueryPlan(currentNode, normalized.context);
+            QueryPlan planned = new QueryPlan(currentNode, normalized.context, normalized.selection.scope());
             ResultStructureResolver.run(planned);
-            if (optimize) { planned = QueryOptimizer.run(planned); }
+            if (optimize) { planned = QueryOptimizer.run(planned, cache); }
 
-            QueryCostResolver.run(planned);
+            QueryCostResolver.run(planned, cache);
 
             output.add(planned);
         }

@@ -5,23 +5,59 @@ import java.util.HashMap;
 
 public class DataModel {
 
-    public String databaseID; // TODO: how to identify an underlying system within mmcat? simply dbType, e.g. MongoDB, or some other way?
+    public static class DatabaseData {
+        /** Field containing size of dataset in bytes */
+        public Long sizeInBytes;
+        /** Field containing size of dataset in pages (virtual disk block size) */
+        public Long sizeInPages;
+        /** Field containing size of page in bytes */
+        public Integer pageSize;
+        /** Field containing size of caches in bytes which could be used for query caching */
+        public Long cacheSize;
+
+        public final HashMap<String, TableData> tables = new HashMap<>();
+        public final HashMap<String, IndexData> indexes = new HashMap<>();
+
+        public TableData getTable(String tableName, boolean createIfNotExist) throws IllegalArgumentException {
+            if (!tables.containsKey(tableName) && !createIfNotExist) {
+                // throw new IllegalArgumentException("Table '" + tableName + "' does not exists in DataModel");
+                return null;
+            } else if (!tables.containsKey(tableName)) {
+                tables.put(tableName, new TableData());
+            }
+            return tables.get(tableName);
+        }
+
+        public IndexData getIndex(String inxName, boolean createIfNotExist) {
+            if (!indexes.containsKey(inxName) && !createIfNotExist) {
+                throw new IllegalArgumentException("Index '" + inxName + "' does not exists in DataModel");
+            } else if (!indexes.containsKey(inxName)) {
+                indexes.put(inxName, new IndexData());
+            }
+            return indexes.get(inxName);
+        }
+
+        public void addTable(String tableName) {
+            if (!tables.containsKey(tableName)) tables.put(tableName, new TableData());
+        }
+
+        public void addIndex(String inxName) {
+            if(!indexes.containsKey(inxName)) indexes.put(inxName, new IndexData());
+        }
+    }
+
+    public static class ResultData {
+        public Double executionTimeMillis = null;
+        public final TableData resultTable = new TableData();
+    }
+
+
+    public String databaseID;
+    public final DatabaseData database = new DatabaseData();
+
     public String query; // TODO: change to querycontent, but we don't have the right dependencies (it would have to be in AbstractWrappers), maybe Object or Serializable if we need it would be enough, but id
+    public final ResultData result = new ResultData();
 
-    /** Field containing size of dataset in bytes */
-    public Long databaseSizeInBytes;
-    /** Field containing size of dataset in pages (virtual disk block size) */
-    public Long databaseSizeInPages;
-    /** Field containing size of page in bytes */
-    public Integer databasePageSize;
-    /** Field containing size of caches in bytes which could be used for query caching */
-    public Long databaseCacheSize;
-
-    public final HashMap<String, TableData> databaseTables = new HashMap<>();
-    public final HashMap<String, IndexData> databaseIndexes = new HashMap<>();
-
-    public Double executionTimeMillis = null;
-    public final TableData resultTable = new TableData();
 
     public DataModel(String databaseID, String query) {
         this.databaseID = databaseID;
@@ -30,31 +66,6 @@ public class DataModel {
 
 
 
-    public TableData getTable(String tableName, boolean createIfNotExist) throws IllegalArgumentException {
-        if (!databaseTables.containsKey(tableName) && !createIfNotExist) {
-            throw new IllegalArgumentException("Table '" + tableName + "' does not exists in DataModel");
-        } else if (!databaseTables.containsKey(tableName)) {
-            databaseTables.put(tableName, new TableData());
-        }
-        return databaseTables.get(tableName);
-    }
-
-    public IndexData getIndex(String inxName, boolean createIfNotExist) {
-        if (!databaseIndexes.containsKey(inxName) && !createIfNotExist) {
-            throw new IllegalArgumentException("Index '" + inxName + "' does not exists in DataModel");
-        } else if (!databaseIndexes.containsKey(inxName)) {
-            databaseIndexes.put(inxName, new IndexData());
-        }
-        return databaseIndexes.get(inxName);
-    }
-
-    public void addTable(String tableName) {
-        if (!databaseTables.containsKey(tableName)) databaseTables.put(tableName, new TableData());
-    }
-
-    public void addIndex(String inxName) {
-        if(!databaseIndexes.containsKey(inxName)) databaseIndexes.put(inxName, new IndexData());
-    }
 
     /** Class holding statistical data about table */
     public static class TableData implements Serializable {
@@ -68,15 +79,32 @@ public class DataModel {
         /** Field containing number of constraints defined over table */
         public Long constraintCount;
 
-        public final HashMap<String, ColumnData> _columns = new HashMap<>();
+        public final HashMap<String, ColumnData> columns;
+
+        private TableData(HashMap<String, ColumnData> columns) {
+            this.columns = columns;
+        }
+        public TableData() {
+            this(new HashMap<>());
+        }
 
         public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException {
-            if (!_columns.containsKey(columnName) && createIfNotExist) {
-                _columns.put(columnName, new ColumnData());
-            } else if (!_columns.containsKey(columnName) && !createIfNotExist) {
+            if (!columns.containsKey(columnName) && createIfNotExist) {
+                columns.put(columnName, new ColumnData());
+            } else if (!columns.containsKey(columnName) && !createIfNotExist) {
                 throw new IllegalArgumentException("Column '" + columnName + "' does not exist");
             }
-            return _columns.get(columnName);
+            return columns.get(columnName);
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        public TableData clone() {
+            final var clone = new TableData((HashMap<String, ColumnData>)columns.clone());
+            clone.sizeInBytes = sizeInBytes;
+            clone.sizeInPages = sizeInPages;
+            clone.rowCount = rowCount;
+            clone.constraintCount = constraintCount;
+            return clone;
         }
     }
 

@@ -55,7 +55,7 @@ public class PostgresDataCollector {
         CachedResult result = executeQuery(PostgreSQLResources.getPageSizeQuery());
         if (result.next()) {
             int pageSize = result.getInt("current_setting");
-            model.databasePageSize = pageSize;
+            model.database.pageSize = pageSize;
         }
     }
 
@@ -64,10 +64,10 @@ public class PostgresDataCollector {
      * @param size byte size of dataset
      */
     private void collectDatabaseSizeInPages(long size) {
-        int pageSize = model.databasePageSize;
+        int pageSize = model.database.pageSize;
         if (pageSize > 0) {
             long sizeInPages = (long) Math.ceil((double)size / (double)pageSize);
-            model.databaseSizeInPages = sizeInPages;
+            model.database.sizeInPages = sizeInPages;
         }
     }
 
@@ -79,7 +79,7 @@ public class PostgresDataCollector {
         CachedResult result = executeQuery(PostgreSQLResources.getDatasetSizeQuery(databaseName));
         if (result.next()) {
             long dataSetSize = result.getLong("pg_database_size");
-            model.databaseSizeInBytes = dataSetSize;
+            model.database.sizeInBytes = dataSetSize;
             collectDatabaseSizeInPages(dataSetSize);
         }
     }
@@ -92,7 +92,7 @@ public class PostgresDataCollector {
         CachedResult result = executeQuery(PostgreSQLResources.getCacheSizeQuery());
         if (result.next()) {
             long size = result.getLong("shared_buffers");
-            model.databaseCacheSize = size;
+            model.database.cacheSize = size;
         }
     }
 
@@ -119,8 +119,8 @@ public class PostgresDataCollector {
         if (res.next()) {
             double ratio = res.getDouble("n_distinct");
             int size = res.getInt("avg_width");
-            model.getTable(tableName, true).getColumn(colName, true).distinctRatio = ratio;
-            model.getTable(tableName, true).getColumn(colName, true).getColumnType(typeName, true).byteSize = size;
+            model.database.getTable(tableName, true).getColumn(colName, true).distinctRatio = ratio;
+            model.database.getTable(tableName, true).getColumn(colName, true).getColumnType(typeName, true).byteSize = size;
         }
 
     }
@@ -138,7 +138,7 @@ public class PostgresDataCollector {
             collectNumericDataForCol(tableName, colName, type);
 
             boolean mandatory = result.getBoolean("attnotnull");
-            model.getTable(tableName, true).getColumn(colName, true).mandatory = mandatory;
+            model.database.getTable(tableName, true).getColumn(colName, true).mandatory = mandatory;
         }
     }
 
@@ -228,8 +228,8 @@ public class PostgresDataCollector {
      * @throws DataCollectException when some of the help queries fails
      */
     private void collectTableData() throws DataCollectException {
-        for (String tableName : model.databaseTables.keySet()) {
-            final var table = model.getTable(tableName, true);
+        for (String tableName : model.database.tables.keySet()) {
+            final var table = model.database.getTable(tableName, true);
             collectTableRowCount(tableName, table);
             collectTableConstraintCount(tableName, table);
             collectTableSizeInPages(tableName, table);
@@ -250,7 +250,7 @@ public class PostgresDataCollector {
         CachedResult result = executeQuery(PostgreSQLResources.getTableNameForIndexQuery(indexName));
         if (result.next()) {
             String tableName = result.getString("tablename");
-            model.addTable(tableName);
+            model.database.addTable(tableName);
         }
     }
 
@@ -264,7 +264,7 @@ public class PostgresDataCollector {
         CachedResult result = executeQuery(PostgreSQLResources.getRowCountForTableQuery(indexName));
         if (result.next()) {
             long rowCount = result.getLong("reltuples");
-            model.getIndex(indexName, true).rowCount = rowCount;
+            model.database.getIndex(indexName, true).rowCount = rowCount;
         }
     }
 
@@ -278,7 +278,7 @@ public class PostgresDataCollector {
         CachedResult result = executeQuery(PostgreSQLResources.getTableSizeInPagesQuery(indexName));
         if (result.next()) {
             long sizeInPages = result.getLong("relpages");
-            model.getIndex(indexName, true).sizeInPages = sizeInPages;
+            model.database.getIndex(indexName, true).sizeInPages = sizeInPages;
         }
     }
 
@@ -292,7 +292,7 @@ public class PostgresDataCollector {
         CachedResult result = executeQuery(PostgreSQLResources.getTableSizeQuery(indexName));
         if (result.next()) {
             long size = result.getLong("pg_total_relation_size");
-            model.getIndex(indexName, true).sizeInBytes = size;
+            model.database.getIndex(indexName, true).sizeInBytes = size;
         }
     }
 
@@ -301,7 +301,7 @@ public class PostgresDataCollector {
      * @throws DataCollectException when some of the help queries fails
      */
     private void collectIndexData() throws DataCollectException {
-        for (String indexName: model.databaseIndexes.keySet()) {
+        for (String indexName: model.database.indexes.keySet()) {
             collectIndexTableName(indexName);
             collectIndexRowCount(indexName);
             collectIndexSizeInPages(indexName);
@@ -316,7 +316,7 @@ public class PostgresDataCollector {
      */
     private void collectResultData(ConsumedResult mainResult) throws DataCollectException {
         long rowCount = mainResult.getRowCount();
-        model.resultTable.rowCount = rowCount;
+        model.result.resultTable.rowCount = rowCount;
 
         long sizeInBytes = 0;
         double colSize = 0;
@@ -327,22 +327,22 @@ public class PostgresDataCollector {
                 String tableName = splitTableColumn[0].substring(1);
                 String columnName = splitTableColumn[1].substring(0, splitTableColumn[1].length() - 1);
 
-                int typeSize = model.getTable(tableName, false).getColumn(columnName, false).getColumnType(colType, false).byteSize;
+                int typeSize = model.database.getTable(tableName, false).getColumn(columnName, false).getColumnType(colType, false).byteSize;
 
                 // FIXME: this assigns a wrong column name to the resultTable (i.e. the original table name, but we probably need the one after projection)
-                model.resultTable.getColumn(columnName, true).getColumnType(colType, true).byteSize = typeSize;
+                model.result.resultTable.getColumn(columnName, true).getColumnType(colType, true).byteSize = typeSize;
                 double ratio = mainResult.getColumnTypeRatio(tableColumn, colType);
-                model.resultTable.getColumn(columnName, true).getColumnType(colType, true).ratio = ratio;
+                model.result.resultTable.getColumn(columnName, true).getColumnType(colType, true).ratio = ratio;
                 colSize += typeSize * ratio;
             }
             sizeInBytes += Math.round(colSize);
         }
         sizeInBytes *= rowCount;
-        model.resultTable.sizeInBytes = (sizeInBytes);
+        model.result.resultTable.sizeInBytes = (sizeInBytes);
 
-        int pageSize = model.databasePageSize;
+        int pageSize = model.database.pageSize;
         if (pageSize > 0)
-            model.resultTable.sizeInPages = (long)Math.ceil((double) sizeInBytes / pageSize);
+            model.result.resultTable.sizeInPages = (long)Math.ceil((double) sizeInBytes / pageSize);
     }
 
     /**

@@ -18,7 +18,7 @@ public class PostgresExplainPlanParser {
     private void saveExecTime(Map<String, Object> root, DataModel model) {
         Object result = root.get("Execution Time");
         if (result instanceof Double time) {
-            model.executionTimeMillis = time;
+            model.result.executionTimeMillis = time;
         }
     }
 
@@ -29,7 +29,7 @@ public class PostgresExplainPlanParser {
      */
     private void parseTableName(Map<String, Object> node, DataModel model) {
         if (node.get("Relation Name") instanceof String tableName) {
-            model.addTable(tableName);
+            model.database.addTable(tableName);
         }
     }
 
@@ -40,7 +40,7 @@ public class PostgresExplainPlanParser {
      */
     private void parseIndexName(Map<String, Object> node, DataModel model) {
         if (node.get("Index Name") instanceof String relName) {
-            model.addIndex(relName);
+            model.database.addIndex(relName);
         }
     }
 

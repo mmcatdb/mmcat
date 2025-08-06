@@ -55,7 +55,7 @@ public class QueryService {
         final var category = categoryEntity.toSchemaCategory();
         final var datasources = getDatasources(categoryEntity.id(), category);
 
-        return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).execute();
+        return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds, null).execute();
     }
 
     public QueryDescription describeQuery(Id categoryId, String queryString) {
@@ -63,7 +63,7 @@ public class QueryService {
         final var category = categoryEntity.toSchemaCategory();
         final var datasources = getDatasources(categoryEntity.id(), category);
 
-        return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds).describe();
+        return new QueryToInstance(datasources.provider, category, queryString, datasources.kinds, null).describe();
     }
 
     private record KindsAndDatasources(

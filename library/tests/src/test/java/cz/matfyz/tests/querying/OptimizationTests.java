@@ -2,10 +2,8 @@ package cz.matfyz.tests.querying;
 
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
-import cz.matfyz.querying.core.patterntree.PatternForKind;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.DatasourceNode.SerializedDatasourceNode;
@@ -27,7 +25,6 @@ public class OptimizationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
     private static final Datasources datasources = new Datasources();
-    private static final ExpressionScope scope = new ExpressionScope();
 
     @BeforeAll
     static void setup() {
@@ -165,7 +162,7 @@ public class OptimizationTests {
                     FILTER(?customerName = "Alice")
                 }
             """)
-            .queryTreeBuilder((plans) -> {
+            .queryTreeBuilder((plans, scope) -> {
                 final var plan = plans.get(0);
                 final var customer = plan.stream().filter(pattern -> "customer".equals(pattern.kind.kindName())).findFirst().get();
                 final var orderItem = plan.stream().filter(pattern -> "order_item".equals(pattern.kind.kindName())).findFirst().get();
