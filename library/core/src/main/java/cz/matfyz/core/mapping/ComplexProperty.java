@@ -228,7 +228,7 @@ public class ComplexProperty extends AccessPath {
     ) {}
 
     public record DynamicNameReplacement(
-        /** The longest common prefix of both name and value signatures. */
+        /** The longest common prefix of both name and value signatures. The actual map entry sits between the prefix and the name/value paths. */
         Signature prefix,
         /** The dynamic name's signature without the common prefix. */
         Signature name,

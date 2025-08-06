@@ -74,21 +74,21 @@ class LineStringBuilder implements Printer {
     }
 
     @Override public String toString() {
-        final StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        stack.descendingIterator().forEachRemaining(builder::append);
-        final String fullString = builder.toString();
+        stack.descendingIterator().forEachRemaining(sb::append);
+        final String fullString = sb.toString();
 
         // So that in the output, there are no whitespaces at the beginning of an empty line. This would make it much harder for string comparison.
-        final StringBuilder trimmedBuilder = new StringBuilder();
+        final StringBuilder trimmedSb = new StringBuilder();
         final var split = fullString.split("\n", -1);
         for (int i = 0; i < split.length - 1; i++)
-            trimmedBuilder.append(trimRight(split[i])).append("\n");
+            trimmedSb.append(trimRight(split[i])).append("\n");
 
         if (split.length > 0)
-            trimmedBuilder.append(trimRight(split[split.length - 1]));
+            trimmedSb.append(trimRight(split[split.length - 1]));
 
-        return trimmedBuilder.toString();
+        return trimmedSb.toString();
     }
 
     private static String trimRight(String input) {

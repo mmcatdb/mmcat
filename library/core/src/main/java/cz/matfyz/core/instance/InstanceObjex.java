@@ -1,5 +1,6 @@
 package cz.matfyz.core.instance;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
@@ -8,6 +9,7 @@ import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -35,10 +37,27 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
      */
     private final Map<Integer, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
-    public InstanceObjex(SchemaObjex schema, InstanceCategory instance) {
+    public InstanceObjex(SchemaObjex schema, InstanceCategory instance, Collection<BaseSignature> dependentObjexes) {
         this.schema = schema;
         this.instance = instance;
-        this.technicalIdGenerator = UniqueSequentialGenerator.create();
+        technicalIdGenerator = UniqueSequentialGenerator.create();
+
+        simpleSignatures = new TreeSet<>(dependentObjexes.stream().filter(s -> !s.isDual()).toList());
+        arraySignatures = new TreeSet<>(dependentObjexes.stream().filter(s -> s.isDual()).toList());
+    }
+
+    private final SortedSet<BaseSignature> simpleSignatures;
+
+    /** Signatures of objexes whose values should be stored in the domain row. */
+    public Collection<BaseSignature> simpleSignatures() {
+        return simpleSignatures;
+    }
+
+    private final SortedSet<BaseSignature> arraySignatures;
+
+    /** Signatures of objexes whose array values should be stored in the domain row. */
+    public Collection<BaseSignature> arraySignatures() {
+        return arraySignatures;
     }
 
     public boolean isEmpty() {
@@ -107,7 +126,7 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
      * Adds the row to the domain (by all of its ids) and to the domain by technical ids.
      */
     void setRow(DomainRow row) {
-        final var ids = row.values.findAllIds(schema.ids()).foundIds();
+        final var ids = row.superId.findAllIds(schema.ids()).foundIds();
         for (final var idValues : ids) {
             final Map<SuperIdValues, DomainRow> rowsWithSameTypeId = domain.computeIfAbsent(idValues.id(), i -> new TreeMap<>());
             rowsWithSameTypeId.put(idValues, row);
@@ -196,7 +215,7 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
             if (foundRows.isEmpty())
                 break; // We have not found anything new.
 
-            foundRows.forEach(row -> output.add(row.values));
+            foundRows.forEach(row -> output.add(row.superId));
         }
 
         return output.build();
@@ -280,10 +299,10 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
 
             for (final DomainRow sourceRow : sourceRows.values()) {
                 // TODO Pending references (probably should be empty, but we should check it).
-                final DomainRow targetRow = new DomainRow(sourceRow.values, sourceRow.technicalId, Set.of());
+                final DomainRow targetRow = new DomainRow(sourceRow.superId, sourceRow.technicalId, Set.of());
 
                 final DomainRow uniqueRow = uniqueRows.computeIfAbsent(targetRow, row -> row);
-                targetRows.put(uniqueRow.values, uniqueRow);
+                targetRows.put(uniqueRow.superId, uniqueRow);
             }
 
             if (!targetRows.isEmpty()) {
@@ -294,7 +313,7 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         for (final var technicalIdEntry : source.domainByTechnicalIds.entrySet()) {
             final Integer technicalId = technicalIdEntry.getKey();
             final DomainRow sourceRow = technicalIdEntry.getValue();
-            final DomainRow targetRow = new DomainRow(sourceRow.values, sourceRow.technicalId, Set.of());
+            final DomainRow targetRow = new DomainRow(sourceRow.superId, sourceRow.technicalId, Set.of());
 
             final DomainRow uniqueRow = uniqueRows.computeIfAbsent(targetRow, row -> row);
             domainByTechnicalIds.put(technicalId, uniqueRow);
@@ -318,16 +337,16 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
     // Debug
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append("\tKey: ").append(schema.key());
-        builder.append("\n");
+        sb.append("\tKey: ").append(schema.key());
+        sb.append("\n");
 
-        builder.append("\tValues:\n");
+        sb.append("\tValues:\n");
         for (final DomainRow row : allRowsToSet())
-            builder.append("\t\t").append(row).append("\n");
+            sb.append("\t\t").append(row).append("\n");
 
-        return builder.toString();
+        return sb.toString();
     }
 
 }

@@ -56,7 +56,7 @@ function traverseAndCollect(property: AccessPath, path: NamePath): AccessPath[] 
  * Replaces the last property on the path with the given edit. All properties on the path are also refreshed.
  * @param path Path from the root to the property to edit (inclusive). Can't be empty.
  * @param edit Replaces the property (or inserts a new one, if the old doesn't exist). If undefined, the property is removed.
- * @returns The refreshed property on the start of the path (a shallow copy of the `property`).
+ * @returns The refreshed property on the start of the path (a shallow copy of the <code>property</code>).
  */
 export function updateAccessPath(property: AccessPath, path: NamePath, edit: AccessPath | undefined): AccessPath {
     const output = copyAccessPath(property);

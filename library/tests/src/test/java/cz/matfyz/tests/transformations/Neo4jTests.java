@@ -46,13 +46,13 @@ class Neo4jTests {
     void getForestForNodeTest() throws Exception {
         new PullForestTestBase(Neo4j.order(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "customer": "Alice",
                     "number": "o_100"
                 }, {
                     "customer": "Bob",
                     "number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }
@@ -61,7 +61,7 @@ class Neo4jTests {
     void getForestForRelationshipTest() throws Exception {
         new PullForestTestBase(Neo4j.item(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "quantity": "10",
                     "_from.Order": {
                         "customer": "Alice"
@@ -97,7 +97,7 @@ class Neo4jTests {
                         "id": "B2",
                         "label": "Other name"
                     }
-                }]
+                } ]
             """)
             .run();
     }

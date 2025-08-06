@@ -34,11 +34,11 @@ public class ForestOfRecords implements Iterable<RootRecord> {
     }
 
     @Override public String toString() {
-        final StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
         for (final RootRecord rootRecord : records)
-            builder.append(rootRecord).append(",\n");
+            sb.append(rootRecord).append(",\n");
 
-        return builder.toString();
+        return sb.toString();
     }
 
     public String toComparableString() {

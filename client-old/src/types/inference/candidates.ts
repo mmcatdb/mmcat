@@ -7,9 +7,6 @@ export class Candidates {
         public refCandidates: ReferenceCandidate[],
     ) {}
 
-    /**
-     * Creates an instance of `Candidates` from a serialized input.
-     */
     static fromServer(input: SerializedCandidates): Candidates {
         const pkCandidates = input.pkCandidates.map(PrimaryKeyCandidate.fromServer);
         const refCandidates = input.refCandidates.map(ReferenceCandidate.fromServer);

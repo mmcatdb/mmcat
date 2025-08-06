@@ -39,9 +39,6 @@ export class InferenceJobData {
         public candidates: Candidates,
     ) {}
 
-    /**
-     * Creates an instance of `InferenceJobData` from server data.
-     */
     static fromServer(input: InferenceJobDataFromServer, info: SchemaCategoryInfo): InferenceJobData {
         return new InferenceJobData(
             input.edits.map(createInferenceEditFromServer),

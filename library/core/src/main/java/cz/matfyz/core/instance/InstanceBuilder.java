@@ -1,5 +1,6 @@
 package cz.matfyz.core.instance;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -12,7 +13,11 @@ import cz.matfyz.core.utils.UniqueSequentialGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class InstanceBuilder {
 
@@ -24,25 +29,39 @@ public class InstanceBuilder {
 
     private static InstanceCategory createEmptyInstance(SchemaCategory schema) {
         final Map<Key, InstanceObjex> objexes = new TreeMap<>();
-        final Map<Signature, InstanceMorphism> morphisms = new TreeMap<>();
+        final Map<BaseSignature, InstanceMorphism> morphisms = new TreeMap<>();
         final var instance = new InstanceCategory(schema, objexes, morphisms);
+        /** For each objex A, we store a list of signatures of morphisms from A to all value-identified objexes B. */
+        final Map<SchemaObjex, Set<BaseSignature>> dependentObjexes = new TreeMap<>();
+
+        final var baseMorphisms = schema.allMorphisms().stream().filter(SchemaMorphism::isBase).toList();
+        for (final var schemaMorhpism : baseMorphisms) {
+            if (schemaMorhpism.cod().ids().isValue() && !schemaMorhpism.dom().superId().contains(schemaMorhpism.signature())) {
+                final var set = dependentObjexes.computeIfAbsent(schemaMorhpism.dom(), x -> new TreeSet<>());
+                set.add((BaseSignature) schemaMorhpism.signature());
+            }
+            else if (schemaMorhpism.dom().ids().isValue() && !schemaMorhpism.cod().superId().contains(schemaMorhpism.signature().dual())) {
+                final var set = dependentObjexes.computeIfAbsent(schemaMorhpism.cod(), x -> new TreeSet<>());
+                set.add(((BaseSignature) schemaMorhpism.signature()).dual());
+            }
+        }
 
         for (final SchemaObjex schemaObjex : schema.allObjexes()) {
-            final InstanceObjex instanceObjex = new InstanceObjex(schemaObjex, instance);
+            if (schemaObjex.ids().isValue())
+                continue;
+
+            var dependents = dependentObjexes.get(schemaObjex);
+            if (dependents == null)
+                dependents = Set.of();
+
+            final InstanceObjex instanceObjex = new InstanceObjex(schemaObjex, instance, dependents);
             objexes.put(instanceObjex.schema.key(), instanceObjex);
         }
 
         // The base moprhisms must be created first because the composite ones use them.
-        final var baseMorphisms = schema.allMorphisms().stream().filter(SchemaMorphism::isBase).toList();
         for (final var schemaMorphism : baseMorphisms) {
             final var instanceMorphism = new InstanceMorphism(schemaMorphism);
-            morphisms.put(schemaMorphism.signature(), instanceMorphism);
-        }
-
-        final var compositeMorphisms = schema.allMorphisms().stream().filter(morphism -> !morphism.isBase()).toList();
-        for (final var schemaMorphism : compositeMorphisms) {
-            final var instanceMorphism = new InstanceMorphism(schemaMorphism);
-            morphisms.put(schemaMorphism.signature(), instanceMorphism);
+            morphisms.put((BaseSignature) schemaMorphism.signature(), instanceMorphism);
         }
 
         return instance;
@@ -59,24 +78,44 @@ public class InstanceBuilder {
 
     // Building domain rows
 
-    private final SuperIdValues.Builder valuesBuilder = new SuperIdValues.Builder();
+    private final Map<Signature, String> values = new TreeMap<>();
 
-    public InstanceBuilder value(Signature signature, String value) {
-        valuesBuilder.add(signature, value);
+    private InstanceBuilder value(Signature signature, @Nullable String value) {
+        if (value != null)
+            values.put(signature, value);
 
         return this;
     }
 
-    public InstanceBuilder value(BuilderMorphism morphism, String value) {
+    public InstanceBuilder value(BuilderMorphism morphism, @Nullable String value) {
         return value(morphism.signature(), value);
+    }
+
+    public InstanceBuilder generatedId(String value) {
+        return value(Signature.createEmpty(), value);
     }
 
     public DomainRow objex(Key key) {
         final var instanceObjex = instance.getObjex(key);
-        final SuperIdValues values = valuesBuilder.build();
 
-        final var row = instanceObjex.createRow(values);
+        final var builder = new SuperIdValues.Builder();
+        instanceObjex.schema.superId().forEach(s -> {
+            final var value = values.get(s);
+            if (value != null)
+                builder.add(s, value);
+        });
+        final SuperIdValues superId = builder.build();
+
+        final var row = instanceObjex.createRow(superId);
         createdRows.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
+
+        instanceObjex.simpleSignatures().forEach(s -> {
+            final var value = values.get(s);
+            if (value != null)
+                row.addSimpleValue((BaseSignature) s, value);
+        });
+
+        values.clear(); // Clear the values for the next objex.
 
         return row;
     }
@@ -85,30 +124,14 @@ public class InstanceBuilder {
         return objex(objex.key());
     }
 
-    public DomainRow valueObjex(BuilderObjex objex, String value) {
-        return valueObjex(objex.key(), value);
-    }
-
-    public DomainRow valueObjex(Key key, String value) {
-        return value(Signature.createEmpty(), value).objex(key);
-    }
-
     // Building mapping rows
 
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {
-        return instance.getMorphism(signature).createMapping(domainRow, codomainRow);
+        return instance.getMorphism((BaseSignature) signature).createMapping(domainRow, codomainRow);
     }
 
     public MappingRow morphism(BuilderMorphism morphism, DomainRow domainRow, DomainRow codomainRow) {
         return morphism(morphism.signature(), domainRow, codomainRow);
-    }
-
-    public void morphism(BuilderMorphism morphism) {
-        morphism(morphism.signature());
-    }
-
-    public void morphism(Signature signature) {
-        instance.getMorphism(signature);
     }
 
     // Getters for rows to allow creating mapping rows

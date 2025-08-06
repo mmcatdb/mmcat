@@ -93,14 +93,14 @@ public class ObjexIds implements Serializable {
         return type == Type.Generated;
     }
 
-    public SignatureId generateDefaultSuperId() {
+    public Set<Signature> generateDefaultSuperId() {
         if (type != Type.Signatures)
-            return SignatureId.createEmpty();
+            return Set.of(Signature.createEmpty());
 
         final var allSignatures = new TreeSet<Signature>();
         signatureIds.forEach(id -> allSignatures.addAll(id.signatures()));
 
-        return new SignatureId(allSignatures);
+        return Set.copyOf(allSignatures);
     }
 
     @Override public String toString() {
@@ -110,15 +110,15 @@ public class ObjexIds implements Serializable {
         if (type == Type.Generated)
             return "_GENERATED";
 
-        StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append("(");
+        sb.append("(");
         for (SignatureId signatureId : signatureIds.headSet(signatureIds.last()))
-            builder.append(signatureId).append(", ");
-        builder.append(signatureIds.last());
-        builder.append(")");
+            sb.append(signatureId).append(", ");
+        sb.append(signatureIds.last());
+        sb.append(")");
 
-        return builder.toString();
+        return sb.toString();
     }
 
     // #region Serialization

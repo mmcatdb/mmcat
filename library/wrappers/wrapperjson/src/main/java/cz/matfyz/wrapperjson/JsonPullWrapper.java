@@ -123,12 +123,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
 
         final var complexProperty = (ComplexProperty) property;
-
-        // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
-        // We do so by passing the parent record instead of creating a new one.
-        final ComplexRecord childRecord = complexProperty.isAuxiliary()
-            ? parentRecord
-            : parentRecord.addComplexRecord(complexProperty.signature());
+        final ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.signature());
 
         addKeysToRecord(childRecord, complexProperty, value);
     }

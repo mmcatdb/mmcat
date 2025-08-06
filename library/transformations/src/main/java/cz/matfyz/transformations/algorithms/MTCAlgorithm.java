@@ -1,7 +1,7 @@
 package cz.matfyz.transformations.algorithms;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceMorphism;
@@ -13,18 +13,17 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
-import cz.matfyz.core.record.SimpleRecord;
 import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueIdGenerator;
+import cz.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,54 +69,177 @@ public class MTCAlgorithm {
     private void processRootRecord(RootRecord rootRecord, ComplexProperty rootAccessPath) {
         LOGGER.debug("Process a root record:\n{}", rootRecord);
 
-        final Deque<StackTriple> masterStack = createStackWithObjex(mapping.rootObjex(), rootRecord, rootAccessPath);
+        final Deque<StackTriple> stack = createStack(rootRecord, rootAccessPath);
 
-        // processing of the tree
-        while (!masterStack.isEmpty())
-            processTopOfStack(masterStack);
+        while (!stack.isEmpty())
+            processTopOfStack(stack);
     }
 
-    private Deque<StackTriple> createStackWithObjex(SchemaObjex objex, RootRecord rootRecord, ComplexProperty rootAccessPath) {
-        final InstanceObjex instanceObjex = instance.getObjex(objex);
-        // If the root objex has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root objex always is).
-        final SuperIdValues values = objex.ids().isGenerated()
-            ? SuperIdValues.fromEmptySignature(idGenerator.next())
-            : fetchSuperIdValues(objex.superId(), rootRecord);
+    private Deque<StackTriple> createStack(RootRecord rootRecord, ComplexProperty rootAccessPath) {
+        final InstanceObjex instanceObjex = instance.getObjex(mapping.rootObjex());
 
-        final Deque<StackTriple> masterStack = new ArrayDeque<>();
+        final var superId = findSuperIdForRoot(rootRecord);
+        final DomainRow row = addRow(instanceObjex, superId);
+        addDependentValuesToRow(instanceObjex, row, rootRecord, Signature.createEmpty());
 
-        final DomainRow row = addRow(instanceObjex, values);
-        addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
+        final Deque<StackTriple> stack = new ArrayDeque<>();
 
-        return masterStack;
+        addPathChildrenToStack(stack, rootAccessPath, row, rootRecord);
+
+        return stack;
     }
 
-    // Fetch id-with-values for given root record.
-    private static SuperIdValues fetchSuperIdValues(SignatureId superId, RootRecord rootRecord) {
+    // #region Stack processing
+
+    private void processTopOfStack(Deque<StackTriple> stack) {
+        final StackTriple triple = stack.pop();
+        LOGGER.debug("Process top of stack:\n{}", triple);
+
+        final InstanceObjex childObjex = instance.getObjex(triple.parentToChild.to());
+
+        // There are two cases - either the child objex has a dedicatd access path, or it doesn't.
+        if (triple.childAccessPath == null) {
+            // If it doesn't, we have to find its values in the parent record.
+            final var superId = findSuperIdForNonRoot(triple, childObjex, null);
+            DomainRow childRow = addRow(childObjex, superId);
+            childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
+            addDependentValuesToRow(childObjex, childRow, triple.parentRecord, triple.parentToChild.signature());
+
+            // TODO probably add values to the domain rows along the path? Or describe why they aren't any.
+
+            return;
+        }
+
+        // If it does, we find the values in the child records.
+        final var children = triple.parentRecord.getComplexRecords(triple.parentToChild.signature());
+
+        for (final var childRecord : children) {
+            final var superId = findSuperIdForNonRoot(triple, childObjex, childRecord);
+            DomainRow childRow = addRow(childObjex, superId);
+            childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
+            addDependentValuesToRow(childObjex, childRow, childRecord, Signature.createEmpty());
+
+            // TODO probably add values to the domain rows along the path? Or describe why they aren't any.
+
+            addPathChildrenToStack(stack, triple.childAccessPath, childRow, childRecord);
+        }
+    }
+
+    /**
+     * Determine possible sub-paths to be traversed from this complex property (inner node of an access path) and add them to the stack.
+     */
+    private void addPathChildrenToStack(Deque<StackTriple> stack, ComplexProperty path, DomainRow parentRow, ComplexRecord complexRecord) {
+        for (final AccessPath subpath : path.subpaths()) {
+            final var signature = subpath.signature();
+            if (signature.isEmpty())
+                continue;
+
+            final var parentToChild = mapping.category().getPath(signature);
+
+            if (!parentToChild.to().ids().isValue()) {
+                if (!(subpath instanceof final ComplexProperty complexSubpath))
+                    throw InvalidStateException.simplePropertyForNonValueIds(subpath);
+
+                // The record might not be here - if the data is missing.
+                if (complexRecord.hasPrefix(parentToChild.signature()))
+                    stack.push(new StackTriple(parentRow, complexRecord, parentToChild, complexSubpath));
+                continue;
+            }
+
+            // There is no need to explore the value-identified objects - their values will be stored in their parents.
+            // However, even though we won't create rows for them, we need to traverse other objects in the path.
+            // E.g., if there is a morphism 1.2, the cod object of 1 should still be created.
+
+            if (!signature.isComposite())
+                continue;
+
+            final var parentToEntity = mapping.category().getPath(signature.cutLast());
+
+            // Value-identified objects are stored in their parents, we don't need to create a dedicated domain objects for them.
+            // So, it doesn't make sense for them to be here.
+            if (parentToEntity.to().ids().isValue())
+                throw InvalidStateException.complexPropertyForValueIds(parentToEntity.to().key());
+
+            if (complexRecord.hasPrefix(parentToEntity.signature()))
+                stack.push(new StackTriple(parentRow, complexRecord, parentToEntity, null));
+        }
+    }
+
+    // #endregion
+    // #region Finding superId
+
+    private SuperIdValues findSuperIdForRoot(RootRecord rootRecord) {
+        final var objex = mapping.rootObjex();
+        if (objex.ids().isGenerated())
+            // If the root objex has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root objex always is).
+            return SuperIdValues.fromEmptySignature(idGenerator.next());
+
         final var builder = new SuperIdValues.Builder();
 
-        for (final Signature signature : superId.signatures()) {
-            for (final SimpleRecord<?> simpleRecord : rootRecord.findSimpleRecords(signature))
-                builder.add(signature, simpleRecord.getValue().toString());
+        for (final Signature signature : objex.superId()) {
+            final @Nullable String value = rootRecord.findScalarValue(signature, false);
+            // We try to find the whole superId. However, if some parts are not there, we simply skip them.
+            if (value != null)
+                builder.add(signature, value);
         }
 
         return builder.build();
     }
 
-    private void processTopOfStack(Deque<StackTriple> masterStack) {
-        final StackTriple triple = masterStack.pop();
-        LOGGER.debug("Process top of stack:\n{}", triple);
-        final var fetchedList = SuperIdValuesFetcher.fetch(idGenerator, triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
+    private SuperIdValues findSuperIdForNonRoot(StackTriple triple, InstanceObjex childObjex, @Nullable ComplexRecord childRecord) {
+        if (childObjex.schema.ids().isGenerated())
+            // The generated id can't be a part of any signature id, so we can't find it in the parent row. By definition, it's not in the record. So we have to generate it.
+            return SuperIdValues.fromEmptySignature(idGenerator.next());
 
-        final InstanceObjex childInstance = instance.getObjex(triple.parentToChild.to());
+        final var builder = new SuperIdValues.Builder();
 
-        for (final var fetched : fetchedList) {
-            DomainRow childRow = addRow(childInstance, fetched.superId());
-            childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
+        final var record = childRecord != null ? childRecord : triple.parentRecord;
+        final var isChildRecord = childRecord != null;
 
-            addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, fetched.childRecord());
+        for (final Signature signature : childObjex.schema.superId()) {
+            final var value = findSuperIdValue(triple, record, isChildRecord, signature);
+            if (value != null)
+                builder.add(signature, value);
+        }
+
+        return builder.build();
+    }
+
+    private @Nullable String findSuperIdValue(StackTriple triple, ComplexRecord record, boolean isChildRecord, Signature signature) {
+        // How the signature looks like from the parent objex.
+        final var signatureInParent = triple.parentToChild.signature().traverse(signature);
+        // If the value is in the parent row, we just add it and move on with our lives.
+        final var valueInParent = triple.parentRow.tryFindScalarValue(signatureInParent);
+        if (valueInParent != null)
+            return valueInParent;
+
+        return isChildRecord
+            ? record.findScalarValue(signature, false)
+            : record.findScalarValue(signatureInParent, false);
+    }
+
+    // #endregion
+
+    /**
+     * @param record The record in which the values are searched. Corresponds either to the row itself, or to a parent property in the access path.
+     * @param prefix Empty in the first case, path from the parent property in the second case.
+     */
+    private void addDependentValuesToRow(InstanceObjex objex, DomainRow row, ComplexRecord record, Signature prefix) {
+        // The values can only be in the record so there's no need to search elsewhere.
+        for (final BaseSignature signature : objex.simpleSignatures()) {
+            final String value = record.findScalarValue(prefix.traverse(signature), true);
+            if (value != null)
+                row.addSimpleValue(signature, value);
+        }
+
+        for (final BaseSignature signature : objex.arraySignatures()) {
+            final List<String> values = record.findDirectArrayValues(prefix.traverse(signature));
+            if (!values.isEmpty())
+                row.addArrayValues(signature, values);
         }
     }
+
+    // #region Domain rows
 
     private DomainRow addRow(InstanceObjex objex, SuperIdValues values) {
         if (values.tryFindFirstId(objex.schema.ids()) == null)
@@ -134,7 +256,7 @@ public class MTCAlgorithm {
     }
 
     public DomainRow addValuesToRow(InstanceObjex objex, DomainRow row, SuperIdValues values) {
-        final boolean isNew = values.signatures().stream().anyMatch(signature -> !row.hasSignature(signature));
+        final boolean isNew = values.signatures().stream().anyMatch(signature -> !row.superId.hasSignature(signature));
         if (!isNew)
             // If the row already contains all the values, we can simply return it.
             return row;
@@ -157,7 +279,7 @@ public class MTCAlgorithm {
 
             // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
             //if (!toObjex.equals(morphism.cod())) {
-            final var values = fetchSuperIdForRelation(toObjex, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
+            final var values = findSuperIdForRelation(toObjex, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
             currentDomainRow = addEdge(edge, currentDomainRow, values);
             //}
             /*
@@ -183,7 +305,7 @@ public class MTCAlgorithm {
             // The edge doesn't go against the morphism so there can be at most one mapping.
             final var mapping = fromRow.getMappingFrom(edgeToObjex.signature());
             if (mapping != null)
-                return addValuesToRow(instanceObjex, mapping.codomainRow(), values);
+                return addValuesToRow(instanceObjex, mapping.cod(), values);
         }
 
         // Then we try to find the row by the superId values.
@@ -205,20 +327,20 @@ public class MTCAlgorithm {
         return instanceObjex.mergeReferences(newRow);
     }
 
-    private SuperIdValues fetchSuperIdForRelation(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
+    private SuperIdValues findSuperIdForRelation(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
         final var builder = new SuperIdValues.Builder();
 
-        for (final var signature : objex.superId().signatures()) {
+        for (final var signature : objex.superId()) {
             // The value is in either the first row ...
-            final var signatureInFirstRow = signature.traverseAlong(pathToParent);
-            if (parentRow.hasSignature(signatureInFirstRow)) {
-                builder.add(signature, parentRow.getValue(signatureInFirstRow));
+            final var signatureInFirstRow = pathToParent.traverseBack(signature);
+            if (parentRow.superId.hasSignature(signatureInFirstRow)) {
+                builder.add(signature, parentRow.superId.getValue(signatureInFirstRow));
                 continue;
             }
 
-            final var signatureInLastRow = signature.traverseAlong(pathToChild);
-            if (childRow.hasSignature(signatureInLastRow))
-                builder.add(signature, childRow.getValue(signatureInLastRow));
+            final var signatureInLastRow = pathToChild.traverseBack(signature);
+            if (childRow.superId.hasSignature(signatureInLastRow))
+                builder.add(signature, childRow.superId.getValue(signatureInLastRow));
 
             // TODO find the value in parent record
         }
@@ -226,34 +348,6 @@ public class MTCAlgorithm {
         return builder.build();
     }
 
-    private record Child(Signature signature, AccessPath property) {}
-
-    private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, ComplexRecord complexRecord) {
-        if (!(path instanceof final ComplexProperty complexPath))
-            return;
-
-        for (final Child child : children(complexPath)) {
-            if (child.signature.isEmpty())
-                continue;
-
-            final var parentToChild = mapping.category().getPath(child.signature());
-            stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
-        }
-    }
-
-    /**
-     * Determine possible sub-paths to be traversed from this complex property (inner node of an access path).
-     * According to the paper, this function should return pairs of (context, value). But value of such sub-path can only be an {@link ComplexProperty}.
-     * Similarly, context must be a signature of a morphism.
-     * @return set of pairs (morphism signature, complex property) of all possible sub-paths.
-     */
-    private static Collection<Child> children(ComplexProperty complexProperty) {
-        final List<Child> output = new ArrayList<>();
-
-        for (final AccessPath subpath : complexProperty.subpaths())
-            output.add(new Child(subpath.signature(), subpath));
-
-        return output;
-    }
+    // //#endregion
 
 }

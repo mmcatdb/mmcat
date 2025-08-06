@@ -3,7 +3,9 @@ package cz.matfyz.core.schema;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
-import cz.matfyz.core.identifiers.SignatureId;
+import cz.matfyz.core.identifiers.Signature;
+
+import java.util.Collection;
 
 public class SchemaObjex implements Identified<SchemaObjex, Key> {
 
@@ -25,9 +27,9 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
         return ids;
     }
 
-    private final SignatureId superId;
+    private final Collection<Signature> superId;
     /** A union of all ids (super key). */
-    public SignatureId superId() {
+    public Collection<Signature> superId() {
         return superId;
     }
 

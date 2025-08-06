@@ -6,6 +6,8 @@ import cz.matfyz.core.identifiers.SignatureId;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -40,7 +42,7 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return tuples.keySet();
     }
 
-    public String getValue(Signature signature) {
+    public @Nullable String getValue(Signature signature) {
         return tuples.get(signature);
     }
 
@@ -60,26 +62,6 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return tuples.isEmpty();
     }
 
-    public boolean containsId(SignatureId id) {
-        for (var signature : id.signatures())
-            if (!hasSignature(signature))
-                return false;
-        return true;
-    }
-
-    public SuperIdValues findId(SignatureId id) {
-        var builder = new Builder();
-
-        for (var signature : id.signatures()) {
-            var value = this.tuples.get(signature);
-            if (value == null)
-                return null;
-            builder.add(signature, value);
-        }
-
-        return builder.build();
-    }
-
     public @Nullable SuperIdValues tryFindFirstId(ObjexIds ids) {
         for (final var id : ids.toSignatureIds())
             if (containsId(id))
@@ -88,7 +70,24 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return null;
     }
 
-    public record FindIdsResult(Set<SuperIdValues> foundIds, Set<SignatureId> notFoundIds) {}
+    private boolean containsId(SignatureId id) {
+        for (final var signature : id.signatures())
+            if (!hasSignature(signature))
+                return false;
+
+        return true;
+    }
+
+    private SuperIdValues findId(SignatureId id) {
+        final var map = new TreeMap<Signature, String>();
+
+        for (final var signature : id.signatures())
+            map.put(signature, this.tuples.get(signature));
+
+        return new SuperIdValues(map);
+    }
+
+    public record FindIdsResult(List<SuperIdValues> foundIds, Set<SignatureId> notFoundIds) {}
 
     /**
      * Returns all ids that are contained there as a subset.
@@ -100,16 +99,14 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
     }
 
     public FindIdsResult findAllSignatureIds(Set<SignatureId> missingIds) {
-        final var foundIds = new TreeSet<SuperIdValues>();
+        final var foundIds = new ArrayList<SuperIdValues>();
         final var notFoundIds = new TreeSet<SignatureId>();
 
         for (final SignatureId missingId : missingIds) {
-            final var foundId = findId(missingId);
-
-            if (foundId == null)
-                notFoundIds.add(missingId);
+            if (containsId(missingId))
+                foundIds.add(findId(missingId));
             else
-                foundIds.add(foundId);
+                notFoundIds.add(missingId);
         }
 
         return new FindIdsResult(foundIds, notFoundIds);
@@ -137,14 +134,14 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         }
 
         public Builder add(SuperIdValues idWithValues) {
-            for (var tuple : idWithValues.tuples.entrySet())
+            for (final var tuple : idWithValues.tuples.entrySet())
                 map.put(tuple.getKey(), tuple.getValue());
 
             return this;
         }
 
         public SuperIdValues build() {
-            var output = new SuperIdValues(map);
+            final var output = new SuperIdValues(map);
             map = new TreeMap<>();
             return output;
         }
@@ -203,21 +200,21 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
     }
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append("{");
-        boolean notFirst = false;
-        for (var entry : tuples.entrySet()) {
-            if (notFirst)
-                builder.append(", ");
-            else
-                notFirst = true;
-
-            builder.append("(").append(entry.getKey()).append(": \"").append(entry.getValue()).append("\")");
+        sb.append("{");
+        final var SEPARATOR = ", ";
+        for (final var entry : tuples.entrySet()) {
+            sb
+                .append(entry.getKey()).append(": \"").append(entry.getValue()).append("\"")
+                .append(SEPARATOR);
         }
-        builder.append("}");
+        if (!tuples.isEmpty())
+            sb.setLength(sb.length() - SEPARATOR.length());
 
-        return builder.toString();
+        sb.append("}");
+
+        return sb.toString();
     }
 
     // #region Serialization

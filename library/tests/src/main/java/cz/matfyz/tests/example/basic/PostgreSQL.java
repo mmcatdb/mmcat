@@ -30,10 +30,7 @@ public abstract class PostgreSQL {
     }
 
     public static void addOrder(InstanceBuilder builder, String numberValue) {
-        builder.morphism(Schema.orderToNumber,
-            builder.value(Schema.orderToNumber, numberValue).objex(Schema.order),
-            builder.valueObjex(Schema.number, numberValue)
-        );
+        builder.value(Schema.orderToNumber, numberValue).objex(Schema.order);
     }
 
     public static TestMapping product(SchemaCategory schema) {
@@ -49,16 +46,11 @@ public abstract class PostgreSQL {
     }
 
     public static void addProduct(InstanceBuilder builder, @Nullable String idValue, @Nullable String labelValue, @Nullable String priceValue) {
-        final var product = builder.value(Schema.productToId, idValue).objex(Schema.product);
-
-        if (idValue != null)
-            builder.morphism(Schema.productToId, product, builder.valueObjex(Schema.id, idValue));
-
-        if (labelValue != null)
-            builder.morphism(Schema.productToLabel, product, builder.valueObjex(Schema.label, labelValue));
-
-        if (priceValue != null)
-            builder.morphism(Schema.productToPrice, product, builder.valueObjex(Schema.price, priceValue));
+        builder
+            .value(Schema.productToId, idValue)
+            .value(Schema.productToLabel, labelValue)
+            .value(Schema.productToPrice, priceValue)
+            .objex(Schema.product);
     }
 
     public static TestMapping item(SchemaCategory schema) {
@@ -75,15 +67,18 @@ public abstract class PostgreSQL {
 
     public static void addItem(InstanceBuilder builder, int orderIndex, int productIndex, String quantityValue) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        final var numberValue = order.values.getValue(Schema.orderToNumber.signature());
+        final var numberValue = order.tryGetScalarValue(Schema.orderToNumber.signature());
 
         final var product = builder.getRow(Schema.product, productIndex);
-        final var idValue = product.values.getValue(Schema.productToId.signature());
+        final var idValue = product.tryGetScalarValue(Schema.productToId.signature());
 
-        final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).objex(Schema.item);
+        final var item = builder
+            .value(Schema.itemToNumber, numberValue)
+            .value(Schema.itemToId, idValue)
+            .value(Schema.itemToQuantity, quantityValue)
+            .objex(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);
         builder.morphism(Schema.itemToProduct, item, product);
-        builder.morphism(Schema.itemToQuantity, item, builder.valueObjex(Schema.quantity, quantityValue));
     }
 
     public static TestMapping dynamic(SchemaCategory schema) {
@@ -101,10 +96,10 @@ public abstract class PostgreSQL {
     }
 
     public static void addDynamic(InstanceBuilder builder, int index) {
-        final var idValue =  "id-" + index;
-        final var dynamic = builder.value(Schema.dynamicToId, idValue).objex(Schema.dynamic);
-        builder.morphism(Schema.dynamicToId, dynamic, builder.valueObjex(Schema.dId, idValue));
-        builder.morphism(Schema.dynamicToLabel, dynamic, builder.valueObjex(Schema.dLabel, "label-" + index));
+        builder
+            .value(Schema.dynamicToId, "id-" + index)
+            .value(Schema.dynamicToLabel, "label-" + index)
+            .objex(Schema.dynamic);
 
         addPrefix(builder, index, "a");
         addPrefix(builder, index, "b");
@@ -117,57 +112,36 @@ public abstract class PostgreSQL {
     private static void addPrefix(InstanceBuilder builder, int index, String value) {
         final var dynamic = builder.getRow(Schema.dynamic, index);
 
-        final var typeValue = "px_" + value;
-        final var prefixValue = "px-" + value + "-" + index;
         final var prefix = builder
-            .value(Schema.prefixToId, dynamic.values.getValue(Schema.dynamicToId.signature()))
-            .value(Schema.prefixToType, typeValue)
+            .value(Schema.prefixToId, dynamic.tryGetScalarValue(Schema.dynamicToId.signature()))
+            .value(Schema.prefixToType, "px_" + value)
+            .value(Schema.prefixToValue, "px-" + value + "-" + index)
             .objex(Schema.prefix);
 
-        builder.morphism(Schema.prefixToType, prefix,
-            builder.valueObjex(Schema.prefixType, typeValue)
-        );
-        builder.morphism(Schema.prefixToValue, prefix,
-            builder.valueObjex(Schema.prefixValue, prefixValue)
-        );
         builder.morphism(Schema.prefixToDynamic, prefix, dynamic);
     }
 
     private static void addPrefiy(InstanceBuilder builder, int index, String value) {
         final var dynamic = builder.getRow(Schema.dynamic, index);
 
-        final var typeValue = "py_" + value;
-        final var prefiyValue = "py-" + value + "-" + index;
         final var prefiy = builder
-            .value(Schema.prefiyToId, dynamic.values.getValue(Schema.dynamicToId.signature()))
-            .value(Schema.prefiyToType, typeValue)
+            .value(Schema.prefiyToId, dynamic.tryGetScalarValue(Schema.dynamicToId.signature()))
+            .value(Schema.prefiyToType, "py_" + value)
+            .value(Schema.prefiyToValue, "py-" + value + "-" + index)
             .objex(Schema.prefiy);
 
-        builder.morphism(Schema.prefiyToType, prefiy,
-            builder.valueObjex(Schema.prefiyType, typeValue)
-        );
-        builder.morphism(Schema.prefiyToValue, prefiy,
-            builder.valueObjex(Schema.prefiyValue, prefiyValue)
-        );
         builder.morphism(Schema.prefiyToDynamic, prefiy, dynamic);
     }
 
     private static void addCatchAll(InstanceBuilder builder, int index, String value) {
         final var dynamic = builder.getRow(Schema.dynamic, index);
 
-        final var typeValue = "catch_all_" + value;
-        final var catchAllValue = "catch-all-" + value + "-" + index;
         final var catchAll = builder
-            .value(Schema.catchAllToId, dynamic.values.getValue(Schema.dynamicToId.signature()))
-            .value(Schema.catchAllToType, typeValue)
+            .value(Schema.catchAllToId, dynamic.tryGetScalarValue(Schema.dynamicToId.signature()))
+            .value(Schema.catchAllToType, "catch_all_" + value)
+            .value(Schema.catchAllToValue, "catch-all-" + value + "-" + index)
             .objex(Schema.catchAll);
 
-        builder.morphism(Schema.catchAllToType, catchAll,
-            builder.valueObjex(Schema.catchAllType, typeValue)
-        );
-        builder.morphism(Schema.catchAllToValue, catchAll,
-            builder.valueObjex(Schema.catchAllValue, catchAllValue)
-        );
         builder.morphism(Schema.catchAllToDynamic, catchAll, dynamic);
     }
 

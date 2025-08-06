@@ -73,8 +73,9 @@ public class MTCAlgorithmTestBase {
         LOGGER.debug("ACTUAL:\n{}", actualInstance);
         LOGGER.debug("EXPECTED:\n{}", expectedInstance);
 
-        assertEquals(expectedInstance.allObjexes(), actualInstance.allObjexes(), "Test objexes differ from the expected objexes.");
-        assertEquals(expectedInstance.allMorphisms(), actualInstance.allMorphisms(), "Test morphisms differ from the expected morphisms.");
+        // The stream - toList shenanigans is here to ensure both collections are the same "type" of list and thus can be compared.
+        assertEquals(expectedInstance.allObjexes().stream().toList(), actualInstance.allObjexes().stream().toList(), "Test objexes differ from the expected objexes.");
+        assertEquals(expectedInstance.allMorphisms().stream().toList(), actualInstance.allMorphisms().stream().toList(), "Test morphisms differ from the expected morphisms.");
 
         for (final var expectedObjex : expectedInstance.allObjexes()) {
             final var objex = actualInstance.getObjex(expectedObjex.schema.key());
@@ -93,7 +94,7 @@ public class MTCAlgorithmTestBase {
             final var signature = entry.getKey();
             final var codObjex = schema.getMorphism(signature).cod();
 
-            output += "\n\tmappings [" + entry.getKey() + "]->(" + codObjex.key() + "): " + entry.getValue().codomainRow();
+            output += "\n\tmappings --[" + entry.getKey() + "]->(" + codObjex.key() + "): " + entry.getValue().cod();
         }
 
         return output + "\n";

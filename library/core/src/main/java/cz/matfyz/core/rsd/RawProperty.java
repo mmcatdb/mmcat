@@ -86,15 +86,15 @@ public class RawProperty implements Serializable, Comparable<RawProperty> {
     }
 
     @Override public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("RawProperty{");
-        sb.append("key=").append(key);
-        sb.append(", value=").append(value);
-        sb.append(", schema=").append(schema);
-        sb.append(", count=").append(count);
-        sb.append(", first=").append(first);
-        sb.append('}');
-        return sb.toString();
+        return new StringBuilder()
+            .append("RawProperty{")
+            .append("key=").append(key)
+            .append(", value=").append(value)
+            .append(", schema=").append(schema)
+            .append(", count=").append(count)
+            .append(", first=").append(first)
+            .append('}')
+            .toString();
     }
 
 }

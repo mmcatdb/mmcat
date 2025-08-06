@@ -6,11 +6,9 @@ import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -216,13 +214,13 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (isEmpty())
             return "EMPTY";
 
-        StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append(ids[0]);
+        sb.append(ids[0]);
         for (int i = 1; i < ids.length; i++)
-            builder.append(separator).append(ids[i]);
+            sb.append(separator).append(ids[i]);
 
-        return builder.toString();
+        return sb.toString();
     }
 
     public static Signature fromString(String string) {
@@ -270,47 +268,53 @@ public class Signature implements Serializable, Comparable<Signature> {
     }
 
     public boolean hasDual() {
-        for (int id : ids)
+        for (final int id : ids)
             if (id < 0)
                 return true;
 
         return false;
     }
 
-    public boolean hasDualOfAsPrefix(Signature signature) {
-        final Signature dual = signature.dual();
-        final int dualLength = dual.ids.length;
-
-        if (ids.length < dualLength)
-            return false;
-
-        for (int i = 0; i < dualLength; i++)
-            if (dual.ids[i] != ids[i])
-                return false;
-
-        return true;
-    }
-
-    public Signature traverseThrough(Signature path) {
-        if (!hasDualOfAsPrefix(path))
-            return null;
-
-        return createComposite(Arrays.copyOfRange(ids, path.ids.length, ids.length));
-    }
-
-    public Signature traverseAlong(Signature path) {
-        final Deque<Integer> output = new ArrayDeque<>();
-        for (final var id : ids)
-            output.addLast(id);
-
-        for (final var pathId : path.ids) {
-            if (output.isEmpty() || pathId != output.getFirst())
-                output.addFirst(-pathId);
-            else
-                output.removeFirst();
+    /**
+     * Like {@link #concatenate(Signature)} but also removes the duplicities between both signatures.
+     * E.g., if this is <code>1.2.3</code> and the <code>path</code> is <code>-3.-2.4</code>, the result is <code>1.4</code>.
+     */
+    public Signature traverse(Signature other) {
+        final int maxCommonLength = Math.min(ids.length, other.ids.length);
+        int commonLength = maxCommonLength;
+        for (int i = 0; i < maxCommonLength; i++) {
+            if (ids[ids.length - i - 1] != -other.ids[i]) {
+                commonLength = i;
+                break;
+            }
         }
 
-        return createComposite(output.stream().mapToInt(Integer::intValue).toArray());
+        // Now we have the length of the common path. The rest is just a copying.
+        final int outputSize = ids.length + other.ids.length - 2 * commonLength;
+        final int[] output = new int[outputSize];
+
+        // Copy the rest of this signature.
+        final int thisRestLength = ids.length - commonLength;
+        for (int i = 0; i < thisRestLength; i++)
+            output[i] = ids[i];
+
+        // Copy the rest of the other signature.
+        for (int i = 0; i < other.ids.length - commonLength; i++)
+            output[thisRestLength + i] = other.ids[commonLength + i];
+
+        return createComposite(output);
+    }
+
+    /**
+     * A convenience method like {@link #traverse(Signature)} but traverses "backwards".
+     * It's equal to <code>this.dual().traverse(other)</code>.
+     * Corresponds to a situation where there is a morphism A -> B (this signature) and A -> C (other signature).
+     * This method returns the signature of the morphism B -> C.
+     * @param other
+     * @return
+     */
+    public Signature traverseBack(Signature other) {
+        return dual().traverse(other);
     }
 
     // #region Serialization

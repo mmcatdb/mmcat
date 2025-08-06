@@ -108,23 +108,24 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     }
 
     private static String propertiesToString(List<PropertyValue> properties) {
-        final var output = new StringBuilder();
-        output.append("{");
+        final var sb = new StringBuilder();
+        sb.append("{");
 
-        for (final var property : properties)
-            output
-            .append(" ")
-            .append(property.name)
-            .append(": ")
-            .append(escapeString(property.value))
-            .append(",");
+        for (final var property : properties) {
+            sb
+                .append(" ")
+                .append(property.name)
+                .append(": ")
+                .append(escapeString(property.value))
+                .append(",");
+        }
 
         if (!properties.isEmpty()) // Remove the last comma
-            output.deleteCharAt(output.length() - 1);
+            sb.deleteCharAt(sb.length() - 1);
 
-        output.append(" }");
+        sb.append(" }");
 
-        return output.toString();
+        return sb.toString();
     }
 
     private static String escapeString(String input) {

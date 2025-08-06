@@ -61,8 +61,8 @@ class DDLAlgorithmTests {
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addTag(builder, 0, new String[]{ "123", "456", "789" });
-                MongoDB.addTag(builder, 1, new String[]{ "123", "String456", "String789" });
+                MongoDB.addTag(builder, 0, "123", "456", "789");
+                MongoDB.addTag(builder, 1, "123", "String456", "String789");
             })
             .expected("""
                 [

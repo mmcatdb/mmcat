@@ -40,21 +40,21 @@ public class DummyICWrapper implements AbstractICWrapper {
     }
 
     private String attributePairsToString(Set<AttributePair> pairs) {
-        var builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append("[");
+        sb.append("[");
         int index = 0;
         for (var pair : pairs) {
             if (index > 0)
-                builder.append(",");
+                sb.append(",");
             index++;
-            builder.append(" ").append("(").append(pair.referencing()).append(", ").append(pair.referenced()).append(")");
+            sb.append(" ").append("(").append(pair.referencing()).append(", ").append(pair.referenced()).append(")");
         }
 
         if (index > 0)
-            builder.append(" ");
-        builder.append("]");
+            sb.append(" ");
+        sb.append("]");
 
-        return builder.toString();
+        return sb.toString();
     }
 }

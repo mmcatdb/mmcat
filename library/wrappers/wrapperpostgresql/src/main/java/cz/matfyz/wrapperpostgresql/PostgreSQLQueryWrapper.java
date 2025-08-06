@@ -45,16 +45,16 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     }
 
-    private StringBuilder builder;
+    private StringBuilder sb;
 
     @Override public QueryStatement createDSLStatement() {
-        builder = new StringBuilder();
+        sb = new StringBuilder();
 
         addSelect();
         addFrom();
         addWhere();
 
-        return new QueryStatement(new StringQuery(builder.toString()), context.rootStructure());
+        return new QueryStatement(new StringQuery(sb.toString()), context.rootStructure());
     }
 
     private void addSelect() {
@@ -62,14 +62,11 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             .map(projection -> "    " + getProjection(projection))
             .collect(Collectors.joining(",\n"));
 
-        builder
-            .append("SELECT\n")
-            .append(projectionsString)
-            .append("\n");
+        sb.append("SELECT\n").append(projectionsString).append("\n");
     }
 
     private void addFrom() {
-        builder.append("FROM ");
+        sb.append("FROM ");
 
         if (!joins.isEmpty()) {
             addJoins();
@@ -81,9 +78,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             throw QueryException.message("No tables are selected in FROM clause.");
 
         final String kindName = projections.getFirst().property().mapping.kindName();
-        builder
-            .append(escapeName(kindName))
-            .append("\n");
+        sb.append(escapeName(kindName)).append("\n");
     }
 
     private void addJoins() {
@@ -94,9 +89,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         final Mapping fromKind = joins.get(0).from();
         joinedKinds.add(fromKind);
 
-        builder
-            .append(escapeName(fromKind.kindName()))
-            .append("\n");
+        sb.append(escapeName(fromKind.kindName())).append("\n");
 
         for (final var join : joins) {
             Mapping newKind;
@@ -114,7 +107,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             final String toProjection = getPropertyName(new Property(join.to(), join.toPath(), null));
             final String condition = fromProjection + " = " + toProjection;
 
-            builder
+            sb
                 .append(" JOIN ")
                 .append(escapeName(newKind.kindName()))
                 .append(" ON (")
@@ -127,11 +120,11 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         if (filters.isEmpty())
             return;
 
-        builder.append("WHERE ");
+        sb.append("WHERE ");
         addFilter(filters.get(0));
 
         filters.stream().skip(1).forEach(filter -> {
-            builder.append("\nAND ");
+            sb.append("\nAND ");
             addFilter(filter);
         });
     }
@@ -144,11 +137,11 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         else if (filter instanceof SetFilter setFilter)
             addSetFilter(setFilter);
 
-        builder.append("\n");
+        sb.append("\n");
     }
 
     private void addUnaryFilter(UnaryFilter filter) {
-        builder
+        sb
             .append(getPropertyName(filter.property()))
             .append(" ")
             .append(operators.stringify(filter.operator()))
@@ -159,25 +152,25 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private void addBinaryFilter(BinaryFilter filter) {
-        builder
+        sb
             .append(getPropertyName(filter.property1()))
             .append(operators.stringify(filter.operator()))
             .append(getPropertyName(filter.property2()));
     }
 
     private void addSetFilter(SetFilter filter) {
-        builder.append(getPropertyName(filter.property()));
+        sb.append(getPropertyName(filter.property()));
 
         final var values = filter.set();
-        builder
+        sb
             .append(" ")
             .append(operators.stringify(filter.operator()))
             .append(" (")
             .append(values.get(0));
 
-        values.stream().skip(1).forEach(value -> builder.append(", ").append(value));
+        values.stream().skip(1).forEach(value -> sb.append(", ").append(value));
 
-        builder.append(")");
+        sb.append(")");
     }
 
     private static String escapeName(String name) {

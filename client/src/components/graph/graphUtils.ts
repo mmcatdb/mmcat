@@ -305,7 +305,7 @@ function xToLeftTop(x: number, c: XTformConstants): Offset {
 }
 
 /**
- * Computes a curved SVG path from `A` to `B` that has a `degree` relative distance (in the middle) from a linear path between these two points. If `degree` is negative, the curve will be on the other side.
+ * Computes a curved SVG path from <code>A</code> to <code>B</code> that has a <code>degree</code> relative distance (in the middle) from a linear path between these two points. If <code>degree</code> is negative, the curve will be on the other side.
  * Uses circle arc.
  */
 function computeEdgeCurvedPath(A: Offset, B: Offset, labelLength: number, degree: number): EdgeSvg {

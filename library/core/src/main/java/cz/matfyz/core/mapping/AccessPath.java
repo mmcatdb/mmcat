@@ -8,6 +8,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Each node is a tuple (name, context, value).
  */
 @JsonDeserialize(using = AccessPath.Deserializer.class)
-public abstract class AccessPath implements Printable {
+public abstract class AccessPath implements Printable, Serializable {
 
     protected final Signature signature;
 

@@ -51,7 +51,7 @@ public interface AbstractQueryWrapper {
 
     /**
      * A queryable property. It's defined by the mapping and a path from its root.
-     *  - If the `parent` property is null, the path is relative to the root of the mapping.
+     *  - If the <code>parent</code> property is null, the path is relative to the root of the mapping.
      *  - Otherwise, the path is relative to the parent property.
      */
     class Property implements Comparable<Property>, Serializable {

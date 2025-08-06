@@ -80,13 +80,13 @@ public class DDLAlgorithmTestBase {
     }
 
     private static String resultToString(List<String> result) {
-        final var builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append("[\n");
-        result.stream().sorted().forEach(line -> builder.append("    ").append(line).append(",\n"));
-        builder.append("]");
+        sb.append("[\n");
+        result.stream().sorted().forEach(line -> sb.append("    ").append(line).append(",\n"));
+        sb.append("]");
 
-        return builder.toString();
+        return sb.toString();
     }
 
 }

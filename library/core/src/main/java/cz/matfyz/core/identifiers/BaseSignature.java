@@ -42,7 +42,8 @@ public class BaseSignature extends Signature {
         return id < 0;
     }
 
-    public BaseSignature toNonDual() {
+    /** In other words, "to non dual". */
+    public BaseSignature toAbsolute() {
         return isDual() ? dual() : this;
     }
 

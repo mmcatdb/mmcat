@@ -12,6 +12,8 @@ import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
 import cz.matfyz.evolution.category.UpdateMorphism;
 import cz.matfyz.evolution.category.UpdateObjex;
 
+import java.util.Set;
+
 public class InstanceEvolver extends InstanceCategory.Editor implements SchemaEvolutionVisitor<Void> {
 
     private final InstanceCategory instance;
@@ -28,7 +30,8 @@ public class InstanceEvolver extends InstanceCategory.Editor implements SchemaEv
     @Override public Void visit(CreateObjex operation) {
         final var key = operation.schema().key();
         final var schemaObjex = instance.schema().getObjex(key);
-        final var instanceObjex = new InstanceObjex(schemaObjex, instance);
+        // FIXME The set.of might be a problem ...
+        final var instanceObjex = new InstanceObjex(schemaObjex, instance, Set.of());
         getObjexes(instance).put(key, instanceObjex);
 
         return null;
@@ -64,7 +67,8 @@ public class InstanceEvolver extends InstanceCategory.Editor implements SchemaEv
     public Void visit(CopyObjex operation) {
         final var targetKey = operation.target().key();
         final var schemaObjex = instance.schema().getObjex(targetKey);
-        final var instanceObjex = new InstanceObjex(schemaObjex, instance);
+        // FIXME The set.of might be a problem ...
+        final var instanceObjex = new InstanceObjex(schemaObjex, instance, Set.of());
         getObjexes(instance).put(targetKey, instanceObjex);
 
         final var sourceKey = operation.source().key();

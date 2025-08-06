@@ -1,5 +1,6 @@
 package cz.matfyz.core.instance;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -36,7 +37,7 @@ public class InstanceSerializer {
     ) {}
 
     public record SerializedInstanceMorphism(
-        Signature signature,
+        BaseSignature signature,
         List<SerializedMappingRow> mappings
     ) {}
 
@@ -76,7 +77,7 @@ public class InstanceSerializer {
         for (final DomainRow row : objex.allRowsToSet()) {
             final var rowWrapper = new SerializedDomainRow(
                 lastId++,
-                row.values,
+                row.superId,
                 row.technicalId,
                 row.pendingReferences.stream().toList()
             );
@@ -97,13 +98,13 @@ public class InstanceSerializer {
         final List<SerializedMappingRow> mappings = new ArrayList<>();
 
         for (final var mapping : morphism.allMappings()) {
-            final int dom = domRowToId.get(mapping.domainRow());
-            final int cod = codRowToId.get(mapping.codomainRow());
+            final int dom = domRowToId.get(mapping.dom());
+            final int cod = codRowToId.get(mapping.cod());
             mappings.add(new SerializedMappingRow(dom, cod));
         }
 
         return new SerializedInstanceMorphism(
-            morphism.schema.signature(),
+            (BaseSignature) morphism.schema.signature(),
             mappings
         );
     }

@@ -66,7 +66,7 @@ public class PlanJoiner {
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
         // Then we group them by their datasource pairs. Remind you, both datasources in the pair can be the same.
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
-        // Remove the candidates that don't make sence or aren't necessary.
+        // Remove the candidates that don't make sense or aren't necessary.
         final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
 
         final List<JoinCandidate> candidatesBetweenParts = new ArrayList<>();
