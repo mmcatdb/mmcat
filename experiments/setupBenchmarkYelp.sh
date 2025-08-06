@@ -88,7 +88,7 @@ if [ $# = 0 ] || [ $# = 1 -a $1 = "small" ] || [ $1 = "neo4j" ]; then
 
     export NEO4J_PASSWORD="${EXAMPLE_PASSWORD}"
     node benchmarkDataSetup/neo4j.js "${businessFile}" "${userFile}" "${reviewFile}" \
-    | cypher-shell -a neo4j://localhost:3206 -u "${NEO4J_USERNAME}"
+    | cypher-shell -a neo4j://localhost:3206 -u neo4j
 fi
 
 echo "Done."
