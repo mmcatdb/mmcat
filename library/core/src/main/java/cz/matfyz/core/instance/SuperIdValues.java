@@ -113,7 +113,7 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
     }
 
     public static SuperIdValues fromEmptySignature(String value) {
-        return new Builder().add(Signature.createEmpty(), value).build();
+        return new Builder().add(Signature.empty(), value).build();
     }
 
     public static SuperIdValues empty() {

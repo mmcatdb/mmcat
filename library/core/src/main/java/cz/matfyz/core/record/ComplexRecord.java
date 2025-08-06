@@ -65,7 +65,7 @@ public class ComplexRecord implements Printable {
         if (signature instanceof BaseSignature)
             return null;
 
-        var currentPath = Signature.createEmpty();
+        var currentPath = Signature.empty();
         for (final var base : signature.toBases()) {
             currentPath = currentPath.concatenate(base);
             final var childRecords = children.get(currentPath);

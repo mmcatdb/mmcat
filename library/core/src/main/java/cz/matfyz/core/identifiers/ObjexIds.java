@@ -95,7 +95,7 @@ public class ObjexIds implements Serializable {
 
     public Set<Signature> generateDefaultSuperId() {
         if (type != Type.Signatures)
-            return Set.of(Signature.createEmpty());
+            return Set.of(Signature.empty());
 
         final var allSignatures = new TreeSet<Signature>();
         signatureIds.forEach(id -> allSignatures.addAll(id.signatures()));

@@ -92,7 +92,7 @@ public class InstanceBuilder {
     }
 
     public InstanceBuilder generatedId(String value) {
-        return value(Signature.createEmpty(), value);
+        return value(Signature.empty(), value);
     }
 
     public DomainRow objex(Key key) {

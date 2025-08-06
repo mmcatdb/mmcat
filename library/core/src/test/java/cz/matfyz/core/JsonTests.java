@@ -27,7 +27,7 @@ class JsonTests {
 
     @Test
     void signature() throws JsonProcessingException, IOException {
-        final var empty = Signature.createEmpty();
+        final var empty = Signature.empty();
         fullTest(empty);
 
         final var base = Signature.createBase(69);

@@ -72,7 +72,7 @@ public class InstanceCategory {
             return;
 
         final var bases = signature.toBases();
-        var signatureToTarget = Signature.createEmpty();
+        var signatureToTarget = Signature.empty();
 
         for (int i = 0; i < bases.size() - 1; i++) {
             final var currentBase = bases.get(i);

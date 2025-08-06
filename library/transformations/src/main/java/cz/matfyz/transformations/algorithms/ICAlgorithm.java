@@ -53,7 +53,7 @@ public class ICAlgorithm {
             wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
 
         // Reference keys constraints.
-        processPath(mapping.accessPath(), mapping, Signature.createEmpty());
+        processPath(mapping.accessPath(), mapping, Signature.empty());
         referencesForAllKinds.forEach((referencedKindName, references) -> wrapper.appendReference(mapping.kindName(), referencedKindName, references));
 
         return wrapper.createICStatements();
@@ -101,7 +101,7 @@ public class ICAlgorithm {
             }
             else {
                 lastMapping = objexMapping;
-                signatureFromLastMapping = Signature.createEmpty();
+                signatureFromLastMapping = Signature.empty();
             }
         }
 

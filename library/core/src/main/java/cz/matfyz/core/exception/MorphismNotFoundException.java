@@ -14,7 +14,7 @@ public class MorphismNotFoundException extends CoreException {
     }
 
     public static MorphismNotFoundException signatureIsEmpty() {
-        return new MorphismNotFoundException("signatureIsEmpty", Signature.createEmpty());
+        return new MorphismNotFoundException("signatureIsEmpty", Signature.empty());
     }
 
     public static MorphismNotFoundException signatureIsComposite(Signature signature) {

@@ -31,21 +31,21 @@ public class AccessPathBuilder {
     }
 
     public ComplexProperty auxiliary(String name, AccessPath... subpaths) {
-        return new ComplexProperty(new StringName(name), Signature.createEmpty(), List.of(subpaths));
+        return new ComplexProperty(new StringName(name), Signature.empty(), List.of(subpaths));
     }
 
     public ComplexProperty auxiliary(Signature name, boolean isKey, AccessPath... subpaths) {
         final var type = isKey ? TypedName.KEY : TypedName.INDEX;
-        return new ComplexProperty(new DynamicName(type, name, null), Signature.createEmpty(), List.of(subpaths));
+        return new ComplexProperty(new DynamicName(type, name, null), Signature.empty(), List.of(subpaths));
     }
 
     // No need for type here because pattern does make sense only for keys.
     public ComplexProperty auxiliary(Signature name, String pattern, AccessPath... subpaths) {
-        return new ComplexProperty(new DynamicName(TypedName.KEY, name, pattern), Signature.createEmpty(), List.of(subpaths));
+        return new ComplexProperty(new DynamicName(TypedName.KEY, name, pattern), Signature.empty(), List.of(subpaths));
     }
 
     public ComplexProperty root(AccessPath... subpaths) {
-        return new ComplexProperty(new TypedName(TypedName.ROOT), Signature.createEmpty(), List.of(subpaths));
+        return new ComplexProperty(new TypedName(TypedName.ROOT), Signature.empty(), List.of(subpaths));
     }
 
     // Simple property

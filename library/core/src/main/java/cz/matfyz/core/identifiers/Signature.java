@@ -44,12 +44,12 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 1)
             return new BaseSignature(ids[0]);
 
-        return ids.length == 0 ? createEmpty() : new Signature(ids);
+        return ids.length == 0 ? empty() : new Signature(ids);
     }
 
     private static final Signature emptyInstance = new Signature(new int[] {});
 
-    public static Signature createEmpty() {
+    public static Signature empty() {
         return emptyInstance;
     }
 
@@ -63,7 +63,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     public Signature cutLast() {
         if (ids.length == 0)
-            return Signature.createEmpty();
+            return Signature.empty();
 
         var newIds = Arrays.copyOfRange(ids, 0, ids.length - 1);
         return createComposite(newIds);
@@ -78,7 +78,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     public Signature cutFirst() {
         if (ids.length == 0)
-            return Signature.createEmpty();
+            return Signature.empty();
 
         var newIds = Arrays.copyOfRange(ids, 1, ids.length);
         return createComposite(newIds);
@@ -225,7 +225,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     public static Signature fromString(String string) {
         if (string.equals("EMPTY"))
-            return createEmpty();
+            return empty();
 
         try {
             final var ids = List.of(string.split("\\" + SEPARATOR)).stream().mapToInt(Integer::parseInt).toArray();

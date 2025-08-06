@@ -43,7 +43,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
     }
 
     public static SignatureId createEmpty() {
-        return new SignatureId(Signature.createEmpty());
+        return new SignatureId(Signature.empty());
     }
 
     private SignatureId(SortedSet<Signature> signatures) {

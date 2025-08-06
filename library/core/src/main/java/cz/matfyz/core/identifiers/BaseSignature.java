@@ -19,7 +19,7 @@ public class BaseSignature extends Signature {
     }
 
     @Override public Signature cutLast() {
-        return Signature.createEmpty();
+        return Signature.empty();
     }
 
     @Override public BaseSignature getLast() {
@@ -27,7 +27,7 @@ public class BaseSignature extends Signature {
     }
 
     @Override public Signature cutFirst() {
-        return Signature.createEmpty();
+        return Signature.empty();
     }
 
     @Override public BaseSignature getFirst() {

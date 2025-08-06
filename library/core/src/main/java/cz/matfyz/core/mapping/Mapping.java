@@ -30,7 +30,7 @@ public class Mapping implements Comparable<Mapping> {
     private static List<Signature> defaultPrimaryKey(SchemaObjex objex) {
         return objex.ids().isSignatures()
             ? objex.ids().toSignatureIds().first().signatures().stream().toList()
-            : List.of(Signature.createEmpty());
+            : List.of(Signature.empty());
     }
 
     public Mapping clone() {

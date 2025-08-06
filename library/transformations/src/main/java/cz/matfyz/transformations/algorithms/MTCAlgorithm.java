@@ -80,7 +80,7 @@ public class MTCAlgorithm {
 
         final var superId = findSuperIdForRoot(rootRecord);
         final DomainRow row = addRow(instanceObjex, superId);
-        addDependentValuesToRow(instanceObjex, row, rootRecord, Signature.createEmpty());
+        addDependentValuesToRow(instanceObjex, row, rootRecord, Signature.empty());
 
         final Deque<StackTriple> stack = new ArrayDeque<>();
 
@@ -117,7 +117,7 @@ public class MTCAlgorithm {
             final var superId = findSuperIdForNonRoot(triple, childObjex, childRecord);
             DomainRow childRow = addRow(childObjex, superId);
             childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
-            addDependentValuesToRow(childObjex, childRow, childRecord, Signature.createEmpty());
+            addDependentValuesToRow(childObjex, childRow, childRecord, Signature.empty());
 
             // TODO probably add values to the domain rows along the path? Or describe why they aren't any.
 
@@ -268,7 +268,7 @@ public class MTCAlgorithm {
         // First, create a domain row with technical id for each objex between the domain and the codomain objexes on the path of the morphism.
         var currentDomainRow = parentRow;
 
-        var parentToCurrent = Signature.createEmpty();
+        var parentToCurrent = Signature.empty();
         var currentToChild = path.signature();
 
         for (final var edge : path.edges()) {
