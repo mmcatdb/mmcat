@@ -9,8 +9,9 @@ import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES, type RS
 import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
+import { PageLayout } from '@/components/RootLayout';
 
-export function AddActionPage() {
+export function NewActionPage() {
     const [ label, setLabel ] = useState('');
     const [ loading, setLoading ] = useState(false);
     const [ error, setError ] = useState(false);
@@ -118,8 +119,9 @@ export function AddActionPage() {
         return <ErrorPage />;
 
     return (
-        <div className='p-6'>
+        <PageLayout>
             <h1 className='text-xl font-semibold mb-4'>Add Action</h1>
+
             <div className='mb-4'>
                 <Input
                     label='Label'
@@ -186,7 +188,7 @@ export function AddActionPage() {
                     Submit
                 </Button>
             </div>
-        </div>
+        </PageLayout>
     );
 }
 

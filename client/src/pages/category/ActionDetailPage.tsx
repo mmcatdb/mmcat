@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { ConfirmationModal } from '@/components/TableCommon';
 import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { routes } from '@/routes/routes';
+import { PageLayout } from '@/components/RootLayout';
 
 export function ActionDetailPage() {
     const { action } = useLoaderData() as ActionLoaderData;
@@ -41,8 +42,9 @@ export function ActionDetailPage() {
     }
 
     return (
-        <div>
+        <PageLayout>
             <h1 className='text-2xl font-bold mb-4'>{action.label}</h1>
+
             <p className='mb-4'>
                 <strong>ID:</strong> {action.id}
             </p>
@@ -85,7 +87,7 @@ export function ActionDetailPage() {
                 cancelButtonText='Cancel'
                 confirmButtonColor='danger'
             />
-        </div>
+        </PageLayout>
     );
 }
 

@@ -1,17 +1,17 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { routes } from '@/routes/routes';
-import { Home } from '@/pages/Home';
+import { RootLayout } from '@/components/RootLayout';
+import { HomePage } from '@/pages/HomePage';
 import { CategoryEditorPage } from '@/pages/category/CategoryEditorPage';
 import { ErrorPage } from '@/pages/errorPages';
 import { CategoryPage, type CategoryLoaderData } from '@/pages/CategoryPage';
 import { DatasourcesPage } from '@/pages/DatasourcesPage';
 import { type DatasourceLoaderData, DatasourceDetailPage, DatasourceInCategoryPage } from '@/pages/DatasourcePage';
 import { AdminerPage } from '@/pages/AdminerPage';
-import { CategoriesPage, SchemaCategoriesPage } from '@/pages/CategoriesPage';
-import { RootLayout } from '@/components/RootLayout';
+import { CategoriesPage } from '@/pages/CategoriesPage';
 import { DatasourcesInCategoryPage } from '@/pages/category/DatasourcesInCategoryPage';
 import { ActionsPage } from '@/pages/category/ActionsPage';
-import { AddActionPage } from '@/pages/category/AddActionPage';
+import { NewActionPage } from '@/pages/category/NewActionPage';
 import { CategoryOverviewPage } from '@/pages/category/CategoryOverviewPage';
 import { JobsPage } from '@/pages/category/JobsPage';
 import { JobPage } from '@/pages/category/JobPage';
@@ -24,13 +24,13 @@ import { QueryingPage } from '@/pages/QueryingPage';
  * Creates the application's routing configuration.
  */
 export const router = createBrowserRouter([ {
-    path: routes.home.path,
     id: routes.home.id,
+    path: routes.home.path,
     Component: RootLayout,
     ErrorBoundary: ErrorPage,
     children: [ {
         index: true,
-        Component: Home,
+        Component: HomePage,
     }, {
         path: routes.datasources.list.path,
         handle: { breadcrumb: 'Datasources' },
@@ -51,7 +51,6 @@ export const router = createBrowserRouter([ {
         handle: { breadcrumb: 'Adminer' },
     }, {
         path: routes.categories,
-        Component: SchemaCategoriesPage,
         handle: { breadcrumb: 'Schema Categories' },
         children: [ {
             index: true,
@@ -109,15 +108,15 @@ export const router = createBrowserRouter([ {
                     loader: ActionsPage.loader,
                     Component: ActionsPage,
                 }, {
-                    id: 'action',
+                    id: routes.category.actions.detail.id,
                     path: routes.category.actions.detail.path,
                     loader: ActionDetailPage.loader,
                     Component: ActionDetailPage,
                     handle: { breadcrumb: (data: ActionLoaderData) => data.action.label },
                 }, {
-                    id: 'add-action',
+                    id: routes.category.actions.new.id,
                     path: routes.category.actions.new.path,
-                    Component: AddActionPage,
+                    Component: NewActionPage,
                     handle: { breadcrumb: 'Add' },
                 } ],
             }, {

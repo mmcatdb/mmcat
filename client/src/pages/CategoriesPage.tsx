@@ -4,8 +4,8 @@ import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
 import { Button, Input, Tooltip } from '@heroui/react';
-import { AddSchemaModal } from './Home';
-import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
+import { AddSchemaModal } from './HomePage';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
@@ -14,6 +14,7 @@ import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
 import { InfoBanner } from '@/components/common';
+import { PageLayout } from '@/components/RootLayout';
 
 /**
  * List of example schema names available for creation.
@@ -21,15 +22,6 @@ import { InfoBanner } from '@/components/common';
 const EXAMPLE_SCHEMAS = [
     'basic',
 ] as const;
-
-/**
- * Renders the parent route for schema categories, delegating to child routes via Outlet.
- */
-export function SchemaCategoriesPage() {
-    return (
-        <Outlet />
-    );
-}
 
 /**
  * Renders the main page for managing schema categories, including creation, search, and display.
@@ -78,7 +70,7 @@ export function CategoriesPage() {
     );
 
     return (
-        <div className='pt-4'>
+        <PageLayout>
             {/* Header Section with Info button */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
@@ -175,7 +167,7 @@ export function CategoriesPage() {
                 }}
                 isSubmitting={isCreatingSchema}
             />
-        </div>
+        </PageLayout>
     );
 }
 

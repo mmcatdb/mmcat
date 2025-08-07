@@ -8,13 +8,13 @@ import { ConfirmationModal, EmptyState, useSortableData } from '@/components/Tab
 import { usePreferences } from '@/components/PreferencesProvider';
 import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
 import { InfoBanner } from '@/components/common';
+import { PageLayout } from '@/components/RootLayout';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
@@ -34,7 +34,7 @@ export function ActionsPage() {
     }
 
     return (
-        <div className='pt-4'>
+        <PageLayout>
             {/* Header with Info Icon */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
@@ -80,7 +80,7 @@ export function ActionsPage() {
                     />
                 )}
             </div>
-        </div>
+        </PageLayout>
     );
 }
 
@@ -243,13 +243,6 @@ type ActionInfoBannerProps = {
 export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button
-                onClick={dismissBanner}
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='size-5' />
-            </button>
-
             <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
 
             {/* Info Content */}

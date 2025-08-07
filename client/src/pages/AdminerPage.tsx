@@ -11,6 +11,7 @@ import { api } from '@/api';
 import { QueryType } from '@/types/adminer/QueryType';
 import { Datasource } from '@/types/Datasource';
 import { twJoin } from 'tailwind-merge';
+import { PageLayout } from '@/components/RootLayout';
 
 /**
  * Main page of Adminer, data visualization and browsing tool
@@ -34,7 +35,7 @@ export function AdminerPage() {
     }, [ searchParams ]);
 
     return (
-        <div className='h-full px-8 flex flex-col'>
+        <PageLayout className='pt-0'>
             <div className={twJoin('flex items-center w-full h-10 border-b px-0',
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
             )}>
@@ -68,7 +69,7 @@ export function AdminerPage() {
                     <AdminerFilterQueryPage datasource={datasource} datasources={datasources} />
                 )
             )}
-        </div>
+        </PageLayout>
     );
 }
 

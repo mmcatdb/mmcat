@@ -1,5 +1,6 @@
 import { api } from '@/api';
 import { QueryTreeDisplay } from '@/components/querying/QueryTreeDisplay';
+import { PageLayout } from '@/components/RootLayout';
 import { type Datasource } from '@/types/Datasource';
 import { type QueryDescription } from '@/types/query';
 import { Button, Textarea } from '@heroui/react';
@@ -28,8 +29,8 @@ export function QueryingPage() {
     }
 
     return (
-        <div className='space-y-6'>
-            <h2>Querying for Project {categoryId}</h2>
+        <PageLayout className='space-y-6'>
+            <h1 className='text-xl font-semibold'>Querying</h1>
 
             <Textarea
                 className='font-mono'
@@ -87,9 +88,11 @@ export function QueryingPage() {
                     {JSON.stringify(description.planned.parts, undefined, 4)}
                 </div>
             </>)}
-        </div>
+        </PageLayout>
     );
 }
+
+QueryingPage.loader = loader;
 
 async function loader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
     if (!categoryId)
@@ -104,8 +107,6 @@ async function loader({ params: { categoryId } }: { params: Params<'categoryId'>
         datasources: response.data,
     };
 }
-
-QueryingPage.loader = loader;
 
 const exampleBasic =
 `SELECT {

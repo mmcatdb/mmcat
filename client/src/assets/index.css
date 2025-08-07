@@ -91,7 +91,7 @@
 
 @layer components {
     .mm-access-path:has(> .mm-target:hover) > .mm-target {
-        @apply bg-black;
+        @apply bg-default-300;
     }
 
     .mm-target {

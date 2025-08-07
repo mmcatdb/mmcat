@@ -59,13 +59,13 @@ export const routes = {
         actions: {
             list: categoryIndex.child('/actions', 'actions'),
             detail: categoryIndex.child<'categoryId' | 'actionId'>('/actions/:actionId', 'action'),
-            new: categoryIndex.child('/actions/new', 'add-action'),
+            new: categoryIndex.child('/actions/new', 'new-action'),
         },
         jobs: categoryIndex.child('/jobs', 'jobs'),
         job: categoryIndex.child<'categoryId' | 'jobId'>('/jobs/:jobId', 'job'),
     },
     datasources: {
         list: datasourcesIndex,
-        detail: datasourcesIndex.child<'id'>('/:id', 'datasource'),
+        detail: datasourcesIndex.child<'datasourceId'>('/:datasourceId', 'datasource'),
     },
 } as const;

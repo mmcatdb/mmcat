@@ -7,13 +7,13 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
 import { JobStateIcon } from './JobPage';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 import { InfoBanner } from '@/components/common';
 import { EmptyState } from '@/components/TableCommon';
+import { PageLayout } from '@/components/RootLayout';
 
 /** In ms. */
 const REFRESH_INTERVAL_MS = 3000;
@@ -65,47 +65,49 @@ export function JobsPage() {
 
     const classNameTH = 'px-4 py-3 text-left font-semibold bg-default-100 border-b border-default-300 text-default-800';
 
-    return (<>
-        <div className='flex items-center gap-2 mb-4 pt-4'>
-            <h1 className='text-xl font-semibold'>Jobs in Runs</h1>
-            <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                <button
-                    onClick={isVisible ? dismissBanner : restoreBanner}
-                    className='text-primary-500 hover:text-primary-700 transition'
-                >
-                    <IoInformationCircleOutline className='size-6' />
-                </button>
-            </Tooltip>
-        </div>
+    return (
+        <PageLayout>
+            <div className='mb-4 flex items-center gap-2'>
+                <h1 className='text-xl font-semibold'>Jobs in Runs</h1>
+                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
+                    <button
+                        onClick={isVisible ? dismissBanner : restoreBanner}
+                        className='text-primary-500 hover:text-primary-700 transition'
+                    >
+                        <IoInformationCircleOutline className='size-6' />
+                    </button>
+                </Tooltip>
+            </div>
 
-        {isVisible && <JobInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            {isVisible && <JobInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
 
-        {/* No HeroUI table here, because of grouping functionality. */}
-        {Object.entries(groupedJobs).length > 0 ? (
-            <table className='w-full border-collapse rounded-xl overflow-hidden shadow-xs  bg-default-50'>
-                <thead>
-                    <tr>
-                        {showTableIDs && <th className={classNameTH}>Run ID</th>}
-                        <th className={classNameTH}>Run Label</th>
-                        <th className={classNameTH}>Jobs</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {Object.entries(groupedJobs).length > 0 && (
-                        Object.entries(groupedJobs).map(([ runId, jobs ]) => (
-                            <RunRow key={runId} runId={runId} jobs={jobs} />
-                        ))
-                    )}
-                </tbody>
-            </table>
-        ) : (
-            <EmptyState
-                message='No runs available yet. First create an Action.'
-                buttonText='Go to Actions Page'
-                to={routes.category.actions.list.resolve({ categoryId: category.id })}
-            />
-        )}
-    </>);
+            {/* No HeroUI table here, because of grouping functionality. */}
+            {Object.entries(groupedJobs).length > 0 ? (
+                <table className='w-full border-collapse rounded-xl overflow-hidden shadow-xs  bg-default-50'>
+                    <thead>
+                        <tr>
+                            {showTableIDs && <th className={classNameTH}>Run ID</th>}
+                            <th className={classNameTH}>Run Label</th>
+                            <th className={classNameTH}>Jobs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(groupedJobs).length > 0 && (
+                            Object.entries(groupedJobs).map(([ runId, jobs ]) => (
+                                <RunRow key={runId} runId={runId} jobs={jobs} />
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            ) : (
+                <EmptyState
+                    message='No runs available yet. First create an Action.'
+                    buttonText='Go to Actions Page'
+                    to={routes.category.actions.list.resolve({ categoryId: category.id })}
+                />
+            )}
+        </PageLayout>
+    );
 }
 
 /**
@@ -207,13 +209,6 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
 
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button
-                onClick={dismissBanner}
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='size-5' />
-            </button>
-
             <h2 className='text-lg font-semibold mb-2'>Understanding Jobs & Runs</h2>
             <p className='text-sm'>
                 A <strong>Job</strong> is a single execution of a transformation algorithm, while a <strong>Run</strong> is a group of related Jobs processed together.

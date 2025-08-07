@@ -73,10 +73,11 @@ export function InfoBanner({ children, className, dismissBanner }: InfoBannerPro
             <CardBody className='text-sm text-foreground px-4 py-3 relative'>
                 <button
                     onClick={dismissBanner}
-                    className='absolute top-2 right-2 text-default-500 hover:text-foreground transition'
+                    className='absolute top-2 right-2 text-default-500 hover:text-foreground transition cursor-pointer'
                 >
                     <HiXMark className='size-5' />
                 </button>
+
                 {children}
             </CardBody>
         </Card>

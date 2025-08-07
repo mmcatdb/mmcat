@@ -7,19 +7,16 @@ import { type SchemaCategoryStats } from '@/types/schema';
 import { routes } from '@/routes/routes';
 import { FaDatabase, FaPlus, FaPlay, FaSearch, FaEdit } from 'react-icons/fa';
 import { type ReactNode } from 'react';
+import { PageLayout } from '@/components/RootLayout';
 
 export function CategoryOverviewPage() {
     const { stats } = useLoaderData() as CategoryLoaderData;
     const { category } = useCategoryInfo();
 
-    if (!category)
-        return <div className='p-6'>Category information not available.</div>;
-
-
     const categoryId = category.id;
 
     return (
-        <div className='pt-4 space-y-6'>
+        <PageLayout className='space-y-6'>
             {/* Header */}
             <h1 className='text-3xl font-bold text-primary-500 truncate max-w-[1000px]' title={category.label}>{category.label}</h1>
 
@@ -96,7 +93,7 @@ export function CategoryOverviewPage() {
                     />
                 </div>
             </div>
-        </div>
+        </PageLayout>
     );
 }
 

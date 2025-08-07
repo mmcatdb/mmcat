@@ -17,31 +17,6 @@ type DatasourcesTableProps = {
     datasourcesWithMappings?: string[];
 };
 
-type DatasourceTableProps = {
-    /** Sorted list of datasources. */
-    datasources: Datasource[];
-    /** Callback to handle datasource deletion. */
-    deleteDatasource: (id: string) => void;
-    /** Current sorting configuration. */
-    sortDescriptor: SortDescriptor;
-    /** Callback to update sorting. */
-    onSortChange: (sortDescriptor: SortDescriptor) => void;
-    /** IDs of datasources with active mappings (if some exist). */
-    datasourcesWithMappings?: string[];
-};
-
-type ConfirmationModalWrapperProps = {
-    isOpen: boolean;
-    /** The datasource to delete, if selected. */
-    datasource?: Datasource;
-    /** Callback to confirm deletion. */
-    onConfirm: () => void;
-    /** Callback to close the modal. */
-    onClose: () => void;
-    /** Whether deletion is in progress. */
-    isDeleting: boolean;
-};
-
 /**
  * Renders a sortable table of datasources with delete functionality.
  */
@@ -53,7 +28,7 @@ export function DatasourcesTable({ datasources, deleteDatasource, datasourcesWit
     });
 
     return (
-        <DatasourceTable
+        <SortedDatasourcesTable
             datasources={sortedDatasources}
             deleteDatasource={deleteDatasource}
             sortDescriptor={sortDescriptor}
@@ -128,25 +103,17 @@ function useDatasourceSelection(datasources: Datasource[], deleteDatasource: (id
     };
 }
 
-/**
- * Navigates to a datasource’s detail page, preserving sort state.
- *
- * @param navigate - The navigate function from react-router-dom.
- * @param categoryId - The optional category ID for contextual navigation.
- * @param datasourceId - The ID of the datasource to navigate to.
- * @param sortDescriptor - The current sorting configuration.
- */
-function navigateToDatasource(
-    navigate: (path: string, options?: { state?: unknown }) => void,
-    categoryId: string | undefined,
-    datasourceId: React.Key,
-    sortDescriptor: SortDescriptor,
-) {
-    const path = categoryId
-        ? routes.category.datasources.list.resolve({ categoryId }) + `/${datasourceId}`
-        : `/datasources/${datasourceId}`;
-    navigate(path, { state: { sortDescriptor } });
-}
+type ConfirmationModalWrapperProps = {
+    isOpen: boolean;
+    /** The datasource to delete, if selected. */
+    datasource?: Datasource;
+    /** Callback to confirm deletion. */
+    onConfirm: () => void;
+    /** Callback to close the modal. */
+    onClose: () => void;
+    /** Whether deletion is in progress. */
+    isDeleting: boolean;
+};
 
 /**
  * Reusable component to render the deletion confirmation modal.
@@ -169,33 +136,44 @@ function ConfirmationModalWrapper({ isOpen, datasource, onConfirm, onClose, isDe
     );
 }
 
+type SortedDatasourcesTableProps = {
+    /** Sorted list of datasources. */
+    datasources: Datasource[];
+    /** Callback to handle datasource deletion. */
+    deleteDatasource: (id: string) => void;
+    /** Current sorting configuration. */
+    sortDescriptor: SortDescriptor;
+    /** Callback to update sorting. */
+    onSortChange: (sortDescriptor: SortDescriptor) => void;
+    /** IDs of datasources with active mappings (if some exist). */
+    datasourcesWithMappings?: string[];
+};
+
 /**
  * Renders the table of datasources with sorting and deletion capabilities.
  */
-function DatasourceTable({
-    datasources,
-    deleteDatasource,
-    sortDescriptor,
-    onSortChange,
-    datasourcesWithMappings = [],
-}: DatasourceTableProps) {
+function SortedDatasourcesTable({ datasources, deleteDatasource, sortDescriptor, onSortChange, datasourcesWithMappings = [] }: SortedDatasourcesTableProps) {
     const { showTableIDs } = usePreferences().preferences;
     const { categoryId } = useParams();
     const navigate = useNavigate();
-    const { isModalOpen, selectedDatasource, isDeleting, handleDeleteClick, confirmDelete, closeModal } =
-        useDatasourceSelection(datasources, deleteDatasource);
+
+    const { isModalOpen, selectedDatasource, isDeleting, handleDeleteClick, confirmDelete, closeModal } = useDatasourceSelection(datasources, deleteDatasource);
 
     /**
      * Navigates to the datasource’s detail page when a row is clicked.
      */
-    function handleRowAction(key: React.Key) {
-        navigateToDatasource(navigate, categoryId, key, sortDescriptor);
+    function navigateToDatasource(key: React.Key) {
+        const datasourceId = key as string;
+        const path = categoryId
+            ? routes.category.datasources.detail.resolve({ categoryId, datasourceId })
+            : routes.datasources.detail.resolve({ datasourceId });
+        navigate(path, { state: { sortDescriptor } });
     }
 
     return (<>
         <Table
             aria-label='Datasource Table'
-            onRowAction={handleRowAction}
+            onRowAction={navigateToDatasource}
             sortDescriptor={sortDescriptor}
             onSortChange={onSortChange}
         >
@@ -211,9 +189,11 @@ function DatasourceTable({
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
+
             <TableBody emptyContent='No rows to display.'>
                 {datasources.map(datasource => {
                     const hasMappings = datasourcesWithMappings.includes(datasource.id);
+
                     return (
                         <TableRow key={datasource.id} className='cursor-pointer hover:bg-default-100 focus:bg-default-200'>
                             {[
@@ -231,7 +211,6 @@ function DatasourceTable({
                                         onPress={() => {
                                             if (!hasMappings)
                                                 handleDeleteClick(datasource.id);
-
                                         }}
                                         title='Delete datasource'
                                         disabled={hasMappings}

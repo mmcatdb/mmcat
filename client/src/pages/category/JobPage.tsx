@@ -11,6 +11,7 @@ import { LoadingPage, ReloadPage } from '../errorPages';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { PlayCircleIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, PauseCircleIcon, XCircleIcon, EllipsisHorizontalCircleIcon, StopCircleIcon } from '@heroicons/react/24/outline';
+import { PageLayout } from '@/components/RootLayout';
 
 /** In milliseconds. */
 const REFRESH_INTERVAL_MS = 1000;
@@ -67,7 +68,7 @@ export function JobPage() {
     }
 
     return (
-        <div className='p-4'>
+        <PageLayout>
             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
 
             <div className='border rounded-lg p-4 border-default-300 bg-default-50'>
@@ -101,7 +102,7 @@ export function JobPage() {
                     </div>
                 </div>
             )}
-        </div>
+        </PageLayout>
     );
 }
 

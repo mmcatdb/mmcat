@@ -98,7 +98,7 @@ function createInitialState({ category, input }: { category: Category, input: Ma
             primaryKey: original?.primaryKey,
             accessPath: (original?.accessPath ?? new RootProperty(new TypedName(TypedName.ROOT), [])).toEditable(),
         },
-        editorPhase: EditorPhase.SelectRoot,
+        editorPhase: original ? EditorPhase.BuildPath : EditorPhase.SelectRoot,
     };
 }
 

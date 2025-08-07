@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { Category } from '@/types/schema';
 import { routes } from '@/routes/routes';
 import { Datasource } from '@/types/Datasource';
+import { PageLayout } from '@/components/RootLayout';
 
 /**
  * Page for adding a new mapping.
@@ -24,12 +25,14 @@ export function NewMappingPage() {
     }
 
     return (
-        <MappingEditor
-            category={category}
-            input={input}
-            onSave={mappingCreated}
-            onCancel={() => navigate(-1)}
-        />
+        <PageLayout isFullscreen>
+            <MappingEditor
+                category={category}
+                input={input}
+                onSave={mappingCreated}
+                onCancel={() => navigate(-1)}
+            />
+        </PageLayout>
     );
 }
 

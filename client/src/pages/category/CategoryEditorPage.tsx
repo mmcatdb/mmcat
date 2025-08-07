@@ -11,6 +11,7 @@ import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/t
 import { categoryToGraph } from '@/components/category/categoryGraph';
 import { SaveProvider, SaveButton } from '@/components/category/SaveContext';
 import { twJoin } from 'tailwind-merge';
+import { PageLayout } from '@/components/RootLayout';
 
 type EditorSidebarState = {
     left: boolean;
@@ -46,73 +47,75 @@ export function CategoryEditorPage() {
     }, []);
 
     return (
-        <SaveProvider categoryState={state}>
-            <div className='flex flex-col h-[calc(100vh-40px)]'>
-                {/* Navbar */}
-                <div className='h-8 flex items-center justify-between px-4 bg-default-100 border-b border-default-200'>
-                    {/* Left Sidebar Toggle */}
-                    <button
-                        onClick={() => toggleSidebar('left')}
-                        title='Toggle Main Editor Sidebar'
-                        className='text-default-600 hover:text-default-800'
-                    >
-                        <TbLayoutSidebarFilled size={20} aria-hidden='true' />
-                    </button>
-
-                    {/* Delete, Save and Right Sidebar Toggle */}
-                    <div className='flex items-center gap-2'>
-                        {/* Delete Button */}
+        <PageLayout isFullscreen>
+            <SaveProvider categoryState={state}>
+                <div className='flex flex-col h-[calc(100vh-40px)]'>
+                    {/* Navbar */}
+                    <div className='h-8 flex items-center justify-between px-4 bg-default-100 border-b border-default-200'>
+                        {/* Left Sidebar Toggle */}
                         <button
-                            onClick={() => {
-                                if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
-                                    deleteSelectedElements(state, dispatch);
-                            }}
-                            disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
-                            title='Delete selected elements (Delete)'
-                            className={twJoin('p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300',
-                                state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
-                                    ? 'text-danger-400 opacity-50 cursor-not-allowed'
-                                    : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer',
-                            )}
-                        >
-                            <FaTrash size={16} aria-hidden='true' />
-                        </button>
-
-                        {/* Save Button */}
-                        <div className='w-px bg-default-400 h-5 mx-2'></div>
-                        <SaveButton />
-                        <div className='w-px bg-default-400 h-5 mx-2'></div>
-
-                        {/* Right Sidebar Toggle */}
-                        <button
-                            onClick={() => toggleSidebar('right')}
-                            title='Toggle Edit Sidebar'
+                            onClick={() => toggleSidebar('left')}
+                            title='Toggle Main Editor Sidebar'
                             className='text-default-600 hover:text-default-800'
                         >
-                            <TbLayoutSidebarRightFilled size={20} aria-hidden='true' />
+                            <TbLayoutSidebarFilled size={20} aria-hidden='true' />
                         </button>
+
+                        {/* Delete, Save and Right Sidebar Toggle */}
+                        <div className='flex items-center gap-2'>
+                            {/* Delete Button */}
+                            <button
+                                onClick={() => {
+                                    if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
+                                        deleteSelectedElements(state, dispatch);
+                                }}
+                                disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
+                                title='Delete selected elements (Delete)'
+                                className={twJoin('p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300',
+                                    state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
+                                        ? 'text-danger-400 opacity-50 cursor-not-allowed'
+                                        : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer',
+                                )}
+                            >
+                                <FaTrash size={16} aria-hidden='true' />
+                            </button>
+
+                            {/* Save Button */}
+                            <div className='w-px bg-default-400 h-5 mx-2'></div>
+                            <SaveButton />
+                            <div className='w-px bg-default-400 h-5 mx-2'></div>
+
+                            {/* Right Sidebar Toggle */}
+                            <button
+                                onClick={() => toggleSidebar('right')}
+                                title='Toggle Edit Sidebar'
+                                className='text-default-600 hover:text-default-800'
+                            >
+                                <TbLayoutSidebarRightFilled size={20} aria-hidden='true' />
+                            </button>
+                        </div>
+
                     </div>
 
+                    <div className='relative flex grow'>
+                        {/* Left Sidebar */}
+                        <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.left ? 'w-56' : 'w-0')}>
+                            {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
+                        </div>
+
+                        {/* Main Canvas */}
+                        <div className='grow relative'>
+                            <CategoryEditorGraph state={state} dispatch={dispatch} className='w-full h-full' />
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.right ? 'w-60' : 'w-0')}>
+                            {sidebarState.right && <RightPanelCategoryEditor state={state} dispatch={dispatch} />}
+                        </div>
+                    </div>
                 </div>
-
-                <div className='relative flex grow'>
-                    {/* Left Sidebar */}
-                    <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.left ? 'w-56' : 'w-0')}>
-                        {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
-                    </div>
-
-                    {/* Main Canvas */}
-                    <div className='grow relative'>
-                        <CategoryEditorGraph state={state} dispatch={dispatch} className='w-full h-full' />
-                    </div>
-
-                    {/* Right Sidebar */}
-                    <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.right ? 'w-60' : 'w-0')}>
-                        {sidebarState.right && <RightPanelCategoryEditor state={state} dispatch={dispatch} />}
-                    </div>
-                </div>
-            </div>
-        </SaveProvider>
+            </SaveProvider>
+        </PageLayout>
     );
 }
 

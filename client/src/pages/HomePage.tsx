@@ -8,10 +8,11 @@ import { toast } from 'react-toastify';
 import { BookOpenIcon } from '@heroicons/react/24/solid';
 import { FaDatabase, FaPlus, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { PageLayout } from '@/components/RootLayout';
 
 const EXAMPLE_SCHEMAS = [ 'basic', 'adminer' ] as const;
 
-export function Home() {
+export function HomePage() {
     const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>();
     const [ isCreatingSchema, setIsCreatingSchema ] = useState(false);
     const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
@@ -52,7 +53,7 @@ export function Home() {
     }, [ navigate ]);
 
     return (
-        <div className='p-6 max-w-7xl mx-auto space-y-16'>
+        <PageLayout className='max-w-7xl space-y-16'>
             <HeaderSection />
             <GettingStartedSection
                 onOpenModal={() => setIsModalOpen(true)}
@@ -77,7 +78,7 @@ export function Home() {
                 onSubmit={label => void handleCreateSchema(label, false)}
                 isSubmitting={isCreatingSchema}
             />
-        </div>
+        </PageLayout>
     );
 }
 

@@ -7,10 +7,10 @@ import { Button, Input, Select, SelectItem } from '@heroui/react';
 import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { getPathSignature } from '../graph/graphUtils';
 import { useCallback, useMemo, useState } from 'react';
-import { twJoin } from 'tailwind-merge';
-import { type Name, NamePathBuilder, StringName } from '@/types/identifiers';
+import { type Name, type NamePath, StringName } from '@/types/identifiers';
 import { PencilIcon } from '@heroicons/react/24/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { AccessPathDisplay } from './AccessPathDisplay';
 
 type MappingEditorProps = {
     /** The schema category to which the mapping belongs. */
@@ -32,7 +32,9 @@ export function MappingEditor({ category, input, onSave, onCancel }: MappingEdit
             {/* Left Panel - Form Controls */}
             <div className='w-80 bg-content1 border-r border-default-200 p-4 flex flex-col'>
                 <div className=''>
-                    <h2 className='text-xl font-semibold'>Create Mapping</h2>
+                    <h2 className='text-xl font-semibold'>
+                        {input.mapping ? 'Edit Mapping' : 'Create Mapping'}
+                    </h2>
 
                     {/* Show datasource info */}
                     <div className='pt-2 pb-6 text-sm text-default-600'>
@@ -85,7 +87,7 @@ export function MappingEditor({ category, input, onSave, onCancel }: MappingEdit
                             isDisabled={!state.form.rootObjexKey}
                             isLoading={isFetching}
                         >
-                            Create Mapping
+                            {input.mapping ? 'Save Mapping' : 'Create Mapping'}
                         </Button>
                     </div>
                 </div>
@@ -127,7 +129,7 @@ function RootSelectionPanel({ state, dispatch }: StateDispatchProps) {
 
             {!selectedNode ? (
                 <div className='p-3 rounded-lg bg-default-100 text-default-500 text-sm'>
-                        Click on a node in the graph
+                    Click on a node in the graph
                 </div>
             ) : (
                 <div className='p-3 rounded-lg bg-default-100'>
@@ -223,24 +225,17 @@ function AccessPathPanel({ state, dispatch }: StateDispatchProps) {
         [ state.selectedPropertyPath, state.form.accessPath ],
     );
 
-    const setSelected = useCallback((builder: NamePathBuilder) => {
-        // The first element is going to be the root property, so we shift it off.
-        // We don't take kindly to your types in here!
-        const path = builder.shift().build();
-        dispatch({ type: 'accessPath', operation: 'select', path });
-    }, [ dispatch ]);
+    const setSelected = useCallback((path: NamePath) => dispatch({ type: 'accessPath', operation: 'select', path }), [ dispatch ]);
 
     return (
         <div className='space-y-4'>
             <h3 className='text-lg font-semibold'>Access Path</h3>
 
-            <div className='p-3 rounded-lg bg-default-100 leading-5'>
-                <ParentPropertyDisplay
-                    property={state.form.accessPath}
-                    selected={selected}
-                    setSelected={setSelected}
-                />
-            </div>
+            <AccessPathDisplay
+                property={state.form.accessPath}
+                selected={selected}
+                setSelected={setSelected}
+            />
 
             {selected && (
                 <SelectedProperty
@@ -251,82 +246,6 @@ function AccessPathPanel({ state, dispatch }: StateDispatchProps) {
                     selected={selected}
                 />
             )}
-        </div>
-    );
-}
-
-type ParentPropertyDisplayProps = {
-    property: AccessPath;
-    selected: AccessPath | undefined;
-    setSelected: (builder: NamePathBuilder) => void;
-};
-
-function ParentPropertyDisplay({ property, selected, setSelected }: ParentPropertyDisplayProps) {
-    const innerSetSelected = useCallback((builder: NamePathBuilder) => {
-        builder.prepend(property.name);
-        setSelected(builder);
-    }, [ setSelected, property.name ]);
-
-    function select() {
-        setSelected(new NamePathBuilder(property.name));
-    }
-
-    const isSelected = property === selected;
-
-    return (
-        <div className={twJoin('mm-access-path grid grid-cols-[auto_minmax(0,1fr)] gap-y-1 gap-x-3', isSelected && 'mm-access-path-selected')}>
-            <div className='mm-target col-span-2 w-fit px-1 space-x-2' onClick={select}>
-                <span>{property.name.toString()}:</span>
-                <span>{property.signature.toString()}</span>
-                <span>{'{'}</span>
-            </div>
-
-            <div className='mm-target w-1' onClick={select} />
-
-            <div className='space-y-1'>
-                {property.subpaths.map(subpath => (
-                    subpath.subpaths.length > 0 ? (
-                        <ParentPropertyDisplay
-                            key={subpath.name.toString()}
-                            property={subpath}
-                            selected={selected}
-                            setSelected={innerSetSelected}
-                        />
-                    ) : (
-                        <SimplePropertyDisplay
-                            key={subpath.name.toString()}
-                            property={subpath}
-                            selected={selected}
-                            setSelected={innerSetSelected}
-                        />
-                    )
-                ))}
-            </div>
-
-            <div className='mm-target col-span-2 w-fit px-1' onClick={select}>
-                {'}'}
-            </div>
-        </div>
-    );
-}
-
-function SimplePropertyDisplay({ property, selected, setSelected }: {
-    property: AccessPath;
-    selected: AccessPath | undefined;
-    setSelected: (builder: NamePathBuilder) => void;
-}) {
-    function select() {
-        setSelected(new NamePathBuilder(property.name));
-    }
-
-    const isSelected = property === selected;
-
-    return (
-        <div className={twJoin('mm-access-path', isSelected && 'mm-access-path-selected')}>
-            <div className='mm-target w-fit px-1 space-x-2' onClick={select}>
-                <span>{property.name.toString()}:</span>
-                <span>{property.signature.toString()}</span>
-            </div>
         </div>
     );
 }
