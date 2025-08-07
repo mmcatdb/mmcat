@@ -1,4 +1,4 @@
-import type { TableResponse, GraphResponse, GraphRelationshipWithNodes, GraphNode, DocumentResponse, GraphResponseData } from '@/types/adminer/DataResponse';
+import { type TableResponse, type GraphResponse, type GraphRelationshipWithNodes, type GraphNode, type DocumentResponse, type GraphResponseData, View } from '@/types/adminer/DataResponse';
 
 const ID = '#id';
 const LABELS = '#labels';
@@ -6,7 +6,11 @@ const FROM_NODE_PREFIX = 'from.';
 const TO_NODE_PREFIX = 'to.';
 
 export function getTableFromGraphData(graphData: GraphResponse): { tableData: TableResponse, columnNames: string[]} {
-    const modifiedData = { type: 'table', metadata: graphData.metadata, data: [] } as TableResponse;
+    const modifiedData = {
+        type: View.table,
+        metadata: graphData.metadata,
+        data: [] as string[][],
+    } satisfies TableResponse;
 
     const fetchedPropertyNames: string[] = graphData.metadata.propertyNames;
 
@@ -20,34 +24,32 @@ export function getTableFromGraphData(graphData: GraphResponse): { tableData: Ta
 
         const tableColumnNames = modifiedData.metadata.propertyNames.filter(name => !name.includes(`${LABELS} - `));
 
-        const data: string[][] = getNodesData(graphData.data.nodes, tableColumnNames);
-        modifiedData.data = data;
-        modifiedData.metadata.propertyNames = modifiedData.metadata.propertyNames.filter(name =>
-            name != LABELS,
-        );
+        modifiedData.data = getNodesData(graphData.data.nodes, tableColumnNames);
+        modifiedData.metadata.propertyNames = modifiedData.metadata.propertyNames.filter(name => name != LABELS);
 
         return { tableData: modifiedData, columnNames: tableColumnNames };
     }
-    else {
-        const { graph, propertyNames } = getRelationshipsWithNodes(fetchedPropertyNames, graphData.data);
 
-        modifiedData.metadata.propertyNames = propertyNames;
+    const { graph, propertyNames } = getRelationshipsWithNodes(fetchedPropertyNames, graphData.data);
 
-        const tableColumnNames = propertyNames.filter(name => !name.includes(`${LABELS} - `));
+    modifiedData.metadata.propertyNames = propertyNames;
 
-        const data: string[][] = getRelationshipsData(graph, tableColumnNames);
+    const tableColumnNames = propertyNames.filter(name => !name.includes(`${LABELS} - `));
 
-        modifiedData.data = data;
-        modifiedData.metadata.propertyNames = modifiedData.metadata.propertyNames.filter(name =>
-            name != `${FROM_NODE_PREFIX}${LABELS}` && name != `${TO_NODE_PREFIX}${LABELS}`,
-        );
+    modifiedData.data = getRelationshipsData(graph, tableColumnNames);
+    modifiedData.metadata.propertyNames = modifiedData.metadata.propertyNames.filter(name =>
+        name != `${FROM_NODE_PREFIX}${LABELS}` && name != `${TO_NODE_PREFIX}${LABELS}`,
+    );
 
-        return { tableData: modifiedData, columnNames: tableColumnNames };
-    }
+    return { tableData: modifiedData, columnNames: tableColumnNames };
 }
 
 export function getDocumentFromGraphData(graphData: GraphResponse): DocumentResponse {
-    const modifiedData = { type: 'document', metadata: graphData.metadata, data: [] } as DocumentResponse;
+    const modifiedData = {
+        type: View.document,
+        metadata: graphData.metadata,
+        data: [] as Record<string, unknown>[],
+    } satisfies DocumentResponse;
 
     const fetchedPropertyNames = graphData.metadata.propertyNames;
 
@@ -65,7 +67,6 @@ export function getDocumentFromGraphData(graphData: GraphResponse): DocumentResp
         const { graph, propertyNames } = getRelationshipsWithNodes(fetchedPropertyNames, graphData.data);
 
         modifiedData.metadata.propertyNames = propertyNames;
-
         modifiedData.data = graph;
     }
 
@@ -91,15 +92,10 @@ function getNodesData(nodes: GraphNode[], propertyNames: string[]): string[][] {
     return data;
 }
 
-function getRelationshipsWithNodes(fetchedPropertyNames: string[], data: GraphResponseData):
-    { graph: GraphRelationshipWithNodes[], propertyNames: string[] } {
+function getRelationshipsWithNodes(fetchedPropertyNames: string[], data: GraphResponseData): { graph: GraphRelationshipWithNodes[], propertyNames: string[] } {
     const graph: GraphRelationshipWithNodes[] = [];
     const propertyNames: string[] = [ ID, `${FROM_NODE_PREFIX}${ID}`, `${TO_NODE_PREFIX}${ID}` ];
-    const relationshipPropertyNames = fetchedPropertyNames
-        .filter(name =>
-            name.startsWith(`${TO_NODE_PREFIX}${LABELS}`)
-            || name.startsWith(`${FROM_NODE_PREFIX}${LABELS}`),
-        );
+    const relationshipPropertyNames = fetchedPropertyNames.filter(name => name.startsWith(`${TO_NODE_PREFIX}${LABELS}`) || name.startsWith(`${FROM_NODE_PREFIX}${LABELS}`));
 
     for (const propertyName of relationshipPropertyNames) {
         if (!propertyNames.includes(propertyName))
@@ -107,10 +103,9 @@ function getRelationshipsWithNodes(fetchedPropertyNames: string[], data: GraphRe
     }
 
     for (const relationship of data.relationships) {
-        const fromNode: GraphNode = data.nodes.find(node => node.id === relationship.fromNodeId)
-            ?? { type: 'node', id: relationship.fromNodeId, properties: {} };
-        const toNode: GraphNode = data.nodes.find(node => node.id === relationship.toNodeId)
-            ?? { type: 'node', id: relationship.toNodeId, properties: {} };
+        const fromNode: GraphNode = data.nodes.find(node => node.id === relationship.fromNodeId) ?? { type: 'node', id: relationship.fromNodeId, properties: {} };
+        const toNode: GraphNode = data.nodes.find(node => node.id === relationship.toNodeId) ?? { type: 'node', id: relationship.toNodeId, properties: {} };
+
         const relationshipWithNodes: GraphRelationshipWithNodes = {
             id: relationship.id,
             properties: relationship.properties,
@@ -144,7 +139,6 @@ function getRelationshipsData(graph: GraphRelationshipWithNodes[], propertyNames
         for (const property of propertyNames)
             relationshipData.push(getPropertyValue(property, relationship));
 
-
         data.push(relationshipData);
     }
 
@@ -155,7 +149,6 @@ function getPropertyValue(property: string, relationship: GraphRelationshipWithN
     if (property === ID)
         return relationship.id;
 
-
     if (property.startsWith(FROM_NODE_PREFIX)) {
         const propertyName = property.substring(FROM_NODE_PREFIX.length);
 
@@ -163,7 +156,6 @@ function getPropertyValue(property: string, relationship: GraphRelationshipWithN
             return relationship.from.id;
 
         return relationship.from.properties[propertyName] as string ?? '';
-
     }
 
     if (property.startsWith(TO_NODE_PREFIX)) {

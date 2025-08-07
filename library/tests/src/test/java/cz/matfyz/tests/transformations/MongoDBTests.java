@@ -29,8 +29,8 @@ public class MongoDBTests {
     @Test
     void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
-            var inputWrapper = datasource.wrapper.getPullWrapper();
-            var dbContent = inputWrapper.readCollectionAsStringForTests(MongoDB.orderKind);
+            final var inputWrapper = datasource.wrapper.getPullWrapper();
+            final var dbContent = inputWrapper.readCollectionAsStringForTests(MongoDB.orderKind);
             LOGGER.trace("DB content:\n" + dbContent);
         });
     }

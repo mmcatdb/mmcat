@@ -23,7 +23,7 @@ export function RootLayout() {
         <div className='h-screen overflow-hidden text-foreground bg-background'>
             <div className='flex h-full'>
                 <Sidebar />
-                <div className={twJoin('flex flex-col grow transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-64')}>
+                <div className={twJoin('min-w-0 flex flex-col grow transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-64')}>
                     <CommonNavbar />
 
                     <Outlet />

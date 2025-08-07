@@ -388,9 +388,7 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
                         onChange={e => setLabel(e.target.value)}
                         fullWidth
                         onKeyDown={handleKeyDown}
-                        classNames={{
-                            input: 'text-lg',
-                        }}
+                        classNames={{ input: 'text-lg' }}
                     />
                 </ModalBody>
                 <ModalFooter>

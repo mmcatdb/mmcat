@@ -28,13 +28,7 @@ export function useFetchData<T>( fetchFunction: FetchFunction<T> ): FetchResult<
     });
 
     useEffect(() => {
-        (async () => {
-            setResult({
-                fetchedData: undefined,
-                loading: true,
-                error: ``,
-            });
-
+        void (async () => {
             const response = await fetchFunction();
 
             if (!response.status && !response.error) {

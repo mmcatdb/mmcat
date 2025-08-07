@@ -1,13 +1,12 @@
 import { useMemo } from 'react';
-import { Divider } from '@heroui/react';
-import { DocumentComponent } from '@/components/adminer/DocumentComponent';
+import { DocumentDisplay } from '@/components/adminer/dataView/DocumentDisplay';
 import { getDocumentFromGraphData } from '@/components/adminer/reshapeData';
 import type { Datasource } from '@/types/Datasource';
-import type { DocumentResponse, GraphResponse } from '@/types/adminer/DataResponse';
+import { View, type DocumentResponse, type GraphResponse } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
 
-type DatabaseDocumentProps = {
+type DocumentViewProps = {
     /** The data to display. */
     data: DocumentResponse | GraphResponse;
     /** References from and to the current kind. */
@@ -23,9 +22,9 @@ type DatabaseDocumentProps = {
 /**
  * Component for displaying data in document
  */
-export function DatabaseDocument({ data, kindReferences, kind, datasourceId, datasources }: DatabaseDocumentProps) {
+export function DocumentView({ data, kindReferences, kind, datasourceId, datasources }: DocumentViewProps) {
     const documentData = useMemo(() => {
-        if (data.type === 'graph')
+        if (data.type === View.graph)
             return getDocumentFromGraphData(data);
 
         return data;
@@ -34,16 +33,20 @@ export function DatabaseDocument({ data, kindReferences, kind, datasourceId, dat
     if (!documentData || documentData.data.length === 0)
         return (<span>No rows to display.</span>);
 
-
     return (
-        <div className='grow mt-2'>
-            {documentData.data.map((value, index) =>
-                <div key={index}>
-                    <DocumentComponent valueKey={undefined} value={value} kindReferences={kindReferences} kind={kind} datasourceId={datasourceId} datasources={datasources}/>
-
-                    {(index != documentData.data.length - 1) && <Divider className='my-4'/> }
-                </div>,
-            )}
+        <div className='space-y-1'>
+            {documentData.data.map((value, index) => (
+                <div key={index} className='pl-4 pr-8 py-2 rounded-lg bg-default-100 even:bg-content1'>
+                    <DocumentDisplay
+                        property={undefined}
+                        value={value}
+                        kindReferences={kindReferences}
+                        kind={kind}
+                        datasourceId={datasourceId}
+                        datasources={datasources}
+                    />
+                </div>
+            ))}
         </div>
     );
 }

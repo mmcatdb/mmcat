@@ -53,7 +53,7 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
                     </div>
                 ) : (
                     <div className='text-red-500'>
-                        Datasource not found<br/>
+                        Datasource not found<br />
                         {node.datasourceIdentifier}
                     </div>
                 )}

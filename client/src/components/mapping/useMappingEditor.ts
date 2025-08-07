@@ -118,20 +118,13 @@ function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAc
     // console.log('REDUCE', action, state);
 
     switch (action.type) {
-    case 'graph':
-        return graph(state, action);
-    case 'select':
-        return select(state, action);
-    case 'sequence':
-        return sequence(state, action);
-    case 'path':
-        return path(state, action);
-    case 'setRoot':
-        return root(state, action);
-    case 'form':
-        return form(state, action);
-    case 'accessPath':
-        return accessPath(state, action);
+    case 'graph': return graph(state, action);
+    case 'select': return select(state, action);
+    case 'sequence': return sequence(state, action);
+    case 'path': return path(state, action);
+    case 'setRoot': return root(state, action);
+    case 'form': return form(state, action);
+    case 'accessPath': return accessPath(state, action);
     case 'sync': {
         if (state.sync)
             return state;

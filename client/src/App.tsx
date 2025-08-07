@@ -7,7 +7,7 @@ const App = () => {
     const { preferences } = usePreferences();
 
     return (<>
-        <RouterProvider router={router} future={{ v7_startTransition: true }}/>
+        <RouterProvider router={router} future={{ v7_startTransition: true }} />
         <ToastContainer
             position='bottom-right'
             theme={preferences.theme}

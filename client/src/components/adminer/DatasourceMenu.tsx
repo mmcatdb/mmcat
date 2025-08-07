@@ -31,19 +31,14 @@ export function DatasourceMenu({ setDatasource, datasource, datasources }: Datas
             items={sources}
             aria-label='Datasource'
             labelPlacement='outside-left'
-            classNames={
-                { label:'sr-only' }
-            }
+            classNames={{ label: 'sr-only' }}
             size='sm'
             placeholder='Select datasource'
             className='max-w-xs'
             selectedKeys={ datasource?.id ? [ datasource.id ] : [] }
         >
             {item => (
-                <SelectItem
-                    key={item.id}
-                    onPress={() => setDatasource(item)}
-                >
+                <SelectItem key={item.id} onPress={() => setDatasource(item)}>
                     {item.label}
                 </SelectItem>
             )}
