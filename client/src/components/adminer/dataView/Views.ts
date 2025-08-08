@@ -1,4 +1,4 @@
-import { View } from '@/types/adminer/View';
+import { View } from '@/types/adminer/DataResponse';
 import { DatasourceType } from '@/types/Datasource';
 
 export const AVAILABLE_VIEWS: Record<DatasourceType, View[]> = {

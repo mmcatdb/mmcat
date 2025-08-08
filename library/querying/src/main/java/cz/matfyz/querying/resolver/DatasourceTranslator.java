@@ -133,8 +133,8 @@ public class DatasourceTranslator {
         preservedNodes = findPreservedNodes(kind.root);
         // TODO This is just a temporary fix.
         final Set<Signature> availablePaths = new TreeSet<>();
-        availablePaths.add(Signature.createEmpty());
-        addAllSubpathSignatures(availablePaths, kind.kind.accessPath(), Signature.createEmpty());
+        availablePaths.add(Signature.empty());
+        addAllSubpathSignatures(availablePaths, kind.kind.accessPath(), Signature.empty());
 
         preservedNodes = preservedNodes.stream()
             .filter(node -> availablePaths.contains(node.computePathFromRoot()))
@@ -142,7 +142,7 @@ public class DatasourceTranslator {
 
         stack = new ArrayDeque<>();
 
-        stack.push(new StackItem(kind.root, null, Signature.createEmpty()));
+        stack.push(new StackItem(kind.root, null, Signature.empty()));
         while (!stack.isEmpty())
             processStackItem(stack.pop());
     }
@@ -180,7 +180,7 @@ public class DatasourceTranslator {
         final var isNewParent = preservedNodes.contains(item.node);
         if (isNewParent) {
             preservedParent = wrapperContext.createProperty(pattern.kind, item);
-            pathFromParent = Signature.createEmpty();
+            pathFromParent = Signature.empty();
         }
         else {
             preservedParent = item.preservedParent;

@@ -16,14 +16,14 @@ export type ObjexIdsResponse = {
 
 export class ObjexIds {
     readonly type: Type;
-    readonly _signatureIds: SignatureId[];
+    private readonly _signatureIds: SignatureId[];
 
     private constructor(type: Type, signatureIds?: SignatureId[]) {
         this.type = type;
         this._signatureIds = signatureIds ?? [];
     }
 
-    get signatureIds(): SignatureId[] {
+    get signatureIds(): readonly SignatureId[] {
         return this._signatureIds;
     }
 

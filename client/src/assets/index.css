@@ -88,3 +88,17 @@
         @apply text-base;
     }
 }
+
+@layer components {
+    .mm-access-path:has(> .mm-target:hover) > .mm-target {
+        @apply bg-default-300;
+    }
+
+    .mm-target {
+        @apply cursor-pointer;
+    }
+
+    .mm-access-path-selected > .mm-target {
+        @apply text-success;
+    }
+}

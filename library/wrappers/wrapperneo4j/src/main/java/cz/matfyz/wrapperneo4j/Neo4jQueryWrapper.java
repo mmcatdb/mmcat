@@ -43,7 +43,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     }
 
     @Override public QueryStatement createDSLStatement() {
-        StringBuilder sb = new StringBuilder();
+        final var sb = new StringBuilder();
 
         addKindMatches(sb);
         addJoinMatches(sb);

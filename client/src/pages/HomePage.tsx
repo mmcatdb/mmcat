@@ -8,13 +8,16 @@ import { toast } from 'react-toastify';
 import { BookOpenIcon } from '@heroicons/react/24/solid';
 import { FaDatabase, FaPlus, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { PageLayout } from '@/components/RootLayout';
 
 const EXAMPLE_SCHEMAS = [ 'basic', 'adminer' ] as const;
+const EMPTY_SCHEMA = 'empty';
 
-export function Home() {
+type NewSchemaType = typeof EMPTY_SCHEMA | typeof EXAMPLE_SCHEMAS[number];
+
+export function HomePage() {
     const [ categories, setCategories ] = useState<SchemaCategoryInfo[]>();
-    const [ isCreatingSchema, setIsCreatingSchema ] = useState(false);
-    const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
+    const [ creatingSchema, setCreatingSchema ] = useState<NewSchemaType>();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ showAllCategories, setShowAllCategories ] = useState(false);
     const navigate = useNavigate();
@@ -29,14 +32,14 @@ export function Home() {
             setCategories(result.data.map(SchemaCategoryInfo.fromResponse));
     }
 
-    const handleCreateSchema = useCallback(async (name: string, isExample = false) => {
-        isExample ? setIsCreatingExampleSchema(true) : setIsCreatingSchema(true);
+    const createSchema = useCallback(async (name: string, type: NewSchemaType) => {
+        setCreatingSchema(type);
 
-        const response = isExample
-            ? await api.schemas.createExampleCategory({ name })
-            : await api.schemas.createNewCategory({}, { label: name });
+        const response = type === EMPTY_SCHEMA
+            ? await api.schemas.createNewCategory({}, { label: name })
+            : await api.schemas.createExampleCategory({ name });
 
-        isExample ? setIsCreatingExampleSchema(false) : setIsCreatingSchema(false);
+        setCreatingSchema(undefined);
 
         if (!response.status) {
             toast.error('Error creating schema category.');
@@ -46,45 +49,44 @@ export function Home() {
         const newCategory = SchemaCategoryInfo.fromResponse(response.data);
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
-        toast.success(`${isExample ? 'Example schema' : 'Schema'} '${name}' created successfully!`);
+        toast.success(`${type === EMPTY_SCHEMA ? 'Schema' : 'Example schema'} '${name}' created successfully!`);
 
         navigate(routes.category.index.resolve({ categoryId: newCategory.id }));
     }, [ navigate ]);
 
     return (
-        <div className='p-6 max-w-7xl mx-auto space-y-16'>
+        <PageLayout className='max-w-7xl space-y-16'>
             <HeaderSection />
+
             <GettingStartedSection
                 onOpenModal={() => setIsModalOpen(true)}
-                isCreatingSchema={isCreatingSchema}
+                creatingSchema={creatingSchema}
                 categories={categories}
             />
+
             <SchemaCategoriesSection
                 categories={categories}
                 showAllCategories={showAllCategories}
                 setShowAllCategories={setShowAllCategories}
                 onOpenModal={() => setIsModalOpen(true)}
-                isCreatingSchema={isCreatingSchema}
-                isCreatingExampleSchema={isCreatingExampleSchema}
-                onCreateSchema={(name, isExample) => {
-                    void handleCreateSchema(name, isExample);
-                }}
+                creatingSchema={creatingSchema}
+                onCreateSchema={createSchema}
                 fetchCategories={fetchCategories}
             />
+
             <AddSchemaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={label => void handleCreateSchema(label, false)}
-                isSubmitting={isCreatingSchema}
+                onSubmit={createSchema}
             />
-        </div>
+        </PageLayout>
     );
 }
 
 function HeaderSection() {
     return (
         <div className='space-y-6 text-center md:text-left'>
-            <h1 className='text-5xl font-bold text-primary-600 bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
+            <h1 className='text-5xl font-bold bg-linear-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent'>
                 MM-cat
             </h1>
             <p className='text-default-600 text-xl mx-auto'>
@@ -95,15 +97,13 @@ function HeaderSection() {
     );
 }
 
-function GettingStartedSection({
-    onOpenModal,
-    isCreatingSchema,
-    categories,
-}: {
+type GettingStartedSectionProps = {
     onOpenModal: () => void;
-    isCreatingSchema: boolean;
+    creatingSchema: NewSchemaType | undefined;
     categories?: SchemaCategoryInfo[];
-}) {
+};
+
+function GettingStartedSection({ onOpenModal, creatingSchema, categories }: GettingStartedSectionProps) {
     const navigate = useNavigate();
 
     return (
@@ -119,8 +119,8 @@ function GettingStartedSection({
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 <FeatureCard
                     icon={
-                        <div className='w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center'>
-                            <FaDatabase className='w-7 h-7 text-primary-600' />
+                        <div className='size-14 rounded-full bg-primary-100 flex items-center justify-center'>
+                            <FaDatabase className='size-7 text-primary-600' />
                         </div>
                     }
                     title='Connect Data Sources'
@@ -130,10 +130,11 @@ function GettingStartedSection({
                     buttonColor='primary'
                     buttonAction={() => navigate(routes.datasources.list.path, { state: { openModal: true } })}
                 />
+
                 <FeatureCard
                     icon={
-                        <div className='w-14 h-14 rounded-full bg-secondary-100 flex items-center justify-center'>
-                            <FaPlus className='w-7 h-7 text-secondary-600' />
+                        <div className='size-14 rounded-full bg-secondary-100 flex items-center justify-center'>
+                            <FaPlus className='size-7 text-secondary-600' />
                         </div>
                     }
                     title='Create Schema Category'
@@ -142,12 +143,14 @@ function GettingStartedSection({
                     buttonVariant='solid'
                     buttonColor='secondary'
                     buttonAction={onOpenModal}
-                    isLoading={isCreatingSchema}
+                    isLoading={creatingSchema === EMPTY_SCHEMA}
+                    isDisabled={!!creatingSchema}
                 />
+
                 <FeatureCard
                     icon={
-                        <div className='w-14 h-14 rounded-full bg-success-100 flex items-center justify-center'>
-                            <BookOpenIcon className='w-7 h-7 text-success-600' />
+                        <div className='size-14 rounded-full bg-success-100 flex items-center justify-center'>
+                            <BookOpenIcon className='size-7 text-success-600' />
                         </div>
                     }
                     title='Define Objects in Editor'
@@ -168,25 +171,17 @@ function GettingStartedSection({
     );
 }
 
-function SchemaCategoriesSection({
-    categories,
-    showAllCategories,
-    setShowAllCategories,
-    onOpenModal,
-    isCreatingSchema,
-    isCreatingExampleSchema,
-    onCreateSchema,
-    fetchCategories,
-}: {
+type SchemaCategoriesSectionProps = {
     categories: SchemaCategoryInfo[] | undefined;
     showAllCategories: boolean;
     setShowAllCategories: (state: boolean) => void;
     onOpenModal: () => void;
-    isCreatingSchema: boolean;
-    isCreatingExampleSchema: boolean;
-    onCreateSchema: (name: string, isExample?: boolean) => void;
+    creatingSchema: NewSchemaType | undefined;
+    onCreateSchema: (name: string, type: NewSchemaType) => void;
     fetchCategories: () => Promise<void>;
-}) {
+};
+
+function SchemaCategoriesSection({ categories, showAllCategories, setShowAllCategories, onOpenModal, creatingSchema, onCreateSchema, fetchCategories }: SchemaCategoriesSectionProps) {
     const [ isReloading, setIsReloading ] = useState(false);
 
     const handleReload = useCallback(async () => {
@@ -213,20 +208,22 @@ function SchemaCategoriesSection({
                 <div className='flex flex-wrap gap-3'>
                     <Button
                         onPress={onOpenModal}
-                        isLoading={isCreatingSchema}
+                        isLoading={creatingSchema === EMPTY_SCHEMA}
+                        isDisabled={!!creatingSchema}
                         color='primary'
-                        startContent={<FaPlus className='w-4 h-4' />}
+                        startContent={<FaPlus className='size-4' />}
                     >
                         New Schema
                     </Button>
                     {EXAMPLE_SCHEMAS.map(example => (
                         <Button
                             key={example}
-                            onPress={() => onCreateSchema(example, true)}
-                            isLoading={isCreatingExampleSchema}
+                            onPress={() => onCreateSchema(example, example)}
+                            isLoading={creatingSchema === example}
+                            isDisabled={!!creatingSchema}
                             color='secondary'
                             variant='flat'
-                            startContent={<FaPlus className='w-4 h-4' />}
+                            startContent={<FaPlus className='size-4' />}
                         >
                             Example ({example})
                         </Button>
@@ -248,7 +245,7 @@ function SchemaCategoriesSection({
                 </div>
             ) : categories.length === 0 ? (
                 <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
-                    <BookOpenIcon className='w-12 h-12 mx-auto text-default-300' />
+                    <BookOpenIcon className='mx-auto size-12 text-default-300' />
                     <p className='mt-4 text-default-500'>No schema categories yet. Create your first one to get started!</p>
                 </div>
             ) : (<>
@@ -298,17 +295,7 @@ type FeatureCardProps = {
     isDisabled?: boolean;
 };
 
-function FeatureCard({
-    icon,
-    title,
-    description,
-    buttonText,
-    buttonVariant = 'solid',
-    buttonColor = 'primary',
-    buttonAction,
-    isLoading = false,
-    isDisabled = false,
-}: FeatureCardProps) {
+function FeatureCard({ icon, title, description, buttonText, buttonVariant = 'solid', buttonColor = 'primary', buttonAction, isLoading, isDisabled }: FeatureCardProps) {
     return (
         <Card className='p-6 h-full flex flex-col'>
             <CardBody className='flex flex-col gap-4 h-full p-0'>
@@ -327,7 +314,7 @@ function FeatureCard({
                             color={buttonColor}
                             variant={buttonVariant}
                             onPress={buttonAction}
-                            endContent={<FaArrowRight className='w-3 h-3' />}
+                            endContent={<FaArrowRight className='size-3' />}
                             className='w-full max-w-[200px]'
                             isLoading={isLoading}
                             isDisabled={isDisabled}
@@ -344,34 +331,33 @@ function FeatureCard({
 type AddSchemaModalProps = {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (label: string) => void;
-    isSubmitting: boolean;
+    onSubmit: (label: string, type: NewSchemaType) => void;
 };
 
-export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddSchemaModalProps) {
+export function AddSchemaModal({ isOpen, onClose, onSubmit }: AddSchemaModalProps) {
     const [ label, setLabel ] = useState('');
 
-    function handleSubmit() {
+    function submit() {
         if (!label.trim()) {
             toast.error('Please provide a valid label for the schema.');
             return;
         }
-        onSubmit(label);
-        handleClose();
+        onSubmit(label, EMPTY_SCHEMA);
+        close();
     }
 
-    function handleClose() {
+    function close() {
         setLabel('');
         onClose();
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         if (e.key === 'Enter')
-            handleSubmit();
+            submit();
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} isDismissable={false}>
+        <Modal isOpen={isOpen} onClose={close} isDismissable={false}>
             <ModalContent>
                 <ModalHeader className='flex flex-col gap-1 text-xl font-semibold'>
                     Create New Schema Category
@@ -387,19 +373,16 @@ export function AddSchemaModal({ isOpen, onClose, onSubmit, isSubmitting }: AddS
                         onChange={e => setLabel(e.target.value)}
                         fullWidth
                         onKeyDown={handleKeyDown}
-                        classNames={{
-                            input: 'text-lg',
-                        }}
+                        classNames={{ input: 'text-lg' }}
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button variant='light' onPress={handleClose}>
+                    <Button variant='light' onPress={close}>
                         Cancel
                     </Button>
                     <Button
                         color='primary'
-                        onPress={handleSubmit}
-                        isLoading={isSubmitting}
+                        onPress={submit}
                         isDisabled={!label.trim()}
                     >
                         Create Schema

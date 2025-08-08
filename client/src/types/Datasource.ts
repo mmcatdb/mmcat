@@ -1,4 +1,5 @@
 import type { Entity, Id } from './id';
+import { Casing, replaceWhitespaces } from './utils/string';
 
 export type DatasourceResponse = {
     id: Id;
@@ -26,6 +27,12 @@ export class Datasource implements Entity {
 
     get specs(): DatasourceSpecs {
         return DATASOURCE_TYPES[this.type].specs;
+    }
+
+    createValidPropertyName(name: string): string | undefined {
+        // We probably shouldn't fix user's mistakes (e.g., if it's in camelCase for postgres, we should accept it). We only replace whitespaces.
+        const replaced = replaceWhitespaces(name, this.specs.propertyCasing);
+        return replaced.length > 0 ? replaced : undefined;
     }
 }
 
@@ -95,6 +102,7 @@ export type DatasourceSpecs = {
     readonly isReferenceAllowed: boolean; // TODO The IC reference algorithm.
     readonly isComplexPropertyAllowed: boolean;
     readonly isSchemaless: boolean;
+    readonly propertyCasing: Casing;
 };
 
 type DatasourceTypeDefinition = {
@@ -116,6 +124,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isReferenceAllowed: true,
             isComplexPropertyAllowed: true,
             isSchemaless: true,
+            propertyCasing: Casing.camel,
         },
     },
     [DatasourceType.postgresql]: {
@@ -130,6 +139,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isReferenceAllowed: true,
             isComplexPropertyAllowed: false,
             isSchemaless: false,
+            propertyCasing: Casing.snake,
         },
     },
     [DatasourceType.neo4j]: {
@@ -144,6 +154,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isReferenceAllowed: false,
             isComplexPropertyAllowed: true, // Just for the _from and _to nodes, false otherwise.
             isSchemaless: true,
+            propertyCasing: Casing.camel,
         },
     },
     [DatasourceType.csv]: {
@@ -158,6 +169,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isReferenceAllowed: true,
             isComplexPropertyAllowed: true,
             isSchemaless: true,
+            propertyCasing: Casing.snake,
         },
     },
     [DatasourceType.json]: {
@@ -172,6 +184,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isReferenceAllowed: true,
             isComplexPropertyAllowed: true,
             isSchemaless: true,
+            propertyCasing: Casing.camel,
         },
     },
     [DatasourceType.jsonld]: {
@@ -186,6 +199,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isReferenceAllowed: true,
             isComplexPropertyAllowed: true,
             isSchemaless: true,
+            propertyCasing: Casing.camel,
         },
     },
 };

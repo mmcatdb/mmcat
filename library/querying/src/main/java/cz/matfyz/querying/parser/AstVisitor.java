@@ -253,31 +253,31 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         final String inner = text.substring(1, text.length() - 1);
 
         final var matcher = ESCAPE_PATTERN.matcher(inner);
-        final var builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
         int lastEnd = 0;
 
         while (matcher.find()) {
-            builder.append(inner, lastEnd, matcher.start());
+            sb.append(inner, lastEnd, matcher.start());
 
             switch (matcher.group().charAt(1)) {
-                case '\'': builder.append('\''); break;
-                case '\"': builder.append('\"'); break;
-                case 't': builder.append('\t'); break;
-                case 'b': builder.append('\b'); break;
-                case 'n': builder.append('\n'); break;
-                case 'r': builder.append('\r'); break;
-                case 'f': builder.append('\f'); break;
-                case '\\': builder.append('\\'); break;
+                case '\'': sb.append('\''); break;
+                case '\"': sb.append('\"'); break;
+                case 't': sb.append('\t'); break;
+                case 'b': sb.append('\b'); break;
+                case 'n': sb.append('\n'); break;
+                case 'r': sb.append('\r'); break;
+                case 'f': sb.append('\f'); break;
+                case '\\': sb.append('\\'); break;
                 default: throw GeneralException.message("Unknown escape sequence");
             }
 
             lastEnd = matcher.end();
         }
 
-        builder.append(inner, lastEnd, inner.length());
+        sb.append(inner, lastEnd, inner.length());
 
-        return new Term(new Constant(builder.toString()));
+        return new Term(new Constant(sb.toString()));
     }
 
     @Override public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {

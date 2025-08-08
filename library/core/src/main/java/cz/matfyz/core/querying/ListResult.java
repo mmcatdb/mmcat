@@ -17,8 +17,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = ListResult.Serializer.class)
 public class ListResult extends ResultNode {
 
-    // TODO nad některými sloupci vytvořit stromy pro rychlejší joinování
-        // - resp. vytvořit je, když jsou potřeba, a pak je nějak udržovat
+    // TODO create indexes over some columns for faster joins
+    // resp. create them when needed, and then maintain them somehow
 
     private List<? extends ResultNode> children;
 

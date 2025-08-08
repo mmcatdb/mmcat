@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Given a MMQL `queryString`, execute this query against the given `schemaCategory`.
+ * Given a MMQL <code>queryString</code>, execute this query against the given <code>schemaCategory</code>.
  * Returns an instance category with the results of the query.
  */
 public class QueryToInstance {

@@ -53,26 +53,26 @@ public class AdminerController {
     public DataResponse getRecords(
         @PathVariable Id datasourceId,
         @RequestParam String kindName,
-        @RequestParam(defaultValue = "") String filtersString,
-        @RequestParam(defaultValue = "50") String limitString,
-        @RequestParam(defaultValue = "0") String offsetString
+        @RequestParam(defaultValue = "") String filters,
+        @RequestParam(defaultValue = "50") String limit,
+        @RequestParam(defaultValue = "0") String offset
     ) {
-        final int limit = Integer.parseInt(limitString);
-        final int offset = Integer.parseInt(offsetString);
+        final int parsedLimit = Integer.parseInt(limit);
+        final int parsedOffset = Integer.parseInt(offset);
 
         final var datasource = datasourceRepository.find(datasourceId);
 
-        List<AdminerFilter> filters = new ArrayList<>();
+        final List<AdminerFilter> parsedFilters = new ArrayList<>();
 
-        if (!filtersString.isEmpty() && !filtersString.equals("[]")) {
+        if (!filters.isEmpty() && !filters.equals("[]")) {
             try {
                 List<AdminerFilter> allFilters = new ObjectMapper()
                     .readerForListOf(AdminerFilter.class)
-                    .readValue(filtersString);
+                    .readValue(filters);
 
                 for (AdminerFilter filter : allFilters) {
                     if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty())
-                        filters.add(filter);
+                        parsedFilters.add(filter);
                 }
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Invalid filter format.");
@@ -81,7 +81,7 @@ public class AdminerController {
 
         final var pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
-        return pullWrapper.getRecords(kindName, limit, offset, filters);
+        return pullWrapper.getRecords(kindName, parsedLimit, parsedOffset, parsedFilters);
     }
 
     /**

@@ -34,7 +34,7 @@ const COMMON_OPERATORS: OperatorLabels = {
     [Operator.In]: 'IN',
 };
 
-const POSTGRESQL_OPERATOR: OperatorLabels = {
+const POSTGRESQL_OPERATORS: OperatorLabels = {
     ...COMMON_OPERATORS,
     [Operator.NotIn]: 'NOT IN',
     [Operator.IsNull]: 'IS NULL',
@@ -46,13 +46,13 @@ const POSTGRESQL_OPERATOR: OperatorLabels = {
     [Operator.NotMatchRegEx]: '!~',
 };
 
-const MONGODB_OPERATOR: OperatorLabels = {
+const MONGODB_OPERATORS: OperatorLabels = {
     ...COMMON_OPERATORS,
     [Operator.NotIn]: 'NOT IN',
     [Operator.MatchRegEx]: 'Match RegEx',
 };
 
-const NEO4J_OPERATOR: OperatorLabels = {
+const NEO4J_OPERATORS: OperatorLabels = {
     ...COMMON_OPERATORS,
     [Operator.IsNull]: 'IS NULL',
     [Operator.IsNotNull]: 'IS NOT NULL',
@@ -62,12 +62,15 @@ const NEO4J_OPERATOR: OperatorLabels = {
     [Operator.MatchRegEx]: '=~',
 };
 
-export const getNeo4jOperators = (propertyName: string): OperatorLabels =>
-    propertyName.startsWith('#') && propertyName.endsWith(' - SIZE') ? COMMON_OPERATORS : NEO4J_OPERATOR;
+function getNeo4jOperators(propertyName: string | undefined): OperatorLabels {
+    return (!propertyName || propertyName.startsWith('#') && propertyName.endsWith(' - SIZE'))
+        ? COMMON_OPERATORS
+        : NEO4J_OPERATORS;
+}
 
-export const OPERATOR_MAPPING: Partial<Record<DatasourceType, (propertyName: string) => OperatorLabels>> = {
-    [DatasourceType.postgresql]: () => POSTGRESQL_OPERATOR,
-    [DatasourceType.mongodb]: () => MONGODB_OPERATOR,
+export const OPERATOR_MAPPING: Partial<Record<DatasourceType, (propertyName: string | undefined) => OperatorLabels>> = {
+    [DatasourceType.postgresql]: () => POSTGRESQL_OPERATORS,
+    [DatasourceType.mongodb]: () => MONGODB_OPERATORS,
     [DatasourceType.neo4j]: getNeo4jOperators,
 };
 

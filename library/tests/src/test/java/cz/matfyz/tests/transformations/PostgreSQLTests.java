@@ -39,11 +39,11 @@ class PostgreSQLTests {
     void getForestForBasicTest() throws Exception {
         new PullForestTestBase(PostgreSQL.order(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }
@@ -52,7 +52,7 @@ class PostgreSQLTests {
     void getForestForStructureTest() throws Exception {
         new PullForestTestBase(PostgreSQL.product(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "id": "123",
                     "label": "Clean Code",
                     "price": "125"
@@ -68,7 +68,7 @@ class PostgreSQLTests {
                     "id": "734",
                     "label": "Animal Farm",
                     "price": "350"
-                }]
+                } ]
             """)
             .run();
     }
@@ -77,7 +77,7 @@ class PostgreSQLTests {
     void getForestForDynamicNamesTest() throws Exception {
         new PullForestTestBase(PostgreSQL.dynamic(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "id": "id-0",
                     "label": "label-0",
                     "px_a": "px-a-0",
@@ -95,7 +95,7 @@ class PostgreSQLTests {
                     "py_b": "py-b-1",
                     "catch_all_a": "catch-all-a-1",
                     "catch_all_b": "catch-all-b-1"
-                }]
+                } ]
             """)
             .run();
     }

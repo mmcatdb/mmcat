@@ -24,8 +24,6 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         if (mongoClient == null)
             mongoClient = MongoClients.create(settings.createConnectionString());
 
-        System.out.println("\nMONGO\n" + settings.createConnectionString() + "\n");
-
         return mongoClient.getDatabase(settings.database);
     }
 
@@ -59,19 +57,16 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
     ) {
 
         public String createConnectionString() {
-            final var builder = new StringBuilder()
+            final var sb = new StringBuilder()
                 .append("mongodb://");
 
             if (username != null)
-                builder
-                    .append(username);
+                sb.append(username);
 
             if (password != null)
-                builder
-                    .append(":")
-                    .append(password);
+                sb.append(":").append(password);
 
-            builder
+            sb
                 .append("@")
                 .append(host)
                 .append(":")
@@ -81,30 +76,27 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
                 .append("?authSource=")
                 .append(authenticationDatabase);
 
-            return builder.toString();
+            return sb.toString();
         }
 
         public String createSparkConnectionString() {
-            final var builder = new StringBuilder()
+            final var sb = new StringBuilder()
                 .append("mongodb://");
 
             if (username != null)
-                builder
-                    .append(username);
+                sb.append(username);
 
             if (password != null)
-                builder
-                    .append(":")
-                    .append(password);
+                sb.append(":").append(password);
 
-            builder
+            sb
                 .append("@")
                 .append(host)
                 .append(":")
                 .append(port)
                 .append("/");
 
-            return builder.toString();
+            return sb.toString();
         }
 
     }

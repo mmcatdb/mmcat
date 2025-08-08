@@ -9,11 +9,11 @@ import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
 import { RiMapPin2Line } from 'react-icons/ri';
 import { Button, Tooltip } from '@heroui/react';
-import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { InfoBanner } from '@/components/common';
+import { PageLayout } from '@/components/RootLayout';
 
 export function DatasourcesInCategoryPage() {
     const data = useLoaderData() as DatasourcesInCategoryLoaderData;
@@ -42,7 +42,7 @@ export function DatasourcesInCategoryPage() {
     }
 
     return (
-        <div className='pt-4'>
+        <PageLayout>
             <div className='flex items-center gap-2 mb-4'>
                 <h1 className='text-xl font-semibold'>Datasources with mappings</h1>
                 <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
@@ -50,7 +50,7 @@ export function DatasourcesInCategoryPage() {
                         onClick={isVisible ? dismissBanner : restoreBanner}
                         className='text-primary-500 hover:text-primary-700 transition'
                     >
-                        <IoInformationCircleOutline className='w-6 h-6' />
+                        <IoInformationCircleOutline className='size-6' />
                     </button>
                 </Tooltip>
             </div>
@@ -100,7 +100,7 @@ export function DatasourcesInCategoryPage() {
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
                     variant='flat'
-                    startContent={<FaPlus className='w-3 h-3' />}
+                    startContent={<FaPlus className='size-3' />}
                 >
                     Add Datasource
                 </Button>
@@ -127,7 +127,7 @@ export function DatasourcesInCategoryPage() {
                 onClose={() => setIsModalOpen(false)}
                 onDatasourceCreated={onDatasourceCreated}
             />
-        </div>
+        </PageLayout>
     );
 }
 
@@ -176,13 +176,6 @@ type MappingInfoBannerProps = {
 export function MappingInfoBanner({ className, dismissBanner }: MappingInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button
-                onClick={dismissBanner}
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
-
             <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>
 
             <p className='text-sm'>

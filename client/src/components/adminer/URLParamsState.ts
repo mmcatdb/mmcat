@@ -1,16 +1,19 @@
-import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
-import { View } from '@/types/adminer/View';
+import { View } from '@/types/adminer/DataResponse';
+import { AVAILABLE_VIEWS } from '@/components/adminer/dataView/Views';
 import { Operator } from '@/types/adminer/Operators';
-import { QueryType } from '@/types/adminer/QueryType';
 import type { Datasource } from '@/types/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
-import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
 import { getInitPaginationState, type PaginationState, type ActiveAdminerState, type AdminerFilterQueryState, type KindFilterState, DEFAULT_LIMIT, DEFAULT_OFFSET } from '@/components/adminer/adminerReducer';
 
 export function getInitURLParams(previousParams: URLSearchParams): URLSearchParams {
     const queryType = getQueryTypeFromURLParams(previousParams);
     const params = getParamsWithQueryType(queryType);
     return params;
+}
+
+export enum QueryType {
+    filter = 'filter',
+    custom = 'custom',
 }
 
 export function getQueryTypeFromURLParams(params: URLSearchParams): QueryType | undefined {
@@ -103,6 +106,13 @@ export function getFilterQueryStateFromURLParams(params: URLSearchParams): Admin
     };
 }
 
+export type PropertyFilter = {
+    id: number;
+    propertyName: string;
+    operator: Operator | undefined;
+    propertyValue: string;
+};
+
 export function getCustomQueryStateFromURLParams(params: URLSearchParams): { query?: string, datasourceId?: string } {
     return {
         query: params.get('query') ?? '',
@@ -127,14 +137,12 @@ export function getHrefFromReference(reference: KindReference, item: Record<stri
         active: {
             limit: DEFAULT_LIMIT,
             offset: DEFAULT_OFFSET,
-            propertyFilters: [
-                {
-                    id: 0,
-                    propertyName: reference.property,
-                    operator: Operator.Equal,
-                    propertyValue: item[propertyName] as string,
-                },
-            ],
+            propertyFilters: [ {
+                id: 0,
+                propertyName: reference.property,
+                operator: Operator.Equal,
+                propertyValue: item[propertyName] as string,
+            } ],
         },
         datasourceId: reference.datasourceId,
         kindName: reference.kindName,

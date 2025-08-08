@@ -108,17 +108,17 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
     }
 
     @Override public Void visit(Composite operation) {
-        /* This function is intentionally empty. */
+        // This function is intentionally empty.
         return null;
     }
 
     @Override public Void visit(CreateMorphism operation) {
-        /* This function is intentionally empty. */
+        // This function is intentionally empty.
         return null;
     }
 
     @Override public Void visit(CreateObjex operation) {
-        /* This function is intentionally empty. */
+        // This function is intentionally empty.
         return null;
     }
 

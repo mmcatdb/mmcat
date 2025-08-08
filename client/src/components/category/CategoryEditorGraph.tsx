@@ -141,7 +141,7 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
             className={twJoin('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
         >
             <div
-                className={twMerge('absolute w-8 h-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
+                className={twMerge('absolute size-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
                     isHoverAllowed && 'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
                     isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
                     isSelected && 'bg-primary-200 border-primary-500',

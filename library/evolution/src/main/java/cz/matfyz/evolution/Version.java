@@ -21,7 +21,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * This class represents the system version of a project.
  * It has a global version and optionally a local version. The former is used for the whole project, the latter is specific for each entity.
  * In either case, the global version is unique. The local version is only an additional information, i.e., something like a comment or a description.
- * The format is `<global-version>` or `<global-version>:<local-version>`. The global version is a non-negative integer. Both versions can't contain the `:` character.
+ * The format is <code><global-version></code> or <code><global-version>:<local-version></code>. The global version is a non-negative integer. Both versions can't contain the <code>:</code> character.
  */
 @JsonSerialize(using = Version.Serializer.class)
 @JsonDeserialize(using = Version.Deserializer.class)

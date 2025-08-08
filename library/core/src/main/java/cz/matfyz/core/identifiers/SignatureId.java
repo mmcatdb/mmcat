@@ -43,7 +43,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
     }
 
     public static SignatureId createEmpty() {
-        return new SignatureId(Signature.createEmpty());
+        return new SignatureId(Signature.empty());
     }
 
     private SignatureId(SortedSet<Signature> signatures) {
@@ -79,13 +79,13 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
     }
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append("(");
-        builder.append(signatures.stream().map(Object::toString).collect(Collectors.joining(", ")));
-        builder.append(")");
+        sb.append("(");
+        sb.append(signatures.stream().map(Object::toString).collect(Collectors.joining(", ")));
+        sb.append(")");
 
-        return builder.toString();
+        return sb.toString();
     }
 
     // #region Serialization

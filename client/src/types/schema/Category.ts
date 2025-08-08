@@ -91,6 +91,14 @@ export class Category implements Entity {
     getMorphisms(): Morphism[] {
         return [ ...this.morphisms.values() ];
     }
+
+    getEdge(signature: Signature): { morphism: Morphism, direction: boolean } {
+        const morphism = this.morphisms.get(signature);
+        if (morphism)
+            return { morphism, direction: true };
+
+        return { morphism: this.getMorphism(signature.dual()), direction: false };
+    }
 }
 
 export type SchemaCategoryResponse = SchemaCategoryInfoResponse & {

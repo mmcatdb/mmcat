@@ -1,22 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
-import { Button, ButtonGroup } from '@heroui/react';
+import { Button, ButtonGroup, Switch } from '@heroui/react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { AdminerCustomQueryPage } from '@/components/adminer/AdminerCustomQueryPage';
 import { AdminerFilterQueryPage } from '@/components/adminer/AdminerFilterQueryPage';
-import { getAdminerURLParams, getInitURLParams, getQueryTypeFromURLParams } from '@/components/adminer/URLParamsState';
+import { getAdminerURLParams, getInitURLParams, getQueryTypeFromURLParams, QueryType } from '@/components/adminer/URLParamsState';
 import { DatasourceMenu } from '@/components/adminer/DatasourceMenu';
-import { LinkLengthSwitch } from '@/components/adminer/LinkLengthSwitch';
 import { api } from '@/api';
-import { QueryType } from '@/types/adminer/QueryType';
 import { Datasource } from '@/types/Datasource';
-import { twJoin } from 'tailwind-merge';
+import { PageLayout } from '@/components/RootLayout';
 
 /**
  * Main page of Adminer, data visualization and browsing tool
  */
 export function AdminerPage() {
-    const { theme } = usePreferences().preferences;
     const { datasources } = useLoaderData() as AdminerLoaderData;
     const [ searchParams, setSearchParams ] = useSearchParams();
     const [ datasource, setDatasource ] = useState<Datasource>();
@@ -34,30 +31,27 @@ export function AdminerPage() {
     }, [ searchParams ]);
 
     return (
-        <div className='h-full px-8 flex flex-col'>
-            <div className={twJoin('flex items-center w-full h-10 border-b px-0',
-                theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
-            )}>
-                <DatasourceMenu setDatasource={setDatasource} datasource={datasource} datasources={datasources}/>
+        <PageLayout isFullscreen className='flex flex-col'>
+            <div className='min-w-4xl p-1 grid grid-cols-3 gap-4 border-b border-default-200'>
+                <DatasourceMenu setDatasource={setDatasource} datasource={datasource} datasources={datasources} />
 
                 {datasource && (<>
-                    <ButtonGroup
-                        className='mx-2'
-                    >
-                        {Object.values(QueryType).map(queryType => (
-                            <Button
-                                size='sm'
-                                variant={queryType === selectedQueryType ? 'solid' : 'ghost'}
-                                key={queryType}
-                                onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
-                            >
-                                {queryType}
-                            </Button>
-                        ),
-                        )}
-                    </ButtonGroup>
+                    <div className='col-span-2 flex items-center gap-2 justify-between'>
+                        <ButtonGroup>
+                            {Object.values(QueryType).map(queryType => (
+                                <Button
+                                    size='sm'
+                                    variant={queryType === selectedQueryType ? 'solid' : 'ghost'}
+                                    key={queryType}
+                                    onPress={() => setSearchParams(prevParams => getAdminerURLParams(prevParams, queryType))}
+                                >
+                                    {queryType}
+                                </Button>
+                            ))}
+                        </ButtonGroup>
 
-                    <LinkLengthSwitch/>
+                        <LinkLengthSwitch />
+                    </div>
                 </>)}
             </div>
 
@@ -68,7 +62,7 @@ export function AdminerPage() {
                     <AdminerFilterQueryPage datasource={datasource} datasources={datasources} />
                 )
             )}
-        </div>
+        </PageLayout>
     );
 }
 
@@ -87,4 +81,22 @@ async function adminerLoader(): Promise<AdminerLoaderData> {
     return {
         datasources: response.data.map(Datasource.fromResponse),
     };
+}
+
+/**
+ * Switch for setting the length of names of datasources, kinds and properties used in links
+ */
+function LinkLengthSwitch() {
+    const { preferences, setPreferences } = usePreferences();
+    const { adminerShortLinks: adminerShortRefs } = preferences;
+
+    return (
+        <Switch
+            isSelected={adminerShortRefs}
+            onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
+            size='sm'
+        >
+            <p className='text-small'>Short names</p>
+        </Switch>
+    );
 }

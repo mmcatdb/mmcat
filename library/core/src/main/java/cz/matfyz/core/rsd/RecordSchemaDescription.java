@@ -206,19 +206,19 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
     }
 
     public String _toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("RecordSchemaDescription{");
-        sb.append("name=").append(name);
-        sb.append(", unique=").append(unique);
-//        sb.append(", share=").append(share);
-        sb.append(", shareTotal=").append(shareTotal);
-        sb.append(", shareFirst=").append(shareFirst);
-        sb.append(", id=").append(id);
-        sb.append(", types=").append(types);
-        sb.append(", models=").append(models);
-        sb.append(", children=").append(children);
-        sb.append('}');
-        return sb.toString();
+        return new StringBuilder()
+            .append("RecordSchemaDescription{")
+            .append("name=").append(name)
+            .append(", unique=").append(unique)
+            // .append(", share=").append(share)
+            .append(", shareTotal=").append(shareTotal)
+            .append(", shareFirst=").append(shareFirst)
+            .append(", id=").append(id)
+            .append(", types=").append(types)
+            .append(", models=").append(models)
+            .append(", children=").append(children)
+            .append('}')
+            .toString();
     }
 
     @Override public String toString() {

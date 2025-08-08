@@ -130,9 +130,9 @@ public class File extends Entity {
     }
 
     public String readPreview(UploadsProperties uploads) {
-        String filePath = getFilePath(this, uploads);
+        final String filePath = getFilePath(this, uploads);
 
-        StringBuilder preview = new StringBuilder();
+        final var sb = new StringBuilder();
         int linesRead = 0;
 
         try (
@@ -140,14 +140,14 @@ public class File extends Entity {
         ) {
             String line;
             while ((line = reader.readLine()) != null && linesRead < PREVIEW_LIMIT) {
-                preview.append(line).append("\n");
+                sb.append(line).append("\n");
                 linesRead++;
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read preview for file: " + filePath, e);
         }
 
-        return preview.toString();
+        return sb.toString();
     }
 
     private record JsonValue(

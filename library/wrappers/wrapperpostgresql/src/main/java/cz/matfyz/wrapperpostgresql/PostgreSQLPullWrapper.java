@@ -223,11 +223,11 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             try (
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM \"" + kindName + "\";")
             ) {
-                final var output = new StringBuilder();
+                final var sb = new StringBuilder();
                 while (resultSet.next())
-                    output.append(resultSet.getString("number")).append("\n");
+                    sb.append(resultSet.getString("number")).append("\n");
 
-                return output.toString();
+                return sb.toString();
             }
         }
     }

@@ -1,5 +1,6 @@
 package cz.matfyz.core.instance;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
@@ -39,7 +40,7 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
     }
 
     public static MappingRow createMappingForEdge(InstanceCategory instance, SchemaEdge edge, DomainRow fromRow, DomainRow toRow) {
-        final InstanceMorphism morphism = instance.getMorphism(edge.morphism());
+        final InstanceMorphism morphism = instance.getMorphism((BaseSignature) edge.morphism().signature());
 
         if (!edge.direction()) {
             var swap = fromRow;
@@ -52,14 +53,14 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
 
     private void addMapping(MappingRow mapping) {
         mappings.add(mapping);
-        mapping.domainRow().setMappingFrom(this, mapping);
-        mapping.codomainRow().addMappingTo(this, mapping);
+        mapping.dom().setMappingFrom(this, mapping);
+        mapping.cod().addMappingTo(this, mapping);
     }
 
     void removeMapping(MappingRow mapping) {
         mappings.remove(mapping);
-        mapping.domainRow().unsetMappingFrom(this);
-        mapping.codomainRow().removeMappingTo(this, mapping);
+        mapping.dom().unsetMappingFrom(this);
+        mapping.cod().removeMappingTo(this, mapping);
     }
 
     SortedSet<MappingRow> allMappings() {
@@ -83,20 +84,21 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
     // Debug
 
     @Override public String toString() {
-        var builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append("\tSignature: ").append(schema.signature())
-            .append("\tDom: ").append(schema.dom().key())
-            .append("\tCod: ").append(schema.cod().key())
-            .append("\n");
+        sb.append("\tSignature: ")
+            .append("(").append(schema.dom().key())
+            .append(")--[").append(schema.signature())
+            .append("]->(").append(schema.cod().key())
+            .append(")\n");
 
-        builder.append("\tValues:\n");
+        sb.append("\tValues:\n");
         //for (Set<ActiveMappingRow> set : mappings.values())
         //    for (ActiveMappingRow row : set)
         for (MappingRow row : allMappings())
-            builder.append("\t\t").append(row).append("\n");
+            sb.append("\t\t").append(row).append("\n");
 
-        return builder.toString();
+        return sb.toString();
     }
 
 }

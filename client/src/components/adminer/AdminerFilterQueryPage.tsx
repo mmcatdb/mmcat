@@ -2,7 +2,6 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Spinner, Pagination } from '@heroui/react';
 import { api } from '@/api';
-import { usePreferences } from '@/components/PreferencesProvider';
 import { getFilterQueryStateFromURLParams, getFiltersURLParam, getURLParamsFromFilterQueryState } from '@/components/adminer/URLParamsState';
 import { FilterForm } from '@/components/adminer/FilterForm';
 import { KindMenu, UNLABELED } from '@/components/adminer/KindMenu';
@@ -11,15 +10,13 @@ import { ExportComponent } from '@/components/adminer/ExportComponent';
 import { adminerReducer } from '@/components/adminer/adminerReducer';
 import { useFetchReferences } from '@/components/adminer/useFetchReferences';
 import { useFetchData } from '@/components/adminer/useFetchData';
-import { DatabaseView } from '@/components/adminer/DatabaseView';
-import { View } from '@/types/adminer/View';
+import { DataView } from '@/components/adminer/dataView/DataView';
 import { type Datasource, DatasourceType } from '@/types/Datasource';
 import type { Id } from '@/types/id';
 import type { QueryParams } from '@/types/api/routes';
-import type { DataResponse } from '@/types/adminer/DataResponse';
+import { View, type DataResponse } from '@/types/adminer/DataResponse';
 import type { AdminerFilterQueryState, KindFilterState } from '@/components/adminer/adminerReducer';
 import type { AdminerReferences, KindReference } from '@/types/adminer/AdminerReferences';
-import { twJoin } from 'tailwind-merge';
 
 type AdminerFilterQueryPageProps = {
     /** The selected datasource. */
@@ -32,7 +29,6 @@ type AdminerFilterQueryPageProps = {
  * Component for fetching the data using filer query
  */
 export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilterQueryPageProps) {
-    const { theme } = usePreferences().preferences;
     const [ searchParams ] = useSearchParams();
     const [ state, dispatch ] = useReducer(adminerReducer, searchParams, getFilterQueryStateFromURLParams);
     const [ kindReferences, setKindReferences ] = useState<KindReference[]>([]);
@@ -40,13 +36,13 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     const searchParamsRef = useRef(searchParams);
 
     useEffect(() => {
-        dispatch({ type:'datasource', newDatasource: datasource });
+        dispatch({ type: 'datasource', newDatasource: datasource });
     }, [ datasource ]);
 
     // Sync state with URL search parameters
     useEffect(() => {
         if (!areEqualURLParams(searchParamsRef.current, searchParams)) {
-            dispatch({ type:'update', newState: getFilterQueryStateFromURLParams(searchParams) });
+            dispatch({ type: 'update', newState: getFilterQueryStateFromURLParams(searchParams) });
             searchParamsRef.current = searchParams;
         }
     }, [ searchParams ]);
@@ -83,48 +79,58 @@ export function AdminerFilterQueryPage({ datasource, datasources }: AdminerFilte
     }, [ references, state.datasourceId, state.kindName ]);
 
     return (<>
-        <div className={twJoin('grid grid-flow-col grid-rows-2 border-b px-0 py-1 gap-2',
-            theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
-        )}>
-            <div className='flex items-start'>
-                <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch}/>
+        <div className='p-1 grid grid-cols-3 gap-4 border-b border-default-200'>
+            <div className='flex items-start gap-2'>
+                <KindMenu datasourceId={datasource.id} kind={state.kindName} showUnlabeled={datasource.type === DatasourceType.neo4j} dispatch={dispatch} />
 
                 {state.kindName !== undefined && (
-                    <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch}/>
+                    <ViewMenu datasourceType={datasource.type} view={state.view} dispatch={dispatch} />
                 )}
             </div>
 
-            {datasource && state.kindName && state.pagination.itemCount !== undefined && state.pagination.itemCount > 0 && (
-                <div className='inline-flex gap-2 items-center self-end'>
-                    {state.view !== View.graph && (<>
-                        <Pagination
-                            size='sm'
-                            total={state.pagination.totalPages}
-                            page={state.pagination.currentPage}
-                            onChange={page => dispatch({ type: 'page', newCurrentPage: page, newOffset: state.active.limit * (page - 1) })}
-                            color='primary'
-                        />
-                        <p className='min-w-36'>Number of rows: {state.pagination.itemCount}</p>
-                    </>)}
-
-                    {fetchedData && (
-                        <ExportComponent data={fetchedData}/>
-                    )}
-                </div>
-            )}
-
-            <div className='row-span-2 justify-self-end'>
+            <div className='col-span-2 flex items-start gap-2 justify-between'>
                 {datasource && state.kindName && (
-                    <FilterForm state={state} datasourceType={datasources.find(source => source.id === state.datasourceId)!.type} propertyNames={fetchedData?.metadata.propertyNames} dispatch={dispatch}/>
+                    <FilterForm
+                        state={state}
+                        datasourceType={datasources.find(source => source.id === state.datasourceId)!.type}
+                        propertyNames={fetchedData?.metadata.propertyNames}
+                        dispatch={dispatch}
+                    />
+                )}
+
+                {datasource && state.kindName && state.pagination.itemCount && (
+                    <div className='flex gap-2 items-center'>
+                        {state.view !== View.graph && (<>
+                            <Pagination
+                                size='sm'
+                                total={state.pagination.totalPages}
+                                page={state.pagination.currentPage}
+                                onChange={page => dispatch({ type: 'page', newCurrentPage: page, newOffset: state.active.limit * (page - 1) })}
+                                color='primary'
+                            />
+                            <p className='min-w-36'>Number of rows: {state.pagination.itemCount}</p>
+                        </>)}
+
+                        {fetchedData && (
+                            <ExportComponent data={fetchedData} />
+                        )}
+                    </div>
                 )}
             </div>
         </div>
 
-        <DataComponent state={state} fetchedData={fetchedData} datasources={datasources} kindReferences={kindReferences} error={error} loading={loading || referencesLoading} />
+        <ResultDisplay
+            state={state}
+            fetchedData={fetchedData}
+            datasources={datasources}
+            kindReferences={kindReferences}
+            error={error}
+            loading={loading || referencesLoading}
+        />
     </>);
 }
 
-type DataComponentProps = {
+type ResultDisplayProps = {
     state: AdminerFilterQueryState;
     fetchedData: DataResponse | undefined;
     datasources: Datasource[];
@@ -133,10 +139,12 @@ type DataComponentProps = {
     loading: boolean;
 };
 
-function DataComponent({ state, fetchedData, datasources, kindReferences, error, loading }: DataComponentProps) {
+function ResultDisplay({ state, fetchedData, datasources, kindReferences, error, loading }: ResultDisplayProps) {
+    console.log('DATA', state.kindName, state.datasourceId, fetchedData?.data);
+
     if (state.kindName && error) {
         return (
-            <p className='ml-1 mt-1'>{error}</p>
+            <p className='mt-2 px-2'>{error}</p>
         );
     }
 
@@ -150,16 +158,14 @@ function DataComponent({ state, fetchedData, datasources, kindReferences, error,
 
     if (state.kindName && state.datasourceId && fetchedData?.data) {
         return (
-            <div className='flex grow min-h-0 mt-2'>
-                <DatabaseView
-                    view={state.view}
-                    data={fetchedData}
-                    kindReferences={kindReferences}
-                    kindName={state.kindName}
-                    datasourceId={state.datasourceId}
-                    datasources={datasources}
-                />
-            </div>
+            <DataView
+                view={state.view}
+                data={fetchedData}
+                kindReferences={kindReferences}
+                kindName={state.kindName}
+                datasourceId={state.datasourceId}
+                datasources={datasources}
+            />
         );
     }
 

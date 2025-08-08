@@ -1,8 +1,9 @@
 package cz.matfyz.transformations.exception;
 
 import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.Name;
-import cz.matfyz.core.record.SimpleRecord;
 
 import java.io.Serializable;
 
@@ -12,24 +13,20 @@ public class InvalidStateException extends TransformationException {
         super("invalidState." + name, data, null);
     }
 
-    public static InvalidStateException simpleRecordIsNotValue(SimpleRecord<?> simpleRecord) {
-        return new InvalidStateException("simpleRecordIsNotValue", simpleRecord);
-    }
-
-    public static InvalidStateException superIdValuesHasArrayValue() {
-        return new InvalidStateException("superIdValuesHasArrayValue", null);
-    }
-
     public static InvalidStateException dynamicNameNotFound(DynamicName dynamicName) {
         return new InvalidStateException("dynamicNameNotFound", dynamicName);
     }
 
-    public static InvalidStateException dynamicNameNotUnique(DynamicName dynamicName) {
-        return new InvalidStateException("dynamicNameNotUnique", dynamicName);
-    }
-
     public static InvalidStateException nameIsNotStatic(Name name) {
         return new InvalidStateException("nameIsNotStatic", name);
+    }
+
+    public static InvalidStateException complexPropertyForValueIds(Key key) {
+        return new InvalidStateException("complexPropertyForValueIds", key);
+    }
+
+    public static InvalidStateException simplePropertyForNonValueIds(AccessPath property) {
+        return new InvalidStateException("simplePropertyForNonValueIds", property);
     }
 
 }

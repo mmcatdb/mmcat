@@ -34,62 +34,60 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
         };
     });
 
-    return (<>
-        {state.form.propertyFilters.map(filter => (
-            <PropertyFilterForm key={filter.id} filter={filter} datasourceType={datasourceType} propertyNames={propertyNames} dispatch={dispatch}/>
-        ))}
+    return (
+        <div className='flex flex-col gap-1'>
+            {state.form.propertyFilters.map(filter => (
+                <PropertyFilterForm key={filter.id} filter={filter} datasourceType={datasourceType} propertyNames={propertyNames} dispatch={dispatch} />
+            ))}
 
-        <div className='mt-1 flex flex-wrap gap-2 items-center'>
-            <label htmlFor='limit'>
-                    Limit:
-            </label>
-            <Input
-                id='limit'
-                className='text-sm max-h-10 w-min min-w-24'
-                type='number'
-                min='0'
-                label='Limit'
-                labelPlacement='outside-left'
-                classNames={
-                    { label:'sr-only' }
-                }
-                size='sm'
-                placeholder='Enter limit'
-                value={state.form.limit.toString()}
-                onChange={e => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
-                required
-            />
+            <div className='flex flex-wrap gap-x-2 gap-y-1 items-center'>
+                <label htmlFor='limit'>Limit:</label>
+                <Input
+                    id='limit'
+                    className='text-sm max-h-10 w-min min-w-24'
+                    type='number'
+                    min='0'
+                    label='Limit'
+                    labelPlacement='outside-left'
+                    classNames={{ label: 'sr-only' }}
+                    size='sm'
+                    placeholder='Enter limit'
+                    value={state.form.limit.toString()}
+                    onChange={e => dispatch({ type: 'input', field: 'limit', value: Number(e.target.value) })}
+                    required
+                />
 
-            <Button
-                className='items-center gap-1 min-w-40'
-                size='sm'
-                color='danger'
-                variant='bordered'
-                onPress={() => {
-                    dispatch({ type: 'form', action: 'delete_filters' });
-                }}
-            >
-                <IoTrashBin /> Delete filters
-            </Button>
+                <Button
+                    className='items-center gap-1 min-w-40'
+                    size='sm'
+                    color='danger'
+                    variant='bordered'
+                    onPress={() => {
+                        dispatch({ type: 'form', action: 'delete_filters' });
+                    }}
+                >
+                    <IoTrashBin /> Delete filters
+                </Button>
 
-            <Button
-                className='items-center gap-1 min-w-40'
-                size='sm'
-                color='success'
-                variant='bordered'
-                onPress={() => dispatch({ type: 'form', action: 'add_filter' })}
-            >
-                <FaPlusCircle /> Add filter
-            </Button>
+                <Button
+                    className='items-center gap-1 min-w-40'
+                    size='sm'
+                    color='success'
+                    variant='bordered'
+                    onPress={() => dispatch({ type: 'form', action: 'add_filter' })}
+                >
+                    <FaPlusCircle /> Add filter
+                </Button>
 
-            <Button
-                className='items-center gap-1 min-w-40'
-                size='sm'
-                color='primary'
-                onPress={() => dispatch({ type: 'submit' })}
-            >
-                <FaSave /> SUBMIT
-            </Button>
+                <Button
+                    className='items-center gap-1 min-w-40'
+                    size='sm'
+                    color='primary'
+                    onPress={() => dispatch({ type: 'submit' })}
+                >
+                    <FaSave /> SUBMIT
+                </Button>
+            </div>
         </div>
-    </>);
+    );
 }

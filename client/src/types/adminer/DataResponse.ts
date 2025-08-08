@@ -1,7 +1,14 @@
+/** View of data is basically the type of the model. */
+export enum View {
+    table = 'table',
+    document = 'document',
+    graph = 'graph',
+}
+
 export type DataResponse = TableResponse | DocumentResponse | GraphResponse;
 
 export type TableResponse = {
-    type: 'table';
+    type: View.table;
     metadata: {
         itemCount: number;
         propertyNames: string[];
@@ -11,7 +18,7 @@ export type TableResponse = {
 };
 
 export type DocumentResponse = {
-    type: 'document';
+    type: View.document;
     metadata: {
         itemCount: number;
         propertyNames: string[];
@@ -21,7 +28,7 @@ export type DocumentResponse = {
 };
 
 export type GraphResponse = {
-    type: 'graph';
+    type: View.graph;
     metadata: {
         itemCount: number;
         propertyNames: string[];

@@ -5,17 +5,16 @@ import java.io.Serializable;
 /**
  * Simple property cannot have children so it is a leaf node in the record tree.
  * However, it can have value.
- * @param <T> a type of the value of this property.
  */
-public class SimpleRecord<T> implements Serializable {
+class SimpleRecord<TDataType> implements Serializable {
 
-    public SimpleRecord(T value) {
+    SimpleRecord(TDataType value) {
         this.value = value;
     }
 
-    private final T value;
+    private final TDataType value;
 
-    public T getValue() {
+    TDataType getValue() {
         return value;
     }
 

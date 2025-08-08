@@ -114,3 +114,56 @@ export class DynamicName extends TypedName {
         return `<${this.type}${patternString}: ${this.signature.toString()}>`;
     }
 }
+
+/**
+ * For convenient navigation in the access path.
+ * Immutable.
+ */
+export class NamePath {
+    constructor(
+        readonly names: Name[],
+    ) {}
+
+    replaceLast(name: Name): NamePath {
+        const names = [ ...this.names ];
+        names[names.length - 1] = name;
+        return new NamePath(names);
+    }
+
+    append(name: Name): NamePath {
+        return new NamePath([ ...this.names, name ]);
+    }
+
+    pop(): NamePath {
+        if (this.names.length === 0)
+            throw new Error('Cannot pop from an empty NamePath');
+
+        return new NamePath(this.names.slice(0, -1));
+    }
+
+    toString(): string {
+        return this.names.map(name => name.toString()).join('.');
+    }
+}
+
+export class NamePathBuilder {
+    private names: Name[];
+
+    constructor(...names: Name[]) {
+        this.names = names;
+    }
+
+    prepend(name: Name): NamePathBuilder {
+        this.names.push(name);
+        return this;
+    }
+
+    shift(): NamePathBuilder {
+        this.names.pop();
+        return this;
+    }
+
+    build(): NamePath {
+        return new NamePath(this.names.toReversed());
+    }
+}

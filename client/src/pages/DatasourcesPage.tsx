@@ -7,12 +7,12 @@ import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { Button, Tooltip } from '@heroui/react';
 import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
-import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { InfoBanner } from '@/components/common';
 import { FaPlus } from 'react-icons/fa';
+import { PageLayout } from '@/components/RootLayout';
 
 export function DatasourcesPage() {
     const data = useLoaderData() as DatasourcesLoaderData;
@@ -47,7 +47,7 @@ export function DatasourcesPage() {
     }
 
     return (
-        <div className='pt-4'>
+        <PageLayout>
             {/* Header Section */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
@@ -57,14 +57,15 @@ export function DatasourcesPage() {
                             onClick={isVisible ? dismissBanner : restoreBanner}
                             className='text-primary-500 hover:text-primary-700 transition'
                         >
-                            <IoInformationCircleOutline className='w-6 h-6' />
+                            <IoInformationCircleOutline className='size-6' />
                         </button>
                     </Tooltip>
                 </div>
+
                 <Button
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
-                    startContent={<FaPlus className='w-3 h-3' />}
+                    startContent={<FaPlus className='size-3' />}
                 >
                     Add Datasource
                 </Button>
@@ -92,7 +93,7 @@ export function DatasourcesPage() {
                 onClose={() => setIsModalOpen(false)}
                 onDatasourceCreated={onDatasourceCreated}
             />
-        </div>
+        </PageLayout>
     );
 }
 
@@ -130,13 +131,6 @@ type DatasourcesInfoBannerProps = {
 export function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button
-                onClick={dismissBanner}
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
-
             <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
             <p className='text-sm'>
                 A <strong>Datasource</strong> represents where your data is stored. You can <strong>import from</strong> or <strong>export to</strong> different sources, including databases and files.

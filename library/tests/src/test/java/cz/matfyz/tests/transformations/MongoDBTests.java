@@ -29,8 +29,8 @@ public class MongoDBTests {
     @Test
     void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
-            var inputWrapper = datasource.wrapper.getPullWrapper();
-            var dbContent = inputWrapper.readCollectionAsStringForTests(MongoDB.orderKind);
+            final var inputWrapper = datasource.wrapper.getPullWrapper();
+            final var dbContent = inputWrapper.readCollectionAsStringForTests(MongoDB.orderKind);
             LOGGER.trace("DB content:\n" + dbContent);
         });
     }
@@ -39,11 +39,11 @@ public class MongoDBTests {
     void getForestForBasicTest() throws Exception {
         new PullForestTestBase(MongoDB.order(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }
@@ -52,7 +52,7 @@ public class MongoDBTests {
     void getForestForStructureTest() throws Exception {
         new PullForestTestBase(MongoDB.address(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
                     "address": {
                         "street": "Ke Karlovu 2027/3",
@@ -66,7 +66,7 @@ public class MongoDBTests {
                         "city": "Praha 1",
                         "zip": "118 00"
                     }
-                }]
+                } ]
             """)
             .run();
     }
@@ -75,7 +75,7 @@ public class MongoDBTests {
     void getForestForSimpleArrayTest() throws Exception {
         new PullForestTestBase(MongoDB.tag(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
                     "tags": [
                         123,
@@ -89,7 +89,7 @@ public class MongoDBTests {
                         "String456",
                         "String789"
                     ]
-                }]
+                } ]
             """)
             .run();
     }
@@ -98,43 +98,36 @@ public class MongoDBTests {
     void getForestForComplexArrayTest() throws Exception {
         new PullForestTestBase(MongoDB.item(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
-                    "items": [
-                        {
-                            "id": 123,
-                            "label": "Clean Code",
-                            "price": 125,
-                            "quantity": 1
-                        }
-                    ]
+                    "items": [ {
+                        "id": 123,
+                        "label": "Clean Code",
+                        "price": 125,
+                        "quantity": 1
+                    } ]
                 }, {
                     "number": "o_100",
-                    "items": [
-                        {
-                            "id": 765,
-                            "label": "The Lord of the Rings",
-                            "price": 199,
-                            "quantity": 2
-                        }
-                    ]
+                    "items": [ {
+                        "id": 765,
+                        "label": "The Lord of the Rings",
+                        "price": 199,
+                        "quantity": 2
+                    } ]
                 }, {
                     "number": "o_200",
-                    "items": [
-                        {
-                            "id": 457,
-                            "label": "The Art of War",
-                            "price": 299,
-                            "quantity": 7
-                        },
-                        {
-                            "id": 734,
-                            "label": "Animal Farm",
-                            "price": 350,
-                            "quantity": 3
-                        }
-                    ]
-                }]
+                    "items": [ {
+                        "id": 457,
+                        "label": "The Art of War",
+                        "price": 299,
+                        "quantity": 7
+                    }, {
+                        "id": 734,
+                        "label": "Animal Farm",
+                        "price": 350,
+                        "quantity": 3
+                    } ]
+                } ]
             """)
             .run();
     }
@@ -143,13 +136,13 @@ public class MongoDBTests {
     void getForestForEmptyArrayTest() throws Exception {
         new PullForestTestBase(MongoDB.itemEmpty(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
                     "items": null
                 }, {
                     "number": "o_200",
                     "items": []
-                }]
+                } ]
             """)
             .run();
     }
@@ -158,7 +151,7 @@ public class MongoDBTests {
     void getForestForComplexMapTest() throws Exception {
         new PullForestTestBase(MongoDB.note(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
                     "note": {
                         "cs-CZ": {
@@ -182,7 +175,7 @@ public class MongoDBTests {
                             "content": "content 2"
                         }
                     }
-                }]
+                } ]
             """)
             .run();
     }
@@ -191,7 +184,7 @@ public class MongoDBTests {
     void getForestForMissingSimpleTest() throws Exception {
         new PullForestTestBase(MongoDB.addressMissingSimple(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
                     "address": {
                         "street": "Ke Karlovu 2027/3",
@@ -203,7 +196,7 @@ public class MongoDBTests {
                         "street": "Malostranské nám. 2/25",
                         "zip": "118 00"
                     }
-                }]
+                } ]
             """)
             .run();
     }
@@ -212,11 +205,11 @@ public class MongoDBTests {
     void getForestForMissingComplexTest() throws Exception {
         new PullForestTestBase(MongoDB.addressMissingComplex(schema), datasource.wrapper.getPullWrapper())
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
                 }, {
                     "number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }

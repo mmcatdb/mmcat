@@ -126,27 +126,27 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
      * @param alias The alias assigned to the graph element in the query.
      */
     private List<String> createWhereConditions(List<AdminerFilter> filters, String alias) {
-        List<String> conditions = new ArrayList<>();
+        final List<String> conditions = new ArrayList<>();
 
-        for (AdminerFilter filter : filters) {
-            StringBuilder condition = new StringBuilder();
+        for (final AdminerFilter filter : filters) {
+            final var sb = new StringBuilder();
 
-            String propertyName = filter.propertyName();
-            Double doubleValue = this.parseNumeric(filter.propertyValue());
+            final String propertyName = filter.propertyName();
+            final Double doubleValue = this.parseNumeric(filter.propertyValue());
 
             if (propertyName.contains(Neo4jUtils.LABELS)) {
-                this.appendLabelsWhereClause(condition, alias, propertyName, filter.operator(), filter.propertyValue(), doubleValue);
+                this.appendLabelsWhereClause(sb, alias, propertyName, filter.operator(), filter.propertyValue(), doubleValue);
                 continue;
             }
 
-            appendPropertyName(condition, alias, propertyName, doubleValue);
+            appendPropertyName(sb, alias, propertyName, doubleValue);
 
-            String operator = OPERATORS.get(filter.operator());
-            appendOperator(condition, operator);
+            final String operator = OPERATORS.get(filter.operator());
+            appendOperator(sb, operator);
 
-            appendPropertyValue(condition, filter.propertyValue(), operator, doubleValue);
+            appendPropertyValue(sb, filter.propertyValue(), operator, doubleValue);
 
-            conditions.add(condition.toString());
+            conditions.add(sb.toString());
         }
 
         return conditions;
@@ -487,34 +487,34 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     private String nodeToString(Value node) {
-        final var output = new StringBuilder();
-        output
+        final var sb = new StringBuilder();
+        sb
             .append(node.asNode().elementId().split(":")[2])
             .append(": (\n");
 
         for (final var label : node.asNode().labels())
-            output.append("    :").append(label).append("\n");
+            sb.append("    :").append(label).append("\n");
 
-        addProperties(node, output);
+        addProperties(node, sb);
 
-        output.append(")");
+        sb.append(")");
 
-        return output.toString();
+        return sb.toString();
     }
 
     private String relationToString(Value relation) {
-        final var output = new StringBuilder();
-        output
+        final var sb = new StringBuilder();
+        sb
             .append(relation.asRelationship().elementId().split(":")[2])
             .append(":")
             .append(relation.asRelationship().type())
             .append(": [\n");
 
-        addProperties(relation, output);
+        addProperties(relation, sb);
 
-        output.append("]");
+        sb.append("]");
 
-        return output.toString();
+        return sb.toString();
     }
 
     @Override public QueryResult executeQuery(QueryStatement statement) {

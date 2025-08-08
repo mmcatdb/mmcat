@@ -4,7 +4,7 @@ import { NodeInspectorDrawer } from './NodeInspectorDrawer';
 import { type GraphStyleModel } from '../../types/GraphStyle';
 import { type VizItem } from '../../types/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import { DatabaseDocument } from '@/components/adminer/DatabaseDocument';
+import { DocumentView } from '@/components/adminer/dataView/DocumentView';
 import { type GraphResponse } from '@/types/adminer/DataResponse';
 import { type KindReference } from '@/types/adminer/AdminerReferences';
 import { type Datasource } from '@/types/Datasource';
@@ -59,7 +59,7 @@ export class NodeInspectorPanel extends Component<NodeInspectorPanelProps, NodeI
                             graphStyle={graphStyle}
                         />
                     ) : (
-                        <DatabaseDocument
+                        <DocumentView
                             data={this.props.data}
                             kindReferences={EMPTY_REFERENCES}
                             kind=''

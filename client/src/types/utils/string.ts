@@ -102,3 +102,41 @@ class LineStringBuilder implements Printer {
         return this.stack.join('');
     }
 }
+
+/** Don't be afraid to add others as needed. */
+export enum Casing {
+    camel = 'camelCase',
+    snake = 'snake_case',
+    pascal = 'PascalCase',
+    kebab = 'kebab-case',
+}
+
+/**
+ * Replaces whitespaces by the preferred casing.
+ * The string itself is NOT converted to the given casing.
+ */
+export function replaceWhitespaces(input: string, casing: Casing): string {
+    const trimmed = input.trim();
+
+    const split = trimmed.split(/\s+/);
+    let output = split[0];
+
+    for (let i = 1; i < split.length; i++) {
+        const word = split[i];
+
+        switch (casing) {
+        case Casing.camel:
+        case Casing.pascal:
+            output += word.charAt(0).toUpperCase() + word.slice(1);
+            break;
+        case Casing.snake:
+            output += '_' + word;
+            break;
+        case Casing.kebab:
+            output += '-' + word;
+            break;
+        }
+    }
+
+    return output;
+}

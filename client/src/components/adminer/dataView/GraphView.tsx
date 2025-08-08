@@ -3,7 +3,7 @@ import { GraphVisualizer } from '@/components/adminer/graph-visualization/GraphV
 import type { BasicNode, BasicRelationship } from '@/components/adminer/graph-visualization/types/types';
 import type { GraphNode, GraphResponse, GraphResponseData } from '@/types/adminer/DataResponse';
 
-type DatabaseTableProps = {
+type GraphViewProps = {
     /** The data to display. */
     data: GraphResponse;
     /** Name of the current kind. */
@@ -13,7 +13,7 @@ type DatabaseTableProps = {
 /**
  * Component for displaying data in graph
  */
-export function DatabaseGraph({ data, kind }: DatabaseTableProps ) {
+export function GraphView({ data, kind }: GraphViewProps ) {
     const graph = useMemo(() => {
         if (!data.data)
             return;

@@ -1,7 +1,7 @@
 import { Button, ButtonGroup } from '@heroui/react';
-import { AVAILABLE_VIEWS } from './Views';
+import { type View } from '@/types/adminer/DataResponse';
+import { AVAILABLE_VIEWS } from './dataView/Views';
 import type { DatasourceType } from '@/types/Datasource';
-import type { View } from '@/types/adminer/View';
 import type { AdminerFilterQueryStateAction } from '@/components/adminer/adminerReducer';
 import { type Dispatch } from 'react';
 
@@ -24,10 +24,7 @@ export function ViewMenu({ datasourceType, view, dispatch }: ViewMenuProps) {
         return null;
 
     return (
-        <ButtonGroup
-            size='sm'
-            className='max-w-m mx-2'
-        >
+        <ButtonGroup size='sm'>
             {availableViews.map(availableView => (
                 <Button
                     size='sm'

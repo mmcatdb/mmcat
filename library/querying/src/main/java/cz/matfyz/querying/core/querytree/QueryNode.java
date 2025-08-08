@@ -27,7 +27,7 @@ public abstract class QueryNode implements TopDownTree<QueryNode> {
 
     public interface SerializedQueryNode extends Serializable {
 
-        /** Will be automatically serialized as `type`. */
+        /** Will be automatically serialized as <code>type</code>. */
         String getType();
 
     }

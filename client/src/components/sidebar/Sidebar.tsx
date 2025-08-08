@@ -1,4 +1,4 @@
-import { type FunctionComponent, type SVGProps, useState } from 'react';
+import { type FunctionComponent, type SVGProps, useMemo, useState } from 'react';
 import { Link, matchPath, useLocation, useParams } from 'react-router-dom';
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@heroui/react';
 import { routes } from '@/routes/routes';
@@ -17,7 +17,7 @@ import { BiCategory, BiSolidCategory } from 'react-icons/bi';
 /**
  * Type for navigation items in the sidebar.
  */
-type NormalSidebarItem = {
+type NormalMenuItem = {
     type: 'normal';
     label: string;
     solidIcon: FunctionComponent<SVGProps<SVGSVGElement>>;
@@ -30,21 +30,19 @@ type NormalSidebarItem = {
  * This is a special type of item that is only used to separate other items.
  * It does not have a route or icon.
  */
-type SeparatorSidebarItem = {
+type SeparatorMenuItem = {
     type: 'separator';
     label: string;
     collapsedLabel: string;
 };
 
-type SidebarItem = NormalSidebarItem | SeparatorSidebarItem;
+type MenuItem = NormalMenuItem | SeparatorMenuItem;
 
 export function Sidebar() {
     const { categoryId } = useParams<'categoryId'>();
     const { theme, isCollapsed } = usePreferences().preferences;
 
-    const dynamicSidebarItems: SidebarItem[] = categoryId
-        ? categorySidebarItems(categoryId)
-        : generalSidebarItems();
+    const dynamicMenuItems: MenuItem[] = useMemo(() => categoryId ? categoryMenuItems(categoryId) : generalMenuItems(), [ categoryId ]);
 
     return (
         <div className={twJoin('fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
@@ -55,8 +53,8 @@ export function Sidebar() {
             </div>
 
             <div className='flex flex-col'>
-                {dynamicSidebarItems.map(item => (
-                    <SidebarItemDisplay key={item.label} item={item} />
+                {dynamicMenuItems.map(item => (
+                    <MenuItemDisplay key={item.label} item={item} />
                 ))}
             </div>
 
@@ -78,7 +76,7 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
             onClick={() => setIsSettingsOpen(true)}
             className={twJoin('flex items-center px-3 py-3 mx-2 rounded-md', theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100')}
         >
-            <Cog6ToothIcon className='w-6 h-6' />
+            <Cog6ToothIcon className='size-6' />
             {!isCollapsed && <span className='px-4'>Settings</span>}
         </button>
     );
@@ -138,8 +136,8 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
 function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
     const content = (
         <Link to={routes.home.path} className='flex items-center mb-6 mt-2 pl-5 group transition-all duration-300 ease-in-out'>
-            <div className={twJoin('shrink-0 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
-                isCollapsed ? 'w-8 h-8 text-xl' : 'w-8 h-8 text-2xl',
+            <div className={twJoin('shrink-0 size-8 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
+                isCollapsed ? 'text-xl' : 'text-2xl',
             )}>
                 <PiCat className='w-full h-full' />
             </div>
@@ -162,10 +160,10 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
 }
 
 /**
- * Renders a single sidebar item (normal link or separator).
+ * Renders a single menu item (normal link or separator).
  */
-function SidebarItemDisplay({ item }: {
-    item : SidebarItem;
+function MenuItemDisplay({ item }: {
+    item : MenuItem;
 }) {
     const { theme, isCollapsed } = usePreferences().preferences;
     const location = useLocation();
@@ -192,7 +190,7 @@ function SidebarItemDisplay({ item }: {
                     theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100', // needs to be defined via 'theme ===' not via default colors (HeroUI does not have good contrast in dark mode or light mode)
                 )}
             >
-                <Icon className='shrink-0 mr-2 w-6 h-6' />
+                <Icon className='shrink-0 mr-2 size-6' />
 
                 <span className={twJoin('ml-2 whitespace-nowrap overflow-hidden', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100')}>
                     {item.label}
@@ -208,16 +206,13 @@ function SidebarItemDisplay({ item }: {
             linkContent
         );
     }
-
-    default:
-        throw new Error(`Unhandled SidebarItem type: ${JSON.stringify(item)}`);
     }
 }
 
 /**
- * Generates sidebar items for general navigation (no schema category context).
+ * Generates menu items for general navigation (no schema category context).
  */
-function generalSidebarItems(): SidebarItem[] {
+function generalMenuItems(): MenuItem[] {
     return [ {
         type: 'normal',
         label: 'Schema categories',
@@ -241,9 +236,9 @@ function generalSidebarItems(): SidebarItem[] {
 }
 
 /**
- * Generates sidebar items for category-specific navigation.
+ * Generates menu items for category-specific navigation.
  */
-function categorySidebarItems(categoryId: string): SidebarItem[] {
+function categoryMenuItems(categoryId: string): MenuItem[] {
     return [ {
         type: 'separator',
         label: 'Schema Category',
@@ -266,14 +261,14 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
         solidIcon: HiDatabase,
         outlineIcon: HiOutlineDatabase,
         route: routes.category.datasources.list.resolve({ categoryId }),
-        match: [ routes.category.datasources.detail.path ],
+        match: [ routes.category.datasources.detail.path, routes.category.mapping.path, routes.category.datasources.newMapping.path ],
     }, {
         type: 'normal',
         label: 'Actions',
         solidIcon: RocketLaunchIconSolid,
         outlineIcon: RocketLaunchIconOutline,
         route: routes.category.actions.list.resolve({ categoryId }),
-        match: [ routes.category.actions.list.path, routes.category.actions.new.path ],
+        match: [ routes.category.actions.new.path ],
     }, {
         type: 'normal',
         label: 'Jobs',
@@ -281,5 +276,11 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
         outlineIcon: PlayCircleIconOutline,
         route: routes.category.jobs.resolve({ categoryId }),
         match: [ routes.category.job.path ],
+    }, {
+        type: 'normal',
+        label: 'Querying',
+        solidIcon: PlayCircleIconSolid,
+        outlineIcon: PlayCircleIconOutline,
+        route: routes.category.querying.resolve({ categoryId }),
     } ];
 }

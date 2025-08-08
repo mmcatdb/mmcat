@@ -23,19 +23,19 @@ public class Computation implements Expression, Comparable<Computation> {
     }
 
     private String computeStringValue() {
-        final var builder = new StringBuilder();
-        builder.append("[").append(operator).append("](");
+        final var sb = new StringBuilder();
+        sb.append("[").append(operator).append("](");
 
         // We want to sort the arguments (if that's possitble) to make sure expressions like "?a = ?b" and "?b = ?a" are considered the same.
         final var sortedArguments = getSortedArguments();
 
-        builder.append(sortedArguments.get(0));
+        sb.append(sortedArguments.get(0));
         for (int i = 1; i < sortedArguments.size(); i++)
-            builder.append(", ").append(sortedArguments.get(i));
+            sb.append(", ").append(sortedArguments.get(i));
 
-        builder.append(")");
+        sb.append(")");
 
-        return builder.toString();
+        return sb.toString();
     }
 
     private List<String> getSortedArguments() {

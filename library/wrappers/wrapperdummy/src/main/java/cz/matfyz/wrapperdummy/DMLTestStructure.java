@@ -28,14 +28,14 @@ public class DMLTestStructure {
     }
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final var sb = new StringBuilder();
 
-        builder.append(name).append(": [\n");
+        sb.append(name).append(": [\n");
         for (final String value : values.stream().sorted().toList())
-            builder.append("    ").append(value).append(",\n");
+            sb.append("    ").append(value).append(",\n");
 
-        builder.append("]");
+        sb.append("]");
 
-        return builder.toString();
+        return sb.toString();
     }
 }

@@ -4,13 +4,12 @@ import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 import { usePreferences } from './PreferencesProvider';
 import { Tooltip } from './common';
 import { Sidebar } from './sidebar/Sidebar';
-import { Link, matchPath, Outlet, type UIMatch, useMatches } from 'react-router-dom';
+import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { routes } from '@/routes/routes';
 
 /**
  * The main layout of the application.
@@ -18,37 +17,42 @@ import { routes } from '@/routes/routes';
  */
 export function RootLayout() {
     const { isCollapsed } = usePreferences().preferences;
-    const location = useLocation(); // Get current route
-
-    // A workaround to detect if we are on the editor page and adjust the layout accordingly.
-    const isFullPage = useMemo(() => fullPageRoutes.some(route => matchPath(route, location.pathname)), [ location.pathname ]);
 
     return (<>
         <ScrollToTop />
         <div className='h-screen overflow-hidden text-foreground bg-background'>
             <div className='flex h-full'>
                 <Sidebar />
-                <div className={twJoin('flex flex-col grow transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-64')}>
+                <div className={twJoin('min-w-0 flex flex-col grow transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-64')}>
                     <CommonNavbar />
-                    <main className='grow relative'>
-                        <div className={twJoin('absolute inset-0', isFullPage ? 'grow h-full overflow-hidden' : 'overflow-y-auto')}>
-                            <div className={twJoin('relative grow mx-auto', isFullPage ? 'h-full' : 'max-w-5xl p-6 overflow-y-auto')}>
-                                <Outlet />
-                            </div>
-                        </div>
-                    </main>
+
+                    <Outlet />
                 </div>
             </div>
         </div>
     </>);
 }
 
-const fullPageRoutes = [
-    routes.category.editor.path,
-    routes.category.datasources.newMapping.path,
-    routes.category.mapping.path,
-    routes.adminer,
-];
+/**
+ * Make sure there is exactly one page layout in the component tree!
+ */
+export function PageLayout({ isFullscreen, className, children }: { isFullscreen?: boolean, className?: string, children: React.ReactNode }) {
+    if (isFullscreen) {
+        return (
+            <main className={twMerge('grow relative overflow-hidden', className)}>
+                {children}
+            </main>
+        );
+    }
+
+    return (
+        <main className='grow relative overflow-y-scroll'>
+            <div className={twMerge('relative grow mx-auto max-w-5xl p-6', className)}>
+                {children}
+            </div>
+        </main>
+    );
+}
 
 function CommonNavbar() {
     return (
@@ -59,14 +63,14 @@ function CommonNavbar() {
                 </div>
 
                 <div className='flex items-center shrink-0 gap-2 ml-auto'>
-                    {/* The documentation for help is not ready yet, so displaying just GitHub link. *}
-                    {/* <HelpDropdown /> */}
+                    <HelpDropdown />
+
                     <Tooltip content='GitHub Repository' placement='bottom'>
                         <Button
                             isIconOnly
                             aria-label='GitHub Repository'
                             variant='light'
-                            className='w-7 h-7 min-w-6'
+                            className='size-7 min-w-6'
                             as='a'
                             href='https://github.com/mmcatdb/mmcat/tree/ui'
                             target='_blank'
@@ -74,7 +78,7 @@ function CommonNavbar() {
                             <FaGithub size={20} />
                         </Button>
                     </Tooltip>
-                    <ThemeToggle className='w-7 h-7' />
+                    <ThemeToggle className='size-7' />
                 </div>
             </div>
         </Navbar>
@@ -160,13 +164,11 @@ function Breadcrumbs() {
 /**
  * A dropdown menu with help related links.
  */
-// This is a placeholder for now, as the documentation is not ready yet.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function HelpDropdown() {
     return (
         <Dropdown>
             <DropdownTrigger>
-                <Button isIconOnly aria-label='Help' variant='light' className='w-7 h-7 min-w-6'>
+                <Button isIconOnly aria-label='Help' variant='light' className='size-7 min-w-6'>
                     <Tooltip content='Help' placement='bottom'>
                         <span>
                             <IoHelpSharp size={18} />
@@ -229,7 +231,7 @@ export function ThemeToggle({ className }: { className?: string }) {
                 aria-label={label}
                 onPress={() => setPreferences({ ...preferences, theme: nextValue })}
                 variant='light'
-                className={twMerge('w-6 h-6 min-w-6 p-0', className)}
+                className={twMerge('size-6 min-w-6 p-0', className)}
             >
                 {theme === 'dark' ? (
                     <MdOutlineDarkMode size={18} />
