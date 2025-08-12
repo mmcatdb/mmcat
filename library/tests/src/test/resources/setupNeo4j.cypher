@@ -1,5 +1,5 @@
-MATCH (a:Order)-[r]->() DELETE a, r;
-MATCH (a:Product)-[r]->() DELETE a, r;
+MATCH (a:Order)-[r]-() DELETE a, r;
+MATCH (a:Product)-[r]-() DELETE a, r;
 MATCH (a:Order) DELETE a;
 MATCH (a:Product) DELETE a;
 

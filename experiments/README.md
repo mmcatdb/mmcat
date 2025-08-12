@@ -29,4 +29,4 @@ mongo --username mmcat_user --password mmcat_password --authenticationDatabase a
 
 ## Query Benchmarks
 
-Some query tests use the *Yelp* dataset to test performance on large data, but due to its size, it is not loaded automatically. To load the dataset, download it from <https://business.yelp.com/data/resources/open-dataset/>, then insert either the archive or extracted data into the `data/` directory. Finally, run the `setupBenchmarkYelp.sh` script to load the data into the database. *Warning:* loading may take a long time.
+Some query tests use the *Yelp* dataset to test performance on large data, but due to its size, it is not loaded automatically. To load the dataset, download it from <https://business.yelp.com/data/resources/open-dataset/>, then insert either the archive or extracted data (i.e. the `yelp_academic_dataset_*.json` files) into the `data/` directory. Finally, run the `setupBenchmarkYelp.sh` script to load the data into the database. *Warning:* loading may take a long time.

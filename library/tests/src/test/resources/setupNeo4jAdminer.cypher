@@ -1,3 +1,5 @@
+MATCH (a:User)-[r]-() DELETE a, r;
+
 CREATE (a:User {id: 'user_001'});
 CREATE (a:User {id: 'user_002'});
 CREATE (a:User {id: 'user_003'});

@@ -67,6 +67,8 @@ services:
             - 3206:7687
             # The bolt port has to be as is because the browser client expects it to be there.
             - 3207:7474
+        volumes:
+            - ./data:/mmcat-data
 
 networks:
     default:
