@@ -37,9 +37,9 @@ class CsvTests {
         final var settings = new CsvSettings(url.toURI().toString(), ',', true, false, false, false);
         final var provider = new CsvProvider(settings);
 
-        final List<String> fileNames = List.of(provider.getCsvFileNames());
+        final List<String> filenames = List.of(provider.getCsvFilenames());
 
-        assertEquals("googleplaystore", fileNames.get(0));
+        assertEquals("googleplaystore", filenames.get(0));
 
         try (
             InputStream inputStream = provider.getInputStream()

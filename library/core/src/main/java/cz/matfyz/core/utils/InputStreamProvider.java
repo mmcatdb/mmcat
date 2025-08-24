@@ -15,22 +15,22 @@ public interface InputStreamProvider {
 
     class FileInputStreamProvider implements InputStreamProvider {
 
-        private String fileName;
+        private String filename;
 
-        public FileInputStreamProvider(String fileName) {
-            this.fileName = fileName;
+        public FileInputStreamProvider(String filename) {
+            this.filename = filename;
         }
 
         public InputStream getInputStream() throws IOException {
             try {
-                final var fileUrl = ClassLoader.getSystemResource(fileName);
+                final var fileUrl = ClassLoader.getSystemResource(filename);
                 Path pathToDataFile = Paths.get(fileUrl.toURI()).toAbsolutePath();
                 File dataFile = pathToDataFile.toFile();
 
                 return new FileInputStream(dataFile);
             }
             catch (Exception e) {
-                throw new IOException("Cannot read from local file " + fileName + ".", e.getCause());
+                throw new IOException("Cannot read from local file " + filename + ".", e.getCause());
             }
         }
 

@@ -2,7 +2,7 @@ const totalBatches = 1024;
 //const totalBatches = 2;
 const batchSize = 1000;
 //const batchSize = 2;
-const outputFileName = 'setupPostgresql.sql';
+const outputFilename = 'setupPostgresql.sql';
 //const maxCustomers = 3;
 //const maxItems = 3;
 
@@ -108,7 +108,7 @@ function getRandomItems() {
 }
 
 const fs = require('fs');
-const outputFile = fs.createWriteStream(outputFileName);
+const outputFile = fs.createWriteStream(outputFilename);
 
 outputFile.write('INSERT INTO app_customer (id, full_name) VALUES\n');
 

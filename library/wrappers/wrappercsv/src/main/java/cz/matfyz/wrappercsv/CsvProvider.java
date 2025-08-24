@@ -47,7 +47,7 @@ public class CsvProvider {
      * Retrieves a list of CSV file names from the specified URL.
      * Supports both local directories and remote file access.
      */
-    public String getCsvFileNames() {
+    public String getCsvFilenames() {
         String url = settings.url;
         return url.substring(url.lastIndexOf('/') + 1);
     }

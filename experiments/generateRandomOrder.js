@@ -1,7 +1,7 @@
 const totalBatches = 64;
 const batchSize = 1000;
 const kindName = 'order';
-const outputFileName = 'setupMongodb.js';
+const outputFilename = 'setupMongodb.js';
 
 const data = require('./randomData');
 
@@ -63,7 +63,7 @@ function getRandomCustomizedItem() {
 }
 
 const fs = require('fs');
-const outputFile = fs.createWriteStream(outputFileName);
+const outputFile = fs.createWriteStream(outputFilename);
 
 outputFile.write(`db.dropDatabase();\n`);
 
