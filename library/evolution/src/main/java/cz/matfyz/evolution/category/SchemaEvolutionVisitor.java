@@ -1,5 +1,7 @@
 package cz.matfyz.evolution.category;
 
+import cz.matfyz.evolution.category.complex.CopyObjex;
+
 public interface SchemaEvolutionVisitor<T> {
 
     T visit(Composite operation);
@@ -9,5 +11,8 @@ public interface SchemaEvolutionVisitor<T> {
     T visit(DeleteObjex operation);
     T visit(UpdateMorphism operation);
     T visit(UpdateObjex operation);
+
+    // Complex operations
+    T visit(CopyObjex operation);
 
 }

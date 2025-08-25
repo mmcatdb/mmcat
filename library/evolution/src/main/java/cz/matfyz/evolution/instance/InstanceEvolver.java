@@ -2,7 +2,6 @@ package cz.matfyz.evolution.instance;
 
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceObjex;
-import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
 import cz.matfyz.evolution.category.Composite;
 import cz.matfyz.evolution.category.CreateMorphism;
 import cz.matfyz.evolution.category.CreateObjex;
@@ -11,6 +10,7 @@ import cz.matfyz.evolution.category.DeleteObjex;
 import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
 import cz.matfyz.evolution.category.UpdateMorphism;
 import cz.matfyz.evolution.category.UpdateObjex;
+import cz.matfyz.evolution.category.complex.CopyObjex;
 
 import java.util.Set;
 
@@ -62,9 +62,8 @@ public class InstanceEvolver extends InstanceCategory.Editor implements SchemaEv
         return null;
     }
 
-    record CopyObjex(SerializedObjex source, SerializedObjex target) {}
 
-    public Void visit(CopyObjex operation) {
+    @Override public Void visit(CopyObjex operation) {
         final var targetKey = operation.target().key();
         final var schemaObjex = instance.schema().getObjex(targetKey);
         // FIXME The set.of might be a problem ...
@@ -78,5 +77,7 @@ public class InstanceEvolver extends InstanceCategory.Editor implements SchemaEv
 
         return null;
     }
+
+
 
 }

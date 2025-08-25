@@ -13,6 +13,7 @@ import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
 import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
 import cz.matfyz.evolution.category.UpdateMorphism;
 import cz.matfyz.evolution.category.UpdateObjex;
+import cz.matfyz.evolution.category.complex.CopyObjex;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.querying.parser.ParsedQuery;
@@ -227,6 +228,10 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
     @Override public Void visit(UpdateObjex operation) {
         errors.add(new QueryEvolutionError(ErrorType.UpdateError, "Unexpected error in the query", null));
+        return null;
+    }
+
+    @Override public Void visit(CopyObjex operation) {
         return null;
     }
 
