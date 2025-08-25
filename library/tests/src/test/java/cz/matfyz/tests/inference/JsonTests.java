@@ -37,9 +37,9 @@ class JsonTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final List<String> fileNames = List.of(jsonProvider.getJsonFileNames());
+        final List<String> filenames = List.of(jsonProvider.getJsonFilenames());
 
-        assertEquals("yelp_business_sample", fileNames.get(0));
+        assertEquals("yelp_business_sample", filenames.get(0));
 
         try (
             InputStream inputStream = jsonProvider.getInputStream()

@@ -1,7 +1,7 @@
 const totalBatches = 1024;
 const batchSize = 1000;
 const kindName = 'customer';
-const outputFileName = 'initialUserData.js';
+const outputFilename = 'initialUserData.js';
 
 const data = require('./randomData');
 
@@ -17,7 +17,7 @@ function getRandomAddress() {
 }
 
 const fs = require('fs');
-const outputFile = fs.createWriteStream(outputFileName);
+const outputFile = fs.createWriteStream(outputFilename);
 
 outputFile.write(`db.dropDatabase();\n`);
 
