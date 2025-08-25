@@ -1,0 +1,30 @@
+{
+  "name": "mmcat-benchmark-data-generator",
+  "version": "1.0.0",
+  "description": "A set of tools for modeling, evolution and querying of multi-model data based on category theory. First and foremost, read our awesome [wiki](https://mmcatdb.com/)!",
+  "homepage": "https://github.com/mmcatdb/mmcat#readme",
+  "bugs": {
+    "url": "https://github.com/mmcatdb/mmcat/issues"
+  },
+  "license": "MIT",
+  "author": "Filip Strobl",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "mongodb": "^6.18.0",
+    "neo4j-driver": "^5.28.1",
+    "pg": "^8.16.3",
+    "random": "^5.4.1",
+    "randomstring": "^1.3.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/neo4j": "^2.0.6",
+    "@types/node": "^24.3.0",
+    "@types/pg": "^8.15.5",
+    "@types/randomstring": "^1.3.0"
+  }
+}
