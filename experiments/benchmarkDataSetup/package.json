@@ -1,14 +1,14 @@
 {
   "name": "mmcat-benchmark-data-generator",
   "version": "1.0.0",
-  "description": "A set of tools for modeling, evolution and querying of multi-model data based on category theory. First and foremost, read our awesome [wiki](https://mmcatdb.com/)!",
+  "description": "Benchmark data generator and importer for multiple database models; developed for the MMCat DB project.",
   "homepage": "https://github.com/mmcatdb/mmcat#readme",
   "bugs": {
     "url": "https://github.com/mmcatdb/mmcat/issues"
   },
   "license": "MIT",
-  "author": "Filip Strobl",
-  "type": "commonjs",
+  "author": "Filip Štrobl",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

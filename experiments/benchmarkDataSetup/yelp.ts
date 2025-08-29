@@ -1,10 +1,8 @@
-#!/usr/bin/env node
-
-import { SubCollection, Importer, generateWithinRange } from './generator.ts'
+import { Importer, generateWithinRange } from './generator.ts'
 import random from 'random'
 import randomstring from 'randomstring'
 
-random.use('helloworld')
+random.use('helloworld') // seed for number generator (TODO somehow make random string generation seedable too)
 
 const importer = new Importer('benchmark_yelp', parseFloat(process.argv[2] || '1.0'))
 
@@ -13,29 +11,35 @@ const importer = new Importer('benchmark_yelp', parseFloat(process.argv[2] || '1
 // `random.shuffle` could be useful for remaking order of arrays for various independent distributions
 
 let idn = 1
-const business = importer.generateRecords(100, () => ({
-    business_id: (idn++).toString(), // TODO: unique string, somehow...
+const business = importer.generateRecords(10, () => ({
+    business_id: (idn++).toString(),
     name: randomstring.generate({ length: 8, charset: 'alphabetic', capitalization: 'lowercase' }),
+    city: randomstring.generate({ length: 2, charset: 'alphabetic', capitalization: 'uppercase' }),
     state: randomstring.generate({ length: 1, charset: 'alphabetic', capitalization: 'uppercase' }),
 }))
 
-const user = importer.generateRecords(1000, () => ({
+const user_length = importer.scalingFactor * 100
+const ufr = random.pareto(1.2)
+const user = importer.generateRecords(100, () => ({
     user_id: (idn++).toString(),
     name: randomstring.generate({ length: 8, charset: 'alphabetic', capitalization: 'lowercase' }),
+    fans: generateWithinRange(() => Math.round(ufr()), 1, user_length) - 1
 }))
 
-const rbr = random.geometric(1 / (business.length))
-const rur = random.geometric(1 / 1000)
-const rrr = random.normal(500, 150)
-const review = importer.generateRecords(3000, () => ({
+const rbr = random.geometric(3 / business.length)
+const rur = random.geometric(10 / user.length)
+const rcr = random.normal(500, 150)
+const stars = [ 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0 ]
+const review = importer.generateRecords(300, () => ({
     review_id: (idn++).toString(),
-    business: business[generateWithinRange(
+    business_id: business[generateWithinRange(
         rbr, 0, business.length-1
     )].business_id,
-    user: user[generateWithinRange(
+    user_id: user[generateWithinRange(
         rur, 0, user.length-1
     )].user_id,
-    content: randomstring.generate(generateWithinRange(() => Math.round(rrr()), 50, 950)),
+    stars: stars[random.int(0, stars.length - 1)],
+    content: randomstring.generate(generateWithinRange(() => Math.round(rcr()), 50, 950)),
 }))
 
 // # STEP 2: Specify import of data
@@ -43,86 +47,142 @@ const review = importer.generateRecords(3000, () => ({
 importer.importData({
     postgreSQL: [
         {
-            name: "business",
+            name: 'business',
             schema: `
-                "business_id" CHAR(16) PRIMARY KEY,
-                "name" TEXT,
-                "city" TEXT,
-                "state" TEXT,
-                "stars" INTEGER,
-                "review_count" INTEGER,
-                "is_open" INTEGER
+                business_id char(22) PRIMARY KEY,
+                name text,
+                city text,
+                state text
             `,
-            data: [], // TODO
+            data: business,
             structure: {
                 business_id: true,
                 name: true,
                 city: true,
                 state: true,
+            }
+        },
+        {
+            name: 'yelp_user',
+            schema: `
+                user_id char(22) PRIMARY KEY,
+                name text,
+                fans integer
+            `,
+            data: user,
+            structure: {
+                user_id: true,
+                name: true,
+                fans: true,
+            }
+        },
+        {
+            name: 'review',
+            schema: `
+                review_id char(22) PRIMARY KEY,
+                user_id char(22) REFERENCES yelp_user (user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+                business_id char(22) REFERENCES business (business_id) ON DELETE SET NULL ON UPDATE CASCADE,
+                stars char(3),
+                content text
+            `,
+            data: review,
+            structure: {
+                review_id: true,
+                user_id: true,
+                business_id: true,
                 stars: true,
-                review_count: true,
-                is_open: true,
+                content: true,
             }
         },
     ],
     mongoDB: [
         {
-            name: "user",
-            data: [],
+            name: 'business',
+            data: business,
             structure: {
-                user_id: true,
-                personal: {
-                    name: true,
-                    address: true,
-                },
-
-                // friends: new SubCollection(
-                //     Join(Join(friendship, "user_a", user, "user_id"), "user_b", user, ""),
-                //     {
-                //         user_id: true,
-                //         name: true
-                //     }
-                // ),
-
-                // friends: Join([
-                //     { collection: "friendship", where: "user_1", is: "user_id" },
-                //     { collection: "user", where: "user_id", is: "user_2" },
-                //     // start with [ user_id ], then, join by join, flat map it to the next collection and set current collection to the joined one
-                //     // you could even somehow allow referring to previous attributes, like `previous("business")`
-                // ]),
-                // NOTE: Joins are difficult since they require aliasing (e.g. when joining two users together), so I decided to avoid them for now
-
-                // OR (this is probably the best one)
-                friends: new SubCollection(
-                    record => findByKey([], "user_a", record.user_id).map(record2 => user.getById(record2.user_b)),
-                    {
-                        user_id: true,
-                        name: true
-                    }
-                )
-                },
+                business_id: true,
+                name: true,
+                city: true,
+                state: true,
+            }
         },
-    ],
-    neo4j: [
         {
-            name: "YelpUser",
-            data: [], // TODO
+            name: 'user',
+            data: user,
             structure: {
                 user_id: true,
                 name: true,
-            },
+                fans: true,
+            }
         },
         {
-            name: "YELP_FRIENDSHIP",
-            data: [], // TODO
-            structure: {},
+            name: 'review',
+            data: review,
+            structure: {
+                review_id: true,
+                user_id: true,
+                business_id: true,
+                stars: true,
+                content: true,
+            }
+        },
+
+        // Example nested implementation...
+        // {
+        //     name: "user",
+        //     data: [],
+        //     structure: {
+        //         user_id: true,
+        //         personal: {
+        //             name: true,
+        //             address: true,
+        //         },
+        //         friends: new SubCollection(
+        //             record => importer.findRecordByKey(friendship, "user_a", record.user_id)
+        //                 // .map(record2 => importer.findRecordByKey(user, "user_id", record2.user_b)),
+        //             {
+        //                 user_id: true,
+        //                 name: true
+        //             }
+        //         )
+        //     },
+        // },
+    ],
+    neo4j: [
+        {
+            name: 'YelpBusiness',
+            data: business,
+            structure: {
+                business_id: true,
+                name: true,
+                city: true,
+                state: true,
+            }
+        },
+        {
+            name: 'YelpUser',
+            data: user,
+            structure: {
+                user_id: true,
+                name: true,
+                fans: true,
+            }
+        },
+        {
+            name: 'YELP_REVIEW',
+            data: review,
+            structure: {
+                review_id: true,
+                stars: true,
+                content: true,
+            },
             from: {
-                label: "YelpUser",
-                match: { user_id: "user_a" },
+                label: 'YelpUser',
+                match: { user_id: 'user_id' },
             },
             to: {
-                label: "YelpUser",
-                match: { user_id: "user_b" },
+                label: 'YelpBusiness',
+                match: { business_id: 'business_id' },
             },
         },
     ],

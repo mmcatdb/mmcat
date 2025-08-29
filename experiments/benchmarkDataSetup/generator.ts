@@ -3,8 +3,9 @@ import neo4j from 'neo4j-driver'
 import { Client as PostgresClient } from 'pg'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-const rootDir = path.join(__dirname, '..', '..')
+const rootDir = path.join(import.meta.dirname, '..', '..')
 
 export class Importer {
     readonly databaseName: string
@@ -97,8 +98,8 @@ export class Importer {
         for (const kind of kinds) {
             await client.query(`CREATE TABLE "${kind.name}" (${kind.schema})`)
 
-            function sanitizeForSQL(input: string): string {
-                return input.replaceAll("'", "''")
+            function sanitizeForSQL(input: any): string {
+                return input.toString().replaceAll("'", "''")
             }
 
             const BATCH_SIZE = 50_000
@@ -110,9 +111,9 @@ export class Importer {
                         if (value === false) {
                             continue
                         } else if (value === true) {
-                            output.push(`'${sanitizeForSQL(key)}'`)
+                            output.push(`'${sanitizeForSQL(record[key])}'`)
                         } else if (typeof(value) === 'string') {
-                            output.push(`'${sanitizeForSQL(value)}'`)
+                            output.push(`'${sanitizeForSQL(record[value])}'`)
                         } else {
                             throw new Error('PostgreSQL can only have flat relations')
                         }
@@ -181,8 +182,8 @@ export class Importer {
 
     private async importNeo4j(kinds: Neo4jKindSettings[]) {
         const driver = neo4j.driver(
-            'neo4j://localhost',
-            neo4j.auth.basic('neo4j', this.password) // NOTE: the free version only has 1 db and user (neo4j)
+            'neo4j://localhost:3206',
+            neo4j.auth.basic('neo4j', this.password) // the free version only has 1 db and user (neo4j)
         )
         const session = driver.session()
 
@@ -190,9 +191,15 @@ export class Importer {
             return (settings as any).from || (settings as any).to
         }
 
+        const BATCH_SIZE = 10_000
         for (const kind of kinds) {
             if (isRelationship(kind)) continue
-            await session.run(`MATCH (a:${kind.name})-[r]-() DELETE a, r`)
+            await session.run(`
+                MATCH (a:${kind.name})
+                CALL { WITH a
+                    DETACH DELETE a
+                } IN TRANSACTIONS OF ${BATCH_SIZE} ROWS
+            `)
         }
 
         for (const kind of kinds) {
@@ -257,8 +264,8 @@ const csvExporter = {
         return filename
     },
 
-    sanitizeForCSV(input: string): string {
-        return input.replaceAll('"', '""')
+    sanitizeForCSV(input: any): string {
+        return input.toString().replaceAll('"', '""')
     },
 }
 
@@ -302,6 +309,8 @@ export class SubCollection { // always under an array
 }
 
 type SubCollectionDataFunc = (record: DataRecord) => DataRecord[] // NOTE: later *maybe* replace (or add to) the single (topmost) record for some context in nested SubCollections, then you can do something like record.super.super.whatever_key
+
+// NOTE: in the future there could also be a Join class or function here so that records can be combined more ways than subcollections, however joining would require aliasing the attributes into the result, which is too complicated for now
 
 type ImportSettings = {
     postgreSQL?: PostgreSQLKindSettings[],
