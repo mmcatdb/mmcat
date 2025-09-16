@@ -5,7 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
-import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
+import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
@@ -107,7 +107,7 @@ public class CsvControlWrapper extends BaseControlWrapper {
         return new CsvInferenceWrapper(provider, getSparkSettings());
     }
 
-    @Override public CollectorWrapper getCollectorWrapper() {
+    @Override public AbstractCollectorWrapper getCollectorWrapper() {
         throw new UnsupportedOperationException("Collector wrapper for this datasource is not integrated yet.");
     }
 }

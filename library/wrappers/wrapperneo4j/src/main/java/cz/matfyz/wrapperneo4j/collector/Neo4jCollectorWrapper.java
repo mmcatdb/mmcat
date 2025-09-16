@@ -1,6 +1,6 @@
 package cz.matfyz.wrapperneo4j.collector;
 
-import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
+import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
@@ -15,7 +15,7 @@ import cz.matfyz.wrapperneo4j.collector.components.Neo4jQueryResultParser;
 /**
  * Class which represents wrapper that is connected to Neo4j database and evaluate queries over it
  */
-public class Neo4jCollectorWrapper implements CollectorWrapper {
+public class Neo4jCollectorWrapper implements AbstractCollectorWrapper {
 
     private final Neo4jProvider provider;
     private final String datasourceIdentifier;

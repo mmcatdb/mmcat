@@ -1,6 +1,6 @@
 package cz.matfyz.wrapperpostgresql.collector;
 
-import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
+import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.*;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
@@ -14,7 +14,7 @@ import cz.matfyz.wrapperpostgresql.collector.components.PostgresQueryResultParse
 /**
  * Class which represents the wrapper operating over PostgreSQL database
  */
-public class PostgreSQLCollectorWrapper implements CollectorWrapper {
+public class PostgreSQLCollectorWrapper implements AbstractCollectorWrapper {
 
     protected final PostgreSQLProvider provider;
     private final String datasourceIdentifier;

@@ -1,4 +1,4 @@
-package cz.matfyz.abstractwrappers.collector;
+package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperException;
@@ -7,9 +7,7 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 /**
  * Class which represents unified API for communication with all wrappers from server module
  */
-public interface CollectorWrapper {
-
-
+public interface AbstractCollectorWrapper {
     /**
      * Method which is executed by QueryScheduler to compute statistical result of query over this wrapper
      * @param query inputted

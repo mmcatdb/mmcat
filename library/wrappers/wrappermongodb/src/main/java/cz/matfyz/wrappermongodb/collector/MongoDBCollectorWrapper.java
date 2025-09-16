@@ -1,5 +1,6 @@
 package cz.matfyz.wrappermongodb.collector;
 
+import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.*;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
@@ -10,12 +11,10 @@ import cz.matfyz.wrappermongodb.collector.components.MongoDataCollector;
 import cz.matfyz.wrappermongodb.collector.components.MongoExplainPlanParser;
 import cz.matfyz.wrappermongodb.collector.components.MongoQueryResultParser;
 
-import cz.matfyz.abstractwrappers.collector.CollectorWrapper;
-
 /**
  * Class representing Wrapper for mongodb database
  */
-public final class MongoDBCollectorWrapper implements CollectorWrapper {
+public final class MongoDBCollectorWrapper implements AbstractCollectorWrapper {
 
     private final MongoDBProvider provider;
     private final String datasourceIdentifier;
