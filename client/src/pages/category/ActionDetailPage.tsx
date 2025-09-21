@@ -114,7 +114,7 @@ async function actionLoader({ params: { actionId } }: { params: Params<'actionId
 type StepsTableProps = {
     payloads: JobPayload[];
     categoryId: string;
-}
+};
 
 /**
  * Renders a table of steps for the action.
@@ -153,7 +153,7 @@ function StepsTable({ payloads, categoryId }: StepsTableProps) {
 type renderDatasourceElementProps = {
     payload: JobPayload;
     categoryId: string;
-}
+};
 
 /**
  * Renders the datasource element based on the payload type.
@@ -163,7 +163,7 @@ function renderDatasourceElement({ payload, categoryId }: renderDatasourceElemen
         if (payload.datasource) {
             return (
                 <Link
-                    to={routes.categories + `/${categoryId}/datasources/${payload.datasource.id}`}
+                    to={routes.category.datasources.detail.resolve({ categoryId, datasourceId: payload.datasource.id })}
                     className='text-primary-500 hover:underline'
                 >
                     {payload.datasource.label}
@@ -179,7 +179,7 @@ function renderDatasourceElement({ payload, categoryId }: renderDatasourceElemen
                 {payload.datasources?.map(ds => (
                     <Link
                         key={ds.id}
-                        to={routes.categories + `/${categoryId}/datasources/${ds.id}`}
+                        to={routes.category.datasources.detail.resolve({ categoryId, datasourceId: ds.id })}
                         className='text-primary-500 hover:underline'
                     >
                         {ds.label}

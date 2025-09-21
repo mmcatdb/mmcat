@@ -49,15 +49,15 @@ export function ActionsPage() {
                     </Tooltip>
                 </div>
 
-                <Link to={routes.category.actions.new.resolve({ categoryId: category.id })}>
-                    <Button
-                        color='primary'
-                        startContent={<FaPlus />}
-                        size='sm'
-                    >
-                        Add Action
-                    </Button>
-                </Link>
+                <Button
+                    as={Link}
+                    to={routes.category.actions.new.resolve({ categoryId: category.id })}
+                    color='primary'
+                    startContent={<FaPlus />}
+                    size='sm'
+                >
+                    Add Action
+                </Button>
             </div>
 
             {/* Info Banner Below Header (Appears When Open) */}

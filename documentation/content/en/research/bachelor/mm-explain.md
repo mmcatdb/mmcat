@@ -12,4 +12,4 @@ The goal of the project is to extend the MM-cat tool with the funkcionality of r
 
 The module will consist both of a backend service and a user-friendly frontend GUI.
 
-**This project is currently available.**
+<!-- **This project is currently available.** -->

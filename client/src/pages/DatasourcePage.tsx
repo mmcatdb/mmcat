@@ -56,11 +56,14 @@ export function DatasourceInCategoryPage() {
                     <h2 className='text-xl'>Mappings Table</h2>
 
                     {mappings.length > 0 && (
-                        <Link to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}>
-                            <Button color='primary' size='sm'>
+                        <Button
+                            as={Link}
+                            to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
+                            color='primary'
+                            size='sm'
+                        >
                                 + Add Mapping
-                            </Button>
-                        </Link>
+                        </Button>
                     )}
                 </div>
 
