@@ -1,3 +1,4 @@
+import { type Signature } from '@/types/identifiers';
 import { EdgeMap, type Edge, type Node } from '../graph/graphUtils';
 import { type SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex, type SchemaMorphism } from '@/types/schema';
 
@@ -73,4 +74,16 @@ function mapCategoryToEdges(category: Category): CategoryEdge[] {
             },
         } satisfies CategoryEdge;
     });
+}
+
+export function traverseCategoryGraph(graph: CategoryGraph, from: CategoryNode, path: Signature): CategoryNode {
+    let currentId = from.id;
+
+    for (const base of path.toBases()) {
+        const nonDual = base.isBaseDual ? base.dual() : base;
+        const edge = graph.edges.get(nonDual.toString())!;
+        currentId = edge.from === currentId ? edge.to : edge.from;
+    }
+
+    return graph.nodes.get(currentId)!;
 }

@@ -1,7 +1,7 @@
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { type ReactNode } from 'react';
 import { toast } from 'react-toastify';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type CopyToClipboardButtonProps = {
     textToCopy: string | (() => string);
@@ -15,7 +15,7 @@ export function CopyToClipboardButton({ textToCopy, title, className, children }
         <button
             onClick={() => copyToClipboard(textToCopy)}
             title={title}
-            className={twMerge('cursor-pointer', className)}
+            className={cn('cursor-pointer', className)}
         >
             {children !== undefined ? children : <DocumentDuplicateIcon />}
         </button>

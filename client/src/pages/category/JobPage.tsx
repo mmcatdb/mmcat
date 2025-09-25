@@ -8,7 +8,7 @@ import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
 import { type SchemaCategoryInfo } from '@/types/schema';
 import { LoadingPage, ReloadPage } from '../errorPages';
-import { twJoin, twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 import { PlayCircleIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, PauseCircleIcon, XCircleIcon, EllipsisHorizontalCircleIcon, StopCircleIcon } from '@heroicons/react/24/outline';
 import { PageLayout } from '@/components/RootLayout';
@@ -83,7 +83,7 @@ export function JobPage() {
                 </p>
                 <p className='mb-1'>
                     <strong>State:</strong>
-                    <span className={twMerge('m-2 px-3 py-1 rounded-full font-semibold', jobStateStyles[job.state].bg)}>
+                    <span className={cn('m-2 px-3 py-1 rounded-full font-semibold', jobStateStyles[job.state].bg)}>
                         {job.state}
                     </span>
                 </p>
@@ -173,7 +173,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 export function JobStateIcon({ state }: {state: JobState }) {
     const styles = jobStateStyles[state];
     return (
-        <styles.icon className={twJoin(
+        <styles.icon className={cn(
             'size-8',
             styles.color,
             state === JobState.Running && 'animate-spin',

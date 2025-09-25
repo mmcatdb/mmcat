@@ -42,7 +42,7 @@ export type GraphSelectEvent = {
     edgeIds: string[];
     /** A special key like ctrl or shift was held during the event. */
     isSpecialKey: boolean;
-}
+};
 
 /** The internal state of the graph engine that is propagated to the UI. */
 export type ReactiveGraphState = {

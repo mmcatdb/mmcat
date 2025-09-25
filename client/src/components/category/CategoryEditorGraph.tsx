@@ -6,7 +6,7 @@ import { type CategoryEditorDispatch, type CategoryEditorState, LeftPanelMode } 
 import { type CategoryEdge, type CategoryNode } from './categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { usePreferences } from '../PreferencesProvider';
-import { twJoin, twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type CategoryEditorGraphProps = {
     state: CategoryEditorState;
@@ -81,7 +81,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     return (
         <div
             ref={setCanvasRef}
-            className={twMerge('relative bg-canvas overflow-hidden',
+            className={cn('relative bg-canvas overflow-hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-default',
                 className,
             )}
@@ -138,10 +138,10 @@ function NodeDisplay({ node, state, dispatch }: NodeDisplayProps) {
         <div
             ref={setNodeRef}
             style={style}
-            className={twJoin('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
+            className={cn('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
         >
             <div
-                className={twMerge('absolute size-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
+                className={cn('absolute size-8 -left-4 -top-4 rounded-full border-2 border-default-600 bg-background',
                     isHoverAllowed && 'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
                     isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
                     isSelected && 'bg-primary-200 border-primary-500',
@@ -206,7 +206,7 @@ function EdgeDisplay({ edge, degree, state, dispatch }: EdgeDisplayProps) {
         <text
             ref={setEdgeRef.label}
             transform={svg.label?.transform}
-            className={twJoin('font-medium', !svg.label && 'hidden')}
+            className={cn('font-medium', !svg.label && 'hidden')}
             fill='currentColor'
             textAnchor='middle'
         >

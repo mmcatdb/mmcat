@@ -6,7 +6,7 @@ import { categoryToGraph } from './categoryGraph';
 import { type FreeSelectionAction } from '../graph/FreeSelection';
 import { SelectionCard } from './SelectionCard';
 import { Cardinality, type Min } from '@/types/schema';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type StateDispatchProps = {
     /** The current state of the category editor. */
@@ -28,7 +28,7 @@ export function RightPanelCategoryEditor({ state, dispatch, className }: RightPa
     const Component = getRightPanelComponent(state);
 
     return (
-        <div className={twMerge('p-2 flex flex-col gap-3', className)}>
+        <div className={cn('p-2 flex flex-col gap-3', className)}>
             <Component state={state} dispatch={dispatch} />
         </div>
     );

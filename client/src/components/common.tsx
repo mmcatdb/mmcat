@@ -3,7 +3,7 @@ import { Card, CardBody, Tooltip as HeroUITooltip, type TooltipProps } from '@he
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { HiXMark } from 'react-icons/hi2';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 /** The tooltip has no delay by default, so we add it here. */
 // The delay is in milliseconds.
@@ -29,7 +29,7 @@ export function CustomLink({ className, isDisabled, ...rest }: LinkProps & { isD
     const disabled = isDisabled ? true : undefined;
 
     return (
-        <ReactRouterLink {...rest} className={twMerge(baseClass, className)} data-disabled={disabled} aria-disabled={disabled} />
+        <ReactRouterLink {...rest} className={cn(baseClass, className)} data-disabled={disabled} aria-disabled={disabled} />
     );
 }
 
@@ -69,7 +69,7 @@ type InfoBannerProps = {
  */
 export function InfoBanner({ children, className, dismissBanner }: InfoBannerProps) {
     return (
-        <Card shadow='sm' radius='lg' className={twMerge('relative bg-content1', className)}>
+        <Card shadow='sm' radius='lg' className={cn('relative bg-content1', className)}>
             <CardBody className='text-sm text-foreground px-4 py-3 relative'>
                 <button
                     onClick={dismissBanner}

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { type NamePath, NamePathBuilder } from '@/types/identifiers';
 import { type AccessPath, type ParentProperty, type RootProperty, type SimpleProperty } from '@/types/mapping';
-import { twJoin, twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 /** Either an access path or editable access path. */
 type Property = ParentProperty | SimpleProperty | AccessPath;
@@ -21,7 +21,7 @@ export function AccessPathDisplay({ property, selected, setSelected, className }
     }, [ setSelected ]);
 
     return (
-        <div className={twMerge('p-3 rounded-lg bg-default-100 leading-5', className)}>
+        <div className={cn('p-3 rounded-lg bg-default-100 leading-5', className)}>
             <ParentPropertyDisplay
                 property={property}
                 selected={selected}
@@ -50,7 +50,7 @@ function ParentPropertyDisplay({ property, selected, setSelected }: ParentProper
     const isSelected = property === selected;
 
     return (
-        <div className={twJoin('mm-access-path grid grid-cols-[auto_minmax(0,1fr)] gap-y-1 gap-x-3', isSelected && 'mm-access-path-selected')}>
+        <div className={cn('mm-access-path grid grid-cols-[auto_minmax(0,1fr)] gap-y-1 gap-x-3', isSelected && 'mm-access-path-selected')}>
             <div className='mm-target col-span-2 w-fit px-1 space-x-2' onClick={select}>
                 <span>{property.name.toString()}:</span>
                 <span>{property.signature.toString()}</span>
@@ -98,7 +98,7 @@ function SimplePropertyDisplay({ property, selected, setSelected }: {
     const isSelected = property === selected;
 
     return (
-        <div className={twJoin('mm-access-path', isSelected && 'mm-access-path-selected')}>
+        <div className={cn('mm-access-path', isSelected && 'mm-access-path-selected')}>
             <div className='mm-target w-fit px-1 space-x-2' onClick={select}>
                 <span>{property.name.toString()}:</span>
                 <span>{property.signature.toString()}</span>

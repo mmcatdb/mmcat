@@ -3,7 +3,7 @@ import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, ty
 import { capitalize } from '@/types/utils/common';
 import { Fragment } from 'react/jsx-runtime';
 import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type QueryTreeDisplayProps = {
     tree: QueryNode;
@@ -232,5 +232,5 @@ function UnionNodeDisplay({ node, datasources }: NodeDisplayProps<UnionNode>) {
 }
 
 function title({ type }: QueryNode, className?: string) {
-    return <h4 className={twMerge('px-3 py-1 text-center font-semibold', className)}>{capitalize(type)}</h4>;
+    return <h4 className={cn('px-3 py-1 text-center font-semibold', className)}>{capitalize(type)}</h4>;
 }

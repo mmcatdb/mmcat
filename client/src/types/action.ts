@@ -53,13 +53,13 @@ export const ACTION_TYPES = [ {
 
 type JobPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
-}
+};
 
 export type JobPayload =
     | ModelToCategoryPayload
     | CategoryToModelPayload
     | UpdateSchemaPayload
-    | RSDToCategoryPayload
+    | RSDToCategoryPayload;
 
 export type JobPayloadResponse<T extends ActionType = ActionType> = {
     type: T;
@@ -81,7 +81,7 @@ export function jobPayloadFromResponse(input: JobPayloadResponse): JobPayload {
 export type JobPayloadInit =
     | ModelToCategoryPayloadInit
     | CategoryToModelPayloadInit
-    | RSDToCategoryPayloadInit
+    | RSDToCategoryPayloadInit;
 
 type ModelToCategoryPayloadResponse = JobPayloadResponse<ActionType.ModelToCategory> & {
     datasource: Datasource;

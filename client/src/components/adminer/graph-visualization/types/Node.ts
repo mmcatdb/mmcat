@@ -1,13 +1,13 @@
 import { type VizItemProperty } from './types';
 import { type GraphModel } from './Graph';
 
-type NodeProperties = Record<string, string>
+type NodeProperties = Record<string, string>;
 export type NodeCaptionLine = {
   node: NodeModel;
   text: string;
   baseline: number;
   remainingWidth: number;
-}
+};
 
 export class NodeModel {
     id: string;

@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
 import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
-import { twJoin, twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 /**
  * The main layout of the application.
@@ -23,7 +23,7 @@ export function RootLayout() {
         <div className='h-screen overflow-hidden text-foreground bg-background'>
             <div className='flex h-full'>
                 <Sidebar />
-                <div className={twJoin('min-w-0 flex flex-col grow transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-64')}>
+                <div className={cn('min-w-0 flex flex-col grow transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-64')}>
                     <CommonNavbar />
 
                     <Outlet />
@@ -39,7 +39,7 @@ export function RootLayout() {
 export function PageLayout({ isFullscreen, className, children }: { isFullscreen?: boolean, className?: string, children: React.ReactNode }) {
     if (isFullscreen) {
         return (
-            <main className={twMerge('grow relative overflow-hidden', className)}>
+            <main className={cn('grow relative overflow-hidden', className)}>
                 {children}
             </main>
         );
@@ -47,7 +47,7 @@ export function PageLayout({ isFullscreen, className, children }: { isFullscreen
 
     return (
         <main className='grow relative overflow-y-scroll'>
-            <div className={twMerge('relative grow mx-auto max-w-5xl p-6', className)}>
+            <div className={cn('relative grow mx-auto max-w-5xl p-6', className)}>
                 {children}
             </div>
         </main>
@@ -147,7 +147,7 @@ function Breadcrumbs() {
                     <BreadcrumbItem key={crumb.path} isCurrent={isCurrent}>
                         <Link
                             to={crumb.path}
-                            className={twJoin('truncate max-w-[160px] focus-visible:outline-hidden',
+                            className={cn('truncate max-w-[160px] focus-visible:outline-hidden',
                                 isCurrent ? 'font-semibold text-foreground hover:text-default-800' : 'text-default-800 hover:text-default-700',
                             )}
                             title={crumb.label}
@@ -231,7 +231,7 @@ export function ThemeToggle({ className }: { className?: string }) {
                 aria-label={label}
                 onPress={() => setPreferences({ ...preferences, theme: nextValue })}
                 variant='light'
-                className={twMerge('size-6 min-w-6 p-0', className)}
+                className={cn('size-6 min-w-6 p-0', className)}
             >
                 {theme === 'dark' ? (
                     <MdOutlineDarkMode size={18} />

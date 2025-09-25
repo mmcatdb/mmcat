@@ -1,7 +1,7 @@
 import { type NodeModel } from './Node';
 import { type RelationshipModel } from './Relationship';
 
-type NodeMap = Record<string, string[]>
+type NodeMap = Record<string, string[]>;
 function uniq<T>(list: T[]): T[] {
     return [ ...new Set(list) ];
 }

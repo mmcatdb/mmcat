@@ -1,6 +1,6 @@
 import { type RelationshipCaptionLayout } from '../types/Relationship';
 
-type Point = { x: number, y: number }
+type Point = { x: number, y: number };
 const square = (l: number) => l * l;
 
 export class ArcArrow {

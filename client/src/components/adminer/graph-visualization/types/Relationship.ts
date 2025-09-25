@@ -4,7 +4,7 @@ import { type LoopArrow } from '../utils/LoopArrow';
 import { type StraightArrow } from '../utils/StraightArrow';
 import { type NodeModel } from './Node';
 
-export type RelationshipCaptionLayout = 'internal' | 'external'
+export type RelationshipCaptionLayout = 'internal' | 'external';
 export class RelationshipModel {
     id: string;
     elementId: string;

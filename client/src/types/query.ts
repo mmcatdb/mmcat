@@ -132,7 +132,7 @@ export type JoinCandidate = {
     toPath: SignatureResponse;
     recursion: number;
     isOptional: boolean;
-}
+};
 
 enum JoinType {
     IdRef = 'IdRef',

@@ -20,13 +20,15 @@ export type PathSelectionAction = {
  */
 export class PathSelection implements GraphSelection {
     private constructor(
+        /** This array can't be empty. */
         readonly nodeIds: readonly string[],
-        /** There are always n-1 edges for n nodes. Except for when the path is empty. */
+        /** There are always n-1 edges for n nodes. */
         readonly edgeIds: readonly string[],
     ) {}
 
     static create(nodeIds: string[] = [], edgeIds: string[] = []): PathSelection {
-        if (nodeIds.length !== edgeIds.length + 1 && (nodeIds.length > 0 || edgeIds.length > 0))
+        // This also checks that the nodeIds aren't empty.
+        if (nodeIds.length !== edgeIds.length + 1)
             throw new Error('There must be n-1 edges for n nodes.');
 
         return new PathSelection([ ...nodeIds ], [ ...edgeIds ]);
@@ -37,7 +39,7 @@ export class PathSelection implements GraphSelection {
     }
 
     get isEmpty(): boolean {
-        return this.nodeIds.length === 0;
+        return this.nodeIds.length === 1;
     }
 
     get firstNodeId(): string {
@@ -52,13 +54,14 @@ export class PathSelection implements GraphSelection {
         if (action.operation === 'start')
             return PathSelection.create([ action.nodeId ]);
         if (action.operation === 'remove')
-            return new PathSelection(this.nodeIds.slice(0, -1), this.edgeIds.slice(0, -1));
+            return PathSelection.create(this.nodeIds.slice(0, -1), this.edgeIds.slice(0, -1));
 
-        const { nodeIds, edgeIds } = action;
+        return this.add(action.nodeIds, action.edgeIds);
+    }
+
+    add(nodeIds: string[], edgeIds: string[]): PathSelection {
         if (nodeIds.length !== edgeIds.length)
             throw new Error('Can\'t add different number of nodes and edges.');
-        if (this.isEmpty)
-            throw new Error('Can\'t add to an empty path.');
 
         return new PathSelection([ ...this.nodeIds, ...nodeIds ], [ ...this.edgeIds, ...edgeIds ]);
     }

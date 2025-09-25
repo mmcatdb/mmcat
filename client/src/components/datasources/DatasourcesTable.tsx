@@ -74,7 +74,7 @@ function useDatasourceSelection(datasources: Datasource[], deleteDatasource: (id
                 deleteDatasource(selectedDatasourceId);
                 toast.success(`Datasource ${selectedDatasource.label} deleted successfully!`);
             }
-            catch (error) {
+            catch {
                 toast.error(`Failed to delete datasource ${selectedDatasource.label}.`);
             }
             finally {

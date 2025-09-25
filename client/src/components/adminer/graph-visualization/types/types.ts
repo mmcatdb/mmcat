@@ -47,7 +47,7 @@ export type NodeItem = {
 type StatusItem = {
     type: 'status-item';
     item: string;
-}
+};
 
 export type RelationshipItem = {
     type: 'relationship';

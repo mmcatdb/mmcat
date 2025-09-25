@@ -10,7 +10,7 @@ import { RightPanelCategoryEditor } from '@/components/category/RightPanelCatego
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
 import { categoryToGraph } from '@/components/category/categoryGraph';
 import { SaveProvider, SaveButton } from '@/components/category/SaveContext';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 import { PageLayout } from '@/components/RootLayout';
 
 type EditorSidebarState = {
@@ -71,7 +71,7 @@ export function CategoryEditorPage() {
                                 }}
                                 disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
                                 title='Delete selected elements (Delete)'
-                                className={twJoin('p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300',
+                                className={cn('p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300',
                                     state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
                                         ? 'text-danger-400 opacity-50 cursor-not-allowed'
                                         : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer',
@@ -99,7 +99,7 @@ export function CategoryEditorPage() {
 
                     <div className='relative flex grow'>
                         {/* Left Sidebar */}
-                        <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.left ? 'w-56' : 'w-0')}>
+                        <div className={cn('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.left ? 'w-56' : 'w-0')}>
                             {sidebarState.left && <LeftPanelCategoryEditor state={state} dispatch={dispatch} />}
                         </div>
 
@@ -109,7 +109,7 @@ export function CategoryEditorPage() {
                         </div>
 
                         {/* Right Sidebar */}
-                        <div className={twJoin('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.right ? 'w-60' : 'w-0')}>
+                        <div className={cn('transition-all duration-300 overflow-hidden bg-default-50', sidebarState.right ? 'w-60' : 'w-0')}>
                             {sidebarState.right && <RightPanelCategoryEditor state={state} dispatch={dispatch} />}
                         </div>
                     </div>

@@ -61,7 +61,7 @@ export type GraphRelationshipWithNodes = {
     properties: Record<string, unknown>;
     from: GraphNode;
     to: GraphNode;
-}
+};
 
 export type ErrorResponse = {
     message: string;

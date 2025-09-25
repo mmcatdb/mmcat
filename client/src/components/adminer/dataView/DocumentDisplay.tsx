@@ -5,7 +5,7 @@ import { ReferenceDisplay } from '@/components/adminer/dataView/ReferenceDisplay
 import type { Datasource } from '@/types/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type DocumentDisplayProps = {
     /** The name of the property. Will be displayed unless undefined or hidden. */
@@ -49,7 +49,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
                     {'{'}
 
                     {/* Keep the components rendered so their open state will remain. */}
-                    <ul className={twJoin('pl-8', !isOpen && 'hidden')}>
+                    <ul className={cn('pl-8', !isOpen && 'hidden')}>
                         {entries.map(([ key, val ]) => (
                             <li key={key}>
                                 <DocumentDisplay
@@ -86,7 +86,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
                     {'['}
 
                     {/* Keep the components rendered so their open state will remain. */}
-                    <ul className={twJoin('pl-8', !isOpen && 'hidden')}>
+                    <ul className={cn('pl-8', !isOpen && 'hidden')}>
                         {parsedValue.map((item, index) => (
                             <li key={index}>
                                 <DocumentDisplay
@@ -123,7 +123,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
             </span>
 
             {property && kindReferences.length > 0 && kindReferences.some(ref => ref.fromProperty === property) && (
-                <div className={twJoin('pl-4 leading-5', adminerShortLinks && 'inline')}>
+                <div className={cn('pl-4 leading-5', adminerShortLinks && 'inline')}>
                     <ReferenceDisplay references={kindReferences} data={({ [property]: parsedValue as string })} property={property} kind={kind} datasourceId={datasourceId} datasources={datasources} />
                 </div>
             )}
@@ -162,7 +162,7 @@ function computeParsedValue(value: unknown): unknown {
 function ToggleOpenButton({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (open: boolean) => void }) {
     return (
         <Button
-            className={twJoin('mx-1 h-5 px-1 min-w-5', isOpen && 'opacity-0 group-hover:opacity-100')}
+            className={cn('mx-1 h-5 px-1 min-w-5', isOpen && 'opacity-0 group-hover:opacity-100')}
             variant='ghost'
             onPress={() => setIsOpen(!isOpen)}
         >

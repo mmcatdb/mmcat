@@ -106,7 +106,7 @@ export function NewActionPage() {
             toast.success('Action created successfully.');
             navigate(-1);
         }
-        catch (err) {
+        catch {
             toast.error('Something went wrong when creating an action.');
             setError(true);
         }

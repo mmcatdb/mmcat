@@ -123,7 +123,7 @@ export type Coordinates = {
     origin: Offset;
     /** Distance in pixels = scale * distance in relative units. */
     scale: number;
-}
+};
 
 export function offsetToPosition(offset: Offset, coordinates: Coordinates): Position {
     return {
@@ -232,7 +232,7 @@ type EdgeSvg = {
     label: {
         transform: string;
     } | undefined;
-}
+};
 
 export function computeEdgeSvg(from: Node, to: Node, label: string, degree: number, coordinates: Coordinates): EdgeSvg {
     const start = positionToOffset(from, coordinates);
@@ -455,7 +455,7 @@ export function computeSelectionBoxStyle(select: SelectState | undefined, coordi
 export type HTMLConnection = {
     ref: HTMLElement;
     cleanup: () => void;
-}
+};
 
 export function getPathSignature(
     graph: CategoryGraph,

@@ -14,4 +14,4 @@ export type MMO<T extends MMOType = MMOType> = {
     toServer(): MMOResponse<T>;
     up(category: Category): void;
     down(category: Category): void;
-}
+};

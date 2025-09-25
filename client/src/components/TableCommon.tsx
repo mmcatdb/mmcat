@@ -1,7 +1,7 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, type SortDescriptor } from '@heroui/react';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 /**
  * Hook to manage sorting of data for HeroUI tables.
@@ -87,26 +87,19 @@ type EmptyStateProps = {
  * A placeholder for empty states in tables.
  */
 export function EmptyState({ message, buttonText, buttonClassName, ...action }: EmptyStateProps) {
-    const innerButton = (
-        <Button
-            className={twMerge('px-4 py-2', buttonClassName)}
-            onPress={'onClick' in action ? action.onClick : undefined}
-        >
-            {buttonText}
-        </Button>
-    );
-
     return (
         <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
             <p className='text-lg mb-4'>{message}</p>
 
             {'to' in action ? (
-                <Link to={action.to}>
-                    {innerButton}
-                </Link>
+                <Button as={Link} to={action.to} className={cn('px-4 py-2', buttonClassName)}>
+                    {buttonText}
+                </Button>
             ) : (
                 <span>
-                    {innerButton}
+                    <Button onPress={action.onClick} className={cn('px-4 py-2', buttonClassName)}>
+                        {buttonText}
+                    </Button>
                 </span>
             )}
         </div>

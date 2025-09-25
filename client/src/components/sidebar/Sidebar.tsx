@@ -6,7 +6,7 @@ import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggle';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { PiCat } from 'react-icons/pi';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 import { CodeBracketSquareIcon as CodeBracketSquareIconOutline, RocketLaunchIcon as RocketLaunchIconOutline, PlayCircleIcon as PlayCircleIconOutline } from '@heroicons/react/24/outline';
 import { CodeBracketSquareIcon as CodeBracketSquareIconSolid, RocketLaunchIcon as RocketLaunchIconSolid, PlayCircleIcon as PlayCircleIconSolid } from '@heroicons/react/24/solid';
 import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
@@ -45,7 +45,7 @@ export function Sidebar() {
     const dynamicMenuItems: MenuItem[] = useMemo(() => categoryId ? categoryMenuItems(categoryId) : generalMenuItems(), [ categoryId ]);
 
     return (
-        <div className={twJoin('fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
+        <div className={cn('fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
             <SidebarHeader isCollapsed={isCollapsed} />
 
             <div className='px-3 py-2'>
@@ -74,7 +74,7 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
     const openSettingsButton = (
         <button
             onClick={() => setIsSettingsOpen(true)}
-            className={twJoin('flex items-center px-3 py-3 mx-2 rounded-md', theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100')}
+            className={cn('flex items-center px-3 py-3 mx-2 rounded-md', theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100')}
         >
             <Cog6ToothIcon className='size-6' />
             {!isCollapsed && <span className='px-4'>Settings</span>}
@@ -136,13 +136,13 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
 function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
     const content = (
         <Link to={routes.home.path} className='flex items-center mb-6 mt-2 pl-5 group transition-all duration-300 ease-in-out'>
-            <div className={twJoin('shrink-0 size-8 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
+            <div className={cn('shrink-0 size-8 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
                 isCollapsed ? 'text-xl' : 'text-2xl',
             )}>
                 <PiCat className='w-full h-full' />
             </div>
 
-            <h1 className={twJoin('text-2xl whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out',
+            <h1 className={cn('text-2xl whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out',
                 isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
             )}>
                 <span className='inline-block transition-transform duration-300 group-hover:-translate-y-px font-medium'>
@@ -185,14 +185,14 @@ function MenuItemDisplay({ item }: {
             <Link
                 key={item.route}
                 to={item.route}
-                className={twJoin('flex items-center px-3 py-3 mx-2 rounded-md',
+                className={cn('flex items-center px-3 py-3 mx-2 rounded-md',
                     isActive && 'text-primary-500 font-bold',
                     theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100', // needs to be defined via 'theme ===' not via default colors (HeroUI does not have good contrast in dark mode or light mode)
                 )}
             >
                 <Icon className='shrink-0 mr-2 size-6' />
 
-                <span className={twJoin('ml-2 whitespace-nowrap overflow-hidden', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100')}>
+                <span className={cn('ml-2 whitespace-nowrap overflow-hidden', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100')}>
                     {item.label}
                 </span>
             </Link>

@@ -136,7 +136,7 @@ export class NamePath {
 
     pop(): NamePath {
         if (this.names.length === 0)
-            throw new Error('Cannot pop from an empty NamePath');
+            throw new Error('Cannot pop from an empty NamePath.');
 
         return new NamePath(this.names.slice(0, -1));
     }

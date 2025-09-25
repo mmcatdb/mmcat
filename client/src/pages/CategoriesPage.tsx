@@ -43,14 +43,14 @@ export function CategoriesPage() {
 
     const createSchema = useCallback(async (name: string, isExample = false) => {
         // setIsFetching(true);
-        isExample ? setIsCreatingExampleSchema(true) : setIsCreatingSchema(true);
+        (isExample ? setIsCreatingExampleSchema : setIsCreatingSchema)(true);
 
         const response = isExample
             ? await api.schemas.createExampleCategory({ name })
             : await api.schemas.createNewCategory({}, { label: name });
 
         // setIsFetching(false);
-        isExample ? setIsCreatingExampleSchema(false) : setIsCreatingSchema(false);
+        (isExample ? setIsCreatingExampleSchema : setIsCreatingSchema)(false);
 
         if (!response.status) {
             toast.error('Error creating schema category.');
@@ -97,6 +97,7 @@ export function CategoriesPage() {
                     >
                         New Schema
                     </Button>
+
                     {EXAMPLE_SCHEMAS.map(example => (
                         <Button
                             key={example}
@@ -165,7 +166,6 @@ export function CategoriesPage() {
                 onSubmit={label => {
                     void createSchema(label, false);
                 }}
-                isSubmitting={isCreatingSchema}
             />
         </PageLayout>
     );

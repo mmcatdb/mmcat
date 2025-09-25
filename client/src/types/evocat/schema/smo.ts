@@ -19,4 +19,4 @@ export type SMO<T extends SMOType = SMOType> = {
     toServer(): SMOResponse<T>;
     up(category: Category): void;
     down(category: Category): void;
-}
+};

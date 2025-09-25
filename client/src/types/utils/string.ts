@@ -1,6 +1,6 @@
 export type Printable = {
     printTo(printer: Printer): void;
-}
+};
 
 export type Printer = {
     down(): Printer;
@@ -13,7 +13,7 @@ export type Printer = {
     append(object: object): Printer;
 
     remove(index?: number): Printer;
-}
+};
 
 /**
  * Utility method for providing a default printer.

@@ -8,7 +8,7 @@ import { categoryToGraph } from './categoryGraph';
 import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type StateDispatchProps = {
     /** The current state of the category editor. */
@@ -53,7 +53,7 @@ export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPane
     }, [ state.leftPanelMode, dispatch ]);
 
     return (
-        <div className={twMerge('p-3 flex flex-col gap-3', className)}>
+        <div className={cn('p-3 flex flex-col gap-3', className)}>
             <Component state={state} dispatch={dispatch} />
         </div>
     );
