@@ -3,7 +3,7 @@ import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelect
 import { type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
-import { Mapping, RootProperty, type MappingInit, type MappingEdit, type AccessPath, traverseAccessPath, collectAccessPathSignature, updateAccessPath } from '@/types/mapping';
+import { Mapping, RootProperty, type MappingInit, type MappingEdit, type AccessPath, traverseAccessPath, updateAccessPath } from '@/types/mapping';
 import { type Key, type Name, type NamePath, type Signature, type SignatureId, TypedName } from '@/types/identifiers';
 import { type Datasource } from '@/types/Datasource';
 import { api } from '@/api';
@@ -59,6 +59,8 @@ export type MappingEditorState = {
     form: MappingEditorFormState;
     sync?: MappingEditorSync;
     selection: FreeSelection | SequenceSelection | PathSelection;
+    /** Id of the component who owns the current selection. */
+    selectionKey?: string;
     editorPhase: EditorPhase;
     /** Path to the currently viewed / edited property. */
     selectedPropertyPath?: NamePath;
@@ -170,12 +172,15 @@ type SelectAction = { type: 'select' } & FreeSelectionAction;
 function select(state: MappingEditorState, action: SelectAction): MappingEditorState {
     if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot)
         return state;
+
     const updatedSelection = state.selection.updateFromAction(action);
+
     // Limit to one node
     if (updatedSelection.nodeIds.size > 1) {
         const firstNode = updatedSelection.nodeIds.values().next().value!;
         return { ...state, selection: FreeSelection.create([ firstNode ]) };
     }
+
     return { ...state, selection: updatedSelection };
 }
 
@@ -187,6 +192,7 @@ type SequenceAction = { type: 'sequence' } & SequenceSelectionAction;
 function sequence(state: MappingEditorState, action: SequenceAction): MappingEditorState {
     if (!(state.selection instanceof SequenceSelection))
         return state;
+
     return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
@@ -198,6 +204,7 @@ type PathAction = { type: 'path' } & PathSelectionAction;
 function path(state: MappingEditorState, action: PathAction): MappingEditorState {
     if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath)
         return state;
+
     return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
@@ -248,16 +255,18 @@ type AccessPathAction = {
     operation: 'select';
     path: NamePath | undefined;
 } | {
-    operation: 'endPath' | 'delete';
+    operation: 'delete';
 } | {
-    operation: 'startPath';
-    selection: PathSelection;
+    operation: 'selection';
+    selectionKey: string;
+    /** If defined, the selection should start. */
+    selection: PathSelection | undefined;
 } | {
     operation: 'update';
     name: Name;
     signature: Signature;
 } | {
-    operation: 'addChild';
+    operation: 'create';
     name: Name;
     signature: Signature;
 });
@@ -266,11 +275,16 @@ function accessPath(state: MappingEditorState, action: AccessPathAction): Mappin
     if (action.operation === 'select')
         return { ...state, selectedPropertyPath: action.path, selection: FreeSelection.create() };
 
-    if (action.operation === 'endPath')
-        return { ...state, selection: FreeSelection.create() };
+    if (action.operation === 'selection') {
+        // Starting selection doesn't require key check - we just overwrite the previous selection.
+        if (action.selection)
+            return { ...state, selection: action.selection, selectionKey: action.selectionKey };
 
-    if (action.operation === 'startPath')
-        return { ...state, selection: action.selection };
+        if (state.selectionKey !== action.selectionKey)
+            return state;
+
+        return { ...state, selection: FreeSelection.create(), selectionKey: undefined };
+    }
 
     if (!state.selectedPropertyPath)
         // This should not happen.
@@ -311,7 +325,7 @@ function accessPath(state: MappingEditorState, action: AccessPathAction): Mappin
         };
     }
 
-    if (action.operation !== 'addChild')
+    if (action.operation !== 'create')
         // This should be banned by the ts compiler. Don't know why it isn't.
         throw new Error('Impossibruh');
 
@@ -355,49 +369,3 @@ function createMappingEdit(state: MappingEditorState): MappingEdit {
         accessPath: RootProperty.fromEditable(state.form.accessPath).toServer(),
     };
 }
-
-// #region Utils
-
-/**
- * Creates selection starting in the currently selected objex. If no property is selected or the path is impossible, an error is thrown.
- * @param isFromParent - If true, the selection will start in the parent of the currently selected objex.
- * @param preselected - If defined, the selection will have preselected this signature.
- */
-export function createPathSelection(state: MappingEditorState, isFromParent: boolean, preselected?: Signature) {
-    if (!state.selectedPropertyPath)
-        throw new Error('Can\'t create path selection without selected property.');
-
-    const toPath = isFromParent ? state.selectedPropertyPath.pop() : state.selectedPropertyPath;
-    const pathFromRoot = collectAccessPathSignature(state.form.accessPath, toPath);
-    const lastBase = pathFromRoot.tryGetLastBase();
-
-    let toObjexKey: Key;
-    if (!lastBase) {
-        // If the path doesn't have at least one base signature, it starts from the root objex.
-        toObjexKey = state.form.rootObjexKey!;
-    }
-    else {
-        // Otherwise, we can find its morphism and therefore the target objex.
-        const edge = state.category.getEdge(lastBase.last);
-        toObjexKey = edge.direction ? edge.morphism.schema.codKey : edge.morphism.schema.domKey;
-    }
-
-    const parentSelection = PathSelection.create([ toObjexKey.toString() ]);
-    return preselected ? appendPathSelection(parentSelection, preselected, state.category) : parentSelection;
-}
-
-function appendPathSelection(selection: PathSelection, signature: Signature, category: Category): PathSelection {
-    const nodeIds: string[] = [];
-    const edgeIds: string[] = [];
-
-    for (const base of signature.toBases()) {
-        const edge = category.getEdge(base);
-        const toObjexKey = edge.direction ? edge.morphism.schema.codKey : edge.morphism.schema.domKey;
-        nodeIds.push(toObjexKey.toString());
-        edgeIds.push(edge.morphism.signature.toString());
-    }
-
-    return selection.add(nodeIds, edgeIds);
-}
-
-// #endregion

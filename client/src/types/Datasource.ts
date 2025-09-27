@@ -34,6 +34,10 @@ export class Datasource implements Entity {
         const replaced = replaceWhitespaces(name, this.specs.propertyCasing);
         return replaced.length > 0 ? replaced : undefined;
     }
+
+    get specialNames(): string[] {
+        return DATASOURCE_TYPES[this.type].specialNames;
+    }
 }
 
 export type DatasourceSettings = {
@@ -109,6 +113,8 @@ type DatasourceTypeDefinition = {
     type: DatasourceType;
     label: string;
     specs: DatasourceSpecs;
+    /** The first one is default. */
+    specialNames: string[];
 };
 
 export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> = {
@@ -126,6 +132,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isSchemaless: true,
             propertyCasing: Casing.camel,
         },
+        specialNames: [], // TODO
     },
     [DatasourceType.postgresql]: {
         type: DatasourceType.postgresql,
@@ -141,6 +148,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isSchemaless: false,
             propertyCasing: Casing.snake,
         },
+        specialNames: [],
     },
     [DatasourceType.neo4j]: {
         type: DatasourceType.neo4j,
@@ -156,6 +164,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isSchemaless: true,
             propertyCasing: Casing.camel,
         },
+        specialNames: [ '_from', '_to' ], // TODO
     },
     [DatasourceType.csv]: {
         type: DatasourceType.csv,
@@ -171,6 +180,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isSchemaless: true,
             propertyCasing: Casing.snake,
         },
+        specialNames: [],
     },
     [DatasourceType.json]: {
         type: DatasourceType.json,
@@ -186,6 +196,7 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isSchemaless: true,
             propertyCasing: Casing.camel,
         },
+        specialNames: [],
     },
     [DatasourceType.jsonld]: {
         type: DatasourceType.jsonld,
@@ -201,5 +212,6 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
             isSchemaless: true,
             propertyCasing: Casing.camel,
         },
+        specialNames: [],
     },
 };

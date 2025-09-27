@@ -143,10 +143,10 @@ function initializeSettings(type: DatasourceType, currentSettings: DatasourceSet
 function FormButtons({ onSubmit, onCancel, isSubmitting }: FormButtonsProps) {
     return (<>
         <Button color='danger' variant='light' onPress={onCancel} isDisabled={isSubmitting}>
-                Close
+            Close
         </Button>
         <Button color='primary' onPress={onSubmit} isLoading={isSubmitting}>
-                Submit
+            Submit
         </Button>
     </>);
 }
@@ -342,7 +342,7 @@ export function DatasourceSpecificFields({ datasourceType, settings, handleSetti
                     isSelected={settings.hasHeader ?? false}
                     onChange={() => handleSettingsChange('hasHeader', !(settings.hasHeader ?? false))}
                 >
-                        Has Header?
+                    Has Header?
                 </Checkbox>
             </>)}
             <Checkbox

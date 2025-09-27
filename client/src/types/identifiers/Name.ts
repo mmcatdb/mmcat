@@ -69,9 +69,9 @@ export class TypedName {
 
     /** The property is a root of the access path tree, the name doesn't mean anything. */
     public static readonly ROOT = 'root';
-    /** The property is a value in an object, the name represents its key. */
+    /** The property is a value in an object, the name represents its key. Has to be dynamic. */
     public static readonly KEY = 'key';
-    /** The property is an element of an array, the name represents its index. */
+    /** The property is an element of an array, the name represents its index. Has to be dynamic. */
     public static readonly INDEX = 'index';
 }
 
@@ -113,7 +113,13 @@ export class DynamicName extends TypedName {
         const patternString = this.pattern == null ? '' : ` (${this.pattern})`;
         return `<${this.type}${patternString}: ${this.signature.toString()}>`;
     }
+
+    static isPatternValid(pattern: string): boolean {
+        return patternValidator.test(pattern);
+    }
 }
+
+const patternValidator = /^[a-zA-Z0-9._\-*]+$/;
 
 /**
  * For convenient navigation in the access path.

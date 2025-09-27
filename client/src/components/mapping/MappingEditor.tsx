@@ -1,18 +1,18 @@
 import { MappingEditorGraph } from './MappingEditorGraph';
-import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch, type MappingEditorInput, createPathSelection } from './useMappingEditor';
+import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch, type MappingEditorInput } from './useMappingEditor';
 import { type Category } from '@/types/schema';
-import { type FreeSelection, PathSelection } from '../graph/graphSelection';
+import { type FreeSelection } from '../graph/graphSelection';
 import { collectAccessPathSignature, traverseAccessPath, type AccessPath, type Mapping } from '@/types/mapping';
 import { Button, Input, Select, SelectItem } from '@heroui/react';
 import { PlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import { getPathSignature } from '../graph/graphUtils';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type Name, type NamePath, Signature, StringName } from '@/types/identifiers';
+import { useCallback, useMemo, useState } from 'react';
+import { DynamicName, type Name, type NamePath, Signature, StringName } from '@/types/identifiers';
 import { PencilIcon } from '@heroicons/react/24/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { AccessPathDisplay } from './AccessPathDisplay';
-import { cn } from '../utils';
 import { traverseCategoryGraph } from '../category/categoryGraph';
+import { fromEditableName, NameInput, toEditableName } from './NameInput';
+import { SignatureInput } from './SignatureInput';
 
 type MappingEditorProps = {
     /** The schema category to which the mapping belongs. */
@@ -254,7 +254,7 @@ function AccessPathPanel({ state, dispatch }: StateDispatchProps) {
 
 enum PropertyPhase {
     view = 'view',
-    addChild = 'addChild',
+    create = 'create',
     update = 'update',
 }
 
@@ -265,9 +265,9 @@ function SelectedProperty({ state, dispatch, selected }: StateDispatchProps & { 
         setPhase(PropertyPhase.view);
     }
 
-    if (phase === PropertyPhase.addChild) {
+    if (phase === PropertyPhase.create) {
         return (
-            <AddChild state={state} dispatch={dispatch} selected={selected} onClose={startViewing} />
+            <CreateProperty state={state} dispatch={dispatch} selected={selected} onClose={startViewing} />
         );
     }
 
@@ -295,7 +295,7 @@ function SelectedProperty({ state, dispatch, selected }: StateDispatchProps & { 
         </div>
 
         <div className='flex gap-2'>
-            <Button color='primary' isIconOnly onPress={() => setPhase(PropertyPhase.addChild)}>
+            <Button color='primary' isIconOnly onPress={() => setPhase(PropertyPhase.create)}>
                 <PlusIcon className='size-6' />
             </Button>
 
@@ -312,30 +312,19 @@ function SelectedProperty({ state, dispatch, selected }: StateDispatchProps & { 
     </>);
 }
 
-function AddChild({ state, dispatch, selected, onClose }: StateDispatchProps & { selected: AccessPath, onClose: () => void }) {
+function CreateProperty({ state, dispatch, selected, onClose }: StateDispatchProps & { selected: AccessPath, onClose: () => void }) {
     const [ name, setName ] = useState('');
-    const [ isTouched, setIsTouched ] = useState(false);
+    const [ isNameTouched, setIsNameTouched ] = useState(false);
     const [ signature, setSignature ] = useState(Signature.empty());
 
-    const { datasource, graph, form, selectedPropertyPath } = state;
-
-    const suggestedName = useMemo(() => {
-        if (signature.isEmpty)
-            return '';
-
-        const signatureToSelected = collectAccessPathSignature(form.accessPath, selectedPropertyPath!);
-        const rootNode = graph.nodes.get(form.rootObjexKey!.toString())!;
-        const childNode = traverseCategoryGraph(graph, rootNode, signatureToSelected.concatenate(signature));
-        return datasource.createValidPropertyName(childNode.metadata.label);
-    }, [ signature, graph, datasource, form, selectedPropertyPath ]);
-
-    const validName = isTouched ? datasource.createValidPropertyName(name) : suggestedName;
-    // FIXME support other name types.
+    const suggestedName = useMemo(() => suggestName(signature, state), [ signature, state ]);
+    const validName = isNameTouched ? state.datasource.createValidPropertyName(name) : suggestedName;
+    // When creating property, we allow only StringName for simplicity. The user can always change it later.
     const nameObject = validName ? new StringName(validName) : undefined;
-    const displayedName = isTouched ? name : suggestedName;
+    const displayedName = isNameTouched ? name : suggestedName;
 
-    function addChild() {
-        dispatch({ type: 'accessPath', operation: 'addChild', name: nameObject!, signature });
+    function createProperty() {
+        dispatch({ type: 'accessPath', operation: 'create', name: nameObject!, signature });
         onClose();
     }
 
@@ -343,11 +332,11 @@ function AddChild({ state, dispatch, selected, onClose }: StateDispatchProps & {
         <h3 className='text-lg font-semibold'>Add property</h3>
 
         <Input
-            label='Property Name'
-            value={displayedName}
+            label='Property name'
+            value={displayedName ?? ''}
             onChange={e => {
                 setName(e.target.value);
-                setIsTouched(true);
+                setIsNameTouched(true);
             }}
             placeholder='Enter property name'
             fullWidth
@@ -362,8 +351,8 @@ function AddChild({ state, dispatch, selected, onClose }: StateDispatchProps & {
         />
 
         <div className='flex gap-2'>
-            <Button size='sm' color='primary' onPress={addChild} isDisabled={!canUseName(selected, nameObject)}>
-                Add Property
+            <Button size='sm' color='primary' onPress={createProperty} isDisabled={!canUseName(selected, nameObject)}>
+                Add property
             </Button>
 
             <Button size='sm' color='secondary' onPress={onClose}>
@@ -373,8 +362,22 @@ function AddChild({ state, dispatch, selected, onClose }: StateDispatchProps & {
     </>);
 }
 
+function suggestName(signature: Signature, state: MappingEditorState): string | undefined {
+    if (signature.isEmpty)
+        return '';
+
+    const { datasource, graph, form, selectedPropertyPath } = state;
+
+    const signatureToSelected = collectAccessPathSignature(form.accessPath, selectedPropertyPath!);
+    const rootNode = graph.nodes.get(form.rootObjexKey!.toString())!;
+    const childNode = traverseCategoryGraph(graph, rootNode, signatureToSelected.concatenate(signature));
+    return datasource.createValidPropertyName(childNode.metadata.label);
+}
+
 function UpdateProperty({ state, dispatch, selected, onClose }: StateDispatchProps & { selected: AccessPath, onClose: () => void }) {
-    const [ name, setName ] = useState(selected.name.toString());
+    const [ name, setName ] = useState(toEditableName(selected.name));
+    const nameObject = fromEditableName(name, state);
+
     const [ signature, setSignature ] = useState(selected.signature);
 
     const parent = useMemo(() => {
@@ -382,26 +385,22 @@ function UpdateProperty({ state, dispatch, selected, onClose }: StateDispatchPro
         return traverseAccessPath(state.form.accessPath, parentPath);
     }, [ state.form.accessPath, state.selectedPropertyPath ]);
 
-    const { datasource } = state;
-
-    const validName = datasource.createValidPropertyName(name);
-    // FIXME support other name types.
-    const nameObject = validName ? new StringName(validName) : undefined;
-
     function updateProperty() {
         dispatch({ type: 'accessPath', operation: 'update', name: nameObject!, signature });
         onClose();
     }
 
+    const isChanged = !nameObject?.equals(selected.name) || !signature.equals(selected.signature);
+
     return (<>
         <h3 className='text-lg font-semibold'>Edit property</h3>
 
-        <Input
-            label='Property Name'
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder='Enter property name'
-            fullWidth
+        <NameInput
+            state={state}
+            dispatch={dispatch}
+            name={name}
+            setName={setName}
+            selected={selected}
         />
 
         <SignatureInput
@@ -414,8 +413,8 @@ function UpdateProperty({ state, dispatch, selected, onClose }: StateDispatchPro
         />
 
         <div className='flex gap-2'>
-            <Button size='sm' color='primary' onPress={updateProperty} isDisabled={!canUseName(parent, nameObject, selected.name)}>
-                Edit Property
+            <Button size='sm' color='primary' onPress={updateProperty} isDisabled={!isChanged || !canUseName(parent, nameObject, selected.name)}>
+                Edit property
             </Button>
 
             <Button size='sm' color='secondary' onPress={onClose}>
@@ -425,68 +424,19 @@ function UpdateProperty({ state, dispatch, selected, onClose }: StateDispatchPro
     </>);
 }
 
-function canUseName(parent: AccessPath, nameObject: Name | undefined, original?: Name): boolean {
-    if (!nameObject)
+function canUseName(parent: AccessPath, name: Name | undefined, original?: Name): boolean {
+    if (!name)
         return false;
 
-    if (original?.equals(nameObject))
+    if (original?.equals(name))
         return true;
 
-    // The subpaths are unique by their names, not their signatures! E.g., there can be multiple empty signatures.
-    return !parent.subpaths.some(s => s.name.equals(nameObject));
-}
-
-type SignatureInputProps = {
-    value: Signature;
-    onChange: (value: Signature) => void;
-    label: string;
-    state: MappingEditorState;
-    dispatch: MappingEditorDispatch;
-    isFromParent?: boolean;
-};
-
-function SignatureInput({ value, onChange, label, state, dispatch, isFromParent }: SignatureInputProps) {
-    const [ isActive, setIsActive ] = useState(false);
-    const isActiveRef = useRef(isActive);
-
-    function toggleActive() {
-        setIsActive(!isActive);
-        isActiveRef.current = !isActive;
-        if (isActive)
-            dispatch({ type: 'accessPath', operation: 'endPath' });
-        else
-            dispatch({ type: 'accessPath', operation: 'startPath', selection: createPathSelection(state, !!isFromParent, value) });
+    // There can only be one dynamic name with null pattern.
+    if (name instanceof DynamicName && !name.pattern) {
+        if (parent.subpaths.some(s => s.name instanceof DynamicName && !s.name.pattern))
+            return false;
     }
 
-    useEffect(() => {
-        return () => {
-            if (isActiveRef.current)
-                dispatch({ type: 'accessPath', operation: 'endPath' });
-        };
-    }, [ dispatch ]);
-
-    useEffect(() => {
-        if (!isActive)
-            return;
-
-        if (!(state.selection instanceof PathSelection))
-            return;
-
-        onChange(getPathSignature(state.graph, state.selection));
-    }, [ state.selection ]);
-
-    return (
-        <div
-            className={cn('w-full px-3 py-2 rounded-medium flex flex-col shadow-xs cursor-pointer bg-default-100 hover:bg-default-200',
-                isActive && 'px-[10px] py-[6px] border-2 border-primary-500',
-            )}
-            onClick={toggleActive}
-        >
-            <label className='text-sm text-default-600 cursor-pointer'>{label}</label>
-
-            <div className='pt-px text-small text-default-foreground break-words'>
-                {value.toString()}
-            </div>
-        </div>
-    );
+    // The subpaths are unique by their names, not their signatures! E.g., there can be multiple empty signatures.
+    return !parent.subpaths.some(s => s.name.equals(name));
 }
