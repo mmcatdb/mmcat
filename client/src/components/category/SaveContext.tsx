@@ -106,9 +106,7 @@ export function SaveButton() {
         <div
             id='save-button'
             className='flex items-center gap-1 text-default-600 hover:text-default-800 cursor-pointer relative'
-            onClick={() => {
-                void handleSave();
-            }}
+            onClick={() => handleSave()}
             title='Save Changes (Ctrl+S)'
         >
             {isSaving ? (

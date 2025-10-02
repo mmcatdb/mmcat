@@ -3,7 +3,7 @@ import { GET, POST, PUT, DELETE } from '../routeFunctions';
 import type { DatasourceInit, DatasourceUpdate, DatasourceResponse } from '@/types/Datasource';
 import type { Id } from '@/types/id';
 
-const datasources = {
+export const datasourcesApi = {
     getAllDatasources: GET<Empty, DatasourceResponse[], { categoryId: Id }>(
         () => `/datasources`,
     ),
@@ -23,5 +23,3 @@ const datasources = {
         u => `/datasources/${u.id}`,
     ),
 };
-
-export default datasources;

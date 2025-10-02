@@ -10,7 +10,7 @@ export default defineConfig([
     {
         // This config will only apply to the following files.
         // All options should be deep-merged with the baseConfig.
-        files: [ '**/*.ts', '**/*.cts', '**.*.mts' ],
+        files: [ '**/*.jsx', '**/*.ts', '**/*.tsx', '**/*.cts', '**.*.mts' ],
 
         languageOptions: {
             parserOptions: {
@@ -26,7 +26,6 @@ export default defineConfig([
             '@typescript-eslint/no-misused-promises': [ 'error', {
                 checksVoidReturn: false,
             } ],
-            '@typescript-eslint/no-floating-promises': 'error',
 
             // React
             'react/no-direct-mutation-state': [ 'error' ],

@@ -13,6 +13,7 @@ import { AccessPathDisplay } from './AccessPathDisplay';
 import { traverseCategoryGraph } from '../category/categoryGraph';
 import { fromEditableName, NameInput, toEditableName } from './NameInput';
 import { SignatureInput } from './SignatureInput';
+import { SpinnerButton } from '../common';
 
 type MappingEditorProps = {
     /** The schema category to which the mapping belongs. */
@@ -80,17 +81,17 @@ export function MappingEditor({ category, input, onSave, onCancel }: MappingEdit
                             </Button>
                         )}
 
-                        <Button
+                        <SpinnerButton
                             color='success'
                             variant='solid'
                             onPress={() => dispatch({ type: 'sync' })}
                             startContent={<CheckCircleIcon className='size-4' />}
                             size='sm'
                             isDisabled={!state.form.rootObjexKey}
-                            isLoading={isFetching}
+                            isFetching={isFetching}
                         >
                             {input.mapping ? 'Save Mapping' : 'Create Mapping'}
-                        </Button>
+                        </SpinnerButton>
                     </div>
                 </div>
             </div>

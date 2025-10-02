@@ -75,15 +75,13 @@ export function MappingPage() {
     );
 }
 
-MappingPage.loader = mappingLoader;
-
 export type MappingLoaderData = {
     category: Category;
     mapping: Mapping;
     datasource: Datasource;
 };
 
-async function mappingLoader({ params: { categoryId, mappingId } }: { params: Params<'categoryId' | 'mappingId'> }) {
+MappingPage.loader = async ({ params: { categoryId, mappingId } }: { params: Params<'categoryId' | 'mappingId'> }) => {
     if (!categoryId || !mappingId)
         throw new Error('Mapping ID is required');
 
@@ -100,7 +98,7 @@ async function mappingLoader({ params: { categoryId, mappingId } }: { params: Pa
         mapping: Mapping.fromResponse(mappingResponse.data),
         datasource: Datasource.fromResponse(datasourceResponse.data),
     };
-}
+};
 
 type DatasourceDetailInfoBannerProps = {
     className?: string;

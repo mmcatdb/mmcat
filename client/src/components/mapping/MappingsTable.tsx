@@ -90,37 +90,23 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
         >
             <TableHeader>
                 {[
-                    ...(showTableIDs
-                        ? [
-                            <TableColumn key='id'>
-                                ID
-                            </TableColumn>,
-                        ]
-                        : []),
-                    <TableColumn key='kindName' allowsSorting>
-                        Kind Name
-                    </TableColumn>,
-                    <TableColumn key='version' allowsSorting allowsResizing>
-                        Version
-                    </TableColumn>,
-                    <TableColumn key='rootObjex'>
-                        Root object
-                    </TableColumn>,
-                    <TableColumn key='primaryKey'>
-                        Primary Key
-                    </TableColumn>,
-                    <TableColumn key='accessPath'>
-                        Access Path
-                    </TableColumn>,
+                    ...(showTableIDs ? [
+                        <TableColumn key='id'>ID</TableColumn>,
+                    ] : []),
+                    <TableColumn key='kindName' allowsSorting>Kind Name</TableColumn>,
+                    <TableColumn key='version' allowsSorting>Version</TableColumn>,
+                    <TableColumn key='rootObjex'>Root object</TableColumn>,
+                    <TableColumn key='primaryKey'>Primary Key</TableColumn>,
+                    <TableColumn key='accessPath'>Access Path</TableColumn>,
                 ]}
             </TableHeader>
             <TableBody emptyContent='No mappings to display.'>
                 {sortedMappings.map(mapping => (
                     <TableRow key={mapping.id} className='hover:bg-default-100 focus:bg-default-200 cursor-pointer'>
                         {[
-                            ...(showTableIDs
-                                ? [ <TableCell key='id'>{mapping.id}</TableCell> ]
-                                : []),
+                            ...(showTableIDs ? [
+                                <TableCell key='id'>{mapping.id}</TableCell>,
+                            ] : []),
                             <TableCell key='kindName'>
                                 {/* The link is here for accessibility. */}
                                 <Link className='underline' to={routes.category.mapping.resolve({ categoryId: category.id, mappingId: mapping.id })}>

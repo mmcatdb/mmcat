@@ -68,7 +68,7 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
                     ))}
                 </div>
 
-                <div className='divide-y'>
+                <div className='mb-2 divide-y empty:hidden'>
                     {node.joinCandidates.map((candidate, index) => (
                         <JoinCandidateDisplay key={index} candidate={candidate} />
                     ))}

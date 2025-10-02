@@ -224,7 +224,7 @@ function getAllPrimaryKeys(kindMappings: MappingInit[]): SignatureIdResponse {
     return primaryKeys;
 }
 
-async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryResponse> {
+async function getSchemaCategory(categoryId: Id): Promise<SchemaCategoryResponse> {
     const schemaCategoryResponse = await api.schemas.getCategory({ id: categoryId });
 
     if (!schemaCategoryResponse.status)
@@ -273,8 +273,8 @@ function addMappingReferences(
     givenKindProperties: Set<SimplePropertyResponse>,
 ): AdminerReferences {
     const anotherKindProperties = getPropertiesFromAccessPath(anotherKindMapping.accessPath, new Set<SimplePropertyResponse>());
-    const anotherKindPropertiesArray = Array.from(anotherKindProperties);
-    const givenKindPropertiesArray = Array.from(givenKindProperties);
+    const anotherKindPropertiesArray = [ ...anotherKindProperties ];
+    const givenKindPropertiesArray = [ ...givenKindProperties ];
 
     addReferences(references, primaryKeys, givenKindMapping, givenKindPropertiesArray, anotherKindMapping, anotherKindPropertiesArray);
 

@@ -15,6 +15,7 @@ import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
 import { InfoBanner } from '@/components/common';
 import { PageLayout } from '@/components/RootLayout';
+import { type Id } from '@/types/id';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
@@ -22,7 +23,7 @@ export function ActionsPage() {
     const { category } = useCategoryInfo();
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('actions-page');
 
-    async function deleteAction(actionId: string) {
+    async function deleteAction(actionId: Id) {
         const result = await api.actions.deleteAction({ id: actionId });
         if (!result.status) {
             toast.error('Error deleting action');
@@ -68,9 +69,7 @@ export function ActionsPage() {
                 {actions.length > 0 ? (
                     <ActionsTable
                         actions={actions}
-                        onDeleteAction={id => {
-                            void deleteAction(id);
-                        }}
+                        onDeleteAction={deleteAction}
                     />
                 ) : (
                     <EmptyState
@@ -84,13 +83,11 @@ export function ActionsPage() {
     );
 }
 
-ActionsPage.loader = actionsLoader;
-
 export type ActionsLoaderData = {
     actions: Action[];
 };
 
-async function actionsLoader({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<ActionsLoaderData> {
+ActionsPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<ActionsLoaderData> => {
     if (!categoryId)
         throw new Error('Action ID is required');
 
@@ -101,11 +98,11 @@ async function actionsLoader({ params: { categoryId } }: { params: Params<'categ
     return {
         actions: response.data.map(Action.fromResponse),
     };
-}
+};
 
 type ActionsTableProps = {
     actions: Action[];
-    onDeleteAction: (id: string) => void;
+    onDeleteAction: (id: Id) => void;
 };
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
@@ -114,12 +111,12 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         column: 'label',
         direction: 'ascending',
     });
-    const [ loadingMap, setLoadingMap ] = useState<Record<string, boolean>>({});
+    const [ loadingMap, setLoadingMap ] = useState<Record<Id, boolean>>({});
     const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ selectedAction, setSelectedAction ] = useState<Action>();
 
-    async function createRun(actionId: string) {
+    async function createRun(actionId: Id) {
         setLoadingMap(prev => ({ ...prev, [actionId]: true }));
 
         const response = await api.jobs.createRun({ actionId });
@@ -169,13 +166,11 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         >
             <TableHeader>
                 {[
-                    ...(showTableIDs
-                        ? [
-                            <TableColumn key='id' allowsSorting>
-                                ID
-                            </TableColumn>,
-                        ]
-                        : []),
+                    ...(showTableIDs ? [
+                        <TableColumn key='id' allowsSorting>
+                            ID
+                        </TableColumn>,
+                    ] : []),
                     <TableColumn key='label' allowsSorting>
                         Label
                     </TableColumn>,
@@ -189,9 +184,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                         className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
-                            ...(showTableIDs
-                                ? [ <TableCell key='id'>{action.id}</TableCell> ]
-                                : []),
+                            ...(showTableIDs ? [
+                                <TableCell key='id'>{action.id}</TableCell>,
+                            ] : []),
                             <TableCell key='label'>{action.label}</TableCell>,
                             <TableCell key='actions' className='flex items-center space-x-2'>
                                 <Button
@@ -207,9 +202,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                     color='primary'
                                     variant='flat'
                                     isDisabled={loadingMap[action.id]}
-                                    onPress={() => {
-                                        void createRun(action.id);
-                                    }}
+                                    onPress={() => createRun(action.id)}
                                 >
                                     {loadingMap[action.id] ? 'Creating...' : 'Create Run'}
                                 </Button>
@@ -247,9 +240,9 @@ export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerP
 
             {/* Info Content */}
             <p className='text-sm'>
-                    An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
-                    Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
-                    For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
+                An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
+                Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
+                For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
             </p>
 
             <ul className='mt-3 text-sm space-y-2'>
@@ -268,7 +261,7 @@ export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerP
             </ul>
 
             <p className='text-sm mt-3'>
-                    Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
+                Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
             </p>
         </InfoBanner>
     );

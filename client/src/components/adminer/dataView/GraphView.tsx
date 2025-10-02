@@ -90,7 +90,7 @@ function getRelationships(data: GraphResponseData, type: string): BasicRelations
 }
 
 function getNodeLabelsAndProperties(properties: Record<string, unknown>):
-    { labels: string[], properties: Record<string, string> } {
+{ labels: string[], properties: Record<string, string> } {
     const props: Record<string, string> = {};
     let labels: string[] = [];
 

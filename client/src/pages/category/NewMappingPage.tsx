@@ -36,14 +36,12 @@ export function NewMappingPage() {
     );
 }
 
-NewMappingPage.loader = newMappingLoader;
-
 export type NewMappingLoaderData = {
     category: Category;
     datasource: Datasource;
 };
 
-async function newMappingLoader({ params: { categoryId, datasourceId } }: { params: Params<'categoryId' | 'datasourceId'> }) {
+NewMappingPage.loader = async ({ params: { categoryId, datasourceId } }: { params: Params<'categoryId' | 'datasourceId'> }) => {
     if (!categoryId)
         throw new Error('Category ID required');
 
@@ -62,4 +60,4 @@ async function newMappingLoader({ params: { categoryId, datasourceId } }: { para
         category: Category.fromResponse(categoryResponse.data),
         datasource: Datasource.fromResponse(datasourceResponse.data),
     };
-}
+};

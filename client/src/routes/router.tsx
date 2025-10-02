@@ -18,7 +18,9 @@ import { JobPage } from '@/pages/category/JobPage';
 import { type MappingLoaderData, MappingPage } from '@/pages/category/MappingPage';
 import { type ActionLoaderData, ActionDetailPage } from '@/pages/category/ActionDetailPage';
 import { NewMappingPage } from '@/pages/category/NewMappingPage';
-import { QueryingPage } from '@/pages/QueryingPage';
+import { NewQueryPage } from '@/pages/category/NewQueryPage';
+import { QueriesPage } from '@/pages/category/QueriesPage';
+import { type QueryLoaderData, QueryPage } from '@/pages/category/QueryPage';
 
 /**
  * Creates the application's routing configuration.
@@ -30,6 +32,7 @@ export const router = createBrowserRouter([ {
     ErrorBoundary: ErrorPage,
     children: [ {
         index: true,
+        loader: HomePage.loader,
         Component: HomePage,
     }, {
         path: routes.datasources.list.path,
@@ -117,7 +120,7 @@ export const router = createBrowserRouter([ {
                     id: routes.category.actions.new.id,
                     path: routes.category.actions.new.path,
                     Component: NewActionPage,
-                    handle: { breadcrumb: 'Add' },
+                    handle: { breadcrumb: 'New' },
                 } ],
             }, {
                 id: routes.category.jobs.id,
@@ -132,11 +135,26 @@ export const router = createBrowserRouter([ {
                     handle: { breadcrumb: 'Job Details' },
                 } ],
             }, {
-                id: routes.category.querying.id,
-                path: routes.category.querying.path,
-                Component: QueryingPage,
-                loader: QueryingPage.loader,
+                id: routes.category.queries.list.id,
+                path: routes.category.queries.list.path,
                 handle: { breadcrumb: 'Querying' },
+                children: [ {
+                    index: true,
+                    loader: QueriesPage.loader,
+                    Component: QueriesPage,
+                }, {
+                    id: routes.category.queries.detail.id,
+                    path: routes.category.queries.detail.path,
+                    loader: QueryPage.loader,
+                    Component: QueryPage,
+                    handle: { breadcrumb: (data: QueryLoaderData) => data.query.label },
+                }, {
+                    id: routes.category.queries.new.id,
+                    path: routes.category.queries.new.path,
+                    Component: NewQueryPage,
+                    loader: NewQueryPage.loader,
+                    handle: { breadcrumb: 'New' },
+                } ],
             } ],
         } ],
     } ],

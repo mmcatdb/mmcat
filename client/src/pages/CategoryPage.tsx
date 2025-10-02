@@ -22,13 +22,11 @@ export function CategoryPage() {
     );
 }
 
-CategoryPage.loader = categoryLoader;
-
 export type CategoryLoaderData = {
     category: SchemaCategoryInfo;
 };
 
-async function categoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+CategoryPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }) => {
     if (!categoryId)
         throw new Error('Category ID is required');
 
@@ -40,4 +38,4 @@ async function categoryLoader({ params: { categoryId } }: { params: Params<'cate
             return SchemaCategoryInfo.fromResponse(response.data);
         }),
     };
-}
+};

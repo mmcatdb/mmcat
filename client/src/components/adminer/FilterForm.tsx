@@ -62,9 +62,7 @@ export function FilterForm({ state, datasourceType, propertyNames, dispatch }: F
                     size='sm'
                     color='danger'
                     variant='bordered'
-                    onPress={() => {
-                        dispatch({ type: 'form', action: 'delete_filters' });
-                    }}
+                    onPress={() => dispatch({ type: 'form', action: 'delete_filters' })}
                 >
                     <IoTrashBin /> Delete filters
                 </Button>

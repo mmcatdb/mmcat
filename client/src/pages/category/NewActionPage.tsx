@@ -10,10 +10,11 @@ import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
 import { PageLayout } from '@/components/RootLayout';
+import { SpinnerButton } from '@/components/common';
 
 export function NewActionPage() {
     const [ label, setLabel ] = useState('');
-    const [ loading, setLoading ] = useState(false);
+    const [ isFetching, setIsFetching ] = useState(false);
     const [ error, setError ] = useState(false);
     const { category } = useCategoryInfo();
     const navigate = useNavigate();
@@ -90,7 +91,7 @@ export function NewActionPage() {
             return;
         }
 
-        setLoading(true);
+        setIsFetching(true);
         setError(false);
 
         try {
@@ -111,7 +112,7 @@ export function NewActionPage() {
             setError(true);
         }
         finally {
-            setLoading(false);
+            setIsFetching(false);
         }
     }
 
@@ -173,20 +174,18 @@ export function NewActionPage() {
             <div className='flex justify-end'>
                 <Button
                     onPress={() => navigate(-1)}
-                    isDisabled={loading}
+                    isDisabled={isFetching}
                     className='mr-2'
                 >
                     Cancel
                 </Button>
-                <Button
+                <SpinnerButton
                     color='primary'
-                    onPress={() => {
-                        void handleSubmit();
-                    }}
-                    isLoading={loading}
+                    onPress={handleSubmit}
+                    isFetching={isFetching}
                 >
                     Submit
-                </Button>
+                </SpinnerButton>
             </div>
         </PageLayout>
     );

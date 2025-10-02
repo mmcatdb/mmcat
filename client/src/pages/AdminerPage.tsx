@@ -66,13 +66,11 @@ export function AdminerPage() {
     );
 }
 
-AdminerPage.loader = adminerLoader;
-
 type AdminerLoaderData = {
     datasources: Datasource[];
 };
 
-async function adminerLoader(): Promise<AdminerLoaderData> {
+AdminerPage.loader = async (): Promise<AdminerLoaderData> => {
     const response = await api.datasources.getAllDatasources({});
 
     if (!response.status)
@@ -81,7 +79,7 @@ async function adminerLoader(): Promise<AdminerLoaderData> {
     return {
         datasources: response.data.map(Datasource.fromResponse),
     };
-}
+};
 
 /**
  * Switch for setting the length of names of datasources, kinds and properties used in links

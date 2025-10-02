@@ -89,7 +89,7 @@ export function CategoryOverviewPage() {
                         title='Query Data'
                         description='Explore and query data within this category.'
                         linkText='Query Data'
-                        linkTo={routes.category.querying.resolve({ categoryId })}
+                        linkTo={routes.category.queries.new.resolve({ categoryId })}
                     />
                 </div>
             </div>

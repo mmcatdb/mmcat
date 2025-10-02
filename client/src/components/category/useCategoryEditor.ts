@@ -3,24 +3,17 @@ import { FreeSelection, type FreeSelectionAction } from '../graph/graphSelection
 import { type CategoryGraph, categoryToGraph } from './categoryGraph';
 import { Evocat } from '@/types/evocat/Evocat';
 import { type GraphEvent } from '../graph/graphEngine';
-import { SchemaUpdate, type SchemaUpdateResponse } from '@/types/schema/SchemaUpdate';
 import { useLoaderData } from 'react-router-dom';
-import { Category, type SchemaCategoryResponse } from '@/types/schema';
 import { useDeleteHandlers } from './useDeleteHandlers';
+import { type CategoryEditorLoaderData } from '@/pages/category/CategoryEditorPage';
 
 export function useCategoryEditor() {
-    const loaderData = useLoaderData() as {
-        category: SchemaCategoryResponse;
-        updates: SchemaUpdateResponse[];
-    };
+    const loaderData = useLoaderData() as CategoryEditorLoaderData;
 
     // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
     const evocatRef = useRef<Evocat>();
-    if (!evocatRef.current) {
-        const updates = loaderData.updates.map(SchemaUpdate.fromResponse);
-        const category = Category.fromResponse(loaderData.category);
-        evocatRef.current = new Evocat(category, updates);
-    }
+    if (!evocatRef.current)
+        evocatRef.current = new Evocat(loaderData.category, loaderData.updates);
 
     const [ state, dispatch ] = useReducer(categoryEditorReducer, evocatRef.current, createInitialState);
     useDeleteHandlers(state, dispatch);
@@ -140,7 +133,7 @@ function select(state: CategoryEditorState, action: SelectAction): CategoryEdito
 
     // Restrict selection during morphism creation to max 2 nodes and no edges
     if (state.leftPanelMode === LeftPanelMode.createMorphism) {
-        const selectedNodeIds = Array.from(newSelection.nodeIds);
+        const selectedNodeIds = [ ...newSelection.nodeIds ];
         // Limit to 2 nodes and no edges in createMorphism mode
         if (selectedNodeIds.length > 2 || newSelection.edgeIds.size > 0) {
             return {
@@ -242,7 +235,7 @@ type CreateObjexAction = {
  * Updates state after creating a new objex, selecting it and resetting the mode.
  */
 function afterObjexCreation(state: CategoryEditorState, { graph }: CreateObjexAction): CategoryEditorState {
-    const latestObjex = Array.from(state.evocat.category.objexes.values()).pop();
+    const latestObjex = [ ...state.evocat.category.objexes.values() ].pop();
 
     return {
         ...state,
@@ -268,7 +261,7 @@ type CreateMorphismAction = {
  * Updates state after creating a new morphism, selecting it and resetting the mode.
  */
 function afterMorphismCreation(state: CategoryEditorState, { graph }: CreateMorphismAction): CategoryEditorState {
-    const latestMorphism = Array.from(state.evocat.category.morphisms.values()).pop();
+    const latestMorphism = [ ...state.evocat.category.morphisms.values() ].pop();
 
     return {
         ...state,

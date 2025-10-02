@@ -13,6 +13,7 @@ import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
 import { HiOutlinePencilSquare, HiPencilSquare } from 'react-icons/hi2';
 import { HiDatabase, HiOutlineDatabase } from 'react-icons/hi';
 import { BiCategory, BiSolidCategory } from 'react-icons/bi';
+import { type Id } from '@/types/id';
 
 /**
  * Type for navigation items in the sidebar.
@@ -238,7 +239,7 @@ function generalMenuItems(): MenuItem[] {
 /**
  * Generates menu items for category-specific navigation.
  */
-function categoryMenuItems(categoryId: string): MenuItem[] {
+function categoryMenuItems(categoryId: Id): MenuItem[] {
     return [ {
         type: 'separator',
         label: 'Schema Category',
@@ -281,6 +282,7 @@ function categoryMenuItems(categoryId: string): MenuItem[] {
         label: 'Querying',
         solidIcon: PlayCircleIconSolid,
         outlineIcon: PlayCircleIconOutline,
-        route: routes.category.querying.resolve({ categoryId }),
+        route: routes.category.queries.list.resolve({ categoryId }),
+        match: [ routes.category.queries.detail.path, routes.category.queries.new.path ],
     } ];
 }

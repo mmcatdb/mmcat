@@ -461,7 +461,7 @@ export function getPathSignature(
     graph: CategoryGraph,
     selection: PathSelection,
 ): Signature {
-    const nodeIds = Array.from(selection.nodeIds);
+    const nodeIds = [ ...selection.nodeIds ];
     const signatures = selection.edgeIds.map((edgeId, index) => {
         const edge: CategoryEdge = graph.edges.get(edgeId)!;
         const fromNodeId = nodeIds[index];

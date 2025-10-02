@@ -9,6 +9,7 @@ import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
 import { cn } from '@/components/utils';
+import { SpinnerButton } from '../common';
 
 type StateDispatchProps = {
     /** The current state of the category editor. */
@@ -103,18 +104,18 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
                         <ExclamationTriangleIcon className='size-4 shrink-0' />
                         <span className='text-sm font-medium'>You have unsaved changes.</span>
                     </div>
-                    <Button
+                    <SpinnerButton
                         variant='solid'
                         color='warning'
                         size='sm'
                         fullWidth
                         onPress={() => handleSave()}
-                        isLoading={isSaving}
+                        isFetching={isSaving}
                         startContent={isSaving ? null : <FaSave className='size-3.5' />}
                         className='shadow-xs hover:shadow-md transition-shadow'
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
-                    </Button>
+                    </SpinnerButton>
                 </div>
             </div>
         )}
@@ -221,7 +222,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
  * Hook to extract and validate selected nodes for morphism creation.
  */
 function useMorphismSelection(state: CategoryEditorState) {
-    const selectedNodes = Array.from(state.selection.nodeIds);
+    const selectedNodes = [ ...state.selection.nodeIds ];
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
     const domainNode = state.graph.nodes.get(selectedNodes[0]);
     const codomainNode = selectedNodes[1] ? state.graph.nodes.get(selectedNodes[1]) : undefined;

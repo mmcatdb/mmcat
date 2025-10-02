@@ -3,7 +3,7 @@ import { GET, POST } from '../routeFunctions';
 import type { MappingResponse, MappingInit, MappingEdit } from '@/types/mapping';
 import { type Id } from '@/types/id';
 
-const mappings = {
+export const mappingsApi = {
     getMapping: GET<{ id: StringLike }, MappingResponse>(
         u => `/mappings/${u.id}`,
     ),
@@ -20,5 +20,3 @@ const mappings = {
         u => `/mappings/${u.id}`,
     ),
 };
-
-export default mappings;

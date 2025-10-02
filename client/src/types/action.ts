@@ -37,7 +37,7 @@ export enum ActionType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel',
     UpdateSchema = 'UpdateSchema',
-    RSDToCategory = 'RSDToCategory'
+    RSDToCategory = 'RSDToCategory',
 }
 
 export const ACTION_TYPES = [ {

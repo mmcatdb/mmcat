@@ -7,11 +7,11 @@ import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
-import { DatasourceSpecificFields } from '@/components/datasources/DatasourceModal';
+import { DatasourceSpecificFields } from '@/components/datasources/CreateDatasourceModal';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, SpinnerButton } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { PageLayout } from '@/components/RootLayout';
@@ -24,13 +24,11 @@ export function DatasourceDetailPage() {
     );
 }
 
-DatasourceDetailPage.loader = datasourceLoader;
-
 export type DatasourceLoaderData = {
     datasource: Datasource;
 };
 
-async function datasourceLoader({ params: { datasourceId } }: { params: Params<'datasourceId'> }): Promise<DatasourceLoaderData> {
+DatasourceDetailPage.loader = async ({ params: { datasourceId } }: { params: Params<'datasourceId'> }): Promise<DatasourceLoaderData> => {
     if (!datasourceId)
         throw new Error('Datasource ID is required');
 
@@ -41,7 +39,7 @@ async function datasourceLoader({ params: { datasourceId } }: { params: Params<'
     return {
         datasource: Datasource.fromResponse(response.data),
     };
-}
+};
 
 export function DatasourceInCategoryPage() {
     const { datasource, mappings } = useLoaderData() as DatasourceInCategoryLoaderData;
@@ -62,7 +60,7 @@ export function DatasourceInCategoryPage() {
                             color='primary'
                             size='sm'
                         >
-                                + Add Mapping
+                            + Add Mapping
                         </Button>
                     )}
                 </div>
@@ -81,14 +79,12 @@ export function DatasourceInCategoryPage() {
     );
 }
 
-DatasourceInCategoryPage.loader = datasourceInCategoryLoader;
-
 export type DatasourceInCategoryLoaderData = {
     datasource: Datasource;
     mappings: Mapping[];
 };
 
-async function datasourceInCategoryLoader({ params: { categoryId, datasourceId } }: { params: Params<'categoryId' | 'datasourceId'> }): Promise<DatasourceInCategoryLoaderData> {
+DatasourceInCategoryPage.loader = async ({ params: { categoryId, datasourceId } }: { params: Params<'categoryId' | 'datasourceId'> }): Promise<DatasourceInCategoryLoaderData> => {
     if (!categoryId || !datasourceId)
         throw new Error('Datasource ID is required');
 
@@ -103,7 +99,7 @@ async function datasourceInCategoryLoader({ params: { categoryId, datasourceId }
         datasource: Datasource.fromResponse(datasourceResponse.data),
         mappings: mappingsResponse.data.map(Mapping.fromResponse),
     };
-}
+};
 
 function DatasourceDisplay() {
     const { datasource: initialDatasource } = useLoaderData() as DatasourceLoaderData | DatasourceInCategoryLoaderData;
@@ -249,14 +245,14 @@ function DatasourceDisplay() {
                             handleSettingsChange={handleInputChange}
                         />
                         <div className='flex gap-2 mt-6'>
-                            <Button
+                            <SpinnerButton
                                 color='primary'
                                 onPress={handleSaveChanges}
-                                isLoading={isSaving}
+                                isFetching={isSaving}
                                 className='px-6'
                             >
                                 Save
-                            </Button>
+                            </SpinnerButton>
                             <Button variant='flat' onPress={cancelUpdating} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>

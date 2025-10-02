@@ -4,8 +4,9 @@ import { type GraphModel } from '@/components/adminer/graph-visualization/types/
 import { type NodeModel } from '@/components/adminer/graph-visualization/types/Node';
 import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
 
-const oneRelationshipPerPairOfNodes = (graph: GraphModel) =>
-    Array.from(graph.groupedRelationships()).map(pair => pair.relationships[0]);
+function oneRelationshipPerPairOfNodes(graph: GraphModel) {
+    return [ ...graph.groupedRelationships() ].map(pair => pair.relationships[0]);
+}
 
 export class ForceSimulation {
     simulation: Simulation<NodeModel, RelationshipModel>;

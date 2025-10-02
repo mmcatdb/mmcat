@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
-import { DatasourceModal } from '@/components/datasources/DatasourceModal';
+import { CreateDatasourceModal } from '@/components/datasources/CreateDatasourceModal';
 import { api } from '@/api';
 import { Datasource } from '@/types/Datasource';
-import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
@@ -14,6 +13,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { InfoBanner } from '@/components/common';
 import { PageLayout } from '@/components/RootLayout';
+import { type Id } from '@/types/id';
 
 export function DatasourcesInCategoryPage() {
     const data = useLoaderData() as DatasourcesInCategoryLoaderData;
@@ -23,23 +23,16 @@ export function DatasourcesInCategoryPage() {
 
     const [ isModalOpen, setIsModalOpen ] = useState(false);
 
-    const [ datasourcesWithMappings ] = useState<string[]>(data.allDatasourcesWithMappings);
+    const [ datasourcesWithMappingsIds ] = useState<Id[]>(data.allDatasourcesWithMappingsIds);
 
     function onDatasourceCreated(newDatasource: Datasource) {
         setDatasourcesNotIn(prev => [ ...prev, newDatasource ]);
     }
 
-    async function deleteDatasource(id: string) {
-        const response = await api.datasources.deleteDatasource({ id });
-
-        if (!response.status) {
-            toast.error('Failed to delete datasource. Please try again.');
-            return;
-        }
-
+    const onDelete = useCallback((id: Id) => {
         setDatasourcesIn(prev => prev.filter(ds => ds.id !== id));
         setDatasourcesNotIn(prev => prev.filter(ds => ds.id !== id));
-    }
+    }, []);
 
     return (
         <PageLayout>
@@ -61,8 +54,8 @@ export function DatasourcesInCategoryPage() {
                 {datasourcesIn.length > 0 ? (
                     <DatasourcesTable
                         datasources={datasourcesIn}
-                        deleteDatasource={deleteDatasource}
-                        datasourcesWithMappings={datasourcesWithMappings}
+                        onDelete={onDelete}
+                        datasourcesWithMappingsIds={datasourcesWithMappingsIds}
                     />
                 ) : (
                     <div className='text-center border-2 border-dashed border-default-300 p-6 rounded-lg'>
@@ -110,8 +103,8 @@ export function DatasourcesInCategoryPage() {
                 {datasourcesNotIn.length > 0 ? (
                     <DatasourcesTable
                         datasources={datasourcesNotIn}
-                        deleteDatasource={deleteDatasource}
-                        datasourcesWithMappings={datasourcesWithMappings}
+                        onDelete={onDelete}
+                        datasourcesWithMappingsIds={datasourcesWithMappingsIds}
                     />
                 ) : (
                     <EmptyState
@@ -122,7 +115,7 @@ export function DatasourcesInCategoryPage() {
                 )}
             </div>
 
-            <DatasourceModal
+            <CreateDatasourceModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onDatasourceCreated={onDatasourceCreated}
@@ -131,15 +124,13 @@ export function DatasourcesInCategoryPage() {
     );
 }
 
-DatasourcesInCategoryPage.loader = datasourcesInCategoryLoader;
-
 export type DatasourcesInCategoryLoaderData = {
     datasourcesIn: Datasource[];
     datasourcesNotIn: Datasource[];
-    allDatasourcesWithMappings: string[];  // IDs of all datasources with mappings in any category
+    allDatasourcesWithMappingsIds: string[];  // IDs of all datasources with mappings in any category
 };
 
-async function datasourcesInCategoryLoader({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<DatasourcesInCategoryLoaderData> {
+DatasourcesInCategoryPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<DatasourcesInCategoryLoaderData> => {
     if (!categoryId)
         throw new Error('Action ID is required');
 
@@ -157,16 +148,12 @@ async function datasourcesInCategoryLoader({ params: { categoryId } }: { params:
         .filter(ds => !datasourcesIn.some(inCategory => inCategory.id === ds.id))
         .map(Datasource.fromResponse);
 
-    const allDatasourcesWithMappings = Array.from(
-        new Set(allMappingsResponse.data.map(m => m.datasourceId)),
-    );
-
     return {
         datasourcesIn,
         datasourcesNotIn,
-        allDatasourcesWithMappings,
+        allDatasourcesWithMappingsIds: [ ...new Set(allMappingsResponse.data.map(m => m.datasourceId)) ],
     };
-}
+};
 
 type MappingInfoBannerProps = {
     className?: string;

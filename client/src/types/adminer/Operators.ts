@@ -19,7 +19,7 @@ export enum Operator {
     StartsWith = 'StartsWith',
     EndsWith = 'EndsWith',
     Contains = 'Contains',
-    Size = 'Size'
+    Size = 'Size',
 }
 
 export type OperatorLabels = Partial<Record<Operator, string>>;

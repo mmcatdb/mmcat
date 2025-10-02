@@ -55,7 +55,11 @@ export const routes = {
             newMapping: categoryIndex.child<'categoryId' | 'datasourceId'>('/datasources/:datasourceId/new-mapping', 'new-mapping'),
         },
         mapping: categoryIndex.child<'categoryId' | 'mappingId'>('/mappings/:mappingId', 'mappings'),
-        querying: categoryIndex.child('/querying', 'querying'),
+        queries: {
+            list: categoryIndex.child('/queries', 'queries'),
+            detail: categoryIndex.child<'categoryId' | 'queryId'>('/queries/:queryId', 'query'),
+            new: categoryIndex.child('/queries/new', 'new-query'),
+        },
         actions: {
             list: categoryIndex.child('/actions', 'actions'),
             detail: categoryIndex.child<'categoryId' | 'actionId'>('/actions/:actionId', 'action'),

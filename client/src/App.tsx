@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { router } from '@/routes/router';
 
-const App = () => {
+export function App() {
     const { preferences } = usePreferences();
 
     return (<>
@@ -14,6 +14,4 @@ const App = () => {
             autoClose={2000}
         />
     </>);
-};
-
-export default App;
+}

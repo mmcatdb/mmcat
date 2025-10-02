@@ -1,21 +1,21 @@
-import actions from './routes/actions';
-import adminer from './routes/adminer';
-import datasources from './routes/datasources';
-import instances from './routes/instances';
-import jobs from './routes/jobs';
-import mappings from './routes/mappings';
-import queries from './routes/queries';
-import schemas from './routes/schemas';
+import { actionsApi } from './routes/actions';
+import { adminerApi } from './routes/adminer';
+import { datasourcesApi } from './routes/datasources';
+import { instancesApi } from './routes/instances';
+import { jobsApi } from './routes/jobs';
+import { mappingsApi } from './routes/mappings';
+import { queriesApi } from './routes/queries';
+import { schemasApi } from './routes/schemas';
 
 const api = {
-    actions,
-    adminer,
-    datasources,
-    instances,
-    jobs,
-    mappings,
-    queries,
-    schemas,
+    actions: actionsApi,
+    adminer: adminerApi,
+    datasources: datasourcesApi,
+    instances: instancesApi,
+    jobs: jobsApi,
+    mappings: mappingsApi,
+    queries: queriesApi,
+    schemas: schemasApi,
 };
 
 export { api };

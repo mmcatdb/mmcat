@@ -74,7 +74,7 @@ class LineStringBuilder implements Printer {
         }
 
         if ('toString' in value) {
-            // eslint-disable-next-line
+             
             this.stack.push(value.toString());
             return this;
         }

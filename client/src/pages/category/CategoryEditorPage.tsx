@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/api';
-import { isPositionEqual } from '@/types/schema';
+import { Category, isPositionEqual } from '@/types/schema';
 import { type Params } from 'react-router-dom';
 import { CategoryEditorGraph } from '@/components/category/CategoryEditorGraph';
 import { FaTrash } from 'react-icons/fa6';
@@ -12,6 +12,7 @@ import { categoryToGraph } from '@/components/category/categoryGraph';
 import { SaveProvider, SaveButton } from '@/components/category/SaveContext';
 import { cn } from '@/components/utils';
 import { PageLayout } from '@/components/RootLayout';
+import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 
 type EditorSidebarState = {
     left: boolean;
@@ -65,10 +66,7 @@ export function CategoryEditorPage() {
                         <div className='flex items-center gap-2'>
                             {/* Delete Button */}
                             <button
-                                onClick={() => {
-                                    if (state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0)
-                                        deleteSelectedElements(state, dispatch);
-                                }}
+                                onClick={() => deleteSelectedElements(state, dispatch)}
                                 disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
                                 title='Delete selected elements (Delete)'
                                 className={cn('p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300',
@@ -119,29 +117,35 @@ export function CategoryEditorPage() {
     );
 }
 
-CategoryEditorPage.loader = categoryEditorLoader;
+export type CategoryEditorLoaderData = {
+    category: Category;
+    updates: SchemaUpdate[];
+};
 
-async function categoryEditorLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+CategoryEditorPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<CategoryEditorLoaderData> => {
     if (!categoryId)
         throw new Error('Category ID is required');
 
-    const [ categoryResponse, updatesResponse, datasourcesResponse, mappingsResponse ] = await Promise.all([
+    // TODO show mappings
+    // const [ categoryResponse, updatesResponse, datasourcesResponse, mappingsResponse ] = await Promise.all([
+    const [ categoryResponse, updatesResponse ] = await Promise.all([
         api.schemas.getCategory({ id: categoryId }),
         api.schemas.getCategoryUpdates({ id: categoryId }),
-        api.datasources.getAllDatasources({}, { categoryId: categoryId }),
-        api.mappings.getAllMappingsInCategory({}, { categoryId: categoryId }),
+        // api.datasources.getAllDatasources({}, { categoryId: categoryId }),
+        // api.mappings.getAllMappingsInCategory({}, { categoryId: categoryId }),
     ]);
 
-    if (!categoryResponse.status || !updatesResponse.status || !datasourcesResponse.status || !mappingsResponse.status)
+    // if (!categoryResponse.status || !updatesResponse.status || !datasourcesResponse.status || !mappingsResponse.status)
+    if (!categoryResponse.status || !updatesResponse.status)
         throw new Error('Failed to load schema category');
 
     return {
-        category: categoryResponse.data,
-        updates: updatesResponse.data,
-        datasources: datasourcesResponse.data,
-        mappings: mappingsResponse.data,
+        category: Category.fromResponse(categoryResponse.data),
+        updates: updatesResponse.data.map(SchemaUpdate.fromResponse),
+        // datasources: datasourcesResponse.data,
+        // mappings: mappingsResponse.data,
     };
-}
+};
 
 function deleteSelectedElements(state: CategoryEditorState, dispatch: CategoryEditorDispatch) {
     // Delete all selected morphisms

@@ -4,7 +4,7 @@ import { SignatureId, SignatureIdFactory, type SignatureIdResponse } from './Sig
 export enum Type {
     Signatures = 'Signatures',
     Value = 'Value',
-    Generated = 'Generated'
+    Generated = 'Generated',
 }
 
 export type NonSignaturesType = Type.Value | Type.Generated;

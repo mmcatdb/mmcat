@@ -56,8 +56,8 @@ function getRightPanelComponent(state: CategoryEditorState) {
  * @returns An object containing selected node and edge data, if valid.
  */
 function useSelection(state: CategoryEditorState) {
-    const selectedNodeId = Array.from(state.selection.nodeIds)[0];
-    const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
+    const selectedNodeId = [ ...state.selection.nodeIds ][0];
+    const selectedEdgeId = [ ...state.selection.edgeIds ][0];
     const selectedNode = selectedNodeId ? state.graph.nodes.get(selectedNodeId) : undefined;
     const selectedMorphism = selectedEdgeId ? state.graph.edges.get(selectedEdgeId) : undefined;
     const hasSelection = state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0;

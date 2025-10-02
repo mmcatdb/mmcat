@@ -1,10 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type KeyboardEvent } from 'react';
 import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTable';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, Input, Tooltip } from '@heroui/react';
-import { AddSchemaModal } from './HomePage';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from '@heroui/react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
@@ -13,57 +12,25 @@ import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, SpinnerButton } from '@/components/common';
 import { PageLayout } from '@/components/RootLayout';
 
-/**
- * List of example schema names available for creation.
- */
-const EXAMPLE_SCHEMAS = [
-    'basic',
-] as const;
+export const EMPTY_CATEGORY = 'empty';
+/** List of example schema names available for creation. */
+export const EXAMPLE_CATEGORIES = [ 'basic', 'adminer' ] as const;
+
+type NewCategoryType = typeof EMPTY_CATEGORY | typeof EXAMPLE_CATEGORIES[number];
 
 /**
  * Renders the main page for managing schema categories, including creation, search, and display.
  */
 export function CategoriesPage() {
     const { categories: loadedCategories } = useLoaderData() as CategoriesLoaderData;
-    const [ categories, setCategories ] = useState(loadedCategories);
     const [ isModalOpen, setIsModalOpen ] = useState(false);
-    // const [ isFetching, setIsFetching ] = useState(false);
-    const [ isCreatingSchema, setIsCreatingSchema ] = useState(false);
-    const [ isCreatingExampleSchema, setIsCreatingExampleSchema ] = useState(false);
     const [ searchTerm, setSearchTerm ] = useState('');
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
-    const navigate = useNavigate();
 
-    const categoryDeleted = useCallback((id: Id) => {
-        setCategories(prev => prev?.filter(category => category.id !== id) ?? []);
-    }, []);
-
-    const createSchema = useCallback(async (name: string, isExample = false) => {
-        // setIsFetching(true);
-        (isExample ? setIsCreatingExampleSchema : setIsCreatingSchema)(true);
-
-        const response = isExample
-            ? await api.schemas.createExampleCategory({ name })
-            : await api.schemas.createNewCategory({}, { label: name });
-
-        // setIsFetching(false);
-        (isExample ? setIsCreatingExampleSchema : setIsCreatingSchema)(false);
-
-        if (!response.status) {
-            toast.error('Error creating schema category.');
-            return;
-        }
-
-        const newCategory = SchemaCategoryInfo.fromResponse(response.data);
-        setCategories(prev => [ newCategory, ...(prev ?? []) ]);
-
-        toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
-
-        navigate(routes.category.index.resolve({ categoryId: newCategory.id }));
-    }, [ navigate ]);
+    const { categories, fetching, createCategory, onDeleteCategory } = useSchemaCategories(loadedCategories);
 
     const filteredCategories = categories.filter(category =>
         category.label.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -88,30 +55,30 @@ export function CategoriesPage() {
                 </div>
 
                 <div className='flex gap-2'>
-                    <Button
+                    <SpinnerButton
                         onPress={() => setIsModalOpen(true)}
-                        isLoading={isCreatingSchema}
+                        fid={FID_EMPTY}
+                        fetching={fetching}
                         color='primary'
                         // size='sm'
                         startContent={<FaPlus className='size-3' />}
                     >
                         New Schema
-                    </Button>
+                    </SpinnerButton>
 
-                    {EXAMPLE_SCHEMAS.map(example => (
-                        <Button
+                    {EXAMPLE_CATEGORIES.map(example => (
+                        <SpinnerButton
                             key={example}
-                            onPress={() => {
-                                void createSchema(example, true);
-                            }}
-                            isLoading={isCreatingExampleSchema}
+                            onPress={() => createCategory(example, example, fidExample(example))}
+                            fid={fidExample(example)}
+                            fetching={fetching}
                             color='secondary'
                             variant='flat'
                             // size='sm'
                             startContent={<FaPlus className='size-3' />}
                         >
                             Example
-                        </Button>
+                        </SpinnerButton>
                     ))}
                 </div>
             </div>
@@ -147,7 +114,7 @@ export function CategoriesPage() {
                     filteredCategories.length > 0 ? (
                         <SchemaCategoriesTable
                             categories={filteredCategories}
-                            onDeleteCategory={categoryDeleted}
+                            onDeleteCategory={onDeleteCategory}
                         />
                     ) : (
                         <p className='text-default-500 text-center'>No matching categories.</p>
@@ -160,24 +127,26 @@ export function CategoriesPage() {
                 )}
             </div>
 
-            <AddSchemaModal
+            <CreateSchemaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={label => {
-                    void createSchema(label, false);
-                }}
+                // TODO The fetching animation should be on the button in the modal ...
+                onSubmit={label => createCategory(label, EMPTY_CATEGORY, FID_EMPTY)}
             />
         </PageLayout>
     );
 }
 
-CategoriesPage.loader = categoriesLoader;
+const FID_EMPTY = 'empty';
+function fidExample(example: string) {
+    return `example-${example}`;
+}
 
 export type CategoriesLoaderData = {
     categories: SchemaCategoryInfo[];
 };
 
-async function categoriesLoader(): Promise<CategoriesLoaderData> {
+CategoriesPage.loader = async (): Promise<CategoriesLoaderData> => {
     const response = await api.schemas.getAllCategoryInfos({});
     if (!response.status)
         throw new Error('Failed to load schema categories');
@@ -185,6 +154,110 @@ async function categoriesLoader(): Promise<CategoriesLoaderData> {
     return {
         categories: response.data.map(SchemaCategoryInfo.fromResponse),
     };
+};
+
+export function useSchemaCategories(loadedCategories: SchemaCategoryInfo[]) {
+    const [ categories, setCategories ] = useState(loadedCategories);
+    const [ fetching, setFetching ] = useState<string>();
+    const navigate = useNavigate();
+
+    const createCategory = useCallback(async (label: string, type: NewCategoryType, fid: string) => {
+        const isExample = type !== EMPTY_CATEGORY;
+
+        setFetching(fid);
+        const response = isExample
+            ? await api.schemas.createExampleCategory({ type })
+            : await api.schemas.createNewCategory({}, { label });
+        setFetching(undefined);
+
+        if (!response.status) {
+            toast.error('Error creating schema category.');
+            return;
+        }
+
+        const newCategory = SchemaCategoryInfo.fromResponse(response.data);
+        setCategories(prev => [ newCategory, ...(prev ?? []) ]);
+
+        toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
+
+        navigate(routes.category.index.resolve({ categoryId: newCategory.id }));
+    }, [ navigate ]);
+
+    const onDeleteCategory = useCallback((id: Id) => {
+        setCategories(prev => prev?.filter(category => category.id !== id) ?? []);
+    }, []);
+
+    return {
+        categories,
+        fetching,
+        createCategory,
+        onDeleteCategory,
+    };
+}
+
+type CreateSchemaModalProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (label: string) => void;
+};
+
+export function CreateSchemaModal({ isOpen, onClose, onSubmit }: CreateSchemaModalProps) {
+    const [ label, setLabel ] = useState('');
+
+    function submit() {
+        if (!label.trim()) {
+            toast.error('Please provide a valid label for the schema.');
+            return;
+        }
+        onSubmit(label);
+        close();
+    }
+
+    function close() {
+        setLabel('');
+        onClose();
+    }
+
+    function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter')
+            submit();
+    }
+
+    return (
+        <Modal isOpen={isOpen} onClose={close} isDismissable={false}>
+            <ModalContent>
+                <ModalHeader className='flex flex-col gap-1 text-xl font-semibold'>
+                    Create New Schema Category
+                </ModalHeader>
+                <ModalBody>
+                    <p className='text-default-500'>
+                        Schema categories help you organize your data models and transformations.
+                    </p>
+                    <Input
+                        autoFocus
+                        label='Schema Name'
+                        value={label}
+                        onChange={e => setLabel(e.target.value)}
+                        fullWidth
+                        onKeyDown={handleKeyDown}
+                        classNames={{ input: 'text-lg' }}
+                    />
+                </ModalBody>
+                <ModalFooter>
+                    <Button variant='light' onPress={close}>
+                        Cancel
+                    </Button>
+                    <Button
+                        color='primary'
+                        onPress={submit}
+                        isDisabled={!label.trim()}
+                    >
+                        Create Schema
+                    </Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
+    );
 }
 
 type SchemaCategoryInfoBannerProps = {

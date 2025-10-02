@@ -5,7 +5,7 @@ import { cn } from '@/components/utils';
 
 type CopyToClipboardButtonProps = {
     textToCopy: string | (() => string);
-    title: string;
+    title: string | undefined;
     className?: string;
     children?: ReactNode;
 };

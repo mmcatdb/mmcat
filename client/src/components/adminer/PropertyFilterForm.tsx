@@ -83,9 +83,7 @@ export function PropertyFilterForm({ filter, datasourceType, propertyNames, disp
                 aria-label='Delete filter'
                 color='danger'
                 variant='bordered'
-                onPress={() => {
-                    dispatch({ type:'form', action: 'delete_filter', id: filter.id });
-                }}
+                onPress={() => dispatch({ type:'form', action: 'delete_filter', id: filter.id })}
             >
                 <IoTrashBin />
             </Button>

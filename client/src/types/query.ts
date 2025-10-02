@@ -1,4 +1,3 @@
-import { type DatasourceResponse } from './Datasource';
 import type { Entity, Id, VersionId } from './id';
 import { type SignatureResponse } from './identifiers';
 
@@ -61,18 +60,24 @@ export type QueryEvolutionError = {
     data: unknown;
 };
 
+// Querying
+
+export type QueryResult = {
+    rows: string[];
+};
+
 export type QueryDescription = {
     planned: QueryPlanDescription;
     optimized: QueryPlanDescription;
 };
 
-export type QueryPlanDescription = {
+type QueryPlanDescription = {
     parts: QueryPartDescription[];
     tree: QueryNode;
 };
 
-type QueryPartDescription = {
-    datasource: DatasourceResponse;
+export type QueryPartDescription = {
+    datasourceIdentifier: Id;
     structure: ResultStructure;
     content: string;
 };

@@ -3,8 +3,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/api';
 import { Datasource, DatasourceType, type DatasourceSettings, validateSettings, type DatasourceInit, DATASOURCE_TYPES } from '@/types/Datasource';
 import { toast } from 'react-toastify';
+import { SpinnerButton } from '../common';
 
-type DatasourceModalProps = {
+type CreateDatasourceModalProps = {
     /** Whether the modal is visible. */
     isOpen: boolean;
     /** Callback to close the modal. */
@@ -145,20 +146,20 @@ function FormButtons({ onSubmit, onCancel, isSubmitting }: FormButtonsProps) {
         <Button color='danger' variant='light' onPress={onCancel} isDisabled={isSubmitting}>
             Close
         </Button>
-        <Button color='primary' onPress={onSubmit} isLoading={isSubmitting}>
+        <SpinnerButton color='primary' onPress={onSubmit} isFetching={isSubmitting}>
             Submit
-        </Button>
+        </SpinnerButton>
     </>);
 }
 
 /**
  * Renders a modal for creating a new datasource with type-specific fields.
  */
-export function DatasourceModal({
+export function CreateDatasourceModal({
     isOpen,
     onClose,
     onDatasourceCreated,
-}: DatasourceModalProps) {
+}: CreateDatasourceModalProps) {
     const {
         datasourceType,
         datasourceName,

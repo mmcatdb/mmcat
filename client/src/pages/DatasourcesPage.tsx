@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
-import { DatasourceModal } from '@/components/datasources/DatasourceModal';
+import { CreateDatasourceModal } from '@/components/datasources/CreateDatasourceModal';
 import { api } from '@/api';
 import { Datasource } from '@/types/Datasource';
-import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
 import { Button, Tooltip } from '@heroui/react';
 import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
@@ -13,6 +12,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { InfoBanner } from '@/components/common';
 import { FaPlus } from 'react-icons/fa';
 import { PageLayout } from '@/components/RootLayout';
+import { type Id } from '@/types/id';
 
 export function DatasourcesPage() {
     const data = useLoaderData() as DatasourcesLoaderData;
@@ -35,16 +35,9 @@ export function DatasourcesPage() {
         setDatasources(prev => [ ...prev, newDatasource ]);
     }
 
-    async function deleteDatasource(id: string) {
-        const response = await api.datasources.deleteDatasource({ id });
-
-        if (!response.status) {
-            toast.error('Failed to delete datasource.');
-            return;
-        }
-
+    const onDelete = useCallback((id: Id) => {
         setDatasources(prev => prev.filter(datasource => datasource.id !== id));
-    }
+    }, []);
 
     return (
         <PageLayout>
@@ -77,8 +70,8 @@ export function DatasourcesPage() {
             {datasources.length > 0 ? (
                 <DatasourcesTable
                     datasources={datasources}
-                    deleteDatasource={id => void deleteDatasource(id)}
-                    datasourcesWithMappings={data.datasourcesWithMappings}
+                    onDelete={onDelete}
+                    datasourcesWithMappingsIds={data.datasourcesWithMappingsIds}
                 />
             ) : (
                 <EmptyState
@@ -88,7 +81,7 @@ export function DatasourcesPage() {
                 />
             )}
 
-            <DatasourceModal
+            <CreateDatasourceModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onDatasourceCreated={onDatasourceCreated}
@@ -97,14 +90,12 @@ export function DatasourcesPage() {
     );
 }
 
-DatasourcesPage.loader = datasourcesLoader;
-
 export type DatasourcesLoaderData = {
     datasources: Datasource[];
-    datasourcesWithMappings: string[]; // IDs of datasources with mappings
+    datasourcesWithMappingsIds: Id[];
 };
 
-async function datasourcesLoader(): Promise<DatasourcesLoaderData> {
+DatasourcesPage.loader = async (): Promise<DatasourcesLoaderData> =>{
     const [ datasourcesResponse, mappingsResponse ] = await Promise.all([
         api.datasources.getAllDatasources({}),
         api.mappings.getAllMappings({}),
@@ -113,22 +104,18 @@ async function datasourcesLoader(): Promise<DatasourcesLoaderData> {
     if (!datasourcesResponse.status || !mappingsResponse.status)
         throw new Error('Failed to load datasources');
 
-    const datasourceIdsWithMappings = new Set(
-        mappingsResponse.data.map(m => m.datasourceId),
-    );
-
     return {
         datasources: datasourcesResponse.data.map(Datasource.fromResponse),
-        datasourcesWithMappings: Array.from(datasourceIdsWithMappings),
+        datasourcesWithMappingsIds: [ ...new Set(mappingsResponse.data.map(m => m.datasourceId)) ],
     };
-}
+};
 
 type DatasourcesInfoBannerProps = {
     className?: string;
     dismissBanner: () => void;
 };
 
-export function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBannerProps) {
+function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
             <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>

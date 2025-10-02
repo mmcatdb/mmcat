@@ -6,7 +6,7 @@ export type BasicNode = {
     elementId: string;
     labels: string[];
     properties: Record<string, string>;
-  };
+};
 
 export type BasicRelationship = {
     id: string;
@@ -19,18 +19,18 @@ export type BasicRelationship = {
     endNodeLabel: string[];
     startNodeProperties: Record<string, string>;
     endNodeProperties: Record<string, string>;
-  };
+};
 
 export type BasicNodesAndRels = {
     nodes: BasicNode[];
     relationships: BasicRelationship[];
-  };
+};
 
 export type DeduplicatedBasicNodesAndRels = {
     nodes: BasicNode[];
     relationships: BasicRelationship[];
     limitHit?: boolean;
-  };
+};
 
 export type VizItemProperty = {
     key: string;
@@ -70,7 +70,7 @@ export type ZoomLimitsReached = {
 export enum ZoomType {
     IN = 'in',
     OUT = 'out',
-    FIT = 'fit'
+    FIT = 'fit',
 }
 
 export type GetNodeNeighborsFn = (

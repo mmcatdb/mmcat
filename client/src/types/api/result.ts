@@ -30,7 +30,7 @@ export enum Crud {
     None,
     Create,
     Update,
-    Delete
+    Delete,
 }
 
 export type Operation<Data> = {

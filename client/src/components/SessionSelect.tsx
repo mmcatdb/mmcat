@@ -1,7 +1,7 @@
 import { api } from '@/api';
 import { type Id } from '@/types/id';
 import { Session } from '@/types/job';
-import cookies from '@/types/utils/cookies';
+import { cookies } from '@/types/utils/cookies';
 import { Button, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useCategoryInfo } from './CategoryInfoProvider';

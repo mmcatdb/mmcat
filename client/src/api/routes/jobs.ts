@@ -2,7 +2,7 @@ import type { StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
 import type { JobResponse, RunResponse, SessionResponse } from '@/types/job';
 
-const jobs = {
+export const jobsApi = {
     getAllJobsInCategory: GET<{ categoryId: StringLike }, JobResponse[]>(
         u => `/schema-categories/${u.categoryId}/jobs`,
     ),
@@ -31,5 +31,3 @@ const jobs = {
         u => `/schema-categories/${u.categoryId}/sessions`,
     ),
 };
-
-export default jobs;

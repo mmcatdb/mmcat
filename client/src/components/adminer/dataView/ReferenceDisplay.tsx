@@ -42,11 +42,7 @@ export function ReferenceDisplay({ references, data, property, kind, datasourceI
             }
         });
 
-    const linkEntries = Array.from(links.entries());
-    linkEntries.sort((a, b) =>
-        compareReferences(a[1], b[1], kind, datasourceId),
-    );
-
+    const linkEntries = [ ...links.entries() ].toSorted((a, b) => compareReferences(a[1], b[1], kind, datasourceId));
     const compressedLinks = getCompressedLinks(linkEntries);
 
     const visibleCount = Math.min(5, compressedLinks.length);

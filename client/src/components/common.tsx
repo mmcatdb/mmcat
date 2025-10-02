@@ -1,5 +1,5 @@
-import { type ReactNode, useLayoutEffect, useState } from 'react';
-import { Card, CardBody, Tooltip as HeroUITooltip, type TooltipProps } from '@heroui/react';
+import { type ReactNode, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { Button, type ButtonProps, Card, CardBody, Tooltip as HeroUITooltip, Spinner, type TooltipProps } from '@heroui/react';
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { HiXMark } from 'react-icons/hi2';
@@ -81,5 +81,75 @@ export function InfoBanner({ children, className, dismissBanner }: InfoBannerPro
                 {children}
             </CardBody>
         </Card>
+    );
+}
+
+type BaseSpinnerButtonProps = Omit<ButtonProps, 'isFetching' | 'fetching' | 'fid' | 'isOverlay' | 'disabled' | 'isLoading'> & {
+    /** The icon is like content, but it will be displayed even if the button is fetching. */
+    icon?: ReactNode;
+};
+
+// Type OR is not ideal here, because we would need to delete the other properties from the rest object.
+type SpinnerButtonProps = BaseSpinnerButtonProps & {
+    isFetching?: boolean;
+    /**
+     * If fetching === fid, then the button is fetching.
+     * Else if !!fetching, then the button is disabled.
+     */
+    fetching?: string;
+    fid?: string;
+    /** If the button is under overlay, it shouldn't be disabled even during fetching. */
+    isOverlay?: boolean;
+};
+
+export function SpinnerButton(props: BaseSpinnerButtonProps & { isFetching: boolean | undefined }): JSX.Element;
+
+export function SpinnerButton(props: BaseSpinnerButtonProps & { fetching: string | undefined, fid: string, isOverlay?: boolean }): JSX.Element;
+
+/**
+ * This component acts like a button that turns into a spinner whenewer isFetching === true.
+ * The button is disabled, however its dimensions remain constant.
+ */
+export function SpinnerButton({ isDisabled, isFetching, fetching, fid, isOverlay, style, icon, ...rest }: SpinnerButtonProps) {
+    const [ measurements, setMeasurements ] = useState<{ width?: number, height?: number }>({});
+    const contentRef = useRef<HTMLButtonElement>(null);
+
+    const doMeasurements = useCallback(() => {
+        if (!contentRef.current)
+            return;
+
+        const newWidth = contentRef.current.getBoundingClientRect().width;
+        const newHeight = contentRef.current.getBoundingClientRect().height;
+
+        setMeasurements(({ width, height }) => ({
+            width: (!width || newWidth > width) ? newWidth : width,
+            height: (!height || newHeight > height) ? newHeight : height,
+        }));
+    }, []);
+
+    const isFetchingInner = isFetching ?? (fid !== undefined && fetching === fid);
+    const finalIsDisabled = !!isDisabled || isFetchingInner || !(!fetching || isOverlay);
+
+    useLayoutEffect(() => {
+        doMeasurements();
+        // This should be enought time for all animations to finish.
+        const timer = setTimeout(doMeasurements, 500);
+        return () => clearTimeout(timer);
+    }, [ isFetchingInner, doMeasurements ]);
+
+    return (
+        <Button
+            {...rest}
+            isDisabled={finalIsDisabled}
+            ref={contentRef}
+            style={(isFetchingInner ? { ...measurements, ...style } : style)}
+        >
+            {isFetchingInner ? (
+                <Spinner size='sm' color='current' />
+            ) : (
+                rest.children
+            )}
+            {icon}
+        </Button>
     );
 }

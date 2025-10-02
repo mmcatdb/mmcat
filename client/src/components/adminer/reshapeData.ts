@@ -5,7 +5,7 @@ const LABELS = '#labels';
 const FROM_NODE_PREFIX = 'from.';
 const TO_NODE_PREFIX = 'to.';
 
-export function getTableFromGraphData(graphData: GraphResponse): { tableData: TableResponse, columnNames: string[]} {
+export function getTableFromGraphData(graphData: GraphResponse): { tableData: TableResponse, columnNames: string[] } {
     const modifiedData = {
         type: View.table,
         metadata: graphData.metadata,

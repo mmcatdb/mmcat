@@ -61,10 +61,10 @@ export function JobPage() {
         return <LoadingPage />;
 
     if (error) {
-        return <ReloadPage onReload={() => {
+        return (
             // This will fetch the job only once, not repeatedly. Replace by a better solution once Tanstack query + router is used.
-            void fetchJob();
-        }} />;
+            <ReloadPage onReload={fetchJob} />
+        );
     }
 
     return (
@@ -170,7 +170,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 /**
  * Returns the appropriate icon for a job's status.
  */
-export function JobStateIcon({ state }: {state: JobState }) {
+export function JobStateIcon({ state }: { state: JobState }) {
     const styles = jobStateStyles[state];
     return (
         <styles.icon className={cn(

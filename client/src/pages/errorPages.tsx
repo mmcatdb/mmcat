@@ -3,10 +3,10 @@ import { Button, Spinner } from '@heroui/react';
 import { cn } from '@/components/utils';
 
 type RouteError = {
-  status?: number;
-  statusText?: string;
-  message?: string;
-  stack?: string;
+    status?: number;
+    statusText?: string;
+    message?: string;
+    stack?: string;
 };
 
 /**
@@ -31,9 +31,9 @@ export function ErrorPage() {
     const errorStyles = isNotFound ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-red-100 text-red-800 border-red-300';
 
     // Extract error message
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const errorMessage = isRouteErrorResponse(error)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+         
         ? error.statusText || error.data?.message || 'The page you are looking for does not exist.'
         : (error as RouteError)?.message ?? (error instanceof Error ? error.message : 'An unexpected error occurred.');
 

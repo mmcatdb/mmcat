@@ -2,6 +2,7 @@ import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, type 
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/components/utils';
+import { SpinnerButton } from './common';
 
 /**
  * Hook to manage sorting of data for HeroUI tables.
@@ -63,9 +64,9 @@ export function ConfirmationModal({ isOpen, onClose, onConfirm, isFetching, titl
                 </ModalBody>
                 <ModalFooter>
                     <Button onPress={onClose} isDisabled={isFetching}>{cancelButtonText}</Button>
-                    <Button color={confirmButtonColor} onPress={onConfirm} isLoading={isFetching}>
+                    <SpinnerButton color={confirmButtonColor} onPress={onConfirm} isFetching={isFetching}>
                         {confirmButtonText}
-                    </Button>
+                    </SpinnerButton>
                 </ModalFooter>
             </ModalContent>
         </Modal>

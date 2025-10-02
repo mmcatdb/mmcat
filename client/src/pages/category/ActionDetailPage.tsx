@@ -7,6 +7,7 @@ import { ConfirmationModal } from '@/components/TableCommon';
 import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 import { PageLayout } from '@/components/RootLayout';
+import { type Id } from '@/types/id';
 
 export function ActionDetailPage() {
     const { action } = useLoaderData() as ActionLoaderData;
@@ -29,7 +30,7 @@ export function ActionDetailPage() {
         navigate(-1);
     }
 
-    async function handleCreateRun(actionId: string) {
+    async function handleCreateRun(actionId: Id) {
         setIsCreatingRun(true);
         const response = await api.jobs.createRun({ actionId });
         setIsCreatingRun(false);
@@ -67,9 +68,7 @@ export function ActionDetailPage() {
                     color='primary'
                     variant='solid'
                     isDisabled={isCreatingRun}
-                    onPress={() => {
-                        void handleCreateRun(action.id);
-                    }}
+                    onPress={() => handleCreateRun(action.id)}
                 >
                     {isCreatingRun ? 'Creating...' : 'Create Run'}
                 </Button>
@@ -78,9 +77,7 @@ export function ActionDetailPage() {
             <ConfirmationModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onConfirm={() => {
-                    void confirmDelete();
-                }}
+                onConfirm={confirmDelete}
                 title='Confirm Deletion?'
                 message='This will permanently delete the action.'
                 confirmButtonText='Yes, Delete'
@@ -91,13 +88,11 @@ export function ActionDetailPage() {
     );
 }
 
-ActionDetailPage.loader = actionLoader;
-
 export type ActionLoaderData = {
     action: Action;
 };
 
-async function actionLoader({ params: { actionId } }: { params: Params<'actionId'> }): Promise<ActionLoaderData> {
+ActionDetailPage.loader = async ({ params: { actionId } }: { params: Params<'actionId'> }): Promise<ActionLoaderData> => {
     if (!actionId)
         throw new Error('Action ID is required');
 
@@ -109,11 +104,11 @@ async function actionLoader({ params: { actionId } }: { params: Params<'actionId
     return {
         action: Action.fromResponse(response.data),
     };
-}
+};
 
 type StepsTableProps = {
     payloads: JobPayload[];
-    categoryId: string;
+    categoryId: Id;
 };
 
 /**
@@ -152,7 +147,7 @@ function StepsTable({ payloads, categoryId }: StepsTableProps) {
 
 type renderDatasourceElementProps = {
     payload: JobPayload;
-    categoryId: string;
+    categoryId: Id;
 };
 
 /**

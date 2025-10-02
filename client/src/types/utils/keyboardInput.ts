@@ -1,7 +1,7 @@
 export enum Key {
     Shift = 'shift',
     Ctrl = 'ctrl',
-    Alt = 'alt'
+    Alt = 'alt',
 }
 
 const keys = {

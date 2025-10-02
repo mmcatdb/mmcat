@@ -249,14 +249,14 @@ export type AdminerFilterQueryStateAction =
     ;
 
 type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
-  ? { type: T }
-  : { type: T } & P;
+    ? { type: T }
+    : { type: T } & P;
 
 type DatasourceAction = AdminerTypedAction<'datasource', { newDatasource: Datasource }>;
 type KindAction = AdminerTypedAction<'kind', { newKind: string }>;
 type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
 type InitializeAction = AdminerTypedAction<'initialize'>;
-type FilterQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerFilterQueryState }>;
+type FilterQueryUpdateAction = AdminerTypedAction<'update', { newState: AdminerFilterQueryState }>;
 type ItemCountAction = AdminerTypedAction<'itemCount', { newItemCount: number | undefined }>;
 type NewPageAction = AdminerTypedAction<'page', { newCurrentPage: number, newOffset: number }>;

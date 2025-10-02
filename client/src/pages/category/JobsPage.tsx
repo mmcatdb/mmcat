@@ -14,6 +14,7 @@ import { routes } from '@/routes/routes';
 import { InfoBanner } from '@/components/common';
 import { EmptyState } from '@/components/TableCommon';
 import { PageLayout } from '@/components/RootLayout';
+import { type Id } from '@/types/id';
 
 /** In ms. */
 const REFRESH_INTERVAL_MS = 3000;
@@ -21,7 +22,7 @@ const REFRESH_INTERVAL_MS = 3000;
 export function JobsPage() {
     const { showTableIDs } = usePreferences().preferences;
     const { category } = useCategoryInfo();
-    const [ groupedJobs, setGroupedJobs ] = useState<Record<string, Job[]>>();
+    const [ groupedJobs, setGroupedJobs ] = useState<Record<Id, Job[]>>();
     const [ error, setError ] = useState(false);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('jobs-page');
 
@@ -59,7 +60,7 @@ export function JobsPage() {
 
     if (error) {
         return (
-            <ReloadPage onReload={() => void fetchJobs()} />
+            <ReloadPage onReload={fetchJobs} />
         );
     }
 
@@ -113,7 +114,7 @@ export function JobsPage() {
 /**
  * Compare old and new job groups for differences.
 */
-function detectChanges(oldGroups: Record<string, Job[]>, newGroups: Record<string, Job[]>) {
+function detectChanges(oldGroups: Record<Id, Job[]>, newGroups: Record<Id, Job[]>) {
     for (const runId in newGroups) {
         const oldJobs = oldGroups[runId] || [];
         const newJobs = newGroups[runId];
@@ -138,10 +139,10 @@ function groupJobsByRunId(jobs: Job[]) {
         acc[runId].push(job);
 
         return acc;
-    }, {} as Record<string, Job[]>);
+    }, {} as Record<Id, Job[]>);
 }
 
-function RunRow({ runId, jobs }: { runId: string, jobs: Job[] }) {
+function RunRow({ runId, jobs }: { runId: Id, jobs: Job[] }) {
     const { showTableIDs } = usePreferences().preferences;
 
     // Keep only the most recent job per index
