@@ -98,8 +98,12 @@ public class SchemaExtractor {
             return;
 
         newSchema.addObjex(objex);
-        objex.ids().toSignatureIds()
-            .stream().flatMap(id -> id.signatures().stream())
+
+        if (!objex.ids().isSignatures())
+            return;
+
+        objex.ids().signatureIds().stream()
+            .flatMap(id -> id.signatures().stream())
             .flatMap(signature -> signature.toBases().stream())
             // We don't have to worry about duals here because ids can't contain them (ids have to have cardinality at most 1).
             .forEach(base -> morphismQueue.add(schema.getMorphism(base)));

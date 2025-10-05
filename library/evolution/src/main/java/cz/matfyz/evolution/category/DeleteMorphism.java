@@ -15,14 +15,11 @@ public record DeleteMorphism(
     }
 
     @Override public void up(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
-        (new SchemaEditor(schemaCategory)).getMorphisms().remove(schema.signature());
+        schemaCategory.removeMorphism(schema);
     }
 
     @Override public void down(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
-        final var objexes = (new SchemaEditor(schemaCategory)).getObjexes();
-        final var morphismWithObjexes = schema.deserialize(objexes::get);
-
-        (new SchemaEditor(schemaCategory)).getMorphisms().put(morphismWithObjexes.signature(), morphismWithObjexes);
+        schemaCategory.addMorphism(schema);
     }
 
 }

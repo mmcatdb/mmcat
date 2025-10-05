@@ -24,12 +24,12 @@ public class Mapping implements Comparable<Mapping> {
     public static Mapping create(Datasource datasource, String kindName, SchemaCategory category, Key rootKey, ComplexProperty accessPath) {
         final var rootObjex = category.getObjex(rootKey);
 
-        return new Mapping(datasource, kindName, category, rootKey, accessPath, defaultPrimaryKey(rootObjex));
+        return new Mapping(datasource, kindName, category, rootKey, accessPath, createDefaultPrimaryKey(rootObjex));
     }
 
-    private static List<Signature> defaultPrimaryKey(SchemaObjex objex) {
+    private static List<Signature> createDefaultPrimaryKey(SchemaObjex objex) {
         return objex.ids().isSignatures()
-            ? objex.ids().toSignatureIds().first().signatures().stream().toList()
+            ? objex.ids().signatureIds().first().signatures().stream().toList()
             : List.of(Signature.empty());
     }
 

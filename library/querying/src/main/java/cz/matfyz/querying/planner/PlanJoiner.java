@@ -136,7 +136,7 @@ public class PlanJoiner {
         if (!rootObjex.ids().isSignatures())
             return null;
         // TODO currently, we are using only the first id for joining.
-        final SignatureId firstId = rootObjex.ids().toSignatureIds().first();
+        final SignatureId firstId = rootObjex.ids().signatureIds().first();
         // TODO currently, we are accepting only signature ids with exactly one signature.
         if (firstId.signatures().size() != 1)
             return null;

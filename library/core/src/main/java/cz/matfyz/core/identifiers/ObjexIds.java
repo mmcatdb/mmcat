@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @JsonSerialize(using = ObjexIds.Serializer.class)
 @JsonDeserialize(using = ObjexIds.Deserializer.class)
@@ -40,10 +41,17 @@ public class ObjexIds implements Serializable {
     }
 
     private final Type type;
-    private final SortedSet<SignatureId> signatureIds;
+    private final @Nullable SortedSet<SignatureId> signatureIds;
+
+    public SortedSet<SignatureId> signatureIds() {
+        return new TreeSet<>(signatureIds);
+    }
 
     // TODO disable this method eventually and fix all other methods that rely on it.
     // The reason is that this whole object was introduced because we want to behave differently to the different types of ids - so there ain't be no function that unifies them back together.
+    /**
+     * @deprecated
+     */
     public SortedSet<SignatureId> toSignatureIds() {
         return isSignatures() ? new TreeSet<>(signatureIds) : new TreeSet<>(Set.of(SignatureId.createEmpty()));
     }
@@ -93,7 +101,7 @@ public class ObjexIds implements Serializable {
         return type == Type.Generated;
     }
 
-    public Set<Signature> generateDefaultSuperId() {
+    public Set<Signature> createDefaultSuperId() {
         if (type != Type.Signatures)
             return Set.of(Signature.empty());
 

@@ -1,10 +1,15 @@
 package cz.matfyz.core.schema;
 
 import cz.matfyz.core.exception.MorphismNotFoundException;
+import cz.matfyz.core.exception.SchemaException;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.Key.KeyGenerator;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,16 +27,91 @@ public class SchemaCategory {
         return objexes.get(key);
     }
 
+    /** @deprecated */
     public SchemaObjex addObjex(SchemaObjex objex) {
         return objexes.put(objex.key(), objex);
     }
 
+    public SchemaObjex addObjex(SerializedObjex serialized) {
+        final var objex = new SchemaObjex(serialized.key(), serialized.ids(), false);
+        objexes.put(objex.key(), objex);
+        return objex;
+    }
+
+    public void removeObjex(SchemaObjex objex) {
+        removeObjex(objex.key());
+    }
+
+    public void removeObjex(SerializedObjex objex) {
+        removeObjex(objex.key());
+    }
+
+    public void removeObjex(Key key) {
+        final var objex = objexes.get(key);
+        if (objex == null)
+            throw SchemaException.removingNonExistingObjex(key);
+
+        final List<Signature> signaturesOfDependentMorphisms = morphisms.values().stream()
+            .filter(morphism -> morphism.dom().equals(objex) || morphism.cod().equals(objex))
+            .map(SchemaMorphism::signature)
+            .toList();
+
+        if (!signaturesOfDependentMorphisms.isEmpty())
+            throw SchemaException.removedObjexDependsOnMorphisms(objex.key(), signaturesOfDependentMorphisms);
+
+        objexes.remove(key);
+    }
+
+    public SchemaObjex replaceObjex(SerializedObjex serialized) {
+        final var key = serialized.key();
+        final var existing = objexes.get(key);
+        if (existing == null)
+            throw SchemaException.replacingNonExistingObjex(key);
+
+        final var objex = new SchemaObjex(key, serialized.ids(), existing.isEntity());
+
+        objexes.put(key, objex);
+        morphisms.values().forEach(morphism -> morphism.updateObjex(objex));
+
+        return objex;
+    }
+
+    /** @deprecated */
     public SchemaMorphism addMorphism(SchemaMorphism morphism) {
         return morphisms.put(morphism.signature(), morphism);
     }
 
+    public SchemaMorphism addMorphism(SerializedMorphism serialized) {
+        final var dom = getObjex(serialized.domKey());
+        final var cod = getObjex(serialized.codKey());
+
+        // FIXME check isEntity
+
+        final var morphism = new SchemaMorphism(serialized.signature(), dom, cod, serialized.min(), serialized.tags());
+        morphisms.put(morphism.signature(), morphism);
+
+        return morphism;
+    }
+
     public void removeMorphism(SchemaMorphism morphism) {
-        morphisms.remove(morphism.signature());
+        removeMorphism(morphism.signature());
+    }
+
+    public void removeMorphism(SerializedMorphism morphism) {
+        removeMorphism(morphism.signature());
+    }
+
+    public void removeMorphism(Signature signature) {
+        // FIXME check isEntity
+
+        morphisms.remove(signature);
+    }
+
+
+    public void replaceMorphism(SerializedMorphism morphism) {
+        // TODO maybe some integriy check is needed here? Or comment why not ...
+        removeMorphism(morphism);
+        addMorphism(morphism);
     }
 
     public SchemaMorphism getMorphism(Signature signature) {
@@ -168,16 +248,12 @@ public class SchemaCategory {
         return new SchemaMorphism(signature, dom, cod, min, Set.of());
     }
 
-    public abstract static class Editor {
+    public KeyGenerator createKeyGenerator() {
+        return KeyGenerator.create(objexes.keySet());
+    }
 
-        protected static Map<Key, SchemaObjex> getObjexes(SchemaCategory category) {
-            return category.objexes;
-        }
-
-        protected static Map<Signature, SchemaMorphism> getMorphisms(SchemaCategory category) {
-            return category.morphisms;
-        }
-
+    public SignatureGenerator createSignatureGenerator() {
+        return SignatureGenerator.create(morphisms.keySet());
     }
 
 }

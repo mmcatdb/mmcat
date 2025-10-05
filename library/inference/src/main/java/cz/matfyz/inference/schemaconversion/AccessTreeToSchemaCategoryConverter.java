@@ -8,8 +8,9 @@ import cz.matfyz.core.metadata.MetadataMorphism;
 import cz.matfyz.core.metadata.MetadataObjex;
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObjex;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
 
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.SchemaWithMetadata;
@@ -53,18 +54,13 @@ public class AccessTreeToSchemaCategoryConverter {
             buildSchemaCategory(childNode);
     }
 
-    /**
-     * Creates a schema objex from the provided access tree node and adds it to the schema.
-     */
     private SchemaObjex createSchemaObjex(AccessTreeNode node, boolean isRoot) {
         final var ids = isRoot || !node.getChildren().isEmpty()
             ? ObjexIds.createGenerated()
             : ObjexIds.createValue();
-
-        final SchemaObjex objex = new SchemaObjex(node.key, ids);
-        schema.addObjex(objex);
-
         final var label = isRoot ? kindName : node.name;
+
+        final var objex = schema.addObjex(new SerializedObjex(node.key, ids));
         metadata.setObjex(objex, new MetadataObjex(label, Position.createDefault()));
 
         return objex;
@@ -72,20 +68,13 @@ public class AccessTreeToSchemaCategoryConverter {
 
     private void createSchemaMorphism(AccessTreeNode node, SchemaObjex objex) {
         final var parentObjex = schema.getObjex(node.getParentKey());
-
         if (parentObjex == null)
             throw new RuntimeException("Error while creating morphism. Domain is null and codomain is " + objex.key());
 
-        SchemaObjex dom = parentObjex;
-        SchemaObjex cod = objex;
+        final SchemaObjex dom = node.isArrayType ? objex : parentObjex;
+        final SchemaObjex cod = node.isArrayType ? parentObjex : objex;
 
-        if (node.isArrayType) {
-            dom = objex;
-            cod = parentObjex;
-        }
-
-        final SchemaMorphism morphism = new SchemaMorphism(node.signature, dom, cod, node.min, Set.of());
-        schema.addMorphism(morphism);
+        final var morphism = schema.addMorphism(new SerializedMorphism(node.signature, dom.key(), cod.key(), node.min, Set.of()));
         metadata.setMorphism(morphism, new MetadataMorphism(node.label));
     }
 }

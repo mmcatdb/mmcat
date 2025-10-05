@@ -15,13 +15,11 @@ public record DeleteObjex(
     }
 
     @Override public void up(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
-        CreateObjex.assertObjexIsSingle(schemaCategory, schema.deserialize());
-
-        (new SchemaEditor(schemaCategory)).getObjexes().remove(schema.key());
+        schemaCategory.removeObjex(schema);
     }
 
     @Override public void down(SchemaCategory schemaCategory, MetadataCategory metadataCategory) {
-        (new SchemaEditor(schemaCategory)).getObjexes().put(schema.key(), schema.deserialize());
+        schemaCategory.addObjex(schema);
     }
 
 }

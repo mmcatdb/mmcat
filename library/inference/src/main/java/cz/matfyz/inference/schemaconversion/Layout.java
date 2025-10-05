@@ -120,11 +120,13 @@ public class Layout {
         }
     }
 
-    private static void storeSubgraphPositions(DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph,
-                                               AbstractLayout<SchemaObjex, SchemaMorphism> layout,
-                                               Map<Key, Position> positions,
-                                               int xOffset,
-                                               int yOffset) {
+    private static void storeSubgraphPositions(
+        DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph,
+        AbstractLayout<SchemaObjex, SchemaMorphism> layout,
+        Map<Key, Position> positions,
+        int xOffset,
+        int yOffset
+    ) {
         for (SchemaObjex node : subgraph.getVertices()) {
             double x = layout.getX(node) + xOffset;
             double y = layout.getY(node) + yOffset;
@@ -139,7 +141,7 @@ public class Layout {
         for (final SchemaObjex objex : schema.allObjexes()) {
             if (!visited.contains(objex)) {
                 DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph = new DirectedSparseGraph<>();
-                Queue<SchemaObjex> queue = new LinkedList<>();
+                Queue<SchemaObjex> queue = new ArrayDeque<>();
                 queue.add(objex);
 
                 while (!queue.isEmpty()) {

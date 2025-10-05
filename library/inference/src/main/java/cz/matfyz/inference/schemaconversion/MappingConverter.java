@@ -3,9 +3,7 @@ package cz.matfyz.inference.schemaconversion;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
-import org.apache.hadoop.yarn.webapp.NotFoundException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.Key;
@@ -51,13 +49,13 @@ public class MappingConverter {
             if (child.isArrayType) {
                 AccessTreeNode valueNode = getValueNodeForArray(child);
                 Signature arraySignature = getArraySignature(child, valueNode);
-                if (isComplexArray(valueNode)) {
+
+                if (isComplexArray(valueNode))
                     subpaths.add(buildComplexPropertyFromNode(valueNode, child.name, arraySignature));
-                } else {
+                else
                     subpaths.add(builder.simple(child.name, arraySignature));
-                }
-            //
-            } else {
+            }
+            else {
                 if (child.getType() == AccessTreeNode.Type.SIMPLE)
                     subpaths.add(builder.simple(child.name, child.signature));
                 else
@@ -67,11 +65,10 @@ public class MappingConverter {
 
         if (node.getType() == AccessTreeNode.Type.ROOT)
             return builder.root(subpaths.toArray(new AccessPath[0]));
+        else if (name != null && signature != null)
+            return builder.complex(name, signature, subpaths.toArray(new AccessPath[0]));
         else
-            if (name != null && signature != null)
-                return builder.complex(name, signature, subpaths.toArray(new AccessPath[0]));
-            else
-                return builder.complex(node.name, node.signature, subpaths.toArray(new AccessPath[0]));
+            return builder.complex(node.name, node.signature, subpaths.toArray(new AccessPath[0]));
     }
 
     private Signature getArraySignature(AccessTreeNode node, AccessTreeNode valueNode) {
@@ -80,11 +77,11 @@ public class MappingConverter {
     }
 
     private AccessTreeNode getValueNodeForArray(AccessTreeNode node) {
-        for (AccessTreeNode child: node.getChildren()) {
+        for (AccessTreeNode child: node.getChildren())
             if (child.name.equals(RSDToAccessTreeConverter.VALUE_LABEL))
                 return child;
-        }
-        throw new NotFoundException("Value node for array node has not been found");
+
+        throw new IllegalStateException("Value node for array node has not been found");
     }
 
     private boolean isComplexArray(AccessTreeNode valueNode) {

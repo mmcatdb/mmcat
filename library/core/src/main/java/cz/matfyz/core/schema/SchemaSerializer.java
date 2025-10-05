@@ -36,10 +36,10 @@ public class SchemaSerializer {
         final var schema = new SchemaCategory();
 
         for (final var serializedObjex : serializedSchema.objexes)
-            schema.addObjex(serializedObjex.deserialize());
+            schema.addObjex(serializedObjex);
 
         for (final var serializedMorphism : serializedSchema.morphisms)
-            schema.addMorphism(serializedMorphism.deserialize(schema::getObjex));
+            schema.addMorphism(serializedMorphism);
 
         return schema;
     }
@@ -53,13 +53,6 @@ public class SchemaSerializer {
             return new SerializedObjex(
                 objex.key(),
                 objex.ids()
-            );
-        }
-
-        public SchemaObjex deserialize() {
-            return new SchemaObjex(
-                key,
-                ids
             );
         }
 
@@ -85,16 +78,6 @@ public class SchemaSerializer {
 
         public interface SchemaObjexProvider {
             SchemaObjex getObjex(Key key);
-        }
-
-        public SchemaMorphism deserialize(SchemaObjexProvider provider) {
-            return new SchemaMorphism(
-                signature,
-                provider.getObjex(domKey),
-                provider.getObjex(codKey),
-                min,
-                tags
-            );
         }
 
     }

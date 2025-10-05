@@ -9,10 +9,13 @@ import java.util.Collection;
 
 public class SchemaObjex implements Identified<SchemaObjex, Key> {
 
-    public SchemaObjex(Key key, ObjexIds ids) {
+    /** Edited by {@link SchemaCategory}. */
+    boolean isEntity;
+
+    SchemaObjex(Key key, ObjexIds ids, boolean isEntity) {
         this.key = key;
         this.ids = ids;
-        this.superId = ids.generateDefaultSuperId();
+        this.superId = ids.createDefaultSuperId();
     }
 
     private final Key key;
@@ -39,6 +42,7 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
      * Entities have either signature identifier(s) or a generated identifier. Properties are identified by their value.
      */
     public boolean isEntity() {
+        // FIXME use isEntity field
         return !ids.isValue();
     }
 

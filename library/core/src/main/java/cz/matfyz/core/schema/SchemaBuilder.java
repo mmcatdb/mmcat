@@ -11,6 +11,8 @@ import cz.matfyz.core.metadata.MetadataObjex;
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
 import cz.matfyz.core.utils.SequenceGenerator;
 
 import java.util.ArrayList;
@@ -243,8 +245,7 @@ public class SchemaBuilder {
             if (objexesToSkip.contains(o))
                 return;
 
-            final var objex = new SchemaObjex(o.key, o.ids);
-            schema.addObjex(objex);
+            schema.addObjex(new SerializedObjex(o.key, o.ids));
         });
 
         morphismsBySignature.values().forEach(m -> {
@@ -254,10 +255,7 @@ public class SchemaBuilder {
             if (!(m.signature instanceof BaseSignature))
                 return;
 
-            final var dom = schema.getObjex(m.domKey());
-            final var cod = schema.getObjex(m.codKey());
-            final var morphism = new SchemaMorphism(m.signature, dom, cod, m.min, m.tags);
-            schema.addMorphism(morphism);
+            schema.addMorphism(new SerializedMorphism(m.signature, m.domKey(), m.codKey(), m.min, m.tags));
         });
 
         objexesToSkip.clear();

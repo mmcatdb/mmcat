@@ -3,10 +3,12 @@ package cz.matfyz.core.exception;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 
+import java.io.Serializable;
+
 public class MorphismNotFoundException extends CoreException {
 
-    private MorphismNotFoundException(String name, Signature signature) {
-        super("morphismNotFound." + name, signature, null);
+    private MorphismNotFoundException(String name, Serializable data) {
+        super("morphismNotFound." + name, data, null);
     }
 
     public static MorphismNotFoundException signatureIsDual(Signature signature) {
@@ -25,4 +27,10 @@ public class MorphismNotFoundException extends CoreException {
         return new MorphismNotFoundException("baseNotFound", signature);
     }
 
+    private record MessageData(String message) implements Serializable {}
+
+    /** Use only as a last resord! */
+    public static MorphismNotFoundException withMessage(String message) {
+        return new MorphismNotFoundException("withMessage", new MessageData(message));
+    }
 }

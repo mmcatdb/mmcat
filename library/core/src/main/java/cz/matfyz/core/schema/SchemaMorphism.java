@@ -24,8 +24,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         role,
     }
 
-
-    public SchemaMorphism(Signature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
+    SchemaMorphism(Signature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
         this.signature = signature;
         this.dom = dom;
         this.cod = cod;
@@ -74,7 +73,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
     /**
      * Replace old version of dom/cod by its newer version (which has the same key).
      */
-    public void updateObjex(SchemaObjex objex) {
+    void updateObjex(SchemaObjex objex) {
         if (this.dom.equals(objex))
             this.dom = objex;
         if (this.cod.equals(objex))
