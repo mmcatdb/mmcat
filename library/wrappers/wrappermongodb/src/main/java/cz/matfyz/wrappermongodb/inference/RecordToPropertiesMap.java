@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.bson.Document;
+import org.apache.spark.sql.Row;
 import org.bson.types.ObjectId;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
-public class RecordToPropertiesMap implements FlatMapFunction<Document, RecordSchemaDescription> {
+public class RecordToPropertiesMap implements FlatMapFunction<Row, RecordSchemaDescription> {
 
     private final String collectionName;
 
@@ -21,27 +21,17 @@ public class RecordToPropertiesMap implements FlatMapFunction<Document, RecordSc
         this.collectionName = collectionName;
     }
 
-    @Override public Iterator<RecordSchemaDescription> call(Document document) throws Exception {
+    @Override public Iterator<RecordSchemaDescription> call(Row row) throws Exception {
         // TODO: USE FAST UTIL!
         ObjectArrayList<RecordSchemaDescription> result = new ObjectArrayList<>();
 
-        document.forEach((key, value) -> {
+        for (final String key : row.schema().fieldNames()) {
+            // TODO this might need to be checked ... not sure whether Row behaves the same ways as the good old bson Document.
+            final var value = row.getAs(key);
             appendProperty(collectionName + '/' + key, value, 1, result, true);
-        });
-
-        return result.iterator();
-    }
-
-    private RecordSchemaDescription buildProperty(String key, Object value, int firstShare, ObjectArrayList<RecordSchemaDescription> result) {
-        RecordSchemaDescription schema = buildPropertySchemaDescription(key, value, firstShare, 1);
-
-        if (value instanceof Map) {
-            appendProperties(key, ((Map<String, Object>) value).entrySet(), result);
-        } else if (value instanceof List) {
-            appendArrayElements(key, (List<Object>) value, result);
         }
 
-        return schema;
+        return result.iterator();
     }
 
     private void appendProperty(String key, Object value, int firstShare, ObjectArrayList<RecordSchemaDescription> result, boolean addThisProperty) {
@@ -120,6 +110,18 @@ public class RecordToPropertiesMap implements FlatMapFunction<Document, RecordSc
         for (RecordSchemaDescription property : xxx)
             if (property != null)
                 result.add(property);
+    }
+
+    private RecordSchemaDescription buildProperty(String key, Object value, int firstShare, ObjectArrayList<RecordSchemaDescription> result) {
+        RecordSchemaDescription schema = buildPropertySchemaDescription(key, value, firstShare, 1);
+
+        if (value instanceof Map) {
+            appendProperties(key, ((Map<String, Object>) value).entrySet(), result);
+        } else if (value instanceof List) {
+            appendArrayElements(key, (List<Object>) value, result);
+        }
+
+        return schema;
     }
 
     private static int getTypeIndex(Object value) {

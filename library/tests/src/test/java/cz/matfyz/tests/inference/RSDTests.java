@@ -29,11 +29,11 @@ public class RSDTests {
             .enableSpark(sparkProvider.getSettings())
             .getInferenceWrapper();
 
-        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
+        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class);
         privateExecuteRBA.setAccessible(true);
 
         final MMInferOneInAll mmInferOneInAll = new MMInferOneInAll();
-        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper, false);
+        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper);
     }
 
     @Test
@@ -46,11 +46,11 @@ public class RSDTests {
             .enableSpark(sparkProvider.getSettings())
             .getInferenceWrapper();
 
-        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
+        final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class);
         privateExecuteRBA.setAccessible(true);
 
         final MMInferOneInAll mmInferOneInAll = new MMInferOneInAll();
-        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper, false);
+        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper);
     }
 
 }

@@ -43,7 +43,9 @@ public class MongoDBQuery implements QueryContent {
             .indentCharacters("    ")
             .build();
 
-        final String pipelineString = pipeline.stream().map(item -> item.toBsonDocument().toJson(settings)).collect(Collectors.joining(", "));
+        // TODO check if the null parameters are ok
+        // final String pipelineString = pipeline.stream().map(item -> item.toBsonDocument().toJson(settings)).collect(Collectors.joining(", "));
+        final String pipelineString = pipeline.stream().map(item -> item.toBsonDocument(null, null).toJson(settings)).collect(Collectors.joining(", "));
 
         return "db." + collection + ".aggregate([ " + pipelineString + " ])";
     }

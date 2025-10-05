@@ -5,10 +5,9 @@ import cz.matfyz.core.rsd.Model;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Type;
 import java.util.Collections;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.apache.spark.sql.Row;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 public abstract class MapMongoDocument {
@@ -17,7 +16,7 @@ public abstract class MapMongoDocument {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapMongoDocument.class);
 
-    public static RecordSchemaDescription process(Document t) {
+    public static RecordSchemaDescription process(Row row) {
         RecordSchemaDescription result = new RecordSchemaDescription();
 
         result.setName(RecordSchemaDescription.ROOT_SYMBOL);
@@ -28,9 +27,13 @@ public abstract class MapMongoDocument {
         result.setTypes(Type.MAP);
         result.setModels(Model.DOC);
 
-        ObjectArrayList/*List*/<RecordSchemaDescription> children = new ObjectArrayList/*ArrayList*/<>(t.size());
+        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>(row.size());
 
-        t.forEach((key, value) -> children.add(MapMongoRecord.process(key, value, true, true)));
+        for (final String key : row.schema().fieldNames()) {
+            // TODO this might need to be checked ... not sure whether Row behaves the same ways as the good old bson Document.
+            final var value = row.getAs(key);
+            children.add(MapMongoRecord.process(key, value, true, true));
+        }
 
         Collections.sort(children);
 

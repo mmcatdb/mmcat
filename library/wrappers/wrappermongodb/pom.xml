@@ -30,18 +30,8 @@
             <version>3.12.10</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_2.12</artifactId>
-            <version>${spark.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_2.12</artifactId>
-            <version>${spark.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.mongodb.spark</groupId>
-            <artifactId>mongo-spark-connector_2.12</artifactId>
+            <artifactId>mongo-spark-connector_2.13</artifactId>
             <version>${mongodb.spark.version}</version>
             <scope>compile</scope>
             <type>jar</type>

@@ -37,11 +37,9 @@ import java.util.regex.Pattern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
-
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MongoDBPullWrapper implements AbstractPullWrapper {

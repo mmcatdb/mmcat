@@ -2,7 +2,7 @@ package cz.matfyz.wrappermongodb.inference;
 
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
-import org.bson.Document;
+import org.apache.spark.sql.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,7 @@ public class MongoRecordToRawPropertyFlatMap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoRecordToRawPropertyFlatMap.class);
 
-    public static Iterator<RawProperty> process(String collectionName, Document t, boolean loadSchema, boolean loadData) {
+    public static Iterator<RawProperty> process(String collectionName, Row t, boolean loadSchema, boolean loadData) {
         return new MongoRecordToRawPropertyFlatMap(loadSchema, loadData).process(collectionName, t);
     }
 
@@ -25,12 +25,14 @@ public class MongoRecordToRawPropertyFlatMap {
         this.loadData = loadData;
     }
 
-    public Iterator<RawProperty> process(String collectionName, Document t) {
-        List<RawProperty> result = new ArrayList<>(objectToRawProperties(collectionName, new Document(), true));
+    public Iterator<RawProperty> process(String collectionName, Row row) {
+        final List<RawProperty> result = new ArrayList<>(objectToRawProperties(collectionName, Row.empty(), true));
 
-        t.forEach((key, value) -> {
+        for (final String key : row.schema().fieldNames()) {
+            // TODO this might need to be checked ... not sure whether Row behaves the same ways as the good old bson Document.
+            final var value = row.getAs(key);
             result.addAll(objectToRawProperties(collectionName + '/' + key, value, true));
-        });
+        }
 
         return result.iterator();
     }

@@ -8,17 +8,17 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.util.HashSet;
 import java.util.Iterator;
-import org.bson.Document;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.sql.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import scala.Tuple2;
 
-public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, String, PropertyHeuristics> {
+public class RecordToHeuristicsMap implements PairFlatMapFunction<Row, String, PropertyHeuristics> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecordToHeuristicsMap.class);
 
@@ -28,14 +28,16 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, Stri
         this.collectionName = collectionName;
     }
 
-    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Document document) {
+    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Row row) {
         ObjectArrayList<Tuple2<String, PropertyHeuristics>> result = new ObjectArrayList<Tuple2<String, PropertyHeuristics>>();
 
-        appendHeuristics(collectionName, new Document(), 1, result, true);
+        appendHeuristics(collectionName, Row.empty(), 1, result, true);
 
-        document.forEach((key, value) -> {
+        for (final String key : row.schema().fieldNames()) {
+            // TODO this might need to be checked ... not sure whether Row behaves the same ways as the good old bson Document.
+            final var value = row.getAs(key);
             appendHeuristics(collectionName + '/' + key, value, 1, result, true);
-        });
+        }
 
         return result.iterator();
     }
