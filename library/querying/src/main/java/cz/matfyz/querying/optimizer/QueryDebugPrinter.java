@@ -99,10 +99,10 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         stringBuilder
             .append("(\n");
 
-        stringBuilder.append(indent()).append("FROM\n");
+        stringBuilder.append(indent()).append(node.forceDepJoinFromRef ? "FROM(dep.)\n" : "FROM\n");
         indentAccept(node.fromChild());
 
-        stringBuilder.append(indent()).append("TO\n");
+        stringBuilder.append(indent()).append(node.forceDepJoinFromId ? "TO(dep.)\n" : "TO\n");
         indentAccept(node.toChild());
 
         stringBuilder.append(indent()).append(")\n");

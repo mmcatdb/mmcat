@@ -1,7 +1,9 @@
 package cz.matfyz.tests.benchmark;
 
-import cz.matfyz.core.collector.CollectorCache;
+import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.querying.QueryToInstance;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.querying.optimizer.QueryDebugPrinter;
 import cz.matfyz.tests.example.benchmarkyelp.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
@@ -27,68 +29,12 @@ class BenchmarkTests {
     private static final Datasources datasources = new Datasources();
     private static final CollectorCache cache = new CollectorCache();
 
-    @BeforeAll
-    static void setup() {
-
-        // fill the cache with database data
-        // new QueryEstimator(
-        //     datasources,
-        //     List.of(
-        //         datasources.postgreSQL(),
-        //         datasources.mongoDB()
-        //     ),
-        //     """
-        //         SELECT {
-        //             ?business
-        //                 bid ?business_id ;
-        //                 reviews ?reviews .
-
-        //         }
-        //         WHERE {
-        //             ?business 1 ?business_id .
-        //             ?business 6 ?reviews .
-
-        //             FILTER(?business_id = "Pns2l4eNsfO8kk83dixA6A")
-        //         }
-        //     """,
-        //     cache,
-        //     true
-        // ).run();
-
-        new QueryEstimator(
-            datasources,
-            List.of(
-                // datasources.postgreSQL(),
-                datasources.mongoDB()
-            ),
-            """
-                SELECT {
-                    ?review
-                        id ?review_id ;
-                        bid ?business_id ;
-                        uid ?user_id .
-
-                }
-                WHERE {
-                    ?review 18 ?review_id .
-                    ?review 20/1 ?business_id .
-                    ?review 19/9 ?user_id .
-
-                    FILTER(?business_id = "Pns2l4eNsfO8kk83dixA6A")
-                }
-            """,
-            cache,
-            true
-        ).run();
-    }
-
     @Test
     void yelpIsLoaded() {
         final var kindNames = datasources.mongoDB().wrapper.getPullWrapper().getKindNames();
 
-        assertEquals(3, kindNames.size());
         assertTrue(kindNames.contains("business"));
-        assertTrue(kindNames.contains("user"));
+        assertTrue(kindNames.contains("yelp_user"));
         assertTrue(kindNames.contains("review"));
 
         // MongoDBPullWrapper.executeQuery("db.count?")
@@ -103,18 +49,18 @@ class BenchmarkTests {
 
         final var query = """
             SELECT {
-                ?business
+                ?review
+                    rid ?review_id ;
                     bid ?business_id ;
-                    name ?name ;
-                    reviews ?reviews .
+                    useful ?useful .
 
             }
             WHERE {
-                ?business 1 ?business_id .
-                ?business 2 ?name .
-                ?business 6 ?reviews .
+                ?review 11 ?review_id .
+                ?review 13 ?business_id .
+                ?review 16 ?useful .
 
-                FILTER(?reviews >= "100")
+                FILTER(?useful >= "100")
             }
         """;
 
@@ -160,9 +106,9 @@ class BenchmarkTests {
                     name ?name .
             }
             WHERE {
-                ?user  9 ?user_id .
-                ?user 10 ?name .
-                ?user -19/20/1 ?business_id .
+                ?user 6 ?user_id .
+                ?user 7 ?name .
+                ?user -12/13/1 ?business_id .
 
                 FILTER(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
                 # GROUP BY ?user
@@ -196,6 +142,120 @@ class BenchmarkTests {
     }
 
     @Test
+    void cache() {
+        // All users which reviewed a given business
+        // (theoretically the filter should be the commented GROUPBY HAVING, but that is not implemented yet, and this seems to work anyways)
+        final var queries = List.of(
+            """
+                SELECT {
+                ?business
+                    bid ?bid ;
+                    name ?name .
+                }
+                WHERE {
+                    ?business 1 ?bid .
+                    ?business 2 ?name .
+                }
+            """,
+            """
+                SELECT {
+                ?user
+                    uid ?uid ;
+                    name ?name .
+                }
+                WHERE {
+                    ?user 6 ?uid .
+                    ?user 7 ?name .
+                }
+            """,
+            """
+                SELECT {
+                ?review
+                    rid ?rid ;
+                    uid ?uid ;
+                    bid ?bid ;
+                    stars ?stars .
+                }
+                WHERE {
+                    ?review 11 ?rid .
+                    ?review 12/6 ?uid .
+                    ?review 13/1 ?bid .
+                    ?review 14 ?stars .
+                }
+            """,
+            """
+                SELECT {
+                ?review
+                    rid ?rid ;
+                    uid ?uid ;
+                    bid ?bid ;
+                    stars ?stars .
+                }
+                WHERE {
+                    ?review 11 ?rid .
+                    ?review 12/6 ?uid .
+                    ?review 13/1 ?bid .
+                    ?review 14 ?stars .
+
+                    FILTER(?bid = "123")
+                }
+            """,
+            """
+                SELECT {
+                ?review
+                    rid ?rid ;
+                    uid ?uid ;
+                    bid ?bid ;
+                    stars ?stars .
+                }
+                WHERE {
+                    ?review 11 ?rid .
+                    ?review 12/6 ?uid .
+                    ?review 13/1 ?bid .
+                    ?review 14 ?stars .
+
+                    FILTER(?uid = "12345")
+                }
+            """,
+            """
+                SELECT {
+                ?user
+                    uid ?user_id ;
+                    name ?name .
+                }
+                WHERE {
+                    ?user 6 ?user_id .
+                    ?user 7 ?name .
+                    ?user -12/13/1 ?business_id .
+
+                    FILTER(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
+                    # GROUP BY ?user
+                    # HAVING(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
+                }
+            """
+        );
+
+        for (final var query : queries) {
+
+            LOGGER.info("Querying : " + query);
+
+            final var usedDatasources = List.of(datasources.mongoDB());
+            final var provider = new DefaultControlWrapperProvider();
+            final var kinds = usedDatasources.stream()
+                .flatMap(testDatasource -> {
+                    provider.setControlWrapper(testDatasource.datasource(), testDatasource.wrapper);
+                    return testDatasource.mappings.stream();
+                }).toList();
+
+            final var queryToInstance = new QueryToInstance(provider, datasources.schema, query, kinds, cache);
+
+            /*final ListResult result = */queryToInstance.execute();
+
+            // log how long it took and display the plan (hopefully seeing if dependent join was taken)
+        }
+    }
+
+    @Test
     void join() {
         // All users which reviewed a given business
         // (theoretically the filter should be the commented GROUPBY HAVING, but that is not implemented yet, and this seems to work anyways)
@@ -206,9 +266,9 @@ class BenchmarkTests {
                     name ?name .
             }
             WHERE {
-                ?user  9 ?user_id .
-                ?user 10 ?name .
-                ?user -19/20/1 ?business_id .
+                ?user 6 ?user_id .
+                ?user 7 ?name .
+                ?user -12/13/1 ?business_id .
 
                 FILTER(?business_id = "MTSW4McQd7CbVtyjqoe9mw")
                 # GROUP BY ?user

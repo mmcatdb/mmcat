@@ -25,8 +25,8 @@ public abstract class PostgreSQL {
                 b.simple("name", Schema.businessToName),
                 b.simple("city", Schema.businessToCity),
                 b.simple("state", Schema.businessToState),
-                b.simple("stars", Schema.businessToStars),
-                b.simple("review_count", Schema.businessToRevCnt),
+                // b.simple("stars", Schema.businessToStars),
+                // b.simple("review_count", Schema.businessToRevCnt),
                 b.simple("is_open", Schema.businessToIsOpen)
             )
         );
@@ -39,11 +39,11 @@ public abstract class PostgreSQL {
             b -> b.root(
                 b.simple("user_id", Schema.userToId),
                 b.simple("name", Schema.userToName),
-                b.simple("review_count", Schema.userToReviewCount),
-                b.simple("yelping_since", Schema.userToYelpingSince),
-                b.simple("useful", Schema.userToUseful),
-                b.simple("funny", Schema.userToFunny),
-                b.simple("cool", Schema.userToCool)
+                // b.simple("review_count", Schema.userToReviewCount),
+                b.simple("yelping_since", Schema.userToYelpingSince)
+                // b.simple("useful", Schema.userToUseful),
+                // b.simple("funny", Schema.userToFunny),
+                // b.simple("cool", Schema.userToCool)
             )
         );
     }

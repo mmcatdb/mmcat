@@ -20,19 +20,19 @@ public abstract class Schema {
     public static final BuilderObjex businessName =         builder.objex("businessName");
     public static final BuilderObjex businessCity =         builder.objex("businessCity");
     public static final BuilderObjex businessState =        builder.objex("businessState");
-    public static final BuilderObjex businessStars =        builder.objex("businessStars");
-    public static final BuilderObjex businessReviewCount =  builder.objex("businessReviewCount");
+    // public static final BuilderObjex businessStars =        builder.objex("businessStars");
+    // public static final BuilderObjex businessReviewCount =  builder.objex("businessReviewCount");
     public static final BuilderObjex businessIsOpen =       builder.objex("businessIsOpen");
-    public static final BuilderObjex businessCategory =     builder.objex("businessCategory");
+    // public static final BuilderObjex businessCategory =     builder.objex("businessCategory");
 
     public static final BuilderObjex user =                 builder.objex("user");
     public static final BuilderObjex userId =               builder.objex("userId");
     public static final BuilderObjex userName =             builder.objex("userName");
-    public static final BuilderObjex userReviewCount =      builder.objex("userReviewCount");
+    // public static final BuilderObjex userReviewCount =      builder.objex("userReviewCount");
     public static final BuilderObjex userYelpingSince =     builder.objex("userYelpingSince");
-    public static final BuilderObjex userUseful =           builder.objex("userUseful");
-    public static final BuilderObjex userFunny =            builder.objex("userFunny");
-    public static final BuilderObjex userCool =             builder.objex("userCool");
+    // public static final BuilderObjex userUseful =           builder.objex("userUseful");
+    // public static final BuilderObjex userFunny =            builder.objex("userFunny");
+    // public static final BuilderObjex userCool =             builder.objex("userCool");
     public static final BuilderObjex friendship =           builder.objex("friendship");
 
     public static final BuilderObjex review =               builder.objex("review");
@@ -49,23 +49,23 @@ public abstract class Schema {
     public static final BuilderMorphism businessToName =    builder.morphism(business, businessName);
     public static final BuilderMorphism businessToCity =    builder.morphism(business, businessCity);
     public static final BuilderMorphism businessToState =   builder.morphism(business, businessState);
-    public static final BuilderMorphism businessToStars =   builder.morphism(business, businessStars);
-    public static final BuilderMorphism businessToRevCnt =  builder.morphism(business, businessReviewCount);
+    // public static final BuilderMorphism businessToStars =   builder.morphism(business, businessStars);
+    // public static final BuilderMorphism businessToRevCnt =  builder.morphism(business, businessReviewCount);
     public static final BuilderMorphism businessToIsOpen =  builder.morphism(business, businessIsOpen);
-    public static final BuilderMorphism businessToCtgry =   builder.morphism(businessCategory, business); // not used for now
+    // public static final BuilderMorphism businessToCtgry =   builder.morphism(businessCategory, business); // not used for now
 
-    public static final BuilderMorphism userToId =          builder.morphism(user, userId); // 9
+    public static final BuilderMorphism userToId =          builder.morphism(user, userId); // 6
     public static final BuilderMorphism userToName =        builder.morphism(user, userName);
-    public static final BuilderMorphism userToReviewCount = builder.morphism(user, userReviewCount);
-    public static final BuilderMorphism userToYelpingSince =builder.morphism(user, userYelpingSince);
-    public static final BuilderMorphism userToUseful =      builder.morphism(user, userUseful);
-    public static final BuilderMorphism userToFunny =       builder.morphism(user, userFunny);
-    public static final BuilderMorphism userToCool =        builder.morphism(user, userCool);
+    // public static final BuilderMorphism userToReviewCount = builder.morphism(user, userReviewCount);
+    public static final BuilderMorphism userToYelpingSince = builder.morphism(user, userYelpingSince);
+    // public static final BuilderMorphism userToUseful =      builder.morphism(user, userUseful);
+    // public static final BuilderMorphism userToFunny =       builder.morphism(user, userFunny);
+    // public static final BuilderMorphism userToCool =        builder.morphism(user, userCool);
 
-    public static final BuilderMorphism friendshipToUser1 = builder.tags(Tag.role).morphism(friendship, user); // 16
+    public static final BuilderMorphism friendshipToUser1 = builder.tags(Tag.role).morphism(friendship, user); // 9
     public static final BuilderMorphism friendshipToUser2 = builder.tags(Tag.role).morphism(friendship, user);
 
-    public static final BuilderMorphism reviewToId =        builder.morphism(review, reviewId); // 18
+    public static final BuilderMorphism reviewToId =        builder.morphism(review, reviewId); // 11
     public static final BuilderMorphism reviewToUser =      builder.morphism(review, user);
     public static final BuilderMorphism reviewToBusiness =  builder.morphism(review, business);
     public static final BuilderMorphism reviewToStars =     builder.morphism(review, reviewStars);
@@ -81,7 +81,8 @@ public abstract class Schema {
         builder
             .ids(business, businessToId)
             .ids(review, reviewToId)
-            .ids(user, userToId);
+            .ids(user, userToId)
+            .ids(friendship, friendshipToUser1, friendshipToUser2);
 
     }
 

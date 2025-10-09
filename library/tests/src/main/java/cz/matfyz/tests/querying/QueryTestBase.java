@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
-import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.QueryToInstance;
 import cz.matfyz.querying.core.QueryDescription.QueryPlanDescription;
+import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.tests.example.common.TestDatasource;
 
 import java.util.ArrayList;

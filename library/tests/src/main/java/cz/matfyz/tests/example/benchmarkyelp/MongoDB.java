@@ -12,7 +12,7 @@ public abstract class MongoDB {
     public static final Datasource datasource = new Datasource(DatasourceType.mongodb, "mongodb");
 
     public static final String businessKind = "business";
-    public static final String userKind = "user";
+    public static final String userKind = "yelp_user";
     public static final String reviewKind = "review";
 
     public static TestMapping business(SchemaCategory schema) {
@@ -24,10 +24,10 @@ public abstract class MongoDB {
                 b.simple("name", Schema.businessToName),
                 b.simple("city", Schema.businessToCity),
                 b.simple("state", Schema.businessToState),
-                b.simple("stars", Schema.businessToStars),
-                b.simple("review_count", Schema.businessToRevCnt),
+                // b.simple("stars", Schema.businessToStars),
+                // b.simple("review_count", Schema.businessToRevCnt),
                 b.simple("is_open", Schema.businessToIsOpen)
-                // b.simple("categories", Schema.businessToCtgry) // TODO: data needs to be modified from csv to JSON array
+                // b.simple("categories", Schema.businessToCtgry)
             )
         );
     }
@@ -39,12 +39,12 @@ public abstract class MongoDB {
             b -> b.root(
                 b.simple("user_id", Schema.userToId),
                 b.simple("name", Schema.userToName),
-                b.simple("review_count", Schema.userToReviewCount),
-                b.simple("yelping_since", Schema.userToYelpingSince),
-                b.simple("useful", Schema.userToUseful),
-                b.simple("funny", Schema.userToFunny),
-                b.simple("cool", Schema.userToCool),
-                b.simple("friends", Schema.friendshipToUser1.dual().concatenate(Schema.friendshipToUser2.signature()).concatenate(Schema.userToId.signature()))
+                // b.simple("review_count", Schema.userToReviewCount),
+                b.simple("yelping_since", Schema.userToYelpingSince)
+                // b.simple("useful", Schema.userToUseful),
+                // b.simple("funny", Schema.userToFunny),
+                // b.simple("cool", Schema.userToCool),
+                // b.simple("friends", Schema.friendshipToUser1.dual().concatenate(Schema.friendshipToUser2.signature()).concatenate(Schema.userToId.signature()))
             )
         );
     }

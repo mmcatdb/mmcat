@@ -1,7 +1,6 @@
 package cz.matfyz.querying;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
-import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.mapping.Mapping;
@@ -11,6 +10,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.querying.optimizer.QueryDebugPrinter;
 import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
@@ -78,7 +78,7 @@ public class QueryToInstance {
 
         final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
 
-        final QueryResult selected = SelectionResolver.run(optimized);
+        final QueryResult selected = SelectionResolver.run(optimized, cache);
         final QueryResult projected = ProjectionResolver.run(normalized.context, normalized.projection, selected);
 
         // optimized

@@ -2,7 +2,6 @@ package cz.matfyz.querying.optimizer;
 
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperException;
-import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;

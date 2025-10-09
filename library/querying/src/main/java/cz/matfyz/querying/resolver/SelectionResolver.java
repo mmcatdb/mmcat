@@ -14,6 +14,7 @@ import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
+import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.querying.planner.QueryPlan;
 
 import java.util.ArrayList;
@@ -29,14 +30,20 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SelectionResolver.class);
 
     public static QueryResult run(QueryPlan plan) {
-        return new SelectionResolver(plan).run();
+        return new SelectionResolver(plan, null).run();
+    }
+
+    public static QueryResult run(QueryPlan plan, CollectorCache cache) {
+        return new SelectionResolver(plan, cache).run();
     }
 
     private final QueryPlan plan;
+    private final CollectorCache cache;
     private final ArrayList<Computation> selectionContext = new ArrayList<>(); // use as a "stack", or maybe in the future as Map<Variable, IdSet>
 
-    private SelectionResolver(QueryPlan plan) {
+    private SelectionResolver(QueryPlan plan, CollectorCache cache) {
         this.plan = plan;
+        this.cache = cache;
     }
 
     private QueryResult run() {
@@ -48,6 +55,12 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         final var result = node.accept(this);
         final var nanos = (System.nanoTime() - startNanos) / 1_000_000;
         node.evaluationMillis = (int)(nanos);
+
+        // in this case, Collector is not run and performance relies on node.evalutaionMillis
+        // TODO: expand for other nodes
+        // also TODO: add result size (even if approximate, like result.data.children().size() )
+        if (cache != null && node instanceof DatasourceNode dsNode) cache.put(dsNode, null);
+
         return result;
     }
 
@@ -80,10 +93,10 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
 
         // TODO: Use collector cache to determine whether to use dependent join
 
-        if (node.forceDepJoinFromId) {
-            final var idResult = timedAccept(node.fromChild());
+        if (node.forceDepJoinFromRef) {
+            final var refResult = timedAccept(node.fromChild());
 
-            node.tform.applySource(idResult.data);
+            node.tform.applySource(refResult.data);
             final List<Expression> operands = new ArrayList<>();
             operands.add(node.candidate.variable());
             for (final var id : node.tform.getSourceIds()) {
@@ -92,28 +105,28 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
 
             selectionContext.add(plan.scope.computation.create(Computation.Operator.In, operands));
 
-            final var refResult = timedAccept(node.toChild());
-            return node.tform.applyTarget(refResult.data);
+            final var idResult = timedAccept(node.toChild());
+            return node.tform.applyTarget(idResult.data);
 
-        } else if (node.forceDepJoinFromRef) {
-            final var refResult = timedAccept(node.toChild());
+        } else if (node.forceDepJoinFromId) {
+            final var idResult = timedAccept(node.toChild());
 
             final List<Expression> operands = new ArrayList<>();
             operands.add(node.candidate.variable());
-            for (final var id : node.tform.getTargetIds(refResult.data)) {
+            for (final var id : node.tform.getTargetIds(idResult.data)) {
                 operands.add(new Constant(id));
             }
 
             selectionContext.add(plan.scope.computation.create(Computation.Operator.In, operands));
 
-            final var idResult = timedAccept(node.fromChild());
-            return node.tform.apply(idResult.data, refResult.data);
+            final var refResult = timedAccept(node.fromChild());
+            return node.tform.apply(refResult.data, idResult.data);
 
         } else {
-            final var idResult = timedAccept(node.fromChild());
-            final var refResult = timedAccept(node.toChild());
+            final var refResult = timedAccept(node.fromChild());
+            final var idResult = timedAccept(node.toChild());
 
-            return node.tform.apply(idResult.data, refResult.data);
+            return node.tform.apply(refResult.data, idResult.data);
         }
     }
 

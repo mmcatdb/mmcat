@@ -1,6 +1,5 @@
 package cz.matfyz.querying.optimizer;
 
-import cz.matfyz.core.collector.CollectorCache;
 import cz.matfyz.querying.planner.QueryPlan;
 
 public class QueryOptimizer {
