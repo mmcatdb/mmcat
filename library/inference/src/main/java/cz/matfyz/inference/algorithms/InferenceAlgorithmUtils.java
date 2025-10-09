@@ -17,24 +17,26 @@ public class InferenceAlgorithmUtils {
      * The input lists are expected to contain no duplicates by themselves, but the same object can be present in both lists.
      */
     public ObjectArrayList<RecordSchemaDescription> mergeOrderedLists(ObjectArrayList<RecordSchemaDescription> list1, ObjectArrayList<RecordSchemaDescription> list2) {
-        final ObjectArrayList<RecordSchemaDescription> mergedList = new ObjectArrayList<>();
+        final var mergedList = new ObjectArrayList<RecordSchemaDescription>();
 
         int i = 0;
         int j = 0;
         while (i < list1.size() && j < list2.size()) {
-            final RecordSchemaDescription element1 = list1.get(i);
-            final RecordSchemaDescription element2 = list2.get(j);
+            final var element1 = list1.get(i);
+            final var element2 = list2.get(j);
 
             final int comparison = element1.compareTo(element2);
 
             if (comparison < 0) {
                 mergedList.add(element1);
                 i++;
-            } else if (comparison > 0) {
+            }
+            else if (comparison > 0) {
                 mergedList.add(element2);
                 j++;
-            } else {
-                RecordSchemaDescription union = reductionFunction.call(element1, element2);
+            }
+            else {
+                final var union = reductionFunction.call(element1, element2);
                 mergedList.add(union);
                 i++;
                 j++;

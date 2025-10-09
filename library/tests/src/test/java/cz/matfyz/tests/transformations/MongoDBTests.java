@@ -3,6 +3,7 @@ package cz.matfyz.tests.transformations;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 import cz.matfyz.tests.example.common.TestDatasource;
@@ -23,11 +24,12 @@ public class MongoDBTests {
 
     @BeforeAll
     public static void setup() {
+        UniqueIdGenerator.makeDeterministic();
         datasource.setup();
     }
 
     @Test
-    void readFromDB_DoesNotThrow() {
+    void readFromDb_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             final var inputWrapper = datasource.wrapper.getPullWrapper();
             final var dbContent = inputWrapper.readCollectionAsStringForTests(MongoDB.orderKind);

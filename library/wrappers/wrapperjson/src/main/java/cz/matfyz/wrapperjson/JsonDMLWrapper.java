@@ -56,7 +56,8 @@ public class JsonDMLWrapper implements AbstractDMLWrapper {
 
             final String jsonContent = constructor.toPrettyString();
             return StringStatement.create(jsonContent);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new OtherException(e);
         }
     }

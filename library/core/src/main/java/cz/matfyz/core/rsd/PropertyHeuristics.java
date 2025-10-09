@@ -1,22 +1,17 @@
 package cz.matfyz.core.rsd;
 
-import cz.matfyz.core.rsd.utils.BasicHashFunction;
+import cz.matfyz.core.rsd.utils.Hashing;
 import cz.matfyz.core.rsd.utils.BloomFilter;
 import cz.matfyz.core.rsd.utils.StartingEndingFilter;
 import java.io.Serializable;
+import java.sql.Blob;
+import java.sql.Clob;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PropertyHeuristics implements Serializable {
 
-    // boolean unique;
-
-    // boolean required;    // pokud narazis na null hodnotu, je to jasne... ale pokud ta hodnota neexistuje, tak se o ni nedozvis jinak nez porovnanim poctu recordu a poctu vyskytu te property
-    // a totez unique ziskas porovnanim
-
-    // boolean sequential;
-
-    // unique, required and sequential combined
-    int binaryProperties = BinaryPropertiesInHeuristics.NONE;
-
+    // TODO fix this shit
     // jeste vedle musi bezet jeden job, ktery spocita pocty records
     // tedy mas funkci MapColumns
     // a pak MapRows - pro pocet recordu, abychom dokazali overit pocet unique a not null (minimalni pocty)?
@@ -29,49 +24,147 @@ public class PropertyHeuristics implements Serializable {
     // kolikrat tam ktera hodnota je
     // a pri slucovani, pokud nektera hodnota je vicekrat, tak se eliminuje
     // musi se to udelat pred distinct
-    public String hierarchicalName;
+    public final String hierarchicalName;
 
-    private Object min;
+    /** Unique, required and sequential combined. */
+    private int binaryProperties = BinaryPropertiesInHeuristics.NONE;
 
-    private Object max;
+    /**
+     * If the property is unique, the value is stored here (or null if there isn't any other value).
+     * Makes sense only for primitive values.
+     */
+    private @Nullable Comparable uniqueValue = null;
 
-    private double average;    // pokud je T numericke, pak prumer je desetinne cislo ziskane z hodnot
-    // pokud T neni numericke, pak je prumerem deetinne cislo ziskane z hashu
+    /** Either Double, Comparable, or null. */
+    private @Nullable Comparable min = null;
+    private @Nullable Comparable max = null;
 
-    private double temp;    //
+    /** Might be NaN. */
+    private double sum = Double.NaN;
+    private int count = 1;
 
-    private int count;    // pro inkrementaci, aby se na konci mohlo spocitat average jako temp/count
+    private final BloomFilter bloomFilter = new BloomFilter();
+    private final StartingEndingFilter startingEnding = new StartingEndingFilter();
 
-    private int first;
-
-    //private int parentCount;        //kolikrat se vyskytuje primy predek v scheme
-
-    private BloomFilter bloomFilter;
-
-        private StartingEndingFilter startingEnding;
-
-    public PropertyHeuristics() {
-        average = 0.0;
-        temp = 0.0;
-        count = 0;
-        //parentCount = 0;
-        bloomFilter = new BloomFilter();
-                startingEnding = new StartingEndingFilter();
+    private PropertyHeuristics(String hierarchicalName) {
+        this.hierarchicalName = hierarchicalName;
+        setIsUnique(true);
     }
 
-        private void setBinaryProperty(int flag, boolean value) {
-            if (value) {
-                binaryProperties |= flag;
-            } else {
-                binaryProperties &= ~flag;
+     /**
+     * Builds a {@link PropertyHeuristics} object for the given key-value pair.
+     * @param key - The hierarchical name to be used for the property.
+     * @param value - The value to be analyzed and stored in the heuristics. Only if it's primitive.
+     */
+    public static PropertyHeuristics createForKeyValuePair(String hierarchicalName, @Nullable Object value) {
+        final var output = new PropertyHeuristics(hierarchicalName);
+
+        if (value == null)
+            return output;
+
+        output.sum = parseDouble(value);
+
+        output.min = tryParseComparable(value);
+        output.max = output.min;
+
+        output.uniqueValue = tryParseUnique(value);
+
+        if (output.uniqueValue != null) {
+            output.bloomFilter.add(output.uniqueValue);
+            output.startingEnding.add(output.uniqueValue);
+        }
+
+        return output;
+    }
+
+    public void merge(PropertyHeuristics other) {
+        sum += other.sum;
+        count += other.getCount();
+
+        if (min != null && other.min != null) {
+            if (min instanceof Double thisMin && other.min instanceof Double otherMin) {
+                // All mins and maxes are stored as Double.
+                min = Math.min(thisMin, otherMin);
+                max = Math.max((double) max, (double) other.max);
+            }
+            else if (min.getClass().equals(other.getMin().getClass())) {
+                if (min.compareTo(other.min) > 0)
+                    min = other.min;
+
+                if (max.compareTo(other.max) < 0)
+                    max = other.max;
             }
         }
+
+        binaryProperties &= other.binaryProperties;
+        if (isUnique() && !isUniqueValuesEqual(uniqueValue, other.uniqueValue)) {
+            uniqueValue = null;
+            setIsUnique(false);
+        }
+
+        bloomFilter.merge(other.bloomFilter);
+        startingEnding.merge(other.startingEnding);
+    }
+
+    /**
+     * For sum - we need only things that make sense to sum - basically only numbers.
+     */
+    private static double parseDouble(Object value) {
+        if (value instanceof Number number)
+            return number.doubleValue();
+
+        if (value instanceof String string) {
+            try {
+                return Double.parseDouble(string);
+            }
+            catch (NumberFormatException e) {
+                return Double.NaN;
+            }
+        }
+
+        return Double.NaN;
+    }
+
+    /**
+     * For min and max - we can use any comparable.
+     * We don't try to convert it to number, because comparables also need a class match for correct comparison.
+     */
+    private static @Nullable Comparable tryParseComparable(Object value) {
+        if (value instanceof Number number)
+            return number.doubleValue();
+        if (value instanceof Comparable comparable)
+            return comparable;
+
+        return null;
+    }
+
+    /**
+     * We care only about equality.
+     * Large objects (BLOBs, CLOBs) are hashed for simpler comparison.
+     * If the value can't be easily compared, a null is returned, meaning "unique".
+     */
+    private static @Nullable Comparable tryParseUnique(Object value) {
+        if (value instanceof Number number)
+            return number.doubleValue();
+        if (value instanceof Comparable comparable)
+            return comparable;
+        if (value instanceof Blob blob)
+            return Hashing.blobToHash(blob);
+        if (value instanceof Clob clob)
+            return Hashing.clobToHash(clob);
+
+        return null;
+    }
+
+    private static boolean isUniqueValuesEqual(Comparable a, Comparable b) {
+        return a == null || b == null || a.equals(b);
+    }
 
     public boolean isUnique() {
         return (binaryProperties & BinaryPropertiesInHeuristics.UNIQUE) == BinaryPropertiesInHeuristics.UNIQUE;
     }
 
-    public void setUnique(boolean unique) {
+    private void setIsUnique(boolean unique) {
         setBinaryProperty(BinaryPropertiesInHeuristics.UNIQUE, unique);
     }
 
@@ -79,7 +172,7 @@ public class PropertyHeuristics implements Serializable {
         return (binaryProperties & BinaryPropertiesInHeuristics.REQUIRED) == BinaryPropertiesInHeuristics.REQUIRED;
     }
 
-    public void setRequired(boolean required) {
+    public void setIsRequired(boolean required) {
         setBinaryProperty(BinaryPropertiesInHeuristics.REQUIRED, required);
     }
 
@@ -87,179 +180,51 @@ public class PropertyHeuristics implements Serializable {
         return (binaryProperties & BinaryPropertiesInHeuristics.SEQUENTIAL) == BinaryPropertiesInHeuristics.SEQUENTIAL;
     }
 
-    public void setSequential(boolean sequential) {
+    public void setIsSequential(boolean sequential) {
         setBinaryProperty(BinaryPropertiesInHeuristics.SEQUENTIAL, sequential);
+    }
+
+    private void setBinaryProperty(int flag, boolean value) {
+        if (value)
+            binaryProperties |= flag;
+        else
+            binaryProperties &= ~flag;
     }
 
     public String getHierarchicalName() {
         return hierarchicalName;
     }
 
-    public void setHierarchicalName(String hierarchicalName) {
-        this.hierarchicalName = hierarchicalName;
-    }
-
     public Object getMin() {
         return min;
-    }
-
-    public void setMin(Object min) {
-        this.min = min;
     }
 
     public Object getMax() {
         return max;
     }
 
-    public void setMax(Object max) {
-        this.max = max;
-    }
-
+    /**
+     * If the type T is numeric, the average is a double value derived from the actual numeric values.
+     * If T is non-numeric, the average is a double value derived from the hash.
+     */
     public double getAverage() {
-        return average;
+        return sum / count;
     }
 
-    public void setAverage(double average) {
-        this.average = average;
-    }
-
-    public double getTemp() {
-        return temp;
-    }
-
-    public void setTemp(double temp) {
-        this.temp = temp;
+    public double getSum() {
+        return sum;
     }
 
     public int getCount() {
         return count;
     }
 
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public int getFirst() {
-        return first;
-    }
-
-    public void setFirst(int first) {
-        this.first = first;
-    }
-
     public BloomFilter getBloomFilter() {
         return bloomFilter;
     }
 
-    public void setBloomFilter(BloomFilter bloomFilter) {
-        this.bloomFilter = bloomFilter;
-    }
-
-    // public int getParentCount() {
-    //    return parentCount;
-    // }
-
-    // public void setParentCount(int parentCount) {
-    //    this.parentCount = parentCount;
-    // }
-
-        public void addToStartingEnding(Object value) {
-            this.startingEnding.add(value);
-        }
-
-    public void add(Object value) {
-        if (value instanceof Number && min instanceof Number) {
-            this.addNumber((Number) min, (Number) max, (Number) value);
-        } else if ((value instanceof Comparable && min instanceof Comparable) && (value.getClass().equals(min.getClass()))) {
-            this.addComparable((Comparable) min, (Comparable) max, (Comparable) value);
-        } else if (value != null) {
-            this.addComparable(min.toString(), max.toString(), value.toString());
-        }
-
-        if (value != null) {
-            bloomFilter.add(value);
-        }
-    }
-
-    private void addComparable(Comparable _min, Comparable _max, Comparable _value) {
-        double resultOfHashFunction = new BasicHashFunction().apply(_value).doubleValue();
-
-        if (_min.compareTo(_value) > 0) {
-            min = _value;
-        } else if (_max.compareTo(_value) < 0) {
-            max = _value;
-        }
-
-        temp += resultOfHashFunction;
-        ++count;
-    }
-
-    private void addNumber(Number _min, Number _max, Number _value) {
-        double __min = _min.doubleValue();
-        double __max = _max.doubleValue();
-        double __value = _value.doubleValue();
-        if (__min > __value) {
-            min = _value;
-        } else if (__max > __value) {
-            max = _value;
-        }
-
-        temp += __value;
-        ++count;
-    }
-
-    public void merge(PropertyHeuristics heuristics) {
-        if (heuristics.min != null) {
-            if (heuristics.min instanceof Number && min instanceof Number && heuristics.max instanceof Number && max instanceof Number) {
-                double _min = ((Number) min).doubleValue();
-                double _max = ((Number) max).doubleValue();
-                double __min = ((Number) heuristics.getMin()).doubleValue();
-                double __max = ((Number) heuristics.getMax()).doubleValue();
-                if (_min > (__min)) {
-                    min = __min;
-                }
-                if (_max < __max) {
-                    max = __max;
-                }
-                temp += ((Number) heuristics.getTemp()).doubleValue();
-            } else if ((heuristics.min instanceof Comparable && min instanceof Comparable && heuristics.max instanceof Comparable && max instanceof Comparable) &&
-                    (heuristics.min.getClass().equals(min.getClass()) && heuristics.max.getClass().equals(max.getClass()))) {
-                Comparable _min = (Comparable) min;
-                Comparable _max = (Comparable) max;
-                Comparable __min = (Comparable) heuristics.min;
-                Comparable __max = (Comparable) heuristics.max;
-                if (_min.compareTo(__min) > 0) {
-                    min = __min;
-                }
-                if (_max == null || _max.compareTo(__max) < 0) {
-                    max = __max;
-                }
-                temp += ((Number) heuristics.getTemp()).doubleValue();
-            } else {
-                String __min = heuristics.getMin().toString();
-                String __max = heuristics.getMax().toString();
-                if (min == null || min.toString().compareTo(__min) > 0) {
-                    min = __min;
-                }
-                if (max == null || max.toString().compareTo(__max) < 0) {
-                    max = __max;
-                }
-                temp += ((Number) heuristics.getTemp()).doubleValue();
-            }
-        }
-
-        count += heuristics.getCount();
-        first += heuristics.getFirst();
-
-        // unique = unique && heuristics.unique;
-        // required = required && heuristics.required;
-        // sequential = sequential && heuristics.sequential;
-                binaryProperties &= heuristics.binaryProperties;
-
-                // spojování starting a ending počtů
-                startingEnding.merge(heuristics.startingEnding);
-
-        bloomFilter.merge(heuristics.getBloomFilter());
+    public StartingEndingFilter getStartingEnding() {
+        return startingEnding;
     }
 
     @Override public String toString() {
@@ -270,13 +235,10 @@ public class PropertyHeuristics implements Serializable {
             + ", hierarchicalName=" + hierarchicalName
             + ", min=" + min
             + ", max=" + max
-            + ", average=" + average
-        //    + ", temp=" + temp
+            + ", average=" + getAverage()
             + ", count=" + count
-            +  ", first=" + first
-            // +  ", parentCount=" + parentCount
-        //    + ", bloomFilter=" + bloomFilter
-        //    + " " + startingEnding.toString()
+            + ", bloomFilter=" + bloomFilter
+            + ", startingEnding=" + startingEnding
             + '}';
     }
 }

@@ -1,6 +1,5 @@
 package cz.matfyz.core.rsd.utils;
 
-import cz.matfyz.core.rsd.helpers.CharToIndexConverter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +38,7 @@ public class StartingEndingFilter implements Serializable {
             else {
                 temp();
             }
-            ++count;
+            count++;
         }
 
         private void addToFilter(Object value) {
@@ -57,8 +56,8 @@ public class StartingEndingFilter implements Serializable {
                 first = stringRepresentation.charAt(1);
             }
             last = stringRepresentation.charAt(stringRepresentation.length() - 1);
-            ++startingArray[CharToIndexConverter.INSTANCE.convert(first)];
-            ++startingEndingArray[CharToIndexConverter.INSTANCE.convertWithEnding(first, last)];
+            startingArray[CharToIndexConverter.convert(first)]++;
+            startingEndingArray[CharToIndexConverter.convertWithEnding(first, last)]++;
         }
 
         private void tempAdd(String string) {
@@ -75,18 +74,18 @@ public class StartingEndingFilter implements Serializable {
                 first = string.charAt(1);
             }
             last = string.charAt(string.length() - 1);
-            tempStartingIndexes.add(CharToIndexConverter.INSTANCE.convert(first));
-            tempStartingEndingIndexes.add(CharToIndexConverter.INSTANCE.convertWithEnding(first, last));
+            tempStartingIndexes.add(CharToIndexConverter.convert(first));
+            tempStartingEndingIndexes.add(CharToIndexConverter.convertWithEnding(first, last));
         }
 
         public void temp() {
         this.startingArray = new int[37];
         this.startingEndingArray = new int[37 * 37];
         for (Integer index : tempStartingIndexes) {
-            ++startingArray[index];
+            startingArray[index]++;
         }
         for (Integer index : tempStartingEndingIndexes) {
-            ++startingEndingArray[index];
+            startingEndingArray[index]++;
         }
         tempStartingIndexes.clear();
         tempStartingEndingIndexes.clear();
@@ -96,10 +95,10 @@ public class StartingEndingFilter implements Serializable {
             if (count + other.count > StartingEndingFilter.size) {
                 this.temp();
                 other.temp();
-                for (int i = 0; i < startingArray.length; ++i) {
+                for (int i = 0; i < startingArray.length; i++) {
                     startingArray[i] += other.startingArray[i];
                 }
-                for (int i = 0; i < startingEndingArray.length; ++i) {
+                for (int i = 0; i < startingEndingArray.length; i++) {
                     startingEndingArray[i] += other.startingEndingArray[i];
                 }
                 this.count += other.count;

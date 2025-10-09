@@ -116,7 +116,7 @@ class JsonTests {
 
     private static class Output { String value = ""; }
 
-    private static String WHITE_COLOR_CODE = "\u001b[1;37m";
+    private static final String WHITE_COLOR_CODE = "\u001b[1;37m";
 
     public static void fullTest(Object object) {
         final Output json = serializationTest(object);
@@ -132,7 +132,7 @@ class JsonTests {
         final Output json = new Output();
         assertDoesNotThrow(() -> {
             json.value = serialize(object);
-            LOGGER.info("\n{}Original:\n{}\n{}Serialized:\n{}", WHITE_COLOR_CODE, object, WHITE_COLOR_CODE, json.value);
+            LOGGER.trace("\n{}Original:\n{}\n{}Serialized:\n{}", WHITE_COLOR_CODE, object, WHITE_COLOR_CODE, json.value);
         });
 
         return json;

@@ -7,7 +7,17 @@ import java.security.MessageDigest;
 import java.sql.Blob;
 import java.sql.Clob;
 
-public class BlobClobHashing {
+public class Hashing {
+
+    public interface HashFunction {
+
+        int apply(Object value);
+
+    }
+
+    public static int basicHash(Object value) {
+        return Math.abs(value.toString().hashCode() % 10);
+    }
 
     public static String blobToHash(Blob blob) {
          try (

@@ -38,7 +38,7 @@ public class Layout {
      * Updates positions of objexes in the given schema category.
      */
     public static void updatePositions(SchemaCategory schema, MetadataCategory metadata, Map<Key, Position> positionsMap) {
-        for (Map.Entry<Key, Position> entry : positionsMap.entrySet()) {
+        for (final var entry : positionsMap.entrySet()) {
             final var key = entry.getKey();
             final var position = entry.getValue();
 

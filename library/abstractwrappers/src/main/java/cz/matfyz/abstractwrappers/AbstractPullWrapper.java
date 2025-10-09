@@ -24,7 +24,7 @@ public interface AbstractPullWrapper {
     QueryResult executeQuery(QueryStatement statement);
 
     /**
-     * Retrieves all list kind names.
+     * Retrieves list of all kind names.
      */
     List<String> getKindNames();
 

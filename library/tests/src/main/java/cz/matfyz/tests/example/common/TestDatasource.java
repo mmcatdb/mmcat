@@ -26,9 +26,9 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
     public final TWrapper wrapper;
     public final List<Mapping> mappings = new ArrayList<>();
     public final SchemaCategory schema;
-    private final String setupFilename;
+    private final @Nullable String setupFilename;
 
-    public TestDatasource(DatasourceType type, String identifier, TWrapper wrapper, SchemaCategory schema, String setupFilename) {
+    public TestDatasource(DatasourceType type, String identifier, TWrapper wrapper, SchemaCategory schema, @Nullable String setupFilename) {
         this.type = type;
         this.identifier = identifier;
         this.wrapper = wrapper;
@@ -44,12 +44,14 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
 
     public void setup() {
         final var filePath = getFilePath();
-        if (filePath != null) wrapper.execute(filePath);
+        if (filePath != null)
+            wrapper.execute(filePath);
     }
 
-    @Nullable
-    private Path getFilePath() {
-        if (setupFilename == null) return null;
+    private @Nullable Path getFilePath() {
+        if (setupFilename == null)
+            return null;
+
         try {
             final var url = ClassLoader.getSystemResource(setupFilename);
             return Paths.get(url.toURI()).toAbsolutePath();

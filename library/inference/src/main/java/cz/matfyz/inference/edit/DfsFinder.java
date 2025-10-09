@@ -181,11 +181,13 @@ public class DfsFinder {
                 if (isSublist(existingList, currentList)) {
                     isMergedOrSubsequence = true;
                     break;
-                } else if (isSublist(currentList, existingList)) {
+                }
+                else if (isSublist(currentList, existingList)) {
                     result.set(j, currentList);
                     isMergedOrSubsequence = true;
                     break;
-                } else if (canMerge(existingList, currentList)) {
+                }
+                else if (canMerge(existingList, currentList)) {
                     List<SchemaObjex> mergedList = mergeLists(existingList, currentList);
                     result.set(j, mergedList);
                     isMergedOrSubsequence = true;

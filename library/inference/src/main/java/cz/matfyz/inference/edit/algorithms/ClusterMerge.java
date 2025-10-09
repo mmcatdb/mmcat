@@ -305,7 +305,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             if (oldClusterNames.contains(mo.label)) {
                 newKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, ObjexIds.createGenerated(), newClusterName);
                 newClusterKey = newKey;
-            } else {
+            }
+            else {
                 newKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, objex.ids(), mo.label);
             }
 
@@ -410,7 +411,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             if (!(mapOldClusterNameSignature.values().contains(subpath.signature()))) {
                 newSubpaths.add(subpath);
                 continue;
-            } else {
+            }
+            else {
                 complexChanged = true;
             }
 
@@ -421,7 +423,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                         complexChanged = true;
                         complexIsCluster = true;
                         break;
-                    } else if (complexProperty != null) { // remove the old cluster members
+                    }
+                    else if (complexProperty != null) { // remove the old cluster members
                         AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
                         if (currentSubpath != null) {
                             complexProperty = complexProperty.minusSubpath(currentSubpath);
@@ -441,7 +444,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
                     : newAccessPath;
 
                 newSubpaths.add(resultAccessPath);
-            } else if (complexProperty != null) {
+            }
+            else if (complexProperty != null) {
                 newSubpaths.add(complexProperty);
             }
         }

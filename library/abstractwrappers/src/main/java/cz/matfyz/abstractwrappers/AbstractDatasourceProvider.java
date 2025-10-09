@@ -13,11 +13,11 @@ public interface AbstractDatasourceProvider {
     /**
      * Returns whether the provider can still be used with the new settings. I.e., whether the change from the current settings to the new settings is stable.
      */
-    public abstract boolean isStillValid(Object newSettings);
+    abstract boolean isStillValid(Object newSettings);
 
     /**
      * If the provider is no longer needed, we should close it to free up the resources.
      */
-    public abstract void close();
+    abstract void close();
 
 }

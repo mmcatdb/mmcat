@@ -156,4 +156,30 @@ public abstract class Name implements Serializable {
 
     }
 
+    /** Compares names without the use of signatures. Used for sorting properties independently on schema category (mostly in tests). */
+    public static int compareNamesLexicographically(Name a, Name b) {
+        // String names first, typed later, dynamic last.
+        if (a instanceof StringName aString) {
+            return b instanceof StringName bString
+                ? aString.value.compareTo(bString.value)
+                : -1;
+        }
+
+        if (b instanceof StringName)
+            return 1;
+
+        // At this point, both names are typed.
+        if (a instanceof DynamicName aDynamic) {
+            if (!(b instanceof DynamicName bDynamic))
+                return 1;
+
+            return aDynamic.type.compareTo(bDynamic.type);
+        }
+
+        if (b instanceof DynamicName)
+            return -1;
+
+        return ((TypedName) a).type.compareTo(((TypedName) b).type);
+    }
+
 }

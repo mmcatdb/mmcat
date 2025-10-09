@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
 public final class MongoDBUtils {
+
     private MongoDBUtils() {}
 
     /**

@@ -101,7 +101,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
         return new Neo4jQueryWrapper();
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper() {
+    @Override public AbstractInferenceWrapper getInferenceWrapper(String kindName) {
         throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
     }
 

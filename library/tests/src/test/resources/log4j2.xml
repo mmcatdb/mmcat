@@ -11,10 +11,14 @@
     </Appenders>
 
     <Loggers>
-        <Root level="debug">
+        <!-- Turn off all logs (unless its something critical), because they are too verbose (looking at you, spark) ... -->
+        <Root level="warn">
             <AppenderRef ref="console"/>
         </Root>
-        <Logger name="org.apache.spark" level="error"/>
-        <Logger name="org.sparkproject.jetty" level="warn"/>
+
+        <!-- ... but allow our logs. -->
+        <Logger name="cz.matfyz" level="debug" additivity="false">
+            <AppenderRef ref="console"/>
+        </Logger>
     </Loggers>
 </Configuration>

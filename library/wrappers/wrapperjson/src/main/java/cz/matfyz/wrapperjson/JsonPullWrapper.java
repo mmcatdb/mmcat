@@ -18,21 +18,18 @@ import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
-import java.util.List;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A pull wrapper implementation for JSON files that implements the {@link AbstractPullWrapper} interface.
  * This class provides methods for pulling data from JSON files and converting it into a {@link ForestOfRecords}.
- * This wrapper also supports the JSON Lines format (newline-delimited JSON).
  */
 public class JsonPullWrapper implements AbstractPullWrapper {
 
@@ -50,10 +47,12 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      */
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) {
         try (
-            InputStream inputStream = provider.getInputStream()
+            InputStream inputStream = provider.getInputStream();
+            Stream<ObjectNode> jsonStream = JsonParsedIterator.toStream(inputStream);
         ) {
-            return processJsonStream(inputStream, path);
-        } catch (IOException e) {
+            return processJsonStream(jsonStream, path);
+        }
+        catch (Exception e) {
             throw PullForestException.inner(e);
         }
     }
@@ -63,30 +62,23 @@ public class JsonPullWrapper implements AbstractPullWrapper {
     /**
      * Processes a JSON input stream and populates a {@link ForestOfRecords} with data parsed from the stream.
      */
-    private ForestOfRecords processJsonStream(InputStream inputStream, ComplexProperty path) throws IOException {
-        final var forest = new ForestOfRecords();
-        final var parser =  new JsonFactory().createParser(inputStream);
-        final var objectMapper = new ObjectMapper();
+    private ForestOfRecords processJsonStream(Stream<ObjectNode> stream, ComplexProperty path) throws IOException {
+        final var forest = new ForestOfRecords();;
 
         replacedNames = path.copyWithoutDynamicNames().replacedNames();
 
-        while (parser.nextToken() != null) {
-            if (parser.currentToken() == JsonToken.START_OBJECT) {
-                final JsonNode jsonNode = objectMapper.readTree(parser);
-                final RootRecord rootRecord = new RootRecord();
+        stream.forEach(object -> {
+            final RootRecord rootRecord = new RootRecord();
 
-                addKeysToRecord(rootRecord, path, jsonNode);
-                forest.addRecord(rootRecord);
-            }
-        }
+            addKeysToRecord(rootRecord, path, object);
+            forest.addRecord(rootRecord);
+        });
 
         return forest;
     }
 
-    private void addKeysToRecord(ComplexRecord record, ComplexProperty path, JsonNode object) {
-        final var iterator = object.fields();
-        while (iterator.hasNext()) {
-            final var entry = iterator.next();
+    private void addKeysToRecord(ComplexRecord record, ComplexProperty path, ObjectNode object) {
+        for (final var entry : object.properties()) {
             final var key = entry.getKey();
             final var value = entry.getValue();
             if (value == null || value.isNull())
@@ -125,7 +117,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         final var complexProperty = (ComplexProperty) property;
         final ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.signature());
 
-        addKeysToRecord(childRecord, complexProperty, value);
+        addKeysToRecord(childRecord, complexProperty, (ObjectNode) value);
     }
 
     @Override public QueryResult executeQuery(QueryStatement statement) {
@@ -133,7 +125,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public List<String> getKindNames() {
-        throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
+        return List.of(provider.getKindName());
     }
 
     @Override public DataResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filter) {

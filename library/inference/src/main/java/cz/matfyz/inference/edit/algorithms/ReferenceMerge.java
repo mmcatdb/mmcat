@@ -120,7 +120,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             newMetadata.setObjex(dom, new MetadataObjex(ARRAY_LABEL, newMetadata.getObjex(dom).position));
 
             this.referenceSignature = findReferenceSignatureWithValueKey(toDelete, data.referencingKey);
-        } else {
+        }
+        else {
             this.referenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema, dom, newSchema.getObjex(data.referencingKey));
             toDelete.add(data.referencingKey);
         }
@@ -220,7 +221,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             final ComplexProperty adjustedReferenceComplexProperty = adjustReferenceComplexProperty(referenceComplexProperty, ARRAY_LABEL);
 
             return adjustComplexProperty(cleanedComplexProperty, adjustedReferenceComplexProperty);
-        } else {
+        }
+        else {
            return adjustReferenceComplexProperty(complexProperty, complexProperty.name().toString());
         }
     }

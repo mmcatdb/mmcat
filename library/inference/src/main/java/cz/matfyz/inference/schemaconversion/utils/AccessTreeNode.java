@@ -18,6 +18,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class AccessTreeNode {
 
+    // TODO Why not use directly schema category / access path?
+
     /**
      * Enum representing the type of the {@code AccessTreeNode}.
      * <ul>
@@ -33,11 +35,13 @@ public class AccessTreeNode {
     }
 
     public final String name;
-    @Nullable public final BaseSignature signature;
     public final Key key;
+
+    @Nullable public final BaseSignature signature;
     @Nullable private Key parentKey;
     @Nullable public final String label;
     @Nullable public final Min min;
+
     public final boolean isArrayType;
     private List<AccessTreeNode> children;
 
@@ -108,6 +112,7 @@ public class AccessTreeNode {
             child.transformArrayNodes();
     }
 
+    // FIXME This is extremely dangerous. Should be done outside of this class. The parentKey should be final.
     private void promoteChildren(AccessTreeNode child) {
         final List<AccessTreeNode> newChildren = new ArrayList<>(child.getChildren());
         for (final AccessTreeNode newChild : newChildren)
@@ -117,14 +122,16 @@ public class AccessTreeNode {
     }
 
     public void printTree(String prefix) {
-        System.out.println(prefix + "Name: " + this.name +
-                                    ", Type: " + this.getType() +
-                                    ", Signature: " + (this.signature != null ? this.signature.toString() : "None") +
-                                    ", Key: " + this.key +
-                                    ", Parent Key: " + this.parentKey +
-                                    ", isArrayType: " + this.isArrayType);
+        System.out.println(
+            prefix + "Name: " + this.name +
+            ", Type: " + this.getType() +
+            ", Signature: " + (this.signature != null ? this.signature.toString() : "None") +
+            ", Key: " + this.key +
+            ", Parent Key: " + this.parentKey +
+            ", isArrayType: " + this.isArrayType
+        );
 
-        for (AccessTreeNode child : this.children)
+        for (final var child : this.children)
             child.printTree(prefix + "    ");
     }
 }

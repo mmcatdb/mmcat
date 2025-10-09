@@ -104,7 +104,8 @@ public class RecursionMerge extends InferenceEditAlgorithm {
                 newPattern.add(new PatternSegment(currentSegment.nodeName(), RECURSIVE_MARKER + nextSegment.direction()));
                 i = i + 2;
                 lastAdjusted = true;
-            } else {
+            }
+            else {
                 newPattern.add(currentSegment);
                 i++;
                 lastAdjusted = false;

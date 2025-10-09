@@ -105,7 +105,8 @@ public class File extends Entity {
     private static void saveToFile(File file, String contents, UploadsProperties uploads) {
         try {
             Files.writeString(Paths.get(getFilePath(file, uploads)), contents, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("Failed to save file: " + getFilePath(file, uploads), e);
         }
     }
@@ -124,7 +125,8 @@ public class File extends Entity {
             fileContents = fileContents.replaceAll("\\s+", " ").trim();
             return List.of(fileContents.split("(?<=;)(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)"));
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("Failed to read execution file: " + filePath, e);
         }
     }
@@ -143,7 +145,8 @@ public class File extends Entity {
                 sb.append(line).append("\n");
                 linesRead++;
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("Failed to read preview for file: " + filePath, e);
         }
 

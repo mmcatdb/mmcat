@@ -5,16 +5,19 @@ import cz.matfyz.inference.algorithms.pba.PropertyBasedAlgorithm;
 import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalCombFunction;
 import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalSeqFunction;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
-import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
+import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.core.rsd.utils.BloomFilter;
-import cz.matfyz.core.rsd.utils.BasicHashFunction;
+import cz.matfyz.core.rsd.utils.Hashing;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.utils.StartingEndingFilter;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.exception.OtherException;
@@ -28,6 +31,8 @@ import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
  * descriptions into schema categories and mappings.
  */
 public class MMInferOneInAll {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MMInferOneInAll.class);
 
     private static final int BLOOM_FILTER_SIZE = 100000;
 
@@ -60,9 +65,13 @@ public class MMInferOneInAll {
             .map(this::processDatasource)
             .flatMap(list -> list.stream()).toList();
 
-        // TODO This is just a temporary solution
         List<AbstractInferenceWrapper> wrappers = provider.getDatasources().stream()
-            .map(d -> provider.getControlWrapper(d).getInferenceWrapper())
+            .flatMap(datasource -> {
+                final var control = provider.getControlWrapper(datasource);
+                final var kindNames = control.getPullWrapper().getKindNames();
+                // We need a separate wrapper instance for each kind name.
+                return kindNames.stream().map(kindName -> control.getInferenceWrapper(kindName));
+            })
             .toList();
 
         final Candidates candidates = executeCandidateMiner(wrappers);
@@ -72,42 +81,43 @@ public class MMInferOneInAll {
     }
 
     private List<CategoryMappingsPair> processDatasource(Datasource datasource) {
-        final var wrapper = this.provider.getControlWrapper(datasource).getInferenceWrapper();
-        return wrapper.getKindNames().stream()
-            .map(kindName -> processKind(wrapper, datasource, kindName))
+        final var control = provider.getControlWrapper(datasource);
+        final var kindNames = control.getPullWrapper().getKindNames();
+        return kindNames.stream()
+            .map(kindName -> processKind(control, datasource, kindName))
             .toList();
     }
 
-    private CategoryMappingsPair processKind(AbstractInferenceWrapper wrapper, Datasource datasource, String kindName) {
-        final var wrapperCopy = wrapper.copyForKind(kindName);
-        final var rsd = executeRBA(wrapperCopy);
-        //final var rsd = executePBA(wrapperCopy);
+    private CategoryMappingsPair processKind(AbstractControlWrapper control, Datasource datasource, String kindName) {
+        final var inference = control.getInferenceWrapper(kindName);
+        final var rsd = executeRBA(inference);
+        //final var rsd = executePBA(inference);
         return schemaConverter.convert(rsd, datasource, kindName);
     }
 
     private static RecordSchemaDescription executeRBA(AbstractInferenceWrapper wrapper) {
-        RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
-        AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
+        final var rba = new RecordBasedAlgorithm();
+        final var merge = new DefaultLocalReductionFunction();
 
-        long start = System.currentTimeMillis();
-        RecordSchemaDescription rsd = rba.process(wrapper, merge);
-        long end = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
+        final var rsd = rba.process(wrapper, merge);
+        final long end = System.currentTimeMillis();
 
-        System.out.println("RESULT_TIME_RECORD_BA TOTAL: " + (end - start) + "ms");
-        System.out.println("RSD: " + rsd);
+        final var total = end - start;
+        LOGGER.debug("executeRBA:\n- total time: {} ms\n- RSD: {}", total, rsd);
 
         return rsd;
     }
 
     public static RecordSchemaDescription executePBA(AbstractInferenceWrapper wrapper) {
-        PropertyBasedAlgorithm pba = new PropertyBasedAlgorithm();
+        final var pba = new PropertyBasedAlgorithm();
 
-        DefaultLocalSeqFunction seqFunction = new DefaultLocalSeqFunction();
-        DefaultLocalCombFunction combFunction = new DefaultLocalCombFunction();
+        final var seqFunction = new DefaultLocalSeqFunction();
+        final var combFunction = new DefaultLocalCombFunction();
 
-        long start = System.currentTimeMillis();
-        RecordSchemaDescription rsd = pba.process(wrapper, seqFunction, combFunction);
-        long end = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
+        final var rsd = pba.process(wrapper, seqFunction, combFunction);
+        final long end = System.currentTimeMillis();
 
         System.out.println("RESULT_TIME_PROPERTY_BA TOTAL: " + (end - start) + "ms");
         System.out.println("RSD: " + rsd == null ? "NULL" : rsd);
@@ -116,9 +126,9 @@ public class MMInferOneInAll {
     }
 
     public static Candidates executeCandidateMiner(List<AbstractInferenceWrapper> wrappers) throws Exception {
-        BloomFilter.setParams(BLOOM_FILTER_SIZE, new BasicHashFunction());
+        BloomFilter.setParams(BLOOM_FILTER_SIZE, Hashing::basicHash);
         StartingEndingFilter.setParams(BLOOM_FILTER_SIZE);
-        CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
+        final var candidateMiner = new CandidateMinerAlgorithm();
 
         return candidateMiner.process(wrappers, false);
     }

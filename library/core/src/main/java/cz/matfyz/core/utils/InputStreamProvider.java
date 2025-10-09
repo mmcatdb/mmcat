@@ -47,7 +47,8 @@ public interface InputStreamProvider {
         public InputStream getInputStream() throws IOException {
             try {
                 return new URI(url).toURL().openStream();
-            } catch (URISyntaxException e) {
+            }
+            catch (URISyntaxException e) {
                 throw new IOException(e);
             }
         }

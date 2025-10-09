@@ -7,11 +7,8 @@ import java.util.List;
  */
 public class BaseSignature extends Signature {
 
-    private final int id;
-
     public BaseSignature(int id) {
         super(new int[] { id });
-        this.id = id;
     }
 
     @Override public List<BaseSignature> toBases() {
@@ -35,11 +32,11 @@ public class BaseSignature extends Signature {
     }
 
     @Override public BaseSignature dual() {
-        return createBase(-id);
+        return createBase(-ids[0]);
     }
 
     public boolean isDual() {
-        return id < 0;
+        return ids[0] < 0;
     }
 
     /** In other words, "to non dual". */
@@ -48,11 +45,21 @@ public class BaseSignature extends Signature {
     }
 
     @Override public String toString() {
-        return Integer.toString(id);
+        return Integer.toString(ids[0]);
     }
 
     @Override public boolean equals(Object object) {
-        return object instanceof BaseSignature signature && compareTo(signature) == 0;
+        return object instanceof BaseSignature base && compareTo(base) == 0;
+    }
+
+    @Override public int compareTo(Signature signature) {
+        return signature instanceof BaseSignature base
+            ? compareTo(base)
+            : 1 - signature.ids.length;
+    }
+
+    public int compareTo(BaseSignature signature) {
+        return ids[0] - signature.ids[0];
     }
 
 }

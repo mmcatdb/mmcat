@@ -350,7 +350,7 @@ public class ComplexProperty extends AccessPath {
 
         printer.append("{").down().nextLine();
 
-        for (final var subpath : subpaths())
+        for (final var subpath : sortedSubpaths())
             printer.append(subpath).append(",").nextLine();
 
         printer.remove().up().nextLine()
@@ -359,6 +359,12 @@ public class ComplexProperty extends AccessPath {
 
     @Override public String toString() {
         return Printer.print(this);
+    }
+
+    private List<AccessPath> sortedSubpaths() {
+        final var list = new ArrayList<>(subpaths.values());
+        Collections.sort(list, (a, b) -> Name.compareNamesLexicographically(a.name, b.name));
+        return list;
     }
 
     // #region Serialization

@@ -27,7 +27,7 @@ class PostgreSQLTests {
     }
 
     @Test
-    void readFromDB_DoesNotThrow() {
+    void readFromDb_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = datasource.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readTableAsStringForTests(PostgreSQL.orderKind);

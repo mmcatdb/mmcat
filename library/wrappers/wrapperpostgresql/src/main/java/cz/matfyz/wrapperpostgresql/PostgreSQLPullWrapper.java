@@ -40,7 +40,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLPullWrapper.class);
 
-    private PostgreSQLProvider provider;
+    private final PostgreSQLProvider provider;
 
     public PostgreSQLPullWrapper(PostgreSQLProvider provider) {
         this.provider = provider;
@@ -115,7 +115,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
         try {
             return Double.parseDouble(str);
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e) {
             return null;
         }
     }
@@ -140,10 +141,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 .append("(")
                 .append(propertyValue)
                 .append(")");
-        } else if (!UNARY_OPERATORS.contains(operator)) {
+        }
+        else if (!UNARY_OPERATORS.contains(operator)) {
             if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
                 whereClause.append(doubleValue);
-            } else {
+            }
+            else {
                 whereClause
                     .append("'")
                     .append(propertyValue)

@@ -160,11 +160,11 @@ public class JobExecutorService {
 
         try {
             processJobByType(run, job);
-            if (job.payload instanceof RSDToCategoryPayload) {
+            if (job.payload instanceof RSDToCategoryPayload)
                 job.state = Job.State.Waiting;
-            } else {
+            else
                 job.state = Job.State.Finished;
-            }
+
             repository.save(job);
             LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id(), job.label);
         }

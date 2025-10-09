@@ -24,7 +24,14 @@ public interface Printer {
      * Utility method for providing a default printer.
      */
     static Printer create() {
-        return new LineStringBuilder(0);
+        return new LineStringBuilder(0, null);
+    }
+
+    /**
+     * Utility method for providing a default printer with custom stringifier.
+     */
+    static Printer create(Stringifier stringifier) {
+        return new LineStringBuilder(0, stringifier);
     }
 
     /**
@@ -32,6 +39,15 @@ public interface Printer {
      */
     static String print(Printable printable) {
         final var printer = create();
+        printable.printTo(printer);
+        return printer.toString();
+    }
+
+    /**
+     * Utility method for printing a printable to a string with custom stringifier.
+     */
+    static String print(Printable printable, Stringifier stringifier) {
+        final var printer = create(stringifier);
         printable.printTo(printer);
         return printer.toString();
     }

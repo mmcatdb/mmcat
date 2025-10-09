@@ -14,55 +14,36 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
 
     private int unique;    // TODO: rozepsat na konstanty vestaveneho datoveho typu char, podobne jako typy a modely
 
-    private int shareTotal;    // TODO: rozepsat na dve property, int total a int first
+    private int id;        // TODO: rozepsat na konstanty vestaveneho datoveho typu char, podobne jako typy a modely
+
+    private int shareTotal;
 
     private int shareFirst;
 
-    private int id;        // TODO: rozepsat na konstanty vestaveneho datoveho typu char, podobne jako typy a modely
-
     private /*Set<Type>*/ int types;
 
-    private /*Set<Model>*/ int models;
-
-    private /*List*/ ObjectArrayList<RecordSchemaDescription> children;    // TODO: pouzit knihovnu https://trove4j.sourceforge.net/javadocs/gnu/trove/list/linked/TLinkedList.html nebo podobne efektivni a vhodnou - mene vytvorenych objektu, pametove uspornejsi a ve vysledku rychlejsi
+    private ObjectArrayList<RecordSchemaDescription> children;    // TODO: pouzit knihovnu https://trove4j.sourceforge.net/javadocs/gnu/trove/list/linked/TLinkedList.html nebo podobne efektivni a vhodnou - mene vytvorenych objektu, pametove uspornejsi a ve vysledku rychlejsi
 
 
     public RecordSchemaDescription() {
-        this("", Char.UNKNOWN, 0, 0/*new Share()*/, Char.UNKNOWN, /*new TreeSet<>(), new TreeSet<>(),*/ new /*ArrayList*/ ObjectArrayList<>());
+        this("", Char.UNKNOWN, Char.UNKNOWN, 0, 0 /*new TreeSet<>(), new TreeSet<>(),*/);
     }
 
     public RecordSchemaDescription(
-            String name,
-            int unique,
-            int shareTotal, int shareFirst, //Share share,
-            int id,
-            //            Set<Type> types,
-            //            Set<Model> models,
-            ObjectArrayList<RecordSchemaDescription> children
-            ) {
+        String name,
+        int unique,
+        int id,
+        int shareTotal,
+        int shareFirst
+        //          Set<Type> types,
+    ) {
         this.name = name;
         this.unique = unique;
-//        this.share = share;
+        this.id = id;
         this.shareTotal = shareTotal;
         this.shareFirst = shareFirst;
-        this.id = id;
         this.types = 0;
-        this.models = 0;
-        this.children = children;
-    }
-    // constructor for cloning
-    public RecordSchemaDescription(RecordSchemaDescription other) {
-        this.name = other.name;
-        this.unique = other.unique;
-        this.shareTotal = other.shareTotal;
-        this.shareFirst = other.shareFirst;
-        this.id = other.id;
-        this.types = other.types;
-        this.models = other.models;
         this.children = new ObjectArrayList<>();
-        for (RecordSchemaDescription child : other.children) {
-            this.children.add(new RecordSchemaDescription(child));
-        }
     }
 
     public String getName() {
@@ -81,6 +62,14 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.unique = unique;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getShareTotal() {
         return shareTotal;
     }
@@ -97,21 +86,6 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.shareFirst = shareFirst;
     }
 
-//    public Share getShare() {
-//        return share;
-//    }
-//
-//    public void setShare(Share share) {
-//        this.share = share;
-//    }
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public /*Set<Type>*/ int getTypes() {
         return types;
     }
@@ -120,19 +94,11 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.types = types;
     }
 
-    public /*Set<Model>*/ int getModels() {
-        return models;
-    }
-
-    public void setModels(/*Set<Model>*/int models) {
-        this.models = models;
-    }
-
-    public /*List*/ ObjectArrayList<RecordSchemaDescription> getChildren() {
+    public ObjectArrayList<RecordSchemaDescription> getChildren() {
         return children;
     }
 
-    public void setChildren(/*List*/ObjectArrayList<RecordSchemaDescription> children) {
+    public void setChildren(ObjectArrayList<RecordSchemaDescription> children) {
         this.children = children;
     }
 
@@ -149,7 +115,7 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
     public boolean addChildrenIfNameMatches(RecordSchemaDescription rsd) {
         if (this.name.equals(rsd.getName())) {
             if (isReferencingRSD(this)) {
-                ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
+                final var newChildren = new ObjectArrayList<RecordSchemaDescription>();
                 this.setChildren(newChildren);
             }
             for (RecordSchemaDescription child : rsd.getChildren()) {
@@ -166,30 +132,31 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
     }
 
     public void addChildren(RecordSchemaDescription child) {
-        ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
-        for (RecordSchemaDescription oldChild : this.children) {
+        final var newChildren = new ObjectArrayList<RecordSchemaDescription>();
+        for (final var oldChild : this.children)
             newChildren.add(oldChild);
-        }
+
         newChildren.add(child);
         this.setChildren(newChildren);
     }
 
     private boolean isReferencingRSD(RecordSchemaDescription rsd) {
-        for (RecordSchemaDescription child : rsd.getChildren()) {
-            if (!child.getName().equals(ROOT_SYMBOL)) {
+        for (final var child : rsd.getChildren()) {
+            if (!child.getName().equals(ROOT_SYMBOL))
                 return false;
-            }
         }
         return true;
     }
 
     public boolean removeChildByName(String name) {
-        for (RecordSchemaDescription child : children) {
+        for (final var child : children) {
             if (child.getName().equals(name)) {
                 children.remove(child);
                 return true;
-            } else if (child.removeChildByName(name))
+            }
+            else if (child.removeChildByName(name)) {
                 return true;
+            }
         }
         return false;
     }
@@ -197,12 +164,7 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
     // end of utility methods
 
     @Override public int compareTo(RecordSchemaDescription o) {
-        int comparedNames = name.compareTo(o.name);
-        if (comparedNames != 0) {
-            return comparedNames;
-        }
-        return 0;
-        //return types - o.types;
+        return name.compareTo(o.name);
     }
 
     public String _toString() {
@@ -210,26 +172,29 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
             .append("RecordSchemaDescription{")
             .append("name=").append(name)
             .append(", unique=").append(unique)
-            // .append(", share=").append(share)
             .append(", shareTotal=").append(shareTotal)
             .append(", shareFirst=").append(shareFirst)
             .append(", id=").append(id)
             .append(", types=").append(types)
-            .append(", models=").append(models)
             .append(", children=").append(children)
             .append('}')
             .toString();
     }
 
+    private final static ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        // Disable pretty print so that each RSD fits on a single line in logs.
+        mapper.disable(SerializationFeature.INDENT_OUTPUT);
+    }
+
     @Override public String toString() {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.disable(SerializationFeature.INDENT_OUTPUT);    // pretty print disabled
-
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+            return mapper.writeValueAsString(this);
+        }
+        catch (JsonProcessingException e) {
             e.printStackTrace();
-            return _toString(); // super.toString(); // Fallback to the default toString() if an exception occurs
+            return _toString();
         }
     }
 }

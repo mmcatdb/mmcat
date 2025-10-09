@@ -65,8 +65,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 0)
             return Signature.empty();
 
-        var newIds = Arrays.copyOfRange(ids, 0, ids.length - 1);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, 0, ids.length - 1));
     }
 
     public BaseSignature getLast() {
@@ -80,8 +79,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 0)
             return Signature.empty();
 
-        var newIds = Arrays.copyOfRange(ids, 1, ids.length);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, 1, ids.length));
     }
 
     public BaseSignature getFirst() {
@@ -128,8 +126,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (!hasPrefix(other))
             return null;
 
-        final var newIds = Arrays.copyOfRange(ids, other.ids.length, ids.length);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, other.ids.length, ids.length));
     }
 
     public boolean hasSuffix(Signature other) {
@@ -148,8 +145,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (!hasSuffix(other))
             return null;
 
-        final var newIds = Arrays.copyOfRange(ids, 0, ids.length - other.ids.length);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, 0, ids.length - other.ids.length));
     }
 
     public boolean contains(Signature other) {
@@ -185,11 +181,11 @@ public class Signature implements Serializable, Comparable<Signature> {
     }
 
     public Signature dual() {
-        int n = ids.length;
+        final int n = ids.length;
         if (n == 0)
             return this;
 
-        int[] array = new int[n];
+        final int[] array = new int[n];
         for (int i = 0; i < n; i++)
             array[i] = -ids[n - i - 1];
 

@@ -41,7 +41,7 @@ import org.neo4j.driver.types.TypeSystem;
 
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
-    private Neo4jProvider provider;
+    private final Neo4jProvider provider;
 
     private static final String RELATIONSHIPS_COUNT = "COUNT(relationship) as recordCount";
     private static final String NODES_COUNT = "COUNT(node) as recordCount";
@@ -163,7 +163,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         try {
             return Double.parseDouble(str);
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e) {
             return null;
         }
     }
@@ -282,10 +283,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 .append("[")
                 .append(propertyValue)
                 .append("]");
-        } else if (!UNARY_OPERATORS.contains(operator)) {
+        }
+        else if (!UNARY_OPERATORS.contains(operator)) {
             if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
                 whereClause.append(doubleValue);
-            } else {
+            }
+            else {
                 whereClause
                     .append("'")
                     .append(propertyValue)
@@ -541,7 +544,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             });
 
             return new QueryResult(builder.build(), statement.structure());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw PullForestException.inner(e);
         }
     }
@@ -638,7 +642,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 : countQueryResult.next().get("recordCount").asLong();
 
             return new GraphResponse(data, itemCount, propertyNames);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw PullForestException.inner(e);
         }
     }
@@ -651,11 +656,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             Record propertyNameRecord = propertyNamesQueryResult.next();
             propertyNameRecord.values().stream()
                 .forEach(element -> {
-                    if (element.hasType(TypeSystem.getDefault().NODE())) {
+                    if (element.hasType(TypeSystem.getDefault().NODE()))
                         Neo4jUtils.getNodeProperties(element, propertyNames);
-                    } else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
+                    else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP()))
                         Neo4jUtils.getRelationshipProperties(element, propertyNames);
-                    }
                 });
         }
 

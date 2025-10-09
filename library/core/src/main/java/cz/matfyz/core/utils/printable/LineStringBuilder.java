@@ -3,41 +3,42 @@ package cz.matfyz.core.utils.printable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 class LineStringBuilder implements Printer {
 
     private int indentationLevel;
     private final String indentationStringPerLevel;
-    private final Deque<String> stack = new ArrayDeque<>();
+    private final @Nullable Stringifier stringifier;
 
-    LineStringBuilder(int indentationLevel, String indentationStringPerLevel) {
+    LineStringBuilder(int indentationLevel, String indentationStringPerLevel, @Nullable Stringifier stringifier) {
         this.indentationLevel = indentationLevel;
         this.indentationStringPerLevel = indentationStringPerLevel;
+        this.stringifier = stringifier;
     }
 
-    LineStringBuilder(int indentationLevel) {
-        this(indentationLevel, "    ");
+    LineStringBuilder(int indentationLevel, @Nullable Stringifier stringifier) {
+        this(indentationLevel, "    ", stringifier);
     }
 
-    public LineStringBuilder down() {
+    @Override public LineStringBuilder down() {
         indentationLevel++;
         return this;
     }
 
-    public LineStringBuilder up() {
+    @Override public LineStringBuilder up() {
         indentationLevel--;
         return this;
     }
 
-    private static String computeTabIndentationString(int level, String string) {
-        return string.repeat(level);
-    }
+    private final Deque<String> stack = new ArrayDeque<>();
 
-    public LineStringBuilder nextLine() {
-        stack.push("\n" + computeTabIndentationString(indentationLevel, indentationStringPerLevel));
+    @Override public LineStringBuilder nextLine() {
+        stack.push("\n" + indentationStringPerLevel.repeat(indentationLevel));
         return this;
     }
 
-    public LineStringBuilder append(Printable printable) {
+    @Override public LineStringBuilder append(Printable printable) {
         final int originalLevel = indentationLevel;
         printable.printTo(this);
         indentationLevel = originalLevel;
@@ -45,27 +46,31 @@ class LineStringBuilder implements Printer {
         return this;
     }
 
-    public LineStringBuilder append(String string) {
+    @Override public LineStringBuilder append(String string) {
         stack.push(string);
         return this;
     }
 
-    public LineStringBuilder append(int integer) {
+    @Override public LineStringBuilder append(int integer) {
         stack.push(Integer.toString(integer));
         return this;
     }
 
-    public LineStringBuilder append(Object object) {
-        stack.push(object.toString());
+    @Override public LineStringBuilder append(Object object) {
+        final var stringValue = stringifier == null
+            ? object.toString()
+            : stringifier.apply(object);
+
+        stack.push(stringValue);
         return this;
     }
 
-    public LineStringBuilder remove() {
+    @Override public LineStringBuilder remove() {
         stack.pop();
         return this;
     }
 
-    public LineStringBuilder remove(int index) {
+    @Override public LineStringBuilder remove(int index) {
         while (index > 0) {
             stack.pop();
             index--;

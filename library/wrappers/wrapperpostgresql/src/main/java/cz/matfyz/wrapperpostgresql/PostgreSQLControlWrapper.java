@@ -94,7 +94,7 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
         return new PostgreSQLQueryWrapper();
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper() {
+    @Override public AbstractInferenceWrapper getInferenceWrapper(String kindName) {
         throw new UnsupportedOperationException("PostgreSQLControlWrapper.getInferenceWrapper not implemented.");
     }
 

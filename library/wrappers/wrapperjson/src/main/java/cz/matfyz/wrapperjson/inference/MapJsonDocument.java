@@ -1,51 +1,104 @@
 package cz.matfyz.wrapperjson.inference;
 
-import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import cz.matfyz.core.rsd.*;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import cz.matfyz.core.rsd.Char;
+import cz.matfyz.core.rsd.DataType;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 import java.util.*;
 
-/**
- * An abstract class responsible for processing a JSON document represented by a BSON {@link Document}
- * and converting it into a {@link RecordSchemaDescription} structure.
- */
-public abstract class MapJsonDocument {
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
-    private MapJsonDocument() {}
+public abstract class MapJsonDocument {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapJsonDocument.class);
 
-    /**
-     * Processes a given BSON {@link Document} and produces a {@link RecordSchemaDescription}
-     * representing the schema of the JSON document.
-     *
-     * @param t the BSON {@link Document} to process.
-     * @return a {@link RecordSchemaDescription} representing the structure and schema
-     *         inferred from the input document.
-     */
-    public static RecordSchemaDescription process(Document t) {
-        RecordSchemaDescription result = new RecordSchemaDescription();
+    private MapJsonDocument() {}
 
-        result.setName(RecordSchemaDescription.ROOT_SYMBOL);
-        result.setUnique(Char.FALSE);
-        // result.setShare(new Share());
-        result.setId(Char.FALSE);
-        result.setTypes(Type.MAP);
-        result.setModels(Model.DOC);
+    public static RecordSchemaDescription process(ObjectNode object) {
+        final var result = new RecordSchemaDescription(
+            RecordSchemaDescription.ROOT_SYMBOL,
+            Char.FALSE,
+            Char.FALSE,
+            0,
+            0
+        );
 
-        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
+        result.setTypes(DataType.MAP);
+        result.setChildren(processMapChildren(object));
 
-        t.forEach((key, value) -> children.add(MapJsonRecord.process(key, value, true, true)));
+        return result;
+    }
+
+    public static RecordSchemaDescription processChild(String key, JsonNode value, boolean isFirstOccurrence) {
+        final var result = new RecordSchemaDescription(
+            key,
+            Char.UNKNOWN,
+            Char.UNKNOWN,
+            1,
+            isFirstOccurrence ? 1 : 0
+        );
+
+        final var type = getType(value);
+        result.setTypes(DataType.OBJECT | type);
+
+        if (type == DataType.MAP)
+            result.setChildren(processMapChildren((ObjectNode) value));
+        else if (type == DataType.ARRAY)
+            result.setChildren(processArrayChildren((ArrayNode) value));
+
+        return result;
+    }
+
+    private static ObjectArrayList<RecordSchemaDescription> processMapChildren(ObjectNode object) {
+        final var children = new ObjectArrayList<RecordSchemaDescription>();
+
+        object.properties().forEach(entry -> {
+            children.add(processChild(entry.getKey(), entry.getValue(), true));
+        });
 
         Collections.sort(children);
 
-        result.setChildren(children);
+        return children;
+    }
 
-        return result;
+    private static ObjectArrayList<RecordSchemaDescription> processArrayChildren(ArrayNode items) {
+        final var children = new ObjectArrayList<RecordSchemaDescription>();
+        RecordSchemaDescription firstElement = null;
+
+        for (final var item : items) {
+            final var currentElement = processChild(RecordSchemaDescription.ROOT_SYMBOL, item, firstElement == null);
+
+            if (firstElement == null) {
+                firstElement = currentElement;
+                children.add(currentElement);
+            }
+            else if (firstElement.compareTo(currentElement) != 0) {
+                children.add(currentElement);
+            }
+        }
+
+        return children;
+    }
+
+    private static int getType(JsonNode value) {
+        return switch (value.getNodeType()) {
+            case NULL -> DataType.UNKNOWN;
+            case NUMBER -> DataType.NUMBER;
+            case BOOLEAN -> DataType.BOOLEAN;
+            case BINARY, STRING -> DataType.STRING;
+            case OBJECT -> DataType.MAP;
+            case ARRAY -> DataType.ARRAY;
+            default -> {
+                LOGGER.error("Invalid data type");
+                yield DataType.UNKNOWN;
+            }
+        };
     }
 
 }

@@ -1,16 +1,9 @@
 package cz.matfyz.wrappercsv.inference;
 
-import cz.matfyz.core.rsd.utils.BlobClobHashing;
 import cz.matfyz.core.rsd.PropertyHeuristics;
-import cz.matfyz.core.rsd.utils.BasicHashFunction;
-import cz.matfyz.core.rsd.utils.BloomFilter;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
-import scala.Tuple2;
+import org.apache.spark.api.java.function.FlatMapFunction;
 
-import java.sql.Blob;
-import java.sql.Clob;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,7 +11,7 @@ import java.util.Map;
  * to a list of Tuples, where each Tuple contains a string key and a {@link PropertyHeuristics} object.
  * This class is used to perform heuristic analysis on the properties of CSV records.
  */
-public class RecordToHeuristicsMap implements PairFlatMapFunction<Map<String, String>, String, PropertyHeuristics> {
+public class RecordToHeuristicsMap implements FlatMapFunction<Map<String, String>, PropertyHeuristics> {
 
     private final String filename;
 
@@ -38,55 +31,14 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Map<String, St
      * @param record a Map representing a CSV record, where each entry is a key-value pair.
      * @return an iterator over tuples containing keys and their corresponding {@link PropertyHeuristics}.
      */
-    @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Map<String, String> record) {
-        List<Tuple2<String, PropertyHeuristics>> result = record.entrySet().stream()
+    @Override public Iterator<PropertyHeuristics> call(Map<String, String> record) {
+        return record.entrySet().stream()
             .map(entry -> {
-                String key = filename + '/' + entry.getKey();
-                PropertyHeuristics heuristics = buildHeuristics(key, entry.getValue(), 1, 1);
-                return new Tuple2<>(key + "::" + entry.getValue(), heuristics);
+                final String key = filename + '/' + entry.getKey();
+                final var value = entry.getValue();
+                return PropertyHeuristics.createForKeyValuePair(key, value);
             })
-            .toList();
-
-        return result.iterator();
+            .iterator();
     }
 
-    /**
-     * Builds a {@link PropertyHeuristics} object for a given key-value pair.
-     * This method is responsible for setting various properties based on the value type.
-     *
-     * @param key the hierarchical name to be used for the property.
-     * @param value the value to be analyzed and stored in the heuristics.
-     * @param first the first occurrence count.
-     * @param total the total occurrence count.
-     * @return a new instance of {@link PropertyHeuristics} with computed properties.
-     */
-    private PropertyHeuristics buildHeuristics(String key, Object value, int first, int total) {
-        return new PropertyHeuristics() {
-            {
-                setHierarchicalName(key);
-                Object valueToSave = value;
-                if (value instanceof Number) {
-                    setTemp(((Number) value).doubleValue());
-                } else if (value instanceof Comparable) {
-                    double resultOfHashFunction = new BasicHashFunction().apply(value).doubleValue();
-                    setTemp(resultOfHashFunction);
-                } else if (value instanceof Blob) {
-                    valueToSave = BlobClobHashing.blobToHash((Blob) value);
-                } else if (value instanceof Clob) {
-                    valueToSave = BlobClobHashing.clobToHash((Clob) value);
-                }
-                setMin(valueToSave);
-                setMax(valueToSave);
-                setFirst(first);
-                setCount(total);
-                setUnique(total == 1);
-                BloomFilter bloomFilter = new BloomFilter();
-                if (value != null) {
-                    bloomFilter.add(valueToSave);
-                }
-                setBloomFilter(bloomFilter);
-                addToStartingEnding(valueToSave);
-            }
-        };
-    }
 }

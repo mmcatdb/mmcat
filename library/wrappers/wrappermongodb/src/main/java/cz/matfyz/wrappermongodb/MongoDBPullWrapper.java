@@ -44,7 +44,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MongoDBPullWrapper implements AbstractPullWrapper {
 
-    private MongoDBProvider provider;
+    private final MongoDBProvider provider;
 
     public MongoDBPullWrapper(MongoDBProvider provider) {
         this.provider = provider;

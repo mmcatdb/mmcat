@@ -1,10 +1,12 @@
 package cz.matfyz.core.datasource;
 
+import java.io.Serializable;
+
 /**
  * This class represents a database or a file. It's identified by an identifier (which doesn't have to be anything specific - it's here just for the Comparable interface).
  * It has a type (PostgreSQL, MongoDB, ...) and a list of kinds.
  */
-public class Datasource implements Comparable<Datasource> {
+public class Datasource implements Comparable<Datasource>, Serializable {
 
     public enum DatasourceType {
         mongodb,

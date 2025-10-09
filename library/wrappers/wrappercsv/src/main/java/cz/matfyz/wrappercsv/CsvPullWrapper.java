@@ -53,10 +53,10 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         final var forest = new ForestOfRecords();
 
         final CsvSchema baseSchema = CsvSchema.emptySchema()
-            .withColumnSeparator(provider.getSeparator())
+            .withColumnSeparator(provider.settings.separator())
             .withEscapeChar('\\');
 
-        final CsvSchema schema = provider.hasHeader()
+        final CsvSchema schema = provider.settings.hasHeader()
             ? baseSchema.withHeader()
             : baseSchema.withColumnsFrom(createHeaderSchema(path));
 
@@ -78,7 +78,8 @@ public class CsvPullWrapper implements AbstractPullWrapper {
 
                 forest.addRecord(createRecord(columns, reader.nextValue()));
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw PullForestException.inner(e);
         }
 
@@ -134,7 +135,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public List<String> getKindNames() {
-        throw new UnsupportedOperationException("CsvPullWrapper.getKindNames not implemented.");
+        return List.of(provider.getKindName());
     }
 
     @Override public DataResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filter) {

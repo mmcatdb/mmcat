@@ -34,7 +34,7 @@ public class MappingConverter {
      * Creates a new {@link Mapping} for the given schema category and kind name.
      */
     public Mapping createMapping(Datasource datasource, SchemaCategory schemaCategory, String kindName) {
-        ComplexProperty accessPath = buildComplexPropertyFromNode(root, null, null);
+        final ComplexProperty accessPath = buildComplexPropertyFromNode(root, null, null);
         return Mapping.create(datasource, kindName, schemaCategory, rootKey, accessPath);
     }
 
@@ -42,13 +42,13 @@ public class MappingConverter {
      * Builds a {@link ComplexProperty} from the given access tree node, recursively processing its children.
      */
     public ComplexProperty buildComplexPropertyFromNode(AccessTreeNode node, @Nullable String name, @Nullable Signature signature) {
-        List<AccessPath> subpaths = new ArrayList<>();
+        final List<AccessPath> subpaths = new ArrayList<>();
 
-        for (AccessTreeNode child : node.getChildren()) {
+        for (final AccessTreeNode child : node.getChildren()) {
             // adjusted mapping for arrays - for now we dont support indexing
             if (child.isArrayType) {
-                AccessTreeNode valueNode = getValueNodeForArray(child);
-                Signature arraySignature = getArraySignature(child, valueNode);
+                final AccessTreeNode valueNode = getValueNodeForArray(child);
+                final Signature arraySignature = getArraySignature(child, valueNode);
 
                 if (isComplexArray(valueNode))
                     subpaths.add(buildComplexPropertyFromNode(valueNode, child.name, arraySignature));
@@ -72,16 +72,15 @@ public class MappingConverter {
     }
 
     private Signature getArraySignature(AccessTreeNode node, AccessTreeNode valueNode) {
-        Signature signature = Signature.concatenate(node.signature.dual(), valueNode.signature);
-        return signature;
+        return Signature.concatenate(node.signature.dual(), valueNode.signature);
     }
 
     private AccessTreeNode getValueNodeForArray(AccessTreeNode node) {
-        for (AccessTreeNode child: node.getChildren())
+        for (final AccessTreeNode child: node.getChildren())
             if (child.name.equals(RSDToAccessTreeConverter.VALUE_LABEL))
                 return child;
 
-        throw new IllegalStateException("Value node for array node has not been found");
+        throw new IllegalStateException("Value node for array node was not found");
     }
 
     private boolean isComplexArray(AccessTreeNode valueNode) {

@@ -77,11 +77,15 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
                 relationship = join.from();
                 node = join.to();
                 relationshipPath = join.fromPath();
-            } else if (!isRelationship(join.from()) && isRelationship(join.to())) {
+            }
+            else if (!isRelationship(join.from()) && isRelationship(join.to())) {
                 relationship = join.to();
                 node = join.from();
                 relationshipPath = join.toPath();
-            } else throw new UnsupportedOperationException("Graph join must be between node and edge.");
+            }
+            else {
+                throw new UnsupportedOperationException("Graph join must be between node and edge.");
+            }
 
             boolean directionIsTowardsNode = relationship.accessPath()
                 .getDirectSubpath(relationshipPath.getFirst())
@@ -104,19 +108,19 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
         boolean first = true;
         for (final var f : filters) {
-            if (first) first = false;
-            else sb.append(" AND\n  ");
+            if (first)
+                first = false;
+            else
+                sb.append(" AND\n  ");
 
-            if (f instanceof UnaryFilter uf) {
+            if (f instanceof UnaryFilter uf)
                 addFilter(uf, sb);
-            } else if (f instanceof BinaryFilter bf) {
+            else if (f instanceof BinaryFilter bf)
                 addFilter(bf, sb);
-            } else if (f instanceof SetFilter sf) {
+            else if (f instanceof SetFilter sf)
                 addFilter(sf, sb);
-            } else {
+            else
                 throw new UnsupportedOperationException("Unknown filter");
-            }
-
         }
 
         sb.append('\n');
