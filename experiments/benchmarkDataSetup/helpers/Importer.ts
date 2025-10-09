@@ -3,9 +3,8 @@ import neo4j from 'neo4j-driver'
 import { Client as PostgresClient } from 'pg'
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 
-const rootDir = path.join(import.meta.dirname, '..', '..')
+const rootDir = path.join(import.meta.dirname, '..', '..', '..')
 
 export class Importer {
     readonly databaseName: string
@@ -26,11 +25,29 @@ export class Importer {
         this.password = process.env.EXAMPLE_PASSWORD!
     }
 
-    generateRecords(baseScale: number, recordCreationFunc: () => DataRecord): DataRecord[] {
-        const output: DataRecord[] = []
+    generateRecords(baseScale: number, recordCreationFunc: () => DataRecord, removeDuplicatesOfFields?: string[]): DataRecord[] {
+        let output: DataRecord[] = []
         for (let i = 0; i < baseScale * this.scalingFactor; i++) {
             output.push(recordCreationFunc())
         }
+
+        if (removeDuplicatesOfFields) {
+            output.sort((a, b) => {
+                for (const field of removeDuplicatesOfFields) {
+                    if (a[field] != b[field]) return a[field] - b[field]
+                }
+                return 0
+            })
+            output = output.filter((a, idx) => {
+                const b = output[idx - 1]
+                for (const field of removeDuplicatesOfFields) {
+                    if (a[field] != b[field]) return true
+                }
+                return false
+            })
+
+        }
+
         return output
     }
 
@@ -48,7 +65,6 @@ export class Importer {
             // populate
             for (const record of records) {
                 const value = record[key]
-                keyIndex[value]
 
                 let recordsWithValue = keyIndex.get(value)
                 if (recordsWithValue === undefined) {
@@ -66,7 +82,7 @@ export class Importer {
 
     findRecordByKey(records: DataRecord[], key: string, value: any): DataRecord[] {
         const index = this.getOrCreateRecordKeyIndex(records, key)
-        return index[value]
+        return index.get(value)!
     }
 
     async importData(settings: ImportSettings) {
@@ -138,7 +154,7 @@ export class Importer {
         const db = client.db(this.databaseName);
 
         function projectRecord(oldRecord: any, structure: Structure): DataRecord {
-            const newRecord = {}
+            const newRecord: DataRecord = {}
             for (const [key, value] of Object.entries(structure)) {
                 if (value === false) {
                     continue
@@ -281,6 +297,7 @@ export function generateWithinRange(generationFunc: () => number, min: number = 
     }
     return generated
 }
+
 
 // region types
 
