@@ -94,6 +94,99 @@ class QueryTests {
     }
 
     @Test
+    void nestedPostgreSQL() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?orderItem
+                        quantity ?quantity ;
+                        product ?product .
+
+                    ?product
+                        id ?id ;
+                        label ?label .
+
+                }
+                WHERE {
+                    ?orderItem 14 ?quantity .
+                    ?orderItem 13 ?product .
+                    ?product 15 ?id .
+                    ?product 16 ?label .
+                }
+            """)
+            .expected("""
+                [ {
+                    "id": "123",
+                    "label": "Clean Code",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "765",
+                    "label": "The Lord of the Rings",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "457",
+                    "label": "The Art of War",
+                    "orders": [ { id: "o_200" } ]
+                },
+                {
+                    "id": "734",
+                    "label": "Animal Farm",
+                    "orders": [ { id: "o_200" } ]
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void nestedPostgreSQLWithArray() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?product
+                        id ?id ;
+                        label ?label ;
+                        orders ?orders .
+
+                    ?orders id ?orderId .
+
+                }
+                WHERE {
+                    ?product 15 ?id .
+                    ?product 16 ?label .
+                    ?product -13 ?orders .
+                    ?orders 12/1 ?orderId .
+                }
+            """)
+            .expected("""
+                [ {
+                    "id": "123",
+                    "label": "Clean Code",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "765",
+                    "label": "The Lord of the Rings",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "457",
+                    "label": "The Art of War",
+                    "orders": [ { id: "o_200" } ]
+                },
+                {
+                    "id": "734",
+                    "label": "Animal Farm",
+                    "orders": [ { id: "o_200" } ]
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
     void nestedMongoDB() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.mongoDB())
