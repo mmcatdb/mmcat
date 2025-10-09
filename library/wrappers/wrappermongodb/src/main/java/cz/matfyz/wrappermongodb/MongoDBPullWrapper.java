@@ -202,7 +202,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 return new ListResult(childList);
             }
             else {
-                final var childString = document.get(child.name, String.class);
+                // final var childString = document.get(child.name, String.class);
+                final var childString = document.get(child.name).toString();
 
                 return new LeafResult(childString);
             }
