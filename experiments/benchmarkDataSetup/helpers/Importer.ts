@@ -25,10 +25,10 @@ export class Importer {
         this.password = process.env.EXAMPLE_PASSWORD!
     }
 
-    generateRecords(baseScale: number, recordCreationFunc: () => DataRecord, removeDuplicatesOfFields?: string[]): DataRecord[] {
+    generateRecords(baseScale: number, recordCreationFunc: (previousRecords: DataRecord[]) => DataRecord, removeDuplicatesOfFields?: string[]): DataRecord[] {
         let output: DataRecord[] = []
         for (let i = 0; i < baseScale * this.scalingFactor; i++) {
-            output.push(recordCreationFunc())
+            output.push(recordCreationFunc(output))
         }
 
         if (removeDuplicatesOfFields) {
@@ -39,6 +39,7 @@ export class Importer {
                 return 0
             })
             output = output.filter((a, idx) => {
+                if (idx == 0) return true;
                 const b = output[idx - 1]
                 for (const field of removeDuplicatesOfFields) {
                     if (a[field] != b[field]) return true

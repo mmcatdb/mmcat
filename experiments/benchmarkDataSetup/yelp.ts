@@ -1,6 +1,5 @@
 import { Importer, SubCollection, generateWithinRange } from './helpers/Importer.ts'
 import random from 'random'
-import randomstring from 'randomstring'
 import { RandomHelper } from './helpers/RandomHelper.ts'
 
 random.use('helloworld') // seed for number generator (TODO somehow make random string generation seedable too)
@@ -26,7 +25,7 @@ const business = importer.generateRecords(10, () => ({
 
 const user = importer.generateRecords(100, () => ({
     user_id: (idn++).toString(),
-    name: randomstring.generate({ length: 8, charset: 'alphabetic', capitalization: 'lowercase' }),
+    name: randomHelper.string(8),
     yelping_since: randomHelper.date(minDate, maxDate).toISOString(),
 }))
 
@@ -47,7 +46,7 @@ const review = importer.generateRecords(300, () => ({
     useful: generateWithinRange(() => Math.round(rcr()), 0, user.length),
     funny: generateWithinRange(() => Math.round(rcr()), 0, user.length),
     cool: generateWithinRange(() => Math.round(rcr()), 0, user.length),
-    content: randomstring.generate(generateWithinRange(() => Math.round(rcr()), 50, 950)),
+    content: randomHelper.string(generateWithinRange(() => Math.round(rcr()), 50, 950)),
 }))
 
 // const rur2 = random.geometric(4 / user.length)

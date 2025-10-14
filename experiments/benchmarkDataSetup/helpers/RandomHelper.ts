@@ -27,4 +27,22 @@ export class RandomHelper {
         if (this.nullDistr() < nullProbability) return null
         return value()
     }
+
+    /**
+     * Given a generation function and a range, repeatedly generates until the output is within the range.
+     * 
+     * It is not too smart and in extreme cases very slow, but should be fine when used carefully.
+     */
+    limit(generationFunc: () => number, min: number = -Infinity, max: number = Infinity): number {
+        let generated = generationFunc()
+        while (generated < min || generated > max) {
+            generated = generationFunc()
+        }
+        return generated
+    }
+
+    record<T>(records: T[], selection?: () => number): T {
+        if (!selection) selection = this.random.geometric(1 / records.length)
+        return records[this.limit(selection, 0, records.length - 1)]
+    }
 }
