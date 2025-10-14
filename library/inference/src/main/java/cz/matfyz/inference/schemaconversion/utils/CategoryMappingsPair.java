@@ -24,24 +24,25 @@ public record CategoryMappingsPair(
      * The merged instance contains a combined schema, metadata, and mappings from all provided pairs.
      */
     public static CategoryMappingsPair merge(List<CategoryMappingsPair> pairs) {
-        final SchemaCategory mergedSchema = new SchemaCategory();
-        final MetadataCategory mergedMetadata = MetadataCategory.createEmpty(mergedSchema);
+        final SchemaCategory schema = new SchemaCategory();
+        final MetadataCategory metadata = MetadataCategory.createEmpty(schema);
 
         for (final CategoryMappingsPair pair : pairs) {
             for (final SchemaObjex objex : pair.schema.allObjexes()) {
-                mergedSchema.addObjex(objex);
-                mergedMetadata.setObjex(objex, pair.metadata.getObjex(objex));
+                final var copy = schema.addObjexCopy(objex);
+                metadata.setObjex(copy, pair.metadata.getObjex(copy));
             }
 
             for (final SchemaMorphism morphism : pair.schema.allMorphisms()) {
-                mergedSchema.addMorphism(morphism);
-                mergedMetadata.setMorphism(morphism, pair.metadata.getMorphism(morphism));
+                final var copy = schema.addMorphismCopy(morphism);
+                metadata.setMorphism(copy, pair.metadata.getMorphism(copy));
             }
         }
 
-        final List<Mapping> mappings = pairs.stream().flatMap(pair -> pair.mappings.stream()).toList();
+        // Collect all mappings & update their schema category.
+        final List<Mapping> mappings = pairs.stream().flatMap(pair -> pair.mappings.stream().map(m -> m.withSchemaAndPath(schema, m.accessPath()))).toList();
 
-        return new CategoryMappingsPair(mergedSchema, mergedMetadata, mappings);
+        return new CategoryMappingsPair(schema, metadata, mappings);
     }
 
 }

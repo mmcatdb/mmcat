@@ -9,9 +9,10 @@ import java.util.Collection;
 
 public class SchemaObjex implements Identified<SchemaObjex, Key> {
 
-    /** Edited by {@link SchemaCategory}. */
-    boolean isEntity;
-
+    /**
+     * An objex should be created only by {@link SchemaCategory}.
+     * The reason is that there are some invariants involving multiple objexes that need to be maintained by the category.
+     */
     SchemaObjex(Key key, ObjexIds ids, boolean isEntity) {
         this.key = key;
         this.ids = ids;
@@ -35,6 +36,9 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
     public Collection<Signature> superId() {
         return superId;
     }
+
+    /** Edited by {@link SchemaCategory}. */
+    boolean isEntity;
 
     /**
      * There are two types of objexes - entites and properties.

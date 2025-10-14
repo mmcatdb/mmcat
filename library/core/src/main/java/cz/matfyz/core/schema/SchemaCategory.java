@@ -27,15 +27,14 @@ public class SchemaCategory {
         return objexes.get(key);
     }
 
-    /** @deprecated */
-    public SchemaObjex addObjex(SchemaObjex objex) {
-        return objexes.put(objex.key(), objex);
-    }
-
     public SchemaObjex addObjex(SerializedObjex serialized) {
         final var objex = new SchemaObjex(serialized.key(), serialized.ids(), false);
         objexes.put(objex.key(), objex);
         return objex;
+    }
+
+    public SchemaObjex addObjexCopy(SchemaObjex objex) {
+        return addObjex(SerializedObjex.serialize(objex));
     }
 
     public void removeObjex(SchemaObjex objex) {
@@ -76,11 +75,6 @@ public class SchemaCategory {
         return objex;
     }
 
-    /** @deprecated */
-    public SchemaMorphism addMorphism(SchemaMorphism morphism) {
-        return morphisms.put(morphism.signature(), morphism);
-    }
-
     public SchemaMorphism addMorphism(SerializedMorphism serialized) {
         final var dom = getObjex(serialized.domKey());
         final var cod = getObjex(serialized.codKey());
@@ -91,6 +85,10 @@ public class SchemaCategory {
         morphisms.put(morphism.signature(), morphism);
 
         return morphism;
+    }
+
+    public SchemaMorphism addMorphismCopy(SchemaMorphism morphism) {
+        return addMorphism(SerializedMorphism.serialize(morphism));
     }
 
     public void removeMorphism(SchemaMorphism morphism) {

@@ -325,7 +325,6 @@ class QueryTests {
                 return new DatasourceNode(
                     datasource,
                     plan,
-                    schema,
                     List.of(),
                     List.of(
                         scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
@@ -361,7 +360,6 @@ class QueryTests {
                 return new DatasourceNode(
                     datasource,
                     plan,
-                    schema,
                     List.of(),
                     List.of(
                         scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
@@ -397,7 +395,6 @@ class QueryTests {
                 return new DatasourceNode(
                     datasource,
                     plan,
-                    schema,
                     List.of(),
                     List.of(
                         scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))

@@ -5,6 +5,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.MapResult;
 import cz.matfyz.core.querying.ResultNode;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
 import cz.matfyz.querying.optimizer.QueryOptimizer;
@@ -39,10 +40,9 @@ class TempTests {
     void test() {
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
+        final var context = new QueryContext(datasources.schema, provider, normalized.selection.variables());
 
-        normalized.context.setProvider(provider);
-
-        final QueryPlan planned = QueryPlanner.run(normalized.context, datasources.schema, kinds, normalized.selection);
+        final QueryPlan planned = QueryPlanner.run(context, kinds, normalized.selection);
         final QueryPlan optimized = QueryOptimizer.run(planned);
 
         final var output = SelectionResolver.run(optimized);

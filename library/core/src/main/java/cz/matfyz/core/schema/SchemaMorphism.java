@@ -8,22 +8,10 @@ import java.util.Set;
 
 public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
-    /** Enum for limiting a morphism cardinality from the bottom. */
-    public enum Min {
-        ZERO,
-        ONE;
-
-        public static Min combine(Min min1, Min min2) {
-            return (min1 == Min.ONE || min2 == Min.ONE) ? Min.ONE : Min.ZERO;
-        }
-    }
-
-    /** Enum for specifying a morphism type (which were defined in the paper). */
-    public enum Tag {
-        isa,
-        role,
-    }
-
+    /**
+     * A morphism should be created only by {@link SchemaCategory}.
+     * The reason is that there are some invariants involving multiple objexes that need to be maintained by the category.
+     */
     SchemaMorphism(Signature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
         this.signature = signature;
         this.dom = dom;
@@ -54,10 +42,26 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         return cod;
     }
 
+    /** Enum for limiting a morphism cardinality from the bottom. */
+    public enum Min {
+        ZERO,
+        ONE;
+
+        public static Min combine(Min min1, Min min2) {
+            return (min1 == Min.ONE || min2 == Min.ONE) ? Min.ONE : Min.ZERO;
+        }
+    }
+
     private final Min min;
     /** Cardinality of the morphism - either 1..0 or 1..1. The cardinality in the opposite direction isn't defined. */
     public Min min() {
         return min;
+    }
+
+    /** Enum for specifying a morphism type (which were defined in the paper). */
+    public enum Tag {
+        isa,
+        role,
     }
 
     private final Set<Tag> tags;

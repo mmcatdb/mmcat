@@ -132,8 +132,8 @@ public class ResultStructureMerger {
         // Either way, we have to create the join structure.
         // This little maneuver is going to cost us 51 years ...
 
-        final var rootVariableTree = GraphUtils.findBFS(context.variables, tree -> tree.variable.equals(targetRoot.variable));
-        final var joinVariableTree = GraphUtils.findBFS(context.variables, tree -> tree.variable.equals(joinVar));
+        final var rootVariableTree = GraphUtils.findBFS(context.getVariables(), tree -> tree.variable.equals(targetRoot.variable));
+        final var joinVariableTree = GraphUtils.findBFS(context.getVariables(), tree -> tree.variable.equals(joinVar));
         final var path = GraphUtils.findPath(rootVariableTree, joinVariableTree);
 
         // We find a path from the root to the join structure (consisting of only basic signatures).

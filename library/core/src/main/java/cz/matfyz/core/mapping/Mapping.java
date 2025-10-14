@@ -69,7 +69,7 @@ public class Mapping implements Comparable<Mapping> {
 
     // Updating
 
-    public Mapping withSchema(SchemaCategory category, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+    public Mapping withSchemaAndPath(SchemaCategory category, ComplexProperty accessPath) {
         return new Mapping(datasource, kindName, category, rootObjex.key(), accessPath, primaryKey);
     }
 

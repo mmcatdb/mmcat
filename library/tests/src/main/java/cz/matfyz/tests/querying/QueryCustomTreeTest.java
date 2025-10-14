@@ -24,9 +24,10 @@ import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
 import cz.matfyz.querying.planner.PlanDrafter;
 import cz.matfyz.querying.planner.QueryPlan;
-import cz.matfyz.querying.planner.SchemaExtractor;
+import cz.matfyz.querying.planner.PatternExtractor;
 import cz.matfyz.querying.resolver.ProjectionResolver;
 import cz.matfyz.querying.resolver.SelectionResolver;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,22 +76,22 @@ public class QueryCustomTreeTest<TWrapper extends AbstractControlWrapper> {
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
-        normalized.context.setProvider(provider);
+        final var context = new QueryContext(schema, provider, normalized.selection.variables());
 
         // from QueryTreeBuilder.run()
-        final var extracted = SchemaExtractor.run(normalized.context, schema, kinds, normalized.selection);
+        final var extracted = PatternExtractor.run(context, kinds, normalized.selection);
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extracted);
 
         final var plan = plans.get(0);
 
         final var queryTree = queryTreeBuilder.build(schema, datasource, plan);
-        final QueryPlan planned = new QueryPlan(queryTree, normalized.context);
+        final QueryPlan planned = new QueryPlan(queryTree, context);
 
         final QueryPlan optimized = QueryOptimizer.run(planned);
 
         // ! the rest is left unchanged
         final QueryResult selection = SelectionResolver.run(optimized);
-        final QueryResult projection = ProjectionResolver.run(normalized.context, normalized.projection, selection);
+        final QueryResult projection = ProjectionResolver.run(context, normalized.projection, selection);
 
         return projection.data;
     }

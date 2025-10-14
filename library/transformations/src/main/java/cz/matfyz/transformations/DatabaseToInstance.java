@@ -4,7 +4,6 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
-import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
@@ -13,12 +12,14 @@ import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class DatabaseToInstance {
 
     private Mapping mapping;
     private InstanceCategory currentInstance;
     private AbstractPullWrapper pullWrapper;
-    private KindNameQuery query = null;
+    private @Nullable KindNameQuery query = null;
 
     public DatabaseToInstance input(Mapping mapping, InstanceCategory currentInstance, AbstractPullWrapper pullWrapper) {
         this.mapping = mapping;
@@ -55,17 +56,13 @@ public class DatabaseToInstance {
 
         Statistics.set(Counter.PULLED_RECORDS, forest.size());
 
-        final InstanceCategory instance = currentInstance != null
-            ? currentInstance
-            : new InstanceBuilder(mapping.category()).build();
-
         Statistics.start(Interval.MTC_ALGORITHM);
-        MTCAlgorithm.run(mapping, instance, forest);
+        MTCAlgorithm.run(mapping, currentInstance, forest);
         Statistics.end(Interval.MTC_ALGORITHM);
 
         Statistics.end(Interval.DATABASE_TO_INSTANCE);
 
-        return instance;
+        return currentInstance;
     }
 
 }

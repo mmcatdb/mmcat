@@ -339,21 +339,17 @@ public class JobExecutorService {
         final List<CategoryMappingsPair> categoryMappingPairs = inferenceResult.pairs();
 
         final var pair = CategoryMappingsPair.merge(categoryMappingPairs);
-        final SchemaCategory schema = pair.schema();
-        final MetadataCategory metadata = pair.metadata();
-        final List<Mapping> mappings = pair.mappings();
-
-        Layout.applyToMetadata(schema, metadata, LayoutType.FR);
+        Layout.applyToMetadata(pair.schema(), pair.metadata(), LayoutType.FR);
 
         job.data = InferenceJobData.fromSchemaCategory(
             List.of(),
-            schema,
-            schema,
-            metadata,
-            metadata,
+            pair.schema(),
+            pair.schema(),
+            pair.metadata(),
+            pair.metadata(),
             LayoutType.FR,
             candidates,
-            mappings
+            pair.mappings()
         );
     }
 

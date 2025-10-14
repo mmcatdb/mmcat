@@ -5,7 +5,6 @@ import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.normalizer.NormalizedQuery.ProjectionClause;
 import cz.matfyz.querying.normalizer.NormalizedQuery.SelectionClause;
 import cz.matfyz.querying.parser.Filter;
@@ -34,9 +33,7 @@ public class QueryNormalizer {
         final var projection = normalizeProjectionClause(parsed.select);
         final var selection = normalizeSelectionClause(parsed.where);
 
-        // FIXME QueryContext.
-        final var context = new QueryContext(selection.variables());
-        return new NormalizedQuery(projection, selection, context);
+        return new NormalizedQuery(projection, selection);
     }
 
     // Projection
