@@ -1,11 +1,10 @@
 import { Importer, generateWithinRange } from './helpers/Importer.ts'
 import random from 'random'
-import randomstring from 'randomstring'
 import { RandomHelper } from './helpers/RandomHelper.ts'
 
-random.use('helloworld') // seed for number generator (TODO somehow make random string generation seedable too)
+random.use('helloworld')
 const randomHelper = new RandomHelper(random)
-const importer = new Importer('benchmark_yelp', parseFloat(process.argv[2] || '1.0'))
+const importer = new Importer('caldotcom', parseFloat(process.argv[2] || '1.0'))
 
 // # STEP 1: Create master entries (likely imperatively through this or other JS files)
 
@@ -21,2706 +20,533 @@ let idn = 1
 const schedulingTypeGen = () => random.choice(['ROUND_ROBIN', 'COLLECTIVE', 'MANAGED'])!
 const periodTypeGen = () => random.choice(['UNLIMITED', 'ROLLING', 'ROLLING_WINDOW', 'RANGE'])!
 const creationSourceGen = () => random.choice(['API_V1', 'API_V2', 'WEBAPP'])!
-
 const membershipRoleGen = () => random.choice(['MEMBER', 'ADMIN', 'OWNER'])!
 
+const user = importer.generateRecords(10, () => ({
+    id: (idn++).toString(),
+    username: randomHelper.string(8),
+    name: randomHelper.string(6),
+}), ['username'])
 
-const host = importer.generateRecords(10, () => ({
-  // user TODO link to user
-  // userId
-  // eventType TODO
-  // eventTypeId
-  isFixed: random.boolean(),
-  priority: random.int(1, 10),
-  weight: random.int(1, 10),
-  // schedule TODO
-  // scheduleId
-  createdAt: randomHelper.date(date1, date2).toISOString(),
-  // group TODO
-  // groupId
-  // member TODO
-  // memberId
-
-  // @@id([userId, eventTypeId])
-  // @@index([memberId])
-  // @@index([userId])
-  // @@index([eventTypeId])
-  // @@index([scheduleId])
+const team = importer.generateRecords(10, previous => ({
+    id: (idn++).toString(),
+    name: randomHelper.string(10),
+    parentId: randomHelper.nullable(0.9, () => random.choice(previous).id)
 }))
 
-const hostGroup = importer.generateRecords(10, () => {
-  const created = randomHelper.date(date1, date2)
-  return {
-    id: randomHelper.string(32), // TODO: UUID
-    name: randomHelper.string(10),
-    // hosts TODO (Host[]) probably needs a flat relation elsewhere
-    // eventType TODO
-    // eventTypeId
-    createdAt: created.toISOString(),
-    updatedAt: randomHelper.date(created, date2).toISOString(),
+const role = importer.generateRecords(10, () => ({
+    id: (idn++).toString(),
+    name: randomHelper.string(8),
+    description: randomHelper.string(generateWithinRange(() => Math.round(rcr()), 50, 950)),
+    team: randomHelper.record(team)
+}))
 
-    // @@index([name])
-    // @@index([eventTypeId])
-  }
+let membership = importer.generateRecords(10, () => {
+    const teamId = randomHelper.record(team, random.geometric(1 / team.length)).id
+    return {
+        id: (idn++).toString(),
+        userId: randomHelper.record(user, random.geometric(3 / user.length)).id,
+        teamId,
+        accepted: random.boolean(),
+        role: membershipRoleGen(),
+        customRoleId: random.choice(importer.findRecordByKey(role, 'team', teamId)).id
+    }
+}, ['userId', 'teamId'])
+
+let team2 = random.shuffle(team)
+
+const rcr = random.normal(500, 150)
+const eventType = importer.generateRecords(10, () => {
+    const teamId = randomHelper.record(team2, random.geometric(1 / team2.length)).id
+    const users = importer.findRecordByKey(membership, 'teamId', teamId)
+    return {
+        id: (idn++).toString(),
+        title: randomHelper.string(8),
+        description: randomHelper.string(generateWithinRange(() => Math.round(rcr()), 50, 950)),
+        teamId,
+    }
+})
+// ensure event type parent and owner is not from unrelated team
+for (const et of eventType) {
+    if (!et.ownerId) {
+        const teamId = et.teamId
+        const eventTypes = importer.findRecordByKey(eventType, 'teamId', teamId)
+        const users = importer.findRecordByKey(membership, 'teamId', teamId)
+
+        for (let i = 0; i < eventTypes.length; i++) {
+            eventTypes[i].ownerId = randomHelper.record(users, random.geometric(5 / users.length)).userId
+
+            eventTypes[i].parentId = randomHelper.nullable(0.5, eventTypes[random.int(0, i - 1)].id)
+        }
+    }
+}
+
+
+const booking = importer.generateRecords(10, () => {
+    const teamId = randomHelper.record(team2, random.geometric(1 / team2.length)).id
+    const eventTypes = importer.findRecordByKey(eventType, 'teamId', teamId)
+    const users = importer.findRecordByKey(membership, 'teamId', teamId)
+    return {
+        id: (idn++).toString(),
+        title: randomHelper.string(8),
+        description: randomHelper.string(generateWithinRange(() => Math.round(rcr()), 50, 950)),
+        userId: randomHelper.record(users, random.geometric(5 / users.length)).userId,
+        eventTypeId: randomHelper.record(eventTypes).id,
+    }
 })
 
-
-
-
-const eventType = importer.generateRecords(10, () => ({
-  id: (idn++).toString(),
-  title: randomHelper.string(10),
-  slug: randomHelper.string(10),
-  description: randomHelper.nullable(0.5, () => randomHelper.string(30)),
-  interfaceLanguage: randomHelper.string(2),
-  position: 0, // TODO default 0
-//   /// @zod.import(["import { eventTypeLocations } from '../../zod-utils'"]).custom.use(eventTypeLocations)
-//   locations         Json?
-  length: 1, // TODO min 1
-  offsetStart: 0, // TODO default 0
-  hidden: random.boolean(),
-
-  //  hosts             Host[]
-//   users  User[] @relation("user_eventtype")
-//   owner  User?  @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
-//   userId Int?
-
-//   profile   Profile? @relation(fields: [profileId], references: [id])
-//   profileId Int?
-
-//   team                               Team?                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
-//   teamId                             Int?
-
-//   hashedLink                         HashedLink[]
-//   bookings                           Booking[]
-//   availability                       Availability[]
-//   webhooks                           Webhook[]
-//   destinationCalendar                DestinationCalendar?
-
-  useEventLevelSelectedCalendars: random.boolean(),
-  eventName: randomHelper.string(8),
-//   customInputs                       EventTypeCustomInput[]
-
-//   parentId                           Int?
-//   parent                             EventType?             @relation("managed_eventtype", fields: [parentId], references: [id], onDelete: Cascade)
-//   children                           EventType[]            @relation("managed_eventtype")
-
-//   /// @zod.import(["import { eventTypeBookingFields } from '../../zod-utils'"]).custom.use(eventTypeBookingFields)
-//   bookingFields                      Json?
-//   timeZone                           String?
-//   lockedTimeZone: random.boolean(),                     String?
-  periodType: periodTypeGen(),
-  periodStartDate: dateGen().toISOString(),
-  periodEndDate: dateGen().toISOString(), // TODO must be larger
-  periodDays: random.int(0, 10),
-  periodCountCalendarDays: random.boolean(),
-
-  // all default false
-  lockTimeZoneToggleOnBookingPage: random.boolean(),
-  requiresConfirmation: random.boolean(),
-  requiresConfirmationWillBlockSlot: random.boolean(),
-  requiresConfirmationForFreeEmail: random.boolean(),
-  requiresBookerEmailVerification: random.boolean(),
-  canSendCalVideoTranscriptionEmails: random.boolean(),
-
-  autoTranslateDescriptionEnabled: random.boolean(),
-  disableGuests: random.boolean(),
-  hideCalendarNotes: random.boolean(),
-  hideCalendarEventDetails: random.boolean(),
-  onlyShowFirstAvailableSlot: random.boolean(),
-  showOptimizedSlots: random.boolean(),
-  disableCancelling: random.boolean(),
-  disableRescheduling: random.boolean(),
-  seatsShowAttendees: random.boolean(),
-  // default true
-  seatsShowAvailabilityCount: random.boolean(),
-
-//   recurringEvent                           Json?
-//   /// @zod.number.min(0)
-  minimumBookingNotice: random.int(10, 240), // default 120
-  beforeEventBuffer: 0, // default 0
-  afterEventBuffer: 0, // default 0
-  seatsPerTimeSlot: randomHelper.nullable(0.5, () => random.int(10, 100)),
-//   schedulingType                           SchedulingType?
-//   schedule                                 Schedule?                 @relation(fields: [scheduleId], references: [id])
-//   scheduleId                               Int?
-//   allowReschedulingCancelledBookings       Boolean?                  @default(false)
-//   slotInterval                             Int?
-//   /// @zod.import(["import { EventTypeMetaDataSchema } from '../../zod-utils'"]).custom.use(EventTypeMetaDataSchema)
-//   metadata                                 Json?
-//   /// @zod.import(["import { successRedirectUrl } from '../../zod-utils'"]).custom.use(successRedirectUrl)
-//   successRedirectUrl                       String?
-//   forwardParamsSuccessRedirect             Boolean?                  @default(true)
-//   workflows                                WorkflowsOnEventTypes[]
-//   /// @zod.import(["import { intervalLimitsType } from '../../zod-utils'"]).custom.use(intervalLimitsType)
-//   bookingLimits                            Json?
-//   /// @zod.import(["import { intervalLimitsType } from '../../zod-utils'"]).custom.use(intervalLimitsType)
-//   durationLimits                           Json?
-//   isInstantEvent                           Boolean                   @default(false)
-//   instantMeetingExpiryTimeOffsetInSeconds  Int                       @default(90)
-//   instantMeetingScheduleId                 Int?
-//   instantMeetingSchedule                   Schedule?                 @relation("InstantMeetingSchedule", fields: [instantMeetingScheduleId], references: [id])
-//   instantMeetingParameters                 String[]
-//   assignAllTeamMembers                     Boolean                   @default(false)
-//   // It is applicable only when assignAllTeamMembers is true and it filters out all the team members using rrSegmentQueryValue
-//   assignRRMembersUsingSegment              Boolean                   @default(false)
-//   /// @zod.import(["import { rrSegmentQueryValueSchema } from '../../zod-utils'"]).custom.use(rrSegmentQueryValueSchema)
-//   rrSegmentQueryValue                      Json?
-//   useEventTypeDestinationCalendarEmail     Boolean                   @default(false)
-//   aiPhoneCallConfig                        AIPhoneCallConfiguration?
-//   isRRWeightsEnabled                       Boolean                   @default(false)
-//   fieldTranslations                        EventTypeTranslation[]
-//   maxLeadThreshold                         Int?
-//   includeNoShowInRRCalculation             Boolean                   @default(false)
-//   selectedCalendars                        SelectedCalendar[]
-//   allowReschedulingPastBookings            Boolean                   @default(false)
-//   hideOrganizerEmail                       Boolean                   @default(false)
-//   maxActiveBookingsPerBooker               Int?
-//   maxActiveBookingPerBookerOfferReschedule Boolean                   @default(false)
-//   /// @zod.import(["import { emailSchema } from '@calcom/lib/emailSchema'"]).custom.use(emailSchema)
-//   customReplyToEmail                       String?
-//   calVideoSettings                         CalVideoSettings?
-
-//   /// @zod.import(["import { eventTypeColor } from '../../zod-utils'"]).custom.use(eventTypeColor)
-//   eventTypeColor                   Json?
-//   rescheduleWithSameRoundRobinHost Boolean @default(false)
-
-//   secondaryEmailId Int?
-//   secondaryEmail   SecondaryEmail? @relation(fields: [secondaryEmailId], references: [id], onDelete: Cascade)
-
-//   useBookerTimezone     Boolean     @default(false)
-//   restrictionScheduleId Int?
-//   restrictionSchedule   Schedule?   @relation("restrictionSchedule", fields: [restrictionScheduleId], references: [id])
-//   hostGroups            HostGroup[]
-
-//   bookingRequiresAuthentication Boolean @default(false)
-
-//   @@unique([userId, slug])
-//   @@unique([teamId, slug])
-//   @@unique([userId, parentId])
-//   @@index([userId])
-//   @@index([teamId])
-//   @@index([profileId])
-//   @@index([scheduleId])
-//   @@index([secondaryEmailId])
-//   @@index([parentId])
-//   @@index([restrictionScheduleId])
+const attendee = importer.generateRecords(10, () => ({
+    id: (idn++).toString(),
+    email: randomHelper.string(12),
+    bookingId: randomHelper.record(booking, random.geometric(3 / booking.length))
 }))
 
+membership = random.shuffle(membership)
 
+const workflow = importer.generateRecords(10, () => {
+    const member = randomHelper.record(membership, random.geometric(5 / membership.length))
 
-// model Booking {
-//   id                           Int                               @id @default(autoincrement())
-//   uid                          String                            @unique
-//   // (optional) UID based on slot start/end time & email against duplicates
-//   idempotencyKey               String?                           @unique
-//   user                         User?                             @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   userId                       Int?
-//   // User's email at the time of booking
-//   /// @zod.import(["import { emailSchema } from '@calcom/lib/emailSchema'"]).custom.use(emailSchema)
-//   userPrimaryEmail             String?
-//   references                   BookingReference[]
-//   eventType                    EventType?                        @relation(fields: [eventTypeId], references: [id])
-//   eventTypeId                  Int?
-//   title                        String
-//   description                  String?
-//   customInputs                 Json?
-//   /// @zod.import(["import { bookingResponses } from '../../zod-utils'"]).custom.use(bookingResponses)
-//   responses                    Json?
-//   startTime                    DateTime
-//   endTime                      DateTime
-//   attendees                    Attendee[]
-//   location                     String?
-//   createdAt                    DateTime                          @default(now())
-//   updatedAt                    DateTime?                         @updatedAt
-//   status                       BookingStatus                     @default(ACCEPTED)
-//   paid                         Boolean                           @default(false)
-//   payment                      Payment[]
-//   destinationCalendar          DestinationCalendar?              @relation(fields: [destinationCalendarId], references: [id])
-//   destinationCalendarId        Int?
-//   cancellationReason           String?
-//   rejectionReason              String?
-//   reassignReason               String?
-//   reassignBy                   User?                             @relation("reassignByUser", fields: [reassignById], references: [id])
-//   reassignById                 Int?
-//   dynamicEventSlugRef          String?
-//   dynamicGroupSlugRef          String?
-//   rescheduled                  Boolean?
-//   fromReschedule               String?
-//   recurringEventId             String?
-//   smsReminderNumber            String?
-//   workflowReminders            WorkflowReminder[]
-//   scheduledJobs                String[] // scheduledJobs is deprecated, please use scheduledTriggers instead
-//   seatsReferences              BookingSeat[]
-//   /// @zod.import(["import { bookingMetadataSchema } from '../../zod-utils'"]).custom.use(bookingMetadataSchema)
-//   metadata                     Json?
-//   isRecorded                   Boolean                           @default(false)
-//   iCalUID                      String?                           @default("")
-//   iCalSequence                 Int                               @default(0)
-//   instantMeetingToken          InstantMeetingToken?
-//   rating                       Int?
-//   ratingFeedback               String?
-//   noShowHost                   Boolean?                          @default(false)
-//   scheduledTriggers            WebhookScheduledTriggers[]
-//   oneTimePassword              String?                           @unique @default(uuid())
-//   /// @zod.import(["import { emailSchema } from '@calcom/lib/emailSchema'"]).custom.use(emailSchema)
-//   cancelledBy                  String?
-//   /// @zod.import(["import { emailSchema } from '@calcom/lib/emailSchema'"]).custom.use(emailSchema)
-//   rescheduledBy                String?
-//   // Ah, made a typo here. Should have been routedFromRoutingFormRe"s"ponse. Live with it :(
-//   routedFromRoutingFormReponse App_RoutingForms_FormResponse?
-//   assignmentReason             AssignmentReason[]
-//   internalNote                 BookingInternalNote[]
-//   creationSource               CreationSource?
-//   tracking                     Tracking?
-//   routingFormResponses         RoutingFormResponseDenormalized[]
-//   expenseLogs                  CreditExpenseLog[]
+    return {
+        id: (idn++).toString(),
+        name: randomHelper.string(8),
+        userId: member.userId,
+        teamId: member.teamId
+    }
+})
 
-//   @@index([eventTypeId])
-//   @@index([userId])
-//   @@index([destinationCalendarId])
-//   @@index([recurringEventId])
-//   @@index([uid])
-//   @@index([status])
-//   @@index([startTime, endTime, status])
-// }
+const userOnEventType = importer.generateRecords(10, () => {
+    const et = randomHelper.record(eventType)
+    return {
+        eventTypeId: et.id,
+        userId: random.choice(importer.findRecordByKey(membership, 'teamId', et.teamId)).userId,
+    }
+}, ['userId', 'eventTypeId'])
 
+const teamOrgScope = importer.generateRecords(10, () => {
+    const t = random.choice(team)
+    return {
+        userId: random.choice(importer.findRecordByKey(user, 'teamId', t.id)),
+        teamId: t.id,
+    }
+}, ['userId', 'teamId'])
 
+const workflowsOnEventTypes = importer.generateRecords(10, () => {
+    const wf = randomHelper.record(workflow)
+    return {
+        workflowId: wf.id,
+        eventTypeId: random.choice(importer.findRecordByKey(eventType, 'teamId', wf.teamId)).id,
+    }
+}, ['workflowId', 'eventTypeId'])
 
-
-
-// model Attendee {
-//   id          Int          @id @default(autoincrement())
-//   email       String
-//   name        String
-//   timeZone    String
-//   phoneNumber String?
-//   locale      String?      @default("en")
-//   booking     Booking?     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-//   bookingId   Int?
-//   bookingSeat BookingSeat?
-//   noShow      Boolean?     @default(false)
-
-//   @@index([email])
-//   @@index([bookingId])
-// }
-
-
-
-
-// model BookingSeat {
-//   id           Int      @id @default(autoincrement())
-//   referenceUid String   @unique
-//   bookingId    Int
-//   booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-//   attendeeId   Int      @unique
-//   attendee     Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
-//   /// @zod.import(["import { bookingSeatDataSchema } from '../../zod-utils'"]).custom.use(bookingSeatDataSchema)
-//   data         Json?
-//   metadata     Json?
-
-//   @@index([bookingId])
-//   @@index([attendeeId])
-// }
-
-
-
-
-// It holds Personal Profiles of a User plus it has email, password and other core things..
-const user = importer.generateRecords(10, () => ({
-  id: (idn++).toString(),
-  username: randomHelper.string(10),
-  name: randomHelper.string(8),
-//   /// @zod.import(["import { emailSchema } from '@calcom/lib/emailSchema'"]).custom.use(emailSchema)
-  email: randomHelper.string(16),
-  emailVerified: dateGen(),
-//   password            UserPassword?
-//   bio                 String?
-  avatarUrl: randomHelper
-//   timeZone            String               @default("Europe/London")
-//   travelSchedules     TravelSchedule[]
-//   weekStart           String               @default("Sunday")
-//   bufferTime          Int                  @default(0)
-//   hideBranding        Boolean              @default(false)
-//   // TODO: should be renamed since it only affects the booking page
-//   theme               String?
-//   appTheme            String?
-//   createdDate         DateTime             @default(now()) @map(name: "created")
-//   trialEndsAt         DateTime?
-//   lastActiveAt        DateTime?
-//   eventTypes          EventType[]          @relation("user_eventtype")
-//   credentials         Credential[]
-//   teams               Membership[]
-//   bookings            Booking[]
-//   schedules           Schedule[]
-//   defaultScheduleId   Int?
-//   selectedCalendars   SelectedCalendar[]
-//   completedOnboarding Boolean              @default(false)
-//   locale              String?
-//   timeFormat          Int?                 @default(12)
-//   twoFactorSecret     String?
-//   twoFactorEnabled    Boolean              @default(false)
-//   backupCodes         String?
-//   identityProvider    IdentityProvider     @default(CAL)
-//   identityProviderId  String?
-//   availability        Availability[]
-//   invitedTo           Int?
-//   webhooks            Webhook[]
-//   brandColor          String?
-//   darkBrandColor      String?
-//   // the location where the events will end up
-//   destinationCalendar DestinationCalendar?
-//   // participate in dynamic group booking or not
-//   allowDynamicBooking Boolean?             @default(true)
-
-//   // participate in SEO indexing or not
-//   allowSEOIndexing Boolean? @default(true)
-
-//   // receive monthly digest email for teams or not
-//   receiveMonthlyDigestEmail Boolean? @default(true)
-
-//   /// @zod.import(["import { userMetadata } from '../../zod-utils'"]).custom.use(userMetadata)
-//   metadata             Json?
-//   verified             Boolean?                @default(false)
-//   role                 UserPermissionRole      @default(USER)
-//   disableImpersonation Boolean                 @default(false)
-//   impersonatedUsers    Impersonations[]        @relation("impersonated_user")
-//   impersonatedBy       Impersonations[]        @relation("impersonated_by_user")
-//   apiKeys              ApiKey[]
-//   accounts             Account[]
-//   sessions             Session[]
-//   Feedback             Feedback[]
-//   ownedEventTypes      EventType[]             @relation("owner")
-//   workflows            Workflow[]
-//   routingForms         App_RoutingForms_Form[] @relation("routing-form")
-//   updatedRoutingForms  App_RoutingForms_Form[] @relation("updated-routing-form")
-//   verifiedNumbers      VerifiedNumber[]
-//   verifiedEmails       VerifiedEmail[]
-//   hosts                Host[]
-//   // organizationId is deprecated. Instead, rely on the Profile to search profiles by organizationId and then get user from the profile.
-//   organizationId       Int?
-//   organization         Team?                   @relation("scope", fields: [organizationId], references: [id], onDelete: SetNull)
-//   accessCodes          AccessCode[]
-//   bookingRedirects     OutOfOfficeEntry[]
-//   bookingRedirectsTo   OutOfOfficeEntry[]      @relation(name: "toUser")
-
-//   // Used to lock the user account
-//   locked                         Boolean                       @default(false)
-//   platformOAuthClients           PlatformOAuthClient[]
-//   AccessToken                    AccessToken[]
-//   RefreshToken                   RefreshToken[]
-//   PlatformAuthorizationToken     PlatformAuthorizationToken[]
-//   profiles                       Profile[]
-//   movedToProfileId               Int?
-//   movedToProfile                 Profile?                      @relation("moved_to_profile", fields: [movedToProfileId], references: [id], onDelete: SetNull)
-//   secondaryEmails                SecondaryEmail[]
-//   isPlatformManaged              Boolean                       @default(false)
-//   OutOfOfficeReasons             OutOfOfficeReason[]
-//   smsLockState                   SMSLockState                  @default(UNLOCKED)
-//   smsLockReviewedByAdmin         Boolean                       @default(false)
-//   NotificationsSubscriptions     NotificationsSubscriptions[]
-//   referralLinkId                 String?
-//   features                       UserFeatures[]
-//   reassignedBookings             Booking[]                     @relation("reassignByUser")
-//   createdAttributeToUsers        AttributeToUser[]             @relation("createdBy")
-//   updatedAttributeToUsers        AttributeToUser[]             @relation("updatedBy")
-//   createdTranslations            EventTypeTranslation[]        @relation("CreatedEventTypeTranslations")
-//   updatedTranslations            EventTypeTranslation[]        @relation("UpdatedEventTypeTranslations")
-//   createdWatchlists              Watchlist[]                   @relation("CreatedWatchlists")
-//   updatedWatchlists              Watchlist[]                   @relation("UpdatedWatchlists")
-//   BookingInternalNote            BookingInternalNote[]
-//   creationSource                 CreationSource?
-//   createdOrganizationOnboardings OrganizationOnboarding[]      @relation("CreatedOrganizationOnboardings")
-//   filterSegments                 FilterSegment[]
-//   filterSegmentPreferences       UserFilterSegmentPreference[]
-//   creditBalance                  CreditBalance?
-//   whitelistWorkflows             Boolean                       @default(false)
-//   calAiPhoneNumbers              CalAiPhoneNumber[]
-//   agents                         Agent[]
-
-//   @@unique([email])
-//   @@unique([email, username])
-//   @@unique([username, organizationId])
-//   @@unique([movedToProfileId])
-//   @@index([username])
-//   @@index([emailVerified])
-//   @@index([identityProvider])
-//   @@index([identityProviderId])
-//   @@map(name: "users")
-}))
-
-
-
-// model Team {
-//   id                     Int                     @id @default(autoincrement())
-//   /// @zod.string.min(1)
-//   name                   String
-//   // It is unique across teams and organizations. We don't have a strong reason for organization and team slug to be conflicting, could be fixed.
-//   // Sub-teams could have same slug across different organizations but not within the same organization.
-//   /// @zod.string.min(1)
-//   slug                   String?
-//   logoUrl                String?
-//   calVideoLogo           String?
-//   appLogo                String?
-//   appIconLogo            String?
-//   bio                    String?
-//   hideBranding           Boolean                 @default(false)
-//   hideTeamProfileLink    Boolean                 @default(false)
-//   isPrivate              Boolean                 @default(false)
-//   hideBookATeamMember    Boolean                 @default(false)
-//   members                Membership[]
-//   eventTypes             EventType[]
-//   workflows              Workflow[]
-//   createdAt              DateTime                @default(now())
-//   /// @zod.import(["import { teamMetadataSchema } from '../../zod-utils'"]).custom.use(teamMetadataSchema)
-//   metadata               Json?
-//   theme                  String?
-//   rrResetInterval        RRResetInterval?        @default(MONTH)
-//   rrTimestampBasis       RRTimestampBasis        @default(CREATED_AT)
-//   brandColor             String?
-//   darkBrandColor         String?
-//   verifiedNumbers        VerifiedNumber[]
-//   verifiedEmails         VerifiedEmail[]
-//   bannerUrl              String?
-//   parentId               Int?
-//   parent                 Team?                   @relation("organization", fields: [parentId], references: [id], onDelete: Cascade)
-//   children               Team[]                  @relation("organization")
-//   orgUsers               User[]                  @relation("scope")
-//   inviteTokens           VerificationToken[]
-//   webhooks               Webhook[]
-//   timeFormat             Int?
-//   timeZone               String                  @default("Europe/London")
-//   weekStart              String                  @default("Sunday")
-//   routingForms           App_RoutingForms_Form[]
-//   apiKeys                ApiKey[]
-//   credentials            Credential[]
-//   accessCodes            AccessCode[]
-//   isOrganization         Boolean                 @default(false)
-//   organizationSettings   OrganizationSettings?
-//   instantMeetingTokens   InstantMeetingToken[]
-//   orgProfiles            Profile[]
-//   pendingPayment         Boolean                 @default(false)
-//   dsyncTeamGroupMapping  DSyncTeamGroupMapping[]
-//   isPlatform             Boolean                 @default(false)
-//   // Organization's OAuth clients. Organization has them but a team does not.
-//   platformOAuthClient    PlatformOAuthClient[]
-//   // OAuth client used to create team of an organization. Team has it but organization does not.
-//   createdByOAuthClient   PlatformOAuthClient?    @relation("CreatedByOAuthClient", fields: [createdByOAuthClientId], references: [id], onDelete: Cascade)
-//   createdByOAuthClientId String?
-//   smsLockState           SMSLockState            @default(UNLOCKED)
-//   platformBilling        PlatformBilling?
-//   activeOrgWorkflows     WorkflowsOnTeams[]
-//   attributes             Attribute[]
-//   smsLockReviewedByAdmin Boolean                 @default(false)
-//   // Available for Organization only
-//   delegationCredentials  DelegationCredential[]
-//   domainWideDelegations  DomainWideDelegation[]
-//   roles                  Role[] // Added for Role relation
-//   calAiPhoneNumbers      CalAiPhoneNumber[]
-//   agents                 Agent[]
-
-//   features TeamFeatures[]
-
-//   /// @zod.import(["import { intervalLimitsType } from '../../zod-utils'"]).custom.use(intervalLimitsType)
-//   bookingLimits                Json?
-//   includeManagedEventsInLimits Boolean                 @default(false)
-//   internalNotePresets          InternalNotePreset[]
-//   creditBalance                CreditBalance?
-//   organizationOnboarding       OrganizationOnboarding?
-
-//   // note(Lauris): if a Team has parentId it is a team, if parentId is null it is an organization, but if parentId is null and managedOrganization is set,
-//   // it means that it is an organization managed by another organization.
-//   managedOrganization  ManagedOrganization?  @relation("ManagedOrganization")
-//   managedOrganizations ManagedOrganization[] @relation("ManagerOrganization")
-//   filterSegments       FilterSegment[]
-
-//   @@unique([slug, parentId])
-//   @@index([parentId])
-// }
-
-
-const membership = importer.generateRecords(10, () => ({
-  id: (idn++).toString(),
-  // teamId TODO foreign(team)
-  // userId TODO foreign(user)
-  accepted: random.boolean(),
-  role: membershipRoleGen(),
-  // customRoleId TODO nullable foreign(role)
-  disableImpersonation: random.boolean(),
-  // AttributeToUser      TODO AttributeToUser[]
-  createdAt: dateGen(),
-  updatedAt: dateGen(), // TODO restrict
-  // Host                 TODO Host[]
-
-  // @@unique([userId, teamId])
-  // @@index([teamId])
-  // @@index([userId])
-  // @@index([accepted])
-  // @@index([role])
-  // @@index([customRoleId])
-}))
-
-
-
-
-
-
-
-
-// enum WorkflowTriggerEvents {
-//   BEFORE_EVENT
-//   EVENT_CANCELLED
-//   NEW_EVENT
-//   AFTER_EVENT
-//   RESCHEDULE_EVENT
-//   AFTER_HOSTS_CAL_VIDEO_NO_SHOW
-//   AFTER_GUESTS_CAL_VIDEO_NO_SHOW
-//   BOOKING_REJECTED
-//   BOOKING_REQUESTED
-//   BOOKING_PAYMENT_INITIATED
-//   BOOKING_PAID
-//   BOOKING_NO_SHOW_UPDATED
-// }
-
-// enum WorkflowActions {
-//   EMAIL_HOST
-//   EMAIL_ATTENDEE
-//   SMS_ATTENDEE
-//   SMS_NUMBER
-//   EMAIL_ADDRESS
-//   WHATSAPP_ATTENDEE
-//   WHATSAPP_NUMBER
-//   CAL_AI_PHONE_CALL
-// }
-
-// model WorkflowStep {
-//   id                        Int                @id @default(autoincrement())
-//   stepNumber                Int
-//   action                    WorkflowActions
-//   workflowId                Int
-//   workflow                  Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-//   sendTo                    String?
-//   reminderBody              String?
-//   emailSubject              String?
-//   template                  WorkflowTemplates  @default(REMINDER)
-//   workflowReminders         WorkflowReminder[]
-//   numberRequired            Boolean?
-//   sender                    String?
-//   numberVerificationPending Boolean            @default(true)
-//   includeCalendarEvent      Boolean            @default(false)
-//   verifiedAt                DateTime?
-//   agentId                   String?            @unique
-//   agent                     Agent?             @relation(fields: [agentId], references: [id], onDelete: SetNull)
-
-//   @@index([workflowId])
-// }
-
-// model Workflow {
-//   id            Int                     @id @default(autoincrement())
-//   position      Int                     @default(0)
-//   name          String
-//   userId        Int?
-//   user          User?                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   team          Team?                   @relation(fields: [teamId], references: [id], onDelete: Cascade)
-//   teamId        Int?
-//   activeOn      WorkflowsOnEventTypes[]
-//   activeOnTeams WorkflowsOnTeams[]
-//   isActiveOnAll Boolean                 @default(false)
-//   trigger       WorkflowTriggerEvents
-//   time          Int?
-//   timeUnit      TimeUnit?
-//   steps         WorkflowStep[]
-
-//   @@index([userId])
-//   @@index([teamId])
-// }
-
-// model AIPhoneCallConfiguration {
-//   id              Int       @id @default(autoincrement())
-//   eventType       EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-//   eventTypeId     Int
-//   templateType    String    @default("CUSTOM_TEMPLATE")
-//   schedulerName   String?
-//   generalPrompt   String?
-//   yourPhoneNumber String
-//   numberToCall    String
-//   guestName       String?
-//   guestEmail      String?
-//   guestCompany    String?
-//   enabled         Boolean   @default(false)
-//   beginMessage    String?
-//   llmId           String?
-
-//   @@unique([eventTypeId])
-//   @@index([eventTypeId])
-// }
-
-// model WorkflowsOnEventTypes {
-//   id          Int       @id @default(autoincrement())
-//   workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-//   workflowId  Int
-//   eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-//   eventTypeId Int
-
-//   @@unique([workflowId, eventTypeId])
-//   @@index([workflowId])
-//   @@index([eventTypeId])
-// }
-
-// model WorkflowsOnTeams {
-//   id         Int      @id @default(autoincrement())
-//   workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-//   workflowId Int
-//   team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-//   teamId     Int
-
-//   @@unique([workflowId, teamId])
-//   @@index([workflowId])
-//   @@index([teamId])
-// }
-
-
-
-
-
-
-// const user_length = importer.scalingFactor * 100
-// const ufr = random.pareto(1.2)
-// const user = importer.generateRecords(100, () => ({
-//     user_id: (idn++).toString(),
-//     name: randomstring.generate({ length: 8, charset: 'alphabetic', capitalization: 'lowercase' }),
-//     fans: generateWithinRange(() => Math.round(ufr()), 1, user_length) - 1
+// const workflowsOnTeams = importer.generateRecords(10, () => ({
 // }))
 
-// const rbr = random.geometric(3 / business.length)
-// const rur = random.geometric(10 / user.length)
-// const rcr = random.normal(500, 150)
-// const stars = [ 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0 ]
-// const review = importer.generateRecords(300, () => ({
-//     review_id: (idn++).toString(),
-//     business_id: business[generateWithinRange(
-//         rbr, 0, business.length-1
-//     )].business_id,
-//     user_id: user[generateWithinRange(
-//         rur, 0, user.length-1
-//     )].user_id,
-//     stars: stars[random.int(0, stars.length - 1)],
-//     content: randomstring.generate(generateWithinRange(() => Math.round(rcr()), 50, 950)),
-// }))
-
-
-
-
-// # STEP 2: Specify import of data
+// TODO: create indexes (like in yelp), import, figure out how to work with relations not in schema category, use faker
 
 importer.importData({
     postgreSQL: [
         {
-            name: 'business',
+            name: 'caldotcom_user',
             schema: `
-                business_id char(22) PRIMARY KEY,
-                name text,
-                city text,
-                state text
-            `,
-            data: business,
-            structure: {
-                business_id: true,
-                name: true,
-                city: true,
-                state: true,
-            }
-        },
-        {
-            name: 'yelp_user',
-            schema: `
-                user_id char(22) PRIMARY KEY,
-                name text,
-                fans integer
+                id integer PRIMARY KEY,
+                username char(22) UNIQUE NOT NULL,
+                name text
             `,
             data: user,
             structure: {
-                user_id: true,
-                name: true,
-                fans: true,
+                id: true,
+                username: true,
+                name: true
             }
         },
         {
-            name: 'review',
+            name: 'team',
             schema: `
-                review_id char(22) PRIMARY KEY,
-                user_id char(22) REFERENCES yelp_user (user_id) ON DELETE SET NULL ON UPDATE CASCADE,
-                business_id char(22) REFERENCES business (business_id) ON DELETE SET NULL ON UPDATE CASCADE,
-                stars char(3),
-                content text
+                id integer PRIMARY KEY,
+                name text,
+                parentId integer REFERENCES team(id)
             `,
-            data: review,
+            data: team,
             structure: {
-                review_id: true,
-                user_id: true,
-                business_id: true,
-                stars: true,
-                content: true,
+                id: true,
+                name: true,
+                parentId: true
+            }
+        },
+        {
+            name: 'role',
+            schema: `
+                id integer PRIMARY KEY,
+                name text,
+                description text
+                team integer REFERENCES team(id)
+            `,
+            data: role,
+            structure: {
+                id: true,
+                name: true,
+                description: true,
+                team: true,
+            }
+        },
+        {
+            name: 'membership',
+            schema: `
+                id integer PRIMARY KEY,
+                userId integer REFERENCES caldotcom_user(id),
+                teamId integer REFERENCES team(id),
+                accepted boolean,
+                role text,
+                customRoleId integer REFERENCES role(id)
+            `,
+            data: membership,
+            structure: {
+                id: true,
+                userId: true,
+                teamId: true,
+                accepted: true,
+                role: true,
+                customRoleId: true,
+            }
+        },
+        {
+            name: 'eventType',
+            schema: `
+                id integer PRIMARY KEY,
+                title text,
+                description text,
+                teamId integer REFERENCES team(id),
+                ownerId integer REFERENCES caldotcom_user(id),
+                parentId integer REFERENCES eventType(id),
+            `,
+            data: eventType,
+            structure: {
+                id: true,
+                title: true,
+                description: true,
+                teamId: true,
+                ownerId: true,
+                parentId: true,
+            }
+        },
+        {
+            name: 'booking',
+            schema: `
+                id integer PRIMARY KEY,
+                title text,
+                description text,
+                userId integer REFERENCES caldotcom_user(id)
+                eventTypeId integer REFERENCES eventType(id)
+            `,
+            data: booking,
+            structure: {
+                id: true,
+                title: true,
+                description: true,
+                userId: true,
+                eventTypeId: true,
+            }
+        },
+        {
+            name: 'attendee',
+            schema: `
+                id integer PRIMARY KEY,
+                email text,
+                bookingId integer REFERENCES booking(id)
+            `,
+            data: attendee,
+            structure: {
+                id: true,
+                email: true,
+                bookingId: true,
+            }
+        },
+        {
+            name: 'workflow',
+            schema: `
+                id integer PRIMARY KEY,
+                name text,
+                userId integer REFERENCES caldotcom_user(id),
+                teamId integer REFERENCES team(id)
+            `,
+            data: workflow,
+            structure: {
+                id: true,
+                name: true,
+                userId: true,
+                teamId: true,
+            }
+        },
+        {
+            name: 'userOnEventType',
+            schema: `
+                userId integer REFERENCES caldotcom_user(id),
+                eventTypeId integer REFERENCES eventType(id),
+                CONSTRAINT pk PRIMARY KEY (userId, eventTypeId)
+            `,
+            data: userOnEventType,
+            structure: {
+                userId: true,
+                eventTypeId: true,
+            }
+        },
+        {
+            name: 'teamOrgScope',
+            schema: `
+                userId integer REFERENCES caldotcom_user(id),
+                teamId integer REFERENCES team(id),
+                CONSTRAINT pk PRIMARY KEY (userId, teamId)
+            `,
+            data: teamOrgScope,
+            structure: {
+                userId: true,
+                teamId: true,
+            }
+        },
+        {
+            name: 'workflowsOnEventTypes',
+            schema: `
+                workflowId integer REFERENCES workflow(id),
+                eventTypeId integer REFERENCES eventType(id),
+                CONSTRAINT pk PRIMARY KEY (workflowId, eventTypeId)
+            `,
+            data: workflowsOnEventTypes,
+            structure: {
+                workflowId: true,
+                eventTypeId: true,
             }
         },
     ],
     mongoDB: [
         {
-            name: 'business',
-            data: business,
-            structure: {
-                business_id: true,
-                name: true,
-                city: true,
-                state: true,
-            }
-        },
-        {
-            name: 'user',
+            name: 'caldotcom_user',
             data: user,
             structure: {
-                user_id: true,
-                name: true,
-                fans: true,
+                id: true,
+                username: true,
+                name: true
             }
         },
         {
-            name: 'review',
-            data: review,
+            name: 'team',
+            data: team,
             structure: {
-                review_id: true,
-                user_id: true,
-                business_id: true,
-                stars: true,
-                content: true,
+                id: true,
+                name: true,
+                parentId: true
             }
         },
-
-        // Example nested implementation...
-        // {
-        //     name: "user",
-        //     data: [],
-        //     structure: {
-        //         user_id: true,
-        //         personal: {
-        //             name: true,
-        //             address: true,
-        //         },
-        //         friends: new SubCollection(
-        //             record => importer.findRecordByKey(friendship, "user_a", record.user_id)
-        //                 // .map(record2 => importer.findRecordByKey(user, "user_id", record2.user_b)),
-        //             {
-        //                 user_id: true,
-        //                 name: true
-        //             }
-        //         )
-        //     },
-        // },
+        {
+            name: 'role',
+            data: role,
+            structure: {
+                id: true,
+                name: true,
+                description: true,
+                team: true,
+            }
+        },
+        {
+            name: 'membership',
+            data: membership,
+            structure: {
+                id: true,
+                userId: true,
+                teamId: true,
+                accepted: true,
+                role: true,
+                customRoleId: true,
+            }
+        },
+        {
+            name: 'eventType',
+            data: eventType,
+            structure: {
+                id: true,
+                title: true,
+                description: true,
+                teamId: true,
+                ownerId: true,
+                parentId: true,
+            }
+        },
+        {
+            name: 'booking',
+            data: booking,
+            structure: {
+                id: true,
+                title: true,
+                description: true,
+                userId: true,
+                eventTypeId: true,
+            }
+        },
+        {
+            name: 'attendee',
+            data: attendee,
+            structure: {
+                id: true,
+                email: true,
+                bookingId: true,
+            }
+        },
+        {
+            name: 'workflow',
+            data: workflow,
+            structure: {
+                id: true,
+                name: true,
+                userId: true,
+                teamId: true,
+            }
+        },
+        {
+            name: 'userOnEventType',
+            data: userOnEventType,
+            structure: {
+                userId: true,
+                eventTypeId: true,
+            }
+        },
+        {
+            name: 'teamOrgScope',
+            data: teamOrgScope,
+            structure: {
+                userId: true,
+                teamId: true,
+            }
+        },
+        {
+            name: 'workflowsOnEventTypes',
+            data: workflowsOnEventTypes,
+            structure: {
+                workflowId: true,
+                eventTypeId: true,
+            }
+        },
     ],
     neo4j: [
         {
-            name: 'YelpBusiness',
-            data: business,
-            structure: {
-                business_id: true,
-                name: true,
-                city: true,
-                state: true,
-            }
-        },
-        {
-            name: 'YelpUser',
+            name: 'CDCUser',
             data: user,
             structure: {
-                user_id: true,
-                name: true,
-                fans: true,
+                id: true,
+                username: true,
+                name: true
             }
         },
         {
-            name: 'YELP_REVIEW',
-            data: review,
+            name: 'CDCTeam',
+            data: team,
             structure: {
-                review_id: true,
-                stars: true,
-                content: true,
-            },
+                id: true,
+                name: true,
+                parentId: true
+            }
+        },
+        {
+            name: 'CDCRole',
+            data: role,
+            structure: {
+                id: true,
+                name: true,
+                description: true,
+                team: true,
+            }
+        },
+        {
+            name: 'CDCMembership',
+            data: membership,
+            structure: {
+                id: true,
+                userId: true,
+                teamId: true,
+                accepted: true,
+                role: true,
+                customRoleId: true,
+            }
+        },
+        {
+            name: 'CDCEventType',
+            data: eventType,
+            structure: {
+                id: true,
+                title: true,
+                description: true,
+                teamId: true,
+                ownerId: true,
+                parentId: true,
+            }
+        },
+        {
+            name: 'CDCBooking',
+            data: booking,
+            structure: {
+                id: true,
+                title: true,
+                description: true,
+                userId: true,
+                eventTypeId: true,
+            }
+        },
+        {
+            name: 'CDCAttendee',
+            data: attendee,
+            structure: {
+                id: true,
+                email: true,
+                bookingId: true,
+            }
+        },
+        {
+            name: 'CDCWorkflow',
+            data: workflow,
+            structure: {
+                id: true,
+                name: true,
+                userId: true,
+                teamId: true,
+            }
+        },
+        {
+            name: 'CDC_USER_ON_EVENT_TYPE',
+            data: userOnEventType,
+            structure: { },
             from: {
-                label: 'YelpUser',
-                match: { user_id: 'user_id' },
+                label: 'CDCUser',
+                match: { userId: 'id' },
             },
             to: {
-                label: 'YelpBusiness',
-                match: { business_id: 'business_id' },
+                label: 'CDCEventType',
+                match: { eventTypeId: 'id' },
+            },
+        },
+        {
+            name: 'CDC_TEAM_ORG_SCOPE',
+            data: teamOrgScope,
+            structure: { },
+            from: {
+                label: 'CDCUser',
+                match: { userId: 'id' },
+            },
+            to: {
+                label: 'CDCTeam',
+                match: { teamId: 'id' },
+            },
+        },
+        {
+            name: 'CDC_WORKFLOWS_ON_EVENT_TYPES',
+            data: workflowsOnEventTypes,
+            structure: { },
+            from: {
+                label: 'CDCWorkflow',
+                match: { userId: 'id' },
+            },
+            to: {
+                label: 'CDCTeam',
+                match: { teamId: 'id' },
             },
         },
     ],
 })
 
-
-
-
-
-/*
-
-// This is your Prisma Schema file
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-
-model CalVideoSettings {
-  eventTypeId Int       @id
-  eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-
-  disableRecordingForOrganizer         Boolean  @default(false)
-  disableRecordingForGuests            Boolean  @default(false)
-  enableAutomaticTranscription         Boolean  @default(false)
-  enableAutomaticRecordingForOrganizer Boolean  @default(false)
-  redirectUrlOnExit                    String?
-  disableTranscriptionForGuests        Boolean  @default(false)
-  disableTranscriptionForOrganizer     Boolean  @default(false)
-  createdAt                            DateTime @default(now())
-  updatedAt                            DateTime @updatedAt
-}
-
-model Credential {
-  id     Int     @id @default(autoincrement())
-  // @@type is deprecated
-  type   String
-  key    Json
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int?
-  team   Team?   @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId Int?
-  app    App?    @relation(fields: [appId], references: [slug], onDelete: Cascade)
-  // How to make it a required column?
-  appId  String?
-
-  // paid apps
-  subscriptionId    String?
-  paymentStatus     String?
-  billingCycleStart Int?
-
-  destinationCalendars   DestinationCalendar[]
-  selectedCalendars      SelectedCalendar[]
-  invalid                Boolean?              @default(false)
-  CalendarCache          CalendarCache[]
-  references             BookingReference[]
-  delegationCredentialId String?
-  delegationCredential   DelegationCredential? @relation(fields: [delegationCredentialId], references: [id], onDelete: Cascade)
-
-  @@index([appId])
-  @@index([subscriptionId])
-  @@index([invalid])
-  @@index([userId, delegationCredentialId])
-}
-
-enum IdentityProvider {
-  CAL
-  GOOGLE
-  SAML
-}
-
-model DestinationCalendar {
-  id                               Int                   @id @default(autoincrement())
-  integration                      String
-  externalId                       String
-  /// @zod.import(["import { emailSchema } from '@calcom/lib/emailSchema'"]).custom.use(emailSchema)
-  primaryEmail                     String?
-  user                             User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                           Int?                  @unique
-  booking                          Booking[]
-  eventType                        EventType?            @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-  eventTypeId                      Int?                  @unique
-  credentialId                     Int?
-  credential                       Credential?           @relation(fields: [credentialId], references: [id], onDelete: Cascade)
-  createdAt                        DateTime?             @default(now())
-  updatedAt                        DateTime?             @updatedAt
-  delegationCredential             DelegationCredential? @relation(fields: [delegationCredentialId], references: [id], onDelete: Cascade)
-  delegationCredentialId           String?
-  domainWideDelegation             DomainWideDelegation? @relation(fields: [domainWideDelegationCredentialId], references: [id], onDelete: Cascade)
-  domainWideDelegationCredentialId String?
-
-  @@index([userId])
-  @@index([eventTypeId])
-  @@index([credentialId])
-}
-
-enum UserPermissionRole {
-  USER
-  ADMIN
-}
-
-// It holds the password of a User, separate from the User model to avoid leaking the password hash
-model UserPassword {
-  hash   String
-  userId Int    @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model TravelSchedule {
-  id           Int       @id @default(autoincrement())
-  userId       Int
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  timeZone     String
-  startDate    DateTime
-  endDate      DateTime?
-  prevTimeZone String?
-
-  @@index([startDate])
-  @@index([endDate])
-}
-
-
-
-model NotificationsSubscriptions {
-  id           Int    @id @default(autoincrement())
-  userId       Int
-  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subscription String
-
-  @@index([userId, subscription])
-}
-
-// It holds Organization Profiles as well as User Profiles for users that have been added to an organization
-model Profile {
-  id             Int         @id @default(autoincrement())
-  // uid allows us to set an identifier chosen by us which is helpful in migration when we create the Profile from User directly.
-  uid            String
-  userId         Int
-  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId Int
-  organization   Team        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  username       String
-  eventTypes     EventType[]
-  movedFromUser  User?       @relation("moved_to_profile")
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
-  // A user can have multiple profiles in different organizations
-  @@unique([userId, organizationId])
-  // Allow username reuse only across different organizations
-  @@unique([username, organizationId])
-  @@index([uid])
-  @@index([userId])
-  @@index([organizationId])
-}
-
-model CreditBalance {
-  id                String              @id @default(uuid())
-  team              Team?               @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId            Int?                @unique
-  // user credit balances will be supported in the future
-  user              User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            Int?                @unique
-  additionalCredits Int                 @default(0)
-  limitReachedAt    DateTime?
-  warningSentAt     DateTime?
-  expenseLogs       CreditExpenseLog[]
-  purchaseLogs      CreditPurchaseLog[]
-}
-
-model CreditPurchaseLog {
-  id              String        @id @default(uuid())
-  creditBalanceId String
-  creditBalance   CreditBalance @relation(fields: [creditBalanceId], references: [id], onDelete: Cascade)
-  credits         Int
-  createdAt       DateTime      @default(now())
-}
-
-enum CreditUsageType {
-  SMS
-  CAL_AI_PHONE_CALL
-}
-
-model CreditExpenseLog {
-  id              String           @id @default(uuid())
-  creditBalanceId String
-  creditBalance   CreditBalance    @relation(fields: [creditBalanceId], references: [id], onDelete: Cascade)
-  bookingUid      String?
-  booking         Booking?         @relation(fields: [bookingUid], references: [uid], onDelete: Cascade)
-  credits         Int?
-  creditType      CreditType
-  date            DateTime
-  smsSid          String?
-  smsSegments     Int?
-  phoneNumber     String?
-  email           String?
-  callDuration    Int?
-  creditFor       CreditUsageType?
-  externalRef     String?          @unique
-}
-
-enum CreditType {
-  MONTHLY
-  ADDITIONAL
-}
-
-model OrganizationSettings {
-  id                                  Int        @id @default(autoincrement())
-  organization                        Team       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId                      Int        @unique
-  isOrganizationConfigured            Boolean    @default(false)
-  // It decides if new organization members can be auto-accepted or not
-  isOrganizationVerified              Boolean    @default(false)
-  // It is a domain e.g "acme.com". Any email with this domain might be auto-accepted
-  // Also, it is the domain to which the organization profile is redirected.
-  orgAutoAcceptEmail                  String
-  lockEventTypeCreationForUsers       Boolean    @default(false)
-  adminGetsNoSlotsNotification        Boolean    @default(false)
-  // It decides if instance ADMIN has reviewed the organization or not.
-  // It is used to allow super sensitive operations like 'impersonation of Org members by Org admin'
-  isAdminReviewed                     Boolean    @default(false)
-  dSyncData                           DSyncData?
-  isAdminAPIEnabled                   Boolean    @default(false)
-  allowSEOIndexing                    Boolean    @default(false)
-  orgProfileRedirectsToVerifiedDomain Boolean    @default(false)
-  disablePhoneOnlySMSNotifications    Boolean    @default(false)
-}
-
-model VerificationToken {
-  id               Int             @id @default(autoincrement())
-  identifier       String
-  token            String          @unique
-  expires          DateTime
-  expiresInDays    Int?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  teamId           Int?
-  team             Team?           @relation(fields: [teamId], references: [id])
-  secondaryEmailId Int?
-  secondaryEmail   SecondaryEmail? @relation(fields: [secondaryEmailId], references: [id])
-
-  @@unique([identifier, token])
-  @@index([token])
-  @@index([teamId])
-  @@index([secondaryEmailId])
-}
-
-model InstantMeetingToken {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  expires   DateTime
-  teamId    Int
-  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  bookingId Int?     @unique
-  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([token])
-}
-
-model BookingReference {
-  id                         Int      @id @default(autoincrement())
-  /// @zod.string.min(1)
-  type                       String
-  /// @zod.string.min(1)
-  uid                        String
-  meetingId                  String?
-  thirdPartyRecurringEventId String?
-  meetingPassword            String?
-  meetingUrl                 String?
-  booking                    Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  bookingId                  Int?
-  externalCalendarId         String?
-  deleted                    Boolean?
-
-  credential                       Credential?           @relation(fields: [credentialId], references: [id], onDelete: SetNull)
-  credentialId                     Int?
-  delegationCredential             DelegationCredential? @relation(fields: [delegationCredentialId], references: [id], onDelete: SetNull)
-  delegationCredentialId           String?
-  domainWideDelegation             DomainWideDelegation? @relation(fields: [domainWideDelegationCredentialId], references: [id], onDelete: SetNull)
-  domainWideDelegationCredentialId String?
-
-  @@index([bookingId])
-  @@index([type])
-  @@index([uid])
-}
-
-enum BookingStatus {
-  CANCELLED     @map("cancelled")
-  ACCEPTED      @map("accepted")
-  REJECTED      @map("rejected")
-  PENDING       @map("pending")
-  AWAITING_HOST @map("awaiting_host")
-}
-
-model Tracking {
-  id           Int     @id @default(autoincrement())
-  bookingId    Int
-  booking      Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  utm_source   String?
-  utm_medium   String?
-  utm_campaign String?
-  utm_term     String?
-  utm_content  String?
-
-  @@unique([bookingId])
-}
-
-model Schedule {
-  id                   Int            @id @default(autoincrement())
-  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId               Int
-  eventType            EventType[]
-  instantMeetingEvents EventType[]    @relation("InstantMeetingSchedule")
-  restrictionSchedule  EventType[]    @relation("restrictionSchedule")
-  name                 String
-  timeZone             String?
-  availability         Availability[]
-  Host                 Host[]
-
-  @@index([userId])
-}
-
-model Availability {
-  id          Int        @id @default(autoincrement())
-  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int?
-  eventType   EventType? @relation(fields: [eventTypeId], references: [id])
-  eventTypeId Int?
-  days        Int[]
-  startTime   DateTime   @db.Time
-  endTime     DateTime   @db.Time
-  date        DateTime?  @db.Date
-  Schedule    Schedule?  @relation(fields: [scheduleId], references: [id])
-  scheduleId  Int?
-
-  @@index([userId])
-  @@index([eventTypeId])
-  @@index([scheduleId])
-}
-
-model SelectedCalendar {
-  id                       String      @id @default(uuid())
-  user                     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                   Int
-  integration              String
-  externalId               String
-  credential               Credential? @relation(fields: [credentialId], references: [id], onDelete: Cascade)
-  credentialId             Int?
-  createdAt                DateTime?   @default(now())
-  updatedAt                DateTime?   @updatedAt
-  // Used to identify a watched calendar channel in Google Calendar
-  googleChannelId          String?
-  googleChannelKind        String?
-  googleChannelResourceId  String?
-  googleChannelResourceUri String?
-  googleChannelExpiration  String?
-
-  delegationCredential   DelegationCredential? @relation(fields: [delegationCredentialId], references: [id], onDelete: Cascade)
-  delegationCredentialId String?
-
-  // Deprecated and unused: Use delegationCredential instead
-  domainWideDelegationCredential   DomainWideDelegation? @relation(fields: [domainWideDelegationCredentialId], references: [id], onDelete: Cascade)
-  domainWideDelegationCredentialId String?
-  error                            String?
-  lastErrorAt                      DateTime?
-  watchAttempts                    Int                   @default(0)
-  unwatchAttempts                  Int                   @default(0)
-  maxAttempts                      Int                   @default(3)
-
-  eventTypeId Int?
-  eventType   EventType? @relation(fields: [eventTypeId], references: [id])
-
-  // It could still allow multiple user-level(eventTypeId is null) selected calendars for same userId, integration, externalId because NULL is not equal to NULL
-  // We currently ensure uniqueness by checking for the existence of the record before creating a new one
-  // Think about introducing a generated unique key ${userId}_${integration}_${externalId}_${eventTypeId}
-  @@unique([userId, integration, externalId, eventTypeId])
-  @@unique([googleChannelId, eventTypeId])
-  @@index([userId])
-  @@index([externalId])
-  @@index([eventTypeId])
-  @@index([credentialId])
-  // Composite indices to optimize calendar-cache queries
-  @@index([integration, googleChannelExpiration, error, watchAttempts, maxAttempts], name: "SelectedCalendar_watch_idx")
-  @@index([integration, googleChannelExpiration, error, unwatchAttempts, maxAttempts], name: "SelectedCalendar_unwatch_idx")
-}
-
-enum EventTypeCustomInputType {
-  TEXT     @map("text")
-  TEXTLONG @map("textLong")
-  NUMBER   @map("number")
-  BOOL     @map("bool")
-  RADIO    @map("radio")
-  PHONE    @map("phone")
-}
-
-model EventTypeCustomInput {
-  id          Int                      @id @default(autoincrement())
-  eventTypeId Int
-  eventType   EventType                @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-  label       String
-  type        EventTypeCustomInputType
-  /// @zod.import(["import { customInputOptionSchema } from '../../zod-utils'"]).custom.use(customInputOptionSchema)
-  options     Json?
-  required    Boolean
-  placeholder String                   @default("")
-
-  @@index([eventTypeId])
-}
-
-model ResetPasswordRequest {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String
-  expires   DateTime
-}
-
-enum ReminderType {
-  PENDING_BOOKING_CONFIRMATION
-}
-
-model ReminderMail {
-  id             Int          @id @default(autoincrement())
-  referenceId    Int
-  reminderType   ReminderType
-  elapsedMinutes Int
-  createdAt      DateTime     @default(now())
-
-  @@index([referenceId])
-  @@index([reminderType])
-}
-
-model Payment {
-  id            Int            @id @default(autoincrement())
-  uid           String         @unique
-  app           App?           @relation(fields: [appId], references: [slug], onDelete: Cascade)
-  appId         String?
-  bookingId     Int
-  booking       Booking?       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount        Int
-  fee           Int
-  currency      String
-  success       Boolean
-  refunded      Boolean
-  data          Json
-  externalId    String         @unique
-  paymentOption PaymentOption? @default(ON_BOOKING)
-
-  @@index([bookingId])
-  @@index([externalId])
-}
-
-enum PaymentOption {
-  ON_BOOKING
-  HOLD
-}
-
-enum WebhookTriggerEvents {
-  BOOKING_CREATED
-  BOOKING_PAYMENT_INITIATED
-  BOOKING_PAID
-  BOOKING_RESCHEDULED
-  BOOKING_REQUESTED
-  BOOKING_CANCELLED
-  BOOKING_REJECTED
-  BOOKING_NO_SHOW_UPDATED
-  FORM_SUBMITTED
-  MEETING_ENDED
-  MEETING_STARTED
-  RECORDING_READY
-  INSTANT_MEETING
-  RECORDING_TRANSCRIPTION_GENERATED
-  OOO_CREATED
-  AFTER_HOSTS_CAL_VIDEO_NO_SHOW
-  AFTER_GUESTS_CAL_VIDEO_NO_SHOW
-  FORM_SUBMITTED_NO_EVENT
-}
-
-model Webhook {
-  id                    String                     @id @unique
-  userId                Int?
-  teamId                Int?
-  eventTypeId           Int?
-  platformOAuthClientId String?
-  /// @zod.string.url()
-  subscriberUrl         String
-  payloadTemplate       String?
-  createdAt             DateTime                   @default(now())
-  active                Boolean                    @default(true)
-  eventTriggers         WebhookTriggerEvents[]
-  user                  User?                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team                  Team?                      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  eventType             EventType?                 @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-  platformOAuthClient   PlatformOAuthClient?       @relation(fields: [platformOAuthClientId], references: [id], onDelete: Cascade)
-  app                   App?                       @relation(fields: [appId], references: [slug], onDelete: Cascade)
-  appId                 String?
-  secret                String?
-  platform              Boolean                    @default(false)
-  scheduledTriggers     WebhookScheduledTriggers[]
-  time                  Int?
-  timeUnit              TimeUnit?
-
-  @@unique([userId, subscriberUrl], name: "courseIdentifier")
-  @@unique([platformOAuthClientId, subscriberUrl], name: "oauthclientwebhook")
-  @@index([active])
-}
-
-model Impersonations {
-  id                 Int      @id @default(autoincrement())
-  createdAt          DateTime @default(now())
-  impersonatedUser   User     @relation("impersonated_user", fields: [impersonatedUserId], references: [id], onDelete: Cascade)
-  impersonatedBy     User     @relation("impersonated_by_user", fields: [impersonatedById], references: [id], onDelete: Cascade)
-  impersonatedUserId Int
-  impersonatedById   Int
-
-  @@index([impersonatedUserId])
-  @@index([impersonatedById])
-}
-
-model ApiKey {
-  id         String      @id @unique @default(cuid())
-  userId     Int
-  teamId     Int?
-  note       String?
-  createdAt  DateTime    @default(now())
-  expiresAt  DateTime?
-  lastUsedAt DateTime?
-  hashedKey  String      @unique()
-  user       User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team       Team?       @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  app        App?        @relation(fields: [appId], references: [slug], onDelete: Cascade)
-  appId      String?
-  rateLimits RateLimit[]
-
-  @@index([userId])
-}
-
-model RateLimit {
-  id            String   @id @default(uuid())
-  name          String
-  apiKeyId      String
-  ttl           Int
-  limit         Int
-  blockDuration Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
-
-  @@index([apiKeyId])
-}
-
-model HashedLink {
-  id            Int       @id @default(autoincrement())
-  link          String    @unique
-  eventTypeId   Int
-  eventType     EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-  expiresAt     DateTime?
-  maxUsageCount Int       @default(1)
-  usageCount    Int       @default(0)
-
-  @@index([eventTypeId])
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            Int
-  type              String
-  provider          String
-  providerAccountId String
-  providerEmail     String?
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-  @@index([type])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       Int
-  expires      DateTime
-  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-enum AppCategories {
-  calendar
-  messaging
-  other
-  payment
-  video // deprecated, please use 'conferencing' instead
-  web3 // deprecated, we should no longer have any web3 apps
-  automation
-  analytics
-  // Wherever video is in use, conferencing should also be used for legacy apps can have it.
-  conferencing
-  crm
-}
-
-model App {
-  // The slug for the app store public page inside `/apps/[slug]`
-  slug        String          @id @unique
-  // The directory name for `/packages/app-store/[dirName]`
-  dirName     String          @unique
-  // Needed API Keys
-  keys        Json?
-  // One or multiple categories to which this app belongs
-  categories  AppCategories[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  credentials Credential[]
-  payments    Payment[]
-  Webhook     Webhook[]
-  ApiKey      ApiKey[]
-  enabled     Boolean         @default(false)
-
-  @@index([enabled])
-}
-
-model App_RoutingForms_Form {
-  id                       String                                      @id @default(cuid())
-  description              String?
-  position                 Int                                         @default(0)
-  routes                   Json?
-  createdAt                DateTime                                    @default(now())
-  updatedAt                DateTime                                    @updatedAt
-  name                     String
-  fields                   Json?
-  user                     User                                        @relation("routing-form", fields: [userId], references: [id], onDelete: Cascade)
-  updatedBy                User?                                       @relation("updated-routing-form", fields: [updatedById], references: [id], onDelete: SetNull)
-  updatedById              Int?
-  // This is the user who created the form and also the user who has read-write access to the form
-  // If teamId is set, the members of the team would also have access to form readOnly or read-write depending on their permission level as team member.
-  userId                   Int
-  team                     Team?                                       @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId                   Int?
-  responses                App_RoutingForms_FormResponse[]
-  queuedResponses          App_RoutingForms_QueuedFormResponse[]
-  disabled                 Boolean                                     @default(false)
-  /// @zod.import(["import { RoutingFormSettings } from '../../zod-utils'"]).custom.use(RoutingFormSettings)
-  settings                 Json?
-  incompleteBookingActions App_RoutingForms_IncompleteBookingActions[]
-
-  @@index([userId])
-  @@index([disabled])
-}
-
-model App_RoutingForms_FormResponse {
-  id           Int                   @id @default(autoincrement())
-  uuid         String?               @default(uuid())
-  formFillerId String                @default(cuid())
-  form         App_RoutingForms_Form @relation(fields: [formId], references: [id], onDelete: Cascade)
-  formId       String
-  response     Json
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime?             @updatedAt
-
-  routedToBookingUid        String?                              @unique
-  // We should not cascade delete the booking, because we want to keep the form response even if the routedToBooking is deleted
-  routedToBooking           Booking?                             @relation(fields: [routedToBookingUid], references: [uid])
-  chosenRouteId             String?
-  routingFormResponseFields RoutingFormResponseField[]
-  routingFormResponses      RoutingFormResponseDenormalized[]
-  queuedFormResponse        App_RoutingForms_QueuedFormResponse?
-
-  @@unique([formFillerId, formId])
-  @@index([formFillerId])
-  @@index([formId])
-  @@index([routedToBookingUid])
-}
-
-model App_RoutingForms_QueuedFormResponse {
-  id               String                         @id @default(cuid())
-  form             App_RoutingForms_Form          @relation(fields: [formId], references: [id], onDelete: Cascade)
-  formId           String
-  response         Json
-  chosenRouteId    String?
-  createdAt        DateTime                       @default(now())
-  updatedAt        DateTime?                      @updatedAt
-  actualResponseId Int?                           @unique
-  actualResponse   App_RoutingForms_FormResponse? @relation(fields: [actualResponseId], references: [id], onDelete: Cascade)
-}
-
-model RoutingFormResponseField {
-  id               Int                             @id @default(autoincrement())
-  responseId       Int
-  fieldId          String
-  valueString      String?
-  valueNumber      Decimal?
-  valueStringArray String[]
-  response         App_RoutingForms_FormResponse   @relation(fields: [responseId], references: [id], map: "RoutingFormResponseField_response_fkey", onDelete: Cascade)
-  denormalized     RoutingFormResponseDenormalized @relation("DenormalizedResponseToFields", fields: [responseId], references: [id], onDelete: Cascade)
-
-  @@index([responseId])
-  @@index([fieldId])
-  @@index([valueNumber])
-  @@index([valueStringArray], type: Gin)
-}
-
-view RoutingFormResponse {
-  id                               Int            @unique
-  response                         Json
-  responseLowercase                Json
-  formId                           String
-  formName                         String
-  formTeamId                       Int?
-  formUserId                       Int?
-  bookingUid                       String?
-  bookingStatus                    BookingStatus?
-  bookingStatusOrder               Int?
-  bookingCreatedAt                 DateTime?
-  bookingAttendees                 Json? // Array of {timeZone: string, email: string}
-  bookingUserId                    Int?
-  bookingUserName                  String?
-  bookingUserEmail                 String?
-  bookingUserAvatarUrl             String?
-  bookingAssignmentReason          String?
-  bookingAssignmentReasonLowercase String?
-  bookingStartTime                 DateTime?
-  bookingEndTime                   DateTime?
-  createdAt                        DateTime
-  utm_source                       String?
-  utm_medium                       String?
-  utm_campaign                     String?
-  utm_term                         String?
-  utm_content                      String?
-}
-
-model RoutingFormResponseDenormalized {
-  id                      Int                           @id
-  uuid                    String?
-  formId                  String
-  formName                String
-  formTeamId              Int?
-  formUserId              Int
-  booking                 Booking?                      @relation(fields: [bookingId], references: [id], onDelete: SetNull)
-  bookingUid              String?
-  bookingId               Int?
-  bookingStatus           BookingStatus?
-  bookingStatusOrder      Int?
-  bookingCreatedAt        DateTime?                     @db.Timestamp(3)
-  bookingStartTime        DateTime?                     @db.Timestamp(3)
-  bookingEndTime          DateTime?                     @db.Timestamp(3)
-  bookingUserId           Int?
-  bookingUserName         String?
-  bookingUserEmail        String?
-  bookingUserAvatarUrl    String?
-  bookingAssignmentReason String?
-  eventTypeId             Int?
-  eventTypeParentId       Int?
-  eventTypeSchedulingType String?
-  createdAt               DateTime                      @db.Timestamp(3)
-  utm_source              String?
-  utm_medium              String?
-  utm_campaign            String?
-  utm_term                String?
-  utm_content             String?
-  response                App_RoutingForms_FormResponse @relation(fields: [id], references: [id], onDelete: Cascade)
-  fields                  RoutingFormResponseField[]    @relation("DenormalizedResponseToFields")
-
-  @@index([formId])
-  @@index([formTeamId])
-  @@index([formUserId])
-  @@index([formId, createdAt])
-  @@index([bookingId])
-  @@index([bookingUserId])
-  @@index([eventTypeId, eventTypeParentId])
-}
-
-model Feedback {
-  id      Int      @id @default(autoincrement())
-  date    DateTime @default(now())
-  userId  Int
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  rating  String
-  comment String?
-
-  @@index([userId])
-  @@index([rating])
-}
-
-model Deployment {
-  /// This is a single row table, so we use a fixed id
-  id                      Int       @id @default(1)
-  logo                    String?
-  /// @zod.import(["import { DeploymentTheme } from '../../zod-utils'"]).custom.use(DeploymentTheme)
-  theme                   Json?
-  licenseKey              String?
-  // We encrypt the signature token in the deployment table with the current calendso encryption key
-  signatureTokenEncrypted String?
-  agreedLicenseAt         DateTime?
-}
-
-enum TimeUnit {
-  DAY    @map("day")
-  HOUR   @map("hour")
-  MINUTE @map("minute")
-}
-
-model WorkflowReminder {
-  id                  Int             @id @default(autoincrement())
-  uuid                String?         @unique @default(uuid())
-  bookingUid          String?
-  booking             Booking?        @relation(fields: [bookingUid], references: [uid])
-  method              WorkflowMethods
-  scheduledDate       DateTime
-  referenceId         String?         @unique
-  scheduled           Boolean
-  workflowStepId      Int?
-  workflowStep        WorkflowStep?   @relation(fields: [workflowStepId], references: [id], onDelete: Cascade)
-  cancelled           Boolean?
-  seatReferenceId     String?
-  isMandatoryReminder Boolean?        @default(false)
-  retryCount          Int             @default(0)
-
-  @@index([bookingUid])
-  @@index([workflowStepId])
-  @@index([seatReferenceId])
-  @@index([method, scheduled, scheduledDate])
-  @@index([cancelled, scheduledDate])
-}
-
-model WebhookScheduledTriggers {
-  id            Int       @id @default(autoincrement())
-  jobName       String? // jobName is deprecated, not needed when webhook and booking is set
-  subscriberUrl String
-  payload       String
-  startAfter    DateTime
-  retryCount    Int       @default(0)
-  createdAt     DateTime? @default(now())
-  appId         String?
-  webhookId     String?
-  webhook       Webhook?  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
-  bookingId     Int?
-  booking       Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-}
-
-enum WorkflowTemplates {
-  REMINDER
-  CUSTOM
-  CANCELLED
-  RESCHEDULED
-  COMPLETED
-  RATING
-}
-
-enum WorkflowMethods {
-  EMAIL
-  SMS
-  WHATSAPP
-  AI_PHONE_CALL
-}
-
-model BookingSeat {
-  id           Int      @id @default(autoincrement())
-  referenceUid String   @unique
-  bookingId    Int
-  booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  attendeeId   Int      @unique
-  attendee     Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
-  /// @zod.import(["import { bookingSeatDataSchema } from '../../zod-utils'"]).custom.use(bookingSeatDataSchema)
-  data         Json?
-  metadata     Json?
-
-  @@index([bookingId])
-  @@index([attendeeId])
-}
-
-model VerifiedNumber {
-  id          Int    @id @default(autoincrement())
-  userId      Int?
-  user        User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId      Int?
-  team        Team?  @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  phoneNumber String
-
-  @@index([userId])
-  @@index([teamId])
-}
-
-model VerifiedEmail {
-  id     Int    @id @default(autoincrement())
-  userId Int?
-  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId Int?
-  team   Team?  @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  email  String
-
-  @@index([userId])
-  @@index([teamId])
-}
-
-model Feature {
-  // The feature slug, ex: 'v2-workflows'
-  slug        String         @id @unique
-  // If the feature is currently enabled
-  enabled     Boolean        @default(false)
-  // A short description of the feature
-  description String?
-  // The type of feature flag
-  type        FeatureType?   @default(RELEASE)
-  // If the flag is considered stale
-  stale       Boolean?       @default(false)
-  lastUsedAt  DateTime?
-  createdAt   DateTime?      @default(now())
-  updatedAt   DateTime?      @default(now()) @updatedAt
-  updatedBy   Int?
-  users       UserFeatures[]
-  teams       TeamFeatures[]
-
-  @@index([enabled])
-  @@index([stale])
-}
-
-model UserFeatures {
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     Int
-  feature    Feature  @relation(fields: [featureId], references: [slug], onDelete: Cascade)
-  featureId  String
-  assignedAt DateTime @default(now())
-  assignedBy String
-  updatedAt  DateTime @updatedAt
-
-  @@id([userId, featureId])
-  @@index([userId, featureId])
-}
-
-model TeamFeatures {
-  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId     Int
-  feature    Feature  @relation(fields: [featureId], references: [slug], onDelete: Cascade)
-  featureId  String
-  assignedAt DateTime @default(now())
-  assignedBy String
-  updatedAt  DateTime @updatedAt
-
-  @@id([teamId, featureId])
-  @@index([teamId, featureId])
-}
-
-enum FeatureType {
-  RELEASE
-  EXPERIMENT
-  OPERATIONAL
-  KILL_SWITCH
-  PERMISSION
-}
-
-enum RRResetInterval {
-  MONTH
-  DAY
-}
-
-enum RRTimestampBasis {
-  CREATED_AT
-  START_TIME
-}
-
-model SelectedSlots {
-  id               Int      @id @default(autoincrement())
-  eventTypeId      Int
-  userId           Int
-  slotUtcStartDate DateTime
-  slotUtcEndDate   DateTime
-  uid              String
-  releaseAt        DateTime
-  isSeat           Boolean  @default(false)
-
-  @@unique(fields: [userId, slotUtcStartDate, slotUtcEndDate, uid], name: "selectedSlotUnique")
-}
-
-model OAuthClient {
-  clientId     String       @id @unique
-  redirectUri  String
-  clientSecret String
-  name         String
-  logo         String?
-  accessCodes  AccessCode[]
-}
-
-model AccessCode {
-  id        Int           @id @default(autoincrement())
-  code      String
-  clientId  String?
-  client    OAuthClient?  @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
-  expiresAt DateTime
-  scopes    AccessScope[]
-  userId    Int?
-  user      User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId    Int?
-  team      Team?         @relation(fields: [teamId], references: [id], onDelete: Cascade)
-}
-
-enum AccessScope {
-  READ_BOOKING
-  READ_PROFILE
-}
-
-view BookingTimeStatus {
-  id             Int            @unique
-  uid            String?
-  eventTypeId    Int?
-  title          String?
-  description    String?
-  startTime      DateTime?
-  endTime        DateTime?
-  createdAt      DateTime?
-  location       String?
-  paid           Boolean?
-  status         BookingStatus?
-  rescheduled    Boolean?
-  userId         Int?
-  teamId         Int?
-  eventLength    Int?
-  timeStatus     String?
-  eventParentId  Int?
-  userEmail      String?
-  username       String?
-  ratingFeedback String?
-  rating         Int?
-  noShowHost     Boolean?
-  isTeamBooking  Boolean
-}
-
-model BookingDenormalized {
-  id             Int           @id @unique
-  uid            String
-  eventTypeId    Int?
-  title          String
-  description    String?
-  startTime      DateTime
-  endTime        DateTime
-  createdAt      DateTime
-  updatedAt      DateTime?
-  location       String?
-  paid           Boolean
-  status         BookingStatus
-  rescheduled    Boolean?
-  userId         Int?
-  teamId         Int?
-  eventLength    Int?
-  eventParentId  Int?
-  userEmail      String?
-  userName       String?
-  userUsername   String?
-  ratingFeedback String?
-  rating         Int?
-  noShowHost     Boolean?
-  isTeamBooking  Boolean
-
-  @@index([userId])
-  @@index([createdAt])
-  @@index([eventTypeId])
-  @@index([eventParentId])
-  @@index([teamId])
-  @@index([startTime])
-  @@index([endTime])
-  @@index([status])
-  @@index([teamId, isTeamBooking])
-  @@index([userId, isTeamBooking])
-}
-
-view BookingTimeStatusDenormalized {
-  id             Int           @id @unique
-  uid            String
-  eventTypeId    Int?
-  title          String
-  description    String?
-  startTime      DateTime
-  endTime        DateTime
-  createdAt      DateTime
-  updatedAt      DateTime?
-  location       String?
-  paid           Boolean
-  status         BookingStatus
-  rescheduled    Boolean?
-  userId         Int?
-  teamId         Int?
-  eventLength    Int?
-  eventParentId  Int?
-  userEmail      String?
-  userName       String?
-  userUsername   String?
-  ratingFeedback String?
-  rating         Int?
-  noShowHost     Boolean?
-  isTeamBooking  Boolean
-  timeStatus     String? // this is the addition on top of BookingDenormalized
-}
-
-model CalendarCache {
-  // To be made required in a followup
-  id String? @default(uuid())
-
-  // The key would be the unique URL that is requested by the user
-  key          String
-  value        Json
-  expiresAt    DateTime
-  // Provide an initial value for legacy rows and future raw inserts
-  updatedAt    DateTime    @default(now()) @updatedAt
-  credentialId Int
-  userId       Int?
-  credential   Credential? @relation(fields: [credentialId], references: [id], onDelete: Cascade)
-
-  @@id([credentialId, key])
-  @@unique([credentialId, key])
-  @@index([userId, key])
-}
-
-enum RedirectType {
-  UserEventType @map("user-event-type")
-  TeamEventType @map("team-event-type")
-  User          @map("user")
-  Team          @map("team")
-}
-
-model TempOrgRedirect {
-  id        Int          @id @default(autoincrement())
-  // Better would be to have fromOrgId and toOrgId as well and then we should have just to instead toUrl
-  from      String
-  // 0 would mean it is non org
-  fromOrgId Int
-  type      RedirectType
-  // It doesn't have any query params
-  toUrl     String
-  enabled   Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
-  @@unique([from, type, fromOrgId])
-}
-
-model Avatar {
-  // e.g. NULL(0), organization ID or team logo
-  teamId    Int    @default(0)
-  // Avatar, NULL(0) if team logo
-  userId    Int    @default(0)
-  // base64 string
-  data      String
-  // different every time to pop the cache.
-  objectKey String @unique
-
-  isBanner Boolean @default(false)
-
-  @@unique([teamId, userId, isBanner])
-  @@map(name: "avatars")
-}
-
-model OutOfOfficeEntry {
-  id       Int                @id @default(autoincrement())
-  uuid     String             @unique
-  start    DateTime
-  end      DateTime
-  notes    String?
-  userId   Int
-  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  toUserId Int?
-  toUser   User?              @relation(name: "toUser", fields: [toUserId], references: [id], onDelete: Cascade)
-  reasonId Int?
-  reason   OutOfOfficeReason? @relation(fields: [reasonId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([uuid])
-  @@index([userId])
-  @@index([toUserId])
-  @@index([start, end])
-}
-
-model OutOfOfficeReason {
-  id      Int     @id @default(autoincrement())
-  emoji   String
-  reason  String  @unique
-  enabled Boolean @default(true)
-  userId  Int?
-  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  entries OutOfOfficeEntry[]
-}
-
-// Platform
-model PlatformOAuthClient {
-  id             String   @id @default(cuid())
-  name           String
-  secret         String
-  permissions    Int
-  users          User[]
-  logo           String?
-  redirectUris   String[]
-  organizationId Int
-  organization   Team     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  teams          Team[]   @relation("CreatedByOAuthClient")
-
-  accessTokens        AccessToken[]
-  refreshToken        RefreshToken[]
-  authorizationTokens PlatformAuthorizationToken[]
-  webhook             Webhook[]
-
-  bookingRedirectUri           String?
-  bookingCancelRedirectUri     String?
-  bookingRescheduleRedirectUri String?
-  areEmailsEnabled             Boolean @default(false)
-  areDefaultEventTypesEnabled  Boolean @default(true)
-  areCalendarEventsEnabled     Boolean @default(true)
-
-  createdAt DateTime @default(now())
-}
-
-model PlatformAuthorizationToken {
-  id String @id @default(cuid())
-
-  owner  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  client PlatformOAuthClient @relation(fields: [platformOAuthClientId], references: [id], onDelete: Cascade)
-
-  platformOAuthClientId String
-  userId                Int
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, platformOAuthClientId])
-}
-
-model AccessToken {
-  id Int @id @default(autoincrement())
-
-  secret    String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-
-  owner  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  client PlatformOAuthClient @relation(fields: [platformOAuthClientId], references: [id], onDelete: Cascade)
-
-  platformOAuthClientId String
-  userId                Int
-}
-
-model RefreshToken {
-  id Int @id @default(autoincrement())
-
-  secret    String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-
-  owner  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  client PlatformOAuthClient @relation(fields: [platformOAuthClientId], references: [id], onDelete: Cascade)
-
-  platformOAuthClientId String
-  userId                Int
-}
-
-model DSyncData {
-  id               Int                     @id @default(autoincrement())
-  directoryId      String                  @unique
-  tenant           String
-  organizationId   Int?                    @unique
-  org              OrganizationSettings?   @relation(fields: [organizationId], references: [organizationId], onDelete: Cascade)
-  teamGroupMapping DSyncTeamGroupMapping[]
-
-  createdAttributeToUsers AttributeToUser[] @relation("createdByDSync")
-  updatedAttributeToUsers AttributeToUser[] @relation("updatedByDSync")
-}
-
-model DSyncTeamGroupMapping {
-  id             Int       @id @default(autoincrement())
-  organizationId Int
-  teamId         Int
-  team           Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  directoryId    String
-  directory      DSyncData @relation(fields: [directoryId], references: [directoryId], onDelete: Cascade)
-  groupName      String
-
-  @@unique([teamId, groupName])
-}
-
-model SecondaryEmail {
-  id                 Int                 @id @default(autoincrement())
-  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId             Int
-  email              String
-  emailVerified      DateTime?
-  verificationTokens VerificationToken[]
-  eventTypes         EventType[]
-
-  @@unique([email])
-  @@unique([userId, email])
-  @@index([userId])
-}
-
-// Needed to store tasks that need to be processed by a background worker or Tasker
-model Task {
-  id                  String    @id @unique @default(uuid())
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  // The time at which the task should be executed
-  scheduledAt         DateTime  @default(now())
-  // The time at which the task was successfully executed
-  succeededAt         DateTime?
-  // The task type to be executed. Left it as a freeform string to avoid more migrations for now. Will be enforced at type level.
-  type                String
-  // Generic payload for the task
-  payload             String
-  // The number of times the task has been attempted
-  attempts            Int       @default(0)
-  // The maximum number of times the task can be attempted
-  maxAttempts         Int       @default(3)
-  lastError           String?
-  lastFailedAttemptAt DateTime?
-  referenceUid        String?
-
-  // unique index on referenceUid,type to avoid duplicate tasks
-  @@unique([referenceUid, type])
-  // for finding succeeded tasks
-  @@index([succeededAt])
-  // for finding tasks that are scheduled to be executed
-  @@index([scheduledAt, succeededAt])
-}
-
-enum SMSLockState {
-  LOCKED
-  UNLOCKED
-  REVIEW_NEEDED
-}
-
-model ManagedOrganization {
-  managedOrganizationId Int  @unique
-  managedOrganization   Team @relation("ManagedOrganization", fields: [managedOrganizationId], references: [id], onDelete: Cascade)
-
-  managerOrganizationId Int
-  managerOrganization   Team @relation("ManagerOrganization", fields: [managerOrganizationId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([managerOrganizationId, managedOrganizationId])
-  @@index([managerOrganizationId])
-}
-
-model PlatformBilling {
-  id Int @id @unique // team id
-
-  customerId     String
-  subscriptionId String?
-  priceId        String?
-  plan           String  @default("none")
-
-  billingCycleStart Int?
-  billingCycleEnd   Int?
-  overdue           Boolean? @default(false)
-
-  // note(Lauris): in case of a platform managed organization's billing record this field points to the manager organization's billing record.
-  managerBillingId Int?
-  managerBilling   PlatformBilling?  @relation("PlatformManagedBilling", fields: [managerBillingId], references: [id])
-  // note(Lauris): in case of a manager organization's billing record this field points to billing records of its platform managed organizations.
-  managedBillings  PlatformBilling[] @relation("PlatformManagedBilling")
-
-  team Team @relation(fields: [id], references: [id], onDelete: Cascade)
-}
-
-enum AttributeType {
-  TEXT
-  NUMBER
-  SINGLE_SELECT
-  MULTI_SELECT
-}
-
-model AttributeOption {
-  id            String            @id @default(uuid())
-  attribute     Attribute         @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  attributeId   String
-  value         String
-  slug          String
-  isGroup       Boolean           @default(false)
-  // It is a list of AttributeOptions ids that are contained in the group option
-  // You could think of a person having the group option to actually have all the options in the contains list.
-  // We are not using relation here because it would be a many to many relation because a group option can contain many non-group options and a non-group option can be contained in many group options
-  // Such a relation would require its own table to be managed and we don't need it for now.
-  contains      String[]
-  assignedUsers AttributeToUser[]
-}
-
-model Attribute {
-  id String @id @default(uuid())
-
-  // This is organization
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  // This is organizationId
-  teamId Int
-
-  type AttributeType
-
-  name    String
-  slug    String
-  enabled Boolean @default(true)
-
-  usersCanEditRelation Boolean @default(false)
-
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  options          AttributeOption[]
-  isWeightsEnabled Boolean           @default(false)
-  isLocked         Boolean           @default(false)
-
-  @@unique([teamId, slug])
-  @@index([teamId])
-}
-
-model AttributeToUser {
-  id String @id @default(uuid())
-
-  // This is the membership of the organization
-  member Membership @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  // This is the membership id of the organization
-  memberId Int
-
-  attributeOption   AttributeOption @relation(fields: [attributeOptionId], references: [id], onDelete: Cascade)
-  attributeOptionId String
-
-  weight Int?
-
-  // We don't intentionally delete assignments on deletion of a user/directory sync
-  createdAt        DateTime   @default(now())
-  createdById      Int?
-  createdBy        User?      @relation("createdBy", fields: [createdById], references: [id], onDelete: SetNull)
-  createdByDSyncId String?
-  createdByDSync   DSyncData? @relation("createdByDSync", fields: [createdByDSyncId], references: [directoryId], onDelete: SetNull)
-
-  updatedAt        DateTime?  @updatedAt
-  updatedBy        User?      @relation("updatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
-  updatedById      Int?
-  updatedByDSyncId String?
-  updatedByDSync   DSyncData? @relation("updatedByDSync", fields: [updatedByDSyncId], references: [directoryId], onDelete: SetNull)
-
-  @@unique([memberId, attributeOptionId])
-}
-
-enum AssignmentReasonEnum {
-  ROUTING_FORM_ROUTING
-  ROUTING_FORM_ROUTING_FALLBACK
-  REASSIGNED
-  RR_REASSIGNED
-  REROUTED
-  SALESFORCE_ASSIGNMENT
-}
-
-model AssignmentReason {
-  id           Int                  @id @unique @default(autoincrement())
-  createdAt    DateTime             @default(now())
-  bookingId    Int
-  booking      Booking              @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  reasonEnum   AssignmentReasonEnum
-  reasonString String
-
-  @@index([bookingId])
-}
-
-enum EventTypeAutoTranslatedField {
-  DESCRIPTION
-  TITLE
-}
-
-model DelegationCredential {
-  id                  String                @id @default(uuid())
-  workspacePlatform   WorkspacePlatform     @relation(fields: [workspacePlatformId], references: [id], onDelete: Cascade)
-  workspacePlatformId Int
-  // Provides possibility to have different service accounts for different organizations if the need arises, but normally they should be the same
-  /// @zod.import(["import { serviceAccountKeySchema } from '../../zod-utils'"]).custom.use(serviceAccountKeySchema)
-  serviceAccountKey   Json
-  enabled             Boolean               @default(false)
-  // lastEnabledAt is set when the delegation credential is enabled
-  lastEnabledAt       DateTime?
-  // lastDisabledAt is set when the delegation credential is disabled. So, lastDisabledAt could be earlier then lastEnabledAt if the delegation credential was enabled -> then disabled -> then enabled again.
-  lastDisabledAt      DateTime?
-  organizationId      Int
-  organization        Team                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  domain              String
-  selectedCalendars   SelectedCalendar[]
-  destinationCalendar DestinationCalendar[]
-  bookingReferences   BookingReference[]
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  credentials         Credential[]
-
-  // Should be fair to assume that one domain can be only on one workspace platform at a time. So, one can't have two different workspace platforms for the same domain
-  // Because we don't know which domain the organization might have, we couldn't make "domain" unique here as that would prevent an actual owner of the domain to be unable to use that domain if it is used by someone else.
-  @@unique([organizationId, domain])
-  @@index([enabled])
-}
-
-// Deprecated and probably unused - Use DelegationCredential instead
-model DomainWideDelegation {
-  id                  String                @id @default(uuid())
-  workspacePlatform   WorkspacePlatform     @relation(fields: [workspacePlatformId], references: [id], onDelete: Cascade)
-  workspacePlatformId Int
-  // Provides possibility to have different service accounts for different organizations if the need arises, but normally they should be the same
-  /// @zod.import(["import { serviceAccountKeySchema } from '../../zod-utils'"]).custom.use(serviceAccountKeySchema)
-  serviceAccountKey   Json
-  enabled             Boolean               @default(false)
-  organizationId      Int
-  organization        Team                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  domain              String
-  selectedCalendars   SelectedCalendar[]
-  destinationCalendar DestinationCalendar[]
-  bookingReferences   BookingReference[]
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-
-  // Should be fair to assume that one domain can be only on one workspace platform at a time. So, one can't have two different workspace platforms for the same domain
-  // Because we don't know which domain the organization might have, we couldn't make "domain" unique here as that would prevent an actual owner of the domain to be unable to use that domain if it is used by someone else.
-  @@unique([organizationId, domain])
-}
-
-// It is for delegation credential
-model WorkspacePlatform {
-  id                       Int                    @id @default(autoincrement())
-  /// @zod.string.min(1)
-  slug                     String
-  /// @zod.string.min(1)
-  name                     String
-  description              String
-  /// @zod.import(["import { serviceAccountKeySchema } from '../../zod-utils'"]).custom.use(serviceAccountKeySchema)
-  defaultServiceAccountKey Json
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime               @updatedAt
-  enabled                  Boolean                @default(false)
-  delegationCredentials    DelegationCredential[]
-  domainWideDelegations    DomainWideDelegation[]
-
-  @@unique([slug])
-}
-
-model EventTypeTranslation {
-  uid            String                       @id @default(cuid())
-  eventType      EventType                    @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
-  eventTypeId    Int
-  field          EventTypeAutoTranslatedField
-  sourceLocale   String
-  targetLocale   String
-  translatedText String                       @db.Text
-  createdAt      DateTime                     @default(now())
-  createdBy      Int
-  updatedAt      DateTime                     @updatedAt
-  updatedBy      Int?
-  creator        User                         @relation("CreatedEventTypeTranslations", fields: [createdBy], references: [id])
-  updater        User?                        @relation("UpdatedEventTypeTranslations", fields: [updatedBy], references: [id], onDelete: SetNull)
-
-  @@unique([eventTypeId, field, targetLocale])
-  @@index([eventTypeId, field, targetLocale])
-}
-
-enum WatchlistType {
-  EMAIL
-  DOMAIN
-  USERNAME
-}
-
-enum WatchlistSeverity {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-model Watchlist {
-  id          String            @id @unique @default(cuid())
-  type        WatchlistType
-  // The identifier of the Watchlisted entity (email or domain)
-  value       String
-  description String?
-  createdAt   DateTime          @default(now())
-  createdBy   User              @relation("CreatedWatchlists", onDelete: Cascade, fields: [createdById], references: [id])
-  createdById Int
-  updatedAt   DateTime          @updatedAt
-  updatedBy   User?             @relation("UpdatedWatchlists", onDelete: SetNull, fields: [updatedById], references: [id])
-  updatedById Int?
-  severity    WatchlistSeverity @default(LOW)
-
-  @@unique([type, value])
-  @@index([type, value])
-}
-
-enum BillingPeriod {
-  MONTHLY
-  ANNUALLY
-}
-
-model OrganizationOnboarding {
-  // TODO: Use uuid for id
-  id String @id @default(uuid())
-
-  // User who started the onboarding. It is different from orgOwnerEmail in case Cal.com admin is doing the onboarding for someone else.
-  createdBy   User     @relation("CreatedOrganizationOnboardings", fields: [createdById], references: [id], onDelete: Cascade)
-  createdById Int
-  createdAt   DateTime @default(now())
-
-  // We keep the email only here and don't need to connect it with user because on User deletion, we don't delete the entry here.
-  // It is unique because an email can be the owner of only one organization at a time.
-  orgOwnerEmail String  @unique
-  error         String?
-
-  updatedAt DateTime @updatedAt
-  // TODO: updatedBy to be added when we support marking updatedBy using webhook too, as webhook also updates it
-
-  // Set after organization payment is done and the organization is created
-  organizationId Int?  @unique
-  organization   Team? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  billingPeriod BillingPeriod
-  pricePerSeat  Float
-  seats         Int
-
-  isPlatform Boolean @default(false)
-
-  // Organization info
-  name               String
-  // We don't keep it unique because we don't want self-serve flows to block a slug if it isn't paid for yet.
-  slug               String
-  logo               String?
-  bio                String?
-  isDomainConfigured Boolean @default(false)
-
-  // Set when payment intent is there.
-  stripeCustomerId         String? @unique
-  // TODO: Can we make it required
-  stripeSubscriptionId     String?
-  stripeSubscriptionItemId String?
-
-  /// @zod.import(["import { orgOnboardingInvitedMembersSchema } from '../../zod-utils'"]).custom.use(orgOnboardingInvitedMembersSchema)
-  invitedMembers Json @default("[]")
-
-  /// @zod.import(["import { orgOnboardingTeamsSchema } from '../../zod-utils'"]).custom.use(orgOnboardingTeamsSchema)
-  teams Json @default("[]")
-
-  // Completion status
-  isComplete Boolean @default(false)
-
-  @@index([orgOwnerEmail])
-  @@index([stripeCustomerId])
-}
-
-enum IncompleteBookingActionType {
-  SALESFORCE
-}
-
-model App_RoutingForms_IncompleteBookingActions {
-  id           Int                         @id @default(autoincrement())
-  form         App_RoutingForms_Form       @relation(fields: [formId], references: [id], onDelete: Cascade)
-  formId       String
-  actionType   IncompleteBookingActionType
-  data         Json
-  enabled      Boolean                     @default(true)
-  credentialId Int?
-}
-
-model InternalNotePreset {
-  id                 Int     @id @default(autoincrement())
-  name               String
-  cancellationReason String?
-  team               Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId             Int
-
-  createdAt           DateTime              @default(now())
-  BookingInternalNote BookingInternalNote[]
-
-  @@unique([teamId, name])
-  @@index([teamId])
-}
-
-enum FilterSegmentScope {
-  USER
-  TEAM
-}
-
-model FilterSegment {
-  id               Int                           @id @default(autoincrement())
-  name             String
-  // Identifies which data table this segment belongs to (e.g. "organization_members", "team_members", "bookings", etc.)
-  tableIdentifier  String
-  scope            FilterSegmentScope
-  // Filter configuration
-  activeFilters    Json?
-  sorting          Json?
-  columnVisibility Json?
-  columnSizing     Json?
-  perPage          Int
-  searchTerm       String?                       @db.Text
-  createdAt        DateTime                      @default(now())
-  updatedAt        DateTime                      @updatedAt
-  // Creator of the segment
-  user             User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId           Int
-  // Team scope - optional, only set when scope is TEAM
-  team             Team?                         @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId           Int?
-  userPreferences  UserFilterSegmentPreference[]
-
-  // For user-scoped segments: scope + userId + tableIdentifier
-  @@index([scope, userId, tableIdentifier])
-  // For team-scoped segments: scope + teamId + tableIdentifier
-  @@index([scope, teamId, tableIdentifier])
-}
-
-model UserFilterSegmentPreference {
-  id              Int            @id @default(autoincrement())
-  userId          Int
-  tableIdentifier String
-  segmentId       Int?
-  systemSegmentId String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  segment         FilterSegment? @relation(fields: [segmentId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, tableIdentifier])
-  @@index([userId])
-  @@index([segmentId])
-}
-
-model BookingInternalNote {
-  id Int @id @default(autoincrement())
-
-  notePreset   InternalNotePreset? @relation(fields: [notePresetId], references: [id], onDelete: Cascade)
-  notePresetId Int?
-  text         String?
-
-  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  bookingId Int
-
-  createdBy   User @relation(fields: [createdById], references: [id])
-  createdById Int
-
-  createdAt DateTime @default(now())
-
-  @@unique([bookingId, notePresetId])
-  @@index([bookingId])
-}
-
-enum WorkflowContactType {
-  PHONE
-  EMAIL
-}
-
-model WorkflowOptOutContact {
-  id        Int                 @id @default(autoincrement())
-  type      WorkflowContactType
-  value     String
-  optedOut  Boolean
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
-
-  @@unique([type, value])
-}
-
-enum RoleType {
-  SYSTEM
-  CUSTOM
-}
-
-model Role {
-  id          String           @id @default(cuid())
-  name        String
-  color       String?
-  description String?
-  teamId      Int? // null for global roles
-  team        Team?            @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  permissions RolePermission[]
-  memberships Membership[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  type        RoleType         @default(CUSTOM)
-
-  @@unique([name, teamId])
-  @@index([teamId])
-}
-
-model RolePermission {
-  id        String   @id @default(uuid())
-  roleId    String
-  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  resource  String
-  action    String
-  createdAt DateTime @default(now())
-
-  @@unique([roleId, resource, action])
-  @@index([roleId])
-  // TODO: come back to this with indexs.
-  @@index([action])
-}
-
-enum PhoneNumberSubscriptionStatus {
-  ACTIVE
-  PAST_DUE
-  CANCELLED
-  INCOMPLETE
-  INCOMPLETE_EXPIRED
-  TRIALING
-  UNPAID
-}
-
-// Cal AI Voice Agent
-model Agent {
-  id   String @id @default(uuid())
-  name String
-
-  // Either user-owned OR team-owned
-  userId Int?
-  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId Int?
-  team   Team? @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  // Provider-specific agent ID (e.g., Retell AI agent ID)
-  providerAgentId String @unique
-
-  enabled   Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  inboundPhoneNumbers  CalAiPhoneNumber[] @relation("InboundAgent")
-  outboundPhoneNumbers CalAiPhoneNumber[] @relation("OutboundAgent")
-  workflowStep         WorkflowStep?
-
-  @@index([userId])
-  @@index([teamId])
-}
-
-model CalAiPhoneNumber {
-  id Int @id @default(autoincrement())
-
-  // Either user-owned OR team-owned
-  userId Int?
-  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId Int?
-  team   Team? @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  phoneNumber String @unique
-  provider    String
-
-  // Provider-specific phone number ID (e.g., Retell phone number ID)
-  providerPhoneNumberId String? @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  stripeCustomerId     String?
-  stripeSubscriptionId String?                        @unique
-  subscriptionStatus   PhoneNumberSubscriptionStatus?
-
-  // Agent associations
-  inboundAgentId  String?
-  inboundAgent    Agent?  @relation("InboundAgent", fields: [inboundAgentId], references: [id], onDelete: SetNull)
-  outboundAgentId String?
-  outboundAgent   Agent?  @relation("OutboundAgent", fields: [outboundAgentId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@index([teamId])
-  @@index([inboundAgentId])
-  @@index([outboundAgentId])
-}
-
-*/
