@@ -4,6 +4,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 
@@ -66,20 +67,20 @@ public class Schema {
     public static final BuilderMorphism commentToText =                     builder.morphism(comment, text, 17);
     public static final BuilderMorphism commentToStars =                    builder.morphism(comment, stars, 18);
 
-    public static final BuilderMorphism commentToUserId =                   builder.composite(commentToUser, userToUserId);
-    public static final BuilderMorphism commentToBusinessId =               builder.composite(commentToBusiness, businessToBusinessId);
+    public static final Signature       commentToUserId =                   builder.concatenate(commentToUser, userToUserId);
+    public static final Signature       commentToBusinessId =               builder.concatenate(commentToBusiness, businessToBusinessId);
 
     public static final BuilderMorphism businessHoursToBusinessHoursId =    builder.morphism(businessHours, businessHoursId, 19);
     public static final BuilderMorphism businessHoursToBusiness =           builder.morphism(businessHours, business, 20);
     public static final BuilderMorphism businessHoursToHours =              builder.morphism(businessHours, hours, 21);
 
-    public static final BuilderMorphism businessHoursToBusinessId =         builder.composite(businessHoursToBusiness, businessToBusinessId);
+    public static final Signature       businessHoursToBusinessId =         builder.concatenate(businessHoursToBusiness, businessToBusinessId);
 
     public static final BuilderMorphism friendToSince =                     builder.morphism(friend, since, 22);
     public static final BuilderMorphism friendToFromUser =                  builder.tags(Tag.role).morphism(friend, user, 23);
     public static final BuilderMorphism friendToToUser =                    builder.tags(Tag.role).morphism(friend, user, 24);
-    public static final BuilderMorphism frientToFromUserId =                builder.composite(friendToFromUser, userToUserId);
-    public static final BuilderMorphism frientToToUserId =                  builder.composite(friendToToUser, userToUserId);
+    public static final Signature       frientToFromUserId =                builder.concatenate(friendToFromUser, userToUserId);
+    public static final Signature       frientToToUserId =                  builder.concatenate(friendToToUser, userToUserId);
 
     // Ids
 

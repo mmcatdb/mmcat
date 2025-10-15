@@ -157,12 +157,14 @@ public class DfsFinder {
     }
 
     private List<SchemaMorphism> findOutgoingMorphisms(SchemaObjex node) {
+        // TODO replace
         return recursionMerge.newSchema.allMorphisms().stream()
             .filter(morphism -> morphism.dom().equals(node))
             .toList();
     }
 
     private List<SchemaMorphism> findIncomingMorphisms(SchemaObjex node) {
+        // TODO replace
         return recursionMerge.newSchema.allMorphisms().stream()
             .filter(morphism -> morphism.cod().equals(node))
             .toList();

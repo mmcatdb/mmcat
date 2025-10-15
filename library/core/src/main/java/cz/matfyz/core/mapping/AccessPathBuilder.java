@@ -1,7 +1,7 @@
 package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
+import cz.matfyz.core.utils.Accessor;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.mapping.Name.TypedName;
@@ -12,12 +12,8 @@ public class AccessPathBuilder {
 
     // Complex property
 
-    public ComplexProperty complex(String name, Signature signature, AccessPath... subpaths) {
-        return new ComplexProperty(new StringName(name), signature, List.of(subpaths));
-    }
-
-    public ComplexProperty complex(String name, BuilderMorphism morphism, AccessPath... subpaths) {
-        return complex(name, morphism.signature(), subpaths);
+    public ComplexProperty complex(String name, Accessor<Signature> signature, AccessPath... subpaths) {
+        return new ComplexProperty(new StringName(name), signature.access(), List.of(subpaths));
     }
 
     public ComplexProperty complex(Signature name, boolean isKey, Signature signature, AccessPath... subpaths) {
@@ -50,12 +46,8 @@ public class AccessPathBuilder {
 
     // Simple property
 
-    public SimpleProperty simple(String name, Signature signature) {
-        return new SimpleProperty(new StringName(name), signature);
-    }
-
-    public SimpleProperty simple(String name, BuilderMorphism morphism) {
-        return simple(name, morphism.signature());
+    public SimpleProperty simple(String name, Accessor<Signature> signature) {
+        return new SimpleProperty(new StringName(name), signature.access());
     }
 
     public SimpleProperty simple(Signature name, boolean isKey, Signature signature) {

@@ -1,8 +1,8 @@
 package cz.matfyz.core.schema;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 
@@ -59,7 +59,7 @@ public class SchemaSerializer {
     }
 
     public record SerializedMorphism(
-        Signature signature,
+        BaseSignature signature,
         Key domKey,
         Key codKey,
         Min min,

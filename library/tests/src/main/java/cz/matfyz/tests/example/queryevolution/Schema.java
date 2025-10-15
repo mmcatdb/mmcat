@@ -58,10 +58,10 @@ public class Schema {
     public static final BuilderMorphism productToTitle =        builder.min(Min.ZERO).morphism(product, title, 15);
     public static final BuilderMorphism productToProductPrice = builder.min(Min.ZERO).morphism(product, productPrice, 16);
 
-    public static final BuilderMorphism orderToCustomerId =     builder.composite(orderToCustomer, customerToCustomerId);
-    public static final BuilderMorphism orderToProductId =      builder.composite(orderToProduct, productToProductId);
+    public static final Signature orderToCustomerId =           builder.concatenate(orderToCustomer, customerToCustomerId);
+    public static final Signature orderToProductId =            builder.concatenate(orderToProduct, productToProductId);
 
-    public static final Signature customerAToCustomerB = builder.concatenate(knowsToCustomerA.dual(), knowsToCustomerB);
+    public static final Signature customerAToCustomerB =        builder.concatenate(knowsToCustomerA.dual(), knowsToCustomerB);
 
     // Version 2
     public static final BuilderMorphism itemToOrderPrice =      builder.morphism(item, orderPrice, 10);
@@ -69,19 +69,19 @@ public class Schema {
     public static final BuilderMorphism itemToProduct =         builder.morphism(item, product, 13);
     public static final BuilderMorphism itemToOrder =           builder.morphism(item, order, 17);
 
-    public static final BuilderMorphism itemToProductId =       builder.composite(itemToProduct, productToProductId);
-    public static final BuilderMorphism itemToTitle =           builder.composite(itemToProduct, productToTitle);
-    public static final BuilderMorphism itemToProductPrice =    builder.composite(itemToProduct, productToProductPrice);
-    public static final BuilderMorphism itemToOrderId =         builder.composite(itemToOrder, orderToOrderId);
+    public static final Signature itemToProductId =             builder.concatenate(itemToProduct, productToProductId);
+    public static final Signature itemToTitle =                 builder.concatenate(itemToProduct, productToTitle);
+    public static final Signature itemToProductPrice =          builder.concatenate(itemToProduct, productToProductPrice);
+    public static final Signature itemToOrderId =               builder.concatenate(itemToOrder, orderToOrderId);
 
     // The same key here is intentional - we want to replace the previous morphisms.
     public static final BuilderMorphism orderedToCustomer =     builder.morphism(ordered, customer, 12);
     public static final BuilderMorphism orderedToOrder =        builder.morphism(ordered, order, 18);
 
-    public static final BuilderMorphism orderedToCustomerId =   builder.composite(orderedToCustomer, customerToCustomerId);
-    public static final BuilderMorphism orderedToOrderId =      builder.composite(orderedToOrder, orderToOrderId);
+    public static final Signature orderedToCustomerId =         builder.concatenate(orderedToCustomer, customerToCustomerId);
+    public static final Signature orderedToOrderId =            builder.concatenate(orderedToOrder, orderToOrderId);
 
-    public static final Signature orderToCustomer2 = builder.concatenate(orderedToOrder.dual(), orderedToCustomer);
+    public static final Signature orderToCustomer2 =            builder.concatenate(orderedToOrder.dual(), orderedToCustomer);
 
     // Ids
 

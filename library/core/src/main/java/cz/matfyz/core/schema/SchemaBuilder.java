@@ -13,22 +13,21 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
+import cz.matfyz.core.utils.Accessor;
 import cz.matfyz.core.utils.SequenceGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SchemaBuilder {
 
     // Schema objex
 
-    public static class BuilderObjex implements Comparable<BuilderObjex> {
+    public static class BuilderObjex implements Comparable<BuilderObjex>, Accessor<Key> {
 
         private final Key key;
         private final String label;
@@ -68,6 +67,10 @@ public class SchemaBuilder {
             return key.compareTo(other.key);
         }
 
+        @Override public Key access() {
+            return key;
+        }
+
     }
 
     private SequenceGenerator keyGenerator = new SequenceGenerator(1);
@@ -102,13 +105,13 @@ public class SchemaBuilder {
     // Schema morphism
 
     public record BuilderMorphism(
-        Signature signature,
+        BaseSignature signature,
         String label,
         BuilderObjex dom,
         BuilderObjex cod,
         Min min,
         Set<Tag> tags
-    ) implements Comparable<BuilderMorphism> {
+    ) implements Comparable<BuilderMorphism>, Accessor<Signature> {
 
         public Key domKey() {
             return dom.key();
@@ -122,8 +125,12 @@ public class SchemaBuilder {
             return signature.compareTo(other.signature);
         }
 
-        public Signature dual() {
+        public BaseSignature dual() {
             return signature.dual();
+        }
+
+        @Override public Signature access() {
+            return signature;
         }
 
     }
@@ -173,50 +180,22 @@ public class SchemaBuilder {
         return morphism;
     }
 
-    public BuilderMorphism composite(BuilderMorphism... morphisms) {
-        final Signature signature = Signature.concatenate(Stream.of(morphisms).map(m -> m.signature()).toList());
-        final String label = Stream.of(morphisms).map(m -> m.label()).collect(Collectors.joining("#"));
-        final var min = Stream.of(morphisms).anyMatch(m -> m.min.equals(Min.ZERO)) ? Min.ZERO : Min.ONE;
-        final var composite = new BuilderMorphism(
-            signature,
-            label,
-            morphisms[0].dom,
-            morphisms[morphisms.length - 1].cod,
-            min,
-            Set.of()
-        );
-
-        morphismsBySignature.put(composite.signature(), composite);
-        morphismsByLabel.put(composite.label(), composite);
-
-        return composite;
-    }
-
-    // Convenience methods for creating composite signatures.
+    // Convenience methods for creating dual signatures.
 
     public Signature dual(BuilderMorphism morphism) {
         return morphism.signature().dual();
     }
 
-    // This is just disgusting. But Java doesn't offer a better way to do this.
-    public Signature concatenate(Object... objects) {
-        final List<Signature> signatures = new ArrayList<>();
-        for (final Object object : objects) {
-            if (object instanceof Signature signature)
-                signatures.add(signature);
-            else if (object instanceof BuilderMorphism morphism)
-                signatures.add(morphism.signature());
-            else
-                throw new IllegalArgumentException("Only signatures and morphisms are allowed.");
-        }
-
-        return Signature.concatenate(signatures);
+    @SafeVarargs
+    public final Signature concatenate(Accessor<Signature>... accessors) {
+        return Signature.concatenate(Stream.of(accessors).map(a -> a.access()).toList());
     }
 
     // Objexes' ids - they need to be defined when the morphisms are already here.
 
-    public SchemaBuilder ids(BuilderObjex objexes, BuilderMorphism... morphisms) {
-        final var id = new SignatureId(Stream.of(morphisms).map(m -> m.signature()).toArray(Signature[]::new));
+    @SafeVarargs
+    public final SchemaBuilder ids(BuilderObjex objexes, Accessor<Signature>... signatures) {
+        final var id = new SignatureId(Stream.of(signatures).map(m -> m.access()).toArray(Signature[]::new));
         objexes.ids = new ObjexIds(Set.of(id));
 
         return this;
@@ -250,9 +229,6 @@ public class SchemaBuilder {
 
         morphismsBySignature.values().forEach(m -> {
             if (morphismsToSkip.contains(m) || objexesToSkip.contains(m.dom) || objexesToSkip.contains(m.cod))
-                return;
-
-            if (!(m.signature instanceof BaseSignature))
                 return;
 
             schema.addMorphism(new SerializedMorphism(m.signature, m.domKey(), m.codKey(), m.min, m.tags));

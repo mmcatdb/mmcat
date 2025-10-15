@@ -103,10 +103,7 @@ public class InstanceSerializer {
             mappings.add(new SerializedMappingRow(dom, cod));
         }
 
-        return new SerializedInstanceMorphism(
-            (BaseSignature) morphism.schema.signature(),
-            mappings
-        );
+        return new SerializedInstanceMorphism(morphism.schema.signature(), mappings);
     }
 
     public static InstanceCategory deserialize(SerializedInstance serializedInstance, SchemaCategory schema) {

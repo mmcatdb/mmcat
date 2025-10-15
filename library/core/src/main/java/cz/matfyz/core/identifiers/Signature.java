@@ -1,6 +1,7 @@
 package cz.matfyz.core.identifiers;
 
 import cz.matfyz.core.exception.SignatureException;
+import cz.matfyz.core.utils.Accessor;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
@@ -28,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @JsonSerialize(using = Signature.Serializer.class)
 @JsonDeserialize(using = Signature.Deserializer.class)
-public class Signature implements Serializable, Comparable<Signature> {
+public class Signature implements Serializable, Comparable<Signature>, Accessor<Signature> {
 
     protected final int[] ids;
 
@@ -261,6 +262,10 @@ public class Signature implements Serializable, Comparable<Signature> {
                 return idDifference;
         }
         return 0;
+    }
+
+    @Override public Signature access() {
+        return this;
     }
 
     public boolean hasDual() {

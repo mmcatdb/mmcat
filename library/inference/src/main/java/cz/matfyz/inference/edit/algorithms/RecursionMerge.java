@@ -1,6 +1,6 @@
 package cz.matfyz.inference.edit.algorithms;
 
-import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -133,6 +133,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     public @Nullable SchemaObjex findNextNode(SchemaCategory schema, SchemaObjex currentNode, PatternSegment currentSegment) {
+        // TODO replace
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
             if (currentSegment.direction().equals(FORWARD) && morphism.dom().equals(currentNode))
                 return morphism.cod();
@@ -197,7 +198,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return output;
     }
 
-    private List<Signature> findSignaturesForObjex(SchemaObjex objex) {
+    private List<BaseSignature> findSignaturesForObjex(SchemaObjex objex) {
         return newSchema.allMorphisms().stream()
             .filter(morphism -> morphism.dom().equals(objex) || morphism.cod().equals(objex))
             .map(SchemaMorphism::signature)

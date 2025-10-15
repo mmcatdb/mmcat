@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class SchemaCategory {
@@ -50,7 +49,7 @@ public class SchemaCategory {
         if (objex == null)
             throw SchemaException.removingNonExistingObjex(key);
 
-        final List<Signature> signaturesOfDependentMorphisms = morphisms.values().stream()
+        final List<BaseSignature> signaturesOfDependentMorphisms = morphisms.values().stream()
             .filter(morphism -> morphism.dom().equals(objex) || morphism.cod().equals(objex))
             .map(SchemaMorphism::signature)
             .toList();
@@ -79,10 +78,14 @@ public class SchemaCategory {
         final var dom = getObjex(serialized.domKey());
         final var cod = getObjex(serialized.codKey());
 
-        // FIXME check isEntity
-
         final var morphism = new SchemaMorphism(serialized.signature(), dom, cod, serialized.min(), serialized.tags());
         morphisms.put(morphism.signature(), morphism);
+
+        dom.morphismsFrom.put(morphism.signature(), morphism);
+        cod.morphismsTo.put(morphism.signature(), morphism);
+
+        // The domain has an outgoing morphism, so it must be an entity.
+        dom.isEntity = true;
 
         return morphism;
     }
@@ -99,8 +102,16 @@ public class SchemaCategory {
         removeMorphism(morphism.signature());
     }
 
-    public void removeMorphism(Signature signature) {
-        // FIXME check isEntity
+    public void removeMorphism(BaseSignature signature) {
+        final var morphism = morphisms.get(signature);
+        if (morphism == null)
+            throw SchemaException.removingNonExistingMorphism(signature);
+
+        morphism.dom().morphismsFrom.remove(signature);
+        morphism.cod().morphismsTo.remove(signature);
+
+        if (morphism.dom().from().stream().findAny().isEmpty())
+            morphism.dom().isEntity = false;
 
         morphisms.remove(signature);
     }
@@ -112,37 +123,31 @@ public class SchemaCategory {
         addMorphism(morphism);
     }
 
-    public SchemaMorphism getMorphism(Signature signature) {
-        if (signature.isEmpty())
-            throw MorphismNotFoundException.signatureIsEmpty();
+    public SchemaMorphism getMorphism(BaseSignature signature) {
+        if (signature.isDual())
+            throw MorphismNotFoundException.signatureIsDual(signature);
 
-        if (signature instanceof BaseSignature baseSignature) {
-            if (baseSignature.isDual())
-                throw MorphismNotFoundException.signatureIsDual(baseSignature);
+        final var morphism = morphisms.get(signature);
+        if (morphism == null)
+            throw MorphismNotFoundException.baseNotFound(signature);
 
-            return morphisms.computeIfAbsent(baseSignature, x -> {
-                throw MorphismNotFoundException.baseNotFound(baseSignature);
-            });
-        }
-
-        return morphisms.computeIfAbsent(signature, this::createCompositeMorphism);
+        return morphism;
     }
 
     /**
      * This class represents a directed edge in the schema category. Essentially, it's either a base morphism or a dual of such.
      */
     public record SchemaEdge(
-        /** A base morphism. */
         SchemaMorphism morphism,
         /** True if the edge corresponds to the morphism. False if it corresponds to its dual. */
         boolean direction
     ) {
         public BaseSignature signature() {
-            return (BaseSignature) (direction ? morphism.signature() : morphism.signature().dual());
+            return (direction ? morphism.signature() : morphism.signature().dual());
         }
 
         public BaseSignature absoluteSignature() {
-            return (BaseSignature) morphism.signature();
+            return morphism.signature();
         }
 
         public SchemaObjex from() {
@@ -219,31 +224,6 @@ public class SchemaCategory {
 
     public boolean hasEdge(BaseSignature base) {
         return hasMorphism(base.toAbsolute());
-    }
-
-    /** Returns whether the objex (corresponding to the given key) appears in any inner node of the (composite) morphism (corresponding to the given signature). */
-    public boolean morphismContainsObjex(Signature signature, Key key) {
-        return signature
-            .cutLast().toBases().stream()
-            .anyMatch(base -> getEdge(base).to().key().equals(key));
-    }
-
-    private SchemaMorphism createCompositeMorphism(Signature signature) {
-        final Signature[] bases = signature.toBases().toArray(Signature[]::new);
-
-        final Signature lastSignature = bases[0];
-        SchemaMorphism lastMorphism = this.getMorphism(lastSignature);
-        final SchemaObjex dom = lastMorphism.dom();
-        SchemaObjex cod = lastMorphism.cod();
-        Min min = lastMorphism.min();
-
-        for (final var base : bases) {
-            lastMorphism = this.getMorphism(base);
-            cod = lastMorphism.cod();
-            min = Min.combine(min, lastMorphism.min());
-        }
-
-        return new SchemaMorphism(signature, dom, cod, min, Set.of());
     }
 
     public KeyGenerator createKeyGenerator() {

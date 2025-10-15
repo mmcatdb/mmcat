@@ -1,6 +1,7 @@
 package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.exception.AccessPathException;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Name.DynamicName;
@@ -169,9 +170,11 @@ public class ComplexProperty extends AccessPath {
     }
 
     @Override public @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema) {
-        final SchemaMorphism morphism = schema.getMorphism(signature);
-        if (morphism.dom().key().equals(key))
-            return this;
+        if (signature instanceof BaseSignature base) {
+            final SchemaMorphism morphism = schema.getMorphism(base);
+            if (morphism.dom().key().equals(key))
+                return this;
+        }
 
         for (final var subpath : subpaths()) {
             final var subProperty = subpath.tryGetSubpathForObjex(key, schema);

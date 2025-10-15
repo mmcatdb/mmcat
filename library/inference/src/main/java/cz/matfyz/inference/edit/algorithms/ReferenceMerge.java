@@ -2,8 +2,8 @@ package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.exception.MorphismNotFoundException;
 import cz.matfyz.core.exception.ObjexNotFoundException;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
@@ -85,8 +85,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     private final Data data;
 
     private boolean referenceIsArray;
-    private Signature referenceSignature;
-    private Signature parentReferenceSignature;
+    private BaseSignature referenceSignature;
+    private BaseSignature parentReferenceSignature;
 
     public ReferenceMerge(Data data) {
         this.data = data;
@@ -132,6 +132,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     }
 
     private boolean isReferenceArray(SchemaCategory schema, MetadataCategory metadata) {
+        // TODO replace
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.dom().key().equals(data.referencingKey) && metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL))
                 return true;
@@ -141,6 +142,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
 
     private Key getReferenceParentKey(SchemaCategory schema, MetadataCategory metadata) {
         if (referenceIsArray) {
+            // TODO replace
             for (final SchemaMorphism morphism : schema.allMorphisms()) {
                 if (
                     morphism.dom().key().equals(data.referencingKey) && (
@@ -154,6 +156,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             throw ObjexNotFoundException.withMessage("Parent key has not been found");
         }
 
+        // TODO replace
         for (final SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.cod().key().equals(data.referencingKey))
                 return morphism.dom().key();
@@ -162,13 +165,14 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw ObjexNotFoundException.withMessage("Parent key has not been found");
     }
 
-    private Signature findReferenceSignatureWithValueKey(KeysAndSignatures toDelete, Key key) {
+    private BaseSignature findReferenceSignatureWithValueKey(KeysAndSignatures toDelete, Key key) {
         final Key valueKey = getValueKey(key);
         toDelete.add(valueKey);
         return InferenceEditorUtils.findSignatureBetween(newSchema, newSchema.getObjex(data.referencingKey), newSchema.getObjex(valueKey));
     }
 
     private Key getValueKey(Key key) {
+        // TODO replace
         for (final SchemaMorphism morphism : newSchema.allMorphisms())
             if (morphism.dom().key().equals(key) && newMetadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL))
                 return morphism.cod().key();

@@ -1,5 +1,6 @@
 package cz.matfyz.core.mapping;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
@@ -42,9 +43,12 @@ public class SimpleProperty extends AccessPath {
     }
 
     @Override public @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema) {
-        final SchemaMorphism morphism = schema.getMorphism(signature);
+        if (signature instanceof BaseSignature base) {
+            final SchemaMorphism morphism = schema.getMorphism(base);
+            return morphism.dom().key().equals(key) ? this : null;
+        }
 
-        return morphism.dom().key().equals(key) ? this : null;
+        return null;
     }
 
     @Override protected SimpleProperty copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames) {

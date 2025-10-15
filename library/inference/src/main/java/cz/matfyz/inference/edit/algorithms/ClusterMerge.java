@@ -1,6 +1,7 @@
 package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.exception.MorphismNotFoundException;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
@@ -316,15 +317,15 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         return mapOldNewKey;
     }
 
-    private void addMorphisms(Set<Signature> signatures, Map<Key, Key> mapOldNewKey, Key clusterRootKey) {
+    private void addMorphisms(Set<BaseSignature> signatures, Map<Key, Key> mapOldNewKey, Key clusterRootKey) {
         for (final var signature : signatures) {
             final var morphism = newSchema.getMorphism(signature);
             final SchemaObjex dom = newSchema.getObjex(mapOldNewKey.get(morphism.dom().key()));
-            final Signature newSignature = InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, dom, newSchema.getObjex(mapOldNewKey.get(morphism.cod().key())));
+            final BaseSignature newSignature = InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, dom, newSchema.getObjex(mapOldNewKey.get(morphism.cod().key())));
             mapOldNewSignature.put(signature, newSignature);
         }
 
-        this.newClusterSignature = InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, newSchema.getObjex(newClusterKey), newSchema.getObjex(clusterRootKey), false, null).dual();
+        this.newClusterSignature = InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, newSchema.getObjex(newClusterKey), newSchema.getObjex(clusterRootKey)).dual();
     }
 
     private KeysAndSignatures findToDelete(Key clusterRootKey) {

@@ -7,7 +7,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
+import cz.matfyz.core.utils.Accessor;
 
 import java.util.Collection;
 
@@ -30,21 +30,17 @@ public class TestMapping {
     private final AccessPathCreator pathCreator;
     private final @Nullable PrimaryKeyCreator keyCreator;
 
-    public TestMapping(Datasource datasource, SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator, @Nullable PrimaryKeyCreator keyCreator) {
+    public TestMapping(Datasource datasource, SchemaCategory schema, Accessor<Key> rootKey, String kindName, AccessPathCreator pathCreator, @Nullable PrimaryKeyCreator keyCreator) {
         this.datasource = datasource;
         this.schema = schema;
-        this.rootKey = rootKey;
+        this.rootKey = rootKey.access();
         this.kindName = kindName;
         this.pathCreator = pathCreator;
         this.keyCreator = keyCreator;
     }
 
-    public TestMapping(Datasource datasource, SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator) {
+    public TestMapping(Datasource datasource, SchemaCategory schema, Accessor<Key> rootKey, String kindName, AccessPathCreator pathCreator) {
         this(datasource, schema, rootKey, kindName, pathCreator, null);
-    }
-
-    public TestMapping(Datasource datasource, SchemaCategory schema, BuilderObjex rootObjex, String kindName, AccessPathCreator pathCreator) {
-        this(datasource, schema, rootObjex.key(), kindName, pathCreator, null);
     }
 
     private @Nullable ComplexProperty accessPath;

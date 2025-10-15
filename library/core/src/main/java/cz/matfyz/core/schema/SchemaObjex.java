@@ -1,11 +1,14 @@
 package cz.matfyz.core.schema;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SchemaObjex implements Identified<SchemaObjex, Key> {
 
@@ -37,7 +40,7 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
         return superId;
     }
 
-    /** Edited by {@link SchemaCategory}. */
+    /** Managed by {@link SchemaCategory}. */
     boolean isEntity;
 
     /**
@@ -46,8 +49,28 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
      * Entities have either signature identifier(s) or a generated identifier. Properties are identified by their value.
      */
     public boolean isEntity() {
-        // FIXME use isEntity field
-        return !ids.isValue();
+        return isEntity;
+    }
+
+    /** All base morphisms starting in this objex. Managed by {@link SchemaCategory}. */
+    final Map<BaseSignature, SchemaMorphism> morphismsFrom = new TreeMap<>();
+    /** All base morphisms ending in this objex. Managed by {@link SchemaCategory}. */
+    final Map<BaseSignature, SchemaMorphism> morphismsTo = new TreeMap<>();
+
+    public Collection<SchemaMorphism> from() {
+        return morphismsFrom.values();
+    }
+
+    public Collection<SchemaMorphism> to() {
+        return morphismsTo.values();
+    }
+
+    public SchemaMorphism from(BaseSignature signature) {
+        return morphismsFrom.get(signature);
+    }
+
+    public SchemaMorphism to(BaseSignature signature) {
+        return morphismsTo.get(signature);
     }
 
     // Identification

@@ -2,7 +2,6 @@ package cz.matfyz.tests.example.basic;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -89,7 +88,7 @@ public abstract class MongoDB {
 
     public static void addTag(InstanceBuilder builder, int orderIndex, String ...tagValues) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        order.addArrayValues((BaseSignature) Schema.tagToOrder.dual(), Arrays.asList(tagValues));
+        order.addArrayValues(Schema.tagToOrder.dual(), Arrays.asList(tagValues));
     }
 
     private static TestMapping createItem(SchemaCategory schema, String kindName) {

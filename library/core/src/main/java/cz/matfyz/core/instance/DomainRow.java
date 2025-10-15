@@ -55,10 +55,10 @@ public class DomainRow implements Comparable<DomainRow> {
      */
     public @Nullable String tryGetScalarValue(Signature signature) {
         final var superIdValue = superId.getValue(signature);
-        if (superIdValue != null || !(signature instanceof final BaseSignature baseSignature))
+        if (superIdValue != null || !(signature instanceof final BaseSignature base))
             return superIdValue;
 
-        return simpleValues.get(baseSignature);
+        return simpleValues.get(base);
     }
 
     /**
@@ -70,8 +70,8 @@ public class DomainRow implements Comparable<DomainRow> {
             return superIdValue;
 
         // A base signature can only be in simpleValues.
-        if (signature instanceof final BaseSignature baseSignature)
-            return simpleValues.get(baseSignature);
+        if (signature instanceof final BaseSignature base)
+            return simpleValues.get(base);
 
         final var bases = signature.toBases();
         DomainRow current = this;
@@ -103,8 +103,8 @@ public class DomainRow implements Comparable<DomainRow> {
      * If the values are not here, traverses other rows and tries to find the values there.
      */
     public Collection<String> findArrayValues(Signature signature) {
-        if (signature instanceof final BaseSignature baseSignature)
-            return getArrayValues(baseSignature);
+        if (signature instanceof final BaseSignature base)
+            return getArrayValues(base);
 
         // Similarly to the function above, we traverse up to the last base.
         final var rows = traverseThrough(signature.cutLast());
@@ -145,7 +145,7 @@ public class DomainRow implements Comparable<DomainRow> {
     // These properties are managed by the morphisms, so they shouldn't be cloned.
 
     /**
-     * All mappings originating in this row by the signature of the corresponding morphism. There can be at most one such morphism for each signature.
+     * All mappings starting in this row by the signature of the corresponding morphism. There can be at most one such morphism for each signature.
      * I.e., the signature is absolute.
      */
     private final Map<BaseSignature, MappingRow> mappingsFrom = new TreeMap<>();
@@ -201,10 +201,7 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     void setMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
-        final var signature = morphism.schema.signature();
-        assert signature instanceof BaseSignature;
-
-        mappingsFrom.put((BaseSignature) signature, mapping);
+        mappingsFrom.put(morphism.schema.signature(), mapping);
     }
 
     void unsetMappingFrom(InstanceMorphism morphism) {
@@ -212,10 +209,7 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     void addMappingTo(InstanceMorphism morphism, MappingRow mapping) {
-        final var signature = morphism.schema.signature();
-        assert signature instanceof BaseSignature;
-
-        final var mappingsOfSameType = mappingsTo.computeIfAbsent((BaseSignature) signature, x -> new TreeSet<>());
+        final var mappingsOfSameType = mappingsTo.computeIfAbsent(morphism.schema.signature(), x -> new TreeSet<>());
         mappingsOfSameType.add(mapping);
     }
 

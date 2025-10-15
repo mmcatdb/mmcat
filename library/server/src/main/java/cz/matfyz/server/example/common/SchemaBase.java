@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.common;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataObjex;
@@ -127,7 +127,7 @@ public abstract class SchemaBase {
         addMetadataOperation(new MorphismMetadata(metadata, null));
     }
 
-    protected void updateMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
+    protected void updateMorphism(BaseSignature signature, @Nullable Key newDom, @Nullable Key newCod) {
         final var oldMorphism = SerializedMorphism.serialize(originalSchema.getMorphism(signature));
         final var newMorphism = new SerializedMorphism(
             oldMorphism.signature(),

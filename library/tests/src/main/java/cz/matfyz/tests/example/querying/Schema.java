@@ -28,7 +28,7 @@ public class Schema {
     public static final List<BuilderMorphism> kind_id = new ArrayList<>();
     public static final List<BuilderMorphism> kind_value = new ArrayList<>();
     public static final List<BuilderMorphism> kind_nextKind = new ArrayList<>();
-    public static final List<BuilderMorphism> kind_nextId = new ArrayList<>();
+    public static final List<Signature> kind_nextId = new ArrayList<>();
 
     static {
 
@@ -59,7 +59,7 @@ public class Schema {
         }
 
         for (int i = 0; i < kindLabels.length - 1; i++)
-            kind_nextId.add(builder.composite(kind_nextKind.get(i), kind_id.get(i + 1)));
+            kind_nextId.add(builder.concatenate(kind_nextKind.get(i), kind_id.get(i + 1)));
 
     }
 
@@ -102,23 +102,23 @@ public class Schema {
     public static final BuilderMorphism z0_z1 = builder.morphism(z0, z1, 101);
     public static final BuilderMorphism z1_z2 = builder.morphism(z1, z2, 102);
     public static final BuilderMorphism z0_z3 = builder.morphism(z0, z3, 103);
-    public static final BuilderMorphism z0_z2 = builder.composite(z0_z1, z1_z2);
+    public static final Signature       z0_z2 = builder.concatenate(z0_z1, z1_z2);
 
     public static final BuilderMorphism z0_x0 = builder.morphism(z0, x0, 110);
     public static final BuilderMorphism z0_x1 = builder.morphism(z0, x1, 111);
-    public static final Signature x1_x2 = builder.morphism(x2, x1, 112).dual();
+    public static final Signature       x1_x2 = builder.morphism(x2, x1, 112).dual();
     public static final BuilderMorphism x1_x3 = builder.morphism(x1, x3, 113);
     public static final BuilderMorphism z1_x4 = builder.morphism(z1, x4, 114);
     public static final BuilderMorphism z3_x5 = builder.morphism(z3, x5, 115);
-    public static final Signature z3_x6 = builder.morphism(x6, z3, 116).dual();
+    public static final Signature       z3_x6 = builder.morphism(x6, z3, 116).dual();
 
     public static final BuilderMorphism z0_y0 = builder.morphism(z0, y0, 120);
     public static final BuilderMorphism z0_y1 = builder.morphism(z0, y1, 121);
-    public static final Signature y1_y2 = builder.morphism(y2, y1, 122).dual();
+    public static final Signature       y1_y2 = builder.morphism(y2, y1, 122).dual();
     public static final BuilderMorphism y1_y3 = builder.morphism(y1, y3, 123);
     public static final BuilderMorphism z1_y4 = builder.morphism(z1, y4, 124);
     public static final BuilderMorphism z3_y5 = builder.morphism(z3, y5, 125);
-    public static final Signature z3_y6 = builder.morphism(y6, z3, 126).dual();
+    public static final Signature       z3_y6 = builder.morphism(y6, z3, 126).dual();
 
     static {
 

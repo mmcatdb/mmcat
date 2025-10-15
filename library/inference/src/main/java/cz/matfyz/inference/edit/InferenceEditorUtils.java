@@ -2,9 +2,9 @@ package cz.matfyz.inference.edit;
 
 import cz.matfyz.core.exception.MorphismNotFoundException;
 import cz.matfyz.core.exception.ObjexNotFoundException;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
@@ -35,15 +35,15 @@ public class InferenceEditorUtils {
 
     private InferenceEditorUtils() {}
 
-    public static Signature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod) {
+    public static BaseSignature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod) {
         return addMorphismWithMetadata(schema, metadata, dom, cod, false, null);
     }
 
-    public static Signature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, @Nullable Signature signature) {
+    public static BaseSignature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, BaseSignature signature) {
         return addMorphismWithMetadata(schema, metadata, dom, cod, false, signature);
     }
 
-    public static Signature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, boolean isDual, @Nullable Signature signature) {
+    public static BaseSignature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, boolean isDual, @Nullable BaseSignature signature) {
         if (signature == null)
             // TODO cache the signature generator.
             signature = schema.createSignatureGenerator().next();
@@ -75,7 +75,8 @@ public class InferenceEditorUtils {
     }
 
     /** Finds Signature for a morphism between specified domain and codomain. */
-    public static Signature findSignatureBetween(SchemaCategory schema, SchemaObjex dom, SchemaObjex cod) {
+    public static BaseSignature findSignatureBetween(SchemaCategory schema, SchemaObjex dom, SchemaObjex cod) {
+        // TODO replace
         for (final SchemaMorphism morphism : schema.allMorphisms())
             if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
                 return morphism.signature();
@@ -114,6 +115,7 @@ public class InferenceEditorUtils {
             final var dom = metadata.getObjex(morphism.dom());
             final var cod = metadata.getObjex(morphism.cod());
 
+            // TODO replace
             if (dom.label.equals(parentName) && cod.label.equals(childName))
                 return morphism.cod().key();
         }
@@ -121,7 +123,7 @@ public class InferenceEditorUtils {
         throw ObjexNotFoundException.withMessage("Key for name " + fullName + " does not exist");
     }
 
-    public static record KeysAndSignatures(Set<Key> keys, Set<Signature> signatures) {
+    public static record KeysAndSignatures(Set<Key> keys, Set<BaseSignature> signatures) {
 
         public KeysAndSignatures() {
             this(new TreeSet<>(), new TreeSet<>());
@@ -131,7 +133,7 @@ public class InferenceEditorUtils {
             keys.add(key);
         }
 
-        public void add(Signature signature) {
+        public void add(BaseSignature signature) {
             signatures.add(signature);
         }
 

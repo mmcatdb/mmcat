@@ -12,7 +12,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
      * A morphism should be created only by {@link SchemaCategory}.
      * The reason is that there are some invariants involving multiple objexes that need to be maintained by the category.
      */
-    SchemaMorphism(Signature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
+    SchemaMorphism(BaseSignature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
         this.signature = signature;
         this.dom = dom;
         this.cod = cod;
@@ -20,14 +20,10 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         this.tags = Set.of(tags.toArray(Tag[]::new));
     }
 
-    private final Signature signature;
+    private final BaseSignature signature;
     /** A unique identifier of the morphism (within one schema category). */
-    public Signature signature() {
+    public BaseSignature signature() {
         return signature;
-    }
-
-    public boolean isBase() {
-        return signature instanceof BaseSignature;
     }
 
     private SchemaObjex dom;
@@ -86,7 +82,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
     // Identification
 
-    @Override public Signature identifier() {
+    @Override public BaseSignature identifier() {
         return signature;
     }
 

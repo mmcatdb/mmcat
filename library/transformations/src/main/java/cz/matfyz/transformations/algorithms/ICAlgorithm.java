@@ -92,12 +92,12 @@ public class ICAlgorithm {
     private void processPath(AccessPath path, Mapping lastMapping, Signature signatureFromLastMapping) {
         //final var newSignatureFromLastMapping = signatureFromLastMapping.concatenate(path.signature());
 
-        for (final var baseSignature : path.signature().toBases()) {
-            final var objex = mapping.category().getEdge(baseSignature).to();
+        for (final var base : path.signature().toBases()) {
+            final var objex = mapping.category().getEdge(base).to();
             final var objexMapping = mappingsByObjexes.get(objex);
 
             if (objexMapping == null) {
-                signatureFromLastMapping = signatureFromLastMapping.concatenate(baseSignature);
+                signatureFromLastMapping = signatureFromLastMapping.concatenate(base);
             }
             else {
                 lastMapping = objexMapping;

@@ -39,18 +39,14 @@ public class InstanceCategory {
      * All other signatures throw an exception.
      */
     public InstanceMorphism getMorphism(BaseSignature signature) {
-        final var morphism = morphisms.get(signature);
-        if (morphism != null)
-            return morphism;
+        if (signature.isDual())
+            throw MorphismNotFoundException.signatureIsDual(signature);
 
-        // Now we just need to decide why the signature is wrong.
-        if (signature.isEmpty())
-            throw MorphismNotFoundException.signatureIsEmpty();
-        if (!(signature instanceof final BaseSignature baseSignature))
-            throw MorphismNotFoundException.signatureIsComposite(signature);
-        if (baseSignature.isDual())
-            throw MorphismNotFoundException.signatureIsDual(baseSignature);
-        throw MorphismNotFoundException.baseNotFound(baseSignature);
+        final var morphism = morphisms.get(signature);
+        if (morphism == null)
+            throw MorphismNotFoundException.baseNotFound(signature);
+
+        return morphism;
     }
 
     public Collection<InstanceObjex> allObjexes() {
