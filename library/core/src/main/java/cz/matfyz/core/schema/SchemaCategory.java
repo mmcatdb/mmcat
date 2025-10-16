@@ -49,29 +49,39 @@ public class SchemaCategory {
         if (objex == null)
             throw SchemaException.removingNonExistingObjex(key);
 
-        final List<BaseSignature> signaturesOfDependentMorphisms = morphisms.values().stream()
-            .filter(morphism -> morphism.dom().equals(objex) || morphism.cod().equals(objex))
-            .map(SchemaMorphism::signature)
-            .toList();
-
-        if (!signaturesOfDependentMorphisms.isEmpty())
-            throw SchemaException.removedObjexDependsOnMorphisms(objex.key(), signaturesOfDependentMorphisms);
+        final List<BaseSignature> dependencies = new ArrayList<>();
+        objex.from().stream().forEach(m -> dependencies.add(m.signature()));
+        objex.to().stream().forEach(m -> dependencies.add(m.signature()));
+        if (!dependencies.isEmpty())
+            throw SchemaException.removedObjexDependsOnMorphisms(objex.key(), dependencies);
 
         objexes.remove(key);
     }
 
     public SchemaObjex replaceObjex(SerializedObjex serialized) {
         final var key = serialized.key();
-        final var existing = objexes.get(key);
-        if (existing == null)
+        final var prev = objexes.get(key);
+        if (prev == null)
             throw SchemaException.replacingNonExistingObjex(key);
 
-        final var objex = new SchemaObjex(key, serialized.ids(), existing.isEntity());
+        final var next = new SchemaObjex(key, serialized.ids(), prev.isEntity());
+        objexes.put(key, next);
 
-        objexes.put(key, objex);
-        morphisms.values().forEach(morphism -> morphism.updateObjex(objex));
+        prev.from().stream().forEach(m -> m.setDom(next));
+        prev.to().stream().forEach(m -> m.setCod(next));
 
-        return objex;
+        return next;
+    }
+
+    public SchemaMorphism getMorphism(BaseSignature signature) {
+        if (signature.isDual())
+            throw MorphismNotFoundException.signatureIsDual(signature);
+
+        final var morphism = morphisms.get(signature);
+        if (morphism == null)
+            throw MorphismNotFoundException.baseNotFound(signature);
+
+        return morphism;
     }
 
     public SchemaMorphism addMorphism(SerializedMorphism serialized) {
@@ -107,31 +117,17 @@ public class SchemaCategory {
         if (morphism == null)
             throw SchemaException.removingNonExistingMorphism(signature);
 
-        morphism.dom().morphismsFrom.remove(signature);
-        morphism.cod().morphismsTo.remove(signature);
-
-        if (morphism.dom().from().stream().findAny().isEmpty())
+        morphism.removeFromObjex();
+        if (morphism.dom().morphismsFrom.isEmpty())
             morphism.dom().isEntity = false;
 
         morphisms.remove(signature);
     }
 
-
     public void replaceMorphism(SerializedMorphism morphism) {
-        // TODO maybe some integriy check is needed here? Or comment why not ...
+        // Unlike objexes, morphisms can don't depend on anything, so they can be simply removed and added again.
         removeMorphism(morphism);
         addMorphism(morphism);
-    }
-
-    public SchemaMorphism getMorphism(BaseSignature signature) {
-        if (signature.isDual())
-            throw MorphismNotFoundException.signatureIsDual(signature);
-
-        final var morphism = morphisms.get(signature);
-        if (morphism == null)
-            throw MorphismNotFoundException.baseNotFound(signature);
-
-        return morphism;
     }
 
     /**

@@ -14,8 +14,8 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
      */
     SchemaMorphism(BaseSignature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
         this.signature = signature;
-        this.dom = dom;
-        this.cod = cod;
+        setDom(dom);
+        setCod(cod);
         this.min = min;
         this.tags = Set.of(tags.toArray(Tag[]::new));
     }
@@ -32,10 +32,31 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         return dom;
     }
 
+    void setDom(SchemaObjex objex) {
+        if (this.dom != null)
+            this.dom.morphismsFrom.remove(signature);
+
+        this.dom = objex;
+        dom.morphismsFrom.put(signature, this);
+    }
+
     private SchemaObjex cod;
     /** The codomain objex (i.e., the target of the arrow). */
     public SchemaObjex cod() {
         return cod;
+    }
+
+    void setCod(SchemaObjex objex) {
+        if (this.cod != null)
+            this.cod.morphismsTo.remove(signature);
+
+        this.cod = objex;
+        cod.morphismsTo.put(signature, this);
+    }
+
+    void removeFromObjex() {
+        dom.morphismsFrom.remove(signature);
+        cod.morphismsTo.remove(signature);
     }
 
     /** Enum for limiting a morphism cardinality from the bottom. */
@@ -68,16 +89,6 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
     public boolean hasTag(Tag tag) {
         return tags.contains(tag);
-    }
-
-    /**
-     * Replace old version of dom/cod by its newer version (which has the same key).
-     */
-    void updateObjex(SchemaObjex objex) {
-        if (this.dom.equals(objex))
-            this.dom = objex;
-        if (this.cod.equals(objex))
-            this.cod = objex;
     }
 
     // Identification

@@ -198,14 +198,14 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         // Then we find the rows that correspond to them and merge their superIds to the superId.
         // If it gets bigger, we try to generate other ids to find their objexes and so on ...
 
-        int previousValuesSize = 0;
+        int prevValuesSize = 0;
         Set<SuperIdValues> foundIds = new TreeSet<>();
         Set<SignatureId> notFoundIds = schema.ids().toSignatureIds();
 
         final var output = new SuperIdValues.Mutable(values);
 
-        while (previousValuesSize < output.size()) {
-            previousValuesSize = output.size();
+        while (prevValuesSize < output.size()) {
+            prevValuesSize = output.size();
 
             final var result = output.findAllSignatureIds(notFoundIds);
             foundIds.addAll(result.foundIds());

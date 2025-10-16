@@ -52,9 +52,9 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
         return isEntity;
     }
 
-    /** All base morphisms starting in this objex. Managed by {@link SchemaCategory}. */
+    /** All base morphisms starting in this objex. Managed by {@link SchemaMorphism}. */
     final Map<BaseSignature, SchemaMorphism> morphismsFrom = new TreeMap<>();
-    /** All base morphisms ending in this objex. Managed by {@link SchemaCategory}. */
+    /** All base morphisms ending in this objex. Managed by {@link SchemaMorphism}. */
     final Map<BaseSignature, SchemaMorphism> morphismsTo = new TreeMap<>();
 
     public Collection<SchemaMorphism> from() {

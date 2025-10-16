@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 /**
  * The {@code InferenceEditorUtils} class provides utility methods for editing
  * schema categories and metadata within the inference framework. This class
@@ -36,21 +34,12 @@ public class InferenceEditorUtils {
     private InferenceEditorUtils() {}
 
     public static BaseSignature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod) {
-        return addMorphismWithMetadata(schema, metadata, dom, cod, false, null);
+        // TODO cache the signature generator.
+        final var signature = schema.createSignatureGenerator().next();
+        return addMorphismWithMetadata(schema, metadata, dom, cod, signature);
     }
 
     public static BaseSignature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, BaseSignature signature) {
-        return addMorphismWithMetadata(schema, metadata, dom, cod, false, signature);
-    }
-
-    public static BaseSignature addMorphismWithMetadata(SchemaCategory schema, MetadataCategory metadata, SchemaObjex dom, SchemaObjex cod, boolean isDual, @Nullable BaseSignature signature) {
-        if (signature == null)
-            // TODO cache the signature generator.
-            signature = schema.createSignatureGenerator().next();
-
-        if (isDual)
-            signature = signature.dual();
-
         final var morphism = schema.addMorphism(new SerializedMorphism(signature, dom.key(), cod.key(), Min.ONE, Set.of()));
         metadata.setMorphism(morphism, new MetadataMorphism(""));
 
@@ -75,10 +64,9 @@ public class InferenceEditorUtils {
     }
 
     /** Finds Signature for a morphism between specified domain and codomain. */
-    public static BaseSignature findSignatureBetween(SchemaCategory schema, SchemaObjex dom, SchemaObjex cod) {
-        // TODO replace
-        for (final SchemaMorphism morphism : schema.allMorphisms())
-            if (morphism.dom().equals(dom) && morphism.cod().equals(cod))
+    public static BaseSignature findSignatureBetween(SchemaObjex dom, SchemaObjex cod) {
+        for (final SchemaMorphism morphism : dom.from())
+            if (morphism.cod().equals(cod))
                 return morphism.signature();
 
         throw MorphismNotFoundException.withMessage("Signature between objexes: " + dom + " and " + cod + " has not been found");
@@ -104,18 +92,17 @@ public class InferenceEditorUtils {
 
     /** Finds a key from a fully qualified name within the schema and metadata. */
     public static Key findKeyFromName(SchemaCategory schemaCategory, MetadataCategory metadata, String fullName) {
-        String[] nameParts = fullName.split("/");
+        final String[] nameParts = fullName.split("/");
         if (nameParts.length != 2)
             throw new IllegalArgumentException("Invalid full name format: " + fullName);
 
-        String parentName = nameParts[0];
-        String childName = nameParts[1];
+        final String parentName = nameParts[0];
+        final String childName = nameParts[1];
 
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+        for (final var morphism : schemaCategory.allMorphisms()) {
             final var dom = metadata.getObjex(morphism.dom());
             final var cod = metadata.getObjex(morphism.cod());
 
-            // TODO replace
             if (dom.label.equals(parentName) && cod.label.equals(childName))
                 return morphism.cod().key();
         }

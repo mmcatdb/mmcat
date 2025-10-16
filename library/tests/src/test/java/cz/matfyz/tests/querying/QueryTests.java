@@ -4,7 +4,6 @@ import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.core.querytree.JoinNode.SerializedJoinNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 

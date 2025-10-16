@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A provider class for accessing JSON files based on given settings.
@@ -35,10 +36,13 @@ public class JsonProvider implements AbstractDatasourceProvider {
         // Nothing to close.
     }
 
-    public String getKindName() {
-        return FileUtils.extractBaseName(settings.url);
-    }
+    private @Nullable String kindName = null;
 
+    public String getKindName() {
+        if (kindName != null)
+            kindName = FileUtils.extractBaseName(settings.url);
+        return kindName;
+    }
     /**
      * Retrieves an input stream for the specified JSON file.
      */

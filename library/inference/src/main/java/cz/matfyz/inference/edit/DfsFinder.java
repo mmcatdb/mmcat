@@ -40,9 +40,9 @@ public class DfsFinder {
      * Initiates the search for occurrences starting from all objexes in the schema.
      */
     public void findOccurrencesInAllNodes() {
-        for (SchemaObjex node : recursionMerge.newSchema.allObjexes()) {
+        for (final SchemaObjex node : recursionMerge.newSchema.allObjexes())
             findOccurrences(node);
-        }
+
         result = cleanOccurrences(result);
     }
 
@@ -54,8 +54,9 @@ public class DfsFinder {
     }
 
     private void dfsFind(SchemaObjex currentNode, int patternIndex) {
-        if (currentNode == null || patternIndex >= recursionMerge.adjustedPattern.size() || visitedNodes.contains(currentNode))
+        if (patternIndex >= recursionMerge.adjustedPattern.size() || visitedNodes.contains(currentNode))
             return;
+
         visitedNodes.add(currentNode);
 
         PatternSegment currentSegment = recursionMerge.adjustedPattern.get(patternIndex);
@@ -104,13 +105,12 @@ public class DfsFinder {
     }
 
     private void processForward(SchemaObjex currentNode, int patternIndex, PatternSegment currentSegment) {
-        List<SchemaMorphism> morphismsToProcess = findOutgoingMorphisms(currentNode);
         final var currentNodeLabel = recursionMerge.newMetadata.getObjex(currentNode).label;
 
         if (currentSegment.direction().equals(RecursionMerge.RECURSIVE_FORWARD))
             recursiveNodes.add(currentNode);
 
-        for (final SchemaMorphism morphism : morphismsToProcess) {
+        for (final var morphism : currentNode.from()) {
             final int nextIndex = currentSegment.direction().equals(RecursionMerge.RECURSIVE_FORWARD) && recursionMerge.newMetadata.getObjex(morphism.cod()).label.equals(currentNodeLabel)
                 ? patternIndex
                 : patternIndex + 1;
@@ -120,10 +120,9 @@ public class DfsFinder {
     }
 
     private void processBackward(SchemaObjex currentNode, int patternIndex, PatternSegment currentSegment) {
-        List<SchemaMorphism> morphismsToProcess = findIncomingMorphisms(currentNode);
         final var currentNodeLabel = recursionMerge.newMetadata.getObjex(currentNode).label;
 
-        for (SchemaMorphism morphism : morphismsToProcess) {
+        for (final var morphism : currentNode.to()) {
             final int nextIndex = currentSegment.direction().equals(RecursionMerge.RECURSIVE_BACKWARD) && recursionMerge.newMetadata.getObjex(morphism.dom()).label.equals(currentNodeLabel)
                 ? patternIndex
                 : patternIndex + 1;
@@ -154,20 +153,6 @@ public class DfsFinder {
         }
 
         return false;
-    }
-
-    private List<SchemaMorphism> findOutgoingMorphisms(SchemaObjex node) {
-        // TODO replace
-        return recursionMerge.newSchema.allMorphisms().stream()
-            .filter(morphism -> morphism.dom().equals(node))
-            .toList();
-    }
-
-    private List<SchemaMorphism> findIncomingMorphisms(SchemaObjex node) {
-        // TODO replace
-        return recursionMerge.newSchema.allMorphisms().stream()
-            .filter(morphism -> morphism.cod().equals(node))
-            .toList();
     }
 
     private static List<List<SchemaObjex>> cleanOccurrences(List<List<SchemaObjex>> listOfLists) {

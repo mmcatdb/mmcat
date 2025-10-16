@@ -9,7 +9,6 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.Statistics;
 import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;

@@ -138,31 +138,35 @@ public class Layout {
         final Set<SchemaObjex> visited = new HashSet<>();
 
         for (final SchemaObjex objex : schema.allObjexes()) {
-            if (!visited.contains(objex)) {
-                final var subgraph = new DirectedSparseGraph<SchemaObjex, SchemaMorphism>();
-                final Queue<SchemaObjex> queue = new ArrayDeque<>();
-                queue.add(objex);
+            if (visited.contains(objex))
+                continue;
 
-                while (!queue.isEmpty()) {
-                    final SchemaObjex current = queue.poll();
-                    if (!visited.contains(current)) {
-                        visited.add(current);
-                        subgraph.addVertex(current);
+            final var subgraph = new DirectedSparseGraph<SchemaObjex, SchemaMorphism>();
+            final Queue<SchemaObjex> queue = new ArrayDeque<>();
+            queue.add(objex);
 
-                        // TODO replace
-                        for (final SchemaMorphism morphism : schema.allMorphisms()) {
-                            if (morphism.dom().equals(current) || morphism.cod().equals(current)) {
-                                subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
-                                final SchemaObjex next = morphism.dom().equals(current) ? morphism.cod() : morphism.dom();
-                                if (!visited.contains(next))
-                                    queue.add(next);
-                            }
-                        }
-                    }
+            while (!queue.isEmpty()) {
+                final SchemaObjex current = queue.poll();
+                if (visited.contains(current))
+                    continue;
+
+                visited.add(current);
+                subgraph.addVertex(current);
+
+                for (final var morphism : current.from()) {
+                    subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
+                    queue.add(morphism.cod());
                 }
-                subgraphs.add(subgraph);
+
+                for (final var morphism : current.to()) {
+                    subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
+                    queue.add(morphism.dom());
+                }
             }
+
+            subgraphs.add(subgraph);
         }
+
         return subgraphs;
     }
 

@@ -1,7 +1,7 @@
 package cz.matfyz.core.metadata;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.schema.SchemaCategory;
 
@@ -29,7 +29,7 @@ public class MetadataSerializer {
     }
 
     public record SerializedMetadataMorphism(
-        Signature signature,
+        BaseSignature signature,
         String label
     ) {
 
@@ -71,7 +71,7 @@ public class MetadataSerializer {
         final var objexes = new TreeMap<Key, MetadataObjex>();
         serializedMetadata.objexes.stream().forEach(so -> objexes.put(so.key, so.deserialize()));
 
-        final var morphisms = new TreeMap<Signature, MetadataMorphism>();
+        final var morphisms = new TreeMap<BaseSignature, MetadataMorphism>();
         serializedMetadata.morphisms.stream().forEach(sm -> morphisms.put(sm.signature, sm.deserialize()));
 
         return new MetadataCategory(schemaCategory, objexes, morphisms);

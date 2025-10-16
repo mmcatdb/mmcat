@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A provider class for accessing CSV files based on given settings.
@@ -35,8 +36,12 @@ public class CsvProvider implements AbstractDatasourceProvider {
         // Nothing to close.
     }
 
+    private @Nullable String kindName = null;
+
     public String getKindName() {
-        return FileUtils.extractBaseName(settings.url);
+        if (kindName != null)
+            kindName = FileUtils.extractBaseName(settings.url);
+        return kindName;
     }
 
     /**

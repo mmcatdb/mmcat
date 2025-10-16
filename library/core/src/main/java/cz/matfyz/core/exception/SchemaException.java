@@ -33,4 +33,8 @@ public class SchemaException extends CoreException {
         return new SchemaException("removingNonExistingMorphism", signature);
     }
 
+    public static SchemaException replacingNonExistingMorphism(BaseSignature signature) {
+        return new SchemaException("replacingNonExistingMorphism", signature);
+    }
+
 }
