@@ -61,7 +61,9 @@ public class Datasources {
         if (neo4j == null)
             neo4j = createNewNeo4j()
                 .addMapping(Neo4j.order(schema))
-                .addMapping(Neo4j.item(schema));
+                .addMapping(Neo4j.item(schema))
+                .addMapping(Neo4j.note(schema))
+                .addMapping(Neo4j.noteRel(schema));
 
         return neo4j;
     }

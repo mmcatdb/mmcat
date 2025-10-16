@@ -94,6 +94,50 @@ class QueryTests {
     }
 
     @Test
+    void joinNeo4J() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
+                SELECT {
+                    ?item
+                        order ?number ;
+                        quantity ?quantity .
+                }
+                WHERE {
+                    ?item 12/1 ?number .
+                    ?item 14 ?quantity .
+                }
+            """)
+            .expected("""
+                TODO (after it runs without crashing)
+            """)
+            .run();
+    }
+
+    @Test
+    void neo4jNodeAndRelationshipShareObjex() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
+                SELECT {
+                    ?note
+                        subject ?subject ;
+                        content ?content ;
+                        order ?orderNumber .
+                }
+                WHERE {
+                    ?note 23/24 ?subject .
+                    ?note 23/25 ?content .
+                    ?note 21/1 ?orderNumber .
+                }
+            """)
+            .expected("""
+                TODO (after it runs without crashing)
+            """)
+            .run();
+    }
+
+    @Test
     void nestedPostgreSQL() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
