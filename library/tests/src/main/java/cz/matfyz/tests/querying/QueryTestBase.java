@@ -144,4 +144,14 @@ public class QueryTestBase {
         }
     }
 
+    public QueryTestBase copy() {
+        final var copy = new QueryTestBase(schema);
+        copy.queryString = queryString;
+        copy.expectedJson = expectedJson;
+        copy.restrictQueryTree = restrictQueryTree;
+        copy.cache = cache;
+        copy.datasources.addAll(datasources);
+        return copy;
+    }
+
 }

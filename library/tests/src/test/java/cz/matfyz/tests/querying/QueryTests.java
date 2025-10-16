@@ -27,118 +27,89 @@ class QueryTests {
         datasources.neo4j().setup();
     }
 
+    static final QueryTestBase commonBasic = new QueryTestBase(datasources.schema)
+        .query("""
+            SELECT {
+                ?order number ?number .
+            }
+            WHERE {
+                ?order 1 ?number .
+            }
+        """)
+        .expected("""
+            [ {
+                "number": "o_100"
+            }, {
+                "number": "o_200"
+            } ]
+        """);
+
+    static final QueryCustomTreeTest commonFilter = new QueryCustomTreeTest(datasources.schema)
+        .query("""
+            SELECT {
+                ?order number ?number .
+            }
+            WHERE {
+                ?order 1 ?number .
+
+                FILTER(?number = "o_100")
+            }
+        """)
+        .queryTreeBuilder((plans, scope) -> {
+            final var plan = plans.get(0);
+            final var pattern = plan.stream().findFirst().get();
+
+            return new DatasourceNode(
+                pattern.kind.datasource(),
+                plan,
+                datasources.schema,
+                List.of(),
+                List.of(
+                    scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                ),
+                pattern.root.variable
+            );
+        })
+        .expected("""
+            [ {
+                "number": "o_100"
+            } ]
+        """);
+
+    static final QueryTestBase commonJoin = new QueryTestBase(datasources.schema)
+        .query("""
+            SELECT {
+                ?item
+                    order ?number ;
+                    quantity ?quantity .
+            }
+            WHERE {
+                ?item 12/1 ?number .
+                ?item 14 ?quantity .
+            }
+        """)
+        .expected("""
+            TODO (after it runs without crashing)
+        """);
+
     @Test
-    void basicPostgreSQL() {
-        new QueryTestBase(datasources.schema)
+    void postgreSQLBasic() {
+        commonBasic
+            .copy()
             .addDatasource(datasources.postgreSQL())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-                }
-            """)
-            .expected("""
-                [ {
-                    "number": "o_100"
-                }, {
-                    "number": "o_200"
-                } ]
-            """)
             .run();
     }
 
     @Test
-    void basicMongoDB() {
-        new QueryTestBase(datasources.schema)
-            .addDatasource(datasources.mongoDB())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-                }
-            """)
-            .expected("""
-                [ {
-                    "number": "o_100"
-                }, {
-                    "number": "o_200"
-                } ]
-            """)
+    void postgreSQLFilter() {
+        commonFilter
+            .copy()
+            .addDatasource(datasources.postgreSQL())
             .run();
     }
 
     @Test
-    void basicNeo4J() {
-        new QueryTestBase(datasources.schema)
-            .addDatasource(datasources.neo4j())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-                }
-            """)
-            .expected("""
-                [ {
-                    "number": "o_100"
-                }, {
-                    "number": "o_200"
-                } ]
-            """)
-            .run();
-    }
-
-    @Test
-    void joinNeo4J() {
-        new QueryTestBase(datasources.schema)
-            .addDatasource(datasources.neo4j())
-            .query("""
-                SELECT {
-                    ?item
-                        order ?number ;
-                        quantity ?quantity .
-                }
-                WHERE {
-                    ?item 12/1 ?number .
-                    ?item 14 ?quantity .
-                }
-            """)
-            .expected("""
-                TODO (after it runs without crashing)
-            """)
-            .run();
-    }
-
-    @Test
-    void neo4jNodeAndRelationshipShareObjex() {
-        new QueryTestBase(datasources.schema)
-            .addDatasource(datasources.neo4j())
-            .query("""
-                SELECT {
-                    ?note
-                        subject ?subject ;
-                        content ?content ;
-                        order ?orderNumber .
-                }
-                WHERE {
-                    ?note 23/24 ?subject .
-                    ?note 23/25 ?content .
-                    ?note 21/1 ?orderNumber .
-                }
-            """)
-            .expected("""
-                TODO (after it runs without crashing)
-            """)
-            .run();
-    }
-
-    @Test
-    void nestedPostgreSQL() {
+    void postgreSQLNested() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
             .query("""
@@ -185,7 +156,7 @@ class QueryTests {
     }
 
     @Test
-    void nestedPostgreSQLWithArray() {
+    void postgreSQLNestedWithArray() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
             .query("""
@@ -230,8 +201,25 @@ class QueryTests {
             .run();
     }
 
+
     @Test
-    void nestedMongoDB() {
+    void mongoDBBasic() {
+        commonBasic
+            .copy()
+            .addDatasource(datasources.mongoDB())
+            .run();
+    }
+
+    @Test
+    void mongoDBFilter() {
+        commonFilter
+            .copy()
+            .addDatasource(datasources.mongoDB())
+            .run();
+    }
+
+    @Test
+    void mongoDBNested() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.mongoDB())
             .query("""
@@ -272,7 +260,7 @@ class QueryTests {
      * Contrary to the previous test, the nesting path contains an array. This enforces us to use the $map operator in MongoDB.
      */
     @Test
-    void nestedMongoDBWithArray() {
+    void mongoDBNestedWithArray() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.mongoDB())
             .query("""
@@ -308,8 +296,56 @@ class QueryTests {
 
     // TODO add double nested object array.
 
+
+    @Test
+    void neo4jBasic() {
+        commonBasic
+            .copy()
+            .addDatasource(datasources.neo4j())
+            .run();
+    }
+
+    @Test
+    void neo4jFilter() {
+        commonFilter
+            .copy()
+            .addDatasource(datasources.neo4j())
+            .run();
+    }
+
+    @Test
+    void neo4jJoin() {
+        commonJoin
+            .copy()
+            .addDatasource(datasources.neo4j())
+            .run();
+    }
+
+    @Test
+    void neo4jNodeAndRelationshipShareObjex() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
+                SELECT {
+                    ?note
+                        subject ?subject ;
+                        content ?content ;
+                        order ?orderNumber .
+                }
+                WHERE {
+                    ?note 23/24 ?subject .
+                    ?note 23/25 ?content .
+                    ?note 21/1 ?orderNumber .
+                }
+            """)
+            .expected("""
+                TODO (after it runs without crashing)
+            """)
+            .run();
+    }
+
     /**
-     * The arrays are flatten (if it's possible) exept for the top-level array. I.e., if there are multiple orders in the database, we are still going to get an array of orders. However, the properties of the orders are going to be flatten.
+     * The arrays are flattened (if it's possible) exept for the top-level array. I.e., if there are multiple orders in the database, we are still going to get an array of orders. However, the properties of the orders are going to be flattened.
      * In this case, the flattening happens in the database itself.
      */
     @Test
@@ -433,117 +469,6 @@ class QueryTests {
                     "tags": [ "123", "456", "789" ]
                 }, {
                     "tags": [ "123", "String456", "String789" ]
-                } ]
-            """)
-            .run();
-    }
-
-    @Test
-    void filterPostgreSQL() {
-        new QueryCustomTreeTest(datasources.schema)
-            .addDatasource(datasources.postgreSQL())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-
-                    FILTER(?number = "o_100")
-                }
-            """)
-            .queryTreeBuilder((plans, scope) -> {
-                final var plan = plans.get(0);
-                final var pattern = plan.stream().findFirst().get();
-
-                return new DatasourceNode(
-                    pattern.kind.datasource(),
-                    plan,
-                    datasources.schema,
-                    List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
-                    pattern.root.variable
-                );
-            })
-            .expected("""
-                [ {
-                    "number": "o_100"
-                } ]
-            """)
-            .run();
-    }
-
-    @Test
-    void filterMongoDB() {
-        new QueryCustomTreeTest(datasources.schema)
-            .addDatasource(datasources.mongoDB())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-
-                    FILTER(?number = "o_100")
-                }
-            """)
-            .queryTreeBuilder((plans, scope) -> {
-                final var plan = plans.get(0);
-                final var pattern = plan.stream().findFirst().get();
-
-                return new DatasourceNode(
-                    pattern.kind.datasource(),
-                    plan,
-                    datasources.schema,
-                    List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
-                    pattern.root.variable
-                );
-            })
-            .expected("""
-                [ {
-                    "number": "o_100"
-                } ]
-            """)
-            .run();
-    }
-
-    @Test
-    void filterNeo4J() {
-        new QueryCustomTreeTest(datasources.schema)
-            .addDatasource(datasources.neo4j())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-
-                    FILTER(?number = "o_100")
-                }
-            """)
-            .queryTreeBuilder((plans, scope) -> {
-                final var plan = plans.get(0);
-                final var pattern = plan.stream().findFirst().get();
-
-                return new DatasourceNode(
-                    pattern.kind.datasource(),
-                    plan,
-                    datasources.schema,
-                    List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
-                    pattern.root.variable
-                );
-            })
-            .expected("""
-                [ {
-                    "number": "o_100"
                 } ]
             """)
             .run();

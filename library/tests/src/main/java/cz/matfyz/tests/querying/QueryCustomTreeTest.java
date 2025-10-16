@@ -161,4 +161,13 @@ public class QueryCustomTreeTest {
             return null;
         }
     }
+
+    public QueryCustomTreeTest copy() {
+        final var copy = new QueryCustomTreeTest(schema);
+        copy.queryString = queryString;
+        copy.expectedJson = expectedJson;
+        copy.queryTreeBuilder = queryTreeBuilder;
+        copy.datasources.addAll(datasources);
+        return copy;
+    }
 }
