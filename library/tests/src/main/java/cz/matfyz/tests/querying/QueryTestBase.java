@@ -14,6 +14,7 @@ import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.tests.example.common.TestDatasource;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -74,6 +75,13 @@ public class QueryTestBase {
         return this;
     }
 
+    private boolean ordered = false;
+
+    public QueryTestBase ordered() {
+        ordered = true;
+        return this;
+    }
+
     public void run() {
         final var provider = new DefaultControlWrapperProvider();
         final var kinds = defineKinds(provider);
@@ -91,7 +99,22 @@ public class QueryTestBase {
 
             final JsonNode jsonResult = parseJsonResult(jsonResults);
             final JsonNode expectedResult = parseExpectedResult(expectedJson);
-            assertEquals(expectedResult, jsonResult);
+
+            if (ordered) {
+                assertEquals(expectedResult, jsonResult);
+            } else {
+                final var arrayResult = (ArrayNode)jsonResult;
+                final var expectedArray = (ArrayNode)expectedResult;
+
+                final var list1 = new ArrayList<JsonNode>(arrayResult.size());
+                for (final var value : arrayResult) list1.add(value);
+                final var list2 = new ArrayList<JsonNode>(expectedArray.size());
+                for (final var value : expectedArray) list2.add(value);
+
+                list1.sort(new JsonComparator());
+                list2.sort(new JsonComparator());
+                assertEquals(list1, list2);
+            }
         }
     }
 
@@ -150,8 +173,50 @@ public class QueryTestBase {
         copy.expectedJson = expectedJson;
         copy.restrictQueryTree = restrictQueryTree;
         copy.cache = cache;
+        copy.ordered = ordered;
         copy.datasources.addAll(datasources);
         return copy;
+    }
+
+
+
+    static class JsonComparator implements java.util.Comparator<JsonNode> {
+
+        @Override
+        public int compare(JsonNode arg0, JsonNode arg1) {
+            if (arg0.isObject() || arg1.isObject()) {
+                if (!arg0.isObject()) return -1;
+                if (!arg1.isObject()) return 1;
+
+                // get all the fields and recursively compare
+                arg0.properties();
+                final var keySet = new TreeSet<String>(arg0.properties().stream().map(e -> e.getKey()).toList());
+                keySet.addAll(arg1.properties().stream().map(e -> e.getKey()).toList());
+
+                for (final String key : keySet) {
+                    if (!arg0.has(key)) return -1;
+                    if (!arg1.has(key)) return 1;
+
+                    final var result = compare(arg0.get(key), arg1.get(key));
+                    if (result != 0) return result;
+                }
+            } else if (arg0.isArray() || arg1.isArray()) {
+                if (!arg0.isArray()) return -1;
+                if (!arg1.isArray()) return 1;
+
+                // get all the elements and recursively compare
+                if (arg0.size() != arg1.size()) return arg0.size() - arg1.size();
+                for (int i = 0; i < arg0.size(); i++) {
+                    final var result = compare(arg0.get(i), arg1.get(i));
+                    if (result != 0) return result;
+                }
+            } else { // both are value nodes; for now we assume string
+                return arg0.asText().compareTo(arg1.asText());
+            }
+
+            return 0;
+        }
+
     }
 
 }
