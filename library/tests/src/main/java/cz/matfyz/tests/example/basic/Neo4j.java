@@ -14,8 +14,10 @@ public abstract class Neo4j {
 
     public static final String orderKind = "Order";
     public static final String itemKind = "ITEM";
-    public static final String noteKind = "Note";
-    public static final String noteRelKind = "NOTE_REL";
+    public static final String contactKind = "Contact";
+    public static final String hasContactKind = "HAS_CONTACT";
+    // public static final String noteKind = "Note";
+    // public static final String noteRelKind = "NOTE_REL";
 
     public static TestMapping order(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
@@ -34,46 +36,58 @@ public abstract class Neo4j {
             itemKind,
             b -> b.root(
                 b.simple("quantity", Schema.itemToQuantity),
-                b.complex("_from.Order", Schema.itemToOrder,
-                    b.simple("customer", Schema.orderToName)
-                ),
-                b.complex("_to.Product", Schema.itemToProduct,
-                    b.simple("id", Schema.productToId),
-                    b.simple("label", Schema.productToLabel)
-                )
+                b.complex("_from.Order", Schema.itemToOrder),
+                b.complex("_to.Product", Schema.itemToProduct)
             )
         );
     }
 
     // Apparently specifying a relationship with _from and _to is sufficient for querying?
 
-    public static TestMapping note(SchemaCategory schema) {
+    public static TestMapping contact(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
-            Schema.note,
-            noteKind,
+            Schema.contact,
+            contactKind,
             b -> b.root(
-                // b.simple("locale", Schema.noteToLocale),
-                b.simple("subject", Schema.noteToData.signature().concatenate(Schema.dataToSubject.signature())),
-                b.simple("content", Schema.noteToData.signature().concatenate(Schema.dataToContent.signature()))
+                b.simple("value", Schema.contactToValue)
             )
         );
     }
 
-    public static TestMapping noteRel(SchemaCategory schema) {
+    public static TestMapping hasContact(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
-            Schema.note,
-            noteRelKind,
+            Schema.contact,
+            hasContactKind,
             b -> b.root(
-                // b.simple("locale", Schema.noteToLocale), // TODO: try if this works
-                b.complex("_from.Note", Signature.createEmpty(),
-                    b.simple("subject", Schema.noteToData.signature().concatenate(Schema.dataToSubject.signature())),
-                    b.simple("content", Schema.noteToData.signature().concatenate(Schema.dataToContent.signature()))
-                ),
-                b.complex("_to.Order", Schema.noteToOrder,
-                    b.simple("number", Schema.orderToNumber)
-                )
+                b.simple("type", Schema.contactToType),
+
+                b.complex("_from.Order", Schema.contactToOrder),
+                b.complex("_to.Contact", Signature.createEmpty())
             )
         );
     }
+
+    // public static TestMapping note(SchemaCategory schema) {
+    //     return new TestMapping(datasource, schema,
+    //         Schema.data,
+    //         noteKind,
+    //         b -> b.root(
+    //             b.simple("subject", Schema.dataToSubject),
+    //             b.simple("content", Schema.dataToContent)
+    //         )
+    //     );
+    // }
+
+    // public static TestMapping hasNote(SchemaCategory schema) {
+    //     return new TestMapping(datasource, schema,
+    //         Schema.note,
+    //         noteRelKind,
+    //         b -> b.root(
+    //             b.simple("locale", Schema.noteToLocale),
+    //             b.complex("_from.Note", Schema.noteToData),
+    //             b.complex("_to.Order", Schema.noteToOrder)
+    //         )
+    //     );
+    // }
 
 }

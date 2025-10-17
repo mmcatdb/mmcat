@@ -89,7 +89,15 @@ class QueryTests {
             }
         """)
         .expected("""
-            TODO (after it runs without crashing)
+            [ {
+                "order":"o_100","quantity":"1"
+            }, {
+                "order":"o_100","quantity":"2"
+            }, {
+                "order":"o_200","quantity":"7"
+            }, {
+                "order":"o_200","quantity":"3"
+            } ]
         """);
 
     @Test
@@ -103,6 +111,14 @@ class QueryTests {
     @Test
     void postgreSQLFilter() {
         commonFilter
+            .copy()
+            .addDatasource(datasources.postgreSQL())
+            .run();
+    }
+
+    @Test
+    void postgreSQLJoin() {
+        commonJoin
             .copy()
             .addDatasource(datasources.postgreSQL())
             .run();
@@ -327,19 +343,35 @@ class QueryTests {
             .addDatasource(datasources.neo4j())
             .query("""
                 SELECT {
-                    ?note
-                        subject ?subject ;
-                        content ?content ;
+                    ?contact
+                        type ?type ;
+                        value ?value ;
                         order ?orderNumber .
                 }
                 WHERE {
-                    ?note 23/24 ?subject .
-                    ?note 23/25 ?content .
-                    ?note 21/1 ?orderNumber .
+                    ?contact 20 ?type .
+                    ?contact 19 ?value .
+                    ?contact 18/1 ?orderNumber .
                 }
             """)
             .expected("""
-                TODO (after it runs without crashing)
+                [ {
+                    "order":"o_100",
+                    "type":"phone",
+                    "value":"123456789"
+                }, {
+                    "order":"o_100",
+                    "type":"email",
+                    "value":"alice@mmcatdb.com"
+                }, {
+                    "order":"o_200",
+                    "type":"email",
+                    "value":"bob@mmcactdb.com"
+                }, {
+                    "order":"o_200",
+                    "type":"github",
+                    "value":"https://github.com/mmcactdb"
+                } ]
             """)
             .run();
     }

@@ -5,12 +5,14 @@ import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.querying.Computation.Operator;
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.Name.StringName;
 
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
@@ -42,6 +44,20 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
     }
 
+    @Override public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
+
+        // Filter out _from.* or _to.* helper variables
+        final var propertyPath = property.mapping.accessPath().getPropertyPath(property.path);
+        for (final var pathElement : propertyPath) {
+            if (
+                pathElement.name().toString().startsWith(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX) ||
+                pathElement.name().toString().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX)
+            ) return;
+        }
+
+        super.addProjection(property, structure, isOptional);
+    }
+
     @Override public QueryStatement createDSLStatement() {
         StringBuilder sb = new StringBuilder();
 
@@ -54,9 +70,18 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     }
 
     private void addKindMatches(StringBuilder sb) {
-        for (final var projection : projections) {
-            final var mapping = projection.property().mapping;
+        if (joins.isEmpty()) {
+            final var mapping = projections.get(0).property().mapping;
+            String name = isRelationship(mapping) ? edgeName(mapping) : nodeName(mapping);
+            sb.append("MATCH ").append(name).append("\n");
+            return;
+        }
 
+        final var joinedKinds = new TreeSet<Mapping>();
+        for (final var projection : projections) {
+            joinedKinds.add(projection.property().mapping);
+        }
+        for (final var mapping : joinedKinds) {
             String name = isRelationship(mapping) ? edgeName(mapping) : nodeName(mapping);
             sb.append("MATCH ").append(name).append("\n");
         }
@@ -83,9 +108,19 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
                 relationshipPath = join.toPath();
             } else throw new UnsupportedOperationException("Graph join must be between node and edge.");
 
-            boolean directionIsTowardsNode = relationship.accessPath()
-                .getDirectSubpath(relationshipPath.getFirst())
-                .name().toString().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
+            boolean directionIsTowardsNode = false;
+            if (!relationshipPath.isEmpty()) {
+                directionIsTowardsNode = relationship.accessPath()
+                    .getDirectSubpath(relationshipPath.getFirst())
+                    .name().toString().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
+            } else {
+                for (final var aPath : relationship.accessPath().subpaths()) {
+                    if (aPath.signature().isEmpty() && aPath.name().toString().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX)) {
+                        directionIsTowardsNode = true;
+                        break;
+                    }
+                }
+            }
 
             sb.append("MATCH (")
                 .append(mappingVarName(node))
@@ -202,7 +237,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     }
 
     private String edgeName(Mapping mapping) {
-        return "()-[" + mappingVarName(mapping) + ":" + escapeName(mapping.kindName()) + "]-()";
+        return "()-[" + mappingVarName(mapping) + ":" + escapeName(mapping.kindName()) + "]->()";
     }
 
     private String getProjectionSrc(Projection projection) {
