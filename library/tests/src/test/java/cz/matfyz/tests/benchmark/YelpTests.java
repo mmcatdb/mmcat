@@ -5,26 +5,24 @@ import cz.matfyz.querying.QueryToInstance;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.querying.optimizer.QueryDebugPrinter;
-import cz.matfyz.tests.example.benchmarkyelp.Datasources;
+import cz.matfyz.tests.example.benchmark.yelp.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.tests.querying.QueryEstimator;
 import cz.matfyz.tests.querying.QueryTestBase;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BenchmarkTests {
+class YelpTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
-    private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(YelpTests.class);
 
     private static final Datasources datasources = new Datasources();
     private static final CollectorCache cache = new CollectorCache();

@@ -1,15 +1,15 @@
-package cz.matfyz.tests.example.caldotcom;
+package cz.matfyz.tests.example.benchmark.caldotcom;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
-public abstract class MongoDB {
+public abstract class PostgreSQL {
 
-    private MongoDB() {}
+    private PostgreSQL() {}
 
-    public static final Datasource datasource = new Datasource(DatasourceType.mongodb, "mongodb");
+    public static final Datasource datasource = new Datasource(DatasourceType.postgresql, "postgresql");
 
     public static final String
         eventTypeKind = "eventType",

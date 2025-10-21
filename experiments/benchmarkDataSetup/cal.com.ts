@@ -4,7 +4,7 @@ import { RandomHelper } from './helpers/RandomHelper.ts'
 
 random.use('helloworld')
 const randomHelper = new RandomHelper(random)
-const importer = new Importer('caldotcom', parseFloat(process.argv[2] || '1.0'))
+const importer = new Importer('benchmark_caldotcom', parseFloat(process.argv[2] || '1.0'))
 
 // # STEP 1: Create master entries (likely imperatively through this or other JS files)
 
@@ -58,7 +58,6 @@ let team2 = random.shuffle(team)
 const rcr = random.normal(500, 150)
 const eventType = importer.generateRecords(10, () => {
     const teamId = randomHelper.record(team2, random.geometric(1 / team2.length)).id
-    const users = importer.findRecordByKey(membership, 'teamId', teamId)
     return {
         id: (idn++).toString(),
         title: randomHelper.string(8),

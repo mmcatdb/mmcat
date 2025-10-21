@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import cz.matfyz.tests.example.benchmarkyelp.Datasources;
+import cz.matfyz.tests.example.benchmark.yelp.Datasources;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
 import cz.matfyz.core.mapping.Mapping;

@@ -1,20 +1,20 @@
-package cz.matfyz.tests.example.benchmarkyelp;
+package cz.matfyz.tests.example.benchmark.yelp;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
-public abstract class Neo4j {
+public abstract class PostgreSQL {
 
-    private Neo4j() {}
+    private PostgreSQL() {}
 
-    public static final Datasource datasource = new Datasource(DatasourceType.neo4j, "neo4j");
+    public static final Datasource datasource = new Datasource(DatasourceType.postgresql, "postgresql");
 
     public static final String businessKind = "business";
-    public static final String userKind = "user";
-    public static final String reviewKind = "REVIEW";
-    public static final String friendshipKind = "FRIENDSHIP";
+    public static final String userKind = "yelp_user";
+    public static final String reviewKind = "review";
+    public static final String isFriendKind = "friendship";
 
     public static TestMapping business(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
@@ -48,18 +48,14 @@ public abstract class Neo4j {
         );
     }
 
-    // TODO: check that this works
+    // TODO: check that this works!
     public static TestMapping friendship(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
-            Schema.friendship,
-            friendshipKind,
+            Schema.user,
+            isFriendKind,
             b -> b.root(
-                b.complex("_from.User", Schema.friendshipToUser1,
-                    b.simple("user_id", Schema.userToId)
-                ),
-                b.complex("_to.User", Schema.friendshipToUser2,
-                    b.simple("user_id", Schema.userToId)
-                )
+                b.simple("user_id", Schema.userToId),
+                b.simple("friend_id", Schema.friendshipToUser1.dual().concatenate(Schema.friendshipToUser2.signature()).concatenate(Schema.userToId.signature()))
             )
         );
     }
@@ -70,14 +66,8 @@ public abstract class Neo4j {
             reviewKind,
             b -> b.root(
                 b.simple("review_id", Schema.reviewToId),
-
-                b.complex("_to.User", Schema.reviewToUser,
-                    b.simple("user_id", Schema.userToId)
-                ),
-                b.complex("_from.Business", Schema.reviewToBusiness,
-                    b.simple("business_id", Schema.businessToId)
-                ),
-
+                b.simple("user_id", Schema.reviewToUser.signature().concatenate(Schema.userToId.signature())),
+                b.simple("business_id", Schema.reviewToBusiness.signature().concatenate(Schema.businessToId.signature())),
                 b.simple("stars", Schema.reviewToStars),
                 b.simple("date", Schema.reviewToDate),
                 b.simple("useful", Schema.reviewToUseful),

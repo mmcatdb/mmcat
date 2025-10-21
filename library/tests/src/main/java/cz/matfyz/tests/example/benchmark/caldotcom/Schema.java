@@ -1,4 +1,4 @@
-package cz.matfyz.tests.example.caldotcom;
+package cz.matfyz.tests.example.benchmark.caldotcom;
 
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
@@ -133,8 +133,8 @@ public abstract class Schema {
 
             .ids(userOnEventType, userOnEventTypeU, userOnEventTypeET)
             .ids(teamOrgScope, teamOrgScopeT, teamOrgScopeU)
-            .ids(workflowsOnEventTypes, workflowsOnEventTypesWF, workflowsOnEventTypesET)
-            .ids(workflowsOnTeams, workflowsOnTeamsWF, workflowsOnTeamsT);
+            .ids(workflowsOnEventTypes, workflowsOnEventTypesWF, workflowsOnEventTypesET);
+            // .ids(workflowsOnTeams, workflowsOnTeamsWF, workflowsOnTeamsT);
 
     }
 

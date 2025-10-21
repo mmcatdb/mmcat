@@ -1,20 +1,19 @@
-package cz.matfyz.tests.example.benchmarkyelp;
+package cz.matfyz.tests.example.benchmark.yelp;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
-public abstract class PostgreSQL {
+public abstract class MongoDB {
 
-    private PostgreSQL() {}
+    private MongoDB() {}
 
-    public static final Datasource datasource = new Datasource(DatasourceType.postgresql, "postgresql");
+    public static final Datasource datasource = new Datasource(DatasourceType.mongodb, "mongodb");
 
     public static final String businessKind = "business";
     public static final String userKind = "yelp_user";
     public static final String reviewKind = "review";
-    public static final String isFriendKind = "friendship";
 
     public static TestMapping business(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
@@ -28,6 +27,7 @@ public abstract class PostgreSQL {
                 // b.simple("stars", Schema.businessToStars),
                 // b.simple("review_count", Schema.businessToRevCnt),
                 b.simple("is_open", Schema.businessToIsOpen)
+                // b.simple("categories", Schema.businessToCtgry)
             )
         );
     }
@@ -43,19 +43,8 @@ public abstract class PostgreSQL {
                 b.simple("yelping_since", Schema.userToYelpingSince)
                 // b.simple("useful", Schema.userToUseful),
                 // b.simple("funny", Schema.userToFunny),
-                // b.simple("cool", Schema.userToCool)
-            )
-        );
-    }
-
-    // TODO: check that this works!
-    public static TestMapping friendship(SchemaCategory schema) {
-        return new TestMapping(datasource, schema,
-            Schema.user,
-            isFriendKind,
-            b -> b.root(
-                b.simple("user_id", Schema.userToId),
-                b.simple("friend_id", Schema.friendshipToUser1.dual().concatenate(Schema.friendshipToUser2.signature()).concatenate(Schema.userToId.signature()))
+                // b.simple("cool", Schema.userToCool),
+                // b.simple("friends", Schema.friendshipToUser1.dual().concatenate(Schema.friendshipToUser2.signature()).concatenate(Schema.userToId.signature()))
             )
         );
     }

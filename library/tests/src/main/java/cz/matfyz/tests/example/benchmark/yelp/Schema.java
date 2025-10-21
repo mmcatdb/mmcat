@@ -1,4 +1,4 @@
-package cz.matfyz.tests.example.benchmarkyelp;
+package cz.matfyz.tests.example.benchmark.yelp;
 
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;

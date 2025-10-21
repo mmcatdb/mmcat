@@ -1,4 +1,4 @@
-package cz.matfyz.tests.example.caldotcom;
+package cz.matfyz.tests.example.benchmark.caldotcom;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.DatasourceProvider;
@@ -10,7 +10,7 @@ public class Datasources {
 
     public final SchemaCategory schema = Schema.newSchema();
 
-    private static final DatasourceProvider datasourceProvider = new DatasourceProvider("tests", "caldotcom");
+    private static final DatasourceProvider datasourceProvider = new DatasourceProvider("tests", "benchmark_caldotcom");
 
     private TestDatasource<MongoDBControlWrapper> mongoDB;
     private TestDatasource<PostgreSQLControlWrapper> postgreSQL;

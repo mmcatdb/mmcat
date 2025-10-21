@@ -1,28 +1,28 @@
-package cz.matfyz.tests.example.caldotcom;
+package cz.matfyz.tests.example.benchmark.caldotcom;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
-public abstract class PostgreSQL {
+public abstract class Neo4j {
 
-    private PostgreSQL() {}
+    private Neo4j() {}
 
-    public static final Datasource datasource = new Datasource(DatasourceType.postgresql, "postgresql");
+    public static final Datasource datasource = new Datasource(DatasourceType.neo4j, "neo4j");
 
     public static final String
-        eventTypeKind = "eventType",
-        userKind = "caldotcom_user",
-        userOnEventTypeKind = "userOnEventType",
-        teamKind = "team",
-        teamOrgScopeKind = "teamOrgScope",
-        membershipKind = "membership",
-        bookingKind = "booking",
-        attendeeKind = "attendee",
-        workflowKind = "workflow",
-        workflowsOnEventTypesKind = "workflowsOnEventTypes",
-        roleKind = "role";
+        eventTypeKind = "CDCEventType",
+        userKind = "CDCUser",
+        userOnEventTypeKind = "CDC_USER_ON_EVENT_TYPE",
+        teamKind = "CDCTeam",
+        teamOrgScopeKind = "CDC_TEAM_ORG_SCOPE",
+        membershipKind = "CDCMembership",
+        bookingKind = "CDCBooking",
+        attendeeKind = "CDCAttendee",
+        workflowKind = "CDCWorkflow",
+        workflowsOnEventTypesKind = "CDC_WORKFLOWS_ON_EVENT_TYPES",
+        roleKind = "CDCRole";
 
     public static TestMapping eventType(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
