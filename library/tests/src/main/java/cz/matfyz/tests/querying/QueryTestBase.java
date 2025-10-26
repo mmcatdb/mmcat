@@ -106,14 +106,14 @@ public class QueryTestBase {
                 final var arrayResult = (ArrayNode)jsonResult;
                 final var expectedArray = (ArrayNode)expectedResult;
 
-                final var list1 = new ArrayList<JsonNode>(arrayResult.size());
-                for (final var value : arrayResult) list1.add(value);
-                final var list2 = new ArrayList<JsonNode>(expectedArray.size());
-                for (final var value : expectedArray) list2.add(value);
+                final var listResult = new ArrayList<JsonNode>(arrayResult.size());
+                for (final var value : arrayResult) listResult.add(value);
+                final var listExpected = new ArrayList<JsonNode>(expectedArray.size());
+                for (final var value : expectedArray) listExpected.add(value);
 
-                list1.sort(new JsonComparator());
-                list2.sort(new JsonComparator());
-                assertEquals(list1, list2);
+                listResult.sort(new JsonComparator());
+                listExpected.sort(new JsonComparator());
+                assertEquals(listExpected, listResult);
             }
         }
     }

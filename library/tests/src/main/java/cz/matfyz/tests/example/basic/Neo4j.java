@@ -13,6 +13,7 @@ public abstract class Neo4j {
     public static final Datasource datasource = new Datasource(DatasourceType.neo4j, "neo4j");
 
     public static final String orderKind = "Order";
+    public static final String productKind = "Product";
     public static final String itemKind = "ITEM";
     public static final String contactKind = "Contact";
     public static final String hasContactKind = "HAS_CONTACT";
@@ -30,14 +31,29 @@ public abstract class Neo4j {
         );
     }
 
+    public static TestMapping product(SchemaCategory schema) {
+        return new TestMapping(datasource, schema,
+            Schema.product,
+            productKind,
+            b -> b.root(
+                b.simple("id", Schema.productToId),
+                b.simple("label", Schema.productToLabel)
+            )
+        );
+    }
+
     public static TestMapping item(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
             Schema.item,
             itemKind,
             b -> b.root(
                 b.simple("quantity", Schema.itemToQuantity),
-                b.complex("_from.Order", Schema.itemToOrder),
-                b.complex("_to.Product", Schema.itemToProduct)
+                b.complex("_from.Order", Schema.itemToOrder,
+                    b.simple("number", Schema.orderToNumber)
+                ),
+                b.complex("_to.Product", Schema.itemToProduct,
+                    b.simple("id", Schema.productToId)
+                )
             )
         );
     }
@@ -61,8 +77,12 @@ public abstract class Neo4j {
             b -> b.root(
                 b.simple("type", Schema.contactToType),
 
-                b.complex("_from.Order", Schema.contactToOrder),
-                b.complex("_to.Contact", Signature.createEmpty())
+                b.complex("_from.Order", Schema.contactToOrder,
+                    b.simple("number", Schema.orderToNumber)
+                ),
+                b.complex("_to.Contact", Signature.createEmpty(),
+                    b.simple("value", Schema.contactToValue)
+                )
             )
         );
     }

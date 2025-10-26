@@ -80,23 +80,27 @@ class QueryTests {
         .query("""
             SELECT {
                 ?item
-                    order ?number ;
+                    product ?label ;
                     quantity ?quantity .
             }
             WHERE {
-                ?item 12/1 ?number .
+                ?item 13/16 ?label .
                 ?item 14 ?quantity .
             }
         """)
         .expected("""
             [ {
-                "order":"o_100","quantity":"1"
+                "product": "Animal Farm",
+                "quantity":"3"
             }, {
-                "order":"o_100","quantity":"2"
+                "product": "Clean Code",
+                "quantity":"1"
             }, {
-                "order":"o_200","quantity":"7"
+                "product": "The Art of War",
+                "quantity":"7"
             }, {
-                "order":"o_200","quantity":"3"
+                "product": "The Lord of the Rings",
+                "quantity":"2"
             } ]
         """);
 

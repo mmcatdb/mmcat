@@ -12,8 +12,10 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.Name.StringName;
 
-import java.util.TreeSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
 
@@ -44,46 +46,53 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
     }
 
-    @Override public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
-
-        // Filter out _from.* or _to.* helper variables
-        final var propertyPath = property.mapping.accessPath().getPropertyPath(property.path);
-        for (final var pathElement : propertyPath) {
-            if (
-                pathElement.name().toString().startsWith(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX) ||
-                pathElement.name().toString().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX)
-            ) return;
+    // For some reason joined ID variables are inserted as projections twice, so this band-aids the problem; a better fix might be to not make it happen in DatasourceTranslator or higher
+    final HashSet<String> projectionDsts = new HashSet<>();
+    @Override
+    public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
+        if (projectionDsts.contains(structure.name)) {
+            return;
         }
-
+        projectionDsts.add(structure.name);
         super.addProjection(property, structure, isOptional);
     }
 
-    @Override public QueryStatement createDSLStatement() {
-        StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
 
-        addKindMatches(sb);
-        addJoinMatches(sb);
-        addWhere(sb);
-        addWithReturn(sb);
+    @Override public QueryStatement createDSLStatement() {
+        addKindMatches();
+        addJoinMatches();
+        addWhere();
+        addWithReturn();
 
         return new QueryStatement(new StringQuery(sb.toString()), context.rootStructure());
     }
 
-    private void addKindMatches(StringBuilder sb) {
+    private void addKindMatches() {
         if (joins.isEmpty()) {
             final var mapping = projections.get(0).property().mapping;
-            String name = isRelationship(mapping) ? edgeName(mapping) : nodeName(mapping);
-            sb.append("MATCH ").append(name).append("\n");
+            sb.append("MATCH ");
+            if (isRelationship(mapping)) {
+               addRelationshipName(mapping);
+            } else {
+                addNodeName(mapping);
+            }
+            sb.append("\n");
             return;
         }
 
-        final var joinedKinds = new TreeSet<Mapping>();
+        final var joinedKinds = new HashSet<Mapping>();
         for (final var projection : projections) {
             joinedKinds.add(projection.property().mapping);
         }
         for (final var mapping : joinedKinds) {
-            String name = isRelationship(mapping) ? edgeName(mapping) : nodeName(mapping);
-            sb.append("MATCH ").append(name).append("\n");
+            sb.append("MATCH ");
+            if (isRelationship(mapping)) {
+               addRelationshipName(mapping);
+            } else {
+                addNodeName(mapping);
+            }
+            sb.append("\n");
         }
     }
 
@@ -91,7 +100,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
      * Adds matches specifying the way that kinds matched in {@link #addKindMatches(Stringbuilder)} should be joined.
      * For Neo4J, the from/to paths don't mostly matter (except for determining relationship direction using _from / _to) since only possible joins are node-relationship, which Neo4J handles independently of user-provided kind identifiers.
      */
-    private void addJoinMatches(StringBuilder sb) {
+    private void addJoinMatches() {
         for (final var join : joins) {
 
             Mapping relationship;
@@ -131,7 +140,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         }
     }
 
-    private void addWhere(StringBuilder sb) {
+    private void addWhere() {
         if (filters.isEmpty())
             return;
 
@@ -143,11 +152,11 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
             else sb.append(" AND\n  ");
 
             if (f instanceof UnaryFilter uf) {
-                addFilter(uf, sb);
+                addFilter(uf);
             } else if (f instanceof BinaryFilter bf) {
-                addFilter(bf, sb);
+                addFilter(bf);
             } else if (f instanceof SetFilter sf) {
-                addFilter(sf, sb);
+                addFilter(sf);
             } else {
                 throw new UnsupportedOperationException("Unknown filter");
             }
@@ -157,9 +166,8 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         sb.append('\n');
     }
 
-    private void addFilter(UnaryFilter filter, StringBuilder sb) {
-        sb
-            .append(getPropertyName(filter.property()))
+    private void addFilter(UnaryFilter filter) {
+        sb.append(getPropertyName(filter.property()))
             .append(" ")
             .append(operators.stringify(filter.operator()))
             // TODO Some sanitization should be done here.
@@ -168,36 +176,37 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
             .append("'");
     }
 
-    private void addFilter(BinaryFilter filter, StringBuilder sb) {
-        sb
-            .append(getPropertyName(filter.property1()))
+    private void addFilter(BinaryFilter filter) {
+        sb.append(getPropertyName(filter.property1()))
             .append(operators.stringify(filter.operator()))
             .append(getPropertyName(filter.property2()));
     }
 
-    private void addFilter(SetFilter filter, StringBuilder sb) {
+    private void addFilter(SetFilter filter) {
         sb.append(getPropertyName(filter.property()));
 
         final var values = filter.set();
-        sb
-            .append(" ")
+        sb.append(' ')
             .append(operators.stringify(filter.operator()))
             .append(" [")
             .append(values.get(0));
 
         values.stream().skip(1).forEach(value -> sb.append(", ").append(value));
 
-        sb.append("]");
+        sb.append(']');
     }
 
-    private void addWithReturn(StringBuilder sb) {
+    private void addWithReturn() {
         sb.append("WITH\n  ");
 
-        sb.append(
-            projections.stream()
-            .map(p -> getProjectionSrc(p) + " AS " + getProjectionDst(p))
-            .collect(Collectors.joining(",\n  "))
-        );
+        boolean first = true;
+
+        for (final var p : projections) {
+            if (first) first = false; else sb.append(',');
+            sb.append(getProjectionSrc(p))
+                .append(" AS ")
+                .append(getProjectionDst(p));
+        }
 
         sb.append("\nRETURN\n  ");
 
@@ -208,6 +217,9 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         );
     }
 
+    private void addNestedProjection(Object o) {
+
+    }
 
     private static boolean isRelationship(Mapping mapping) {
         final boolean hasFrom = hasSubpathByPrefix(mapping.accessPath(), Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
@@ -231,16 +243,36 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     private static String mappingVarName(Mapping mapping) {
         return escapeName("VAR_" + mapping.kindName());
     }
-
-    private String nodeName(Mapping mapping) {
-        return "(" + mappingVarName(mapping) + ":" + escapeName(mapping.kindName()) + ")";
+    private static String mappingVarNameFrom(Mapping mapping) {
+        return escapeName("VARFROM_" + mapping.kindName());
+    }
+    private static String mappingVarNameTo(Mapping mapping) {
+        return escapeName("VARTO_" + mapping.kindName());
     }
 
-    private String edgeName(Mapping mapping) {
-        return "()-[" + mappingVarName(mapping) + ":" + escapeName(mapping.kindName()) + "]->()";
+    private void addNodeName(Mapping mapping) {
+        sb.append('(')
+            .append(mappingVarName(mapping))
+            .append(':')
+            .append(escapeName(mapping.kindName()))
+            .append(')');
     }
+
+    private void addRelationshipName(Mapping mapping) {
+        sb.append('(')
+            .append(mappingVarNameFrom(mapping))
+            .append(")-[")
+            .append(mappingVarName(mapping))
+            .append(':')
+            .append(escapeName(mapping.kindName()))
+            .append("]->(")
+            .append(mappingVarNameTo(mapping))
+            .append(')');
+    }
+
 
     private String getProjectionSrc(Projection projection) {
+        // TODO if from or to then use relationship variables and push elsewhere
         return getPropertyName(projection.property());
     }
     private String getProjectionDst(Projection projection) {
@@ -255,6 +287,14 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     }
 
     private String getPropertyNameWithoutAggregation(Property property) {
+        final var propertyPath = property.mapping.accessPath().getPropertyPath(property.path);
+        final var firstKey = propertyPath.get(0).name().toString();
+        if (firstKey.startsWith(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX)) {
+            return mappingVarNameFrom(property.mapping) + "." + propertyPath.stream().skip(1).map(ap -> escapeName(ap.name().toString())).collect(Collectors.joining("."));
+        } else if (firstKey.startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX)) {
+            return mappingVarNameTo(property.mapping) + "." + propertyPath.stream().skip(1).map(ap -> escapeName(ap.name().toString())).collect(Collectors.joining("."));
+        }
+
         return mappingVarName(property.mapping) + "." + getRawAttributeName(property);
     }
 
