@@ -28,9 +28,7 @@ function useGraphEngine(graph: Graph, dispatch: Dispatch<GraphEvent>, options?: 
     const [ state, setState ] = useState<ReactiveGraphState>(() => createInitialGraphState(graph));
     const engine = useMemo(() => new GraphEngine(graph, dispatch, state, setState, { ...defaultGraphOptions, ...options }), [ options ]);
 
-    useEffect(() => {
-        return engine.setup();
-    }, [ engine ]);
+    useEffect(() => engine.setup(), [ engine ]);
 
     const cache = useRef(graph);
     if (cache.current !== graph) {

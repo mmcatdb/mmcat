@@ -42,7 +42,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         this(new TreeSet<>(List.of(signatures)));
     }
 
-    public static SignatureId createEmpty() {
+    public static SignatureId empty() {
         return new SignatureId(Signature.empty());
     }
 

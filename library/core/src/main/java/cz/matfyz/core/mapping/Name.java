@@ -75,7 +75,6 @@ public abstract class Name implements Serializable {
         public final String type;
 
         public TypedName(String type) {
-            super();
             this.type = type;
         }
 
@@ -89,25 +88,19 @@ public abstract class Name implements Serializable {
 
         /** The property is a root of the access path tree, the name doesn't mean anything. */
         public static final String ROOT = "root";
-        /** The property is a value in an objex, the name represents its key. */
+        /** The property is a value in an objex, the name represents its key. @deprecated */
         public static final String KEY = "key";
-        /** The property is an element of an array, the name represents its index. */
+        /** The property is an element of an array, the name represents its index. @deprecated */
         public static final String INDEX = "index";
 
     }
 
     /**
-     * Name that is mapped to a key (in an objex) or to an index (in an array).
+     * Name that is mapped to a key in an object / map / dictionary / etc.
      */
-    public static class DynamicName extends TypedName implements Comparable<DynamicName> {
+    public static class DynamicName extends Name implements Comparable<DynamicName> {
 
         public final Signature signature;
-
-        public DynamicName(String type, Signature signature, @Nullable String pattern) {
-            super(type);
-            this.signature = signature;
-            this.pattern = pattern;
-        }
 
         /**
          * If provided, only the matching names will be considered when retrieving records.
@@ -117,6 +110,11 @@ public abstract class Name implements Serializable {
          */
         @JsonProperty
         private final @Nullable String pattern;
+
+        public DynamicName(String type, Signature signature, @Nullable String pattern) {
+            this.signature = signature;
+            this.pattern = pattern;
+        }
 
         public @Nullable Pattern compiledPattern() {
             if (pattern == null)
@@ -137,8 +135,8 @@ public abstract class Name implements Serializable {
         private static final Pattern patternValidator = Pattern.compile("^[a-zA-Z0-9._\\-*]+$");
 
         @Override public String toString() {
-            final String patternString = pattern == null ? "" : " (" + pattern + ")";
-            return "<" + type + patternString + ": " + signature.toString() + ">";
+            final String patternString = pattern == null ? "" : " (" + pattern + "): ";
+            return "<" + patternString + ": " + signature.toString() + ">";
         }
 
         @Override public boolean equals(Object object) {
@@ -168,18 +166,30 @@ public abstract class Name implements Serializable {
         if (b instanceof StringName)
             return 1;
 
-        // At this point, both names are typed.
-        if (a instanceof DynamicName aDynamic) {
-            if (!(b instanceof DynamicName bDynamic))
-                return 1;
-
-            return aDynamic.type.compareTo(bDynamic.type);
+        // Let's try typed now ...
+        if (a instanceof TypedName aTyped) {
+            return b instanceof TypedName bTyped
+                ? aTyped.type.compareTo(bTyped.type)
+                : -1;
         }
 
-        if (b instanceof DynamicName)
-            return -1;
+        if (b instanceof TypedName)
+            return 1;
 
-        return ((TypedName) a).type.compareTo(((TypedName) b).type);
+        // At this point, both names are dynamic.
+        final var aDynamic = (DynamicName) a;
+        final var bDynamic = (DynamicName) b;
+
+        if (aDynamic.pattern == null) {
+            return bDynamic.pattern == null
+                ? 0
+                : -1;
+        }
+
+        if (bDynamic.pattern == null)
+            return 1;
+
+        return aDynamic.pattern.compareTo(bDynamic.pattern);
     }
 
 }

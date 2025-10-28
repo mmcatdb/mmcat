@@ -29,7 +29,7 @@ public class ComplexRecord implements Printable {
         return children.get(signature);
     }
 
-    public <TDataType> @Nullable List<TDataType> findValues(Signature signature, boolean onlyDirect) {
+    public <TDataType> @Nullable List<TDataType> findArrayValues(Signature signature, boolean onlyDirect) {
         final var records = onlyDirect ? values.get(signature) : findSimpleRecords(signature);
         if (records == null)
             return null;
@@ -42,18 +42,13 @@ public class ComplexRecord implements Printable {
     }
 
     public <TDataType> @Nullable TDataType findScalarValue(Signature signature, boolean onlyDirect) {
-        final @Nullable List<TDataType> values = findValues(signature, onlyDirect);
+        final @Nullable List<TDataType> values = findArrayValues(signature, onlyDirect);
         if (values == null)
             return null;
 
         assert values.size() == 1 : "There should be exactly one value for a signature in a complex record, but found: " + values.size();
 
         return values.get(0);
-    }
-
-    public <TDataType> List<TDataType> findDirectArrayValues(Signature signature) {
-        final @Nullable List<TDataType> values = findValues(signature, true);
-        return values == null ? List.of() : values;
     }
 
     private @Nullable List<SimpleRecord<?>> findSimpleRecords(Signature signature) {

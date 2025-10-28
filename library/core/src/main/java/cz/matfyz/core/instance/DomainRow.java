@@ -5,7 +5,6 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +33,7 @@ public class DomainRow implements Comparable<DomainRow> {
     public final @Nullable Integer technicalId;
 
     // FIXME consider this when merging
-    private final Map<BaseSignature, String> simpleValues = new TreeMap<>();
-    // FIXME consider this when merging
-    private final Map<BaseSignature, List<String>> arrayValues = new TreeMap<>();
+    private final Map<BaseSignature, String> propertyValues = new TreeMap<>();
 
     /**
      * All signatures from the superId of this objex that point to values that are used in superIds of some other objexes.
@@ -51,14 +48,14 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     /**
-     * A scalar value is either a simple value or a value from the superId.
+     * A scalar value is either a property value or a value from the superId.
      */
     public @Nullable String tryGetScalarValue(Signature signature) {
         final var superIdValue = superId.getValue(signature);
         if (superIdValue != null || !(signature instanceof final BaseSignature base))
             return superIdValue;
 
-        return simpleValues.get(base);
+        return propertyValues.get(base);
     }
 
     /**
@@ -69,9 +66,9 @@ public class DomainRow implements Comparable<DomainRow> {
         if (superIdValue != null)
             return superIdValue;
 
-        // A base signature can only be in simpleValues.
+        // A base signature can only be in propertyValues (if it's not in the superId).
         if (signature instanceof final BaseSignature base)
-            return simpleValues.get(base);
+            return propertyValues.get(base);
 
         final var bases = signature.toBases();
         DomainRow current = this;
@@ -92,54 +89,29 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     /**
-     * Returns all array values directly in this row.
-     */
-    public Collection<String> getArrayValues(BaseSignature signature) {
-        final var values = arrayValues.get(signature);
-        return values == null ? List.of() : values;
-    }
-
-    /**
      * If the values are not here, traverses other rows and tries to find the values there.
      */
     public Collection<String> findArrayValues(Signature signature) {
-        if (signature instanceof final BaseSignature base)
-            return getArrayValues(base);
-
         // Similarly to the function above, we traverse up to the last base.
         final var rows = traverseThrough(signature.cutLast());
         final var lastBase = signature.getLast();
 
         final Set<String> output = new TreeSet<>();
 
-        // The "array" part can be caused both by the path being dual, or the last base being dual.
-        if (!lastBase.isDual()) {
-            for (final var row : rows) {
-                final var value = row.tryGetScalarValue(lastBase);
-                if (value != null)
-                    output.add(value);
-            }
-        }
-        else {
-            for (final var row : rows) {
-                final var values = row.getArrayValues(lastBase);
-                output.addAll(values);
-            }
+        // The last base can't be dual - we are retrieving a property value from some entity.
+        assert !lastBase.isDual() : "The last base of a signature used to retrieve array values cannot be dual: " + signature;
+
+        for (final var row : rows) {
+            final var value = row.tryGetScalarValue(lastBase);
+            if (value != null)
+                output.add(value);
         }
 
         return output;
     }
 
-    public void addSimpleValue(BaseSignature signature, String value) {
-        simpleValues.put(signature, value);
-    }
-
-    public void addArrayValue(BaseSignature signature, String value) {
-        arrayValues.computeIfAbsent(signature, x -> new ArrayList<>()).add(value);
-    }
-
-    public void addArrayValues(BaseSignature signature, Collection<String> values) {
-        arrayValues.computeIfAbsent(signature, x -> new ArrayList<>()).addAll(values);
+    public void addPropertyValue(BaseSignature signature, String value) {
+        propertyValues.put(signature, value);
     }
 
     // These properties are managed by the morphisms, so they shouldn't be cloned.
@@ -296,19 +268,12 @@ public class DomainRow implements Comparable<DomainRow> {
         sb.append(": (");
         final var SEPARATOR = ", ";
 
-        for (final var entry : simpleValues.entrySet())
+        for (final var entry : propertyValues.entrySet())
             sb
                 .append(entry.getKey()).append(": \"").append(entry.getValue()).append("\"")
                 .append(SEPARATOR);
 
-        for (final var entry : arrayValues.entrySet())
-            sb
-                .append(entry.getKey()).append(": [")
-                .append(String.join(", ", entry.getValue()))
-                .append("]")
-                .append(SEPARATOR);
-
-        if (!simpleValues.isEmpty() || !arrayValues.isEmpty())
+        if (!propertyValues.isEmpty())
             sb.setLength(sb.length() - SEPARATOR.length());
 
         sb.append(")");

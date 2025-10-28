@@ -83,7 +83,7 @@ public class ICAlgorithm {
             else
                 // These names are identifiers of given kind so they must be unique among all names.
                 // This quality can't be achieved by dynamic names so they aren't supported here.
-                throw InvalidStateException.nameIsNotStatic(subpath.name());
+                throw InvalidStateException.nameIsNotString(subpath.name());
         }
 
         return new IdentifierStructure(output);

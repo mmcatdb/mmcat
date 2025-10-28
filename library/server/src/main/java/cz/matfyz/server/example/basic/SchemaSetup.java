@@ -24,8 +24,16 @@ class SchemaSetup extends SchemaBase {
         });
         addIds(Schema.order);
 
+        // Tag - it's both a set and an array (so that we can test both usecases).
         addObjex(Schema.tag, -1, -1);
-        addMorphism(Schema.tagToOrder);
+        addComposite("custom", () -> {
+            addObjex(Schema.tags, -0.5, -0.5);
+            addMorphism(Schema.tagsToOrder);
+            addMorphism(Schema.tagsToTag);
+            addObjex(Schema.index, -1, -0.5);
+            addMorphism(Schema.tagsToIndex);
+            addIds(Schema.tags);
+        });
 
         // Customer
         addObjex(Schema.customer, -2, 0);

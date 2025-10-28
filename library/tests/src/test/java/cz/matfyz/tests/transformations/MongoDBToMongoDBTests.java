@@ -59,7 +59,7 @@ class MongoDBToMongoDBTests {
     }
 
     @Test
-    void complex_arrayTest() {
+    void complexArrayTest() {
         new PullToDDLAndDMLTestBase(
             datasource.wrapper.getPullWrapper(),
             new MongoDBDDLWrapper(),

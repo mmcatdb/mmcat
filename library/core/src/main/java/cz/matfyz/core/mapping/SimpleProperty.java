@@ -32,8 +32,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = SimpleProperty.Deserializer.class)
 public class SimpleProperty extends AccessPath {
 
+    /** @deprecated build only */
     public SimpleProperty(Name name, Signature signature) {
-        super(name, signature);
+        super(name, signature, List.of());
+    }
+
+    SimpleProperty(Name name, Signature signature, List<@Nullable Signature> indexSignatures) {
+        super(name, signature, indexSignatures);
     }
 
     @Override protected @Nullable List<AccessPath> getPropertyPathInternal(Signature signature) {
@@ -52,7 +57,8 @@ public class SimpleProperty extends AccessPath {
     }
 
     @Override protected SimpleProperty copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames) {
-        return new SimpleProperty(name, signature);
+        // TODO check if indexSignatures needs to be updated as well
+        return new SimpleProperty(name, signature, indexSignatures);
     }
 
     @Override public void printTo(Printer printer) {
@@ -73,6 +79,12 @@ public class SimpleProperty extends AccessPath {
             generator.writeStartObject();
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
+
+            generator.writeArrayFieldStart("indexSignatures");
+            for (final var signature : property.indexSignatures())
+                generator.writePOJO(signature);
+            generator.writeEndArray();
+
             generator.writeEndObject();
         }
     }
@@ -87,8 +99,9 @@ public class SimpleProperty extends AccessPath {
 
             final Name name = codec.treeToValue(node.get("name"), Name.class);
             final Signature signature = codec.treeToValue(node.get("signature"), Signature.class);
+            final Signature[] indexSignatures = codec.treeToValue(node.get("indexSignatures"), Signature[].class);
 
-            return new SimpleProperty(name, signature);
+            return new SimpleProperty(name, signature, List.of(indexSignatures));
         }
     }
 

@@ -32,4 +32,8 @@ public class InvalidPathException extends WrapperException {
         return new InvalidPathException("isArray", datasource, path);
     }
 
+    public static InvalidPathException unsupportedArrayDimension(DatasourceType datasource, PropertyPath path) {
+        return new InvalidPathException("unsupportedArrayDimension", datasource, path);
+    }
+
 }

@@ -196,7 +196,9 @@ public class SchemaBuilder {
     @SafeVarargs
     public final SchemaBuilder ids(BuilderObjex objexes, Accessor<Signature>... signatures) {
         final var id = new SignatureId(Stream.of(signatures).map(m -> m.access()).toArray(Signature[]::new));
-        objexes.ids = new ObjexIds(Set.of(id));
+        objexes.ids = objexes.ids.isSignatures()
+            ? objexes.ids.extend(id)
+            : new ObjexIds(Set.of(id));
 
         return this;
     }

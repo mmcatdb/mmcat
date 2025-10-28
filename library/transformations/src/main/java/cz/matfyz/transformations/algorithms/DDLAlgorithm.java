@@ -13,6 +13,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -68,10 +69,7 @@ public class DDLAlgorithm {
         final AccessPath property = element.property();
         final SchemaPath schemaPath = mapping.category().getPath(property.signature());
 
-        final Set<String> names = getPropertyNames(property);
-        final var isDynamic = property.name() instanceof DynamicName;
-        final boolean isArray = schemaPath.isArray() && !isDynamic;
-        final PropertyPath path = element.path().add(new PathSegment(names, isDynamic, isArray));
+        final PropertyPath path = element.path().add(createPathSegment(property));
 
         if (property instanceof final ComplexProperty complexProperty)
             addSubpathsToStack(masterStack, complexProperty, path);
@@ -79,14 +77,49 @@ public class DDLAlgorithm {
         final boolean isComplex = property instanceof ComplexProperty;
         final boolean isRequired = isRequired(property, schemaPath);
         wrapper.addProperty(path, isComplex, isRequired);
-
     }
 
-    private Set<String> getPropertyNames(AccessPath property) {
-        if (property.name() instanceof final StringName stringName)
-            return Set.of(stringName.value);
+    private PathSegment createPathSegment(AccessPath property) {
+        // There are two ways how to represent arrays:
+        // - A set (index isn't mapped):
+        // order: {
+        //     tags: -1.3
+        // }
+        //
+        // - An array (index is mapped):
+        // order: {
+        //     tags: {
+        //         <index: -1.2>: -1.3
+        //     }
+        // }
+        //
+        // The second one also allows multi-dimensional arrays:
+        // data: {
+        //     values: {
+        //         <index: -1.2>: -1.3 {
+        //             <index: -5.6>: -5.7
+        //         }
+        //     }
+        // }
+        //
+        // The first one is just a 'shorthand' for single-dimensional arrays - i.e., "tags[]".
+        // The second one is the same ("tags[]"), but the multi-dimensional variant is more complex ("values[][]").
 
-        final var replacement = replacedNames.get((DynamicName) property.name());
+        if (property.name() instanceof final StringName stringName)
+            return PathSegment.scalar(stringName.value);
+
+        if (!(property.name() instanceof DynamicName dynamicName))
+            throw InvalidStateException.nameIsTyped(property.name());
+
+        // FIXME build only
+        // if (dynamicName.type.equals(DynamicName.INDEX))
+        //     return PathSegment.array();
+
+        return PathSegment.map(getPropertyNames(dynamicName));
+    }
+
+    private Set<String> getPropertyNames(DynamicName dynamicName) {
+        final var replacement = replacedNames.get(dynamicName);
 
         final var prefixPath = mapping.category().getPath(replacement.prefix());
         final var mapObjex = instance.getObjex(prefixPath.to());

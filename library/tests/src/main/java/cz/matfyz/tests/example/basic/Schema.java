@@ -19,52 +19,64 @@ public abstract class Schema {
 
     public static final BuilderObjex order =           builder.objex("order", 1);
     public static final BuilderObjex number =          builder.objex("number", 2);
-    public static final BuilderObjex tag =             builder.objex("tag", 3);
+    public static final BuilderObjex tags =            builder.objex("tags", 3);
+    public static final BuilderObjex tag =             builder.objex("tag", 4);
+    public static final BuilderObjex index =           builder.objex("index", 5);
 
-    public static final BuilderObjex customer =        builder.objex("customer", 4);
-    public static final BuilderObjex name =            builder.objex("name", 5);
-    public static final BuilderObjex friend =          builder.objex("friend", 6);
-    public static final BuilderObjex since =           builder.objex("since", 7);
+    public static final BuilderObjex customer =        builder.objex("customer", 6);
+    public static final BuilderObjex name =            builder.objex("name", 7);
+    public static final BuilderObjex friend =          builder.objex("friend", 8);
+    public static final BuilderObjex since =           builder.objex("since", 9);
 
-    public static final BuilderObjex address =         builder.generatedIds().objex("address", 8);
-    public static final BuilderObjex street =          builder.objex("street", 9);
-    public static final BuilderObjex city =            builder.objex("city", 10);
-    public static final BuilderObjex zip =             builder.objex("zip", 11);
+    public static final BuilderObjex address =         builder.generatedIds().objex("address", 10);
+    public static final BuilderObjex street =          builder.objex("street", 11);
+    public static final BuilderObjex city =            builder.objex("city", 12);
+    public static final BuilderObjex zip =             builder.objex("zip", 13);
 
-    public static final BuilderObjex item =            builder.objex("item", 12);
-    public static final BuilderObjex product =         builder.objex("product", 13);
-    public static final BuilderObjex quantity =        builder.objex("quantity", 14);
-    public static final BuilderObjex id =              builder.objex("id", 15);
-    public static final BuilderObjex label =           builder.objex("label", 16);
-    public static final BuilderObjex price =           builder.objex("price", 17);
+    public static final BuilderObjex item =            builder.objex("item", 14);
+    public static final BuilderObjex product =         builder.objex("product", 15);
+    public static final BuilderObjex quantity =        builder.objex("quantity", 16);
+    public static final BuilderObjex id =              builder.objex("id", 17);
+    public static final BuilderObjex label =           builder.objex("label", 18);
+    public static final BuilderObjex price =           builder.objex("price", 19);
 
-    public static final BuilderObjex contact =         builder.objex("contact", 18);
-    public static final BuilderObjex value =           builder.objex("value", 19);
-    public static final BuilderObjex type =            builder.objex("type", 20);
+    public static final BuilderObjex contact =         builder.objex("contact", 20);
+    public static final BuilderObjex value =           builder.objex("value", 21);
+    public static final BuilderObjex type =            builder.objex("type", 22);
 
-    public static final BuilderObjex note =            builder.objex("note", 21);
-    public static final BuilderObjex locale =          builder.objex("locale", 22);
-    public static final BuilderObjex data =            builder.generatedIds().objex("data", 23);
-    public static final BuilderObjex subject =         builder.objex("subject", 24);
-    public static final BuilderObjex content =         builder.objex("content", 25);
+    public static final BuilderObjex note =            builder.objex("note", 23);
+    public static final BuilderObjex locale =          builder.objex("locale", 24);
+    public static final BuilderObjex data =            builder.generatedIds().objex("data", 25);
+    public static final BuilderObjex subject =         builder.objex("subject", 26);
+    public static final BuilderObjex content =         builder.objex("content", 27);
 
-    public static final BuilderObjex dynamic =         builder.objex("dynamic", 26);
-    public static final BuilderObjex dId =             builder.objex("id", 27);
-    public static final BuilderObjex dLabel =          builder.objex("label", 28);
-    public static final BuilderObjex prefix =          builder.objex("prefix", 29);
-    public static final BuilderObjex prefixType =      builder.objex("type-x", 30);
-    public static final BuilderObjex prefixValue =     builder.objex("type-x", 31);
-    public static final BuilderObjex prefiy =          builder.objex("prefiy", 32);
-    public static final BuilderObjex prefiyType =      builder.objex("type-y", 33);
-    public static final BuilderObjex prefiyValue =     builder.objex("type-y", 34);
-    public static final BuilderObjex catchAll =        builder.objex("catch-all", 35);
-    public static final BuilderObjex catchAllType =    builder.objex("catch-all-type", 36);
-    public static final BuilderObjex catchAllValue =   builder.objex("catch-all-value", 37);
+    public static final BuilderObjex dynamic =         builder.objex("dynamic", 28);
+    public static final BuilderObjex dId =             builder.objex("id", 29);
+    public static final BuilderObjex dLabel =          builder.objex("label", 30);
+    public static final BuilderObjex prefix =          builder.objex("prefix", 31);
+    public static final BuilderObjex prefixType =      builder.objex("type-x", 32);
+    public static final BuilderObjex prefixValue =     builder.objex("type-x", 33);
+    public static final BuilderObjex prefiy =          builder.objex("prefiy", 34);
+    public static final BuilderObjex prefiyType =      builder.objex("type-y", 35);
+    public static final BuilderObjex prefiyValue =     builder.objex("type-y", 36);
+    public static final BuilderObjex catchAll =        builder.objex("catch-all", 37);
+    public static final BuilderObjex catchAllType =    builder.objex("catch-all-type", 38);
+    public static final BuilderObjex catchAllValue =   builder.objex("catch-all-value", 39);
 
     // Morphisms
 
     public static final BuilderMorphism orderToNumber =             builder.morphism(order, number, 1);
-    public static final BuilderMorphism tagToOrder =                builder.morphism(tag, order, 2);
+    // FIXME remove this from everywhere
+    // public static final BuilderMorphism tagToOrder =                builder.morphism(tag, order, 2);
+
+    // FIXME rename all morphisms
+    // TODO use a different numbering (e.g., 1, 2, 3, 11, 12, 13, 21, ...) to allow easier insertions later.
+    public static final BuilderMorphism tagsToOrder =               builder.tags(Tag.role).morphism(tags, order, 101);
+    public static final BuilderMorphism tagsToTag =                 builder.tags(Tag.role).morphism(tags, tag, 102);
+    public static final BuilderMorphism tagsToIndex =               builder.tags(Tag.role).morphism(tags, index, 103);
+    public static final Signature       orderToTag =                builder.concatenate(tagsToOrder.dual(), tagsToTag);
+    public static final Signature       orderToIndex =              builder.concatenate(tagsToOrder.dual(), tagsToIndex);
+    public static final Signature       tagsToNumber =              builder.concatenate(tagsToOrder, orderToNumber);
 
     public static final BuilderMorphism orderToCustomer =           builder.morphism(order, customer, 3);
     public static final BuilderMorphism customerToName =            builder.morphism(customer, name, 4);
@@ -142,6 +154,9 @@ public abstract class Schema {
 
         builder
             .ids(order, orderToNumber)
+            // Tags are identified in two ways - either as a set (number, value) or as an array (number, index). We want to be able to test both usecases.
+            .ids(tags, tagsToNumber, tagsToTag)
+            .ids(tags, tagsToNumber, tagsToIndex)
             .ids(customer, customerToName)
             .ids(friend, friendToCustomerA, friendToCustomerB)
             .ids(item, itemToNumber, itemToId)

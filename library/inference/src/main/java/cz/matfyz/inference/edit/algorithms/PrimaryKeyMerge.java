@@ -18,9 +18,6 @@ import cz.matfyz.inference.edit.InferenceEditorUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -133,16 +130,10 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     }
 
     private ObjexIds createUpdatedIds(SchemaObjex schemaObjex, Signature signature) {
-        final SortedSet<SignatureId> signatureSet = new TreeSet<>(Set.of(new SignatureId(signature)));
-        return schemaObjex.ids().isSignatures()
-            ? new ObjexIds(addSignatureToSet(schemaObjex.ids(), signature))
-            : new ObjexIds(signatureSet);
-    }
-
-    private SortedSet<SignatureId> addSignatureToSet(ObjexIds ids, Signature signature) {
-        final SortedSet<SignatureId> signatureIds = ids.signatureIds();
-        signatureIds.add(new SignatureId(signature));
-        return signatureIds;
+        final var newId = new SignatureId(signature);
+        return schemaObjex.hasSignatureId()
+            ? schemaObjex.ids().extend(newId)
+            : new ObjexIds(newId);
     }
 
     /**

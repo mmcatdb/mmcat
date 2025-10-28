@@ -97,11 +97,10 @@ public class PatternExtractor {
 
         extractedObjexes.add(objex.key());
 
-        if (!objex.ids().isSignatures())
+        if (!objex.hasSignatureId())
             return;
 
-        objex.ids().signatureIds().stream()
-            .flatMap(id -> id.signatures().stream())
+        objex.ids().collectAllSignatures().stream()
             .flatMap(signature -> signature.toBases().stream())
             // We don't have to worry about duals here because ids can't contain them (ids have to have cardinality at most 1).
             .forEach(base -> morphismQueue.add(context.getSchema().getMorphism(base)));

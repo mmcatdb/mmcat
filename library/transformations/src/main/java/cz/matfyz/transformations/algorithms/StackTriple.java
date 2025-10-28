@@ -1,12 +1,12 @@
 package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.core.instance.DomainRow;
+import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.printable.*;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class StackTriple implements Printable {
 
@@ -14,13 +14,17 @@ public class StackTriple implements Printable {
     public final ComplexRecord parentRecord;
     public final SchemaPath parentToChild;
 
-    /**
-     * If null, there is no access path associated with the row.
-     * E.g., the property has signature <code>1.2</code>, but the object corresponds to the cod object of <code>1</code>.
-     */
-    public final @Nullable ComplexProperty childAccessPath;
 
-    public StackTriple(DomainRow parentRow, ComplexRecord parentRecord, SchemaPath parentToChild, @Nullable ComplexProperty childAccessPath) {
+    // TODO parent to child is the path to the objex.
+    // TODO the following comment. If childAccessPath is simple, then it's signature isn't the same as parentToChild.signature(). If complex, then it is.
+
+    /**
+     * If null, there is no {@link ComplexProperty} associated with the row.
+     * E.g., there is a {@link SimpleProperty} with signature <code>1.2</code>, but the child object is the dom of the last morphism (i.e., <code>1</code>).
+     */
+    public final AccessPath childAccessPath;
+
+    public StackTriple(DomainRow parentRow, ComplexRecord parentRecord, SchemaPath parentToChild, AccessPath childAccessPath) {
         this.parentRow = parentRow;
         this.parentRecord = parentRecord;
         this.parentToChild = parentToChild;

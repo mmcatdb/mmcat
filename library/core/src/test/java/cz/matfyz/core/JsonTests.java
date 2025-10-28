@@ -46,11 +46,11 @@ class JsonTests {
 
     @Test
     void name() {
-        final var static1 = new StringName("Static name");
-        fullTest(static1);
+        final var string1 = new StringName("String name");
+        fullTest(string1);
 
-        final var special1 = new TypedName(TypedName.ROOT);
-        fullTest(special1);
+        final var typed1 = new TypedName(TypedName.ROOT);
+        fullTest(typed1);
 
         final var dynamic1 = new DynamicName(TypedName.INDEX, Signature.createBase(69), null);
         fullTest(dynamic1);

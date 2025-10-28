@@ -35,18 +35,18 @@ public class InstanceBuilder {
         final Map<SchemaObjex, Set<BaseSignature>> dependentObjexes = new TreeMap<>();
 
         for (final var schemaMorhpism : schema.allMorphisms()) {
-            if (schemaMorhpism.cod().ids().isValue() && !schemaMorhpism.dom().superId().contains(schemaMorhpism.signature())) {
+            if (!schemaMorhpism.cod().isEntity() && !schemaMorhpism.dom().superId().contains(schemaMorhpism.signature())) {
                 final var set = dependentObjexes.computeIfAbsent(schemaMorhpism.dom(), x -> new TreeSet<>());
                 set.add(schemaMorhpism.signature());
             }
-            else if (schemaMorhpism.dom().ids().isValue() && !schemaMorhpism.cod().superId().contains(schemaMorhpism.signature().dual())) {
+            else if (!schemaMorhpism.dom().isEntity() && !schemaMorhpism.cod().superId().contains(schemaMorhpism.signature().dual())) {
                 final var set = dependentObjexes.computeIfAbsent(schemaMorhpism.cod(), x -> new TreeSet<>());
-                set.add((schemaMorhpism.signature()).dual());
+                set.add(schemaMorhpism.signature().dual());
             }
         }
 
         for (final SchemaObjex schemaObjex : schema.allObjexes()) {
-            if (schemaObjex.ids().isValue())
+            if (!schemaObjex.isEntity())
                 continue;
 
             var dependents = dependentObjexes.get(schemaObjex);
@@ -106,10 +106,10 @@ public class InstanceBuilder {
         final var row = instanceObjex.createRow(superId);
         createdRows.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
 
-        instanceObjex.simpleSignatures().forEach(s -> {
+        instanceObjex.propertySignatures().forEach(s -> {
             final var value = values.get(s);
             if (value != null)
-                row.addSimpleValue(s, value);
+                row.addPropertyValue(s, value);
         });
 
         values.clear(); // Clear the values for the next objex.

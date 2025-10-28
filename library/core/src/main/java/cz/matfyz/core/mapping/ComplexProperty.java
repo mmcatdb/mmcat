@@ -38,8 +38,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = ComplexProperty.Deserializer.class)
 public class ComplexProperty extends AccessPath {
 
+    /** @deprecated build only */
     public ComplexProperty(Name name, Signature signature, Iterable<AccessPath> subpaths) {
-        super(name, signature);
+        super(name, signature, List.of());
+
+        this.subpaths = new TreeMap<>();
+        subpaths.forEach(subpath -> this.subpaths.put(subpath.signature(), subpath));
+    }
+
+    ComplexProperty(Name name, Signature signature, List<@Nullable Signature> indexSignatures, Iterable<AccessPath> subpaths) {
+        super(name, signature, indexSignatures);
 
         this.subpaths = new TreeMap<>();
         subpaths.forEach(subpath -> this.subpaths.put(subpath.signature(), subpath));
@@ -195,15 +203,15 @@ public class ComplexProperty extends AccessPath {
 
         final List<AccessPath> newSubpaths = subpaths().stream().filter(path -> !path.equals(subpath)).toList();
 
-        return new ComplexProperty(name, signature, newSubpaths);
+        return new ComplexProperty(name, signature, indexSignatures, newSubpaths);
     }
 
     /**
-     * Properties from given synthetic nodes are moved to their parent paths.
+     * Properties from auxiliary nodes are moved to their parents' paths.
      */
     public ComplexProperty copyWithoutAuxiliaryNodes() {
         List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();
-        return new ComplexProperty(name, signature, newSubpaths);
+        return new ComplexProperty(name, signature, indexSignatures, newSubpaths);
     }
 
     private List<AccessPath> getContentWithoutAuxiliaryNodes() {
@@ -257,7 +265,8 @@ public class ComplexProperty extends AccessPath {
             ? subpaths()
             : subpaths.values().stream().map(subpath -> replaceDynamicName(subpath, replacedNames)).toList();
 
-        return new ComplexProperty(name, signature, newSubpaths);
+        // TODO check if indexSignatures needs to be updated as well
+        return new ComplexProperty(name, signature, indexSignatures, newSubpaths);
     }
 
     /**
@@ -270,7 +279,7 @@ public class ComplexProperty extends AccessPath {
         final Signature prefix = path.signature.longestCommonPrefix(dynamicName.signature);
 
         if (prefix.isEmpty())
-            // This is ilegal and punishable by death.
+            // This is illegal and punishable by death.
             throw AccessPathException.dynamicNameMissingCommonPrefix(dynamicName.signature, path.signature);
 
         final var valueSignature = path.signature.cutPrefix(prefix);
@@ -281,8 +290,9 @@ public class ComplexProperty extends AccessPath {
         final var valueToName = valueSignature.dual().concatenate(nameSignature);
         replacedNames.put(dynamicName, new DynamicNameReplacement(prefix, nameSignature, partiallyReplacedValue, valueToName));
 
-        return new ComplexProperty(new StringName("_DYNAMIC"), prefix, List.of(
-            new SimpleProperty(new StringName("_NAME"), nameSignature),
+        // TODO check if indexSignatures needs to be updated as well
+        return new ComplexProperty(new StringName("_DYNAMIC"), prefix, path.indexSignatures, List.of(
+            new SimpleProperty(new StringName("_NAME"), nameSignature, List.of()),
             fullyReplacedValue
         ));
     }
@@ -301,7 +311,7 @@ public class ComplexProperty extends AccessPath {
     private @Nullable NameMatcher nameMatcherCache;
 
     private static class NameMatcher {
-        private final Map<String, AccessPath> statics = new TreeMap<>();
+        private final Map<String, AccessPath> staticSubpaths = new TreeMap<>();
         private final List<Pattern> dynamicPatterns = new ArrayList<>();
         private final List<AccessPath> dynamicSubpaths = new ArrayList<>();
         private final @Nullable AccessPath dynamicWithoutPattern;
@@ -311,7 +321,7 @@ public class ComplexProperty extends AccessPath {
 
             for (final var subpath : subpaths) {
                 if (subpath.name instanceof final StringName stringName) {
-                    statics.put(stringName.value, subpath);
+                    staticSubpaths.put(stringName.value, subpath);
                     continue;
                 }
 
@@ -333,7 +343,7 @@ public class ComplexProperty extends AccessPath {
         }
 
         public @Nullable AccessPath match(String name) {
-            final var staticMatch = statics.get(name);
+            final var staticMatch = staticSubpaths.get(name);
             if (staticMatch != null)
                 return staticMatch;
 
@@ -381,6 +391,11 @@ public class ComplexProperty extends AccessPath {
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
 
+            generator.writeArrayFieldStart("indexSignatures");
+            for (final var signature : property.indexSignatures())
+                generator.writePOJO(signature);
+            generator.writeEndArray();
+
             generator.writeArrayFieldStart("subpaths");
             for (final var subpath : property.subpaths())
                 generator.writePOJO(subpath);
@@ -400,9 +415,10 @@ public class ComplexProperty extends AccessPath {
 
             final Name name = codec.treeToValue(node.get("name"), Name.class);
             final Signature signature = codec.treeToValue(node.get("signature"), Signature.class);
+            final Signature[] indexSignatures = codec.treeToValue(node.get("indexSignatures"), Signature[].class);
             final AccessPath[] subpaths = codec.treeToValue(node.get("subpaths"), AccessPath[].class);
 
-            return new ComplexProperty(name, signature, List.of(subpaths));
+            return new ComplexProperty(name, signature, List.of(indexSignatures), List.of(subpaths));
         }
     }
 

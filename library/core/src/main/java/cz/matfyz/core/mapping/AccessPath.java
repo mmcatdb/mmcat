@@ -21,21 +21,33 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Common ancestor for the access path tree. It can be a {@link ComplexProperty} or a {@link SimpleProperty}.
- * Each node is a tuple (name, context, value).
  */
 @JsonDeserialize(using = AccessPath.Deserializer.class)
 public abstract class AccessPath implements Printable, Serializable {
 
     protected final Signature signature;
 
+    /** A path to the property from its parent property (in the {@link SchemaCategory} graph). */
     public Signature signature() {
         return signature;
     }
 
     protected final Name name;
 
+    /** A path to the property from its parent property (in the hierarchy of the given datasource). */
     public Name name() {
         return name;
+    }
+
+    /**
+     * If this property represents a (multidimensional) array, the indexes are mapped via these signatures.
+     * Can contain nulls for dimensions that are not mapped (so the order is preserved).
+     * The array dimension of the property is therefore equal to the size of this list.
+     */
+    protected final List<@Nullable Signature> indexSignatures;
+
+    protected List<@Nullable Signature> indexSignatures() {
+        return indexSignatures;
     }
 
     // TODO v3
@@ -49,9 +61,10 @@ public abstract class AccessPath implements Printable, Serializable {
         return isRequired;
     }
 
-    protected AccessPath(Name name, Signature signature) {
+    protected AccessPath(Name name, Signature signature, List<@Nullable Signature> indexSignatures) {
         this.name = name;
         this.signature = signature;
+        this.indexSignatures = List.copyOf(indexSignatures);
     }
 
     /**

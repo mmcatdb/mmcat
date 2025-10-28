@@ -61,7 +61,7 @@ class MongoDBTests {
         assertKindMappingEquals(result, MongoDB.addressKind, MongoDB::address);
         // assertKindMappingEquals(result, MongoDB.addressMissingSimpleKind, MongoDB::addressMissingSimple);
         // assertKindMappingEquals(result, MongoDB.addressMissingComplexKind, MongoDB::addressMissingComplex);
-        assertKindMappingEquals(result, MongoDB.tagKind, MongoDB::tag);
+        assertKindMappingEquals(result, MongoDB.tagKind, MongoDB::tagSet);
         assertKindMappingEquals(result, MongoDB.itemKind, MongoDB::item);
         // assertKindMappingEquals(result, MongoDB.itemEmptyKind, MongoDB::itemEmpty);
 

@@ -31,6 +31,7 @@ public class InstanceSerializer {
 
     public record SerializedDomainRow(
         int id,
+        // FIXME Property values where?
         SuperIdValues values,
         @Nullable Integer technicalId,
         List<Signature> pendingReferences

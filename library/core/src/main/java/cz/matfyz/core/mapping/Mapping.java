@@ -27,9 +27,9 @@ public class Mapping implements Comparable<Mapping> {
         return new Mapping(datasource, kindName, category, rootKey, accessPath, createDefaultPrimaryKey(rootObjex));
     }
 
-    private static List<Signature> createDefaultPrimaryKey(SchemaObjex objex) {
-        return objex.ids().isSignatures()
-            ? objex.ids().signatureIds().first().signatures().stream().toList()
+    private static Collection<Signature> createDefaultPrimaryKey(SchemaObjex objex) {
+        return objex.hasSignatureId()
+            ? objex.ids().first().signatures()
             : List.of(Signature.empty());
     }
 

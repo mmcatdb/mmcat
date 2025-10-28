@@ -39,6 +39,7 @@ public interface AbstractDDLWrapper {
     public record PropertyPath(
         List<PathSegment> segments
     ) implements Serializable {
+
         public static PropertyPath empty() {
             return new PropertyPath(new ArrayList<>());
         }
@@ -55,22 +56,61 @@ public interface AbstractDDLWrapper {
         @Override public String toString() {
             return segments.stream().map(PathSegment::toString).collect(Collectors.joining(PATH_SEPARATOR));
         }
+
     }
 
-    public record PathSegment(
-        Set<String> names,
-        /** If false, the names should contain exactly one element. */
-        boolean isDynamic,
-        /** An array property contains an array of values. */
-        boolean isArray
-    ) implements Serializable {
-        @Override public String toString() {
-            final String options = isDynamic
-                ? "(" + names.stream().collect(Collectors.joining("|")) + ")"
-                : names.iterator().next();
+    public class PathSegment implements Serializable {
 
-            return options + (isArray ? "[]" : "");
+        /** Actually a set. */
+        public final List<String> names;
+        private final Type type;
+        /** If this is an array, it has this many dimensions. Minimum is 1. */
+        private final int dimension;
+
+        private PathSegment(List<String> names, Type type, int dimension) {
+            this.names = names;
+            this.type = type;
+            this.dimension = dimension;
         }
+
+        public static PathSegment scalar(String name) {
+            return new PathSegment(List.of(name), Type.SCALAR, 0);
+        }
+
+        public static PathSegment array(int dimension) {
+            return new PathSegment(List.of(), Type.ARRAY, dimension);
+        }
+
+        public static PathSegment map(Set<String> names) {
+            return new PathSegment(List.copyOf(names), Type.MAP, 0);
+        }
+
+        public enum Type {
+            /** The names should contain exactly one value. */
+            SCALAR,
+            /** The names should be empty. */
+            ARRAY,
+            /** The names can contain any number of values. */
+            MAP,
+        }
+
+        public boolean isArray() {
+            return type == Type.ARRAY;
+        }
+
+        public int arrayDimension() {
+            assert type == Type.ARRAY : "Can't get array dimension of non-array path segment.";
+            return dimension;
+        }
+
+        @Override public String toString() {
+            return switch (type) {
+                case Type.SCALAR -> names.iterator().next();
+                case Type.ARRAY -> names.iterator().next() + "[]".repeat(dimension);
+                case Type.MAP -> "(" + names.stream().collect(Collectors.joining("|")) + ")";
+            };
+        }
+
     }
 
 }

@@ -44,7 +44,7 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
         if (segment.isArray())
             throw InvalidPathException.isArray(DatasourceType.csv, path);
 
-        properties.addAll(segment.names());
+        properties.addAll(segment.names);
     }
 
     /**

@@ -6,8 +6,6 @@ import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
-import java.util.Arrays;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class MongoDB {
@@ -75,20 +73,57 @@ public abstract class MongoDB {
         builder.morphism(Schema.orderToAddress, builder.getRow(Schema.order, orderIndex), address);
     }
 
-    public static TestMapping tag(SchemaCategory schema) {
+    public static TestMapping tagSet(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
             Schema.order,
             tagKind,
             b -> b.root(
                 b.simple("number", Schema.orderToNumber),
-                b.simple("tags", Schema.tagToOrder.dual())
+                b.simple("tags", Schema.orderToTag)
             )
         );
     }
 
-    public static void addTag(InstanceBuilder builder, int orderIndex, String ...tagValues) {
+    public static void addTagSet(InstanceBuilder builder, int orderIndex, String ...tagValues) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        order.addArrayValues(Schema.tagToOrder.dual(), Arrays.asList(tagValues));
+        final var numberValue = order.tryGetScalarValue(Schema.orderToNumber.signature());
+
+        for (final var tagValue : tagValues) {
+            final var tags = builder
+                .value(Schema.tagsToNumber, numberValue)
+                .value(Schema.tagsToTag, tagValue)
+                .objex(Schema.tags);
+
+            builder.morphism(Schema.tagsToOrder, tags, order);
+        }
+    }
+
+    public static TestMapping tagArray(SchemaCategory schema) {
+        return new TestMapping(datasource, schema,
+            Schema.order,
+            tagKind,
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber),
+                b.auxiliary("tags",
+                    b.simple(Schema.orderToIndex, false, Schema.orderToTag)
+                )
+            )
+        );
+    }
+
+    public static void addTagArray(InstanceBuilder builder, int orderIndex, String ...tagValues) {
+        final var order = builder.getRow(Schema.order, orderIndex);
+        final var numberValue = order.tryGetScalarValue(Schema.orderToNumber.signature());
+
+        for (int i = 0; i < tagValues.length; i++) {
+            final var tags = builder
+                .value(Schema.tagsToNumber, numberValue)
+                .value(Schema.tagsToIndex, String.valueOf(i))
+                .value(Schema.tagsToTag, tagValues[i])
+                .objex(Schema.tags);
+
+            builder.morphism(Schema.tagsToOrder, tags, order);
+        }
     }
 
     private static TestMapping createItem(SchemaCategory schema, String kindName) {

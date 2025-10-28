@@ -21,6 +21,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonSerialize(using = ObjexIds.Serializer.class)
 @JsonDeserialize(using = ObjexIds.Deserializer.class)
 public class ObjexIds implements Serializable {
+
     public enum Type {
         /**
          * A set of signatures. If there is just one, it's a simple identifier, otherwise it's a composite identifier.
@@ -43,17 +44,16 @@ public class ObjexIds implements Serializable {
     private final Type type;
     private final @Nullable SortedSet<SignatureId> signatureIds;
 
+    public SignatureId first() {
+        return signatureIds.first();
+    }
+
     public SortedSet<SignatureId> signatureIds() {
         return new TreeSet<>(signatureIds);
     }
 
-    // TODO disable this method eventually and fix all other methods that rely on it.
-    // The reason is that this whole object was introduced because we want to behave differently to the different types of ids - so there ain't be no function that unifies them back together.
-    /**
-     * @deprecated
-     */
-    public SortedSet<SignatureId> toSignatureIds() {
-        return isSignatures() ? new TreeSet<>(signatureIds) : new TreeSet<>(Set.of(SignatureId.createEmpty()));
+    public Iterable<SignatureId> toSignatureIds() {
+        return isSignatures() ? signatureIds : List.of(SignatureId.empty());
     }
 
     public ObjexIds(Set<SignatureId> signatureIds) {
@@ -62,19 +62,11 @@ public class ObjexIds implements Serializable {
 
     // There must be at least one signature
     public ObjexIds(SignatureId... signatureIds) {
-        this(new TreeSet<>(List.of(signatureIds)));
+        this(Set.of(signatureIds));
     }
 
     public ObjexIds(Signature... signatures) {
-        this(new TreeSet<>(List.of(new SignatureId(signatures))));
-    }
-
-    public static ObjexIds createValue() {
-        return new ObjexIds(Type.Value);
-    }
-
-    public static ObjexIds createGenerated() {
-        return new ObjexIds(Type.Generated);
+        this(Set.of(new SignatureId(signatures)));
     }
 
     private ObjexIds(SortedSet<SignatureId> signatures) {
@@ -89,26 +81,43 @@ public class ObjexIds implements Serializable {
         this.type = type;
     }
 
+    public static ObjexIds createValue() {
+        return new ObjexIds(Type.Value);
+    }
+
+    public static ObjexIds createGenerated() {
+        return new ObjexIds(Type.Generated);
+    }
+
+    public ObjexIds extend(SignatureId id) {
+        assert isSignatures();
+        final var newIds = new TreeSet<>(signatureIds);
+        newIds.add(id);
+        return new ObjexIds(newIds);
+    }
+
+    /** @deprecated */
     public boolean isSignatures() {
         return type == Type.Signatures;
     }
 
-    public boolean isValue() {
-        return type == Type.Value;
-    }
-
+    /** @deprecated */
     public boolean isGenerated() {
         return type == Type.Generated;
     }
 
-    public Set<Signature> createDefaultSuperId() {
+    // public boolean isValue() {
+    //     return type == Type.Value;
+    // }
+
+    public Set<Signature> collectAllSignatures() {
         if (type != Type.Signatures)
             return Set.of(Signature.empty());
 
         final var allSignatures = new TreeSet<Signature>();
         signatureIds.forEach(id -> allSignatures.addAll(id.signatures()));
 
-        return Set.copyOf(allSignatures);
+        return allSignatures;
     }
 
     @Override public String toString() {

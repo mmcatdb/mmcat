@@ -8,6 +8,7 @@ import cz.matfyz.core.identifiers.Signature;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class SchemaObjex implements Identified<SchemaObjex, Key> {
@@ -19,7 +20,7 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
     SchemaObjex(Key key, ObjexIds ids, boolean isEntity) {
         this.key = key;
         this.ids = ids;
-        this.superId = ids.createDefaultSuperId();
+        this.superId = Set.copyOf(ids.collectAllSignatures());
     }
 
     private final Key key;
@@ -29,7 +30,10 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
     }
 
     private final ObjexIds ids;
-    /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key). */
+    /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
+     *
+     * @deprecated
+     */
     public ObjexIds ids() {
         return ids;
     }
@@ -50,6 +54,14 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
      */
     public boolean isEntity() {
         return isEntity;
+    }
+
+    public boolean hasSignatureId() {
+        return ids.isSignatures();
+    }
+
+    public boolean hasGeneratedId() {
+        return ids.isGenerated();
     }
 
     /** All base morphisms starting in this objex. Managed by {@link SchemaMorphism}. */

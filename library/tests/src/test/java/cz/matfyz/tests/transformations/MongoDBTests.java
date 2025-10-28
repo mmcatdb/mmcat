@@ -74,22 +74,22 @@ public class MongoDBTests {
     }
 
     @Test
-    void getForestForSimpleArrayTest() throws Exception {
-        new PullForestTestBase(MongoDB.tag(schema), datasource.wrapper.getPullWrapper())
+    void getForestForSimpleSetTest() throws Exception {
+        new PullForestTestBase(MongoDB.tagSet(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [ {
                     "number": "o_100",
                     "tags": [
-                        123,
-                        456,
-                        789
+                        t_123,
+                        t_456,
+                        t_789
                     ]
                 }, {
                     "number": "o_200",
                     "tags": [
-                        "123",
-                        "String456",
-                        "String789"
+                        "t_123",
+                        "t_555",
+                        "t_888"
                     ]
                 } ]
             """)
@@ -97,13 +97,36 @@ public class MongoDBTests {
     }
 
     @Test
-    void getForestForComplexArrayTest() throws Exception {
+    void getForestForSimpleArrayTest() throws Exception {
+        new PullForestTestBase(MongoDB.tagArray(schema), datasource.wrapper.getPullWrapper())
+            .expected("""
+                [ {
+                    "number": "o_100",
+                    "tags": [
+                        t_123,
+                        t_456,
+                        t_789
+                    ]
+                }, {
+                    "number": "o_200",
+                    "tags": [
+                        "t_123",
+                        "t_555",
+                        "t_888"
+                    ]
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void getForestForComplexSetTest() throws Exception {
         new PullForestTestBase(MongoDB.item(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [ {
                     "number": "o_100",
                     "items": [ {
-                        "id": 123,
+                        "id": p_123,
                         "label": "Clean Code",
                         "price": 125,
                         "quantity": 1
@@ -111,7 +134,7 @@ public class MongoDBTests {
                 }, {
                     "number": "o_100",
                     "items": [ {
-                        "id": 765,
+                        "id": p_765,
                         "label": "The Lord of the Rings",
                         "price": 199,
                         "quantity": 2
@@ -119,12 +142,12 @@ public class MongoDBTests {
                 }, {
                     "number": "o_200",
                     "items": [ {
-                        "id": 457,
+                        "id": p_457,
                         "label": "The Art of War",
                         "price": 299,
                         "quantity": 7
                     }, {
-                        "id": 734,
+                        "id": p_734,
                         "label": "Animal Farm",
                         "price": 350,
                         "quantity": 3
@@ -135,7 +158,7 @@ public class MongoDBTests {
     }
 
     @Test
-    void getForestForEmptyArrayTest() throws Exception {
+    void getForestForEmptySetTest() throws Exception {
         new PullForestTestBase(MongoDB.itemEmpty(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [ {
