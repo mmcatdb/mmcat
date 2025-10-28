@@ -1,18 +1,14 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { DELETE, GET, POST, PUT } from '../routeFunctions';
 import type { Id } from '@/types/id';
-import type { QueryDescription, QueryResponse, QueryInit, QueryEdit } from '@/types/query';
+import type { QueryDescription, QueryResponse, QueryInit, QueryEdit, QueryResult } from '@/types/query';
 
 export type QueryInput = {
     categoryId: Id;
     queryString: string;
 };
 
-export type QueryResult = {
-    rows: string[];
-};
-
-const queries = {
+export const queriesApi = {
     execute: POST<Empty, QueryResult, QueryInput>(
         () => `/queries/execute`,
     ),
@@ -35,5 +31,3 @@ const queries = {
         u => `/queries/${u.queryId}`,
     ),
 };
-
-export default queries;

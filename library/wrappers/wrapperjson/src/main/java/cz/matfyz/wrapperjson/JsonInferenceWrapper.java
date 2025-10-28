@@ -43,7 +43,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     /**
      * Returns the name of the JSON file currently being processed.
      */
-    private String fileName() {
+    private String filename() {
         return kindName;
     }
 
@@ -137,14 +137,14 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
 
-        return jsonDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
+        return jsonDocuments.flatMapToPair(new RecordToHeuristicsMap(filename()));
     }
 
     /**
      * Retrieves a list of kind names (JSON file names) from the provider.
      */
     @Override public List<String> getKindNames() {
-        return List.of(provider.getJsonFileNames());
+        return List.of(provider.getJsonFilenames());
     }
 
 }

@@ -40,6 +40,22 @@ public class DatasourceRepository {
         "Datasource", id);
     }
 
+    public DatasourceEntity findByMappingId(Id mappingId) {
+        return db.get((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT datasource.*
+                FROM datasource
+                JOIN mapping ON mapping.datasource_id = datasource.id
+                WHERE mapping.id = ?;
+                """);
+            setId(statement, 1, mappingId);
+            final var resultSet = statement.executeQuery();
+
+            if (resultSet.next())
+                output.set(fromResultSet(resultSet));
+        });
+    }
+
     public List<DatasourceEntity> findAll() {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("SELECT * FROM datasource ORDER BY id;");

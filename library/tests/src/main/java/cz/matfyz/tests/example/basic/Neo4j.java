@@ -80,7 +80,7 @@ public abstract class Neo4j {
                 b.complex("_from.Order", Schema.contactToOrder,
                     b.simple("number", Schema.orderToNumber)
                 ),
-                b.complex("_to.Contact", Signature.createEmpty(),
+                b.complex("_to.Contact", Signature.empty(),
                     b.simple("value", Schema.contactToValue)
                 )
             )

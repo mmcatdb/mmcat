@@ -48,6 +48,12 @@ export type MappingInit = {
     accessPath: RootPropertyResponse;
 };
 
+export type MappingEdit = {
+    primaryKey: SignatureIdResponse;
+    kindName: string;
+    accessPath: RootPropertyResponse;
+};
+
 export type MappingInfoResponse = {
     id: Id;
     kindName: string;

@@ -3,7 +3,7 @@ import { type NodeCaptionLine, type NodeModel } from '@/components/adminer/graph
 import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
 import { Renderer } from './Renderer';
 import { NODE_RADIUS } from '../../utils/constants';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 const nodeRingStrokeSize = 8;
 
@@ -59,7 +59,7 @@ const nodeRing = new Renderer<NodeModel>({
             .selectAll(`circle.${RING_CLASS}`)
             .data((node: NodeModel) => [ node ])
             .join('circle')
-            .attr('class', d => twJoin(RING_CLASS, 'opacity-0', d.selected && 'opacity-30 stroke-[#fdcc59]'))
+            .attr('class', d => cn(RING_CLASS, 'opacity-0', d.selected && 'opacity-30 stroke-[#fdcc59]'))
             .attr('cx', 0)
             .attr('cy', 0)
             .attr('stroke-width', `${nodeRingStrokeSize}px`)
@@ -129,7 +129,7 @@ const relationshipOverlay = new Renderer<RelationshipModel>({
             .selectAll(`path.${OVERLAY_CLASS}`)
             .data(rel => [ rel ])
             .join('path')
-            .attr('class', d => twJoin(OVERLAY_CLASS, 'opacity-0 hover:opacity-30 hover:fill-[#6ac6ff]', d.selected && 'opacity-30 fill-[#fdcc59]'));
+            .attr('class', d => cn(OVERLAY_CLASS, 'opacity-0 hover:opacity-30 hover:fill-[#6ac6ff]', d.selected && 'opacity-30 fill-[#fdcc59]'));
     },
 
     onTick(selection) {

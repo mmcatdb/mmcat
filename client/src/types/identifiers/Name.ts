@@ -69,9 +69,9 @@ export class TypedName {
 
     /** The property is a root of the access path tree, the name doesn't mean anything. */
     public static readonly ROOT = 'root';
-    /** The property is a value in an object, the name represents its key. */
+    /** The property is a value in an object, the name represents its key. Has to be dynamic. */
     public static readonly KEY = 'key';
-    /** The property is an element of an array, the name represents its index. */
+    /** The property is an element of an array, the name represents its index. Has to be dynamic. */
     public static readonly INDEX = 'index';
 }
 
@@ -112,5 +112,64 @@ export class DynamicName extends TypedName {
     toString(): string {
         const patternString = this.pattern == null ? '' : ` (${this.pattern})`;
         return `<${this.type}${patternString}: ${this.signature.toString()}>`;
+    }
+
+    static isPatternValid(pattern: string): boolean {
+        return patternValidator.test(pattern);
+    }
+}
+
+const patternValidator = /^[a-zA-Z0-9._\-*]+$/;
+
+/**
+ * For convenient navigation in the access path.
+ * Immutable.
+ */
+export class NamePath {
+    constructor(
+        readonly names: Name[],
+    ) {}
+
+    replaceLast(name: Name): NamePath {
+        const names = [ ...this.names ];
+        names[names.length - 1] = name;
+        return new NamePath(names);
+    }
+
+    append(name: Name): NamePath {
+        return new NamePath([ ...this.names, name ]);
+    }
+
+    pop(): NamePath {
+        if (this.names.length === 0)
+            throw new Error('Cannot pop from an empty NamePath.');
+
+        return new NamePath(this.names.slice(0, -1));
+    }
+
+    toString(): string {
+        return this.names.map(name => name.toString()).join('.');
+    }
+}
+
+export class NamePathBuilder {
+    private names: Name[];
+
+    constructor(...names: Name[]) {
+        this.names = names;
+    }
+
+    prepend(name: Name): NamePathBuilder {
+        this.names.push(name);
+        return this;
+    }
+
+    shift(): NamePathBuilder {
+        this.names.pop();
+        return this;
+    }
+
+    build(): NamePath {
+        return new NamePath(this.names.toReversed());
     }
 }

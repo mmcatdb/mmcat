@@ -51,7 +51,7 @@ export type SchemaMorphismResponse = {
 export enum Cardinality {
     Zero = 'ZERO',
     One = 'ONE',
-    Star = 'STAR'
+    Star = 'STAR',
 }
 
 export type Min = Cardinality.Zero | Cardinality.One;
@@ -59,7 +59,7 @@ export type Max = Cardinality.One | Cardinality.Star;
 
 export enum Tag {
     Isa = 'isa',
-    Role = 'role'
+    Role = 'role',
 }
 
 /**

@@ -98,7 +98,7 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
     // Debug
 
     @Override public String toString() {
-        return "M: " + dom.key() + " -[" + signature + "]-> " + cod.key();
+        return "(" + dom.key() + ")--[" + signature + "]->(" + cod.key() + ")";
     }
 
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useState } from 'react';
 import { Button, Input, Radio, RadioGroup } from '@heroui/react';
 import { RightPanelMode, type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { type FormPosition, toFormNumber, toNumber, toPosition } from '@/types/utils/common';
@@ -6,7 +6,7 @@ import { categoryToGraph } from './categoryGraph';
 import { type FreeSelectionAction } from '../graph/FreeSelection';
 import { SelectionCard } from './SelectionCard';
 import { Cardinality, type Min } from '@/types/schema';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type StateDispatchProps = {
     /** The current state of the category editor. */
@@ -28,7 +28,7 @@ export function RightPanelCategoryEditor({ state, dispatch, className }: RightPa
     const Component = getRightPanelComponent(state);
 
     return (
-        <div className={twMerge('p-2 flex flex-col gap-3', className)}>
+        <div className={cn('p-2 flex flex-col gap-3', className)}>
             <Component state={state} dispatch={dispatch} />
         </div>
     );
@@ -56,8 +56,8 @@ function getRightPanelComponent(state: CategoryEditorState) {
  * @returns An object containing selected node and edge data, if valid.
  */
 function useSelection(state: CategoryEditorState) {
-    const selectedNodeId = Array.from(state.selection.nodeIds)[0];
-    const selectedEdgeId = Array.from(state.selection.edgeIds)[0];
+    const selectedNodeId = [ ...state.selection.nodeIds ][0];
+    const selectedEdgeId = [ ...state.selection.edgeIds ][0];
     const selectedNode = selectedNodeId ? state.graph.nodes.get(selectedNodeId) : undefined;
     const selectedMorphism = selectedEdgeId ? state.graph.edges.get(selectedEdgeId) : undefined;
     const hasSelection = state.selection.nodeIds.size > 0 || state.selection.edgeIds.size > 0;
@@ -102,7 +102,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
 type EditorFormProps = {
     /** Additional form fields or content. */
-    children: React.ReactNode;
+    children: ReactNode;
     /** Function to call when submitting the form. */
     onSubmit: () => void;
     /** Function to call when canceling the form. */
@@ -118,9 +118,9 @@ function EditorForm({ children, onSubmit, onCancel, isSubmitDisabled }: EditorFo
     return (<>
         {children}
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={onCancel}>Cancel</Button>
-            <Button color='primary' onClick={onSubmit} isDisabled={isSubmitDisabled}>
-                    Apply
+            <Button onPress={onCancel}>Cancel</Button>
+            <Button color='primary' onPress={onSubmit} isDisabled={isSubmitDisabled}>
+                Apply
             </Button>
         </div>
     </>);
@@ -165,7 +165,7 @@ function UpdateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         dispatch({ type: 'rightPanelMode', mode: RightPanelMode.updateObjex, graph });
     }
 
-    function handleKeyDown(e: React.KeyboardEvent) {
+    function handleKeyDown(e: KeyboardEvent) {
         if (e.key === 'Enter' && hasChanges) {
             e.preventDefault();
             handleApply();
@@ -262,7 +262,7 @@ export function UpdateMorphismDisplay({ state, dispatch }: StateDispatchProps) {
         resetToDefaultMode(dispatch);
     }
 
-    function handleKeyDown(e: React.KeyboardEvent) {
+    function handleKeyDown(e: KeyboardEvent) {
         if (e.key === 'Enter' && hasChanges) {
             e.preventDefault();
             handleApply();

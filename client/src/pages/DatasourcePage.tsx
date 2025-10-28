@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type Params, useLoaderData, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type DatasourceSettings } from '@/types/Datasource';
 import { Button, Input, Tooltip } from '@heroui/react';
@@ -7,101 +7,90 @@ import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
-import { DatasourceSpecificFields } from '@/components/datasources/DatasourceModal';
-import { HiXMark } from 'react-icons/hi2';
+import { DatasourceSpecificFields } from '@/components/datasources/CreateDatasourceModal';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, SpinnerButton } from '@/components/common';
 import { routes } from '@/routes/routes';
+import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { PageLayout } from '@/components/RootLayout';
 
 export function DatasourceDetailPage() {
     return (
-        <DatasourceDisplay />
+        <PageLayout>
+            <DatasourceDisplay />
+        </PageLayout>
     );
 }
-
-DatasourceDetailPage.loader = datasourceLoader;
 
 export type DatasourceLoaderData = {
     datasource: Datasource;
 };
 
-async function datasourceLoader({ params: { id } }: { params: Params<'id'> }): Promise<DatasourceLoaderData> {
-    if (!id)
+DatasourceDetailPage.loader = async ({ params: { datasourceId } }: { params: Params<'datasourceId'> }): Promise<DatasourceLoaderData> => {
+    if (!datasourceId)
         throw new Error('Datasource ID is required');
 
-    const response = await api.datasources.getDatasource({ id });
+    const response = await api.datasources.getDatasource({ id: datasourceId });
     if (!response.status)
         throw new Error('Failed to load datasource info');
 
     return {
         datasource: Datasource.fromResponse(response.data),
     };
-}
+};
 
 export function DatasourceInCategoryPage() {
     const { datasource, mappings } = useLoaderData() as DatasourceInCategoryLoaderData;
-    const { categoryId } = useParams<{ categoryId: string }>();
-    const navigate = useNavigate();
-
-    function handleCreateMapping() {
-        if (!categoryId) {
-            console.error('Category ID is missing');
-            return;
-        }
-
-        navigate(routes.category.newMapping.resolve({ categoryId }), {
-            state: {
-                datasourceId: datasource.id,       // Pass datasource ID for new mapping creation
-                datasourceLabel: datasource.label, // Add datasource label
-            },
-        });
-    }
+    const { category } = useCategoryInfo();
 
     return (
-        <div>
+        <PageLayout>
             <DatasourceDisplay />
 
             <div className='mt-6'>
-                <div className='flex justify-between items-center pb-6'>
-                    <p className='text-xl'>Mappings Table</p>
-                    <Button
-                        color='primary'
-                        onPress={handleCreateMapping}
-                        size='sm'
-                    >
-                        + Add Mapping
-                    </Button>
+                <div className='mb-6 h-8 flex justify-between items-center'>
+                    <h2 className='text-xl'>Mappings Table</h2>
+
+                    {mappings.length > 0 && (
+                        <Button
+                            as={Link}
+                            to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
+                            color='primary'
+                            size='sm'
+                        >
+                            + Add Mapping
+                        </Button>
+                    )}
                 </div>
+
                 {mappings.length > 0 ? (
                     <MappingsTable mappings={mappings} />
                 ) : (
                     <EmptyState
                         message='This datasource does not have a mapping yet.'
                         buttonText='+ Add Mapping'
-                        onButtonClick={handleCreateMapping}
+                        to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
                     />
                 )}
             </div>
-        </div>
+        </PageLayout>
     );
 }
-
-DatasourceInCategoryPage.loader = datasourceInCategoryLoader;
 
 export type DatasourceInCategoryLoaderData = {
     datasource: Datasource;
     mappings: Mapping[];
 };
 
-async function datasourceInCategoryLoader({ params: { categoryId, id } }: { params: Params<'categoryId' | 'id'> }): Promise<DatasourceInCategoryLoaderData> {
-    if (!categoryId || !id)
+DatasourceInCategoryPage.loader = async ({ params: { categoryId, datasourceId } }: { params: Params<'categoryId' | 'datasourceId'> }): Promise<DatasourceInCategoryLoaderData> => {
+    if (!categoryId || !datasourceId)
         throw new Error('Datasource ID is required');
 
     const [ datasourceResponse, mappingsResponse ] = await Promise.all([
-        api.datasources.getDatasource({ id }),
-        api.mappings.getAllMappingsInCategory({}, { categoryId: categoryId, datasourceId: id }),
+        api.datasources.getDatasource({ id: datasourceId }),
+        api.mappings.getAllMappingsInCategory({}, { categoryId, datasourceId }),
     ]);
     if (!datasourceResponse.status || !mappingsResponse.status)
         throw new Error('Failed to load datasource or mappings');
@@ -110,7 +99,7 @@ async function datasourceInCategoryLoader({ params: { categoryId, id } }: { para
         datasource: Datasource.fromResponse(datasourceResponse.data),
         mappings: mappingsResponse.data.map(Mapping.fromResponse),
     };
-}
+};
 
 function DatasourceDisplay() {
     const { datasource: initialDatasource } = useLoaderData() as DatasourceLoaderData | DatasourceInCategoryLoaderData;
@@ -192,7 +181,7 @@ function DatasourceDisplay() {
     }
 
     return (
-        <div className='pt-4'>
+        <div>
             <div className='flex items-center gap-2 mb-4'>
                 <h1 className='text-xl font-bold text-default-800'>{initialDatasource.label}</h1>
                 <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
@@ -200,11 +189,13 @@ function DatasourceDisplay() {
                         onClick={isVisible ? dismissBanner : restoreBanner}
                         className='text-primary-500 hover:text-primary-700 transition'
                     >
-                        <IoInformationCircleOutline className='w-6 h-6' />
+                        <IoInformationCircleOutline className='size-6' />
                     </button>
                 </Tooltip>
             </div>
+
             {isVisible && <DatasourceDetailInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+
             <div className='mb-6 p-4 bg-default-50 rounded-lg'>
                 <div className='flex gap-8'>
                     <div>
@@ -217,13 +208,14 @@ function DatasourceDisplay() {
                     </div>
                 </div>
             </div>
+
             {!isUpdating ? (
                 // View Mode
                 <div className='mb-6'>
                     <div className='flex justify-between items-center mb-3'>
                         <h2 className='text-lg font-semibold'>Connection Settings</h2>
                         <Button
-                            onClick={() => setIsUpdating(true)}
+                            onPress={() => setIsUpdating(true)}
                             color='primary'
                             size='sm'
                         >
@@ -253,21 +245,22 @@ function DatasourceDisplay() {
                             handleSettingsChange={handleInputChange}
                         />
                         <div className='flex gap-2 mt-6'>
-                            <Button
+                            <SpinnerButton
                                 color='primary'
-                                onClick={handleSaveChanges}
-                                isLoading={isSaving}
+                                onPress={handleSaveChanges}
+                                isFetching={isSaving}
                                 className='px-6'
                             >
                                 Save
-                            </Button>
-                            <Button variant='flat' onClick={cancelUpdating} isDisabled={isSaving} className='px-6'>
+                            </SpinnerButton>
+                            <Button variant='flat' onPress={cancelUpdating} isDisabled={isSaving} className='px-6'>
                                 Cancel
                             </Button>
                         </div>
                     </form>
                 </div>
             )}
+
             <div>
                 <Button
                     size='sm'
@@ -277,6 +270,7 @@ function DatasourceDisplay() {
                 >
                     {isSpecsShown ? 'Hide specs' : 'Show specs'}
                 </Button>
+
                 {isSpecsShown && (
                     <div className='p-4 rounded-md bg-default-50'>
                         <pre className='text-sm text-default-600 overflow-x-auto'>
@@ -294,15 +288,9 @@ type DatasourceDetailInfoBannerProps = {
     dismissBanner: () => void;
 };
 
-export function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
+function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button
-                onClick={dismissBanner}
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
             <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
             <ul className='mt-2 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>

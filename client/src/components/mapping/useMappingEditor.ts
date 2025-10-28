@@ -1,68 +1,105 @@
-import { useReducer, type Dispatch } from 'react';
-import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SelectionType, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
-import { type CategoryEdge, type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
+import { useEffect, useReducer, useState, type Dispatch } from 'react';
+import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
+import { type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
 import { type GraphEvent } from '../graph/graphEngine';
 import { type Category } from '@/types/schema';
-import { type Mapping, SimpleProperty, RootProperty } from '@/types/mapping';
-import { Key, Signature, type SignatureId, StringName, TypedName } from '@/types/identifiers';
+import { Mapping, RootProperty, type MappingInit, type MappingEdit, type AccessPath, traverseAccessPath, updateAccessPath } from '@/types/mapping';
+import { type Key, type Name, type NamePath, type Signature, type SignatureId, TypedName } from '@/types/identifiers';
+import { type Datasource } from '@/types/Datasource';
+import { api } from '@/api';
 import { type Id } from '@/types/id';
+import { toast } from 'react-toastify';
 
-type MappingEditorInput = Mapping | {
-    datasourceId: Id;
+export type MappingEditorInput = {
+    /** The existing mapping to edit (or undefined if it's a new mapping). */
+    mapping: Mapping | undefined;
+    datasource: Datasource;
 };
 
-export function useMappingEditor(category: Category, input: MappingEditorInput) {
+export function useMappingEditor(category: Category, input: MappingEditorInput, onSave?: (mapping: Mapping) => void) {
     const [ state, dispatch ] = useReducer(mappingEditorReducer, { category, input }, createInitialState);
 
-    return { state, dispatch };
+    const [ isFetching, setIsFetching ] = useState(false);
+
+    async function saveMapping(data: MappingEditorSync) {
+        setIsFetching(true);
+        const request = 'init' in data
+            ? api.mappings.createMapping({}, data.init)
+            : api.mappings.updateMapping({ id: data.mappingId }, data.edit);
+        const response = await request;
+        setIsFetching(false);
+
+        if (!response.status) {
+            toast.error('Failed to save mapping');
+            return;
+        }
+
+        toast.success('Mapping saved successfully!');
+        onSave?.(Mapping.fromResponse(response.data));
+    }
+
+    useEffect(() => {
+        if (state.sync)
+            void saveMapping(state.sync);
+    }, [ state.sync ]);
+
+    return { state, dispatch, isFetching };
 }
 
 export enum EditorPhase {
-    SelectRoot = 'select-root',
-    BuildPath = 'build-path',
+    SelectRoot = 'selectRoot',
+    BuildPath = 'buildPath',
 }
 
 export type MappingEditorState = {
     original?: Mapping;
+    datasource: Datasource;
     category: Category;
     graph: CategoryGraph;
     form: MappingEditorFormState;
-    selectionType: SelectionType;
+    sync?: MappingEditorSync;
     selection: FreeSelection | SequenceSelection | PathSelection;
+    /** Id of the component who owns the current selection. */
+    selectionKey?: string;
     editorPhase: EditorPhase;
-    rootNodeId: string | null;
+    /** Path to the currently viewed / edited property. */
+    selectedPropertyPath?: NamePath;
 };
 
 type MappingEditorFormState = {
-    datasourceId: Id;
     kindName: string;
     rootObjexKey: Key | undefined;
     primaryKey: SignatureId | undefined;
-    accessPath: RootProperty;
-}
+    accessPath: AccessPath;
+};
+
+type MappingEditorSync = {
+    init: MappingInit;
+} | {
+    mappingId: Id;
+    edit: MappingEdit;
+};
 
 /**
  * Creates the initial state for the mapping editor.
  */
 function createInitialState({ category, input }: { category: Category, input: MappingEditorInput }): MappingEditorState {
-    const original = 'id' in input ? input : undefined;
+    const original = input.mapping;
 
     return {
         original,
+        datasource: input.datasource,
         category,
         // Convert category to graph for visualization
         graph: categoryToGraph(category),
-        selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         form: {
-            datasourceId: input.datasourceId,
             kindName: original?.kindName ?? '',
             rootObjexKey: original?.rootObjexKey,
             primaryKey: original?.primaryKey,
-            accessPath: original?.accessPath ?? new RootProperty(new TypedName(TypedName.ROOT), []),
+            accessPath: (original?.accessPath ?? new RootProperty(new TypedName(TypedName.ROOT), [])).toEditable(),
         },
-        editorPhase: EditorPhase.SelectRoot,
-        rootNodeId: null,
+        editorPhase: original ? EditorPhase.BuildPath : EditorPhase.SelectRoot,
     };
 }
 
@@ -73,41 +110,29 @@ type MappingEditorAction =
     | SelectAction
     | SequenceAction
     | PathAction
-    | TempSelectionTypeAction
-    | { type: 'set-root', rootNodeId: string }
-    | { type: 'append-to-access-path', nodeId: string }
-    | { type: 'remove-from-access-path', subpathIndex: number };
+    | SetRootAction
+    | FormAction
+    | AccessPathAction
+    | { type: 'sync' };
 
-export function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAction): MappingEditorState {
+function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAction): MappingEditorState {
     // console.log('REDUCE', action, state);
 
     switch (action.type) {
-    case 'graph':
-        return graph(state, action);
-    case 'select':
-        return select(state, action);
-    case 'sequence':
-        return sequence(state, action);
-    case 'path':
-        return path(state, action);
-    case 'selection-type': {
-        const { selectionType } = action;
-        if (selectionType === SelectionType.Free)
-            return { ...state, selectionType, selection: FreeSelection.create() };
-        if (selectionType === SelectionType.Sequence)
-            return { ...state, selectionType, selection: SequenceSelection.create() };
-        if (selectionType === SelectionType.Path)
-            return { ...state, selectionType, selection: PathSelection.create([ state.form.rootObjexKey.toString() ]) };
-        return { ...state, selectionType: action.selectionType };
+    case 'graph': return graph(state, action);
+    case 'select': return select(state, action);
+    case 'sequence': return sequence(state, action);
+    case 'path': return path(state, action);
+    case 'setRoot': return root(state, action);
+    case 'form': return form(state, action);
+    case 'accessPath': return accessPath(state, action);
+    case 'sync': {
+        if (state.sync)
+            return state;
+
+        const sync = state.original ? { mappingId: state.original.id, edit: createMappingEdit(state) } : { init: createMappingInit(state) };
+        return { ...state, sync };
     }
-    case 'set-root': {
-        return root(state, action.rootNodeId);
-    }
-    case 'append-to-access-path': {
-        return appendToAccessPath(state, action.nodeId);
-    }
-    case 'remove-from-access-path':
-        return removeFromAccessPath(state, action.subpathIndex);
     }
 }
 
@@ -119,48 +144,18 @@ type GraphAction = { type: 'graph', event: GraphEvent };
 function graph(state: MappingEditorState, { event }: GraphAction): MappingEditorState {
     switch (event.type) {
     case 'move':
-        // Node movement doesn’t update state in mapping editor (handled by graph engine)
+        // Node movement doesn’t update state in mapping editor (handled by graph engine).
         return state;
     case 'select': {
-        if (state.selectionType === SelectionType.Path && state.selection instanceof PathSelection) {
-            // Handle path selection
-            if (state.selection.isEmpty) {
-                // Starting a new path
-                return {
-                    ...state,
-                    // @ts-expect-error FIXME
-                    selection: PathSelection.create([ String(event.nodeId) ]),
-                };
-            }
-            else {
-                // Find the edge between last node and new node
-                const lastNodeId = state.selection.lastNodeId;
-                const edge = state.graph.edges.bundledEdges.flat().find(e =>
-                    // @ts-expect-error FIXME
-                    (e.from === lastNodeId && e.to === event.nodeId) ||
-                    // @ts-expect-error FIXME
-                    (e.to === lastNodeId && e.from === event.nodeId),
-                );
-
-                if (edge) {
-                    return {
-                        ...state,
-                        selection: state.selection.updateFromAction({
-                            operation: 'add',
-                            // @ts-expect-error FIXME
-                            nodeIds: [ String(event.nodeId) ],
-                            edgeIds: [ edge.id ],
-                        }),
-                    };
-                }
-            }
-        }
-
         // Default free selection handling
         if (state.selection instanceof FreeSelection) {
             const updatedSelection = state.selection.updateFromGraphEvent(event);
             return { ...state, selection: updatedSelection };
         }
+
+        // Path selection would be a nightmare - we would have to compute here the whole path options and whether we can actually insert the node / edge ...
+        // TODO Maybe disable the selection box in that case?
+
         return state;
     }
     }
@@ -177,13 +172,15 @@ type SelectAction = { type: 'select' } & FreeSelectionAction;
 function select(state: MappingEditorState, action: SelectAction): MappingEditorState {
     if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot)
         return state;
+
     const updatedSelection = state.selection.updateFromAction(action);
+
     // Limit to one node
     if (updatedSelection.nodeIds.size > 1) {
-        const firstNode = updatedSelection.nodeIds.values().next().value;
-        // @ts-expect-error FIXME
+        const firstNode = updatedSelection.nodeIds.values().next().value!;
         return { ...state, selection: FreeSelection.create([ firstNode ]) };
     }
+
     return { ...state, selection: updatedSelection };
 }
 
@@ -195,6 +192,7 @@ type SequenceAction = { type: 'sequence' } & SequenceSelectionAction;
 function sequence(state: MappingEditorState, action: SequenceAction): MappingEditorState {
     if (!(state.selection instanceof SequenceSelection))
         return state;
+
     return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
@@ -206,84 +204,168 @@ type PathAction = { type: 'path' } & PathSelectionAction;
 function path(state: MappingEditorState, action: PathAction): MappingEditorState {
     if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath)
         return state;
+
     return { ...state, selection: state.selection.updateFromAction(action) };
 }
 
-/**
- * Action for changing the selection type.
- */
-type TempSelectionTypeAction = { type: 'selection-type', selectionType: SelectionType };
+type SetRootAction = {
+    type: 'setRoot';
+    key: Key;
+};
 
 /**
  * Sets the root node in the mapping editor state.
  */
-function root(state: MappingEditorState, rootNodeId: string): MappingEditorState {
-    const rootNode = state.graph.nodes.get(rootNodeId);
-    if (!rootNode)
-        return state;
+function root(state: MappingEditorState, action: SetRootAction): MappingEditorState {
+    const rootObject = state.category.getObjex(action.key);
+    const ids = rootObject.schema.ids!.signatureIds;
 
     return {
         ...state,
         form: {
             ...state.form,
-            rootObjexKey: Key.fromResponse(Number(rootNodeId)),
+            rootObjexKey: action.key,
+            primaryKey: ids.length === 1 ? ids[0] : undefined,
         },
-        selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
         editorPhase: EditorPhase.BuildPath,
-        rootNodeId: rootNodeId,
     };
 }
 
-/**
- * Appends a node to the access path in the mapping editor state.
- */
-function appendToAccessPath(state: MappingEditorState, nodeId: string): MappingEditorState {
-    if (!(state.selection instanceof PathSelection))
+type FormAction = {
+    type: 'form';
+} & ({
+    field: 'kindName';
+    value: string;
+} | {
+    field: 'primaryKey';
+    value: SignatureId;
+});
+
+function form(state: MappingEditorState, action: FormAction): MappingEditorState {
+    if (action.field === 'kindName')
+        return { ...state, form: { ...state.form, kindName: action.value } };
+
+    return { ...state, form: { ...state.form, primaryKey: action.value } };
+}
+
+type AccessPathAction = {
+    type: 'accessPath';
+} & ({
+    operation: 'select';
+    path: NamePath | undefined;
+} | {
+    operation: 'delete';
+} | {
+    operation: 'selection';
+    selectionKey: string;
+    /** If defined, the selection should start. */
+    selection: PathSelection | undefined;
+} | {
+    operation: 'update';
+    name: Name;
+    signature: Signature;
+} | {
+    operation: 'create';
+    name: Name;
+    signature: Signature;
+});
+
+function accessPath(state: MappingEditorState, action: AccessPathAction): MappingEditorState {
+    if (action.operation === 'select')
+        return { ...state, selectedPropertyPath: action.path, selection: FreeSelection.create() };
+
+    if (action.operation === 'selection') {
+        // Starting selection doesn't require key check - we just overwrite the previous selection.
+        if (action.selection)
+            return { ...state, selection: action.selection, selectionKey: action.selectionKey };
+
+        if (state.selectionKey !== action.selectionKey)
+            return state;
+
+        return { ...state, selection: FreeSelection.create(), selectionKey: undefined };
+    }
+
+    if (!state.selectedPropertyPath)
+        // This should not happen.
         return state;
 
-    const newNode = state.graph.nodes.get(nodeId);
-    if (!newNode)
-        return state;
+    const selected = traverseAccessPath(state.form.accessPath, state.selectedPropertyPath);
 
-    const signatures = state.selection.edgeIds.map((edgeId, index) => {
-        const edge: CategoryEdge = state.graph.edges.get(edgeId)!;
-        const fromNodeId = Array.from(state.selection.nodeIds)[index];
-        return edge.from === fromNodeId ? edge.schema.signature : edge.schema.signature.dual();
-    });
+    if (action.operation === 'delete') {
+        if (selected.isRoot)
+            return state;
 
-    const signature = Signature.concatenate(...signatures);
+        return {
+            ...state,
+            form: {
+                ...state.form,
+                accessPath: updateAccessPath(state.form.accessPath, state.selectedPropertyPath, undefined),
+            },
+            // The selected property path is no longer valid.
+            selectedPropertyPath: undefined,
+        };
+    }
 
-    const newSubpath = new SimpleProperty(
-        new StringName(newNode.metadata.label),
-        signature,
-        state.form.accessPath,
-    );
+    if (action.operation === 'update') {
+        return {
+            ...state,
+            form: {
+                ...state.form,
+                accessPath: updateAccessPath(state.form.accessPath, state.selectedPropertyPath, {
+                    name: action.name,
+                    signature: action.signature,
+                    // If the signature changed, we have to drop all subpaths.
+                    subpaths: action.signature.equals(selected.signature) ? [ ...selected.subpaths ] : [],
+                    isRoot: selected.isRoot,
+                }),
+            },
+            // The selected property path did change but we can fix it.
+            selectedPropertyPath: state.selectedPropertyPath.replaceLast(action.name),
+        };
+    }
 
-    const newAccessPath = new RootProperty(state.form.accessPath.name, [
-        ...state.form.accessPath.subpaths,
-        newSubpath,
-    ]);
+    if (action.operation !== 'create')
+        // This should be banned by the ts compiler. Don't know why it isn't.
+        throw new Error('Impossibruh');
+
+    const pathToNewChild = state.selectedPropertyPath.append(action.name);
 
     return {
         ...state,
         form: {
             ...state.form,
-            accessPath: newAccessPath,
+            accessPath: updateAccessPath(state.form.accessPath, pathToNewChild, {
+                name: action.name,
+                signature: action.signature,
+                subpaths: [],
+                isRoot: false,
+            }),
         },
-        selectionType: SelectionType.Free,
         selection: FreeSelection.create(),
+        // The selected property path didn't change at all, so we keep it.
     };
 }
 
-/**
- * Removes a subpath from the access path in the mapping editor state.
- */
-function removeFromAccessPath(state: MappingEditorState, subpathIndex: number): MappingEditorState {
-    const newSubpaths = [ ...state.form.accessPath.subpaths ].toSpliced(subpathIndex, 1);
-    const newAccessPath = new RootProperty(state.form.accessPath.name, newSubpaths);
+function createMappingInit(state: MappingEditorState): MappingInit {
+    if (!state.form.rootObjexKey)
+        throw new Error('Root object key must be set before syncing mapping');
 
-    return { ...state, form: { ...state.form,
-        accessPath: newAccessPath,
-    } };
+    return {
+        categoryId: state.category.id,
+        datasourceId: state.datasource.id,
+        rootObjexKey: state.form.rootObjexKey.toServer(),
+        ...createMappingEdit(state),
+    };
+}
+
+function createMappingEdit(state: MappingEditorState): MappingEdit {
+    if (!state.form.primaryKey)
+        throw new Error('Primary key must be set before syncing mapping');
+
+    return {
+        primaryKey: state.form.primaryKey.toServer(),
+        kindName: state.form.kindName,
+        accessPath: RootProperty.fromEditable(state.form.accessPath).toServer(),
+    };
 }

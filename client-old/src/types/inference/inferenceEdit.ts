@@ -69,9 +69,6 @@ export class PrimaryKeyMergeInferenceEdit {
     public isActive: boolean;
     public id: number | null;
 
-    /**
-     * Constructs a `PrimaryKeyMergeInferenceEdit` from either keys or a candidate.
-     */
     constructor(primaryKeyOrCandidate: Key | PrimaryKeyCandidate, primaryKeyIdentifiedOrIsActive: Key | boolean, isActiveOrId?: boolean | number | null, id: number | null = null) {
         if (primaryKeyOrCandidate instanceof Key && primaryKeyIdentifiedOrIsActive instanceof Key) {
             this.primaryKey = primaryKeyOrCandidate;
@@ -89,9 +86,6 @@ export class PrimaryKeyMergeInferenceEdit {
         }
     }
 
-    /**
-     * Creates a `PrimaryKeyMergeInferenceEdit` instance from serialized server data.
-     */
     static fromServer(data: SerializedInferenceEdit): PrimaryKeyMergeInferenceEdit {
         if (data.primaryKey != null && data.primaryKeyIdentified != null) {
             return new PrimaryKeyMergeInferenceEdit(
@@ -124,7 +118,7 @@ export class ReferenceMergeInferenceEdit {
     public id: number | null;
 
     /**
-     * Constructs a `ReferenceMergeInferenceEdit` from either keys or a candidate.
+     * Constructs a {@link ReferenceMergeInferenceEdit} from either keys or a candidate.
      * @param referenceOrCandidate - The reference key or candidate involved in the edit.
      * @param referencedKeyOrIsActive - The referred key or whether the edit is active.
      * @param isActiveOrId - Whether the edit is active or the edit ID.
@@ -147,9 +141,6 @@ export class ReferenceMergeInferenceEdit {
         }
     }
 
-    /**
-     * Creates a `ReferenceMergeInferenceEdit` instance from serialized server data.
-     */
     static fromServer(data: SerializedInferenceEdit): ReferenceMergeInferenceEdit {
         if (data.referencingKey != null && data.referencedKey != null) {
             return new ReferenceMergeInferenceEdit(
@@ -179,18 +170,12 @@ export class ClusterInferenceEdit {
     public isActive: boolean;
     public id: number | null;
 
-    /**
-     * Constructs a `ClusterInferenceEdit`.
-     */
     constructor(clusterKeys: Key[], isActive: boolean, id: number | null = null) {
         this.clusterKeys = clusterKeys;
         this.isActive = isActive;
         this.id = id;
     }
 
-    /**
-     * Creates a `ClusterInferenceEdit` instance from serialized server data.
-     */
     static fromServer(data: SerializedInferenceEdit): ClusterInferenceEdit {
         return new ClusterInferenceEdit(
             data.clusterKeys!.map(Key.fromServer),
@@ -209,18 +194,12 @@ export class RecursionInferenceEdit {
     public isActive: boolean;
     public id: number | null;
 
-    /**
-     * Constructs a `RecursionInferenceEdit`.
-     */
     constructor(pattern: PatternSegment[], isActive: boolean, id: number | null = null) {
         this.pattern = pattern;
         this.isActive = isActive;
         this.id = id;
     }
 
-    /**
-     * Creates a `RecursionInferenceEdit` instance from serialized server data.
-     */
     static fromServer(data: SerializedInferenceEdit): RecursionInferenceEdit {
         return new RecursionInferenceEdit(
             data.pattern!.map(segment => new PatternSegment(segment.nodeName, segment.direction)),
@@ -234,17 +213,11 @@ export class RecursionInferenceEdit {
  * Class representing a segment of a recursion pattern.
  */
 export class PatternSegment {
-    /**
-     * Constructs a `PatternSegment`.
-     */
     constructor(
         readonly nodeName: string,
         readonly direction: string,
     ) {}
 
-    /**
-     * Creates a `PatternSegment` instance from serialized server data.
-     */
     static fromServer(data: SerializedPatternSegment): PatternSegment {
         return new PatternSegment(data.nodeName, data.direction);
     }

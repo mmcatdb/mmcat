@@ -1,5 +1,5 @@
 import { type JSX, type TransitionEvent, useEffect, useState } from 'react';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 const Closing = 'CLOSING';
 const Closed = 'CLOSED';
@@ -41,7 +41,7 @@ export function NodeInspectorDrawer({ isOpen, children }: NodeInspectorDrawerPro
     const isDrawerVisible = [ Opening, Open, Closing ].includes(transitionState);
 
     return (
-        <div className={twJoin('absolute z-10 right-2 top-2 bottom-2 max-w-9/10 bg-default-50 overflow-hidden overflow-y-auto transition-width', isOpen ? 'w-80' : 'w-0')}
+        <div className={cn('absolute z-10 right-2 top-2 bottom-2 max-w-9/10 bg-default-50 overflow-hidden overflow-y-auto transition-width', isOpen ? 'w-80' : 'w-0')}
             onTransitionEnd={onTransitionEnd}
         >
             {isDrawerVisible && children}

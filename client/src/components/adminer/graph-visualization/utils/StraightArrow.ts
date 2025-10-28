@@ -34,7 +34,7 @@ export class StraightArrow {
         this.outline = function (shortCaptionLength: number) {
             if (captionLayout === 'external') {
                 const startBreak =
-          startArrow + (this.shaftLength - shortCaptionLength) / 2;
+                    startArrow + (this.shaftLength - shortCaptionLength) / 2;
                 const endBreak = endShaft - (this.shaftLength - shortCaptionLength) / 2;
 
                 return [

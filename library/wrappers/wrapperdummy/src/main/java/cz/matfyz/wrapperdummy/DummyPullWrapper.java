@@ -99,14 +99,9 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         }
 
         final var complexProperty = (ComplexProperty) property;
+        final ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.signature());
+
         final var object = (JSONObject) value;
-
-        // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
-        // We do so by passing the parent record instead of creating a new one.
-        final ComplexRecord childRecord = complexProperty.isAuxiliary()
-            ? parentRecord
-            : parentRecord.addComplexRecord(complexProperty.signature());
-
         addKeysToRecord(childRecord, complexProperty, object);
     }
 

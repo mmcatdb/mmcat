@@ -123,7 +123,7 @@ export type Coordinates = {
     origin: Offset;
     /** Distance in pixels = scale * distance in relative units. */
     scale: number;
-}
+};
 
 export function offsetToPosition(offset: Offset, coordinates: Coordinates): Position {
     return {
@@ -232,7 +232,7 @@ type EdgeSvg = {
     label: {
         transform: string;
     } | undefined;
-}
+};
 
 export function computeEdgeSvg(from: Node, to: Node, label: string, degree: number, coordinates: Coordinates): EdgeSvg {
     const start = positionToOffset(from, coordinates);
@@ -305,7 +305,7 @@ function xToLeftTop(x: number, c: XTformConstants): Offset {
 }
 
 /**
- * Computes a curved SVG path from `A` to `B` that has a `degree` relative distance (in the middle) from a linear path between these two points. If `degree` is negative, the curve will be on the other side.
+ * Computes a curved SVG path from <code>A</code> to <code>B</code> that has a <code>degree</code> relative distance (in the middle) from a linear path between these two points. If <code>degree</code> is negative, the curve will be on the other side.
  * Uses circle arc.
  */
 function computeEdgeCurvedPath(A: Offset, B: Offset, labelLength: number, degree: number): EdgeSvg {
@@ -455,13 +455,13 @@ export function computeSelectionBoxStyle(select: SelectState | undefined, coordi
 export type HTMLConnection = {
     ref: HTMLElement;
     cleanup: () => void;
-}
+};
 
 export function getPathSignature(
     graph: CategoryGraph,
     selection: PathSelection,
 ): Signature {
-    const nodeIds = Array.from(selection.nodeIds);
+    const nodeIds = [ ...selection.nodeIds ];
     const signatures = selection.edgeIds.map((edgeId, index) => {
         const edge: CategoryEdge = graph.edges.get(edgeId)!;
         const fromNodeId = nodeIds[index];

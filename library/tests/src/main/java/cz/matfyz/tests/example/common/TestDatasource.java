@@ -26,14 +26,14 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
     public final TWrapper wrapper;
     public final List<Mapping> mappings = new ArrayList<>();
     public final SchemaCategory schema;
-    private final String setupFileName;
+    private final String setupFilename;
 
-    public TestDatasource(DatasourceType type, String identifier, TWrapper wrapper, SchemaCategory schema, String setupFileName) {
+    public TestDatasource(DatasourceType type, String identifier, TWrapper wrapper, SchemaCategory schema, String setupFilename) {
         this.type = type;
         this.identifier = identifier;
         this.wrapper = wrapper;
         this.schema = schema;
-        this.setupFileName = setupFileName;
+        this.setupFilename = setupFilename;
     }
 
     public TestDatasource<TWrapper> addMapping(TestMapping testMapping) {
@@ -49,9 +49,9 @@ public class TestDatasource<TWrapper extends AbstractControlWrapper> {
 
     @Nullable
     private Path getFilePath() {
-        if (setupFileName == null) return null;
+        if (setupFilename == null) return null;
         try {
-            final var url = ClassLoader.getSystemResource(setupFileName);
+            final var url = ClassLoader.getSystemResource(setupFilename);
             return Paths.get(url.toURI()).toAbsolutePath();
         }
         catch (URISyntaxException e) {

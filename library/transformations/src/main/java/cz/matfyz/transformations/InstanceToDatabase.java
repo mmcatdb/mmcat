@@ -108,11 +108,11 @@ public class InstanceToDatabase {
     }
 
     private String statementsToString(Collection<AbstractStatement> statements, AbstractDMLWrapper dmlWrapper) {
-        final var output = new StringBuilder();
+        final var sb = new StringBuilder();
         for (final var ddlStatement : statements)
-            output.append(ddlStatement.getContent()).append("\n");
+            sb.append(ddlStatement.getContent()).append("\n");
 
-        return output.toString();
+        return sb.toString();
     }
 
 }

@@ -6,9 +6,9 @@ import { EditorPhase, type MappingEditorDispatch, type MappingEditorState } from
 import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
-import { FreeSelection, PathSelection, SelectionType, SequenceSelection } from '../graph/graphSelection';
+import { FreeSelection, PathSelection, SequenceSelection } from '../graph/graphSelection';
 import { usePreferences } from '../PreferencesProvider';
-import { twJoin, twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type MapppingEditorGraphProps = {
     /** The current state of the mapping editor. */
@@ -25,17 +25,16 @@ type MapppingEditorGraphProps = {
  * Renders a graph-based UI for editing mappings, including nodes, edges, and selection.
  */
 export function MappingEditorGraph({ state, dispatch, options, className }: MapppingEditorGraphProps) {
-    // Memoize graph dispatch to forward graph events to the reducer
+    // Memoize graph dispatch to forward graph events to the reducer.
     const graphDispatch = useCallback((event: GraphEvent) => dispatch({ type: 'graph', event }), [ dispatch ]);
 
     const { selection } = state;
 
-    // Compute path graph for path-based selections
+    // Compute path graph for path-based selections.
     const pathGraph = useMemo(() => {
-        if (!(selection instanceof PathSelection) || selection.isEmpty)
+        if (!(selection instanceof PathSelection))
             return undefined;
 
-        // TODO This ...
         const sourceObjex = state.category.getObjex(state.graph.nodes.get(selection.lastNodeId)!.schema.key);
         return computePathsFromObjex(sourceObjex);
     }, [ selection ]);
@@ -99,7 +98,7 @@ function CanvasDisplay({ children, className }: CanvasDisplayProps) {
     return (
         <div
             ref={setCanvasRef}
-            className={twMerge('relative bg-canvas overflow-hidden',
+            className={cn('relative bg-canvas overflow-hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-default',
                 className,
             )}
@@ -132,7 +131,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
     const isSelectionAllowed = isNodeSelectionAllowed(state, node, pathGraph);
 
     const pathNode = pathGraph?.nodes.get(node.id);
-    const isRoot = node.id === state.rootNodeId;
+    const isRoot = node.id === state.form.rootObjexKey?.toString();
 
     const { theme } = usePreferences().preferences;
 
@@ -159,8 +158,9 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
         }
 
         if (pathNode!.id === selection.lastNodeId) {
-            // The last node is clicked, we can remove it.
-            dispatch({ type: 'path', operation: 'remove' });
+            // The last node is clicked, we can remove it. Unless the path is empty.
+            if (!selection.isEmpty)
+                dispatch({ type: 'path', operation: 'remove' });
             return;
         }
 
@@ -172,11 +172,11 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
         <div
             ref={setNodeRef}
             style={style}
-            className={twJoin('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
+            className={cn('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
         >
             <div
-                className={twMerge(
-                    'absolute w-8 h-8 -left-4 -top-4 rounded-full border-2',
+                className={cn(
+                    'absolute size-8 -left-4 -top-4 rounded-full border-2',
                     // Root node styling.
                     isRoot && 'bg-success border-success-700',
                     // Normal styling only applied if not root.
@@ -198,7 +198,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
             />
 
             <div className='w-fit h-0'>
-                <span className={twMerge('relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]',
+                <span className={cn('relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]',
                     isRoot && 'text-success-600 font-bold',
                 )}>
                     {isRoot && 'root:'} {node.metadata.label}
@@ -211,10 +211,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
 /**
  * Checks if a node is selected based on the editor state.
  */
-function isNodeSelected({ selection, selectionType }: MappingEditorState, node: CategoryNode): boolean {
-    if (selectionType === SelectionType.None)
-        return false;
-
+function isNodeSelected({ selection }: MappingEditorState, node: CategoryNode): boolean {
     if (selection instanceof FreeSelection)
         return selection.nodeIds.has(node.id);
     if (selection instanceof SequenceSelection)
@@ -226,19 +223,23 @@ function isNodeSelected({ selection, selectionType }: MappingEditorState, node: 
 /**
  * Determines if a node can be selected based on the editor state and path graph.
  */
-function isNodeSelectionAllowed({ selection, selectionType, editorPhase }: MappingEditorState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
-    if (selectionType === SelectionType.None)
-        return false;
-
+function isNodeSelectionAllowed({ selection, editorPhase }: MappingEditorState, node: CategoryNode, pathGraph: PathGraph | undefined): boolean {
     if (selection instanceof FreeSelection && editorPhase === EditorPhase.SelectRoot)
         return true;
 
     if (selection instanceof PathSelection && editorPhase === EditorPhase.BuildPath) {
         if (!pathGraph)
             return true;
+
         const pathNode = pathGraph.nodes.get(node.id);
         if (!pathNode)
             return false;
+
+        // Can't remove the root node of the path.
+        if (selection.isEmpty && pathNode.id === selection.lastNodeId)
+            return false;
+
+        // There is only one path to the node, or we are removing the last node of the selection.
         return pathNode.pathCount === PathCount.One || pathNode.id === selection.lastNodeId;
     }
 
@@ -283,7 +284,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
         if (!isSelectionAllowed)
             return;
 
-        if (state.selectionType === SelectionType.Free) {
+        if (state.selection instanceof FreeSelection) {
             const isSpecialKey = event.ctrlKey || event.ctrlKey;
             dispatch({ type: 'select', edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' });
             return;
@@ -300,7 +301,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
             d={svg.path}
             stroke={isSelected ? 'hsl(var(--heroui-primary))' : 'hsl(var(--heroui-default-500))'}
             strokeWidth='4'
-            className={twMerge('text-zinc-600',
+            className={cn('text-zinc-600',
                 isSelectionAllowed && [
                     isHoverAllowed && 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]',
                     pathEdge && 'path-shadow-green',
@@ -312,7 +313,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
         <text
             ref={setEdgeRef.label}
             transform={svg.label?.transform}
-            className={twJoin('font-medium', !svg.label && 'hidden')}
+            className={cn('font-medium', !svg.label && 'hidden')}
             fill='currentColor'
             textAnchor='middle'
         >
@@ -325,7 +326,7 @@ function EdgeDisplay({ edge, degree, state, dispatch, pathGraph }: EdgeDisplayPr
  * Checks if an edge is selected based on the editor state.
  */
 function isEdgeSelected(state: MappingEditorState, edge: CategoryEdge): boolean {
-    if (state.selectionType === SelectionType.None || state.selectionType === SelectionType.Path)
+    if (state.selection instanceof PathSelection)
         return false;
 
     if (state.selection instanceof FreeSelection)
@@ -337,10 +338,7 @@ function isEdgeSelected(state: MappingEditorState, edge: CategoryEdge): boolean 
 /**
  * Determines if an edge can be selected based on the editor state and path graph.
  */
-function isEdgeSelectionAllowed({ selection, selectionType }: MappingEditorState, edge: CategoryEdge, pathGraph: PathGraph | undefined): boolean {
-    if (selectionType === SelectionType.None)
-        return false;
-
+function isEdgeSelectionAllowed({ selection }: MappingEditorState, edge: CategoryEdge, pathGraph: PathGraph | undefined): boolean {
     if (selection instanceof FreeSelection)
         return true;
     if (selection instanceof SequenceSelection)

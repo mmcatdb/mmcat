@@ -9,4 +9,4 @@ Modern web applications usually include consepts like "organization", "user", an
 
 The module will consist both of a backend service and a user-friendly frontend GUI.
 
-**This project is currently available.**
+<!-- **This project is currently available.** -->

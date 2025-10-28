@@ -6,24 +6,24 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { toast } from 'react-toastify';
 import { ConfirmationModal, EmptyState, useSortableData } from '@/components/TableCommon';
 import { usePreferences } from '@/components/PreferencesProvider';
-import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
+import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
 import { InfoBanner } from '@/components/common';
+import { PageLayout } from '@/components/RootLayout';
+import { type Id } from '@/types/id';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
     const [ actions, setActions ] = useState<Action[]>(data.actions);
     const { category } = useCategoryInfo();
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('actions-page');
-    const navigate = useNavigate();
 
-    async function deleteAction(actionId: string) {
+    async function deleteAction(actionId: Id) {
         const result = await api.actions.deleteAction({ id: actionId });
         if (!result.status) {
             toast.error('Error deleting action');
@@ -35,7 +35,7 @@ export function ActionsPage() {
     }
 
     return (
-        <div className='pt-4'>
+        <PageLayout>
             {/* Header with Info Icon */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
@@ -45,13 +45,14 @@ export function ActionsPage() {
                             onClick={isVisible ? dismissBanner : restoreBanner}
                             className='text-primary-500 hover:text-primary-700 transition'
                         >
-                            <IoInformationCircleOutline className='w-6 h-6' />
+                            <IoInformationCircleOutline className='size-6' />
                         </button>
                     </Tooltip>
                 </div>
 
                 <Button
-                    onPress={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
+                    as={Link}
+                    to={routes.category.actions.new.resolve({ categoryId: category.id })}
                     color='primary'
                     startContent={<FaPlus />}
                     size='sm'
@@ -68,29 +69,25 @@ export function ActionsPage() {
                 {actions.length > 0 ? (
                     <ActionsTable
                         actions={actions}
-                        onDeleteAction={id => {
-                            void deleteAction(id);
-                        }}
+                        onDeleteAction={deleteAction}
                     />
                 ) : (
                     <EmptyState
                         message='No actions available.'
                         buttonText='+ Add Action'
-                        onButtonClick={() => navigate(routes.category.index.resolve({ categoryId: category.id }) + `/actions/add`)}
+                        to={routes.category.actions.new.resolve({ categoryId: category.id })}
                     />
                 )}
             </div>
-        </div>
+        </PageLayout>
     );
 }
-
-ActionsPage.loader = actionsLoader;
 
 export type ActionsLoaderData = {
     actions: Action[];
 };
 
-async function actionsLoader({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<ActionsLoaderData> {
+ActionsPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<ActionsLoaderData> => {
     if (!categoryId)
         throw new Error('Action ID is required');
 
@@ -101,11 +98,11 @@ async function actionsLoader({ params: { categoryId } }: { params: Params<'categ
     return {
         actions: response.data.map(Action.fromResponse),
     };
-}
+};
 
 type ActionsTableProps = {
     actions: Action[];
-    onDeleteAction: (id: string) => void;
+    onDeleteAction: (id: Id) => void;
 };
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
@@ -114,12 +111,12 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         column: 'label',
         direction: 'ascending',
     });
-    const [ loadingMap, setLoadingMap ] = useState<Record<string, boolean>>({});
+    const [ loadingMap, setLoadingMap ] = useState<Record<Id, boolean>>({});
     const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ selectedAction, setSelectedAction ] = useState<Action>();
 
-    async function createRun(actionId: string) {
+    async function createRun(actionId: Id) {
         setLoadingMap(prev => ({ ...prev, [actionId]: true }));
 
         const response = await api.jobs.createRun({ actionId });
@@ -137,7 +134,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
 
     function handleRowAction(key: React.Key) {
         if (category.id) {
-            navigate(routes.category.actions.resolve({ categoryId: category.id }) + `/${key}`, {
+            navigate(routes.category.actions.detail.resolve({ categoryId: category.id, actionId: String(key) }), {
                 state: { sortDescriptor },
             });
         }
@@ -169,13 +166,11 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         >
             <TableHeader>
                 {[
-                    ...(showTableIDs
-                        ? [
-                            <TableColumn key='id' allowsSorting>
-                                ID
-                            </TableColumn>,
-                        ]
-                        : []),
+                    ...(showTableIDs ? [
+                        <TableColumn key='id' allowsSorting>
+                            ID
+                        </TableColumn>,
+                    ] : []),
                     <TableColumn key='label' allowsSorting>
                         Label
                     </TableColumn>,
@@ -189,9 +184,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                         className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
-                            ...(showTableIDs
-                                ? [ <TableCell key='id'>{action.id}</TableCell> ]
-                                : []),
+                            ...(showTableIDs ? [
+                                <TableCell key='id'>{action.id}</TableCell>,
+                            ] : []),
                             <TableCell key='label'>{action.label}</TableCell>,
                             <TableCell key='actions' className='flex items-center space-x-2'>
                                 <Button
@@ -201,15 +196,13 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                                     variant='light'
                                     onPress={() => openModal(action)}
                                 >
-                                    <TrashIcon className='w-5 h-5' />
+                                    <TrashIcon className='size-5' />
                                 </Button>
                                 <Button
                                     color='primary'
                                     variant='flat'
                                     isDisabled={loadingMap[action.id]}
-                                    onPress={() => {
-                                        void createRun(action.id);
-                                    }}
+                                    onPress={() => createRun(action.id)}
                                 >
                                     {loadingMap[action.id] ? 'Creating...' : 'Create Run'}
                                 </Button>
@@ -243,20 +236,13 @@ type ActionInfoBannerProps = {
 export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerProps) {
     return (
         <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <button
-                onClick={dismissBanner}
-                className='absolute top-2 right-2 text-default-500 hover:text-default-700 transition'
-            >
-                <HiXMark className='w-5 h-5' />
-            </button>
-
             <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
 
             {/* Info Content */}
             <p className='text-sm'>
-                    An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
-                    Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
-                    For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
+                An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
+                Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
+                For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
             </p>
 
             <ul className='mt-3 text-sm space-y-2'>
@@ -275,7 +261,7 @@ export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerP
             </ul>
 
             <p className='text-sm mt-3'>
-                    Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
+                Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
             </p>
         </InfoBanner>
     );

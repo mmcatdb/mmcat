@@ -12,7 +12,7 @@ public abstract class QueryParser {
     private QueryParser() {}
 
     /**
-     * Given a MMQL query in the form of a `queryString`, parse the query into AST.
+     * Given a MMQL query in the form of a <code>queryString</code>, parse the query into AST.
      */
     public static ParsedQuery parse(String queryString) {
         final var inputStream = CharStreams.fromString(queryString);

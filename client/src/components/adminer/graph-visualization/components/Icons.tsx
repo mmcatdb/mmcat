@@ -1,17 +1,13 @@
-import { ChevronRightIcon as ChevronRightIconSolid, ChevronLeftIcon as ChevronLeftIconSolid, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/solid';
 
 const SMALL_SIZE = 15;
-
-export const ChevronRightIcon = () => <ChevronRightIconSolid />;
-
-export const ChevronLeftIcon = () => <ChevronLeftIconSolid />;
 
 const ZOOM_ICONS_DEFAULT_SIZE_IN_PX = SMALL_SIZE;
 const ZOOM_ICONS_LARGE_SCALE_FACTOR = 1.2;
 export const ZoomInIcon = ({
     large = false,
 }: {
-  large?: boolean;
+    large?: boolean;
 }) => {
     const scale = large ? ZOOM_ICONS_LARGE_SCALE_FACTOR : 1;
     return (
@@ -24,7 +20,7 @@ export const ZoomInIcon = ({
 export const ZoomOutIcon = ({
     large = false,
 }: {
-  large?: boolean;
+    large?: boolean;
 }) => {
     const scale = large ? ZOOM_ICONS_LARGE_SCALE_FACTOR : 1;
     return (
@@ -38,7 +34,7 @@ export const ZoomOutIcon = ({
 export const ZoomToFitIcon = ({
     large = false,
 }: {
-  large?: boolean;
+    large?: boolean;
 }) => {
     const scale = large ? ZOOM_ICONS_LARGE_SCALE_FACTOR : 1;
 

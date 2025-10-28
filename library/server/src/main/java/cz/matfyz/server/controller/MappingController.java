@@ -1,11 +1,13 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.evolution.Version;
-import cz.matfyz.evolution.mapping.MappingUpdate;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingInit;
-import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.MappingEntity;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.service.MappingService;
 
@@ -61,10 +63,41 @@ public class MappingController {
         return service.create(newMapping);
     }
 
-    @PostMapping("/mappings/{id}/update")
-    public MappingEntity updateMapping(@RequestBody MappingUpdate update) {
-        // TOOD
-        throw new UnsupportedOperationException();
+
+    public record MappingInit(
+        Id categoryId,
+        Id datasourceId,
+        Key rootObjexKey,
+        List<Signature> primaryKey,
+        String kindName,
+        ComplexProperty accessPath
+    ) {
+
+        public static MappingInit fromMapping(Mapping mapping, Id categoryId, Id datasourceId) {
+            return new MappingInit(
+                categoryId,
+                datasourceId,
+                mapping.rootObjex().key(),
+                mapping.primaryKey().stream().toList(),
+                mapping.kindName(),
+                mapping.accessPath()
+            );
+        }
+
     }
+
+    @PostMapping("/mappings/{id}")
+    public MappingEntity updateMapping(@RequestParam Id id, @RequestBody MappingEdit update) {
+        final var mapping = repository.find(id);
+        service.update(mapping, update);
+
+        return mapping;
+    }
+
+    public record MappingEdit(
+        List<Signature> primaryKey,
+        String kindName,
+        ComplexProperty accessPath
+    ) {}
 
 }

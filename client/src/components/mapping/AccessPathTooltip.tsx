@@ -1,7 +1,7 @@
 import { Tooltip } from '@heroui/react';
 import type { RootProperty } from '@/types/mapping';
 
-export function AccessPathTooltip({ accessPath }: { accessPath: RootProperty }) {
+export function AccessPathTooltip({ accessPath, text }: { accessPath: RootProperty, text: string }) {
     return (
         <Tooltip
             content={
@@ -12,7 +12,7 @@ export function AccessPathTooltip({ accessPath }: { accessPath: RootProperty }) 
             placement='top-start'
         >
             <span className='underline cursor-pointer'>
-                Show Access Path
+                {text}
             </span>
         </Tooltip>
     );

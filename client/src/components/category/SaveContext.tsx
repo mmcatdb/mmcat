@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { FaSave, FaSpinner } from 'react-icons/fa';
 import { api } from '@/api';
@@ -19,7 +19,7 @@ type SaveState = {
 const SaveContext = createContext<SaveState | undefined>(undefined);
 
 type SaveProviderProps = {
-    children: React.ReactNode;
+    children: ReactNode;
     /** Category state to monitor for unsaved changes */
     categoryState?: CategoryEditorState;
 };
@@ -106,9 +106,7 @@ export function SaveButton() {
         <div
             id='save-button'
             className='flex items-center gap-1 text-default-600 hover:text-default-800 cursor-pointer relative'
-            onClick={() => {
-                void handleSave();
-            }}
+            onClick={() => handleSave()}
             title='Save Changes (Ctrl+S)'
         >
             {isSaving ? (

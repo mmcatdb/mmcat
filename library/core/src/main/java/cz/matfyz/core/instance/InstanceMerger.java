@@ -74,13 +74,13 @@ class InstanceMerger {
         /** Should be merged with the values. It's a set because there might be multiple such rows. */
         final Set<DomainRow> originalRows;
         /** Values that should be added to the original rows. */
-        final SuperIdValues values;
+        final SuperIdValues superId;
 
-        MergeRowsJob(InstanceMerger merger, InstanceObjex instanceObjex, Set<DomainRow> originalRows, SuperIdValues values) {
+        MergeRowsJob(InstanceMerger merger, InstanceObjex instanceObjex, Set<DomainRow> originalRows, SuperIdValues superId) {
             this.merger = merger;
             this.instanceObjex = instanceObjex;
             this.originalRows = originalRows;
-            this.values = values;
+            this.superId = superId;
         }
 
         /**
@@ -88,17 +88,17 @@ class InstanceMerger {
          */
         public DomainRow process() {
             final var builder = new SuperIdValues.Builder();
-            builder.add(values);
+            builder.add(superId);
             for (final var row : originalRows)
-                builder.add(row.values);
+                builder.add(row.superId);
             final var mergedValues = builder.build();
 
             // Iteratively get all rows that are identified by the superId values (while expanding the superId values).
-            final var maximalValues = instanceObjex.findMaximalSuperIdValues(mergedValues, originalRows);
+            final var maximalSuperId = instanceObjex.findMaximalSuperIdValues(mergedValues, originalRows);
 
             // A merge job was required, so we can expect there is some new information in the superId values. So we have to create a new row.
             // If multiple rows were merged, we know there must be at least one value id. Otherwise, we have to check whether the technical id is necessary.
-            final var newRow = originalRows.size() > 1 ? instanceObjex.createRowWithValueId(maximalValues) : instanceObjex.createRow(values);
+            final var newRow = originalRows.size() > 1 ? instanceObjex.createRowWithValueId(maximalSuperId) : instanceObjex.createRow(superId);
             // If there were any technical ids, we don't need them anymore.
             instanceObjex.removeTechnicalIds(originalRows);
 
@@ -159,7 +159,7 @@ class InstanceMerger {
                     final var rowSet = output.computeIfAbsent(morphism, x -> new TreeSet<>());
 
                     final var mappingRow = entry.getValue();
-                    rowSet.add(mappingRow.codomainRow());
+                    rowSet.add(mappingRow.cod());
 
                     // Remove old mappings from their rows.
                     morphism.removeMapping(mappingRow);
@@ -180,7 +180,7 @@ class InstanceMerger {
 
                     // There might be multiple mappings for the same morphism, but that's completely legal for the "to" mappings.
                     for (final var mappingRow : entry.getValue()) {
-                        rowSet.add(mappingRow.domainRow());
+                        rowSet.add(mappingRow.dom());
                         // Remove old mappings from their rows.
                         morphism.removeMapping(mappingRow);
                     }
@@ -218,7 +218,7 @@ class InstanceMerger {
             final var targetRows = sourceRow.traverseThrough(reference.path());
 
             for (final var targetRow : targetRows) {
-                if (!targetRow.hasSignature(reference.signatureInOther()))
+                if (!targetRow.superId.hasSignature(reference.signatureInOther()))
                     continue; // The row already has the value.
 
                 // Add value to the targetRow.

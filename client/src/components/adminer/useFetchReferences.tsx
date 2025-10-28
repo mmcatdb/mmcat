@@ -4,9 +4,7 @@ import { Signature } from '@/types/identifiers/Signature';
 import { nameFromResponse, StringName, type NameResponse } from '@/types/identifiers/Name';
 import type { SignatureIdResponse } from '@/types/identifiers/SignatureId';
 import type { AdminerReferenceKind, AdminerReferences } from '@/types/adminer/AdminerReferences';
-import type { ChildPropertyResponse, ComplexPropertyResponse } from '@/types/mapping/ComplexProperty';
-import type { RootPropertyResponse } from '@/types/mapping/RootProperty';
-import type { SimplePropertyResponse } from '@/types/mapping/SimpleProperty';
+import type { ChildPropertyResponse, ComplexPropertyResponse, RootPropertyResponse, SimplePropertyResponse } from '@/types/mapping';
 import type { SchemaCategoryResponse } from '@/types/schema';
 import type { MappingResponse, MappingInit } from '@/types/mapping';
 import type { Id } from '@/types/id';
@@ -226,7 +224,7 @@ function getAllPrimaryKeys(kindMappings: MappingInit[]): SignatureIdResponse {
     return primaryKeys;
 }
 
-async function getSchemaCategory(categoryId: string): Promise<SchemaCategoryResponse> {
+async function getSchemaCategory(categoryId: Id): Promise<SchemaCategoryResponse> {
     const schemaCategoryResponse = await api.schemas.getCategory({ id: categoryId });
 
     if (!schemaCategoryResponse.status)
@@ -242,6 +240,7 @@ function getPropertiesFromAccessPath(
     accessPath: RootPropertyResponse | ChildPropertyResponse,
     properties: Set<SimplePropertyResponse>,
 ): Set<SimplePropertyResponse>{
+    // FIXME Use from server to avoid the reference to the 'EMPTY' literal
     if ('signature' in accessPath && accessPath.signature !== 'EMPTY')
         properties.add({ name: accessPath.name, signature: getLastBase(accessPath.signature) });
 
@@ -274,8 +273,8 @@ function addMappingReferences(
     givenKindProperties: Set<SimplePropertyResponse>,
 ): AdminerReferences {
     const anotherKindProperties = getPropertiesFromAccessPath(anotherKindMapping.accessPath, new Set<SimplePropertyResponse>());
-    const anotherKindPropertiesArray = Array.from(anotherKindProperties);
-    const givenKindPropertiesArray = Array.from(givenKindProperties);
+    const anotherKindPropertiesArray = [ ...anotherKindProperties ];
+    const givenKindPropertiesArray = [ ...givenKindProperties ];
 
     addReferences(references, primaryKeys, givenKindMapping, givenKindPropertiesArray, anotherKindMapping, anotherKindPropertiesArray);
 

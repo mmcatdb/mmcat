@@ -7,11 +7,11 @@ The folowing topics consist of a project part (mostly implementation) and a thes
 
 ### Bachelor
 
-- [Explaining Multi-Model Queries](mm-explain.md)
-- [Infrastructure for Multi-Model Data Management Tool](mm-users.md)
+<!-- - [Explaining Multi-Model Queries](mm-explain.md) -->
+<!-- - [Infrastructure for Multi-Model Data Management Tool](mm-users.md) -->
 - [Unified Interface for Accessing Multi-Model Data](mm-accessor.md)
 
 ### Master
 
-- [Propagation of changes to multi-model data](mm-evocat-impl.md)
+<!-- - [Propagation of changes to multi-model data](mm-evocat-impl.md) -->
 - [Querying over multi-model data](mm-evoque-impl.md)

@@ -1,22 +1,29 @@
-import { useState } from 'react';
-import { Link, matchPath, useParams } from 'react-router-dom';
+import { type FunctionComponent, type SVGProps, useMemo, useState } from 'react';
+import { Link, matchPath, useLocation, useParams } from 'react-router-dom';
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@heroui/react';
 import { routes } from '@/routes/routes';
-import { SidebarIconKey, sidebarIconMap } from '@/components/icons/Icons';
 import { usePreferences } from '../PreferencesProvider';
 import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggle';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { PiCat } from 'react-icons/pi';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
+import { CodeBracketSquareIcon as CodeBracketSquareIconOutline, RocketLaunchIcon as RocketLaunchIconOutline, PlayCircleIcon as PlayCircleIconOutline } from '@heroicons/react/24/outline';
+import { CodeBracketSquareIcon as CodeBracketSquareIconSolid, RocketLaunchIcon as RocketLaunchIconSolid, PlayCircleIcon as PlayCircleIconSolid } from '@heroicons/react/24/solid';
+import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
+import { HiOutlinePencilSquare, HiPencilSquare } from 'react-icons/hi2';
+import { HiDatabase, HiOutlineDatabase } from 'react-icons/hi';
+import { BiCategory, BiSolidCategory } from 'react-icons/bi';
+import { type Id } from '@/types/id';
 
 /**
  * Type for navigation items in the sidebar.
  */
-type NormalSidebarItem = {
+type NormalMenuItem = {
     type: 'normal';
     label: string;
+    solidIcon: FunctionComponent<SVGProps<SVGSVGElement>>;
+    outlineIcon: FunctionComponent<SVGProps<SVGSVGElement>>;
     route: string;
-    iconName: keyof typeof sidebarIconMap;
     match?: string[];
 };
 
@@ -24,24 +31,22 @@ type NormalSidebarItem = {
  * This is a special type of item that is only used to separate other items.
  * It does not have a route or icon.
  */
-type SeparatorSidebarItem = {
+type SeparatorMenuItem = {
     type: 'separator';
     label: string;
     collapsedLabel: string;
 };
 
-type SidebarItem = NormalSidebarItem | SeparatorSidebarItem;
+type MenuItem = NormalMenuItem | SeparatorMenuItem;
 
 export function Sidebar() {
     const { categoryId } = useParams<'categoryId'>();
     const { theme, isCollapsed } = usePreferences().preferences;
 
-    const dynamicSidebarItems: SidebarItem[] = categoryId
-        ? categorySidebarItems(categoryId)
-        : generalSidebarItems();
+    const dynamicMenuItems: MenuItem[] = useMemo(() => categoryId ? categoryMenuItems(categoryId) : generalMenuItems(), [ categoryId ]);
 
     return (
-        <div className={twJoin('fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
+        <div className={cn('fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
             <SidebarHeader isCollapsed={isCollapsed} />
 
             <div className='px-3 py-2'>
@@ -49,8 +54,8 @@ export function Sidebar() {
             </div>
 
             <div className='flex flex-col'>
-                {dynamicSidebarItems.map(item => (
-                    <SidebarItemDisplay key={item.label} item={item} />
+                {dynamicMenuItems.map(item => (
+                    <MenuItemDisplay key={item.label} item={item} />
                 ))}
             </div>
 
@@ -70,9 +75,9 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
     const openSettingsButton = (
         <button
             onClick={() => setIsSettingsOpen(true)}
-            className={twJoin('flex items-center px-3 py-3 mx-2 rounded-md', theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100')}
+            className={cn('flex items-center px-3 py-3 mx-2 rounded-md', theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100')}
         >
-            <Cog6ToothIcon className='w-6 h-6' />
+            <Cog6ToothIcon className='size-6' />
             {!isCollapsed && <span className='px-4'>Settings</span>}
         </button>
     );
@@ -132,13 +137,13 @@ export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
 function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
     const content = (
         <Link to={routes.home.path} className='flex items-center mb-6 mt-2 pl-5 group transition-all duration-300 ease-in-out'>
-            <div className={twJoin('shrink-0 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
-                isCollapsed ? 'w-8 h-8 text-xl' : 'w-8 h-8 text-2xl',
+            <div className={cn('shrink-0 size-8 text-foreground pr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110',
+                isCollapsed ? 'text-xl' : 'text-2xl',
             )}>
                 <PiCat className='w-full h-full' />
             </div>
 
-            <h1 className={twJoin('text-2xl whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out',
+            <h1 className={cn('text-2xl whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out',
                 isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
             )}>
                 <span className='inline-block transition-transform duration-300 group-hover:-translate-y-px font-medium'>
@@ -156,49 +161,39 @@ function SidebarHeader({ isCollapsed }: { isCollapsed: boolean }) {
 }
 
 /**
- * Renders a single sidebar item (normal link or separator).
+ * Renders a single menu item (normal link or separator).
  */
-function SidebarItemDisplay({ item }: {
-    item : SidebarItem;
+function MenuItemDisplay({ item }: {
+    item : MenuItem;
 }) {
     const { theme, isCollapsed } = usePreferences().preferences;
+    const location = useLocation();
 
     switch (item.type) {
     case 'separator':
         return (
-            <p
-                key={`separator-${item.label}`}
-                className={`font-semibold px-4 py-3 whitespace-nowrap overflow-hidden`}
-            >
+            <p key={`separator-${item.label}`} className='font-semibold px-4 py-3 whitespace-nowrap overflow-hidden'>
                 {isCollapsed ? item.collapsedLabel : item.label}
             </p>
         );
 
     case 'normal': {
-        // Get clean pathname without query params
-        const currentPathWithoutQuery = new URL(window.location.href).pathname;
-        const itemRouteWithoutQuery = new URL(item.route, window.location.origin).pathname;
+        const isActive = !!matchPath(item.route, location.pathname) || !!item.match?.some(path => matchPath(path, location.pathname));
 
-        const isMatched = item.match?.some(path => matchPath(path, currentPathWithoutQuery));
-        const isActive = currentPathWithoutQuery === itemRouteWithoutQuery || isMatched;
-        const icon = sidebarIconMap[item.iconName];
+        const Icon = isActive ? item.solidIcon : item.outlineIcon;
 
         const linkContent = (
             <Link
                 key={item.route}
                 to={item.route}
-                className={twJoin('flex items-center px-3 py-3 mx-2 rounded-md',
+                className={cn('flex items-center px-3 py-3 mx-2 rounded-md',
                     isActive && 'text-primary-500 font-bold',
                     theme === 'dark' ? 'hover:bg-zinc-900' : 'hover:bg-zinc-100', // needs to be defined via 'theme ===' not via default colors (HeroUI does not have good contrast in dark mode or light mode)
                 )}
             >
-                <span className='shrink-0'>{icon && (isActive ? icon.solid : icon.outline)}</span>
+                <Icon className='shrink-0 mr-2 size-6' />
 
-                <span
-                    className={`ml-2 whitespace-nowrap overflow-hidden ${
-                        isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
-                    }`}
-                >
+                <span className={cn('ml-2 whitespace-nowrap overflow-hidden', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100')}>
                     {item.label}
                 </span>
             </Link>
@@ -212,39 +207,39 @@ function SidebarItemDisplay({ item }: {
             linkContent
         );
     }
-
-    default:
-        throw new Error(`Unhandled SidebarItem type: ${JSON.stringify(item)}`);
     }
 }
 
 /**
- * Generates sidebar items for general navigation (no schema category context).
+ * Generates menu items for general navigation (no schema category context).
  */
-function generalSidebarItems(): SidebarItem[] {
+function generalMenuItems(): MenuItem[] {
     return [ {
         type: 'normal',
         label: 'Schema categories',
+        solidIcon: BiSolidCategory,
+        outlineIcon: BiCategory,
         route: routes.categories,
-        iconName: SidebarIconKey.SchemaCategory,
     }, {
         type: 'normal',
         label: 'Datasources',
-        route: routes.datasources.path,
-        iconName: SidebarIconKey.Datasources,
-        match: [ routes.datasourceRoutes.datasource.path ],
+        solidIcon: HiDatabase,
+        outlineIcon: HiOutlineDatabase,
+        route: routes.datasources.list.path,
+        match: [ routes.datasources.detail.path ],
     }, {
         type: 'normal',
         label: 'Adminer',
+        solidIcon: CodeBracketSquareIconSolid,
+        outlineIcon: CodeBracketSquareIconOutline,
         route: `${routes.adminer}?reload=true`,
-        iconName: SidebarIconKey.CodeBracketSquare,
     } ];
 }
 
 /**
- * Generates sidebar items for category-specific navigation.
+ * Generates menu items for category-specific navigation.
  */
-function categorySidebarItems(categoryId: string): SidebarItem[] {
+function categoryMenuItems(categoryId: Id): MenuItem[] {
     return [ {
         type: 'separator',
         label: 'Schema Category',
@@ -252,30 +247,42 @@ function categorySidebarItems(categoryId: string): SidebarItem[] {
     }, {
         type: 'normal',
         label: 'Overview',
+        solidIcon: MdDashboard,
+        outlineIcon: MdOutlineDashboard,
         route: routes.category.index.resolve({ categoryId }),
-        iconName: SidebarIconKey.Overview,
     }, {
         type: 'normal',
         label: 'Editor',
+        solidIcon: HiPencilSquare,
+        outlineIcon: HiOutlinePencilSquare,
         route: routes.category.editor.resolve({ categoryId }),
-        iconName: SidebarIconKey.Editor,
     }, {
         type: 'normal',
         label: 'Datasources',
-        route: routes.category.datasources.resolve({ categoryId }),
-        iconName: SidebarIconKey.Datasources,
-        match: [ routes.category.datasource.path ],
+        solidIcon: HiDatabase,
+        outlineIcon: HiOutlineDatabase,
+        route: routes.category.datasources.list.resolve({ categoryId }),
+        match: [ routes.category.datasources.detail.path, routes.category.mapping.path, routes.category.datasources.newMapping.path ],
     }, {
         type: 'normal',
         label: 'Actions',
-        route: routes.category.actions.resolve({ categoryId }),
-        iconName: SidebarIconKey.Rocket,
-        match: [ routes.category.action.path, routes.category.addAction.path ],
+        solidIcon: RocketLaunchIconSolid,
+        outlineIcon: RocketLaunchIconOutline,
+        route: routes.category.actions.list.resolve({ categoryId }),
+        match: [ routes.category.actions.new.path ],
     }, {
         type: 'normal',
         label: 'Jobs',
+        solidIcon: PlayCircleIconSolid,
+        outlineIcon: PlayCircleIconOutline,
         route: routes.category.jobs.resolve({ categoryId }),
-        iconName: SidebarIconKey.PlayCircle,
         match: [ routes.category.job.path ],
+    }, {
+        type: 'normal',
+        label: 'Querying',
+        solidIcon: PlayCircleIconSolid,
+        outlineIcon: PlayCircleIconOutline,
+        route: routes.category.queries.list.resolve({ categoryId }),
+        match: [ routes.category.queries.detail.path, routes.category.queries.new.path ],
     } ];
 }

@@ -162,8 +162,8 @@ export class GraphStyleModel {
         try {
             this.loadRules();
         }
-        catch (_error) {
-            // e = _error
+        catch {
+            // TODO error
         }
     }
 
@@ -220,7 +220,7 @@ export class GraphStyleModel {
             /^.+/,
         ];
 
-        let defaultCaption = captionPrioOrder.reduceRight((leading, current) => {
+        const defaultCaption = captionPrioOrder.reduceRight((leading, current) => {
             const hits = ('propertyList' in item ? item.propertyList : []).filter(prop => current.test(prop.key));
             if (hits.length)
                 return `{${hits[0].key}}`;
@@ -228,10 +228,9 @@ export class GraphStyleModel {
                 return leading;
 
         }, '');
-        defaultCaption || (defaultCaption = '<id>');
 
         return {
-            caption: defaultCaption,
+            caption: defaultCaption ||'<id>',
         };
     }
 
@@ -259,7 +258,7 @@ export class GraphStyleModel {
         if (defaultColor) {
             const calcColor = (label: Selector): DefaultColorType => {
                 const { backgroundColor, borderColor, textColor } =
-          calculateDefaultNodeColors(label.classes[0]);
+                    calculateDefaultNodeColors(label.classes[0]);
 
                 return {
                     'border-color': borderColor,
@@ -301,8 +300,8 @@ export class GraphStyleModel {
             const rules = this.parse(string);
             this.loadRules(rules);
         }
-        catch (_error) {
-            // e = _error
+        catch {
+            // TODO error
         }
     }
 

@@ -1,6 +1,6 @@
 export type Printable = {
     printTo(printer: Printer): void;
-}
+};
 
 export type Printer = {
     down(): Printer;
@@ -13,7 +13,7 @@ export type Printer = {
     append(object: object): Printer;
 
     remove(index?: number): Printer;
-}
+};
 
 /**
  * Utility method for providing a default printer.
@@ -74,7 +74,7 @@ class LineStringBuilder implements Printer {
         }
 
         if ('toString' in value) {
-            // eslint-disable-next-line
+             
             this.stack.push(value.toString());
             return this;
         }
@@ -101,4 +101,42 @@ class LineStringBuilder implements Printer {
         // We don't do no trimming here, because we don't need it (we are not comparing strings for equality in tests on FE).
         return this.stack.join('');
     }
+}
+
+/** Don't be afraid to add others as needed. */
+export enum Casing {
+    camel = 'camelCase',
+    snake = 'snake_case',
+    pascal = 'PascalCase',
+    kebab = 'kebab-case',
+}
+
+/**
+ * Replaces whitespaces by the preferred casing.
+ * The string itself is NOT converted to the given casing.
+ */
+export function replaceWhitespaces(input: string, casing: Casing): string {
+    const trimmed = input.trim();
+
+    const split = trimmed.split(/\s+/);
+    let output = split[0];
+
+    for (let i = 1; i < split.length; i++) {
+        const word = split[i];
+
+        switch (casing) {
+        case Casing.camel:
+        case Casing.pascal:
+            output += word.charAt(0).toUpperCase() + word.slice(1);
+            break;
+        case Casing.snake:
+            output += '_' + word;
+            break;
+        case Casing.kebab:
+            output += '-' + word;
+            break;
+        }
+    }
+
+    return output;
 }

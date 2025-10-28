@@ -15,12 +15,11 @@ import { useSearchParams } from 'react-router-dom';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
-import { AVAILABLE_VIEWS } from '@/components/adminer/Views';
+import { AVAILABLE_VIEWS } from '@/components/adminer/dataView/Views';
 import { ExportComponent } from '@/components/adminer/ExportComponent';
-import { DatabaseView } from '@/components/adminer/DatabaseView';
-import { View } from '@/types/adminer/View';
+import { DataView } from '@/components/adminer/dataView/DataView';
 import { DatasourceType, type Datasource } from '@/types/Datasource';
-import type { DataResponse, ErrorResponse } from '@/types/adminer/DataResponse';
+import { View, type DataResponse, type ErrorResponse } from '@/types/adminer/DataResponse';
 import { type KindReference } from '@/types/adminer/AdminerReferences';
 
 const EXAMPLE_QUERY: Record<DatasourceType, string> = {
@@ -101,7 +100,7 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
     }, [ datasource.type, execute ]);
 
     return (<>
-        <div className='mt-1'>
+        <div className='pt-1'>
             <CodeMirror
                 value={query}
                 onChange={onQueryChange}
@@ -133,9 +132,7 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
                     items={AVAILABLE_VIEWS[datasource.type].entries()}
                     label='View'
                     labelPlacement='outside-left'
-                    classNames={
-                        { label:'sr-only' }
-                    }
+                    classNames={{ label: 'sr-only' }}
                     size='sm'
                     placeholder='Select view'
                     className='ml-1 max-w-xs align-middle'
@@ -154,18 +151,18 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
 
             {queryResult && 'data' in queryResult && (
                 <span className='ml-2'>
-                    <ExportComponent data={queryResult}/>
+                    <ExportComponent data={queryResult} />
                 </span>
             )}
         </div>
 
-        <div className='flex grow min-h-0 mt-2'>
+        <div className='flex grow min-h-0'>
             {queryResult && 'message' in queryResult && (<>
                 {queryResult.message}
             </>)}
 
             {queryResult && 'data' in queryResult && (
-                <DatabaseView
+                <DataView
                     view={AVAILABLE_VIEWS[datasource.type].length === 1 ? AVAILABLE_VIEWS[datasource.type][0] : view}
                     data={queryResult}
                     kindReferences={EMPTY_REFERENCES}

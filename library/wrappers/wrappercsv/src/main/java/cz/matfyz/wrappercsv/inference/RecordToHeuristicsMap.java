@@ -20,15 +20,15 @@ import java.util.Map;
  */
 public class RecordToHeuristicsMap implements PairFlatMapFunction<Map<String, String>, String, PropertyHeuristics> {
 
-    private final String fileName;
+    private final String filename;
 
     /**
      * Constructs a new instance of {@code RecordToHeuristicsMap}.
      *
-     * @param fileName the name of the file being processed, used as a prefix for the keys.
+     * @param filename the name of the file being processed, used as a prefix for the keys.
      */
-    public RecordToHeuristicsMap(String fileName) {
-        this.fileName = fileName;
+    public RecordToHeuristicsMap(String filename) {
+        this.filename = filename;
     }
 
     /**
@@ -41,7 +41,7 @@ public class RecordToHeuristicsMap implements PairFlatMapFunction<Map<String, St
     @Override public Iterator<Tuple2<String, PropertyHeuristics>> call(Map<String, String> record) {
         List<Tuple2<String, PropertyHeuristics>> result = record.entrySet().stream()
             .map(entry -> {
-                String key = fileName + '/' + entry.getKey();
+                String key = filename + '/' + entry.getKey();
                 PropertyHeuristics heuristics = buildHeuristics(key, entry.getValue(), 1, 1);
                 return new Tuple2<>(key + "::" + entry.getValue(), heuristics);
             })

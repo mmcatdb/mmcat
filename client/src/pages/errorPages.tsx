@@ -1,13 +1,13 @@
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import { Button, Spinner } from '@heroui/react';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 type RouteError = {
-  status?: number;
-  statusText?: string;
-  message?: string;
-  stack?: string;
-}
+    status?: number;
+    statusText?: string;
+    message?: string;
+    stack?: string;
+};
 
 /**
  * Error page component that handles 404 and other exceptions.
@@ -31,16 +31,16 @@ export function ErrorPage() {
     const errorStyles = isNotFound ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-red-100 text-red-800 border-red-300';
 
     // Extract error message
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const errorMessage = isRouteErrorResponse(error)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+         
         ? error.statusText || error.data?.message || 'The page you are looking for does not exist.'
         : (error as RouteError)?.message ?? (error instanceof Error ? error.message : 'An unexpected error occurred.');
 
     const errorStack = isDev ? (error as RouteError)?.stack ?? (error instanceof Error ? error.stack : undefined) : undefined;
 
     return (
-        <div className={twJoin('min-h-screen flex flex-col items-center justify-center p-4', errorStyles)}>
+        <div className={cn('min-h-screen flex flex-col items-center justify-center p-4', errorStyles)}>
             <h1 className='text-4xl font-bold mb-4'>
                 {isNotFound ? '404 - Page Not Found' : 'Something Went Wrong'}
             </h1>

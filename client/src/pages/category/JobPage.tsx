@@ -1,15 +1,17 @@
 import { api } from '@/api';
 import { Job, JobState } from '@/types/job';
-import { type Dispatch, useEffect, useRef, useState } from 'react';
+import { type Dispatch, type FunctionComponent, type SVGProps, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@heroui/react';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
-import { getJobStateTextStyle } from '@/components/icons/Icons';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
 import { type SchemaCategoryInfo } from '@/types/schema';
 import { LoadingPage, ReloadPage } from '../errorPages';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
+import { PlayCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, PauseCircleIcon, XCircleIcon, EllipsisHorizontalCircleIcon, StopCircleIcon } from '@heroicons/react/24/outline';
+import { PageLayout } from '@/components/RootLayout';
 
 /** In milliseconds. */
 const REFRESH_INTERVAL_MS = 1000;
@@ -59,14 +61,14 @@ export function JobPage() {
         return <LoadingPage />;
 
     if (error) {
-        return <ReloadPage onReload={() => {
+        return (
             // This will fetch the job only once, not repeatedly. Replace by a better solution once Tanstack query + router is used.
-            void fetchJob();
-        }} />;
+            <ReloadPage onReload={fetchJob} />
+        );
     }
 
     return (
-        <div className='p-4'>
+        <PageLayout>
             <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
 
             <div className='border rounded-lg p-4 border-default-300 bg-default-50'>
@@ -81,7 +83,7 @@ export function JobPage() {
                 </p>
                 <p className='mb-1'>
                     <strong>State:</strong>
-                    <span className={twMerge('m-2 px-3 py-1 rounded-full font-semibold', getJobStateTextStyle(job.state))}>
+                    <span className={cn('m-2 px-3 py-1 rounded-full font-semibold', jobStateStyles[job.state].bg)}>
                         {job.state}
                     </span>
                 </p>
@@ -100,7 +102,7 @@ export function JobPage() {
                     </div>
                 </div>
             )}
-        </div>
+        </PageLayout>
     );
 }
 
@@ -140,7 +142,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 
     if (job.state === JobState.Disabled) {
         return (
-            <Button color='success' onClick={handleEnableJob} className={className}>
+            <Button color='success' onPress={handleEnableJob} className={className}>
                 Enable
             </Button>
         );
@@ -148,7 +150,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 
     if (job.state === JobState.Ready) {
         return (
-            <Button color='warning' onClick={handleDisableJob} className={className}>
+            <Button color='warning' onPress={handleDisableJob} className={className}>
                 Disable
             </Button>
         );
@@ -156,7 +158,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 
     if (TERMINAL_STATES.includes(job.state)) {
         return (
-            <Button color='primary' onClick={handleRestartJob} className={className}>
+            <Button color='primary' onPress={handleRestartJob} className={className}>
                 Restart
             </Button>
         );
@@ -164,3 +166,29 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 
     return null;
 }
+
+/**
+ * Returns the appropriate icon for a job's status.
+ */
+export function JobStateIcon({ state }: { state: JobState }) {
+    const styles = jobStateStyles[state];
+    return (
+        <styles.icon className={cn(
+            'size-8',
+            styles.color,
+            state === JobState.Running && 'animate-spin',
+        )} />
+    );
+}
+
+/**
+ * Styling configuration for job states, mapping each state to color and background.
+ */
+const jobStateStyles: Record<JobState, { color: string, bg: string, icon: FunctionComponent<SVGProps<SVGSVGElement>> }> = {
+    [JobState.Disabled]: { color: 'text-default-400', bg: 'bg-default-400', icon: StopCircleIcon },
+    [JobState.Ready]: { color: 'text-primary-400', bg: 'bg-primary-400', icon: PlayCircleIcon },
+    [JobState.Running]: { color: 'text-primary-500', bg: 'bg-primary-500', icon: EllipsisHorizontalCircleIcon },
+    [JobState.Waiting]: { color: 'text-warning-500', bg: 'bg-yellow-500', icon: PauseCircleIcon },
+    [JobState.Finished]: { color: 'text-success-500', bg: 'bg-success-400', icon: CheckCircleIcon },
+    [JobState.Failed]: { color: 'text-danger-400', bg: 'bg-danger-400', icon: XCircleIcon },
+};

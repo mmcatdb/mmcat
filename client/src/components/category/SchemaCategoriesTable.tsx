@@ -44,7 +44,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
     const navigate = useNavigate();
 
     function handleRowAction(key: React.Key) {
-        navigate(routes.categories + `/${key}`);
+        navigate(routes.category.index.resolve({ categoryId: String(key) }));
     }
 
     const [ deletingCategoryId, setDeletingCategoryId ] = useState<Id>();
@@ -66,11 +66,22 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
 
         toast.success(`Schema category ${deletingCategory.label} deleted successfully!`);
         onDeleteCategory(deletingCategory.id);
-
         setDeletingCategoryId(undefined);
     }
 
     return (<>
+        <ConfirmationModal
+            isOpen={!!rawDeletingCategory}
+            onClose={() => setDeletingCategoryId(undefined)}
+            onConfirm={confirmDelete}
+            isFetching={isDeleting}
+            title='Confirm Deletion?'
+            message={`The schema category ${deletingCategory?.label} will be permanently deleted.`}
+            confirmButtonText='Yes, Delete'
+            cancelButtonText='Cancel'
+            confirmButtonColor='danger'
+        />
+
         <Table
             aria-label='Schema Categories Table'
             onRowAction={handleRowAction}
@@ -79,13 +90,11 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
         >
             <TableHeader>
                 {[
-                    ...(showTableIDs
-                        ? [
-                            <TableColumn key='id' allowsSorting>
-                                ID
-                            </TableColumn>,
-                        ]
-                        : []),
+                    ...(showTableIDs ? [
+                        <TableColumn key='id' allowsSorting>
+                            ID
+                        </TableColumn>,
+                    ] : []),
                     <TableColumn key='label' allowsSorting>
                         Label
                     </TableColumn>,
@@ -102,9 +111,9 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                         className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
                     >
                         {[
-                            ...(showTableIDs
-                                ? [ <TableCell key='id'>{category.id}</TableCell> ]
-                                : []),
+                            ...(showTableIDs ? [
+                                <TableCell key='id'>{category.id}</TableCell>,
+                            ] : []),
                             <TableCell key='label'>{category.label}</TableCell>,
                             <TableCell key='version'>{category.systemVersionId}</TableCell>,
                             <TableCell key='actions'>
@@ -115,7 +124,7 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                                     variant='light'
                                     onPress={() => setDeletingCategoryId(category.id)}
                                 >
-                                    <TrashIcon className='w-5 h-5' />
+                                    <TrashIcon className='size-5' />
                                 </Button>
                             </TableCell>,
                         ]}
@@ -123,19 +132,5 @@ function CategoriesTable({ categories, onDeleteCategory, sortDescriptor, onSortC
                 ))}
             </TableBody>
         </Table>
-
-        <ConfirmationModal
-            isOpen={!!rawDeletingCategory}
-            onClose={() => setDeletingCategoryId(undefined)}
-            onConfirm={() => {
-                void confirmDelete();
-            }}
-            isFetching={isDeleting}
-            title='Confirm Deletion?'
-            message={`The schema category ${deletingCategory?.label} will be permanently deleted.`}
-            confirmButtonText='Yes, Delete'
-            cancelButtonText='Cancel'
-            confirmButtonColor='danger'
-        />
     </>);
 }

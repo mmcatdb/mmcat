@@ -42,7 +42,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     /**
      * Returns the name of the CSV file currently being processed.
      */
-    private String fileName() {
+    private String filename() {
         return kindName;
     }
 
@@ -151,13 +151,13 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
      */
     @Override public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
-        return csvDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
+        return csvDocuments.flatMapToPair(new RecordToHeuristicsMap(filename()));
     }
 
     /**
      * Retrieves a list of kind names (CSV file names) from the provider.
      */
     @Override public List<String> getKindNames() {
-        return List.of(provider.getCsvFileNames());
+        return List.of(provider.getCsvFilenames());
     }
 }

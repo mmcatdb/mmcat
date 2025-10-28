@@ -5,6 +5,8 @@ import type { Mapping } from '@/types/mapping';
 import { useCategoryInfo } from '../CategoryInfoProvider';
 import { AccessPathTooltip } from './AccessPathTooltip';
 import { useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { routes } from '@/routes/routes';
 
 type MappingsTableProps = {
     mappings: Mapping[];
@@ -68,61 +70,48 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
         });
     }, [ mappings, sortDescriptor ]);
 
-    // left for future use, if update of mapping needed
-    // const handleRowAction = (mappingId: React.Key) => {
-    //     navigate(routes.category.mapping.resolve({
-    //         categoryId: category.id,
-    //         mappingId: String(mappingId),
-    //     }));
-    // };
+    const navigate = useNavigate();
+
+    const handleRowAction = (mappingId: React.Key) => {
+        navigate(routes.category.mapping.resolve({
+            categoryId: category.id,
+            mappingId: String(mappingId),
+        }));
+    };
 
     return (
         <Table
             aria-label='Mappings Table'
             sortDescriptor={sortDescriptor}
             onSortChange={onSortChange}
-            // onRowAction={handleRowAction}
+            onRowAction={handleRowAction}
             removeWrapper
             isCompact
         >
             <TableHeader>
                 {[
-                    ...(showTableIDs
-                        ? [
-                            <TableColumn key='id'>
-                                ID
-                            </TableColumn>,
-                        ]
-                        : []),
-                    <TableColumn key='kindName' allowsSorting>
-                        Kind Name
-                    </TableColumn>,
-                    <TableColumn key='version' allowsSorting allowsResizing>
-                        Version
-                    </TableColumn>,
-                    <TableColumn key='rootObjex'>
-                        Root object
-                    </TableColumn>,
-                    <TableColumn key='primaryKey'>
-                        Primary Key
-                    </TableColumn>,
-                    <TableColumn key='accessPath'>
-                        Access Path
-                    </TableColumn>,
+                    ...(showTableIDs ? [
+                        <TableColumn key='id'>ID</TableColumn>,
+                    ] : []),
+                    <TableColumn key='kindName' allowsSorting>Kind Name</TableColumn>,
+                    <TableColumn key='version' allowsSorting>Version</TableColumn>,
+                    <TableColumn key='rootObjex'>Root object</TableColumn>,
+                    <TableColumn key='primaryKey'>Primary Key</TableColumn>,
+                    <TableColumn key='accessPath'>Access Path</TableColumn>,
                 ]}
             </TableHeader>
             <TableBody emptyContent='No mappings to display.'>
                 {sortedMappings.map(mapping => (
-                    <TableRow
-                        key={mapping.id}
-                        className='hover:bg-default-100 focus:bg-default-200'
-                    >
+                    <TableRow key={mapping.id} className='hover:bg-default-100 focus:bg-default-200 cursor-pointer'>
                         {[
-                            ...(showTableIDs
-                                ? [ <TableCell key='id'>{mapping.id}</TableCell> ]
-                                : []),
+                            ...(showTableIDs ? [
+                                <TableCell key='id'>{mapping.id}</TableCell>,
+                            ] : []),
                             <TableCell key='kindName'>
-                                {mapping.kindName}
+                                {/* The link is here for accessibility. */}
+                                <Link className='underline' to={routes.category.mapping.resolve({ categoryId: category.id, mappingId: mapping.id })}>
+                                    {mapping.kindName}
+                                </Link>
                             </TableCell>,
                             <TableCell key='version'>
                                 <span className={Number(category.systemVersionId) > Number(mapping.version) ? 'text-danger-500' : ''}>
@@ -136,7 +125,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                 {mapping.primaryKey.signatures.join(', ')}
                             </TableCell>,
                             <TableCell key='accessPath'>
-                                <AccessPathTooltip accessPath={mapping.accessPath} />
+                                <AccessPathTooltip accessPath={mapping.accessPath} text='Preview' />
                             </TableCell>,
                         ]}
                     </TableRow>

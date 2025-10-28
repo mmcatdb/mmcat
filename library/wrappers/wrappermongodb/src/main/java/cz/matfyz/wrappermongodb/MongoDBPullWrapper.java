@@ -138,14 +138,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
 
         final var complexProperty = (ComplexProperty) property;
+        final ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.signature());
+
         final var object = (Document) value;
-
-        // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
-        // We do so by passing the parent record instead of creating a new one.
-        final ComplexRecord childRecord = complexProperty.isAuxiliary()
-            ? parentRecord
-            : parentRecord.addComplexRecord(complexProperty.signature());
-
         addKeysToRecord(childRecord, complexProperty, object);
     }
 
@@ -154,11 +149,11 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         final MongoCollection<Document> collection = database.getCollection(kindName);
         final Iterator<Document> iterator = collection.find().iterator();
 
-        final var output = new StringBuilder();
+        final var sb = new StringBuilder();
         while (iterator.hasNext())
-            output.append(iterator.next().toString());
+            sb.append(iterator.next().toString());
 
-        return output.toString();
+        return sb.toString();
     }
 
     @Override public QueryResult executeQuery(QueryStatement query) {

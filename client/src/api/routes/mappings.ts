@@ -1,9 +1,9 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
-import type { MappingResponse, MappingInit } from '@/types/mapping';
+import type { MappingResponse, MappingInit, MappingEdit } from '@/types/mapping';
 import { type Id } from '@/types/id';
 
-const mappings = {
+export const mappingsApi = {
     getMapping: GET<{ id: StringLike }, MappingResponse>(
         u => `/mappings/${u.id}`,
     ),
@@ -16,6 +16,7 @@ const mappings = {
     createMapping: POST<Empty, MappingResponse, MappingInit>(
         () => `/mappings`,
     ),
+    updateMapping: POST<{ id: StringLike }, MappingResponse, MappingEdit>(
+        u => `/mappings/${u.id}`,
+    ),
 };
-
-export default mappings;

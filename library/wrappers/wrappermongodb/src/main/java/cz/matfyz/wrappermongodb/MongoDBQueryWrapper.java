@@ -211,7 +211,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         /** Path since the last split by the last array result structure. */
         private AccessPath lastAccessPath;
         /** Signature from the lastAccessPath to the current object. */
-        private Signature fromLastPath = Signature.createEmpty();
+        private Signature fromLastPath = Signature.empty();
 
         private void traverseAccessPath(ResultStructure structure) {
             final var property = context.getProperty(structure);
@@ -225,7 +225,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
 
             final List<AccessPath> accessPaths = lastComplex.getPropertyPath(fromLastPath);
             lastAccessPath = accessPaths.getLast();
-            fromLastPath = Signature.createEmpty();
+            fromLastPath = Signature.empty();
 
             return accessPaths;
         }

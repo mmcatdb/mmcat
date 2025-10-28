@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { type Dispatch, useCallback, useMemo } from 'react';
 import { Spinner, Select, SelectItem } from '@heroui/react';
 import { useFetchData } from '@/components/adminer/useFetchData';
 import { api } from '@/api';
@@ -15,7 +15,7 @@ type KindMenuProps = {
     /** If 'true', additional kind name for unlabeled nodes from Neo4j is added. */
     showUnlabeled: boolean;
     /** A function for state updating. */
-    dispatch: React.Dispatch<AdminerFilterQueryStateAction>;
+    dispatch: Dispatch<AdminerFilterQueryStateAction>;
 };
 
 type Option = {
@@ -65,13 +65,11 @@ export function KindMenu({ datasourceId, kind, showUnlabeled, dispatch }: KindMe
             items={selectItems}
             aria-label='Kind'
             labelPlacement='outside-left'
-            classNames={
-                { label:'sr-only' }
-            }
+            classNames={{ label: 'sr-only' }}
             size='sm'
             placeholder='Select kind'
-            className='max-w-xs px-0'
-            selectedKeys={ kind ? [ kind ] : undefined }
+            className='max-w-xs'
+            selectedKeys={kind ? [ kind ] : undefined}
         >
             {item => (
                 <SelectItem

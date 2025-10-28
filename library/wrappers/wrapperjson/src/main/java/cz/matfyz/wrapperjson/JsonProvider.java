@@ -39,7 +39,7 @@ public class JsonProvider {
      * Retrieves a list of JSON file names from the specified URL.
      * Supports both local directories and remote file access.
      */
-    public String getJsonFileNames() {
+    public String getJsonFilenames() {
         String url = settings.url;
         return url.substring(url.lastIndexOf('/') + 1);
     }

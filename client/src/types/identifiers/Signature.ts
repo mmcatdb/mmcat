@@ -4,6 +4,7 @@ enum SignatureType {
     Empty,
 }
 
+const EMPTY_VALUE = 'EMPTY';
 const SEPARATOR = '.';
 
 export type SignatureResponse = string;
@@ -26,7 +27,7 @@ export class Signature {
     }
 
     static fromResponse(input: SignatureResponse): Signature {
-        if (input === 'EMPTY')
+        if (input === EMPTY_VALUE)
             return Signature.empty();
 
         return new Signature(input.split(SEPARATOR).map(base => Number.parseInt(base)));
@@ -90,13 +91,13 @@ export class Signature {
 
     private toValue(): string {
         if (this.type === SignatureType.Empty)
-            return 'EMPTY';
+            return EMPTY_VALUE;
 
         return this.ids.join(SEPARATOR);
     }
 
     toString(): string {
-        return this.value;
+        return this.value === EMPTY_VALUE ? 'ε' : this.value;
     }
 
     toBases(): Signature[] {
@@ -112,7 +113,7 @@ export class Signature {
             : undefined;
     }
 
-    tryGetLastBase(): { rest: Signature, last: Signature} | undefined {
+    tryGetLastBase(): { rest: Signature, last: Signature } | undefined {
         return this.type === SignatureType.Base || this.type === SignatureType.Composite
             ? {
                 rest: Signature.fromIds(this.ids.slice(0, -1)),

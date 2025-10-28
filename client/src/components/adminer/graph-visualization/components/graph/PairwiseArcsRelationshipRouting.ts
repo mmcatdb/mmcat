@@ -89,7 +89,7 @@ export class PairwiseArcsRelationshipRouting {
             if (nodePair.isLoop()) {
                 let angles = [];
                 const node = nodePair.nodeA;
-                for (const relationship of Array.from(relationships)) {
+                for (const relationship of relationships) {
                     if (!relationship.isLoop()) {
                         if (relationship.source === node)
                             angles.push(relationship.naturalAngle);

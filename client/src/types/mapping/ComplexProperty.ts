@@ -2,6 +2,7 @@ import { type NameResponse, nameFromResponse, Signature, type SignatureResponse,
 import { print, type Printable, type Printer } from '@/types/utils/string';
 import { SimpleProperty, type SimplePropertyResponse } from './SimpleProperty';
 import { type RootProperty } from './RootProperty';
+import { type AccessPath } from './AccessPath';
 
 export type ComplexPropertyResponse = {
     name: NameResponse;
@@ -25,7 +26,7 @@ export class ComplexProperty implements Printable {
     public constructor(
         readonly name: Name,
         readonly signature: Signature,
-        readonly parent: ParentProperty | undefined,
+        readonly parent: ParentProperty,
         readonly subpaths: ChildProperty[],
     ) {}
 
@@ -42,7 +43,7 @@ export class ComplexProperty implements Printable {
             subpaths,
         );
 
-        input.subpaths.map(subpath => subpathFromResponse(subpath, property)).forEach(subpath => subpaths.push(subpath));
+        input.subpaths.map(s => subpathFromResponse(s, property)).forEach(s => subpaths.push(s));
 
         return property;
     }
@@ -51,14 +52,14 @@ export class ComplexProperty implements Printable {
         return {
             name: this.name.toServer(),
             signature: this.signature.toServer(),
-            subpaths: this.subpaths.map(subpath => subpath.toServer()),
+            subpaths: this.subpaths.map(s => s.toServer()),
         };
     }
 
     printTo(printer: Printer): void {
-        printer.append(this.name).append(': ');
-        if (!this.isAuxiliary)
-            printer.append(this.signature).append(' ');
+        printer
+            .append(this.name).append(': ')
+            .append(this.signature).append(' ');
 
         printer.append('{').down().nextLine();
 
@@ -71,5 +72,14 @@ export class ComplexProperty implements Printable {
 
     toString(): string {
         return print(this);
+    }
+
+    toEditable(): AccessPath {
+        return {
+            name: this.name,
+            signature: this.signature,
+            subpaths: this.subpaths.map(s => s.toEditable()),
+            isRoot: false,
+        };
     }
 }

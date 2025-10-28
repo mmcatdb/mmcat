@@ -11,11 +11,11 @@ import { ForceSimulation } from './ForceSimulation';
 import { nodeEventHandlers, relationshipEventHandlers } from './mouseEventHandlers';
 import { NODE_HOVER_CLASS, nodeRenderer, relationshipRenderer } from './renderers';
 import { type ZoomLimitsReached, ZoomType } from '@/components/adminer/graph-visualization/types/types';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 export const SELECTED_CLASS = 'svg-selected';
 
-type MeasureSizeFunction = () => { width: number, height: number }
+type MeasureSizeFunction = () => { width: number, height: number };
 
 export class Visualization {
     private readonly root: Selection<SVGElement, unknown, BaseType, unknown>;
@@ -89,7 +89,7 @@ export class Visualization {
                 onZoomEvent(limitsReached);
 
                 return this.container
-                    // @ts-expect-error
+                    // @ts-expect-error Don't know what's happening here ... like dude, WTF?
                     .transition()
                     .duration(isZoomClick ? 400 : 20)
                     .call((sel: any) => (isZoomClick ? sel.ease(easeCubic) : sel))
@@ -147,7 +147,7 @@ export class Visualization {
             .selectAll<SVGGElement, NodeModel>(`g.${NODE_CLASS}`)
             .data(nodes, d => d.id)
             .join('g')
-            .attr('class', d => twJoin(NODE_CLASS, 'cursor-pointer', NODE_HOVER_CLASS, d.selected && SELECTED_CLASS))
+            .attr('class', d => cn(NODE_CLASS, 'cursor-pointer', NODE_HOVER_CLASS, d.selected && SELECTED_CLASS))
             .attr('aria-label', d => `graph-node${d.id}`)
             .call(nodeEventHandlers, this.trigger, this.forceSimulation.simulation);
 
@@ -170,7 +170,7 @@ export class Visualization {
             .selectAll<SVGGElement, RelationshipModel>(`g.${RELATIONSHIP_CLASS}`)
             .data(relationships, d => d.id)
             .join('g')
-            .attr('class', d => twJoin(RELATIONSHIP_CLASS, 'cursor-pointer', d.selected && SELECTED_CLASS))
+            .attr('class', d => cn(RELATIONSHIP_CLASS, 'cursor-pointer', d.selected && SELECTED_CLASS))
             .call(relationshipEventHandlers, this.trigger);
 
         relationshipRenderer.forEach(renderer =>
@@ -234,7 +234,7 @@ export class Visualization {
                 return;
 
             const scale =
-        (1 - ZOOM_FIT_PADDING_PERCENT) /
+                (1 - ZOOM_FIT_PADDING_PERCENT) /
         Math.max(graphWidth / availableWidth, graphHeight / availableHeight);
 
             const centerPointOffset = { x: -graphCenterX, y: -graphCenterY };

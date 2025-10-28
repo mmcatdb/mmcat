@@ -169,12 +169,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         if (strings.isEmpty())
             return "";
 
-        final StringBuilder combinedBuilder = new StringBuilder();
+        final var combinedSb = new StringBuilder();
         for (int i = 0; i < strings.size(); i++) {
-            combinedBuilder.append(strings.get(i)).append((char) (i + 'a'));
+            combinedSb.append(strings.get(i)).append((char) (i + 'a'));
         }
 
-        final String combined = combinedBuilder.toString();
+        final String combined = combinedSb.toString();
         final Integer[] suffixArray = buildSuffixArray(combined);
         final int[] lcp = buildLCP(combined, suffixArray);
 

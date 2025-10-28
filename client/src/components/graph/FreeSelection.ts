@@ -51,12 +51,18 @@ export class FreeSelection implements GraphSelection {
             const nodeId = action.nodeId;
             const selected = new Set(this.nodeIds);
 
-            if (operation === 'add')
+            if (operation === 'add') {
                 selected.add(nodeId);
-            else if (operation === 'remove')
+            }
+            else if (operation === 'remove') {
                 selected.delete(nodeId);
-            else if (operation === 'toggle')
-                selected.has(nodeId) ? selected.delete(nodeId) : selected.add(nodeId);
+            }
+            else if (operation === 'toggle') {
+                if (selected.has(nodeId))
+                    selected.delete(nodeId);
+                else
+                    selected.add(nodeId);
+            }
 
             return new FreeSelection(selected, this.edgeIds);
         }
@@ -64,12 +70,18 @@ export class FreeSelection implements GraphSelection {
             const edgeId = action.edgeId;
             const selected = new Set(this.edgeIds);
 
-            if (operation === 'add')
+            if (operation === 'add') {
                 selected.add(edgeId);
-            else if (operation === 'remove')
+            }
+            else if (operation === 'remove') {
                 selected.delete(edgeId);
-            else if (operation === 'toggle')
-                selected.has(edgeId) ? selected.delete(edgeId) : selected.add(edgeId);
+            }
+            else if (operation === 'toggle') {
+                if (selected.has(edgeId))
+                    selected.delete(edgeId);
+                else
+                    selected.add(edgeId);
+            }
 
             return new FreeSelection(this.nodeIds, selected);
         }
@@ -86,12 +98,18 @@ export class FreeSelection implements GraphSelection {
         // A special key is pressed - we toggle the given nodes and edges.
         const nodeIds = new Set(this.nodeIds);
         event.nodeIds.forEach(nodeId => {
-            nodeIds.has(nodeId) ? nodeIds.delete(nodeId) : nodeIds.add(nodeId);
+            if (nodeIds.has(nodeId))
+                nodeIds.delete(nodeId);
+            else
+                nodeIds.add(nodeId);
         });
 
         const edgeIds = new Set(this.edgeIds);
         event.edgeIds.forEach(edgeId => {
-            edgeIds.has(edgeId) ? edgeIds.delete(edgeId) : edgeIds.add(edgeId);
+            if (edgeIds.has(edgeId))
+                edgeIds.delete(edgeId);
+            else
+                edgeIds.add(edgeId);
         });
 
         return new FreeSelection(nodeIds, edgeIds);

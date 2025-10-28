@@ -1,7 +1,7 @@
 import { type NodeModel } from './Node';
 import { type RelationshipModel } from './Relationship';
 
-type NodeMap = Record<string, string[]>
+type NodeMap = Record<string, string[]>;
 function uniq<T>(list: T[]): T[] {
     return [ ...new Set(list) ];
 }
@@ -18,7 +18,7 @@ export class GraphModel {
         this.removeNode = this.removeNode.bind(this);
         this.updateNode = this.updateNode.bind(this);
         this.removeConnectedRelationships =
-        this.removeConnectedRelationships.bind(this);
+            this.removeConnectedRelationships.bind(this);
         this.addRelationships = this.addRelationships.bind(this);
         this.addInternalRelationships = this.addInternalRelationships.bind(this);
         this.pruneInternalRelationships = this.pruneInternalRelationships.bind(this);
@@ -47,9 +47,9 @@ export class GraphModel {
             let nodePair = new NodePair(relationship.source, relationship.target);
 
             nodePair =
-        groups[nodePair.toString()] != null
-            ? groups[nodePair.toString()]
-            : nodePair;
+                groups[nodePair.toString()] != null
+                    ? groups[nodePair.toString()]
+                    : nodePair;
 
             nodePair.relationships.push(relationship);
 
@@ -69,7 +69,7 @@ export class GraphModel {
     }
 
     addExpandedNodes = (node: NodeModel, nodes: NodeModel[]): void => {
-        for (const eNode of Array.from(nodes)) {
+        for (const eNode of nodes) {
             if (this.findNode(eNode.id) == null) {
                 this.nodeMap[eNode.id] = eNode;
                 this._nodes.push(eNode);
@@ -110,7 +110,7 @@ export class GraphModel {
     }
 
     removeConnectedRelationships(node: NodeModel): void {
-        for (const r of Array.from(this.findAllRelationshipToNode(node))) {
+        for (const r of this.findAllRelationshipToNode(node)) {
             this.updateNode(r.source);
             this.updateNode(r.target);
             this._relationships.splice(this._relationships.indexOf(r), 1);
@@ -119,7 +119,7 @@ export class GraphModel {
     }
 
     addRelationships(relationships: RelationshipModel[]): void {
-        for (const relationship of Array.from(relationships)) {
+        for (const relationship of relationships) {
             const existingRelationship = this.findRelationship(relationship.id);
             if (existingRelationship != null) {
                 existingRelationship.internal = false;
@@ -133,7 +133,7 @@ export class GraphModel {
     }
 
     addInternalRelationships(relationships: RelationshipModel[]): void {
-        for (const relationship of Array.from(relationships)) {
+        for (const relationship of relationships) {
             relationship.internal = true;
             if (this.findRelationship(relationship.id) == null) {
                 this.relationshipMap[relationship.id] = relationship;

@@ -44,11 +44,15 @@ export class ObjexMetadata implements MMO<MMOType.Objex> {
         };
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     up(category: Category): void {
         // category.getObjex(this.key).current = this.newObjex;
+        // TODO do something
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     down(category: Category): void {
         // category.getObjex(this.key).current = this.oldObjex;
+        // TODO do something
     }
 }

@@ -54,7 +54,7 @@ export const nodeEventHandlers = (
     // Math.sqrt was removed to avoid unnecessary computation, since this
     // function is called very often when dragging.
         const dist =
-      Math.pow(initialDragPosition[0] - event.x, 2) +
+            Math.pow(initialDragPosition[0] - event.x, 2) +
       Math.pow(initialDragPosition[1] - event.y, 2);
 
         // This is to prevent clicks/double clicks from restarting the simulation

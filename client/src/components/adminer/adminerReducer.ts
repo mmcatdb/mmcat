@@ -1,7 +1,7 @@
-import { getNewView } from './Views';
-import { View } from '@/types/adminer/View';
+import { View } from '@/types/adminer/DataResponse';
+import { getNewView } from './dataView/Views';
 import { Operator, UNARY_OPERATORS } from '@/types/adminer/Operators';
-import type { PropertyFilter } from '@/types/adminer/PropertyFilter';
+import { type PropertyFilter } from './URLParamsState';
 import type { Datasource } from '@/types/Datasource';
 import type { Id } from '@/types/id';
 
@@ -20,9 +20,7 @@ export function adminerReducer(state: AdminerFilterQueryState, action: AdminerFi
             pagination: getInitPaginationState(),
         };
     }
-    case 'update': {
-        return action.newState;
-    }
+    case 'update': return action.newState;
     case 'datasource': {
         if (state.datasourceId !== action.newDatasource.id) {
             return {
@@ -45,12 +43,7 @@ export function adminerReducer(state: AdminerFilterQueryState, action: AdminerFi
             pagination: getInitPaginationState(),
         };
     }
-    case 'view': {
-        return {
-            ...state,
-            view: action.newView,
-        };
-    }
+    case 'view': return { ...state, view: action.newView };
     case 'submit': {
         return {
             ...state,
@@ -61,12 +54,8 @@ export function adminerReducer(state: AdminerFilterQueryState, action: AdminerFi
             },
         };
     }
-    case 'input': {
-        return reducerInput(state, action);
-    }
-    case 'form': {
-        return reducerForm(state, action);
-    }
+    case 'input': return input(state, action);
+    case 'form': return form(state, action);
     case 'itemCount': {
         return {
             ...state,
@@ -108,12 +97,23 @@ export function adminerReducer(state: AdminerFilterQueryState, action: AdminerFi
             },
         };
     }
-    default:
-        throw new Error('Unknown action');
     }
 }
 
-function reducerInput(state: AdminerFilterQueryState, action: InputAction): AdminerFilterQueryState {
+type InputAction = AdminerTypedAction<'input', {
+    field: 'limit';
+    value: number;
+} | {
+    field: 'propertyName' | 'propertyValue';
+    id: number;
+    value: string;
+} | {
+    field: 'operator';
+    id: number;
+    value: Operator;
+}>;
+
+function input(state: AdminerFilterQueryState, action: InputAction): AdminerFilterQueryState {
     const { field, value } = action;
 
     switch (field) {
@@ -128,7 +128,8 @@ function reducerInput(state: AdminerFilterQueryState, action: InputAction): Admi
 
                 if (field === 'operator' && UNARY_OPERATORS.includes(value))
                     updatedFilter.propertyValue = '';
-
+                if (field === 'propertyName' && !filter.operator)
+                    updatedFilter.operator = Operator.Equal;
 
                 return updatedFilter;
             }
@@ -139,7 +140,16 @@ function reducerInput(state: AdminerFilterQueryState, action: InputAction): Admi
     }
 }
 
-function reducerForm(state: AdminerFilterQueryState, action: FormAction): AdminerFilterQueryState {
+type FormAction = AdminerTypedAction<'form', {
+    action: 'add_filter';
+} | {
+    action: 'delete_filter';
+    id: number;
+} | {
+    action: 'delete_filters';
+}>;
+
+function form(state: AdminerFilterQueryState, action: FormAction): AdminerFilterQueryState {
     const { action: formAction } = action;
 
     switch (formAction) {
@@ -148,9 +158,10 @@ function reducerForm(state: AdminerFilterQueryState, action: FormAction): Admine
         const newFilter: PropertyFilter = {
             id: nextId,
             propertyName: '',
-            operator: Operator.Equal,
+            operator: undefined,
             propertyValue: '',
         };
+
         return {
             ...state,
             form: { ...state.form, propertyFilters: [ ...state.form.propertyFilters, newFilter ] },
@@ -159,9 +170,12 @@ function reducerForm(state: AdminerFilterQueryState, action: FormAction): Admine
     case 'delete_filter': {
         const activeFilters = state.active.propertyFilters.filter(filter => filter.id !== action.id);
         const newFilters = state.form.propertyFilters.filter(filter => filter.id !== action.id);
+
         return {
             ...state,
-            active: {
+            // Just an optimization to avoid unnecessary re-fetching.
+            // FIXME This should obv be handled more carefully in the fetching logic.
+            active: activeFilters.length === state.active.propertyFilters.length ? state.active : {
                 ...state.active,
                 propertyFilters: activeFilters,
             },
@@ -222,48 +236,27 @@ export type PaginationState = {
 };
 
 export type AdminerFilterQueryStateAction =
-| DatasourceAction
-| KindAction
-| ViewAction
-| InputAction
-| FormAction
-| SubmitAction
-| InitializeAction
-| FilterQueryUpdateAction
-| ItemCountAction
-| NewPageAction;
+    | DatasourceAction
+    | KindAction
+    | ViewAction
+    | InputAction
+    | FormAction
+    | SubmitAction
+    | InitializeAction
+    | FilterQueryUpdateAction
+    | ItemCountAction
+    | NewPageAction
+    ;
 
 type AdminerTypedAction<T extends string, P = undefined> = P extends undefined
-  ? { type: T }
-  : { type: T } & P;
-
-type InputAction = AdminerTypedAction<'input', {
-    field: 'limit';
-    value: number;
-} | {
-    field: 'propertyName' | 'propertyValue';
-    id: number;
-    value: string;
-} | {
-    field: 'operator';
-    id: number;
-    value: Operator;
-}>;
-
-type FormAction = AdminerTypedAction<'form', {
-    action: 'add_filter';
-} | {
-    action: 'delete_filter';
-    id: number;
-} | {
-    action: 'delete_filters';
-}>;
+    ? { type: T }
+    : { type: T } & P;
 
 type DatasourceAction = AdminerTypedAction<'datasource', { newDatasource: Datasource }>;
 type KindAction = AdminerTypedAction<'kind', { newKind: string }>;
 type ViewAction = AdminerTypedAction<'view', { newView: View }>;
 type SubmitAction = AdminerTypedAction<'submit'>;
 type InitializeAction = AdminerTypedAction<'initialize'>;
-type FilterQueryUpdateAction = AdminerTypedAction<'update', {newState: AdminerFilterQueryState }>;
+type FilterQueryUpdateAction = AdminerTypedAction<'update', { newState: AdminerFilterQueryState }>;
 type ItemCountAction = AdminerTypedAction<'itemCount', { newItemCount: number | undefined }>;
 type NewPageAction = AdminerTypedAction<'page', { newCurrentPage: number, newOffset: number }>;

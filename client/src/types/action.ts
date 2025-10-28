@@ -37,7 +37,7 @@ export enum ActionType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel',
     UpdateSchema = 'UpdateSchema',
-    RSDToCategory = 'RSDToCategory'
+    RSDToCategory = 'RSDToCategory',
 }
 
 export const ACTION_TYPES = [ {
@@ -53,14 +53,13 @@ export const ACTION_TYPES = [ {
 
 type JobPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
-}
+};
 
 export type JobPayload =
     | ModelToCategoryPayload
     | CategoryToModelPayload
     | UpdateSchemaPayload
-    | RSDToCategoryPayload
-    ;
+    | RSDToCategoryPayload;
 
 export type JobPayloadResponse<T extends ActionType = ActionType> = {
     type: T;
@@ -79,15 +78,10 @@ export function jobPayloadFromResponse(input: JobPayloadResponse): JobPayload {
     }
 }
 
-export type JobPayloadInit = {
-    type: ActionType.ModelToCategory | ActionType.CategoryToModel;
-    datasourceId: Id;
-    /** If not empty, only the selected mappings from this datasource will be used. */
-    mappingIds: Id[];
-} | {
-    type: ActionType.RSDToCategory;
-    datasourceIds: Id[];
-};
+export type JobPayloadInit =
+    | ModelToCategoryPayloadInit
+    | CategoryToModelPayloadInit
+    | RSDToCategoryPayloadInit;
 
 type ModelToCategoryPayloadResponse = JobPayloadResponse<ActionType.ModelToCategory> & {
     datasource: Datasource;
@@ -110,6 +104,13 @@ class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategor
     }
 }
 
+export type ModelToCategoryPayloadInit = {
+    type: ActionType.ModelToCategory;
+    datasourceId: Id;
+    /** If not empty, only the selected mappings from this datasource will be used. */
+    mappingIds: Id[];
+};
+
 type CategoryToModelPayloadResponse = JobPayloadResponse<ActionType.CategoryToModel> & {
     datasource: Datasource;
     mappings: MappingInfoResponse[];
@@ -130,6 +131,13 @@ class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToMode
         );
     }
 }
+
+export type CategoryToModelPayloadInit = {
+    type: ActionType.CategoryToModel;
+    datasourceId: Id;
+    /** If not empty, only the selected mappings from this datasource will be used. */
+    mappingIds: Id[];
+};
 
 type UpdateSchemaPayloadResponse = JobPayloadResponse<ActionType.UpdateSchema> & {
     prevVersion: VersionId;
@@ -170,3 +178,7 @@ class RSDToCategoryPayload implements JobPayloadType<ActionType.RSDToCategory> {
     }
 }
 
+export type RSDToCategoryPayloadInit = {
+    type: ActionType.RSDToCategory;
+    datasourceIds: Id[];
+};

@@ -1,95 +1,63 @@
-import { type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
+import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { MappingEditor } from '@/components/mapping/MappingEditor';
-import { Mapping, type MappingResponse, type MappingInit } from '@/types/mapping';
-import { type KeyResponse, type SignatureIdResponse } from '@/types/identifiers';
-import { toast } from 'react-toastify';
-import { useState } from 'react';
+import { type Mapping } from '@/types/mapping';
+import { useMemo } from 'react';
 import { Category } from '@/types/schema';
 import { routes } from '@/routes/routes';
+import { Datasource } from '@/types/Datasource';
+import { PageLayout } from '@/components/RootLayout';
 
 /**
  * Page for adding a new mapping.
  */
 export function NewMappingPage() {
-    const { category } = useLoaderData() as NewMappingLoaderData;
+    const { category, datasource } = useLoaderData() as NewMappingLoaderData;
     const navigate = useNavigate();
-    const location = useLocation();
-    const [ kindName, setKindName ] = useState('');
 
-    // Get datasource ID from route state
-    // const datasourceId = location.state?.datasourceId;
-    const { datasourceId, datasourceLabel } = location.state || {};
+    const input = useMemo(() => ({
+        mapping: undefined,
+        datasource,
+    }), [ datasource ]);
 
-    if (!datasourceId) {
-        navigate(-1); // Go back if no datasource ID
-        // toast.error('Datasource ID is required');
-        return null;
-    }
-
-    const initialMappingData: MappingResponse = {
-        id: '',
-        kindName,
-        categoryId: category.id,
-        datasourceId,
-        rootObjexKey: 0 as KeyResponse,
-        primaryKey: [ 'EMPTY' ] as SignatureIdResponse,
-        accessPath: {
-            name: { value: 'root' },
-            signature: 'EMPTY',
-            subpaths: [],
-        },
-        version: '',
-    };
-
-    const initialMapping = Mapping.fromResponse(initialMappingData);
-
-    async function handleSaveMapping(mapping: Mapping, finalKindName: string) {
-        const mappingInit: MappingInit = {
-            categoryId: mapping.categoryId,
-            datasourceId: mapping.datasourceId,
-            rootObjexKey: mapping.rootObjexKey.toServer(),
-            primaryKey: mapping.primaryKey.toServer(),
-            kindName: finalKindName,
-            accessPath: mapping.accessPath.toServer(),
-        };
-
-        const response = await api.mappings.createMapping({}, mappingInit);
-        if (response.status) {
-            toast.success('Mapping created successfully!');
-            navigate(routes.category.datasource.resolve({ categoryId: category.id, datasourceId: mapping.datasourceId }));
-        }
-        else {
-            toast.error('Failed to create mapping');
-        }
+    function mappingCreated(mapping: Mapping) {
+        navigate(routes.category.datasources.detail.resolve({ categoryId: category.id, datasourceId: mapping.datasourceId }));
     }
 
     return (
-        <MappingEditor
-            category={category}
-            mapping={initialMapping}
-            kindName={kindName}
-            setKindName={setKindName}
-            onSave={handleSaveMapping}
-            datasourceLabel={datasourceLabel}
-        />
+        <PageLayout isFullscreen>
+            <MappingEditor
+                category={category}
+                input={input}
+                onSave={mappingCreated}
+                onCancel={() => navigate(-1)}
+            />
+        </PageLayout>
     );
 }
 
-NewMappingPage.loader = newMappingLoader;
-
 export type NewMappingLoaderData = {
     category: Category;
+    datasource: Datasource;
 };
 
-async function newMappingLoader({ params: { categoryId } }: { params: Params<'categoryId'> }) {
+NewMappingPage.loader = async ({ params: { categoryId, datasourceId } }: { params: Params<'categoryId' | 'datasourceId'> }) => {
     if (!categoryId)
         throw new Error('Category ID required');
 
-    const categoryResponse = await api.schemas.getCategory({ id: categoryId });
+    if (!datasourceId)
+        throw new Error('Datasource ID is required');
 
-    if (!categoryResponse.status)
+    const [ categoryResponse, datasourceResponse ] = await Promise.all([
+        api.schemas.getCategory({ id: categoryId }),
+        api.datasources.getDatasource({ id: datasourceId }),
+    ]);
+
+    if (!categoryResponse.status || !datasourceResponse.status)
         throw new Error('Failed to load category');
 
-    return { category: Category.fromResponse(categoryResponse.data) };
-}
+    return {
+        category: Category.fromResponse(categoryResponse.data),
+        datasource: Datasource.fromResponse(datasourceResponse.data),
+    };
+};

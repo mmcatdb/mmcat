@@ -58,12 +58,12 @@ public class ResultStructureComputer {
         }
 
         @Override public String toString() {
-            final var builder = new StringBuilder();
+            final var sb = new StringBuilder();
 
             for (final var tform : tforms)
-                builder.append(tform).append("\n");
+                sb.append(tform).append("\n");
 
-            return builder.toString();
+            return sb.toString();
         }
 
     }

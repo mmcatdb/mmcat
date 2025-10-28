@@ -15,4 +15,4 @@ In many cases, the propagation will require manual input from the users. Therefo
 2. Pavel Koupil, Jáchym Bártík, and Irena Holubová. 2022. MM-evocat: A Tool for Modelling and Evolution Management of Multi-Model Data. In Proceedings of the 31st ACM International Conference on Information & Knowledge Management (CIKM '22). Association for Computing Machinery, New York, NY, USA, 4892–4896. [https://doi.org/10.1145/3511808.3557180](https://doi.org/10.1145/3511808.3557180)
 3. Pavel Koupil, and Irena Holubová. 2022. A unified representation and transformation of multi-model data using category theory. J Big Data 9, 61 (2022). [https://doi.org/10.1186/s40537-022-00613-3](https://doi.org/10.1186/s40537-022-00613-3)
 
-**This project is currently available.**
+<!-- **This project is currently available.** -->

@@ -1,9 +1,10 @@
 import { Select, SelectItem } from '@heroui/react';
 import { type Datasource, DatasourceType } from '@/types/Datasource';
+import { type Dispatch, type SetStateAction } from 'react';
 
 type DatasourceMenuProps = {
     /** Function for updating 'datasource' parameter. */
-    setDatasource: React.Dispatch<React.SetStateAction<Datasource | undefined>>;
+    setDatasource: Dispatch<SetStateAction<Datasource | undefined>>;
     /** The selected datasource. */
     datasource: Datasource | undefined;
     /** All active datasources. */
@@ -30,19 +31,14 @@ export function DatasourceMenu({ setDatasource, datasource, datasources }: Datas
             items={sources}
             aria-label='Datasource'
             labelPlacement='outside-left'
-            classNames={
-                { label:'sr-only' }
-            }
+            classNames={{ label: 'sr-only' }}
             size='sm'
             placeholder='Select datasource'
             className='max-w-xs'
             selectedKeys={ datasource?.id ? [ datasource.id ] : [] }
         >
             {item => (
-                <SelectItem
-                    key={item.id}
-                    onPress={() => setDatasource(item)}
-                >
+                <SelectItem key={item.id} onPress={() => setDatasource(item)}>
                     {item.label}
                 </SelectItem>
             )}

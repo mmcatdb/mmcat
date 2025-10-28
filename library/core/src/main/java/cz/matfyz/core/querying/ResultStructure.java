@@ -94,14 +94,14 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
     /** Traverses given signature as far as possible. Returns the last result structure. */
     public ResultStructure traverseSignature(Signature path) {
         ResultStructure current = this;
-        Signature currentSignature = Signature.createEmpty();
+        Signature currentSignature = Signature.empty();
 
         for (final var base : path.toBases()) {
             currentSignature = currentSignature.concatenate(base);
             final var found = current.getChild(currentSignature);
             if (found != null) {
                 current = found;
-                currentSignature = Signature.createEmpty();
+                currentSignature = Signature.empty();
             }
         }
 
@@ -128,7 +128,7 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
     /** Returns the signature from the root to this structure. */
     public Signature getSignatureFromRoot() {
         if (this.signatureFromParent == null)
-            return Signature.createEmpty();
+            return Signature.empty();
 
         return Signature.concatenate(
             getPathFromRoot().stream().map(ResultStructure::getSignatureFromParent),

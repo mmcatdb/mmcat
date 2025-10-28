@@ -14,7 +14,7 @@ class ProjectionTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionTests.class);
 
     // TODO fix the default values in the result structures. They should not be needed for this test, however.
-    private static final Signature signature = Signature.createEmpty();
+    private static final Signature signature = Signature.empty();
 
     @Test
     void onlyRootList() {

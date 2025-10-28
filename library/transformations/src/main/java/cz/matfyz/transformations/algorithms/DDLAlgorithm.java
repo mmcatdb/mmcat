@@ -4,8 +4,6 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper.PathSegment;
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper.PropertyPath;
-import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -15,7 +13,6 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
-import cz.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -89,28 +86,21 @@ public class DDLAlgorithm {
         if (property.name() instanceof final StringName stringName)
             return Set.of(stringName.value);
 
-        final var dynamicName = (DynamicName) property.name();
-        final var replacement = replacedNames.get(dynamicName);
-        final var namePath = mapping.category().getPath(replacement.valueToName());
+        final var replacement = replacedNames.get((DynamicName) property.name());
 
-        final var schemaObjex = mapping.category().getPath(property.signature()).to();
-        final var objexRows = instance.getObjex(schemaObjex).allRowsToSet();
+        final var prefixPath = mapping.category().getPath(replacement.prefix());
+        final var mapObjex = instance.getObjex(prefixPath.to());
+
         final var names = new TreeSet<String>();
 
-        objexRows.forEach(row -> names.add(getDynamicNameValue(dynamicName, namePath, row)));
+        for (final var row : mapObjex.allRowsToSet()) {
+            // It has to be a scalar value because each map entry has to have a single name.
+            final var name = row.tryFindScalarValue(replacement.name());
+            if (name != null)
+                names.add(name);
+        }
 
         return names;
-    }
-
-    public static String getDynamicNameValue(DynamicName dynamicName, SchemaPath namePath, DomainRow objexRow) {
-        final var nameRowSet = objexRow.traverseThrough(namePath);
-
-        if (nameRowSet.isEmpty())
-            throw InvalidStateException.dynamicNameNotFound(dynamicName);
-        if (nameRowSet.size() > 1)
-            throw InvalidStateException.dynamicNameNotUnique(dynamicName);
-
-        return nameRowSet.iterator().next().getValue(Signature.createEmpty());
     }
 
     private static boolean isRequired(AccessPath property, SchemaPath schemaPath) {

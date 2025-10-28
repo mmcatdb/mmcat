@@ -13,7 +13,7 @@ import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdGenerator;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.mapping.MappingEntity;
+import cz.matfyz.server.entity.MappingEntity;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.SchemaCategoryRepository;

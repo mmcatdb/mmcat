@@ -78,7 +78,7 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
     public Signature computePathFromRoot() {
         return edgeFromParent != null
             ? parent.computePathFromRoot().concatenate(edgeFromParent.signature())
-            : Signature.createEmpty();
+            : Signature.empty();
     }
 
     public boolean isTerminal() {

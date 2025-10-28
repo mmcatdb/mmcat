@@ -5,6 +5,7 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,38 +29,130 @@ public class DomainRow implements Comparable<DomainRow> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
     /** The tuples that holds the value of this row. Immutable. */
-    public final SuperIdValues values;
+    public final SuperIdValues superId;
     /** If defined, the object doesn't have enough values from the superId to form a valid identifier. */
     public final @Nullable Integer technicalId;
+
+    // FIXME consider this when merging
+    private final Map<BaseSignature, String> simpleValues = new TreeMap<>();
+    // FIXME consider this when merging
+    private final Map<BaseSignature, List<String>> arrayValues = new TreeMap<>();
+
     /**
      * All signatures from the superId of this objex that point to values that are used in superIds of some other objexes.
      * Whenever a value for one of these signatures is found, the signature should be removed from this set and the value should be propagated to the referenced objexes.
      */
     public final Set<Signature> pendingReferences;
 
-    public DomainRow(SuperIdValues values, @Nullable Integer technicalId, Set<Signature> pendingReferences) {
-        this.values = values;
+    public DomainRow(SuperIdValues superId, @Nullable Integer technicalId, Set<Signature> pendingReferences) {
+        this.superId = superId;
         this.technicalId = technicalId;
         this.pendingReferences = pendingReferences;
     }
 
-    public boolean hasSignature(Signature signature) {
-        return values.hasSignature(signature);
+    /**
+     * A scalar value is either a simple value or a value from the superId.
+     */
+    public @Nullable String tryGetScalarValue(Signature signature) {
+        final var superIdValue = superId.getValue(signature);
+        if (superIdValue != null || !(signature instanceof final BaseSignature baseSignature))
+            return superIdValue;
+
+        return simpleValues.get(baseSignature);
     }
 
-    public Set<Signature> signatures() {
-        return values.signatures();
+    /**
+     * If the value is not here, traverses other rows and tries to find the value there.
+     */
+    public @Nullable String tryFindScalarValue(Signature signature) {
+        final var superIdValue = superId.getValue(signature);
+        if (superIdValue != null)
+            return superIdValue;
+
+        // A base signature can only be in simpleValues.
+        if (signature instanceof final BaseSignature baseSignature)
+            return simpleValues.get(baseSignature);
+
+        final var bases = signature.toBases();
+        DomainRow current = this;
+        for (int i = 0; i < bases.size() - 1; i++) {
+            final var base = bases.get(i);
+            // A scalar value can only be in a "from" mapping.
+            final var mapping = current.mappingsFrom.get(base);
+            if (mapping == null)
+                return null;
+
+            current = mapping.cod();
+        }
+
+        // If the value is somewhere, it should also be in the last base.
+        // This might not be true during the creation of the rows, but let's just don't use this function in that case.
+        final var lastBase = bases.get(bases.size() - 1);
+        return current.tryGetScalarValue(lastBase);
     }
 
-    public String getValue(Signature signature) {
-        return values.getValue(signature);
+    /**
+     * Returns all array values directly in this row.
+     */
+    public Collection<String> getArrayValues(BaseSignature signature) {
+        final var values = arrayValues.get(signature);
+        return values == null ? List.of() : values;
+    }
+
+    /**
+     * If the values are not here, traverses other rows and tries to find the values there.
+     */
+    public Collection<String> findArrayValues(Signature signature) {
+        if (signature instanceof final BaseSignature baseSignature)
+            return getArrayValues(baseSignature);
+
+        // Similarly to the function above, we traverse up to the last base.
+        final var rows = traverseThrough(signature.cutLast());
+        final var lastBase = signature.getLast();
+
+        final Set<String> output = new TreeSet<>();
+
+        // The "array" part can be caused both by the path being dual, or the last base being dual.
+        if (!lastBase.isDual()) {
+            for (final var row : rows) {
+                final var value = row.tryGetScalarValue(lastBase);
+                if (value != null)
+                    output.add(value);
+            }
+        }
+        else {
+            for (final var row : rows) {
+                final var values = row.getArrayValues(lastBase);
+                output.addAll(values);
+            }
+        }
+
+        return output;
+    }
+
+    public void addSimpleValue(BaseSignature signature, String value) {
+        simpleValues.put(signature, value);
+    }
+
+    public void addArrayValue(BaseSignature signature, String value) {
+        arrayValues.computeIfAbsent(signature, x -> new ArrayList<>()).add(value);
+    }
+
+    public void addArrayValues(BaseSignature signature, Collection<String> values) {
+        arrayValues.computeIfAbsent(signature, x -> new ArrayList<>()).addAll(values);
     }
 
     // These properties are managed by the morphisms, so they shouldn't be cloned.
 
-    /** All mappings originating in this row by the signature of the corresponding morphism. There can be at most one such morphism for each signature. */
+    /**
+     * All mappings originating in this row by the signature of the corresponding morphism. There can be at most one such morphism for each signature.
+     * I.e., the signature is absolute.
+     */
     private final Map<BaseSignature, MappingRow> mappingsFrom = new TreeMap<>();
-    /** All mappings ending in this row by the signature of the corresponding morphism. There can be multiple such morphisms for each signature. */
+    /**
+     * All mappings ending in this row by the signature of the corresponding morphism. There can be multiple such morphisms for each signature.
+     * I.e., the signature is absolute.
+     */
     private final Map<BaseSignature, Set<MappingRow>> mappingsTo = new TreeMap<>();
 
     public Set<MappingRow> getMappingsForEdge(SchemaEdge edge) {
@@ -81,7 +174,7 @@ public class DomainRow implements Comparable<DomainRow> {
             if (mappingFrom == null)
                 return false;
 
-            return mappingFrom.codomainRow().equals(other);
+            return mappingFrom.cod() == other;
         }
 
         final var mappings = mappingsTo.get(signature);
@@ -89,7 +182,7 @@ public class DomainRow implements Comparable<DomainRow> {
             return false;
 
         for (final var mapping : mappings)
-            if (mapping.domainRow().equals(other))
+            if (mapping.dom() == other)
                 return true;
 
         return false;
@@ -132,36 +225,44 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     public Set<DomainRow> traverseThrough(SchemaPath path) {
-        var currentSet = new TreeSet<DomainRow>();
-        currentSet.add(this);
+        Set<DomainRow> current = Set.of(this);
 
-        for (final var edge : path.edges()) {
-            final var nextSet = new TreeSet<DomainRow>();
-            for (final var row : currentSet)
-                addCodomainOfRow(row, nextSet, edge);
+        for (final var edge : path.edges())
+            current = collectCodomainRows(current, edge.direction(), edge.absoluteSignature());
 
-            currentSet = nextSet;
-        }
-
-        return currentSet;
+        return current;
     }
 
-    private void addCodomainOfRow(DomainRow row, Set<DomainRow> codomainSet, SchemaEdge edgeFromRow) {
-        final var signature = edgeFromRow.morphism().signature();
+    public Set<DomainRow> traverseThrough(Signature signature) {
+        Set<DomainRow> current = Set.of(this);
 
-        if (edgeFromRow.direction()) {
-            final var mappingFrom = row.mappingsFrom.get(signature);
-            if (mappingFrom != null)
-                codomainSet.add(mappingFrom.codomainRow());
+        for (final var base : signature.toBases())
+            current = collectCodomainRows(current, !base.isDual(), base.toAbsolute());
 
-            return;
+        return current;
+    }
+
+    private Set<DomainRow> collectCodomainRows(Collection<DomainRow> prev, boolean direction, BaseSignature absoluteBase) {
+        final var next = new TreeSet<DomainRow>();
+
+        if (direction) {
+            for (final var row : prev) {
+                final var mappingFrom = row.mappingsFrom.get(absoluteBase);
+                if (mappingFrom != null)
+                    next.add(mappingFrom.cod());
+            }
+        }
+        else {
+            for (final var row : prev) {
+                final var mappings = row.mappingsTo.get(absoluteBase);
+                if (mappings != null) {
+                    for (final var mappingRow : mappings)
+                        next.add(mappingRow.dom());
+                }
+            }
         }
 
-        final var mappings = row.mappingsTo.get(signature);
-        if (mappings != null) {
-            for (final var mappingRow : mappings)
-                codomainSet.add(mappingRow.domainRow());
-        }
+        return next;
     }
 
     record SignatureWithValue(
@@ -172,16 +273,19 @@ public class DomainRow implements Comparable<DomainRow> {
     ) {}
 
     List<SignatureWithValue> getAndRemovePendingReferencePairs() {
-        final var pendingSignatures = pendingReferences.stream().filter(this::hasSignature).toList();
+        final var pendingSignatures = pendingReferences.stream().filter(s -> superId.hasSignature(s)).toList();
         pendingReferences.removeAll(pendingSignatures);
 
-        return pendingSignatures.stream().map(signature -> new SignatureWithValue(signature, getValue(signature))).toList();
+        return pendingSignatures.stream().map(signature -> new SignatureWithValue(signature, tryGetScalarValue(signature))).toList();
     }
 
     @Override public int compareTo(DomainRow other) {
-        final var valuesComparison = values.compareTo(other.values);
-        if (valuesComparison != 0)
-            return valuesComparison;
+        if (this == other)
+            return 0;
+
+        final var superIdComparison = superId.compareTo(other.superId);
+        if (superIdComparison != 0)
+            return superIdComparison;
 
         if (technicalId == null)
             return technicalId == null ? 0 : 1;
@@ -190,17 +294,36 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     @Override public String toString() {
-        final var builder = new StringBuilder();
-        builder.append(values.toString());
+        final var sb = new StringBuilder();
+        sb.append(superId.toString());
         if (technicalId != null)
-            builder.append("#").append(technicalId);
+            sb.append("#").append(technicalId);
 
-        return builder.toString();
+        sb.append(": (");
+        final var SEPARATOR = ", ";
+
+        for (final var entry : simpleValues.entrySet())
+            sb
+                .append(entry.getKey()).append(": \"").append(entry.getValue()).append("\"")
+                .append(SEPARATOR);
+
+        for (final var entry : arrayValues.entrySet())
+            sb
+                .append(entry.getKey()).append(": [")
+                .append(String.join(", ", entry.getValue()))
+                .append("]")
+                .append(SEPARATOR);
+
+        if (!simpleValues.isEmpty() || !arrayValues.isEmpty())
+            sb.setLength(sb.length() - SEPARATOR.length());
+
+        sb.append(")");
+
+        return sb.toString();
     }
 
-    // TODO change equals and compareTo to do == first
-    @Override public boolean equals(Object object) {
-        return object instanceof DomainRow row && values.equals(row.values);
-    }
+    // There is no notion of equality for DomainRow, so we don't override equals.
+    // In practice, they are identified by the superId values and technicalId. However, they should be unique by these values in the context of one instance objex.
+    // So, if two rows have the same values, they have to be referentially equal.
 
 }

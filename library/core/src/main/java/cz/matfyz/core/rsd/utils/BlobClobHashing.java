@@ -31,7 +31,7 @@ public class BlobClobHashing {
         try {
             Reader reader = clob.getCharacterStream();
             char[] buffer = new char[1024];
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             int charsRead;
             while ((charsRead = reader.read(buffer)) != -1) {
                 sb.append(buffer, 0, charsRead);

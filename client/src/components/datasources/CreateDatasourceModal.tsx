@@ -3,8 +3,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/api';
 import { Datasource, DatasourceType, type DatasourceSettings, validateSettings, type DatasourceInit, DATASOURCE_TYPES } from '@/types/Datasource';
 import { toast } from 'react-toastify';
+import { SpinnerButton } from '../common';
 
-type DatasourceModalProps = {
+type CreateDatasourceModalProps = {
     /** Whether the modal is visible. */
     isOpen: boolean;
     /** Callback to close the modal. */
@@ -143,22 +144,22 @@ function initializeSettings(type: DatasourceType, currentSettings: DatasourceSet
 function FormButtons({ onSubmit, onCancel, isSubmitting }: FormButtonsProps) {
     return (<>
         <Button color='danger' variant='light' onPress={onCancel} isDisabled={isSubmitting}>
-                Close
+            Close
         </Button>
-        <Button color='primary' onPress={onSubmit} isLoading={isSubmitting}>
-                Submit
-        </Button>
+        <SpinnerButton color='primary' onPress={onSubmit} isFetching={isSubmitting}>
+            Submit
+        </SpinnerButton>
     </>);
 }
 
 /**
  * Renders a modal for creating a new datasource with type-specific fields.
  */
-export function DatasourceModal({
+export function CreateDatasourceModal({
     isOpen,
     onClose,
     onDatasourceCreated,
-}: DatasourceModalProps) {
+}: CreateDatasourceModalProps) {
     const {
         datasourceType,
         datasourceName,
@@ -232,8 +233,8 @@ function SelectDatasourceType({ datasourceType, setDatasourceType }: SelectDatas
             label='Type'
             placeholder='Select a Type'
             selectedKeys={datasourceType ? new Set([ datasourceType ]) : new Set()}
-            onSelectionChange={e => {
-                const selectedType = Array.from(e as Set<DatasourceType>)[0];
+            onSelectionChange={keys => {
+                const selectedType = (keys as Set<DatasourceType>).values().next().value;
                 if (selectedType)
                     setDatasourceType(selectedType, {});
             }}
@@ -342,7 +343,7 @@ export function DatasourceSpecificFields({ datasourceType, settings, handleSetti
                     isSelected={settings.hasHeader ?? false}
                     onChange={() => handleSettingsChange('hasHeader', !(settings.hasHeader ?? false))}
                 >
-                        Has Header?
+                    Has Header?
                 </Checkbox>
             </>)}
             <Checkbox

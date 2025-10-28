@@ -7,7 +7,7 @@ import { createGraph } from '@/components/adminer/graph-visualization/utils/mapp
 import { Visualization } from './Visualization';
 import { ResizeObserver } from '@juggle/resize-observer';
 import { ZoomInIcon, ZoomOutIcon, ZoomToFitIcon } from '@/components/adminer/graph-visualization/components/Icons';
-import { twJoin } from 'tailwind-merge';
+import { cn } from '@/components/utils';
 
 export type GraphProps = {
     isFullscreen: boolean;
@@ -144,7 +144,7 @@ export class Graph extends Component<GraphProps, GraphState> {
             <div ref={this.wrapperElement} className='relative h-full leading-0'>
                 <svg className='size-full' ref={this.svgElement} />
 
-                <div className={twJoin('bottom-2 left-2 flex flex-col bg-default-50', isFullscreen ? 'fixed' : 'absolute')}>
+                <div className={cn('bottom-2 left-2 flex flex-col bg-default-50', isFullscreen ? 'fixed' : 'absolute')}>
                     <ZoomButton
                         aria-label='zoom-in'
                         onClick={() => this.visualization?.zoomByType(ZoomType.IN)}

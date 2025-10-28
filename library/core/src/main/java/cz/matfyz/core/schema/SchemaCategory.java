@@ -63,6 +63,10 @@ public class SchemaCategory {
             return (BaseSignature) (direction ? morphism.signature() : morphism.signature().dual());
         }
 
+        public BaseSignature absoluteSignature() {
+            return (BaseSignature) morphism.signature();
+        }
+
         public SchemaObjex from() {
             return direction ? morphism.dom() : morphism.cod();
         }
@@ -78,7 +82,7 @@ public class SchemaCategory {
 
     public SchemaEdge getEdge(BaseSignature base) {
         return new SchemaEdge(
-            getMorphism(base.toNonDual()),
+            getMorphism(base.toAbsolute()),
             !base.isDual()
         );
     }
@@ -136,7 +140,7 @@ public class SchemaCategory {
     }
 
     public boolean hasEdge(BaseSignature base) {
-        return hasMorphism(base.toNonDual());
+        return hasMorphism(base.toAbsolute());
     }
 
     /** Returns whether the objex (corresponding to the given key) appears in any inner node of the (composite) morphism (corresponding to the given signature). */

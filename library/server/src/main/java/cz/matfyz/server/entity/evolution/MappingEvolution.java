@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 public class MappingEvolution extends Evolution {
 
     public final Id mappingId;
+    // TODO this
     public final Object todo;
 
     private MappingEvolution(Id id, Id categoryId, Version version, Id mappingId, Object todo) {

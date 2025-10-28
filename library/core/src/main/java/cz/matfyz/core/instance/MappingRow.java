@@ -6,39 +6,40 @@ package cz.matfyz.core.instance;
  */
 public class MappingRow implements Comparable<MappingRow> {
 
-    private final DomainRow domainRow;
-    private final DomainRow codomainRow;
+    private final DomainRow dom;
+    private final DomainRow cod;
 
-    public DomainRow domainRow() {
-        return domainRow;
+    public DomainRow dom() {
+        return dom;
     }
 
-    public DomainRow codomainRow() {
-        return codomainRow;
+    public DomainRow cod() {
+        return cod;
     }
 
-    public MappingRow(DomainRow domainRow, DomainRow codomainRow) {
-        this.domainRow = domainRow;
-        this.codomainRow = codomainRow;
+    public MappingRow(DomainRow dom, DomainRow cod) {
+        this.dom = dom;
+        this.cod = cod;
     }
 
-    @Override public int compareTo(MappingRow row) {
+    @Override public int compareTo(MappingRow other) {
+        if (this == other)
+            return 0;
+
         // This is not sufficient generally because there might be multiple different mappings between the same two rows.
         // However, it is sufficient in the context of one instance morphisms, i.e., if we compare only mappings that belong to the same morphism.
-        int domainCompareResult = domainRow.compareTo(row.domainRow);
-        return domainCompareResult != 0 ? domainCompareResult : codomainRow.compareTo(row.codomainRow);
+        final int domComparison = dom.compareTo(other.dom);
+        return domComparison != 0 ? domComparison : cod.compareTo(other.cod);
     }
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(domainRow).append(" -> ").append(codomainRow);
-
-        return builder.toString();
+        return new StringBuilder()
+            .append(dom.superId).append(" -> ").append(cod.superId)
+            .toString();
     }
 
-    @Override public boolean equals(Object object) {
-        return object instanceof MappingRow row && domainRow.equals(row.domainRow) && codomainRow.equals(row.codomainRow);
-    }
+    // There is no notion of equality for MappingRow, so we don't override equals.
+    // In practice, they are identified by their domain and codomain rows. However, they should be unique by these values in the context of one instance morphism.
+    // So, if two rows have the same values, they have to be referentially equal.
 
 }

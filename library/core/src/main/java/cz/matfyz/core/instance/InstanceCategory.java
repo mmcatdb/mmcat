@@ -5,7 +5,6 @@ import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.Collection;
@@ -15,9 +14,9 @@ public class InstanceCategory {
 
     private final SchemaCategory schema;
     private final Map<Key, InstanceObjex> objexes;
-    private final Map<Signature, InstanceMorphism> morphisms;
+    private final Map<BaseSignature, InstanceMorphism> morphisms;
 
-    InstanceCategory(SchemaCategory schema, Map<Key, InstanceObjex> objexes, Map<Signature, InstanceMorphism> morphisms) {
+    InstanceCategory(SchemaCategory schema, Map<Key, InstanceObjex> objexes, Map<BaseSignature, InstanceMorphism> morphisms) {
         this.schema = schema;
         this.objexes = objexes;
         this.morphisms = morphisms;
@@ -35,40 +34,36 @@ public class InstanceCategory {
         return this.getObjex(schemaObjex.key());
     }
 
-    public InstanceMorphism getMorphism(Signature signature) {
+    /**
+     * Only base morphisms that already exists are returned.
+     * All other signatures throw an exception.
+     */
+    public InstanceMorphism getMorphism(BaseSignature signature) {
+        final var morphism = morphisms.get(signature);
+        if (morphism != null)
+            return morphism;
+
+        // Now we just need to decide why the signature is wrong.
         if (signature.isEmpty())
             throw MorphismNotFoundException.signatureIsEmpty();
-
-        if (signature instanceof BaseSignature baseSignature) {
-            if (baseSignature.isDual())
-                throw MorphismNotFoundException.signatureIsDual(baseSignature);
-
-            return morphisms.computeIfAbsent(baseSignature, x -> {
-                throw MorphismNotFoundException.baseNotFound(baseSignature);
-            });
-        }
-
-        return morphisms.computeIfAbsent(signature, x -> {
-            // The composite morphisms are created dynamically when needed.
-            return new InstanceMorphism(schema.getMorphism(x));
-        });
-    }
-
-    public InstanceMorphism getMorphism(SchemaMorphism schemaMorphism) {
-        return this.getMorphism(schemaMorphism.signature());
+        if (!(signature instanceof final BaseSignature baseSignature))
+            throw MorphismNotFoundException.signatureIsComposite(signature);
+        if (baseSignature.isDual())
+            throw MorphismNotFoundException.signatureIsDual(baseSignature);
+        throw MorphismNotFoundException.baseNotFound(baseSignature);
     }
 
     public Collection<InstanceObjex> allObjexes() {
-        return schema.allObjexes().stream().map(this::getObjex).toList();
+        return this.objexes.values();
     }
 
     public Collection<InstanceMorphism> allMorphisms() {
-        return schema.allMorphisms().stream().map(this::getMorphism).toList();
+        return this.morphisms.values();
     }
 
     public void createReferences() {
         for (final var objex : objexes.values())
-            for (final var signature : objex.schema.superId().signatures())
+            for (final var signature : objex.schema.superId())
                 createReferencesForSignature(signature);
     }
 
@@ -77,7 +72,7 @@ public class InstanceCategory {
             return;
 
         final var bases = signature.toBases();
-        var signatureToTarget = Signature.createEmpty();
+        var signatureToTarget = Signature.empty();
 
         for (int i = 0; i < bases.size() - 1; i++) {
             final var currentBase = bases.get(i);
@@ -86,7 +81,7 @@ public class InstanceCategory {
 
             final var pathFromTarget = schema.getPath(signatureToTarget.dual());
             final var currentTarget = pathFromTarget.to();
-            if (!currentTarget.superId().hasSignature(signatureInTarget))
+            if (!currentTarget.superId().contains(signatureInTarget))
                 continue;
 
             getObjex(currentTarget).addReference(signatureInTarget, pathFromTarget, signature);
@@ -94,31 +89,31 @@ public class InstanceCategory {
     }
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
-        builder.append("Keys: ");
+        sb.append("Keys: ");
         for (Key key : objexes.keySet())
-            builder.append(key).append(", ");
-        builder.append("\n\n");
+            sb.append(key).append(", ");
+        sb.append("\n\n");
 
-        builder.append("Objexes (showing only non-empty):\n");
+        sb.append("Objexes (showing only non-empty):\n");
         for (InstanceObjex objex : objexes.values())
             if (!objex.isEmpty())
-                builder.append(objex).append("\n");
-        builder.append("\n");
+                sb.append(objex).append("\n");
+        sb.append("\n");
 
-        builder.append("Signatures: ");
+        sb.append("Signatures: ");
         for (Signature signature : morphisms.keySet())
-            builder.append(signature).append(", ");
-        builder.append("\n\n");
+            sb.append(signature).append(", ");
+        sb.append("\n\n");
 
-        builder.append("Morphisms (showing only non-empty):\n");
+        sb.append("Morphisms (showing only non-empty):\n");
         for (InstanceMorphism morphism : morphisms.values())
             if (!morphism.isEmpty())
-                builder.append(morphism).append("\n");
-        builder.append("\n");
+                sb.append(morphism).append("\n");
+        sb.append("\n");
 
-        return builder.toString();
+        return sb.toString();
     }
 
     @Override public boolean equals(Object object) {
@@ -133,7 +128,7 @@ public class InstanceCategory {
             return category.objexes;
         }
 
-        protected static Map<Signature, InstanceMorphism> getMorphisms(InstanceCategory category) {
+        protected static Map<BaseSignature, InstanceMorphism> getMorphisms(InstanceCategory category) {
             return category.morphisms;
         }
 

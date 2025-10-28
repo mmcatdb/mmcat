@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent as ReactKeyboardEvent, type RefObject, useEffect, useRef, useState } from 'react';
 import { Button, Input } from '@heroui/react';
 import { LeftPanelMode, type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { toPosition } from '@/types/utils/common';
@@ -8,7 +8,8 @@ import { categoryToGraph } from './categoryGraph';
 import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/components/utils';
+import { SpinnerButton } from '../common';
 
 type StateDispatchProps = {
     /** The current state of the category editor. */
@@ -53,7 +54,7 @@ export function LeftPanelCategoryEditor({ state, dispatch, className }: LeftPane
     }, [ state.leftPanelMode, dispatch ]);
 
     return (
-        <div className={twMerge('p-3 flex flex-col gap-3', className)}>
+        <div className={cn('p-3 flex flex-col gap-3', className)}>
             <Component state={state} dispatch={dispatch} />
         </div>
     );
@@ -82,7 +83,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
         <Button
             title='Create object (Ctrl+O)'
-            onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}
+            onPress={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createObjex })}
             color='default'
         >
             Create object
@@ -90,7 +91,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
 
         <Button
             title='Create morphism (Ctrl+M)'
-            onClick={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
+            onPress={() => dispatch({ type: 'leftPanelMode', mode: LeftPanelMode.createMorphism })}
             color='default'
         >
             Create Morphism
@@ -100,21 +101,21 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             <div className='mt-4 animate-fade-in'>
                 <div className='flex flex-col gap-2 p-3 bg-warning-100 rounded-lg border border-warning-300'>
                     <div className='flex items-center gap-2 text-warning-800'>
-                        <ExclamationTriangleIcon className='h-4 w-4 shrink-0' />
+                        <ExclamationTriangleIcon className='size-4 shrink-0' />
                         <span className='text-sm font-medium'>You have unsaved changes.</span>
                     </div>
-                    <Button
+                    <SpinnerButton
                         variant='solid'
                         color='warning'
                         size='sm'
                         fullWidth
-                        onClick={() => handleSave()}
-                        isLoading={isSaving}
-                        startContent={isSaving ? null : <FaSave className='h-3.5 w-3.5' />}
+                        onPress={() => handleSave()}
+                        isFetching={isSaving}
+                        startContent={isSaving ? null : <FaSave className='size-3.5' />}
                         className='shadow-xs hover:shadow-md transition-shadow'
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
-                    </Button>
+                    </SpinnerButton>
                 </div>
             </div>
         )}
@@ -126,7 +127,7 @@ type EditorFormProps = {
     setLabel: (value: string) => void;
     onSubmit: () => void;
     onCancel: () => void;
-    inputRef: React.RefObject<HTMLInputElement>;
+    inputRef: RefObject<HTMLInputElement>;
     isSubmitDisabled: boolean;
     placeholder?: string;
 };
@@ -144,7 +145,7 @@ function EditorForm({
     placeholder,
 }: EditorFormProps) {
     // Handles Enter key press to trigger form submission and Escape for cancel.
-    function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
         if (event.key === 'Enter')
             onSubmit();
         if (event.key === 'Escape')
@@ -161,9 +162,9 @@ function EditorForm({
             placeholder={placeholder}
         />
         <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={onCancel}>Cancel</Button>
-            <Button color='primary' onClick={onSubmit} isDisabled={isSubmitDisabled}>
-                    Add
+            <Button onPress={onCancel}>Cancel</Button>
+            <Button color='primary' onPress={onSubmit} isDisabled={isSubmitDisabled}>
+                Add
             </Button>
         </div>
     </>);
@@ -221,7 +222,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
  * Hook to extract and validate selected nodes for morphism creation.
  */
 function useMorphismSelection(state: CategoryEditorState) {
-    const selectedNodes = Array.from(state.selection.nodeIds);
+    const selectedNodes = [ ...state.selection.nodeIds ];
     const isValidSelection = selectedNodes.length === 2 && state.selection.edgeIds.size === 0;
     const domainNode = state.graph.nodes.get(selectedNodes[0]);
     const codomainNode = selectedNodes[1] ? state.graph.nodes.get(selectedNodes[1]) : undefined;

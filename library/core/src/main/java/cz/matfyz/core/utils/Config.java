@@ -44,11 +44,11 @@ public class Config {
         properties = getProperties("application.properties", defaultProperties);
     }
 
-    private static Properties getProperties(String fileName, Properties defaultProperties) {
+    private static Properties getProperties(String filename, Properties defaultProperties) {
         try {
             final Properties output = new Properties(defaultProperties);
 
-            final var url = ClassLoader.getSystemResource(fileName);
+            final var url = ClassLoader.getSystemResource(filename);
             // If the file can't be found that's fine, provided we already have default properties.
             if (url == null && defaultProperties != null)
                 return defaultProperties;
@@ -64,7 +64,7 @@ public class Config {
             }
         }
         catch (Exception e) {
-            throw ConfigurationException.notAvailable(fileName, e);
+            throw ConfigurationException.notAvailable(filename, e);
         }
     }
 

@@ -25,11 +25,9 @@ function DELETE<T>(action: string, params = {}): PullResult<T> {
     return promiseToResponse<T>(instance.delete(action, { params }));
 }
 
-const rawAPI = {
+export const rawAPI = {
     GET,
     POST,
     PUT,
     DELETE,
 };
-
-export default rawAPI;

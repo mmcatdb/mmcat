@@ -19,7 +19,7 @@ public class BaseSignature extends Signature {
     }
 
     @Override public Signature cutLast() {
-        return Signature.createEmpty();
+        return Signature.empty();
     }
 
     @Override public BaseSignature getLast() {
@@ -27,7 +27,7 @@ public class BaseSignature extends Signature {
     }
 
     @Override public Signature cutFirst() {
-        return Signature.createEmpty();
+        return Signature.empty();
     }
 
     @Override public BaseSignature getFirst() {
@@ -42,7 +42,8 @@ public class BaseSignature extends Signature {
         return id < 0;
     }
 
-    public BaseSignature toNonDual() {
+    /** In other words, "to non dual". */
+    public BaseSignature toAbsolute() {
         return isDual() ? dual() : this;
     }
 
