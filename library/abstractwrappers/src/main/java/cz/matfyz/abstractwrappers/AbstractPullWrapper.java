@@ -28,7 +28,7 @@ public interface AbstractPullWrapper {
     QueryResult executeQuery(QueryStatement statement);
 
     /**
-     * Retrieves all list kind names.
+     * Retrieves list of all kind names.
      */
     List<String> getKindNames();
 
@@ -42,7 +42,6 @@ public interface AbstractPullWrapper {
      */
     DataResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filter);
 
-    // FIXME Remove the datasourceId parameter. It should be obtained from the wrapper itself.
     /**
      * Retrieves a list of foreign key relationships for the specified kind.
      *

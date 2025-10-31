@@ -37,7 +37,6 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     private static final Operators operators = new Operators();
 
     static {
-
         operators.define(Operator.Equal, "$eq");
         operators.define(Operator.NotEqual, "$ne");
         operators.define(Operator.Less, "$lt");
@@ -49,7 +48,6 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
 
         operators.define(Operator.In, "$in");
         operators.define(Operator.NotIn, "$nin");
-
     }
 
     public QueryStatement createDSLStatement() {

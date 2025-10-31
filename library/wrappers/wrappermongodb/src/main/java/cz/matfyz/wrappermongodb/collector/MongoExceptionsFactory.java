@@ -5,8 +5,8 @@ import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.queryparser.CommandBuilder;
 
-public class
-MongoExceptionsFactory extends WrapperExceptionsFactory {
+/** @deprecated */
+public class MongoExceptionsFactory extends WrapperExceptionsFactory {
     //region ParseException initialization
     public ParseException documentKeyNotFound(String key) {
         var message = new Message("key '" + key + "' was not present in document").toString();

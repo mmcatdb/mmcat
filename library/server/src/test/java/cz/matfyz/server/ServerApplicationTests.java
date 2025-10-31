@@ -6,6 +6,7 @@ import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
@@ -22,6 +23,8 @@ import cz.matfyz.transformations.DatabaseToInstance;
 import cz.matfyz.transformations.InstanceToDatabase;
 
 import java.util.List;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -101,7 +104,7 @@ class ServerApplicationTests {
         LOGGER.info("Finished");
     }
 
-    private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id datasourceId, int records) throws Exception {
+    private InstanceCategory importMapping(@Nullable InstanceCategory instance, Id mappingId, Id datasourceId, int records) throws Exception {
         final var datasourceEntity = datasourceRepository.find(datasourceId);
         final var mappingEntity = mappingRepository.find(mappingId);
 
@@ -110,9 +113,9 @@ class ServerApplicationTests {
 
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasourceEntity).getPullWrapper();
 
-        final var newInstance = new DatabaseToInstance()
-            .input(mapping, instance, pullWrapper, new KindNameQuery(mapping.kindName(), records, null))
-            .run();
+        final var prevInstance = instance != null ? instance : new InstanceBuilder(mapping.category()).build();
+        final var query = new KindNameQuery(mapping.kindName(), records, null);
+        final var nextInstance = new DatabaseToInstance().input(mapping, prevInstance, pullWrapper, query).run();
 
         message += "#" + mapping.kindName()
             + ", " + Statistics.getInfo(Counter.PULLED_RECORDS)
@@ -121,7 +124,7 @@ class ServerApplicationTests {
 
         Statistics.reset();
 
-        return newInstance;
+        return nextInstance;
     }
 
     /**

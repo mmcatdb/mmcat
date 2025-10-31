@@ -26,7 +26,6 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     private static final Operators operators = new Operators();
 
     static {
-
         operators.define(Operator.Equal, "=");
         operators.define(Operator.NotEqual, "<>");
         operators.define(Operator.Less, "<");
@@ -42,7 +41,6 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
         operators.define(Operator.In, "IN");
         operators.define(Operator.NotIn, "NOT IN");
-
     }
 
     private StringBuilder sb;

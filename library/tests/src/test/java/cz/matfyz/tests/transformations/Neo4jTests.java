@@ -34,7 +34,7 @@ class Neo4jTests {
     }
 
     @Test
-    void readFromDB_DoesNotThrow() {
+    void readFromDb_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = datasource.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readNodeAsStringForTests(Neo4j.orderKind);

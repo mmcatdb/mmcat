@@ -25,12 +25,9 @@
         <log4j.version>2.23.1</log4j.version>
         <junit.jupiter.version>5.9.3</junit.jupiter.version>
         <junit.platform.version>1.8.1</junit.platform.version>
-        <jackson.version>2.15.2</jackson.version>
-        <jena.version>4.6.1</jena.version>
+        <jackson.version>2.18.4</jackson.version>
         <spring.version>3.2.1</spring.version>
-        <spark.version>3.5.0</spark.version>
-        <mongodb.spark.version>3.0.2</mongodb.spark.version>
-        <fastutil.version>8.5.12</fastutil.version>
+        <spark.version>4.0.1</spark.version>
     </properties>
 
     <dependencies>

@@ -39,9 +39,11 @@ public class Candidates {
 
         if (columnName.equalsIgnoreCase("id")) {
             score += 20;
-        } else if (columnName.toLowerCase().endsWith("id")) {
+        }
+        else if (columnName.toLowerCase().endsWith("id")) {
             score += 5;
         }
+
         return score;
     }
 

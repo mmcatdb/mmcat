@@ -6,7 +6,6 @@ import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.wrapperpostgresql.collector.PostgreSQLCollectorWrapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -96,7 +95,7 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
         return new PostgreSQLQueryWrapper();
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper() {
+    @Override public AbstractInferenceWrapper getInferenceWrapper(String kindName) {
         throw new UnsupportedOperationException("PostgreSQLControlWrapper.getInferenceWrapper not implemented.");
     }
 

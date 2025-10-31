@@ -34,6 +34,18 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
 
     protected final Map<Signature, String> tuples;
 
+    private SuperIdValues(Map<Signature, String> map) {
+        this.tuples = map;
+    }
+
+    public static SuperIdValues fromEmptySignature(String value) {
+        return new Builder().add(Signature.empty(), value).build();
+    }
+
+    public static SuperIdValues empty() {
+        return new SuperIdValues(new TreeMap<>());
+    }
+
     public boolean hasSignature(Signature signature) {
         return tuples.containsKey(signature);
     }
@@ -63,28 +75,30 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
     }
 
     public @Nullable SuperIdValues tryFindFirstId(ObjexIds ids) {
-        for (final var id : ids.toSignatureIds())
-            if (containsId(id))
-                return findId(id);
+        if (!ids.isSignatures())
+            return tryFindId(SignatureId.empty());
+
+        for (final var id : ids.signatureIds()) {
+            final var found = tryFindId(id);
+            if (found != null)
+                return found;
+        }
 
         return null;
     }
 
-    private boolean containsId(SignatureId id) {
-        for (final var signature : id.signatures())
-            if (!hasSignature(signature))
-                return false;
+    private @Nullable SuperIdValues tryFindId(SignatureId id) {
+        final var output = new TreeMap<Signature, String>();
 
-        return true;
-    }
+        for (final var signature : id.signatures()) {
+            final var value = this.tuples.get(signature);
+            if (value == null)
+                return null;
 
-    private SuperIdValues findId(SignatureId id) {
-        final var map = new TreeMap<Signature, String>();
+            output.put(signature, value);
+        }
 
-        for (final var signature : id.signatures())
-            map.put(signature, this.tuples.get(signature));
-
-        return new SuperIdValues(map);
+        return new SuperIdValues(output);
     }
 
     public record FindIdsResult(List<SuperIdValues> foundIds, Set<SignatureId> notFoundIds) {}
@@ -98,30 +112,19 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return findAllSignatureIds(ids.toSignatureIds());
     }
 
-    public FindIdsResult findAllSignatureIds(Set<SignatureId> missingIds) {
+    public FindIdsResult findAllSignatureIds(Iterable<SignatureId> missingIds) {
         final var foundIds = new ArrayList<SuperIdValues>();
         final var notFoundIds = new TreeSet<SignatureId>();
 
         for (final SignatureId missingId : missingIds) {
-            if (containsId(missingId))
-                foundIds.add(findId(missingId));
+            final var found = tryFindId(missingId);
+            if (found != null)
+                foundIds.add(found);
             else
                 notFoundIds.add(missingId);
         }
 
         return new FindIdsResult(foundIds, notFoundIds);
-    }
-
-    public static SuperIdValues fromEmptySignature(String value) {
-        return new Builder().add(Signature.empty(), value).build();
-    }
-
-    public static SuperIdValues empty() {
-        return new SuperIdValues(new TreeMap<>());
-    }
-
-    private SuperIdValues(Map<Signature, String> map) {
-        this.tuples = map;
     }
 
     public static class Builder {
@@ -200,13 +203,23 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
     }
 
     @Override public String toString() {
+        return toStringWithoutGeneratedIds(null);
+    }
+
+    /**
+     * Prints the row but replaces the generated id with the provided <code>idValue</code> (if there is such id and the value isn't null).
+     * Useful for tests.
+     */
+    public String toStringWithoutGeneratedIds(@Nullable String idValue) {
         final var sb = new StringBuilder();
 
         sb.append("{");
         final var SEPARATOR = ", ";
         for (final var entry : tuples.entrySet()) {
+            final var signature = entry.getKey();
+            final var value = (signature.isEmpty() && idValue != null) ? idValue : entry.getValue();
             sb
-                .append(entry.getKey()).append(": \"").append(entry.getValue()).append("\"")
+                .append(signature).append(": \"").append(value).append("\"")
                 .append(SEPARATOR);
         }
         if (!tuples.isEmpty())

@@ -3,7 +3,6 @@ package cz.matfyz.querying.core.querytree;
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
@@ -23,7 +22,6 @@ public class DatasourceNode extends QueryNode {
     public final Datasource datasource;
     /** All kinds used in this pattern. */
     public final Set<PatternForKind> kinds;
-    public final SchemaCategory schema;
     public final List<JoinCandidate> joinCandidates;
     public final ArrayList<Computation> filters;
     /** The root term of this pattern. When this node is translated to query, this term will be the root of the result structure. */
@@ -32,14 +30,12 @@ public class DatasourceNode extends QueryNode {
     public DatasourceNode(
         Datasource datasource,
         Set<PatternForKind> kinds,
-        SchemaCategory schema,
         List<JoinCandidate> joinCandidates,
         List<Computation> filters,
         Variable rootVariable
     ) {
         this.datasource = datasource;
         this.kinds = kinds;
-        this.schema = schema;
         this.joinCandidates = joinCandidates;
         this.filters = new ArrayList<Computation>(filters);
         this.rootVariable = rootVariable;

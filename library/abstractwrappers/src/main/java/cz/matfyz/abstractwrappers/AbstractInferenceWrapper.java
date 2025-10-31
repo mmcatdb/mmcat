@@ -1,66 +1,64 @@
 package cz.matfyz.abstractwrappers;
 
-import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.PropertyHeuristics;
-import cz.matfyz.core.rsd.Share;
-
-import java.util.List;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class AbstractInferenceWrapper {
 
-    protected String kindName;
+    protected final String kindName;
+    private final SparkSettings sparkSettings;
 
-    protected final SparkSettings sparkSettings;
-    protected SparkSession sparkSession;
-    protected JavaSparkContext context;
-
-    protected AbstractInferenceWrapper(SparkSettings sparkSettings) {
+    protected AbstractInferenceWrapper(String kindName, SparkSettings sparkSettings) {
+        this.kindName = kindName;
         this.sparkSettings = sparkSettings;
     }
 
-    public AbstractInferenceWrapper copyForKind(String kindName) {
-        AbstractInferenceWrapper copy = copy();
-        copy.kindName = kindName;
+    // SparkSession is the main entry point for Spark functionality, SparkContext is the low-level object that does all the work.
+    // There can be at most one SparkContext per JVM (and thus one SparkSession). We can "create" it multiple times, but it will always return the same instance.
+    // So there is no point in building the session multiple times.
+    // Also, there is no point in stopping the session - we would need to create a new one or something (idk, there's no explicit `restart` method).
 
-        return copy;
+    private @Nullable SparkSession sparkSession;
+
+    protected SparkSession getSession() {
+        if (sparkSession == null)
+            sparkSession = buildSession();
+
+        return sparkSession;
     }
 
-    protected abstract AbstractInferenceWrapper copy();
-
-    public void startSession() {
-        buildSession();
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setCheckpointDir(sparkSettings.checkpointDir());
-    }
-
-    protected void buildSession() {
-        sparkSession = SparkSession.builder()
+    private SparkSession buildSession() {
+        final var output = SparkSession.builder()
             .master(sparkSettings.master())
             .getOrCreate();
+
+        output.sparkContext().setCheckpointDir(sparkSettings.checkpointDir());
+
+        return output;
     }
 
-    public void stopSession() {
-        sparkSession.stop();
-    }
+    // JavaSparkContext doesn't have to be singleton because it's just a wrapper around SparkContext, which is singleton.
 
-    public abstract JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData);
+    private @Nullable JavaSparkContext context;
+
+    protected JavaSparkContext getContext() {
+        if (context == null)
+            context = new JavaSparkContext(getSession().sparkContext());
+
+        return context;
+    }
 
     public abstract JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema();
 
-    public abstract JavaPairRDD<String, PropertyHeuristics> loadPropertyData();
+    public abstract JavaRDD<PropertyHeuristics> loadPropertyData();
 
     public abstract JavaRDD<RecordSchemaDescription> loadRSDs();
-
-    public abstract JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs();
-
-    // FIXME This is already defined on AbstractPullWrapper. Unify this.
-    public abstract List<String> getKindNames();
 
     public record SparkSettings(
         String master,

@@ -12,7 +12,7 @@ import org.neo4j.driver.SessionConfig;
 
 public class Neo4jProvider implements AbstractDatasourceProvider {
 
-    public final Neo4jSettings settings;
+    final Neo4jSettings settings;
 
     // The driver itself handles connection pooling so there should be only one driver (with given connection string) per application.
     // This also means that there should be at most one instance of this class so it should be cached somewhere.
@@ -29,7 +29,7 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
         return driver.session(SessionConfig.forDatabase(settings.database));
     }
 
-    public boolean isStillValid(Object settings) {
+    @Override public boolean isStillValid(Object settings) {
         if (!(settings instanceof Neo4jSettings neo4jSettings))
             return false;
 
@@ -40,7 +40,7 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
             && this.settings.isQueryable == neo4jSettings.isQueryable;
     }
 
-    public void close() {
+    @Override public void close() {
         if (driver != null)
             driver.close();
     }

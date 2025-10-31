@@ -104,10 +104,10 @@ class FilterDeepener implements QueryVisitor<Boolean> {
 
     private void replaceParentsChild(@Nullable QueryNode parent, QueryNode originalChild, QueryNode replacementChild) {
         if (parent != null) {
-            if (!parent.replaceChild(originalChild, replacementChild)) {
+            if (!parent.replaceChild(originalChild, replacementChild))
                 throw QueryException.message("Inconsistent query tree structure");
-            }
-        } else {
+        }
+        else {
             replacementChild.setParent(null);
             queryPlan.root = replacementChild;
         }
@@ -159,7 +159,8 @@ class FilterDeepener implements QueryVisitor<Boolean> {
             if (coveredByFrom) {
                 filterNode2 = new FilterNode(childNode, filterNode.filter);
                 filtersToProcess.add(filterNode2);
-            } else {
+            }
+            else {
                 filterNode2 = filterNode;
             }
 
@@ -192,11 +193,10 @@ class FilterDeepener implements QueryVisitor<Boolean> {
         for (final var coac : childNode.children()) {
             final FilterNode currentFilter = first ? filterNode : new FilterNode(childNode, filterNode.filter);
 
-            if (first) {
+            if (first)
                 first = false;
-            } else {
+            else
                 filtersToProcess.add(currentFilter);
-            }
 
             replaceParentsChild(currentFilter, childNode, coac);
             replaceParentsChild(childNode, coac, currentFilter);

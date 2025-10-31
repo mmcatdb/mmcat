@@ -38,7 +38,7 @@ public class Layout {
      * Updates positions of objexes in the given schema category.
      */
     public static void updatePositions(SchemaCategory schema, MetadataCategory metadata, Map<Key, Position> positionsMap) {
-        for (Map.Entry<Key, Position> entry : positionsMap.entrySet()) {
+        for (final var entry : positionsMap.entrySet()) {
             final var key = entry.getKey();
             final var position = entry.getValue();
 
@@ -64,13 +64,13 @@ public class Layout {
 
     @SuppressWarnings("unchecked")
     private static Map<Key, Position> computeObjexesLayout(SchemaCategory schema, LayoutType layoutType) {
-        List<DirectedSparseGraph<SchemaObjex, SchemaMorphism>> subgraphs = partitionIntoSubgraphs(schema);
+        final var subgraphs = partitionIntoSubgraphs(schema);
         final var positions = new HashMap<Key, Position>();
 
-        int canvasSize = calculateCanvasSize(schema.allObjexes().size());
-        int subgraphSize = calculateSubgraphSize(canvasSize, subgraphs.size());
-        int subgraphSpacing = subgraphSize + SUBGRAPH_PADDING;
-        int subgraphCountPerRow = calculateSubgraphCountPerRow(subgraphs.size());
+        final int canvasSize = calculateCanvasSize(schema.allObjexes().size());
+        final int subgraphSize = calculateSubgraphSize(canvasSize, subgraphs.size());
+        final int subgraphSpacing = subgraphSize + SUBGRAPH_PADDING;
+        final int subgraphCountPerRow = calculateSubgraphCountPerRow(subgraphs.size());
 
         int currentXOffset = subgraphSpacing / 2;
         int currentYOffset = subgraphSpacing / 2;
@@ -82,9 +82,8 @@ public class Layout {
             layout.setSize(new Dimension(subgraphSize, subgraphSize));
             layout.initialize();
 
-            if (layout instanceof FRLayout frLayout) {
+            if (layout instanceof FRLayout frLayout)
                 runInitialLayoutSteps(frLayout);
-            }
 
             storeSubgraphPositions(subgraph, layout, positions, currentXOffset, currentYOffset);
 
@@ -120,48 +119,54 @@ public class Layout {
         }
     }
 
-    private static void storeSubgraphPositions(DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph,
-                                               AbstractLayout<SchemaObjex, SchemaMorphism> layout,
-                                               Map<Key, Position> positions,
-                                               int xOffset,
-                                               int yOffset) {
-        for (SchemaObjex node : subgraph.getVertices()) {
-            double x = layout.getX(node) + xOffset;
-            double y = layout.getY(node) + yOffset;
+    private static void storeSubgraphPositions(
+        DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph,
+        AbstractLayout<SchemaObjex, SchemaMorphism> layout,
+        Map<Key, Position> positions,
+        int xOffset,
+        int yOffset
+    ) {
+        for (final SchemaObjex node : subgraph.getVertices()) {
+            final double x = layout.getX(node) + xOffset;
+            final double y = layout.getY(node) + yOffset;
             positions.put(node.key(), new Position(x, y));
         }
     }
 
     private static List<DirectedSparseGraph<SchemaObjex, SchemaMorphism>> partitionIntoSubgraphs(SchemaCategory schema) {
-        List<DirectedSparseGraph<SchemaObjex, SchemaMorphism>> subgraphs = new ArrayList<>();
-        Set<SchemaObjex> visited = new HashSet<>();
+        final var subgraphs = new ArrayList<DirectedSparseGraph<SchemaObjex, SchemaMorphism>>();
+        final Set<SchemaObjex> visited = new HashSet<>();
 
         for (final SchemaObjex objex : schema.allObjexes()) {
-            if (!visited.contains(objex)) {
-                DirectedSparseGraph<SchemaObjex, SchemaMorphism> subgraph = new DirectedSparseGraph<>();
-                Queue<SchemaObjex> queue = new LinkedList<>();
-                queue.add(objex);
+            if (visited.contains(objex))
+                continue;
 
-                while (!queue.isEmpty()) {
-                    SchemaObjex current = queue.poll();
-                    if (!visited.contains(current)) {
-                        visited.add(current);
-                        subgraph.addVertex(current);
+            final var subgraph = new DirectedSparseGraph<SchemaObjex, SchemaMorphism>();
+            final Queue<SchemaObjex> queue = new ArrayDeque<>();
+            queue.add(objex);
 
-                        for (SchemaMorphism morphism : schema.allMorphisms()) {
-                            if (morphism.dom().equals(current) || morphism.cod().equals(current)) {
-                                subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
-                                SchemaObjex next = morphism.dom().equals(current) ? morphism.cod() : morphism.dom();
-                                if (!visited.contains(next)) {
-                                    queue.add(next);
-                                }
-                            }
-                        }
-                    }
+            while (!queue.isEmpty()) {
+                final SchemaObjex current = queue.poll();
+                if (visited.contains(current))
+                    continue;
+
+                visited.add(current);
+                subgraph.addVertex(current);
+
+                for (final var morphism : current.from()) {
+                    subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
+                    queue.add(morphism.cod());
                 }
-                subgraphs.add(subgraph);
+
+                for (final var morphism : current.to()) {
+                    subgraph.addEdge(morphism, morphism.dom(), morphism.cod());
+                    queue.add(morphism.dom());
+                }
             }
+
+            subgraphs.add(subgraph);
         }
+
         return subgraphs;
     }
 

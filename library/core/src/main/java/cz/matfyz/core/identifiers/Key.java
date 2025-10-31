@@ -1,5 +1,6 @@
 package cz.matfyz.core.identifiers;
 
+import cz.matfyz.core.utils.Accessor;
 import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  */
 @JsonSerialize(using = Key.Serializer.class)
 @JsonDeserialize(using = Key.Deserializer.class)
-public class Key implements Serializable, Comparable<Key> {
+public class Key implements Serializable, Comparable<Key>, Accessor<Key> {
 
     private final int value;
 
@@ -52,6 +53,10 @@ public class Key implements Serializable, Comparable<Key> {
         int hash = 7;
         hash = 29 * hash + this.value;
         return hash;
+    }
+
+    @Override public Key access() {
+        return this;
     }
 
     // #region Serialization

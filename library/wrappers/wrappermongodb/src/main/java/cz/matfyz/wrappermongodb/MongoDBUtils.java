@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
 public final class MongoDBUtils {
+
     private MongoDBUtils() {}
 
     /**
@@ -36,7 +37,10 @@ public final class MongoDBUtils {
      */
     public static List<String> getPropertyNames(MongoCollection<Document> collection) {
         List<String> propertyNames = new ArrayList<>();
-        collection.find().forEach(document -> collectProperties(document, propertyNames, ""));
+
+        for (final var document : collection.find())
+            collectProperties(document, propertyNames, "");
+
         return propertyNames;
     }
 

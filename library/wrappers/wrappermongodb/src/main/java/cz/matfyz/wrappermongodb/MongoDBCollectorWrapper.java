@@ -1,11 +1,10 @@
-package cz.matfyz.wrappermongodb.collector;
+package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.*;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.wrappermongodb.MongoDBProvider;
-import cz.matfyz.wrappermongodb.MongoDBQuery;
+import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.components.MongoConnection;
 import cz.matfyz.wrappermongodb.collector.components.MongoDataCollector;
 import cz.matfyz.wrappermongodb.collector.components.MongoExplainPlanParser;

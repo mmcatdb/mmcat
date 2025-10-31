@@ -98,7 +98,7 @@ public abstract class BaseControlWrapper implements AbstractControlWrapper {
             if (wrapper == null)
                 throw new IllegalArgumentException("No wrapper for datasource " + datasource.identifier);
 
-            return wrappers.get(datasource);
+            return wrapper;
         }
 
     }

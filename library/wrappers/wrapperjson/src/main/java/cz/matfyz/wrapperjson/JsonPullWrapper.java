@@ -11,28 +11,25 @@ import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.record.ComplexRecord;
+import cz.matfyz.core.record.ComplexRecord.ArrayCollector;
 
 import java.io.IOException;
-import java.util.List;
 import java.io.InputStream;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A pull wrapper implementation for JSON files that implements the {@link AbstractPullWrapper} interface.
  * This class provides methods for pulling data from JSON files and converting it into a {@link ForestOfRecords}.
- * This wrapper also supports the JSON Lines format (newline-delimited JSON).
  */
 public class JsonPullWrapper implements AbstractPullWrapper {
 
@@ -50,90 +47,105 @@ public class JsonPullWrapper implements AbstractPullWrapper {
      */
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) {
         try (
-            InputStream inputStream = provider.getInputStream()
+            InputStream inputStream = provider.getInputStream();
+            Stream<ObjectNode> jsonStream = JsonParsedIterator.toStream(inputStream);
         ) {
-            return processJsonStream(inputStream, path);
-        } catch (IOException e) {
+            return processJsonStream(jsonStream, path);
+        }
+        catch (Exception e) {
             throw PullForestException.inner(e);
         }
     }
 
-    private Map<DynamicName, DynamicNameReplacement> replacedNames;
-
     /**
      * Processes a JSON input stream and populates a {@link ForestOfRecords} with data parsed from the stream.
      */
-    private ForestOfRecords processJsonStream(InputStream inputStream, ComplexProperty path) throws IOException {
-        final var forest = new ForestOfRecords();
-        final var parser =  new JsonFactory().createParser(inputStream);
-        final var objectMapper = new ObjectMapper();
+    private ForestOfRecords processJsonStream(Stream<ObjectNode> stream, ComplexProperty path) throws IOException {
+        final var forest = new ForestOfRecords();;
 
-        replacedNames = path.copyWithoutDynamicNames().replacedNames();
+        stream.forEach(object -> {
+            final RootRecord rootRecord = new RootRecord();
 
-        while (parser.nextToken() != null) {
-            if (parser.currentToken() == JsonToken.START_OBJECT) {
-                final JsonNode jsonNode = objectMapper.readTree(parser);
-                final RootRecord rootRecord = new RootRecord();
-
-                addKeysToRecord(rootRecord, path, jsonNode);
-                forest.addRecord(rootRecord);
-            }
-        }
+            addKeysToRecord(rootRecord, path, object);
+            forest.addRecord(rootRecord);
+        });
 
         return forest;
     }
 
-    private void addKeysToRecord(ComplexRecord record, ComplexProperty path, JsonNode object) {
-        final var iterator = object.fields();
-        while (iterator.hasNext()) {
-            final var entry = iterator.next();
+    private void addKeysToRecord(ComplexRecord record, ComplexProperty path, ObjectNode object) {
+        for (final var entry : object.properties()) {
             final var key = entry.getKey();
             final var value = entry.getValue();
             if (value == null || value.isNull())
                 continue;
 
-            final var subpath = path.findSubpathByName(key);
-            if (subpath == null)
+            final var property = path.findSubpathByName(key);
+            if (property == null)
                 continue;
 
-            if (!(subpath.name() instanceof final DynamicName dynamicName)) {
-                addValueToRecord(record, subpath, value);
+            if (property.name() instanceof DynamicName) {
+                final var dynamicRecord = record.addDynamicRecord(property, key);
+                final var valueProperty = ((ComplexProperty) property).getTypedSubpath(TypedName.VALUE);
+                addValueToRecord(dynamicRecord, valueProperty, value);
                 continue;
             }
 
-            // Replace the dynamically named property with an object containing both name and value properties.
-            final var replacement = replacedNames.get(dynamicName);
-            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
-            addValueToRecord(replacer, replacement.value(), value);
+            addValueToRecord(record, property, value);
         }
     }
 
     private void addValueToRecord(ComplexRecord parentRecord, AccessPath property, JsonNode value) {
-        if (value.isArray()) {
-            // If it's array, we flatten it.
-            for (final JsonNode arrayItem : value)
-                addValueToRecord(parentRecord, property, arrayItem);
-            return;
-        }
+        if (property.signature().hasDual())
+            addArrayToRecord(parentRecord, property, value);
+        else
+            addScalarValueToRecord(parentRecord, property, value);
+    }
 
+    private void addScalarValueToRecord(ComplexRecord parentRecord, AccessPath property, JsonNode value) {
         if (property instanceof final SimpleProperty simpleProperty) {
             // If it's a simple value, we add it to the record.
             parentRecord.addSimpleRecord(simpleProperty.signature(), value.asText());
             return;
         }
 
-        final var complexProperty = (ComplexProperty) property;
-        final ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.signature());
-
-        addKeysToRecord(childRecord, complexProperty, value);
+        final ComplexRecord childRecord = parentRecord.addComplexRecord(property.signature());
+        addKeysToRecord(childRecord, (ComplexProperty) property, (ObjectNode) value);
     }
+
+    private void addArrayToRecord(ComplexRecord parentRecord, AccessPath property, JsonNode array) {
+        if (!(property instanceof final ComplexProperty complexProperty) || complexProperty.getIndexSubpaths().isEmpty()) {
+            for (final var element : array)
+                addScalarValueToRecord(parentRecord, property, element);
+            return;
+        }
+
+        final var collector = new ArrayCollector(parentRecord, complexProperty);
+        processArrayDimension(collector, array);
+    }
+
+    private void processArrayDimension(ArrayCollector collector, JsonNode array) {
+        final var isValueDimension = collector.nextDimension();
+        int i = 0;
+        for (final var element : array) {
+            collector.setIndex(i);
+            if (isValueDimension)
+                addValueToRecord(collector.addIndexedRecord(), collector.valueSubpath, element);
+            else
+                processArrayDimension(collector, element);
+            i++;
+        }
+        collector.prevDimension();
+    }
+
+    // #region Querying
 
     @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("JsonPullWrapper.executeQuery not implemented.");
     }
 
     @Override public List<String> getKindNames() {
-        throw new UnsupportedOperationException("JsonPullWrapper.getKindNames not implemented.");
+        return List.of(provider.getKindName());
     }
 
     @Override public DataResponse getRecords(String kindName, @Nullable Integer limit, @Nullable Integer offset, @Nullable List<AdminerFilter> filter) {
@@ -147,5 +159,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
     @Override public DataResponse getQueryResult(QueryContent query) {
         throw new UnsupportedOperationException("JsonPullWrapper.getQueryResult not implemented.");
     }
+
+    // #endregion
 
 }

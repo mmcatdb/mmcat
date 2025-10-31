@@ -7,6 +7,7 @@ import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
 import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
 import org.bson.Document;
 
+/** @deprecated */
 public record MongoConnection(MongoDatabase database) {
     /**
      * Implementation of abstract method that will execute query and cache whole result parsed to CachedResult

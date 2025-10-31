@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.common;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadataObjex;
@@ -85,10 +85,10 @@ public abstract class SchemaBase {
         final var key = builderObjex.key();
         final var objex = originalSchema.getObjex(key);
         // Signature ids can't be defined yet because there are no morphisms. Even in the composite operations the ids are defined later.
-        final ObjexIds ids = !objex.ids().isSignatures()
-                ? objex.ids()
-                // However, ids can't be null in any case, so we create a generated one.
-                : ObjexIds.createGenerated();
+        final ObjexIds ids = objex.hasSignatureId()
+            // However, ids can't be null in any case, so we create a generated one.
+            ? ObjexIds.createGenerated()
+            : objex.ids();
 
         final var schema = new SerializedObjex(key, ids);
         final var metadata = new SerializedMetadataObjex(key, builderObjex.label(), createPosition(x, y));
@@ -127,7 +127,7 @@ public abstract class SchemaBase {
         addMetadataOperation(new MorphismMetadata(metadata, null));
     }
 
-    protected void updateMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
+    protected void updateMorphism(BaseSignature signature, @Nullable Key newDom, @Nullable Key newCod) {
         final var oldMorphism = SerializedMorphism.serialize(originalSchema.getMorphism(signature));
         final var newMorphism = new SerializedMorphism(
             oldMorphism.signature(),

@@ -31,23 +31,26 @@ public class SchemaConverter {
      * This involves creating an access tree from the RSD, converting the tree to a schema category, and generating the mapping for the schema category.
      */
     public CategoryMappingsPair convert(RecordSchemaDescription rsd, Datasource datasource, String kindName) {
-        LOGGER.info("Converting RSD to SchemaCategory...");
+        LOGGER.debug("Converting RSD to SchemaCategory - kind: \"{}\"", datasource.getUniqueKindIdentifier(kindName));
 
-        LOGGER.info("Creating the access tree from RSD...");
-        final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter(kindName, keyGenerator, signatureGenerator);
+        final var rsdToAccessTreeConverter = new RSDToAccessTreeConverter(kindName, keyGenerator, signatureGenerator);
         final AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
-        System.out.println("Access tree with unprocessed arrays: ");
-        root.printTree(" ");
 
-        LOGGER.info("Creating the schema category from the access tree...");
-        final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(kindName);
+        final var accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(kindName);
         final var schemaWithMetadata = accessTreeToSchemaCategoryConverter.convert(root);
         final var schema = schemaWithMetadata.schema();
         final var metadata = schemaWithMetadata.metadata();
 
-        LOGGER.info("Creating the mapping for the schema category...");
-        final MappingConverter mappingConverter = new MappingConverter(root.key, root);
+        LOGGER.info(
+            "Schema category created - objects: {}, morphisms: {}",
+            schema.allObjexes().size(),
+            schema.allMorphisms().size()
+        );
+
+        final var mappingConverter = new MappingConverter(root.key, root);
         final Mapping mapping = mappingConverter.createMapping(datasource, schema, kindName);
+
+        LOGGER.info("Mapping created - accessPath: \n{}", mapping.accessPath());
 
         return new CategoryMappingsPair(schema, metadata, List.of(mapping));
     }

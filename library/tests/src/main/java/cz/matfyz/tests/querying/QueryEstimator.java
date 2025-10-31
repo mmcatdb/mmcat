@@ -17,11 +17,12 @@ import cz.matfyz.querying.optimizer.QueryCostResolver;
 import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
+import cz.matfyz.querying.planner.PatternExtractor;
 import cz.matfyz.querying.planner.PlanDrafter;
 import cz.matfyz.querying.planner.PlanJoiner;
 import cz.matfyz.querying.planner.QueryPlan;
 import cz.matfyz.querying.planner.ResultStructureResolver;
-import cz.matfyz.querying.planner.SchemaExtractor;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
 /**
@@ -63,21 +64,21 @@ public class QueryEstimator {
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
-        normalized.context.setProvider(provider);
+        final var context = new QueryContext(schema, provider, normalized.selection.variables());
 
         // from QueryTreeBuilder.run()
-        final var extracted = SchemaExtractor.run(normalized.context, schema, kinds, normalized.selection);
+        final var extracted = PatternExtractor.run(context, kinds, normalized.selection);
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extracted);
 
         final var output = new ArrayList<QueryPlan>();
 
         for (final var plan : plans) {
-            QueryNode currentNode = PlanJoiner.run(normalized.context, plan, normalized.selection.variables());
+            QueryNode currentNode = PlanJoiner.run(context, plan, normalized.selection.variables());
 
             for (final var filter : normalized.selection.filters())
                 currentNode = new FilterNode(currentNode, filter);
 
-            QueryPlan planned = new QueryPlan(currentNode, normalized.context, normalized.selection.scope());
+            QueryPlan planned = new QueryPlan(currentNode, context, normalized.selection.scope());
             ResultStructureResolver.run(planned);
             if (optimize) { planned = QueryOptimizer.run(planned, cache); }
 

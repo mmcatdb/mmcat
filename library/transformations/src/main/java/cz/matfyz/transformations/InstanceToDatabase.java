@@ -6,7 +6,6 @@ import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
-import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
@@ -67,10 +66,6 @@ public class InstanceToDatabase {
 
         Statistics.start(Interval.INSTANCE_TO_DATABASE);
 
-        final InstanceCategory instance = currentInstance != null
-            ? currentInstance
-            : new InstanceBuilder(allMappings.iterator().next().category()).build();
-
         final var ddlStatements = new ArrayList<AbstractStatement>();
         final var icStatements = new ArrayList<AbstractStatement>();
         final var dmlStatements = new ArrayList<AbstractStatement>();
@@ -78,9 +73,9 @@ public class InstanceToDatabase {
         for (final var mapping : allMappings) {
             Statistics.start(Interval.CTM_ALGORITHM);
 
-            ddlStatements.add(DDLAlgorithm.run(mapping, instance, ddlWrapper));
+            ddlStatements.add(DDLAlgorithm.run(mapping, currentInstance, ddlWrapper));
             icStatements.addAll(ICAlgorithm.run(mapping, allMappings, icWrapper));
-            dmlStatements.addAll(DMLAlgorithm.run(mapping, instance, dmlWrapper));
+            dmlStatements.addAll(DMLAlgorithm.run(mapping, currentInstance, dmlWrapper));
 
             Statistics.end(Interval.CTM_ALGORITHM);
         }

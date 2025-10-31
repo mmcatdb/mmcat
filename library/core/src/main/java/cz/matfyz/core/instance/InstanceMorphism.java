@@ -29,10 +29,6 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
         return mappings.isEmpty();
     }
 
-    public boolean isBase() {
-        return this.schema.isBase();
-    }
-
     public MappingRow createMapping(DomainRow domainRow, DomainRow codomainRow) {
         final var mapping = new MappingRow(domainRow, codomainRow);
         addMapping(mapping);
@@ -40,7 +36,7 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
     }
 
     public static MappingRow createMappingForEdge(InstanceCategory instance, SchemaEdge edge, DomainRow fromRow, DomainRow toRow) {
-        final InstanceMorphism morphism = instance.getMorphism((BaseSignature) edge.morphism().signature());
+        final InstanceMorphism morphism = instance.getMorphism(edge.morphism().signature());
 
         if (!edge.direction()) {
             var swap = fromRow;
@@ -69,7 +65,7 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
 
     // Identification
 
-    @Override public Signature identifier() {
+    @Override public BaseSignature identifier() {
         return schema.signature();
     }
 

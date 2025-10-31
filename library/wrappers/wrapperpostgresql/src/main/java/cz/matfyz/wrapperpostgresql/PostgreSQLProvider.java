@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class PostgreSQLProvider implements AbstractDatasourceProvider {
 
-    public final PostgreSQLSettings settings;
+    final PostgreSQLSettings settings;
 
     // This class is also meant to be instantiated only once (see the MongoDB wrapper) but it currently doesn't use any caching itself.
     // However, some connection pooling can be added in the future.
@@ -29,12 +29,12 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
         }
     }
 
-    public boolean isStillValid(Object settings) {
+    @Override public boolean isStillValid(Object settings) {
         // We always create a new connection so we don't need to cache anything.
         return false;
     }
 
-    public void close() {
+    @Override public void close() {
         // We don't need to close anything because we don't cache anything.
     }
 

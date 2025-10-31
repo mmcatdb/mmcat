@@ -1,5 +1,7 @@
 package cz.matfyz.core.rsd.utils;
 
+import cz.matfyz.core.rsd.utils.Hashing.HashFunction;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,19 +34,19 @@ public class BloomFilter implements Serializable {
     }
 
     public void add(Object value) {
-            if (count > size) {
-                for (HashFunction function : hashFunctions) {
-                    this.addToFilter(function.apply(value));
-                }
-                // neni treba inkrementovat size, protoze v ELSE branch se == zmeni v >
-            } else if (count < size) {
-                for (HashFunction function : hashFunctions) {
-                    temp.add(function.apply(value));
-                }
-            } else {
-                this.temp();
-            }
-            ++count;
+        if (count > size) {
+            for (HashFunction function : hashFunctions)
+                this.addToFilter(function.apply(value));
+            // neni treba inkrementovat size, protoze v ELSE branch se == zmeni v >
+        }
+        else if (count < size) {
+            for (HashFunction function : hashFunctions)
+                temp.add(function.apply(value));
+        }
+        else {
+            this.temp();
+        }
+        count++;
     }
 
     private void addToFilter(int index) {
@@ -73,7 +75,8 @@ public class BloomFilter implements Serializable {
             filter.temp();
             this.merge(filter.bloomFilter);
             count += filter.count;
-        } else if (count + filter.count <= BloomFilter.size) {
+        }
+        else if (count + filter.count <= BloomFilter.size) {
             this.merge(filter.temp);
             count += filter.count;
         }
@@ -81,9 +84,8 @@ public class BloomFilter implements Serializable {
     }
 
     private void merge(long[] anotherFilter) {
-        for (int i = 0; i < BloomFilter.size; ++i) {
+        for (int i = 0; i < BloomFilter.size; i++)
             bloomFilter[i] += anotherFilter[i];
-        }
     }
 
     private void merge(List<Integer> anotherTemp) {
@@ -106,4 +108,5 @@ public class BloomFilter implements Serializable {
         }
         return isEqual ? 0 : 1;
     }
+
 }

@@ -12,10 +12,8 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.Name.StringName;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
 
@@ -31,7 +29,6 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     private static final Operators operators = new Operators();
 
     static {
-
         operators.define(Operator.Equal, "=");
         operators.define(Operator.NotEqual, "<>");
         operators.define(Operator.Less, "<");
@@ -43,7 +40,6 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
         operators.define(Operator.In, "IN");
         operators.define(Operator.NotIn, "NOT IN");
-
     }
 
     // For some reason joined ID variables are inserted as projections twice, so this band-aids the problem; a better fix might be to not make it happen in DatasourceTranslator or higher
@@ -111,11 +107,15 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
                 relationship = join.from();
                 node = join.to();
                 relationshipPath = join.fromPath();
-            } else if (!isRelationship(join.from()) && isRelationship(join.to())) {
+            }
+            else if (!isRelationship(join.from()) && isRelationship(join.to())) {
                 relationship = join.to();
                 node = join.from();
                 relationshipPath = join.toPath();
-            } else throw new UnsupportedOperationException("Graph join must be between node and edge.");
+            }
+            else {
+                throw new UnsupportedOperationException("Graph join must be between node and edge.");
+            }
 
             boolean directionIsTowardsNode = false;
             if (!relationshipPath.isEmpty()) {
@@ -148,19 +148,19 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
         boolean first = true;
         for (final var f : filters) {
-            if (first) first = false;
-            else sb.append(" AND\n  ");
+            if (first)
+                first = false;
+            else
+                sb.append(" AND\n  ");
 
-            if (f instanceof UnaryFilter uf) {
+            if (f instanceof UnaryFilter uf)
                 addFilter(uf);
-            } else if (f instanceof BinaryFilter bf) {
+            else if (f instanceof BinaryFilter bf)
                 addFilter(bf);
-            } else if (f instanceof SetFilter sf) {
+            else if (f instanceof SetFilter sf)
                 addFilter(sf);
-            } else {
+            else
                 throw new UnsupportedOperationException("Unknown filter");
-            }
-
         }
 
         sb.append('\n');

@@ -464,10 +464,10 @@ class SchemaCategoryInferenceEditorTests {
         final SchemaCategory output = new SchemaCategory();
         for (final SchemaCategory schema : schemas) {
             for (final SchemaObjex objex : schema.allObjexes())
-                schema.addObjex(objex);
+                schema.addObjexCopy(objex);
 
             for (final SchemaMorphism morphism : schema.allMorphisms())
-                schema.addMorphism(morphism);
+                schema.addMorphismCopy(morphism);
         }
 
         return output;

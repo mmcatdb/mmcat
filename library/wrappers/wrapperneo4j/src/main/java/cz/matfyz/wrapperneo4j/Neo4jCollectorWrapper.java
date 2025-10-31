@@ -1,4 +1,4 @@
-package cz.matfyz.wrapperneo4j.collector;
+package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
@@ -6,7 +6,6 @@ import cz.matfyz.abstractwrappers.exception.collector.WrapperException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.wrapperneo4j.Neo4jProvider;
 import cz.matfyz.wrapperneo4j.collector.components.Neo4jConnection;
 import cz.matfyz.wrapperneo4j.collector.components.Neo4jDataCollector;
 import cz.matfyz.wrapperneo4j.collector.components.Neo4jExplainPlanParser;

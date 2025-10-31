@@ -27,7 +27,7 @@ public interface AbstractControlWrapper {
 
     AbstractQueryWrapper getQueryWrapper();
 
-    AbstractInferenceWrapper getInferenceWrapper();
+    AbstractInferenceWrapper getInferenceWrapper(String kindName);
 
     AbstractCollectorWrapper getCollectorWrapper();
 }

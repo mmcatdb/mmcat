@@ -45,45 +45,43 @@ public abstract class Schema {
 
     // Morphisms
 
-    public static final BuilderMorphism businessToId =      builder.morphism(business, businessId); // 1
-    public static final BuilderMorphism businessToName =    builder.morphism(business, businessName);
-    public static final BuilderMorphism businessToCity =    builder.morphism(business, businessCity);
-    public static final BuilderMorphism businessToState =   builder.morphism(business, businessState);
-    // public static final BuilderMorphism businessToStars =   builder.morphism(business, businessStars);
-    // public static final BuilderMorphism businessToRevCnt =  builder.morphism(business, businessReviewCount);
-    public static final BuilderMorphism businessToIsOpen =  builder.morphism(business, businessIsOpen);
-    // public static final BuilderMorphism businessToCtgry =   builder.morphism(businessCategory, business); // not used for now
+    public static final BuilderMorphism business_id =      builder.morphism(business, businessId); // 1
+    public static final BuilderMorphism business_name =    builder.morphism(business, businessName);
+    public static final BuilderMorphism business_city =    builder.morphism(business, businessCity);
+    public static final BuilderMorphism business_state =   builder.morphism(business, businessState);
+    // public static final BuilderMorphism business_stars =   builder.morphism(business, businessStars);
+    // public static final BuilderMorphism business_revCnt =  builder.morphism(business, businessReviewCount);
+    public static final BuilderMorphism business_isOpen =  builder.morphism(business, businessIsOpen);
+    // public static final BuilderMorphism business_ctgry =   builder.morphism(businessCategory, business); // not used for now
 
-    public static final BuilderMorphism userToId =          builder.morphism(user, userId); // 6
-    public static final BuilderMorphism userToName =        builder.morphism(user, userName);
-    // public static final BuilderMorphism userToReviewCount = builder.morphism(user, userReviewCount);
-    public static final BuilderMorphism userToYelpingSince = builder.morphism(user, userYelpingSince);
-    // public static final BuilderMorphism userToUseful =      builder.morphism(user, userUseful);
-    // public static final BuilderMorphism userToFunny =       builder.morphism(user, userFunny);
-    // public static final BuilderMorphism userToCool =        builder.morphism(user, userCool);
+    public static final BuilderMorphism user_id =          builder.morphism(user, userId); // 6
+    public static final BuilderMorphism user_name =        builder.morphism(user, userName);
+    // public static final BuilderMorphism user_reviewCount = builder.morphism(user, userReviewCount);
+    public static final BuilderMorphism user_yelpingSince = builder.morphism(user, userYelpingSince);
+    // public static final BuilderMorphism user_useful =      builder.morphism(user, userUseful);
+    // public static final BuilderMorphism user_funny =       builder.morphism(user, userFunny);
+    // public static final BuilderMorphism user_cool =        builder.morphism(user, userCool);
 
-    public static final BuilderMorphism friendshipToUser1 = builder.tags(Tag.role).morphism(friendship, user); // 9
-    public static final BuilderMorphism friendshipToUser2 = builder.tags(Tag.role).morphism(friendship, user);
+    public static final BuilderMorphism friendship_user1 = builder.tags(Tag.role).morphism(friendship, user); // 9
+    public static final BuilderMorphism friendship_user2 = builder.tags(Tag.role).morphism(friendship, user);
 
-    public static final BuilderMorphism reviewToId =        builder.morphism(review, reviewId); // 11
-    public static final BuilderMorphism reviewToUser =      builder.morphism(review, user);
-    public static final BuilderMorphism reviewToBusiness =  builder.morphism(review, business);
-    public static final BuilderMorphism reviewToStars =     builder.morphism(review, reviewStars);
-    public static final BuilderMorphism reviewToDate =      builder.morphism(review, reviewDate);
-    public static final BuilderMorphism reviewToUseful =    builder.morphism(review, reviewUseful);
-    public static final BuilderMorphism reviewToFunny =     builder.morphism(review, reviewFunny);
-    public static final BuilderMorphism reviewToCool =      builder.morphism(review, reviewCool);
+    public static final BuilderMorphism review_id =        builder.morphism(review, reviewId); // 11
+    public static final BuilderMorphism review_user =      builder.morphism(review, user);
+    public static final BuilderMorphism review_business =  builder.morphism(review, business);
+    public static final BuilderMorphism review_stars =     builder.morphism(review, reviewStars);
+    public static final BuilderMorphism review_date =      builder.morphism(review, reviewDate);
+    public static final BuilderMorphism review_useful =    builder.morphism(review, reviewUseful);
+    public static final BuilderMorphism review_funny =     builder.morphism(review, reviewFunny);
+    public static final BuilderMorphism review_cool =      builder.morphism(review, reviewCool);
 
     // Ids
 
     static {
-
         builder
-            .ids(business, businessToId)
-            .ids(review, reviewToId)
-            .ids(user, userToId)
-            .ids(friendship, friendshipToUser1, friendshipToUser2);
-
+            .ids(business, business_id)
+            .ids(review, review_id)
+            .ids(user, user_id)
+            .ids(friendship, friendship_user1, friendship_user2);
     }
 
     /**

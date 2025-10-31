@@ -174,7 +174,6 @@ public class OptimizationTests {
                     new DatasourceNode(
                         customer.kind.datasource(),
                         Set.of(customer),
-                        datasources.schema,
                         List.of(),
                         List.of(
                             scope.computation.create(Operator.Equal, filterVariable, new Constant("Alice"))
@@ -184,7 +183,6 @@ public class OptimizationTests {
                     new DatasourceNode(
                         orderItem.kind.datasource(),
                         Set.of(orderItem),
-                        datasources.schema,
                         List.of(),
                         List.of(),
                         orderItem.root.variable

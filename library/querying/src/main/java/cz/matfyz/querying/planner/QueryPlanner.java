@@ -1,6 +1,5 @@
 package cz.matfyz.querying.planner;
 
-import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
@@ -22,18 +21,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class QueryPlanner {
 
-    public static QueryPlan run(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
-        return new QueryPlanner(context, originalSchema, allKinds, rootClause).run();
+    public static QueryPlan run(QueryContext context, List<Mapping> allKinds, SelectionClause rootClause) {
+        return new QueryPlanner(context, allKinds, rootClause).run();
     }
 
     private final QueryContext context;
-    private final SchemaCategory originalSchema;
     private final List<Mapping> allKinds;
     private final SelectionClause rootClause;
 
-    private QueryPlanner(QueryContext context, SchemaCategory originalSchema, List<Mapping> allKinds, SelectionClause rootClause) {
+    private QueryPlanner(QueryContext context, List<Mapping> allKinds, SelectionClause rootClause) {
         this.context = context;
-        this.originalSchema = originalSchema;
         this.allKinds = allKinds;
         this.rootClause = rootClause;
     }
@@ -45,7 +42,7 @@ public class QueryPlanner {
 
     private QueryNode processClause(SelectionClause clause, @Nullable QueryNode childNode) {
         // TODO The QueryContext should be immutable. It should be created for each clause instead of updating the schema category in the same context.
-        final var extractedPatterns = SchemaExtractor.run(context, originalSchema, allKinds, clause);
+        final var extractedPatterns = PatternExtractor.run(context, allKinds, clause);
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extractedPatterns);
         if (plans.isEmpty())
             throw PlanningException.noPlans();

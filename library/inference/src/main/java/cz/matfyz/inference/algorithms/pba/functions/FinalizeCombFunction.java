@@ -31,13 +31,13 @@ public class FinalizeCombFunction implements Function2<RecordSchemaDescription, 
     private void createNodeInSchema(RecordSchemaDescription property, String[] hierarchies, RecordSchemaDescription tree, int index) {
         if (hierarchies.length > index + 1) {        //if the current node is not the last node in hierarchicalName
             traverseSchema(property, hierarchies, tree, index + 1);         //proceed with the next node name
-        } else {
+        }
+        else {
             tree.setUnique(property.getUnique());
+            tree.setId(property.getId());
             tree.setShareTotal(property.getShareTotal());
             tree.setShareFirst(property.getShareFirst());
-            tree.setUnique(property.getId());
             tree.setTypes(tree.getTypes() | property.getTypes());
-            tree.setModels(property.getModels());
         }
     }
 

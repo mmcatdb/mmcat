@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.mapping.Name.IndexName;
 import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.Name.StringName;
@@ -46,37 +47,40 @@ class JsonTests {
 
     @Test
     void name() {
-        final var static1 = new StringName("Static name");
-        fullTest(static1);
+        final var string1 = new StringName("String name");
+        fullTest(string1);
 
-        final var special1 = new TypedName(TypedName.ROOT);
-        fullTest(special1);
+        final var typed1 = new TypedName(TypedName.ROOT);
+        fullTest(typed1);
 
-        final var dynamic1 = new DynamicName(TypedName.INDEX, Signature.createBase(69), null);
+        final var dynamic1 = new DynamicName(null);
         fullTest(dynamic1);
 
-        final var dynamic2 = new DynamicName(TypedName.KEY, Signature.createBase(69), "*xxx*");
+        final var dynamic2 = new DynamicName("*xxx*");
         fullTest(dynamic2);
+
+        final var index = new IndexName(0);
+        fullTest(index);
     }
 
     @Test
     void accessPath() {
-        final var builder = new AccessPathBuilder();
+        final var b = new AccessPathBuilder();
 
-        final var simple = builder.simple("simple", Signature.createBase(1));
+        final var simple = b.simple("simple", Signature.createBase(1));
         fullTest(simple);
 
-        final var complex = builder.complex("complex", Signature.createBase(2),
+        final var complex = b.complex("complex", Signature.createBase(2),
             simple,
-            builder.simple("simple2", Signature.createBase(3))
+            b.simple("simple2", Signature.createBase(3))
         );
         fullTest(complex);
 
-        final var path = builder.root(
+        final var path = b.root(
             complex,
-            builder.auxiliary("auxiliary"),
-            builder.complex("dynamic", Signature.createBase(4).concatenate(Signature.createBase(5)),
-                builder.simple(Signature.createBase(6), true, Signature.createBase(7))
+            b.auxiliary("auxiliary"),
+            b.complex("dynamic", Signature.createBase(4).concatenate(Signature.createBase(5)),
+                b.dynamic(Signature.createBase(6).dual(), "abc*", Signature.createBase(7), Signature.createBase(8))
             )
         );
         fullTest(path);
@@ -116,7 +120,7 @@ class JsonTests {
 
     private static class Output { String value = ""; }
 
-    private static String WHITE_COLOR_CODE = "\u001b[1;37m";
+    private static final String WHITE_COLOR_CODE = "\u001b[1;37m";
 
     public static void fullTest(Object object) {
         final Output json = serializationTest(object);
@@ -132,7 +136,7 @@ class JsonTests {
         final Output json = new Output();
         assertDoesNotThrow(() -> {
             json.value = serialize(object);
-            LOGGER.info("\n{}Original:\n{}\n{}Serialized:\n{}", WHITE_COLOR_CODE, object, WHITE_COLOR_CODE, json.value);
+            LOGGER.trace("\n{}Original:\n{}\n{}Serialized:\n{}", WHITE_COLOR_CODE, object, WHITE_COLOR_CODE, json.value);
         });
 
         return json;

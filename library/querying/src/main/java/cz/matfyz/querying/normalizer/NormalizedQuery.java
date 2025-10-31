@@ -2,7 +2,6 @@ package cz.matfyz.querying.normalizer;
 
 import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Expression.ExpressionScope;
-import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.parser.WhereClause.ClauseType;
 
 import java.util.List;
@@ -11,12 +10,10 @@ public class NormalizedQuery {
 
     public final ProjectionClause projection;
     public final SelectionClause selection;
-    public final QueryContext context;
 
-    public NormalizedQuery(ProjectionClause projection, SelectionClause selection, QueryContext context) {
+    public NormalizedQuery(ProjectionClause projection, SelectionClause selection) {
         this.projection = projection;
         this.selection = selection;
-        this.context = context;
     }
 
     public record ProjectionClause(

@@ -48,7 +48,8 @@ public class Neo4jPathWrapper implements AbstractPathWrapper {
                     // There can be only one _from node.
                     return false;
                 hasFromNode = true;
-            } else {
+            }
+            else {
                 if (hasToNode)
                     // There can be only one _to node.
                     return false;

@@ -41,60 +41,58 @@ public class Schema {
     // Signatures
 
     // Version 1
-    public static final BuilderMorphism customerToCustomerId =  builder.morphism(customer, customerId, 1);
-    public static final BuilderMorphism customerToName =        builder.morphism(customer, name, 2);
-    public static final BuilderMorphism customerToSurname =     builder.morphism(customer, surname, 3);
-    public static final BuilderMorphism knowsToCustomerA =      builder.morphism(knows, customer, 4);
-    public static final BuilderMorphism knowsToCustomerB =      builder.morphism(knows, customer, 5);
-    public static final BuilderMorphism orderToOrderId =        builder.morphism(order, orderId, 6);
-    public static final BuilderMorphism orderToStreet =         builder.morphism(order, street, 7);
-    public static final BuilderMorphism orderToCity =           builder.morphism(order, city, 8);
-    public static final BuilderMorphism orderToPostCode =       builder.morphism(order, postCode, 9);
-    public static final BuilderMorphism orderToOrderPrice =     builder.morphism(order, orderPrice, 10);
-    public static final BuilderMorphism orderToQuantity =       builder.morphism(order, quantity, 11);
-    public static final BuilderMorphism orderToCustomer =       builder.morphism(order, customer, 12);
-    public static final BuilderMorphism orderToProduct =        builder.morphism(order, product, 13);
-    public static final BuilderMorphism productToProductId =    builder.morphism(product, productId, 14);
-    public static final BuilderMorphism productToTitle =        builder.min(Min.ZERO).morphism(product, title, 15);
-    public static final BuilderMorphism productToProductPrice = builder.min(Min.ZERO).morphism(product, productPrice, 16);
+    public static final BuilderMorphism customer_customerId =  builder.morphism(customer, customerId, 1);
+    public static final BuilderMorphism customer_name =        builder.morphism(customer, name, 2);
+    public static final BuilderMorphism customer_surname =     builder.morphism(customer, surname, 3);
+    public static final BuilderMorphism knows_customerA =      builder.morphism(knows, customer, 4);
+    public static final BuilderMorphism knows_customerB =      builder.morphism(knows, customer, 5);
+    public static final BuilderMorphism order_orderId =        builder.morphism(order, orderId, 6);
+    public static final BuilderMorphism order_street =         builder.morphism(order, street, 7);
+    public static final BuilderMorphism order_city =           builder.morphism(order, city, 8);
+    public static final BuilderMorphism order_postCode =       builder.morphism(order, postCode, 9);
+    public static final BuilderMorphism order_orderPrice =     builder.morphism(order, orderPrice, 10);
+    public static final BuilderMorphism order_quantity =       builder.morphism(order, quantity, 11);
+    public static final BuilderMorphism order_customer =       builder.morphism(order, customer, 12);
+    public static final BuilderMorphism order_product =        builder.morphism(order, product, 13);
+    public static final BuilderMorphism product_productId =    builder.morphism(product, productId, 14);
+    public static final BuilderMorphism product_title =        builder.min(Min.ZERO).morphism(product, title, 15);
+    public static final BuilderMorphism product_productPrice = builder.min(Min.ZERO).morphism(product, productPrice, 16);
 
-    public static final BuilderMorphism orderToCustomerId =     builder.composite(orderToCustomer, customerToCustomerId);
-    public static final BuilderMorphism orderToProductId =      builder.composite(orderToProduct, productToProductId);
+    public static final Signature order_customerId =           builder.concatenate(order_customer, customer_customerId);
+    public static final Signature order_productId =            builder.concatenate(order_product, product_productId);
 
-    public static final Signature customerAToCustomerB = builder.concatenate(knowsToCustomerA.dual(), knowsToCustomerB);
+    public static final Signature customerA_customerB =        builder.concatenate(knows_customerA.dual(), knows_customerB);
 
     // Version 2
-    public static final BuilderMorphism itemToOrderPrice =      builder.morphism(item, orderPrice, 10);
-    public static final BuilderMorphism itemToQuantity =        builder.morphism(item, quantity, 11);
-    public static final BuilderMorphism itemToProduct =         builder.morphism(item, product, 13);
-    public static final BuilderMorphism itemToOrder =           builder.morphism(item, order, 17);
+    public static final BuilderMorphism item_orderPrice =      builder.morphism(item, orderPrice, 10);
+    public static final BuilderMorphism item_quantity =        builder.morphism(item, quantity, 11);
+    public static final BuilderMorphism item_product =         builder.morphism(item, product, 13);
+    public static final BuilderMorphism item_order =           builder.morphism(item, order, 17);
 
-    public static final BuilderMorphism itemToProductId =       builder.composite(itemToProduct, productToProductId);
-    public static final BuilderMorphism itemToTitle =           builder.composite(itemToProduct, productToTitle);
-    public static final BuilderMorphism itemToProductPrice =    builder.composite(itemToProduct, productToProductPrice);
-    public static final BuilderMorphism itemToOrderId =         builder.composite(itemToOrder, orderToOrderId);
+    public static final Signature item_productId =             builder.concatenate(item_product, product_productId);
+    public static final Signature item_title =                 builder.concatenate(item_product, product_title);
+    public static final Signature item_productPrice =          builder.concatenate(item_product, product_productPrice);
+    public static final Signature item_orderId =               builder.concatenate(item_order, order_orderId);
 
     // The same key here is intentional - we want to replace the previous morphisms.
-    public static final BuilderMorphism orderedToCustomer =     builder.morphism(ordered, customer, 12);
-    public static final BuilderMorphism orderedToOrder =        builder.morphism(ordered, order, 18);
+    public static final BuilderMorphism ordered_customer =     builder.morphism(ordered, customer, 12);
+    public static final BuilderMorphism ordered_order =        builder.morphism(ordered, order, 18);
 
-    public static final BuilderMorphism orderedToCustomerId =   builder.composite(orderedToCustomer, customerToCustomerId);
-    public static final BuilderMorphism orderedToOrderId =      builder.composite(orderedToOrder, orderToOrderId);
+    public static final Signature ordered_customerId =         builder.concatenate(ordered_customer, customer_customerId);
+    public static final Signature ordered_orderId =            builder.concatenate(ordered_order, order_orderId);
 
-    public static final Signature orderToCustomer2 = builder.concatenate(orderedToOrder.dual(), orderedToCustomer);
+    public static final Signature order_customer2 =            builder.concatenate(ordered_order.dual(), ordered_customer);
 
     // Ids
 
     static {
-
         builder
-            .ids(customer, customerToCustomerId)
-            .ids(knows, knowsToCustomerA, knowsToCustomerB)
-            .ids(product, productToProductId)
-            .ids(order, orderToOrderId, orderToProductId)
-            .ids(item, itemToOrderId, itemToProductId)
-            .ids(ordered, orderedToOrderId, orderedToCustomerId);
-
+            .ids(customer, customer_customerId)
+            .ids(knows, knows_customerA, knows_customerB)
+            .ids(product, product_productId)
+            .ids(order, order_orderId, order_productId)
+            .ids(item, item_orderId, item_productId)
+            .ids(ordered, ordered_orderId, ordered_customerId);
     }
 
     /**

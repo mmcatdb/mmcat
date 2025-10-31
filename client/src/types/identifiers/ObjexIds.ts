@@ -7,8 +7,6 @@ export enum Type {
     Generated = 'Generated',
 }
 
-export type NonSignaturesType = Type.Value | Type.Generated;
-
 export type ObjexIdsResponse = {
     type: Type;
     signatureIds?: SignatureIdResponse[];
@@ -35,7 +33,7 @@ export class ObjexIds {
         return new ObjexIds(Type.Signatures, signatureIds);
     }
 
-    static createNonSignatures(type: NonSignaturesType): ObjexIds {
+    static createNonSignatures(type: Type.Value | Type.Generated): ObjexIds {
         return new ObjexIds(type);
     }
 

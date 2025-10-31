@@ -1,9 +1,8 @@
 package cz.matfyz.core.mapping;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.utils.printable.*;
@@ -11,7 +10,6 @@ import cz.matfyz.core.utils.printable.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -31,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = SimpleProperty.Deserializer.class)
 public class SimpleProperty extends AccessPath {
 
-    public SimpleProperty(Name name, Signature signature) {
+    SimpleProperty(Name name, Signature signature) {
         super(name, signature);
     }
 
@@ -42,13 +40,12 @@ public class SimpleProperty extends AccessPath {
     }
 
     @Override public @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema) {
-        final SchemaMorphism morphism = schema.getMorphism(signature);
+        if (signature instanceof BaseSignature base) {
+            final SchemaMorphism morphism = schema.getMorphism(base);
+            return morphism.dom().key().equals(key) ? this : null;
+        }
 
-        return morphism.dom().key().equals(key) ? this : null;
-    }
-
-    @Override protected SimpleProperty copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames) {
-        return new SimpleProperty(name, signature);
+        return null;
     }
 
     @Override public void printTo(Printer printer) {
@@ -69,6 +66,7 @@ public class SimpleProperty extends AccessPath {
             generator.writeStartObject();
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
+
             generator.writeEndObject();
         }
     }

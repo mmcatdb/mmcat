@@ -15,21 +15,17 @@ public record ObjexMetadata(
     }
 
     @Override public void up(MetadataCategory metadata) {
-        final var objexes = (new MetadataEditor(metadata)).getObjexes();
-
         if (newObjex == null)
-            objexes.remove(oldObjex.key());
+            metadata.setObjex(oldObjex.key(), null);
         else
-            objexes.put(newObjex.key(), newObjex.deserialize());
+            metadata.setObjex(newObjex.key(), newObjex.deserialize());
     }
 
     @Override public void down(MetadataCategory metadata) {
-        final var objexes = (new MetadataEditor(metadata)).getObjexes();
-
         if (oldObjex == null)
-            objexes.remove(newObjex.key());
+            metadata.setObjex(newObjex.key(), null);
         else
-            objexes.put(oldObjex.key(), oldObjex.deserialize());
+            metadata.setObjex(oldObjex.key(), oldObjex.deserialize());
     }
 
 }

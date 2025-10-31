@@ -7,6 +7,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
@@ -68,10 +69,9 @@ public class QueryToInstance {
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
+        final var context = new QueryContext(schema, provider, normalized.selection.variables());
 
-        normalized.context.setProvider(provider);
-
-        final QueryPlan planned = QueryPlanner.run(normalized.context, schema, kinds, normalized.selection);
+        final QueryPlan planned = QueryPlanner.run(context, kinds, normalized.selection);
         ResultStructureResolver.run(planned);
 
         final QueryPlan optimized = QueryOptimizer.run(planned, cache);
@@ -79,7 +79,7 @@ public class QueryToInstance {
         final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
 
         final QueryResult selected = SelectionResolver.run(optimized, cache);
-        final QueryResult projected = ProjectionResolver.run(normalized.context, normalized.projection, selected);
+        final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
 
         // optimized
         LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);
@@ -105,10 +105,9 @@ public class QueryToInstance {
     private QueryDescription innerDescribe() {
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
+        final var context = new QueryContext(schema, provider, normalized.selection.variables());
 
-        normalized.context.setProvider(provider);
-
-        final QueryPlan planned = QueryPlanner.run(normalized.context, schema, kinds, normalized.selection);
+        final QueryPlan planned = QueryPlanner.run(context, kinds, normalized.selection);
         ResultStructureResolver.run(planned);
         final var plannedDescription = QueryPlanDescriptor.run(planned);
 

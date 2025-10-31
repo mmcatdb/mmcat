@@ -1,16 +1,18 @@
 package cz.matfyz.inference.edit.algorithms;
 
+import cz.matfyz.core.exception.MorphismNotFoundException;
+import cz.matfyz.core.exception.ObjexNotFoundException;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataObjex;
 import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObjex;
 
 import java.util.ArrayList;
@@ -21,9 +23,9 @@ import java.util.logging.Logger;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
+import cz.matfyz.inference.edit.InferenceEditorUtils.KeysAndSignatures;
 import cz.matfyz.inference.schemaconversion.RSDToAccessTreeConverter;
 
-import org.apache.hadoop.yarn.webapp.NotFoundException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -82,8 +84,10 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     private final Data data;
 
     private boolean referenceIsArray;
-    private Signature referenceSignature;
-    private Signature parentReferenceSignature;
+    private BaseSignature referenceSignature;
+    private BaseSignature parentReferenceSignature;
+
+    private final AccessPathBuilder b = new AccessPathBuilder();
 
     public ReferenceMerge(Data data) {
         this.data = data;
@@ -109,65 +113,67 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         SchemaObjex dom = newSchema.getObjex(referenceParentKey);
         final SchemaObjex cod = newSchema.getObjex(data.referencedKey);
 
+        final var toDelete = new KeysAndSignatures();
+
         if (referenceIsArray) {
-            this.parentReferenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema, newSchema.getObjex(data.referencingKey), dom);
+            this.parentReferenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema.getObjex(data.referencingKey), dom);
             dom = newSchema.getObjex(data.referencingKey);
+            newMetadata.setObjex(dom, new MetadataObjex(ARRAY_LABEL, newMetadata.getObjex(dom).position));
 
-            InferenceEditorUtils.updateMetadataObjexesLabel(dom, newMetadata, ARRAY_LABEL);
-
-            this.referenceSignature = findReferenceSignatureWithValueKey(data.referencingKey);
-        } else {
-            this.referenceSignature = InferenceEditorUtils.findSignatureBetween(newSchema, dom, newSchema.getObjex(data.referencingKey));
-            keysToDelete.add(data.referencingKey);
+            this.referenceSignature = findReferenceSignatureWithValueKey(toDelete, data.referencingKey);
         }
-        InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, cod, this.referenceSignature);
+        else {
+            this.referenceSignature = InferenceEditorUtils.findSignatureBetween(dom, newSchema.getObjex(data.referencingKey));
+            toDelete.add(data.referencingKey);
+        }
 
-        InferenceEditorUtils.removeMorphismsAndObjexes(newSchema, signaturesToDelete, keysToDelete);
+        InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, dom, cod, this.referenceSignature);
+
+        InferenceEditorUtils.removeMorphismsAndObjexes(newSchema, toDelete);
     }
 
     private boolean isReferenceArray(SchemaCategory schema, MetadataCategory metadata) {
-        for (final SchemaMorphism morphism : schema.allMorphisms()) {
-            if (morphism.dom().key().equals(data.referencingKey) && metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL))
+        for (final var morphism : schema.getObjex(data.referencingKey).from()) {
+            if (metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL))
                 return true;
         }
+
         return false;
     }
 
     private Key getReferenceParentKey(SchemaCategory schema, MetadataCategory metadata) {
         if (referenceIsArray) {
-            for (final SchemaMorphism morphism : schema.allMorphisms()) {
+            for (final var morphism : schema.getObjex(data.referencingKey).from()) {
                 if (
-                    morphism.dom().key().equals(data.referencingKey) && (
-                        !metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL) ||
-                        !metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL)
-                    )
+                    !metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.INDEX_LABEL) ||
+                    !metadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL)
                 )
                     return morphism.cod().key();
             }
 
-            throw new NotFoundException("Parent key has not been found");
+            throw ObjexNotFoundException.withMessage("Parent key has not been found");
         }
 
-        for (final SchemaMorphism morphism : schema.allMorphisms()) {
-            if (morphism.cod().key().equals(data.referencingKey))
-                return morphism.dom().key();
-        }
 
-        throw new NotFoundException("Parent key has not been found");
+        for (final var morphism : schema.getObjex(data.referencingKey).to())
+            return morphism.dom().key();
+
+        throw ObjexNotFoundException.withMessage("Parent key has not been found");
     }
 
-    private Signature findReferenceSignatureWithValueKey(Key key) {
+    private BaseSignature findReferenceSignatureWithValueKey(KeysAndSignatures toDelete, Key key) {
         final Key valueKey = getValueKey(key);
-        keysToDelete.add(valueKey);
-        return InferenceEditorUtils.findSignatureBetween(newSchema, newSchema.getObjex(data.referencingKey), newSchema.getObjex(valueKey));
+        toDelete.add(valueKey);
+        return InferenceEditorUtils.findSignatureBetween(newSchema.getObjex(data.referencingKey), newSchema.getObjex(valueKey));
     }
 
     private Key getValueKey(Key key) {
-        for (final SchemaMorphism morphism : newSchema.allMorphisms())
-            if (morphism.dom().key().equals(key) && newMetadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL))
+        for (final var morphism : newSchema.getObjex(key).from()) {
+            if (newMetadata.getObjex(morphism.cod()).label.equals(RSDToAccessTreeConverter.VALUE_LABEL))
                 return morphism.cod().key();
+        }
 
-        throw new NotFoundException("Index key has not been found");
+        throw ObjexNotFoundException.withMessage("Index key has not been found");
     }
 
     /**
@@ -196,12 +202,12 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             )
                 return mapping;
 
-        throw new NotFoundException("Mapping for reference has not been found.");
+        throw MorphismNotFoundException.withMessage("Mapping for reference has not been found.");
     }
 
     private Mapping createAdjustedMapping(Mapping mapping) {
         final ComplexProperty cleanedComplexProperty = adjustComplexProperty(mapping);
-        return mapping.withSchema(newSchema, cleanedComplexProperty, mapping.primaryKey());
+        return mapping.withSchemaAndPath(newSchema, cleanedComplexProperty);
     }
 
     private ComplexProperty adjustComplexProperty(Mapping mapping) {
@@ -215,7 +221,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             final ComplexProperty adjustedReferenceComplexProperty = adjustReferenceComplexProperty(referenceComplexProperty, ARRAY_LABEL);
 
             return adjustComplexProperty(cleanedComplexProperty, adjustedReferenceComplexProperty);
-        } else {
+        }
+        else {
            return adjustReferenceComplexProperty(complexProperty, complexProperty.name().toString());
         }
     }
@@ -227,17 +234,17 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         final List<AccessPath> accessPaths = new ArrayList<>(adjustedComplexProperty.subpaths());
         accessPaths.add(createNewReferenceProperty());
 
-        return new ComplexProperty(new StringName(label), complexProperty.signature(), accessPaths);
+        return b.complex(label, complexProperty.signature(), accessPaths.toArray(AccessPath[]::new));
     }
 
     private SimpleProperty createNewReferenceProperty() {
-        return new SimpleProperty(new StringName(InferenceEditorUtils.findLabelFromKey(data.referencedKey, newMetadata)), this.referenceSignature);
+        return b.simple(newMetadata.getObjex(data.referencedKey).label, this.referenceSignature);
     }
 
     private ComplexProperty adjustComplexProperty(ComplexProperty complexProperty, ComplexProperty referenceComplexProperty) {
         final List<AccessPath> accessPaths = new ArrayList<>(complexProperty.subpaths());
         accessPaths.add(referenceComplexProperty);
-        return new ComplexProperty(complexProperty.name(), complexProperty.signature(), accessPaths);
+        return b.complex(complexProperty.name(), complexProperty.signature(), accessPaths.toArray(AccessPath[]::new));
     }
 
 }

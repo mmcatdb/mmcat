@@ -7,13 +7,7 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 public class RecordBasedAlgorithm {
 
     public RecordSchemaDescription process(AbstractInferenceWrapper wrapper, AbstractRSDsReductionFunction merge) {
-        wrapper.startSession();
-
-        final var rsd = wrapper.loadRSDs().reduce(merge);
-
-        wrapper.stopSession();
-
-        return rsd;
+        return wrapper.loadRSDs().reduce(merge);
     }
 
 }

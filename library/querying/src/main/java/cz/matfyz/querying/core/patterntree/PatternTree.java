@@ -6,7 +6,6 @@ import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
-import cz.matfyz.querying.exception.GeneralException;
 
 import java.util.Collection;
 import java.util.Map;
@@ -45,15 +44,13 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
     }
 
     public PatternTree getOrCreateChild(SchemaEdge schemaEdge, Variable variable) {
-        if (!(schemaEdge.signature() instanceof BaseSignature baseSignature))
-            throw GeneralException.message("Non-base signature " + schemaEdge.signature() + " in pattern tree.");
-
-        final var currentChild = children.get(baseSignature);
+        final var signature = schemaEdge.signature();
+        final var currentChild = children.get(signature);
         if (currentChild != null)
             return currentChild;
 
         final var child = new PatternTree(schemaEdge.to(), variable, this, schemaEdge);
-        children.put(baseSignature, child);
+        children.put(signature, child);
 
         return child;
     }
@@ -70,9 +67,7 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
     @Nullable
     public BaseSignature signatureFromParent() {
         // The signature must be base because it comes from the SelectionTriple.
-        return edgeFromParent != null
-            ? (BaseSignature) edgeFromParent.signature()
-            : null;
+        return edgeFromParent != null ? edgeFromParent.signature() : null;
     }
 
     public Signature computePathFromRoot() {

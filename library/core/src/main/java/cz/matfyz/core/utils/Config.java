@@ -27,8 +27,8 @@ public class Config {
         if (properties == null)
             loadProperties();
 
-        String prefixedKey = prefix + key;
-        String property = properties.getProperty(prefixedKey);
+        final String prefixedKey = prefix + key;
+        final String property = properties.getProperty(prefixedKey);
         if (property == null)
             throw ConfigurationException.keyNotFound(prefixedKey);
 

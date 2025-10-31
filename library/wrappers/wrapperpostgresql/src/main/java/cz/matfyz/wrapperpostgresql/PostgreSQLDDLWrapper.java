@@ -40,8 +40,12 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         if (isComplex)
             throw InvalidPathException.isComplex(DatasourceType.postgresql, path);
 
-        final String type = segment.isArray() ? "TEXT[]" : "TEXT";
-        segment.names().forEach(name -> {
+        if (segment.isArray && segment.arrayDimension() != 1)
+            throw InvalidPathException.unsupportedArrayDimension(DatasourceType.postgresql, path);
+
+        final String type = segment.isArray ? "TEXT[]" : "TEXT";
+
+        segment.names.forEach(name -> {
             final String command = "\"" + name + "\" " + type + (isRequired ? " NOT NULL" : "");
             properties.add(new Property(name, command));
         });

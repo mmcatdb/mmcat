@@ -11,40 +11,34 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class QueryContext {
 
-    public final VariableTree variables;
+    // TODO - maybe should be unique per nested clause?
 
-    public QueryContext(VariableTree variables) {
+    public QueryContext(SchemaCategory schema, ControlWrapperProvider provider, VariableTree variables) {
+        this.schema = schema;
+        this.provider = provider;
         this.variables = variables;
+    }
+
+    private final VariableTree variables;
+
+    public @Nullable VariableTree getVariables() {
+        return variables;
     }
 
     // Schema category
 
-    // TODO - should be unique per nested clause. However, the variables probably should be as well, so ...
+    private final SchemaCategory schema;
 
-    private @Nullable SchemaCategory schema;
-
-    public @Nullable SchemaCategory getSchema() {
+    public SchemaCategory getSchema() {
         return schema;
-    }
-
-    public QueryContext setSchema(SchemaCategory schema) {
-        this.schema = schema;
-
-        return this;
     }
 
     // Querying
 
-    private @Nullable ControlWrapperProvider provider;
+    private final ControlWrapperProvider provider;
 
-    public @Nullable ControlWrapperProvider getProvider() {
+    public ControlWrapperProvider getProvider() {
         return provider;
-    }
-
-    public QueryContext setProvider(ControlWrapperProvider provider) {
-        this.provider = provider;
-
-        return this;
     }
 
 }

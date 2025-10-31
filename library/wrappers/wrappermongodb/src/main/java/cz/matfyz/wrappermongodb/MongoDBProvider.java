@@ -10,7 +10,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MongoDBProvider implements AbstractDatasourceProvider {
 
-    public final MongoDBSettings settings;
+    final MongoDBSettings settings;
 
     // The client itself handles connection pooling so there should be only one client (with given connection string) per application.
     // This also means that there should be at most one instance of this class so it should be cached somewhere.
@@ -27,7 +27,7 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         return mongoClient.getDatabase(settings.database);
     }
 
-    public boolean isStillValid(Object settings) {
+    @Override public boolean isStillValid(Object settings) {
         if (!(settings instanceof MongoDBSettings mongoDBSettings))
             return false;
 
@@ -38,7 +38,7 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
             && this.settings.isQueryable == mongoDBSettings.isQueryable;
     }
 
-    public void close() {
+    @Override public void close() {
         if (mongoClient != null)
             mongoClient.close();
     }
@@ -56,7 +56,7 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
         boolean isClonable
     ) {
 
-        public String createConnectionString() {
+        String createConnectionString() {
             final var sb = new StringBuilder()
                 .append("mongodb://");
 
@@ -94,7 +94,8 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
                 .append(host)
                 .append(":")
                 .append(port)
-                .append("/");
+                .append("/")
+                .append(database);
 
             return sb.toString();
         }

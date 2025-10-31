@@ -25,8 +25,8 @@ public abstract class Neo4j {
             Schema.order,
             orderKind,
             b -> b.root(
-                b.simple("customer", Schema.orderToName),
-                b.simple("number", Schema.orderToNumber)
+                b.simple("customer", Schema.order_name),
+                b.simple("number", Schema.order_number)
             )
         );
     }
@@ -36,8 +36,8 @@ public abstract class Neo4j {
             Schema.product,
             productKind,
             b -> b.root(
-                b.simple("id", Schema.productToId),
-                b.simple("label", Schema.productToLabel)
+                b.simple("id", Schema.product_id),
+                b.simple("label", Schema.product_label)
             )
         );
     }
@@ -47,12 +47,12 @@ public abstract class Neo4j {
             Schema.item,
             itemKind,
             b -> b.root(
-                b.simple("quantity", Schema.itemToQuantity),
-                b.complex("_from.Order", Schema.itemToOrder,
-                    b.simple("number", Schema.orderToNumber)
+                b.simple("quantity", Schema.item_quantity),
+                b.complex("_from.Order", Schema.item_order,
+                    b.simple("number", Schema.order_number)
                 ),
-                b.complex("_to.Product", Schema.itemToProduct,
-                    b.simple("id", Schema.productToId)
+                b.complex("_to.Product", Schema.item_product,
+                    b.simple("id", Schema.product_id)
                 )
             )
         );
@@ -65,7 +65,7 @@ public abstract class Neo4j {
             Schema.contact,
             contactKind,
             b -> b.root(
-                b.simple("value", Schema.contactToValue)
+                b.simple("value", Schema.contact_value)
             )
         );
     }
@@ -75,13 +75,13 @@ public abstract class Neo4j {
             Schema.contact,
             hasContactKind,
             b -> b.root(
-                b.simple("type", Schema.contactToType),
+                b.simple("type", Schema.contact_type),
 
-                b.complex("_from.Order", Schema.contactToOrder,
-                    b.simple("number", Schema.orderToNumber)
+                b.complex("_from.Order", Schema.contact_order,
+                    b.simple("number", Schema.order_number)
                 ),
                 b.complex("_to.Contact", Signature.empty(),
-                    b.simple("value", Schema.contactToValue)
+                    b.simple("value", Schema.contact_value)
                 )
             )
         );
@@ -92,8 +92,8 @@ public abstract class Neo4j {
     //         Schema.data,
     //         noteKind,
     //         b -> b.root(
-    //             b.simple("subject", Schema.dataToSubject),
-    //             b.simple("content", Schema.dataToContent)
+    //             b.simple("subject", Schema.data_subject),
+    //             b.simple("content", Schema.data_content)
     //         )
     //     );
     // }
@@ -103,9 +103,9 @@ public abstract class Neo4j {
     //         Schema.note,
     //         noteRelKind,
     //         b -> b.root(
-    //             b.simple("locale", Schema.noteToLocale),
-    //             b.complex("_from.Note", Schema.noteToData),
-    //             b.complex("_to.Order", Schema.noteToOrder)
+    //             b.simple("locale", Schema.note_locale),
+    //             b.complex("_from.Note", Schema.note_data),
+    //             b.complex("_to.Order", Schema.note_order)
     //         )
     //     );
     // }

@@ -1,13 +1,8 @@
 package cz.matfyz.inference.algorithms.pba.functions;
 
 import cz.matfyz.core.rsd.ProcessedProperty;
-import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
 
-/**
- *
- * @author sebastian.hricko
- */
 public class DefaultLocalSeqFunction implements AbstractSeqFunction {
 
     @Override
@@ -19,12 +14,12 @@ public class DefaultLocalSeqFunction implements AbstractSeqFunction {
         for (ProcessedProperty property : t2) {
             if (result == null) {
                 result = property;
-            } else {
-                DefaultLocalReductionFunction reductionFunction = new DefaultLocalReductionFunction();
-                RecordSchemaDescription mergedSchema = reductionFunction.call(result.getSchema(), property.getSchema());
+            }
+            else {
+                final var reductionFunction = new DefaultLocalReductionFunction();
+                final var mergedSchema = reductionFunction.call(result.getSchema(), property.getSchema());
                 result.setSchema(mergedSchema);
-                                // moje
-                                (result.getHeuristics()).merge(property.getHeuristics());
+                result.getHeuristics().merge(property.getHeuristics());
             }
         }
 

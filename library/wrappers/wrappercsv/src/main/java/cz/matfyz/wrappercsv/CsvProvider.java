@@ -1,21 +1,24 @@
 package cz.matfyz.wrappercsv;
 
+import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
+import cz.matfyz.core.utils.FileUtils;
+import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A provider class for accessing CSV files based on given settings.
  * This class provides methods to retrieve input streams and CSV file names
  * from both local and remote sources.
  */
-public class CsvProvider {
+public class CsvProvider implements AbstractDatasourceProvider {
 
     /** The settings used by this provider for accessing CSV files. */
-    public final CsvSettings settings;
+    final CsvSettings settings;
 
     /**
      * Constructs a new {@code CsvProvider} with the specified settings.
@@ -24,16 +27,21 @@ public class CsvProvider {
         this.settings = settings;
     }
 
-    public String getUrl() {
-        return settings.url;
+    @Override public boolean isStillValid(Object settings) {
+        // We don't cache anything so the provider is always valid.
+        return true;
     }
 
-    public char getSeparator() {
-        return settings.separator;
+    @Override public void close() {
+        // Nothing to close.
     }
 
-    public boolean hasHeader() {
-        return settings.hasHeader;
+    private @Nullable String kindName = null;
+
+    public String getKindName() {
+        if (kindName != null)
+            kindName = FileUtils.extractBaseName(settings.url);
+        return kindName;
     }
 
     /**
@@ -41,15 +49,6 @@ public class CsvProvider {
      */
     public InputStream getInputStream() throws IOException {
         return new UrlInputStreamProvider(settings.url).getInputStream();
-    }
-
-    /**
-     * Retrieves a list of CSV file names from the specified URL.
-     * Supports both local directories and remote file access.
-     */
-    public String getCsvFilenames() {
-        String url = settings.url;
-        return url.substring(url.lastIndexOf('/') + 1);
     }
 
     /**

@@ -15,21 +15,17 @@ public record MorphismMetadata(
     }
 
     @Override public void up(MetadataCategory metadata) {
-        final var morphisms = (new MetadataEditor(metadata)).getMorphisms();
-
         if (newMorphism == null)
-            morphisms.remove(oldMorphism.signature());
+            metadata.setMorphism(oldMorphism.signature(), null);
         else
-            morphisms.put(newMorphism.signature(), newMorphism.deserialize());
+            metadata.setMorphism(newMorphism.signature(), newMorphism.deserialize());
     }
 
     @Override public void down(MetadataCategory metadata) {
-        final var morphisms = (new MetadataEditor(metadata)).getMorphisms();
-
         if (oldMorphism == null)
-            morphisms.remove(newMorphism.signature());
+            metadata.setMorphism(newMorphism.signature(), null);
         else
-            morphisms.put(oldMorphism.signature(), oldMorphism.deserialize());
+            metadata.setMorphism(oldMorphism.signature(), oldMorphism.deserialize());
     }
 
 }

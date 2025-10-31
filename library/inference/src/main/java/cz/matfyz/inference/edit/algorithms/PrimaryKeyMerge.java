@@ -1,5 +1,7 @@
 package cz.matfyz.inference.edit.algorithms;
 
+import cz.matfyz.core.exception.MorphismNotFoundException;
+import cz.matfyz.core.exception.ObjexNotFoundException;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
@@ -9,18 +11,15 @@ import cz.matfyz.core.rsd.PrimaryKeyCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObjex;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
-import org.apache.hadoop.yarn.webapp.NotFoundException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -101,8 +100,8 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         final SchemaObjex pkRootObjex = newSchema.getObjex(primaryKeyRoot);
 
         if (primaryKeyRoot.equals(data.primaryKeyIdentified)) { // update PK identification for the PK's parent
-            final SchemaObjex updatedPkRootObjex = updateSchemaObjexIds(pkRootObjex, primaryKeySignature);
-            InferenceEditorUtils.updateObjexes(newSchema, newMetadata, pkRootObjex, updatedPkRootObjex);
+            final var newIds = createUpdatedIds(pkRootObjex, primaryKeySignature);
+            newSchema.replaceObjex(new SerializedObjex(pkRootObjex.key(), newIds));
         }
     }
 
@@ -111,7 +110,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             if (morphism.cod().key().equals(data.primaryKey))
                 return morphism.dom().key();
 
-        throw new NotFoundException("Primary Key Identified has not been found.");
+        throw ObjexNotFoundException.withMessage("Primary Key Identified has not been found.");
     }
 
     private Key findPrimaryKeyRoot(SchemaCategory schema) {
@@ -119,7 +118,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             if (morphism.cod().key().equals(data.primaryKey))
                 return morphism.dom().key();
 
-        throw new NotFoundException("Primary Key Root has not been found");
+        throw ObjexNotFoundException.withMessage("Primary Key Root has not been found");
     }
 
     private Signature findPKSignature() {
@@ -127,22 +126,14 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             if (morphism.dom().key().equals(this.primaryKeyRoot) && morphism.cod().key().equals(data.primaryKey))
                 return morphism.signature();
 
-        throw new NotFoundException("Primary Key Signature has not been found");
+        throw ObjexNotFoundException.withMessage("Primary Key Signature has not been found");
     }
 
-    private SchemaObjex updateSchemaObjexIds(SchemaObjex schemaObjex, Signature signature) {
-        final SortedSet<SignatureId> signatureSet = new TreeSet<>(Set.of(new SignatureId(signature)));
-        final ObjexIds updatedIds = schemaObjex.ids().isSignatures()
-            ? new ObjexIds(addSignatureToSet(schemaObjex.ids(), signature))
-            : new ObjexIds(signatureSet);
-
-        return new SchemaObjex(schemaObjex.key(), updatedIds);
-    }
-
-    private SortedSet<SignatureId> addSignatureToSet(ObjexIds ids, Signature signature) {
-        final SortedSet<SignatureId> signatureIds = new TreeSet<>(ids.toSignatureIds());
-        signatureIds.add(new SignatureId(signature));
-        return signatureIds;
+    private ObjexIds createUpdatedIds(SchemaObjex schemaObjex, Signature signature) {
+        final var newId = new SignatureId(signature);
+        return schemaObjex.hasSignatureId()
+            ? schemaObjex.ids().extend(newId)
+            : new ObjexIds(newId);
     }
 
     /**
@@ -162,7 +153,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             if (mapping.rootObjex().key().equals(primaryKeyRoot))
                 return mapping;
         }
-        throw new NotFoundException("Mapping for objex identified with PK has not been found.");
+        throw MorphismNotFoundException.withMessage("Mapping for objex identified with PK has not been found.");
     }
 
     private Mapping updatePrimaryKeyMapping(Mapping mapping) {

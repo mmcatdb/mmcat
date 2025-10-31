@@ -1,16 +1,20 @@
 package cz.matfyz.core.schema;
 
 import cz.matfyz.core.exception.MorphismNotFoundException;
+import cz.matfyz.core.exception.SchemaException;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.Key.KeyGenerator;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedObjex;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class SchemaCategory {
@@ -22,49 +26,124 @@ public class SchemaCategory {
         return objexes.get(key);
     }
 
-    public SchemaObjex addObjex(SchemaObjex objex) {
-        return objexes.put(objex.key(), objex);
+    public SchemaObjex addObjex(SerializedObjex serialized) {
+        final var objex = new SchemaObjex(serialized.key(), serialized.ids(), false);
+        objexes.put(objex.key(), objex);
+        return objex;
     }
 
-    public SchemaMorphism addMorphism(SchemaMorphism morphism) {
-        return morphisms.put(morphism.signature(), morphism);
+    public SchemaObjex addObjexCopy(SchemaObjex objex) {
+        return addObjex(SerializedObjex.serialize(objex));
+    }
+
+    public void removeObjex(SchemaObjex objex) {
+        removeObjex(objex.key());
+    }
+
+    public void removeObjex(SerializedObjex objex) {
+        removeObjex(objex.key());
+    }
+
+    public void removeObjex(Key key) {
+        final var objex = objexes.get(key);
+        if (objex == null)
+            throw SchemaException.removingNonExistingObjex(key);
+
+        final List<BaseSignature> dependencies = new ArrayList<>();
+        objex.from().stream().forEach(m -> dependencies.add(m.signature()));
+        objex.to().stream().forEach(m -> dependencies.add(m.signature()));
+        if (!dependencies.isEmpty())
+            throw SchemaException.removedObjexDependsOnMorphisms(objex.key(), dependencies);
+
+        objexes.remove(key);
+    }
+
+    public SchemaObjex replaceObjex(SerializedObjex serialized) {
+        final var key = serialized.key();
+        final var prev = objexes.get(key);
+        if (prev == null)
+            throw SchemaException.replacingNonExistingObjex(key);
+
+        final var next = new SchemaObjex(key, serialized.ids(), prev.isEntity());
+        objexes.put(key, next);
+
+        prev.from().stream().forEach(m -> m.setDom(next));
+        prev.to().stream().forEach(m -> m.setCod(next));
+
+        return next;
+    }
+
+    public SchemaMorphism getMorphism(BaseSignature signature) {
+        if (signature.isDual())
+            throw MorphismNotFoundException.signatureIsDual(signature);
+
+        final var morphism = morphisms.get(signature);
+        if (morphism == null)
+            throw MorphismNotFoundException.baseNotFound(signature);
+
+        return morphism;
+    }
+
+    public SchemaMorphism addMorphism(SerializedMorphism serialized) {
+        final var dom = getObjex(serialized.domKey());
+        final var cod = getObjex(serialized.codKey());
+
+        final var morphism = new SchemaMorphism(serialized.signature(), dom, cod, serialized.min(), serialized.tags());
+        morphisms.put(morphism.signature(), morphism);
+
+        dom.morphismsFrom.put(morphism.signature(), morphism);
+        cod.morphismsTo.put(morphism.signature(), morphism);
+
+        // The domain has an outgoing morphism, so it must be an entity.
+        dom.isEntity = true;
+
+        return morphism;
+    }
+
+    public SchemaMorphism addMorphismCopy(SchemaMorphism morphism) {
+        return addMorphism(SerializedMorphism.serialize(morphism));
     }
 
     public void removeMorphism(SchemaMorphism morphism) {
-        morphisms.remove(morphism.signature());
+        removeMorphism(morphism.signature());
     }
 
-    public SchemaMorphism getMorphism(Signature signature) {
-        if (signature.isEmpty())
-            throw MorphismNotFoundException.signatureIsEmpty();
+    public void removeMorphism(SerializedMorphism morphism) {
+        removeMorphism(morphism.signature());
+    }
 
-        if (signature instanceof BaseSignature baseSignature) {
-            if (baseSignature.isDual())
-                throw MorphismNotFoundException.signatureIsDual(baseSignature);
+    public void removeMorphism(BaseSignature signature) {
+        final var morphism = morphisms.get(signature);
+        if (morphism == null)
+            throw SchemaException.removingNonExistingMorphism(signature);
 
-            return morphisms.computeIfAbsent(baseSignature, x -> {
-                throw MorphismNotFoundException.baseNotFound(baseSignature);
-            });
-        }
+        morphism.removeFromObjex();
+        if (morphism.dom().morphismsFrom.isEmpty())
+            morphism.dom().isEntity = false;
 
-        return morphisms.computeIfAbsent(signature, this::createCompositeMorphism);
+        morphisms.remove(signature);
+    }
+
+    public void replaceMorphism(SerializedMorphism morphism) {
+        // Unlike objexes, morphisms can don't depend on anything, so they can be simply removed and added again.
+        removeMorphism(morphism);
+        addMorphism(morphism);
     }
 
     /**
      * This class represents a directed edge in the schema category. Essentially, it's either a base morphism or a dual of such.
      */
     public record SchemaEdge(
-        /** A base morphism. */
         SchemaMorphism morphism,
         /** True if the edge corresponds to the morphism. False if it corresponds to its dual. */
         boolean direction
     ) {
         public BaseSignature signature() {
-            return (BaseSignature) (direction ? morphism.signature() : morphism.signature().dual());
+            return (direction ? morphism.signature() : morphism.signature().dual());
         }
 
         public BaseSignature absoluteSignature() {
-            return (BaseSignature) morphism.signature();
+            return morphism.signature();
         }
 
         public SchemaObjex from() {
@@ -143,41 +222,12 @@ public class SchemaCategory {
         return hasMorphism(base.toAbsolute());
     }
 
-    /** Returns whether the objex (corresponding to the given key) appears in any inner node of the (composite) morphism (corresponding to the given signature). */
-    public boolean morphismContainsObjex(Signature signature, Key key) {
-        return signature
-            .cutLast().toBases().stream()
-            .anyMatch(base -> getEdge(base).to().key().equals(key));
+    public KeyGenerator createKeyGenerator() {
+        return KeyGenerator.create(objexes.keySet());
     }
 
-    private SchemaMorphism createCompositeMorphism(Signature signature) {
-        final Signature[] bases = signature.toBases().toArray(Signature[]::new);
-
-        final Signature lastSignature = bases[0];
-        SchemaMorphism lastMorphism = this.getMorphism(lastSignature);
-        final SchemaObjex dom = lastMorphism.dom();
-        SchemaObjex cod = lastMorphism.cod();
-        Min min = lastMorphism.min();
-
-        for (final var base : bases) {
-            lastMorphism = this.getMorphism(base);
-            cod = lastMorphism.cod();
-            min = Min.combine(min, lastMorphism.min());
-        }
-
-        return new SchemaMorphism(signature, dom, cod, min, Set.of());
-    }
-
-    public abstract static class Editor {
-
-        protected static Map<Key, SchemaObjex> getObjexes(SchemaCategory category) {
-            return category.objexes;
-        }
-
-        protected static Map<Signature, SchemaMorphism> getMorphisms(SchemaCategory category) {
-            return category.morphisms;
-        }
-
+    public SignatureGenerator createSignatureGenerator() {
+        return SignatureGenerator.create(morphisms.keySet());
     }
 
 }

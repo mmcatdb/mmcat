@@ -65,42 +65,71 @@ class MTCAlgorithmTests {
     }
 
     @Test
-    void simpleArrayTest() {
+    void simpleSetTest() {
         new MTCAlgorithmTestBase()
-            .mappingWithRecords(MongoDB.tag(schema), """
+            .mappingWithRecords(MongoDB.tagSet(schema), """
                 [ {
                     "number": "o_100",
                     "tags": [
-                        123,
-                        456,
-                        789
+                        "t_123",
+                        "t_456",
+                        "t_789"
                     ]
                 }, {
                     "number": "o_200",
                     "tags": [
-                        "123",
-                        "String456",
-                        "String789"
+                        "t_123",
+                        "t_555",
+                        "t_888"
                     ]
                 } ]
             """)
             .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addTag(builder, 0, "123", "456", "789");
-                MongoDB.addTag(builder, 1, "123", "String456", "String789");
+                MongoDB.addTagSet(builder, 0, "t_123", "t_456", "t_789");
+                MongoDB.addTagSet(builder, 1, "t_123", "t_555", "t_888");
             })
             .run();
     }
 
     @Test
-    void complexArrayTest() {
+    void simpleArrayTest() {
+        new MTCAlgorithmTestBase()
+            .mappingWithRecords(MongoDB.tagArray(schema), """
+                [ {
+                    "number": "o_100",
+                    "tags": [
+                        "t_123",
+                        "t_456",
+                        "t_789"
+                    ]
+                }, {
+                    "number": "o_200",
+                    "tags": [
+                        "t_123",
+                        "t_555",
+                        "t_888"
+                    ]
+                } ]
+            """)
+            .expected(builder -> {
+                PostgreSQL.addOrder(builder, "o_100");
+                PostgreSQL.addOrder(builder, "o_200");
+                MongoDB.addTagArray(builder, 0, "t_123", "t_456", "t_789");
+                MongoDB.addTagArray(builder, 1, "t_123", "t_555", "t_888");
+            })
+            .run();
+    }
+
+    @Test
+    void complexSetTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.item(schema), """
                 [ {
                     "number": "o_100",
                     "items": [ {
-                        "id": 123,
+                        "id": "p_123",
                         "label": "Clean Code",
                         "price": 125,
                         "quantity": 1
@@ -108,7 +137,7 @@ class MTCAlgorithmTests {
                 }, {
                     "number": "o_100",
                     "items": [ {
-                        "id": 765,
+                        "id": "p_765",
                         "label": "The Lord of the Rings",
                         "price": 199,
                         "quantity": 2
@@ -116,12 +145,12 @@ class MTCAlgorithmTests {
                 }, {
                     "number": "o_200",
                     "items": [ {
-                        "id": 457,
+                        "id": "p_457",
                         "label": "The Art of War",
                         "price": 299,
                         "quantity": 7
                     }, {
-                        "id": 734,
+                        "id": "p_734",
                         "label": "Animal Farm",
                         "price": 350,
                         "quantity": 3
@@ -131,10 +160,10 @@ class MTCAlgorithmTests {
             .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                PostgreSQL.addProduct(builder, "123", "Clean Code", "125");
-                PostgreSQL.addProduct(builder, "765", "The Lord of the Rings", "199");
-                PostgreSQL.addProduct(builder, "457", "The Art of War", "299");
-                PostgreSQL.addProduct(builder, "734", "Animal Farm", "350");
+                PostgreSQL.addProduct(builder, "p_123", "Clean Code", "125");
+                PostgreSQL.addProduct(builder, "p_765", "The Lord of the Rings", "199");
+                PostgreSQL.addProduct(builder, "p_457", "The Art of War", "299");
+                PostgreSQL.addProduct(builder, "p_734", "Animal Farm", "350");
                 MongoDB.addItem(builder, 0, 0, "1");
                 MongoDB.addItem(builder, 0, 1, "2");
                 MongoDB.addItem(builder, 1, 2, "7");
@@ -173,7 +202,7 @@ class MTCAlgorithmTests {
     }
 
     @Test
-    void syntheticPropertyTest() {
+    void auxiliaryPropertyTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.customer(schema), """
                 [ {
@@ -244,7 +273,7 @@ class MTCAlgorithmTests {
     }
 
     @Test
-    void emptyArrayTest() {
+    void emptySetTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.item(schema), """
                 [ {
@@ -304,31 +333,31 @@ class MTCAlgorithmTests {
     }
 
     @Test
-    void missingArrayTest() {
+    void missingSetTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.item(schema), """
                 [ {
                     "number": "o_100",
                     "items": [ {
-                        "id": 123,
+                        "id": "p_123",
                         "price": 125,
                         "quantity": 1
                     } ]
                 }, {
                     "number": "o_100",
                     "items": [ {
-                        "id": 765,
+                        "id": "p_765",
                         "label": "The Lord of the Rings",
                         "quantity": 2
                     } ]
                 }, {
                     "number": "o_200",
                     "items": [ {
-                        "id": 457,
+                        "id": "p_457",
                         "price": 299,
                         "quantity": 7
                     }, {
-                        "id": 734,
+                        "id": "p_734",
                         "label": "Animal Farm",
                         "quantity": 3
                     } ]
@@ -337,10 +366,10 @@ class MTCAlgorithmTests {
             .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                PostgreSQL.addProduct(builder, "123", null, "125");
-                PostgreSQL.addProduct(builder, "765", "The Lord of the Rings", null);
-                PostgreSQL.addProduct(builder, "457", null, "299");
-                PostgreSQL.addProduct(builder, "734", "Animal Farm", null);
+                PostgreSQL.addProduct(builder, "p_123", null, "125");
+                PostgreSQL.addProduct(builder, "p_765", "The Lord of the Rings", null);
+                PostgreSQL.addProduct(builder, "p_457", null, "299");
+                PostgreSQL.addProduct(builder, "p_734", "Animal Farm", null);
                 MongoDB.addItem(builder, 0, 0, "1");
                 MongoDB.addItem(builder, 0, 1, "2");
                 MongoDB.addItem(builder, 1, 2, "7");
@@ -361,19 +390,19 @@ class MTCAlgorithmTests {
             """)
             .mappingWithRecords(PostgreSQL.product(schema), """
                 [ {
-                    "id": "123",
+                    "id": "p_123",
                     "label": "Clean Code",
                     "price": "125"
                 }, {
-                    "id": "765",
+                    "id": "p_765",
                     "label": "The Lord of the Rings",
                     "price": "199"
                 }, {
-                    "id": "457",
+                    "id": "p_457",
                     "label": "The Art of War",
                     "price": "299"
                 }, {
-                    "id": "734",
+                    "id": "p_734",
                     "label": "Animal Farm",
                     "price": "350"
                 } ]
@@ -381,29 +410,29 @@ class MTCAlgorithmTests {
             .mappingWithRecords(PostgreSQL.item(schema), """
                 [ {
                     "order_number": "o_100",
-                    "product_id": "123",
+                    "product_id": "p_123",
                     "quantity": 1
                 }, {
                     "order_number": "o_100",
-                    "product_id": "765",
+                    "product_id": "p_765",
                     "quantity": 2
                 }, {
                     "order_number": "o_200",
-                    "product_id": "457",
+                    "product_id": "p_457",
                     "quantity": 7
                 }, {
                     "order_number": "o_200",
-                    "product_id": "734",
+                    "product_id": "p_734",
                     "quantity": 3
                 } ]
             """)
             .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                PostgreSQL.addProduct(builder, "123", "Clean Code", "125");
-                PostgreSQL.addProduct(builder, "765", "The Lord of the Rings", "199");
-                PostgreSQL.addProduct(builder, "457", "The Art of War", "299");
-                PostgreSQL.addProduct(builder, "734", "Animal Farm", "350");
+                PostgreSQL.addProduct(builder, "p_123", "Clean Code", "125");
+                PostgreSQL.addProduct(builder, "p_765", "The Lord of the Rings", "199");
+                PostgreSQL.addProduct(builder, "p_457", "The Art of War", "299");
+                PostgreSQL.addProduct(builder, "p_734", "Animal Farm", "350");
                 PostgreSQL.addItem(builder, 0, 0, "1");
                 PostgreSQL.addItem(builder, 0, 1, "2");
                 PostgreSQL.addItem(builder, 1, 2, "7");
@@ -466,5 +495,43 @@ class MTCAlgorithmTests {
     //     "number": "o_200",
     //     "id": "#o_200"
     // } ]
+
+    @Test
+    void hardcoreTest() {
+        new MTCAlgorithmTestBase()
+            .mappingWithRecords(MongoDB.hardcore(schema), """
+                [ {
+                    "id": "h_1",
+                    "a": [ [
+                        [ "v_a-00-0", "v_a-00-1" ],
+                        [ "v_a-01-0", "v_a-01-1" ]
+                    ], [
+                        [ "v_a-10-0", "v_a-10-1" ],
+                        [ "v_a-11-0", "v_a-11-1" ]
+                    ] ],
+                    "b": [ [
+                        [ "v_b-00-0", "v_b-00-1" ],
+                        [ "v_b-01-0", "v_b-01-1" ]
+                    ], [
+                        [ "v_b-10-0", "v_b-10-1" ],
+                        [ "v_b-11-0", "v_b-11-1" ]
+                    ] ],
+                    "array": []
+                }, {
+                    "id": "h_2",
+                    "array": [ {
+                        "id": "c_0",
+                        "x": { "i": "v_0-x-i", "j": "v_0-x-j" },
+                        "y": { "i": "v_0-y-i", "j": "v_0-y-j" }
+                    }, {
+                        "id": "c_1",
+                        "x": { "i": "v_1-x-i", "j": "v_1-x-j" },
+                        "y": { "i": "v_1-y-i", "j": "v_1-y-j" }
+                    } ],
+                } ]
+            """)
+            .expected(builder -> MongoDB.addHardcore(builder))
+            .run();
+    }
 
 }

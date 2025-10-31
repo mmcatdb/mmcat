@@ -43,18 +43,18 @@ public class SchemaConversionTests {
     void testRSDToAccessTree() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleYelpSimple.json");
         final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
-        final var jsonProvider = new JsonProvider(settings);
+        final var provider = new JsonProvider(settings);
 
-        final var inferenceWrapper = new JsonControlWrapper(jsonProvider)
+        final var inference = new JsonControlWrapper(provider)
             .enableSpark(sparkProvider.getSettings())
-            .getInferenceWrapper();
+            .getInferenceWrapper(provider.getKindName());
 
         // accessing the private method with reflection w/o having to make it visible
         final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class);
         privateExecuteRBA.setAccessible(true);
 
         final MMInferOneInAll mmInferOneInAll = new MMInferOneInAll();
-        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inferenceWrapper);
+        final var rsd = (RecordSchemaDescription) privateExecuteRBA.invoke(mmInferOneInAll, inference);
 
         final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter("business", KeyGenerator.create(), SignatureGenerator.create());
         final AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
@@ -65,23 +65,27 @@ public class SchemaConversionTests {
         System.setOut(new PrintStream(outputStream));
 
         try {
-            root.printTree(" ");
+            root.printTree("");
         } finally {
             System.setOut(originalOut);
         }
 
-        String treeOutput = outputStream.toString();
+        String treeOutput = outputStream.toString().trim();
 
         String expectedTreeStructure = """
-                                        Name: business, State: ROOT, Signature: None, Key: 0, Parent Key: null, isArrayType: false
-                                             Name: address, State: SIMPLE, Signature: 0, Key: 1, Parent Key: 0, isArrayType: false
-                                             Name: business_id, State: SIMPLE, Signature: 1, Key: 2, Parent Key: 0, isArrayType: false
-                                             Name: hours, State: COMPLEX, Signature: 2, Key: 3, Parent Key: 0, isArrayType: false
-                                                 Name: Friday, State: SIMPLE, Signature: 3, Key: 4, Parent Key: 3, isArrayType: false
-                                                 Name: Saturday, State: SIMPLE, Signature: 4, Key: 5, Parent Key: 3, isArrayType: false
-                                             Name: name, State: SIMPLE, Signature: 5, Key: 6, Parent Key: 0, isArrayType: false""";
+            Name: business, Type: ROOT, Signature: None, Key: 0, Parent Key: null, isArrayType: false
+                Name: address, Type: SIMPLE, Signature: 0, Key: 1, Parent Key: 0, isArrayType: false
+                Name: business_id, Type: SIMPLE, Signature: 1, Key: 2, Parent Key: 0, isArrayType: false
+                Name: hours, Type: COMPLEX, Signature: 2, Key: 3, Parent Key: 0, isArrayType: false
+                    Name: Friday, Type: SIMPLE, Signature: 3, Key: 4, Parent Key: 3, isArrayType: false
+                    Name: Saturday, Type: SIMPLE, Signature: 4, Key: 5, Parent Key: 3, isArrayType: false
+                Name: name, Type: SIMPLE, Signature: 5, Key: 6, Parent Key: 0, isArrayType: false""";
 
-        assertEquals(expectedTreeStructure, treeOutput.trim());
+        System.out.println(expectedTreeStructure);
+
+        System.out.println(treeOutput);
+
+        assertEquals(expectedTreeStructure, treeOutput);
     }
 
     @Test
@@ -134,7 +138,7 @@ public class SchemaConversionTests {
         final Mapping mapping = pair.mappings().get(0);
 
         assertEquals(10, schema.allObjexes().size(), "There should be 10 Schema Objexes.");
-        assertEquals(9, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
+        assertEquals(9, schema.allMorphisms().size(), "There should be 9 Schema Morphisms.");
 
         assertEquals(mapping.accessPath().subpaths().size(), schema.allObjexes().size() - 1, "Mapping should be as long as there are Schema Objexes.");
     }
@@ -143,14 +147,14 @@ public class SchemaConversionTests {
     void testComplexRSDToSchemaCategoryAndMapping() throws Exception {
         final var url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
         final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
-        final var jsonProvider = new JsonProvider(settings);
+        final var provider = new JsonProvider(settings);
 
-        final var provider = new JsonControlWrapper(jsonProvider)
+        final var control = new JsonControlWrapper(provider)
             .enableSpark(sparkProvider.getSettings())
             .createProvider();
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(provider)
+            .input(control)
             .run();
 
         final List<CategoryMappingsPair> pairs = inferenceResult.pairs();
@@ -159,8 +163,8 @@ public class SchemaConversionTests {
         final SchemaCategory schema = pair.schema();
         final Mapping mapping = pair.mappings().get(0);
 
-        assertEquals(22, schema.allObjexes().size(), "There should be 10 Schema Objexes.");
-        assertEquals(21, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
+        assertEquals(22, schema.allObjexes().size(), "There should be 22 Schema Objexes.");
+        assertEquals(21, schema.allMorphisms().size(), "There should be 21 Schema Morphisms.");
 
         assertEquals(3, countComplexProperties(mapping), "There should be 3 complex properties");
     }

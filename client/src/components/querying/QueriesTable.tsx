@@ -168,7 +168,6 @@ function QueryContentTooltip({ query, text }: { query: Query, text: string }) {
                     {query.content}
                 </pre>
             }
-            placement='top-start'
         >
             <span className='underline cursor-pointer'>
                 {text}

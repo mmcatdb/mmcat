@@ -1,8 +1,8 @@
 package cz.matfyz.core.schema;
 
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjexIds;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 
@@ -36,10 +36,10 @@ public class SchemaSerializer {
         final var schema = new SchemaCategory();
 
         for (final var serializedObjex : serializedSchema.objexes)
-            schema.addObjex(serializedObjex.deserialize());
+            schema.addObjex(serializedObjex);
 
         for (final var serializedMorphism : serializedSchema.morphisms)
-            schema.addMorphism(serializedMorphism.deserialize(schema::getObjex));
+            schema.addMorphism(serializedMorphism);
 
         return schema;
     }
@@ -56,17 +56,10 @@ public class SchemaSerializer {
             );
         }
 
-        public SchemaObjex deserialize() {
-            return new SchemaObjex(
-                key,
-                ids
-            );
-        }
-
     }
 
     public record SerializedMorphism(
-        Signature signature,
+        BaseSignature signature,
         Key domKey,
         Key codKey,
         Min min,
@@ -85,16 +78,6 @@ public class SchemaSerializer {
 
         public interface SchemaObjexProvider {
             SchemaObjex getObjex(Key key);
-        }
-
-        public SchemaMorphism deserialize(SchemaObjexProvider provider) {
-            return new SchemaMorphism(
-                signature,
-                provider.getObjex(domKey),
-                provider.getObjex(codKey),
-                min,
-                tags
-            );
         }
 
     }

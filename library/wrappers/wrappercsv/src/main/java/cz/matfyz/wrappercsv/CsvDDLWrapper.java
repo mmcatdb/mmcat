@@ -41,10 +41,10 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
         if (isComplex)
             throw InvalidPathException.isComplex(DatasourceType.csv, path);
 
-        if (segment.isArray())
+        if (segment.isArray)
             throw InvalidPathException.isArray(DatasourceType.csv, path);
 
-        properties.addAll(segment.names());
+        properties.addAll(segment.names);
     }
 
     /**
@@ -63,7 +63,6 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
 
     @Override
     public AbstractStatement createCreationStatement(String newDBName, String owner) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
     }
 }

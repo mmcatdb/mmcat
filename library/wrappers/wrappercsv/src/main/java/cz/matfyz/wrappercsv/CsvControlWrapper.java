@@ -32,8 +32,6 @@ public class CsvControlWrapper extends BaseControlWrapper {
 
     /**
      * Constructs a new {@code CsvControlWrapper} with the specified CSV provider.
-     *
-     * @param provider the CSV provider that supplies settings and configurations for this wrapper.
      */
     public CsvControlWrapper(CsvProvider provider) {
         super(provider.settings.isWritable(), provider.settings.isQueryable());
@@ -41,18 +39,16 @@ public class CsvControlWrapper extends BaseControlWrapper {
     }
 
     /**
-     * Executes a collection of statements. This method is currently not implemented.
-     *
-     * @param statement a collection of {@link AbstractStatement} statements to be executed.
+     * Executes a collection of statements.
+     * This method is currently not implemented.
      */
     @Override public void execute(Collection<AbstractStatement> statement) throws ExecuteException {
         throw new UnsupportedOperationException("CsvControlWrapper.execute not implemented.");
     }
 
     /**
-     * Executes a script from the specified file path. This method is currently not implemented.
-     *
-     * @param path the file path to the script to be executed.
+     * Executes a script from the specified file path.
+     * This method is currently not implemented.
      */
     @Override public void execute(Path path) throws ExecuteException {
         throw new UnsupportedOperationException("CsvControlWrapper.execute not implemented.");
@@ -94,7 +90,8 @@ public class CsvControlWrapper extends BaseControlWrapper {
     }
 
     /**
-     * Returns a query wrapper for executing queries. This method is currently not implemented.
+     * Returns a query wrapper for executing queries.
+     * This method is currently not implemented.
      */
     @Override public AbstractQueryWrapper getQueryWrapper() {
         throw new UnsupportedOperationException("CsvControlWrapper.getQueryWrapper not implemented.");
@@ -103,8 +100,8 @@ public class CsvControlWrapper extends BaseControlWrapper {
     /**
      * Returns an inference wrapper for CSV that provides functionalities for data inference using Spark.
      */
-    @Override public CsvInferenceWrapper getInferenceWrapper() {
-        return new CsvInferenceWrapper(provider, getSparkSettings());
+    @Override public CsvInferenceWrapper getInferenceWrapper(String kindName) {
+        return new CsvInferenceWrapper(provider, kindName, getSparkSettings());
     }
 
     @Override public AbstractCollectorWrapper getCollectorWrapper() {

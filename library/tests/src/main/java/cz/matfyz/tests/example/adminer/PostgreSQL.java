@@ -22,20 +22,20 @@ public abstract class PostgreSQL {
             Schema.user,
             userKind,
             b -> b.root(
-                b.simple("user_id", Schema.userToUserId),
-                b.simple("name", Schema.userToName),
-                b.simple("created_at", Schema.userToCreatedAt),
-                b.simple("fans", Schema.userToFans)
+                b.simple("user_id", Schema.user_userId),
+                b.simple("name", Schema.user_name),
+                b.simple("created_at", Schema.user_createdAt),
+                b.simple("fans", Schema.user_fans)
             )
         );
     }
 
     public static void addUser(InstanceBuilder builder, String userIdValue, String nameValue, String createdAtValue, String fansValue) {
         builder
-            .value(Schema.userToUserId, userIdValue)
-            .value(Schema.userToName, nameValue)
-            .value(Schema.userToCreatedAt, createdAtValue)
-            .value(Schema.userToFans, fansValue)
+            .value(Schema.user_userId, userIdValue)
+            .value(Schema.user_name, nameValue)
+            .value(Schema.user_createdAt, createdAtValue)
+            .value(Schema.user_fans, fansValue)
             .objex(Schema.user);
     }
 
@@ -44,12 +44,12 @@ public abstract class PostgreSQL {
             Schema.comment,
             commentKind,
             b -> b.root(
-                b.simple("comment_id", Schema.commentToCommentId),
-                b.simple("business_id", Schema.commentToBusinessId),
-                b.simple("user_id", Schema.commentToUserId),
-                b.simple("date", Schema.commentToDate),
-                b.simple("text", Schema.commentToText),
-                b.simple("stars", Schema.commentToStars)
+                b.simple("comment_id", Schema.comment_commentId),
+                b.simple("business_id", Schema.comment_businessId),
+                b.simple("user_id", Schema.comment_userId),
+                b.simple("date", Schema.comment_date),
+                b.simple("text", Schema.comment_text),
+                b.simple("stars", Schema.comment_stars)
             )
         );
     }
@@ -59,14 +59,14 @@ public abstract class PostgreSQL {
         final var business = builder.getRow(Schema.business, businessIndex);
 
         final var comment = builder
-            .value(Schema.commentToCommentId, commentIdValue)
-            .value(Schema.commentToDate, dateValue)
-            .value(Schema.commentToText, textValue)
-            .value(Schema.commentToStars, starsValue)
+            .value(Schema.comment_commentId, commentIdValue)
+            .value(Schema.comment_date, dateValue)
+            .value(Schema.comment_text, textValue)
+            .value(Schema.comment_stars, starsValue)
             .objex(Schema.comment);
 
-        builder.morphism(Schema.commentToBusiness, comment, business);
-        builder.morphism(Schema.commentToUser, comment, user);
+        builder.morphism(Schema.comment_business, comment, business);
+        builder.morphism(Schema.comment_user, comment, user);
     }
 
     public static TestMapping businessHours(SchemaCategory schema) {
@@ -74,9 +74,9 @@ public abstract class PostgreSQL {
             Schema.businessHours,
             businessHoursKind,
             b -> b.root(
-                b.simple("business_hours_id", Schema.businessHoursToBusinessHoursId),
-                b.simple("business_id", Schema.businessHoursToBusinessId),
-                b.simple("hours", Schema.businessHoursToHours)
+                b.simple("business_hours_id", Schema.businessHours_businessHoursId),
+                b.simple("business_id", Schema.businessHours_businessId),
+                b.simple("hours", Schema.businessHours_hours)
             )
         );
     }
@@ -85,11 +85,11 @@ public abstract class PostgreSQL {
         final var business = builder.getRow(Schema.business, businessIndex);
 
         final var businessHours = builder
-            .value(Schema.businessHoursToBusinessHoursId, businessHoursIdValue)
-            .value(Schema.businessHoursToHours, hoursValue)
+            .value(Schema.businessHours_businessHoursId, businessHoursIdValue)
+            .value(Schema.businessHours_hours, hoursValue)
             .objex(Schema.businessHours);
 
-        builder.morphism(Schema.businessHoursToBusiness, businessHours, business);
+        builder.morphism(Schema.businessHours_business, businessHours, business);
     }
 
 }

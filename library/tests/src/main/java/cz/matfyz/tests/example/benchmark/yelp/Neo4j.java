@@ -21,13 +21,13 @@ public abstract class Neo4j {
             Schema.business,
             businessKind,
             b -> b.root(
-                b.simple("business_id", Schema.businessToId),
-                b.simple("name", Schema.businessToName),
-                b.simple("city", Schema.businessToCity),
-                b.simple("state", Schema.businessToState),
-                // b.simple("stars", Schema.businessToStars),
-                // b.simple("review_count", Schema.businessToRevCnt),
-                b.simple("is_open", Schema.businessToIsOpen)
+                b.simple("business_id", Schema.business_id),
+                b.simple("name", Schema.business_name),
+                b.simple("city", Schema.business_city),
+                b.simple("state", Schema.business_state),
+                // b.simple("stars", Schema.business_stars),
+                // b.simple("review_count", Schema.business_revCnt),
+                b.simple("is_open", Schema.business_isOpen)
             )
         );
     }
@@ -37,13 +37,13 @@ public abstract class Neo4j {
             Schema.user,
             userKind,
             b -> b.root(
-                b.simple("user_id", Schema.userToId),
-                b.simple("name", Schema.userToName),
-                // b.simple("review_count", Schema.userToReviewCount),
-                b.simple("yelping_since", Schema.userToYelpingSince)
-                // b.simple("useful", Schema.userToUseful),
-                // b.simple("funny", Schema.userToFunny),
-                // b.simple("cool", Schema.userToCool)
+                b.simple("user_id", Schema.user_id),
+                b.simple("name", Schema.user_name),
+                // b.simple("review_count", Schema.user_reviewCount),
+                b.simple("yelping_since", Schema.user_yelpingSince)
+                // b.simple("useful", Schema.user_useful),
+                // b.simple("funny", Schema.user_funny),
+                // b.simple("cool", Schema.user_cool)
             )
         );
     }
@@ -54,11 +54,11 @@ public abstract class Neo4j {
             Schema.friendship,
             friendshipKind,
             b -> b.root(
-                b.complex("_from.User", Schema.friendshipToUser1,
-                    b.simple("user_id", Schema.userToId)
+                b.complex("_from.User", Schema.friendship_user1,
+                    b.simple("user_id", Schema.user_id)
                 ),
-                b.complex("_to.User", Schema.friendshipToUser2,
-                    b.simple("user_id", Schema.userToId)
+                b.complex("_to.User", Schema.friendship_user2,
+                    b.simple("user_id", Schema.user_id)
                 )
             )
         );
@@ -69,20 +69,20 @@ public abstract class Neo4j {
             Schema.review,
             reviewKind,
             b -> b.root(
-                b.simple("review_id", Schema.reviewToId),
+                b.simple("review_id", Schema.review_id),
 
-                b.complex("_to.User", Schema.reviewToUser,
-                    b.simple("user_id", Schema.userToId)
+                b.complex("_to.User", Schema.review_user,
+                    b.simple("user_id", Schema.user_id)
                 ),
-                b.complex("_from.Business", Schema.reviewToBusiness,
-                    b.simple("business_id", Schema.businessToId)
+                b.complex("_from.Business", Schema.review_business,
+                    b.simple("business_id", Schema.business_id)
                 ),
 
-                b.simple("stars", Schema.reviewToStars),
-                b.simple("date", Schema.reviewToDate),
-                b.simple("useful", Schema.reviewToUseful),
-                b.simple("funny", Schema.reviewToFunny),
-                b.simple("cool", Schema.reviewToCool)
+                b.simple("stars", Schema.review_stars),
+                b.simple("date", Schema.review_date),
+                b.simple("useful", Schema.review_useful),
+                b.simple("funny", Schema.review_funny),
+                b.simple("cool", Schema.review_cool)
             )
         );
     }

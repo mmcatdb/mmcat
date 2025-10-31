@@ -5,7 +5,6 @@ import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.wrappermongodb.collector.MongoDBCollectorWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,13 +49,13 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
     @Override public void execute(Path path) {
         try {
             // Unfortunately, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
-            String[] command = { "mongosh", provider.settings.createConnectionString(), path.toString() };
+            final String[] command = { "mongosh", provider.settings.createConnectionString(), path.toString() };
 
-            Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(command);
+            final Runtime runtime = Runtime.getRuntime();
+            final Process process = runtime.exec(command);
             process.waitFor();
 
-            BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            final BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
         }
         catch (InterruptedException e) {
@@ -91,8 +90,8 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
         return new MongoDBQueryWrapper();
     }
 
-    @Override public MongoDBInferenceWrapper getInferenceWrapper() {
-        return new MongoDBInferenceWrapper(provider, getSparkSettings());
+    @Override public MongoDBInferenceWrapper getInferenceWrapper(String kindName) {
+        return new MongoDBInferenceWrapper(provider, kindName, getSparkSettings());
     }
 
     @Override public MongoDBCollectorWrapper getCollectorWrapper() {

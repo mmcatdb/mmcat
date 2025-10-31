@@ -160,11 +160,11 @@ public class JobExecutorService {
 
         try {
             processJobByType(run, job);
-            if (job.payload instanceof RSDToCategoryPayload) {
+            if (job.payload instanceof RSDToCategoryPayload)
                 job.state = Job.State.Waiting;
-            } else {
+            else
                 job.state = Job.State.Finished;
-            }
+
             repository.save(job);
             LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id(), job.label);
         }
@@ -339,21 +339,17 @@ public class JobExecutorService {
         final List<CategoryMappingsPair> categoryMappingPairs = inferenceResult.pairs();
 
         final var pair = CategoryMappingsPair.merge(categoryMappingPairs);
-        final SchemaCategory schema = pair.schema();
-        final MetadataCategory metadata = pair.metadata();
-        final List<Mapping> mappings = pair.mappings();
-
-        Layout.applyToMetadata(schema, metadata, LayoutType.FR);
+        Layout.applyToMetadata(pair.schema(), pair.metadata(), LayoutType.FR);
 
         job.data = InferenceJobData.fromSchemaCategory(
             List.of(),
-            schema,
-            schema,
-            metadata,
-            metadata,
+            pair.schema(),
+            pair.schema(),
+            pair.metadata(),
+            pair.metadata(),
             LayoutType.FR,
             candidates,
-            mappings
+            pair.mappings()
         );
     }
 

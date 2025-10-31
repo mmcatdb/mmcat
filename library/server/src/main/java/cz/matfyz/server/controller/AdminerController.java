@@ -74,7 +74,8 @@ public class AdminerController {
                     if (!filter.propertyName().isEmpty() && !filter.operator().isEmpty())
                         parsedFilters.add(filter);
                 }
-            } catch (JsonProcessingException e) {
+            }
+            catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Invalid filter format.");
             }
         }

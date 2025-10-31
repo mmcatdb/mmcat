@@ -62,7 +62,6 @@ class QueryTests {
             return new DatasourceNode(
                 pattern.kind.datasource(),
                 plan,
-                datasources.schema,
                 List.of(),
                 List.of(
                     scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
@@ -298,16 +297,16 @@ class QueryTests {
             .expected("""
                 [ {
                     "items": [
-                        { "id": "123", "label": "Clean Code" }
+                        { "id": "p_123", "label": "Clean Code" }
                     ]
                 }, {
                     "items": [
-                        { "id": "765", "label": "The Lord of the Rings" }
+                        { "id": "p_765", "label": "The Lord of the Rings" }
                     ]
                 }, {
                     "items": [
-                        { "id": "457", "label": "The Art of War" },
-                        { "id": "734", "label": "Animal Farm" }
+                        { "id": "p_457", "label": "The Art of War" },
+                        { "id": "p_734", "label": "Animal Farm" }
                     ]
                 } ]
             """)
@@ -398,11 +397,11 @@ class QueryTests {
             """)
             .expected("""
                 [ {
-                    "id": [ "123" ]
+                    "id": [ "p_123" ]
                 }, {
-                    "id": [ "765" ]
+                    "id": [ "p_765" ]
                 }, {
-                    "id": [ "457", "734" ]
+                    "id": [ "p_457", "p_734" ]
                 } ]
             """)
             .run();
@@ -428,13 +427,13 @@ class QueryTests {
             """)
             .expected("""
                 [ {
-                    "id": [ "123" ],
+                    "id": [ "p_123" ],
                     "label": [ "Clean Code" ]
                 }, {
-                    "id": [ "765" ],
+                    "id": [ "p_765" ],
                     "label": [ "The Lord of the Rings" ]
                 }, {
-                    "id": [ "457", "734" ],
+                    "id": [ "p_457", "p_734" ],
                     "label": [ "The Art of War", "Animal Farm" ]
                 } ]
             """)
@@ -502,9 +501,9 @@ class QueryTests {
             """)
             .expected("""
                 [ {
-                    "tags": [ "123", "456", "789" ]
+                    "tags": [ "t_123", "t_456", "t_789" ]
                 }, {
-                    "tags": [ "123", "String456", "String789" ]
+                    "tags": [ "t_123", "t_555", "t_888" ]
                 } ]
             """)
             .run();
@@ -732,19 +731,19 @@ class QueryTests {
             """)
             .expected("""
                 [ {
-                    "id": "123",
+                    "id": "p_123",
                     "label": "Clean Code",
                     "price": "125"
                 }, {
-                    "id": "765",
+                    "id": "p_765",
                     "label": "The Lord of the Rings",
                     "price": "199"
                 }, {
-                    "id": "457",
+                    "id": "p_457",
                     "label": "The Art of War",
                     "price": "299"
                 }, {
-                    "id": "734",
+                    "id": "p_734",
                     "label": "Animal Farm",
                     "price": "350"
                 } ]
@@ -775,16 +774,16 @@ class QueryTests {
             .expected("""
                 [ {
                     "items": [
-                        { "quantity": "1", "id": "123", "label": "Clean Code", "price": "125" }
+                        { "quantity": "1", "id": "p_123", "label": "Clean Code", "price": "125" }
                     ]
                 }, {
                     "items": [
-                        { "quantity": "2", "id": "765", "label": "The Lord of the Rings", "price": "199" }
+                        { "quantity": "2", "id": "p_765", "label": "The Lord of the Rings", "price": "199" }
                     ]
                 }, {
                     "items": [
-                        { "quantity": "7", "id": "457", "label": "The Art of War", "price": "299" },
-                        { "quantity": "3", "id": "734", "label": "Animal Farm", "price": "350" }
+                        { "quantity": "7", "id": "p_457", "label": "The Art of War", "price": "299" },
+                        { "quantity": "3", "id": "p_734", "label": "Animal Farm", "price": "350" }
                     ]
                 } ]
             """)
@@ -808,10 +807,10 @@ class QueryTests {
             """)
             .expected("""
                 [
-                    { "quantity": "1", "id": "123" },
-                    { "quantity": "2", "id": "765" },
-                    { "quantity": "7", "id": "457" },
-                    { "quantity": "3", "id": "734" }
+                    { "quantity": "1", "id": "p_123" },
+                    { "quantity": "2", "id": "p_765" },
+                    { "quantity": "7", "id": "p_457" },
+                    { "quantity": "3", "id": "p_734" }
                 ]
             """)
             .run();
@@ -838,16 +837,16 @@ class QueryTests {
             .expected("""
                 [ {
                     "number": "o_100",
-                    "id": "123"
+                    "id": "p_123"
                 }, {
                     "number": "o_100",
-                    "id": "765"
+                    "id": "p_765"
                 }, {
                     "number": "o_200",
-                    "id": "457"
+                    "id": "p_457"
                 }, {
                     "number": "o_200",
-                    "id": "734"
+                    "id": "p_734"
                 } ]
             """)
             .run();
@@ -927,7 +926,7 @@ class QueryTests {
             .addDatasource(datasources.postgreSQL())
             .addDatasource(
                 datasources.createNewMongoDB()
-                    .addMapping(MongoDB.tag(datasources.schema))
+                    .addMapping(MongoDB.tagSet(datasources.schema))
                     .addMapping(MongoDB.customer(datasources.schema))
             )
             .query("""
@@ -946,10 +945,10 @@ class QueryTests {
             .expected("""
                 [ {
                     "name": "Alice",
-                    "tags": [ "123", "456", "789" ]
+                    "tags": [ "t_123", "t_456", "t_789" ]
                 }, {
                     "name": "Bob",
-                    "tags": [ "123", "String456", "String789" ]
+                    "tags": [ "t_123", "t_555", "t_888" ]
                 } ]
             """)
             .run();
@@ -977,16 +976,16 @@ class QueryTests {
             .expected("""
                 [ {
                     "number": "o_100",
-                    "id": "123"
+                    "id": "p_123"
                 }, {
                     "number": "o_100",
-                    "id": "765"
+                    "id": "p_765"
                 }, {
                     "number": "o_200",
-                    "id": "457"
+                    "id": "p_457"
                 }, {
                     "number": "o_200",
-                    "id": "734"
+                    "id": "p_734"
                 } ]
             """)
             .run();

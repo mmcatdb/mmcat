@@ -1,11 +1,10 @@
-package cz.matfyz.wrapperpostgresql.collector;
+package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.*;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
-import cz.matfyz.wrapperpostgresql.PostgreSQLQuery;
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
 import cz.matfyz.wrapperpostgresql.collector.components.PostgresConnection;
 import cz.matfyz.wrapperpostgresql.collector.components.PostgresDataCollector;
 import cz.matfyz.wrapperpostgresql.collector.components.PostgresExplainPlanParser;

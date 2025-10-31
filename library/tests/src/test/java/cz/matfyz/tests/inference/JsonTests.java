@@ -1,75 +1,83 @@
 package cz.matfyz.tests.inference;
 
+import cz.matfyz.tests.example.basic.Datasources;
+import cz.matfyz.tests.example.basic.MongoDB;
 import cz.matfyz.tests.example.common.SparkProvider;
+import cz.matfyz.tests.mock.MockJsonProvider;
 import cz.matfyz.wrapperjson.JsonControlWrapper;
 import cz.matfyz.wrapperjson.JsonInferenceWrapper;
 import cz.matfyz.wrapperjson.JsonProvider;
 import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
+import java.io.UncheckedIOException;
+import java.net.URI;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 class JsonTests {
 
-    private final SparkProvider sparkProvider = new SparkProvider();
+    private static final SparkProvider sparkProvider = new SparkProvider();
 
-    JsonInferenceWrapper setup(JsonProvider jsonProvider) {
-        final var wrapper = new JsonControlWrapper(jsonProvider)
-            .enableSpark(sparkProvider.getSettings())
-            .getInferenceWrapper();
-        wrapper.startSession();
+    private JsonInferenceWrapper createInferenceWrapper(JsonProvider provider) {
+        final var control = new JsonControlWrapper(provider);
+        control.enableSpark(sparkProvider.getSettings());
 
-        return (JsonInferenceWrapper) wrapper;
+        return control.getInferenceWrapper(provider.getKindName());
+    }
+
+    private static final Datasources datasources = new Datasources();
+
+    @Test
+    void todo() {
+
+        final var content = "[ { \"number\": \"o_100\" }, { \"number\": \"o_200\" } ]";
+        // final var content = "{ \"number\": \"o_100\" }\n{ \"number\": \"o_200\" }";
+
+        final var provider = new MockJsonProvider(content);
+        final var control = new JsonControlWrapper(provider);
+        final var pull = control.getPullWrapper();
+
+        final var output = pull.pullForest(MongoDB.order(datasources.schema).accessPath(), null);
+
+        System.out.println(output);
+
     }
 
     @Test
-    void testServerUrl() throws Exception {
-        @SuppressWarnings("deprecation")
-        final URL url = new URL("https://data.mmcatdb.com/yelp_business_sample.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
-        final var jsonProvider = new JsonProvider(settings);
+    void canReadFromServerUrl() throws Exception {
+        final var uri = new URI("https://data.mmcatdb.com/yelp_business_sample.json");
+        final var provider = new JsonProvider(new JsonSettings(uri.toString(), false, false, false));
+        final var inference = createInferenceWrapper(provider);
 
-        final List<String> filenames = List.of(jsonProvider.getJsonFilenames());
-
-        assertEquals("yelp_business_sample", filenames.get(0));
-
-        try (
-            InputStream inputStream = jsonProvider.getInputStream()
-        ) {
-            assertNotNull(inputStream);
-        }
+        assertDoesNotThrow(() -> {
+            inference.loadDocuments();
+        });
     }
 
     @Test
-    void testLoadDocumentsBasicFromFile() throws Exception {
-        final URL url = ClassLoader.getSystemResource("inferenceSampleYelp.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false, false);
-        final var jsonProvider = new JsonProvider(settings);
-        final var inferenceWrapper = setup(jsonProvider);
+    void canLoadDocumentsFromFile() throws Exception {
+        final var uri = ClassLoader.getSystemResource("inferenceSampleYelp.json").toURI();
+        final var provider = new JsonProvider(new JsonSettings(uri.toString(), false, false, false));
+        final var inference = createInferenceWrapper(provider);
 
-        var documents = inferenceWrapper.loadDocuments();
+        final var documents = inference.loadDocuments();
 
         assertNotNull(documents, "Documents should not be null");
         assertFalse(documents.isEmpty(), "Documents should not be empty");
     }
 
     @Test
-    void testLoadDocumentsFromArrayJson() throws Exception {
-        String jsonArray = "[{\"key1\":\"value1\"},{\"key2\":\"value2\"}]";
-        JsonSettings settings = new JsonSettings("", false, false, false);
-        JsonProvider jsonProvider = new StringJsonProvider(settings, jsonArray);
+    void canLoadDocumentsFromJsonArray() throws Exception {
+        final var provider = new MockJsonProvider("[{\"key1\":\"value1\"},{\"key2\":\"value2\"}]");
+        final var inference = createInferenceWrapper(provider);
 
-        final var inferenceWrapper = setup(jsonProvider);
-
-        var documents = inferenceWrapper.loadDocuments();
+        final var documents = inference.loadDocuments();
 
         assertNotNull(documents, "Documents should not be null");
         assertFalse(documents.isEmpty(), "Documents should not be empty");
@@ -77,44 +85,25 @@ class JsonTests {
     }
 
     @Test
-    void testLoadDocumentsFromObjectJson() throws Exception {
-        String jsonObject = "{\"key\":\"value\"}";
-        JsonSettings settings = new JsonSettings("", false, false, false);
-        JsonProvider jsonProvider = new StringJsonProvider(settings, jsonObject);
+    void canLoadDocumentsFromJsonObjects() throws Exception {
+        final var provider = new MockJsonProvider("{\"key\":\"value1\"}\n{\"key\":\"value2\"}");
+        final var inference = createInferenceWrapper(provider);
 
-        final var inferenceWrapper = setup(jsonProvider);
-
-        var documents = inferenceWrapper.loadDocuments();
+        final var documents = inference.loadDocuments();
 
         assertNotNull(documents, "Documents should not be null");
         assertFalse(documents.isEmpty(), "Documents should not be empty");
-        assertEquals(1, documents.count(), "There should be one document");
+        assertEquals(2, documents.count(), "There should be two documents");
     }
 
     @Test
-    void testLoadDocumentsWithMalformedJson() throws Exception {
-        String malformedJson = "{\"key\":\"value\"}\n{\"malformedJson\"";
-        JsonSettings settings = new JsonSettings("", false, false, false);
-        JsonProvider jsonProvider = new StringJsonProvider(settings, malformedJson);
+    void cannotLoadDocumentsFromInvalidJson() throws Exception {
+        final var provider = new MockJsonProvider("{\"key\":\"value\"}\n{\"invalidJson\"");
+        final var inference = createInferenceWrapper(provider);
 
-        final var inferenceWrapper = setup(jsonProvider);
-
-        var documents = inferenceWrapper.loadDocuments();
-
-        assertNotNull(documents, "Documents should not be null");
-        assertFalse(documents.isEmpty(), "Documents should not be empty");
+        assertThrows(UncheckedIOException.class, () -> {
+            inference.loadDocuments();
+        });
     }
 
-    private static class StringJsonProvider extends JsonProvider {
-        private final String jsonContent;
-
-        StringJsonProvider(JsonSettings settings, String jsonContent) {
-            super(settings);
-            this.jsonContent = jsonContent;
-        }
-
-        @Override public InputStream getInputStream() {
-            return new ByteArrayInputStream(jsonContent.getBytes());
-        }
-    }
 }

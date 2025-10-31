@@ -56,13 +56,13 @@ class DDLAlgorithmTests {
     }
 
     @Test
-    void simpleArrayTest() {
-        new DDLAlgorithmTestBase(MongoDB.tag(schema))
+    void simpleSetTest() {
+        new DDLAlgorithmTestBase(MongoDB.tagSet(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addTag(builder, 0, "123", "456", "789");
-                MongoDB.addTag(builder, 1, "123", "String456", "String789");
+                MongoDB.addTagSet(builder, 0, "t_123", "t_456", "t_789");
+                MongoDB.addTagSet(builder, 1, "t_123", "t_555", "t_888");
             })
             .expected("""
                 [
@@ -78,15 +78,37 @@ class DDLAlgorithmTests {
     }
 
     @Test
-    void complexArrayTest() {
+    void simpleArrayTest() {
+        new DDLAlgorithmTestBase(MongoDB.tagArray(schema))
+            .instance(builder -> {
+                PostgreSQL.addOrder(builder, "o_100");
+                PostgreSQL.addOrder(builder, "o_200");
+                MongoDB.addTagArray(builder, 0, "t_123", "t_456", "t_789");
+                MongoDB.addTagArray(builder, 1, "t_123", "t_555", "t_888");
+            })
+            .expected("""
+                [
+                    "clear()",
+                    "setKindName(tag)",
+                    "isSchemaless()",
+                    "addProperty(number, simple, required)",
+                    "addProperty(tags[], simple, optional)",
+                    "createDDLStatement()"
+                ]
+            """)
+            .run();
+    }
+
+    @Test
+    void complexSetTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                PostgreSQL.addProduct(builder, "123", "Clean Code", "125");
-                PostgreSQL.addProduct(builder, "765", "The Lord of the Rings", "199");
-                PostgreSQL.addProduct(builder, "457", "The Art of War", "299");
-                PostgreSQL.addProduct(builder, "734", "Animal Farm", "350");
+                PostgreSQL.addProduct(builder, "p_123", "Clean Code", "125");
+                PostgreSQL.addProduct(builder, "p_765", "The Lord of the Rings", "199");
+                PostgreSQL.addProduct(builder, "p_457", "The Art of War", "299");
+                PostgreSQL.addProduct(builder, "p_734", "Animal Farm", "350");
                 MongoDB.addItem(builder, 0, 0, "1");
                 MongoDB.addItem(builder, 0, 1, "2");
                 MongoDB.addItem(builder, 1, 2, "7");
@@ -135,7 +157,7 @@ class DDLAlgorithmTests {
     }
 
     @Test
-    void syntheticPropertyTest() {
+    void auxiliaryPropertyTest() {
         new DDLAlgorithmTestBase(MongoDB.customer(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -206,7 +228,7 @@ class DDLAlgorithmTests {
     }
 
     @Test
-    void emptyArrayTest() {
+    void emptySetTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -257,15 +279,15 @@ class DDLAlgorithmTests {
     }
 
     @Test
-    void missingArrayTest() {
+    void missingSetTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                PostgreSQL.addProduct(builder, "123", null, "125");
-                PostgreSQL.addProduct(builder, "765", "The Lord of the Rings", null);
-                PostgreSQL.addProduct(builder, "457", null, "299");
-                PostgreSQL.addProduct(builder, "734", "Animal Farm", null);
+                PostgreSQL.addProduct(builder, "p_123", null, "125");
+                PostgreSQL.addProduct(builder, "p_765", "The Lord of the Rings", null);
+                PostgreSQL.addProduct(builder, "p_457", null, "299");
+                PostgreSQL.addProduct(builder, "p_734", "Animal Farm", null);
                 MongoDB.addItem(builder, 0, 0, "1");
                 MongoDB.addItem(builder, 0, 1, "2");
                 MongoDB.addItem(builder, 1, 2, "7");
@@ -336,5 +358,27 @@ class DDLAlgorithmTests {
     //     "addProperty(number, simple, required)",
     //     "createDDLStatement()"
     // ]
+
+    @Test
+    void hardcoreTest() {
+        new DDLAlgorithmTestBase(MongoDB.hardcore(schema))
+            .instance(builder -> MongoDB.addHardcore(builder))
+            .expected("""
+                [
+                    "clear()",
+                    "setKindName(hardcore)",
+                    "isSchemaless()",
+                    "addProperty(id, simple, required)",
+                    "addProperty((a|b)[][][], simple, optional)",
+                    "addProperty(array[], complex, optional)",
+                    "addProperty(array[]/id, simple, required)",
+                    "addProperty(array[]/(x|y), complex, optional)",
+                    "addProperty(array[]/(x|y)/i, simple, required)",
+                    "addProperty(array[]/(x|y)/j, simple, required)",
+                    "createDDLStatement()"
+                ]
+            """)
+            .run();
+    }
 
 }

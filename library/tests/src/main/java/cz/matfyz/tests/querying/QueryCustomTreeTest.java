@@ -23,12 +23,13 @@ import cz.matfyz.querying.normalizer.QueryNormalizer;
 import cz.matfyz.querying.optimizer.QueryDebugPrinter;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
+import cz.matfyz.querying.planner.PatternExtractor;
 import cz.matfyz.querying.planner.PlanDrafter;
 import cz.matfyz.querying.planner.QueryPlan;
 import cz.matfyz.querying.planner.ResultStructureResolver;
-import cz.matfyz.querying.planner.SchemaExtractor;
 import cz.matfyz.querying.resolver.ProjectionResolver;
 import cz.matfyz.querying.resolver.SelectionResolver;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,14 +95,14 @@ public class QueryCustomTreeTest {
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
-        normalized.context.setProvider(provider);
+        final var context = new QueryContext(schema, provider, normalized.selection.variables());
 
         // from QueryTreeBuilder.run()
-        final var extracted = SchemaExtractor.run(normalized.context, schema, kinds, normalized.selection);
+        final var extracted = PatternExtractor.run(context, kinds, normalized.selection);
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extracted);
 
         final var queryTree = queryTreeBuilder.build(plans, normalized.selection.scope());
-        final QueryPlan planned = new QueryPlan(queryTree, normalized.context, normalized.selection.scope());
+        final QueryPlan planned = new QueryPlan(queryTree, context, normalized.selection.scope());
         ResultStructureResolver.run(planned);
 
         // final QueryPlan optimized = QueryOptimizer.run(planned, cache); // Due to custom tree so far not neccessary
@@ -111,7 +112,7 @@ public class QueryCustomTreeTest {
 
         // ! the rest is left unchanged
         final QueryResult selected = SelectionResolver.run(optimized);
-        final QueryResult projected = ProjectionResolver.run(normalized.context, normalized.projection, selected);
+        final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
 
         // optimized
         LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);

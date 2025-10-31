@@ -1,6 +1,6 @@
 package cz.matfyz.inference.edit.algorithms;
 
-import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -10,6 +10,7 @@ import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
 import cz.matfyz.inference.edit.PatternSegment;
+import cz.matfyz.inference.edit.InferenceEditorUtils.KeysAndSignatures;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -85,30 +86,32 @@ public class RecursionMerge extends InferenceEditAlgorithm {
 
         bridgeOccurences(occurences);
 
-        findMorphismsAndObjexesToDelete(occurences);
-        InferenceEditorUtils.removeMorphismsAndObjexes(newSchema, signaturesToDelete, keysToDelete);
+        final var toDelete = findToDelete(occurences);
+        InferenceEditorUtils.removeMorphismsAndObjexes(newSchema, toDelete);
 
-        createRecursiveMorphisms(occurences);
+        createRecursiveMorphisms(toDelete, occurences);
     }
 
     private void adjustPattern() {
-        List<PatternSegment> newPattern = new ArrayList<>();
+        final List<PatternSegment> newPattern = new ArrayList<>();
         int i = 0;
         boolean lastAdjusted = false;
         while (i < data.pattern.size() - 1) {
-            PatternSegment currentSegment = data.pattern.get(i);
-            PatternSegment nextSegment = data.pattern.get(i + 1);
+            final PatternSegment currentSegment = data.pattern.get(i);
+            final PatternSegment nextSegment = data.pattern.get(i + 1);
 
             if (currentSegment.nodeName().equals(nextSegment.nodeName())) {
                 newPattern.add(new PatternSegment(currentSegment.nodeName(), RECURSIVE_MARKER + nextSegment.direction()));
                 i = i + 2;
                 lastAdjusted = true;
-            } else {
+            }
+            else {
                 newPattern.add(currentSegment);
                 i++;
                 lastAdjusted = false;
             }
         }
+
         if (!lastAdjusted) {
             newPattern.add(data.pattern.get(data.pattern.size() - 1));
         }
@@ -131,91 +134,101 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     public @Nullable SchemaObjex findNextNode(SchemaCategory schema, SchemaObjex currentNode, PatternSegment currentSegment) {
-        for (final SchemaMorphism morphism : schema.allMorphisms()) {
-            if (currentSegment.direction().equals(FORWARD) && morphism.dom().equals(currentNode))
-                return morphism.cod();
-            if (currentSegment.direction().equals(BACKWARD) && morphism.cod().equals(currentNode))
-                return morphism.dom();
-            if (currentSegment.direction().equals(RECURSIVE_FORWARD) && morphism.dom().equals(currentNode))
-                return morphism.cod();
-            if (currentSegment.direction().equals(RECURSIVE_BACKWARD) && morphism.cod().equals(currentNode))
-                return morphism.dom();
+        switch (currentSegment.direction()) {
+            case FORWARD, RECURSIVE_FORWARD -> {
+                for (final var morphism : currentNode.from())
+                    return morphism.cod();
+
+                break;
+            }
+            case BACKWARD, RECURSIVE_BACKWARD -> {
+                for (final var morphism : currentNode.to())
+                    return morphism.dom();
+
+                break;
+            }
         }
+
         return null;
     }
 
     private void bridgeOccurences(List<List<SchemaObjex>> occurences) {
-        for (List<SchemaObjex> occurence : occurences) {
-            SchemaObjex firstInPattern = occurence.get(0);
-            SchemaObjex oneBeforeLastOccurence = occurence.get(occurence.size() - 2);
-            SchemaObjex lastOccurence = occurence.get(occurence.size() - 1);
+        for (final List<SchemaObjex> occurence : occurences) {
+            final var firstInPattern = occurence.get(0);
+            final var oneBeforeLastOccurence = occurence.get(occurence.size() - 2);
+            final var lastOccurence = occurence.get(occurence.size() - 1);
 
-            List<SchemaMorphism> otherMorphisms = findOtherMorphisms(lastOccurence, oneBeforeLastOccurence);
+            final var otherMorphisms = findOtherMorphisms(lastOccurence, oneBeforeLastOccurence);
             createNewOtherMorphisms(lastOccurence, firstInPattern, otherMorphisms);
         }
     }
 
-    private List<SchemaMorphism> findOtherMorphisms(SchemaObjex node, SchemaObjex previous) {
-        List<SchemaMorphism> morphisms = new ArrayList<>();
-        for (SchemaMorphism morphism : newSchema.allMorphisms()) {
-            if ((morphism.cod().equals(node) && !morphism.dom().equals(previous)) ||
-                (morphism.dom().equals(node) && !morphism.cod().equals(previous))) {
-                morphisms.add(morphism);
-            }
+    private List<SchemaMorphism> findOtherMorphisms(SchemaObjex node, SchemaObjex prev) {
+        final List<SchemaMorphism> output = new ArrayList<>();
+
+        for (final var morphism : node.from()) {
+            if (!morphism.cod().equals(prev))
+                output.add(morphism);
         }
-        return morphisms;
+        for (final var morphism : node.to()) {
+            if (!morphism.dom().equals(prev))
+                output.add(morphism);
+        }
+
+        return output;
     }
 
     private void createNewOtherMorphisms(SchemaObjex lastOccurence, SchemaObjex firstInPattern, List<SchemaMorphism> otherMorphisms) {
-        if (otherMorphisms == null)
-            return;
-
-        for (SchemaMorphism morphism : otherMorphisms) {
+        for (final var morphism : otherMorphisms) {
             SchemaObjex dom = firstInPattern;
             SchemaObjex cod = morphism.cod();
             if (!morphism.dom().equals(lastOccurence)) {
                 dom = morphism.dom();
                 cod = firstInPattern;
             }
-            InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, cod);
+            InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, dom, cod);
         }
     }
 
-    private void findMorphismsAndObjexesToDelete(List<List<SchemaObjex>> occurences) {
+    private KeysAndSignatures findToDelete(List<List<SchemaObjex>> occurences) {
+        final var output = new KeysAndSignatures();
+
         for (List<SchemaObjex> occurence : occurences) {
             for (int i = adjustedPattern.size() - 1; i < occurence.size(); i++) {
                 SchemaObjex objex = occurence.get(i);
-                keysToDelete.add(objex.key());
-                signaturesToDelete.addAll(findSignaturesForObjex(objex));
+                output.add(objex.key());
+                output.signatures().addAll(findSignaturesForObjex(objex));
             }
         }
+
+        return output;
     }
 
-    private List<Signature> findSignaturesForObjex(SchemaObjex objex) {
+    private List<BaseSignature> findSignaturesForObjex(SchemaObjex objex) {
         return newSchema.allMorphisms().stream()
             .filter(morphism -> morphism.dom().equals(objex) || morphism.cod().equals(objex))
             .map(SchemaMorphism::signature)
             .toList();
     }
 
-    private void createRecursiveMorphisms(List<List<SchemaObjex>> occurences) {
+    private void createRecursiveMorphisms(KeysAndSignatures deleted, List<List<SchemaObjex>> occurences) {
         for (List<SchemaObjex> occurence : occurences) {
             SchemaObjex firstInPattern = occurence.get(0);
             SchemaObjex oneBeforeLastInPattern = occurence.get(adjustedPattern.size() - 2);
-            InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, oneBeforeLastInPattern, firstInPattern);
+            InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, oneBeforeLastInPattern, firstInPattern);
         }
 
-        createRepetitiveMorphisms(occurences);
+        createRepetitiveMorphisms(deleted, occurences);
     }
 
-    private void createRepetitiveMorphisms(List<List<SchemaObjex>> occurences) {
+    private void createRepetitiveMorphisms(KeysAndSignatures deleted, List<List<SchemaObjex>> occurences) {
         for (PatternSegment segment : adjustedPattern) {
             if (!isRepetitive(segment))
                 continue;
 
             for (SchemaObjex objex : mapPatternObjexes.get(segment))
-                if (!keysToDelete.contains(objex.key()) && inAnyOccurence(occurences, objex))
-                    InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, objex, objex);
+                if (!deleted.keys().contains(objex.key()) && inAnyOccurence(occurences, objex))
+                    InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, objex, objex);
         }
     }
 

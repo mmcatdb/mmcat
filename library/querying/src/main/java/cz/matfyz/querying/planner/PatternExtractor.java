@@ -1,11 +1,10 @@
 package cz.matfyz.querying.planner;
 
-import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
@@ -20,25 +19,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
- * This class extract a subset of schema category based on the query pattern. It also modifies mappings by discarding unnecessary objexes.
+ * From each mapping, this class extracts a pattern that is relevant for the query.
  */
-public class SchemaExtractor {
+public class PatternExtractor {
 
-    public static List<PatternForKind> run(QueryContext context, SchemaCategory schema, List<Mapping> kinds, SelectionClause clause) {
-        return new SchemaExtractor(context, schema, kinds, clause).run();
+    public static List<PatternForKind> run(QueryContext context, List<Mapping> kinds, SelectionClause clause) {
+        return new PatternExtractor(context, kinds, clause).run();
     }
 
     private final QueryContext context;
-    private final SchemaCategory schema;
     private final List<Mapping> kinds;
     private final SelectionClause clause;
 
-    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Mapping> kinds, SelectionClause clause) {
+    private PatternExtractor(QueryContext context, List<Mapping> kinds, SelectionClause clause) {
         this.context = context;
-        this.schema = schema;
         this.kinds = kinds;
         this.clause = clause;
     }
@@ -54,7 +53,7 @@ public class SchemaExtractor {
                 // Root - just skip it.
                 return;
 
-            final var edge = schema.getEdge(tree.edgeFromParent);
+            final var edge = context.getSchema().getEdge(tree.edgeFromParent);
             patternMorphisms.add(edge.morphism());
 
             keyToVariable.put(edge.from().key(), tree.parent().variable);
@@ -62,7 +61,6 @@ public class SchemaExtractor {
         });
 
         createNewCategory(patternMorphisms);
-        context.setSchema(newSchema);
 
         final var patterns = createPatternsForKinds();
         // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the KindPlanner shouldn't be able to create any plan.
@@ -70,13 +68,13 @@ public class SchemaExtractor {
         return patterns;
     }
 
-    // The schema category of all objexes and morphisms that are reachable from the pattern plus those that are needed to identify the objexes.
-    private SchemaCategory newSchema;
-    private Queue<SchemaMorphism> morphismQueue;
+    private final Queue<SchemaMorphism> morphismQueue = new ArrayDeque<>();
+    // We extract all objexes and morphisms that are reachable from the pattern plus those that are needed to identify the objexes.
+    private final Set<Key> extractedObjexes = new TreeSet<>();
+    private final Set<Signature> extractedMorphisms = new TreeSet<>();
 
     private void createNewCategory(List<SchemaMorphism> patternMorphisms) {
-        newSchema = new SchemaCategory();
-        morphismQueue = new ArrayDeque<>(patternMorphisms);
+        morphismQueue.addAll(patternMorphisms);
 
         // We have to use queue because the morphisms need to add objexes which need to add their ids which consist of objexes and morphisms ... so we have to break the chain somewhere.
         while (!morphismQueue.isEmpty())
@@ -85,29 +83,32 @@ public class SchemaExtractor {
 
     private void addMorphism(SchemaMorphism morphism) {
         // There are no duals in the queue on the start and we aren't adding them during the process. So this is safe.
-        if (newSchema.hasMorphism(morphism.signature()))
+        if (extractedMorphisms.contains(morphism.signature()))
             return;
 
-        newSchema.addMorphism(morphism);
+        extractedMorphisms.add(morphism.signature());
         addObjex(morphism.dom());
         addObjex(morphism.cod());
     }
 
     private void addObjex(SchemaObjex objex) {
-        if (newSchema.hasObjex(objex.key()))
+        if (extractedObjexes.contains(objex.key()))
             return;
 
-        newSchema.addObjex(objex);
-        objex.ids().toSignatureIds()
-            .stream().flatMap(id -> id.signatures().stream())
+        extractedObjexes.add(objex.key());
+
+        if (!objex.hasSignatureId())
+            return;
+
+        objex.ids().collectAllSignatures().stream()
             .flatMap(signature -> signature.toBases().stream())
             // We don't have to worry about duals here because ids can't contain them (ids have to have cardinality at most 1).
-            .forEach(base -> morphismQueue.add(schema.getMorphism(base)));
+            .forEach(base -> morphismQueue.add(context.getSchema().getMorphism(base)));
     }
 
     private List<PatternForKind> createPatternsForKinds() {
         return kinds.stream()
-            .filter(kind -> newSchema.hasObjex(kind.rootObjex().key()))
+            .filter(kind -> extractedObjexes.contains(kind.rootObjex().key()))
             .map(kind -> {
                 final var rootObjex = kind.rootObjex();
                 // TODO really?
@@ -125,11 +126,11 @@ public class SchemaExtractor {
             .forEach(subpath -> {
                 // TODO - is this going to work? Because it might not be possible to browse a database with composed signatures only.
                 var currentNode = node;
-                for (final BaseSignature baseSignature : subpath.signature().toBases()) {
-                    if (!newSchema.hasEdge(baseSignature))
+                for (final var base : subpath.signature().toBases()) {
+                    if (!extractedMorphisms.contains(base.toAbsolute()))
                         return;
 
-                    final SchemaEdge edge = schema.getEdge(baseSignature);
+                    final SchemaEdge edge = context.getSchema().getEdge(base);
                     final Variable childVariable = getOrCreateVariableForObjex(edge.to());
 
                     currentNode = currentNode.getOrCreateChild(edge, childVariable);

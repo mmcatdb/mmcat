@@ -2,15 +2,12 @@ package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -21,19 +18,20 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Common ancestor for the access path tree. It can be a {@link ComplexProperty} or a {@link SimpleProperty}.
- * Each node is a tuple (name, context, value).
  */
 @JsonDeserialize(using = AccessPath.Deserializer.class)
 public abstract class AccessPath implements Printable, Serializable {
 
     protected final Signature signature;
 
+    /** A path to the property from its parent property (in the {@link SchemaCategory} graph). */
     public Signature signature() {
         return signature;
     }
 
     protected final Name name;
 
+    /** A path to the property from its parent property (in the hierarchy of the given datasource). */
     public Name name() {
         return name;
     }
@@ -62,12 +60,6 @@ public abstract class AccessPath implements Printable, Serializable {
     protected abstract @Nullable List<AccessPath> getPropertyPathInternal(Signature signature);
 
     public abstract @Nullable AccessPath tryGetSubpathForObjex(Key key, SchemaCategory schema);
-
-    /**
-     * Creates copy of this property but with a new name and signature.
-     * @param replacedNames If not null, all dynamic names in children will be replaced. The results will be added to this map.
-     */
-    protected abstract AccessPath copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames);
 
     @Override public boolean equals(Object object) {
         return object instanceof AccessPath path && name.equals(path.name);

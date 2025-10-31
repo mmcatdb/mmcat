@@ -4,7 +4,6 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.querying.Variable;
-import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.core.utils.GraphUtils.Component;
@@ -56,7 +55,7 @@ public class PlanJoiner {
             final var onlyPattern = allPatterns.stream().findFirst().get(); // NOSONAR
             final var datasource = onlyPattern.kind.datasource();
 
-            return new DatasourceNode(datasource, allPatterns, context.getSchema(), List.of(), List.of(), onlyPattern.root.variable);
+            return new DatasourceNode(datasource, allPatterns, List.of(), List.of(), onlyPattern.root.variable);
         }
 
         // TODO there might be some joining needed for OPTIONAL joins?
@@ -133,10 +132,11 @@ public class PlanJoiner {
     private JoinCandidate tryCreateIdRefCandidate(SchemaObjex idObjex, PatternForKind idPattern, PatternForKind refPattern, ObjexColoring coloring) {
         // First, check if the idObjex is an identifier of the root of the idKind.
         final SchemaObjex rootObjex = idPattern.root.objex;
-        if (!rootObjex.ids().isSignatures())
+        if (!rootObjex.hasSignatureId())
             return null;
+
         // TODO currently, we are using only the first id for joining.
-        final SignatureId firstId = rootObjex.ids().toSignatureIds().first();
+        final SignatureId firstId = rootObjex.ids().first();
         // TODO currently, we are accepting only signature ids with exactly one signature.
         if (firstId.signatures().size() != 1)
             return null;
@@ -298,7 +298,7 @@ public class PlanJoiner {
 
     private interface JoinTreeNode {
         Set<PatternForKind> patterns();
-        QueryNode toQueryNode(SchemaCategory schema);
+        QueryNode toQueryNode();
     }
 
     // public interface HasKinds {
@@ -323,7 +323,7 @@ public class PlanJoiner {
         JoinCandidate candidate,
         Set<PatternForKind> patterns
     ) implements JoinTreeNode {
-        public JoinNode toQueryNode(SchemaCategory schema) {
+        public JoinNode toQueryNode() {
             // First, we try to move operations and filters down the tree.
             // final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
             // final var fromFilters = HasKinds.splitByKinds(filters, from.kinds());
@@ -340,7 +340,7 @@ public class PlanJoiner {
             // final var newFromOperations = fromOperations.included();
             // newFromOperations.add(join);
 
-            return new JoinNode(from().toQueryNode(schema), to().toQueryNode(schema), candidate);
+            return new JoinNode(from.toQueryNode(), to.toQueryNode(), candidate);
         }
     }
 
@@ -351,12 +351,11 @@ public class PlanJoiner {
             return queryPart.patterns;
         }
 
-        public DatasourceNode toQueryNode(SchemaCategory schema) {
-            // TODO schema
+        public DatasourceNode toQueryNode() {
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
             final var datasource = queryPart.patterns.stream().findFirst().get().kind.datasource();
-            return new DatasourceNode(datasource, queryPart.patterns, schema, queryPart.joinCandidates, List.of(), queryPart.rootVariable);
+            return new DatasourceNode(datasource, queryPart.patterns, queryPart.joinCandidates, List.of(), queryPart.rootVariable);
         }
     }
 
@@ -368,7 +367,7 @@ public class PlanJoiner {
     private QueryNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates) {
         final JoinTreeNode joinTree = computeJoinTree(queryParts, candidates);
         // The schema category is not splitted - it stays as is for all sub-patterns
-        return joinTree.toQueryNode(context.getSchema());
+        return joinTree.toQueryNode();
     }
 
     private JoinTreeNode computeJoinTree(List<QueryPart> queryParts, List<JoinCandidate> candidates) {

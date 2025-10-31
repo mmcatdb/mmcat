@@ -7,7 +7,6 @@ import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
-import cz.matfyz.wrapperneo4j.collector.Neo4jCollectorWrapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -104,7 +103,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
         return new Neo4jQueryWrapper();
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper() {
+    @Override public AbstractInferenceWrapper getInferenceWrapper(String kindName) {
         throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
     }
 

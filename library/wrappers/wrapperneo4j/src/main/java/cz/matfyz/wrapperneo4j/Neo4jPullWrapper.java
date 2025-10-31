@@ -15,7 +15,6 @@ import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
 import cz.matfyz.core.adminer.Reference.ReferenceKind;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
@@ -41,7 +40,7 @@ import org.neo4j.driver.types.TypeSystem;
 
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
-    private Neo4jProvider provider;
+    private final Neo4jProvider provider;
 
     private static final String RELATIONSHIPS_COUNT = "COUNT(relationship) as recordCount";
     private static final String NODES_COUNT = "COUNT(node) as recordCount";
@@ -163,7 +162,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         try {
             return Double.parseDouble(str);
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e) {
             return null;
         }
     }
@@ -282,10 +282,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 .append("[")
                 .append(propertyValue)
                 .append("]");
-        } else if (!UNARY_OPERATORS.contains(operator)) {
+        }
+        else if (!UNARY_OPERATORS.contains(operator)) {
             if (doubleValue != null && !STRING_OPERATORS.contains(operator)) {
                 whereClause.append(doubleValue);
-            } else {
+            }
+            else {
                 whereClause
                     .append("'")
                     .append(propertyValue)
@@ -338,11 +340,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    private Map<DynamicName, DynamicNameReplacement> replacedNames;
-
     private ForestOfRecords innerPullForest(ComplexProperty path, QueryContent query) {
-        replacedNames = path.copyWithoutDynamicNames().replacedNames();
-
         final @Nullable ComplexProperty fromNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
         final @Nullable ComplexProperty toNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
         final boolean isRelationship = fromNodeSubpath != null && toNodeSubpath != null;
@@ -435,14 +433,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             if (property == null)
                 continue;
 
-            if (!(property.name() instanceof final DynamicName dynamicName)) {
-                record.addSimpleRecord(property.signature(), value.asString());
+            if (property.name() instanceof DynamicName) {
+                record.addDynamicRecordWithValue(property, key, value);
                 continue;
             }
 
-            final var replacement = replacedNames.get(dynamicName);
-            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
-            replacer.addSimpleRecord(replacement.value().signature(), value.asString());
+            record.addSimpleRecord(property.signature(), value.asString());
         }
     }
 
@@ -517,6 +513,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return sb.toString();
     }
 
+    // #region Querying
+
     @Override public QueryResult executeQuery(QueryStatement statement) {
         // TODO: Neo4J might be able to return nested results, but this implementation so far covers only flat relations.
         final var columns = statement.structure().children().stream().map(c -> c.name).toList();
@@ -541,7 +539,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             });
 
             return new QueryResult(builder.build(), statement.structure());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw PullForestException.inner(e);
         }
     }
@@ -638,7 +637,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 : countQueryResult.next().get("recordCount").asLong();
 
             return new GraphResponse(data, itemCount, propertyNames);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw PullForestException.inner(e);
         }
     }
@@ -651,11 +651,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             Record propertyNameRecord = propertyNamesQueryResult.next();
             propertyNameRecord.values().stream()
                 .forEach(element -> {
-                    if (element.hasType(TypeSystem.getDefault().NODE())) {
+                    if (element.hasType(TypeSystem.getDefault().NODE()))
                         Neo4jUtils.getNodeProperties(element, propertyNames);
-                    } else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP())) {
+                    else if (element.hasType(TypeSystem.getDefault().RELATIONSHIP()))
                         Neo4jUtils.getRelationshipProperties(element, propertyNames);
-                    }
                 });
         }
 
@@ -679,5 +678,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         return createRelationshipQueryString(query, isCountQuery);
     }
+
+    // #endregion
 
 }

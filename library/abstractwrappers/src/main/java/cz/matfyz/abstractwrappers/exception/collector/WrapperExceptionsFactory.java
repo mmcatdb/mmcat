@@ -1,5 +1,6 @@
 package cz.matfyz.abstractwrappers.exception.collector;
 
+/** @deprecated */
 public class WrapperExceptionsFactory {
 
     //region Connection

@@ -42,22 +42,17 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         this.instance = instance;
         technicalIdGenerator = UniqueSequentialGenerator.create();
 
-        simpleSignatures = new TreeSet<>(dependentObjexes.stream().filter(s -> !s.isDual()).toList());
-        arraySignatures = new TreeSet<>(dependentObjexes.stream().filter(s -> s.isDual()).toList());
+        for (final var signature : dependentObjexes)
+            assert !signature.isDual() : "Property signatures cannot be dual: " + signature;
+
+        propertySignatures = new TreeSet<>(dependentObjexes);
     }
 
-    private final SortedSet<BaseSignature> simpleSignatures;
+    private final SortedSet<BaseSignature> propertySignatures;
 
-    /** Signatures of objexes whose values should be stored in the domain row. */
-    public Collection<BaseSignature> simpleSignatures() {
-        return simpleSignatures;
-    }
-
-    private final SortedSet<BaseSignature> arraySignatures;
-
-    /** Signatures of objexes whose array values should be stored in the domain row. */
-    public Collection<BaseSignature> arraySignatures() {
-        return arraySignatures;
+    /** Signatures of objexes whose values should be stored in the domain row (and which are not already part of the superId). */
+    public Collection<BaseSignature> propertySignatures() {
+        return propertySignatures;
     }
 
     public boolean isEmpty() {
@@ -198,14 +193,14 @@ public class InstanceObjex implements Identified<InstanceObjex, Key> {
         // Then we find the rows that correspond to them and merge their superIds to the superId.
         // If it gets bigger, we try to generate other ids to find their objexes and so on ...
 
-        int previousValuesSize = 0;
-        Set<SuperIdValues> foundIds = new TreeSet<>();
-        Set<SignatureId> notFoundIds = schema.ids().toSignatureIds();
+        int prevValuesSize = 0;
+        final Set<SuperIdValues> foundIds = new TreeSet<>();
+        Iterable<SignatureId> notFoundIds = schema.ids().toSignatureIds();
 
         final var output = new SuperIdValues.Mutable(values);
 
-        while (previousValuesSize < output.size()) {
-            previousValuesSize = output.size();
+        while (prevValuesSize < output.size()) {
+            prevValuesSize = output.size();
 
             final var result = output.findAllSignatureIds(notFoundIds);
             foundIds.addAll(result.foundIds());

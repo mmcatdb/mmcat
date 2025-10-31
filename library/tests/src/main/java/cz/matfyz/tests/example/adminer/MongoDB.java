@@ -18,14 +18,14 @@ public abstract class MongoDB {
             Schema.business,
             businessKind,
             b -> b.root(
-                b.simple("business_id", Schema.businessToBusinessId),
-                b.simple("name", Schema.businessToName),
-                b.simple("city", Schema.businessToCity),
-                b.simple("state", Schema.businessToState),
-                b.simple("dates", Schema.businessToDates),
-                b.complex("attributes", Schema.businessToAttributes,
-                    b.simple("wifi", Schema.attributesToWifi),
-                    b.simple("outdoor_seating", Schema.attributesToOutdoorSeating)
+                b.simple("business_id", Schema.business_businessId),
+                b.simple("name", Schema.business_name),
+                b.simple("city", Schema.business_city),
+                b.simple("state", Schema.business_state),
+                b.simple("dates", Schema.business_dates),
+                b.complex("attributes", Schema.business_attributes,
+                    b.simple("wifi", Schema.attributes_wifi),
+                    b.simple("outdoor_seating", Schema.attributes_outdoorSeating)
                 )
             )
         );

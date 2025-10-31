@@ -9,7 +9,6 @@ export function AccessPathTooltip({ accessPath, text }: { accessPath: RootProper
                     {accessPath.toString()}
                 </pre>
             }
-            placement='top-start'
         >
             <span className='underline cursor-pointer'>
                 {text}

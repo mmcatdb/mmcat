@@ -40,7 +40,7 @@ public class Datasources {
             mongoDB = createNewMongoDB()
                 .addMapping(MongoDB.order(schema))
                 .addMapping(MongoDB.address(schema))
-                .addMapping(MongoDB.tag(schema))
+                .addMapping(MongoDB.tagSet(schema))
                 .addMapping(MongoDB.item(schema))
                 .addMapping(MongoDB.contact(schema))
                 .addMapping(MongoDB.customer(schema))

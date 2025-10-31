@@ -66,30 +66,61 @@ class DMLAlgorithmTests {
     }
 
     @Test
-    void simpleArrayTest() {
-        new DMLAlgorithmTestBase(MongoDB.tag(schema))
+    void simpleSetTest() {
+        new DMLAlgorithmTestBase(MongoDB.tagSet(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addTag(builder, 0, "123", "456", "789");
-                MongoDB.addTag(builder, 1, "123", "String456", "String789");
+                MongoDB.addTagSet(builder, 0, "t_123", "t_456", "t_789");
+                MongoDB.addTagSet(builder, 1, "t_123", "t_555", "t_888");
             })
             .expected("""
                 [ {
                     "name": "tag",
                     "values": [
                         "append(number, o_100)",
-                        "append(tags[0], 123)",
-                        "append(tags[1], 456)",
-                        "append(tags[2], 789)"
+                        "append(tags[0], t_123)",
+                        "append(tags[1], t_456)",
+                        "append(tags[2], t_789)"
                     ]
                 }, {
                     "name": "tag",
                     "values": [
                         "append(number, o_200)",
-                        "append(tags[0], 123)",
-                        "append(tags[1], String456)",
-                        "append(tags[2], String789)"
+                        "append(tags[0], t_123)",
+                        "append(tags[1], t_555)",
+                        "append(tags[2], t_888)"
+                    ]
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void simpleArrayTest() {
+        new DMLAlgorithmTestBase(MongoDB.tagArray(schema))
+            .instance(builder -> {
+                PostgreSQL.addOrder(builder, "o_100");
+                PostgreSQL.addOrder(builder, "o_200");
+                MongoDB.addTagArray(builder, 0, "t_123", "t_456", "t_789");
+                MongoDB.addTagArray(builder, 1, "t_123", "t_555", "t_888");
+            })
+            .expected("""
+                [ {
+                    "name": "tag",
+                    "values": [
+                        "append(number, o_100)",
+                        "append(tags[0], t_123)",
+                        "append(tags[1], t_456)",
+                        "append(tags[2], t_789)"
+                    ]
+                }, {
+                    "name": "tag",
+                    "values": [
+                        "append(number, o_200)",
+                        "append(tags[0], t_123)",
+                        "append(tags[1], t_555)",
+                        "append(tags[2], t_888)"
                     ]
                 } ]
             """)
@@ -98,15 +129,15 @@ class DMLAlgorithmTests {
 
     // This isn't a comprehensive test because it doesn't check if the order is correct. However, to implement a complete test would be such an overkill.
     @Test
-    void complexArrayTest() {
+    void complexSetTest() {
         new DMLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                PostgreSQL.addProduct(builder, "123", "Clean Code", "125");
-                PostgreSQL.addProduct(builder, "765", "The Lord of the Rings", "199");
-                PostgreSQL.addProduct(builder, "457", "The Art of War", "299");
-                PostgreSQL.addProduct(builder, "734", "Animal Farm", "350");
+                PostgreSQL.addProduct(builder, "p_123", "Clean Code", "125");
+                PostgreSQL.addProduct(builder, "p_765", "The Lord of the Rings", "199");
+                PostgreSQL.addProduct(builder, "p_457", "The Art of War", "299");
+                PostgreSQL.addProduct(builder, "p_734", "Animal Farm", "350");
                 MongoDB.addItem(builder, 0, 0, "1");
                 MongoDB.addItem(builder, 0, 1, "2");
                 MongoDB.addItem(builder, 1, 2, "7");
@@ -117,8 +148,8 @@ class DMLAlgorithmTests {
                     "name": "orderItem",
                     "values": [
                         "append(number, o_100)",
-                        "append(items[0]/id, 123)",
-                        "append(items[1]/id, 765)",
+                        "append(items[0]/id, p_123)",
+                        "append(items[1]/id, p_765)",
                         "append(items[0]/label, Clean Code)",
                         "append(items[1]/label, The Lord of the Rings)",
                         "append(items[0]/price, 125)",
@@ -130,8 +161,8 @@ class DMLAlgorithmTests {
                     "name": "orderItem",
                     "values": [
                         "append(number, o_200)",
-                        "append(items[0]/id, 457)",
-                        "append(items[1]/id, 734)",
+                        "append(items[0]/id, p_457)",
+                        "append(items[1]/id, p_734)",
                         "append(items[0]/label, The Art of War)",
                         "append(items[1]/label, Animal Farm)",
                         "append(items[0]/price, 299)",
@@ -176,7 +207,7 @@ class DMLAlgorithmTests {
     }
 
     @Test
-    void syntheticPropertyTest() {
+    void auxiliaryPropertyTest() {
         new DMLAlgorithmTestBase(MongoDB.customer(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -259,7 +290,7 @@ class DMLAlgorithmTests {
     }
 
     @Test
-    void emptyArrayTest() {
+    void emptySetTest() {
         new DMLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -319,15 +350,15 @@ class DMLAlgorithmTests {
     }
 
     @Test
-    void missingArrayTest() {
+    void missingSetTest() {
         new DMLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                PostgreSQL.addProduct(builder, "123", null, "125");
-                PostgreSQL.addProduct(builder, "765", "The Lord of the Rings", null);
-                PostgreSQL.addProduct(builder, "457", null, "299");
-                PostgreSQL.addProduct(builder, "734", "Animal Farm", null);
+                PostgreSQL.addProduct(builder, "p_123", null, "125");
+                PostgreSQL.addProduct(builder, "p_765", "The Lord of the Rings", null);
+                PostgreSQL.addProduct(builder, "p_457", null, "299");
+                PostgreSQL.addProduct(builder, "p_734", "Animal Farm", null);
                 MongoDB.addItem(builder, 0, 0, "1");
                 MongoDB.addItem(builder, 0, 1, "2");
                 MongoDB.addItem(builder, 1, 2, "7");
@@ -338,8 +369,8 @@ class DMLAlgorithmTests {
                     "name": "orderItem",
                     "values": [
                         "append(number, o_100)",
-                        "append(items[0]/id, 123)",
-                        "append(items[1]/id, 765)",
+                        "append(items[0]/id, p_123)",
+                        "append(items[1]/id, p_765)",
                         "append(items[0]/label, null)",
                         "append(items[1]/label, The Lord of the Rings)",
                         "append(items[0]/price, 125)",
@@ -351,8 +382,8 @@ class DMLAlgorithmTests {
                     "name": "orderItem",
                     "values": [
                         "append(number, o_200)",
-                        "append(items[0]/id, 457)",
-                        "append(items[1]/id, 734)",
+                        "append(items[0]/id, p_457)",
+                        "append(items[1]/id, p_734)",
                         "append(items[0]/label, null)",
                         "append(items[1]/label, Animal Farm)",
                         "append(items[0]/price, 299)",
@@ -432,5 +463,51 @@ class DMLAlgorithmTests {
     //         "append(number, o_200)"
     //     ]
     // } ]
+
+    @Test
+    void hardcoreTest() {
+        new DMLAlgorithmTestBase(MongoDB.hardcore(schema))
+            .instance(builder -> MongoDB.addHardcore(builder))
+            .expected("""
+                [ {
+                    "name": "hardcore",
+                    "values": [
+                        "append(a[0][0][0], v_a-00-0)",
+                        "append(a[0][0][1], v_a-00-1)",
+                        "append(a[0][1][0], v_a-01-0)",
+                        "append(a[0][1][1], v_a-01-1)",
+                        "append(a[1][0][0], v_a-10-0)",
+                        "append(a[1][0][1], v_a-10-1)",
+                        "append(a[1][1][0], v_a-11-0)",
+                        "append(a[1][1][1], v_a-11-1)",
+                        "append(b[0][0][0], v_b-00-0)",
+                        "append(b[0][0][1], v_b-00-1)",
+                        "append(b[0][1][0], v_b-01-0)",
+                        "append(b[0][1][1], v_b-01-1)",
+                        "append(b[1][0][0], v_b-10-0)",
+                        "append(b[1][0][1], v_b-10-1)",
+                        "append(b[1][1][0], v_b-11-0)",
+                        "append(b[1][1][1], v_b-11-1)",
+                        "append(id, h_1)"
+                    ]
+                }, {
+                    "name": "hardcore",
+                    "values": [
+                        "append(array[0]/id, c_0)",
+                        "append(array[0]/x/i, v_0-x-i)",
+                        "append(array[0]/x/j, v_0-x-j)",
+                        "append(array[0]/y/i, v_0-y-i)",
+                        "append(array[0]/y/j, v_0-y-j)",
+                        "append(array[1]/id, c_1)",
+                        "append(array[1]/x/i, v_1-x-i)",
+                        "append(array[1]/x/j, v_1-x-j)",
+                        "append(array[1]/y/i, v_1-y-i)",
+                        "append(array[1]/y/j, v_1-y-j)",
+                        "append(id, h_2)"
+                    ]
+                } ]
+            """)
+            .run();
+    }
 
 }

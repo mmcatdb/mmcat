@@ -27,7 +27,7 @@ class PostgreSQLTests {
     }
 
     @Test
-    void readFromDB_DoesNotThrow() {
+    void readFromDb_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = datasource.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readTableAsStringForTests(PostgreSQL.orderKind);
@@ -53,19 +53,19 @@ class PostgreSQLTests {
         new PullForestTestBase(PostgreSQL.product(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [ {
-                    "id": "123",
+                    "id": "p_123",
                     "label": "Clean Code",
                     "price": "125"
                 }, {
-                    "id": "765",
+                    "id": "p_765",
                     "label": "The Lord of the Rings",
                     "price": "199"
                 }, {
-                    "id": "457",
+                    "id": "p_457",
                     "label": "The Art of War",
                     "price": "299"
                 }, {
-                    "id": "734",
+                    "id": "p_734",
                     "label": "Animal Farm",
                     "price": "350"
                 } ]

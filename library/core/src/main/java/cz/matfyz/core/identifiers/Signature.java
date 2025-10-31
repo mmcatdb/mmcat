@@ -1,6 +1,7 @@
 package cz.matfyz.core.identifiers;
 
 import cz.matfyz.core.exception.SignatureException;
+import cz.matfyz.core.utils.Accessor;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.core.utils.UniqueSequentialGenerator;
 
@@ -28,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @JsonSerialize(using = Signature.Serializer.class)
 @JsonDeserialize(using = Signature.Deserializer.class)
-public class Signature implements Serializable, Comparable<Signature> {
+public class Signature implements Serializable, Comparable<Signature>, Accessor<Signature> {
 
     protected final int[] ids;
 
@@ -65,8 +66,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 0)
             return Signature.empty();
 
-        var newIds = Arrays.copyOfRange(ids, 0, ids.length - 1);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, 0, ids.length - 1));
     }
 
     public BaseSignature getLast() {
@@ -80,8 +80,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 0)
             return Signature.empty();
 
-        var newIds = Arrays.copyOfRange(ids, 1, ids.length);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, 1, ids.length));
     }
 
     public BaseSignature getFirst() {
@@ -128,8 +127,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (!hasPrefix(other))
             return null;
 
-        final var newIds = Arrays.copyOfRange(ids, other.ids.length, ids.length);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, other.ids.length, ids.length));
     }
 
     public boolean hasSuffix(Signature other) {
@@ -148,8 +146,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (!hasSuffix(other))
             return null;
 
-        final var newIds = Arrays.copyOfRange(ids, 0, ids.length - other.ids.length);
-        return createComposite(newIds);
+        return createComposite(Arrays.copyOfRange(ids, 0, ids.length - other.ids.length));
     }
 
     public boolean contains(Signature other) {
@@ -185,11 +182,11 @@ public class Signature implements Serializable, Comparable<Signature> {
     }
 
     public Signature dual() {
-        int n = ids.length;
+        final int n = ids.length;
         if (n == 0)
             return this;
 
-        int[] array = new int[n];
+        final int[] array = new int[n];
         for (int i = 0; i < n; i++)
             array[i] = -ids[n - i - 1];
 
@@ -265,6 +262,10 @@ public class Signature implements Serializable, Comparable<Signature> {
                 return idDifference;
         }
         return 0;
+    }
+
+    @Override public Signature access() {
+        return this;
     }
 
     public boolean hasDual() {

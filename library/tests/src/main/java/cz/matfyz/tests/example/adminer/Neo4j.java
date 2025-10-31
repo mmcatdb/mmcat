@@ -19,7 +19,7 @@ public abstract class Neo4j {
             Schema.user,
             userKind,
             b -> b.root(
-                b.simple("id", Schema.userToUserId)
+                b.simple("id", Schema.user_userId)
             )
         );
     }
@@ -29,12 +29,12 @@ public abstract class Neo4j {
             Schema.friend,
             friendKind,
             b -> b.root(
-                b.simple("since", Schema.friendToSince),
-                b.complex("_from.User", Schema.friendToFromUser,
-                    b.simple("id", Schema.userToUserId)
+                b.simple("since", Schema.friend_since),
+                b.complex("_from.User", Schema.friend_fromUser,
+                    b.simple("id", Schema.user_userId)
                 ),
-                b.complex("_to.User", Schema.friendToToUser,
-                    b.simple("id", Schema.userToUserId)
+                b.complex("_to.User", Schema.friend__user,
+                    b.simple("id", Schema.user_userId)
                 )
             )
         );

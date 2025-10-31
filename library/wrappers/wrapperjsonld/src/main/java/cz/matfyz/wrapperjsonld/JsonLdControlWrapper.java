@@ -67,7 +67,7 @@ public class JsonLdControlWrapper extends BaseControlWrapper {
         throw new UnsupportedOperationException("JsonLdControlWrapper.getQueryWrapper not implemented.");
     }
 
-    @Override public AbstractInferenceWrapper getInferenceWrapper() {
+    @Override public AbstractInferenceWrapper getInferenceWrapper(String kindName) {
         throw new UnsupportedOperationException("JsonLdControlWrapper.getInferenceWrapper not implemented.");
     }
 

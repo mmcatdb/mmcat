@@ -24,12 +24,12 @@ public class Mapping implements Comparable<Mapping> {
     public static Mapping create(Datasource datasource, String kindName, SchemaCategory category, Key rootKey, ComplexProperty accessPath) {
         final var rootObjex = category.getObjex(rootKey);
 
-        return new Mapping(datasource, kindName, category, rootKey, accessPath, defaultPrimaryKey(rootObjex));
+        return new Mapping(datasource, kindName, category, rootKey, accessPath, createDefaultPrimaryKey(rootObjex));
     }
 
-    private static List<Signature> defaultPrimaryKey(SchemaObjex objex) {
-        return objex.ids().isSignatures()
-            ? objex.ids().toSignatureIds().first().signatures().stream().toList()
+    private static Collection<Signature> createDefaultPrimaryKey(SchemaObjex objex) {
+        return objex.hasSignatureId()
+            ? objex.ids().first().signatures()
             : List.of(Signature.empty());
     }
 
@@ -69,7 +69,7 @@ public class Mapping implements Comparable<Mapping> {
 
     // Updating
 
-    public Mapping withSchema(SchemaCategory category, ComplexProperty accessPath, Collection<Signature> primaryKey) {
+    public Mapping withSchemaAndPath(SchemaCategory category, ComplexProperty accessPath) {
         return new Mapping(datasource, kindName, category, rootObjex.key(), accessPath, primaryKey);
     }
 

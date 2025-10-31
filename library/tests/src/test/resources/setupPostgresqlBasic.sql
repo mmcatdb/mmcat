@@ -22,10 +22,10 @@ CREATE TABLE "product" (
 
 INSERT INTO "product" ("id", "label", "price")
 VALUES
-    ('123', 'Clean Code', '125'),
-    ('765', 'The Lord of the Rings', '199'),
-    ('457', 'The Art of War', '299'),
-    ('734', 'Animal Farm', '350');
+    ('p_123', 'Clean Code', '125'),
+    ('p_765', 'The Lord of the Rings', '199'),
+    ('p_457', 'The Art of War', '299'),
+    ('p_734', 'Animal Farm', '350');
 
 CREATE TABLE "order_item" (
     "order_number" TEXT,
@@ -38,10 +38,10 @@ CREATE TABLE "order_item" (
 
 INSERT INTO "order_item" ("order_number", "product_id", "quantity")
 VALUES
-    ('o_100', '123', '1'),
-    ('o_100', '765', '2'),
-    ('o_200', '457', '7'),
-    ('o_200', '734', '3');
+    ('o_100', 'p_123', '1'),
+    ('o_100', 'p_765', '2'),
+    ('o_200', 'p_457', '7'),
+    ('o_200', 'p_734', '3');
 
 CREATE TABLE "dynamic" (
     "id" TEXT PRIMARY KEY,

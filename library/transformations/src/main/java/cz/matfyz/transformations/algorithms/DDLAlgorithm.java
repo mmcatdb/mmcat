@@ -7,16 +7,15 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper.PropertyPath;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.Name.StringName;
-import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
+import cz.matfyz.core.mapping.Name.TypedName;
+import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -29,73 +28,63 @@ public class DDLAlgorithm {
     private final Mapping mapping;
     private final InstanceCategory instance;
     private final AbstractDDLWrapper wrapper;
-    private final Map<DynamicName, DynamicNameReplacement> replacedNames;
 
     private DDLAlgorithm(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper) {
         this.mapping = mapping;
         this.instance = instance;
         this.wrapper = wrapper;
-        this.replacedNames = mapping.accessPath().copyWithoutDynamicNames().replacedNames();
     }
 
-    private record StackElement(
-        PropertyPath path,
-        AccessPath property
-    ) {}
+    private record StackJob(ComplexProperty path, PropertyPath prefix) {}
+
+    private final Deque<StackJob> stack = new ArrayDeque<>();
 
     private AbstractStatement run() {
+        stack.clear();
+
         wrapper.clear();
         wrapper.setKindName(mapping.kindName());
 
         if (!wrapper.isSchemaless()) {
-            final Deque<StackElement> masterStack = new ArrayDeque<>();
-            addSubpathsToStack(masterStack, mapping.accessPath(), PropertyPath.empty());
+            stack.push(new StackJob(mapping.accessPath(), PropertyPath.empty()));
 
-            while (!masterStack.isEmpty())
-                processTopOfStack(masterStack);
+            while (!stack.isEmpty()) {
+                final StackJob job = stack.pop();
+                processComplexProperty(job.path, job.prefix);
+            }
         }
 
         return wrapper.createDDLStatement();
     }
 
-    private void addSubpathsToStack(Deque<StackElement> masterStack, ComplexProperty property, PropertyPath path) {
-        for (final AccessPath subpath : property.subpaths())
-            masterStack.push(new StackElement(path, subpath));
+    private void processComplexProperty(ComplexProperty path, PropertyPath prefix) {
+        for (final AccessPath subpath : path.subpaths()) {
+            if (subpath.name() instanceof DynamicName) {
+                processMap((ComplexProperty) subpath, prefix);
+            }
+            else {
+                final var name = prefix.add(PathSegment.scalar(((StringName) subpath.name()).value));
+                processSubpath(subpath, name);
+            }
+        }
     }
 
-    private void processTopOfStack(Deque<StackElement> masterStack) {
-        final StackElement element = masterStack.pop();
-        final AccessPath property = element.property();
-        final SchemaPath schemaPath = mapping.category().getPath(property.signature());
+    private void processMap(ComplexProperty map, PropertyPath prefix) {
+        final var valueProperty = map.getTypedSubpath(TypedName.VALUE);
 
-        final Set<String> names = getPropertyNames(property);
-        final var isDynamic = property.name() instanceof DynamicName;
-        final boolean isArray = schemaPath.isArray() && !isDynamic;
-        final PropertyPath path = element.path().add(new PathSegment(names, isDynamic, isArray));
-
-        if (property instanceof final ComplexProperty complexProperty)
-            addSubpathsToStack(masterStack, complexProperty, path);
-
-        final boolean isComplex = property instanceof ComplexProperty;
-        final boolean isRequired = isRequired(property, schemaPath);
-        wrapper.addProperty(path, isComplex, isRequired);
-
+        final var name = prefix.add(PathSegment.map(getDynamicPropertyNames(map)));
+        processSubpath(valueProperty, name);
     }
 
-    private Set<String> getPropertyNames(AccessPath property) {
-        if (property.name() instanceof final StringName stringName)
-            return Set.of(stringName.value);
-
-        final var replacement = replacedNames.get((DynamicName) property.name());
-
-        final var prefixPath = mapping.category().getPath(replacement.prefix());
-        final var mapObjex = instance.getObjex(prefixPath.to());
-
+    private Set<String> getDynamicPropertyNames(ComplexProperty map) {
+        final var schemaPath = mapping.category().getPath(map.signature());
+        final var mapObjex = instance.getObjex(schemaPath.to());
         final var names = new TreeSet<String>();
+        final var keyProperty = map.getTypedSubpath(TypedName.KEY);
 
         for (final var row : mapObjex.allRowsToSet()) {
             // It has to be a scalar value because each map entry has to have a single name.
-            final var name = row.tryFindScalarValue(replacement.name());
+            final var name = row.tryFindScalarValue(keyProperty.signature());
             if (name != null)
                 names.add(name);
         }
@@ -103,8 +92,66 @@ public class DDLAlgorithm {
         return names;
     }
 
-    private static boolean isRequired(AccessPath property, SchemaPath schemaPath) {
-        return property.isRequired() || schemaPath.min() != Min.ZERO;
+    private void processSubpath(AccessPath subpath, PropertyPath prefix) {
+        if (!(subpath instanceof final ComplexProperty complex)) {
+            processSimpleSubpath((SimpleProperty) subpath, prefix);
+            return;
+        }
+
+        if (!complex.signature().hasDual()) {
+            // Not an array.
+            addProperty(complex, prefix);
+            return;
+        }
+
+        // It's an array. It still might have mapped indexes.
+        if (!complex.getIndexSubpaths().isEmpty()) {
+            processArray(complex, prefix);
+            return;
+        }
+
+        // It's a complex array without mapped indexes.
+        final var name = prefix.addArray(1);
+        addProperty(subpath, name);
+    }
+
+    private void processSimpleSubpath(SimpleProperty subpath, PropertyPath prefix) {
+        // Now we know it's a normal property with a string name.
+        if (!subpath.signature().hasDual()) {
+            // Not an array.
+            addProperty(subpath, prefix);
+            return;
+        }
+
+        // It's a simple array without mapped indexes.
+        final var name = prefix.addArray(1);
+        addProperty(subpath, name);
+    }
+
+    private void processArray(ComplexProperty array, PropertyPath prefix) {
+        final var dimensions = array.getIndexSubpaths().size();
+        final var name = prefix.addArray(dimensions);
+        final var valueSubpath = array.getTypedSubpath(TypedName.VALUE);
+        processSubpath(valueSubpath, name);
+    }
+
+    private void addProperty(AccessPath path, PropertyPath name) {
+        wrapper.addProperty(name, path instanceof ComplexProperty, isRequired(path, name));
+
+        if (path instanceof final ComplexProperty complex)
+            stack.push(new StackJob(complex, name));
+    }
+
+    private boolean isRequired(AccessPath path, PropertyPath name) {
+        if (path.isRequired())
+            return true;
+
+        final var last = name.segments().get(name.segments().size() - 1);
+        if (last.isArray || last.isMap)
+            return false;
+
+        final var schemaPath = mapping.category().getPath(path.signature());
+        return schemaPath.min() != Min.ZERO;
     }
 
 }

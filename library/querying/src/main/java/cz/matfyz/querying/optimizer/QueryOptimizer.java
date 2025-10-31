@@ -2,9 +2,11 @@ package cz.matfyz.querying.optimizer;
 
 import cz.matfyz.querying.planner.QueryPlan;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class QueryOptimizer {
 
-    public static QueryPlan run(QueryPlan queryPlan, CollectorCache cache) {
+    public static QueryPlan run(QueryPlan queryPlan, @Nullable CollectorCache cache) {
 
         FilterDeepener.run(queryPlan);
 

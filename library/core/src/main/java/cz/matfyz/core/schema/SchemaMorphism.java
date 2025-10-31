@@ -8,6 +8,57 @@ import java.util.Set;
 
 public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
+    /**
+     * A morphism should be created only by {@link SchemaCategory}.
+     * The reason is that there are some invariants involving multiple objexes that need to be maintained by the category.
+     */
+    SchemaMorphism(BaseSignature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
+        this.signature = signature;
+        setDom(dom);
+        setCod(cod);
+        this.min = min;
+        this.tags = Set.of(tags.toArray(Tag[]::new));
+    }
+
+    private final BaseSignature signature;
+    /** A unique identifier of the morphism (within one schema category). */
+    public BaseSignature signature() {
+        return signature;
+    }
+
+    private SchemaObjex dom;
+    /** The domain objex (i.e., the source of the arrow). */
+    public SchemaObjex dom() {
+        return dom;
+    }
+
+    void setDom(SchemaObjex objex) {
+        if (this.dom != null)
+            this.dom.morphismsFrom.remove(signature);
+
+        this.dom = objex;
+        dom.morphismsFrom.put(signature, this);
+    }
+
+    private SchemaObjex cod;
+    /** The codomain objex (i.e., the target of the arrow). */
+    public SchemaObjex cod() {
+        return cod;
+    }
+
+    void setCod(SchemaObjex objex) {
+        if (this.cod != null)
+            this.cod.morphismsTo.remove(signature);
+
+        this.cod = objex;
+        cod.morphismsTo.put(signature, this);
+    }
+
+    void removeFromObjex() {
+        dom.morphismsFrom.remove(signature);
+        cod.morphismsTo.remove(signature);
+    }
+
     /** Enum for limiting a morphism cardinality from the bottom. */
     public enum Min {
         ZERO,
@@ -18,47 +69,16 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         }
     }
 
-    /** Enum for specifying a morphism type (which were defined in the paper). */
-    public enum Tag {
-        isa,
-        role,
-    }
-
-
-    public SchemaMorphism(Signature signature, SchemaObjex dom, SchemaObjex cod, Min min, Set<Tag> tags) {
-        this.signature = signature;
-        this.dom = dom;
-        this.cod = cod;
-        this.min = min;
-        this.tags = Set.of(tags.toArray(Tag[]::new));
-    }
-
-    private final Signature signature;
-    /** A unique identifier of the morphism (within one schema category). */
-    public Signature signature() {
-        return signature;
-    }
-
-    public boolean isBase() {
-        return signature instanceof BaseSignature;
-    }
-
-    private SchemaObjex dom;
-    /** The domain objex (i.e., the source of the arrow). */
-    public SchemaObjex dom() {
-        return dom;
-    }
-
-    private SchemaObjex cod;
-    /** The codomain objex (i.e., the target of the arrow). */
-    public SchemaObjex cod() {
-        return cod;
-    }
-
     private final Min min;
     /** Cardinality of the morphism - either 1..0 or 1..1. The cardinality in the opposite direction isn't defined. */
     public Min min() {
         return min;
+    }
+
+    /** Enum for specifying a morphism type (which were defined in the paper). */
+    public enum Tag {
+        isa,
+        role,
     }
 
     private final Set<Tag> tags;
@@ -71,19 +91,9 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         return tags.contains(tag);
     }
 
-    /**
-     * Replace old version of dom/cod by its newer version (which has the same key).
-     */
-    public void updateObjex(SchemaObjex objex) {
-        if (this.dom.equals(objex))
-            this.dom = objex;
-        if (this.cod.equals(objex))
-            this.cod = objex;
-    }
-
     // Identification
 
-    @Override public Signature identifier() {
+    @Override public BaseSignature identifier() {
         return signature;
     }
 

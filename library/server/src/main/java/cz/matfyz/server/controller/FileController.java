@@ -54,7 +54,8 @@ public class FileController {
             return ResponseEntity.ok() // TODO: Unfortunatelly, these settings are never used.
                 .header("fileType", file.fileType.toString())
                 .body(resource);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }

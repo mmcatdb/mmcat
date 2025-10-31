@@ -19,26 +19,26 @@ public abstract class MongoDB {
             Schema.order,
             ordersKind,
             b -> b.root(
-                b.simple("_id", Schema.orderToOrderId),
-                b.simple("street", Schema.orderToStreet),
-                b.simple("city", Schema.orderToCity),
-                b.simple("postCode", Schema.orderToPostCode),
-                b.complex("customer", Schema.orderToCustomer2,
-                    b.simple("id", Schema.customerToCustomerId),
-                    b.simple("name", Schema.customerToName),
-                    b.simple("surname", Schema.customerToSurname),
-                    b.complex("knows", Schema.customerAToCustomerB,
-                        b.simple("id", Schema.customerToCustomerId),
-                        b.simple("name", Schema.customerToName),
-                        b.simple("surname", Schema.customerToSurname)
+                b.simple("_id", Schema.order_orderId),
+                b.simple("street", Schema.order_street),
+                b.simple("city", Schema.order_city),
+                b.simple("postCode", Schema.order_postCode),
+                b.complex("customer", Schema.order_customer2,
+                    b.simple("id", Schema.customer_customerId),
+                    b.simple("name", Schema.customer_name),
+                    b.simple("surname", Schema.customer_surname),
+                    b.complex("knows", Schema.customerA_customerB,
+                        b.simple("id", Schema.customer_customerId),
+                        b.simple("name", Schema.customer_name),
+                        b.simple("surname", Schema.customer_surname)
                     )
                 ),
-                b.complex("items", Schema.itemToOrder.dual(),
-                b.simple("quantity", Schema.itemToQuantity),
-                b.simple("price", Schema.itemToOrderPrice),
-                    b.simple("pid", Schema.itemToProductId),
-                    b.simple("title", Schema.itemToTitle),
-                    b.simple("currentPrice", Schema.itemToProductPrice)
+                b.complex("items", Schema.item_order.dual(),
+                b.simple("quantity", Schema.item_quantity),
+                b.simple("price", Schema.item_orderPrice),
+                    b.simple("pid", Schema.item_productId),
+                    b.simple("title", Schema.item_title),
+                    b.simple("currentPrice", Schema.item_productPrice)
                 )
             )
         );
@@ -49,20 +49,20 @@ public abstract class MongoDB {
             Schema.order,
             orderKind,
             b -> b.root(
-                b.simple("_id", Schema.orderToOrderId),
-                b.simple("street", Schema.orderToStreet),
-                b.simple("city", Schema.orderToCity),
-                b.simple("postCode", Schema.orderToPostCode),
-                b.complex("customer", Schema.orderToCustomer2,
-                    b.simple("id", Schema.customerToCustomerId),
-                    b.simple("name", Schema.customerToName),
-                    b.simple("surname", Schema.customerToSurname)
+                b.simple("_id", Schema.order_orderId),
+                b.simple("street", Schema.order_street),
+                b.simple("city", Schema.order_city),
+                b.simple("postCode", Schema.order_postCode),
+                b.complex("customer", Schema.order_customer2,
+                    b.simple("id", Schema.customer_customerId),
+                    b.simple("name", Schema.customer_name),
+                    b.simple("surname", Schema.customer_surname)
                 ),
-                b.complex("items", Schema.itemToOrder.dual(),
-                b.simple("quantity", Schema.itemToQuantity),
-                b.simple("price", Schema.itemToOrderPrice),
-                    b.simple("pid", Schema.productToProductId),
-                    b.simple("title", Schema.productToTitle)
+                b.complex("items", Schema.item_order.dual(),
+                b.simple("quantity", Schema.item_quantity),
+                b.simple("price", Schema.item_orderPrice),
+                    b.simple("pid", Schema.product_productId),
+                    b.simple("title", Schema.product_title)
                 )
             )
         );

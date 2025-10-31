@@ -11,7 +11,8 @@ import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.summary.ResultSummary;
 
 /**
- * Class which is responsible to connect to neo4j and enable query execution
+ * Class which is responsible to connect to neo4j and enable query execution.
+ * @deprecated
  */
 public class Neo4jConnection implements AutoCloseable {
     private final Session querySession;

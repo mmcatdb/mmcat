@@ -10,7 +10,8 @@ import cz.matfyz.wrapperpostgresql.collector.PostgreSQLResources;
 import java.sql.*;
 
 /**
- * Class representing connection to PostgreSQL database and enables to evaluate queries
+ * Class representing connection to PostgreSQL database and enables to evaluate queries.
+ * @deprecated
  */
 public class PostgresConnection implements AutoCloseable {
     private final Connection connection;
