@@ -2,6 +2,7 @@ package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.utils.GraphUtils.TopDownTree;
+import cz.matfyz.querying.optimizer.NodeCostData;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,6 +19,12 @@ public abstract class QueryNode implements TopDownTree<QueryNode> {
 
     @Nullable
     public ResultStructure structure = null;
+
+    @Nullable
+    public NodeCostData predictedCostData = null;
+
+    @Nullable
+    public Integer evaluationMillis = null;
 
     public void setParent(@Nullable QueryNode parent) {
         this.parent = parent;

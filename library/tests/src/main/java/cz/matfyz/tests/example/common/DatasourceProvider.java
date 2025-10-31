@@ -52,7 +52,7 @@ public class DatasourceProvider {
     }
 
     public TestDatasource<PostgreSQLControlWrapper> createPostgreSQL(String identifier, SchemaCategory schema, String setupFilename) {
-        final var wrapper = new PostgreSQLControlWrapper(getPostgreSQLProvider());
+        final var wrapper = new PostgreSQLControlWrapper(getPostgreSQLProvider(), identifier);
         return new TestDatasource<>(DatasourceType.postgresql, identifier, wrapper, schema, setupFilename);
     }
 
@@ -79,7 +79,7 @@ public class DatasourceProvider {
     }
 
     public TestDatasource<MongoDBControlWrapper> createMongoDB(String identifier, SchemaCategory schema, String setupFilename) {
-        final var wrapper = new MongoDBControlWrapper(getMongoDBProvider());
+        final var wrapper = new MongoDBControlWrapper(getMongoDBProvider(), identifier);
         return new TestDatasource<>(DatasourceType.mongodb, identifier, wrapper, schema, setupFilename);
     }
 
@@ -105,7 +105,7 @@ public class DatasourceProvider {
     }
 
     public TestDatasource<Neo4jControlWrapper> createNeo4j(String identifier, SchemaCategory schema, String setupFilename) {
-        final var wrapper = new Neo4jControlWrapper(getNeo4jProvider());
+        final var wrapper = new Neo4jControlWrapper(getNeo4jProvider(), identifier);
         return new TestDatasource<>(DatasourceType.neo4j, identifier, wrapper, schema, setupFilename);
     }
 

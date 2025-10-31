@@ -9,6 +9,7 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
@@ -70,4 +71,7 @@ public class JsonLdControlWrapper extends BaseControlWrapper {
         throw new UnsupportedOperationException("JsonLdControlWrapper.getInferenceWrapper not implemented.");
     }
 
+    @Override public AbstractCollectorWrapper getCollectorWrapper() {
+        throw new UnsupportedOperationException("Collector wrapper for this datasource is not integrated yet.");
+    }
 }

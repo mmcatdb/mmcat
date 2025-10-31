@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
 import com.mongodb.client.model.Aggregates;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
+import org.bson.BsonInt32;
 import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.conversions.Bson;
 
 @SuppressWarnings("java:S125")
@@ -79,7 +81,11 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         if (filter instanceof UnaryFilter unaryFilter) {
             property = unaryFilter.property();
 
-            final var constant = new BsonString(unaryFilter.constant().value());
+            // If the variable 'looks like' a number, then compares like a number
+            // TODO: set this as configurable parameter
+            final BsonValue constant = unaryFilter.constant().value().chars().allMatch(ch -> ch >= '0' && ch <= '9')
+                ? new BsonInt32(Integer.parseInt(unaryFilter.constant().value()))
+                : new BsonString(unaryFilter.constant().value());
 
             final var operator = operators.stringify(unaryFilter.operator());
             filterCondition.put(operator, constant);

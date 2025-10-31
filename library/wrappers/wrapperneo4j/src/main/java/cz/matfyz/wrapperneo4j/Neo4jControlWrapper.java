@@ -7,6 +7,7 @@ import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
+import cz.matfyz.wrapperneo4j.collector.Neo4jCollectorWrapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,10 +33,12 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
     static final String TO_NODE_PROPERTY_PREFIX = "_to.";
 
     private final Neo4jProvider provider;
+    private final String datasourceIdentifier;
 
-    public Neo4jControlWrapper(Neo4jProvider provider) {
+    public Neo4jControlWrapper(Neo4jProvider provider, String datasourceIdentifier) {
         super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
@@ -103,6 +106,10 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
 
     @Override public AbstractInferenceWrapper getInferenceWrapper() {
         throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
+    }
+
+    @Override public Neo4jCollectorWrapper getCollectorWrapper() {
+        return new Neo4jCollectorWrapper(provider, datasourceIdentifier);
     }
 
 }

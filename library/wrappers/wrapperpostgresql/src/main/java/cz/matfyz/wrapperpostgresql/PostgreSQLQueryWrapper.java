@@ -2,13 +2,13 @@ package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.mapping.Name.StringName;
 
+import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -46,6 +46,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private StringBuilder sb;
+    private List<String> tableColumns;
 
     @Override public QueryStatement createDSLStatement() {
         sb = new StringBuilder();
@@ -54,7 +55,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         addFrom();
         addWhere();
 
-        return new QueryStatement(new StringQuery(sb.toString()), context.rootStructure());
+        return new QueryStatement(new PostgreSQLQuery(sb.toString(), tableColumns), context.rootStructure());
     }
 
     private void addSelect() {
@@ -63,6 +64,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             .collect(Collectors.joining(",\n"));
 
         sb.append("SELECT\n").append(projectionsString).append("\n");
+        tableColumns = projections.stream().map(projection -> getPropertyName(projection.property())).toList();
     }
 
     private void addFrom() {
@@ -165,12 +167,12 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         sb
             .append(" ")
             .append(operators.stringify(filter.operator()))
-            .append(" (")
+            .append(" ('")
             .append(values.get(0));
 
-        values.stream().skip(1).forEach(value -> sb.append(", ").append(value));
+        values.stream().skip(1).forEach(value -> sb.append("', '").append(value));
 
-        sb.append(")");
+        sb.append("')");
     }
 
     private static String escapeName(String name) {

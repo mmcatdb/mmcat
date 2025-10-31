@@ -2,9 +2,7 @@ package cz.matfyz.tests.querying;
 
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.querying.Expression.Constant;
-import cz.matfyz.core.querying.Expression.ExpressionScope;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.core.querytree.JoinNode.SerializedJoinNode;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 
@@ -21,7 +19,6 @@ class QueryTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
     private static final Datasources datasources = new Datasources();
-    private static final ExpressionScope scope = new ExpressionScope();
 
     @BeforeAll
     static void setup() {
@@ -30,74 +27,219 @@ class QueryTests {
         datasources.neo4j().setup();
     }
 
+    static final QueryTestBase commonBasic = new QueryTestBase(datasources.schema)
+        .query("""
+            SELECT {
+                ?order number ?number .
+            }
+            WHERE {
+                ?order 1 ?number .
+            }
+        """)
+        .expected("""
+            [ {
+                "number": "o_100"
+            }, {
+                "number": "o_200"
+            } ]
+        """);
+
+    static final QueryCustomTreeTest commonFilter = new QueryCustomTreeTest(datasources.schema)
+        .query("""
+            SELECT {
+                ?order number ?number .
+            }
+            WHERE {
+                ?order 1 ?number .
+
+                FILTER(?number = "o_100")
+            }
+        """)
+        .queryTreeBuilder((plans, scope) -> {
+            final var plan = plans.get(0);
+            final var pattern = plan.stream().findFirst().get();
+
+            return new DatasourceNode(
+                pattern.kind.datasource(),
+                plan,
+                datasources.schema,
+                List.of(),
+                List.of(
+                    scope.computation.create(Operator.Equal, pattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
+                ),
+                pattern.root.variable
+            );
+        })
+        .expected("""
+            [ {
+                "number": "o_100"
+            } ]
+        """);
+
+    static final QueryTestBase commonJoin = new QueryTestBase(datasources.schema)
+        .query("""
+            SELECT {
+                ?item
+                    product ?label ;
+                    quantity ?quantity .
+            }
+            WHERE {
+                ?item 13/16 ?label .
+                ?item 14 ?quantity .
+            }
+        """)
+        .expected("""
+            [ {
+                "product": "Animal Farm",
+                "quantity":"3"
+            }, {
+                "product": "Clean Code",
+                "quantity":"1"
+            }, {
+                "product": "The Art of War",
+                "quantity":"7"
+            }, {
+                "product": "The Lord of the Rings",
+                "quantity":"2"
+            } ]
+        """);
+
     @Test
-    void basicPostgreSQL() {
+    void postgreSQLBasic() {
+        commonBasic
+            .copy()
+            .addDatasource(datasources.postgreSQL())
+            .run();
+    }
+
+    @Test
+    void postgreSQLFilter() {
+        commonFilter
+            .copy()
+            .addDatasource(datasources.postgreSQL())
+            .run();
+    }
+
+    @Test
+    void postgreSQLJoin() {
+        commonJoin
+            .copy()
+            .addDatasource(datasources.postgreSQL())
+            .run();
+    }
+
+    @Test
+    void postgreSQLNested() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
             .query("""
                 SELECT {
-                    ?order number ?number .
+                    ?orderItem
+                        quantity ?quantity ;
+                        product ?product .
+
+                    ?product
+                        id ?id ;
+                        label ?label .
+
                 }
                 WHERE {
-                    ?order 1 ?number .
+                    ?orderItem 14 ?quantity .
+                    ?orderItem 13 ?product .
+                    ?product 15 ?id .
+                    ?product 16 ?label .
                 }
             """)
             .expected("""
                 [ {
-                    "number": "o_100"
-                }, {
-                    "number": "o_200"
+                    "id": "123",
+                    "label": "Clean Code",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "765",
+                    "label": "The Lord of the Rings",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "457",
+                    "label": "The Art of War",
+                    "orders": [ { id: "o_200" } ]
+                },
+                {
+                    "id": "734",
+                    "label": "Animal Farm",
+                    "orders": [ { id: "o_200" } ]
                 } ]
             """)
             .run();
     }
 
     @Test
-    void basicMongoDB() {
+    void postgreSQLNestedWithArray() {
         new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?product
+                        id ?id ;
+                        label ?label ;
+                        orders ?orders .
+
+                    ?orders id ?orderId .
+
+                }
+                WHERE {
+                    ?product 15 ?id .
+                    ?product 16 ?label .
+                    ?product -13 ?orders .
+                    ?orders 12/1 ?orderId .
+                }
+            """)
+            .expected("""
+                [ {
+                    "id": "123",
+                    "label": "Clean Code",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "765",
+                    "label": "The Lord of the Rings",
+                    "orders": [ { id: "o_100" } ]
+                },
+                {
+                    "id": "457",
+                    "label": "The Art of War",
+                    "orders": [ { id: "o_200" } ]
+                },
+                {
+                    "id": "734",
+                    "label": "Animal Farm",
+                    "orders": [ { id: "o_200" } ]
+                } ]
+            """)
+            .run();
+    }
+
+
+    @Test
+    void mongoDBBasic() {
+        commonBasic
+            .copy()
             .addDatasource(datasources.mongoDB())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-                }
-            """)
-            .expected("""
-                [ {
-                    "number": "o_100"
-                }, {
-                    "number": "o_200"
-                } ]
-            """)
             .run();
     }
 
     @Test
-    void basicNeo4J() {
-        new QueryTestBase(datasources.schema)
-            .addDatasource(datasources.neo4j())
-            .query("""
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-                }
-            """)
-            .expected("""
-                [ {
-                    "number": "o_100"
-                }, {
-                    "number": "o_200"
-                } ]
-            """)
+    void mongoDBFilter() {
+        commonFilter
+            .copy()
+            .addDatasource(datasources.mongoDB())
             .run();
     }
 
     @Test
-    void nestedMongoDB() {
+    void mongoDBNested() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.mongoDB())
             .query("""
@@ -138,7 +280,7 @@ class QueryTests {
      * Contrary to the previous test, the nesting path contains an array. This enforces us to use the $map operator in MongoDB.
      */
     @Test
-    void nestedMongoDBWithArray() {
+    void mongoDBNestedWithArray() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.mongoDB())
             .query("""
@@ -174,8 +316,72 @@ class QueryTests {
 
     // TODO add double nested object array.
 
+
+    @Test
+    void neo4jBasic() {
+        commonBasic
+            .copy()
+            .addDatasource(datasources.neo4j())
+            .run();
+    }
+
+    @Test
+    void neo4jFilter() {
+        commonFilter
+            .copy()
+            .addDatasource(datasources.neo4j())
+            .run();
+    }
+
+    @Test
+    void neo4jJoin() {
+        commonJoin
+            .copy()
+            .addDatasource(datasources.neo4j())
+            .run();
+    }
+
+    @Test
+    void neo4jNodeAndRelationshipShareObjex() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
+                SELECT {
+                    ?contact
+                        type ?type ;
+                        value ?value ;
+                        order ?orderNumber .
+                }
+                WHERE {
+                    ?contact 20 ?type .
+                    ?contact 19 ?value .
+                    ?contact 18/1 ?orderNumber .
+                }
+            """)
+            .expected("""
+                [ {
+                    "order":"o_100",
+                    "type":"phone",
+                    "value":"123456789"
+                }, {
+                    "order":"o_100",
+                    "type":"email",
+                    "value":"alice@mmcatdb.com"
+                }, {
+                    "order":"o_200",
+                    "type":"email",
+                    "value":"bob@mmcactdb.com"
+                }, {
+                    "order":"o_200",
+                    "type":"github",
+                    "value":"https://github.com/mmcactdb"
+                } ]
+            """)
+            .run();
+    }
+
     /**
-     * The arrays are flatten (if it's possible) exept for the top-level array. I.e., if there are multiple orders in the database, we are still going to get an array of orders. However, the properties of the orders are going to be flatten.
+     * The arrays are flattened (if it's possible) exept for the top-level array. I.e., if there are multiple orders in the database, we are still going to get an array of orders. However, the properties of the orders are going to be flattened.
      * In this case, the flattening happens in the database itself.
      */
     @Test
@@ -302,114 +508,6 @@ class QueryTests {
                 } ]
             """)
             .run();
-    }
-
-    @Test
-    void filterPostgreSQL() {
-        new QueryCustomTreeTest<>(
-            datasources,
-            datasources.postgreSQL(),
-            """
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-
-                    FILTER(?number = "o_100")
-                }
-            """,
-            (schema, datasource, plan) -> {
-                final var onlyPattern = plan.stream().findFirst().get();
-
-                return new DatasourceNode(
-                    datasource,
-                    plan,
-                    schema,
-                    List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
-                    onlyPattern.root.variable
-                );
-            },
-            """
-                [ {
-                    "number": "o_100"
-                } ]
-            """).run();
-    }
-
-    @Test
-    void filterMongoDB() {
-        new QueryCustomTreeTest<>(
-            datasources,
-            datasources.mongoDB(),
-            """
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-
-                    FILTER(?number = "o_100")
-                }
-            """,
-            (schema, datasource, plan) -> {
-                final var onlyPattern = plan.stream().findFirst().get();
-
-                return new DatasourceNode(
-                    datasource,
-                    plan,
-                    schema,
-                    List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
-                    onlyPattern.root.variable
-                );
-            },
-            """
-                [ {
-                    "number": "o_100"
-                } ]
-            """).run();
-    }
-
-    @Test
-    void filterNeo4J() {
-        new QueryCustomTreeTest<>(
-            datasources,
-            datasources.neo4j(),
-            """
-                SELECT {
-                    ?order number ?number .
-                }
-                WHERE {
-                    ?order 1 ?number .
-
-                    FILTER(?number = "o_100")
-                }
-            """,
-            (schema, datasource, plan) -> {
-                final var onlyPattern = plan.stream().findFirst().get();
-
-                return new DatasourceNode(
-                    datasource,
-                    plan,
-                    schema,
-                    List.of(),
-                    List.of(
-                        scope.computation.create(Operator.Equal, onlyPattern.root.children().stream().findFirst().get().variable, new Constant("o_100"))
-                    ),
-                    onlyPattern.root.variable
-                );
-            },
-            """
-                [ {
-                    "number": "o_100"
-                } ]
-            """).run();
     }
 
     @Test

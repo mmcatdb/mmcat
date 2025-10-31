@@ -1,9 +1,10 @@
-package cz.matfyz.tests.example.benchmarkyelp;
+package cz.matfyz.tests.example.benchmark.yelp;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.DatasourceProvider;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
+import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 
 public class Datasources {
 
@@ -12,15 +13,33 @@ public class Datasources {
     private static final DatasourceProvider datasourceProvider = new DatasourceProvider("tests", "benchmark_yelp");
 
     private TestDatasource<MongoDBControlWrapper> mongoDB;
+    private TestDatasource<PostgreSQLControlWrapper> postgreSQL;
 
     public TestDatasource<MongoDBControlWrapper> mongoDB() {
-        if (mongoDB == null)
+        if (mongoDB == null) {
             mongoDB = createNewMongoDB()
                 .addMapping(MongoDB.business(schema))
                 .addMapping(MongoDB.user(schema))
                 .addMapping(MongoDB.review(schema));
+        }
 
         return mongoDB;
+    }
+
+    public TestDatasource<PostgreSQLControlWrapper> createNewPostgreSQL() {
+        return datasourceProvider.createPostgreSQL(PostgreSQL.datasource.identifier, schema, null);
+    }
+
+        public TestDatasource<PostgreSQLControlWrapper> postgreSQL() {
+        if (postgreSQL == null) {
+            postgreSQL = createNewPostgreSQL()
+                .addMapping(PostgreSQL.business(schema))
+                .addMapping(PostgreSQL.user(schema))
+                .addMapping(PostgreSQL.friendship(schema))
+                .addMapping(PostgreSQL.review(schema));
+        }
+
+        return postgreSQL;
     }
 
     public TestDatasource<MongoDBControlWrapper> createNewMongoDB() {

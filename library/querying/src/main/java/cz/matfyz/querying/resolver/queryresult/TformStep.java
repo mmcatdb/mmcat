@@ -11,6 +11,7 @@ import cz.matfyz.querying.resolver.queryresult.TformContext.RemoverContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -280,6 +281,7 @@ public abstract class TformStep implements Printable {
     }
 
     static class WriteToList<T extends ResultNode> extends TformStep {
+        @SuppressWarnings("unchecked")
         @Override public void apply(TformContext context) {
             applyChildren(context);
             final var outputNode = (T) context.outputs.pop();
@@ -294,12 +296,56 @@ public abstract class TformStep implements Printable {
     }
 
     /**
+     * A partial implementation of WriteToIndex required for a dependent join.
+     */
+    static class WriteToSet extends TformStep {
+        // This step can be divided to smaller steps (traversing + writing to index), but why if it's gona always be used this way?
+        // An exception to the traversal rule might be if we wanted to travel the parent. But that's not possible right now.
+
+        private final Set<String> set;
+        private final List<String> pathToIdentifier;
+
+        WriteToSet(Set<String> set, List<String> pathToIdentifier) {
+            this.set = set;
+            this.pathToIdentifier = pathToIdentifier;
+        }
+
+        @Override public void apply(TformContext context) {
+            final var thisNode = context.inputs.peek();
+            final var identifierLeaf = (LeafResult) traversePath(thisNode, pathToIdentifier);
+
+            set.add(identifierLeaf.value);
+        }
+
+        @Override public void printTo(Printer printer) {
+            printer.append("set.write(");
+
+            for (int i = 0; i < pathToIdentifier.size(); i++)
+                printer.append(pathToIdentifier.get(i)).append(".");
+
+            if (pathToIdentifier.isEmpty())
+                printer.append("#empty");
+            else
+                printer.remove();
+
+            printer
+                .append(")")
+                .nextLine();
+        }
+
+        @Override protected boolean isChildrenSupported() {
+            return false;
+        }
+    }
+
+    /**
      * Peeks node from input and writes it to the index using the identifier as a key.
      * The path to the identifier must be 1:1 so we always travel through maps. There is no need for any other kind of traversal.
      */
     static class WriteToIndex<T extends ResultNode> extends TformStep {
         // This step can be divided to smaller steps (traversing + writing to index), but why if it's gona always be used this way?
         // An exception to the traversal rule might be if we wanted to travel the parent. But that's not possible right now.
+        // EDIT FROM THE FUTURE: For WriteToSet it might be useful to split so that code isn't duplicated... TODO
 
         private final Map<String, T> index;
         private final List<String> pathToIdentifier;
@@ -309,6 +355,7 @@ public abstract class TformStep implements Printable {
             this.pathToIdentifier = pathToIdentifier;
         }
 
+        @SuppressWarnings("unchecked")
         @Override public void apply(TformContext context) {
             final var thisNode = (T) context.inputs.peek();
             final var identifierLeaf = (LeafResult) traversePath(thisNode, pathToIdentifier);

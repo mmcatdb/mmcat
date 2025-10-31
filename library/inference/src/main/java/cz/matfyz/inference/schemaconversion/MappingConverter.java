@@ -3,7 +3,7 @@ package cz.matfyz.inference.schemaconversion;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 

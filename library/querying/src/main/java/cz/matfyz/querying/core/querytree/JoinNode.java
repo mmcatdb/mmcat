@@ -12,6 +12,10 @@ public class JoinNode extends QueryNode {
     public QueryNode setToChild(QueryNode node) { return children.set(1, node); }
     public final JoinCandidate candidate;
 
+    public boolean forceDepJoinFromId = false, forceDepJoinFromRef = false;
+    public JoinNode forceDepJoinFromId() { forceDepJoinFromId = true; return this; }
+    public JoinNode forceDepJoinFromRef() { forceDepJoinFromRef = true; return this; }
+
     public MergeTform tform;
 
     public JoinNode(QueryNode fromChild, QueryNode toChild, JoinCandidate candidate) {

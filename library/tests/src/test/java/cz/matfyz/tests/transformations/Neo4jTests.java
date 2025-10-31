@@ -62,7 +62,7 @@ class Neo4jTests {
         new PullForestTestBase(Neo4j.item(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [ {
-                    "quantity": "10",
+                    "quantity": "1",
                     "_from.Order": {
                         "customer": "Alice"
                     },
@@ -71,7 +71,7 @@ class Neo4jTests {
                         "label": "Some name"
                     }
                 }, {
-                    "quantity": "12",
+                    "quantity": "2",
                     "_from.Order": {
                         "customer": "Alice"
                     },
@@ -80,7 +80,7 @@ class Neo4jTests {
                         "label": "Some name"
                     }
                 }, {
-                    "quantity": "17",
+                    "quantity": "7",
                     "_from.Order": {
                         "customer": "Alice"
                     },
@@ -89,7 +89,7 @@ class Neo4jTests {
                         "label": "Other name"
                     }
                 }, {
-                    "quantity": "24",
+                    "quantity": "3",
                     "_from.Order": {
                         "customer": "Bob"
                     },

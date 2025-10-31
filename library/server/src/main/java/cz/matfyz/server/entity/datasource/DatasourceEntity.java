@@ -45,6 +45,9 @@ public class DatasourceEntity extends Entity {
         return sanitized;
     }
 
+    /** Returns the same identifier as the corresponding {@link Datasource}. */
+    public String stringIdentifier() { return id().toString(); }
+
     public void updateFrom(DatasourceUpdate data) {
         if (data.label() != null)
             this.label = data.label();
@@ -54,7 +57,7 @@ public class DatasourceEntity extends Entity {
     }
 
     public Datasource toDatasource() {
-        return new Datasource(type, id().toString());
+        return new Datasource(type, stringIdentifier());
     }
 
     public record JsonValue(
