@@ -45,28 +45,31 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         this.provider = provider;
     }
 
-    private PreparedStatement prepareStatement(Connection connection, QueryContent query, boolean countQuery) throws SQLException {
+    private PreparedStatement prepareStatement(Connection connection, QueryContent query, boolean isCountQuery) throws SQLException {
+        if (query instanceof final PostgreSQLQuery postgreSQLQuery)
+            return connection.prepareStatement(postgreSQLQuery.queryString);
+
         if (query instanceof final StringQuery stringQuery)
             return connection.prepareStatement(stringQuery.content);
 
         if (query instanceof final KindNameQuery kindNameQuery)
-            return connection.prepareStatement(kindNameQueryToString(kindNameQuery, null, countQuery));
+            return connection.prepareStatement(kindNameQueryToString(kindNameQuery, null, isCountQuery));
 
         if (query instanceof final KindNameFilterQuery kindNameFilterQuery)
-            return connection.prepareStatement(kindNameQueryToString(kindNameFilterQuery.kindNameQuery, kindNameFilterQuery.getFilters(), countQuery));
+            return connection.prepareStatement(kindNameQueryToString(kindNameFilterQuery.kindNameQuery, kindNameFilterQuery.getFilters(), isCountQuery));
 
         throw PullForestException.invalidQuery(this, query);
     }
 
-    private String kindNameQueryToString(KindNameQuery query, @Nullable List<AdminerFilter> filters, boolean countQuery) {
-        String columns = countQuery ? "COUNT(1)" : "*";
+    private String kindNameQueryToString(KindNameQuery query, @Nullable List<AdminerFilter> filters, boolean isCountQuery) {
+        String columns = isCountQuery ? "COUNT(1)" : "*";
         // TODO escape all table names globally
         var command = "SELECT " + columns + " FROM " + "\"" + query.kindName + "\"";
         if (filters != null)
             command += createWhereClause(filters);
-        if (!countQuery && query.hasLimit())
+        if (!isCountQuery && query.hasLimit())
             command += "\nLIMIT " + query.getLimit();
-        if (!countQuery && query.hasOffset())
+        if (!isCountQuery && query.hasOffset())
             command += "\nOFFSET " + query.getOffset();
         command += ";";
 

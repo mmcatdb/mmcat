@@ -11,6 +11,8 @@ import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
+import cz.matfyz.querying.optimizer.CollectorCache;
+import cz.matfyz.querying.optimizer.QueryDebugPrinter;
 import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.parser.ParsedQuery;
 import cz.matfyz.querying.parser.QueryParser;
@@ -23,6 +25,7 @@ import cz.matfyz.querying.resolver.SelectionResolver;
 
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +41,14 @@ public class QueryToInstance {
     private final SchemaCategory schema;
     private final String queryString;
     private final List<Mapping> kinds;
+    @Nullable private final CollectorCache cache;
 
-    public QueryToInstance(ControlWrapperProvider provider, SchemaCategory schema, String queryString, List<Mapping> kinds) {
+    public QueryToInstance(ControlWrapperProvider provider, SchemaCategory schema, String queryString, List<Mapping> kinds, CollectorCache cache) {
         this.provider = provider;
         this.schema = schema;
         this.queryString = queryString;
         this.kinds = kinds;
+        this.cache = cache;
     }
 
     public ListResult execute() {
@@ -60,6 +65,8 @@ public class QueryToInstance {
     }
 
     private ListResult innerExecute() {
+        final var startNanos = System.nanoTime();
+
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
         final var context = new QueryContext(schema, provider, normalized.selection.variables());
@@ -67,10 +74,17 @@ public class QueryToInstance {
         final QueryPlan planned = QueryPlanner.run(context, kinds, normalized.selection);
         ResultStructureResolver.run(planned);
 
-        final QueryPlan optimized = QueryOptimizer.run(planned);
+        final QueryPlan optimized = QueryOptimizer.run(planned, cache);
 
-        final QueryResult selected = SelectionResolver.run(optimized);
+        final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
+
+        final QueryResult selected = SelectionResolver.run(optimized, cache);
         final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
+
+        // optimized
+        LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);
+        LOGGER.info("Evaluated query took {} ms", optimized.root.evaluationMillis);
+        LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
 
         return projected.data;
     }
@@ -97,7 +111,7 @@ public class QueryToInstance {
         ResultStructureResolver.run(planned);
         final var plannedDescription = QueryPlanDescriptor.run(planned);
 
-        final QueryPlan optimized = QueryOptimizer.run(planned);
+        final QueryPlan optimized = QueryOptimizer.run(planned, cache);
         final var optimizedDescription = QueryPlanDescriptor.run(optimized);
 
         return new QueryDescription(plannedDescription, optimizedDescription);

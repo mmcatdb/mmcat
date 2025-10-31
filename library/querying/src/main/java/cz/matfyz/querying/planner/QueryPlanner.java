@@ -37,7 +37,7 @@ public class QueryPlanner {
 
     private QueryPlan run() {
         final var rootNode = processClause(rootClause, null);
-        return new QueryPlan(rootNode, context);
+        return new QueryPlan(rootNode, context, rootClause.scope());
     }
 
     private QueryNode processClause(SelectionClause clause, @Nullable QueryNode childNode) {

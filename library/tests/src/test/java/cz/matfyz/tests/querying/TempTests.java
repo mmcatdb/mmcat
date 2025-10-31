@@ -43,7 +43,7 @@ class TempTests {
         final var context = new QueryContext(datasources.schema, provider, normalized.selection.variables());
 
         final QueryPlan planned = QueryPlanner.run(context, kinds, normalized.selection);
-        final QueryPlan optimized = QueryOptimizer.run(planned);
+        final QueryPlan optimized = QueryOptimizer.run(planned, null);
 
         final var output = SelectionResolver.run(optimized);
 

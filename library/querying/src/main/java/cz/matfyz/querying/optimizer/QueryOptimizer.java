@@ -2,21 +2,15 @@ package cz.matfyz.querying.optimizer;
 
 import cz.matfyz.querying.planner.QueryPlan;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class QueryOptimizer {
 
-    public static QueryPlan run(QueryPlan plan) {
-        return new QueryOptimizer(plan).run();
-    }
-
-    private final QueryPlan queryPlan;
-
-    private QueryOptimizer(QueryPlan original) {
-        this.queryPlan = original;
-    }
-
-    private QueryPlan run() {
+    public static QueryPlan run(QueryPlan queryPlan, @Nullable CollectorCache cache) {
 
         FilterDeepener.run(queryPlan);
+
+        if (cache != null) JoinDependator.run(queryPlan, cache);
 
         // TODO Other optimization techniques:
         // - Split filters to further deepen them (WARNING: reference nodes and filtered nodes may change, some checks are required)

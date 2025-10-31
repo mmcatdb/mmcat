@@ -69,19 +69,19 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         this.provider = provider;
     }
 
-    private String createRelationshipQueryString(QueryContent query, boolean countQuery) {
+    private String createRelationshipQueryString(QueryContent query, boolean isCountQuery) {
         if (query instanceof StringQuery stringQuery)
             return stringQuery.content;
 
         if (query instanceof KindNameFilterQuery knfQuery) {
-            String returnQueryPart = countQuery ? RELATIONSHIPS_COUNT : "from_node, relationship, to_node" + getOffsetAndLimit(knfQuery.kindNameQuery);
+            String returnQueryPart = isCountQuery ? RELATIONSHIPS_COUNT : "from_node, relationship, to_node" + getOffsetAndLimit(knfQuery.kindNameQuery);
             List<String> whereConditions = createWhereConditions(knfQuery.getFilters(), "relationship");
 
             return "MATCH (from_node)-[relationship: " + knfQuery.kindNameQuery.kindName + "]->(to_node) " + createWhereClause(whereConditions) + " RETURN " + returnQueryPart + ";";
         }
 
         if (query instanceof KindNameQuery knQuery) {
-            String returnQueryPart = countQuery ? RELATIONSHIPS_COUNT : "from_node, relationship, to_node" + getOffsetAndLimit(knQuery);
+            String returnQueryPart = isCountQuery ? RELATIONSHIPS_COUNT : "from_node, relationship, to_node" + getOffsetAndLimit(knQuery);
 
             return "MATCH (from_node)-[relationship: " + knQuery.kindName + "]->(to_node) RETURN " + returnQueryPart + ";";
         }
@@ -89,7 +89,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         throw PullForestException.invalidQuery(this, query);
     }
 
-    private String createNodeQueryString(QueryContent query, boolean countQuery) {
+    private String createNodeQueryString(QueryContent query, boolean isCountQuery) {
         if (query instanceof StringQuery stringQuery)
             return stringQuery.content;
 
@@ -107,7 +107,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             whereConditions.add("size(labels(node)) = 0");
         String wherePart = createWhereClause(whereConditions);
 
-        String returnPart = countQuery ? NODES_COUNT : "node" + getOffsetAndLimit(knQuery);
+        String returnPart = isCountQuery ? NODES_COUNT : "node" + getOffsetAndLimit(knQuery);
 
         return basePart + " " + wherePart + " RETURN " + returnPart + ";";
     }
@@ -661,22 +661,22 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return propertyNames;
     }
 
-    private String getQueryString(QueryContent query, boolean countQuery) {
+    private String getQueryString(QueryContent query, boolean isCountQuery) {
         if (query instanceof StringQuery stringQuery)
             return stringQuery.content;
         if (query instanceof KindNameFilterQuery knfQuery)
-            return createQueryString(knfQuery.kindNameQuery.kindName, query, countQuery);
+            return createQueryString(knfQuery.kindNameQuery.kindName, query, isCountQuery);
         if (query instanceof KindNameQuery knQuery)
-            return createQueryString(knQuery.kindName, query, countQuery);
+            return createQueryString(knQuery.kindName, query, isCountQuery);
 
         throw PullForestException.invalidQuery(this, query);
     }
 
-    private String createQueryString(String kindName, QueryContent query, boolean countQuery) {
+    private String createQueryString(String kindName, QueryContent query, boolean isCountQuery) {
         if (kindName.isEmpty() || !kindName.equals(kindName.toUpperCase()))
-            return createNodeQueryString(query, countQuery);
+            return createNodeQueryString(query, isCountQuery);
 
-        return createRelationshipQueryString(query, countQuery);
+        return createRelationshipQueryString(query, isCountQuery);
     }
 
     // #endregion

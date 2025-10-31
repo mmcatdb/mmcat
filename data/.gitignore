@@ -1,0 +1,5 @@
+*
+!.gitignore
+!yelp_business_small.json
+!yelp_user_small.json
+!yelp_review_small.json

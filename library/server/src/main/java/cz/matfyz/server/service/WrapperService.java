@@ -41,17 +41,17 @@ public class WrapperService {
                     datasource,
                     MongoDBSettings.class,
                     MongoDBProvider::new
-                ));
+                ), datasource.stringIdentifier());
                 case postgresql -> new PostgreSQLControlWrapper(getProvider(
                     datasource,
                     PostgreSQLSettings.class,
                     PostgreSQLProvider::new
-                ));
+                ), datasource.stringIdentifier());
                 case neo4j -> new Neo4jControlWrapper(getProvider(
                     datasource,
                     Neo4jSettings.class,
                     Neo4jProvider::new
-                ));
+                ), datasource.stringIdentifier());
                 case jsonld -> getJsonLdControlWrapper(datasource);
                 case json -> getJsonControlWrapper(datasource);
                 case csv -> getCsvControlWrapper(datasource);
@@ -75,7 +75,7 @@ public class WrapperService {
         DatasourceEntity datasource,
         Class<TSettings> clazz,
         CreateProviderFunction<TProvider, TSettings> create
-    ) throws JsonProcessingException {
+    ) throws Exception {
         final TSettings settings = mapper.treeToValue(datasource.settings, clazz);
 
         // First, we try to get the provider from the cache. If it's there and still valid, we return it.

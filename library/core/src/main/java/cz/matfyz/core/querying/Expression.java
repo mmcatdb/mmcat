@@ -30,6 +30,10 @@ public interface Expression extends Serializable {
 
         public final ComputationScope computation = new ComputationScope();
 
+        public ExpressionScope clone() {
+            // TODO: deep clone when working with multiple different scopes
+            return this;
+        }
     }
 
 }

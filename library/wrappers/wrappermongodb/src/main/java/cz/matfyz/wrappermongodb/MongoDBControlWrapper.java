@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 public class MongoDBControlWrapper extends BaseControlWrapper {
 
-    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBControlWrapper.class);
 
     @Override protected DatasourceType getType() {
@@ -27,10 +26,12 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
     }
 
     private final MongoDBProvider provider;
+    private final String datasourceIdentifier;
 
-    public MongoDBControlWrapper(MongoDBProvider provider) {
+    public MongoDBControlWrapper(MongoDBProvider provider, String datasourceIdentifier) {
         super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
+        this.datasourceIdentifier = datasourceIdentifier;
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
@@ -47,7 +48,7 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
 
     @Override public void execute(Path path) {
         try {
-            // Unfortunatelly, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
+            // Unfortunately, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
             final String[] command = { "mongosh", provider.settings.createConnectionString(), path.toString() };
 
             final Runtime runtime = Runtime.getRuntime();
@@ -93,4 +94,7 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
         return new MongoDBInferenceWrapper(provider, kindName, getSparkSettings());
     }
 
+    @Override public MongoDBCollectorWrapper getCollectorWrapper() {
+        return new MongoDBCollectorWrapper(provider, datasourceIdentifier);
+    }
 }
