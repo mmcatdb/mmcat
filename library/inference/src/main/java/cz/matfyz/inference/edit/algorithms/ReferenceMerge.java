@@ -5,10 +5,10 @@ import cz.matfyz.core.exception.ObjexNotFoundException;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataObjex;
 import cz.matfyz.core.rsd.ReferenceCandidate;
@@ -86,6 +86,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     private boolean referenceIsArray;
     private BaseSignature referenceSignature;
     private BaseSignature parentReferenceSignature;
+
+    private final AccessPathBuilder b = new AccessPathBuilder();
 
     public ReferenceMerge(Data data) {
         this.data = data;
@@ -232,17 +234,17 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         final List<AccessPath> accessPaths = new ArrayList<>(adjustedComplexProperty.subpaths());
         accessPaths.add(createNewReferenceProperty());
 
-        return new ComplexProperty(new StringName(label), complexProperty.signature(), accessPaths);
+        return b.complex(label, complexProperty.signature(), accessPaths.toArray(AccessPath[]::new));
     }
 
     private SimpleProperty createNewReferenceProperty() {
-        return new SimpleProperty(new StringName(newMetadata.getObjex(data.referencedKey).label), this.referenceSignature);
+        return b.simple(newMetadata.getObjex(data.referencedKey).label, this.referenceSignature);
     }
 
     private ComplexProperty adjustComplexProperty(ComplexProperty complexProperty, ComplexProperty referenceComplexProperty) {
         final List<AccessPath> accessPaths = new ArrayList<>(complexProperty.subpaths());
         accessPaths.add(referenceComplexProperty);
-        return new ComplexProperty(complexProperty.name(), complexProperty.signature(), accessPaths);
+        return b.complex(complexProperty.name(), complexProperty.signature(), accessPaths.toArray(AccessPath[]::new));
     }
 
 }

@@ -260,18 +260,27 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     @Override public String toString() {
+        return toStringWithoutGeneratedIds(null);
+    }
+
+    /**
+     * Prints the row but replaces the generated id with the provided <code>idValue</code> (if there is such id and the value isn't null).
+     * Useful for tests.
+     */
+    public String toStringWithoutGeneratedIds(@Nullable String idValue) {
         final var sb = new StringBuilder();
-        sb.append(superId.toString());
+        sb.append(superId.toStringWithoutGeneratedIds(idValue));
         if (technicalId != null)
             sb.append("#").append(technicalId);
 
         sb.append(": (");
         final var SEPARATOR = ", ";
 
-        for (final var entry : propertyValues.entrySet())
+        for (final var entry : propertyValues.entrySet()) {
             sb
                 .append(entry.getKey()).append(": \"").append(entry.getValue()).append("\"")
                 .append(SEPARATOR);
+        }
 
         if (!propertyValues.isEmpty())
             sb.setLength(sb.length() - SEPARATOR.length());

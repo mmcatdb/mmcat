@@ -203,13 +203,23 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
     }
 
     @Override public String toString() {
+        return toStringWithoutGeneratedIds(null);
+    }
+
+    /**
+     * Prints the row but replaces the generated id with the provided <code>idValue</code> (if there is such id and the value isn't null).
+     * Useful for tests.
+     */
+    public String toStringWithoutGeneratedIds(@Nullable String idValue) {
         final var sb = new StringBuilder();
 
         sb.append("{");
         final var SEPARATOR = ", ";
         for (final var entry : tuples.entrySet()) {
+            final var signature = entry.getKey();
+            final var value = (signature.isEmpty() && idValue != null) ? idValue : entry.getValue();
             sb
-                .append(entry.getKey()).append(": \"").append(entry.getValue()).append("\"")
+                .append(signature).append(": \"").append(value).append("\"")
                 .append(SEPARATOR);
         }
         if (!tuples.isEmpty())

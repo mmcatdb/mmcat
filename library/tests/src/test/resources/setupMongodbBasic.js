@@ -115,13 +115,44 @@ db.customer.insertMany([ {
 db.note.insertMany([ {
     number: "o_100",
     note: {
-        'en-US': { subject: "subject 1", content: "content en" },
-        'cs-CZ': { subject: "subject 1", content: "content cz" },
+        "en-US": { subject: "subject 1", content: "content en" },
+        "cs-CZ": { subject: "subject 1", content: "content cz" },
     },
 }, {
     number: "o_200",
     note: {
-        'cs-CZ': { subject: "subject cz", content: "content 1" },
-        'en-GB': { subject: "subject gb", content: "content 2" },
+        "cs-CZ": { subject: "subject cz", content: "content 1" },
+        "en-GB": { subject: "subject gb", content: "content 2" },
     },
+} ]);
+
+
+db.hardcore.insertMany([ {
+    id: "h_1",
+    a: [ [
+        [ "v_a-00-0", "v_a-00-1" ],
+        [ "v_a-01-0", "v_a-01-1" ],
+    ], [
+        [ "v_a-10-0", "v_a-10-1" ],
+        [ "v_a-11-0", "v_a-11-1" ],
+    ] ],
+    b: [ [
+        [ "v_b-00-0", "v_b-00-1" ],
+        [ "v_b-01-0", "v_b-01-1" ],
+    ], [
+        [ "v_b-10-0", "v_b-10-1" ],
+        [ "v_b-11-0", "v_b-11-1" ],
+    ] ],
+    array: [],
+}, {
+    id: "h_2",
+    array: [ {
+        id: "c_0",
+        x: { i: "v_0-x-i", j: "v_0-x-j" },
+        y: { i: "v_0-y-i", j: "v_0-y-j" },
+    }, {
+        id: "c_1",
+        x: { i: "v_1-x-i", j: "v_1-x-j" },
+        y: { i: "v_1-y-i", j: "v_1-y-j" },
+    } ],
 } ]);

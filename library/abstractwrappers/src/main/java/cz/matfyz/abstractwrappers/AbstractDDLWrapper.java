@@ -3,8 +3,10 @@ package cz.matfyz.abstractwrappers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public interface AbstractDDLWrapper {
@@ -48,8 +50,15 @@ public interface AbstractDDLWrapper {
          * Creates a new path with the added value.
          */
         public PropertyPath add(PathSegment segment) {
-            List<PathSegment> newSegments = new ArrayList<>(segments);
+            final List<PathSegment> newSegments = new ArrayList<>(segments);
             newSegments.add(segment);
+            return new PropertyPath(newSegments);
+        }
+
+        public PropertyPath addArray(int dimension) {
+            final List<PathSegment> newSegments = new ArrayList<>(segments);
+            final int lastIndex = newSegments.size() - 1;
+            newSegments.set(lastIndex, PathSegment.array(newSegments.get(lastIndex), dimension));
             return new PropertyPath(newSegments);
         }
 
@@ -61,54 +70,46 @@ public interface AbstractDDLWrapper {
 
     public class PathSegment implements Serializable {
 
-        /** Actually a set. */
-        public final List<String> names;
-        private final Type type;
+        /** Actually an immutable sorted set. */
+        public final Set<String> names;
+        public final boolean isMap;
+        public final boolean isArray;
+
         /** If this is an array, it has this many dimensions. Minimum is 1. */
         private final int dimension;
 
-        private PathSegment(List<String> names, Type type, int dimension) {
+        private PathSegment(Set<String> names, boolean isMap, int dimension) {
             this.names = names;
-            this.type = type;
+            this.isMap = isMap;
+            this.isArray = dimension > 0;
             this.dimension = dimension;
         }
 
         public static PathSegment scalar(String name) {
-            return new PathSegment(List.of(name), Type.SCALAR, 0);
-        }
-
-        public static PathSegment array(int dimension) {
-            return new PathSegment(List.of(), Type.ARRAY, dimension);
+            return new PathSegment(Set.of(name), false, 0);
         }
 
         public static PathSegment map(Set<String> names) {
-            return new PathSegment(List.copyOf(names), Type.MAP, 0);
+            final var sortedNames = Collections.unmodifiableSortedSet(new TreeSet<>(names));
+            return new PathSegment(sortedNames, true, 0);
         }
 
-        public enum Type {
-            /** The names should contain exactly one value. */
-            SCALAR,
-            /** The names should be empty. */
-            ARRAY,
-            /** The names can contain any number of values. */
-            MAP,
-        }
-
-        public boolean isArray() {
-            return type == Type.ARRAY;
+        public static PathSegment array(PathSegment segment, int dimension) {
+            final var sum = (segment.isArray ? segment.dimension : 0) + dimension;
+            return new PathSegment(segment.names, segment.isMap, sum);
         }
 
         public int arrayDimension() {
-            assert type == Type.ARRAY : "Can't get array dimension of non-array path segment.";
+            assert isArray : "Can't get array dimension of non-array path segment.";
             return dimension;
         }
 
         @Override public String toString() {
-            return switch (type) {
-                case Type.SCALAR -> names.iterator().next();
-                case Type.ARRAY -> names.iterator().next() + "[]".repeat(dimension);
-                case Type.MAP -> "(" + names.stream().collect(Collectors.joining("|")) + ")";
-            };
+            final var name = isMap
+                ? "(" + names.stream().collect(Collectors.joining("|")) + ")"
+                : names.iterator().next();
+
+            return name + "[]".repeat(dimension);
         }
 
     }

@@ -19,8 +19,8 @@ public abstract class Neo4j {
             Schema.order,
             orderKind,
             b -> b.root(
-                b.simple("customer", Schema.orderToName),
-                b.simple("number", Schema.orderToNumber)
+                b.simple("customer", Schema.order_name),
+                b.simple("number", Schema.order_number)
             )
         );
     }
@@ -30,13 +30,13 @@ public abstract class Neo4j {
             Schema.item,
             itemKind,
             b -> b.root(
-                b.simple("quantity", Schema.itemToQuantity),
-                b.complex("_from.Order", Schema.itemToOrder,
-                    b.simple("customer", Schema.orderToName)
+                b.simple("quantity", Schema.item_quantity),
+                b.complex("_from.Order", Schema.item_order,
+                    b.simple("customer", Schema.order_name)
                 ),
-                b.complex("_to.Product", Schema.itemToProduct,
-                    b.simple("id", Schema.productToId),
-                    b.simple("label", Schema.productToLabel)
+                b.complex("_to.Product", Schema.item_product,
+                    b.simple("id", Schema.product_id),
+                    b.simple("label", Schema.product_label)
                 )
             )
         );

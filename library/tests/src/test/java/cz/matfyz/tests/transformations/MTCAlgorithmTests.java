@@ -496,4 +496,42 @@ class MTCAlgorithmTests {
     //     "id": "#o_200"
     // } ]
 
+    @Test
+    void hardcoreTest() {
+        new MTCAlgorithmTestBase()
+            .mappingWithRecords(MongoDB.hardcore(schema), """
+                [ {
+                    "id": "h_1",
+                    "a": [ [
+                        [ "v_a-00-0", "v_a-00-1" ],
+                        [ "v_a-01-0", "v_a-01-1" ]
+                    ], [
+                        [ "v_a-10-0", "v_a-10-1" ],
+                        [ "v_a-11-0", "v_a-11-1" ]
+                    ] ],
+                    "b": [ [
+                        [ "v_b-00-0", "v_b-00-1" ],
+                        [ "v_b-01-0", "v_b-01-1" ]
+                    ], [
+                        [ "v_b-10-0", "v_b-10-1" ],
+                        [ "v_b-11-0", "v_b-11-1" ]
+                    ] ],
+                    "array": []
+                }, {
+                    "id": "h_2",
+                    "array": [ {
+                        "id": "c_0",
+                        "x": { "i": "v_0-x-i", "j": "v_0-x-j" },
+                        "y": { "i": "v_0-y-i", "j": "v_0-y-j" }
+                    }, {
+                        "id": "c_1",
+                        "x": { "i": "v_1-x-i", "j": "v_1-x-j" },
+                        "y": { "i": "v_1-y-i", "j": "v_1-y-j" }
+                    } ],
+                } ]
+            """)
+            .expected(builder -> MongoDB.addHardcore(builder))
+            .run();
+    }
+
 }

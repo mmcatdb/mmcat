@@ -3,6 +3,9 @@ package cz.matfyz.core.record;
 import cz.matfyz.core.exception.SignatureException;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.utils.printable.*;
 
 import java.util.ArrayList;
@@ -112,17 +115,73 @@ public class ComplexRecord implements Printable {
         return simpleRecord;
     }
 
-    public ComplexRecord addDynamicReplacer(Signature signature, Signature nameSignature, String name) {
-        if (signature.isEmpty())
+    /** Make sure the property is a {@link ComplexProperty} and that it has a dynamic name! */
+    public <TDataType> ComplexRecord addDynamicRecord(AccessPath property, String key) {
+        if (property.signature().isEmpty())
             throw SignatureException.isEmpty();
 
-        final ComplexRecord dynamicWrapper = new ComplexRecord();
-        children.computeIfAbsent(signature, x -> new ArrayList<>()).add(dynamicWrapper);
+        final ComplexRecord dynamicRecord = new ComplexRecord();
+        children.computeIfAbsent(property.signature(), x -> new ArrayList<>()).add(dynamicRecord);
 
-        dynamicWrapper.addSimpleRecord(nameSignature, name);
+        final var keyProperty = ((ComplexProperty) property).getTypedSubpath(TypedName.KEY);
+        dynamicRecord.addSimpleRecord(keyProperty.signature(), key);
 
-        return dynamicWrapper;
+        return dynamicRecord;
     }
+
+
+    /** Make sure the property is a {@link ComplexProperty} and that it has a dynamic name! */
+    public <TDataType> ComplexRecord addDynamicRecordWithValue(AccessPath property, String key, TDataType value) {
+        final var dynamicRecord = addDynamicRecord(property, key);
+
+        final var valueProperty = ((ComplexProperty) property).getTypedSubpath(TypedName.VALUE);
+        dynamicRecord.addSimpleRecord(valueProperty.signature(), value);
+
+        return dynamicRecord;
+    }
+
+    public static class ArrayCollector {
+
+        private final ComplexRecord parentRecord;
+        public final AccessPath valueSubpath;
+        private final Signature propertySignature;
+        private final Signature[] indexSignatures;
+        private final int[] indexes;
+        private int dimension = -1;
+
+        public ArrayCollector(ComplexRecord parentRecord, ComplexProperty property) {
+            this.parentRecord = parentRecord;
+
+            valueSubpath = property.getTypedSubpath(TypedName.VALUE);
+            propertySignature = property.signature();
+            indexSignatures = property.getIndexSubpaths().stream().map(AccessPath::signature).toArray(Signature[]::new);
+            indexes = new int[indexSignatures.length];
+        }
+
+        /** Returns whether this is the final (value) dimension. */
+        public boolean nextDimension() {
+            dimension++;
+            return dimension == indexes.length - 1;
+        }
+
+        public void prevDimension() {
+            dimension--;
+        }
+
+        public void setIndex(int index) {
+            indexes[dimension] = index;
+        }
+
+        public ComplexRecord addIndexedRecord() {
+            final ComplexRecord record = parentRecord.addComplexRecord(propertySignature);
+            for (int i = 0; i < indexes.length; i++)
+                record.addSimpleRecord(indexSignatures[i], Integer.toString(indexes[i]));
+            return record;
+        }
+
+    }
+
+    // #region Print + comparing
 
     @Override public void printTo(Printer printer) {
         printer.append("{").down().nextLine();
@@ -189,4 +248,6 @@ public class ComplexRecord implements Printable {
 
         return sb.toString();
     }
+
+    // #endregion
 }

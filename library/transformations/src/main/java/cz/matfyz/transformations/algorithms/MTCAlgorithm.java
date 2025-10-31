@@ -18,6 +18,8 @@ import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.UniqueIdGenerator;
+import cz.matfyz.core.utils.printable.Printable;
+import cz.matfyz.core.utils.printable.Printer;
 import cz.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayDeque;
@@ -56,9 +58,7 @@ public class MTCAlgorithm {
         LOGGER.debug("Model To Category algorithm");
         final ComplexProperty rootAccessPath = mapping.accessPath()
             // The auxiliary nodes are merged with their parents during the pull forest algorithm.
-            .copyWithoutAuxiliaryNodes()
-            // The dynamic names are replaced by a complex records with name and value properties during the pull forest algorithm.
-            .copyWithoutDynamicNames().path();
+            .copyWithoutAuxiliaryNodes();
 
         // Create references for adding found values to the superId of other rows.
         instance.createReferences();
@@ -69,87 +69,121 @@ public class MTCAlgorithm {
     private void processRootRecord(RootRecord rootRecord, ComplexProperty rootAccessPath) {
         LOGGER.debug("Process a root record:\n{}", rootRecord);
 
-        final Deque<StackTriple> stack = createStack(rootRecord, rootAccessPath);
+        final Deque<StackJob> stack = createStack(rootRecord, rootAccessPath);
 
         while (!stack.isEmpty())
             processTopOfStack(stack);
     }
 
-    private Deque<StackTriple> createStack(RootRecord rootRecord, ComplexProperty rootAccessPath) {
+    private Deque<StackJob> createStack(RootRecord rootRecord, ComplexProperty rootAccessPath) {
         final InstanceObjex rootObjex = instance.getObjex(mapping.rootObjex());
 
         final var superId = findSuperIdForRoot(rootRecord);
         final DomainRow rootRow = addRow(rootObjex, superId);
         addDependentValuesToRow(rootObjex, rootRow, rootRecord, Signature.empty());
 
-        final Deque<StackTriple> stack = new ArrayDeque<>();
+        final Deque<StackJob> stack = new ArrayDeque<>();
 
         addPathChildrenToStack(stack, rootAccessPath, rootRow, rootRecord);
 
         return stack;
     }
 
+    private record StackJob(
+        DomainRow parentRow,
+        ComplexRecord parentRecord,
+        SchemaPath parentToChild,
+        /**
+         * If null, there is no {@link ComplexProperty} associated with the row.
+         * E.g., there is a {@link SimpleProperty} with signature <code>1.2</code>, but the child object is the dom of the last morphism (i.e., <code>1</code>).
+         */
+        AccessPath childAccessPath
+    ) implements Printable {
+
+        // TODO parent to child is the path to the objex.
+        // TODO the following comment. If childAccessPath is simple, then it's signature isn't the same as parentToChild.signature(). If complex, then it is.
+
+        @Override public void printTo(Printer printer) {
+            printer.append("<").down().nextLine();
+
+            printer.append("parentToChildPath: ").append(parentToChild.signature()).append(",").nextLine();
+            printer.append("parentRow: ").append(parentRow).append(",").nextLine();
+            printer.append("childAccessPath: ")
+                .append("{").down().nextLine()
+                .append(childAccessPath == null ? "null" : childAccessPath)
+                .up().nextLine().append("}").append(",").nextLine();
+            printer.append("record: ").append(parentRecord).append(",");
+
+            printer.up().nextLine().append(">");
+        }
+
+        @Override public String toString() {
+            return Printer.print(this);
+        }
+
+    }
+
     // #region Stack processing
 
-    private void processTopOfStack(Deque<StackTriple> stack) {
-        final StackTriple triple = stack.pop();
-        LOGGER.debug("Process top of stack:\n{}", triple);
+    private void processTopOfStack(Deque<StackJob> stack) {
+        final StackJob job = stack.pop();
+        LOGGER.debug("Process top of stack:\n{}", job);
 
-        final InstanceObjex childObjex = instance.getObjex(triple.parentToChild.to());
+        final InstanceObjex childObjex = instance.getObjex(job.parentToChild.to());
 
         // TODO comments here
 
         // There are two cases - either the child objex has a dedicated access path, or it doesn't.
-        if (triple.childAccessPath instanceof SimpleProperty simpleSubpath) {
+        if (job.childAccessPath instanceof SimpleProperty simpleSubpath) {
             // If it doesn't, we have to find its values in the parent record.
 
-            if (!triple.parentToChild.isArray()) {
-                final var superId = findSuperIdForNonRoot(triple, childObjex, null);
+            if (!job.parentToChild.isArray()) {
+                final var superId = findSuperIdForNonRoot(job, childObjex, null);
                 DomainRow childRow = addRow(childObjex, superId);
-                childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
-                addDependentValuesToRow(childObjex, childRow, triple.parentRecord, triple.parentToChild.signature());
+                childRow = addRelation(job.parentToChild, job.parentRow, childRow, job.parentRecord);
+                addDependentValuesToRow(childObjex, childRow, job.parentRecord, job.parentToChild.signature());
             }
             else {
                 // The subpath whose values we are adding is a `SimpleProperty` (because `childAccessPath` is null). It's also an array.
                 // Therefore, we have to get all its values and create a row for each of them.
-                final var values = triple.parentRecord.<String>findArrayValues(simpleSubpath.signature(), true);
+                final var values = job.parentRecord.<String>findArrayValues(simpleSubpath.signature(), true);
                 if (values == null)
                     return;
 
                 for (final var value : values) {
                     // Like findSuperIdForNonRoot, but not exactly the same.
-                    final var superId = tempFindSuperIdForArray(triple, childObjex, simpleSubpath.signature(), value);
+                    final var superId = tempFindSuperIdForArray(job, childObjex, simpleSubpath.signature(), value);
                     DomainRow childRow = addRow(childObjex, superId);
-                    childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
+                    childRow = addRelation(job.parentToChild, job.parentRow, childRow, job.parentRecord);
                     // FIXME Still not ideal - again, there is the "find scalar value" call inside.
-                    addDependentValuesToRow(childObjex, childRow, triple.parentRecord, triple.parentToChild.signature());
+                    addDependentValuesToRow(childObjex, childRow, job.parentRecord, job.parentToChild.signature());
                 }
             }
 
-            // TODO probably add values to the domain rows along the path? Or describe why they aren't any.
+            // TODO probably add values to the domain rows along the path? Or describe why there aren't any.
 
             return;
         }
 
         // If it does, we find the values in the child records.
-        final var children = triple.parentRecord.getComplexRecords(triple.parentToChild.signature());
+        final var children = job.parentRecord.getComplexRecords(job.parentToChild.signature());
 
         for (final var childRecord : children) {
-            final var superId = findSuperIdForNonRoot(triple, childObjex, childRecord);
+            final var superId = findSuperIdForNonRoot(job, childObjex, childRecord);
             DomainRow childRow = addRow(childObjex, superId);
-            childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
+            childRow = addRelation(job.parentToChild, job.parentRow, childRow, job.parentRecord);
             addDependentValuesToRow(childObjex, childRow, childRecord, Signature.empty());
 
-            // TODO probably add values to the domain rows along the path? Or describe why they aren't any.
+            // TODO probably add values to the domain rows along the path? Or describe why there aren't any.
 
-            addPathChildrenToStack(stack, (ComplexProperty) triple.childAccessPath, childRow, childRecord);
+            addPathChildrenToStack(stack, (ComplexProperty) job.childAccessPath, childRow, childRecord);
         }
     }
 
     /**
      * Determine possible sub-paths to be traversed from this complex property (inner node of an access path) and add them to the stack.
      */
-    private void addPathChildrenToStack(Deque<StackTriple> stack, ComplexProperty parentAccessPath, DomainRow parentRow, ComplexRecord parentRecord) {
+    private void addPathChildrenToStack(Deque<StackJob> stack, ComplexProperty parentAccessPath, DomainRow parentRow, ComplexRecord parentRecord) {
         for (final AccessPath subpath : parentAccessPath.subpaths()) {
             final var signature = subpath.signature();
             if (signature.isEmpty())
@@ -163,7 +197,7 @@ public class MTCAlgorithm {
 
                 // The record might not be here - if the data is missing.
                 if (parentRecord.hasPrefix(parentToChild.signature()))
-                    stack.push(new StackTriple(parentRow, parentRecord, parentToChild, complexSubpath));
+                    stack.push(new StackJob(parentRow, parentRecord, parentToChild, complexSubpath));
 
                 continue;
             }
@@ -183,7 +217,7 @@ public class MTCAlgorithm {
                 throw InvalidStateException.complexPropertyForProperty(parentToEntity.to().key());
 
             if (parentRecord.hasPrefix(parentToEntity.signature()))
-                stack.push(new StackTriple(parentRow, parentRecord, parentToEntity, subpath));
+                stack.push(new StackJob(parentRow, parentRecord, parentToEntity, subpath));
         }
     }
 
@@ -208,18 +242,18 @@ public class MTCAlgorithm {
         return builder.build();
     }
 
-    private SuperIdValues findSuperIdForNonRoot(StackTriple triple, InstanceObjex childObjex, @Nullable ComplexRecord childRecord) {
+    private SuperIdValues findSuperIdForNonRoot(StackJob job, InstanceObjex childObjex, @Nullable ComplexRecord childRecord) {
         if (childObjex.schema.hasGeneratedId())
             // The generated id can't be a part of any signature id, so we can't find it in the parent row. By definition, it's not in the record. So we have to generate it.
             return SuperIdValues.fromEmptySignature(idGenerator.next());
 
         final var builder = new SuperIdValues.Builder();
 
-        final var record = childRecord != null ? childRecord : triple.parentRecord;
+        final var record = childRecord != null ? childRecord : job.parentRecord;
         final var isChildRecord = childRecord != null;
 
         for (final Signature signature : childObjex.schema.superId()) {
-            final var value = findSuperIdValue(triple, record, isChildRecord, signature);
+            final var value = findSuperIdValue(job, record, isChildRecord, signature);
             if (value != null)
                 builder.add(signature, value);
         }
@@ -227,11 +261,11 @@ public class MTCAlgorithm {
         return builder.build();
     }
 
-    private @Nullable String findSuperIdValue(StackTriple triple, ComplexRecord record, boolean isChildRecord, Signature signature) {
+    private @Nullable String findSuperIdValue(StackJob job, ComplexRecord record, boolean isChildRecord, Signature signature) {
         // How the signature looks like from the parent objex.
-        final var signatureInParent = triple.parentToChild.signature().traverse(signature);
+        final var signatureInParent = job.parentToChild.signature().traverse(signature);
         // If the value is in the parent row, we just add it and move on with our lives.
-        final var valueInParent = triple.parentRow.tryFindScalarValue(signatureInParent);
+        final var valueInParent = job.parentRow.tryFindScalarValue(signatureInParent);
         if (valueInParent != null)
             return valueInParent;
 
@@ -241,18 +275,18 @@ public class MTCAlgorithm {
     }
 
     // FIXME this
-    private SuperIdValues tempFindSuperIdForArray(StackTriple triple, InstanceObjex childObjex, Signature specialPath, String specialValue) {
+    private SuperIdValues tempFindSuperIdForArray(StackJob job, InstanceObjex childObjex, Signature specialPath, String specialValue) {
          if (childObjex.schema.hasGeneratedId())
             // The generated id can't be a part of any signature id, so we can't find it in the parent row. By definition, it's not in the record. So we have to generate it.
             return SuperIdValues.fromEmptySignature(idGenerator.next());
 
         final var builder = new SuperIdValues.Builder();
 
-        final var record = triple.parentRecord;
+        final var record = job.parentRecord;
         final var isChildRecord = false;
 
         for (final Signature signature : childObjex.schema.superId()) {
-            final var value = tempFindSuperIdValueForArray(triple, record, isChildRecord, signature, specialPath, specialValue);
+            final var value = tempFindSuperIdValueForArray(job, record, isChildRecord, signature, specialPath, specialValue);
             if (value != null)
                 builder.add(signature, value);
         }
@@ -260,14 +294,14 @@ public class MTCAlgorithm {
         return builder.build();
     }
 
-    private @Nullable String tempFindSuperIdValueForArray(StackTriple triple, ComplexRecord record, boolean isChildRecord, Signature signature, Signature specialPath, String specialValue) {
+    private @Nullable String tempFindSuperIdValueForArray(StackJob job, ComplexRecord record, boolean isChildRecord, Signature signature, Signature specialPath, String specialValue) {
         // How the signature looks like from the parent objex.
-        final var signatureInParent = triple.parentToChild.signature().traverse(signature);
+        final var signatureInParent = job.parentToChild.signature().traverse(signature);
         if (signatureInParent.equals(specialPath))
             return specialValue;
 
         // If the value is in the parent row, we just add it and move on with our lives.
-        final var valueInParent = triple.parentRow.tryFindScalarValue(signatureInParent);
+        final var valueInParent = job.parentRow.tryFindScalarValue(signatureInParent);
         if (valueInParent != null)
             return valueInParent;
 
@@ -400,6 +434,6 @@ public class MTCAlgorithm {
         return instanceObjex.mergeReferences(newRow);
     }
 
-    // //#endregion
+    // #endregion
 
 }

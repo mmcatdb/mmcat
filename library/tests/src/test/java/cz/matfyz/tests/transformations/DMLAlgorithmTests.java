@@ -464,4 +464,50 @@ class DMLAlgorithmTests {
     //     ]
     // } ]
 
+    @Test
+    void hardcoreTest() {
+        new DMLAlgorithmTestBase(MongoDB.hardcore(schema))
+            .instance(builder -> MongoDB.addHardcore(builder))
+            .expected("""
+                [ {
+                    "name": "hardcore",
+                    "values": [
+                        "append(a[0][0][0], v_a-00-0)",
+                        "append(a[0][0][1], v_a-00-1)",
+                        "append(a[0][1][0], v_a-01-0)",
+                        "append(a[0][1][1], v_a-01-1)",
+                        "append(a[1][0][0], v_a-10-0)",
+                        "append(a[1][0][1], v_a-10-1)",
+                        "append(a[1][1][0], v_a-11-0)",
+                        "append(a[1][1][1], v_a-11-1)",
+                        "append(b[0][0][0], v_b-00-0)",
+                        "append(b[0][0][1], v_b-00-1)",
+                        "append(b[0][1][0], v_b-01-0)",
+                        "append(b[0][1][1], v_b-01-1)",
+                        "append(b[1][0][0], v_b-10-0)",
+                        "append(b[1][0][1], v_b-10-1)",
+                        "append(b[1][1][0], v_b-11-0)",
+                        "append(b[1][1][1], v_b-11-1)",
+                        "append(id, h_1)"
+                    ]
+                }, {
+                    "name": "hardcore",
+                    "values": [
+                        "append(array[0]/id, c_0)",
+                        "append(array[0]/x/i, v_0-x-i)",
+                        "append(array[0]/x/j, v_0-x-j)",
+                        "append(array[0]/y/i, v_0-y-i)",
+                        "append(array[0]/y/j, v_0-y-j)",
+                        "append(array[1]/id, c_1)",
+                        "append(array[1]/x/i, v_1-x-i)",
+                        "append(array[1]/x/j, v_1-x-j)",
+                        "append(array[1]/y/i, v_1-y-i)",
+                        "append(array[1]/y/j, v_1-y-j)",
+                        "append(id, h_2)"
+                    ]
+                } ]
+            """)
+            .run();
+    }
+
 }

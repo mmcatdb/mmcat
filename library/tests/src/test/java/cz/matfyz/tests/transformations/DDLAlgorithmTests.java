@@ -359,4 +359,26 @@ class DDLAlgorithmTests {
     //     "createDDLStatement()"
     // ]
 
+    @Test
+    void hardcoreTest() {
+        new DDLAlgorithmTestBase(MongoDB.hardcore(schema))
+            .instance(builder -> MongoDB.addHardcore(builder))
+            .expected("""
+                [
+                    "clear()",
+                    "setKindName(hardcore)",
+                    "isSchemaless()",
+                    "addProperty(id, simple, required)",
+                    "addProperty((a|b)[][][], simple, optional)",
+                    "addProperty(array[], complex, optional)",
+                    "addProperty(array[]/id, simple, required)",
+                    "addProperty(array[]/(x|y), complex, optional)",
+                    "addProperty(array[]/(x|y)/i, simple, required)",
+                    "addProperty(array[]/(x|y)/j, simple, required)",
+                    "createDDLStatement()"
+                ]
+            """)
+            .run();
+    }
+
 }

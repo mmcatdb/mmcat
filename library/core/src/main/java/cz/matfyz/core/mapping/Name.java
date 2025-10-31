@@ -1,8 +1,5 @@
 package cz.matfyz.core.mapping;
 
-import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.utils.UniqueSequentialGenerator;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.regex.Pattern;
@@ -34,13 +31,13 @@ public abstract class Name implements Serializable {
                 return new StringName(node.get("value").asText());
 
             final String type = node.get("type").asText();
-            if (!node.has("signature"))
-                return new TypedName(node.get("type").asText());
 
-            final Signature signature = codec.treeToValue(node.get("signature"), Signature.class);
-            final @Nullable String pattern = node.hasNonNull("pattern") ? node.get("pattern").asText() : null;
+            if (type.equals(DynamicName.type))
+                return new DynamicName(node.hasNonNull("pattern") ? node.get("pattern").asText() : null);
+            if (type.equals(IndexName.type))
+                return new IndexName(node.get("dimension").asInt());
 
-            return new DynamicName(type, signature, pattern);
+            return new TypedName(type);
         }
     }
 
@@ -68,7 +65,7 @@ public abstract class Name implements Serializable {
     }
 
     /**
-     * A name with a special meaning in the given datasource. E.g., the root of the complex property tree, or nodes in a Neo4j relationship.
+     * A name with a special meaning in the given datasource (or in general). E.g., the root of the complex property tree, or nodes in a Neo4j relationship.
      */
     public static class TypedName extends Name {
 
@@ -79,7 +76,7 @@ public abstract class Name implements Serializable {
         }
 
         @Override public String toString() {
-            return "<" + type + ">";
+            return type;
         }
 
         @Override public boolean equals(Object object) {
@@ -87,20 +84,21 @@ public abstract class Name implements Serializable {
         }
 
         /** The property is a root of the access path tree, the name doesn't mean anything. */
-        public static final String ROOT = "root";
-        /** The property is a value in an objex, the name represents its key. @deprecated */
-        public static final String KEY = "key";
-        /** The property is an element of an array, the name represents its index. @deprecated */
-        public static final String INDEX = "index";
+        public static final String ROOT = "$root";
+        /** The key corresponding to the {@link TypedName#VALUE}. */
+        public static final String KEY = "$key";
+        /** The actual value of the map/array property. */
+        public static final String VALUE = "$value";
 
     }
 
     /**
      * Name that is mapped to a key in an object / map / dictionary / etc.
+     * The actual value of the name is stored in a child property with the name {@link TypedName#KEY}.
      */
-    public static class DynamicName extends Name implements Comparable<DynamicName> {
+    public static class DynamicName extends TypedName implements Comparable<DynamicName> {
 
-        public final Signature signature;
+        static final String type = "$dynamic";
 
         /**
          * If provided, only the matching names will be considered when retrieving records.
@@ -111,8 +109,8 @@ public abstract class Name implements Serializable {
         @JsonProperty
         private final @Nullable String pattern;
 
-        public DynamicName(String type, Signature signature, @Nullable String pattern) {
-            this.signature = signature;
+        public DynamicName(@Nullable String pattern) {
+            super(type);
             this.pattern = pattern;
         }
 
@@ -135,28 +133,59 @@ public abstract class Name implements Serializable {
         private static final Pattern patternValidator = Pattern.compile("^[a-zA-Z0-9._\\-*]+$");
 
         @Override public String toString() {
-            final String patternString = pattern == null ? "" : " (" + pattern + "): ";
-            return "<" + patternString + ": " + signature.toString() + ">";
+            final String patternString = pattern == null ? "" : "(" + pattern + ")";
+            return type + patternString;
         }
 
         @Override public boolean equals(Object object) {
-            // Just signature is enough since there can't be two dynamic names with the same signature.
-            return object instanceof DynamicName dynamicName && signature.equals(dynamicName.signature);
+            return object instanceof DynamicName dynamicName &&
+                (pattern == null ? dynamicName.pattern == null : pattern.equals(dynamicName.pattern));
         }
 
-        // We don't need anything special here. All dynamic names should be unique.
-        private static final UniqueSequentialGenerator comparableGenerator = UniqueSequentialGenerator.create();
-        private final int comparable = comparableGenerator.next();
-
         @Override public int compareTo(DynamicName dynamicName) {
-            return comparable - dynamicName.comparable;
+            if (pattern == null)
+                return dynamicName.pattern == null ? 0 : -1;
+
+            return dynamicName.pattern == null ? 1 : pattern.compareTo(dynamicName.pattern);
+        }
+
+    }
+
+    /**
+     * Stores the value of the index in an array.
+     */
+    public static class IndexName extends TypedName implements Comparable<IndexName> {
+
+        static final String type = "$index";
+
+        /**
+         * An array can be multi-dimensional. This tells us for which dimension this index name is used. Zero based.
+         */
+        @JsonProperty
+        public final int dimension;
+
+        public IndexName(int dimension) {
+            super(type);
+            this.dimension = dimension;
+        }
+
+        @Override public String toString() {
+            return type + "(" + dimension + ")";
+        }
+
+        @Override public boolean equals(Object object) {
+            return object instanceof IndexName dynamicName && dimension == dynamicName.dimension;
+        }
+
+        @Override public int compareTo(IndexName dynamicName) {
+            return dimension - dynamicName.dimension;
         }
 
     }
 
     /** Compares names without the use of signatures. Used for sorting properties independently on schema category (mostly in tests). */
     public static int compareNamesLexicographically(Name a, Name b) {
-        // String names first, typed later, dynamic last.
+        // String names first, typed later, specials like dynamic and index last.
         if (a instanceof StringName aString) {
             return b instanceof StringName bString
                 ? aString.value.compareTo(bString.value)
@@ -166,30 +195,19 @@ public abstract class Name implements Serializable {
         if (b instanceof StringName)
             return 1;
 
-        // Let's try typed now ...
-        if (a instanceof TypedName aTyped) {
-            return b instanceof TypedName bTyped
-                ? aTyped.type.compareTo(bTyped.type)
-                : -1;
-        }
+        // Now both have to be typed ...
+        final var typeComparison = ((TypedName) a).type.compareTo(((TypedName) b).type);
+        if (typeComparison != 0)
+            return typeComparison;
 
-        if (b instanceof TypedName)
-            return 1;
+        // They are the same type. We compare specific types now.
+        if (a instanceof DynamicName dynamic)
+            return dynamic.compareTo((DynamicName) b);
 
-        // At this point, both names are dynamic.
-        final var aDynamic = (DynamicName) a;
-        final var bDynamic = (DynamicName) b;
+        if (a instanceof IndexName index)
+            return index.compareTo((IndexName) b);
 
-        if (aDynamic.pattern == null) {
-            return bDynamic.pattern == null
-                ? 0
-                : -1;
-        }
-
-        if (bDynamic.pattern == null)
-            return 1;
-
-        return aDynamic.pattern.compareTo(bDynamic.pattern);
+        return 0;
     }
 
 }

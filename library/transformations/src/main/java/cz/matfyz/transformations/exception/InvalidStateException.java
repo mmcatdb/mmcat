@@ -2,6 +2,7 @@ package cz.matfyz.transformations.exception;
 
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.Name;
 
@@ -17,12 +18,12 @@ public class InvalidStateException extends TransformationException {
         return new InvalidStateException("dynamicNameNotFound", dynamicName);
     }
 
-    public static InvalidStateException nameIsNotString(Name name) {
-        return new InvalidStateException("nameIsNotString", name);
+    public static InvalidStateException indexNotFound(Signature signature) {
+        return new InvalidStateException("indexNotFound", signature);
     }
 
-    public static InvalidStateException nameIsTyped(Name name) {
-        return new InvalidStateException("nameIsTyped", name);
+    public static InvalidStateException nameIsNotString(Name name) {
+        return new InvalidStateException("nameIsNotString", name);
     }
 
     public static InvalidStateException complexPropertyForProperty(Key key) {

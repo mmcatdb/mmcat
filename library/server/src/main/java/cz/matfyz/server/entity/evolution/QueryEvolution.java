@@ -16,7 +16,7 @@ public class QueryEvolution extends Evolution {
     public final Id queryId;
     public final String newContent;
     public final String oldContent;
-    // FIXME
+    // TODO
     public List<QueryEvolutionError> errors;
 
     private QueryEvolution(Id id, Id categoryId, Version version, Id queryId, String newContent, String oldContent, List<QueryEvolutionError> errors) {

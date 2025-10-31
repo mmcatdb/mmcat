@@ -27,7 +27,6 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     private static final Operators operators = new Operators();
 
     static {
-
         operators.define(Operator.Equal, "=");
         operators.define(Operator.NotEqual, "<>");
         operators.define(Operator.Less, "<");
@@ -39,7 +38,6 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
         operators.define(Operator.In, "IN");
         operators.define(Operator.NotIn, "NOT IN");
-
     }
 
     @Override public QueryStatement createDSLStatement() {

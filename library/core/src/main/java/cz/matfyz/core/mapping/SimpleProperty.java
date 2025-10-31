@@ -3,8 +3,6 @@ package cz.matfyz.core.mapping;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
-import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.utils.printable.*;
@@ -12,7 +10,6 @@ import cz.matfyz.core.utils.printable.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -32,13 +29,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = SimpleProperty.Deserializer.class)
 public class SimpleProperty extends AccessPath {
 
-    /** @deprecated build only */
-    public SimpleProperty(Name name, Signature signature) {
-        super(name, signature, List.of());
-    }
-
-    SimpleProperty(Name name, Signature signature, List<@Nullable Signature> indexSignatures) {
-        super(name, signature, indexSignatures);
+    SimpleProperty(Name name, Signature signature) {
+        super(name, signature);
     }
 
     @Override protected @Nullable List<AccessPath> getPropertyPathInternal(Signature signature) {
@@ -54,11 +46,6 @@ public class SimpleProperty extends AccessPath {
         }
 
         return null;
-    }
-
-    @Override protected SimpleProperty copyForReplacement(Name name, Signature signature, @Nullable Map<DynamicName, DynamicNameReplacement> replacedNames) {
-        // TODO check if indexSignatures needs to be updated as well
-        return new SimpleProperty(name, signature, indexSignatures);
     }
 
     @Override public void printTo(Printer printer) {
@@ -80,11 +67,6 @@ public class SimpleProperty extends AccessPath {
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
 
-            generator.writeArrayFieldStart("indexSignatures");
-            for (final var signature : property.indexSignatures())
-                generator.writePOJO(signature);
-            generator.writeEndArray();
-
             generator.writeEndObject();
         }
     }
@@ -99,9 +81,8 @@ public class SimpleProperty extends AccessPath {
 
             final Name name = codec.treeToValue(node.get("name"), Name.class);
             final Signature signature = codec.treeToValue(node.get("signature"), Signature.class);
-            final Signature[] indexSignatures = codec.treeToValue(node.get("indexSignatures"), Signature[].class);
 
-            return new SimpleProperty(name, signature, List.of(indexSignatures));
+            return new SimpleProperty(name, signature);
         }
     }
 

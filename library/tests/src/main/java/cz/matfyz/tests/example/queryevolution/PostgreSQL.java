@@ -26,18 +26,18 @@ public abstract class PostgreSQL {
             Schema.customer,
             customerKind,
             b -> b.root(
-                b.simple("id", Schema.customerToCustomerId),
-                b.simple("name", Schema.customerToName),
-                b.simple("surname", Schema.customerToSurname)
+                b.simple("id", Schema.customer_customerId),
+                b.simple("name", Schema.customer_name),
+                b.simple("surname", Schema.customer_surname)
             )
         );
     }
 
     public static void addCustomer(InstanceBuilder builder, String idValue, String nameValue, String surnameValue) {
         builder
-            .value(Schema.customerToCustomerId, idValue)
-            .value(Schema.customerToName, nameValue)
-            .value(Schema.customerToSurname, surnameValue)
+            .value(Schema.customer_customerId, idValue)
+            .value(Schema.customer_name, nameValue)
+            .value(Schema.customer_surname, surnameValue)
             .objex(Schema.customer);
     }
 
@@ -46,8 +46,8 @@ public abstract class PostgreSQL {
             Schema.knows,
             knowsKind,
             b -> b.root(
-                b.simple("id1", Schema.knowsToCustomerA),
-                b.simple("id2", Schema.knowsToCustomerB)
+                b.simple("id1", Schema.knows_customerA),
+                b.simple("id2", Schema.knows_customerB)
             )
         );
     }
@@ -57,12 +57,12 @@ public abstract class PostgreSQL {
         final var customerB = builder.getRow(Schema.customer, customerBIndex);
 
         final var knows = builder
-            .value(Schema.knowsToCustomerA, customerA.tryGetScalarValue(Schema.customerToCustomerId.signature()))
-            .value(Schema.knowsToCustomerB, customerB.tryGetScalarValue(Schema.customerToCustomerId.signature()))
+            .value(Schema.knows_customerA, customerA.tryGetScalarValue(Schema.customer_customerId.signature()))
+            .value(Schema.knows_customerB, customerB.tryGetScalarValue(Schema.customer_customerId.signature()))
             .objex(Schema.knows);
 
-        builder.morphism(Schema.knowsToCustomerA, knows, customerA);
-        builder.morphism(Schema.knowsToCustomerB, knows, customerB);
+        builder.morphism(Schema.knows_customerA, knows, customerA);
+        builder.morphism(Schema.knows_customerB, knows, customerB);
     }
 
     public static TestMapping product(SchemaCategory schema) {
@@ -70,18 +70,18 @@ public abstract class PostgreSQL {
             Schema.product,
             productKind,
             b -> b.root(
-                b.simple("pid", Schema.productToProductId),
-                b.simple("title", Schema.productToTitle),
-                b.simple("price", Schema.productToProductPrice)
+                b.simple("pid", Schema.product_productId),
+                b.simple("title", Schema.product_title),
+                b.simple("price", Schema.product_productPrice)
             )
         );
     }
 
     public static void addProduct(InstanceBuilder builder, String idValue, String titleValue, String priceValue) {
         builder
-            .value(Schema.productToProductId, idValue)
-            .value(Schema.productToTitle, titleValue)
-            .value(Schema.productToProductPrice, priceValue)
+            .value(Schema.product_productId, idValue)
+            .value(Schema.product_title, titleValue)
+            .value(Schema.product_productPrice, priceValue)
             .objex(Schema.product);
     }
 
@@ -90,14 +90,14 @@ public abstract class PostgreSQL {
             Schema.order,
             ordersKind,
             b -> b.root(
-                b.simple("id", Schema.orderToCustomerId),
-                b.simple("pid", Schema.orderToProductId),
-                b.simple("oid", Schema.orderToOrderId),
-                b.simple("price", Schema.orderToOrderPrice),
-                b.simple("quantity", Schema.orderToQuantity),
-                b.simple("street", Schema.orderToStreet),
-                b.simple("city", Schema.orderToCity),
-                b.simple("postCode", Schema.orderToPostCode)
+                b.simple("id", Schema.order_customerId),
+                b.simple("pid", Schema.order_productId),
+                b.simple("oid", Schema.order_orderId),
+                b.simple("price", Schema.order_orderPrice),
+                b.simple("quantity", Schema.order_quantity),
+                b.simple("street", Schema.order_street),
+                b.simple("city", Schema.order_city),
+                b.simple("postCode", Schema.order_postCode)
             )
         );
     }
@@ -107,17 +107,17 @@ public abstract class PostgreSQL {
         final var product = builder.getRow(Schema.product, productIndex);
 
         final var order = builder
-            .value(Schema.orderToOrderId, orderIdValue)
-            .value(Schema.orderToProductId, product.tryGetScalarValue(Schema.productToProductId.signature()))
-            .value(Schema.orderToOrderPrice, orderPriceValue)
-            .value(Schema.orderToQuantity, quantityValue)
-            .value(Schema.orderToStreet, streetValue)
-            .value(Schema.orderToCity, cityValue)
-            .value(Schema.orderToPostCode, postCodeValue)
+            .value(Schema.order_orderId, orderIdValue)
+            .value(Schema.order_productId, product.tryGetScalarValue(Schema.product_productId.signature()))
+            .value(Schema.order_orderPrice, orderPriceValue)
+            .value(Schema.order_quantity, quantityValue)
+            .value(Schema.order_street, streetValue)
+            .value(Schema.order_city, cityValue)
+            .value(Schema.order_postCode, postCodeValue)
             .objex(Schema.order);
 
-        builder.morphism(Schema.orderToCustomer, order, customer);
-        builder.morphism(Schema.orderToProduct, order, product);
+        builder.morphism(Schema.order_customer, order, customer);
+        builder.morphism(Schema.order_product, order, product);
     }
 
     public static TestMapping order(SchemaCategory schema) {
@@ -125,19 +125,19 @@ public abstract class PostgreSQL {
             Schema.order,
             orderKind,
             b -> b.root(
-                b.simple("oid", Schema.orderToOrderId),
-                b.simple("street", Schema.orderToStreet),
-                b.simple("city", Schema.orderToCity),
-                b.simple("postCode", Schema.orderToPostCode)
+                b.simple("oid", Schema.order_orderId),
+                b.simple("street", Schema.order_street),
+                b.simple("city", Schema.order_city),
+                b.simple("postCode", Schema.order_postCode)
             )
         );
     }
 
     public static void addOrder(InstanceBuilder builder, String orderIdValue, String streetValue, String cityValue, String postCodeValue) {
         builder
-            .value(Schema.orderToOrderId, orderIdValue)
-            .value(Schema.orderToCity, streetValue)
-            .value(Schema.orderToPostCode, postCodeValue)
+            .value(Schema.order_orderId, orderIdValue)
+            .value(Schema.order_city, streetValue)
+            .value(Schema.order_postCode, postCodeValue)
             .objex(Schema.order);
     }
 
@@ -146,10 +146,10 @@ public abstract class PostgreSQL {
             Schema.item,
             itemKind,
             b -> b.root(
-                b.simple("pid", Schema.itemToProductId),
-                b.simple("oid", Schema.itemToOrderId),
-                b.simple("price", Schema.itemToOrderPrice),
-                b.simple("quantity", Schema.itemToQuantity)
+                b.simple("pid", Schema.item_productId),
+                b.simple("oid", Schema.item_orderId),
+                b.simple("price", Schema.item_orderPrice),
+                b.simple("quantity", Schema.item_quantity)
             )
         );
     }
@@ -159,14 +159,14 @@ public abstract class PostgreSQL {
         final var order = builder.getRow(Schema.order, orderIndex);
 
         final var item = builder
-            .value(Schema.itemToProductId, product.tryGetScalarValue(Schema.productToProductId.signature()))
-            .value(Schema.itemToOrderId, order.tryGetScalarValue(Schema.orderToOrderId.signature()))
-            .value(Schema.itemToOrderPrice, orderPriceValue)
-            .value(Schema.itemToQuantity, quantityValue)
+            .value(Schema.item_productId, product.tryGetScalarValue(Schema.product_productId.signature()))
+            .value(Schema.item_orderId, order.tryGetScalarValue(Schema.order_orderId.signature()))
+            .value(Schema.item_orderPrice, orderPriceValue)
+            .value(Schema.item_quantity, quantityValue)
             .objex(Schema.item);
 
-        builder.morphism(Schema.itemToProduct, item, product);
-        builder.morphism(Schema.itemToOrder, item, order);
+        builder.morphism(Schema.item_product, item, product);
+        builder.morphism(Schema.item_order, item, order);
     }
 
     public static TestMapping ordered(SchemaCategory schema) {
@@ -174,8 +174,8 @@ public abstract class PostgreSQL {
             Schema.ordered,
             orderedKind,
             b -> b.root(
-                b.simple("id", Schema.orderToCustomerId),
-                b.simple("oid", Schema.orderedToOrderId)
+                b.simple("id", Schema.order_customerId),
+                b.simple("oid", Schema.ordered_orderId)
             )
         );
     }
@@ -185,12 +185,12 @@ public abstract class PostgreSQL {
         final var order = builder.getRow(Schema.order, orderIndex);
 
         final var ordered = builder
-            .value(Schema.orderedToCustomerId, customer.tryGetScalarValue(Schema.customerToCustomerId.signature()))
-            .value(Schema.orderedToOrderId, order.tryGetScalarValue(Schema.orderToOrderId.signature()))
+            .value(Schema.ordered_customerId, customer.tryGetScalarValue(Schema.customer_customerId.signature()))
+            .value(Schema.ordered_orderId, order.tryGetScalarValue(Schema.order_orderId.signature()))
             .objex(Schema.ordered);
 
-        builder.morphism(Schema.orderedToCustomer, ordered, customer);
-        builder.morphism(Schema.orderedToOrder, ordered, order);
+        builder.morphism(Schema.ordered_customer, ordered, customer);
+        builder.morphism(Schema.ordered_order, ordered, order);
     }
 
 }

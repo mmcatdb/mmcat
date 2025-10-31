@@ -13,7 +13,6 @@ import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name.DynamicName;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
@@ -176,22 +175,20 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     private ForestOfRecords innerPullForest(ComplexProperty path, ResultSet resultSet) throws SQLException {
         final ForestOfRecords forest = new ForestOfRecords();
         final List<Column> columns = createColumns(resultSet, path);
-        final var replacedNames = path.copyWithoutDynamicNames().replacedNames();
 
         while (resultSet.next()) {
             final var rootRecord = new RootRecord();
 
             for (final Column column : columns) {
+                final var property = column.property;
                 final var value = resultSet.getString(column.index);
 
-                if (!(column.property.name() instanceof final DynamicName dynamicName)) {
-                    rootRecord.addSimpleRecord(column.property.signature(), value);
+                if (property.name() instanceof DynamicName) {
+                    rootRecord.addDynamicRecordWithValue(property, column.name, value);
                     continue;
                 }
 
-                final var replacement = replacedNames.get(dynamicName);
-                final var replacer = rootRecord.addDynamicReplacer(replacement.prefix(), replacement.name(), column.name);
-                replacer.addSimpleRecord(replacement.value().signature(), value);
+                rootRecord.addSimpleRecord(property.signature(), value);
             }
 
             forest.addRecord(rootRecord);
@@ -200,7 +197,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return forest;
     }
 
-    private record Column(int index, String name, SimpleProperty property) {}
+    private record Column(int index, String name, AccessPath property) {}
 
     private List<Column> createColumns(ResultSet resultSet, ComplexProperty path) throws SQLException {
         final var metadata = resultSet.getMetaData();
@@ -212,7 +209,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             final @Nullable AccessPath property = path.findSubpathByName(name);
 
             if (property != null)
-                columns.add(new Column(i, name, (SimpleProperty) property));
+                columns.add(new Column(i, name, property));
         }
 
         return columns;
@@ -234,6 +231,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             }
         }
     }
+
+    // #region Querying
 
     @Override public QueryResult executeQuery(QueryStatement query) {
         final var columns = query.structure().children().stream().map(child -> child.name).toList();
@@ -388,5 +387,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
      * A list of PostgreSQL operators used with string values.
      */
     private static final List<String> STRING_OPERATORS = Arrays.asList("LIKE", "ILIKE", "NOT LIKE", "~", "!~");
+
+    // #endregion
 
 }

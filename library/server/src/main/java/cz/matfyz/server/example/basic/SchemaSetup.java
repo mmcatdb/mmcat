@@ -20,7 +20,7 @@ class SchemaSetup extends SchemaBase {
         addObjex(Schema.order, 0, 0);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.number, 0, -1);
-            addMorphism(Schema.orderToNumber);
+            addMorphism(Schema.order_number);
         });
         addIds(Schema.order);
 
@@ -28,80 +28,80 @@ class SchemaSetup extends SchemaBase {
         addObjex(Schema.tag, -1, -1);
         addComposite("custom", () -> {
             addObjex(Schema.tags, -0.5, -0.5);
-            addMorphism(Schema.tagsToOrder);
-            addMorphism(Schema.tagsToTag);
+            addMorphism(Schema.tags_order);
+            addMorphism(Schema.tags_tag);
             addObjex(Schema.index, -1, -0.5);
-            addMorphism(Schema.tagsToIndex);
+            addMorphism(Schema.tags_index);
             addIds(Schema.tags);
         });
 
         // Customer
         addObjex(Schema.customer, -2, 0);
-        addMorphism(Schema.orderToCustomer);
+        addMorphism(Schema.order_customer);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.name, -2, -1);
-            addMorphism(Schema.customerToName);
+            addMorphism(Schema.customer_name);
         });
         addIds(Schema.customer);
 
         addObjex(Schema.friend, -3, -0);
-        addMorphism(Schema.friendToCustomerA);
-        addMorphism(Schema.friendToCustomerB);
+        addMorphism(Schema.friend_customerA);
+        addMorphism(Schema.friend_customerB);
         addIds(Schema.friend);
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.since, -3, -1);
-            addMorphism(Schema.friendToSince);
+            addMorphism(Schema.friend_since);
         });
 
         // Address
         addObjex(Schema.address, -2, 1);
-        addMorphism(Schema.orderToAddress);
+        addMorphism(Schema.order_address);
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.street, -3, 1);
-            addMorphism(Schema.addressToStreet);
+            addMorphism(Schema.address_street);
         });
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.city, -3, 2);
-            addMorphism(Schema.addressToCity);
+            addMorphism(Schema.address_city);
         });
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.zip, -2, 2);
-            addMorphism(Schema.addressToZip);
+            addMorphism(Schema.address_zip);
         });
 
         // Item - Product
         addObjex(Schema.product, 2, 1);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.id, 1, 2);
-            addMorphism(Schema.productToId);
+            addMorphism(Schema.product_id);
         });
         addIds(Schema.product);
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.label, 2, 2);
-            addMorphism(Schema.productToLabel);
+            addMorphism(Schema.product_label);
         });
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.price, 3, 2);
-            addMorphism(Schema.productToPrice);
+            addMorphism(Schema.product_price);
         });
 
         // Item
         addComposite(ADD_SET, () -> {
             addObjex(Schema.item, 1, 1);
-            addMorphism(Schema.itemToOrder);
-            addMorphism(Schema.itemToProduct);
+            addMorphism(Schema.item_order);
+            addMorphism(Schema.item_product);
             addIds(Schema.item);
         });
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.quantity, 1, 0);
-            addMorphism(Schema.itemToQuantity);
+            addMorphism(Schema.item_quantity);
         });
 
         // Contact
@@ -110,9 +110,9 @@ class SchemaSetup extends SchemaBase {
         addComposite(ADD_MAP, () -> {
             addObjex(Schema.type, -1, 2);
             addObjex(Schema.contact, 0, 1);
-            addMorphism(Schema.contactToType);
-            addMorphism(Schema.contactToOrder);
-            addMorphism(Schema.contactToValue);
+            addMorphism(Schema.contact_type);
+            addMorphism(Schema.contact_order);
+            addMorphism(Schema.contact_value);
             addIds(Schema.contact);
         });
 
@@ -121,21 +121,21 @@ class SchemaSetup extends SchemaBase {
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.subject, 3, -1);
-            addMorphism(Schema.dataToSubject);
+            addMorphism(Schema.data_subject);
         });
 
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.content, 3, 0);
-            addMorphism(Schema.dataToContent);
+            addMorphism(Schema.data_content);
         });
 
         // Note
         addComposite(ADD_MAP, () -> {
             addObjex(Schema.locale, 2, 0);
             addObjex(Schema.note, 1, -1);
-            addMorphism(Schema.noteToLocale);
-            addMorphism(Schema.noteToOrder);
-            addMorphism(Schema.noteToData);
+            addMorphism(Schema.note_locale);
+            addMorphism(Schema.note_order);
+            addMorphism(Schema.note_data);
             addIds(Schema.note);
         });
     }

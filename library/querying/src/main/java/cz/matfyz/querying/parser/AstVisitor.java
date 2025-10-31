@@ -317,7 +317,6 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
     private static final Operators operators = new Operators();
 
     static {
-
         operators.define(Operator.Equal, "=");
         operators.define(Operator.NotEqual, "!=");
         operators.define(Operator.Less, "<");
@@ -334,7 +333,6 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         // TODO Not yet part of the grammar.
         operators.define(Operator.In, "IN");
         operators.define(Operator.NotIn, "NOT IN");
-
     }
 
 }

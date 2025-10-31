@@ -13,8 +13,8 @@ import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.MapResult;
@@ -22,6 +22,7 @@ import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.querying.ResultNode;
 import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.record.ComplexRecord;
+import cz.matfyz.core.record.ComplexRecord.ArrayCollector;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
@@ -75,11 +76,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         return find.iterator();
     }
 
-    private Map<DynamicName, DynamicNameReplacement> replacedNames;
-
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         final var forest = new ForestOfRecords();
-        replacedNames = path.copyWithoutDynamicNames().replacedNames();
 
         try (
             final var iterator = getDocumentIterator(query);
@@ -109,37 +107,56 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             if (property == null)
                 continue;
 
-            if (!(property.name() instanceof final DynamicName dynamicName)) {
-                addValueToRecord(record, property, value);
+            if (property.name() instanceof DynamicName) {
+                final var dynamicRecord = record.addDynamicRecord(property, key);
+                final var valueProperty = ((ComplexProperty) property).getTypedSubpath(TypedName.VALUE);
+                addValueToRecord(dynamicRecord, valueProperty, value);
                 continue;
             }
 
-            // Replace the dynamically named property with an object containing both name and value properties.
-            final var replacement = replacedNames.get(dynamicName);
-            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
-            addValueToRecord(replacer, replacement.value(), value);
+            addValueToRecord(record, property, value);
         }
     }
 
     private void addValueToRecord(ComplexRecord parentRecord, AccessPath property, Object value) {
-        if (value instanceof final ArrayList<?> array) {
-            // If it's array, we flatten it.
-            for (int i = 0; i < array.size(); i++)
-                addValueToRecord(parentRecord, property, array.get(i));
-            return;
-        }
+        if (property.signature().hasDual())
+            addArrayToRecord(parentRecord, property, (List<?>) value);
+        else
+            addScalarValueToRecord(parentRecord, property, value);
+    }
 
+    private void addScalarValueToRecord(ComplexRecord parentRecord, AccessPath property, Object value) {
         if (property instanceof final SimpleProperty simpleProperty) {
             // If it's a simple value, we add it to the record.
             parentRecord.addSimpleRecord(simpleProperty.signature(), value.toString());
             return;
         }
 
-        final var complexProperty = (ComplexProperty) property;
-        final ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.signature());
+        final ComplexRecord childRecord = parentRecord.addComplexRecord(property.signature());
+        addKeysToRecord(childRecord, (ComplexProperty) property, (Document) value);
+    }
 
-        final var object = (Document) value;
-        addKeysToRecord(childRecord, complexProperty, object);
+    private void addArrayToRecord(ComplexRecord parentRecord, AccessPath property, List<?> array) {
+        if (!(property instanceof final ComplexProperty complexProperty) || complexProperty.getIndexSubpaths().isEmpty()) {
+            for (int i = 0; i < array.size(); i++)
+                addScalarValueToRecord(parentRecord, property, array.get(i));
+            return;
+        }
+
+        final var collector = new ArrayCollector(parentRecord, complexProperty);
+        processArrayDimension(collector, array);
+    }
+
+    private void processArrayDimension(ArrayCollector collector, List<?> array) {
+        final var isValueDimension = collector.nextDimension();
+        for (int i = 0; i < array.size(); i++) {
+            collector.setIndex(i);
+            if (isValueDimension)
+                addValueToRecord(collector.addIndexedRecord(), collector.valueSubpath, array.get(i));
+            else
+                processArrayDimension(collector, (ArrayList<?>) array.get(i));
+        }
+        collector.prevDimension();
     }
 
     public String readCollectionAsStringForTests(String kindName) {
@@ -153,6 +170,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
         return sb.toString();
     }
+
+    // #region Querying
 
     @Override public QueryResult executeQuery(QueryStatement query) {
         final var output = new ArrayList<MapResult>();
@@ -187,7 +206,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         if (child.isLeaf()) {
             // This child is a leaf - it's value has to be either a string or an array of strings.
             if (child.isArray) {
-                final List<LeafResult> childList = ((ArrayList<String>) document.get(child.name))
+                final List<LeafResult> childList = ((List<String>) document.get(child.name))
                     .stream()
                     .map(childString -> new LeafResult(childString))
                     .toList();
@@ -203,7 +222,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         else {
             if (child.isArray) {
                 // An array of arrays is not supported yet.
-                final List<MapResult> childList = ((ArrayList<Document>) document.get(child.name))
+                final List<MapResult> childList = ((List<Document>) document.get(child.name))
                     .stream()
                     .map(childDocument -> getResultFromDocument(childDocument, child))
                     .toList();
@@ -316,14 +335,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * Parses a string into a list of strings.
+     * A map of operator names to MongoDB filter functions.
      */
-    private static List<String> parseStringToList(String value) {
-        return Arrays.stream(value.split(","))
-            .map(String::trim)
-            .map(str -> str.substring(1, str.length() - 1))
-            .toList();
-    }
+    private static final Map<String, BiFunction<String, Object, Bson>> OPERATORS = defineOperators();
 
     /**
      * Defines a mapping between operator names and their corresponding MongoDB filter functions.
@@ -347,8 +361,15 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     /**
-     * A map of operator names to MongoDB filter functions.
+     * Parses a string into a list of strings.
      */
-    private static final Map<String, BiFunction<String, Object, Bson>> OPERATORS = defineOperators();
+    private static List<String> parseStringToList(String value) {
+        return Arrays.stream(value.split(","))
+            .map(String::trim)
+            .map(str -> str.substring(1, str.length() - 1))
+            .toList();
+    }
+
+    // #endregion
 
 }

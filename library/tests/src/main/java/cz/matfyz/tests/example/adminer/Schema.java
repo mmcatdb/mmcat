@@ -46,53 +46,51 @@ public class Schema {
 
     // Signatures
 
-    public static final BuilderMorphism userToUserId =                      builder.morphism(user, userId, 1);
-    public static final BuilderMorphism userToName =                        builder.morphism(user, name, 2);
-    public static final BuilderMorphism userToCreatedAt =                   builder.morphism(user, createdAt, 3);
-    public static final BuilderMorphism userToFans =                        builder.morphism(user, fans, 4);
+    public static final BuilderMorphism user_userId =                      builder.morphism(user, userId, 1);
+    public static final BuilderMorphism user_name =                        builder.morphism(user, name, 2);
+    public static final BuilderMorphism user_createdAt =                   builder.morphism(user, createdAt, 3);
+    public static final BuilderMorphism user_fans =                        builder.morphism(user, fans, 4);
 
-    public static final BuilderMorphism businessToBusinessId =              builder.morphism(business, businessId, 5);
-    public static final BuilderMorphism businessToName =                    builder.morphism(business, name, 6);
-    public static final BuilderMorphism businessToCity =                    builder.morphism(business, city, 7);
-    public static final BuilderMorphism businessToState =                   builder.morphism(business, state, 8);
-    public static final BuilderMorphism businessToDates =                   builder.morphism(business, dates, 9);
-    public static final BuilderMorphism businessToAttributes =              builder.morphism(business, attributes, 10);
-    public static final BuilderMorphism attributesToWifi =                  builder.morphism(attributes, wifi, 11);
-    public static final BuilderMorphism attributesToOutdoorSeating =        builder.morphism(attributes, outdoorSeating, 12);
+    public static final BuilderMorphism business_businessId =              builder.morphism(business, businessId, 5);
+    public static final BuilderMorphism business_name =                    builder.morphism(business, name, 6);
+    public static final BuilderMorphism business_city =                    builder.morphism(business, city, 7);
+    public static final BuilderMorphism business_state =                   builder.morphism(business, state, 8);
+    public static final BuilderMorphism business_dates =                   builder.morphism(business, dates, 9);
+    public static final BuilderMorphism business_attributes =              builder.morphism(business, attributes, 10);
+    public static final BuilderMorphism attributes_wifi =                  builder.morphism(attributes, wifi, 11);
+    public static final BuilderMorphism attributes_outdoorSeating =        builder.morphism(attributes, outdoorSeating, 12);
 
-    public static final BuilderMorphism commentToCommentId =                builder.morphism(comment, commentId, 13);
-    public static final BuilderMorphism commentToUser =                     builder.morphism(comment, user, 14);
-    public static final BuilderMorphism commentToBusiness =                 builder.morphism(comment, business, 15);
-    public static final BuilderMorphism commentToDate =                     builder.morphism(comment, date, 16);
-    public static final BuilderMorphism commentToText =                     builder.morphism(comment, text, 17);
-    public static final BuilderMorphism commentToStars =                    builder.morphism(comment, stars, 18);
+    public static final BuilderMorphism comment_commentId =                builder.morphism(comment, commentId, 13);
+    public static final BuilderMorphism comment_user =                     builder.morphism(comment, user, 14);
+    public static final BuilderMorphism comment_business =                 builder.morphism(comment, business, 15);
+    public static final BuilderMorphism comment_date =                     builder.morphism(comment, date, 16);
+    public static final BuilderMorphism comment_text =                     builder.morphism(comment, text, 17);
+    public static final BuilderMorphism comment_stars =                    builder.morphism(comment, stars, 18);
 
-    public static final Signature       commentToUserId =                   builder.concatenate(commentToUser, userToUserId);
-    public static final Signature       commentToBusinessId =               builder.concatenate(commentToBusiness, businessToBusinessId);
+    public static final Signature       comment_userId =                   builder.concatenate(comment_user, user_userId);
+    public static final Signature       comment_businessId =               builder.concatenate(comment_business, business_businessId);
 
-    public static final BuilderMorphism businessHoursToBusinessHoursId =    builder.morphism(businessHours, businessHoursId, 19);
-    public static final BuilderMorphism businessHoursToBusiness =           builder.morphism(businessHours, business, 20);
-    public static final BuilderMorphism businessHoursToHours =              builder.morphism(businessHours, hours, 21);
+    public static final BuilderMorphism businessHours_businessHoursId =    builder.morphism(businessHours, businessHoursId, 19);
+    public static final BuilderMorphism businessHours_business =           builder.morphism(businessHours, business, 20);
+    public static final BuilderMorphism businessHours_hours =              builder.morphism(businessHours, hours, 21);
 
-    public static final Signature       businessHoursToBusinessId =         builder.concatenate(businessHoursToBusiness, businessToBusinessId);
+    public static final Signature       businessHours_businessId =         builder.concatenate(businessHours_business, business_businessId);
 
-    public static final BuilderMorphism friendToSince =                     builder.morphism(friend, since, 22);
-    public static final BuilderMorphism friendToFromUser =                  builder.tags(Tag.role).morphism(friend, user, 23);
-    public static final BuilderMorphism friendToToUser =                    builder.tags(Tag.role).morphism(friend, user, 24);
-    public static final Signature       frientToFromUserId =                builder.concatenate(friendToFromUser, userToUserId);
-    public static final Signature       frientToToUserId =                  builder.concatenate(friendToToUser, userToUserId);
+    public static final BuilderMorphism friend_since =                     builder.morphism(friend, since, 22);
+    public static final BuilderMorphism friend_fromUser =                  builder.tags(Tag.role).morphism(friend, user, 23);
+    public static final BuilderMorphism friend__user =                    builder.tags(Tag.role).morphism(friend, user, 24);
+    public static final Signature       frient_fromUserId =                builder.concatenate(friend_fromUser, user_userId);
+    public static final Signature       frient__userId =                  builder.concatenate(friend__user, user_userId);
 
     // Ids
 
     static {
-
         builder
-            .ids(user, userToUserId)
-            .ids(comment, commentToCommentId)
-            .ids(business, businessToBusinessId)
-            .ids(businessHours, businessHoursToBusinessHoursId)
-            .ids(friend, frientToFromUserId, frientToToUserId);
-
+            .ids(user, user_userId)
+            .ids(comment, comment_commentId)
+            .ids(business, business_businessId)
+            .ids(businessHours, businessHours_businessHoursId)
+            .ids(friend, frient_fromUserId, frient__userId);
     }
 
     /**

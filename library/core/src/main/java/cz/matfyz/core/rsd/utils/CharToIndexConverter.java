@@ -8,7 +8,6 @@ public class CharToIndexConverter {
     static final int[] map = new int[512];
 
     static {
-
         // 36 is default value for non specified characters
         Arrays.fill(map, 36);
         // Mapping '0' to '9' to integer values 0 to 9
@@ -37,7 +36,6 @@ public class CharToIndexConverter {
             final char normalized = normalizeChar(original);
             map[original] = normalized - 'a' + 10;
         }
-
     }
 
     public static int convert(char c) {

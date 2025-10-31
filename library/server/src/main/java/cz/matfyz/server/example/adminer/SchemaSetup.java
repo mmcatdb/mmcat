@@ -20,99 +20,99 @@ class SchemaSetup extends SchemaBase {
         addObjex(Schema.user, 3.5, 4);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.userId, 5, 3);
-            addMorphism(Schema.userToUserId);
+            addMorphism(Schema.user_userId);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.name, 4, 3);
-            addMorphism(Schema.userToName);
+            addMorphism(Schema.user_name);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.createdAt, 3, 3);
-            addMorphism(Schema.userToCreatedAt);
+            addMorphism(Schema.user_createdAt);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.fans, 2, 3);
-            addMorphism(Schema.userToFans);
+            addMorphism(Schema.user_fans);
         });
         addIds(Schema.user);
 
         // Comment
         addObjex(Schema.comment, 0.5, 5);
-        addMorphism(Schema.commentToUser);
+        addMorphism(Schema.comment_user);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.commentId, 1, 6);
-            addMorphism(Schema.commentToCommentId);
+            addMorphism(Schema.comment_commentId);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.date, 0, 6);
-            addMorphism(Schema.commentToDate);
+            addMorphism(Schema.comment_date);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.text, -1, 6);
-            addMorphism(Schema.commentToText);
+            addMorphism(Schema.comment_text);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.stars, 2, 6);
-            addMorphism(Schema.commentToStars);
+            addMorphism(Schema.comment_stars);
         });
         addIds(Schema.comment);
 
         // Business
         addObjex(Schema.business, -3.5, 3);
-        addMorphism(Schema.commentToBusiness);
+        addMorphism(Schema.comment_business);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.businessId, -2, 1);
-            addMorphism(Schema.businessToBusinessId);
+            addMorphism(Schema.business_businessId);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.city, -3, 1);
-            addMorphism(Schema.businessToCity);
+            addMorphism(Schema.business_city);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.state, -4, 1);
-            addMorphism(Schema.businessToState);
+            addMorphism(Schema.business_state);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.dates, -5, 1);
-            addMorphism(Schema.businessToDates);
+            addMorphism(Schema.business_dates);
         });
         addIds(Schema.business);
 
         // Attributes
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.attributes, -6, 1);
-            addMorphism(Schema.businessToAttributes);
+            addMorphism(Schema.business_attributes);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.wifi, -5.5, 0);
-            addMorphism(Schema.attributesToWifi);
+            addMorphism(Schema.attributes_wifi);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.outdoorSeating, -6.5, 0);
-            addMorphism(Schema.attributesToOutdoorSeating);
+            addMorphism(Schema.attributes_outdoorSeating);
         });
         addIds(Schema.attributes);
 
         // Business Hours
         addObjex(Schema.businessHours, 2, 1);
-        addMorphism(Schema.businessHoursToBusiness);
+        addMorphism(Schema.businessHours_business);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.businessHoursId, 1.5, 0);
-            addMorphism(Schema.businessHoursToBusinessHoursId);
+            addMorphism(Schema.businessHours_businessHoursId);
         });
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.hours, 2.5, 0);
-            addMorphism(Schema.businessHoursToHours);
+            addMorphism(Schema.businessHours_hours);
         });
         addIds(Schema.businessHours);
 
         // Friend
         addObjex(Schema.friend, 5, 6);
-        addMorphism(Schema.friendToFromUser);
-        addMorphism(Schema.friendToToUser);
+        addMorphism(Schema.friend_fromUser);
+        addMorphism(Schema.friend__user);
         addComposite(ADD_PROPERTY, () -> {
             addObjex(Schema.since, 7, 3);
-            addMorphism(Schema.friendToSince);
+            addMorphism(Schema.friend_since);
         });
         addIds(Schema.friend);
     }

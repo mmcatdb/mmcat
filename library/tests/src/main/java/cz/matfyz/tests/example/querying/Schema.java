@@ -31,9 +31,7 @@ public class Schema {
     public static final List<Signature> kind_nextId = new ArrayList<>();
 
     static {
-
         // Keys
-
         for (int i = 0; i < kindLabels.length; i++) {
             final String label = kindLabels[i];
             int key = (i + 1) * 10;
@@ -43,7 +41,6 @@ public class Schema {
         }
 
         // Signatures
-
         for (int i = 0; i < kindLabels.length; i++) {
             int signature = (i + 1) * 10;
             final BuilderObjex _kind = kind.get(i);
@@ -60,7 +57,6 @@ public class Schema {
 
         for (int i = 0; i < kindLabels.length - 1; i++)
             kind_nextId.add(builder.concatenate(kind_nextKind.get(i), kind_id.get(i + 1)));
-
     }
 
     // A separate kind for joins
@@ -121,9 +117,7 @@ public class Schema {
     public static final Signature       z3_y6 = builder.morphism(y6, z3, 126).dual();
 
     static {
-
         builder.ids(z0, z0_z2);
-
     }
 
     /**

@@ -11,16 +11,16 @@ import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.record.ComplexRecord;
+import cz.matfyz.core.record.ComplexRecord.ArrayCollector;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,15 +57,11 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    private Map<DynamicName, DynamicNameReplacement> replacedNames;
-
     /**
      * Processes a JSON input stream and populates a {@link ForestOfRecords} with data parsed from the stream.
      */
     private ForestOfRecords processJsonStream(Stream<ObjectNode> stream, ComplexProperty path) throws IOException {
         final var forest = new ForestOfRecords();;
-
-        replacedNames = path.copyWithoutDynamicNames().replacedNames();
 
         stream.forEach(object -> {
             final RootRecord rootRecord = new RootRecord();
@@ -84,41 +80,65 @@ public class JsonPullWrapper implements AbstractPullWrapper {
             if (value == null || value.isNull())
                 continue;
 
-            final var subpath = path.findSubpathByName(key);
-            if (subpath == null)
+            final var property = path.findSubpathByName(key);
+            if (property == null)
                 continue;
 
-            if (!(subpath.name() instanceof final DynamicName dynamicName)) {
-                addValueToRecord(record, subpath, value);
+            if (property.name() instanceof DynamicName) {
+                final var dynamicRecord = record.addDynamicRecord(property, key);
+                final var valueProperty = ((ComplexProperty) property).getTypedSubpath(TypedName.VALUE);
+                addValueToRecord(dynamicRecord, valueProperty, value);
                 continue;
             }
 
-            // Replace the dynamically named property with an object containing both name and value properties.
-            final var replacement = replacedNames.get(dynamicName);
-            final var replacer = record.addDynamicReplacer(replacement.prefix(), replacement.name(), key);
-            addValueToRecord(replacer, replacement.value(), value);
+            addValueToRecord(record, property, value);
         }
     }
 
     private void addValueToRecord(ComplexRecord parentRecord, AccessPath property, JsonNode value) {
-        if (value.isArray()) {
-            // If it's array, we flatten it.
-            for (final JsonNode arrayItem : value)
-                addValueToRecord(parentRecord, property, arrayItem);
-            return;
-        }
+        if (property.signature().hasDual())
+            addArrayToRecord(parentRecord, property, value);
+        else
+            addScalarValueToRecord(parentRecord, property, value);
+    }
 
+    private void addScalarValueToRecord(ComplexRecord parentRecord, AccessPath property, JsonNode value) {
         if (property instanceof final SimpleProperty simpleProperty) {
             // If it's a simple value, we add it to the record.
             parentRecord.addSimpleRecord(simpleProperty.signature(), value.asText());
             return;
         }
 
-        final var complexProperty = (ComplexProperty) property;
-        final ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.signature());
-
-        addKeysToRecord(childRecord, complexProperty, (ObjectNode) value);
+        final ComplexRecord childRecord = parentRecord.addComplexRecord(property.signature());
+        addKeysToRecord(childRecord, (ComplexProperty) property, (ObjectNode) value);
     }
+
+    private void addArrayToRecord(ComplexRecord parentRecord, AccessPath property, JsonNode array) {
+        if (!(property instanceof final ComplexProperty complexProperty) || complexProperty.getIndexSubpaths().isEmpty()) {
+            for (final var element : array)
+                addScalarValueToRecord(parentRecord, property, element);
+            return;
+        }
+
+        final var collector = new ArrayCollector(parentRecord, complexProperty);
+        processArrayDimension(collector, array);
+    }
+
+    private void processArrayDimension(ArrayCollector collector, JsonNode array) {
+        final var isValueDimension = collector.nextDimension();
+        int i = 0;
+        for (final var element : array) {
+            collector.setIndex(i);
+            if (isValueDimension)
+                addValueToRecord(collector.addIndexedRecord(), collector.valueSubpath, element);
+            else
+                processArrayDimension(collector, element);
+            i++;
+        }
+        collector.prevDimension();
+    }
+
+    // #region Querying
 
     @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("JsonPullWrapper.executeQuery not implemented.");
@@ -139,5 +159,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
     @Override public DataResponse getQueryResult(QueryContent query) {
         throw new UnsupportedOperationException("JsonPullWrapper.getQueryResult not implemented.");
     }
+
+    // #endregion
 
 }

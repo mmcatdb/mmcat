@@ -7,11 +7,9 @@ import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.AccessPathBuilder;
 import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObjex;
@@ -104,6 +102,8 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
     private Map<String, Signature> mapOldClusterNameSignature = new HashMap<>(); // this maps the original cluster names to their original signatures
     private Map<Signature, Signature> mapOldNewSignature = new HashMap<>(); // this maps the original signatures to the new signatures
+
+    private final AccessPathBuilder b = new AccessPathBuilder();
 
     /**
      * Constructs a {@code ClusterMerge} instance with the specified data.
@@ -436,12 +436,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             }
 
             if (complexChanged) {
-                List<AccessPath> updatedSubpaths = complexProperty != null ? new ArrayList<>(complexProperty.subpaths()) : new ArrayList<>();
-                AccessPath newAccessPath = createNewComplexProperty(firstClusterAccessPath);
+                final List<AccessPath> updatedSubpaths = complexProperty != null ? new ArrayList<>(complexProperty.subpaths()) : new ArrayList<>();
+                final AccessPath newAccessPath = createNewComplexProperty(firstClusterAccessPath);
                 updatedSubpaths.add(newAccessPath);
 
-                AccessPath resultAccessPath = complexProperty != null
-                    ? new ComplexProperty(complexProperty.name(), complexProperty.signature(), updatedSubpaths)
+                final AccessPath resultAccessPath = complexProperty != null
+                    ? b.complex(complexProperty.name(), complexProperty.signature(), updatedSubpaths.toArray(AccessPath[]::new))
                     : newAccessPath;
 
                 newSubpaths.add(resultAccessPath);
@@ -456,20 +456,19 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     private AccessPath createNewComplexProperty(AccessPath original) {
-        if (original instanceof SimpleProperty) {
-            Signature dynamicNameSignature = this.newClusterSignature.concatenate(this.newTypeSignature);
-            Signature valueSignature = this.newClusterSignature.concatenate(this.newValueSignature);
-            return new SimpleProperty(new DynamicName(TypedName.KEY, dynamicNameSignature, newClusterName + "*"), valueSignature);
-        }
+        if (original instanceof SimpleProperty)
+            return b.dynamic(this.newClusterSignature, newClusterName + "*", this.newTypeSignature, this.newValueSignature);
 
         final var newSubpaths = transformSubpaths(((ComplexProperty) original).subpaths());
 
         if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
-            return new ComplexProperty(
-                new DynamicName(TypedName.KEY, newClusterSignature, newClusterName + "*"),
-                newClusterSignature,
-                newSubpaths
-            );
+            // return b.complex(
+            //     new DynamicName(newClusterSignature, newClusterName + "*"),
+            //     newClusterSignature,
+            //     newSubpaths
+            // );
+            // FIXME This is definitely wrong. The original code doesn't make sense (why is newClusterSignature repeated?), However, I don't have time to fix it now.
+            throw new IllegalStateException("Signature mapping not found for complex property.");
         }
 
         Signature complexPropertySignature = mapOldNewSignature.get(original.signature());
@@ -477,25 +476,25 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             // Meaning the original was an array and so the signature was dual.
             complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
 
-        return new ComplexProperty(original.name(), complexPropertySignature, newSubpaths);
+        return b.complex(original.name(), complexPropertySignature, newSubpaths);
     }
 
-    private List<AccessPath> transformSubpaths(Collection<AccessPath> originalSubpaths) {
+    private AccessPath[] transformSubpaths(Collection<AccessPath> originalSubpaths) {
         return originalSubpaths.stream()
             .map(this::transformSubpath)
-            .toList();
+            .toArray(AccessPath[]::new);
     }
 
     private AccessPath transformSubpath(AccessPath original) {
-        if (original instanceof SimpleProperty)
-            return createNewSimpleProperty((SimpleProperty) original);
-        if (original instanceof ComplexProperty)
-            return createNewComplexProperty((ComplexProperty) original);
+        if (original instanceof final SimpleProperty simpleProperty)
+            return createNewSimpleProperty((SimpleProperty) simpleProperty);
+        if (original instanceof final ComplexProperty complexProperty)
+            return createNewComplexProperty((ComplexProperty) complexProperty);
 
         throw new IllegalArgumentException("Unknown AccessPath type");
     }
 
     private SimpleProperty createNewSimpleProperty(SimpleProperty original) {
-        return new SimpleProperty(original.name(), mapOldNewSignature.get(original.signature()));
+        return b.simple(original.name(),mapOldNewSignature.get(original.signature()));
     }
 }

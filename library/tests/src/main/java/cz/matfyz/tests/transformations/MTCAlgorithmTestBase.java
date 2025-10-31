@@ -80,21 +80,27 @@ public class MTCAlgorithmTestBase {
         for (final var expectedObjex : expectedInstance.allObjexes()) {
             final var objex = actualInstance.getObjex(expectedObjex.schema.key());
 
-            final var expectedString = expectedObjex.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObjex, schema)).toList();
-            final var string = objex.allRowsToSet().stream().map(row -> rowToMappingsString(row, objex, schema)).toList();
+            final var expectedString = expectedObjex.allRowsToSet().stream()
+                .map(row -> rowToMappingsString(row, expectedObjex, schema))
+                .sorted().toList();
+            final var string = objex.allRowsToSet().stream()
+                .map(row -> rowToMappingsString(row, objex, schema))
+                .sorted().toList();
 
             assertEquals(expectedString, string);
         }
     }
 
+    private final static String GENERATED_ID = "<generated>";
+
     private static String rowToMappingsString(DomainRow row, InstanceObjex objex, SchemaCategory schema) {
-        String output = "\n[row] (" + objex.schema.key() + ") "  + row;
+        String output = "\n[row] (" + objex.schema.key() + ") "  + row.toStringWithoutGeneratedIds(GENERATED_ID);
 
         for (final var entry : row.getAllMappingsFrom()) {
             final var signature = entry.getKey();
             final var codObjex = schema.getMorphism(signature).cod();
 
-            output += "\n\tmappings --[" + entry.getKey() + "]->(" + codObjex.key() + "): " + entry.getValue().cod();
+            output += "\n\tmappings --[" + entry.getKey() + "]->(" + codObjex.key() + "): " + entry.getValue().cod().toStringWithoutGeneratedIds(GENERATED_ID);
         }
 
         return output + "\n";

@@ -5,10 +5,9 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.ComplexProperty.DynamicNameReplacement;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
-import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
@@ -27,7 +26,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import cz.matfyz.core.mapping.Name.StringName;
 
 /**
  * A pull wrapper implementation for CSV files that implements the {@link AbstractPullWrapper} interface.
@@ -44,8 +42,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         this.provider = provider;
     }
 
-    private Map<DynamicName, DynamicNameReplacement> replacedNames;
-
     /**
      * Pulls a forest of records from a CSV file based on a complex property path and query content.
      */
@@ -60,8 +56,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
             ? baseSchema.withHeader()
             : baseSchema.withColumnsFrom(createHeaderSchema(path));
 
-        replacedNames = path.copyWithoutDynamicNames().replacedNames();
-
         try (
             InputStream inputStream = provider.getInputStream();
         ) {
@@ -70,7 +64,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
                 .with(schema)
                 .readValues(inputStream);
 
-            @Nullable Map<String, SimpleProperty> columns = null;
+            @Nullable Map<String, AccessPath> columns = null;
 
             while (reader.hasNext()) {
                 if (columns == null)
@@ -96,20 +90,20 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         return builder.build();
     }
 
-    private Map<String, SimpleProperty> createColumns(Map<String, String> row, ComplexProperty path) {
-        final Map<String, SimpleProperty> columns = new TreeMap<>();
+    private Map<String, AccessPath> createColumns(Map<String, String> row, ComplexProperty path) {
+        final Map<String, AccessPath> columns = new TreeMap<>();
 
         for (final String name : row.keySet()) {
             final @Nullable AccessPath property = path.findSubpathByName(name);
 
             if (property != null)
-                columns.put(name, (SimpleProperty) property);
+                columns.put(name, property);
         }
 
         return columns;
     }
 
-    private RootRecord createRecord(Map<String, SimpleProperty> columns, Map<String, String> line) {
+    private RootRecord createRecord(Map<String, AccessPath> columns, Map<String, String> line) {
         final var rootRecord = new RootRecord();
 
         for (final var entry : columns.entrySet()) {
@@ -117,18 +111,18 @@ public class CsvPullWrapper implements AbstractPullWrapper {
             final var property = entry.getValue();
             final var value = line.get(name);
 
-            if (!(property.name() instanceof final DynamicName dynamicName)) {
-                rootRecord.addSimpleRecord(property.signature(), value);
+            if (property.name() instanceof DynamicName) {
+                rootRecord.addDynamicRecordWithValue(property, name, value);
                 continue;
             }
 
-            final var replacement = replacedNames.get(dynamicName);
-            final var replacer = rootRecord.addDynamicReplacer(replacement.prefix(), replacement.name(), name);
-            replacer.addSimpleRecord(replacement.value().signature(), value);
+            rootRecord.addSimpleRecord(property.signature(), value);
         }
 
         return rootRecord;
     }
+
+    // #region Querying
 
     @Override public QueryResult executeQuery(QueryStatement statement) {
         throw new UnsupportedOperationException("CsvPullWrapper.executeQuery not implemented.");
@@ -149,5 +143,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
     @Override public DataResponse getQueryResult(QueryContent query) {
         throw new UnsupportedOperationException("CsvPullWrapper.getQueryResult not implemented.");
     }
+
+    // #endregion
 
 }

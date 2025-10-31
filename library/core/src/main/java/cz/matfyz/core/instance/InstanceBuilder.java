@@ -86,10 +86,15 @@ public class InstanceBuilder {
     }
 
     public InstanceBuilder generatedId(String value) {
-        if (value != null)
-            values.put(Signature.empty(), value);
+        values.put(Signature.empty(), value);
 
         return this;
+    }
+
+    private final UniqueSequentialGenerator idGenerator = UniqueSequentialGenerator.create();
+
+    public InstanceBuilder generatedId() {
+        return generatedId(idGenerator.nextString());
     }
 
     public DomainRow objex(Key key) {
