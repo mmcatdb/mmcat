@@ -83,8 +83,8 @@ class QueryTests {
                     quantity ?quantity .
             }
             WHERE {
-                ?item 13/16 ?label .
-                ?item 14 ?quantity .
+                ?item 52/55 ?label .
+                ?item 53 ?quantity .
             }
         """)
         .expected("""
@@ -143,30 +143,30 @@ class QueryTests {
 
                 }
                 WHERE {
-                    ?orderItem 14 ?quantity .
-                    ?orderItem 13 ?product .
-                    ?product 15 ?id .
-                    ?product 16 ?label .
+                    ?orderItem 53 ?quantity .
+                    ?orderItem 52 ?product .
+                    ?product 54 ?id .
+                    ?product 55 ?label .
                 }
             """)
             .expected("""
                 [ {
-                    "id": "123",
+                    "id": "p_123",
                     "label": "Clean Code",
                     "orders": [ { id: "o_100" } ]
                 },
                 {
-                    "id": "765",
+                    "id": "p_765",
                     "label": "The Lord of the Rings",
                     "orders": [ { id: "o_100" } ]
                 },
                 {
-                    "id": "457",
+                    "id": "p_457",
                     "label": "The Art of War",
                     "orders": [ { id: "o_200" } ]
                 },
                 {
-                    "id": "734",
+                    "id": "p_734",
                     "label": "Animal Farm",
                     "orders": [ { id: "o_200" } ]
                 } ]
@@ -189,30 +189,30 @@ class QueryTests {
 
                 }
                 WHERE {
-                    ?product 15 ?id .
-                    ?product 16 ?label .
-                    ?product -13 ?orders .
-                    ?orders 12/1 ?orderId .
+                    ?product 54 ?id .
+                    ?product 55 ?label .
+                    ?product -52 ?orders .
+                    ?orders 51/1 ?orderId .
                 }
             """)
             .expected("""
                 [ {
-                    "id": "123",
+                    "id": "p_123",
                     "label": "Clean Code",
                     "orders": [ { id: "o_100" } ]
                 },
                 {
-                    "id": "765",
+                    "id": "p_765",
                     "label": "The Lord of the Rings",
                     "orders": [ { id: "o_100" } ]
                 },
                 {
-                    "id": "457",
+                    "id": "p_457",
                     "label": "The Art of War",
                     "orders": [ { id: "o_200" } ]
                 },
                 {
-                    "id": "734",
+                    "id": "p_734",
                     "label": "Animal Farm",
                     "orders": [ { id: "o_200" } ]
                 } ]
@@ -250,9 +250,9 @@ class QueryTests {
                         city ?city .
                 }
                 WHERE {
-                    ?order 8 ?address .
-                    ?address 9 ?street ;
-                        10 ?city .
+                    ?order 41 ?address .
+                    ?address 42 ?street ;
+                        43 ?city .
                 }
             """)
             .expected("""
@@ -289,9 +289,9 @@ class QueryTests {
                         label ?label .
                 }
                 WHERE {
-                    ?order -12 ?item .
-                    ?item 13/15 ?id ;
-                        13/16 ?label .
+                    ?order -51 ?item .
+                    ?item 52/54 ?id ;
+                        52/55 ?label .
                 }
             """)
             .expected("""
@@ -352,9 +352,9 @@ class QueryTests {
                         order ?orderNumber .
                 }
                 WHERE {
-                    ?contact 20 ?type .
-                    ?contact 19 ?value .
-                    ?contact 18/1 ?orderNumber .
+                    ?contact 63 ?type .
+                    ?contact 62 ?value .
+                    ?contact 61/1 ?orderNumber .
                 }
             """)
             .expected("""
@@ -392,7 +392,7 @@ class QueryTests {
                     ?order id ?id .
                 }
                 WHERE {
-                    ?order -12/13/15 ?id .
+                    ?order -51/52/54 ?id .
                 }
             """)
             .expected("""
@@ -420,9 +420,9 @@ class QueryTests {
                         label ?label .
                 }
                 WHERE {
-                    ?order -12 ?item .
-                    ?item 13/15 ?id ;
-                        13/16 ?label .
+                    ?order -51 ?item .
+                    ?item 52/54 ?id ;
+                        52/55 ?label .
                 }
             """)
             .expected("""
@@ -496,7 +496,7 @@ class QueryTests {
                     ?order tags ?tag .
                 }
                 WHERE {
-                    ?order -2 ?tag .
+                    ?order -2/4 ?tag .
                 }
             """)
             .expected("""
@@ -724,9 +724,9 @@ class QueryTests {
                         price ?price .
                 }
                 WHERE {
-                    ?product 15 ?id ;
-                        16 ?label ;
-                        17 ?price .
+                    ?product 54 ?id ;
+                        55 ?label ;
+                        56 ?price .
                 }
             """)
             .expected("""
@@ -764,11 +764,11 @@ class QueryTests {
                         price ?price .
                 }
                 WHERE {
-                    ?order -12 ?item .
-                    ?item 14 ?quantity ;
-                        13/15 ?id ;
-                        13/16 ?label ;
-                        13/17 ?price .
+                    ?order -51 ?item .
+                    ?item 53 ?quantity ;
+                        52/54 ?id ;
+                        52/55 ?label ;
+                        52/56 ?price .
                 }
             """)
             .expected("""
@@ -800,9 +800,9 @@ class QueryTests {
                         id ?id ;
                 }
                 WHERE {
-                    ?order -12 ?item .
-                    ?item 14 ?quantity ;
-                        13/15 ?id ;
+                    ?order -51 ?item .
+                    ?item 53 ?quantity ;
+                        52/54 ?id ;
                 }
             """)
             .expected("""
@@ -830,8 +830,8 @@ class QueryTests {
                         id ?id .
                 }
                 WHERE {
-                    ?item 12/1 ?number ;
-                        13/15 ?id .
+                    ?item 51/1 ?number ;
+                        52/54 ?id .
                 }
             """)
             .expected("""
@@ -862,8 +862,8 @@ class QueryTests {
                         label ?label .
                 }
                 WHERE {
-                    ?item 14 ?quantity ;
-                        13/16 ?label .
+                    ?item 53 ?quantity ;
+                        52/55 ?label .
                 }
             """)
             .expected("""
@@ -898,8 +898,8 @@ class QueryTests {
                         street ?street .
                 }
                 WHERE {
-                    ?item 14 ?quantity ;
-                        12/8/9 ?street .
+                    ?item 53 ?quantity ;
+                        51/41/42 ?street .
                 }
             """)
             .expected("""
@@ -938,8 +938,8 @@ class QueryTests {
                 }
                 WHERE {
                     ?order
-                        3/4 ?customerName ;
-                        -2 ?tag .
+                        21/22 ?customerName ;
+                        -2/4 ?tag .
                 }
             """)
             .expected("""
@@ -967,10 +967,10 @@ class QueryTests {
                         id ?id .
                 }
                 WHERE {
-                    ?item 12 ?order .
+                    ?item 51 ?order .
                     ?order 1 ?number .
-                    ?item 13 ?product .
-                    ?product 15 ?id .
+                    ?item 52 ?product .
+                    ?product 54 ?id .
                 }
             """)
             .expected("""

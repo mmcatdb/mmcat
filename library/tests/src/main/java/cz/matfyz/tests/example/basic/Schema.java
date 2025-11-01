@@ -22,91 +22,86 @@ public abstract class Schema {
     public static final BuilderObjex order =           builder.objex("order", 1);
     public static final BuilderObjex number =          builder.objex("number", 2);
     public static final BuilderObjex tags =            builder.objex("tags", 3);
-    public static final BuilderObjex tag =             builder.objex("tag", 4);
-    public static final BuilderObjex index =           builder.objex("index", 5);
+    public static final BuilderObjex index =           builder.objex("index", 4);
+    public static final BuilderObjex tag =             builder.objex("tag", 5);
 
-    public static final BuilderObjex customer =        builder.objex("customer", 6);
-    public static final BuilderObjex name =            builder.objex("name", 7);
-    public static final BuilderObjex friend =          builder.objex("friend", 8);
-    public static final BuilderObjex since =           builder.objex("since", 9);
+    public static final BuilderObjex customer =        builder.objex("customer", 21);
+    public static final BuilderObjex name =            builder.objex("name", 22);
+    public static final BuilderObjex friend =          builder.objex("friend", 23);
+    public static final BuilderObjex since =           builder.objex("since", 24);
 
-    public static final BuilderObjex address =         builder.generatedIds().objex("address", 10);
-    public static final BuilderObjex street =          builder.objex("street", 11);
-    public static final BuilderObjex city =            builder.objex("city", 12);
-    public static final BuilderObjex zip =             builder.objex("zip", 13);
+    public static final BuilderObjex address =         builder.generatedIds().objex("address", 41);
+    public static final BuilderObjex street =          builder.objex("street", 42);
+    public static final BuilderObjex city =            builder.objex("city", 43);
+    public static final BuilderObjex zip =             builder.objex("zip", 44);
 
-    public static final BuilderObjex item =            builder.objex("item", 14);
-    public static final BuilderObjex product =         builder.objex("product", 15);
-    public static final BuilderObjex quantity =        builder.objex("quantity", 16);
-    public static final BuilderObjex id =              builder.objex("id", 17);
-    public static final BuilderObjex label =           builder.objex("label", 18);
-    public static final BuilderObjex price =           builder.objex("price", 19);
+    public static final BuilderObjex item =            builder.objex("item", 51);
+    public static final BuilderObjex product =         builder.objex("product", 52);
+    public static final BuilderObjex quantity =        builder.objex("quantity", 53);
+    public static final BuilderObjex id =              builder.objex("id", 54);
+    public static final BuilderObjex label =           builder.objex("label", 55);
+    public static final BuilderObjex price =           builder.objex("price", 56);
 
-    public static final BuilderObjex contact =         builder.objex("contact", 20);
-    public static final BuilderObjex value =           builder.objex("value", 21);
-    public static final BuilderObjex type =            builder.objex("type", 22);
+    public static final BuilderObjex contact =         builder.objex("contact", 61);
+    public static final BuilderObjex value =           builder.objex("value", 62);
+    public static final BuilderObjex type =            builder.objex("type", 63);
 
-    public static final BuilderObjex note =            builder.objex("note", 23);
-    public static final BuilderObjex locale =          builder.objex("locale", 24);
-    public static final BuilderObjex data =            builder.generatedIds().objex("data", 25);
-    public static final BuilderObjex subject =         builder.objex("subject", 26);
-    public static final BuilderObjex content =         builder.objex("content", 27);
+    public static final BuilderObjex note =            builder.objex("note", 71);
+    public static final BuilderObjex locale =          builder.objex("locale", 72);
+    public static final BuilderObjex data =            builder.generatedIds().objex("data", 73);
+    public static final BuilderObjex subject =         builder.objex("subject", 74);
+    public static final BuilderObjex content =         builder.objex("content", 75);
 
     // Morphisms
 
     public static final BuilderMorphism order_number =             builder.morphism(order, number, 1);
-    // FIXME remove this from everywhere
-    // public static final BuilderMorphism tag_order =                builder.morphism(tag, order, 2);
-
-    // FIXME rename all morphisms
-    // TODO use a different numbering (e.g., 1, 2, 3, 11, 12, 13, 21, ...) to allow easier insertions later.
-    public static final BuilderMorphism tags_order =               builder.tags(Tag.role).morphism(tags, order, 901);
-    public static final BuilderMorphism tags_tag =                 builder.tags(Tag.role).morphism(tags, tag, 902);
-    public static final BuilderMorphism tags_index =               builder.tags(Tag.role).morphism(tags, index, 903);
-    public static final Signature       order_tag =                builder.concatenate(tags_order.dual(), tags_tag);
+    public static final BuilderMorphism tags_order =               builder.tags(Tag.role).morphism(tags, order, 2);
+    public static final BuilderMorphism tags_index =               builder.tags(Tag.role).morphism(tags, index, 3);
+    public static final BuilderMorphism tags_tag =                 builder.tags(Tag.role).morphism(tags, tag, 4);
     public static final Signature       order_index =              builder.concatenate(tags_order.dual(), tags_index);
+    public static final Signature       order_tag =                builder.concatenate(tags_order.dual(), tags_tag);
     public static final Signature       tags_number =              builder.concatenate(tags_order, order_number);
 
-    public static final BuilderMorphism order_customer =           builder.morphism(order, customer, 3);
-    public static final BuilderMorphism customer_name =            builder.morphism(customer, name, 4);
-    public static final BuilderMorphism friend_customerA =         builder.morphism(friend, customer, 5);
-    public static final BuilderMorphism friend_customerB =         builder.morphism(friend, customer, 6);
-    public static final BuilderMorphism friend_since =             builder.morphism(friend, since, 7);
+    public static final BuilderMorphism order_customer =           builder.morphism(order, customer, 21);
+    public static final BuilderMorphism customer_name =            builder.morphism(customer, name, 22);
+    public static final BuilderMorphism friend_customerA =         builder.morphism(friend, customer, 23);
+    public static final BuilderMorphism friend_customerB =         builder.morphism(friend, customer, 24);
+    public static final BuilderMorphism friend_since =             builder.morphism(friend, since, 25);
 
     public static final Signature       order_name =               builder.concatenate(order_customer, customer_name);
     public static final Signature       friend_nameA =             builder.concatenate(friend_customerA, customer_name);
     public static final Signature       friend_nameB =             builder.concatenate(friend_customerB, customer_name);
 
-    public static final BuilderMorphism order_address =            builder.morphism(order, address, 8);
-    public static final BuilderMorphism address_street =           builder.morphism(address, street, 9);
-    public static final BuilderMorphism address_city =             builder.morphism(address, city, 10);
-    public static final BuilderMorphism address_zip =              builder.morphism(address, zip, 11);
+    public static final BuilderMorphism order_address =            builder.morphism(order, address, 41);
+    public static final BuilderMorphism address_street =           builder.morphism(address, street, 42);
+    public static final BuilderMorphism address_city =             builder.morphism(address, city, 43);
+    public static final BuilderMorphism address_zip =              builder.morphism(address, zip, 44);
 
-    public static final BuilderMorphism item_order =               builder.tags(Tag.role).morphism(item, order, 12);
-    public static final BuilderMorphism item_product =             builder.tags(Tag.role).morphism(item, product, 13);
-    public static final BuilderMorphism item_quantity =            builder.morphism(item, quantity, 14);
-    public static final BuilderMorphism product_id =               builder.morphism(product, id, 15);
-    public static final BuilderMorphism product_label =            builder.min(Min.ZERO).morphism(product, label, 16);
-    public static final BuilderMorphism product_price =            builder.min(Min.ZERO).morphism(product, price, 17);
+    public static final BuilderMorphism item_order =               builder.tags(Tag.role).morphism(item, order, 51);
+    public static final BuilderMorphism item_product =             builder.tags(Tag.role).morphism(item, product, 52);
+    public static final BuilderMorphism item_quantity =            builder.morphism(item, quantity, 53);
+    public static final BuilderMorphism product_id =               builder.morphism(product, id, 54);
+    public static final BuilderMorphism product_label =            builder.min(Min.ZERO).morphism(product, label, 55);
+    public static final BuilderMorphism product_price =            builder.min(Min.ZERO).morphism(product, price, 56);
 
     public static final Signature       item_number =              builder.concatenate(item_order, order_number);
     public static final Signature       item_id =                  builder.concatenate(item_product, product_id);
     public static final Signature       item_label =               builder.concatenate(item_product, product_label);
     public static final Signature       item_price =               builder.concatenate(item_product, product_price);
 
-    public static final BuilderMorphism contact_order =            builder.morphism(contact, order, 18);
-    public static final BuilderMorphism contact_value =            builder.morphism(contact, value, 19);
-    public static final BuilderMorphism contact_type =             builder.morphism(contact, type, 20);
+    public static final BuilderMorphism contact_order =            builder.morphism(contact, order, 61);
+    public static final BuilderMorphism contact_value =            builder.morphism(contact, value, 62);
+    public static final BuilderMorphism contact_type =             builder.morphism(contact, type, 63);
 
     public static final Signature       contact_number =           builder.concatenate(contact_order, order_number);
     public static final Signature       order_value =              builder.concatenate(contact_order.dual(), contact_value);
     public static final Signature       order_type =               builder.concatenate(contact_order.dual(), contact_type);
 
-    public static final BuilderMorphism note_order =               builder.morphism(note, order, 21);
-    public static final BuilderMorphism note_locale =              builder.morphism(note, locale, 22);
-    public static final BuilderMorphism note_data =                builder.morphism(note, data, 23);
-    public static final BuilderMorphism data_subject =             builder.morphism(data, subject, 24);
-    public static final BuilderMorphism data_content =             builder.morphism(data, content, 25);
+    public static final BuilderMorphism note_order =               builder.morphism(note, order, 71);
+    public static final BuilderMorphism note_locale =              builder.morphism(note, locale, 72);
+    public static final BuilderMorphism note_data =                builder.morphism(note, data, 73);
+    public static final BuilderMorphism data_subject =             builder.morphism(data, subject, 74);
+    public static final BuilderMorphism data_content =             builder.morphism(data, content, 75);
 
     public static final Signature       note_number =              builder.concatenate(note_order, order_number);
     public static final Signature       order_locale =             builder.concatenate(note_order.dual(), note_locale);

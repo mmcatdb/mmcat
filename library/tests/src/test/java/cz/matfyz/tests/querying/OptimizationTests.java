@@ -78,9 +78,9 @@ public class OptimizationTests {
                 }
                 WHERE {
                     ?orderItem
-                        12/1 ?orderNumber ;
-                        12/3/4 ?customerName ;
-                        14 ?quantity .
+                        51/1 ?orderNumber ;
+                        51/21/22 ?customerName ;
+                        53 ?quantity .
 
                     # FILTER(?customerName = "Alice" || ?quantity >= "2") // TODO: fix the bug which prevents this condition from being parsed
                     FILTER(?customerName != ?quantity)
@@ -115,9 +115,9 @@ public class OptimizationTests {
                 }
                 WHERE {
                     ?orderItem
-                        12/1 ?orderNumber ;
-                        12/3/4 ?customerName ;
-                        14 ?quantity .
+                        51/1 ?orderNumber ;
+                        51/21/22 ?customerName ;
+                        53 ?quantity .
 
                     FILTER(?customerName = "Alice")
                 }
@@ -155,9 +155,9 @@ public class OptimizationTests {
                 }
                 WHERE {
                     ?orderItem
-                        12/1 ?orderNumber ;
-                        12/3/4 ?customerName ;
-                        14 ?quantity .
+                        51/1 ?orderNumber ;
+                        51/21/22 ?customerName ;
+                        53 ?quantity .
 
                     FILTER(?customerName = "Alice")
                 }

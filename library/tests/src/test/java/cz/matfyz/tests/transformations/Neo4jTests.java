@@ -64,38 +64,34 @@ class Neo4jTests {
                 [ {
                     "quantity": "1",
                     "_from.Order": {
-                        "customer": "Alice"
+                        "number": "o_100"
                     },
                     "_to.Product": {
-                        "id": "A1",
-                        "label": "Some name"
+                        "id": "p_123"
                     }
                 }, {
                     "quantity": "2",
                     "_from.Order": {
-                        "customer": "Alice"
+                        "number": "o_100"
                     },
                     "_to.Product": {
-                        "id": "A1",
-                        "label": "Some name"
+                        "id": "p_765"
                     }
                 }, {
                     "quantity": "7",
                     "_from.Order": {
-                        "customer": "Alice"
+                        "number": "o_200"
                     },
                     "_to.Product": {
-                        "id": "B2",
-                        "label": "Other name"
+                        "id": "p_457"
                     }
                 }, {
                     "quantity": "3",
                     "_from.Order": {
-                        "customer": "Bob"
+                        "number": "o_200"
                     },
                     "_to.Product": {
-                        "id": "B2",
-                        "label": "Other name"
+                        "id": "p_734"
                     }
                 } ]
             """)
