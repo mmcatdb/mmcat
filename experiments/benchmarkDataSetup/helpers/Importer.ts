@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { IndexSpecification, MongoClient } from 'mongodb'
 import neo4j from 'neo4j-driver'
 import { Client as PostgresClient } from 'pg'
 import fs from 'fs'
@@ -25,31 +25,37 @@ export class Importer {
         this.password = process.env.EXAMPLE_PASSWORD!
     }
 
-    generateRecords(baseScale: number, recordCreationFunc: (previousRecords: DataRecord[]) => DataRecord, removeDuplicatesOfFields?: string[]): DataRecord[] {
+    generateUnscaledRecords(count: number, recordCreationFunc: (previousRecords: DataRecord[]) => DataRecord, removeDuplicatesOfFields?: string[]): DataRecord[] {
         let output: DataRecord[] = []
-        for (let i = 0; i < baseScale * this.scalingFactor; i++) {
+        for (let i = 0; i < count * this.scalingFactor; i++) {
             output.push(recordCreationFunc(output))
         }
 
-        if (removeDuplicatesOfFields) {
-            output.sort((a, b) => {
-                for (const field of removeDuplicatesOfFields) {
-                    if (a[field] != b[field]) return a[field] - b[field]
-                }
-                return 0
-            })
-            output = output.filter((a, idx) => {
-                if (idx == 0) return true;
-                const b = output[idx - 1]
-                for (const field of removeDuplicatesOfFields) {
-                    if (a[field] != b[field]) return true
-                }
-                return false
-            })
+        if (!removeDuplicatesOfFields) return output
 
-        }
+        return this.removeDuplicateRecords(output, removeDuplicatesOfFields)
+    }
 
-        return output
+    generateRecords(baseScale: number, recordCreationFunc: (previousRecords: DataRecord[]) => DataRecord, removeDuplicatesOfFields?: string[]): DataRecord[] {
+        return this.generateUnscaledRecords(baseScale * this.scalingFactor, recordCreationFunc, removeDuplicatesOfFields)
+    }
+
+    removeDuplicateRecords(records: DataRecord[], fields: string[]): DataRecord[] {
+        records.sort((a, b) => {
+            for (const field of fields) {
+                if (a[field] != b[field]) return a[field] - b[field]
+            }
+            return 0
+        })
+        records = records.filter((a, idx) => {
+            if (idx == 0) return true;
+            const b = records[idx - 1]
+            for (const field of fields) {
+                if (a[field] != b[field]) return true
+            }
+            return false
+        })
+        return records
     }
 
     private getOrCreateRecordKeyIndex(records: DataRecord[], key: string): Map<object, DataRecord[]> {
@@ -83,7 +89,7 @@ export class Importer {
 
     findRecordByKey(records: DataRecord[], key: string, value: any): DataRecord[] {
         const index = this.getOrCreateRecordKeyIndex(records, key)
-        return index.get(value)!
+        return index.get(value) ?? []
     }
 
     async importData(settings: ImportSettings) {
@@ -161,12 +167,12 @@ export class Importer {
                     continue
                 } else if (value === true) {
                     newRecord[key] = oldRecord[key]
-                } else if (typeof(value) == 'string') {
+                } else if (typeof(value) === 'string') {
                     newRecord[key] = oldRecord[value]
                 } else if (value instanceof SubCollection) {
                     newRecord[key] = value
                         .getData(oldRecord)
-                        .map(subRecord => typeof(value.structure) == 'string'
+                        .map(subRecord => typeof(value.structure) === 'string'
                             ? subRecord[value.structure]
                             : projectRecord(subRecord, value.structure)
                         )
@@ -183,6 +189,7 @@ export class Importer {
             const collection = db.collection(kind.name);
 
             await collection.deleteMany()
+            await collection.dropIndexes()
 
             const BATCH_SIZE = 10_000
             for (let i = 0; i < kind.data.length; i += BATCH_SIZE) {
@@ -191,6 +198,12 @@ export class Importer {
                     .map(record => projectRecord(record, kind.structure))
 
                 await collection.insertMany(values)
+            }
+
+            for (const indexCols of kind.indexes ?? []) {
+                const indexObj: IndexSpecification = {}
+                for (const col of indexCols) indexObj[col] = 1
+                await collection.createIndex(indexObj)
             }
         }
 
@@ -217,6 +230,11 @@ export class Importer {
                     DETACH DELETE a
                 } IN TRANSACTIONS OF ${BATCH_SIZE} ROWS
             `)
+            for (const indexCols of kind.indexes ?? []) {
+                await session.run(`
+                    DROP INDEX ${kind.name}__${indexCols.join('_')} IF EXISTS
+                `)
+            }
         }
 
         for (const kind of kinds) {
@@ -241,6 +259,12 @@ export class Importer {
 
             if (isRelationship(kind)) {
                 const rkind = kind as Neo4jRelationshipSettings
+                for (const indexCols of kind.indexes ?? []) {
+                    await session.run(`
+                        CREATE INDEX ${kind.name}__${indexCols.join('_')} FOR ()-[r:${kind.name}]-() ON (${indexCols.map(col => 'r.' + col).join(', ')})
+                    `)
+                }
+
                 await session.run(`
                     LOAD CSV WITH HEADERS FROM 'file:///${filename}' AS row
                     MATCH (a:${rkind.from.label} { ${attributes(rkind.from.match)} }),
@@ -248,6 +272,12 @@ export class Importer {
                     CREATE (a)-[:${rkind.name} { ${attributes(rkind.structure)} }]->(b)
                 `)
             } else {
+                for (const indexCols of kind.indexes ?? []) {
+                    await session.run(`
+                        CREATE INDEX ${kind.name}__${indexCols.join('_')} FOR (n:${kind.name}) ON (${indexCols.map(col => 'n.' + col).join(', ')})
+                    `)
+                }
+
                 await session.run(`
                     LOAD CSV WITH HEADERS FROM 'file:///${filename}' AS row
                     CREATE (:${kind.name} { ${attributes(kind.structure)} })
@@ -273,7 +303,7 @@ const csvExporter = {
 
         const header = keys.map(k => `"${csvExporter.sanitizeForCSV(k)}"`).join(',')
         const values = records.map(r =>
-            keys.map(k => `"${csvExporter.sanitizeForCSV(r[k])}"`).join(',')
+            keys.map(k => csvExporter.sanitizeForCSV(r[k])).join(',')
         )
 
         fs.writeFileSync(filepath, header + '\r\n' + values.join('\r\n'))
@@ -282,7 +312,8 @@ const csvExporter = {
     },
 
     sanitizeForCSV(input: any): string {
-        return input.toString().replaceAll('"', '""')
+        if (input === null || input === undefined) return ''
+        return `"${input.toString().replaceAll('"', '""')}"`
     },
 }
 
@@ -306,7 +337,7 @@ type DataRecord = any
 
 type Structure = {
     [key: string]: boolean|string|Structure|SubCollection
-}
+} | JoinedEntry
 
 export class SubCollection { // always under an array
     private readonly data: DataRecord[] | SubCollectionDataFunc
@@ -318,7 +349,7 @@ export class SubCollection { // always under an array
     }
 
     getData(superRecord: DataRecord): DataRecord[] {
-        if (typeof(this.data) == 'function') {
+        if (typeof(this.data) === 'function') {
             return this.data(superRecord)
         } else {
             return this.data
@@ -328,6 +359,27 @@ export class SubCollection { // always under an array
 
 type SubCollectionDataFunc = (record: DataRecord) => DataRecord[] // NOTE: later *maybe* replace (or add to) the single (topmost) record for some context in nested SubCollections, then you can do something like record.super.super.whatever_key
 
+export class JoinedEntry {
+    private readonly data: DataRecord | JoinedEntryDataFunc
+    public readonly structure: Structure
+
+    constructor(data: DataRecord[] | SubCollectionDataFunc, structure: Structure) {
+        this.data = data
+        this.structure = structure
+    }
+
+    getData(superRecord: DataRecord): DataRecord[] {
+        if (typeof(this.data) === 'function') {
+            return this.data(superRecord)
+        } else {
+            return this.data
+        }
+    }
+}
+
+type JoinedEntryDataFunc = (record: DataRecord) => DataRecord // NOTE: same as in SubCollectionDataFunc
+
+
 // NOTE: in the future there could also be a Join class or function here so that records can be combined more ways than subcollections, however joining would require aliasing the attributes into the result, which is too complicated for now
 
 type ImportSettings = {
@@ -335,6 +387,8 @@ type ImportSettings = {
     mongoDB?: MongoDBKindSettings[],
     neo4j?: Neo4jKindSettings[],
 }
+
+type IndexSettings = string[] // Columns of the index
 
 type PostgreSQLKindSettings = {
     name: string,
@@ -347,17 +401,20 @@ type MongoDBKindSettings = {
     name: string,
     data: DataRecord[],
     structure: Structure,
+    indexes?: IndexSettings[],
 }
 
 type Neo4jNodeSettings = {
     name: string,
     data: DataRecord[],
     structure: Structure,
+    indexes?: IndexSettings[],
 }
 type Neo4jRelationshipSettings = {
     name: string,
     data: DataRecord[],
     structure: Structure,
+    indexes?: IndexSettings[],
     from: {
         label: string,
         match: Structure
