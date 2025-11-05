@@ -58,6 +58,7 @@ services:
         env_file: .env
         environment:
             - NEO4J_AUTH=neo4j/${EXAMPLE_PASSWORD}
+            - NEO4J_PLUGINS=["apoc"]
         expose:
             - 7473 # This one is for https, which can be ignored on localhost
             - 7474
