@@ -12,129 +12,285 @@ public abstract class Schema {
 
     private static final SchemaBuilder builder = new SchemaBuilder();
 
-    // Keys
-
-    public static final BuilderObjex eventType =            builder.objex("eventType");
-    public static final BuilderObjex eventTypeId =          builder.objex("eventTypeId");
-    public static final BuilderObjex eventTypeTitle =       builder.objex("eventTypeTitle");
-    public static final BuilderObjex eventTypeDescription = builder.objex("eventTypeDescription");
-
-    public static final BuilderObjex user =                 builder.objex("user");
-    public static final BuilderObjex userId =               builder.objex("userId");
-    public static final BuilderObjex userUsername =         builder.objex("userUsername");
-    public static final BuilderObjex userName =             builder.objex("userName");
-
-    public static final BuilderObjex userOnEventType =      builder.objex("userOnEventType");
-
-    public static final BuilderObjex team =                 builder.objex("team");
-    public static final BuilderObjex teamId =               builder.objex("teamId");
-    public static final BuilderObjex teamName =             builder.objex("teamName");
-
-    public static final BuilderObjex teamOrgScope =         builder.objex("teamOrgScope");
-
-    public static final BuilderObjex membership =           builder.objex("membership");
-    public static final BuilderObjex membershipId =         builder.objex("membershipId");
-    public static final BuilderObjex membershipAccepted =   builder.objex("membershipAccepted");
-    public static final BuilderObjex membershipRole =       builder.objex("membershipRole");
-
-    public static final BuilderObjex booking =              builder.objex("booking");
-    public static final BuilderObjex bookingId =            builder.objex("bookingId");
-    public static final BuilderObjex bookingTitle =         builder.objex("bookingTitle");
-    public static final BuilderObjex bookingDescription =   builder.objex("bookingDescription");
-
-    public static final BuilderObjex attendee =             builder.objex("attendee");
-    public static final BuilderObjex attendeeId =           builder.objex("attendeeId");
-    public static final BuilderObjex attendeeEmail =        builder.objex("attendeeEmail");
-
-    public static final BuilderObjex workflow =             builder.objex("workflow");
-    public static final BuilderObjex workflowId =           builder.objex("workflowId");
-    public static final BuilderObjex workflowName =         builder.objex("workflowName");
-
-    public static final BuilderObjex workflowsOnEventTypes = builder.objex("workflowsOnEventTypes");
-
-    // public static final BuilderObjex workflowsOnTeams =     builder.objex("workflowsOnTeams");
-
-    public static final BuilderObjex role =                 builder.objex("role");
-    public static final BuilderObjex roleId =               builder.objex("roleId");
-    public static final BuilderObjex roleName =             builder.objex("roleName");
-    public static final BuilderObjex roleDescription =      builder.objex("roleDescription");
 
 
-    // Morphisms
+    public static final BuilderObjex
+        team =                  builder.objex("team"),
+        teamId =                builder.objex("teamId"),
+        teamName =              builder.objex("teamName"),
 
-    public static final BuilderMorphism eventTypeToId =         builder.morphism(eventType, eventTypeId);
-    public static final BuilderMorphism eventTypeToTitle =      builder.morphism(eventType, eventTypeTitle);
-    public static final BuilderMorphism eventTypeToDescription = builder.morphism(eventType, eventTypeDescription);
-    public static final BuilderMorphism eventTypeToOwner =      builder.morphism(eventType, user);
-    public static final BuilderMorphism eventTypeToTeam =       builder.morphism(eventType, team);
-    public static final BuilderMorphism eventTypeToParent =     builder.morphism(eventType, eventType);
+        role =                  builder.objex("role"),
+        roleId =                builder.objex("roleId"),
+        roleName =              builder.objex("roleName"),
+        roleDescription =       builder.objex("roleDescription"),
 
-    public static final BuilderMorphism userToId =              builder.morphism(user, userId);
-    public static final BuilderMorphism userToUsername =        builder.morphism(user, userUsername);
-    public static final BuilderMorphism userToName =            builder.morphism(user, userName);
+        attribute =             builder.objex("attribute"),
+        attributeId =           builder.objex("attributeId"),
+        attributeName =         builder.objex("attributeName"),
 
-    public static final BuilderMorphism userOnEventTypeU =      builder.morphism(userOnEventType, user);
-    public static final BuilderMorphism userOnEventTypeET =     builder.morphism(userOnEventType, eventType);
-
-    public static final BuilderMorphism teamToId =              builder.morphism(team, teamId);
-    public static final BuilderMorphism teamToName =            builder.morphism(team, teamName);
-    public static final BuilderMorphism teamToParent =          builder.morphism(team, team);
-
-    public static final BuilderMorphism teamOrgScopeU =         builder.morphism(teamOrgScope, user);
-    public static final BuilderMorphism teamOrgScopeT =         builder.morphism(teamOrgScope, team);
-
-    public static final BuilderMorphism membershipToId =        builder.morphism(membership, membershipId);
-    public static final BuilderMorphism membershipToAccepted =  builder.morphism(membership, membershipAccepted);
-    public static final BuilderMorphism membershipToRole =      builder.morphism(membership, membershipRole);
-    public static final BuilderMorphism membershipToUser =      builder.morphism(membership, user);
-    public static final BuilderMorphism membershipToTeam =      builder.morphism(membership, team);
-    public static final BuilderMorphism membershipToCustomRole = builder.morphism(membership, role);
+        attributeOption =       builder.objex("attributeOption"),
+        attributeOptionId =     builder.objex("attributeOptionId"),
+        attributeOptionValue =  builder.objex("attributeOptionValue"),
 
 
-    public static final BuilderMorphism attendeeToId =          builder.morphism(attendee, attendeeId);
-    public static final BuilderMorphism attendeeToEmail =       builder.morphism(attendee, attendeeEmail);
-    public static final BuilderMorphism attendeeToBooking =     builder.morphism(attendee, booking);
 
-    public static final BuilderMorphism bookingToId =           builder.morphism(booking, bookingId);
-    public static final BuilderMorphism bookingToTitle =        builder.morphism(booking, bookingTitle);
-    public static final BuilderMorphism bookingToDescription =  builder.morphism(booking, bookingDescription);
-    public static final BuilderMorphism bookingToUser =         builder.morphism(booking, user);
-    public static final BuilderMorphism bookingToEventType =    builder.morphism(booking, eventType);
+        user =                  builder.objex("user"),
+        userId =                builder.objex("userId"),
+        userUsername =          builder.objex("userUsername"),
+        userName =              builder.objex("userName"),
 
-    public static final BuilderMorphism workflowsOnEventTypesWF = builder.morphism(workflowsOnEventTypes, workflow);
-    public static final BuilderMorphism workflowsOnEventTypesET = builder.morphism(workflowsOnEventTypes, eventType);
+        membership =            builder.objex("membership"),
+        membershipId =          builder.objex("membershipId"),
+        membershipAccepted =    builder.objex("membershipAccepted"),
+        membershipRole =        builder.objex("membershipRole"),
 
-    // public static final BuilderMorphism workflowsOnTeamsWF =    builder.morphism(workflowsOnTeams, workflow);
-    // public static final BuilderMorphism workflowsOnTeamsT =     builder.morphism(workflowsOnTeams, team);
+        teamOrgScope =          builder.objex("teamOrgScope"),
 
-    public static final BuilderMorphism workflowToId =          builder.morphism(workflow, workflowId);
-    public static final BuilderMorphism workflowToName =        builder.morphism(workflow, workflowName);
-    public static final BuilderMorphism workflowToUser =        builder.morphism(workflow, user);
-    public static final BuilderMorphism workflowToTeam =        builder.morphism(workflow, team);
+        attributeToUser =       builder.objex("attributeToUser"),
 
-    public static final BuilderMorphism roleToId =              builder.morphism(role, roleId);
-    public static final BuilderMorphism roleToName =            builder.morphism(role, roleName);
-    public static final BuilderMorphism roleToDescription =     builder.morphism(role, roleDescription);
-    public static final BuilderMorphism roleToTeam =            builder.morphism(role, team);
 
-    // Ids
+
+        // has a 1:n relationship to user
+        verifiedEmail =         builder.objex("verifiedEmail"),
+        verifiedEmailId =       builder.objex("verifiedEmailId"),
+        verifiedEmailValue =    builder.objex("verifiedEmailValue"),
+
+        schedule =              builder.objex("schedule"),
+        scheduleId =            builder.objex("scheduleId"),
+        scheduleName =          builder.objex("scheduleName"),
+
+        eventType =             builder.objex("eventType"),
+        eventTypeId =           builder.objex("eventTypeId"),
+        eventTypeTitle =        builder.objex("eventTypeTitle"),
+        eventTypeDescription =  builder.objex("eventTypeDescription"),
+
+        availability =          builder.objex("availability"),
+        availabilityId =        builder.objex("availabilityId"),
+        availabilityStart =     builder.objex("availabilityStart"),
+        availabilityEnd =       builder.objex("availabilityEnd"),
+
+        // redirects among users
+        outOfOffice =           builder.objex("outOfOffice"),
+        outOfOfficeId =         builder.objex("outOfOfficeId"),
+        outOfOfficeStart =      builder.objex("outOfOfficeStart"),
+        outOfOfficeEnd =        builder.objex("outOfOfficeEnd"),
+
+
+
+        // not just hosting, but (presumably) access & control
+        userOnEventType =       builder.objex("userOnEventType"),
+
+        hostGroup =             builder.objex("hostGroup"),
+        hostGroupId =           builder.objex("hostGroupId"),
+
+        // also user on event type, but only in hosting
+        eventHost =             builder.objex("eventHost"),
+
+
+
+        // some functionality, limited count, managed globally
+        feature =               builder.objex("feature"),
+        featureId =             builder.objex("featureId"),
+        featureName =           builder.objex("featureName"),
+
+        userFeatures =          builder.objex("userFeatures"),
+
+        teamFeatures =          builder.objex("teamFeatures"),
+
+
+
+        workflow =              builder.objex("workflow"),
+        workflowId =            builder.objex("workflowId"),
+        workflowName =          builder.objex("workflowName"),
+
+        workflowStep =          builder.objex("workflowStep"),
+        workflowStepId =        builder.objex("workflowStepId"),
+        workflowStepNumber =    builder.objex("workflowStepNumber"),
+        workflowStepAction =    builder.objex("workflowStepAction"),
+
+        workflowsOnEventTypes = builder.objex("workflowsOnEventTypes"),
+
+        // which workflow is active on which team
+        workflowsOnTeams =      builder.objex("workflowsOnTeams"),
+
+
+
+        booking =               builder.objex("booking"),
+        bookingId =             builder.objex("bookingId"),
+        bookingTitle =          builder.objex("bookingTitle"),
+        bookingDescription =    builder.objex("bookingDescription"),
+
+        attendee =              builder.objex("attendee"),
+        attendeeId =            builder.objex("attendeeId"),
+        attendeeEmail =         builder.objex("attendeeEmail");
+
+
+
+
+
+    public static final BuilderMorphism
+        teamToId =                  builder.morphism(team, teamId),
+        teamToName =                builder.morphism(team, teamName),
+        teamToParent =              builder.morphism(team, team),
+
+        roleToId =                  builder.morphism(role, roleId),
+        roleToName =                builder.morphism(role, roleName),
+        roleToDescription =         builder.morphism(role, roleDescription),
+        roleToTeam =                builder.morphism(role, team),
+
+        attributeToId =             builder.morphism(attribute, attributeId),
+        attributeToName =           builder.morphism(attribute, attributeName),
+        attributeToTeam =           builder.morphism(attribute, team),
+
+        attributeOptionToId =       builder.morphism(attributeOption, attributeOptionId),
+        attributeOptionToValue =    builder.morphism(attributeOption, attributeOptionValue),
+        attributeOptionToAttribute = builder.morphism(attributeOption, attribute),
+
+
+
+        userToId =                  builder.morphism(user, userId),
+        userToUsername =            builder.morphism(user, userUsername),
+        userToName =                builder.morphism(user, userName),
+
+        membershipToId =            builder.morphism(membership, membershipId),
+        membershipToAccepted =      builder.morphism(membership, membershipAccepted),
+        membershipToRole =          builder.morphism(membership, membershipRole),
+        membershipToUser =          builder.morphism(membership, user),
+        membershipToTeam =          builder.morphism(membership, team),
+        membershipToCustomRole =    builder.morphism(membership, role),
+
+        teamOrgScopeU =             builder.morphism(teamOrgScope, user),
+        teamOrgScopeT =             builder.morphism(teamOrgScope, team),
+
+        attributeToUserA =          builder.morphism(attributeToUser, attributeOption),
+        attributeToUserU =          builder.morphism(attributeToUser, membership),
+
+
+
+        // although unused, its not bound to membership probably because one of them can be null
+        verifiedEmailToId =         builder.morphism(verifiedEmail, verifiedEmailId),
+        verifiedEmailToValue =      builder.morphism(verifiedEmail, verifiedEmailValue),
+        verifiedEmailToUser =       builder.morphism(verifiedEmail, user),
+        verifiedEmailToTeam =       builder.morphism(verifiedEmail, team),
+
+        scheduleToId =              builder.morphism(schedule, scheduleId),
+        scheduleToName =            builder.morphism(schedule, scheduleName),
+        scheduleToUser =            builder.morphism(schedule, user),
+
+        eventTypeToId =             builder.morphism(eventType, eventTypeId),
+        eventTypeToTitle =          builder.morphism(eventType, eventTypeTitle),
+        eventTypeToDescription =    builder.morphism(eventType, eventTypeDescription),
+        eventTypeToOwner =          builder.morphism(eventType, user),
+        eventTypeToTeam =           builder.morphism(eventType, team),
+        eventTypeToParent =         builder.morphism(eventType, eventType),
+        eventTypeToSchedule =       builder.morphism(eventType, schedule),
+
+        availabilityToId =          builder.morphism(availability, availabilityId),
+        availabilityToStart =       builder.morphism(availability, availabilityStart),
+        availabilityToEnd =         builder.morphism(availability, availabilityEnd),
+        availabilityToUser =        builder.morphism(availability, user),
+        availabilityToEventType =   builder.morphism(availability, eventType),
+        availabilityToSchedule =    builder.morphism(availability, schedule),
+
+        outOfOfficeToId =           builder.morphism(outOfOffice, outOfOfficeId),
+        outOfOfficeToStart =        builder.morphism(outOfOffice, outOfOfficeStart),
+        outOfOfficeToEnd =          builder.morphism(outOfOffice, outOfOfficeEnd),
+        outOfOfficeToUser =         builder.morphism(outOfOffice, user),
+        outOfOfficeToNewUser =      builder.morphism(outOfOffice, user),
+
+
+
+        hostGroupToId =             builder.morphism(hostGroup, hostGroupId),
+        hostGroupToEventType =      builder.morphism(hostGroup, eventType),
+
+        eventHostToUser =           builder.morphism(eventHost, user),
+        eventHostToMembership =     builder.morphism(eventHost, membership),
+        eventHostToEventType =      builder.morphism(eventHost, eventType),
+        eventHostToSchedule =       builder.morphism(eventHost, schedule),
+        eventHostToHostGroup =      builder.morphism(eventHost, hostGroup),
+
+        userOnEventTypeU =          builder.morphism(userOnEventType, user),
+        userOnEventTypeET =         builder.morphism(userOnEventType, eventType),
+
+
+
+        featureToId =               builder.morphism(feature, featureId),
+        featureToName =             builder.morphism(feature, featureName),
+
+        userFeaturesU =             builder.morphism(userFeatures, user),
+        userFeaturesF =             builder.morphism(userFeatures, feature),
+
+        teamFeaturesT =             builder.morphism(teamFeatures, team),
+        teamFeaturesF =             builder.morphism(teamFeatures, feature),
+
+
+
+        workflowToId =              builder.morphism(workflow, workflowId),
+        workflowToName =            builder.morphism(workflow, workflowName),
+        workflowToUser =            builder.morphism(workflow, user),
+        workflowToTeam =            builder.morphism(workflow, team),
+
+        workflowStepToId =          builder.morphism(workflowStep, workflowStepId),
+        workflowStepToNumber =      builder.morphism(workflowStep, workflowStepNumber),
+        workflowStepToAction =      builder.morphism(workflowStep, workflowStepAction),
+        workflowStepToWorkflow =    builder.morphism(workflowStep, workflow),
+
+        workflowsOnEventTypesWF =   builder.morphism(workflowsOnEventTypes, workflow),
+        workflowsOnEventTypesET =   builder.morphism(workflowsOnEventTypes, eventType),
+
+        workflowsOnTeamsWF =        builder.morphism(workflowsOnTeams, workflow),
+        workflowsOnTeamsT =         builder.morphism(workflowsOnTeams, team),
+
+
+
+        bookingToId =               builder.morphism(booking, bookingId),
+        bookingToTitle =            builder.morphism(booking, bookingTitle),
+        bookingToDescription =      builder.morphism(booking, bookingDescription),
+        bookingToUser =             builder.morphism(booking, user),
+        bookingToEventType =        builder.morphism(booking, eventType),
+
+        attendeeToId =              builder.morphism(attendee, attendeeId),
+        attendeeToEmail =           builder.morphism(attendee, attendeeEmail),
+        attendeeToBooking =         builder.morphism(attendee, booking);
+
+
+
+
 
     static {
 
         builder
-            .ids(eventType, eventTypeToId)
-            .ids(user, userToId)
             .ids(team, teamToId)
-            .ids(membership, membershipToId)
-            .ids(attendee, attendeeToId)
-            .ids(booking, bookingToId)
-            .ids(workflow, workflowToId)
             .ids(role, roleToId)
+            .ids(attribute, attributeToId)
+            .ids(attributeOption, attributeOptionToId)
+
+            .ids(user, userToId)
+            .ids(membership, membershipToId)
+            .ids(teamOrgScope, teamOrgScopeT, teamOrgScopeU)
+            .ids(attributeToUser, attributeToUserA, attributeToUserU)
+
+            .ids(verifiedEmail, verifiedEmailToId)
+            .ids(schedule, scheduleToId)
+            .ids(eventType, eventTypeToId)
+            .ids(availability, availabilityToId)
+            .ids(outOfOffice, outOfOfficeToId)
 
             .ids(userOnEventType, userOnEventTypeU, userOnEventTypeET)
-            .ids(teamOrgScope, teamOrgScopeT, teamOrgScopeU)
-            .ids(workflowsOnEventTypes, workflowsOnEventTypesWF, workflowsOnEventTypesET);
-            // .ids(workflowsOnTeams, workflowsOnTeamsWF, workflowsOnTeamsT);
+            .ids(eventHost, eventHostToUser, eventHostToEventType)
+            .ids(hostGroup, hostGroupToId)
+
+            .ids(feature, featureToId)
+            .ids(userFeatures, userFeaturesU, userFeaturesF)
+            .ids(teamFeatures, teamFeaturesT, teamFeaturesF)
+
+            .ids(workflow, workflowToId)
+            .ids(workflowStep, workflowStepToId)
+            .ids(workflowsOnEventTypes, workflowsOnEventTypesWF, workflowsOnEventTypesET)
+            .ids(workflowsOnTeams, workflowsOnTeamsWF, workflowsOnTeamsT)
+
+            .ids(booking, bookingToId)
+            .ids(attendee, attendeeToId);
 
     }
 
