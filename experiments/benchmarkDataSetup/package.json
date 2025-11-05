@@ -14,7 +14,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "faker": "^6.6.6",
     "mongodb": "^6.18.0",
     "neo4j-driver": "^5.28.1",
     "pg": "^8.16.3",
@@ -22,6 +21,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@types/neo4j": "^2.0.6",
     "@types/node": "^24.3.0",
     "@types/pg": "^8.15.5",
