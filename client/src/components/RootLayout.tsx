@@ -10,6 +10,9 @@ import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
 import { cn } from '@/components/utils';
+import { DevBar } from '@/components/DevBar';
+
+const enableDevPage = import.meta.env.DEV;
 
 /**
  * The main layout of the application.
@@ -20,6 +23,7 @@ export function RootLayout() {
 
     return (<>
         <ScrollToTop />
+
         <div className='h-screen overflow-hidden text-foreground bg-background'>
             <div className='flex h-full'>
                 <Sidebar />
@@ -30,6 +34,10 @@ export function RootLayout() {
                 </div>
             </div>
         </div>
+
+        {enableDevPage && (
+            <DevBar />
+        )}
     </>);
 }
 
