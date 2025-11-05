@@ -72,4 +72,5 @@ export const routes = {
         list: datasourcesIndex,
         detail: datasourcesIndex.child<'datasourceId'>('/:datasourceId', 'datasource'),
     },
+    dev: '/dev',
 } as const;

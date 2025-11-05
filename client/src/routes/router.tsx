@@ -21,6 +21,9 @@ import { NewMappingPage } from '@/pages/category/NewMappingPage';
 import { NewQueryPage } from '@/pages/category/NewQueryPage';
 import { QueriesPage } from '@/pages/category/QueriesPage';
 import { type QueryLoaderData, QueryPage } from '@/pages/category/QueryPage';
+import { DevPage } from '@/pages/DevPage';
+
+const enableDevPage = import.meta.env.DEV;
 
 /**
  * Creates the application's routing configuration.
@@ -157,7 +160,10 @@ export const router = createBrowserRouter([ {
                 } ],
             } ],
         } ],
-    } ],
+    }, ...(enableDevPage ? [ {
+        path: routes.dev,
+        Component: DevPage,
+    } ] : []) ],
 }, {
     // Catch-all route for 404 errors
     path: '*',
