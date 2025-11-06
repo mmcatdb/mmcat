@@ -1,13 +1,13 @@
-import { Signature, type SignatureResponse } from './Signature';
-
-export type NameResponse = StringNameResponse | TypedNameResponse | DynamicNameResponse;
+export type NameResponse = StringNameResponse | TypedNameResponse | DynamicNameResponse | IndexNameResponse;
 
 export function nameFromResponse(input: NameResponse): Name {
     if ('value' in input)
         return StringName.fromResponse(input);
-    if (!('signature' in input))
-        return TypedName.fromResponse(input);
-    return DynamicName.fromResponse(input);
+    if (input.type === DynamicName.type)
+        return DynamicName.fromResponse(input as DynamicNameResponse);
+    if (input.type === IndexName.type)
+        return IndexName.fromResponse(input as IndexNameResponse);
+    return TypedName.fromResponse(input);
 }
 
 export type Name = StringName | TypedName;
@@ -68,50 +68,57 @@ export class TypedName {
     }
 
     /** The property is a root of the access path tree, the name doesn't mean anything. */
-    public static readonly ROOT = 'root';
-    /** The property is a value in an object, the name represents its key. Has to be dynamic. */
-    public static readonly KEY = 'key';
-    /** The property is an element of an array, the name represents its index. Has to be dynamic. */
-    public static readonly INDEX = 'index';
+    static readonly ROOT = '$root';
+    /** The key corresponding to the {@link TypedName.VALUE}. */
+    static readonly KEY = '$key';
+    /** The actual value of the map/array property. */
+    static readonly VALUE = '$value';
+
+    /**
+     * The property is an element of an array, the name represents its index. Has to be dynamic.
+     * @deprecated Use {@link IndexName } instead.
+     */
+    static readonly INDEX = 'index';
 }
 
-type DynamicNameResponse = TypedNameResponse & {
-    signature: SignatureResponse;
+type DynamicNameResponse = {
+    type: typeof DynamicName.type;
     pattern?: string;
 };
 
+/**
+ * Name that is mapped to a key in an object / map / dictionary / etc.
+ * The actual value of the name is stored in a child property with the name {@link TypedName.KEY}.
+ */
 export class DynamicName extends TypedName {
+    static readonly type = '$dynamic';
+
     constructor(
-        type: string,
-        readonly signature: Signature,
         readonly pattern?: string,
     ) {
-        super(type);
+        super(DynamicName.type);
     }
 
     static fromResponse(input: DynamicNameResponse): DynamicName {
         return new DynamicName(
-            input.type,
-            Signature.fromResponse(input.signature),
             input.pattern,
         );
     }
 
     toServer(): DynamicNameResponse {
         return {
-            type: this.type,
-            signature: this.signature.toServer(),
+            type: DynamicName.type,
             pattern: this.pattern,
         };
     }
 
     equals(other: Name): boolean {
-        return other instanceof DynamicName && this.signature.equals(other.signature);
+        return other instanceof DynamicName && this.pattern === other.pattern;
     }
 
     toString(): string {
-        const patternString = this.pattern == null ? '' : ` (${this.pattern})`;
-        return `<${this.type}${patternString}: ${this.signature.toString()}>`;
+        const patternString = this.pattern ? '' : '(' + this.pattern + ')';
+        return DynamicName.type + patternString;
     }
 
     static isPatternValid(pattern: string): boolean {
@@ -120,6 +127,37 @@ export class DynamicName extends TypedName {
 }
 
 const patternValidator = /^[a-zA-Z0-9._\-*]+$/;
+
+type IndexNameResponse = {
+    type: typeof IndexName.type;
+    dimension: number;
+};
+
+/**
+ * Stores the value of the index in an array.
+ */
+export class IndexName extends TypedName {
+    static readonly type = '$index';
+
+    constructor(
+        /** An array can be multi-dimensional. This tells us for which dimension this index name is used. Zero based. */
+        readonly dimension: number,
+    ) {
+        super(IndexName.type);
+    }
+
+    static fromResponse(input: IndexNameResponse): IndexName {
+        return new IndexName(input.dimension);
+    }
+
+    equals(other: Name): boolean {
+        return other instanceof IndexName && this.dimension == other.dimension;
+    }
+
+    toString(): string {
+        return DynamicName.type + '(' + this.dimension + ')';
+    }
+}
 
 /**
  * For convenient navigation in the access path.

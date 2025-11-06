@@ -29,7 +29,7 @@ QueryPage.loader = async ({ params: { categoryId, queryId } }: { params: Params<
         throw new Error('Query ID is required');
 
     const [ datasourcesResponse, queryResponse ] = await Promise.all([
-        api.datasources.getAllDatasources({}, { categoryId: categoryId }),
+        api.datasources.getAllDatasources({}, { categoryId }),
         api.queries.getQuery({ queryId }),
     ]);
     if (!datasourcesResponse.status || !queryResponse.status)

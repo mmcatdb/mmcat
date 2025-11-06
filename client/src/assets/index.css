@@ -21,6 +21,16 @@
 
 :root {
     --mm-canvas-color: #e4e4e7;
+    --mm-document-dark: #82b366;
+    --mm-document-light: #d5e8d4;
+    --mm-relational-dark: #9673a6;
+    --mm-relational-light: #e1d5e7;
+    --mm-graph-dark: #6c8ebf;
+    --mm-graph-light: #dae8fc;
+    --mm-columnar-dark: #b85450;
+    --mm-columnar-light: #f8cecc;
+    --mm-keyValue-dark: #d79b00;
+    --mm-keyValue-light: #ffe6cc;
 }
 
 :root.dark {

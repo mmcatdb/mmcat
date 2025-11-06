@@ -47,7 +47,7 @@ export function MappingEditorGraph({ state, dispatch, options, className }: Mapp
                 ))}
 
                 {/* SVG layer for rendering edges with arrow markers */}
-                <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='w-full h-full pointer-events-none'>
+                <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='w-full h-full pointer-events-none select-none'>
                     <defs>
                         {/* Define arrow marker for edge ends */}
                         <marker
@@ -372,7 +372,7 @@ function SelectionBox() {
     return (
         <div
             ref={setSelectionBoxRef}
-            className='absolute border-2 border-zinc-700 border-dotted pointer-events-none'
+            className='absolute border-2 border-primary-500 border-dashed pointer-events-none bg-primary-100/20'
             style={style}
         />
     );

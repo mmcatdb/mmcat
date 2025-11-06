@@ -2,9 +2,13 @@
 
 import { type Position } from '@/components/graph/graphUtils';
 
+// This is kosher because this is the one use case in which the {} type actually means something.
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type EmptyIntersection = {};
 export type EmptyObject = Record<string, never>;
+export function emptyFunction() {
+    // This function is intentionally empty.
+}
 
 export async function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));

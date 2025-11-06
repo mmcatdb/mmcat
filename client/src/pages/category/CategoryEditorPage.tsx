@@ -131,8 +131,8 @@ CategoryEditorPage.loader = async ({ params: { categoryId } }: { params: Params<
     const [ categoryResponse, updatesResponse ] = await Promise.all([
         api.schemas.getCategory({ id: categoryId }),
         api.schemas.getCategoryUpdates({ id: categoryId }),
-        // api.datasources.getAllDatasources({}, { categoryId: categoryId }),
-        // api.mappings.getAllMappingsInCategory({}, { categoryId: categoryId }),
+        // api.datasources.getAllDatasources({}, { categoryId }),
+        // api.mappings.getAllMappingsInCategory({}, { categoryId }),
     ]);
 
     // if (!categoryResponse.status || !updatesResponse.status || !datasourcesResponse.status || !mappingsResponse.status)

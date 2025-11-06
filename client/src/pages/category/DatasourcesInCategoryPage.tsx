@@ -135,7 +135,7 @@ DatasourcesInCategoryPage.loader = async ({ params: { categoryId } }: { params: 
         throw new Error('Action ID is required');
 
     const [ inCategoryResponse, allResponse, allMappingsResponse ] = await Promise.all([
-        api.datasources.getAllDatasources({}, { categoryId: categoryId }),
+        api.datasources.getAllDatasources({}, { categoryId }),
         api.datasources.getAllDatasources({}),
         api.mappings.getAllMappings({}), // Get ALL mappings to check for datasources used elsewhere
     ]);

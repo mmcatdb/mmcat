@@ -17,8 +17,7 @@ export class GraphModel {
         this.addNodes = this.addNodes.bind(this);
         this.removeNode = this.removeNode.bind(this);
         this.updateNode = this.updateNode.bind(this);
-        this.removeConnectedRelationships =
-            this.removeConnectedRelationships.bind(this);
+        this.removeConnectedRelationships = this.removeConnectedRelationships.bind(this);
         this.addRelationships = this.addRelationships.bind(this);
         this.addInternalRelationships = this.addInternalRelationships.bind(this);
         this.pruneInternalRelationships = this.pruneInternalRelationships.bind(this);
@@ -46,10 +45,9 @@ export class GraphModel {
         for (const relationship of this._relationships) {
             let nodePair = new NodePair(relationship.source, relationship.target);
 
-            nodePair =
-                groups[nodePair.toString()] != null
-                    ? groups[nodePair.toString()]
-                    : nodePair;
+            nodePair = groups[nodePair.toString()] != null
+                ? groups[nodePair.toString()]
+                : nodePair;
 
             nodePair.relationships.push(relationship);
 
@@ -143,9 +141,7 @@ export class GraphModel {
     }
 
     pruneInternalRelationships(): void {
-        const relationships = this._relationships.filter(
-            relationship => !relationship.internal,
-        );
+        const relationships = this._relationships.filter(relationship => !relationship.internal);
         this.relationshipMap = {};
         this._relationships = [];
         this.addRelationships(relationships);
@@ -157,10 +153,7 @@ export class GraphModel {
 
     findNodeNeighborIds(id: string): string[] {
         return this._relationships
-            .filter(
-                relationship =>
-                    relationship.source.id === id || relationship.target.id === id,
-            )
+            .filter(relationship => relationship.source.id === id || relationship.target.id === id)
             .map(relationship => {
                 if (relationship.target.id === id)
                     return relationship.source.id;
@@ -174,10 +167,7 @@ export class GraphModel {
     }
 
     findAllRelationshipToNode(node: NodeModel): RelationshipModel[] {
-        return this._relationships.filter(
-            relationship =>
-                relationship.source.id === node.id || relationship.target.id === node.id,
-        );
+        return this._relationships.filter(relationship => relationship.source.id === node.id || relationship.target.id === node.id);
     }
 
     resetGraph(): void {
@@ -193,6 +183,7 @@ export class NodePair {
     nodeA: NodeModel;
     nodeB: NodeModel;
     relationships: RelationshipModel[];
+
     constructor(node1: NodeModel, node2: NodeModel) {
         this.relationships = [];
         if (node1.id < node2.id) {

@@ -7,13 +7,28 @@ import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggl
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { PiCat } from 'react-icons/pi';
 import { cn } from '@/components/utils';
-import { CodeBracketSquareIcon as CodeBracketSquareIconOutline, RocketLaunchIcon as RocketLaunchIconOutline, PlayCircleIcon as PlayCircleIconOutline } from '@heroicons/react/24/outline';
-import { CodeBracketSquareIcon as CodeBracketSquareIconSolid, RocketLaunchIcon as RocketLaunchIconSolid, PlayCircleIcon as PlayCircleIconSolid } from '@heroicons/react/24/solid';
-import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
-import { HiOutlinePencilSquare, HiPencilSquare } from 'react-icons/hi2';
-import { HiDatabase, HiOutlineDatabase } from 'react-icons/hi';
-import { BiCategory, BiSolidCategory } from 'react-icons/bi';
 import { type Id } from '@/types/id';
+import {
+    SquaresPlusIcon as SquaresPlusIconOutline,
+    CircleStackIcon as CircleStackIconOutline,
+    CodeBracketSquareIcon as CodeBracketSquareIconOutline,
+    PencilSquareIcon as PencilSquareIconOutline,
+    RocketLaunchIcon as RocketLaunchIconOutline,
+    PlayCircleIcon as PlayCircleIconOutline,
+    MagnifyingGlassIcon as MagnifyingGlassIconOutline,
+    ArrowPathIcon as ArrowPathIconOutline,
+} from '@heroicons/react/24/outline';
+import {
+    SquaresPlusIcon as SquaresPlusIconSolid,
+    CircleStackIcon as CircleStackIconSolid,
+    CodeBracketSquareIcon as CodeBracketSquareIconSolid,
+    PencilSquareIcon as PencilSquareIconSolid,
+    RocketLaunchIcon as RocketLaunchIconSolid,
+    PlayCircleIcon as PlayCircleIconSolid,
+    MagnifyingGlassIcon as MagnifyingGlassIconSolid,
+    ArrowPathIcon as ArrowPathIconSolid,
+} from '@heroicons/react/24/solid';
+import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
 
 /**
  * Type for navigation items in the sidebar.
@@ -217,14 +232,14 @@ function generalMenuItems(): MenuItem[] {
     return [ {
         type: 'normal',
         label: 'Schema categories',
-        solidIcon: BiSolidCategory,
-        outlineIcon: BiCategory,
+        solidIcon: SquaresPlusIconSolid,
+        outlineIcon: SquaresPlusIconOutline,
         route: routes.categories,
     }, {
         type: 'normal',
         label: 'Datasources',
-        solidIcon: HiDatabase,
-        outlineIcon: HiOutlineDatabase,
+        solidIcon: CircleStackIconSolid,
+        outlineIcon: CircleStackIconOutline,
         route: routes.datasources.list.path,
         match: [ routes.datasources.detail.path ],
     }, {
@@ -253,14 +268,14 @@ function categoryMenuItems(categoryId: Id): MenuItem[] {
     }, {
         type: 'normal',
         label: 'Editor',
-        solidIcon: HiPencilSquare,
-        outlineIcon: HiOutlinePencilSquare,
+        solidIcon: PencilSquareIconSolid,
+        outlineIcon: PencilSquareIconOutline,
         route: routes.category.editor.resolve({ categoryId }),
     }, {
         type: 'normal',
         label: 'Datasources',
-        solidIcon: HiDatabase,
-        outlineIcon: HiOutlineDatabase,
+        solidIcon: CircleStackIconSolid,
+        outlineIcon: CircleStackIconOutline,
         route: routes.category.datasources.list.resolve({ categoryId }),
         match: [ routes.category.datasources.detail.path, routes.category.mapping.path, routes.category.datasources.newMapping.path ],
     }, {
@@ -280,9 +295,16 @@ function categoryMenuItems(categoryId: Id): MenuItem[] {
     }, {
         type: 'normal',
         label: 'Querying',
-        solidIcon: PlayCircleIconSolid,
-        outlineIcon: PlayCircleIconOutline,
+        solidIcon: MagnifyingGlassIconSolid,
+        outlineIcon: MagnifyingGlassIconOutline,
         route: routes.category.queries.list.resolve({ categoryId }),
         match: [ routes.category.queries.detail.path, routes.category.queries.new.path ],
+    }, {
+        type: 'normal',
+        label: 'Adaptation',
+        solidIcon: ArrowPathIconSolid,
+        outlineIcon: ArrowPathIconOutline,
+        route: routes.category.adaptation.resolve({ categoryId }),
+        match: [ routes.category.adaptation.path ],
     } ];
 }

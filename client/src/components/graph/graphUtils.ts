@@ -16,7 +16,7 @@ export type Edge = {
     id: string;
     from: string;
     to: string;
-    get label(): string;
+    get label(): string | undefined;
 };
 
 /** Maps edges by their from- and to- nodes. */
@@ -234,12 +234,12 @@ type EdgeSvg = {
     } | undefined;
 };
 
-export function computeEdgeSvg(from: Node, to: Node, label: string, degree: number, coordinates: Coordinates): EdgeSvg {
+export function computeEdgeSvg(from: Node, to: Node, label: string | undefined, degree: number, coordinates: Coordinates): EdgeSvg {
     const start = positionToOffset(from, coordinates);
     const end = positionToOffset(to, coordinates);
     // Some heuristic. Not ideal tho.
     // TODO Replace by something like https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/measureText.
-    const labelLength = label.length * 7 + 16;
+    const labelLength = label ? label.length * 7 + 16 : 0;
 
     return degree === 0
         ? computeEdgeStraightPath(start, end, labelLength)
@@ -253,9 +253,9 @@ function computeEdgeStraightPath(A: Offset, B: Offset, labelLength: number): Edg
     const tform = computeCommonTform(A, B);
     const { a_x, labelAngle } = tform;
 
-    const { e_x, f_x, g_x, h_x, labelCenter_x, isTooSmall } = computeCommonPoints(labelLength, a_x);
+    const { e_x, f_x, g_x, h_x, labelCenter_x, isLabelOmitted } = computeCommonPoints(labelLength, a_x);
 
-    if (isTooSmall) {
+    if (isLabelOmitted) {
         return {
             path: `M ${xToSvg(e_x, tform)} L ${xToSvg(h_x, tform)}`,
             label: undefined,
@@ -281,9 +281,9 @@ function computeCommonPoints(labelLength: number, a_x: number) {
     const f_x = labelCenter_x + labelLength / 2;
     const g_x = labelCenter_x - labelLength / 2;
 
-    const isTooSmall = (f_x > e_x) || (h_x > g_x);
+    const isLabelOmitted = labelLength === 0 || (f_x > e_x) || (h_x > g_x);
 
-    return { e_x, f_x, g_x, h_x, labelCenter_x, isTooSmall };
+    return { e_x, f_x, g_x, h_x, labelCenter_x, isLabelOmitted };
 }
 
 function createLabelTransform(center: Offset, angle: number): string {
@@ -350,8 +350,8 @@ function computeEdgeCurvedPath(A: Offset, B: Offset, labelLength: number, degree
     const arcPrefix = `${roundedRadius} ${roundedRadius} 0 0 ${sweepFlag}`;
 
     // We use the same condition here as for the straight path. We want all labels to disappear at the same edge length.
-    const { isTooSmall } = computeCommonPoints(labelLength, a_x);
-    if (isTooSmall) {
+    const { isLabelOmitted } = computeCommonPoints(labelLength, a_x);
+    if (isLabelOmitted) {
         return {
             path: `M ${phiToSvg(e_phi, tform)} A ${arcPrefix} ${phiToSvg(h_phi, tform)}`,
             label: undefined,

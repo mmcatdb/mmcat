@@ -67,6 +67,7 @@ export const routes = {
         },
         jobs: categoryIndex.child('/jobs', 'jobs'),
         job: categoryIndex.child<'categoryId' | 'jobId'>('/jobs/:jobId', 'job'),
+        adaptation: categoryIndex.child('/adaptation', 'adaptation'),
     },
     datasources: {
         list: datasourcesIndex,

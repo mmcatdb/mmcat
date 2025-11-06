@@ -67,8 +67,11 @@ public class SchemaCategory {
         final var next = new SchemaObjex(key, serialized.ids(), prev.isEntity());
         objexes.put(key, next);
 
-        prev.from().stream().forEach(m -> m.setDom(next));
-        prev.to().stream().forEach(m -> m.setCod(next));
+        // The `set` methods modify the collections which we can't do while iterating over them. So we have to collect them first.
+        final var prevFrom = prev.from().stream().toList();
+        prevFrom.stream().forEach(m -> m.setDom(next));
+        final var prevTo = prev.to().stream().toList();
+        prevTo.stream().forEach(m -> m.setCod(next));
 
         return next;
     }

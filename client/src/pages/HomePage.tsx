@@ -191,6 +191,7 @@ function SchemaCategoriesSection({ categories, showAllCategories, setShowAllCate
                     >
                         New Schema
                     </SpinnerButton>
+
                     {EXAMPLE_CATEGORIES.map(example => (
                         <SpinnerButton
                             key={example}

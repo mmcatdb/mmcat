@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { routes } from '@/routes/routes';
 import { Link } from 'react-router-dom';
 import { AiFillBug, AiOutlineBug } from 'react-icons/ai';
-import { twJoin } from 'tailwind-merge';
 import { Button } from '@heroui/react';
+import { cn } from './utils';
 
 export function DevBar() {
     const [ show, setShow ] = useState(false);
 
     return (<>
         <div className='fixed bottom-4 right-[96px] z-9999999999 flex justify-end pointer-events-none'>
-            <div className={twJoin('h-12 px-1 py-1 rounded-medium flex gap-3 items-center pointer-events-auto bg-danger-300', !show && 'hidden')}>
+            <div className={cn('h-12 px-1 py-1 rounded-medium flex gap-3 items-center pointer-events-auto bg-danger-300', !show && 'hidden')}>
                 <Button as={Link} to={routes.dev}>Dev page</Button>
 
                 <div className='pr-2'>

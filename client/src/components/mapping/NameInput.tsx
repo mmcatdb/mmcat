@@ -148,10 +148,14 @@ export function toEditableName(name: Name): EditableName {
     if (name instanceof StringName)
         return { type: NameType.string, value: name.value };
 
-    if (name instanceof DynamicName) {
-        const type = name.type === TypedName.KEY ? NameType.dynamicKey : NameType.dynamicIndex;
-        return { type, signature: name.signature, pattern: name.pattern ?? '' };
-    }
+
+    // FIXME This needs to be completely reimplemented.
+
+
+    // if (name instanceof DynamicName) {
+    //     const type = name.type === TypedName.KEY ? NameType.dynamicKey : NameType.dynamicIndex;
+    //     return { type, signature: name.signature, pattern: name.pattern ?? '' };
+    // }
 
     return { type: NameType.typed, value: name.type };
 }
@@ -165,13 +169,14 @@ export function fromEditableName(editable: EditableName, state: MappingEditorSta
     if (editable.type === NameType.typed)
         return new TypedName(editable.value);
 
+    // FIXME This needs to be completely reimplemented.
     const type = editable.type === NameType.dynamicKey ? TypedName.KEY : TypedName.INDEX;
     const trimmedPattern = editable.pattern.trim();
     const pattern = trimmedPattern.length === 0 ? undefined : trimmedPattern;
     if (pattern && !DynamicName.isPatternValid(pattern))
         return undefined;
 
-    return new DynamicName(type, editable.signature, pattern);
+    return new DynamicName(pattern);
 }
 
 function switchEditableNameType(type: NameType, prev: EditableName, original: EditableName, datasource: Datasource): EditableName | undefined {

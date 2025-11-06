@@ -22,6 +22,7 @@ import { NewQueryPage } from '@/pages/category/NewQueryPage';
 import { QueriesPage } from '@/pages/category/QueriesPage';
 import { type QueryLoaderData, QueryPage } from '@/pages/category/QueryPage';
 import { DevPage } from '@/pages/DevPage';
+import { AdaptationPage } from '@/pages/category/AdaptationPage';
 
 const enableDevPage = import.meta.env.DEV;
 
@@ -158,6 +159,12 @@ export const router = createBrowserRouter([ {
                     loader: NewQueryPage.loader,
                     handle: { breadcrumb: 'New' },
                 } ],
+            }, {
+                id: routes.category.adaptation.id,
+                path: routes.category.adaptation.path,
+                loader: AdaptationPage.loader,
+                Component: AdaptationPage,
+                handle: { breadcrumb: 'Adaptation' },
             } ],
         } ],
     }, ...(enableDevPage ? [ {

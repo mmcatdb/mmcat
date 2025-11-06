@@ -93,8 +93,9 @@ function getObjexesFromPath(path: ParentProperty, context: CategoryContext): Com
     path.subpaths.forEach(subpath => {
         findObjexesFromSignature(subpath.signature, context).forEach(objex => output.add(objex));
 
-        if (subpath.name instanceof DynamicName)
-            findObjexesFromSignature(subpath.name.signature, context).forEach(objex => output.add(objex));
+        // FIXME This needs to be completely reimplemented.
+        // if (subpath.name instanceof DynamicName)
+        //     findObjexesFromSignature(subpath.name.signature, context).forEach(objex => output.add(objex));
 
         if (subpath instanceof ComplexProperty)
             getObjexesFromPath(subpath, context).forEach(objex => output.add(objex));

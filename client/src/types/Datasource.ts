@@ -215,3 +215,20 @@ export const DATASOURCE_TYPES: Record<DatasourceType, DatasourceTypeDefinition> 
         specialNames: [],
     },
 };
+
+export enum DatasourceModel {
+    document = 'document',
+    relational = 'relational',
+    graph = 'graph',
+    columnar = 'columnar',
+    keyValue = 'keyValue',
+}
+
+export const DATASOURCE_MODELS: Record<DatasourceType, DatasourceModel> = {
+    [DatasourceType.mongodb]: DatasourceModel.document,
+    [DatasourceType.postgresql]: DatasourceModel.relational,
+    [DatasourceType.neo4j]: DatasourceModel.graph,
+    [DatasourceType.csv]: DatasourceModel.relational,
+    [DatasourceType.json]: DatasourceModel.document,
+    [DatasourceType.jsonld]: DatasourceModel.document,
+};

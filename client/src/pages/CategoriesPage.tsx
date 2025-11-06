@@ -70,14 +70,13 @@ export function CategoriesPage() {
                         <SpinnerButton
                             key={example}
                             onPress={() => createCategory(example, example, fidExample(example))}
-                            fid={fidExample(example)}
-                            fetching={fetching}
                             color='secondary'
                             variant='flat'
-                            // size='sm'
-                            startContent={<FaPlus className='size-3' />}
+                            startContent={<FaPlus className='size-4' />}
+                            fetching={fetching}
+                            fid={fidExample(example)}
                         >
-                            Example
+                            Example ({example})
                         </SpinnerButton>
                     ))}
                 </div>

@@ -57,8 +57,7 @@ export function CategoryEditorGraph({ state, dispatch, options, className }: Cat
                             state={state}
                             dispatch={dispatch}
                         />
-                    )),
-                    )}
+                    )))}
                 </svg>
 
                 <SelectionBox />
