@@ -1,5 +1,6 @@
 package cz.matfyz.abstractwrappers.exception.collector;
 
+/** @deprecated Use some specialization of NamedException instead. */
 public class WrapperUnsupportedOperationException extends WrapperException {
 
     public WrapperUnsupportedOperationException(String message) {

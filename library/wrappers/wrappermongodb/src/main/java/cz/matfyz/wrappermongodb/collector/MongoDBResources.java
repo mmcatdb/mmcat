@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Class containing all help queries used for gather data and some constants for computing sizes etc.
  */
-public class MongoResources {
+public class MongoDBResources {
     public static final String SYSTEM_NAME = "MongoDB";
 
     public static Document getExplainCommand(Document command) {

@@ -7,7 +7,7 @@ import org.bson.Document;
 /**
  * Main class handling all process of parsing mongo query to correct mongo command
  */
-public class MongoQueryParser {
+public class MongoDBQueryParser {
 
     /**
      * Method which will split query into tokens for easier parsing

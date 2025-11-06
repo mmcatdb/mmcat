@@ -4,11 +4,9 @@ import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
 import cz.matfyz.abstractwrappers.exception.collector.*;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
-import cz.matfyz.wrappermongodb.collector.MongoExceptionsFactory;
-import cz.matfyz.wrappermongodb.collector.components.MongoConnection;
-import cz.matfyz.wrappermongodb.collector.components.MongoDataCollector;
-import cz.matfyz.wrappermongodb.collector.components.MongoExplainPlanParser;
-import cz.matfyz.wrappermongodb.collector.components.MongoQueryResultParser;
+import cz.matfyz.wrappermongodb.collector.MongoDBDataCollector;
+import cz.matfyz.wrappermongodb.collector.MongoDBExplainPlanParser;
+import cz.matfyz.wrappermongodb.collector.MongoDBQueryResultParser;
 
 /**
  * Class representing Wrapper for mongodb database
@@ -19,46 +17,37 @@ public final class MongoDBCollectorWrapper implements AbstractCollectorWrapper {
     private final String datasourceIdentifier;
 
     // TODO: do these need to be persisted as state variables, or are local variables enough? - local is ok for non-state (or just static)
-    private final MongoQueryResultParser resultParser;
+    private final MongoDBQueryResultParser resultParser;
 
-    private final MongoExplainPlanParser explainPlanParser;
+    private final MongoDBExplainPlanParser explainPlanParser;
 
     public MongoDBCollectorWrapper(MongoDBProvider provider, String datasourceIdentifier) {
         this.provider = provider;
         this.datasourceIdentifier = datasourceIdentifier;
-        resultParser = new MongoQueryResultParser();
-        explainPlanParser = new MongoExplainPlanParser();
+        resultParser = new MongoDBQueryResultParser(provider);
+        explainPlanParser = new MongoDBExplainPlanParser();
     }
 
     @Override
     public final DataModel executeQuery(QueryContent query) throws WrapperException {
         assert query instanceof MongoDBQuery;
-        final var mongoQuery = (MongoDBQuery)query;
+        final var mongoQuery = (MongoDBQuery) query;
 
-        var dataModel = new DataModel(datasourceIdentifier, mongoQuery.toString());
-        var connection = new MongoConnection(provider.getDatabase());
+        final var dataModel = new DataModel(datasourceIdentifier, mongoQuery.toString());
 
-        resultParser.setConnection(connection);
-
-        final var queryResult = connection.database().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline);
+        final var queryResult = provider.getDatabase().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline);
         final var queryPlan = queryResult.explain();
-
 
         // var inputQuery = queryParser.parseQueryToCommand(mongoQuery.toString());
         // var explainResult = connection.executeWithExplain(inputQuery);
 
-        var mainResult = resultParser.parseResultAndConsume(queryResult);
+        final var mainResult = resultParser.parseResultAndConsume(queryResult);
         explainPlanParser.parsePlan(queryPlan, dataModel);
 
-        try {
-            var dataCollector = new MongoDataCollector(dataModel, connection, resultParser, provider.settings.database());
-            dataCollector.collectData(mainResult);
+        final var dataCollector = new MongoDBDataCollector(dataModel, provider, resultParser);
+        dataCollector.collectData(mainResult);
 
-            resultParser.removeConnection();
-            return dataModel;
-        } catch (ConnectionException e) {
-            throw MongoExceptionsFactory.getExceptionsFactory().dataCollectorNotInitialized(e);
-        }
+        return dataModel;
     }
 
 }

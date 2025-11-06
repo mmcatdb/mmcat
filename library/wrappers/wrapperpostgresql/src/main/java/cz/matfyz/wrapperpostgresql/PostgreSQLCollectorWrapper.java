@@ -1,14 +1,20 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractCollectorWrapper;
-import cz.matfyz.abstractwrappers.exception.collector.*;
+import cz.matfyz.abstractwrappers.exception.collector.WrapperException;
+import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.collector.DataModel;
+import cz.matfyz.core.collector.ResultWithPlan;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLDataCollector;
 import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
-import cz.matfyz.wrapperpostgresql.collector.components.PostgresConnection;
-import cz.matfyz.wrapperpostgresql.collector.components.PostgresDataCollector;
-import cz.matfyz.wrapperpostgresql.collector.components.PostgresExplainPlanParser;
-import cz.matfyz.wrapperpostgresql.collector.components.PostgresQueryResultParser;
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExplainPlanParser;
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLQueryResultParser;
+import cz.matfyz.wrapperpostgresql.collector.PostgreSQLResources;
 
 /**
  * Class which represents the wrapper operating over PostgreSQL database
@@ -18,15 +24,15 @@ public class PostgreSQLCollectorWrapper implements AbstractCollectorWrapper {
     protected final PostgreSQLProvider provider;
     private final String datasourceIdentifier;
 
-    protected final PostgresQueryResultParser resultParser;
+    protected final PostgreSQLQueryResultParser resultParser;
 
-    protected final PostgresExplainPlanParser explainPlanParser;
+    protected final PostgreSQLExplainPlanParser explainPlanParser;
 
     public PostgreSQLCollectorWrapper(PostgreSQLProvider provider, String datasourceIdentifier) {
         this.provider = provider;
         this.datasourceIdentifier = datasourceIdentifier;
-        resultParser = new PostgresQueryResultParser();
-        explainPlanParser = new PostgresExplainPlanParser();
+        resultParser = new PostgreSQLQueryResultParser();
+        explainPlanParser = new PostgreSQLExplainPlanParser();
     }
 
     public final DataModel executeQuery(QueryContent query) throws WrapperException {
@@ -35,20 +41,33 @@ public class PostgreSQLCollectorWrapper implements AbstractCollectorWrapper {
 
         final var dataModel = new DataModel(datasourceIdentifier, postgresQuery.toString());
 
+        final var explainResult = executeWithExplain(postgresQuery.toString());
+
+        final var mainResult = resultParser.parseResultAndConsume(explainResult.result(), postgresQuery.tableColumns);
+        explainPlanParser.parsePlan(explainResult.plan(), dataModel);
+
+        final var dataCollector = new PostgreSQLDataCollector(dataModel, provider, resultParser, provider.settings.database());
+        dataCollector.collectData(mainResult);
+
+        return dataModel;
+    }
+
+    private ResultWithPlan<ResultSet, String> executeWithExplain(String query) throws QueryExecutionException {
         try (
-            final var connection = new PostgresConnection(provider);
+            var connection = provider.getConnection();
+            var statement = connection.createStatement();
         ) {
-            final var explainResult = connection.executeWithExplain(postgresQuery.toString());
+            ResultSet planResult = statement.executeQuery(PostgreSQLResources.getExplainPlanQuery(query));
+            String plan = null;
+            if (planResult.next())
+                plan = planResult.getString("QUERY PLAN");
 
-            final var mainResult = resultParser.parseResultAndConsume(explainResult.result(), postgresQuery.tableColumns);
-            explainPlanParser.parsePlan(explainResult.plan(), dataModel);
+            ResultSet result = statement.executeQuery(query);
 
-
-            final var dataCollector = new PostgresDataCollector(provider.settings.database(), dataModel, connection, resultParser);
-            dataCollector.collectData(mainResult);
-            return dataModel;
-        } catch (ConnectionException e) {
-            throw PostgreSQLExceptionsFactory.getExceptionsFactory().dataCollectorNotInitialized(e);
+            return new ResultWithPlan<>(result, plan);
+        } catch (SQLException e) {
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().queryExecutionWithExplainFailed(e);
         }
     }
+
 }

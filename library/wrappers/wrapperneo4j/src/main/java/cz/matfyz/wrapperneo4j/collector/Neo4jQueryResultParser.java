@@ -1,8 +1,7 @@
-package cz.matfyz.wrapperneo4j.collector.components;
+package cz.matfyz.wrapperneo4j.collector;
 
 import cz.matfyz.core.collector.CachedResult;
 import cz.matfyz.core.collector.ConsumedResult;
-import cz.matfyz.wrapperneo4j.collector.Neo4jResources;
 
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;

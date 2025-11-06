@@ -19,5 +19,10 @@
             <artifactId>inference</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>7.0.2</version>
+        </dependency>
     </dependencies>
 </project>

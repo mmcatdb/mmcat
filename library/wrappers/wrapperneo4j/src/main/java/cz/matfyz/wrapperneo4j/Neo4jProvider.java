@@ -3,6 +3,7 @@ package cz.matfyz.wrapperneo4j;
 import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
@@ -16,7 +17,7 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
 
     // The driver itself handles connection pooling so there should be only one driver (with given connection string) per application.
     // This also means that there should be at most one instance of this class so it should be cached somewhere.
-    private Driver driver;
+    private @Nullable Driver driver;
 
     public Neo4jProvider(Neo4jSettings settings) {
         this.settings = settings;
@@ -26,6 +27,7 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
         if (driver == null)
             driver = GraphDatabase.driver(settings.createConnectionString(), settings.createAuthToken());
 
+        // Sessions are cheap. We can create as many as we want.
         return driver.session(SessionConfig.forDatabase(settings.database));
     }
 

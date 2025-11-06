@@ -30,7 +30,7 @@ public class RecordToPropertiesMap implements FlatMapFunction<Row, RecordSchemaD
     }
 
     private void appendProperty(String key, Object value, ObjectArrayList<RecordSchemaDescription> result) {
-        final var type = MapMongoDocument.getType(value);
+        final var type = MapMongoDBDocument.getType(value);
         result.add(buildPropertySchemaDescription(key, type));
 
         appendPropertyChildren(key, value, result);
@@ -58,7 +58,7 @@ public class RecordToPropertiesMap implements FlatMapFunction<Row, RecordSchemaD
         final String hierarchicalName = parentName + "/" + RecordSchemaDescription.ROOT_SYMBOL;
 
         for (final Object value : list) {
-            final int type = MapMongoDocument.getType(value);
+            final int type = MapMongoDBDocument.getType(value);
             final var property = typeMap.get(type);
             if (property == null)
                 typeMap.set(type, buildPropertySchemaDescription(hierarchicalName, type));

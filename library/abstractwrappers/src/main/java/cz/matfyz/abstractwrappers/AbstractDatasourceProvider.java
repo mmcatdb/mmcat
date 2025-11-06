@@ -3,7 +3,7 @@ package cz.matfyz.abstractwrappers;
 public interface AbstractDatasourceProvider extends AutoCloseable {
 
     // Once created, the datasource connection should be stable, even if the credentials change. However, if the host or port changes, we have to obviously create a new connection.
-    // We can therefore distinguish two types of changes: stable (credentials, label, ...) and unstable (host, port, ...). However, each datasource is different - e.g., PostgreSQL creates a new connection for each query, while MongoDB uses connection pooling. So, for each datasource, we have to decide separately.
+    // We can therefore distinguish two types of changes: stable (credentials, label, ...) and unstable (host, port, ...). However, each datasource is different - e.g., JSON just reads from the file each time, while MongoDB uses connection pooling. So, for each datasource, we have to decide separately.
     // A stable change doesn't affect the current connection. An unstable change completely invalidates it.
     // Notice there isn't any middle ground, because we don't try to reconnect or something like that. If we were, the stable changes would be divided to:
     //  - "Non" changes (e.g., the label changes but the connection is still valid).

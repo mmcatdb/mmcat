@@ -4,17 +4,20 @@ import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 import cz.matfyz.core.exception.OtherException;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PostgreSQLProvider implements AbstractDatasourceProvider {
 
     final PostgreSQLSettings settings;
 
-    // This class is also meant to be instantiated only once (see the MongoDB wrapper) but it currently doesn't use any caching itself.
-    // However, some connection pooling can be added in the future.
+    // The dataSource itself handles connection pooling so there should be only one dataSource (with given connection string) per application.
+    // This also means that there should be at most one instance of this class so it should be cached somewhere.
+    private @Nullable HikariDataSource dataSource;
 
     public PostgreSQLProvider(PostgreSQLSettings settings) {
         this.settings = settings;
@@ -22,7 +25,14 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
 
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection(settings.createConnectionString());
+            if (dataSource == null) {
+                final var config = new HikariConfig();
+                config.setJdbcUrl(settings.createConnectionString());
+                config.setReadOnly(!settings.isWritable);
+                dataSource = new HikariDataSource(config);
+            }
+
+            return dataSource.getConnection();
         }
         catch (SQLException e) {
             throw new OtherException(e);
@@ -30,12 +40,19 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
     }
 
     @Override public boolean isStillValid(Object settings) {
-        // We always create a new connection so we don't need to cache anything.
-        return false;
+        if (!(settings instanceof PostgreSQLSettings postgreSqlSettings))
+            return false;
+
+        return this.settings.host.equals(postgreSqlSettings.host)
+            && this.settings.port.equals(postgreSqlSettings.port)
+            && this.settings.database.equals(postgreSqlSettings.database)
+            && this.settings.isWritable == postgreSqlSettings.isWritable
+            && this.settings.isQueryable == postgreSqlSettings.isQueryable;
     }
 
     @Override public void close() {
-        // We don't need to close anything because we don't cache anything.
+        if (dataSource != null)
+            dataSource.close();
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

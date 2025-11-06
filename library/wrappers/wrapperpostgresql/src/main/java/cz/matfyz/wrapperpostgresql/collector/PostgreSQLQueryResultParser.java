@@ -1,16 +1,15 @@
-package cz.matfyz.wrapperpostgresql.collector.components;
+package cz.matfyz.wrapperpostgresql.collector;
 
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.core.collector.CachedResult;
 import cz.matfyz.core.collector.ConsumedResult;
-import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
 
-public class PostgresQueryResultParser {
+public class PostgreSQLQueryResultParser {
 
     /**
      * Method which adds values to cached result and parse correctly parse them using metaData

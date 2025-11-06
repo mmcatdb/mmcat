@@ -1,4 +1,4 @@
-package cz.matfyz.wrapperpostgresql.collector.components;
+package cz.matfyz.wrapperpostgresql.collector;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +8,7 @@ import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import java.util.List;
 import java.util.Map;
 
-public class PostgresExplainPlanParser {
+public class PostgreSQLExplainPlanParser {
 
     /**
      * Method which saves the execution time of query to model

@@ -2,6 +2,7 @@ package cz.matfyz.abstractwrappers.exception.collector;
 
 /**
  * Exception thrown from instance of AbstractDataCollector when some problem occur during collecting statistical data
+ * @deprecated Use some specialization of NamedException instead.
  */
 public class DataCollectException extends WrapperException {
     public DataCollectException(Throwable cause) { super(cause); }

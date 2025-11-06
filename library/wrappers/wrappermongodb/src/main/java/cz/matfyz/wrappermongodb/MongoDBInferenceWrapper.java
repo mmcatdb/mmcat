@@ -2,7 +2,7 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.PropertyHeuristics;
-import cz.matfyz.wrappermongodb.inference.MapMongoDocument;
+import cz.matfyz.wrappermongodb.inference.MapMongoDBDocument;
 import cz.matfyz.wrappermongodb.inference.RecordToHeuristicsMap;
 import cz.matfyz.wrappermongodb.inference.RecordToPropertiesMap;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
@@ -24,7 +24,7 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
     private static final String READ_PREFIX = "spark.mongodb.read.";
 
     @Override public JavaRDD<RecordSchemaDescription> loadRSDs() {
-        return loadRecords().map(MapMongoDocument::process);
+        return loadRecords().map(MapMongoDBDocument::process);
     }
 
     @Override public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {

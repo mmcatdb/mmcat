@@ -1,15 +1,11 @@
-package cz.matfyz.wrapperpostgresql.collector.components;
+package cz.matfyz.wrapperpostgresql.collector;
 
-import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
-import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExceptionsFactory;
-import cz.matfyz.wrapperpostgresql.collector.PostgreSQLResources;
 import cz.matfyz.abstractwrappers.exception.collector.DataCollectException;
-import cz.matfyz.abstractwrappers.exception.collector.ParseException;
-import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
 import cz.matfyz.core.collector.CachedResult;
 import cz.matfyz.core.collector.ConsumedResult;
 import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.core.collector.DataModel.TableData;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,30 +13,28 @@ import java.util.Set;
 /**
  * Class which is responsible for collecting all statistical data and save them to data model
  */
-public class PostgresDataCollector {
-    private final PostgresConnection connection;
-    private final PostgresQueryResultParser resultParser;
+public class PostgreSQLDataCollector {
 
-    protected final String databaseName;
-    protected final DataModel model;
+    private final DataModel model;
+    private final PostgreSQLProvider provider;
+    private final PostgreSQLQueryResultParser resultParser;
+    private final String databaseName;
 
-
-    public PostgresDataCollector(
-            String databaseName,
-            DataModel dataModel,
-            PostgresConnection connection,
-            PostgresQueryResultParser resultParser
-    ) throws ConnectionException {
-        this.databaseName = databaseName;
-        this.model = dataModel;
-        this.connection = connection;
+    public PostgreSQLDataCollector(DataModel model, PostgreSQLProvider provider, PostgreSQLQueryResultParser resultParser, String databaseName) {
+        this.model = model;
+        this.provider = provider;
         this.resultParser = resultParser;
+        this.databaseName = databaseName;
     }
 
-    protected CachedResult executeQuery(String query) throws DataCollectException {
-        try {
-            return resultParser.parseResultAndCache(connection.executeQuery(query));
-        } catch (QueryExecutionException | ParseException e) {
+    private CachedResult executeQuery(String query) throws DataCollectException {
+        try (
+            var connection = provider.getConnection();
+            var statement = connection.createStatement();
+        ) {
+            final var result = statement.executeQuery(query);
+            return resultParser.parseResultAndCache(result);
+        } catch (Exception e) {
             throw PostgreSQLExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
         }
     }

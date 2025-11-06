@@ -14,7 +14,7 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
 
     // The client itself handles connection pooling so there should be only one client (with given connection string) per application.
     // This also means that there should be at most one instance of this class so it should be cached somewhere.
-    private MongoClient mongoClient;
+    private @Nullable MongoClient mongoClient;
 
     public MongoDBProvider(MongoDBSettings settings) {
         this.settings = settings;

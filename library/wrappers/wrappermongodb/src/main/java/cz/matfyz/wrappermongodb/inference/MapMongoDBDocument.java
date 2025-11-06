@@ -13,11 +13,11 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import scala.collection.Seq;
 import scala.jdk.CollectionConverters;
 
-public abstract class MapMongoDocument {
+public abstract class MapMongoDBDocument {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapMongoDocument.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapMongoDBDocument.class);
 
-    private MapMongoDocument() {}
+    private MapMongoDBDocument() {}
 
     public static RecordSchemaDescription process(Row row) {
         final var result = new RecordSchemaDescription(

@@ -6,12 +6,8 @@ import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 import cz.matfyz.wrappermongodb.collector.queryparser.CommandBuilder;
 
 /** @deprecated */
-public class MongoExceptionsFactory extends WrapperExceptionsFactory {
-    //region ParseException initialization
-    public ParseException documentKeyNotFound(String key) {
-        var message = new Message("key '" + key + "' was not present in document").toString();
-        return new ParseException(message);
-    }
+public class MongoDBExceptionsFactory extends WrapperExceptionsFactory {
+    // #region ParseException initialization
 
     public ParseException invalidNumberOfArgumentsInMethod(String methodName, CommandBuilder.ReturnType type) {
         String message;
@@ -61,12 +57,12 @@ public class MongoExceptionsFactory extends WrapperExceptionsFactory {
         String message = new Message("count method can be used on find method only").toString();
         return new ParseException(message);
     }
-    //endregion
+    // #endregion
 
     public DataCollectException collectionNotParsed() {
         var message = new Message("no collection was parsed from explain plan").toString();
         return new DataCollectException(message);
     }
 
-    public static MongoExceptionsFactory getExceptionsFactory() { return new MongoExceptionsFactory(); }
+    public static MongoDBExceptionsFactory getExceptionsFactory() { return new MongoDBExceptionsFactory(); }
 }

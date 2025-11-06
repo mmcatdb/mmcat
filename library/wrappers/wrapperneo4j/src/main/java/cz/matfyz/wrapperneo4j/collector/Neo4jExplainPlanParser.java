@@ -1,4 +1,4 @@
-package cz.matfyz.wrapperneo4j.collector.components;
+package cz.matfyz.wrapperneo4j.collector;
 
 import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;

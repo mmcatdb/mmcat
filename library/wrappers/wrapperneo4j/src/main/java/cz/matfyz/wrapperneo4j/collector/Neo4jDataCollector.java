@@ -1,55 +1,51 @@
-package cz.matfyz.wrapperneo4j.collector.components;
+package cz.matfyz.wrapperneo4j.collector;
 
-import cz.matfyz.abstractwrappers.exception.collector.ConnectionException;
-import cz.matfyz.wrapperneo4j.collector.Neo4jResources;
 import cz.matfyz.core.collector.CachedResult;
 import cz.matfyz.core.collector.ConsumedResult;
 import cz.matfyz.core.collector.DataModel;
+import cz.matfyz.wrapperneo4j.Neo4jProvider;
 import cz.matfyz.abstractwrappers.exception.collector.DataCollectException;
-import cz.matfyz.abstractwrappers.exception.collector.QueryExecutionException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperExceptionsFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.neo4j.driver.exceptions.Neo4jException;
+
 /**
  * Class responsible for collecting all statistical data from neo4j
  */
 public class Neo4jDataCollector {
 
-    private final Neo4jConnection connection;
+    private final DataModel model;
+    private final Neo4jProvider provider;
     private final Neo4jQueryResultParser resultParser;
 
-    protected final String databaseName;
-    protected final DataModel model;
-
-
-    public Neo4jDataCollector(
-            DataModel dataModel,
-            Neo4jConnection connection,
-            Neo4jQueryResultParser resultParser,
-            String databaseName
-    ) throws ConnectionException {
-        this.databaseName = databaseName;
-        this.model = dataModel;
-        this.connection = connection;
+    public Neo4jDataCollector(DataModel model, Neo4jProvider provider, Neo4jQueryResultParser resultParser) {
+        this.model = model;
+        this.provider = provider;
         this.resultParser = resultParser;
     }
 
-
-    protected CachedResult executeQuery(String query) throws DataCollectException {
-        try {
-            return resultParser.parseResultAndCache(connection.executeQuery(query));
-        } catch (QueryExecutionException e) {
+    private CachedResult executeQuery(String query) throws DataCollectException {
+        try (
+            final var session = provider.getSession();
+        ) {
+            final var result = session.run(query);
+            return resultParser.parseResultAndCache(result);
+        } catch (Neo4jException e) {
             throw WrapperExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
         }
     }
 
-    protected ConsumedResult executeQueryAndConsume(String query) throws DataCollectException {
-        try {
-            return resultParser.parseResultAndConsume(connection.executeQuery(query));
-        } catch (QueryExecutionException e) {
+    private ConsumedResult executeQueryAndConsume(String query) throws DataCollectException {
+        try (
+            final var session = provider.getSession();
+        ) {
+            final var result = session.run(query);
+            return resultParser.parseResultAndConsume(result);
+        } catch (Exception e) {
             throw WrapperExceptionsFactory.getExceptionsFactory().dataCollectionFailed(e);
         }
     }
@@ -112,7 +108,6 @@ public class Neo4jDataCollector {
 
     /**
      * Method which saves the gathered cache size to data model
-     * @throws DataCollectException when QueryExecutionException occur in help query evaluation
      */
     private void collectCacheSize() throws DataCollectException {
         CachedResult result = executeQuery(Neo4jResources.getPageCacheSizeQuery());

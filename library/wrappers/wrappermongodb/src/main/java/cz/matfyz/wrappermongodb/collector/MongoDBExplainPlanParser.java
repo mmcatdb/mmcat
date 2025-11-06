@@ -1,11 +1,11 @@
-package cz.matfyz.wrappermongodb.collector.components;
+package cz.matfyz.wrappermongodb.collector;
 
 import cz.matfyz.core.collector.DataModel;
 import cz.matfyz.abstractwrappers.exception.collector.ParseException;
 import cz.matfyz.abstractwrappers.exception.collector.WrapperUnsupportedOperationException;
 import org.bson.Document;
 
-public class MongoExplainPlanParser {
+public class MongoDBExplainPlanParser {
 
     /**
      * Method which parses collection name of query
