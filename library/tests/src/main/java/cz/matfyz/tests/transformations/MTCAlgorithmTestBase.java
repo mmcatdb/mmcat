@@ -11,6 +11,7 @@ import cz.matfyz.core.instance.InstanceBuilder.InstanceAdder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.utils.IterableUtils;
 import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;
 import cz.matfyz.wrapperdummy.DummyPullWrapper;
@@ -80,10 +81,10 @@ public class MTCAlgorithmTestBase {
         for (final var expectedObjex : expectedInstance.allObjexes()) {
             final var objex = actualInstance.getObjex(expectedObjex.schema.key());
 
-            final var expectedString = expectedObjex.allRowsToSet().stream()
+            final var expectedString = IterableUtils.toSet(expectedObjex.allRows()).stream()
                 .map(row -> rowToMappingsString(row, expectedObjex, schema))
                 .sorted().toList();
-            final var string = objex.allRowsToSet().stream()
+            final var string = IterableUtils.toSet(objex.allRows()).stream()
                 .map(row -> rowToMappingsString(row, objex, schema))
                 .sorted().toList();
 
@@ -91,16 +92,14 @@ public class MTCAlgorithmTestBase {
         }
     }
 
-    private final static String GENERATED_ID = "<generated>";
-
     private static String rowToMappingsString(DomainRow row, InstanceObjex objex, SchemaCategory schema) {
-        String output = "\n[row] (" + objex.schema.key() + ") "  + row.toStringWithoutGeneratedIds(GENERATED_ID);
+        String output = "\n[row] (" + objex.schema.key() + ") "  + row.toStringForTests(true);
 
         for (final var entry : row.getAllMappingsFrom()) {
             final var signature = entry.getKey();
             final var codObjex = schema.getMorphism(signature).cod();
 
-            output += "\n\tmappings --[" + entry.getKey() + "]->(" + codObjex.key() + "): " + entry.getValue().cod().toStringWithoutGeneratedIds(GENERATED_ID);
+            output += "\n\tmappings --[" + entry.getKey() + "]->(" + codObjex.key() + "): " + entry.getValue().cod().toStringForTests(true);
         }
 
         return output + "\n";

@@ -64,7 +64,7 @@ public class Signature implements Serializable, Comparable<Signature>, Accessor<
 
     public Signature cutLast() {
         if (ids.length == 0)
-            return Signature.empty();
+            return empty();
 
         return createComposite(Arrays.copyOfRange(ids, 0, ids.length - 1));
     }
@@ -78,7 +78,7 @@ public class Signature implements Serializable, Comparable<Signature>, Accessor<
 
     public Signature cutFirst() {
         if (ids.length == 0)
-            return Signature.empty();
+            return empty();
 
         return createComposite(Arrays.copyOfRange(ids, 1, ids.length));
     }
@@ -335,7 +335,7 @@ public class Signature implements Serializable, Comparable<Signature>, Accessor<
 
         @Override public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-            return Signature.fromString(node.asText());
+            return fromString(node.asText());
         }
     }
 
@@ -360,7 +360,7 @@ public class Signature implements Serializable, Comparable<Signature>, Accessor<
         }
 
         public BaseSignature next() {
-            return Signature.createBase(idGenerator.next());
+            return createBase(idGenerator.next());
         }
 
     }

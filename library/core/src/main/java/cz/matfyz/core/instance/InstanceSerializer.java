@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 public class InstanceSerializer {
 
     public record SerializedInstance(
@@ -26,14 +24,13 @@ public class InstanceSerializer {
     public record SerializedInstanceObjex(
         Key key,
         List<SerializedDomainRow> rows,
-        SerializedUniqueSequentialGenerator technicalIdGenerator
+        SerializedUniqueSequentialGenerator rowIdGenerator
     ) {}
 
     public record SerializedDomainRow(
         int id,
         // FIXME Property values where?
         SuperIdValues values,
-        @Nullable Integer technicalId,
         List<Signature> pendingReferences
     ) {}
 
@@ -72,14 +69,12 @@ public class InstanceSerializer {
         final Map<DomainRow, Integer> rowToId = new TreeMap<>();
         keyToRowToId.put(objex.schema.key(), rowToId);
 
-        int lastId = 0;
         final List<SerializedDomainRow> rows = new ArrayList<>();
 
-        for (final DomainRow row : objex.allRowsToSet()) {
+        for (final DomainRow row : objex.allRows()) {
             final var rowWrapper = new SerializedDomainRow(
-                lastId++,
+                row.surrogateId,
                 row.superId,
-                row.technicalId,
                 row.pendingReferences.stream().toList()
             );
             rowToId.put(row, rowWrapper.id());
@@ -89,7 +84,7 @@ public class InstanceSerializer {
         return new SerializedInstanceObjex(
             objex.schema.key(),
             rows,
-            objex.technicalIdGenerator.serialize()
+            objex.rowIdGenerator.serialize()
         );
     }
 
@@ -127,7 +122,7 @@ public class InstanceSerializer {
 
     private void deserializeObjex(SerializedInstanceObjex serializedObjex, InstanceCategory instance) {
         final var objex = instance.getObjex(serializedObjex.key);
-        objex.technicalIdGenerator = UniqueSequentialGenerator.deserialize(serializedObjex.technicalIdGenerator);
+        objex.rowIdGenerator = UniqueSequentialGenerator.deserialize(serializedObjex.rowIdGenerator);
 
         final Map<Integer, DomainRow> idToRow = new TreeMap<>();
         keyToIdToRow.put(serializedObjex.key, idToRow);
@@ -135,7 +130,7 @@ public class InstanceSerializer {
         for (final var serializedRow : serializedObjex.rows) {
             final var row = new DomainRow(
                 serializedRow.values,
-                serializedRow.technicalId,
+                serializedRow.id,
                 new TreeSet<>(serializedRow.pendingReferences)
             );
 

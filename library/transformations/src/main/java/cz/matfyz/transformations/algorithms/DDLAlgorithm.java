@@ -82,7 +82,7 @@ public class DDLAlgorithm {
         final var names = new TreeSet<String>();
         final var keyProperty = map.getTypedSubpath(TypedName.KEY);
 
-        for (final var row : mapObjex.allRowsToSet()) {
+        for (final var row : mapObjex.allRows()) {
             // It has to be a scalar value because each map entry has to have a single name.
             final var name = row.tryFindScalarValue(keyProperty.signature());
             if (name != null)

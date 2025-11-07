@@ -29,9 +29,8 @@ public class DomainRow implements Comparable<DomainRow> {
 
     /** The tuples that holds the value of this row. Immutable. */
     public final SuperIdValues superId;
-    /** If defined, the object doesn't have enough values from the superId to form a valid identifier. */
-    public final @Nullable Integer technicalId;
-
+    /** For easy comparisons. Uniqueness is ensured by the {@link InstanceObjex}. */
+    final int surrogateId;
     // FIXME consider this when merging
     private final Map<BaseSignature, String> propertyValues = new TreeMap<>();
 
@@ -41,9 +40,9 @@ public class DomainRow implements Comparable<DomainRow> {
      */
     public final Set<Signature> pendingReferences;
 
-    public DomainRow(SuperIdValues superId, @Nullable Integer technicalId, Set<Signature> pendingReferences) {
+    public DomainRow(SuperIdValues superId, int surrogateId, Set<Signature> pendingReferences) {
         this.superId = superId;
-        this.technicalId = technicalId;
+        this.surrogateId = surrogateId;
         this.pendingReferences = pendingReferences;
     }
 
@@ -246,32 +245,26 @@ public class DomainRow implements Comparable<DomainRow> {
     }
 
     @Override public int compareTo(DomainRow other) {
-        if (this == other)
-            return 0;
+        // There is no notion of equality for DomainRow, so we don't override equals.
+        // In theory, they are identified by the superId values (or just id if needed). However, they should be unique by these values in the context of one instance objex.
+        // So, if two rows have the same values, they have to be referentially equal. So we can just use the uniqueId for comparison.
 
-        final var superIdComparison = superId.compareTo(other.superId);
-        if (superIdComparison != 0)
-            return superIdComparison;
-
-        if (technicalId == null)
-            return technicalId == null ? 0 : 1;
-
-        return other.technicalId == null ? -1 : technicalId.compareTo(other.technicalId);
+        return surrogateId - other.surrogateId;
     }
 
     @Override public String toString() {
-        return toStringWithoutGeneratedIds(null);
+        return toStringForTests(false);
     }
 
     /**
-     * Prints the row but replaces the generated id with the provided <code>idValue</code> (if there is such id and the value isn't null).
+     * Prints the row but replaces the generated id (if there is such id and the value isn't null) and uniqueId.
      * Useful for tests.
      */
-    public String toStringWithoutGeneratedIds(@Nullable String idValue) {
+    public String toStringForTests(boolean isTest) {
         final var sb = new StringBuilder();
-        sb.append(superId.toStringWithoutGeneratedIds(idValue));
-        if (technicalId != null)
-            sb.append("#").append(technicalId);
+        sb.append(superId.toStringForTests(isTest));
+        if (!isTest)
+            sb.append("#").append(surrogateId);
 
         sb.append(": (");
         final var SEPARATOR = ", ";
@@ -289,9 +282,5 @@ public class DomainRow implements Comparable<DomainRow> {
 
         return sb.toString();
     }
-
-    // There is no notion of equality for DomainRow, so we don't override equals.
-    // In practice, they are identified by the superId values and technicalId. However, they should be unique by these values in the context of one instance objex.
-    // So, if two rows have the same values, they have to be referentially equal.
 
 }

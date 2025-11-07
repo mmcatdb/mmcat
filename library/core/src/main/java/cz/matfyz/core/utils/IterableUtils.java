@@ -1,8 +1,13 @@
 package cz.matfyz.core.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 public class IterableUtils {
 
@@ -51,6 +56,28 @@ public class IterableUtils {
         }
 
         return (iteratorA.hasNext() ? 1 : 0) - (iteratorB.hasNext() ? 1 : 0);
+    }
+
+    public static <T> List<T> toList(Iterable<T> source) {
+        return toList(source, ArrayList::new);
+    }
+
+    public static <T> List<T> toList(Iterable<T> source, Supplier<? extends List<T>> constructor) {
+        final var output = constructor.get();
+        for (final var item : source)
+            output.add(item);
+        return output;
+    }
+
+    public static <T> Set<T> toSet(Iterable<T> source) {
+        return toSet(source, TreeSet::new);
+    }
+
+    public static <T> Set<T> toSet(Iterable<T> source, Supplier<? extends Set<T>> constructor) {
+        final var output = constructor.get();
+        for (final var item : source)
+            output.add(item);
+        return output;
     }
 
 }

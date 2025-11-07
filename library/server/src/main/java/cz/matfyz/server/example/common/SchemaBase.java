@@ -83,12 +83,8 @@ public abstract class SchemaBase {
 
     protected void addObjex(BuilderObjex builderObjex, double x, double y) {
         final var key = builderObjex.key();
-        final var objex = originalSchema.getObjex(key);
         // Signature ids can't be defined yet because there are no morphisms. Even in the composite operations the ids are defined later.
-        final ObjexIds ids = objex.hasSignatureId()
-            // However, ids can't be null in any case, so we create a generated one.
-            ? ObjexIds.createGenerated()
-            : objex.ids();
+        final var ids = ObjexIds.empty();
 
         final var schema = new SerializedObjex(key, ids);
         final var metadata = new SerializedMetadataObjex(key, builderObjex.label(), createPosition(x, y));

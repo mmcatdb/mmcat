@@ -77,12 +77,6 @@ public class SchemaBuilder {
     private Map<Key, BuilderObjex> objexesByKey = new TreeMap<>();
     private Map<String, BuilderObjex> objexesByLabel = new TreeMap<>();
 
-    private boolean nextIdsIsGenerated = false;
-    public SchemaBuilder generatedIds() {
-        this.nextIdsIsGenerated = true;
-        return this;
-    }
-
     public BuilderObjex objex(String label) {
         return objex(label, new Key(keyGenerator.next()));
     }
@@ -92,13 +86,9 @@ public class SchemaBuilder {
     }
 
     private BuilderObjex objex(String label, Key key) {
-        final var ids = nextIdsIsGenerated ? ObjexIds.createGenerated() : ObjexIds.createValue();
-        final var objex = new BuilderObjex(key, label, ids);
+        final var objex = new BuilderObjex(key, label, ObjexIds.empty());
         objexesByKey.put(objex.key(), objex);
         objexesByLabel.put(objex.label(), objex);
-
-        nextIdsIsGenerated = false;
-
         return objex;
     }
 
@@ -195,11 +185,8 @@ public class SchemaBuilder {
 
     @SafeVarargs
     public final SchemaBuilder ids(BuilderObjex objexes, Accessor<Signature>... signatures) {
-        final var id = new SignatureId(Stream.of(signatures).map(m -> m.access()).toArray(Signature[]::new));
-        objexes.ids = objexes.ids.isSignatures()
-            ? objexes.ids.extend(id)
-            : new ObjexIds(Set.of(id));
-
+        final var id = SignatureId.fromSignatures(Stream.of(signatures).map(m -> m.access()).toArray(Signature[]::new));
+        objexes.ids = objexes.ids.extend(id);
         return this;
     }
 
@@ -207,7 +194,6 @@ public class SchemaBuilder {
 
     public SchemaBuilder skip(BuilderObjex... objexes) {
         objexesToSkip.addAll(List.of(objexes));
-
         return this;
     }
 
@@ -215,7 +201,6 @@ public class SchemaBuilder {
 
     public SchemaBuilder skip(BuilderMorphism... morphisms) {
         morphismsToSkip.addAll(List.of(morphisms));
-
         return this;
     }
 

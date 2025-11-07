@@ -132,16 +132,16 @@ public class PlanJoiner {
     private JoinCandidate tryCreateIdRefCandidate(SchemaObjex idObjex, PatternForKind idPattern, PatternForKind refPattern, ObjexColoring coloring) {
         // First, check if the idObjex is an identifier of the root of the idKind.
         final SchemaObjex rootObjex = idPattern.root.objex;
-        if (!rootObjex.hasSignatureId())
+        if (rootObjex.ids().isEmpty())
             return null;
 
         // TODO currently, we are using only the first id for joining.
         final SignatureId firstId = rootObjex.ids().first();
         // TODO currently, we are accepting only signature ids with exactly one signature.
-        if (firstId.signatures().size() != 1)
+        if (firstId.size() != 1)
             return null;
 
-        final BaseSignature fromSignature = firstId.signatures().first().getLast();
+        final BaseSignature fromSignature = firstId.first().getLast();
         final SchemaObjex rootIdObjex = context.getSchema().getEdge(fromSignature).to();
         if (!idObjex.equals(rootIdObjex))
             return null;

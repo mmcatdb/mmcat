@@ -207,12 +207,12 @@ class MTCAlgorithmTests {
             .mappingWithRecords(MongoDB.customer(schema), """
                 [ {
                     "customer": {
-                        "name": 1,
+                        "name": "Alice",
                         "number": "o_100"
                     }
                 }, {
                     "customer": {
-                        "name": 1,
+                        "name": "Bob",
                         "number": "o_200"
                     }
                 } ]
@@ -220,8 +220,8 @@ class MTCAlgorithmTests {
             .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addCustomer(builder, 0, "1");
-                MongoDB.addCustomer(builder, 1, "1");
+                MongoDB.addCustomer(builder, 0, "Alice");
+                MongoDB.addCustomer(builder, 1, "Bob");
             })
             .run();
     }

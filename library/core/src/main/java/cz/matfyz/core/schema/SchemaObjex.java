@@ -30,16 +30,13 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
     }
 
     private final ObjexIds ids;
-    /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
-     *
-     * @deprecated
-     */
+    /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key). */
     public ObjexIds ids() {
         return ids;
     }
 
     private final Collection<Signature> superId;
-    /** A union of all ids (super key). */
+    /** A union of all ids (super key). Immutable. */
     public Collection<Signature> superId() {
         return superId;
     }
@@ -54,14 +51,6 @@ public class SchemaObjex implements Identified<SchemaObjex, Key> {
      */
     public boolean isEntity() {
         return isEntity;
-    }
-
-    public boolean hasSignatureId() {
-        return ids.isSignatures();
-    }
-
-    public boolean hasGeneratedId() {
-        return ids.isGenerated();
     }
 
     /** All base morphisms starting in this objex. Managed by {@link SchemaMorphism}. */

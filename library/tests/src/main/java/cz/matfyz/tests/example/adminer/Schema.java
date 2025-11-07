@@ -37,7 +37,7 @@ public class Schema {
     public static final BuilderObjex city =            builder.objex("city", 16);
     public static final BuilderObjex state =           builder.objex("state", 17);
     public static final BuilderObjex dates =           builder.objex("dates", 18);
-    public static final BuilderObjex attributes =      builder.generatedIds().objex("attributes", 19);
+    public static final BuilderObjex attributes =      builder.objex("attributes", 19);
     public static final BuilderObjex wifi =            builder.objex("wifi", 20);
     public static final BuilderObjex outdoorSeating =  builder.objex("outdoor_seating", 21);
 

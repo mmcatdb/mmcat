@@ -97,7 +97,7 @@ public class PatternExtractor {
 
         extractedObjexes.add(objex.key());
 
-        if (!objex.hasSignatureId())
+        if (objex.ids().isEmpty())
             return;
 
         objex.ids().collectAllSignatures().stream()

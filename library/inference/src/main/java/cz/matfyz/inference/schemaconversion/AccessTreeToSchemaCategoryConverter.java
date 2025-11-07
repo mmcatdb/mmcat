@@ -55,12 +55,8 @@ public class AccessTreeToSchemaCategoryConverter {
     }
 
     private SchemaObjex createSchemaObjex(AccessTreeNode node, boolean isRoot) {
-        final var ids = isRoot || !node.getChildren().isEmpty()
-            ? ObjexIds.createGenerated()
-            : ObjexIds.createValue();
         final var label = isRoot ? kindName : node.name;
-
-        final var objex = schema.addObjex(new SerializedObjex(node.key, ids));
+        final var objex = schema.addObjex(new SerializedObjex(node.key, ObjexIds.empty()));
         metadata.setObjex(objex, new MetadataObjex(label, Position.createDefault()));
 
         return objex;

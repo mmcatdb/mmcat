@@ -304,7 +304,7 @@ public class ClusterMerge extends InferenceEditAlgorithm {
 
             Key newKey;
             if (oldClusterNames.contains(mo.label)) {
-                newKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, ObjexIds.createGenerated(), newClusterName);
+                newKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, ObjexIds.empty(), newClusterName);
                 newClusterKey = newKey;
             }
             else {
@@ -350,12 +350,12 @@ public class ClusterMerge extends InferenceEditAlgorithm {
     }
 
     private void addTypeObjexAndMorphism() {
-        final Key typeKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, ObjexIds.createValue(), TYPE_LABEL);
+        final Key typeKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, ObjexIds.empty(), TYPE_LABEL);
         this.newTypeSignature = InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, newSchema.getObjex(newClusterKey), newSchema.getObjex(typeKey));
     }
 
     private void addValueObjexAndMorphism() {
-        final Key valueKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, ObjexIds.createValue(), VALUE_LABEL);
+        final Key valueKey = InferenceEditorUtils.addObjexWithMetadata(newSchema, newMetadata, ObjexIds.empty(), VALUE_LABEL);
         this.newValueSignature = InferenceEditorUtils.addMorphismWithMetadata(newSchema, newMetadata, newSchema.getObjex(newClusterKey), newSchema.getObjex(valueKey));
     }
 

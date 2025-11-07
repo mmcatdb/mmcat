@@ -7,12 +7,12 @@ import cz.matfyz.core.identifiers.SignatureId;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -30,16 +30,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @JsonSerialize(using = SuperIdValues.Serializer.class)
 @JsonDeserialize(using = SuperIdValues.Deserializer.class)
-public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
+public class SuperIdValues implements Serializable {
 
-    protected final Map<Signature, String> tuples;
+    /** Actually immutable (except for a very specific use case in the {@link Mutator} class). */
+    protected Map<Signature, String> tuples;
 
     private SuperIdValues(Map<Signature, String> map) {
         this.tuples = map;
     }
 
     public static SuperIdValues fromEmptySignature(String value) {
-        return new Builder().add(Signature.empty(), value).build();
+        return new Mutator().add(Signature.empty(), value).build();
     }
 
     public static SuperIdValues empty() {
@@ -58,14 +59,6 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return tuples.get(signature);
     }
 
-    private @Nullable SignatureId cachedId;
-
-    public SignatureId id() {
-        if (cachedId == null)
-            cachedId = new SignatureId(tuples.keySet());
-        return cachedId;
-    }
-
     public int size() {
         return tuples.size();
     }
@@ -74,150 +67,124 @@ public class SuperIdValues implements Serializable, Comparable<SuperIdValues> {
         return tuples.isEmpty();
     }
 
-    public @Nullable SuperIdValues tryFindFirstId(ObjexIds ids) {
-        if (!ids.isSignatures())
-            return tryFindId(SignatureId.empty());
-
+    public boolean containsSomeIds(ObjexIds ids) {
         for (final var id : ids.signatureIds()) {
-            final var found = tryFindId(id);
-            if (found != null)
-                return found;
+            final var found = containsId(id);
+            if (found)
+                return true;
         }
 
-        return null;
+        return false;
     }
 
-    private @Nullable SuperIdValues tryFindId(SignatureId id) {
-        final var output = new TreeMap<Signature, String>();
-
+    public boolean containsId(SignatureId id) {
         for (final var signature : id.signatures()) {
-            final var value = this.tuples.get(signature);
-            if (value == null)
-                return null;
-
-            output.put(signature, value);
+            final var containsSignature = tuples.containsKey(signature);
+            if (!containsSignature)
+                return false;
         }
 
-        return new SuperIdValues(output);
+        return true;
     }
-
-    public record FindIdsResult(List<SuperIdValues> foundIds, Set<SignatureId> notFoundIds) {}
 
     /**
-     * Returns all ids that are contained there as a subset.
-     * @param signatureIds The ids we want to find.
-     * @return A set of found ids and also not found ids.
+     * Returns all ids that are contained here as a subset.
      */
-    public FindIdsResult findAllIds(ObjexIds ids) {
-        return findAllSignatureIds(ids.toSignatureIds());
+    public List<SignatureId> findAllIds(ObjexIds ids) {
+        return findAllIds(ids.signatureIds());
     }
 
-    public FindIdsResult findAllSignatureIds(Iterable<SignatureId> missingIds) {
-        final var foundIds = new ArrayList<SuperIdValues>();
-        final var notFoundIds = new TreeSet<SignatureId>();
+    /**
+     * Returns all ids that are contained here as a subset.
+     * @param signatureIds The ids we want to find.
+     */
+    public List<SignatureId> findAllIds(Iterable<SignatureId> ids) {
+        final var output = new ArrayList<SignatureId>();
 
-        for (final SignatureId missingId : missingIds) {
-            final var found = tryFindId(missingId);
-            if (found != null)
-                foundIds.add(found);
-            else
-                notFoundIds.add(missingId);
+        for (final SignatureId id : ids) {
+            if (containsId(id))
+                output.add(id);
         }
 
-        return new FindIdsResult(foundIds, notFoundIds);
+        return output;
     }
 
-    public static class Builder {
+    public static record IdComparator(
+        SignatureId id
+    ) implements Comparator<SuperIdValues> {
 
-        private Map<Signature, String> map = new TreeMap<>();
+        @Override public int compare(SuperIdValues a, SuperIdValues b) {
+            for (final Signature signature : id.signatures()) {
+                final int result = a.tuples.get(signature).compareTo(b.tuples.get(signature));
+                if (result != 0)
+                    return result;
+            }
 
-        public Builder add(Signature signature, String value) {
-            map.put(signature, value);
+            return 0;
+        }
+
+    }
+
+    public static class Mutator extends SuperIdValues {
+
+        public Mutator() {
+            super(new TreeMap<>());
+        }
+
+        public Mutator(@Nullable SuperIdValues input) {
+            super(input == null ? new TreeMap<>() : new TreeMap<>(input.tuples));
+        }
+
+        public Mutator add(Signature signature, String value) {
+            tuples.put(signature, value);
             return this;
         }
 
-        public Builder add(SuperIdValues idWithValues) {
-            for (final var tuple : idWithValues.tuples.entrySet())
-                map.put(tuple.getKey(), tuple.getValue());
-
+        public Mutator add(SuperIdValues other) {
+            tuples.putAll(other.tuples);
             return this;
         }
 
         public SuperIdValues build() {
-            final var output = new SuperIdValues(map);
-            map = new TreeMap<>();
+            final var output = new SuperIdValues(tuples);
+            // Prevent further modifications. Not the most elegant way, but it works.
+            tuples = null;
             return output;
         }
 
     }
 
-    public static class Mutable extends SuperIdValues {
-
-        public Mutable(@Nullable SuperIdValues input) {
-            super(input == null ? new TreeMap<>() : new TreeMap<>(input.tuples));
-        }
-
-        public Mutable add(Signature signature, String value) {
-            tuples.put(signature, value);
-            return this;
-        }
-
-        public Mutable add(SuperIdValues idWithValues) {
-            for (var tuple : idWithValues.tuples.entrySet())
-                tuples.put(tuple.getKey(), tuple.getValue());
-
-            return this;
-        }
-
-        public SuperIdValues build() {
-            return new SuperIdValues(new TreeMap<>(tuples));
-        }
-
-    }
-
     @Override public boolean equals(Object object) {
-        if (!(object instanceof SuperIdValues idWithValues))
+        if (!(object instanceof SuperIdValues other))
             return false;
 
-        return Objects.equals(this.tuples, idWithValues.tuples);
+        return Objects.equals(tuples, other.tuples);
     }
 
     @Override public int hashCode() {
         int hash = 3;
-        hash = 83 * hash + Objects.hashCode(this.tuples);
+        hash = 83 * hash + Objects.hashCode(tuples);
         return hash;
     }
 
-    @Override public int compareTo(SuperIdValues idWithValues) {
-        final int idCompareResult = id().compareTo(idWithValues.id());
-        if (idCompareResult != 0)
-            return idCompareResult;
-
-        for (final Signature signature : signatures()) {
-            final int signatureCompareResult = tuples.get(signature).compareTo(idWithValues.tuples.get(signature));
-            if (signatureCompareResult != 0)
-                return signatureCompareResult;
-        }
-
-        return 0;
-    }
+    // This class is not comparable by itself. Use `IdComparator` instead.
 
     @Override public String toString() {
-        return toStringWithoutGeneratedIds(null);
+        return toStringForTests(false);
     }
 
     /**
-     * Prints the row but replaces the generated id with the provided <code>idValue</code> (if there is such id and the value isn't null).
+     * Prints the row but replaces the generated id with a fixed string value (if there is such id and the value isn't null).
      * Useful for tests.
      */
-    public String toStringWithoutGeneratedIds(@Nullable String idValue) {
+    public String toStringForTests(boolean isTest) {
         final var sb = new StringBuilder();
 
         sb.append("{");
         final var SEPARATOR = ", ";
         for (final var entry : tuples.entrySet()) {
             final var signature = entry.getKey();
-            final var value = (signature.isEmpty() && idValue != null) ? idValue : entry.getValue();
+            final var value = (signature.isEmpty() && isTest) ? "<generated>" : entry.getValue();
             sb
                 .append(signature).append(": \"").append(value).append("\"")
                 .append(SEPARATOR);

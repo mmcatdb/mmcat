@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // FIXME This is still not right.
-// Now that there is only one technical id per row, it might happen that a row is replaced (in the domain) while we still have a reference to the now non-existing row (e.g., on the stack above).
+// Now that there is only one surrogate id per row, it might happen that a row is replaced (in the domain) while we still have a reference to the now non-existing row (e.g., on the stack above).
 // A working solution might be to first create all the rows and then merge them all at once.
 // Merging this way might be even quite efficient - we could first merge all rows, then all mappings, then propagate the references, and then continue with a new iteration.
 
@@ -226,11 +226,11 @@ public class MTCAlgorithm {
 
     private SuperIdValues findSuperIdForRoot(RootRecord rootRecord) {
         final var objex = mapping.rootObjex();
-        if (objex.hasGeneratedId())
+        if (objex.ids().isEmpty())
             // If the root objex has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root objex always is).
             return SuperIdValues.fromEmptySignature(idGenerator.next());
 
-        final var builder = new SuperIdValues.Builder();
+        final var builder = new SuperIdValues.Mutator();
 
         for (final Signature signature : objex.superId()) {
             final @Nullable String value = rootRecord.findScalarValue(signature, false);
@@ -243,11 +243,11 @@ public class MTCAlgorithm {
     }
 
     private SuperIdValues findSuperIdForNonRoot(StackJob job, InstanceObjex childObjex, @Nullable ComplexRecord childRecord) {
-        if (childObjex.schema.hasGeneratedId())
+        if (childObjex.schema.ids().isEmpty())
             // The generated id can't be a part of any signature id, so we can't find it in the parent row. By definition, it's not in the record. So we have to generate it.
             return SuperIdValues.fromEmptySignature(idGenerator.next());
 
-        final var builder = new SuperIdValues.Builder();
+        final var builder = new SuperIdValues.Mutator();
 
         final var record = childRecord != null ? childRecord : job.parentRecord;
         final var isChildRecord = childRecord != null;
@@ -276,11 +276,11 @@ public class MTCAlgorithm {
 
     // FIXME this
     private SuperIdValues tempFindSuperIdForArray(StackJob job, InstanceObjex childObjex, Signature specialPath, String specialValue) {
-         if (childObjex.schema.hasGeneratedId())
+         if (childObjex.schema.ids().isEmpty())
             // The generated id can't be a part of any signature id, so we can't find it in the parent row. By definition, it's not in the record. So we have to generate it.
             return SuperIdValues.fromEmptySignature(idGenerator.next());
 
-        final var builder = new SuperIdValues.Builder();
+        final var builder = new SuperIdValues.Mutator();
 
         final var record = job.parentRecord;
         final var isChildRecord = false;
@@ -311,7 +311,7 @@ public class MTCAlgorithm {
     }
 
     private SuperIdValues findSuperIdForRelation(SchemaObjex objex, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, ComplexRecord parentRecord) {
-        final var builder = new SuperIdValues.Builder();
+        final var builder = new SuperIdValues.Mutator();
 
         for (final var signature : objex.superId()) {
             // The value is in either the first row ...
@@ -349,16 +349,16 @@ public class MTCAlgorithm {
     // #region Domain rows
 
     private DomainRow addRow(InstanceObjex objex, SuperIdValues values) {
-        if (values.tryFindFirstId(objex.schema.ids()) == null)
-            // The superId doesn't contain any id, we have to create a technical one.
-            return objex.createRowWithTechnicalId(values);
+        if (!values.containsSomeIds(objex.schema.ids()))
+            // The superId doesn't contain any id, so a surrogate one will be created.
+            return objex.createRow(values);
 
         final var currentRow = objex.tryFindRow(values);
         if (currentRow != null)
             // The row already exists, so we just add the values to it.
             return addValuesToRow(objex, currentRow, values);
 
-        final var newRow = objex.createRowWithValueId(values);
+        final var newRow = objex.createRow(values);
         return objex.mergeReferences(newRow);
     }
 
@@ -372,7 +372,7 @@ public class MTCAlgorithm {
     }
 
     private DomainRow addRelation(SchemaPath path, DomainRow parentRow, DomainRow childRow, ComplexRecord childRecord) {
-        // First, create a domain row with technical id for each objex between the domain and the codomain objexes on the path of the morphism.
+        // First, create a domain row with surrogate id for each objex between the domain and the codomain objexes on the path of the morphism.
         var currentDomainRow = parentRow;
 
         var parentToCurrent = Signature.empty();

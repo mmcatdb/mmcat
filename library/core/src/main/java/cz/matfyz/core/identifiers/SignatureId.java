@@ -3,7 +3,6 @@ package cz.matfyz.core.identifiers;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -28,34 +27,54 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
 
     private final SortedSet<Signature> signatures;
 
-    // TODO make immutable
-    public SortedSet<Signature> signatures() {
+    public int size() {
+        return signatures.size();
+    }
+
+    public Iterable<Signature> signatures() {
         return signatures;
     }
 
-    public SignatureId(Set<Signature> signatures) {
-        this(new TreeSet<>(signatures));
-    }
-
-    // There must be at least one signature
-    public SignatureId(Signature... signatures) {
-        this(new TreeSet<>(List.of(signatures)));
-    }
-
-    public static SignatureId empty() {
-        return new SignatureId(Signature.empty());
+    public Signature first() {
+        return signatures.first();
     }
 
     private SignatureId(SortedSet<Signature> signatures) {
         this.signatures = signatures;
     }
 
+    public static SignatureId fromSet(Set<Signature> signatures) {
+        assert !signatures.isEmpty() : "Can't create SignatureId from empty set.";
+
+        if (signatures.size() == 1 && signatures.iterator().next().isEmpty())
+            return empty();
+
+        for (final Signature signature : signatures)
+            assert !signature.isEmpty() : "Can't create SignatureId with both empty signature and normal signatures.";
+
+        return new SignatureId(new TreeSet<>(signatures));
+    }
+
+    public static SignatureId fromSignatures(Signature... signatures) {
+        return fromSet(Set.of(signatures));
+    }
+
+    private static final SignatureId emptyInstance = new SignatureId(new TreeSet<>(Set.of(Signature.empty())));
+
+    public static SignatureId empty() {
+        return emptyInstance;
+    }
+
     public boolean hasSignature(Signature signature) {
         return this.signatures.contains(signature);
     }
 
-    public boolean hasOnlyEmptySignature() {
-        return this.signatures.size() == 1 && this.signatures.first().isEmpty();
+    /**
+     * A signature empty is empty if it has exactly empty signature.
+     * It always has to have at least one signature.
+     */
+    public boolean isEmpty() {
+        return this == empty();
     }
 
     @Override public int compareTo(SignatureId id) {
@@ -111,7 +130,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
             final var codec = parser.getCodec();
             final JsonNode node = codec.readTree(parser);
             final Signature[] signatures = codec.treeToValue(node, Signature[].class);
-            return new SignatureId(signatures);
+            return fromSignatures(signatures);
         }
     }
 

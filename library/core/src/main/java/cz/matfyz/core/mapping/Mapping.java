@@ -5,6 +5,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObjex;
+import cz.matfyz.core.utils.IterableUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -28,9 +29,9 @@ public class Mapping implements Comparable<Mapping> {
     }
 
     private static Collection<Signature> createDefaultPrimaryKey(SchemaObjex objex) {
-        return objex.hasSignatureId()
-            ? objex.ids().first().signatures()
-            : List.of(Signature.empty());
+        assert !objex.ids().isEmpty() : "Can't create default primary key - objex has no IDs.";
+        final var firstId = objex.ids().first();
+        return IterableUtils.toList(firstId.signatures());
     }
 
     public Mapping clone() {

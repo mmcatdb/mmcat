@@ -30,7 +30,7 @@ public abstract class Schema {
     public static final BuilderObjex friend =          builder.objex("friend", 23);
     public static final BuilderObjex since =           builder.objex("since", 24);
 
-    public static final BuilderObjex address =         builder.generatedIds().objex("address", 41);
+    public static final BuilderObjex address =         builder.objex("address", 41);
     public static final BuilderObjex street =          builder.objex("street", 42);
     public static final BuilderObjex city =            builder.objex("city", 43);
     public static final BuilderObjex zip =             builder.objex("zip", 44);
@@ -48,7 +48,7 @@ public abstract class Schema {
 
     public static final BuilderObjex note =            builder.objex("note", 71);
     public static final BuilderObjex locale =          builder.objex("locale", 72);
-    public static final BuilderObjex data =            builder.generatedIds().objex("data", 73);
+    public static final BuilderObjex data =            builder.objex("data", 73);
     public static final BuilderObjex subject =         builder.objex("subject", 74);
     public static final BuilderObjex content =         builder.objex("content", 75);
 
@@ -180,11 +180,11 @@ public abstract class Schema {
     public static final BuilderObjex key =      builder.objex("key", 212);
 
     // Let's use generated IDs because it would be such a royal pain in the ass to connect it with all the identifiers of map (and even more so for array1D).
-    public static final BuilderObjex array2D =  builder.generatedIds().objex("array2D", 213);
+    public static final BuilderObjex array2D =  builder.objex("array2D", 213);
     public static final BuilderObjex index1 =   builder.objex("index1", 214);
     public static final BuilderObjex index2 =   builder.objex("index2", 215);
 
-    public static final BuilderObjex array1D =  builder.generatedIds().objex("array1D", 216);
+    public static final BuilderObjex array1D =  builder.objex("array1D", 216);
     public static final BuilderObjex index3 =   builder.objex("index3", 217);
     public static final BuilderObjex simple =   builder.objex("simple", 219);
 

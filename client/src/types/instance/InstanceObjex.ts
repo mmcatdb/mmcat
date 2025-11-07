@@ -36,6 +36,7 @@ export class InstanceObjex {
 type DomainRowResponse = {
     id: number;
     values: SuperIdValuesResponse;
+    /** @deprecated */
     technicalId: number | null;
     pendingReferences: Signature[];
 };
@@ -43,6 +44,7 @@ type DomainRowResponse = {
 export class DomainRow {
     private constructor(
         readonly values: SuperIdValues,
+        /** @deprecated */
         readonly technicalId: number | undefined,
     ) {}
 

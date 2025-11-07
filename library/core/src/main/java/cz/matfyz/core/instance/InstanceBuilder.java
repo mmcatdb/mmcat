@@ -65,8 +65,8 @@ public class InstanceBuilder {
         return instance;
     }
 
-    public InstanceBuilder technicalIdGenerator(Key key, UniqueSequentialGenerator generator) {
-        instance.getObjex(key).technicalIdGenerator = generator;
+    public InstanceBuilder rowIdGenerator(Key key, UniqueSequentialGenerator generator) {
+        instance.getObjex(key).rowIdGenerator = generator;
         return this;
     }
 
@@ -100,7 +100,7 @@ public class InstanceBuilder {
     public DomainRow objex(Key key) {
         final var instanceObjex = instance.getObjex(key);
 
-        final var builder = new SuperIdValues.Builder();
+        final var builder = new SuperIdValues.Mutator();
         instanceObjex.schema.superId().forEach(s -> {
             final var value = values.get(s);
             if (value != null)

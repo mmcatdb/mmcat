@@ -56,8 +56,7 @@ public class DMLAlgorithm {
 
         final List<AbstractStatement> output = new ArrayList<>();
 
-        final Set<DomainRow> domainRows = instance.getObjex(mapping.rootObjex()).allRowsToSet();
-        for (final DomainRow row : domainRows)
+        for (final DomainRow row : instance.getObjex(mapping.rootObjex()).allRows())
             output.add(buildStatement(row));
 
         return output;

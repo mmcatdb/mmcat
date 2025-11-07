@@ -3,9 +3,7 @@ package cz.matfyz.inference.edit.algorithms;
 import cz.matfyz.core.exception.MorphismNotFoundException;
 import cz.matfyz.core.exception.ObjexNotFoundException;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjexIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.PrimaryKeyCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -100,7 +98,7 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         final SchemaObjex pkRootObjex = newSchema.getObjex(primaryKeyRoot);
 
         if (primaryKeyRoot.equals(data.primaryKeyIdentified)) { // update PK identification for the PK's parent
-            final var newIds = createUpdatedIds(pkRootObjex, primaryKeySignature);
+            final var newIds = pkRootObjex.ids().extend(primaryKeySignature);
             newSchema.replaceObjex(new SerializedObjex(pkRootObjex.key(), newIds));
         }
     }
@@ -127,13 +125,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
                 return morphism.signature();
 
         throw ObjexNotFoundException.withMessage("Primary Key Signature has not been found");
-    }
-
-    private ObjexIds createUpdatedIds(SchemaObjex schemaObjex, Signature signature) {
-        final var newId = new SignatureId(signature);
-        return schemaObjex.hasSignatureId()
-            ? schemaObjex.ids().extend(newId)
-            : new ObjexIds(newId);
     }
 
     /**
