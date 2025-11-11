@@ -2,7 +2,6 @@ FROM neo4j:latest
 
 COPY docker/neo4j/entrypoint-wrapper.sh entrypoint-wrapper.sh
 COPY docker/neo4j/entrypoint.sh entrypoint.sh
-COPY docker/neo4j/apoc.conf conf/apoc.conf
 COPY docker/neo4j/neo4j.conf conf/neo4j.conf
 
 COPY library/tests/src/test/resources/setupNeo4j.cypher .
