@@ -37,7 +37,7 @@ const role = importer.generateRecords(40, () => ({
     id: (idn++).toString(),
     name: faker.commerce.department(),
     description: faker.company.catchPhraseDescriptor(),
-    team: randomHelper.record(team),
+    teamId: randomHelper.record(team).id,
 }))
 
 const attribute = importer.generateRecords(40, () => ({
@@ -75,14 +75,14 @@ team.map(t => ({
     role: 'OWNER',
     customRoleId: null,
 })).concat(importer.generateRecords(150, () => {
-    const teamId = randomHelper.record(team, random.geometric(1 / team.length)).id
+    const teamId = randomHelper.record(team, randomHelper.geometricFromZero(1 / team.length)).id
     return {
         id: (idn++).toString(),
         userId: random.choice(user).id,
         teamId,
         accepted: random.boolean(),
         role: membershipRoleGen(),
-        customRoleId: random.choice(importer.findRecordByKey(role, 'team', teamId))?.id ?? null
+        customRoleId: random.choice(importer.findRecordByKey(role, 'teamId', teamId))?.id ?? null
     }
 })), ['userId', 'teamId'])
 
@@ -95,14 +95,15 @@ const teamOrgScope = importer.generateRecords(25, () => {
 }, ['userId', 'teamId'])
 
 let attributeToUser = importer.generateRecords(250, () => {
-    const member = random.choice(membership)
-    const attrId = random.choice(importer.findRecordByKey(attribute, 'teamId', member.teamId)).id
+    const attr = random.choice(attribute)
+    const member = random.choice(importer.findRecordByKey(membership, 'teamId', attr.teamId))
+    const attrId = attr.id
     const attrOptionId = attrId + attribute.length * (random.boolean() ? 2 : 1)
     return {
-        memberId: random.choice(membership).id,
+        memberId: member.id,
         attributeOptionId: attrOptionId,
     }
-})
+}, ['memberId', 'attributeOptionId'])
 
 
 
@@ -115,7 +116,7 @@ const verifiedEmail = importer.generateRecords(300, () => {
         id: (idn++).toString(),
         value: faker.internet.email(),
         userId: usr.id,
-        teamId: random.choice(members).teamId
+        teamId: random.choice(members)?.teamId ?? null
     }
 })
 
@@ -128,7 +129,7 @@ const schedule = importer.generateRecords(250, () => {
 })
 
 const eventType = importer.generateRecords(200, () => {
-    const teamId = randomHelper.record(team2, random.geometric(1 / team2.length)).id
+    const teamId = randomHelper.record(team2, randomHelper.geometricFromZero(1 / team2.length)).id
     const members = importer.findRecordByKey(membership, 'teamId', teamId)
     const owner = random.choice(members)
     const sched = random.choice(importer.findRecordByKey(schedule, 'userId', owner.userId))
@@ -211,6 +212,7 @@ const eventHost = importer.generateRecords(450, () => {
     const member = random.choice(importer.findRecordByKey(membership, 'teamId', et.teamId))
     const sched = random.choice(importer.findRecordByKey(schedule, 'userId', member.userId))
     return {
+        id: (idn++).toString(),
         userId: et.id,
         memberId: member.id,
         eventTypeId: et.id,
@@ -250,7 +252,7 @@ const teamFeatures = importer.generateRecords(25, () => ({
 
 
 const workflow = importer.generateRecords(120, () => {
-    const member = randomHelper.record(membership, random.geometric(5 / membership.length))
+    const member = randomHelper.record(membership, randomHelper.geometricFromZero(5 / membership.length))
 
     return {
         id: (idn++).toString(),
@@ -281,9 +283,11 @@ for (let i = 0; i < workflow.length; i++) {
 
 const workflowsOnEventTypes = importer.generateRecords(300, () => {
     const wf = randomHelper.record(workflow)
+    const et = random.choice(importer.findRecordByKey(eventType, 'teamId', wf.teamId))
+    if (!et) return null
     return {
         workflowId: wf.id,
-        eventTypeId: random.choice(importer.findRecordByKey(eventType, 'teamId', wf.teamId)).id,
+        eventTypeId: et.id,
     }
 }, ['workflowId', 'eventTypeId'])
 
@@ -295,14 +299,14 @@ const workflowsOnTeams = importer.generateRecords(180, () => ({
 
 
 const booking = importer.generateRecords(800, () => {
-    const teamId = randomHelper.record(team2, random.geometric(1 / team2.length)).id
+    const teamId = randomHelper.record(team2, randomHelper.geometricFromZero(1 / team2.length)).id
     const eventTypes = importer.findRecordByKey(eventType, 'teamId', teamId)
     const users = importer.findRecordByKey(membership, 'teamId', teamId)
     return {
         id: (idn++).toString(),
         title: faker.commerce.product(),
         description: faker.commerce.productDescription(),
-        userId: randomHelper.record(users, random.geometric(5 / users.length)).userId,
+        userId: randomHelper.record(users, randomHelper.geometricFromZero(Math.min(5 / users.length, 0.6))).userId,
         eventTypeId: randomHelper.record(eventTypes).id,
     }
 })
@@ -310,12 +314,8 @@ const booking = importer.generateRecords(800, () => {
 const attendee = importer.generateRecords(5000, () => ({
     id: (idn++).toString(),
     email: randomHelper.string(12),
-    bookingId: randomHelper.record(booking, random.geometric(3 / booking.length))
+    bookingId: randomHelper.record(booking, randomHelper.geometricFromZero(3 / booking.length))
 }))
-
-
-
-// TODO: create indexes (like in yelp), import, figure out how to work with relations not in schema category, use faker
 
 importer.importData({
     postgreSQL: [
@@ -338,7 +338,7 @@ importer.importData({
             schema: `
                 id integer PRIMARY KEY,
                 name text,
-                description text
+                description text,
                 teamId integer REFERENCES team(id)
             `,
             data: role,
@@ -384,7 +384,7 @@ importer.importData({
             name: 'caldotcom_user',
             schema: `
                 id integer PRIMARY KEY,
-                username char(22) UNIQUE NOT NULL,
+                username text UNIQUE NOT NULL,
                 name text
             `,
             data: user,
@@ -419,7 +419,7 @@ importer.importData({
             schema: `
                 userId integer REFERENCES caldotcom_user(id),
                 teamId integer REFERENCES team(id),
-                CONSTRAINT pk PRIMARY KEY (userId, teamId)
+                CONSTRAINT teamOrgScope_pk PRIMARY KEY (userId, teamId)
             `,
             data: teamOrgScope,
             structure: {
@@ -432,7 +432,7 @@ importer.importData({
             schema: `
                 attributeOptionId integer REFERENCES attributeOption(id),
                 memberId integer REFERENCES caldotcom_user(id),
-                CONSTRAINT pk PRIMARY KEY (attributeOptionId, memberId)
+                CONSTRAINT attributeToUser_pk PRIMARY KEY (attributeOptionId, memberId)
             `,
             data: attributeToUser,
             structure: {
@@ -556,7 +556,7 @@ importer.importData({
                 eventTypeId integer REFERENCES eventType(id),
                 scheduleId integer REFERENCES schedule(id),
                 hostGroupId integer REFERENCES hostGroup(id),
-                CONSTRAINT pk PRIMARY KEY (userId, eventTypeId)
+                CONSTRAINT eventHost_pk PRIMARY KEY (userId, eventTypeId)
             `,
             data: eventHost,
             structure: {
@@ -572,7 +572,7 @@ importer.importData({
             schema: `
                 userId integer REFERENCES caldotcom_user(id),
                 eventTypeId integer REFERENCES eventType(id),
-                CONSTRAINT pk PRIMARY KEY (userId, eventTypeId)
+                CONSTRAINT userOnEventType_pk PRIMARY KEY (userId, eventTypeId)
             `,
             data: userOnEventType,
             structure: {
@@ -600,7 +600,7 @@ importer.importData({
             schema: `
                 userId integer REFERENCES caldotcom_user(id),
                 featureId integer REFERENCES feature(id),
-                CONSTRAINT pk PRIMARY KEY (userId, featureId)
+                CONSTRAINT userFeatures_pk PRIMARY KEY (userId, featureId)
             `,
             data: userFeatures,
             structure: {
@@ -613,7 +613,7 @@ importer.importData({
             schema: `
                 teamId integer REFERENCES team(id),
                 featureId integer REFERENCES feature(id),
-                CONSTRAINT pk PRIMARY KEY (teamId, featureId)
+                CONSTRAINT teamFeatures_pk PRIMARY KEY (teamId, featureId)
             `,
             data: teamFeatures,
             structure: {
@@ -661,7 +661,7 @@ importer.importData({
             schema: `
                 workflowId integer REFERENCES workflow(id),
                 eventTypeId integer REFERENCES eventType(id),
-                CONSTRAINT pk PRIMARY KEY (workflowId, eventTypeId)
+                CONSTRAINT workflowsOnEventTypes_pk PRIMARY KEY (workflowId, eventTypeId)
             `,
             data: workflowsOnEventTypes,
             structure: {
@@ -674,7 +674,7 @@ importer.importData({
             schema: `
                 workflowId integer REFERENCES workflow(id),
                 teamId integer REFERENCES team(id),
-                CONSTRAINT pk PRIMARY KEY (workflowId, teamId)
+                CONSTRAINT workflowsOnTeams_pk PRIMARY KEY (workflowId, teamId)
             `,
             data: workflowsOnTeams,
             structure: {
@@ -718,6 +718,7 @@ importer.importData({
             }
         },
     ],
+    /*
     mongoDB: [
         {
             name: 'team',
@@ -1492,27 +1493,28 @@ importer.importData({
             data: hostGroup,
             structure: {
                 id: true,
-                eventTypeId: true,
             },
             indexes: [ ['id'] ],
         },
         {
-            name: 'CDC_HOST_GROUP_USER',
-            data: outOfOffice,
+            name: 'CDC_HOST_GROUP_EVENT_TYPE',
+            data: hostGroup,
             structure: { },
             from: {
                 label: 'CDCHostGroup',
                 match: { id: 'id' },
             },
             to: {
-                label: 'CDCUser',
-                match: { userId: 'id' },
+                label: 'CDCEventType',
+                match: { eventTypeId: 'id' },
             },
         },
         {
             name: 'CDCEventHost',
             data: eventHost,
-            structure: { }
+            structure: {
+                id: true,
+            }
         },
         {
             name: 'CDC_HOST_GROUP_HOST',
@@ -1567,7 +1569,7 @@ importer.importData({
             },
         },
         {
-            name: 'CDC_USER_ON_SCHEDULE',
+            name: 'CDC_USER_ON_EVENT_TYPE',
             data: userOnEventType,
             structure: { },
             from: {
@@ -1575,8 +1577,8 @@ importer.importData({
                 match: { userId: 'id' },
             },
             to: {
-                label: 'CDCSchedule',
-                match: { scheduleId: 'id' },
+                label: 'CDCEventType',
+                match: { eventTypeId: 'id' },
             },
         },
 
@@ -1766,4 +1768,5 @@ importer.importData({
             },
         },
     ],
+    */
 })

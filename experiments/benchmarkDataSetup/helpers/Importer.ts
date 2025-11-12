@@ -1,4 +1,4 @@
-import { IndexSpecification, MongoClient } from 'mongodb'
+import { MongoClient } from 'mongodb'
 import neo4j from 'neo4j-driver'
 import { Client as PostgresClient } from 'pg'
 import fs from 'fs'
@@ -25,10 +25,11 @@ export class Importer {
         this.password = process.env.EXAMPLE_PASSWORD!
     }
 
-    generateUnscaledRecords(count: number, recordCreationFunc: (previousRecords: DataRecord[]) => DataRecord, removeDuplicatesOfFields?: string[]): DataRecord[] {
+    generateUnscaledRecords(count: number, recordCreationFunc: (previousRecords: DataRecord[]) => DataRecord | null, removeDuplicatesOfFields?: string[]): DataRecord[] {
         let output: DataRecord[] = []
-        for (let i = 0; i < count * this.scalingFactor; i++) {
-            output.push(recordCreationFunc(output))
+        while (output.length < count) {
+            const newRecord = recordCreationFunc(output)
+            if (newRecord !== null) output.push(newRecord)
         }
 
         if (!removeDuplicatesOfFields) return output
@@ -76,7 +77,7 @@ export class Importer {
                 let recordsWithValue = keyIndex.get(value)
                 if (recordsWithValue === undefined) {
                     recordsWithValue = []
-                    keyIndex.set(records, recordsWithValue)
+                    keyIndex.set(value, recordsWithValue)
                 }
                 recordsWithValue.push(record)
             }
@@ -122,7 +123,8 @@ export class Importer {
             await client.query(`CREATE TABLE "${kind.name}" (${kind.schema})`)
 
             function sanitizeForSQL(input: any): string {
-                return input.toString().replaceAll("'", "''")
+                if (input === null || input === undefined) return 'null'
+                return `'${input.toString().replaceAll("'", "''")}'`
             }
 
             const BATCH_SIZE = 50_000
@@ -134,9 +136,9 @@ export class Importer {
                         if (value === false) {
                             continue
                         } else if (value === true) {
-                            output.push(`'${sanitizeForSQL(record[key])}'`)
+                            output.push(sanitizeForSQL(record[key]))
                         } else if (typeof(value) === 'string') {
-                            output.push(`'${sanitizeForSQL(record[value])}'`)
+                            output.push(sanitizeForSQL(record[value]))
                         } else {
                             throw new Error('PostgreSQL can only have flat relations')
                         }
@@ -201,7 +203,7 @@ export class Importer {
             }
 
             for (const indexCols of kind.indexes ?? []) {
-                const indexObj: IndexSpecification = {}
+                const indexObj: any = {}
                 for (const col of indexCols) indexObj[col] = 1
                 await collection.createIndex(indexObj)
             }

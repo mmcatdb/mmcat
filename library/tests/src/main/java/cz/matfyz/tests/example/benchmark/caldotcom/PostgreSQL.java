@@ -49,9 +49,9 @@ public abstract class PostgreSQL {
             Schema.team,
             teamKind,
             b -> b.root(
-                b.simple("id", Schema.teamToId),
-                b.simple("name", Schema.teamToName),
-                b.simple("parentId", Schema.teamToParent.signature().concatenate(Schema.teamToId.signature()))
+                b.simple("id", Schema.team_id),
+                b.simple("name", Schema.team_name),
+                b.simple("parentId", Schema.team_parent.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
@@ -61,10 +61,10 @@ public abstract class PostgreSQL {
             Schema.role,
             roleKind,
             b -> b.root(
-                b.simple("id", Schema.roleToId),
-                b.simple("name", Schema.roleToName),
-                b.simple("description", Schema.roleToDescription),
-                b.simple("teamId", Schema.roleToTeam.signature().concatenate(Schema.teamToId.signature()))
+                b.simple("id", Schema.role_id),
+                b.simple("name", Schema.role_name),
+                b.simple("description", Schema.role_description),
+                b.simple("teamId", Schema.role_team.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
@@ -74,9 +74,9 @@ public abstract class PostgreSQL {
             Schema.attribute,
             attributeKind,
             b -> b.root(
-                b.simple("id", Schema.attributeToId),
-                b.simple("name", Schema.attributeToName),
-                b.simple("teamId", Schema.attributeToTeam.signature().concatenate(Schema.teamToId.signature()))
+                b.simple("id", Schema.attribute_id),
+                b.simple("name", Schema.attribute_name),
+                b.simple("teamId", Schema.attribute_team.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
@@ -86,9 +86,9 @@ public abstract class PostgreSQL {
             Schema.attributeOption,
             attributeOptionKind,
             b -> b.root(
-                b.simple("id", Schema.attributeOptionToId),
-                b.simple("value", Schema.attributeOptionToValue),
-                b.simple("attributeId", Schema.attributeOptionToAttribute.signature().concatenate(Schema.attributeToId.signature()))
+                b.simple("id", Schema.attributeOption_id),
+                b.simple("value", Schema.attributeOption_value),
+                b.simple("attributeId", Schema.attributeOption_attribute.signature().concatenate(Schema.attribute_id.signature()))
             )
         );
     }
@@ -100,9 +100,9 @@ public abstract class PostgreSQL {
             Schema.user,
             userKind,
             b -> b.root(
-                b.simple("id", Schema.userToId),
-                b.simple("username", Schema.userToUsername),
-                b.simple("name", Schema.userToName)
+                b.simple("id", Schema.user_id),
+                b.simple("username", Schema.user_username),
+                b.simple("name", Schema.user_name)
             )
         );
     }
@@ -112,12 +112,12 @@ public abstract class PostgreSQL {
             Schema.membership,
             membershipKind,
             b -> b.root(
-                b.simple("id", Schema.membershipToId),
-                b.simple("userId", Schema.membershipToUser.signature().concatenate(Schema.userToId.signature())),
-                b.simple("teamId", Schema.membershipToTeam.signature().concatenate(Schema.teamToId.signature())),
-                b.simple("accepted", Schema.membershipToAccepted),
-                b.simple("role", Schema.membershipToRole),
-                b.simple("customRoleId", Schema.membershipToCustomRole.signature().concatenate(Schema.roleToId.signature()))
+                b.simple("id", Schema.membership_id),
+                b.simple("userId", Schema.membership_user.signature().concatenate(Schema.user_id.signature())),
+                b.simple("teamId", Schema.membership_team.signature().concatenate(Schema.team_id.signature())),
+                b.simple("accepted", Schema.membership_accepted),
+                b.simple("role", Schema.membership_role),
+                b.simple("customRoleId", Schema.membership_customRole.signature().concatenate(Schema.role_id.signature()))
             )
         );
     }
@@ -127,8 +127,8 @@ public abstract class PostgreSQL {
             Schema.teamOrgScope,
             teamOrgScopeKind,
             b -> b.root(
-                b.simple("userId", Schema.teamOrgScopeU.signature().concatenate(Schema.userToId.signature())),
-                b.simple("teamId", Schema.teamOrgScopeT.signature().concatenate(Schema.teamToId.signature()))
+                b.simple("userId", Schema.teamOrgScope_u.signature().concatenate(Schema.user_id.signature())),
+                b.simple("teamId", Schema.teamOrgScope_t.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
@@ -138,23 +138,21 @@ public abstract class PostgreSQL {
             Schema.attributeToUser,
             attributeToUserKind,
             b -> b.root(
-                b.simple("attributeOptionId", Schema.attributeToUserA.signature().concatenate(Schema.attributeOptionToId.signature())),
-                b.simple("memberId", Schema.attributeToUserU.signature().concatenate(Schema.membershipToId.signature()))
+                b.simple("attributeOptionId", Schema.attributeToUser_ao.signature().concatenate(Schema.attributeOption_id.signature())),
+                b.simple("memberId", Schema.attributeToUser_m.signature().concatenate(Schema.membership_id.signature()))
             )
         );
     }
-
-    
 
     public static TestMapping verifiedEmail(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
             Schema.verifiedEmail,
             verifiedEmailKind,
             b -> b.root(
-                b.simple("id", Schema.verifiedEmailToId),
-                b.simple("value", Schema.verifiedEmailToValue),
-                b.simple("userId", Schema.verifiedEmailToUser.signature().concatenate(Schema.userToId.signature())),
-                b.simple("teamId", Schema.verifiedEmailToTeam.signature().concatenate(Schema.teamToId.signature()))
+                b.simple("id", Schema.verifiedEmail_id),
+                b.simple("value", Schema.verifiedEmail_value),
+                b.simple("userId", Schema.verifiedEmail_user.signature().concatenate(Schema.user_id.signature())),
+                b.simple("teamId", Schema.verifiedEmail_team.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
@@ -164,9 +162,9 @@ public abstract class PostgreSQL {
             Schema.schedule,
             scheduleKind,
             b -> b.root(
-                b.simple("id", Schema.scheduleToId),
-                b.simple("name", Schema.scheduleToName),
-                b.simple("userId", Schema.scheduleToUser.signature().concatenate(Schema.userToId.signature()))
+                b.simple("id", Schema.schedule_id),
+                b.simple("name", Schema.schedule_name),
+                b.simple("userId", Schema.schedule_user.signature().concatenate(Schema.user_id.signature()))
             )
         );
     }
@@ -176,13 +174,13 @@ public abstract class PostgreSQL {
             Schema.eventType,
             eventTypeKind,
             b -> b.root(
-                b.simple("id", Schema.eventTypeToId),
-                b.simple("title", Schema.eventTypeToTitle),
-                b.simple("description", Schema.eventTypeToDescription),
-                b.simple("teamId", Schema.eventTypeToTeam.signature().concatenate(Schema.teamToId.signature())),
-                b.simple("ownerId", Schema.eventTypeToOwner.signature().concatenate(Schema.userToId.signature())),
-                b.simple("parentId", Schema.eventTypeToParent.signature().concatenate(Schema.eventTypeToId.signature())),
-                b.simple("scheduleId", Schema.eventTypeToSchedule.signature().concatenate(Schema.scheduleToId.signature()))
+                b.simple("id", Schema.eventType_id),
+                b.simple("title", Schema.eventType_title),
+                b.simple("description", Schema.eventType_description),
+                b.simple("teamId", Schema.eventType_team.signature().concatenate(Schema.team_id.signature())),
+                b.simple("ownerId", Schema.eventType_owner.signature().concatenate(Schema.user_id.signature())),
+                b.simple("parentId", Schema.eventType_parent.signature().concatenate(Schema.eventType_id.signature())),
+                b.simple("scheduleId", Schema.eventType_schedule.signature().concatenate(Schema.schedule_id.signature()))
             )
         );
     }
@@ -192,12 +190,12 @@ public abstract class PostgreSQL {
             Schema.availability,
             availabilityKind,
             b -> b.root(
-                b.simple("id", Schema.availabilityToId),
-                b.simple("start", Schema.availabilityToStart),
-                b.simple("end", Schema.availabilityToEnd),
-                b.simple("userId", Schema.availabilityToUser.signature().concatenate(Schema.userToId.signature())),
-                b.simple("eventTypeId", Schema.availabilityToEventType.signature().concatenate(Schema.eventTypeToId.signature())),
-                b.simple("scheduleId", Schema.availabilityToSchedule.signature().concatenate(Schema.scheduleToId.signature()))
+                b.simple("id", Schema.availability_id),
+                b.simple("start", Schema.availability_start),
+                b.simple("end", Schema.availability_end),
+                b.simple("userId", Schema.availability_user.signature().concatenate(Schema.user_id.signature())),
+                b.simple("eventTypeId", Schema.availability_eventType.signature().concatenate(Schema.eventType_id.signature())),
+                b.simple("scheduleId", Schema.availability_schedule.signature().concatenate(Schema.schedule_id.signature()))
             )
         );
     }
@@ -207,11 +205,11 @@ public abstract class PostgreSQL {
             Schema.outOfOffice,
             outOfOfficeKind,
             b -> b.root(
-                b.simple("id", Schema.outOfOfficeToId),
-                b.simple("start", Schema.outOfOfficeToStart),
-                b.simple("end", Schema.outOfOfficeToEnd),
-                b.simple("userId", Schema.outOfOfficeToUser.signature().concatenate(Schema.userToId.signature())),
-                b.simple("toUserId", Schema.outOfOfficeToNewUser.signature().concatenate(Schema.userToId.signature()))
+                b.simple("id", Schema.outOfOffice_id),
+                b.simple("start", Schema.outOfOffice_start),
+                b.simple("end", Schema.outOfOffice_end),
+                b.simple("userId", Schema.outOfOffice_user.signature().concatenate(Schema.user_id.signature())),
+                b.simple("toUserId", Schema.outOfOffice_newUser.signature().concatenate(Schema.user_id.signature()))
             )
         );
     }
@@ -223,8 +221,8 @@ public abstract class PostgreSQL {
             Schema.hostGroup,
             hostGroupKind,
             b -> b.root(
-                b.simple("id", Schema.hostGroupToId),
-                b.simple("eventTypeId", Schema.hostGroupToEventType.signature().concatenate(Schema.eventTypeToId.signature()))
+                b.simple("id", Schema.hostGroup_id),
+                b.simple("eventTypeId", Schema.hostGroup_eventType.signature().concatenate(Schema.eventType_id.signature()))
             )
         );
     }
@@ -234,11 +232,11 @@ public abstract class PostgreSQL {
             Schema.eventHost,
             eventHostKind,
             b -> b.root(
-                b.simple("userId", Schema.eventHostToUser.signature().concatenate(Schema.userToId.signature())),
-                b.simple("memberId", Schema.eventHostToMembership.signature().concatenate(Schema.membershipToId.signature())),
-                b.simple("eventTypeId", Schema.eventHostToEventType.signature().concatenate(Schema.eventTypeToId.signature())),
-                b.simple("scheduleId", Schema.eventHostToSchedule.signature().concatenate(Schema.scheduleToId.signature())),
-                b.simple("hostGroupId", Schema.eventHostToHostGroup.signature().concatenate(Schema.hostGroupToId.signature()))
+                b.simple("userId", Schema.eventHost_user.signature().concatenate(Schema.user_id.signature())),
+                b.simple("memberId", Schema.eventHost_membership.signature().concatenate(Schema.membership_id.signature())),
+                b.simple("eventTypeId", Schema.eventHost_eventType.signature().concatenate(Schema.eventType_id.signature())),
+                b.simple("scheduleId", Schema.eventHost_schedule.signature().concatenate(Schema.schedule_id.signature())),
+                b.simple("hostGroupId", Schema.eventHost_hostGroup.signature().concatenate(Schema.hostGroup_id.signature()))
             )
         );
     }
@@ -248,8 +246,8 @@ public abstract class PostgreSQL {
             Schema.userOnEventType,
             userOnEventTypeKind,
             b -> b.root(
-                b.simple("userId", Schema.userOnEventTypeU.signature().concatenate(Schema.userToId.signature())),
-                b.simple("eventTypeId", Schema.userOnEventTypeET.signature().concatenate(Schema.eventTypeToId.signature()))
+                b.simple("userId", Schema.userOnEventTypeU.signature().concatenate(Schema.user_id.signature())),
+                b.simple("eventTypeId", Schema.userOnEventTypeET.signature().concatenate(Schema.eventType_id.signature()))
             )
         );
     }
@@ -261,8 +259,8 @@ public abstract class PostgreSQL {
             Schema.feature,
             featureKind,
             b -> b.root(
-                b.simple("id", Schema.featureToId),
-                b.simple("name", Schema.featureToId)
+                b.simple("id", Schema.feature_id),
+                b.simple("name", Schema.feature_id)
             )
         );
     }
@@ -272,8 +270,8 @@ public abstract class PostgreSQL {
             Schema.userFeatures,
             userFeaturesKind,
             b -> b.root(
-                b.simple("userId", Schema.userFeaturesU.signature().concatenate(Schema.userToId.signature())),
-                b.simple("eventTypeId", Schema.userFeaturesF.signature().concatenate(Schema.featureToId.signature()))
+                b.simple("userId", Schema.userFeaturesU.signature().concatenate(Schema.user_id.signature())),
+                b.simple("eventTypeId", Schema.userFeaturesF.signature().concatenate(Schema.feature_id.signature()))
             )
         );
     }
@@ -283,8 +281,8 @@ public abstract class PostgreSQL {
             Schema.teamFeatures,
             teamFeaturesKind,
             b -> b.root(
-                b.simple("teamId", Schema.teamFeaturesT.signature().concatenate(Schema.teamToId.signature())),
-                b.simple("eventTypeId", Schema.teamFeaturesF.signature().concatenate(Schema.featureToId.signature()))
+                b.simple("teamId", Schema.teamFeaturesT.signature().concatenate(Schema.team_id.signature())),
+                b.simple("eventTypeId", Schema.teamFeaturesF.signature().concatenate(Schema.feature_id.signature()))
             )
         );
     }
@@ -296,10 +294,10 @@ public abstract class PostgreSQL {
             Schema.workflow,
             workflowKind,
             b -> b.root(
-                b.simple("id", Schema.workflowToId),
-                b.simple("name", Schema.workflowToName),
-                b.simple("userId", Schema.workflowToUser.signature().concatenate(Schema.userToId.signature())),
-                b.simple("teamId", Schema.workflowToTeam.signature().concatenate(Schema.teamToId.signature()))
+                b.simple("id", Schema.workflow_id),
+                b.simple("name", Schema.workflow_name),
+                b.simple("userId", Schema.workflow_user.signature().concatenate(Schema.user_id.signature())),
+                b.simple("teamId", Schema.workflow_team.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
@@ -309,10 +307,10 @@ public abstract class PostgreSQL {
             Schema.workflowStep,
             workflowStepKind,
             b -> b.root(
-                b.simple("id", Schema.workflowStepToId),
-                b.simple("number", Schema.workflowStepToNumber),
-                b.simple("action", Schema.workflowStepToAction),
-                b.simple("workflowId", Schema.workflowStepToWorkflow.signature().concatenate(Schema.workflowToId.signature()))
+                b.simple("id", Schema.workflowStep_id),
+                b.simple("number", Schema.workflowStep_number),
+                b.simple("action", Schema.workflowStep_action),
+                b.simple("workflowId", Schema.workflowStep_workflow.signature().concatenate(Schema.workflow_id.signature()))
             )
         );
     }
@@ -322,8 +320,8 @@ public abstract class PostgreSQL {
             Schema.workflowsOnEventTypes,
             workflowsOnEventTypesKind,
             b -> b.root(
-                b.simple("workflowId", Schema.workflowsOnEventTypesWF.signature().concatenate(Schema.workflowToId.signature())),
-                b.simple("eventTypeId", Schema.workflowsOnEventTypesET.signature().concatenate(Schema.eventTypeToId.signature()))
+                b.simple("workflowId", Schema.workflowsOnEventTypesWF.signature().concatenate(Schema.workflow_id.signature())),
+                b.simple("eventTypeId", Schema.workflowsOnEventTypesET.signature().concatenate(Schema.eventType_id.signature()))
             )
         );
     }
@@ -333,8 +331,8 @@ public abstract class PostgreSQL {
             Schema.workflowsOnTeams,
             workflowsOnTeamsKind,
             b -> b.root(
-                b.simple("workflowId", Schema.workflowsOnTeamsWF.signature().concatenate(Schema.workflowToId.signature())),
-                b.simple("eventTypeId", Schema.workflowsOnTeamsT.signature().concatenate(Schema.teamToId.signature()))
+                b.simple("workflowId", Schema.workflowsOnTeamsWF.signature().concatenate(Schema.workflow_id.signature())),
+                b.simple("eventTypeId", Schema.workflowsOnTeamsT.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
@@ -346,11 +344,11 @@ public abstract class PostgreSQL {
             Schema.booking,
             bookingKind,
             b -> b.root(
-                b.simple("id", Schema.bookingToId),
-                b.simple("title", Schema.bookingToTitle),
-                b.simple("description", Schema.bookingToDescription),
-                b.simple("userId", Schema.bookingToUser.signature().concatenate(Schema.userToId.signature())),
-                b.simple("eventTypeId", Schema.bookingToEventType.signature().concatenate(Schema.eventTypeToId.signature()))
+                b.simple("id", Schema.booking_id),
+                b.simple("title", Schema.booking_title),
+                b.simple("description", Schema.booking_description),
+                b.simple("userId", Schema.booking_user.signature().concatenate(Schema.user_id.signature())),
+                b.simple("eventTypeId", Schema.booking_eventType.signature().concatenate(Schema.eventType_id.signature()))
             )
         );
     }
@@ -360,9 +358,9 @@ public abstract class PostgreSQL {
             Schema.attendee,
             attendeeKind,
             b -> b.root(
-                b.simple("id", Schema.attendeeToId),
-                b.simple("email", Schema.attendeeToEmail),
-                b.simple("bookingId", Schema.attendeeToBooking.signature().concatenate(Schema.bookingToId.signature()))
+                b.simple("id", Schema.attendee_id),
+                b.simple("email", Schema.attendee_email),
+                b.simple("bookingId", Schema.attendee_booking.signature().concatenate(Schema.booking_id.signature()))
             )
         );
     }
