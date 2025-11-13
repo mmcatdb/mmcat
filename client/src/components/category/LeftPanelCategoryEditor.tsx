@@ -3,7 +3,7 @@ import { Button, Input } from '@heroui/react';
 import { LeftPanelMode, type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { toPosition } from '@/types/utils/common';
 import { Cardinality } from '@/types/schema/Morphism';
-import { Key } from '@/types/identifiers';
+import { Key, ObjexIds } from '@/types/identifiers';
 import { categoryToGraph } from './categoryGraph';
 import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
@@ -199,6 +199,7 @@ function CreateObjexDisplay({ state, dispatch }: StateDispatchProps) {
         state.evocat.createObjex({
             label: label,
             position: toPosition(getNewObjexPosition()),
+            ids: ObjexIds.empty(),
         });
         const graph = categoryToGraph(state.evocat.category);
         dispatch({ type: 'createObjex', graph });

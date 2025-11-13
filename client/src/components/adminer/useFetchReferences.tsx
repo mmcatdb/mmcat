@@ -4,7 +4,7 @@ import { Signature } from '@/types/identifiers/Signature';
 import { nameFromResponse, StringName, type NameResponse } from '@/types/identifiers/Name';
 import type { SignatureIdResponse } from '@/types/identifiers/SignatureId';
 import type { AdminerReferenceKind, AdminerReferences } from '@/types/adminer/AdminerReferences';
-import type { ChildPropertyResponse, ComplexPropertyResponse, RootPropertyResponse, SimplePropertyResponse } from '@/types/mapping';
+import type { AccessPathResponse, ComplexPropertyResponse, SimplePropertyResponse } from '@/types/mapping';
 import type { SchemaCategoryResponse } from '@/types/schema';
 import type { MappingResponse, MappingInit } from '@/types/mapping';
 import type { Id } from '@/types/id';
@@ -103,7 +103,7 @@ function extractAllKindMappings(mappings: MappingResponse[]): MappingInit[] {
     return mappings.flatMap((mapping: MappingResponse) => {
         let fromSubpath: ComplexPropertyResponse | undefined = undefined;
         let toSubpath: ComplexPropertyResponse | undefined = undefined;
-        const allSubpaths: ChildPropertyResponse[] = [];
+        const allSubpaths: AccessPathResponse[] = [];
 
         for (let subpath of mapping.accessPath.subpaths) {
             const name = nameFromResponse(subpath.name);
@@ -190,7 +190,7 @@ function extractAllKindMappings(mappings: MappingResponse[]): MappingInit[] {
 /**
 * Adds given prefix to all names in access path of a relationship kind excluding names of node kinds.
 */
-function prefixSubpathNames(subpath: ChildPropertyResponse, prefix: string, level: number): ChildPropertyResponse {
+function prefixSubpathNames(subpath: AccessPathResponse, prefix: string, level: number): AccessPathResponse {
     let prefixedName: NameResponse = subpath.name;
     if ('value' in subpath.name && level > 0)
         prefixedName = { value: `${prefix}.${subpath.name.value}` };
@@ -237,7 +237,7 @@ async function getSchemaCategory(categoryId: Id): Promise<SchemaCategoryResponse
 * Returns a set of objects with name and signature of each objex in the given access path.
 */
 function getPropertiesFromAccessPath(
-    accessPath: RootPropertyResponse | ChildPropertyResponse,
+    accessPath: AccessPathResponse,
     properties: Set<SimplePropertyResponse>,
 ): Set<SimplePropertyResponse>{
     // FIXME Use from server to avoid the reference to the 'EMPTY' literal

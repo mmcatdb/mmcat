@@ -15,6 +15,7 @@ type Preferences = {
     theme: Theme;
     isCollapsed: boolean;
     showTableIDs: boolean;
+    accessPathShortForm: boolean;
     adminerShortLinks: boolean;
 };
 
@@ -23,23 +24,17 @@ type PreferencesContext = {
     setPreferences: (preferences: Preferences) => void;
 };
 
-type StoredPreferences = {
-    theme: Theme;
-    isCollapsed: boolean;
-    showTableIDs: boolean;
-    adminerShortLinks: boolean;
-};
-
 /**
  * Loads preferences from local storage with defaults.
  */
 function fromStored(): Preferences {
-    const stored = localStorage.get<Partial<StoredPreferences>>(PREFERENCES_KEY) ?? {};
+    const stored = localStorage.get<Partial<Preferences>>(PREFERENCES_KEY) ?? {};
 
     return {
         theme: stored.theme ?? 'light',
         isCollapsed: stored.isCollapsed ?? false,
         showTableIDs: stored.showTableIDs ?? false,
+        accessPathShortForm: stored.accessPathShortForm ?? true,
         adminerShortLinks: stored.adminerShortLinks ?? false,
     };
 }
@@ -49,11 +44,12 @@ const defaultPreferences = fromStored();
 /*
  * Converts preferences to a format suitable for local storage.
  */
-function toStored(preferences: Preferences): StoredPreferences {
+function toStored(preferences: Preferences): Preferences {
     return {
         theme: preferences.theme,
         isCollapsed: preferences.isCollapsed,
         showTableIDs: preferences.showTableIDs,
+        accessPathShortForm: preferences.accessPathShortForm,
         adminerShortLinks: preferences.adminerShortLinks,
     };
 }

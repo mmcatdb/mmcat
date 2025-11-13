@@ -1,4 +1,4 @@
-import { Signature, type NamePath, type Name } from '../identifiers';
+import { Signature, type NamePath, type Name, DynamicName, IndexName, TypedName, StringName } from '../identifiers';
 
 /** Editable, React-friendly version of access path. */
 export type AccessPath = {
@@ -104,4 +104,98 @@ function subpathNotFoundError(parent: AccessPath, name: Name): Error {
         `Name "${name.toString()}" not found in access path "${parent.name.toString()}".\n` +
         `Subpaths:\n${parent.subpaths.map(s => s.name.toString()).join('\n')}`,
     );
+}
+
+export enum AccessPathType {
+    default = 'default',
+    map = 'map',
+    array = 'array',
+    special = 'special',
+}
+
+export function getAccessPathType(property: AccessPath): AccessPathType {
+    if (property.name instanceof DynamicName)
+        return AccessPathType.map;
+    if (findIndexSubpaths(property).length > 0)
+        return AccessPathType.array;
+    if (property.name instanceof TypedName)
+        return AccessPathType.special;
+    return AccessPathType.default;
+}
+
+export function findTypedSubpath(property: AccessPath, type: string): AccessPath | undefined {
+    return property.subpaths.find(s => s.name instanceof TypedName && s.name.type === type);
+}
+
+export function findIndexSubpaths(property: AccessPath): AccessPath[] {
+    return property.subpaths.filter(s => s.name instanceof IndexName);
+}
+
+export function transformAccessPathType(nextType: AccessPathType, prev: AccessPath, original: AccessPath): AccessPath {
+    const prevType = getAccessPathType(prev);
+    if (nextType === prevType)
+        return prev;
+
+    // String names can be reused without any issues. We want to prioritize the previous name first.
+    const nextStringName = (prev.name instanceof StringName ? prev.name : undefined) ??
+        (original.name instanceof StringName ? original.name : undefined) ??
+        new StringName('');
+
+    const originalType = getAccessPathType(original);
+    if (nextType === originalType && prev.signature.equals(original.signature)) {
+        // If the signature didn't change, we can just reuse the original property.
+        // Except for the string name, for which we always want the latest valid version.
+        return original.name instanceof StringName ? { ...original, name: nextStringName } : original;
+    }
+
+    const isNextComposed = nextType === AccessPathType.map || nextType === AccessPathType.array;
+    const isPrevComposed = prevType === AccessPathType.map || prevType === AccessPathType.array;
+
+    const prevValuePath = findTypedSubpath(prev, TypedName.VALUE);
+
+    if (!isNextComposed) {
+        const name = nextType === AccessPathType.special ? new TypedName(TypedName.VALUE) : nextStringName;
+        if (!isPrevComposed)
+            // Default -> special (or vice versa).
+            return { ...prev, name };
+
+        // Composed -> plain - we just decompose the previous property.
+        return {
+            ...prev,
+            name,
+            signature: prev.signature.concatenate(prevValuePath!.signature),
+            subpaths: prevValuePath!.subpaths,
+        };
+    }
+
+    const name = nextType === AccessPathType.map ? new DynamicName() : nextStringName;
+    const nextKeyOrIndexPath = {
+        name: nextType === AccessPathType.map ? new TypedName(TypedName.KEY) : new IndexName(0),
+        signature: Signature.empty(),
+        subpaths: [],
+        isRoot: false,
+    } satisfies AccessPath;
+
+    if (isPrevComposed) {
+        // Map -> array (or vice versa).
+        return {
+            ...prev,
+            name,
+            subpaths: [ nextKeyOrIndexPath, prevValuePath! ],
+        };
+    }
+
+    // Plain -> composed - we just compose the next property.
+    const nextValuePath = {
+        name: new TypedName(TypedName.VALUE),
+        signature: Signature.empty(),
+        subpaths: prev.subpaths,
+        isRoot: false,
+    } satisfies AccessPath;
+
+    return {
+        ...prev,
+        name,
+        subpaths: [ nextKeyOrIndexPath, nextValuePath ],
+    };
 }

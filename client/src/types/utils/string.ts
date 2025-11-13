@@ -13,20 +13,22 @@ export type Printer = {
     append(object: object): Printer;
 
     remove(index?: number): Printer;
+
+    context(key: symbol): unknown;
 };
 
 /**
  * Utility method for providing a default printer.
  */
-export function createPrinter() {
-    return new LineStringBuilder(0);
+export function createPrinter(context?: Record<symbol, unknown>): Printer {
+    return new LineStringBuilder(0, undefined, context);
 }
 
 /**
  * Utility method for printing a printable to a string. Should be used in the toString method of the printable.
  */
-export function print(printable: Printable): string {
-    const printer = createPrinter();
+export function print(printable: Printable, context?: Record<symbol, unknown>): string {
+    const printer = createPrinter(context);
     printable.printTo(printer);
     return printer.toString();
 }
@@ -37,6 +39,7 @@ class LineStringBuilder implements Printer {
     constructor(
         private indentationLevel: number,
         private readonly indentationStringPerLevel = '    ',
+        private readonly contextData: Record<symbol, unknown> = {},
     ) {}
 
     down(): LineStringBuilder {
@@ -74,7 +77,7 @@ class LineStringBuilder implements Printer {
         }
 
         if ('toString' in value) {
-             
+
             this.stack.push(value.toString());
             return this;
         }
@@ -95,6 +98,10 @@ class LineStringBuilder implements Printer {
         }
 
         return this;
+    }
+
+    context(key: symbol): unknown {
+        return this.contextData[key];
     }
 
     toString(): string {

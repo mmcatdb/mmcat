@@ -197,7 +197,7 @@ export class Evocat {
 
     updateObjex(key: Key, update: {
         label?: string;
-        ids?: ObjexIds | null;
+        ids?: ObjexIds;
         position?: Position;
     }) {
         const objex = this._category.getObjex(key);
