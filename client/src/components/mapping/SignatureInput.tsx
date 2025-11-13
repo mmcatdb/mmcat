@@ -38,8 +38,11 @@ export function SignatureInput({ value, onChange, label, state, dispatch, isFrom
 
     // Propagate changes when the selection changes. Not ideal but who cares.
     useEffect(() => {
-        if (isActive && state.selection instanceof PathSelection)
-            onChange(getPathSignature(state.graph, state.selection));
+        if (isActive && state.selection instanceof PathSelection) {
+            const nextValue = getPathSignature(state.graph, state.selection);
+            if (!nextValue.equals(value))
+                onChange(nextValue);
+        }
     }, [ state.selection ]);
 
     return (

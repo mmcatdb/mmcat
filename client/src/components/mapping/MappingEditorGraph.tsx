@@ -3,12 +3,14 @@ import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { EditorPhase, type MappingEditorDispatch, type MappingEditorState } from './useMappingEditor';
-import { type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
+import { traverseCategoryGraph, type CategoryEdge, type CategoryNode } from '../category/categoryGraph';
 import { EDGE_ARROW_LENGTH, getEdgeDegree } from '../graph/graphUtils';
 import { computePathsFromObjex, computePathToNode, computePathWithEdge, PathCount, type PathGraph } from '@/types/schema/PathMarker';
 import { FreeSelection, PathSelection, SequenceSelection } from '../graph/graphSelection';
 import { usePreferences } from '../PreferencesProvider';
 import { cn } from '@/components/utils';
+import { collectAccessPathSignature } from '@/types/mapping';
+import { type Key } from '@/types/identifiers';
 
 type MapppingEditorGraphProps = {
     /** The current state of the mapping editor. */
@@ -39,11 +41,23 @@ export function MappingEditorGraph({ state, dispatch, options, className }: Mapp
         return computePathsFromObjex(sourceObjex);
     }, [ selection ]);
 
+    const inspectedKey = useMemo(() => {
+        if (!state.selectedPropertyPath)
+            return undefined;
+
+        const signatureToSelected = collectAccessPathSignature(state.form.accessPath, state.selectedPropertyPath);
+        const rootNode = state.graph.nodes.get(state.form.rootObjexKey!.toString())!;
+        const childNode = traverseCategoryGraph(state.graph, rootNode, signatureToSelected);
+        return childNode?.schema.key;
+    // This is ok since everything else can't change without changing the selected path.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ state.selectedPropertyPath ]);
+
     return (
         <GraphProvider dispatch={graphDispatch} graph={state.graph} options={options}>
             <CanvasDisplay className={className}>
                 {state.graph.nodes.values().toArray().map(node => (
-                    <NodeDisplay key={node.id} node={node} state={state} dispatch={dispatch} pathGraph={pathGraph} />
+                    <NodeDisplay key={node.id} node={node} state={state} dispatch={dispatch} pathGraph={pathGraph} inspectedKey={inspectedKey} />
                 ))}
 
                 {/* SVG layer for rendering edges with arrow markers */}
@@ -118,17 +132,21 @@ type NodeDisplayProps = {
     dispatch: MappingEditorDispatch;
     /** Optional path graph for path-based selections. */
     pathGraph: PathGraph | undefined;
+    /** Currently inspected property in the access path editor. */
+    inspectedKey?: Key;
 };
 
 /**
  * Renders a single node with selection and drag behavior.
  */
-function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
+function NodeDisplay({ node, state, dispatch, pathGraph, inspectedKey }: NodeDisplayProps) {
     const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragging } = useNode(node);
 
     const { selection } = state;
     const isSelected = isNodeSelected(state, node);
     const isSelectionAllowed = isNodeSelectionAllowed(state, node, pathGraph);
+    const isClickable = isHoverAllowed && isSelectionAllowed;
+    const isInspected = inspectedKey?.equals(node.schema.key);
 
     const pathNode = pathGraph?.nodes.get(node.id);
     const isRoot = node.id === state.form.rootObjexKey?.toString();
@@ -177,21 +195,20 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
             <div
                 className={cn(
                     'absolute size-8 -left-4 -top-4 rounded-full border-2',
-                    // Root node styling.
-                    isRoot && 'bg-success border-success-700',
-                    // Normal styling only applied if not root.
-                    !isRoot && [
-                        'border-default-600 bg-background',
-                        isHoverAllowed && isSelectionAllowed && 'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110 active:bg-primary-200 active:border-primary-400',
-                        isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
+                    isClickable && 'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110',
+                    isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
+                    theme === 'light' ? [
+                        !isSelected && 'bg-background border-default-600',
+                        isInspected && 'bg-success',
                         isSelected && 'bg-primary-200 border-primary-500',
-                        theme === 'dark' && [
-                            !isSelected && 'bg-default-200 border-default-900',
-                            isSelected && 'bg-primary-400 border-primary-600',
-                            isHoverAllowed && isSelectionAllowed && 'active:bg-primary-500 active:border-default-900',
-                        ],
-                        pathNode && pathClasses[pathNode.pathCount],
+                        isClickable && 'active:bg-primary-200 active:border-primary-400',
+                    ] : [
+                        !isSelected && 'bg-default-200 border-default-900',
+                        isInspected && 'bg-success',
+                        isSelected && 'bg-primary-400 border-primary-600',
+                        isClickable && 'active:bg-primary-500 active:border-default-900',
                     ],
+                    pathNode && pathClasses[pathNode.pathCount],
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}
@@ -199,7 +216,7 @@ function NodeDisplay({ node, state, dispatch, pathGraph }: NodeDisplayProps) {
 
             <div className='w-fit h-0'>
                 <span className={cn('relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px]',
-                    isRoot && 'text-success-600 font-bold',
+                    isRoot && 'font-bold',
                 )}>
                     {isRoot && 'root:'} {node.metadata.label}
                 </span>

@@ -1,4 +1,4 @@
-import { idsAreEqual, Key, ObjexIds, type KeyResponse, type ObjexIdsResponse } from '../identifiers';
+import { Key, ObjexIds, type KeyResponse, type ObjexIdsResponse } from '../identifiers';
 import { type Category } from './Category';
 import { SchemaCategoryInvalidError } from './Error';
 import { type Morphism } from './Morphism';
@@ -43,7 +43,7 @@ export class Objex {
 
 export type SchemaObjexResponse = {
     key: KeyResponse;
-    ids?: ObjexIdsResponse;
+    ids: ObjexIdsResponse;
 };
 
 /**
@@ -52,14 +52,14 @@ export type SchemaObjexResponse = {
 export class SchemaObjex {
     private constructor(
         readonly key: Key,
-        readonly ids: ObjexIds | undefined,
+        readonly ids: ObjexIds,
         private _isNew: boolean,
     ) {}
 
     static fromResponse(schema: SchemaObjexResponse): SchemaObjex {
         return new SchemaObjex(
             Key.fromResponse(schema.key),
-            schema.ids ? ObjexIds.fromResponse(schema.ids) : undefined,
+            ObjexIds.fromResponse(schema.ids),
             false,
         );
     }
@@ -73,11 +73,8 @@ export class SchemaObjex {
     }
 
     /** If there is nothing to update, undefined will be returned. */
-    update({ ids }: { ids?: ObjexIds | null }): SchemaObjex | undefined {
-        if (ids === null && this.ids)
-            return SchemaObjex.createNew(this.key, {});
-
-        if (ids && !idsAreEqual(ids, this.ids))
+    update({ ids }: { ids?: ObjexIds }): SchemaObjex | undefined {
+        if (ids && !this.ids.equals(ids))
             return SchemaObjex.createNew(this.key, { ids });
 
         return undefined;
@@ -97,7 +94,7 @@ export class SchemaObjex {
     toServer(): SchemaObjexResponse {
         return {
             key: this.key.toServer(),
-            ids: this.ids?.toServer(),
+            ids: this.ids.toServer(),
         };
     }
 
@@ -109,7 +106,7 @@ export class SchemaObjex {
 export type ObjexDefinition = {
     label: string;
     position: Position;
-    ids?: ObjexIds;
+    ids: ObjexIds;
 };
 
 export type MetadataObjexResponse = {

@@ -86,15 +86,15 @@ AdminerPage.loader = async (): Promise<AdminerLoaderData> => {
  */
 function LinkLengthSwitch() {
     const { preferences, setPreferences } = usePreferences();
-    const { adminerShortLinks: adminerShortRefs } = preferences;
+    const { adminerShortLinks } = preferences;
 
     return (
         <Switch
-            isSelected={adminerShortRefs}
+            isSelected={adminerShortLinks}
             onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
             size='sm'
         >
-            <p className='text-small'>Short names</p>
+            Short links
         </Switch>
     );
 }

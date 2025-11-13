@@ -1,81 +1,61 @@
-import { Signature } from './Signature';
-import { SignatureId, SignatureIdFactory, type SignatureIdResponse } from './SignatureId';
+import { SignatureId, type SignatureIdResponse } from './SignatureId';
 
-export enum Type {
-    Signatures = 'Signatures',
-    Value = 'Value',
-    Generated = 'Generated',
-}
-
-export type ObjexIdsResponse = {
-    type: Type;
-    signatureIds?: SignatureIdResponse[];
-};
+export type ObjexIdsResponse = SignatureIdResponse[];
 
 export class ObjexIds {
-    readonly type: Type;
     private readonly _signatureIds: SignatureId[];
 
-    private constructor(type: Type, signatureIds?: SignatureId[]) {
-        this.type = type;
-        this._signatureIds = signatureIds ?? [];
+    private constructor(signatureIds: SignatureId[]) {
+        this._signatureIds = signatureIds;
     }
 
     get signatureIds(): readonly SignatureId[] {
-        return this._signatureIds;
+        return this._signatureIds.length === 0 ? [ SignatureId.empty() ] : this._signatureIds;
     }
 
-    get isSignatures(): boolean {
-        return this.type === Type.Signatures;
+    static create(signatureIds: SignatureId[]): ObjexIds {
+        return signatureIds.length === 0 ? this.empty() : new ObjexIds(signatureIds);
     }
 
-    static createSignatures(signatureIds: SignatureId[]): ObjexIds {
-        return new ObjexIds(Type.Signatures, signatureIds);
+    // TODO Re-implement if needed (or delete if not). Should be useful when creating maps or arrays.
+    // static createCrossProduct(elements: { signature: Signature, ids: ObjexIds }[]): ObjexIds {
+    //     let signatureIds = [ new SignatureId([]) ];
+    //     for (const element of elements)
+    //         signatureIds = ObjexIds.combineCrossProductIds(signatureIds, element.signature, element.ids);
+
+    //     return ObjexIds.create(signatureIds);
+    // }
+
+    // private static combineCrossProductIds(current: SignatureId[], signature: Signature, ids: ObjexIds): SignatureId[] {
+    //     const newSignatureIds = ids.isEmpty
+    //         ? [ [ Signature.empty() ] ]
+    //         : ids._signatureIds.map(id => id.signatures);
+
+    //     const concatenatedSignatureIds = newSignatureIds.map(signatureId => signatureId.map(s => signature.concatenate(s)));
+
+    //     return current.flatMap(currentId => concatenatedSignatureIds.map(signatureId => new SignatureId([ ...currentId.signatures, ...signatureId ])));
+    // }
+
+    private static readonly emptyInstance = new ObjexIds([]);
+
+    static empty(): ObjexIds {
+        return this.emptyInstance;
     }
 
-    static createNonSignatures(type: Type.Value | Type.Generated): ObjexIds {
-        return new ObjexIds(type);
-    }
-
-    static createCrossProduct(elements: { signature: Signature, ids: ObjexIds }[]): ObjexIds {
-        let signatureIds = [ new SignatureId([]) ];
-        for (const element of elements)
-            signatureIds = ObjexIds.combineCrossProductIds(signatureIds, element.signature, element.ids);
-
-        return ObjexIds.createSignatures(signatureIds);
-    }
-
-    private static combineCrossProductIds(current: SignatureId[], signature: Signature, ids: ObjexIds): SignatureId[] {
-        const newSignatureIds = ids.isSignatures
-            ? ids._signatureIds.map(id => id.signatures)
-            : [ [ Signature.empty() ] ];
-
-        const concatenatedSignatureIds = newSignatureIds.map(signatureId => signatureId.map(s => signature.concatenate(s)));
-
-        return current.flatMap(currentId => concatenatedSignatureIds.map(signatureId => new SignatureId([ ...currentId.signatures, ...signatureId ])));
+    get isEmpty(): boolean {
+        return this._signatureIds.length === 0;
     }
 
     static fromResponse(input: ObjexIdsResponse): ObjexIds {
-        const type = input.type;
-        const signatureIds = input.signatureIds?.map(SignatureId.fromResponse);
-        return new ObjexIds(type, signatureIds);
+        return this.create(input.map(SignatureId.fromResponse));
     }
 
     toServer(): ObjexIdsResponse {
-        return {
-            type: this.type,
-            signatureIds: this.type === Type.Signatures ? this._signatureIds.map(id => id.toServer()) : undefined,
-        };
+        return this._signatureIds.map(id => id.toServer());
     }
 
     equals(other: ObjexIds): boolean {
         if (this === other)
-            return true;
-
-        if (this.type !== other.type)
-            return false;
-
-        if (!this.isSignatures)
             return true;
 
         if (this._signatureIds.length !== other._signatureIds.length)
@@ -89,15 +69,4 @@ export class ObjexIds {
 
         return true;
     }
-
-    public generateDefaultSuperId(): SignatureId {
-        if (this.type !== Type.Signatures)
-            return SignatureIdFactory.createEmpty();
-
-        return SignatureId.union(this._signatureIds);
-    }
-}
-
-export function idsAreEqual(a: ObjexIds | undefined, b: ObjexIds | undefined) {
-    return (!a && !b) || (b && a?.equals(b));
 }

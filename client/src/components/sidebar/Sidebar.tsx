@@ -111,7 +111,7 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
                 <ModalHeader>Settings</ModalHeader>
                 <ModalBody>
                     <p>Customize your application preferences here.</p>
-                    <ShowTableIDsSwitch />
+                    <SettingsForm />
                 </ModalBody>
                 <ModalFooter>
                     <Button onPress={() => setIsSettingsOpen(false)} color='primary'>Close</Button>
@@ -121,26 +121,33 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
     </>);
 }
 
-type ShowTableIDsSwitchProps = {
-    className?: string;
-};
-
-/**
- * Renders a switch to toggle visibility of table IDs.
- * It is a user preference updated in Settings.
- */
-export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
+function SettingsForm() {
     const { preferences, setPreferences } = usePreferences();
-    const { showTableIDs } = preferences;
 
     return (
-        <div className={className}>
+        <div className='flex flex-col gap-2'>
             <Switch
-                isSelected={showTableIDs}
+                isSelected={preferences.showTableIDs}
                 onChange={e => setPreferences({ ...preferences, showTableIDs: e.target.checked })}
                 size='sm'
             >
-                <p className='text-small'>Show Table IDs</p>
+                Show table IDs
+            </Switch>
+
+            <Switch
+                isSelected={preferences.accessPathShortForm}
+                onChange={e => setPreferences({ ...preferences, accessPathShortForm: e.target.checked })}
+                size='sm'
+            >
+                Short form of access path
+            </Switch>
+
+            <Switch
+                isSelected={preferences.adminerShortLinks}
+                onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
+                size='sm'
+            >
+                Short links in Adminer
             </Switch>
         </div>
     );

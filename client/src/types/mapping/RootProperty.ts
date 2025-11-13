@@ -1,12 +1,10 @@
 import { print, type Printable, type Printer } from '@/types/utils/string';
-import { type Name, nameFromResponse, type NameResponse, Signature } from '@/types/identifiers';
-import { ComplexProperty, type ParentProperty, subpathFromResponse, type ChildProperty, type ComplexPropertyResponse } from './ComplexProperty';
+import { type Name, nameFromResponse, Signature } from '@/types/identifiers';
+import { ComplexProperty, type ParentProperty, subpathFromResponse, type ChildProperty, type ComplexPropertyResponse, PRINTER_CONTEXT_SHORT_FORM } from './ComplexProperty';
 import { SimpleProperty } from './SimpleProperty';
 import { type AccessPath } from './AccessPath';
 
 // TODO Candice be unified with the ComplexProperty?
-
-export type RootPropertyResponse = ComplexPropertyResponse & { name: NameResponse };
 
 export class RootProperty implements Printable {
     public constructor(
@@ -17,7 +15,7 @@ export class RootProperty implements Printable {
     readonly isAuxiliary = true;
     readonly signature = Signature.empty();
 
-    static fromResponse(input: RootPropertyResponse): RootProperty {
+    static fromResponse(input: ComplexPropertyResponse): RootProperty {
         const subpaths: ChildProperty[] = [];
         const property = new RootProperty(
             nameFromResponse(input.name),
@@ -29,7 +27,7 @@ export class RootProperty implements Printable {
         return property;
     }
 
-    toServer(): RootPropertyResponse {
+    toServer(): ComplexPropertyResponse {
         return {
             name: this.name.toServer(),
             signature: this.signature.toServer(),
@@ -53,6 +51,10 @@ export class RootProperty implements Printable {
 
     toString(): string {
         return print(this);
+    }
+
+    toStringShortForm(): string {
+        return print(this, { [PRINTER_CONTEXT_SHORT_FORM]: true });
     }
 
     static getPropertyRoot(property: RootProperty | ChildProperty): RootProperty {

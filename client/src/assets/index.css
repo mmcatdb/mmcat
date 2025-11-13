@@ -100,11 +100,11 @@
 }
 
 @layer components {
-    .mm-access-path:has(> .mm-target:hover) > .mm-target {
+    .mm-access-path-selectable:has(> .mm-target:hover) > .mm-target {
         @apply bg-default-300;
     }
 
-    .mm-target {
+    .mm-access-path-selectable .mm-target {
         @apply cursor-pointer;
     }
 

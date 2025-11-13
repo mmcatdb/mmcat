@@ -122,7 +122,7 @@ function MappingsTableContent({ mappings, sortDescriptor, onSortChange }: Mappin
                                 {mapping.rootObjexKey.value}
                             </TableCell>,
                             <TableCell key='primaryKey'>
-                                {mapping.primaryKey.signatures.join(', ')}
+                                {[ ...mapping.primaryKey.signatures ].join(', ')}
                             </TableCell>,
                             <TableCell key='accessPath'>
                                 <AccessPathTooltip accessPath={mapping.accessPath} text='Preview' />

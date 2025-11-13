@@ -218,7 +218,7 @@ type SetRootAction = {
  */
 function root(state: MappingEditorState, action: SetRootAction): MappingEditorState {
     const rootObject = state.category.getObjex(action.key);
-    const ids = rootObject.schema.ids!.signatureIds;
+    const ids = rootObject.schema.ids.signatureIds;
 
     return {
         ...state,
@@ -263,8 +263,7 @@ type AccessPathAction = {
     selection: PathSelection | undefined;
 } | {
     operation: 'update';
-    name: Name;
-    signature: Signature;
+    accessPath: AccessPath;
 } | {
     operation: 'create';
     name: Name;
@@ -287,10 +286,10 @@ function accessPath(state: MappingEditorState, action: AccessPathAction): Mappin
     }
 
     if (!state.selectedPropertyPath)
-        // This should not happen.
-        return state;
+        throw new Error('No property selected in mapping editor');
 
-    const selected = traverseAccessPath(state.form.accessPath, state.selectedPropertyPath);
+    const form = state.form;
+    const selected = traverseAccessPath(form.accessPath, state.selectedPropertyPath);
 
     if (action.operation === 'delete') {
         if (selected.isRoot)
@@ -299,8 +298,8 @@ function accessPath(state: MappingEditorState, action: AccessPathAction): Mappin
         return {
             ...state,
             form: {
-                ...state.form,
-                accessPath: updateAccessPath(state.form.accessPath, state.selectedPropertyPath, undefined),
+                ...form,
+                accessPath: updateAccessPath(form.accessPath, state.selectedPropertyPath, undefined),
             },
             // The selected property path is no longer valid.
             selectedPropertyPath: undefined,
@@ -311,17 +310,11 @@ function accessPath(state: MappingEditorState, action: AccessPathAction): Mappin
         return {
             ...state,
             form: {
-                ...state.form,
-                accessPath: updateAccessPath(state.form.accessPath, state.selectedPropertyPath, {
-                    name: action.name,
-                    signature: action.signature,
-                    // If the signature changed, we have to drop all subpaths.
-                    subpaths: action.signature.equals(selected.signature) ? [ ...selected.subpaths ] : [],
-                    isRoot: selected.isRoot,
-                }),
+                ...form,
+                accessPath: updateAccessPath(form.accessPath, state.selectedPropertyPath, action.accessPath),
             },
             // The selected property path did change but we can fix it.
-            selectedPropertyPath: state.selectedPropertyPath.replaceLast(action.name),
+            selectedPropertyPath: state.selectedPropertyPath.replaceLast(action.accessPath.name),
         };
     }
 
@@ -334,8 +327,8 @@ function accessPath(state: MappingEditorState, action: AccessPathAction): Mappin
     return {
         ...state,
         form: {
-            ...state.form,
-            accessPath: updateAccessPath(state.form.accessPath, pathToNewChild, {
+            ...form,
+            accessPath: updateAccessPath(form.accessPath, pathToNewChild, {
                 name: action.name,
                 signature: action.signature,
                 subpaths: [],

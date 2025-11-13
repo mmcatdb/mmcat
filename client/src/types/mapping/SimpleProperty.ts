@@ -1,6 +1,6 @@
 import { print, type Printable, type Printer } from '@/types/utils/string';
-import { type NameResponse, nameFromResponse, Signature, type SignatureResponse, type Name } from '@/types/identifiers';
-import { type ParentProperty } from './ComplexProperty';
+import { type NameResponse, nameFromResponse, Signature, type SignatureResponse, type Name, TypedName } from '@/types/identifiers';
+import { PRINTER_CONTEXT_SHORT_FORM, type ParentProperty } from './ComplexProperty';
 import { type AccessPath } from './AccessPath';
 
 export type SimplePropertyResponse = {
@@ -31,7 +31,11 @@ export class SimpleProperty implements Printable {
     }
 
     printTo(printer: Printer): void {
-        printer.append(this.name).append(': ').append(this.signature);
+        const showName = !printer.context(PRINTER_CONTEXT_SHORT_FORM) || !(this.name instanceof TypedName) || this.name.type !== TypedName.VALUE;
+        if (showName)
+            printer.append(this.name).append(': ');
+
+        printer.append(this.signature);
     }
 
     toString(): string {

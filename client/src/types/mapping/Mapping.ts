@@ -1,4 +1,4 @@
-import { RootProperty, type RootPropertyResponse } from '@/types/mapping';
+import { RootProperty, type ComplexPropertyResponse } from '@/types/mapping';
 import type { Entity, Id, VersionId } from '../id';
 import { Key, SignatureId, type KeyResponse, type SignatureIdResponse } from '../identifiers';
 
@@ -9,7 +9,7 @@ export type MappingResponse = {
     rootObjexKey: KeyResponse;
     primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyResponse;
+    accessPath: ComplexPropertyResponse;
     version: VersionId;
 };
 
@@ -45,13 +45,13 @@ export type MappingInit = {
     rootObjexKey: KeyResponse;
     primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyResponse;
+    accessPath: ComplexPropertyResponse;
 };
 
 export type MappingEdit = {
     primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyResponse;
+    accessPath: ComplexPropertyResponse;
 };
 
 export type MappingInfoResponse = {
