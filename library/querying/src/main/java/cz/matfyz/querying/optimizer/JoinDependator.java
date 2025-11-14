@@ -23,19 +23,16 @@ public class JoinDependator implements QueryVisitor<Integer> {
         queryPlan.root.accept(new JoinDependator(queryPlan, cache));
     }
 
-    @Override
-    public Integer visit(DatasourceNode node) {
+    @Override public Integer visit(DatasourceNode node) {
         return cache.predict(node);
     }
 
-    @Override
-    public Integer visit(FilterNode node) {
+    @Override public Integer visit(FilterNode node) {
         // TODO: estimate filter selectivity
         return node.child().accept(this);
     }
 
-    @Override
-    public Integer visit(JoinNode node) {
+    @Override public Integer visit(JoinNode node) {
         final var fromCost = node.fromChild().accept(this);
         final var toCost = node.toChild().accept(this);
 
@@ -53,18 +50,15 @@ public class JoinDependator implements QueryVisitor<Integer> {
         return fromCost * 2;
     }
 
-    @Override
-    public Integer visit(MinusNode node) {
+    @Override public Integer visit(MinusNode node) {
         return null;
     }
 
-    @Override
-    public Integer visit(OptionalNode node) {
+    @Override public Integer visit(OptionalNode node) {
         return null;
     }
 
-    @Override
-    public Integer visit(UnionNode node) {
+    @Override public Integer visit(UnionNode node) {
         return null;
     }
 

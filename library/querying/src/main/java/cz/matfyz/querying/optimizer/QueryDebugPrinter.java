@@ -59,8 +59,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         }
     }
 
-    @Override
-    public Void visit(DatasourceNode node) {
+    @Override public Void visit(DatasourceNode node) {
         stringBuilder
             .append(indent())
             .append("DATASRC[")
@@ -77,8 +76,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visit(FilterNode node) {
+    @Override public Void visit(FilterNode node) {
         stringBuilder
             .append(indent())
             .append("FILTER");
@@ -90,8 +88,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visit(JoinNode node) {
+    @Override public Void visit(JoinNode node) {
         stringBuilder
             .append(indent())
             .append("JOIN");
@@ -109,8 +106,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visit(MinusNode node) {
+    @Override public Void visit(MinusNode node) {
         stringBuilder.append(indent()).append("(\n");
         indentAccept(node.primaryChild());
         stringBuilder.append(indent()).append("MINUS\n");
@@ -119,14 +115,12 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visit(OptionalNode node) {
+    @Override public Void visit(OptionalNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'visit'");
     }
 
-    @Override
-    public Void visit(UnionNode node) {
+    @Override public Void visit(UnionNode node) {
         stringBuilder.append(indent()).append("(\n");
         indentAccept(node.children().stream().findFirst().get());
 

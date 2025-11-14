@@ -113,8 +113,7 @@ class FilterDeepener implements QueryVisitor<Boolean> {
         }
     }
 
-    @Override
-    public Boolean visit(DatasourceNode childNode) {
+    @Override public Boolean visit(DatasourceNode childNode) {
         // TODO: Check filterNotIndexable (when it will matter, i.e. with Cassandra)
 
         final boolean canFilter = queryPlan.context.getProvider().getControlWrapper(childNode.datasource).getQueryWrapper().isFilteringSupported();
@@ -131,8 +130,7 @@ class FilterDeepener implements QueryVisitor<Boolean> {
         return true;
     }
 
-    @Override
-    public Boolean visit(FilterNode childNode) {
+    @Override public Boolean visit(FilterNode childNode) {
         // It is automatically deepenable, no check needed
 
         replaceParentsChild(filterNode, childNode, childNode.child());
@@ -141,8 +139,7 @@ class FilterDeepener implements QueryVisitor<Boolean> {
         return true;
     }
 
-    @Override
-    public Boolean visit(JoinNode childNode) {
+    @Override public Boolean visit(JoinNode childNode) {
         // checks if one of the children contains all filter vars, if yes deepen only to that child;
         // if both children contain all filter vars, then without knowing how the results will be merged, we should propagate to both children
 
@@ -171,20 +168,17 @@ class FilterDeepener implements QueryVisitor<Boolean> {
         return coveredByFrom || coveredByTo;
     }
 
-    @Override
-    public Boolean visit(MinusNode childNode) {
+    @Override public Boolean visit(MinusNode childNode) {
         // TODO: Here the filter needs to be spread to both children OR possibly just the primary one
         return false;
     }
 
-    @Override
-    public Boolean visit(OptionalNode childNode) {
+    @Override public Boolean visit(OptionalNode childNode) {
         // TODO: Probably same as JoinNode?
         return false;
     }
 
-    @Override
-    public Boolean visit(UnionNode childNode) {
+    @Override public Boolean visit(UnionNode childNode) {
         // Here the filter needs to be spread to all children
         // TODO: Test these nodes once they are properly supported
 

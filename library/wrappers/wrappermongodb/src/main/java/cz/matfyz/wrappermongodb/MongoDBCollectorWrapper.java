@@ -8,9 +8,6 @@ import cz.matfyz.wrappermongodb.collector.MongoDBDataCollector;
 import cz.matfyz.wrappermongodb.collector.MongoDBExplainPlanParser;
 import cz.matfyz.wrappermongodb.collector.MongoDBQueryResultParser;
 
-/**
- * Class representing Wrapper for mongodb database
- */
 public final class MongoDBCollectorWrapper implements AbstractCollectorWrapper {
 
     private final MongoDBProvider provider;
@@ -28,8 +25,7 @@ public final class MongoDBCollectorWrapper implements AbstractCollectorWrapper {
         explainPlanParser = new MongoDBExplainPlanParser();
     }
 
-    @Override
-    public final DataModel executeQuery(QueryContent query) throws WrapperException {
+    @Override public final DataModel executeQuery(QueryContent query) throws WrapperException {
         assert query instanceof MongoDBQuery;
         final var mongoQuery = (MongoDBQuery) query;
 
