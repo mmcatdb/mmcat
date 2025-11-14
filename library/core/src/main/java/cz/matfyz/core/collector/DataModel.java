@@ -6,6 +6,7 @@ import java.util.HashMap;
 public class DataModel {
 
     public static class DatabaseData {
+
         /** Field containing size of dataset in bytes */
         public Long sizeInBytes;
         /** Field containing size of dataset in pages (virtual disk block size) */
@@ -44,6 +45,7 @@ public class DataModel {
         public void addIndex(String inxName) {
             if(!indexes.containsKey(inxName)) indexes.put(inxName, new IndexData());
         }
+
     }
 
     public static class ResultData {
@@ -58,14 +60,10 @@ public class DataModel {
     public String query; // TODO: change to querycontent, but we don't have the right dependencies (it would have to be in AbstractWrappers), maybe Object or Serializable if we need it would be enough, but id
     public final ResultData result = new ResultData();
 
-
     public DataModel(String databaseID, String query) {
         this.databaseID = databaseID;
         this.query = query;
     }
-
-
-
 
     /** Class holding statistical data about table */
     public static class TableData implements Serializable {
@@ -107,7 +105,6 @@ public class DataModel {
             return clone;
         }
     }
-
 
     /** Class responsible for representing collected statistical data about individual columns */
     public static class ColumnData implements Serializable {

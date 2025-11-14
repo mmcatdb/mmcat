@@ -44,8 +44,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
     // For some reason joined ID variables are inserted as projections twice, so this band-aids the problem; a better fix might be to not make it happen in DatasourceTranslator or higher
     final HashSet<String> projectionDsts = new HashSet<>();
-    @Override
-    public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
+    @Override public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
         if (projectionDsts.contains(structure.name)) {
             return;
         }

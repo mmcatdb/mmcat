@@ -16,9 +16,6 @@ import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.Result;
 
-/**
- * Class which represents wrapper that is connected to Neo4j database and evaluate queries over it
- */
 public class Neo4jCollectorWrapper implements AbstractCollectorWrapper {
 
     private final Neo4jProvider provider;

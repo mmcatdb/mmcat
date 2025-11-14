@@ -67,8 +67,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         String command
     ) {}
 
-    @Override
-    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+    @Override public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
         Collection<AbstractStatement> deleteStatements = new ArrayList<>();
         List<String> tableNames = extractCreatedTables(executionCommands);
 
@@ -98,8 +97,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         return StringStatement.create(content);
     }
 
-    @Override
-    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+    @Override public AbstractStatement createCreationStatement(String newDBName, String owner) {
         final String content = String.format("""
                 CREATE DATABASE \"%s\" OWNER \"%s\";
                 """, newDBName, owner);

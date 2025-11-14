@@ -178,12 +178,9 @@ public class QueryTestBase {
         return copy;
     }
 
-
-
     static class JsonComparator implements java.util.Comparator<JsonNode> {
 
-        @Override
-        public int compare(JsonNode arg0, JsonNode arg1) {
+        @Override public int compare(JsonNode arg0, JsonNode arg1) {
             if (arg0.isObject() || arg1.isObject()) {
                 if (!arg0.isObject()) return -1;
                 if (!arg1.isObject()) return 1;

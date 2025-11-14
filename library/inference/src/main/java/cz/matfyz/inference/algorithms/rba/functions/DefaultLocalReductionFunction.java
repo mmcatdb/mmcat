@@ -26,8 +26,7 @@ public class DefaultLocalReductionFunction implements AbstractRSDsReductionFunct
      * Merges two {@link RecordSchemaDescription} RSDs into a single {@link RecordSchemaDescription}.
      * The resulting RSD aggregates properties from both input RSDs.
      */
-    @Override
-    public RecordSchemaDescription call(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) {
+    @Override public RecordSchemaDescription call(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) {
         final var result = new RecordSchemaDescription(
             rsd1.getName(),
             Char.min(rsd1.getUnique(), rsd2.getUnique()),
@@ -44,4 +43,5 @@ public class DefaultLocalReductionFunction implements AbstractRSDsReductionFunct
 
         return result;
     }
+
 }

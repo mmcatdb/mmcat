@@ -16,9 +16,6 @@ import cz.matfyz.wrapperpostgresql.collector.PostgreSQLExplainPlanParser;
 import cz.matfyz.wrapperpostgresql.collector.PostgreSQLQueryResultParser;
 import cz.matfyz.wrapperpostgresql.collector.PostgreSQLResources;
 
-/**
- * Class which represents the wrapper operating over PostgreSQL database
- */
 public class PostgreSQLCollectorWrapper implements AbstractCollectorWrapper {
 
     protected final PostgreSQLProvider provider;

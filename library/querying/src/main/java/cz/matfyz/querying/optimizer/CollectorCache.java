@@ -25,7 +25,7 @@ public class CollectorCache {
 
     public final Map<String, DataModel.DatabaseData> databaseData = new HashMap<>();
 
-    // 
+    //
     public final Map<String, ArrayList<CacheEntry>> queryData = new HashMap<>();
 
     public void put(DatasourceNode datasourceNode, DataModel data) {
@@ -226,8 +226,7 @@ public class CollectorCache {
             return sb.toString();
         }
 
-        @Override
-        public Void visit(DatasourceNode node) {
+        @Override public Void visit(DatasourceNode node) {
             stringBuilder.append("datasrc:");
             stringBuilder.append(node.datasource.identifier);
             stringBuilder.append("(");
@@ -249,14 +248,12 @@ public class CollectorCache {
             return null;
         }
 
-        @Override
-        public Void visit(FilterNode node) {
+        @Override public Void visit(FilterNode node) {
             node.child().accept(this);
             return null;
         }
 
-        @Override
-        public Void visit(JoinNode node) {
+        @Override public Void visit(JoinNode node) {
             final var candidate = node.candidate;
 
             stringBuilder.append('(');
@@ -279,19 +276,15 @@ public class CollectorCache {
             return null;
         }
 
-
-        @Override
-        public Void visit(MinusNode node) {
+        @Override public Void visit(MinusNode node) {
             throw new UnsupportedOperationException("Unimplemented method 'visit'");
         }
 
-        @Override
-        public Void visit(OptionalNode node) {
+        @Override public Void visit(OptionalNode node) {
             throw new UnsupportedOperationException("Unimplemented method 'visit'");
         }
 
-        @Override
-        public Void visit(UnionNode node) {
+        @Override public Void visit(UnionNode node) {
             throw new UnsupportedOperationException("Unimplemented method 'visit'");
         }
 

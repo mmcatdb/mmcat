@@ -5,8 +5,7 @@ import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunctio
 
 public class DefaultLocalSeqFunction implements AbstractSeqFunction {
 
-    @Override
-    public ProcessedProperty call(ProcessedProperty t1, Iterable<ProcessedProperty> t2) throws Exception {
+    @Override public ProcessedProperty call(ProcessedProperty t1, Iterable<ProcessedProperty> t2) throws Exception {
         // agreguje dohromady Object a statistiku, a tedy vklada objekt do min, max, average, inkrementuje count, inkrementuje totalValue, inkrementuje bloom filter
 
         ProcessedProperty result = null;
@@ -25,5 +24,5 @@ public class DefaultLocalSeqFunction implements AbstractSeqFunction {
 
         return result;
     }
-}
 
+}

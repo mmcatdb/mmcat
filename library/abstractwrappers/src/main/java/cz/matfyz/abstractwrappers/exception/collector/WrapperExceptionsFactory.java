@@ -67,8 +67,7 @@ public class WrapperExceptionsFactory {
                 _messageBuilder.append(" because of: ").append(cause.getMessage());
         }
 
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return _messageBuilder.append(".").toString();
         }
     }

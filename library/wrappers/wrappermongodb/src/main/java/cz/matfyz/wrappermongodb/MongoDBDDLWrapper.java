@@ -40,8 +40,7 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
         return new MongoDBCommandStatement("db.createCollection(\"" + kindName + "\");", new BsonDocument("create", new BsonString(kindName)));
     }
 
-    @Override
-    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+    @Override public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
         Collection<AbstractStatement> deleteStatements = new ArrayList<>();
         List<String> tableNames = extractCreatedTables(executionCommands);
 
@@ -69,8 +68,7 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
     }
 
     // To create a new db in mongo and then insert into it, you need to grant roles on that db to the current user
-    @Override
-    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+    @Override public AbstractStatement createCreationStatement(String newDBName, String owner) {
         String command = "use admin; db.grantRolesToUser(\"" + owner + "\", [ { role: \"readWrite\", db: \"" + newDBName + "\" } ]); use " + newDBName + ";";
 
         BsonDocument commandDoc = new BsonDocument()
