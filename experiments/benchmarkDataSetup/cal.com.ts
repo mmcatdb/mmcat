@@ -98,7 +98,7 @@ let attributeToUser = importer.generateRecords(250, () => {
     const attr = random.choice(attribute)
     const member = random.choice(importer.findRecordByKey(membership, 'teamId', attr.teamId))
     const attrId = attr.id
-    const attrOptionId = attrId + attribute.length * (random.boolean() ? 2 : 1)
+    const attrOptionId = Number.parseInt(attrId) + attribute.length * (random.boolean() ? 2 : 1)
     return {
         memberId: member.id,
         attributeOptionId: attrOptionId,
@@ -181,8 +181,8 @@ const outOfOffice = importer.generateRecords(1000, () => {
         id: (idn++).toString(),
         start: d1.toISOString(),
         end: d2.toISOString(),
-        userId: u1,
-        toUserId: u2,
+        userId: u1.id,
+        toUserId: u2.id,
     }
 })
 
@@ -206,31 +206,34 @@ const hostGroup = importer.generateRecords(15, () => {
     }
 })
 
-const eventHost = importer.generateRecords(450, () => {
-    // No group
-    const et = randomHelper.record(eventType)
-    const member = random.choice(importer.findRecordByKey(membership, 'teamId', et.teamId))
-    const sched = random.choice(importer.findRecordByKey(schedule, 'userId', member.userId))
-    return {
-        id: (idn++).toString(),
-        userId: et.id,
-        memberId: member.id,
-        eventTypeId: et.id,
-        scheduleId: sched?.id ?? null,
-        hostGroupId: null,
-    }
-}).concat(importer.generateRecords(150, () => {
-    // In group
-    const hGroup = random.choice(hostGroup)
-    const member = random.choice(importer.findRecordByKey(membership, 'teamId', hGroup.teamId))
-    return {
-        userId: member.userId,
-        memberId: member.id,
-        eventTypeId: hGroup.eventTypeId,
-        scheduleId: null,
-        hostGroupId: hGroup.id,
-    }
-}, ['eventTypeId', 'userId']))
+const eventHost = importer.removeDuplicateRecords(
+    importer.generateRecords(450, () => {
+        // No group
+        const et = randomHelper.record(eventType)
+        const member = random.choice(importer.findRecordByKey(membership, 'teamId', et.teamId))
+        const sched = random.choice(importer.findRecordByKey(schedule, 'userId', member.userId))
+        return {
+            id: (idn++).toString(),
+            userId: member.userId,
+            memberId: member.id,
+            eventTypeId: et.id,
+            scheduleId: sched?.id ?? null,
+            hostGroupId: null,
+        }
+    }).concat(importer.generateRecords(150, () => {
+        // In group
+        const hGroup = random.choice(hostGroup)
+        const member = random.choice(importer.findRecordByKey(membership, 'teamId', hGroup.teamId))
+        return {
+            userId: member.userId,
+            memberId: member.id,
+            eventTypeId: hGroup.eventTypeId,
+            scheduleId: null,
+            hostGroupId: hGroup.id,
+        }
+    })),
+    ['eventTypeId', 'userId']
+)
 
 
 
@@ -242,12 +245,12 @@ const feature = importer.generateUnscaledRecords(8, () => ({
 const userFeatures = importer.generateRecords(150, () => ({
     userId: random.choice(user).id,
     featureId: random.choice(feature).id,
-}))
+}), ['userId', 'featureId'])
 
 const teamFeatures = importer.generateRecords(25, () => ({
     teamId: random.choice(team).id,
     featureId: random.choice(feature).id,
-}))
+}), ['teamId', 'featureId'])
 
 
 
@@ -292,9 +295,9 @@ const workflowsOnEventTypes = importer.generateRecords(300, () => {
 }, ['workflowId', 'eventTypeId'])
 
 const workflowsOnTeams = importer.generateRecords(180, () => ({
-    workflowId: randomHelper.record(workflow),
-    teamId: randomHelper.record(team),
-}))
+    workflowId: randomHelper.record(workflow).id,
+    teamId: randomHelper.record(team).id,
+}), ['workflowId', 'teamId'])
 
 
 
@@ -314,7 +317,7 @@ const booking = importer.generateRecords(800, () => {
 const attendee = importer.generateRecords(5000, () => ({
     id: (idn++).toString(),
     email: randomHelper.string(12),
-    bookingId: randomHelper.record(booking, randomHelper.geometricFromZero(3 / booking.length))
+    bookingId: randomHelper.record(booking, randomHelper.geometricFromZero(3 / booking.length)).id
 }))
 
 importer.importData({
@@ -431,7 +434,7 @@ importer.importData({
             name: 'attributeToUser',
             schema: `
                 attributeOptionId integer REFERENCES attributeOption(id),
-                memberId integer REFERENCES caldotcom_user(id),
+                memberId integer REFERENCES membership(id),
                 CONSTRAINT attributeToUser_pk PRIMARY KEY (attributeOptionId, memberId)
             `,
             data: attributeToUser,
@@ -499,8 +502,8 @@ importer.importData({
             name: 'availability',
             schema: `
                 id integer PRIMARY KEY,
-                start text,
-                end text,
+                startTime text,
+                endTime text,
                 userId integer REFERENCES caldotcom_user(id),
                 eventTypeId integer REFERENCES eventType(id),
                 scheduleId integer REFERENCES schedule(id)
@@ -508,8 +511,8 @@ importer.importData({
             data: availability,
             structure: {
                 id: true,
-                start: true,
-                end: true,
+                startTime: 'start',
+                endTime: 'end',
                 userId: true,
                 eventTypeId: true,
                 scheduleId: true,
@@ -519,16 +522,16 @@ importer.importData({
             name: 'outOfOffice',
             schema: `
                 id integer PRIMARY KEY,
-                start text,
-                end text,
+                startTime text,
+                endTime text,
                 userId integer REFERENCES caldotcom_user(id),
                 toUserId integer REFERENCES caldotcom_user(id)
             `,
             data: outOfOffice,
             structure: {
                 id: true,
-                start: true,
-                end: true,
+                startTime: 'start',
+                endTime: 'end',
                 userId: true,
                 toUserId: true,
             }
@@ -691,7 +694,7 @@ importer.importData({
                 id integer PRIMARY KEY,
                 title text,
                 description text,
-                userId integer REFERENCES caldotcom_user(id)
+                userId integer REFERENCES caldotcom_user(id),
                 eventTypeId integer REFERENCES eventType(id)
             `,
             data: booking,
@@ -718,7 +721,6 @@ importer.importData({
             }
         },
     ],
-    /*
     mongoDB: [
         {
             name: 'team',
@@ -1768,5 +1770,4 @@ importer.importData({
             },
         },
     ],
-    */
 })

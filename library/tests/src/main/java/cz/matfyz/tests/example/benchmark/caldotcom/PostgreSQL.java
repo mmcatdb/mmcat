@@ -191,8 +191,8 @@ public abstract class PostgreSQL {
             availabilityKind,
             b -> b.root(
                 b.simple("id", Schema.availability_id),
-                b.simple("start", Schema.availability_start),
-                b.simple("end", Schema.availability_end),
+                b.simple("startTime", Schema.availability_start),
+                b.simple("endTime", Schema.availability_end),
                 b.simple("userId", Schema.availability_user.signature().concatenate(Schema.user_id.signature())),
                 b.simple("eventTypeId", Schema.availability_eventType.signature().concatenate(Schema.eventType_id.signature())),
                 b.simple("scheduleId", Schema.availability_schedule.signature().concatenate(Schema.schedule_id.signature()))
@@ -206,8 +206,8 @@ public abstract class PostgreSQL {
             outOfOfficeKind,
             b -> b.root(
                 b.simple("id", Schema.outOfOffice_id),
-                b.simple("start", Schema.outOfOffice_start),
-                b.simple("end", Schema.outOfOffice_end),
+                b.simple("startTime", Schema.outOfOffice_start),
+                b.simple("endTime", Schema.outOfOffice_end),
                 b.simple("userId", Schema.outOfOffice_user.signature().concatenate(Schema.user_id.signature())),
                 b.simple("toUserId", Schema.outOfOffice_newUser.signature().concatenate(Schema.user_id.signature()))
             )

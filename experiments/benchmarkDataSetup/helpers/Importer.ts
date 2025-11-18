@@ -116,11 +116,11 @@ export class Importer {
         await client.connect()
 
         for (let i = kinds.length - 1; i >= 0; i--) {
-            await client.query(`DROP TABLE IF EXISTS "${kinds[i].name}"`)
+            await client.query(`DROP TABLE IF EXISTS ${kinds[i].name}`)
         }
 
         for (const kind of kinds) {
-            await client.query(`CREATE TABLE "${kind.name}" (${kind.schema})`)
+            await client.query(`CREATE TABLE ${kind.name} (${kind.schema})`)
 
             function sanitizeForSQL(input: any): string {
                 if (input === null || input === undefined) return 'null'
@@ -146,7 +146,7 @@ export class Importer {
                     return `(${output.join(',')})`
                 }).join(',')
 
-                await client.query(`INSERT INTO "${kind.name}" VALUES ${values}`)
+                await client.query(`INSERT INTO ${kind.name} VALUES ${values}`)
             }
         }
 
@@ -303,7 +303,7 @@ const csvExporter = {
 
         const keys = Object.keys(records[0])
 
-        const header = keys.map(k => `"${csvExporter.sanitizeForCSV(k)}"`).join(',')
+        const header = keys.map(k => csvExporter.sanitizeForCSV(k)).join(',')
         const values = records.map(r =>
             keys.map(k => csvExporter.sanitizeForCSV(r[k])).join(',')
         )
