@@ -166,27 +166,27 @@ export function MappingInfoBanner({ className, dismissBanner }: MappingInfoBanne
             <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>
 
             <p className='text-sm'>
-                Before creating a <strong>Mapping</strong>, you need to connect a <strong>Data Source</strong>.
+                Before creating a <span className='font-bold'>Mapping</span>, you need to connect a <span className='font-bold'>Data Source</span>.
                 A Data Source represents where your data is stored, such as a database, or file.
             </p>
 
             <p className='text-sm mt-2'>
                 Once a Data Source is connected, you can create a <em>Mapping</em> on a <em>Schema Category</em>, linking the source to the <em>Conceptual Schema</em>.
-                A <strong>Mapping</strong> defines how data is structured and stored, using a <em>JSON-like access path</em> to describe relationships between objects.
+                A <span className='font-bold'>Mapping</span> defines how data is structured and stored, using a <em>JSON-like access path</em> to describe relationships between objects.
             </p>
 
             <ul className='mt-3 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Mapping:</strong> Defines how conceptual schema elements relate to database structures.
+                    <span className='font-bold'>Mapping:</span> Defines how conceptual schema elements relate to database structures.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Access Path:</strong> A tree structure that maps schema objects to database tables, or properties.
+                    <span className='font-bold'>Access Path:</span> A tree structure that maps schema objects to database tables, or properties.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Data Source:</strong> The data source where mapped data is stored, defined by connection details.
+                    <span className='font-bold'>Data Source:</span> The data source where mapped data is stored, defined by connection details.
                 </li>
             </ul>
 

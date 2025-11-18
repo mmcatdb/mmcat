@@ -1,4 +1,4 @@
-import { type GraphSelection } from './graphSelection';
+import type { PathGraph, PathGraphProvider } from './PathGraph';
 
 export type PathSelectionAction = {
     /** Create the initial path. */
@@ -18,20 +18,21 @@ export type PathSelectionAction = {
  * Represents a sequence of nodes selected by the user that forms a continuous path.
  * There are edges between them (because there might be multiple paths, so we want to prevent any ambiguity).
  */
-export class PathSelection implements GraphSelection {
+export class PathSelection {
     private constructor(
+        readonly provider: PathGraphProvider,
         /** This array can't be empty. */
         readonly nodeIds: readonly string[],
         /** There are always n-1 edges for n nodes. */
         readonly edgeIds: readonly string[],
     ) {}
 
-    static create(nodeIds: string[] = [], edgeIds: string[] = []): PathSelection {
+    static create(provider: PathGraphProvider, nodeIds: string[] = [], edgeIds: string[] = []): PathSelection {
         // This also checks that the nodeIds aren't empty.
         if (nodeIds.length !== edgeIds.length + 1)
             throw new Error('There must be n-1 edges for n nodes.');
 
-        return new PathSelection([ ...nodeIds ], [ ...edgeIds ]);
+        return new PathSelection(provider, [ ...nodeIds ], [ ...edgeIds ]);
     }
 
     values(): readonly string[] {
@@ -50,11 +51,11 @@ export class PathSelection implements GraphSelection {
         return this.nodeIds[this.nodeIds.length - 1];
     }
 
-    updateFromAction(action: PathSelectionAction): PathSelection {
+    update(action: PathSelectionAction): PathSelection {
         if (action.operation === 'start')
-            return PathSelection.create([ action.nodeId ]);
+            return PathSelection.create(this.provider, [ action.nodeId ]);
         if (action.operation === 'remove')
-            return PathSelection.create(this.nodeIds.slice(0, -1), this.edgeIds.slice(0, -1));
+            return PathSelection.create(this.provider, this.nodeIds.slice(0, -1), this.edgeIds.slice(0, -1));
 
         return this.add(action.nodeIds, action.edgeIds);
     }
@@ -63,6 +64,19 @@ export class PathSelection implements GraphSelection {
         if (nodeIds.length !== edgeIds.length)
             throw new Error('Can\'t add different number of nodes and edges.');
 
-        return new PathSelection([ ...this.nodeIds, ...nodeIds ], [ ...this.edgeIds, ...edgeIds ]);
+        return new PathSelection(this.provider, [ ...this.nodeIds, ...nodeIds ], [ ...this.edgeIds, ...edgeIds ]);
+    }
+
+    /**
+     * Cached structure for finding paths for the selection.
+     * Should be valid for the lifetime of this selection (if the category changes, a new selection should be created anyway).
+     */
+    private _pathGraph: PathGraph | undefined;
+
+    get pathGraph(): PathGraph {
+        if (!this._pathGraph)
+            this._pathGraph = this.provider.computePathGraph(this.lastNodeId);
+
+        return this._pathGraph;
     }
 }

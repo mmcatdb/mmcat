@@ -38,10 +38,6 @@ type FormButtonsProps = {
 
 /**
  * Hook to manage datasource form state and submission.
- *
- * @param onClose - Callback to close the modal.
- * @param onDatasourceCreated - Callback to handle successful creation.
- * @returns Form state and handlers.
  */
 function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasource: Datasource) => void) {
     const [ datasourceType, setDatasourceType ] = useState<DatasourceType | ''>('');
@@ -71,13 +67,10 @@ function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasou
     /**
      * Updates the datasource type and initializes settings.
      */
-    const handleSetDatasourceType = useCallback(
-        (type: DatasourceType, prevSettings: DatasourceSettings) => {
-            setDatasourceType(type);
-            setSettings(initializeSettings(type, prevSettings));
-        },
-        [],
-    );
+    const handleSetDatasourceType = useCallback((type: DatasourceType, prevSettings: DatasourceSettings) => {
+        setDatasourceType(type);
+        setSettings(initializeSettings(type, prevSettings));
+    }, []);
 
     /**
      * Submits the form to create a new datasource.
@@ -125,9 +118,6 @@ function useDatasourceForm(onClose: () => void, onDatasourceCreated: (newDatasou
 
 /**
  * Initializes settings for a given datasource type.
- *
- * @param type - The selected datasource type.
- * @param currentSettings - The current settings to merge with defaults.
  */
 function initializeSettings(type: DatasourceType, currentSettings: DatasourceSettings): DatasourceSettings {
     const isDatabaseType = [ DatasourceType.mongodb, DatasourceType.postgresql, DatasourceType.neo4j ].includes(type);

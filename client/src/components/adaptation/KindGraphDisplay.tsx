@@ -1,5 +1,5 @@
 import { type ReactNode, type MouseEvent } from 'react';
-import { type Graph, type GraphOptions } from '../graph/graphEngine';
+import { type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { EDGE_ARROW_LENGTH } from '../graph/graphUtils';
@@ -43,7 +43,6 @@ export function KindGraphDisplay({ graph, options, className }: KindGraphDisplay
                         <EdgeDisplay
                             key={edge.id}
                             edge={edge}
-                            graph={graph}
                         />
                     )))}
                 </svg>
@@ -123,11 +122,10 @@ function NodeDisplay({ node }: NodeDisplayProps) {
 
 type EdgeDisplayProps = {
     edge: KindEdge;
-    graph: Graph;
 };
 
-function EdgeDisplay({ edge, graph }: EdgeDisplayProps) {
-    const { setEdgeRef, svg, isHoverAllowed } = useEdge(edge, 0, graph);
+function EdgeDisplay({ edge }: EdgeDisplayProps) {
+    const { setEdgeRef, svg, isHoverAllowed } = useEdge(edge, 0);
 
     function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();

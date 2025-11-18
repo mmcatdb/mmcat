@@ -68,6 +68,13 @@ export class GraphEngine {
     private nodes: Map<string, Node>;
     private edges: EdgeMap;
 
+    getEdgeNodes(edge: Edge) {
+        return {
+            from: this.nodes.get(edge.from)!,
+            to: this.nodes.get(edge.to)!,
+        };
+    }
+
     constructor(
         input: Graph,
         private readonly dispatch: Dispatch<GraphEvent>,
@@ -200,6 +207,7 @@ export class GraphEngine {
         ref.label?.setAttribute('transform', svg.label?.transform ?? '');
     }
 
+    /** If undefined, the selection is explicitly turned off. */
     private selectionBoxRef?: HTMLElement;
 
     setSelectionBoxRef(ref: HTMLElement | null) {
@@ -216,7 +224,7 @@ export class GraphEngine {
     private propagateSelectionBox(select: SelectState | undefined) {
         const ref = this.selectionBoxRef;
         if (!ref) {
-            console.warn('Selection box ref not found in propagateSelectionBox.');
+            // This should not happen - if the selection box isn't set, the selection shouldn't have been started in the first place.
             return;
         }
 
@@ -268,8 +276,10 @@ export class GraphEngine {
             this.updateState({ drag: { type: 'canvas', draggedPoint } });
         }
         else if (actionButtons.select.canvas === event.button) {
-            const initial = getMousePosition(event, this.canvas, this.state.coordinates);
-            this.updateState({ select: { initial, current: initial } });
+            if (this.selectionBoxRef) {
+                const initial = getMousePosition(event, this.canvas, this.state.coordinates);
+                this.updateState({ select: { initial, current: initial } });
+            }
         }
     }
 
@@ -431,7 +441,7 @@ export class GraphEngine {
                 .map(edge => edge.id)
                 .toArray();
 
-            const isSpecialKey = event.shiftKey || event.ctrlKey;
+            const isSpecialKey = event.ctrlKey || event.shiftKey;
 
             this.dispatch({ type: 'select', nodeIds, edgeIds, isSpecialKey });
         }

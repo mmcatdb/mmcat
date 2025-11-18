@@ -47,7 +47,7 @@ export function ActionDetailPage() {
             <h1 className='text-2xl font-bold mb-4'>{action.label}</h1>
 
             <p className='mb-4'>
-                <strong>ID:</strong> {action.id}
+                <span className='font-bold'>ID:</span> {action.id}
             </p>
 
             <div className='mb-6'>

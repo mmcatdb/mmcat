@@ -1,5 +1,5 @@
 import { createContext, type MouseEvent, useCallback, useContext, useMemo, useRef } from 'react';
-import { type ReactiveGraphState, type GraphEngine, type Graph } from './graphEngine';
+import { type ReactiveGraphState, type GraphEngine } from './graphEngine';
 import { computeEdgeSvg, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
 
 type GraphContext = {
@@ -73,7 +73,7 @@ export function useNode(node: Node) {
     };
 }
 
-export function useEdge(edge: Edge, degree: number, graph: Graph) {
+export function useEdge(edge: Edge, degree: number) {
     const { state, engine } = useGraphContext();
     const pathRef = useRef<SVGPathElement | null>(null);
     const labelRef = useRef<SVGTextElement | null>(null);
@@ -96,17 +96,12 @@ export function useEdge(edge: Edge, degree: number, graph: Graph) {
         },
     }), [ engine, edgeId ]);
 
-    const nodes = graph.nodes;
-    const cache = useMemo(() => ({
-        from: nodes.get(edge.from)!,
-        to: nodes.get(edge.to)!,
-    }), [ edge, nodes ]);
-
+    const { from, to } = engine.getEdgeNodes(edge);
     const isHoverAllowed = !state.drag && !state.select;
 
     return {
         setEdgeRef,
-        svg: computeEdgeSvg(cache.from, cache.to, edge.label, degree, state.coordinates),
+        svg: computeEdgeSvg(from, to, edge.label, degree, state.coordinates),
         isHoverAllowed,
     };
 }

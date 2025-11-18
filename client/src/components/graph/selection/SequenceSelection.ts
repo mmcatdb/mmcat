@@ -1,5 +1,3 @@
-import { type GraphSelection } from './graphSelection';
-
 export type SequenceSelectionAction = {
     operation: 'set' | 'add' | 'remove' | 'toggle';
     nodeId: string;
@@ -10,7 +8,7 @@ export type SequenceSelectionAction = {
 /**
  * Represents a sequence of nodes selected by the user. The order matters.
  */
-export class SequenceSelection implements GraphSelection {
+export class SequenceSelection {
     private constructor(
         readonly nodeIds: readonly string[],
         private readonly nodeIdsSet: Set<string>,
@@ -48,7 +46,7 @@ export class SequenceSelection implements GraphSelection {
         return new SequenceSelection(this.nodeIds.filter(id => id !== nodeId), set);
     }
 
-    updateFromAction(action: SequenceSelectionAction): SequenceSelection {
+    update(action: SequenceSelectionAction): SequenceSelection {
         const { operation } = action;
 
         if (operation === 'clear')

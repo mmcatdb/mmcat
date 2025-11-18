@@ -1,5 +1,4 @@
-import { type GraphSelectEvent, type Graph } from './graphEngine';
-import { type GraphSelection } from './graphSelection';
+import { type GraphSelectEvent, type Graph } from '../graphEngine';
 
 export type FreeSelectionAction = {
     operation: 'set' | 'add' | 'remove' | 'toggle';
@@ -15,7 +14,7 @@ export type FreeSelectionAction = {
 /**
  * Represents a selection of nodes and edges in the graph. The order doesn't matter.
  */
-export class FreeSelection implements GraphSelection {
+export class FreeSelection {
     private constructor(
         readonly nodeIds: Set<string>,
         readonly edgeIds: Set<string>,
@@ -29,10 +28,18 @@ export class FreeSelection implements GraphSelection {
         return this.nodeIds.size === 0 && this.edgeIds.size === 0;
     }
 
+    get firstNodeId(): string | undefined {
+        return this.nodeIds.values().next().value;
+    }
+
+    get firstEdgeId(): string | undefined {
+        return this.edgeIds.values().next().value;
+    }
+
     /**
      * Handle high-level selection, e.g., in some UI menu.
      */
-    updateFromAction(action: FreeSelectionAction): FreeSelection {
+    update(action: FreeSelectionAction): FreeSelection {
         const { operation } = action;
 
         if (operation === 'clear') {
@@ -92,7 +99,7 @@ export class FreeSelection implements GraphSelection {
      */
     updateFromGraphEvent(event: GraphSelectEvent): FreeSelection {
         if (!event.isSpecialKey)
-        // The default case - we select exactly the given nodes.
+            // The default case - we select exactly the given nodes.
             return new FreeSelection(new Set(event.nodeIds), new Set(event.edgeIds));
 
         // A special key is pressed - we toggle the given nodes and edges.

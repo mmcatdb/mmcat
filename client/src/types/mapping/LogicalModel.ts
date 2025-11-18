@@ -1,6 +1,6 @@
 import { type DatasourceResponse, type DatasourceType, Datasource } from '../Datasource';
 import { ComplexProperty, Mapping, type MappingResponse, type ParentProperty } from '@/types/mapping';
-import { DynamicName, type Key, type Signature } from '../identifiers';
+import { type Key, type Signature } from '../identifiers';
 import { type Objex, type Morphism } from '@/types/schema';
 import { type ComparableMap } from '@/types/utils/ComparableMap';
 import { ComparableSet } from '@/types/utils/ComparableSet';
@@ -92,10 +92,6 @@ function getObjexesFromPath(path: ParentProperty, context: CategoryContext): Com
 
     path.subpaths.forEach(subpath => {
         findObjexesFromSignature(subpath.signature, context).forEach(objex => output.add(objex));
-
-        // FIXME This needs to be completely reimplemented.
-        // if (subpath.name instanceof DynamicName)
-        //     findObjexesFromSignature(subpath.name.signature, context).forEach(objex => output.add(objex));
 
         if (subpath instanceof ComplexProperty)
             getObjexesFromPath(subpath, context).forEach(objex => output.add(objex));

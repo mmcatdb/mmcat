@@ -1,14 +1,14 @@
 import { useEffect, useReducer, useState, type Dispatch } from 'react';
-import { FreeSelection, type FreeSelectionAction, PathSelection, type PathSelectionAction, SequenceSelection, type SequenceSelectionAction } from '../graph/graphSelection';
-import { type CategoryGraph, categoryToGraph } from '../category/categoryGraph';
-import { type GraphEvent } from '../graph/graphEngine';
+import { FreeSelection, type CategoryGraphSelection } from '../category/graph/selection';
+import { type CategoryGraph, type CategoryNode, categoryToGraph, traverseCategoryGraph } from '../category/graph/categoryGraph';
 import { type Category } from '@/types/schema';
-import { Mapping, RootProperty, type MappingInit, type MappingEdit, type AccessPath, traverseAccessPath, updateAccessPath } from '@/types/mapping';
+import { Mapping, RootProperty, type MappingInit, type MappingEdit, type AccessPath, traverseAccessPath, updateAccessPath, collectAccessPathSignature } from '@/types/mapping';
 import { type Key, type Name, type NamePath, type Signature, type SignatureId, TypedName } from '@/types/identifiers';
 import { type Datasource } from '@/types/Datasource';
 import { api } from '@/api';
 import { type Id } from '@/types/id';
 import { toast } from 'react-toastify';
+import { type GraphMoveEvent } from '../graph/graphEngine';
 
 export type MappingEditorInput = {
     /** The existing mapping to edit (or undefined if it's a new mapping). */
@@ -58,7 +58,7 @@ export type MappingEditorState = {
     graph: CategoryGraph;
     form: MappingEditorFormState;
     sync?: MappingEditorSync;
-    selection: FreeSelection | SequenceSelection | PathSelection;
+    selection: CategoryGraphSelection | undefined;
     /** Id of the component who owns the current selection. */
     selectionKey?: string;
     editorPhase: EditorPhase;
@@ -90,7 +90,7 @@ function createInitialState({ category, input }: { category: Category, input: Ma
         original,
         datasource: input.datasource,
         category,
-        // Convert category to graph for visualization
+        // Convert category to graph for visualization.
         graph: categoryToGraph(category),
         selection: FreeSelection.create(),
         form: {
@@ -106,10 +106,8 @@ function createInitialState({ category, input }: { category: Category, input: Ma
 export type MappingEditorDispatch = Dispatch<MappingEditorAction>;
 
 type MappingEditorAction =
-    | GraphAction
-    | SelectAction
-    | SequenceAction
-    | PathAction
+    | GraphMoveEvent
+    | SelectionAction
     | SetRootAction
     | FormAction
     | AccessPathAction
@@ -119,10 +117,9 @@ function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAc
     // console.log('REDUCE', action, state);
 
     switch (action.type) {
-    case 'graph': return graph(state, action);
-    case 'select': return select(state, action);
-    case 'sequence': return sequence(state, action);
-    case 'path': return path(state, action);
+    // Node movement doesn’t update state in mapping editor (it's handled by the graph engine).
+    case 'move': return state;
+    case 'selection': return selection(state, action);
     case 'setRoot': return root(state, action);
     case 'form': return form(state, action);
     case 'accessPath': return accessPath(state, action);
@@ -136,76 +133,32 @@ function mappingEditorReducer(state: MappingEditorState, action: MappingEditorAc
     }
 }
 
-type GraphAction = { type: 'graph', event: GraphEvent };
+type SelectionAction = {
+    type: 'selection';
+    selection: CategoryGraphSelection | undefined;
+    selectionKey?: string;
+};
 
-/**
- * Handles graph-related actions (e.g., node movement, selection).
- */
-function graph(state: MappingEditorState, { event }: GraphAction): MappingEditorState {
-    switch (event.type) {
-    case 'move':
-        // Node movement doesn’t update state in mapping editor (handled by graph engine).
-        return state;
-    case 'select': {
-        // Default free selection handling
-        if (state.selection instanceof FreeSelection) {
-            const updatedSelection = state.selection.updateFromGraphEvent(event);
-            return { ...state, selection: updatedSelection };
-        }
+function selection(state: MappingEditorState, { selection, selectionKey }: SelectionAction): MappingEditorState {
+    if (!selection) {
+        if (state.selectionKey !== selectionKey)
+            // Only the component that owns the selection can clear it. Howevever, starting a new selection is fine.
+            return state;
 
-        // Path selection would be a nightmare - we would have to compute here the whole path options and whether we can actually insert the node / edge ...
-        // TODO Maybe disable the selection box in that case?
-
-        return state;
+        selectionKey = undefined;
     }
-    }
-}
-
-/**
- * Action for free selection operations.
- */
-type SelectAction = { type: 'select' } & FreeSelectionAction;
-
-/**
- * Handles free selection actions (e.g., node selection).
- */
-function select(state: MappingEditorState, action: SelectAction): MappingEditorState {
-    if (!(state.selection instanceof FreeSelection) || state.editorPhase !== EditorPhase.SelectRoot)
-        return state;
-
-    const updatedSelection = state.selection.updateFromAction(action);
-
-    // Limit to one node
-    if (updatedSelection.nodeIds.size > 1) {
-        const firstNode = updatedSelection.nodeIds.values().next().value!;
-        return { ...state, selection: FreeSelection.create([ firstNode ]) };
+    else {
+        // Some graph events don't respect the selectionKey - in that case, we continue with the previous one.
+        selectionKey = selectionKey ?? state.selectionKey;
     }
 
-    return { ...state, selection: updatedSelection };
-}
+    if (selection instanceof FreeSelection) {
+        // Limit to one node.
+        if (selection.firstNodeId)
+            selection = FreeSelection.create([ selection.firstNodeId ]);
+    };
 
-type SequenceAction = { type: 'sequence' } & SequenceSelectionAction;
-
-/**
- * Handles sequence selection actions.
- */
-function sequence(state: MappingEditorState, action: SequenceAction): MappingEditorState {
-    if (!(state.selection instanceof SequenceSelection))
-        return state;
-
-    return { ...state, selection: state.selection.updateFromAction(action) };
-}
-
-type PathAction = { type: 'path' } & PathSelectionAction;
-
-/**
- * Handles path selection actions.
- */
-function path(state: MappingEditorState, action: PathAction): MappingEditorState {
-    if (!(state.selection instanceof PathSelection) || state.editorPhase !== EditorPhase.BuildPath)
-        return state;
-
-    return { ...state, selection: state.selection.updateFromAction(action) };
+    return { ...state, selection, selectionKey };
 }
 
 type SetRootAction = {
@@ -227,7 +180,7 @@ function root(state: MappingEditorState, action: SetRootAction): MappingEditorSt
             rootObjexKey: action.key,
             primaryKey: ids.length === 1 ? ids[0] : undefined,
         },
-        selection: FreeSelection.create(),
+        selection: undefined,
         editorPhase: EditorPhase.BuildPath,
     };
 }
@@ -257,11 +210,6 @@ type AccessPathAction = {
 } | {
     operation: 'delete';
 } | {
-    operation: 'selection';
-    selectionKey: string;
-    /** If defined, the selection should start. */
-    selection: PathSelection | undefined;
-} | {
     operation: 'update';
     accessPath: AccessPath;
 } | {
@@ -273,17 +221,6 @@ type AccessPathAction = {
 function accessPath(state: MappingEditorState, action: AccessPathAction): MappingEditorState {
     if (action.operation === 'select')
         return { ...state, selectedPropertyPath: action.path, selection: FreeSelection.create() };
-
-    if (action.operation === 'selection') {
-        // Starting selection doesn't require key check - we just overwrite the previous selection.
-        if (action.selection)
-            return { ...state, selection: action.selection, selectionKey: action.selectionKey };
-
-        if (state.selectionKey !== action.selectionKey)
-            return state;
-
-        return { ...state, selection: FreeSelection.create(), selectionKey: undefined };
-    }
 
     if (!state.selectedPropertyPath)
         throw new Error('No property selected in mapping editor');
@@ -335,7 +272,6 @@ function accessPath(state: MappingEditorState, action: AccessPathAction): Mappin
                 isRoot: false,
             }),
         },
-        selection: FreeSelection.create(),
         // The selected property path didn't change at all, so we keep it.
     };
 }
@@ -361,4 +297,19 @@ function createMappingEdit(state: MappingEditorState): MappingEdit {
         kindName: state.form.kindName,
         accessPath: RootProperty.fromEditable(state.form.accessPath).toServer(),
     };
+}
+
+/**
+ * Finds node corresponding to the schema objex corresponding to the selected property (or its parent).
+ * @param useParent - If true, we are interested in the parent property.
+ */
+export function findSelectedNode(state: MappingEditorState, useParent = false): CategoryNode | undefined {
+    if (!state.selectedPropertyPath)
+        return;
+
+    const toPath = useParent ? state.selectedPropertyPath.pop() : state.selectedPropertyPath;
+    const pathFromRoot = collectAccessPathSignature(state.form.accessPath, toPath);
+
+    const rootNode = state.graph.nodes.get(state.form.rootObjexKey!.toString())!;
+    return traverseCategoryGraph(state.graph, rootNode, pathFromRoot);
 }

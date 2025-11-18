@@ -4,7 +4,7 @@ import { FaSave, FaSpinner } from 'react-icons/fa';
 import { api } from '@/api';
 import { Category } from '@/types/schema';
 import { onSuccess } from '@/types/api/result';
-import { detectUnsavedChanges } from '@/pages/category/CategoryEditorPage';
+import { getUnsavedChanges } from '@/pages/category/CategoryEditorPage';
 import { type CategoryEditorState } from './useCategoryEditor';
 
 type SaveState = {
@@ -38,7 +38,7 @@ export function SaveProvider({ children, categoryState }: SaveProviderProps) {
 
             // Category changes
             if (categoryState)
-                unsaved = unsaved || detectUnsavedChanges(categoryState);
+                unsaved = unsaved || getUnsavedChanges(categoryState);
 
             setHasUnsavedChanges(unsaved);
         };
