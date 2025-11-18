@@ -9,7 +9,7 @@ export class Key {
         return new Key(input);
     }
 
-    static createNew(value: number): Key {
+    static fromNumber(value: number): Key {
         return new Key(value);
     }
 

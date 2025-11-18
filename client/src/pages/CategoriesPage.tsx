@@ -45,10 +45,7 @@ export function CategoriesPage() {
                         Schema Categories
                     </h1>
                     <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button
-                            onClick={isVisible ? dismissBanner : restoreBanner}
-                            className='text-primary-500 hover:text-primary-700 transition'
-                        >
+                        <button onClick={isVisible ? dismissBanner : restoreBanner} className='text-primary-500 hover:text-primary-700 transition'>
                             <IoInformationCircleOutline className='size-6' />
                         </button>
                     </Tooltip>
@@ -96,10 +93,7 @@ export function CategoriesPage() {
                     startContent={<HiMiniMagnifyingGlass className='size-5 text-default-400' />}
                     endContent={
                         searchTerm && (
-                            <button
-                                onClick={() => setSearchTerm('')}
-                                className='text-default-500 hover:text-default-700 transition'
-                            >
+                            <button onClick={() => setSearchTerm('')} className='text-default-500 hover:text-default-700 transition'>
                                 <HiXMark className='size-5' />
                             </button>
                         )
@@ -246,11 +240,7 @@ export function CreateSchemaModal({ isOpen, onClose, onSubmit }: CreateSchemaMod
                     <Button variant='light' onPress={close}>
                         Cancel
                     </Button>
-                    <Button
-                        color='primary'
-                        onPress={submit}
-                        isDisabled={!label.trim()}
-                    >
+                    <Button color='primary' onPress={submit} isDisabled={!label.trim()}>
                         Create Schema
                     </Button>
                 </ModalFooter>
@@ -269,22 +259,22 @@ export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCat
         <InfoBanner className={className} dismissBanner={dismissBanner}>
             <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
             <p className='text-sm'>
-                A <strong>Schema Category</strong> represents the structure of your data at a high level.
+                A <span className='font-bold'>Schema Category</span> represents the structure of your data at a high level.
                 It is a <em>project</em>, grouping everything related to a specific conceptual schema.
                 Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
             </p>
             <ul className='mt-3 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Conceptual Schema:</strong> Defines the data model without focusing on storage details.
+                    <span className='font-bold'>Conceptual Schema:</span> Defines the data model without focusing on storage details.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Instance Category:</strong> Holds concrete data based on the schema.
+                    <span className='font-bold'>Instance Category:</span> Holds concrete data based on the schema.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Logical Model:</strong> Defines how data is stored in tables, documents, or other structures.
+                    <span className='font-bold'>Logical Model:</span> Defines how data is stored in tables, documents, or other structures.
                 </li>
             </ul>
             <p className='text-sm mt-3'>

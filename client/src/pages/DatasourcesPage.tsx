@@ -120,22 +120,22 @@ function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBann
         <InfoBanner className={className} dismissBanner={dismissBanner}>
             <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
             <p className='text-sm'>
-                A <strong>Datasource</strong> represents where your data is stored. You can <strong>import from</strong> or <strong>export to</strong> different sources, including databases and files.
+                A <span className='font-bold'>Datasource</span> represents where your data is stored. You can <span className='font-bold'>import from</span> or <span className='font-bold'>export to</span> different sources, including databases and files.
             </p>
 
             <ul className='mt-3 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Databases:</strong> MongoDB, PostgreSQL, Neo4j.
+                    <span className='font-bold'>Databases:</span> MongoDB, PostgreSQL, Neo4j.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Files:</strong> CSV, JSON, JSON-LD.
+                    <span className='font-bold'>Files:</span> CSV, JSON, JSON-LD.
                 </li>
             </ul>
 
             <p className='text-sm mt-3'>
-                Click <strong>&quot;+ Add Datasource&quot;</strong> to connect a new source. Once added, it will appear in the table below.
+                Click <span className='font-bold'>&quot;+ Add Datasource&quot;</span> to connect a new source. Once added, it will appear in the table below.
             </p>
         </InfoBanner>
     );

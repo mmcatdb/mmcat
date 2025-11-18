@@ -176,14 +176,16 @@ export class Evocat {
 
     /**
      * Creates a completely new objex with a key that has never been seen before.
+     * @returns The key.
      */
-    createObjex(def: ObjexDefinition) {
+    createObjex(def: ObjexDefinition): Key {
         const key = this._category.createKey();
         const schema = SchemaObjex.createNew(key, def);
         const metadata = new MetadataObjex(def.label, def.position);
         const operation = new CreateObjex(schema, metadata);
 
         this.addOperation(operation);
+        return key;
     }
 
     deleteObjex(key: Key) {
@@ -218,13 +220,18 @@ export class Evocat {
         // TODO Something here? Or is this enough?
     }
 
-    createMorphism(def: MorphismDefinition) {
+    /**
+     * Creates a completely new morphism with a signature that has never been seen before.
+     * @returns The signature.
+     */
+    createMorphism(def: MorphismDefinition): Signature {
         const signature = this._category.createSignature();
         const schema = SchemaMorphism.createNew(signature, def);
         const metadata = new MetadataMorphism(def.label);
         const operation = new CreateMorphism(schema, metadata);
 
         this.addOperation(operation);
+        return signature;
     }
 
     deleteMorphism(signature: Signature) {

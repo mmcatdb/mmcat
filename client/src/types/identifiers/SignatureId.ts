@@ -36,6 +36,10 @@ export class SignatureId {
         return this.emptyInstance;
     }
 
+    get isEmpty(): boolean {
+        return this === SignatureId.empty();
+    }
+
     static union(ids: SignatureId[]): SignatureId {
         const union: Signature[] = [];
         ids.forEach(id => {
@@ -70,6 +74,6 @@ export class SignatureId {
     }
 
     toString(): string {
-        return [ ...this._signatures.values() ].map(s => s.toString()).join(', ');
+        return '(' + [ ...this._signatures.values() ].map(s => s.toString()).join(', ') + ')';
     }
 }

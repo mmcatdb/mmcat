@@ -56,7 +56,7 @@ export class Category implements Entity {
 
     private keyProvider = new UniqueIdProvider<Key>({
         function: key => key.value,
-        inversion: value => Key.createNew(value),
+        inversion: value => Key.fromNumber(value),
     });
 
     createKey(): Key {

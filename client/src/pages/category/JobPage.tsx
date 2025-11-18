@@ -73,22 +73,22 @@ export function JobPage() {
 
             <div className='border rounded-lg p-4 border-default-300 bg-default-50'>
                 <p className='mb-1'>
-                    <strong>ID:</strong> {job.id}
+                    <span className='font-bold'>ID:</span> {job.id}
                 </p>
                 <p className='mb-1'>
-                    <strong>Run ID:</strong> {job.runId}
+                    <span className='font-bold'>Run ID:</span> {job.runId}
                 </p>
                 <p className='mb-1'>
-                    <strong>Index:</strong> {job.index}
+                    <span className='font-bold'>Index:</span> {job.index}
                 </p>
                 <p className='mb-1'>
-                    <strong>State:</strong>
+                    <span className='font-bold'>State:</span>
                     <span className={cn('m-2 px-3 py-1 rounded-full font-semibold', jobStateStyles[job.state].bg)}>
                         {job.state}
                     </span>
                 </p>
                 <p>
-                    <strong>Created At:</strong> {new Date(job.createdAt).toString()}
+                    <span className='font-bold'>Created At:</span> {new Date(job.createdAt).toString()}
                 </p>
             </div>
 

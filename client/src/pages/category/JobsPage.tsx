@@ -41,8 +41,8 @@ export function JobsPage() {
         // Compare states and update if needed
         setGroupedJobs(rawPrev => {
             const prev = rawPrev ?? {};
-            const hasChanges = detectChanges(prev, grouped);
-            return hasChanges ? grouped : prev;
+            const isChanged = getChanges(prev, grouped);
+            return isChanged ? grouped : prev;
         });
     }
 
@@ -114,7 +114,7 @@ export function JobsPage() {
 /**
  * Compare old and new job groups for differences.
 */
-function detectChanges(oldGroups: Record<Id, Job[]>, newGroups: Record<Id, Job[]>) {
+function getChanges(oldGroups: Record<Id, Job[]>, newGroups: Record<Id, Job[]>) {
     for (const runId in newGroups) {
         const oldJobs = oldGroups[runId] || [];
         const newJobs = newGroups[runId];
@@ -174,16 +174,16 @@ function RunRow({ runId, jobs }: { runId: Id, jobs: Job[] }) {
                             content={
                                 <div>
                                     <p>
-                                        <strong>ID:</strong> {job.id}
+                                        <span className='font-bold'>ID:</span> {job.id}
                                     </p>
                                     <p>
-                                        <strong>Step:</strong> #{job.index}
+                                        <span className='font-bold'>Step:</span> #{job.index}
                                     </p>
                                     <p>
-                                        <strong>State:</strong> {job.state}
+                                        <span className='font-bold'>State:</span> {job.state}
                                     </p>
                                     <p>
-                                        <strong>Created At:</strong> {new Date(job.createdAt).toString()}
+                                        <span className='font-bold'>Created At:</span> {new Date(job.createdAt).toString()}
                                     </p>
                                 </div>
                             }
@@ -212,21 +212,21 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
         <InfoBanner className={className} dismissBanner={dismissBanner}>
             <h2 className='text-lg font-semibold mb-2'>Understanding Jobs & Runs</h2>
             <p className='text-sm'>
-                A <strong>Job</strong> is a single execution of a transformation algorithm, while a <strong>Run</strong> is a group of related Jobs processed together.
+                A <span className='font-bold'>Job</span> is a single execution of a transformation algorithm, while a <span className='font-bold'>Run</span> is a group of related Jobs processed together.
             </p>
 
             <ul className='mt-3 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Job:</strong> Executes a transformation (e.g., importing/exporting data).
+                    <span className='font-bold'>Job:</span> Executes a transformation (e.g., importing/exporting data).
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Run:</strong> A batch of Jobs executed sequentially.
+                    <span className='font-bold'>Run:</span> A batch of Jobs executed sequentially.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Status:</strong> Jobs can be <Chip size='sm'>Ready</Chip><Chip size='sm'>Running</Chip><Chip size='sm'>Finished</Chip><Chip size='sm'>Failed</Chip> or <Chip size='sm'>Disabled</Chip>.
+                    <span className='font-bold'>Status:</span> Jobs can be <Chip size='sm'>Ready</Chip><Chip size='sm'>Running</Chip><Chip size='sm'>Finished</Chip><Chip size='sm'>Failed</Chip> or <Chip size='sm'>Disabled</Chip>.
                 </li>
             </ul>
 
@@ -239,12 +239,12 @@ export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) 
             <ul className='space-y-1 text-sm'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Manage Jobs:</strong> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.
+                    <span className='font-bold'>Manage Jobs:</span> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
 
-                    <strong>Create a New Run & Jobs:</strong>
+                    <span className='font-bold'>Create a New Run & Jobs:</span>
                     Go to the
                     <span>
                         <Link

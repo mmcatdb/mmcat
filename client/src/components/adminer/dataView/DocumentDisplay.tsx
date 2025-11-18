@@ -41,7 +41,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
             <div className='group leading-5'>
                 {!hideProperty && property !== undefined && (
                     <span className='text-secondary-600'>
-                        <strong className='mr-3'>{property}:</strong>
+                        <span className='mr-3 font-bold'>{property}:</span>
                     </span>
                 )}
 
@@ -78,7 +78,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
             <div className='group leading-5'>
                 {!hideProperty && property !== undefined && (
                     <span className='text-secondary-600'>
-                        <strong className='mr-3'>{property}:</strong>
+                        <span className='mr-3 font-bold'>{property}:</span>
                     </span>
                 )}
 
@@ -114,7 +114,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
         <div className='leading-5'>
             {!hideProperty && property !== undefined && (
                 <span className='text-secondary-600'>
-                    <strong className='mr-3'>{property}:</strong>
+                    <span className='mr-3 font-bold'>{property}:</span>
                 </span>
             )}
 

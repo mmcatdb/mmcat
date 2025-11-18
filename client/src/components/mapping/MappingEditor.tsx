@@ -1,8 +1,8 @@
-import { MappingEditorGraph } from './MappingEditorGraph';
-import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch, type MappingEditorInput } from './useMappingEditor';
+import { CategoryGraphDisplay } from '../category/graph/CategoryGraphDisplay';
+import { type MappingEditorState, EditorPhase, useMappingEditor, type MappingEditorDispatch, type MappingEditorInput, findSelectedNode } from './useMappingEditor';
 import { type Category } from '@/types/schema';
-import { type FreeSelection } from '../graph/graphSelection';
-import { collectAccessPathSignature, findIndexSubpaths, findTypedSubpath, getAccessPathType, traverseAccessPath, type AccessPath, type Mapping } from '@/types/mapping';
+import { type FreeSelection } from '../graph/selection';
+import { findIndexSubpaths, findTypedSubpath, getAccessPathType, traverseAccessPath, type AccessPath, type Mapping } from '@/types/mapping';
 import { Button, Input, Select, SelectItem } from '@heroui/react';
 import { PlusIcon, CheckCircleIcon, XMarkIcon, MinusIcon } from '@heroicons/react/20/solid';
 import { useCallback, useMemo, useState } from 'react';
@@ -10,11 +10,13 @@ import { DynamicName, IndexName, type Name, type NamePath, Signature, StringName
 import { PencilIcon } from '@heroicons/react/24/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { AccessPathDisplay, AccessPathPreview } from './AccessPathDisplay';
-import { traverseCategoryGraph } from '../category/categoryGraph';
+import { traverseCategoryGraph } from '../category/graph/categoryGraph';
 import { NameInput } from './NameInput';
-import { SignatureInput } from './SignatureInput';
+import { SignatureInput } from '../category/graph/SignatureInput';
 import { SpinnerButton } from '../common';
 import { PropertyTypeInput } from './PropertyTypeInput';
+import { GraphHighlights } from '../category/graph/highlights';
+import { DefaultPathGraphProvider } from '../category/graph/selection';
 
 type MappingEditorProps = {
     /** The schema category to which the mapping belongs. */
@@ -30,6 +32,13 @@ type MappingEditorProps = {
  */
 export function MappingEditor({ category, input, onSave, onCancel }: MappingEditorProps) {
     const { state, dispatch, isFetching } = useMappingEditor(category, input, onSave);
+
+    const graphHighlights = useMemo(() => {
+        const selectedNode = findSelectedNode(state);
+        return selectedNode ? GraphHighlights.create([ selectedNode.id ]) : undefined;
+        // This is ok since nothing else can't change without changing the selected path.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ state.selectedPropertyPath ]);
 
     return (
         <div className='relative flex h-[calc(100vh-40px)]'>
@@ -98,7 +107,13 @@ export function MappingEditor({ category, input, onSave, onCancel }: MappingEdit
             </div>
 
             {/* Main Graph Area */}
-            <MappingEditorGraph state={state} dispatch={dispatch} className='grow' />
+            <CategoryGraphDisplay
+                graph={state.graph}
+                selection={state.selection}
+                dispatch={dispatch}
+                highlights={graphHighlights}
+                className='grow'
+            />
         </div>
     );
 }
@@ -115,16 +130,11 @@ function RootSelectionPanel({ state, dispatch }: StateDispatchProps) {
     const selection = state.selection as FreeSelection;
     const { graph } = state;
 
-    const selectedNode = selection.nodeIds.size > 0
-        ? graph.nodes.get([ ...selection.nodeIds ][0])
-        : null;
+    const selectedNode = selection.firstNodeId ? graph.nodes.get(selection.firstNodeId) : undefined;
 
     function setRoot() {
-        if (!selection.isEmpty) {
-            const rootNodeId = selection.nodeIds.values().next().value!;
-            const rootNode = graph.nodes.get(rootNodeId)!;
-            dispatch({ type: 'setRoot', key: rootNode.schema.key });
-        }
+        if (selectedNode)
+            dispatch({ type: 'setRoot', key: selectedNode.schema.key });
     }
 
     return (
@@ -151,7 +161,8 @@ function RootSelectionPanel({ state, dispatch }: StateDispatchProps) {
                             isIconOnly
                             size='sm'
                             variant='light'
-                            onPress={() => dispatch({ type: 'select', operation: 'clear', range: 'nodes' })}
+                            // FIXME Replace with a proper action.
+                            onPress={() => dispatch({ type: 'selection', selection: selection.update({ operation: 'clear', range: 'nodes' }) })}
                         >
                             <XMarkIcon className='size-5' />
                         </Button>
@@ -179,27 +190,25 @@ function RootSelectionPanel({ state, dispatch }: StateDispatchProps) {
 }
 
 function PrimaryKeySelect({ state, dispatch }: StateDispatchProps) {
-    const { graph } = state;
-
-    const rootObject = graph.nodes.get(state.form.rootObjexKey!.toString())!;
+    const rootObjex = state.category.getObjex(state.form.rootObjexKey!);
 
     const options = useMemo(() => {
-        return rootObject.schema.ids.signatureIds.map((id, index) => ({
+        return rootObjex.schema.ids.signatureIds.map((id, index) => ({
             key: String(index),
             label: id.toString(),
         }));
-    }, [ rootObject ]);
+    }, [ rootObjex ]);
 
     const primaryKey = state.form.primaryKey;
 
     const selectedKeys = useMemo(() => {
         const output = new Set<string>();
         if (primaryKey) {
-            const index = rootObject.schema.ids.signatureIds.findIndex(id => id.equals(primaryKey));
+            const index = rootObjex.schema.ids.signatureIds.findIndex(id => id.equals(primaryKey));
             output.add(String(index));
         }
         return output;
-    }, [ rootObject, primaryKey ]);
+    }, [ rootObjex, primaryKey ]);
 
     return (
         <Select
@@ -211,7 +220,7 @@ function PrimaryKeySelect({ state, dispatch }: StateDispatchProps) {
                 if (key === undefined)
                     return;
 
-                const id = rootObject.schema.ids.signatureIds[Number(key)];
+                const id = rootObjex.schema.ids.signatureIds[Number(key)];
                 dispatch({ type: 'form', field: 'primaryKey', value: id });
             }}
         >
@@ -330,7 +339,19 @@ function CreateProperty({ state, dispatch, parent, onClose }: StateDispatchProps
     const [ isNameTouched, setIsNameTouched ] = useState(false);
     const [ signature, setSignature ] = useState(Signature.empty());
 
-    const suggestedName = useMemo(() => suggestName(signature, state), [ signature, state ]);
+    // This is ok since nothing else can't change without changing the selected path.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const selectedNode = useMemo(() => findSelectedNode(state)!, [ state.form.accessPath, state.selectedPropertyPath ]);
+
+    const suggestedName = useMemo(() => {
+        if (signature.isEmpty)
+            return '';
+
+        const childNode = traverseCategoryGraph(state.graph, selectedNode, signature);
+        return state.datasource.createValidPropertyName(childNode.metadata.label);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ signature, selectedNode ]);
+
     const validName = isNameTouched ? state.datasource.createValidPropertyName(name) : suggestedName;
     // When creating property, we allow only StringName for simplicity. The user can always change it later.
     const nameObject = validName ? new StringName(validName) : undefined;
@@ -357,11 +378,14 @@ function CreateProperty({ state, dispatch, parent, onClose }: StateDispatchProps
             />
 
             <SignatureInput
+                selection={state.selection}
+                selectionKey={state.selectionKey}
+                pathGraphProvider={new DefaultPathGraphProvider(state.category)}
+                dispatch={dispatch}
                 value={signature}
                 onChange={setSignature}
+                fromNode={selectedNode}
                 label='Path'
-                state={state}
-                dispatch={dispatch}
             />
         </div>
 
@@ -377,18 +401,6 @@ function CreateProperty({ state, dispatch, parent, onClose }: StateDispatchProps
     </>);
 }
 
-function suggestName(signature: Signature, state: MappingEditorState): string | undefined {
-    if (signature.isEmpty)
-        return '';
-
-    const { datasource, graph, form, selectedPropertyPath } = state;
-
-    const signatureToSelected = collectAccessPathSignature(form.accessPath, selectedPropertyPath!);
-    const rootNode = graph.nodes.get(form.rootObjexKey!.toString())!;
-    const childNode = traverseCategoryGraph(graph, rootNode, signatureToSelected.concatenate(signature));
-    return datasource.createValidPropertyName(childNode.metadata.label);
-}
-
 function UpdateProperty({ state, dispatch, original, onClose }: StateDispatchProps & { original: AccessPath, onClose: () => void }) {
     const [ property, setProperty ] = useState(original);
 
@@ -396,6 +408,10 @@ function UpdateProperty({ state, dispatch, original, onClose }: StateDispatchPro
         const parentPath = state.selectedPropertyPath!.pop();
         return traverseAccessPath(state.form.accessPath, parentPath);
     }, [ state.form.accessPath, state.selectedPropertyPath ]);
+
+    // This is ok since nothing else can't change without changing the selected path.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const parentNode = useMemo(() => findSelectedNode(state, true)!, [ state.form.accessPath, state.selectedPropertyPath ]);
 
     function updateProperty() {
         dispatch({ type: 'accessPath', operation: 'update', accessPath: property });
@@ -458,12 +474,14 @@ function UpdateProperty({ state, dispatch, original, onClose }: StateDispatchPro
             )}
 
             <SignatureInput
-                isFromParent
+                selection={state.selection}
+                selectionKey={state.selectionKey}
+                pathGraphProvider={new DefaultPathGraphProvider(state.category)}
+                dispatch={dispatch}
                 value={property.signature}
                 onChange={setSignature}
+                fromNode={parentNode}
                 label='Path'
-                state={state}
-                dispatch={dispatch}
             />
 
             {indexSubpaths.length !== 0 && (
@@ -478,11 +496,11 @@ function UpdateProperty({ state, dispatch, original, onClose }: StateDispatchPro
 
                     <div className='flex-1' />
 
-                    <Button className='min-w-10 px-0' onPress={() => incrementDimension(false)} isDisabled={indexSubpaths.length <= 1}>
+                    <Button isIconOnly onPress={() => incrementDimension(false)} isDisabled={indexSubpaths.length <= 1}>
                         <MinusIcon className='size-5' />
                     </Button>
 
-                    <Button className='min-w-10 px-0' onPress={() => incrementDimension(true)}>
+                    <Button isIconOnly onPress={() => incrementDimension(true)}>
                         <PlusIcon className='size-5' />
                     </Button>
                 </div>

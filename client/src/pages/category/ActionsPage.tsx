@@ -240,23 +240,23 @@ export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerP
 
             {/* Info Content */}
             <p className='text-sm'>
-                An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
-                Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
-                For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
+                An <span className='font-bold'>Action</span> is something that <span className='font-bold'>spawns Jobs</span>.
+                Think of it as a <span className='font-bold'>trigger</span> for executing transformations or data processing tasks.
+                For example, if you want to <span className='font-bold'>export data to PostgreSQL</span>, you create an <span className='font-bold'>Action</span> to start the process.
             </p>
 
             <ul className='mt-3 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Action:</strong> Spawns jobs (e.g., exporting data to PostgreSQL).
+                    <span className='font-bold'>Action:</span> Spawns jobs (e.g., exporting data to PostgreSQL).
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Job:</strong> A single execution of a transformation algorithm.
+                    <span className='font-bold'>Job:</span> A single execution of a transformation algorithm.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Run:</strong> A collection of multiple Job executions (similar to a CI/CD pipeline).
+                    <span className='font-bold'>Run:</span> A collection of multiple Job executions (similar to a CI/CD pipeline).
                 </li>
             </ul>
 

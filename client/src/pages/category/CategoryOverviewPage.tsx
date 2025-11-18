@@ -41,10 +41,10 @@ export function CategoryOverviewPage() {
                         Within this category, you can:
                     </p>
                     <ul className='list-disc pl-6 space-y-2 text-default-700'>
-                        <li>Build a <strong>Schema Category Graph</strong> in the Editor to define objects and relationships.</li>
-                        <li>Create <strong>Mappings</strong> to connect your schema to data sources for import/export jobs.</li>
-                        <li>Manage <strong>Datasources</strong> (e.g., MongoDB, PostgreSQL) to link external databases.</li>
-                        <li>Define <strong>Actions</strong> and run <strong>Jobs</strong> to transform and process data.</li>
+                        <li>Build a <span className='font-bold'>Schema Category Graph</span> in the Editor to define objects and relationships.</li>
+                        <li>Create <span className='font-bold'>Mappings</span> to connect your schema to data sources for import/export jobs.</li>
+                        <li>Manage <span className='font-bold'>Datasources</span> (e.g., MongoDB, PostgreSQL) to link external databases.</li>
+                        <li>Define <span className='font-bold'>Actions</span> and run <span className='font-bold'>Jobs</span> to transform and process data.</li>
                     </ul>
                     <p className='text-default-600 text-sm'>
                         Note: Changes to the graph that could break existing mappings are restricted. Future updates will include procedures to handle such breaking changes safely.

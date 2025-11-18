@@ -1,6 +1,7 @@
-import type { Signature } from '../identifiers';
-import { Cardinality, type Objex, type Max, type Min, type Morphism } from '.';
-import { type DatasourceSpecs } from '../Datasource';
+import type { Signature } from '@/types/identifiers';
+import { Cardinality, type Objex, type Max, type Min, type Morphism, type Category } from '@/types/schema';
+import { type DatasourceSpecs } from '@/types/Datasource';
+import { getEdgeId, getNodeId, getNodeKey } from '@/components/category/graph/categoryGraph';
 
 /**
  * Nodes and edges correspond to the objexes and morphisms from the category.
@@ -12,22 +13,14 @@ export type PathGraph = {
     edges: Map<string, PathEdge>;
 };
 
-export type PathNode = {
+type PathNode = {
     id: string;
     pathCount: PathCount;
-    /** If defined, there is a path from the source objex to this one. It might be ambiguous (in that case, only one of them is listed here). */
-    pathSegmentTo?: PathSegment;
     /** If this node will ever be found ambiguous, these ones will also be marked as such. */
     dependentNodes: PathNode[];
+    /** If defined, there is a path from the source objex to this one. It might be ambiguous (in that case, only one of them is listed here). */
+    pathSegmentTo?: PathSegment;
 };
-
-function createPathNode(objex: Objex): PathNode {
-    return {
-        id: objex.key.toString(),
-        pathCount: PathCount.None,
-        dependentNodes: [],
-    };
-}
 
 /** How many paths from the source there are to this one. The default options is None. */
 export enum PathCount {
@@ -36,14 +29,22 @@ export enum PathCount {
     Many = 'many',
 }
 
-type Path = {
+function createPathNode(objex: Objex): PathNode {
+    return {
+        id: getNodeId(objex),
+        pathCount: PathCount.None,
+        dependentNodes: [],
+    };
+}
+
+type CategoryPath = {
     /** The full signature from the source node to here. */
     signature: Signature;
     min: Min;
     max: Max;
 };
 
-function extendPath(path: Path, second: Path): Path {
+function extendPath(path: CategoryPath, second: CategoryPath): CategoryPath {
     return {
         signature: path.signature.concatenate(second.signature),
         min: path.min === Cardinality.One && second.min === Cardinality.One ? Cardinality.One : Cardinality.Zero,
@@ -51,11 +52,10 @@ function extendPath(path: Path, second: Path): Path {
     };
 }
 
-export type PathEdge = {
+type PathEdge = {
     id: string;
     from: string;
     to: string;
-
     /**
      * If defined, this is a direction of at least one traversable path that uses this edge. However, there might be multiple paths.
      * The edge is traversable if there is only one such path. I.e., one of its nodes is {@link PathCount.One} and the other is not {@link PathCount.None}.
@@ -65,25 +65,37 @@ export type PathEdge = {
 
 function createPathEdge(morphism: Morphism): PathEdge {
     return {
-        id: morphism.signature.toString(),
-        from: morphism.from.key.toString(),
-        to: morphism.to.key.toString(),
+        id: getEdgeId(morphism),
+        from: getNodeId(morphism.from),
+        to: getNodeId(morphism.to),
     };
 }
 
 /** Corresponds to a specific edge in the graph. There might be multiple segments for the same edge. */
 type PathSegment = {
     edge: PathEdge;
-    from: Objex;
-    to: Objex;
-    fromNode: PathNode;
+    from: PathNode;
+    to: PathNode;
+    prevSegment: PathSegment | undefined;
+    fullPath: CategoryPath;
 
     markTraversable(): void;
-
-    fullPath: Path;
-    prevSegment: PathSegment | undefined;
-    dependentSegments: PathSegment[];
 };
+
+export type PathGraphProvider = {
+    computePathGraph(sourceNodeId: string): PathGraph;
+};
+
+export class DefaultPathGraphProvider implements PathGraphProvider {
+    constructor(
+        private readonly category: Category,
+    ) {}
+
+    computePathGraph(sourceNodeId: string): PathGraph {
+        const sourceObjex = this.category.getObjex(getNodeKey(sourceNodeId));
+        return computePathsFromObjex(sourceObjex);
+    }
+}
 
 export function computePathsFromObjex(source: Objex, filterFunction?: FilterFunction): PathGraph {
     const marker = new PathMarker(source, filterFunction);
@@ -91,7 +103,7 @@ export function computePathsFromObjex(source: Objex, filterFunction?: FilterFunc
     marker.markPathsFromSourceObjex();
 
     return {
-        sourceNodeId: source.key.toString(),
+        sourceNodeId: getNodeId(source),
         nodes: marker.nodes,
         edges: marker.edges,
     };
@@ -100,53 +112,69 @@ export function computePathsFromObjex(source: Objex, filterFunction?: FilterFunc
 class PathMarker {
     // It's actually important this is a stack and not a queue, because the paths has to be traversed in one go.
     private readonly stack: PathSegment[] = [];
+    private readonly sourceNode: PathNode;
 
     constructor(
         private readonly sourceObjex: Objex,
         private readonly filterFunction?: FilterFunction,
-    ) {}
+    ) {
+        this.sourceNode = this.getNode(sourceObjex);
+    }
 
     readonly nodes = new Map<string, PathNode>();
+    readonly objexes = new Map<string, Objex>();
 
     private getNode(objex: Objex): PathNode {
-        const id = objex.key.toString();
+        const id = getNodeId(objex);
 
         let node = this.nodes.get(id);
         if (!node) {
             node = createPathNode(objex);
             this.nodes.set(id, node);
+            this.objexes.set(id, objex);
         }
 
         return node;
     }
 
+    private getObjex(node: PathNode): Objex {
+        return this.objexes.get(node.id)!;
+    }
+
     readonly edges = new Map<string, PathEdge>();
+    readonly morphisms = new Map<string, Morphism>();
 
     private getEdge(morphism: Morphism): PathEdge {
-        const id = morphism.signature.toString();
+        const id = getEdgeId(morphism);
 
         let edge = this.edges.get(id);
         if (!edge) {
             edge = createPathEdge(morphism);
             this.edges.set(id, edge);
+            this.morphisms.set(id, morphism);
         }
 
         return edge;
     }
 
+    private getMorphism(edge: PathEdge): Morphism {
+        return this.morphisms.get(edge.id)!;
+    }
+
     private createPathSegment(from: Objex, morphism: Morphism, prevSegment?: PathSegment): PathSegment {
         const isSameDirection = morphism.from.equals(from);
 
-        const segmentPath: Path = {
+        const segmentPath: CategoryPath = {
             signature: morphism.signature,
             min: isSameDirection ? morphism.schema.min : Cardinality.Zero,
             max: isSameDirection ? Cardinality.One : Cardinality.Star,
         };
 
+        const to = isSameDirection ? morphism.to : morphism.from;
+
         return {
-            from,
-            fromNode: this.getNode(from),
-            to: isSameDirection ? morphism.to : morphism.from,
+            from: this.getNode(from),
+            to: this.getNode(to),
             edge: this.getEdge(morphism),
 
             markTraversable() {
@@ -155,12 +183,11 @@ class PathMarker {
 
             fullPath: prevSegment ? extendPath(prevSegment.fullPath, segmentPath) : segmentPath,
             prevSegment,
-            dependentSegments: [],
         };
     }
 
     markPathsFromSourceObjex(): void {
-        this.getNode(this.sourceObjex).pathCount = PathCount.One;
+        this.sourceNode.pathCount = PathCount.One;
 
         // A queue is needed for the direct neighbors of the source.
         const queue = this.getTraversableNeighbors(this.sourceObjex);
@@ -183,7 +210,8 @@ class PathMarker {
         if (!continueAdding)
             return;
 
-        const addition = this.getTraversableNeighbors(neighbor.to, neighbor);
+        const toObjex = this.getObjex(neighbor.to);
+        const addition = this.getTraversableNeighbors(toObjex, neighbor);
         this.stack.push(...addition);
     }
 
@@ -191,11 +219,11 @@ class PathMarker {
         let neighbors = from.findNeighborMorphisms()
             .map(morphism => this.createPathSegment(from, morphism, prevSegment))
             // No need to go back to the source.
-            .filter(neighbor => !neighbor.to.equals(this.sourceObjex));
+            .filter(neighbor => neighbor.to.id !== this.sourceNode.id);
 
         if (prevSegment)
             // We march to victory, or we march to defeat. But we go forward, only forward.
-            neighbors = neighbors.filter(neighbor => !neighbor.to.equals(prevSegment.from));
+            neighbors = neighbors.filter(neighbor => neighbor.to.id !== prevSegment.from.id);
 
         if (this.filterFunction)
             neighbors = neighbors.filter(this.filterFunction);
@@ -210,8 +238,8 @@ class PathMarker {
     private markNeighbor(neighbor: PathSegment): boolean {
         neighbor.markTraversable();
 
-        const fromNode = this.getNode(neighbor.from);
-        const toNode = this.getNode(neighbor.to);
+        const fromNode = neighbor.from;
+        const toNode = neighbor.to;
 
         // If the previous node was the source node, this node is definitely available so we mark it this way.
         // However, it still might be ambiguous.
@@ -235,8 +263,6 @@ class PathMarker {
                 // If the previous node will ever be found ambiguous, this one will also be marked as such.
                 if (neighbor.prevSegment)
                     fromNode.dependentNodes.push(toNode);
-                    // neighbor.prevSegment.dependentSegments.push(neighbor);
-
             }
 
             return true;
@@ -253,7 +279,7 @@ class PathMarker {
     private processAmbiguousPath(newSegment: PathSegment): void {
         // Let's travel back to the last common node. Both paths are ambiguous from this point.
         // We met here!
-        const contactNode = this.getNode(newSegment.to);
+        const contactNode = newSegment.to;
 
         // The first nodes after the common node on the first and second paths.
         let firstPathStart: PathNode | undefined;
@@ -264,14 +290,14 @@ class PathMarker {
         let current = contactNode;
         while (current.pathSegmentTo) {
             visitedNodes.add(current.id);
-            current = current.pathSegmentTo.fromNode;
+            current = current.pathSegmentTo.from;
         }
 
         // The source node is the common node until proven otherwise.
-        let commonNode = this.getNode(this.sourceObjex);
+        let commonNode: PathNode = this.sourceNode;
 
         // We go back along the other path and we look for the first common node. We also need to find the first node after the common one.
-        current = newSegment.fromNode;
+        current = newSegment.from;
         while (current.pathSegmentTo) {
             if (visitedNodes.has(current.id)) {
                 commonNode = current;
@@ -279,13 +305,13 @@ class PathMarker {
             }
 
             secondPathStart = current;
-            current = current.pathSegmentTo.fromNode;
+            current = current.pathSegmentTo.from;
         }
 
         current = contactNode;
         while (current !== commonNode) {
             firstPathStart = current;
-            current = current.pathSegmentTo!.fromNode;
+            current = current.pathSegmentTo!.from;
         }
 
         // Now we go back along the first path and find the first node after the common one.
@@ -323,7 +349,7 @@ export function computePathToNode(pathNode: PathNode): { nodeIds: string[], edge
     while (current.pathSegmentTo) {
         nodeIdsReversed.push(current.id);
         edgeIdsReversed.push(current.pathSegmentTo.edge.id);
-        current = current.pathSegmentTo.fromNode;
+        current = current.pathSegmentTo.from;
     }
 
     return { nodeIds: nodeIdsReversed.reverse(), edgeIds: edgeIdsReversed.reverse() };

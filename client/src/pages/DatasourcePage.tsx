@@ -295,15 +295,15 @@ function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDeta
             <ul className='mt-2 text-sm space-y-2'>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Edit:</strong> You can update connection details, but the type cannot be changed.
+                    <span className='font-bold'>Edit:</span> You can update connection details, but the type cannot be changed.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Password:</strong> If edit password field left empty, the existing password remains unchanged.
+                    <span className='font-bold'>Password:</span> If edit password field left empty, the existing password remains unchanged.
                 </li>
                 <li className='flex items-center gap-2'>
                     <GoDotFill className='text-primary-500' />
-                    <strong>Delete:</strong> A Data Source can be removed if it’s not in use.
+                    <span className='font-bold'>Delete:</span> A Data Source can be removed if it’s not in use.
                 </li>
             </ul>
         </InfoBanner>

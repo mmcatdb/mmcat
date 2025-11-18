@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '@/api';
 import { Category, isPositionEqual } from '@/types/schema';
 import { type Params } from 'react-router-dom';
-import { CategoryEditorGraph } from '@/components/category/CategoryEditorGraph';
 import { FaTrash } from 'react-icons/fa6';
-import { type CategoryEditorDispatch, type CategoryEditorState, useCategoryEditor } from '@/components/category/useCategoryEditor';
-import { LeftPanelCategoryEditor } from '@/components/category/LeftPanelCategoryEditor';
-import { RightPanelCategoryEditor } from '@/components/category/RightPanelCategoryEditor';
+import { type CategoryEditorDispatch, type CategoryEditorState, useCategoryEditor } from '@/components/category/editor/useCategoryEditor';
+import { LeftPanelCategoryEditor } from '@/components/category/editor/LeftPanelCategoryEditor';
+import { RightPanelCategoryEditor } from '@/components/category/editor/RightPanelCategoryEditor';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
-import { categoryToGraph } from '@/components/category/categoryGraph';
-import { SaveProvider, SaveButton } from '@/components/category/SaveContext';
+import { SaveProvider, SaveButton } from '@/components/category/editor/SaveContext';
 import { cn } from '@/components/utils';
 import { PageLayout } from '@/components/RootLayout';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
+import { getEdgeId, getEdgeSignature, getNodeId, getNodeKey } from '@/components/category/graph/categoryGraph';
+import {  CategoryGraphDisplay } from '@/components/category/graph/CategoryGraphDisplay';
+import { FreeSelection } from '@/components/graph/selection';
+import { GraphHighlights } from '@/components/category/graph/highlights';
 
 type EditorSidebarState = {
     left: boolean;
@@ -47,6 +49,14 @@ export function CategoryEditorPage() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    const graphHighlights = useMemo(() => {
+        switch (state.form?.type) {
+        case 'objex': return GraphHighlights.create([ getNodeId(state.form.key) ]);
+        case 'morphism': return GraphHighlights.create([], [ getEdgeId(state.form.signature) ]);
+        default: return undefined;
+        }
+    }, [ state.form ]);
+
     return (
         <PageLayout isFullscreen>
             <SaveProvider categoryState={state}>
@@ -67,13 +77,9 @@ export function CategoryEditorPage() {
                             {/* Delete Button */}
                             <button
                                 onClick={() => deleteSelectedElements(state, dispatch)}
-                                disabled={state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0}
+                                disabled={!(state.selection instanceof FreeSelection) || state.selection.isEmpty}
                                 title='Delete selected elements (Delete)'
-                                className={cn('p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300',
-                                    state.selection.nodeIds.size === 0 && state.selection.edgeIds.size === 0
-                                        ? 'text-danger-400 opacity-50 cursor-not-allowed'
-                                        : 'text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer',
-                                )}
+                                className='p-1 transition rounded focus:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-300 text-danger-400 hover:text-danger-500 hover:opacity-70 cursor-pointer disabled:opacity-50 disabled:pointer-events-none'
                             >
                                 <FaTrash size={16} aria-hidden='true' />
                             </button>
@@ -103,7 +109,13 @@ export function CategoryEditorPage() {
 
                         {/* Main Canvas */}
                         <div className='grow relative'>
-                            <CategoryEditorGraph state={state} dispatch={dispatch} className='w-full h-full' />
+                            <CategoryGraphDisplay
+                                graph={state.graph}
+                                selection={state.selection}
+                                dispatch={dispatch}
+                                highlights={graphHighlights}
+                                className='w-full h-full'
+                            />
                         </div>
 
                         {/* Right Sidebar */}
@@ -148,29 +160,22 @@ CategoryEditorPage.loader = async ({ params: { categoryId } }: { params: Params<
 };
 
 function deleteSelectedElements(state: CategoryEditorState, dispatch: CategoryEditorDispatch) {
-    // Delete all selected morphisms
-    for (const edgeId of state.selection.edgeIds) {
-        const morphism = state.graph.edges.get(edgeId);
-        if (morphism)
-            state.evocat.deleteMorphism(morphism.schema.signature);
-    }
+    const selection = state.selection as FreeSelection;
+    // Delete all selected edges (before the nodes).
+    for (const edgeId of selection.edgeIds)
+        state.evocat.deleteMorphism(getEdgeSignature(edgeId));
 
-    // Delete all selected nodes
-    for (const nodeId of state.selection.nodeIds) {
-        const node = state.graph.nodes.get(nodeId);
-        if (node)
-            state.evocat.deleteObjex(node.schema.key);
-    }
+    // Delete all selected nodes.
+    for (const nodeId of selection.nodeIds)
+        state.evocat.deleteObjex(getNodeKey(nodeId));
 
-    // Update the graph state
-    const graph = categoryToGraph(state.evocat.category);
-    dispatch({ type: 'deleteElements', graph });
+    dispatch({ type: 'deleteElements' });
 }
 
 /*
- * Function to detect unsaved changes: node movement, schema updates
+ * Function to get unsaved changes: node movement, schema updates
  */
-export function detectUnsavedChanges(state: CategoryEditorState) {
+export function getUnsavedChanges(state: CategoryEditorState) {
     const evocat = state.evocat;
     const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();
     const hasMovedNodes = evocat.category.getObjexes().some(objex =>

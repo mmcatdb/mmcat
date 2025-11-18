@@ -1,6 +1,6 @@
-import { type Signature } from '@/types/identifiers';
-import { EdgeMap, type Edge, type Node } from '../graph/graphUtils';
-import { type SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex, type SchemaMorphism } from '@/types/schema';
+import { Key, Signature } from '@/types/identifiers';
+import { EdgeMap, type Edge, type Node } from '../../graph/graphUtils';
+import { type Morphism, type Objex, type SchemaMorphism, type SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex } from '@/types/schema';
 
 /**
  * Represents a graph structure for a category, compatible with the graph library.
@@ -11,17 +11,11 @@ export type CategoryGraph = {
     edges: EdgeMap<CategoryEdge>;
 };
 
-/**
- * A node in the category graph, extending the base graph Node with schema and metadata.
- */
 export type CategoryNode = Node & {
     schema: SchemaObjex;
     metadata: MetadataObjex;
 };
 
-/**
- * An edge in the category graph, extending the base graph Edge with schema and metadata.
- */
 export type CategoryEdge = Edge & {
     schema: SchemaMorphism;
     metadata: MetadataMorphism;
@@ -30,9 +24,6 @@ export type CategoryEdge = Edge & {
 /**
  * Converts a category into a graph structure suitable for rendering in React.
  * Creates immutable node and edge maps from the category's objexes and morphisms.
- *
- * @param category - The category to transform into a graph.
- * @returns A CategoryGraph containing nodes and edges.
  */
 export function categoryToGraph(category: Category): CategoryGraph {
     const nodes = mapCategoryToNodes(category);
@@ -44,14 +35,12 @@ export function categoryToGraph(category: Category): CategoryGraph {
     };
 }
 
-/**
- * Maps the objex components of a category into graph nodes.
- */
+/** Maps the objex components of a category into graph nodes. */
 function mapCategoryToNodes(category: Category): CategoryNode[] {
     return category.getObjexes().map(objex => {
         const { schema, metadata } = objex;
         return {
-            id: schema.key.toString(),
+            id: getNodeId(schema),
             ...metadata.position,
             schema,
             metadata,
@@ -59,14 +48,23 @@ function mapCategoryToNodes(category: Category): CategoryNode[] {
     });
 }
 
+export function getNodeId(objexOrKey: Objex | SchemaObjex | Key): string {
+    const key = objexOrKey instanceof Key ? objexOrKey : objexOrKey.key;
+    return key.toString();
+}
+
+export function getNodeKey(nodeId: string): Key {
+    return Key.fromNumber(Number(nodeId));
+}
+
 /** Maps the morphism components of a category into graph edges. */
 function mapCategoryToEdges(category: Category): CategoryEdge[] {
     return category.getMorphisms().map(morphism => {
         const { schema, metadata } = morphism;
         return {
-            id: schema.signature.toString(),
-            from: schema.domKey.toString(),
-            to: schema.codKey.toString(),
+            id: getEdgeId(schema),
+            from: getNodeId(schema.domKey),
+            to: getNodeId(schema.codKey),
             schema,
             metadata,
             get label() {
@@ -76,6 +74,24 @@ function mapCategoryToEdges(category: Category): CategoryEdge[] {
     });
 }
 
+export function getEdgeId(morphismOrSignature: Morphism | SchemaMorphism | Signature): string {
+    if (!(morphismOrSignature instanceof Signature)) 
+        return morphismOrSignature.signature.toString();
+    
+    if (!morphismOrSignature.isBase || morphismOrSignature.isBaseDual)
+        throw new Error('Edge ID can only be obtained from base non-dual signatures.');
+
+    return morphismOrSignature.toString();
+}
+
+export function getEdgeSignature(edgeId: string): Signature {
+    return Signature.base(Number(edgeId));
+}
+
+/**
+ * Goes from the `from` node along the given `path`.
+ * @returns The destination node.
+ */
 export function traverseCategoryGraph(graph: CategoryGraph, from: CategoryNode, path: Signature): CategoryNode {
     let currentId = from.id;
 

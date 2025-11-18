@@ -1,3 +1,4 @@
+import { type Signature } from './Signature';
 import { SignatureId, type SignatureIdResponse } from './SignatureId';
 
 export type ObjexIdsResponse = SignatureIdResponse[];
@@ -48,6 +49,26 @@ export class ObjexIds {
 
     static fromResponse(input: ObjexIdsResponse): ObjexIds {
         return this.create(input.map(SignatureId.fromResponse));
+    }
+
+    static build(sigantures: Signature[][]) {
+        let signatureIds: SignatureId[] = [];
+
+        for (const signatures of sigantures) {
+            const id = SignatureId.create(signatures);
+
+            for (const existingId of signatureIds) {
+                if (existingId.equals(id))
+                    continue;
+            }
+
+            signatureIds.push(id);
+        }
+
+        if (signatureIds.length > 1)
+            signatureIds = signatureIds.filter(id => !id.equals(SignatureId.empty()));
+
+        return ObjexIds.create(signatureIds);
     }
 
     toServer(): ObjexIdsResponse {
