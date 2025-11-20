@@ -206,18 +206,16 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         if (child.isLeaf()) {
             // This child is a leaf - it's value has to be either a string or an array of strings.
             if (child.isArray) {
-                final List<LeafResult> childList = ((List<String>) document.get(child.name))
+                final List<LeafResult> childList = ((List<Object>) document.get(child.name))
                     .stream()
-                    .map(childString -> new LeafResult(childString))
+                    .map(value -> new LeafResult(getValueForLeafResult(value)))
                     .toList();
 
                 return new ListResult(childList);
             }
             else {
-                // final var childString = document.get(child.name, String.class);
-                final var childString = document.get(child.name).toString();
-
-                return new LeafResult(childString);
+                final var value = document.get(child.name);
+                return new LeafResult(getValueForLeafResult(value));
             }
         }
         else {
@@ -236,6 +234,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 return getResultFromDocument(childDocument, child);
             }
         }
+    }
+
+    private static String getValueForLeafResult(Object value) {
+        if (value == null)
+            return LeafResult.NULL_STRING;
+        if (value instanceof Boolean boolValue)
+            return LeafResult.getBooleanString(boolValue);
+        return value.toString();
     }
 
     @Override public List<String> getKindNames() {
@@ -289,40 +295,42 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     @Override public DocumentResponse getQueryResult(QueryContent query) {
         try {
             if (query instanceof final StringQuery stringQuery) {
-                Document parsedQuery = Document.parse(stringQuery.content);
-                Document result = provider.getDatabase().runCommand(parsedQuery);
+                final Document parsedQuery = Document.parse(stringQuery.content);
+                final Document result = provider.getDatabase().runCommand(parsedQuery);
 
-                Document cursor = (Document) result.get("cursor");
-                List<Document> documents = (List<Document>) cursor.get("firstBatch");
-                long itemCount = documents.size();
+                final Document cursor = (Document) result.get("cursor");
+                final List<Document> documents = (List<Document>) cursor.get("firstBatch");
+                final long itemCount = documents.size();
 
-                List<String> propertyNames = new ArrayList<>();
+                final List<String> propertyNames;
                 if (parsedQuery.containsKey("find")) {
-                    String kindName = parsedQuery.getString("find");
-                    MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
+                    final String kindName = parsedQuery.getString("find");
+                    final MongoCollection<Document> collection = provider.getDatabase().getCollection(kindName);
                     propertyNames = MongoDBUtils.getPropertyNames(collection);
+                }
+                else {
+                    propertyNames = new ArrayList<>();
                 }
 
                 return new DocumentResponse(documents, itemCount, propertyNames);
             }
 
-            List<Document> data = new ArrayList<>();
-            MongoCursor<Document> iterator = getDocumentIterator(query);
+            final List<Document> data = new ArrayList<>();
+            final MongoCursor<Document> iterator = getDocumentIterator(query);
             long itemCount = 0;
 
             while (iterator.hasNext()) {
                 data.add(iterator.next());
-
                 itemCount++;
             }
 
-            List<String> propertyNames;
+            final List<String> propertyNames;
             if (query instanceof final KindNameQuery knQuery) {
-                MongoCollection<Document> collection = provider.getDatabase().getCollection(knQuery.kindName);
+                final MongoCollection<Document> collection = provider.getDatabase().getCollection(knQuery.kindName);
                 propertyNames = MongoDBUtils.getPropertyNames(collection);
             }
             else if (query instanceof final KindNameFilterQuery knfQuery) {
-                MongoCollection<Document> collection = provider.getDatabase().getCollection(knfQuery.kindNameQuery.kindName);
+                final MongoCollection<Document> collection = provider.getDatabase().getCollection(knfQuery.kindNameQuery.kindName);
                 propertyNames = MongoDBUtils.getPropertyNames(collection);
             }
             else

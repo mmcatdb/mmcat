@@ -21,8 +21,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     @Override public boolean isJoinSupported() { return true; }
     @Override public boolean isOptionalJoinSupported() { return true; }
     @Override public boolean isRecursiveJoinSupported() { return true; }
-    @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean isFilteringNotIndexedSupported() { return true; }
+    @Override public boolean isFilterSupported(Operator operator) { return operators.isSupported(operator); }
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
@@ -36,6 +35,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         operators.define(Operator.Greater, ">");
         operators.define(Operator.GreaterOrEqual, ">=");
 
+        // TODO Logical operators.
         // TODO Aggregation operators.
 
         operators.define(Operator.In, "IN");

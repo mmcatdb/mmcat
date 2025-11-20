@@ -116,8 +116,9 @@ class FilterDeepener implements QueryVisitor<Boolean> {
     @Override public Boolean visit(DatasourceNode childNode) {
         // TODO: Check filterNotIndexable (when it will matter, i.e. with Cassandra)
 
-        final boolean canFilter = queryPlan.context.getProvider().getControlWrapper(childNode.datasource).getQueryWrapper().isFilteringSupported();
-        if (!canFilter) return false;
+        final boolean canFilter = queryPlan.context.getProvider().getControlWrapper(childNode.datasource).getQueryWrapper().isFilterSupported(filterNode.filter.operator);
+        if (!canFilter)
+            return false;
 
         childNode.filters.add(filterNode.filter);
 
@@ -126,7 +127,6 @@ class FilterDeepener implements QueryVisitor<Boolean> {
         filterNode.setChild(null);
 
         // The filterNode will be garbage collected afterwards
-
         return true;
     }
 

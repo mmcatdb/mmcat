@@ -36,14 +36,9 @@ public interface AbstractQueryWrapper {
     boolean isRecursiveJoinSupported();
 
     /**
-     * Determines whether filtering of values of a specific property is supported in general.
+     * Determines whether filtering of values of a specific property via the given operator is supported.
      */
-    boolean isFilteringSupported();
-
-    /**
-     * Determines whether filtering of values of a specific property is supported if the property is not part of the identifier (key) of a specific kind.
-     */
-    boolean isFilteringNotIndexedSupported();
+    boolean isFilterSupported(Operator operator);
 
     /**
      * Determines whether the aggregation functions are supported.

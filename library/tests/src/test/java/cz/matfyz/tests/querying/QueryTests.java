@@ -717,7 +717,7 @@ class QueryTests {
     }
 
     @Test
-    void disjunctionFilter() {
+    void orFilter() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
             .query("""
@@ -735,6 +735,28 @@ class QueryTests {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void andFilter() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?order number ?number .
+                }
+                WHERE {
+                    ?order 1 ?number .
+
+                    FILTER(?number = "o_100" && ?number != "o_300")
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
                 } ]
             """)
             .run();

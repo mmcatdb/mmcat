@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -278,6 +279,29 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         sb.append(inner, lastEnd, inner.length());
 
         return new Term(new Constant(sb.toString()));
+    }
+
+    @Override public ParserNode visitConditionalOrExpression(QuerycatParser.ConditionalOrExpressionContext ctx) {
+        return visitLogicalExpression(ctx.children, Operator.Or);
+    }
+
+    @Override public ParserNode visitConditionalAndExpression(QuerycatParser.ConditionalAndExpressionContext ctx) {
+        return visitLogicalExpression(ctx.children, Operator.And);
+    }
+
+    private ParserNode visitLogicalExpression(List<ParseTree> children, Operator operator) {
+        if (children.size() == 1)
+            return visit(children.get(0));
+
+        final List<Expression> arguments = new ArrayList<>();
+
+        // Increment by 2 to skip the operator.
+        for (int i = 0; i < children.size(); i += 2) {
+            final var childTerm = visit(children.get(i));
+            arguments.add(childTerm.asTerm().asExpression());
+        }
+
+        return new Term(scope.computation.create(operator, arguments));
     }
 
     @Override public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {

@@ -86,19 +86,9 @@ aggregationFunction
 // The reason is that and is like multiplication while or is like addition.
 expression: conditionalOrExpression;
 conditionalOrExpression: conditionalAndExpression ('||' conditionalAndExpression)*;
-conditionalAndExpression: valueLogical ('&&' valueLogical)*;
-valueLogical: relationalExpression;
-relationalExpression:
-    expressionPart (
-        '=' expressionPart
-        | '!=' expressionPart
-        | '<' expressionPart
-        | '>' expressionPart
-        | '<=' expressionPart
-        | '>=' expressionPart
-    )?;
-expressionPart: primaryExpression;
-primaryExpression: brackettedExpression | term;
+conditionalAndExpression: relationalExpression ('&&' relationalExpression)*;
+relationalExpression: expressionPart (('=' | '!=' | '<' | '>' | '<=' | '>=') expressionPart)?;
+expressionPart: brackettedExpression | term;
 brackettedExpression: '(' expression ')';
 
 numericLiteral: numericLiteralUnsigned | numericLiteralPositive | numericLiteralNegative;

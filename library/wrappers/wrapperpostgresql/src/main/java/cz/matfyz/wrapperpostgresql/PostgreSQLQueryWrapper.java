@@ -8,6 +8,7 @@ import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.querying.Computation.Operator;
 import cz.matfyz.core.mapping.Name.StringName;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -18,8 +19,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     @Override public boolean isJoinSupported() { return true; }
     @Override public boolean isOptionalJoinSupported() { return true; }
     @Override public boolean isRecursiveJoinSupported() { return true; }
-    @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean isFilteringNotIndexedSupported() { return true; }
+    @Override public boolean isFilterSupported(Operator operator) { return operators.isSupported(operator); }
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
@@ -33,6 +33,8 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         operators.define(Operator.Greater, ">");
         operators.define(Operator.GreaterOrEqual, ">=");
 
+        // TODO Logical operators.
+
         operators.define(Operator.Count, "COUNT");
         operators.define(Operator.Sum, "SUM");
         operators.define(Operator.Min, "MIN");
@@ -44,16 +46,18 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private StringBuilder sb;
+    private List<String> rawVariables;
     private List<String> tableColumns;
 
     @Override public QueryStatement createDSLStatement() {
         sb = new StringBuilder();
+        rawVariables = new ArrayList<>();
 
         addSelect();
         addFrom();
         addWhere();
 
-        return new QueryStatement(new PostgreSQLQuery(sb.toString(), tableColumns), context.rootStructure());
+        return new QueryStatement(new PostgreSQLQuery(sb.toString(), rawVariables, tableColumns), context.rootStructure());
     }
 
     private void addSelect() {
@@ -146,9 +150,8 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             .append(" ")
             .append(operators.stringify(filter.operator()))
             // TODO Some sanitization should be done here.
-            .append(" '")
-            .append(filter.constant().value())
-            .append("'");
+            .append(" ?");
+        rawVariables.add(filter.constant().value());
     }
 
     private void addBinaryFilter(BinaryFilter filter) {
@@ -165,18 +168,20 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         sb
             .append(" ")
             .append(operators.stringify(filter.operator()))
-            .append(" ('")
+            .append(" (?")
             .append(values.get(0));
 
-        values.stream().skip(1).forEach(value -> sb.append("', '").append(value));
+        values.stream().skip(1).forEach(value -> sb.append(", ?"));
 
-        sb.append("')");
+        sb.append(")");
+
+        for (final var constant : values)
+            rawVariables.add(constant.value());
     }
 
     private static String escapeName(String name) {
         return "\"" + name + "\"";
     }
-
 
     private String getProjection(Projection projection) {
         return getPropertyName(projection.property()) + " AS " + escapeName(projection.structure().name);

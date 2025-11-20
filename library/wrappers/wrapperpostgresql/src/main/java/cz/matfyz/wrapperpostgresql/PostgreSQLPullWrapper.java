@@ -13,6 +13,7 @@ import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
@@ -46,8 +47,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     private PreparedStatement prepareStatement(Connection connection, QueryContent query, boolean isCountQuery) throws SQLException {
-        if (query instanceof final PostgreSQLQuery postgreSQLQuery)
-            return connection.prepareStatement(postgreSQLQuery.queryString);
+        if (query instanceof final PostgreSQLQuery postgreSQLQuery) {
+            final var statement = connection.prepareStatement(postgreSQLQuery.queryString);
+            for (int i = 0; i < postgreSQLQuery.rawVariables.size(); i++)
+                statement.setString(i + 1, postgreSQLQuery.rawVariables.get(i));
+            return statement;
+        }
 
         if (query instanceof final StringQuery stringQuery)
             return connection.prepareStatement(stringQuery.content);
@@ -67,6 +72,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         var command = "SELECT " + columns + " FROM " + "\"" + query.kindName + "\"";
         if (filters != null)
             command += createWhereClause(filters);
+        // FIXME prevent sql injection
         if (!isCountQuery && query.hasLimit())
             command += "\nLIMIT " + query.getLimit();
         if (!isCountQuery && query.hasOffset())
@@ -255,7 +261,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 while (resultSet.next()) {
                     final var values = new ArrayList<String>();
                     for (final var column : columns)
-                        values.add(resultSet.getString(column));
+                        values.add(getValueForLeafResult(resultSet, column));
 
                     builder.addRow(values);
                 }
@@ -266,6 +272,16 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         catch (Exception e) {
             throw PullForestException.inner(e);
         }
+    }
+
+    private static String getValueForLeafResult(ResultSet resultSet, String column) throws SQLException {
+        final var value = resultSet.getString(column);
+        return switch (value) {
+            case null -> LeafResult.NULL_STRING;
+            case "t" -> LeafResult.TRUE_STRING;
+            case "f" -> LeafResult.FALSE_STRING;
+            default -> value;
+        };
     }
 
     @Override public List<String> getKindNames() {
@@ -311,22 +327,22 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         try (
             Connection connection = provider.getConnection();
         ) {
-            List<List<String>> data = new ArrayList<>();
+            final List<List<String>> data = new ArrayList<>();
 
-            PreparedStatement stmt = prepareStatement(connection, query, false);
-            ResultSet resultSet = stmt.executeQuery();
+            final PreparedStatement stmt = prepareStatement(connection, query, false);
+            final ResultSet resultSet = stmt.executeQuery();
 
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
+            final ResultSetMetaData metaData = resultSet.getMetaData();
+            final int columnCount = metaData.getColumnCount();
 
-            List<String> propertyNames = new ArrayList<>();
+            final List<String> propertyNames = new ArrayList<>();
             for (int i = 1; i <= columnCount; i++)
                 propertyNames.add(metaData.getColumnName(i));
 
             long itemCount = 0;
 
             while (resultSet.next()) {
-                List<String> item = new ArrayList<>();
+                final List<String> item = new ArrayList<>();
 
                 for (int i = 1; i <= columnCount; i++)
                     item.add(resultSet.getString(i));
@@ -335,9 +351,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 itemCount++;
             }
 
-            PreparedStatement countStmt = prepareStatement(connection, query, true);
+            final PreparedStatement countStmt = prepareStatement(connection, query, true);
             if (!(query instanceof StringQuery)) {
-                ResultSet countResultSet = countStmt.executeQuery();
+                final ResultSet countResultSet = countStmt.executeQuery();
                 if (countResultSet.next())
                     itemCount = countResultSet.getInt(1);
             }

@@ -268,12 +268,12 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitObjectList(QuerycatParser.ObjectListContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#node}.
+	 * Enter a parse tree produced by {@link QuerycatParser#object}.
 	 * @param ctx the parse tree
 	 */
 	void enterObject(QuerycatParser.ObjectContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#node}.
+	 * Exit a parse tree produced by {@link QuerycatParser#object}.
 	 * @param ctx the parse tree
 	 */
 	void exitObject(QuerycatParser.ObjectContext ctx);
@@ -498,16 +498,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 */
 	void exitConditionalAndExpression(QuerycatParser.ConditionalAndExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#valueLogical}.
-	 * @param ctx the parse tree
-	 */
-	void enterValueLogical(QuerycatParser.ValueLogicalContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#valueLogical}.
-	 * @param ctx the parse tree
-	 */
-	void exitValueLogical(QuerycatParser.ValueLogicalContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -527,16 +517,6 @@ public interface QuerycatListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpressionPart(QuerycatParser.ExpressionPartContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QuerycatParser#primaryExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterPrimaryExpression(QuerycatParser.PrimaryExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QuerycatParser#primaryExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitPrimaryExpression(QuerycatParser.PrimaryExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QuerycatParser#brackettedExpression}.
 	 * @param ctx the parse tree
