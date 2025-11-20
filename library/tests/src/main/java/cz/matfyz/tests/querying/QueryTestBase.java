@@ -93,7 +93,7 @@ public class QueryTestBase {
         }
 
         if (expectedJson != null) {
-            final ListResult result = queryToInstance.execute();
+            final ListResult result = queryToInstance.execute().result();
             final var jsonResults = result.toJsonArray();
             LOGGER.info("\n{}", jsonResults);
 

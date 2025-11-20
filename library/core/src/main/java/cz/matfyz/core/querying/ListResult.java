@@ -31,15 +31,15 @@ public class ListResult extends ResultNode {
     }
 
     /** The indices have to be in ascending order. */
-    public void removeChildren(List<Integer> sortedIndices) {
-        if (sortedIndices.isEmpty())
+    public void removeChildren(List<Integer> sortedIndexes) {
+        if (sortedIndexes.isEmpty())
             return;
 
         final var newChildren = new ArrayList<ResultNode>();
         int j = 0;
 
         for (int i = 0; i < children.size(); i++) {
-            if (j < sortedIndices.size() && i == sortedIndices.get(j))
+            if (j < sortedIndexes.size() && i == sortedIndexes.get(j))
                 j++;
             else
                 newChildren.add(children.get(i));

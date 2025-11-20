@@ -4,7 +4,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
-import cz.matfyz.server.entity.datasource.DatasourceUpdate;
+import cz.matfyz.server.entity.datasource.DatasourceEdit;
 import cz.matfyz.server.entity.datasource.DatasourceResponse;
 import cz.matfyz.server.service.DatasourceService;
 
@@ -58,12 +58,12 @@ public class DatasourceController {
     }
 
     @PutMapping("/datasources/{id}")
-    public DatasourceResponse updateDatasource(@PathVariable Id id, @RequestBody DatasourceUpdate update) {
-        if (!update.hasPassword()) {
+    public DatasourceResponse updateDatasource(@PathVariable Id id, @RequestBody DatasourceEdit edit) {
+        if (!edit.hasPassword()) {
             final var originalDatasource = repository.find(id);
-            update.trySetPasswordFrom(originalDatasource);
+            edit.trySetPasswordFrom(originalDatasource);
         }
-        final DatasourceEntity datasource = service.update(id, update);
+        final DatasourceEntity datasource = service.update(id, edit);
 
         return DatasourceResponse.fromEntity(datasource);
     }

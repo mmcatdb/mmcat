@@ -99,24 +99,24 @@ export class SchemaMorphism {
 
     /** If there is nothing to update, undefined will be returned. */
     update({ domKey, codKey, min, tags }: Partial<Omit<MorphismDefinition, 'label'>>): SchemaMorphism | undefined {
-        const update: Partial<Omit<MorphismDefinition, 'label'>> = {};
+        const edit: Partial<Omit<MorphismDefinition, 'label'>> = {};
         if (domKey && !this.domKey.equals(domKey))
-            update.domKey = domKey;
+            edit.domKey = domKey;
         if (codKey && !this.codKey.equals(codKey))
-            update.codKey = codKey;
+            edit.codKey = codKey;
         if (min && this.min !== min)
-            update.min = min;
+            edit.min = min;
         if (tags && !isArrayEqual(this.tags, tags))
-            update.tags = tags;
+            edit.tags = tags;
 
-        if (Object.keys(update).length === 0)
+        if (Object.keys(edit).length === 0)
             return;
 
         return SchemaMorphism.createNew(this.signature, {
-            domKey: update.domKey ?? this.domKey,
-            codKey: update.codKey ?? this.codKey,
-            min: update.min ?? this.min,
-            tags: update.tags ?? this.tags,
+            domKey: edit.domKey ?? this.domKey,
+            codKey: edit.codKey ?? this.codKey,
+            min: edit.min ?? this.min,
+            tags: edit.tags ?? this.tags,
         });
     }
 

@@ -9,7 +9,7 @@ import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.planner.QueryPlan;
 
-public class JoinDependator implements QueryVisitor<Integer> {
+public class JoinDependator implements QueryVisitor<Double> {
 
     private final QueryPlan plan;
     private final CollectorCache cache;
@@ -23,16 +23,16 @@ public class JoinDependator implements QueryVisitor<Integer> {
         queryPlan.root.accept(new JoinDependator(queryPlan, cache));
     }
 
-    @Override public Integer visit(DatasourceNode node) {
+    @Override public Double visit(DatasourceNode node) {
         return cache.predict(node);
     }
 
-    @Override public Integer visit(FilterNode node) {
+    @Override public Double visit(FilterNode node) {
         // TODO: estimate filter selectivity
         return node.child().accept(this);
     }
 
-    @Override public Integer visit(JoinNode node) {
+    @Override public Double visit(JoinNode node) {
         final var fromCost = node.fromChild().accept(this);
         final var toCost = node.toChild().accept(this);
 
@@ -50,15 +50,15 @@ public class JoinDependator implements QueryVisitor<Integer> {
         return fromCost * 2;
     }
 
-    @Override public Integer visit(MinusNode node) {
+    @Override public Double visit(MinusNode node) {
         return null;
     }
 
-    @Override public Integer visit(OptionalNode node) {
+    @Override public Double visit(OptionalNode node) {
         return null;
     }
 
-    @Override public Integer visit(UnionNode node) {
+    @Override public Double visit(UnionNode node) {
         return null;
     }
 

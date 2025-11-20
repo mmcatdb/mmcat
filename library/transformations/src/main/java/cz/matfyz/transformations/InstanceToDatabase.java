@@ -9,8 +9,6 @@ import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
-import cz.matfyz.core.utils.Statistics.Counter;
-import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.transformations.algorithms.DDLAlgorithm;
 import cz.matfyz.transformations.algorithms.DMLAlgorithm;
 import cz.matfyz.transformations.algorithms.ICAlgorithm;
@@ -64,20 +62,20 @@ public class InstanceToDatabase {
         if (allMappings.size() == 0)
             return new InstanceToDatabaseResult("", List.of());
 
-        Statistics.start(Interval.INSTANCE_TO_DATABASE);
+        Statistics.start(RUN_INTERVAL);
 
         final var ddlStatements = new ArrayList<AbstractStatement>();
         final var icStatements = new ArrayList<AbstractStatement>();
         final var dmlStatements = new ArrayList<AbstractStatement>();
 
         for (final var mapping : allMappings) {
-            Statistics.start(Interval.CTM_ALGORITHM);
+            Statistics.start(CTM_INTERVAL);
 
             ddlStatements.add(DDLAlgorithm.run(mapping, currentInstance, ddlWrapper));
             icStatements.addAll(ICAlgorithm.run(mapping, allMappings, icWrapper));
             dmlStatements.addAll(DMLAlgorithm.run(mapping, currentInstance, dmlWrapper));
 
-            Statistics.end(Interval.CTM_ALGORITHM);
+            Statistics.end(CTM_INTERVAL);
         }
 
         final var sortedIcStatements = AbstractStatement.sortByPriority(icStatements);
@@ -94,8 +92,8 @@ public class InstanceToDatabase {
         statements.addAll(dmlStatements);
         statements.addAll(sortedIcStatements);
 
-        Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());
-        Statistics.end(Interval.INSTANCE_TO_DATABASE);
+        Statistics.set(STATEMENTS_COUNTER, dmlStatements.size());
+        Statistics.end(RUN_INTERVAL);
 
         final var statementsAsString = statementsToString(statements, dmlWrapper);
 
@@ -109,5 +107,9 @@ public class InstanceToDatabase {
 
         return sb.toString();
     }
+
+    public static final String RUN_INTERVAL = "instance-to-database";
+    public static final String CTM_INTERVAL = "ctm-algorithm";
+    public static final String STATEMENTS_COUNTER = "created-statements";
 
 }

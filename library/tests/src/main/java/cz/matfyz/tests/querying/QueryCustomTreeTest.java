@@ -91,7 +91,7 @@ public class QueryCustomTreeTest {
 
         // ! from QueryToInstance.innerExecute() (onward from here...)
 
-        final var startNanos = System.nanoTime();
+        final long startNanos = System.nanoTime();
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
@@ -108,15 +108,15 @@ public class QueryCustomTreeTest {
         // final QueryPlan optimized = QueryOptimizer.run(planned, cache); // Due to custom tree so far not neccessary
         final QueryPlan optimized = planned;
 
-        final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
+        final double planningTimeInMs = (System.nanoTime() - startNanos) / 1_000_000.0;
 
         // ! the rest is left unchanged
         final QueryResult selected = SelectionResolver.run(optimized);
         final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
 
         // optimized
-        LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);
-        LOGGER.info("Evaluated query took {} ms", optimized.root.evaluationMillis);
+        LOGGER.info("Parsing & creating plans took {} ms", Math.round(planningTimeInMs));
+        LOGGER.info("Evaluated query took {} ms", Math.round(optimized.root.evaluationTimeInMs));
         LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
 
         return projected.data;

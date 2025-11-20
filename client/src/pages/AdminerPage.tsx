@@ -91,7 +91,7 @@ function LinkLengthSwitch() {
     return (
         <Switch
             isSelected={adminerShortLinks}
-            onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
+            onValueChange={value => setPreferences({ ...preferences, adminerShortLinks: value })}
             size='sm'
         >
             Short links

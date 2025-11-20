@@ -4,14 +4,15 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.querying.QueryToInstance;
 import cz.matfyz.querying.core.QueryDescription;
+import cz.matfyz.querying.core.QueryExecution;
 import cz.matfyz.server.controller.QueryController.QueryInit;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.Query;
+import cz.matfyz.server.entity.QueryStats;
 import cz.matfyz.server.entity.SchemaCategoryEntity;
 import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
@@ -50,7 +51,7 @@ public class QueryService {
     @Autowired
     private SchemaCategoryRepository categoryRepository;
 
-    public ListResult executeQuery(Id categoryId, String queryString) {
+    public QueryExecution executeQuery(Id categoryId, String queryString) {
         final var categoryEntity = categoryRepository.find(categoryId);
         final var category = categoryEntity.toSchemaCategory();
         final var datasources = getDatasources(categoryEntity.id(), category);
@@ -121,7 +122,7 @@ public class QueryService {
         return query;
     }
 
-    public void update(Query query, String content, List<QueryEvolutionError> errors) {
+    public void update(Query query, String content, List<QueryEvolutionError> errors, boolean isResetStats) {
         final var category = categoryRepository.find(query.categoryId);
 
         final var newVersion = category.systemVersion().generateNext();
@@ -130,6 +131,8 @@ public class QueryService {
         query.updateVersion(newVersion, category.systemVersion());
         query.content = content;
         query.errors = errors;
+        if (isResetStats)
+            query.stats = QueryStats.empty();
 
         repository.save(query);
         evolutionRepository.create(evolution);
@@ -161,6 +164,31 @@ public class QueryService {
                 mappingRepository.save(mapping);
             });
 
+    }
+
+    public QueryStats computeQueryStats(QueryExecution execution) {
+        long resultSizeInBytes = 0L;
+        for (final var item : execution.result().toJsonArray())
+            resultSizeInBytes += item.getBytes().length;
+
+        return new QueryStats(
+            1,
+            resultSizeInBytes,
+            execution.planningTimeInMs(),
+            execution.evaluationTimeInMs()
+        );
+    }
+
+    public QueryStats updateQueryStats(Id queryId, QueryExecution execution) {
+        final var query = repository.find(queryId);
+
+        final var next = computeQueryStats(execution);
+
+        query.stats = query.stats.merge(next);
+
+        repository.save(query);
+
+        return query.stats;
     }
 
     // TODO Allow only soft-delete because of the evolution.

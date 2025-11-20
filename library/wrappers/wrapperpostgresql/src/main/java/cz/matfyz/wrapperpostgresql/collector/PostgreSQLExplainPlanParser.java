@@ -41,7 +41,7 @@ public class PostgreSQLExplainPlanParser {
     private void saveQueryExecutionTime(Map<String, Object> root, DataModel model) {
         Object result = root.get("Execution Time");
         if (result instanceof Double time) {
-            model.result.executionTimeMillis = time;
+            model.result.executionTimeInMs = time;
         }
     }
 

@@ -38,12 +38,12 @@ public class CollectorCache {
         results.add(new CacheEntry(datasourceNode, data));
     }
 
-    public Integer predict(QueryNode node) {
+    public Double predict(QueryNode node) {
         if (node instanceof DatasourceNode dsNode) return predict(dsNode);
         // TODO: expand using joins
         return null;
     }
-    public Integer predict(DatasourceNode node) {
+    public Double predict(DatasourceNode node) {
         final var key = PlanToCacheKeyConverter.run(node);
         final var entries = queryData.get(key);
 
@@ -52,24 +52,29 @@ public class CollectorCache {
         final var comparisons = entries.stream().map(entry -> {
             final var comp = compare(node, entry.node);
             // return new ConcreteComparison(comp, entry.dataModel.result.resultTable.sizeInBytes);
-            return new ConcreteComparison(comp, entry.node.evaluationMillis);
+            return new ConcreteComparison(comp, entry.node.evaluationTimeInMs);
         }).toList();
 
-        Integer min = null, max = null;
+        Double min = null, max = null;
         for (final var comp : comparisons) {
-            if (comp.comparison == Comparison.More) min = comp.cost;
-            else if (comp.comparison == Comparison.Less) max = comp.cost;
+            if (comp.comparison == Comparison.More)
+                min = comp.cost;
+            else if (comp.comparison == Comparison.Less)
+                max = comp.cost;
         }
-        int sum = 0, count = 0;
+        double sum = 0, count = 0;
         for (final var comp : comparisons) {
             if (comp.comparison != Comparison.Similar) continue;
             if (min != null && comp.cost < min) continue;
             if (max != null && comp.cost > max) continue;
             sum += comp.cost; count++;
         }
-        if (count > 0) return sum / count;
-        if (min != null && max != null) return min + max / 2;
-        if (min != null) return min;
+        if (count > 0)
+            return sum / count;
+        if (min != null && max != null)
+            return min + max / 2;
+        if (min != null)
+            return min;
         return max;
     }
 
@@ -89,7 +94,7 @@ public class CollectorCache {
             };
         }
     }
-    private static record ConcreteComparison(Comparison comparison, int cost) { }
+    private static record ConcreteComparison(Comparison comparison, double cost) { }
     public Comparison compare(QueryNode qp1, QueryNode qp2) {
         if (!(qp1 instanceof DatasourceNode)) {
             return Comparison.Indeterminate;
@@ -167,9 +172,7 @@ public class CollectorCache {
             final Expression arg1 = filter1.arguments.get(i), arg2 = filter2.arguments.get(i);
             int order1 = 0, order2 = 0;
 
-            if (arg1 instanceof Variable && arg2 instanceof Variable) {
-                final var var1 = (Variable)arg1;
-                final var var2 = (Variable)arg2;
+            if (arg1 instanceof Variable var1 && arg2 instanceof Variable var2) {
                 // FIXME: this probably won't work when filtering through a non-returned column
                 final var sig1 = node1.structure.tryFindDescendantByVariable(var1).getSignatureFromRoot();
                 final var sig2 = node2.structure.tryFindDescendantByVariable(var2).getSignatureFromRoot();

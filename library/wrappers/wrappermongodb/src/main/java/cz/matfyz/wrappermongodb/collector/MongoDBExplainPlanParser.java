@@ -27,7 +27,8 @@ public class MongoDBExplainPlanParser {
 
     private void parseExecutionStats(DataModel model, Document node) {
         if (node.getBoolean("executionSuccess")) {
-            model.result.executionTimeMillis = Double.valueOf(node.getInteger("executionTimeMillis")); // TODO: change to getDouble?
+            // Yes, it's named differently in mongo than in our model. And yes, it's int in mongo but double in our model.
+            model.result.executionTimeInMs = Double.valueOf(node.getInteger("executionTimeMillis"));
         }
     }
 

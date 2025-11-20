@@ -26,6 +26,7 @@
     "dependencies": {
         "@codemirror/lang-javascript": "^6.2.3",
         "@codemirror/lang-sql": "^6.8.0",
+        "@codemirror/legacy-modes": "^6.5.2",
         "@heroicons/react": "^2.1.5",
         "@heroui/react": "^2.8.0-beta.10",
         "@juggle/resize-observer": "^3.4.0",

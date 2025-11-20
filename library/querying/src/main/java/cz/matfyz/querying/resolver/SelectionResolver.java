@@ -51,15 +51,15 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     }
 
     private QueryResult timedAccept(QueryNode node) {
-        final var startNanos = System.nanoTime();
+        final long startNanos = System.nanoTime();
         final var result = node.accept(this);
-        final var nanos = (System.nanoTime() - startNanos) / 1_000_000;
-        node.evaluationMillis = (int)(nanos);
+        node.evaluationTimeInMs = (System.nanoTime() - startNanos) / 1_000_000.0;
 
         // in this case, Collector is not run and performance relies on node.evalutaionMillis
         // TODO: expand for other nodes
         // also TODO: add result size (even if approximate, like result.data.children().size() )
-        if (cache != null && node instanceof DatasourceNode dsNode) cache.put(dsNode, null);
+        if (cache != null && node instanceof DatasourceNode dsNode)
+            cache.put(dsNode, null);
 
         return result;
     }

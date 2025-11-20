@@ -9,6 +9,7 @@ export type QueryResponse = {
     label: string;
     content: string;
     errors: QueryEvolutionError[];
+    stats: QueryStats;
 };
 
 export class Query implements Entity {
@@ -20,6 +21,7 @@ export class Query implements Entity {
         readonly label: string,
         readonly content: string,
         readonly errors: QueryEvolutionError[],
+        readonly stats: QueryStats,
     ) {}
 
     static fromResponse(input: QueryResponse): Query {
@@ -31,6 +33,7 @@ export class Query implements Entity {
             input.label,
             input.content,
             input.errors,
+            input.stats,
         );
     }
 }
@@ -46,6 +49,11 @@ export type QueryInit = {
 export type QueryEdit = {
     content: string;
     errors: QueryEvolutionError[];
+    /**
+     * If true, ve should forget the query history.
+     * Basically the new version is too different for the old stats to make sense.
+     */
+    isResetStats: boolean;
 };
 
 export enum ErrorType {
@@ -64,6 +72,7 @@ export type QueryEvolutionError = {
 
 export type QueryResult = {
     rows: string[];
+    stats: QueryStats | null;
 };
 
 export type QueryDescription = {
@@ -165,3 +174,12 @@ export type OptionalNode = TypedNode<QueryNodeType.Optional, {
 export type UnionNode = TypedNode<QueryNodeType.Union, {
     children: QueryNode[];
 }>;
+
+// Stats
+
+export type QueryStats = {
+    executionCount: number;
+    resultSizeSumInBytes: number;
+    planningTimeSumInMs: number;
+    evaluationTimeSumInMs: number;
+};

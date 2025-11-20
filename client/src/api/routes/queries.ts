@@ -1,10 +1,12 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { DELETE, GET, POST, PUT } from '../routeFunctions';
 import type { Id } from '@/types/id';
-import type { QueryDescription, QueryResponse, QueryInit, QueryEdit, QueryResult } from '@/types/query';
+import type { QueryDescription, QueryResponse, QueryInit, QueryEdit, QueryResult, QueryStats } from '@/types/query';
 
 export type QueryInput = {
     categoryId: Id;
+    /** If defined, the execution should count towards the query's stats. */
+    queryId: Id | undefined;
     queryString: string;
 };
 
@@ -29,5 +31,8 @@ export const queriesApi = {
     ),
     updateQuery: PUT<{ queryId: StringLike }, QueryResponse, QueryEdit>(
         u => `/queries/${u.queryId}`,
+    ),
+    updateQueryStats: PUT<{ queryId: StringLike }, QueryResponse, QueryStats>(
+        u => `/queries/${u.queryId}/stats`,
     ),
 };

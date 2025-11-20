@@ -49,7 +49,7 @@ public class DataModel {
     }
 
     public static class ResultData {
-        public Double executionTimeMillis = null;
+        public Double executionTimeInMs = null;
         public final TableData resultTable = new TableData();
     }
 

@@ -16,13 +16,15 @@ public class Query extends VersionedEntity {
     public String label;
     public String content;
     public List<QueryEvolutionError> errors;
+    public QueryStats stats;
 
-    private Query(Id id, Version version, Version lastValid, Id categoryId, String label, String content, List<QueryEvolutionError> errors) {
+    private Query(Id id, Version version, Version lastValid, Id categoryId, String label, String content, List<QueryEvolutionError> errors, QueryStats stats) {
         super(id, version, lastValid);
         this.categoryId = categoryId;
         this.label = label;
         this.content = content;
         this.errors = errors;
+        this.stats = stats;
     }
 
     public static Query createNew(Version version, Id categoryId, String label, String content) {
@@ -33,14 +35,16 @@ public class Query extends VersionedEntity {
             categoryId,
             label,
             content,
-            List.of()
+            List.of(),
+            QueryStats.empty()
         );
     }
 
     private record JsonValue(
         String label,
         String content,
-        List<QueryEvolutionError> errors
+        List<QueryEvolutionError> errors,
+        QueryStats stats
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
@@ -55,7 +59,8 @@ public class Query extends VersionedEntity {
             categoryId,
             json.label,
             json.content,
-            json.errors
+            json.errors,
+            json.stats
         );
     }
 
@@ -63,7 +68,8 @@ public class Query extends VersionedEntity {
         return jsonValueWriter.writeValueAsString(new JsonValue(
             label,
             content,
-            errors
+            errors,
+            stats
         ));
     }
 

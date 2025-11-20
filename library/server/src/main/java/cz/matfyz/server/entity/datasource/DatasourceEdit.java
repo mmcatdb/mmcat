@@ -2,7 +2,7 @@ package cz.matfyz.server.entity.datasource;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public record DatasourceUpdate(
+public record DatasourceEdit(
     String label,
     ObjectNode settings
 ) {

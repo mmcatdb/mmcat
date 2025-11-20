@@ -1,7 +1,7 @@
 import { api } from '@/api';
 import { Query } from '@/types/query';
 import { type Datasource } from '@/types/Datasource';
-import { Button, Input, Textarea } from '@heroui/react';
+import { Button, Checkbox, Input, Textarea } from '@heroui/react';
 import { useEffect, useState } from 'react';
 import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
 import { QueryOutputDisplay } from './QueryOutputDisplay';
@@ -32,13 +32,21 @@ export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDispl
 
     const resultOutput = useQueryOutput('result', query?.id, queryString => {
         onOutput?.(queryString);
-        return api.queries.execute({}, { categoryId: category.id, queryString });
+        return api.queries.execute({}, { categoryId: category.id, queryId: query?.id, queryString });
     });
 
     const descriptionOutput = useQueryOutput('description', query?.id, queryString => {
         onOutput?.(queryString);
-        return api.queries.describe({}, { categoryId: category.id, queryString });
+        return api.queries.describe({}, { categoryId: category.id, queryId: query?.id, queryString });
     });
+
+    const [ stats, setStats ] = useState(query?.stats);
+
+    const fetchedStats = (resultOutput.fetched && 'data' in resultOutput.fetched ? resultOutput.fetched.data.stats : undefined);
+    useEffect(() => {
+        if (fetchedStats)
+            setStats(fetchedStats);
+    }, [ fetchedStats ]);
 
     const revalidator = useRevalidator();
     const navigate = useNavigate();
@@ -47,6 +55,7 @@ export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDispl
         // TODO something like setLoaderData?
         void newQuery;
         revalidator.revalidate();
+        setStats(newQuery.stats);
     }
 
     function onCreate(newQuery: Query) {
@@ -89,10 +98,13 @@ export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDispl
         </div>
 
         <QueryOutputDisplay
-            result={resultOutput.fetched}
-            description={descriptionOutput.fetched}
+            query={query}
             queryString={queryString}
             datasources={datasources}
+            result={resultOutput.fetched}
+            description={descriptionOutput.fetched}
+            stats={stats}
+            setStats={setStats}
         />
     </>);
 }
@@ -235,7 +247,15 @@ type UpdateQueryButtonProps = {
 };
 
 function UpdateQueryButton({ query, content, onUpdate }: UpdateQueryButtonProps) {
+    const [ isResetStats, setIsResetStats ] = useState(false);
     const [ isFetching, setIsFetching ] = useState(false);
+
+    const isEnabled = content !== query.content && isValidQueryContent(content);
+
+    useEffect(() => {
+        if (isEnabled)
+            setIsResetStats(false);
+    }, [ isEnabled ]);
 
     async function save() {
         setIsFetching(true);
@@ -244,6 +264,7 @@ function UpdateQueryButton({ query, content, onUpdate }: UpdateQueryButtonProps)
             // TODO fix the errors
             // TODO enable editing label - maybe in a separate field that is saved on blur?
             errors: [],
+            isResetStats,
         });
         setIsFetching(false);
         if (!response.status) {
@@ -255,8 +276,17 @@ function UpdateQueryButton({ query, content, onUpdate }: UpdateQueryButtonProps)
     }
 
     return (
-        <div className='flex'>
-            <SpinnerButton onPress={save} isFetching={isFetching} isDisabled={content === query.content || !isValidQueryContent(content)}>
+        <div className='flex items-center gap-4'>
+            {isEnabled && (
+                <Checkbox
+                    isSelected={isResetStats}
+                    onValueChange={setIsResetStats}
+                >
+                    Clear stats?
+                </Checkbox>
+            )}
+
+            <SpinnerButton onPress={save} isFetching={isFetching} isDisabled={!isEnabled} color='success'>
                 Save
             </SpinnerButton>
         </div>

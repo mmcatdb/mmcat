@@ -97,3 +97,96 @@ export function compareStringsAscii(a: string, b: string): number {
 export function capitalize(word: string) {
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
+
+export function prettyPrintNumber(value: number): string {
+    if (value < 1000)
+        return value.toString();
+
+    return value.toExponential(2);
+}
+
+const dataSizeUnits = [ 'B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ];
+const dataSizeThreshold = 1024;
+
+export type DataSizeUnit = typeof dataSizeUnits[number];
+
+export function defineDataSizeUnits(from: DataSizeUnit = 'B', to: DataSizeUnit = 'YB'): DataSizeUnit[] {
+    const fromIndex = dataSizeUnits.indexOf(from);
+    const toIndex = dataSizeUnits.indexOf(to);
+    return dataSizeUnits.slice(fromIndex, toIndex + 1);
+}
+
+export function prettyPrintDataSize(bytes: number): string {
+    let index = 0;
+    let value = bytes;
+
+    while (value >= dataSizeThreshold && index < dataSizeUnits.length - 1) {
+        value /= dataSizeThreshold;
+        index++;
+    }
+
+    // We don't want to show decimal places for bytes.
+    const numberPart = (index === 0 ? String(value) : value.toFixed(2));
+    return `${numberPart} ${dataSizeUnits[index]}`;
+}
+
+export function convertDataSize(bytes: number, toUnit: DataSizeUnit): number {
+    let value = bytes;
+    for (const unit of dataSizeUnits) {
+        if (unit === toUnit)
+            return value;
+
+        value /= dataSizeThreshold;
+    }
+    throw new Error('Impossibruh');
+}
+
+export function convertDataSizeToBytes(value: number, fromUnit: DataSizeUnit): number {
+    let bytes = value;
+    for (let i = dataSizeUnits.indexOf(fromUnit); i > 0; i--)
+        bytes *= dataSizeThreshold;
+    return Math.round(bytes);
+}
+
+const timeUnits = [ 'ms', 's', 'min', 'h', 'd', 'y' ];
+const timeThresholds = [ 1000, 60, 60, 24, 365 ];
+
+export type TimeUnit = typeof timeUnits[number];
+
+export function defineTimeUnits(from: TimeUnit = 'ms', to: TimeUnit = 'y'): TimeUnit[] {
+    const fromIndex = timeUnits.indexOf(from);
+    const toIndex = timeUnits.indexOf(to);
+    return timeUnits.slice(fromIndex, toIndex + 1);
+}
+
+export function prettyPrintTime(ms: number): string {
+    let index = 0;
+    let value = ms;
+
+    while (value >= timeThresholds[index] && index < timeThresholds.length) {
+        value /= timeThresholds[index];
+        index++;
+    }
+
+    // Time can be double so we always show the decimal places.
+    return `${value.toFixed(2)} ${timeUnits[index]}`;
+}
+
+export function convertTime(ms: number, toUnit: TimeUnit): number {
+    let value = ms;
+    for (let i = 0; i < timeUnits.length; i++) {
+        const unit = timeUnits[i];
+        if (unit === toUnit)
+            return value;
+
+        value /= timeThresholds[i];
+    }
+    throw new Error('Impossibruh');
+}
+
+export function convertTimeToMs(value: number, fromUnit: TimeUnit): number {
+    let ms = value;
+    for (let i = timeUnits.indexOf(fromUnit); i > 0; i--)
+        ms *= timeThresholds[i - 1];
+    return ms;
+}

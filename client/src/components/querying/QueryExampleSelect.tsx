@@ -39,9 +39,9 @@ const examples: Record<string, { label: string, queryString: string }> = {
 }
 WHERE {
     ?product
-        15 ?id ;
-        16 ?label ;
-        17 ?price .
+        54 ?id ;
+        55 ?label ;
+        56 ?price .
 }` },
     join: { label: 'Join', queryString:
 `SELECT {
@@ -49,8 +49,8 @@ WHERE {
         street ?street .
 }
 WHERE {
-    ?item 14 ?quantity ;
-        12/8/9 ?street .
+    ?item 53 ?quantity ;
+        51/41/42 ?street .
 }` },
     filter: { label: 'Filter', queryString:
 `SELECT {
